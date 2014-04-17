@@ -3,12 +3,12 @@
 #include "../ruddercommand/RudderCommand.h"
 #include "../servocontroller/MaestroController.h"
 #include "../servocontroller/ServoObject.h"
-// #include "../gps/GPSReader.h"
+#include "../gps/GPSReader.h"
 #include "../dbhandler/DBHandler.h"
 #include "../coursecalculation/CourseCalculation.h"
 #include "../waypointlist/WaypointList.h"
 
-
+/*
 class GPSReader {
 //mock gpsreader
 	public:
@@ -39,7 +39,7 @@ class GPSReader {
 	double getHeading() {
 		return 230.4;
 	};
-};
+};*/
 
 
 class SailingRobot {

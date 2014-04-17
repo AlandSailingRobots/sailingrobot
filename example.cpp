@@ -5,6 +5,7 @@ int main() {
 	try {
 		sr.init();
 		sr.run();
+		sr.shutdown();
 	} catch (char const* e) {
 		std::cout << e << "\n";
 	}

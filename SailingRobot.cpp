@@ -38,7 +38,7 @@ std::cout << "maestro initeed\n";
 	m_rudderServo.setSpeed(0);
 
 	m_sailServo.setController(&m_maestroController);
-	m_sailServo.setChannel(0);
+	m_sailServo.setChannel(1);
 	m_sailServo.setMax(8000);
 	m_sailServo.setMin(4000);
 	m_sailServo.setRange(90);
@@ -47,12 +47,12 @@ std::cout << "maestro initeed\n";
 std::cout << "servos inited\n";
 	//windsensor
 	try {
-		m_windSensorController.loadConfig("Mock");
+		m_windSensorController.loadConfig("CV7", "/dev/ttyAMA0", 4800);
 	} catch(const char* exception) {
 		cout << exception << endl;
 		return;
 	}
-	m_windSensorController.mockDirection(180);
+	//m_windSensorController.mockDirection(180);
 std::cout << "windsens inited\n";
 
 	//dbhandler
@@ -79,10 +79,15 @@ std::cout << "wp inited\n";
 
 void SailingRobot::run() {
 	
-	while(true) {
+	for (int i = 0; i < 100; i++) {
 
+//		if (i > 10) {
+//			m_windSensorController.mockDirection(0);
+//		}
+		
 		//check sensors
 		m_gpsReader.readGPS();
+		m_windSensorController.refreshData();
 
 		//do coursecalc
 		m_courseCalc.setTWD(m_windSensorController.getWindDirection());
@@ -117,6 +122,10 @@ void SailingRobot::run() {
 
 		m_dbHandler.insertHeadingData(0, m_gpsReader.getHeading());
 		m_dbHandler.insertWPdata(m_waypointList.getLatitude(), m_waypointList.getLongitude());
+
+		//output
+		std::cout << "gpslat: " << m_gpsReader.getLatitude() << ", gpslong: " << m_gpsReader.getLongitude() << ", gpshead: " << m_gpsReader.getHeading() << "\n";
+		std::cout << "rudderVal: " << rudderCommand << ", sailVal: " << sailCommand << "\n";
 	}
 
 
@@ -124,5 +133,5 @@ void SailingRobot::run() {
 
 
 void SailingRobot::shutdown() {
-
+	m_dbHandler.closeDatabase();
 }
