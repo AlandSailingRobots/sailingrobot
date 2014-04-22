@@ -75,13 +75,13 @@ void SailingRobot::run() {
 
 		//do coursecalc
 		m_courseCalc.setTWD(m_windSensorController.getWindDirection());
-		if (m_courseCalc.getDWP() < 15) {
+		if (m_courseCalc.getDTW() < 15) {
 			m_waypointList.next();
 		}
 
-		m_courseCalc.calculateBWP(m_gpsReader.getLatitude(), m_gpsReader.getLongitude(),
+		m_courseCalc.calculateBTW(m_gpsReader.getLatitude(), m_gpsReader.getLongitude(),
 			m_waypointList.getLatitude(), m_waypointList.getLongitude());
-		m_courseCalc.calculateDWP(m_gpsReader.getLatitude(), m_gpsReader.getLongitude(),
+		m_courseCalc.calculateDTW(m_gpsReader.getLatitude(), m_gpsReader.getLongitude(),
 			m_waypointList.getLatitude(), m_waypointList.getLongitude());
 
 		m_courseCalc.calculateCTS();
@@ -102,7 +102,7 @@ void SailingRobot::run() {
 			m_gpsReader.getAltitude(), m_gpsReader.getSpeed(), m_gpsReader.getHeading());
 
 		m_dbHandler.insertCalculations(m_rudderCommand.getOffCourse(), m_rudderCommand.getSteeringValue(),
-			m_courseCalc.getCTS(), m_courseCalc.getBWP(), m_courseCalc.getDWP(), m_courseCalc.getTACK());
+			m_courseCalc.getCTS(), m_courseCalc.getBTW(), m_courseCalc.getDTW(), m_courseCalc.getTACK());
 
 		m_dbHandler.insertHeadingData(0, m_gpsReader.getHeading());
 		m_dbHandler.insertWPdata(m_waypointList.getLatitude(), m_waypointList.getLongitude());
