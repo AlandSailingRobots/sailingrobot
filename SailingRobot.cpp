@@ -2,22 +2,6 @@
 #include <iostream>
 
 SailingRobot::SailingRobot() {
-	// m_gpsReader = GPSReader();
-
-	// m_rudderCommand = RudderCommand();
-	// m_sailCommand = SailCommand();
-
-	// m_windSensorController = WindSensorController();
-
-	// m_courseCalc = CourseCalculation();
-
-	// m_maestroController = MaestroController();
-	// m_rudderServo = ServoObject();
-	// m_sailServo = ServoObject();
-
-	// m_dbHandler = DBHandler();
-
-	// m_waypointList = WaypointList();
 }
 
 SailingRobot::~SailingRobot() {
