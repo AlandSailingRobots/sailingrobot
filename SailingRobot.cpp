@@ -93,7 +93,7 @@ void SailingRobot::run() {
 
 
 		//sail adjust
-		int sailCommand = m_sailCommand.getSailCommand(m_courseCalc.getCTS(), m_windSensorController.getWindDirection());
+		int sailCommand = m_sailCommand.getSailCommand(m_windSensorController.getWindDirection());
 		m_sailServo.setPosition(sailCommand);
 
 
