@@ -88,12 +88,12 @@ void SailingRobot::run() {
 
 
 		//rudder adjust
-		int rudderCommand = m_rudderCommand.getRudderValue(m_courseCalc.getCTS(), m_gpsReader.getHeading());
+        int rudderCommand = m_rudderCommand.getCommand(m_courseCalc.getCTS(), m_gpsReader.getHeading());
 		m_rudderServo.setPosition(rudderCommand);
 
 
 		//sail adjust
-		int sailCommand = m_sailCommand.getSailCommand(m_windSensorController.getWindDirection());
+        int sailCommand = m_sailCommand.getCommand(m_windSensorController.getWindDirection());
 		m_sailServo.setPosition(sailCommand);
 
 
@@ -101,8 +101,8 @@ void SailingRobot::run() {
 		m_dbHandler.insertGPSdata(m_gpsReader.getTimestamp(), m_gpsReader.getLatitude(), m_gpsReader.getLongitude(),
 			m_gpsReader.getAltitude(), m_gpsReader.getSpeed(), m_gpsReader.getHeading());
 
-		m_dbHandler.insertCalculations(m_rudderCommand.getOffCourse(), m_rudderCommand.getSteeringValue(),
-			m_courseCalc.getCTS(), m_courseCalc.getBTW(), m_courseCalc.getDTW(), m_courseCalc.getTACK());
+    //	m_dbHandler.insertCalculations(m_rudderCommand.getOffCourse(), m_rudderCommand.getSteeringValue(),
+    //		m_courseCalc.getCTS(), m_courseCalc.getBTW(), m_courseCalc.getDTW(), m_courseCalc.getTACK());
 
 		m_dbHandler.insertHeadingData(0, m_gpsReader.getHeading());
 		m_dbHandler.insertWPdata(m_waypointList.getLatitude(), m_waypointList.getLongitude());
