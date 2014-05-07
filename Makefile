@@ -9,10 +9,10 @@
 
 CC = g++
 FLAGS = -Wall -pedantic -Werror
-LIBS =
+LIBS = -lsqlite3 -lgps -lrt -lwiringPi
 
 OBJS1 = ../coursecalculation/CourseCalculation.o ../dbhandler/DBHandler.o ../ruddercommand/RudderCommand.o ../sailcommand/SailCommand.o ../waypointlist/WaypointList.o ../servocontroller/ServoObject.o 
-OBJS2 = ../servocontroller/MaestroController.o ./windsensor/WindSensorController.o ../windsensor/AdapterWaleswind.o ../windsensor/AdapterCV7.o ../gps/GPSReader.o
+OBJS2 = ../servocontroller/MaestroController.o ../windsensor/WindSensorController.o ../windsensor/AdapterWaleswind.o ../windsensor/AdapterCV7.o ../gps/GPSReader.o
 OBJECTS = $(OBJS1) $(OBJS2)
 SOURCES = SailingRobot.cpp example.cpp
 HEADERS = SailingRobot.h
