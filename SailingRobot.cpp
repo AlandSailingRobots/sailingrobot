@@ -45,7 +45,7 @@ std::cout << "windsens inited\n";
 std::cout << "dbh inited\n";
 
 	//gps
-	m_gpsReader.connectToGPS();
+	m_gpsReader.connectToGPS("/dev/ttyUSB0", "localhost");
 std::cout << "gpsr inited\n";
 
 	//coursecalc
@@ -71,7 +71,11 @@ void SailingRobot::run() {
 		
 		//check sensors
 		m_gpsReader.readGPS();
-		m_windSensorController.refreshData();
+		try {
+			m_windSensorController.refreshData();
+		} catch(const char* exception) {
+			cout << exception << endl;
+		}
 
 		//do coursecalc
 		m_courseCalc.setTWD(m_windSensorController.getWindDirection());
