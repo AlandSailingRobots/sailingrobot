@@ -46,5 +46,5 @@ windsensor :
 gps :
 	cd ../gps && $(MAKE)
 
-$(FILE) : $(SOURCES) $(HEADERS)
+$(FILE) : $(SOURCES) $(HEADERS) $(OBJECTS)
 	$(CC) $(SOURCES) $(OBJECTS) $(FLAGS) $(LIBS) -o $(FILE)
