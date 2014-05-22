@@ -15,19 +15,17 @@ void SailingRobot::init() {
 std::cout << "maestro initeed\n";
 	m_rudderServo.setController(&m_maestroController);
 	m_rudderServo.setChannel(0);
-	m_rudderServo.setMax(8000);
 	m_rudderServo.setMin(4000);
-	m_rudderServo.setRange(90);
-	m_rudderServo.setAcceleration(0);
+	m_rudderServo.setMax(8000);
 	m_rudderServo.setSpeed(0);
+	m_rudderServo.setAcceleration(0);
 
 	m_sailServo.setController(&m_maestroController);
 	m_sailServo.setChannel(1);
-	m_sailServo.setMax(8000);
 	m_sailServo.setMin(4000);
-	m_sailServo.setRange(90);
-	m_sailServo.setAcceleration(0);
+	m_sailServo.setMax(8000);
 	m_sailServo.setSpeed(0);
+	m_sailServo.setAcceleration(0);
 std::cout << "servos inited\n";
 	//windsensor
 	try {
