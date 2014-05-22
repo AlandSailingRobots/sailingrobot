@@ -99,12 +99,21 @@ void SailingRobot::run() {
 		m_sailServo.setPosition(sailCommand);
 
 
-		// recordData
+	m_dbHandler.insertLog(sailCommand, rudderCommand, m_courseCalc.getDTW(), m_courseCalc.getBTW(),
+		m_courseCalc.getCTS(), m_windSensorController.getWindDirection(), m_courseCalc.getTACK(),
+		m_windSensorController.getBufferSize(), m_windSensorController.getSensorModel(),
+		m_windSensorController.getWindDirection(), m_windSensorController.getWindSpeed(), 
+		m_windSensorController.getWindTemperature(), m_rudderServo.getPosition(), m_sailServo.getPosition(),
+		m_gpsReader.getTimestamp(), m_gpsReader.getLatitude(), m_gpsReader.getLongitude(),
+		m_gpsReader.getAltitude(), m_gpsReader.getSpeed(), m_gpsReader.getHeading(),
+		m_gpsReader.getMode(), m_gpsReader.getSatellites_used());
+
+/*		// recordData
 		m_dbHandler.insertGPSdata(m_gpsReader.getTimestamp(), m_gpsReader.getLatitude(), m_gpsReader.getLongitude(),
 			m_gpsReader.getAltitude(), m_gpsReader.getSpeed(), m_gpsReader.getHeading());
 
-    //	m_dbHandler.insertCalculations(m_rudderCommand.getOffCourse(), m_rudderCommand.getSteeringValue(),
-    //		m_courseCalc.getCTS(), m_courseCalc.getBTW(), m_courseCalc.getDTW(), m_courseCalc.getTACK());
+    		m_dbHandler.insertCalculations(m_rudderCommand.getOffCourse(), m_rudderCommand.getSteeringValue(),
+    		m_courseCalc.getCTS(), m_courseCalc.getBTW(), m_courseCalc.getDTW(), m_courseCalc.getTACK());
 
 		m_dbHandler.insertHeadingData(0, m_gpsReader.getHeading());
 		m_dbHandler.insertWPdata(m_waypointList.getLatitude(), m_waypointList.getLongitude());
@@ -112,8 +121,8 @@ void SailingRobot::run() {
 		//output
 		std::cout << "gpslat: " << m_gpsReader.getLatitude() << ", gpslong: " << m_gpsReader.getLongitude() << ", gpshead: " << m_gpsReader.getHeading() << "\n";
 		std::cout << "rudderVal: " << rudderCommand << ", sailVal: " << sailCommand << "\n";
+*/
 	}
-
 
 }
 
