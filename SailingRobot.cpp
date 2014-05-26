@@ -1,10 +1,15 @@
 #include "SailingRobot.h"
 #include <iostream>
+#include <wiringPi.h>
 
 SailingRobot::SailingRobot() {
+	wiringPiSetup();
+	pinMode(6, OUTPUT);
+	digitalWrite(6, HIGH);
 }
 
 SailingRobot::~SailingRobot() {
+	digitalWrite(6, LOW);
 	std::cout << "sr destruct\n";
 }
 
@@ -12,7 +17,7 @@ SailingRobot::~SailingRobot() {
 void SailingRobot::init() {
 	//servos
 	m_maestroController.setPort("/dev/ttyACM0");
-std::cout << "maestro initeed\n";
+std::cout << "maestro inited\n";
 	m_rudderServo.setController(&m_maestroController);
 	m_rudderServo.setChannel(0);
 	m_rudderServo.setMin(4000);
