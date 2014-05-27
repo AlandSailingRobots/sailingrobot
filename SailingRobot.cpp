@@ -16,60 +16,104 @@ SailingRobot::~SailingRobot() {
 
 void SailingRobot::init() {
 
+	std::string val, val2, val3, val4;
+
 	//dbhandler
 	m_dbHandler.openDatabase("db");
-	m_dbHandler.createTables();
 std::cout << "dbh inited\n";
 
 	//servos
-	std::string val = m_dbHandler.retriveCell("configs", "1", "mc_portname");
+	val = m_dbHandler.retriveCell("configs", "1", "mc_portname");
 	m_maestroController.setPort(val.c_str());
 std::cout << "maestro inited\n";
+
 	m_rudderServo.setController(&m_maestroController);
-	m_rudderServo.setChannel(0);
-	m_rudderServo.setMin(4000);
-	m_rudderServo.setMax(8000);
-	m_rudderServo.setSpeed(0);
-	m_rudderServo.setAcceleration(0);
+	val = m_dbHandler.retriveCell("configs", "1", "rs_channel");
+	m_rudderServo.setChannel(std::stoi(val));
+	val = m_dbHandler.retriveCell("configs", "1", "rs_limitmin");
+	m_rudderServo.setMin(std::stoi(val));
+	val = m_dbHandler.retriveCell("configs", "1", "rs_limitmax");
+	m_rudderServo.setMax(std::stoi(val));
+	val = m_dbHandler.retriveCell("configs", "1", "rs_speed");
+	m_rudderServo.setSpeed(std::stoi(val));
+	val = m_dbHandler.retriveCell("configs", "1", "rs_acceleration");
+	m_rudderServo.setAcceleration(std::stoi(val));
 
 	m_sailServo.setController(&m_maestroController);
-	m_sailServo.setChannel(1);
-	m_sailServo.setMin(4000);
-	m_sailServo.setMax(8000);
-	m_sailServo.setSpeed(0);
-	m_sailServo.setAcceleration(0);
+	val = m_dbHandler.retriveCell("configs", "1", "ss_channel");
+	m_sailServo.setChannel(std::stoi(val));
+	val = m_dbHandler.retriveCell("configs", "1", "ss_limitmin");
+	m_sailServo.setMin(std::stoi(val));
+	val = m_dbHandler.retriveCell("configs", "1", "ss_limitmax");
+	m_sailServo.setMax(std::stoi(val));
+	val = m_dbHandler.retriveCell("configs", "1", "ss_speed");
+	m_sailServo.setSpeed(std::stoi(val));
+	val = m_dbHandler.retriveCell("configs", "1", "ss_acceleration");
+	m_sailServo.setAcceleration(std::stoi(val));
 
 	m_windSensor.setController(&m_maestroController);
 	m_windSensor.setChannel(5);
 
-std::cout << "servos inited\n";
+	void setCommandValues(int extreme, int medium, int small, int midships);
+
+	// sets the angles used by getCommand() to return appropriate command,
+	// extreme angle uses whats left over
+	void setAngleValues(int medium, int small, int midships);
+	std::cout << "servos inited\n";
 	//windsensor
-	try {
+/*	try {
 		m_windSensorController.loadConfig("CV7", "/dev/ttyAMA0", 4800);
 	} catch(const char* exception) {
 		cout << exception << endl;
 		return;
 	}
 	//m_windSensorController.mockDirection(180);
-std::cout << "windsens inited\n";
+std::cout << "windsens inited\n";*/
 
 
 
 	//gps
-	m_gpsReader.connectToGPS("/dev/ttyUSB0", "localhost");
+	val = m_dbHandler.retriveCell("configs", "1", "gps_portname");
+	val2 = m_dbHandler.retriveCell("configs", "1", "gps_connectionname");
+	m_gpsReader.connectToGPS(val.c_str(), val2.c_str());
 std::cout << "gpsr inited\n";
 
 	//coursecalc
-	m_courseCalc.setTACK_ANGLE(45);
-	m_courseCalc.setSECTOR_ANGLE(5);
+	val = m_dbHandler.retriveCell("configs", "1", "cc_tackangle");
+	m_courseCalc.setTACK_ANGLE(std::stoi(val));
+	val = m_dbHandler.retriveCell("configs", "1", "cc_sectorangle");
+	m_courseCalc.setSECTOR_ANGLE(std::stoi(val));
 std::cout << "coursecalc inited\n";
 
+
+	val = m_dbHandler.retriveCell("configs", "1", "rc_commandextreme");
+	val2 = m_dbHandler.retriveCell("configs", "1", "rc_commandmedium");
+	val3 = m_dbHandler.retriveCell("configs", "1", "rc_commandsmall");
+	val4 = m_dbHandler.retriveCell("configs", "1", "rc_commandmidships");
+	m_rudderCommand.setCommandValues(std::stoi(val), std::stoi(val2), std::stoi(val3), std::stoi(val4));
+	val = m_dbHandler.retriveCell("configs", "1", "rc_anglemedium");
+	val2 = m_dbHandler.retriveCell("configs", "1", "rc_anglesmall");
+	val3 = m_dbHandler.retriveCell("configs", "1", "rc_anglemidships");
+	m_rudderCommand.setAngleValues(std::stoi(val), std::stoi(val2), std::stoi(val3));
+std::cout << "ruddercommand inited\n";
+
+	val = m_dbHandler.retriveCell("configs", "1", "sc_commandclosereach");
+	val2 = m_dbHandler.retriveCell("configs", "1", "sc_commandbeamreach");
+	val3 = m_dbHandler.retriveCell("configs", "1", "sc_commandbroadreach");
+	val4 = m_dbHandler.retriveCell("configs", "1", "sc_commandrunning");
+	m_sailCommand.setCommandValues(std::stoi(val), std::stoi(val2), std::stoi(val3), std::stoi(val4));
+	val = m_dbHandler.retriveCell("configs", "1", "sc_anglebeamreach");
+	val2 = m_dbHandler.retriveCell("configs", "1", "sc_anglebroadreach");
+	val3 = m_dbHandler.retriveCell("configs", "1", "sc_anglerunning");
+	m_sailCommand.setAngleValues(std::stoi(val), std::stoi(val2), std::stoi(val3));
+std::cout << "sailcommand inited\n";
+
+
 	//waypoints
-	m_waypointList.add(100.1, 30.1);
-	m_waypointList.add(200.1, 40.1);
+	val = m_dbHandler.retriveCell("waypoints", "1", "latitude");
+	val2 = m_dbHandler.retriveCell("waypoints", "1", "longitude");
+	m_waypointList.add(std::stod(val), std::stod(val2));
 std::cout << "wp inited\n";
-
-
 }
 
 
@@ -77,10 +121,6 @@ void SailingRobot::run() {
 	
 	for (int i = 0; i < 100; i++) {
 
-//		if (i > 10) {
-//			m_windSensorController.mockDirection(0);
-//		}
-		
 		//check sensors
 		m_gpsReader.readGPS();
 		try {
@@ -113,7 +153,7 @@ void SailingRobot::run() {
 		m_sailServo.setPosition(sailCommand);
 
 
-	m_dbHandler.insertDataLog(sailCommand, rudderCommand, m_courseCalc.getDTW(), m_courseCalc.getBTW(),
+		m_dbHandler.insertDataLog(sailCommand, rudderCommand, m_courseCalc.getDTW(), m_courseCalc.getBTW(),
 		m_courseCalc.getCTS(), m_courseCalc.getTACK(),
 		m_windSensorController.getBufferSize(), m_windSensorController.getSensorModel(),
 		m_windSensorController.getWindDirection(), m_windSensorController.getWindSpeed(), 

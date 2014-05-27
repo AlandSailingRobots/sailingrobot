@@ -8,7 +8,7 @@
 #######################################################
 
 CC = g++
-FLAGS = -Wall -pedantic -Werror
+FLAGS = -Wall -pedantic -Werror -std=c++11
 LIBS = -lsqlite3 -lgps -lrt -lwiringPi
 
 OBJS1 = ../coursecalculation/CourseCalculation.o ../dbhandler/DBHandler.o ../ruddercommand/RudderCommand.o ../sailcommand/SailCommand.o ../waypointlist/WaypointList.o ../servocontroller/ServoObject.o 
