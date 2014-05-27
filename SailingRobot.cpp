@@ -3,14 +3,14 @@
 #include <wiringPi.h>
 
 SailingRobot::SailingRobot() {
-	wiringPiSetup();
+/*	wiringPiSetup();
 	pinMode(6, OUTPUT);
-	digitalWrite(6, HIGH);
+	digitalWrite(6, HIGH);*/
 }
 
 SailingRobot::~SailingRobot() {
-	digitalWrite(6, LOW);
-	std::cout << "sr destruct\n";
+/*	digitalWrite(6, LOW);
+	std::cout << "sr destruct\n";*/
 }
 
 
