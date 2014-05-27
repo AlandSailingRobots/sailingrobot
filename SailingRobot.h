@@ -3,6 +3,7 @@
 #include "../ruddercommand/RudderCommand.h"
 #include "../servocontroller/MaestroController.h"
 #include "../servocontroller/ServoObject.h"
+#include "../servocontroller/SensorObject.h"
 #include "../gps/GPSReader.h"
 #include "../dbhandler/DBHandler.h"
 #include "../coursecalculation/CourseCalculation.h"
@@ -60,6 +61,7 @@ private:
 	MaestroController m_maestroController;
 	ServoObject m_rudderServo;
 	ServoObject m_sailServo;
+	SensorObject m_windSensor;
 
 	DBHandler m_dbHandler;
 

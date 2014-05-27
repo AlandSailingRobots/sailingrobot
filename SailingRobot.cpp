@@ -15,8 +15,15 @@ SailingRobot::~SailingRobot() {
 
 
 void SailingRobot::init() {
+
+	//dbhandler
+	m_dbHandler.openDatabase("db");
+	m_dbHandler.createTables();
+std::cout << "dbh inited\n";
+
 	//servos
-	m_maestroController.setPort("/dev/ttyACM0");
+	std::string val = m_dbHandler.retriveCell("configs", "1", "mc_portname");
+	m_maestroController.setPort(val.c_str());
 std::cout << "maestro inited\n";
 	m_rudderServo.setController(&m_maestroController);
 	m_rudderServo.setChannel(0);
@@ -31,6 +38,10 @@ std::cout << "maestro inited\n";
 	m_sailServo.setMax(8000);
 	m_sailServo.setSpeed(0);
 	m_sailServo.setAcceleration(0);
+
+	m_windSensor.setController(&m_maestroController);
+	m_windSensor.setChannel(5);
+
 std::cout << "servos inited\n";
 	//windsensor
 	try {
@@ -42,10 +53,7 @@ std::cout << "servos inited\n";
 	//m_windSensorController.mockDirection(180);
 std::cout << "windsens inited\n";
 
-	//dbhandler
-	m_dbHandler.openDatabase();
-	m_dbHandler.createTables();
-std::cout << "dbh inited\n";
+
 
 	//gps
 	m_gpsReader.connectToGPS("/dev/ttyUSB0", "localhost");
@@ -60,6 +68,7 @@ std::cout << "coursecalc inited\n";
 	m_waypointList.add(100.1, 30.1);
 	m_waypointList.add(200.1, 40.1);
 std::cout << "wp inited\n";
+
 
 }
 
@@ -104,8 +113,8 @@ void SailingRobot::run() {
 		m_sailServo.setPosition(sailCommand);
 
 
-	m_dbHandler.insertLog(sailCommand, rudderCommand, m_courseCalc.getDTW(), m_courseCalc.getBTW(),
-		m_courseCalc.getCTS(), m_windSensorController.getWindDirection(), m_courseCalc.getTACK(),
+	m_dbHandler.insertDataLog(sailCommand, rudderCommand, m_courseCalc.getDTW(), m_courseCalc.getBTW(),
+		m_courseCalc.getCTS(), m_courseCalc.getTACK(),
 		m_windSensorController.getBufferSize(), m_windSensorController.getSensorModel(),
 		m_windSensorController.getWindDirection(), m_windSensorController.getWindSpeed(), 
 		m_windSensorController.getWindTemperature(), m_rudderServo.getPosition(), m_sailServo.getPosition(),
@@ -113,20 +122,9 @@ void SailingRobot::run() {
 		m_gpsReader.getAltitude(), m_gpsReader.getSpeed(), m_gpsReader.getHeading(),
 		m_gpsReader.getMode(), m_gpsReader.getSatellites_used());
 
-/*		// recordData
-		m_dbHandler.insertGPSdata(m_gpsReader.getTimestamp(), m_gpsReader.getLatitude(), m_gpsReader.getLongitude(),
-			m_gpsReader.getAltitude(), m_gpsReader.getSpeed(), m_gpsReader.getHeading());
 
-    		m_dbHandler.insertCalculations(m_rudderCommand.getOffCourse(), m_rudderCommand.getSteeringValue(),
-    		m_courseCalc.getCTS(), m_courseCalc.getBTW(), m_courseCalc.getDTW(), m_courseCalc.getTACK());
 
-		m_dbHandler.insertHeadingData(0, m_gpsReader.getHeading());
-		m_dbHandler.insertWPdata(m_waypointList.getLatitude(), m_waypointList.getLongitude());
 
-		//output
-		std::cout << "gpslat: " << m_gpsReader.getLatitude() << ", gpslong: " << m_gpsReader.getLongitude() << ", gpshead: " << m_gpsReader.getHeading() << "\n";
-		std::cout << "rudderVal: " << rudderCommand << ", sailVal: " << sailCommand << "\n";
-*/
 	}
 
 }
