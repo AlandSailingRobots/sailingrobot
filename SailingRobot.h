@@ -4,12 +4,12 @@
 #include "../servocontroller/MaestroController.h"
 #include "../servocontroller/ServoObject.h"
 #include "../servocontroller/SensorObject.h"
-#include "../gps/GPSReader.h"
+//#include "../gps/GPSReader.h"
 #include "../dbhandler/DBHandler.h"
 #include "../coursecalculation/CourseCalculation.h"
 #include "../waypointlist/WaypointList.h"
 
-/*
+
 class GPSReader {
 //mock gpsreader
 	public:
@@ -18,7 +18,7 @@ class GPSReader {
 	~GPSReader() {
 		std::cout << "gps detr\n";
 	}
-	void connectToGPS() {
+	void connectToGPS(string portName, string connectionName) {
 	};
 	void readGPS() {
 	};
@@ -40,7 +40,15 @@ class GPSReader {
 	double getHeading() {
 		return 230.4;
 	};
-};*/
+
+ 	int getMode() {
+ 		return -1;
+ 	}
+
+	int getSatellites_used() {
+		return 0;
+	}
+};
 
 
 class SailingRobot {
