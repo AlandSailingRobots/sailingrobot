@@ -1,4 +1,5 @@
 #include "SailingRobot.h"
+#include <cstdlib>
 #include <iostream>
 #include <wiringPi.h>
 
@@ -30,27 +31,27 @@ std::cout << "maestro inited\n";
 
 	m_rudderServo.setController(&m_maestroController);
 	val = m_dbHandler.retriveCell("configs", "1", "rs_channel");
-	m_rudderServo.setChannel(std::stoi(val));
+	m_rudderServo.setChannel(atoi(val.c_str()));
 	val = m_dbHandler.retriveCell("configs", "1", "rs_limitmin");
-	m_rudderServo.setMin(std::stoi(val));
+	m_rudderServo.setMin(atoi(val.c_str()));
 	val = m_dbHandler.retriveCell("configs", "1", "rs_limitmax");
-	m_rudderServo.setMax(std::stoi(val));
+	m_rudderServo.setMax(atoi(val.c_str()));
 	val = m_dbHandler.retriveCell("configs", "1", "rs_speed");
-	m_rudderServo.setSpeed(std::stoi(val));
+	m_rudderServo.setSpeed(atoi(val.c_str()));
 	val = m_dbHandler.retriveCell("configs", "1", "rs_acceleration");
-	m_rudderServo.setAcceleration(std::stoi(val));
+	m_rudderServo.setAcceleration(atoi(val.c_str()));
 std::cout << "rudder inited\n";
 	m_sailServo.setController(&m_maestroController);
 	val = m_dbHandler.retriveCell("configs", "1", "ss_channel");
-	m_sailServo.setChannel(std::stoi(val));
+	m_sailServo.setChannel(atoi(val.c_str()));
 	val = m_dbHandler.retriveCell("configs", "1", "ss_limitmin");
-	m_sailServo.setMin(std::stoi(val));
+	m_sailServo.setMin(atoi(val.c_str()));
 	val = m_dbHandler.retriveCell("configs", "1", "ss_limitmax");
-	m_sailServo.setMax(std::stoi(val));
+	m_sailServo.setMax(atoi(val.c_str()));
 	val = m_dbHandler.retriveCell("configs", "1", "ss_speed");
-	m_sailServo.setSpeed(std::stoi(val));
+	m_sailServo.setSpeed(atoi(val.c_str()));
 	val = m_dbHandler.retriveCell("configs", "1", "ss_acceleration");
-	m_sailServo.setAcceleration(std::stoi(val));
+	m_sailServo.setAcceleration(atoi(val.c_str()));
 std::cout << "sail inited\n";
 	m_windSensor.setController(&m_maestroController);
 	m_windSensor.setChannel(5);
@@ -77,9 +78,9 @@ std::cout << "gpsr inited\n";
 
 	//coursecalc
 	val = m_dbHandler.retriveCell("configs", "1", "cc_tackangle");
-	m_courseCalc.setTACK_ANGLE(std::stoi(val));
+	m_courseCalc.setTACK_ANGLE(atoi(val.c_str()));
 	val = m_dbHandler.retriveCell("configs", "1", "cc_sectorangle");
-	m_courseCalc.setSECTOR_ANGLE(std::stoi(val));
+	m_courseCalc.setSECTOR_ANGLE(atoi(val.c_str()));
 std::cout << "coursecalc inited\n";
 
 
@@ -87,11 +88,11 @@ std::cout << "coursecalc inited\n";
 	val2 = m_dbHandler.retriveCell("configs", "1", "rc_commandmedium");
 	val3 = m_dbHandler.retriveCell("configs", "1", "rc_commandsmall");
 	val4 = m_dbHandler.retriveCell("configs", "1", "rc_commandmidships");
-	m_rudderCommand.setCommandValues(std::stoi(val), std::stoi(val2), std::stoi(val3), std::stoi(val4));
+	m_rudderCommand.setCommandValues(atoi(val.c_str()), atoi(val2.c_str()), atoi(val3.c_str()), atoi(val4.c_str()));
 	val = m_dbHandler.retriveCell("configs", "1", "rc_anglemedium");
 	val2 = m_dbHandler.retriveCell("configs", "1", "rc_anglesmall");
 	val3 = m_dbHandler.retriveCell("configs", "1", "rc_anglemidships");
-	m_rudderCommand.setAngleValues(std::stoi(val), std::stoi(val2), std::stoi(val3));
+	m_rudderCommand.setAngleValues(atoi(val.c_str()), atoi(val2.c_str()), atoi(val3.c_str()));
 std::cout << "ruddercommand inited\n";
 
 	val = m_dbHandler.retriveCell("configs", "1", "sc_commandclosereach");
@@ -102,7 +103,7 @@ std::cout << "2\n";
 std::cout << "3\n";
 	val4 = m_dbHandler.retriveCell("configs", "1", "sc_commandrunning");
 std::cout << "4\n";
-	m_sailCommand.setCommandValues(std::stoi(val), std::stoi(val2), std::stoi(val3), std::stoi(val4));
+	m_sailCommand.setCommandValues(atoi(val.c_str()), atoi(val2.c_str()), atoi(val3.c_str()), atoi(val4.c_str()));
 std::cout << "5\n";
 	val = m_dbHandler.retriveCell("configs", "1", "sc_anglebeamreach");
 std::cout << "6\n";
@@ -110,14 +111,14 @@ std::cout << "6\n";
 std::cout << "7\n";
 	val3 = m_dbHandler.retriveCell("configs", "1", "sc_anglerunnning");
 std::cout << "8\n";
-	m_sailCommand.setAngleValues(std::stoi(val), std::stoi(val2), std::stoi(val3));
+	m_sailCommand.setAngleValues(atoi(val.c_str()), atoi(val2.c_str()), atoi(val3.c_str()));
 std::cout << "sailcommand inited\n";
 
 
 	//waypoints
 	val = m_dbHandler.retriveCell("waypoints", "1", "latitude");
 	val2 = m_dbHandler.retriveCell("waypoints", "1", "longitude");
-	m_waypointList.add(std::stod(val), std::stod(val2));
+	m_waypointList.add(strtod(val.c_str(), NULL), strtod(val2.c_str(), NULL));
 std::cout << "wp inited\n";
 }
 
