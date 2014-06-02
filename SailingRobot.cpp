@@ -40,7 +40,7 @@ std::cout << "maestro inited\n";
 	m_rudderServo.setSpeed(atoi(val.c_str()));
 	val = m_dbHandler.retriveCell("configs", "1", "rs_acceleration");
 	m_rudderServo.setAcceleration(atoi(val.c_str()));
-std::cout << "rudder inited\n";
+std::cout << "rudderservo inited\n";
 	m_sailServo.setController(&m_maestroController);
 	val = m_dbHandler.retriveCell("configs", "1", "ss_channel");
 	m_sailServo.setChannel(atoi(val.c_str()));
@@ -52,10 +52,10 @@ std::cout << "rudder inited\n";
 	m_sailServo.setSpeed(atoi(val.c_str()));
 	val = m_dbHandler.retriveCell("configs", "1", "ss_acceleration");
 	m_sailServo.setAcceleration(atoi(val.c_str()));
-std::cout << "sail inited\n";
+std::cout << "sailservo inited\n";
 	m_windSensor.setController(&m_maestroController);
 	m_windSensor.setChannel(5);
-std::cout << "servos inited\n";
+std::cout << "windsensor inited\n";
 
 
 	//windsensor
@@ -74,7 +74,7 @@ std::cout << "windsens inited\n";*/
 	std::string port2 = m_dbHandler.retriveCell("configs", "1", "gps_portname");
 	std::string port3 = m_dbHandler.retriveCell("configs", "1", "gps_connectionname");
 	m_gpsReader.connectToGPS(port2.c_str(), port3.c_str());
-std::cout << "gpsr inited\n";
+std::cout << "gpsreader inited\n";
 
 	//coursecalc
 	val = m_dbHandler.retriveCell("configs", "1", "cc_tackangle");
@@ -96,21 +96,13 @@ std::cout << "coursecalc inited\n";
 std::cout << "ruddercommand inited\n";
 
 	val = m_dbHandler.retriveCell("configs", "1", "sc_commandclosereach");
-std::cout << "1\n";
 	val2 = m_dbHandler.retriveCell("configs", "1", "sc_commandbeamreach");
-std::cout << "2\n";
 	val3 = m_dbHandler.retriveCell("configs", "1", "sc_commandbroadreach");
-std::cout << "3\n";
 	val4 = m_dbHandler.retriveCell("configs", "1", "sc_commandrunning");
-std::cout << "4\n";
 	m_sailCommand.setCommandValues(atoi(val.c_str()), atoi(val2.c_str()), atoi(val3.c_str()), atoi(val4.c_str()));
-std::cout << "5\n";
 	val = m_dbHandler.retriveCell("configs", "1", "sc_anglebeamreach");
-std::cout << "6\n";
 	val2 = m_dbHandler.retriveCell("configs", "1", "sc_anglebroadreach");
-std::cout << "7\n";
 	val3 = m_dbHandler.retriveCell("configs", "1", "sc_anglerunnning");
-std::cout << "8\n";
 	m_sailCommand.setAngleValues(atoi(val.c_str()), atoi(val2.c_str()), atoi(val3.c_str()));
 std::cout << "sailcommand inited\n";
 
@@ -126,9 +118,10 @@ std::cout << "wp inited\n";
 void SailingRobot::run() {
 	
 	for (int i = 0; i < 100; i++) {
-std::cout << "forloop start\n";
 		//check sensors
-		m_gpsReader.readGPS();
+		while (isnan(m_gpsReader.getLatitude())) {
+			m_gpsReader.readGPS(50000000);
+		}
 //		try {
 //			m_windSensorController.refreshData();
 //		} catch(const char* exception) {

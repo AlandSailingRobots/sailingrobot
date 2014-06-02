@@ -4,13 +4,13 @@
 #include "../servocontroller/MaestroController.h"
 #include "../servocontroller/ServoObject.h"
 #include "../servocontroller/SensorObject.h"
-//#include "../gps/GPSReader.h"
+#include "../gps/GPSReader.h"
 #include "../dbhandler/DBHandler.h"
 #include "../coursecalculation/CourseCalculation.h"
 #include "../waypointlist/WaypointList.h"
 
 
-class GPSReader {
+/*class GPSReader {
 //mock gpsreader
 	public:
 		GPSReader() {
@@ -48,7 +48,7 @@ class GPSReader {
 	int getSatellites_used() {
 		return 0;
 	}
-};
+};*/
 
 
 class SailingRobot {
