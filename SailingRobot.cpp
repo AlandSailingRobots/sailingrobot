@@ -160,7 +160,7 @@ std::cout << "servos done\n";
 		0, m_rudderServo.getPosition(), m_sailServo.getPosition(),
 		m_gpsReader.getTimestamp(), m_gpsReader.getLatitude(), m_gpsReader.getLongitude(),
 		m_gpsReader.getAltitude(), m_gpsReader.getSpeed(), m_gpsReader.getHeading(),
-		m_gpsReader.getMode(), m_gpsReader.getSatellites_used());
+		m_gpsReader.getMode(), m_gpsReader.getSatellitesUsed());
 
 
 
