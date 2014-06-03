@@ -2,7 +2,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <wiringPi.h>
-
+#include <unistd.h>
 
 SailingRobot::SailingRobot() {
 /*	wiringPiSetup();
@@ -163,8 +163,9 @@ std::cout << "servos done\n";
 		m_gpsReader.getMode(), m_gpsReader.getSatellitesUsed());
 
 
-
-
+		sleep(1);
+		m_rudderServo.setPosition(m_rudderCommand.getMidShipsCommand());
+		sleep(1);
 	}
 
 }
