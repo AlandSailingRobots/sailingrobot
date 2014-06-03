@@ -192,7 +192,7 @@ void SailingRobot::shutdown() {
 void SailingRobot::logError(string error) {
 	try {
 		m_dbHandler.insertErrorLog(error);
-	} catch (string logError) {
+	} catch (const char * logError) {
 		std::ofstream errorFile;
 			errorFile.open("errors", ios::app);
 			errorFile << "log error: " << logError << "\n";
