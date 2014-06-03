@@ -63,6 +63,8 @@ public:
 
 private:
 
+	void logError(string error) ;
+
 	WindSensorController m_windSensorController;
 	CourseCalculation m_courseCalc;
 
