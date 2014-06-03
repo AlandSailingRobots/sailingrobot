@@ -119,11 +119,7 @@ void SailingRobot::init() {
 
 	} catch (const char * error) {
 		logError(error);
-		if (strcmp(error, "not so bad error") == 0) {
-
-		} else {
-			exit(0);
-		}
+		exit(0);
 	}
 }
 
@@ -132,8 +128,9 @@ void SailingRobot::run() {
 	
 	for (int i = 0; i < 100; i++) {
 		//check sensors
+		readGPS();
 		while (isnan(m_gpsReader.getLatitude())) {
-			m_gpsReader.readGPS(50000000);
+			readGPS();
 		}
 //		try {
 //			m_windSensorController.refreshData();
@@ -166,15 +163,18 @@ std::cout << "cts calulated\n";
 		m_sailServo.setPosition(sailCommand);
 
 std::cout << "servos done\n";
-		m_dbHandler.insertDataLog(sailCommand, rudderCommand, m_courseCalc.getDTW(), m_courseCalc.getBTW(),
-		m_courseCalc.getCTS(), m_courseCalc.getTACK(),
-		0, "WW",
-		m_windSensor.getDirection(), 0, 
-		0, m_rudderServo.getPosition(), m_sailServo.getPosition(),
-		m_gpsReader.getTimestamp(), m_gpsReader.getLatitude(), m_gpsReader.getLongitude(),
-		m_gpsReader.getAltitude(), m_gpsReader.getSpeed(), m_gpsReader.getHeading(),
-		m_gpsReader.getMode(), m_gpsReader.getSatellitesUsed());
-
+		try {
+			m_dbHandler.insertDataLog(sailCommand, rudderCommand, m_courseCalc.getDTW(), m_courseCalc.getBTW(),
+			m_courseCalc.getCTS(), m_courseCalc.getTACK(),
+			0, "WW",
+			m_windSensor.getDirection(), 0, 
+			0, m_rudderServo.getPosition(), m_sailServo.getPosition(),
+			m_gpsReader.getTimestamp(), m_gpsReader.getLatitude(), m_gpsReader.getLongitude(),
+			m_gpsReader.getAltitude(), m_gpsReader.getSpeed(), m_gpsReader.getHeading(),
+			m_gpsReader.getMode(), m_gpsReader.getSatellitesUsed());
+		} catch (const char * error) {
+			logError(error);
+		}
 
 		sleep(1);
 		m_rudderServo.setPosition(m_rudderCommand.getMidShipsCommand());
@@ -199,4 +199,12 @@ void SailingRobot::logError(string error) {
 			errorFile << "when logging error: " << error << "\n";
 		errorFile.close();
 	}
+}
+
+void SailingRobot::readGPS() {
+		try {
+			m_gpsReader.readGPS(50000000);
+		} catch (const char * error) {
+			logError(error);
+		}
 }
