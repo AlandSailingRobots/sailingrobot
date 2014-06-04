@@ -1,13 +1,13 @@
-#include "../windsensor/WindSensorController.h"
-#include "../sailcommand/SailCommand.h"
-#include "../ruddercommand/RudderCommand.h"
-#include "../servocontroller/MaestroController.h"
-#include "../servocontroller/ServoObject.h"
-#include "../servocontroller/SensorObject.h"
-#include "../gps/GPSReader.h"
-#include "../dbhandler/DBHandler.h"
-#include "../coursecalculation/CourseCalculation.h"
-#include "../waypointlist/WaypointList.h"
+#include "windsensor/WindSensorController.h"
+#include "sailcommand/SailCommand.h"
+#include "ruddercommand/RudderCommand.h"
+#include "servocontroller/MaestroController.h"
+#include "servocontroller/ServoObject.h"
+#include "servocontroller/SensorObject.h"
+#include "gps/GPSReader.h"
+#include "dbhandler/DBHandler.h"
+#include "coursecalculation/CourseCalculation.h"
+#include "waypointlist/WaypointList.h"
 
 
 /*class GPSReader {
