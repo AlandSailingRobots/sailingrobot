@@ -24,12 +24,11 @@ void SailingRobot::init() {
 
 	try {
 		//dbhandler
-		m_dbHandler.openDatabase("db");
+		m_dbHandler.openDatabase("/root/sailingrobot/asr.db");
 	std::cout << "dbh inited\n";
 
 		//servos
 		std::string port = m_dbHandler.retriveCell("configs", "1", "mc_portname");
-	std::cout << "retrieve cell\n";
 		m_maestroController.setPort(port.c_str());
 	std::cout << "maestro inited\n";
 
@@ -119,14 +118,14 @@ void SailingRobot::init() {
 
 	} catch (const char * error) {
 		logError(error);
-		exit(0);
+		exit(1);
 	}
 }
 
 
 void SailingRobot::run() {
 	
-	for (int i = 0; i < 100; i++) {
+	while(true) {
 		//check sensors
 		readGPS();
 		while (isnan(m_gpsReader.getLatitude())) {
@@ -194,7 +193,7 @@ void SailingRobot::logError(string error) {
 		m_dbHandler.insertErrorLog(error);
 	} catch (const char * logError) {
 		std::ofstream errorFile;
-			errorFile.open("errors", ios::app);
+			errorFile.open("/root/sailingrobot/errors.log", ios::app);
 			errorFile << "log error: " << logError << "\n";
 			errorFile << "when logging error: " << error << "\n";
 		errorFile.close();
