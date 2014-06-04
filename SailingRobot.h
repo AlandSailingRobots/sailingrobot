@@ -10,46 +10,6 @@
 #include "waypointlist/WaypointList.h"
 
 
-/*class GPSReader {
-//mock gpsreader
-	public:
-		GPSReader() {
-	};
-	~GPSReader() {
-		std::cout << "gps detr\n";
-	}
-	void connectToGPS(string portName, string connectionName) {
-	};
-	void readGPS() {
-	};
-	string getTimestamp() {
-		return "timestamp";
-	};
-	double getLatitude() {
-		return 30.2;
-	};
-	double getLongitude() {
-		return 40.9;
-	};
-	double getAltitude() {
-		return 40.3;
-	};
-	double getSpeed() {
-		return 3.04;
-	};
-	double getHeading() {
-		return 230.4;
-	};
-
- 	int getMode() {
- 		return -1;
- 	}
-
-	int getSatellites_used() {
-		return 0;
-	}
-};*/
-
 
 class SailingRobot {
 
@@ -66,6 +26,18 @@ private:
 	void logError(string error);
 	void readGPS();
 
+	void setupDB(string filename);
+	void setupMaestro();
+	void setupRudderServo();
+	void setupSailServo();
+	void setupWindSensor();
+	void setupGPS();
+	void setupCourseCalculation();
+	void setupRudderCommand();
+	void setupSailCommand();
+	void setupWaypointList();
+
+
 	WindSensorController m_windSensorController;
 	CourseCalculation m_courseCalc;
 
@@ -81,6 +53,5 @@ private:
 
 	RudderCommand m_rudderCommand;
 	SailCommand m_sailCommand;
-
 
 };
