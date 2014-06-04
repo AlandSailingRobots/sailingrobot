@@ -17,7 +17,7 @@ COMMAND = ruddercommand/RudderCommand.o sailcommand/SailCommand.o
 WAYPOINT = waypointlist/WaypointList.o 
 MAESTRO = servocontroller/MaestroController.o servocontroller/ServoObject.o servocontroller/SensorObject.o 
 CV7 = windsensor/WindSensorController.o windsensor/AdapterWaleswind.o windsensor/AdapterCV7.o
-GPS = gps/GPSReader.o
+GPS = gps/GPSReader.o gps/MockGPSReader.o
 
 OBJECTS = $(COURSE) $(DB) $(COMMAND) $(WAYPOINT) $(MAESTRO) $(CV7) $(GPS)
 SOURCES = SailingRobot.cpp example.cpp
