@@ -5,6 +5,7 @@
 #include "servocontroller/ServoObject.h"
 #include "servocontroller/SensorObject.h"
 #include "gps/GPSReader.h"
+#include "gps/MockGPSReader.h"
 #include "dbhandler/DBHandler.h"
 #include "coursecalculation/CourseCalculation.h"
 #include "waypointlist/WaypointList.h"
