@@ -58,7 +58,11 @@ void SailingRobot::run() {
 //		}
 std::cout << "gpsread\n";
 		//do coursecalc
-		m_courseCalc.setTWD(m_windSensor.getDirection());
+		try {
+			m_courseCalc.setTWD(m_windSensor.getDirection());
+		} catch (const char * error) {
+			logError(error);
+		}
 std::cout << "windsensor done\n";
 		if (m_courseCalc.getDTW() < 15) {
 			m_waypointList.next();
@@ -78,7 +82,7 @@ std::cout << "cts calulated\n";
 
 
 		//sail adjust
-        int sailCommand = m_sailCommand.getCommand(m_windSensor.getDirection());
+        int sailCommand = m_sailCommand.getCommand(m_courseCalc.getTWD());
 		m_sailServo.setPosition(sailCommand);
 
 std::cout << "servos done\n";
@@ -86,7 +90,7 @@ std::cout << "servos done\n";
 			m_dbHandler.insertDataLog(sailCommand, rudderCommand, m_courseCalc.getDTW(), m_courseCalc.getBTW(),
 			m_courseCalc.getCTS(), m_courseCalc.getTACK(),
 			0, "WW",
-			m_windSensor.getDirection(), 0, 
+			m_courseCalc.getTWD(), 0, 
 			0, m_rudderServo.getPosition(), m_sailServo.getPosition(),
 			m_gpsReader.getTimestamp(), m_gpsReader.getLatitude(), m_gpsReader.getLongitude(),
 			m_gpsReader.getAltitude(), m_gpsReader.getSpeed(), m_gpsReader.getHeading(),
