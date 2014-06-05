@@ -95,9 +95,6 @@ std::cout << "servos done\n";
 			logError(error);
 		}
 
-		sleep(1);
-		m_rudderServo.setPosition(m_rudderCommand.getMidShipsCommand());
-		sleep(1);
 	}
 
 }
