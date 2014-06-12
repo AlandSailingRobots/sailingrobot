@@ -22,22 +22,39 @@ void SailingRobot::init() {
 
 	setupDB("/root/sailingrobot/asr.db");
 	std::cout << "dbh inited\n";
+	
 	setupMaestro();
 	std::cout << "maestro inited\n";
+	
 	setupRudderServo();
 	std::cout << "rudderservo inited\n";
+	
 	setupSailServo();
 	std::cout << "sailservo inited\n";
+	
 	setupWindSensor();
 	std::cout << "windsensor inited\n";
+	
 	setupGPS();
+	readGPS();
+	while (isnan(m_gpsReader.getLatitude())) {
+		m_rudderServo.setPosition(m_rudderCommand.getMidShipsCommand());
+		readGPS();
+		sleep(2);
+		m_rudderServo.setPosition(m_rudderCommand.getPortCommand());
+		sleep(2);
+	}
 	std::cout << "gpsreader inited\n";
+	
 	setupCourseCalculation();
 	std::cout << "coursecalc inited\n";
+	
 	setupRudderCommand();
 	std::cout << "ruddercommand inited\n";
+	
 	setupSailCommand();
 	std::cout << "sailcommand inited\n";
+	
 	setupWaypointList();
 	std::cout << "wp inited\n";
 }
@@ -51,6 +68,7 @@ void SailingRobot::run() {
 		while (isnan(m_gpsReader.getLatitude())) {
 			readGPS();
 		}
+		
 //		try {
 //			m_windSensorController.refreshData();
 //		} catch(const char* exception) {
@@ -58,11 +76,26 @@ void SailingRobot::run() {
 //		}
 std::cout << "gpsread\n";
 		//do coursecalc
-		try {
-			m_courseCalc.setTWD(m_windSensor.getDirection());
-		} catch (const char * error) {
-			logError(error);
+		
+		int windDir = -10;
+		while (windDir == -10) {
+			try {
+				windDir = m_windSensor.getDirection();
+			} catch (const char * error) {
+				logError(error);
+			}
 		}
+
+		int twd = m_gpsReader.getHeading() + windDir - 180;
+		if (twd > 359) {
+			twd -= 360;
+		}
+		if (twd < 0) {
+			twd += 360;
+		}
+		
+		m_courseCalc.setTWD(twd);
+
 std::cout << "windsensor done\n";
 		if (m_courseCalc.getDTW() < 15) {
 			m_waypointList.next();
@@ -77,12 +110,12 @@ std::cout << "windsensor done\n";
 
 std::cout << "cts calulated\n";
 		//rudder adjust
-        int rudderCommand = m_rudderCommand.getCommand(m_courseCalc.getCTS(), m_gpsReader.getHeading());
+	        int rudderCommand = m_rudderCommand.getCommand(m_courseCalc.getCTS(), m_gpsReader.getHeading());
 		m_rudderServo.setPosition(rudderCommand);
 
 
 		//sail adjust
-        int sailCommand = m_sailCommand.getCommand(m_courseCalc.getTWD());
+       		int sailCommand = m_sailCommand.getCommand(windDir);
 		m_sailServo.setPosition(sailCommand);
 
 std::cout << "servos done\n";
@@ -90,7 +123,7 @@ std::cout << "servos done\n";
 			m_dbHandler.insertDataLog(sailCommand, rudderCommand, m_courseCalc.getDTW(), m_courseCalc.getBTW(),
 			m_courseCalc.getCTS(), m_courseCalc.getTACK(),
 			0, "WW",
-			m_courseCalc.getTWD(), 0, 
+			windDir, m_waypointList.getCurrent(), 
 			0, m_rudderServo.getPosition(), m_sailServo.getPosition(),
 			m_gpsReader.getTimestamp(), m_gpsReader.getLatitude(), m_gpsReader.getLongitude(),
 			m_gpsReader.getAltitude(), m_gpsReader.getSpeed(), m_gpsReader.getHeading(),
@@ -98,9 +131,7 @@ std::cout << "servos done\n";
 		} catch (const char * error) {
 			logError(error);
 		}
-
 	}
-
 }
 
 
@@ -204,11 +235,11 @@ void SailingRobot::setupGPS() {
 	try {
 		val = m_dbHandler.retriveCell("configs", "1", "gps_portname");
 		val2 = m_dbHandler.retriveCell("configs", "1", "gps_connectionname");
-		m_gpsReader.connectToGPS(val.c_str(), val2.c_str());
+		m_gpsReader.connectToGPS(val.c_str(), "localhost");
 	} catch (const char * error) {
 		logError(error);
 		exit(1);
-	}
+	}	
 }
 
 void SailingRobot::setupCourseCalculation() {
@@ -261,7 +292,10 @@ void SailingRobot::setupSailCommand() {
 }
 
 void SailingRobot::setupWaypointList() {
-	std::string val, val2;
+	m_waypointList.add(60.103580, 19.867784);
+	m_waypointList.add(60.103677, 19.865273);
+	m_waypointList.add(60.104489, 19.866818);
+/*	std::string val, val2;
 	try {
 		val = m_dbHandler.retriveCell("waypoints", "1", "latitude");
 		val2 = m_dbHandler.retriveCell("waypoints", "1", "longitude");
@@ -269,5 +303,5 @@ void SailingRobot::setupWaypointList() {
 	} catch (const char * error) {
 		logError(error);
 		exit(1);
-	}
+	}*/
 }
