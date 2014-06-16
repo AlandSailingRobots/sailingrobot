@@ -65,15 +65,15 @@ void SailingRobot::run() {
 	while(true) {
 
 		readGPS();
-/*		while (isnan(m_gpsReader.getLatitude())) {
+		while (isnan(m_gpsReader.getLatitude())) {
 			readGPS();
-		}*/
+		}
 		
-//		try {
-//			m_windSensorController.refreshData();
-//		} catch(const char* exception) {
-//			cout << exception << endl;
-//		}
+/*		try {
+			m_windSensorController.refreshData();
+		} catch(const char* exception) {
+			cout << exception << endl;
+		}*/
 std::cout << "gpsread\n";
 		
 		//read windsensor
@@ -190,10 +190,6 @@ void SailingRobot::setupRudderServo() {
 		m_rudderServo.setController(&m_maestroController);
 		val = m_dbHandler.retriveCell("configs", "1", "rs_channel");
 		m_rudderServo.setChannel(atoi(val.c_str()));
-		val = m_dbHandler.retriveCell("configs", "1", "rs_limitmin");
-		m_rudderServo.setMin(atoi(val.c_str()));
-		val = m_dbHandler.retriveCell("configs", "1", "rs_limitmax");
-		m_rudderServo.setMax(atoi(val.c_str()));
 		val = m_dbHandler.retriveCell("configs", "1", "rs_speed");
 		m_rudderServo.setSpeed(atoi(val.c_str()));
 		val = m_dbHandler.retriveCell("configs", "1", "rs_acceleration");
@@ -210,10 +206,6 @@ void SailingRobot::setupSailServo() {
 		m_sailServo.setController(&m_maestroController);
 		val = m_dbHandler.retriveCell("configs", "1", "ss_channel");
 		m_sailServo.setChannel(atoi(val.c_str()));
-		val = m_dbHandler.retriveCell("configs", "1", "ss_limitmin");
-		m_sailServo.setMin(atoi(val.c_str()));
-		val = m_dbHandler.retriveCell("configs", "1", "ss_limitmax");
-		m_sailServo.setMax(atoi(val.c_str()));
 		val = m_dbHandler.retriveCell("configs", "1", "ss_speed");
 		m_sailServo.setSpeed(atoi(val.c_str()));
 		val = m_dbHandler.retriveCell("configs", "1", "ss_acceleration");
