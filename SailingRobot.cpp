@@ -65,9 +65,6 @@ void SailingRobot::run() {
 	while(true) {
 
 		readGPS();
-		while (isnan(m_gpsReader.getLatitude())) {
-			readGPS();
-		}
 		
 /*		try {
 			m_windSensorController.refreshData();
