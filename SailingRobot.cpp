@@ -63,11 +63,11 @@ void SailingRobot::init() {
 void SailingRobot::run() {
 	
 	while(true) {
-		//check sensors
+
 		readGPS();
-		while (isnan(m_gpsReader.getLatitude())) {
+/*		while (isnan(m_gpsReader.getLatitude())) {
 			readGPS();
-		}
+		}*/
 		
 //		try {
 //			m_windSensorController.refreshData();
@@ -75,17 +75,18 @@ void SailingRobot::run() {
 //			cout << exception << endl;
 //		}
 std::cout << "gpsread\n";
-		//do coursecalc
 		
-		int windDir = -10;
-		while (windDir == -10) {
+		//read windsensor
+		int windDir = m_windSensor.getDirection();
+/*		while (windDir == -10) {
 			try {
 				windDir = m_windSensor.getDirection();
 			} catch (const char * error) {
 				logError(error);
 			}
-		}
+		}*/
 
+		//calc & set TWD
 		int twd = m_gpsReader.getHeading() + windDir - 180;
 		if (twd > 359) {
 			twd -= 360;
@@ -93,17 +94,18 @@ std::cout << "gpsread\n";
 		if (twd < 0) {
 			twd += 360;
 		}
-		
 		m_courseCalc.setTWD(twd);
 
 std::cout << "windsensor done\n";
+
+		//calc DTW
 		m_courseCalc.calculateDTW(m_gpsReader.getLatitude(), m_gpsReader.getLongitude(),
 			m_waypointList.getLatitude(), m_waypointList.getLongitude());
 		if (m_courseCalc.getDTW() < 15) {
 			m_waypointList.next();
 		}
 
-
+		//calc CTS
 		m_courseCalc.calculateBTW(m_gpsReader.getLatitude(), m_gpsReader.getLongitude(),
 			m_waypointList.getLatitude(), m_waypointList.getLongitude());
 		m_courseCalc.calculateCTS();
@@ -119,6 +121,8 @@ std::cout << "cts calulated\n";
 		m_sailServo.setPosition(sailCommand);
 
 std::cout << "servos done\n";
+
+		//logging
 		try {
 			m_dbHandler.insertDataLog(sailCommand, rudderCommand, m_courseCalc.getDTW(), m_courseCalc.getBTW(),
 			m_courseCalc.getCTS(), m_courseCalc.getTACK(),
