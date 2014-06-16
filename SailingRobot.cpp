@@ -97,15 +97,15 @@ std::cout << "gpsread\n";
 		m_courseCalc.setTWD(twd);
 
 std::cout << "windsensor done\n";
+		m_courseCalc.calculateDTW(m_gpsReader.getLatitude(), m_gpsReader.getLongitude(),
+			m_waypointList.getLatitude(), m_waypointList.getLongitude());
 		if (m_courseCalc.getDTW() < 15) {
 			m_waypointList.next();
 		}
 
+
 		m_courseCalc.calculateBTW(m_gpsReader.getLatitude(), m_gpsReader.getLongitude(),
 			m_waypointList.getLatitude(), m_waypointList.getLongitude());
-		m_courseCalc.calculateDTW(m_gpsReader.getLatitude(), m_gpsReader.getLongitude(),
-			m_waypointList.getLatitude(), m_waypointList.getLongitude());
-
 		m_courseCalc.calculateCTS();
 
 std::cout << "cts calulated\n";
