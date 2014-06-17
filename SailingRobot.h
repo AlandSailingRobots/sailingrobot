@@ -37,6 +37,7 @@ private:
 	void setupRudderCommand();
 	void setupSailCommand();
 	void setupWaypointList();
+	void setupHTTPSync();
 
 
 	WindSensorController m_windSensorController;
@@ -54,5 +55,7 @@ private:
 
 	RudderCommand m_rudderCommand;
 	SailCommand m_sailCommand;
+
+	HTTPSync m_httpSync;
 
 };
