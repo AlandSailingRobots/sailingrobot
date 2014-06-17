@@ -9,6 +9,8 @@
 #include "dbhandler/DBHandler.h"
 #include "coursecalculation/CourseCalculation.h"
 #include "waypointlist/WaypointList.h"
+#include "httpsync/HTTPSync.h"
+#include "httpsync/JSON.h"
 
 
 
@@ -39,6 +41,7 @@ private:
 	void setupWaypointList();
 	void setupHTTPSync();
 
+	void syncServer();
 
 	WindSensorController m_windSensorController;
 	CourseCalculation m_courseCalc;

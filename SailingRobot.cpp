@@ -296,9 +296,9 @@ void SailingRobot::setupHTTPSync() {
 		val = m_dbHandler.retriveCell("server", "1", "boat_id");
 		m_httpSync.setShipID(val);
 		val = m_dbHandler.retriveCell("server", "1", "boat_pwd");
-		m_httpSync.setShipPWD(string shipPWD);
+		m_httpSync.setShipPWD(val);
 		val = m_dbHandler.retriveCell("server", "1", "srv_addr");
-		m_httpSync.setServerURL(string URL);
+		m_httpSync.setServerURL(val);
 	} catch (const char * error) {
 		logError(error);
 		exit(1);
