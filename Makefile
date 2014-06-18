@@ -9,7 +9,7 @@
 
 CC = g++
 FLAGS = -Wall -pedantic -Werror
-LIBS = -lsqlite3 -lgps -lrt -lwiringPi
+LIBS = -lsqlite3 -lgps -lrt -lwiringPi -lcurl
 
 COURSE = coursecalculation/CourseCalculation.o 
 DB = dbhandler/DBHandler.o 

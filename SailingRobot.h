@@ -26,7 +26,7 @@ public:
 
 private:
 
-	void logError(string error);
+	void logMessage(string type, string message);
 	void readGPS();
 
 	void setupDB(string filename);

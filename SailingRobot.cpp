@@ -21,21 +21,42 @@ SailingRobot::~SailingRobot() {
 void SailingRobot::init() {
 
 	setupDB("/root/sailingrobot/asr.db");
+	logMessage("message", "setupDB() done");
+
+	setupHTTPSync();
+	logMessage("message", "setupHTTPSync() done"); syncServer();
+
 	setupMaestro();
+	logMessage("message", "setupMaestro() done"); syncServer();
+
 	setupRudderServo();
+	logMessage("message", "setupRudderServo() done"); syncServer();
+
 	setupSailServo();
+	logMessage("message", "setupSailServo() done"); syncServer();
+
 	setupWindSensor();
+	logMessage("message", "setupWindSensor() done"); syncServer();
+
 	setupGPS();
 	readGPS();
 	while (isnan(m_gpsReader.getLatitude())) {
 		readGPS();
 		sleep(2);
 	}	
+	logMessage("message", "setupGPS() done"); syncServer();
+
 	setupCourseCalculation();
+	logMessage("message", "setupCourseCalculation() done"); syncServer();
+
 	setupRudderCommand();
+	logMessage("message", "setupRudderCommand() done"); syncServer();
+
 	setupSailCommand();
+	logMessage("message", "setupSailCommand() done"); syncServer();
+
 	setupWaypointList();
-	setupHTTPSync();
+	logMessage("message", "setupWaypointList() done"); syncServer();
 }
 
 
@@ -79,7 +100,7 @@ void SailingRobot::run() {
 
 		} else {
 
-			logError("SailingRobot::run(), gps NaN");
+			logMessage("error", "SailingRobot::run(), gps NaN");
 		}
 
 		//sail position calculation
@@ -113,7 +134,7 @@ void SailingRobot::run() {
 				m_waypointList.getCurrent());
 
 		} catch (const char * error) {
-			logError(error);
+			logMessage("error", error);
 		}
 
 		syncServer();
@@ -129,14 +150,14 @@ void SailingRobot::shutdown() {
 }
 
 
-void SailingRobot::logError(string error) {
+void SailingRobot::logMessage(string type, string message) {
 	try {
-		m_dbHandler.insertMessageLog("timeplz", "error", error, 99);
+		m_dbHandler.insertMessageLog("timeplz", type, message);
 	} catch (const char * logError) {
 		std::ofstream errorFile;
 			errorFile.open("/root/sailingrobot/errors.log", ios::app);
 			errorFile << "log error: " << logError << "\n";
-			errorFile << "when logging error: " << error << "\n";
+			errorFile << "when logging " << type << ": " << message << "\n";
 		errorFile.close();
 	}
 }
@@ -145,7 +166,7 @@ void SailingRobot::readGPS() {
 		try {
 			m_gpsReader.readGPS(50000000);
 		} catch (const char * error) {
-			logError(error);
+			logMessage("error", error);
 		}
 }
 
@@ -153,7 +174,7 @@ void SailingRobot::setupDB(string filename) {
 	try {
 		m_dbHandler.openDatabase(filename);
 	} catch (const char * error) {
-		logError(error);
+		logMessage("error", error);
 		exit(1);
 	}
 }
@@ -164,7 +185,7 @@ void SailingRobot::setupMaestro() {
 		std::string val = m_dbHandler.retriveCell("configs", "1", "mc_port");
 		m_maestroController.setPort(val.c_str());
 	} catch (const char * error) {
-		logError(error);
+		logMessage("error", error);
 		exit(1);
 	}
 }
@@ -180,7 +201,7 @@ void SailingRobot::setupRudderServo() {
 		val = m_dbHandler.retriveCell("configs", "1", "rs_acc");
 		m_rudderServo.setAcceleration(atoi(val.c_str()));
 	} catch (const char * error) {
-		logError(error);
+		logMessage("error", error);
 		exit(1);
 	}
 }
@@ -196,7 +217,7 @@ void SailingRobot::setupSailServo() {
 		val = m_dbHandler.retriveCell("configs", "1", "ss_acc");
 		m_sailServo.setAcceleration(atoi(val.c_str()));
 	} catch (const char * error) {
-		logError(error);
+		logMessage("error", error);
 		exit(1);
 	}
 }
@@ -208,7 +229,7 @@ void SailingRobot::setupWindSensor() {
 		val = m_dbHandler.retriveCell("configs", "1", "ws_chan");
 		m_windSensor.setChannel(atoi(val.c_str()));
 	} catch (const char * error) {
-		logError(error);
+		logMessage("error", error);
 		exit(1);
 	}
 }
@@ -217,7 +238,7 @@ void SailingRobot::setupGPS() {
 	try {
 		m_gpsReader.connectToGPS();
 	} catch (const char * error) {
-		logError(error);
+		logMessage("error", error);
 		exit(1);
 	}	
 }
@@ -230,7 +251,7 @@ void SailingRobot::setupCourseCalculation() {
 		val = m_dbHandler.retriveCell("configs", "1", "cc_ang_sect");
 		m_courseCalc.setSECTOR_ANGLE(atoi(val.c_str()));
 	} catch (const char * error) {
-		logError(error);
+		logMessage("error", error);
 		exit(1);
 	}
 }
@@ -248,7 +269,7 @@ void SailingRobot::setupRudderCommand() {
 		val3 = m_dbHandler.retriveCell("configs", "1", "rc_ang_mid");
 		m_rudderCommand.setAngleValues(atoi(val.c_str()), atoi(val2.c_str()), atoi(val3.c_str()));
 	} catch (const char * error) {
-		logError(error);
+		logMessage("error", error);
 		exit(1);
 	}
 }
@@ -266,7 +287,7 @@ void SailingRobot::setupSailCommand() {
 		val3 = m_dbHandler.retriveCell("configs", "1", "sc_ang_run");
 		m_sailCommand.setAngleValues(atoi(val.c_str()), atoi(val2.c_str()), atoi(val3.c_str()));
 	} catch (const char * error) {
-		logError(error);
+		logMessage("error", error);
 		exit(1);
 	}
 }
@@ -281,7 +302,7 @@ void SailingRobot::setupWaypointList() {
 		val2 = m_dbHandler.retriveCell("waypoints", "1", "longitude");
 		m_waypointList.add(strtod(val.c_str(), NULL), strtod(val2.c_str(), NULL));
 	} catch (const char * error) {
-		logError(error);
+		logMessage("error", error);
 		exit(1);
 	}*/
 }
@@ -297,7 +318,7 @@ void SailingRobot::setupHTTPSync() {
 		val = m_dbHandler.retriveCell("server", "1", "srv_addr");
 		m_httpSync.setServerURL(val);
 	} catch (const char * error) {
-		logError(error);
+		logMessage("error", error);
 		exit(1);
 	}
 }
@@ -305,12 +326,12 @@ void SailingRobot::setupHTTPSync() {
 void SailingRobot::syncServer() {
 
 	vector<string> logIds;
-	logIds = db.getTableIds("datalogs");
+	logIds = m_dbHandler.getTableIds("datalogs");
 
 	JSONArray datalogs;
 	datalogs.setName("datalogs");
 
-	for (int i = 0; i < logIds.size(); i++) {
+	for (unsigned int i = 0; i < logIds.size(); i++) {
 		JSONData data;
 		data.add("id", m_dbHandler.retriveCell("datalogs", logIds[i], "id"));
 		data.add("gps_time",m_dbHandler.retriveCell("datalogs", logIds[i], "gps_time"));
@@ -342,12 +363,12 @@ void SailingRobot::syncServer() {
 
 
 	vector<string> msgIds;
-	msgIds = db.getTableIds("messages");
+	msgIds = m_dbHandler.getTableIds("messages");
 
 	JSONArray messages;
 	messages.setName("messages");
 
-	for (int i = 0; i < msgIds.size(); i++) {
+	for (unsigned int i = 0; i < msgIds.size(); i++) {
 		JSONData data;
 		data.add("id",m_dbHandler.retriveCell("messages", msgIds[i], "id"));
 		data.add("gps_time",m_dbHandler.retriveCell("messages", msgIds[i], "gps_time"));
@@ -367,7 +388,7 @@ void SailingRobot::syncServer() {
 
 	m_httpSync.pushLogs(main.toString());
 
-	db.clearTable("datalogs");
-	db.clearTable("messages");
+	m_dbHandler.clearTable("datalogs");
+	m_dbHandler.clearTable("messages");
 }
 
