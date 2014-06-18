@@ -24,19 +24,19 @@ void SailingRobot::init() {
 	logMessage("message", "setupDB() done");
 
 	setupHTTPSync();
-	logMessage("message", "setupHTTPSync() done"); syncServer();
+	logMessage("message", "setupHTTPSync() done");// syncServer();
 
 	setupMaestro();
-	logMessage("message", "setupMaestro() done"); syncServer();
+	logMessage("message", "setupMaestro() done");// syncServer();
 
 	setupRudderServo();
-	logMessage("message", "setupRudderServo() done"); syncServer();
+	logMessage("message", "setupRudderServo() done");// syncServer();
 
 	setupSailServo();
-	logMessage("message", "setupSailServo() done"); syncServer();
+	logMessage("message", "setupSailServo() done");// syncServer();
 
 	setupWindSensor();
-	logMessage("message", "setupWindSensor() done"); syncServer();
+	logMessage("message", "setupWindSensor() done");// syncServer();
 
 	setupGPS();
 	readGPS();
@@ -44,19 +44,19 @@ void SailingRobot::init() {
 		readGPS();
 		sleep(2);
 	}	
-	logMessage("message", "setupGPS() done"); syncServer();
+	logMessage("message", "setupGPS() done");// syncServer();
 
 	setupCourseCalculation();
-	logMessage("message", "setupCourseCalculation() done"); syncServer();
+	logMessage("message", "setupCourseCalculation() done");// syncServer();
 
 	setupRudderCommand();
-	logMessage("message", "setupRudderCommand() done"); syncServer();
+	logMessage("message", "setupRudderCommand() done");// syncServer();
 
 	setupSailCommand();
-	logMessage("message", "setupSailCommand() done"); syncServer();
+	logMessage("message", "setupSailCommand() done");// syncServer();
 
 	setupWaypointList();
-	logMessage("message", "setupWaypointList() done"); syncServer();
+	logMessage("message", "setupWaypointList() done");// syncServer();
 }
 
 
