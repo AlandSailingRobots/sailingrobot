@@ -54,7 +54,7 @@ private:
 	DBHandler m_dbHandler;
 
 	WaypointList m_waypointList;
-	GPSReader m_gpsReader;
+	MockGPSReader m_gpsReader;
 
 	RudderCommand m_rudderCommand;
 	SailCommand m_sailCommand;

@@ -113,6 +113,7 @@ void SailingRobot::run() {
 
 		//logging
 		try {
+std::cout << "insertdatalog start";
 			m_dbHandler.insertDataLog(
 				m_gpsReader.getTimestamp(),
 				m_gpsReader.getLatitude(),
@@ -132,7 +133,7 @@ void SailingRobot::run() {
 				0,
 				0,
 				m_waypointList.getCurrent());
-
+std::cout << " end\n";
 		} catch (const char * error) {
 			logMessage("error", error);
 		}
@@ -330,7 +331,7 @@ void SailingRobot::syncServer() {
 
 	JSONArray datalogs;
 	datalogs.setName("datalogs");
-
+std::cout << "logSize: " << logIds.size() << " logId: " << logIds[0];
 	for (unsigned int i = 0; i < logIds.size(); i++) {
 		JSONData data;
 		data.add("id", m_dbHandler.retriveCell("datalogs", logIds[i], "id"));
@@ -356,11 +357,9 @@ void SailingRobot::syncServer() {
 		data.add("wpt_cur",m_dbHandler.retriveCell("datalogs", logIds[i], "wpt_cur"));
 		data.add("wpt_rev","wpt0001");
 		JSONBlock block;
-		block.add(&data);
-		datalogs.add(block);
+		block.add(data.toString());
+		datalogs.add(block.toString());
 	}
-
-
 
 	vector<string> msgIds;
 	msgIds = m_dbHandler.getTableIds("messages");
@@ -376,18 +375,17 @@ void SailingRobot::syncServer() {
 		data.add("msg",m_dbHandler.retriveCell("messages", msgIds[i], "msg"));
 		data.add("log_id",m_dbHandler.retriveCell("messages", msgIds[i], "log_id"));
 		JSONBlock block;
-		block.add(&data);
-		messages.add(block);
+		block.add(data.toString());
+		messages.add(block.toString());
 	}
 
-
-
 	JSONBlock main;
-	main.add(&datalogs);
-	main.add(&messages);
-
-	m_httpSync.pushLogs(main.toString());
-
+	if(logIds.size() > 0)
+		main.add(datalogs.toString());
+	if(msgIds.size() > 0)
+		main.add(messages.toString());
+	if(logIds.size() > 0 || msgIds.size() > 0)
+std::cout << "server response: " << m_httpSync.pushLogs(main.toString()) << "\n";
 	m_dbHandler.clearTable("datalogs");
 	m_dbHandler.clearTable("messages");
 }
