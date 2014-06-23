@@ -112,29 +112,39 @@ void SailingRobot::run() {
 		m_sailServo.setPosition(sailCommand);
 
 		//logging
+		int sailServoPosition, rudderServoPosition;
 		try {
-			m_dbHandler.insertDataLog(
-				m_gpsReader.getTimestamp(),
-				m_gpsReader.getLatitude(),
-				m_gpsReader.getLongitude(),
-				m_gpsReader.getSpeed(),
-				m_gpsReader.getHeading(),
-				m_gpsReader.getSatellitesUsed(),
-				sailCommand,
-				rudderCommand,
-				m_sailServo.getPosition(),
-				m_rudderServo.getPosition(),
-				m_courseCalc.getDTW(),
-				m_courseCalc.getBTW(),
-				m_courseCalc.getCTS(),
-				m_courseCalc.getTACK(),
-				windDir,
-				0,
-				0,
-				m_waypointList.getCurrent());
+			sailServoPosition = m_sailServo.getPosition();
 		} catch (const char * error) {
 			logMessage("error", error);
+			sailServoPosition = 0;
 		}
+		try {
+			rudderServoPosition = m_rudderServo.getPosition();
+		} catch (const char * error) {
+			logMessage("error", error);
+			rudderServoPosition = 0;
+		}
+
+		m_dbHandler.insertDataLog(
+			m_gpsReader.getTimestamp(),
+			m_gpsReader.getLatitude(),
+			m_gpsReader.getLongitude(),
+			m_gpsReader.getSpeed(),
+			m_gpsReader.getHeading(),
+			m_gpsReader.getSatellitesUsed(),
+			sailCommand,
+			rudderCommand,
+			sailServoPosition,
+			rudderServoPosition,
+			m_courseCalc.getDTW(),
+			m_courseCalc.getBTW(),
+			m_courseCalc.getCTS(),
+			m_courseCalc.getTACK(),
+			windDir,
+			0,
+			0,
+			m_waypointList.getCurrent());
 
 		syncServer();
 
