@@ -392,9 +392,10 @@ void SailingRobot::syncServer() {
 		main.add(datalogs.toString());
 	if(msgIds.size() > 0)
 		main.add(messages.toString());
-	if(logIds.size() > 0 || msgIds.size() > 0)
-
-	m_dbHandler.clearTable("datalogs");
-	m_dbHandler.clearTable("messages");
+	if(logIds.size() > 0 || msgIds.size() > 0) {
+		m_httpSync.pushLogs(main.toString());
+		m_dbHandler.clearTable("datalogs");
+		m_dbHandler.clearTable("messages");
+	}
 }
 
