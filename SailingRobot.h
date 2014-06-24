@@ -7,10 +7,11 @@
 #include "gps/GPSReader.h"
 #include "gps/MockGPSReader.h"
 #include "dbhandler/DBHandler.h"
+#include "dbhandler/JSON.h"
 #include "coursecalculation/CourseCalculation.h"
 #include "waypointlist/WaypointList.h"
 #include "httpsync/HTTPSync.h"
-#include "httpsync/JSON.h"
+
 
 
 
