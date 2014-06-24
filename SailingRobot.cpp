@@ -333,69 +333,8 @@ void SailingRobot::setupHTTPSync() {
 }
 
 void SailingRobot::syncServer() {
-
-	vector<string> logIds;
-	logIds = m_dbHandler.getTableIds("datalogs");
-
-	JSONArray datalogs;
-	datalogs.setName("datalogs");
-
-	for (unsigned int i = 0; i < logIds.size(); i++) {
-		JSONData data;
-		data.add("id", m_dbHandler.retriveCell("datalogs", logIds[i], "id"));
-		data.add("gps_time",m_dbHandler.retriveCell("datalogs", logIds[i], "gps_time"));
-		data.add("gps_lat",m_dbHandler.retriveCell("datalogs", logIds[i], "gps_lat"));
-		data.add("gps_lon",m_dbHandler.retriveCell("datalogs", logIds[i], "gps_lon"));
-		data.add("gps_spd",m_dbHandler.retriveCell("datalogs", logIds[i], "gps_spd"));
-		data.add("gps_head",m_dbHandler.retriveCell("datalogs", logIds[i], "gps_head"));
-		data.add("gps_sat",m_dbHandler.retriveCell("datalogs", logIds[i], "gps_sat"));
-		data.add("sc_cmd",m_dbHandler.retriveCell("datalogs", logIds[i], "sc_cmd"));
-		data.add("rc_cmd",m_dbHandler.retriveCell("datalogs", logIds[i], "rc_cmd"));
-		data.add("ss_pos",m_dbHandler.retriveCell("datalogs", logIds[i], "ss_pos"));
-		data.add("rs_pos",m_dbHandler.retriveCell("datalogs", logIds[i], "rs_pos"));
-		data.add("cc_dtw",m_dbHandler.retriveCell("datalogs", logIds[i], "cc_dtw"));
-		data.add("cc_btw",m_dbHandler.retriveCell("datalogs", logIds[i], "cc_btw"));
-		data.add("cc_cts",m_dbHandler.retriveCell("datalogs", logIds[i], "cc_cts"));
-		data.add("cc_tack",m_dbHandler.retriveCell("datalogs", logIds[i], "cc_tack"));
-		data.add("ws_dir",m_dbHandler.retriveCell("datalogs", logIds[i], "ws_dir"));
-		data.add("ws_spd",m_dbHandler.retriveCell("datalogs", logIds[i], "ws_spd"));
-		data.add("ws_tmp",m_dbHandler.retriveCell("datalogs", logIds[i], "ws_tmp"));
-		data.add("cfg_rev","cfg0001");
-		data.add("rte_rev","rte0001");
-		data.add("wpt_cur",m_dbHandler.retriveCell("datalogs", logIds[i], "wpt_cur"));
-		data.add("wpt_rev","wpt0001");
-		JSONBlock block;
-		block.add(data.toString());
-		datalogs.add(block.toString());
-	}
-
-	vector<string> msgIds;
-	msgIds = m_dbHandler.getTableIds("messages");
-
-	JSONArray messages;
-	messages.setName("messages");
-
-	for (unsigned int i = 0; i < msgIds.size(); i++) {
-		JSONData data;
-		data.add("id",m_dbHandler.retriveCell("messages", msgIds[i], "id"));
-		data.add("gps_time",m_dbHandler.retriveCell("messages", msgIds[i], "gps_time"));
-		data.add("type",m_dbHandler.retriveCell("messages", msgIds[i], "type"));
-		data.add("msg",m_dbHandler.retriveCell("messages", msgIds[i], "msg"));
-		data.add("log_id",m_dbHandler.retriveCell("messages", msgIds[i], "log_id"));
-		JSONBlock block;
-		block.add(data.toString());
-		messages.add(block.toString());
-	}
-
-	JSONBlock main;
-	if(logIds.size() > 0)
-		main.add(datalogs.toString());
-	if(msgIds.size() > 0)
-		main.add(messages.toString());
-	if(logIds.size() > 0 || msgIds.size() > 0) {
-		m_httpSync.pushLogs(main.toString());
+		m_httpSync.pushLogs( m_dbHandler.getLogs() );
 		m_dbHandler.clearTable("datalogs");
 		m_dbHandler.clearTable("messages");
-	}
 }
 
