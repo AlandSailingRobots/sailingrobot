@@ -20,7 +20,7 @@ SailingRobot::~SailingRobot() {
 
 void SailingRobot::init() {
 
-	setupDB("/root/sailingrobot/asr.db");
+	setupDB("asr.db");
 	logMessage("message", "setupDB() done");
 
 	setupHTTPSync();
