@@ -21,7 +21,7 @@ public:
 
 	SailingRobot();
 	~SailingRobot();
-	void init();
+	void init(string programPath, string dbFileName, string errorFileName);
 	void run();
 	void shutdown();
 
@@ -29,6 +29,7 @@ private:
 
 	void logMessage(string type, string message);
 	void readGPS();
+	void syncServer();
 
 	void setupDB(string filename);
 	void setupMaestro();
@@ -42,7 +43,6 @@ private:
 	void setupWaypointList();
 	void setupHTTPSync();
 
-	void syncServer();
 
 	WindSensorController m_windSensorController;
 	CourseCalculation m_courseCalc;
@@ -62,4 +62,5 @@ private:
 
 	HTTPSync m_httpSync;
 
+	std::string m_errorLogPath;
 };

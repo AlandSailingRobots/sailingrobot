@@ -18,9 +18,10 @@ SailingRobot::~SailingRobot() {
 }
 
 
-void SailingRobot::init() {
+void SailingRobot::init(string programPath, string dbFileName, string errorFileName) {
 
-	setupDB("asr.db");
+	m_errorLogPath = programPath + errorFileName;
+	setupDB(programPath + dbFileName);
 	logMessage("message", "setupDB() done");
 
 	setupHTTPSync();
@@ -43,7 +44,7 @@ void SailingRobot::init() {
 	while (isnan(m_gpsReader.getLatitude())) {
 		readGPS();
 		sleep(2);
-	}	
+	}
 	logMessage("message", "setupGPS() done"); syncServer();
 
 	setupCourseCalculation();
@@ -65,16 +66,16 @@ void SailingRobot::run() {
 	int rudderCommand, sailCommand, windDir, twd;
 
 	while(true) {
-		
+
 		//read windsensor
 		windDir = m_windSensor.getDirection();
 
 		if ( !isnan(m_gpsReader.getLatitude()) ) {
-			
+
 			//calc DTW
 			m_courseCalc.calculateDTW(m_gpsReader.getLatitude(), m_gpsReader.getLongitude(),
 				m_waypointList.getLatitude(), m_waypointList.getLongitude());
-	
+
 			//check if we are within 15meters of the waypoint and move to next wp in that case
 			if (m_courseCalc.getDTW() < 15) {
 				m_waypointList.next();
@@ -99,8 +100,7 @@ void SailingRobot::run() {
 			rudderCommand = m_rudderCommand.getCommand(m_courseCalc.getCTS(), m_gpsReader.getHeading());
 
 		} else {
-
-			logMessage("error", "SailingRobot::run(), gps NaN");
+			logMessage("error", "SailingRobot::run(), gps NaN. Using values from last iteration.");
 		}
 
 		//sail position calculation
@@ -161,23 +161,36 @@ void SailingRobot::shutdown() {
 
 void SailingRobot::logMessage(string type, string message) {
 	try {
-		m_dbHandler.insertMessageLog("timeplz", type, message);
+		m_dbHandler.insertMessageLog(m_gpsReader.getTimestamp(), type, message);
 	} catch (const char * logError) {
 		std::ofstream errorFile;
-			errorFile.open("/root/sailingrobot/errors.log", ios::app);
-			errorFile << "log error: " << logError << "\n";
-			errorFile << "when logging " << type << ": " << message << "\n";
+		errorFile.open(m_errorLogPath.c_str(), ios::app);
+		errorFile << "log error: " << logError << "\n";
+		errorFile << "when logging " << type << ": " << message << "\n";
 		errorFile.close();
 	}
 }
 
 void SailingRobot::readGPS() {
-		try {
-			m_gpsReader.readGPS(50000000);
-		} catch (const char * error) {
-			logMessage("error", error);
-		}
+	try {
+		m_gpsReader.readGPS(50000000); //microseconds
+	} catch (const char * error) {
+		logMessage("error", error);
+	}
 }
+
+void SailingRobot::syncServer() {
+	m_httpSync.pushLogs( m_dbHandler.getLogs() );
+	m_dbHandler.clearTable("datalogs");
+	m_dbHandler.clearTable("messages");
+}
+
+
+
+
+///////// setup crap
+/////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////
 
 void SailingRobot::setupDB(string filename) {
 	try {
@@ -331,10 +344,3 @@ void SailingRobot::setupHTTPSync() {
 		exit(1);
 	}
 }
-
-void SailingRobot::syncServer() {
-		m_httpSync.pushLogs( m_dbHandler.getLogs() );
-		m_dbHandler.clearTable("datalogs");
-		m_dbHandler.clearTable("messages");
-}
-
