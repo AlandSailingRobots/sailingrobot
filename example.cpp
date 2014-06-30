@@ -5,7 +5,7 @@ int main(int argc, char *argv[]) {
 	if (argc < 2) {
 		sr.init("", "asr.db", "errors.log");
 	} else {
-		sr.init(std::string(argv[1]), "asr.db", "errors.log");
+		sr.init(std::string(argv[1]), "/asr.db", "/errors.log");
 	}
 	sr.run();
 	sr.shutdown();
