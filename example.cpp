@@ -1,12 +1,29 @@
 #include "SailingRobot.h"
 
+
+
+
 int main(int argc, char *argv[]) {
+
 	SailingRobot sr;
+	string path, db, errorLog;
 	if (argc < 2) {
-		sr.init("", "asr.db", "errors.log");
+		path = "";
+		db = "asr.db";
+		errorLog = "errors.log";
 	} else {
-		sr.init(std::string(argv[1]), "/asr.db", "/errors.log");
+		path = std::string(argv[1]);
+		db = "/asr.db";
+		errorLog = "/errors.log";
 	}
-	sr.run();
+
+	try {
+		sr.init(path, db, errorLog);
+		sr.run();
+	} catch (const char * e) {
+		sr.shutdown();
+		return 1;
+	}
 	sr.shutdown();
+	return 0;
 }

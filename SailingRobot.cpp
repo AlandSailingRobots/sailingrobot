@@ -26,6 +26,19 @@ void SailingRobot::init(string programPath, string dbFileName, string errorFileN
 
 	setupHTTPSync();
 	logMessage("message", "setupHTTPSync() done"); syncServer();
+	////////////////////////////////////////////////////////////////////////////
+	std::cout << "sync setup done\n";
+/*	try {
+		//m_dbHandler.updateConfig(m_httpSync.getConfig());
+		std::cout << m_httpSync.getRoute() << "\n";
+		//m_dbHandler.updateWaypoints(m_httpSync.getRoute());
+	} catch (const char * e) {
+		std::cout << e << "\n";
+	}*/
+//	exit(0);
+		throw "rtrtrtrt";
+
+	////////////////////////////////////////////////////////////////////////////
 
 	setupMaestro();
 	logMessage("message", "setupMaestro() done"); syncServer();
@@ -62,7 +75,7 @@ void SailingRobot::init(string programPath, string dbFileName, string errorFileN
 
 
 void SailingRobot::run() {
-	
+
 	int rudderCommand, sailCommand, windDir, twd;
 
 	while(true) {
@@ -197,7 +210,7 @@ void SailingRobot::setupDB(string filename) {
 		m_dbHandler.openDatabase(filename);
 	} catch (const char * error) {
 		logMessage("error", error);
-		exit(1);
+		throw;
 	}
 }
 
@@ -208,7 +221,7 @@ void SailingRobot::setupMaestro() {
 		m_maestroController.setPort(val.c_str());
 	} catch (const char * error) {
 		logMessage("error", error);
-		exit(1);
+		throw;
 	}
 }
 
@@ -224,7 +237,7 @@ void SailingRobot::setupRudderServo() {
 		m_rudderServo.setAcceleration(atoi(val.c_str()));
 	} catch (const char * error) {
 		logMessage("error", error);
-		exit(1);
+		throw;
 	}
 }
 
@@ -240,7 +253,7 @@ void SailingRobot::setupSailServo() {
 		m_sailServo.setAcceleration(atoi(val.c_str()));
 	} catch (const char * error) {
 		logMessage("error", error);
-		exit(1);
+		throw;
 	}
 }
 
@@ -252,7 +265,7 @@ void SailingRobot::setupWindSensor() {
 		m_windSensor.setChannel(atoi(val.c_str()));
 	} catch (const char * error) {
 		logMessage("error", error);
-		exit(1);
+		throw;
 	}
 }
 
@@ -261,7 +274,7 @@ void SailingRobot::setupGPS() {
 		m_gpsReader.connectToGPS();
 	} catch (const char * error) {
 		logMessage("error", error);
-		exit(1);
+		throw;
 	}	
 }
 
@@ -274,7 +287,7 @@ void SailingRobot::setupCourseCalculation() {
 		m_courseCalc.setSECTOR_ANGLE(atoi(val.c_str()));
 	} catch (const char * error) {
 		logMessage("error", error);
-		exit(1);
+		throw;
 	}
 }
 
@@ -292,7 +305,7 @@ void SailingRobot::setupRudderCommand() {
 		m_rudderCommand.setAngleValues(atoi(val.c_str()), atoi(val2.c_str()), atoi(val3.c_str()));
 	} catch (const char * error) {
 		logMessage("error", error);
-		exit(1);
+		throw;
 	}
 }
 
@@ -310,7 +323,7 @@ void SailingRobot::setupSailCommand() {
 		m_sailCommand.setAngleValues(atoi(val.c_str()), atoi(val2.c_str()), atoi(val3.c_str()));
 	} catch (const char * error) {
 		logMessage("error", error);
-		exit(1);
+		throw;
 	}
 }
 
@@ -325,7 +338,7 @@ void SailingRobot::setupWaypointList() {
 		m_waypointList.add(strtod(val.c_str(), NULL), strtod(val2.c_str(), NULL));
 	} catch (const char * error) {
 		logMessage("error", error);
-		exit(1);
+		throw;
 	}*/
 }
 
@@ -341,6 +354,6 @@ void SailingRobot::setupHTTPSync() {
 		m_httpSync.setServerURL(val);
 	} catch (const char * error) {
 		logMessage("error", error);
-		exit(1);
+		throw;
 	}
 }
