@@ -14,20 +14,19 @@ LIBS = -lsqlite3 -lgps -lrt -lwiringPi -lcurl
 COURSE = coursecalculation/CourseCalculation.o 
 DB = dbhandler/DBHandler.o  dbhandler/JSON.o
 COMMAND = ruddercommand/RudderCommand.o sailcommand/SailCommand.o 
-WAYPOINT = waypointlist/WaypointList.o 
 MAESTRO = servocontroller/MaestroController.o servocontroller/ServoObject.o servocontroller/SensorObject.o 
 CV7 = windsensor/WindSensorController.o windsensor/AdapterWaleswind.o windsensor/AdapterCV7.o
 GPS = gps/GPSReader.o gps/MockGPSReader.o
 HTTP = httpsync/HTTPSync.o
 
-OBJECTS = $(COURSE) $(DB) $(COMMAND) $(WAYPOINT) $(MAESTRO) $(CV7) $(GPS) $(HTTP)
+OBJECTS = $(COURSE) $(DB) $(COMMAND) $(MAESTRO) $(CV7) $(GPS) $(HTTP)
 SOURCES = SailingRobot.cpp example.cpp
 HEADERS = SailingRobot.h
 FILE = sr
 
 
 
-all : coursecalculation dbhandler ruddercommand sailcommand waypointlist servocontroller windsensor gps httpsync $(FILE)
+all : coursecalculation dbhandler ruddercommand sailcommand servocontroller windsensor gps httpsync $(FILE)
 
 coursecalculation :
 	cd coursecalculation && $(MAKE)
@@ -40,9 +39,6 @@ ruddercommand :
 
 sailcommand :
 	cd sailcommand && $(MAKE)
-
-waypointlist :
-	cd waypointlist && $(MAKE)
 
 servocontroller :
 	cd servocontroller && $(MAKE)

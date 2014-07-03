@@ -9,7 +9,6 @@
 #include "dbhandler/DBHandler.h"
 #include "dbhandler/JSON.h"
 #include "coursecalculation/CourseCalculation.h"
-#include "waypointlist/WaypointList.h"
 #include "httpsync/HTTPSync.h"
 
 
@@ -31,6 +30,7 @@ private:
 	void readGPS();
 	void syncServer();
 	void updateState();
+	void nextWaypoint();
 
 	void setupDB(string filename);
 	void setupMaestro();
@@ -41,7 +41,7 @@ private:
 	void setupCourseCalculation();
 	void setupRudderCommand();
 	void setupSailCommand();
-	void setupWaypointList();
+	void setupWaypoint();
 	void setupHTTPSync();
 
 
@@ -55,7 +55,6 @@ private:
 
 	DBHandler m_dbHandler;
 
-	WaypointList m_waypointList;
 	MockGPSReader m_gpsReader;
 
 	RudderCommand m_rudderCommand;
@@ -64,4 +63,8 @@ private:
 	HTTPSync m_httpSync;
 
 	std::string m_errorLogPath;
+
+	float m_waypointLatitude;
+	float m_waypointLongitude;
+	string m_waypointId;
 };

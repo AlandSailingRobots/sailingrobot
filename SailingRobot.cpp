@@ -27,6 +27,8 @@ void SailingRobot::init(string programPath, string dbFileName, string errorFileN
 
 	updateState();
 
+	setupWaypoint();
+
 	setupMaestro();
 
 	setupRudderServo();
@@ -48,7 +50,7 @@ void SailingRobot::init(string programPath, string dbFileName, string errorFileN
 
 	setupSailCommand();
 
-	setupWaypointList();
+	setupWaypoint();
 }
 
 
@@ -65,11 +67,12 @@ void SailingRobot::run() {
 
 			//calc DTW
 			m_courseCalc.calculateDTW(m_gpsReader.getLatitude(), m_gpsReader.getLongitude(),
-				m_waypointList.getLatitude(), m_waypointList.getLongitude());
+				m_waypointLatitude, m_waypointLongitude);
 
 			//check if we are within 15meters of the waypoint and move to next wp in that case
 			if (m_courseCalc.getDTW() < 15) {
-				m_waypointList.next();
+				nextWaypoint();
+				setupWaypoint();
 			}
 
 			//calc & set TWD
@@ -84,7 +87,7 @@ void SailingRobot::run() {
 
 			//calc BTW & CTS
 			m_courseCalc.calculateBTW(m_gpsReader.getLatitude(), m_gpsReader.getLongitude(),
-				m_waypointList.getLatitude(), m_waypointList.getLongitude());
+				m_waypointLatitude, m_waypointLongitude);
 			m_courseCalc.calculateCTS();
 
 			//rudder position calculation
@@ -135,7 +138,7 @@ void SailingRobot::run() {
 			windDir,
 			0,
 			0,
-			m_waypointList.getCurrent());  ///needs fix, lowest id in waypoint table
+			atoi(m_waypointId.c_str()) );
 
 		syncServer();
 
@@ -186,20 +189,35 @@ void SailingRobot::syncServer() {
 void SailingRobot::updateState() {
 	try {
 		std::string setup = m_httpSync.getSetup();
+		bool stateChanged = false;
 		if (m_dbHandler.revChanged("cfg_rev", setup) ) {
 			m_dbHandler.updateTable("configs", m_httpSync.getConfig());
-			m_dbHandler.updateTable("state", m_httpSync.getSetup());
+			stateChanged = true;
+			logMessage("message", "config state updated");
 		}
 		if (m_dbHandler.revChanged("rte_rev", setup) ) {
 			m_dbHandler.updateTable("waypoints", m_httpSync.getRoute());
+			stateChanged = true;
+			logMessage("message", "route state updated");
+		}
+		if (stateChanged)  {
 			m_dbHandler.updateTable("state", m_httpSync.getSetup());
 		}
 	} catch (const char * error) {
 		logMessage("error", error);
+		throw;
 	}
-	logMessage("message", "state updated");
 }
 
+
+void SailingRobot::nextWaypoint() {
+	try {
+		m_dbHandler.deleteRow("waypoints", m_waypointId);
+	} catch (const char * error) {
+		logMessage("error", error);
+	}
+	logMessage("message", "SailingRobot::nextWaypoint(), waypoint removed");
+}
 
 
 ///////// setup crap
@@ -337,20 +355,19 @@ void SailingRobot::setupSailCommand() {
 	logMessage("message", "setupSailCommand() done");
 }
 
-void SailingRobot::setupWaypointList() {
-	m_waypointList.add(60.103580, 19.867784);
-	m_waypointList.add(60.103677, 19.865273);
-	m_waypointList.add(60.104489, 19.866818);
-/*	std::string val, val2;
+void SailingRobot::setupWaypoint() {
 	try {
-		val = m_dbHandler.retriveCell("waypoints", "1", "latitude");
-		val2 = m_dbHandler.retriveCell("waypoints", "1", "longitude");
-		m_waypointList.add(strtod(val.c_str(), NULL), strtod(val2.c_str(), NULL));
+		m_waypointId = m_dbHandler.getMinIdFromTable("waypoints");
+
+		string lat = m_dbHandler.retriveCell("waypoints", m_waypointId, "lat");
+		m_waypointLatitude = atof(lat.c_str());
+		string lon = m_dbHandler.retriveCell("waypoints", m_waypointId, "lon");
+		m_waypointLongitude = atof(lon.c_str());
 	} catch (const char * error) {
 		logMessage("error", error);
 		throw;
-	}*/
-	logMessage("message", "setupWaypointList() done");
+	}
+	logMessage("message", "setupWaypoint() done");
 }
 
 
