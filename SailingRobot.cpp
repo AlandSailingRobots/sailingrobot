@@ -28,36 +28,16 @@ void SailingRobot::init(string programPath, string dbFileName, string errorFileN
 	logMessage("message", "setupHTTPSync() done"); syncServer();
 	////////////////////////////////////////////////////////////////////////////
 	std::cout << "sync setup done\n";
+//	m_dbHandler.updateTable("waypoints", m_httpSync.getRoute());
 	try {
-		//m_dbHandler.updateConfig(m_httpSync.getConfig());
-		m_dbHandler.updateWaypoints(m_httpSync.getRoute());
-	} catch (const char * e) {
-		std::cout << e << "\n";
-	}
-//	exit(0);
-
-		m_dbHandler.insertDataLog(
-			"m_gpsReader.getTimestamp()",
-			0,
-			0,
-			0,
-			0,
-			0,
-			0,
-			0,
-			0,
-			0,
-			0,
-			0,
-			0,
-			0,
-			0,
-			0,
-			0,
-			0);
-
-		syncServer();
-
+		getServer();
+	// m_dbHandler.updateTable("configs", m_httpSync.getConfig());
+	// m_dbHandler.updateTable("waypoints", m_httpSync.getRoute());
+//	m_dbHandler.updateTable("state", m_httpSync.getSetup());
+} catch (const char * error) {
+	std::cout << error << "\n";
+}
+	//getServer();
 	throw "rtrtrtrt";
 
 	////////////////////////////////////////////////////////////////////////////
@@ -179,7 +159,7 @@ void SailingRobot::run() {
 			windDir,
 			0,
 			0,
-			m_waypointList.getCurrent());
+			m_waypointList.getCurrent());  ///needs fix, lowest id in waypoint table
 
 		syncServer();
 
@@ -206,6 +186,7 @@ void SailingRobot::logMessage(string type, string message) {
 	}
 }
 
+
 void SailingRobot::readGPS() {
 	try {
 		m_gpsReader.readGPS(50000000); //microseconds
@@ -214,13 +195,30 @@ void SailingRobot::readGPS() {
 	}
 }
 
-void SailingRobot::syncServer() {
+
+void SailingRobot::syncServer() {	
 	string response = m_httpSync.pushLogs( m_dbHandler.getLogs() );
 	m_dbHandler.removeLogs(response);
-	//m_dbHandler.clearTable("datalogs");
-	//m_dbHandler.clearTable("messages");
 }
 
+
+void SailingRobot::getServer() {
+	std::string setup = m_httpSync.getSetup();
+	try {
+		if (m_dbHandler.revChanged("cfg_rev", setup) ) {
+			std::cout << "changing confg\n";
+			m_dbHandler.updateTable("configs", m_httpSync.getConfig());
+			m_dbHandler.updateTable("state", m_httpSync.getSetup());
+		}
+		if (m_dbHandler.revChanged("rte_rev", setup) ) {
+			std::cout << "changing waypoints\n";
+			m_dbHandler.updateTable("waypoints", m_httpSync.getRoute());
+			m_dbHandler.updateTable("state", m_httpSync.getSetup());
+		}
+	} catch (const char * error) {
+		logMessage("error", error);
+	}
+}
 
 
 

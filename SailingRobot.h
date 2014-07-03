@@ -30,6 +30,7 @@ private:
 	void logMessage(string type, string message);
 	void readGPS();
 	void syncServer();
+	void getServer();
 
 	void setupDB(string filename);
 	void setupMaestro();
