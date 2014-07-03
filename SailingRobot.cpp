@@ -22,37 +22,18 @@ void SailingRobot::init(string programPath, string dbFileName, string errorFileN
 
 	m_errorLogPath = programPath + errorFileName;
 	setupDB(programPath + dbFileName);
-	logMessage("message", "setupDB() done");
 
 	setupHTTPSync();
-	logMessage("message", "setupHTTPSync() done"); syncServer();
-	////////////////////////////////////////////////////////////////////////////
-	std::cout << "sync setup done\n";
-//	m_dbHandler.updateTable("waypoints", m_httpSync.getRoute());
-	try {
-		getServer();
-	// m_dbHandler.updateTable("configs", m_httpSync.getConfig());
-	// m_dbHandler.updateTable("waypoints", m_httpSync.getRoute());
-//	m_dbHandler.updateTable("state", m_httpSync.getSetup());
-} catch (const char * error) {
-	std::cout << error << "\n";
-}
-	//getServer();
-	throw "rtrtrtrt";
 
-	////////////////////////////////////////////////////////////////////////////
+	updateState();
 
 	setupMaestro();
-	logMessage("message", "setupMaestro() done"); syncServer();
 
 	setupRudderServo();
-	logMessage("message", "setupRudderServo() done"); syncServer();
 
 	setupSailServo();
-	logMessage("message", "setupSailServo() done"); syncServer();
 
 	setupWindSensor();
-	logMessage("message", "setupWindSensor() done"); syncServer();
 
 	setupGPS();
 	readGPS();
@@ -60,19 +41,14 @@ void SailingRobot::init(string programPath, string dbFileName, string errorFileN
 		readGPS();
 		sleep(2);
 	}
-	logMessage("message", "setupGPS() done"); syncServer();
 
 	setupCourseCalculation();
-	logMessage("message", "setupCourseCalculation() done"); syncServer();
 
 	setupRudderCommand();
-	logMessage("message", "setupRudderCommand() done"); syncServer();
 
 	setupSailCommand();
-	logMessage("message", "setupSailCommand() done"); syncServer();
 
 	setupWaypointList();
-	logMessage("message", "setupWaypointList() done"); syncServer();
 }
 
 
@@ -170,6 +146,7 @@ void SailingRobot::run() {
 
 
 void SailingRobot::shutdown() {
+	syncServer();
 	m_dbHandler.closeDatabase();
 }
 
@@ -196,28 +173,31 @@ void SailingRobot::readGPS() {
 }
 
 
-void SailingRobot::syncServer() {	
-	string response = m_httpSync.pushLogs( m_dbHandler.getLogs() );
-	m_dbHandler.removeLogs(response);
+void SailingRobot::syncServer() {
+	try {
+		string response = m_httpSync.pushLogs( m_dbHandler.getLogs() );
+		m_dbHandler.removeLogs(response);
+	} catch (const char * error) {
+		logMessage("error", error);
+	}
 }
 
 
-void SailingRobot::getServer() {
-	std::string setup = m_httpSync.getSetup();
+void SailingRobot::updateState() {
 	try {
+		std::string setup = m_httpSync.getSetup();
 		if (m_dbHandler.revChanged("cfg_rev", setup) ) {
-			std::cout << "changing confg\n";
 			m_dbHandler.updateTable("configs", m_httpSync.getConfig());
 			m_dbHandler.updateTable("state", m_httpSync.getSetup());
 		}
 		if (m_dbHandler.revChanged("rte_rev", setup) ) {
-			std::cout << "changing waypoints\n";
 			m_dbHandler.updateTable("waypoints", m_httpSync.getRoute());
 			m_dbHandler.updateTable("state", m_httpSync.getSetup());
 		}
 	} catch (const char * error) {
 		logMessage("error", error);
 	}
+	logMessage("message", "state updated");
 }
 
 
@@ -233,6 +213,7 @@ void SailingRobot::setupDB(string filename) {
 		logMessage("error", error);
 		throw;
 	}
+	logMessage("message", "setupDB() done");
 }
 
 void SailingRobot::setupMaestro() {
@@ -244,6 +225,7 @@ void SailingRobot::setupMaestro() {
 		logMessage("error", error);
 		throw;
 	}
+	logMessage("message", "setupMaestro() done");
 }
 
 void SailingRobot::setupRudderServo() {
@@ -260,6 +242,7 @@ void SailingRobot::setupRudderServo() {
 		logMessage("error", error);
 		throw;
 	}
+	logMessage("message", "setupRudderServo() done");
 }
 
 void SailingRobot::setupSailServo() {
@@ -276,6 +259,7 @@ void SailingRobot::setupSailServo() {
 		logMessage("error", error);
 		throw;
 	}
+	logMessage("message", "setupSailServo() done");
 }
 
 void SailingRobot::setupWindSensor() {
@@ -288,6 +272,7 @@ void SailingRobot::setupWindSensor() {
 		logMessage("error", error);
 		throw;
 	}
+	logMessage("message", "setupWindSensor() done");
 }
 
 void SailingRobot::setupGPS() {
@@ -296,7 +281,8 @@ void SailingRobot::setupGPS() {
 	} catch (const char * error) {
 		logMessage("error", error);
 		throw;
-	}	
+	}
+	logMessage("message", "setupGPS() done");
 }
 
 void SailingRobot::setupCourseCalculation() {
@@ -310,6 +296,7 @@ void SailingRobot::setupCourseCalculation() {
 		logMessage("error", error);
 		throw;
 	}
+	logMessage("message", "setupCourseCalculation() done");
 }
 
 void SailingRobot::setupRudderCommand() {
@@ -328,6 +315,7 @@ void SailingRobot::setupRudderCommand() {
 		logMessage("error", error);
 		throw;
 	}
+	logMessage("message", "setupRudderCommand() done");
 }
 
 void SailingRobot::setupSailCommand() {
@@ -346,6 +334,7 @@ void SailingRobot::setupSailCommand() {
 		logMessage("error", error);
 		throw;
 	}
+	logMessage("message", "setupSailCommand() done");
 }
 
 void SailingRobot::setupWaypointList() {
@@ -361,6 +350,7 @@ void SailingRobot::setupWaypointList() {
 		logMessage("error", error);
 		throw;
 	}*/
+	logMessage("message", "setupWaypointList() done");
 }
 
 
@@ -377,4 +367,5 @@ void SailingRobot::setupHTTPSync() {
 		logMessage("error", error);
 		throw;
 	}
+	logMessage("message", "setupHTTPSync() done");
 }
