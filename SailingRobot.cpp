@@ -28,15 +28,37 @@ void SailingRobot::init(string programPath, string dbFileName, string errorFileN
 	logMessage("message", "setupHTTPSync() done"); syncServer();
 	////////////////////////////////////////////////////////////////////////////
 	std::cout << "sync setup done\n";
-/*	try {
+	try {
 		//m_dbHandler.updateConfig(m_httpSync.getConfig());
-		std::cout << m_httpSync.getRoute() << "\n";
-		//m_dbHandler.updateWaypoints(m_httpSync.getRoute());
+		m_dbHandler.updateWaypoints(m_httpSync.getRoute());
 	} catch (const char * e) {
 		std::cout << e << "\n";
-	}*/
+	}
 //	exit(0);
-		throw "rtrtrtrt";
+
+		m_dbHandler.insertDataLog(
+			"m_gpsReader.getTimestamp()",
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0);
+
+		syncServer();
+
+	throw "rtrtrtrt";
 
 	////////////////////////////////////////////////////////////////////////////
 
@@ -193,9 +215,10 @@ void SailingRobot::readGPS() {
 }
 
 void SailingRobot::syncServer() {
-	m_httpSync.pushLogs( m_dbHandler.getLogs() );
-	m_dbHandler.clearTable("datalogs");
-	m_dbHandler.clearTable("messages");
+	string response = m_httpSync.pushLogs( m_dbHandler.getLogs() );
+	m_dbHandler.removeLogs(response);
+	//m_dbHandler.clearTable("datalogs");
+	//m_dbHandler.clearTable("messages");
 }
 
 
