@@ -25,6 +25,8 @@ void SailingRobot::init(string programPath, string dbFileName, string errorFileN
 
 	setupHTTPSync();
 
+	setupWaypoint();
+
 	updateState();
 
 	setupMaestro();
@@ -48,7 +50,6 @@ void SailingRobot::init(string programPath, string dbFileName, string errorFileN
 
 	setupSailCommand();
 
-	setupWaypoint();
 }
 
 
@@ -56,7 +57,7 @@ void SailingRobot::run() {
 
 	int rudderCommand, sailCommand, windDir, twd;
 
-	while(true) {
+	while(!m_waypointId.empty()) {
 
 		//read windsensor
 		windDir = m_windSensor.getDirection();
@@ -66,12 +67,6 @@ void SailingRobot::run() {
 			//calc DTW
 			m_courseCalc.calculateDTW(m_gpsReader.getLatitude(), m_gpsReader.getLongitude(),
 				m_waypointLatitude, m_waypointLongitude);
-
-			//check if we are within 15meters of the waypoint and move to next wp in that case
-			if (m_courseCalc.getDTW() < 15) {
-				nextWaypoint();
-				setupWaypoint();
-			}
 
 			//calc & set TWD
 			twd = m_gpsReader.getHeading() + windDir - 180;
@@ -142,6 +137,12 @@ void SailingRobot::run() {
 
 		//update gps
 		readGPS();
+		
+		//check if we are within 15meters of the waypoint and move to next wp in that case
+		if (m_courseCalc.getDTW() < 15) {
+			nextWaypoint();
+			setupWaypoint();
+		}
 	}
 }
 
@@ -356,14 +357,11 @@ void SailingRobot::setupSailCommand() {
 void SailingRobot::setupWaypoint() {
 	try {
 		m_waypointId = m_dbHandler.getMinIdFromTable("waypoints");
+		if (m_waypointId.empty()) {
+			return;
+		}
 
 		string lat = m_dbHandler.retriveCell("waypoints", m_waypointId, "lat");
-		if (lat == NULL) {
-			std::cout << "lat = null\n";
-		}
-		if (lat.compare("") == 0) {
-			std::cout << "lat = ""\n";
-		}
 		m_waypointLatitude = atof(lat.c_str());
 		string lon = m_dbHandler.retriveCell("waypoints", m_waypointId, "lon");
 		m_waypointLongitude = atof(lon.c_str());
