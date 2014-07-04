@@ -361,7 +361,7 @@ void SailingRobot::setupWaypoint() {
 		if (lat == NULL) {
 			std::cout << "lat = null\n";
 		}
-		if (lat.compare("") =0 0) {
+		if (lat.compare("") == 0) {
 			std::cout << "lat = ""\n";
 		}
 		m_waypointLatitude = atof(lat.c_str());
