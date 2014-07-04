@@ -237,6 +237,12 @@ void SailingRobot::setupMaestro() {
 	try {
 		std::string val = m_dbHandler.retriveCell("configs", "1", "mc_port");
 		m_maestroController.setPort(val.c_str());
+		int maestroErrorCode = m_maestroController.getError();
+		if (maestroErrorCode != 0) {
+			stringstream stream;
+			stream << "maestro errorcode: " << maestroErrorCode;
+			logMessage("error", stream.str());
+		}
 	} catch (const char * error) {
 		logMessage("error", error);
 		throw;
