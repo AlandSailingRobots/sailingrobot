@@ -27,8 +27,6 @@ void SailingRobot::init(string programPath, string dbFileName, string errorFileN
 
 	updateState();
 
-	setupWaypoint();
-
 	setupMaestro();
 
 	setupRudderServo();
@@ -360,6 +358,12 @@ void SailingRobot::setupWaypoint() {
 		m_waypointId = m_dbHandler.getMinIdFromTable("waypoints");
 
 		string lat = m_dbHandler.retriveCell("waypoints", m_waypointId, "lat");
+		if (lat == NULL) {
+			std::cout << "lat = null\n";
+		}
+		if (lat.compare("") =0 0) {
+			std::cout << "lat = ""\n";
+		}
 		m_waypointLatitude = atof(lat.c_str());
 		string lon = m_dbHandler.retriveCell("waypoints", m_waypointId, "lon");
 		m_waypointLongitude = atof(lon.c_str());
