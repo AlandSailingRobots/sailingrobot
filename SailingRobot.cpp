@@ -25,8 +25,6 @@ void SailingRobot::init(string programPath, string dbFileName, string errorFileN
 
 	setupHTTPSync();
 
-	setupWaypoint();
-
 	updateState();
 
 	setupMaestro();
@@ -50,6 +48,7 @@ void SailingRobot::init(string programPath, string dbFileName, string errorFileN
 
 	setupSailCommand();
 
+	setupWaypoint();
 }
 
 
@@ -137,7 +136,7 @@ void SailingRobot::run() {
 
 		//update gps
 		readGPS();
-		
+
 		//check if we are within 15meters of the waypoint and move to next wp in that case
 		if (m_courseCalc.getDTW() < 15) {
 			nextWaypoint();
