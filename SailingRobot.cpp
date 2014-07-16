@@ -39,7 +39,6 @@ void SailingRobot::init(string programPath, string dbFileName, string errorFileN
 	readGPS();
 	while (isnan(m_gpsReader.getLatitude())) {
 		readGPS();
-		sleep(2);
 	}
 
 	setupCourseCalculation();
@@ -233,10 +232,8 @@ void SailingRobot::setupDB(string filename) {
 }
 
 void SailingRobot::setupMaestro() {
-	std::string val;
 	try {
-		std::string val = m_dbHandler.retriveCell("configs", "1", "mc_port");
-		m_maestroController.setPort(val.c_str());
+		m_maestroController.setPort( m_dbHandler.retriveCell("configs", "1", "mc_port") );
 		int maestroErrorCode = m_maestroController.getError();
 		if (maestroErrorCode != 0) {
 			stringstream stream;
@@ -251,15 +248,11 @@ void SailingRobot::setupMaestro() {
 }
 
 void SailingRobot::setupRudderServo() {
-	std::string val;
 	try {
 		m_rudderServo.setController(&m_maestroController);
-		val = m_dbHandler.retriveCell("configs", "1", "rs_chan");
-		m_rudderServo.setChannel(atoi(val.c_str()));
-		val = m_dbHandler.retriveCell("configs", "1", "rs_spd");
-		m_rudderServo.setSpeed(atoi(val.c_str()));
-		val = m_dbHandler.retriveCell("configs", "1", "rs_acc");
-		m_rudderServo.setAcceleration(atoi(val.c_str()));
+		m_rudderServo.setChannel( m_dbHandler.retriveCellAsInt("configs", "1", "rs_chan") );
+		m_rudderServo.setSpeed( m_dbHandler.retriveCellAsInt("configs", "1", "rs_spd") );
+		m_rudderServo.setAcceleration( m_dbHandler.retriveCellAsInt("configs", "1", "rs_acc") );
 	} catch (const char * error) {
 		logMessage("error", error);
 		throw;
@@ -268,15 +261,11 @@ void SailingRobot::setupRudderServo() {
 }
 
 void SailingRobot::setupSailServo() {
-	std::string val;
 	try {
 		m_sailServo.setController(&m_maestroController);
-		val = m_dbHandler.retriveCell("configs", "1", "ss_chan");
-		m_sailServo.setChannel(atoi(val.c_str()));
-		val = m_dbHandler.retriveCell("configs", "1", "ss_spd");
-		m_sailServo.setSpeed(atoi(val.c_str()));
-		val = m_dbHandler.retriveCell("configs", "1", "ss_acc");
-		m_sailServo.setAcceleration(atoi(val.c_str()));
+		m_sailServo.setChannel( m_dbHandler.retriveCellAsInt("configs", "1", "ss_chan") );
+		m_sailServo.setSpeed( m_dbHandler.retriveCellAsInt("configs", "1", "ss_spd") );
+		m_sailServo.setAcceleration( m_dbHandler.retriveCellAsInt("configs", "1", "ss_acc") );
 	} catch (const char * error) {
 		logMessage("error", error);
 		throw;
@@ -285,11 +274,9 @@ void SailingRobot::setupSailServo() {
 }
 
 void SailingRobot::setupWindSensor() {
-	std::string val;
 	try {
 		m_windSensor.setController(&m_maestroController);
-		val = m_dbHandler.retriveCell("configs", "1", "ws_chan");
-		m_windSensor.setChannel(atoi(val.c_str()));
+		m_windSensor.setChannel( m_dbHandler.retriveCellAsInt("configs", "1", "ws_chan") );
 	} catch (const char * error) {
 		logMessage("error", error);
 		throw;
@@ -308,12 +295,9 @@ void SailingRobot::setupGPS() {
 }
 
 void SailingRobot::setupCourseCalculation() {
-	std::string val;
 	try {
-		val = m_dbHandler.retriveCell("configs", "1", "cc_ang_tack");
-		m_courseCalc.setTACK_ANGLE(atoi(val.c_str()));
-		val = m_dbHandler.retriveCell("configs", "1", "cc_ang_sect");
-		m_courseCalc.setSECTOR_ANGLE(atoi(val.c_str()));
+		m_courseCalc.setTACK_ANGLE( m_dbHandler.retriveCellAsInt("configs", "1", "cc_ang_tack") );
+		m_courseCalc.setSECTOR_ANGLE( m_dbHandler.retriveCellAsInt("configs", "1", "cc_ang_sect") );
 	} catch (const char * error) {
 		logMessage("error", error);
 		throw;
@@ -322,17 +306,15 @@ void SailingRobot::setupCourseCalculation() {
 }
 
 void SailingRobot::setupRudderCommand() {
-	std::string val, val2, val3, val4;
 	try {
-		val = m_dbHandler.retriveCell("configs", "1", "rc_cmd_xtrm");
-		val2 = m_dbHandler.retriveCell("configs", "1", "rc_cmd_med");
-		val3 = m_dbHandler.retriveCell("configs", "1", "rc_cmd_sml");
-		val4 = m_dbHandler.retriveCell("configs", "1", "rc_cmd_mid");
-		m_rudderCommand.setCommandValues(atoi(val.c_str()), atoi(val2.c_str()), atoi(val3.c_str()), atoi(val4.c_str()));
-		val = m_dbHandler.retriveCell("configs", "1", "rc_ang_med");
-		val2 = m_dbHandler.retriveCell("configs", "1", "rc_ang_sml");
-		val3 = m_dbHandler.retriveCell("configs", "1", "rc_ang_mid");
-		m_rudderCommand.setAngleValues(atoi(val.c_str()), atoi(val2.c_str()), atoi(val3.c_str()));
+		m_rudderCommand.setCommandValues( m_dbHandler.retriveCellAsInt("configs", "1", "rc_cmd_xtrm"),
+			m_dbHandler.retriveCellAsInt("configs", "1", "rc_cmd_med"),
+			m_dbHandler.retriveCellAsInt("configs", "1", "rc_cmd_sml"),
+			m_dbHandler.retriveCellAsInt("configs", "1", "rc_cmd_mid"));
+
+		m_rudderCommand.setAngleValues( m_dbHandler.retriveCellAsInt("configs", "1", "rc_ang_med"),
+			m_dbHandler.retriveCellAsInt("configs", "1", "rc_ang_sml"),
+			m_dbHandler.retriveCellAsInt("configs", "1", "rc_ang_mid"));
 	} catch (const char * error) {
 		logMessage("error", error);
 		throw;
@@ -341,17 +323,15 @@ void SailingRobot::setupRudderCommand() {
 }
 
 void SailingRobot::setupSailCommand() {
-	std::string val, val2, val3, val4;
 	try {
-		val = m_dbHandler.retriveCell("configs", "1", "sc_cmd_clse");
-		val2 = m_dbHandler.retriveCell("configs", "1", "sc_cmd_beam");
-		val3 = m_dbHandler.retriveCell("configs", "1", "sc_cmd_brd");
-		val4 = m_dbHandler.retriveCell("configs", "1", "sc_cmd_run");
-		m_sailCommand.setCommandValues(atoi(val.c_str()), atoi(val2.c_str()), atoi(val3.c_str()), atoi(val4.c_str()));
-		val = m_dbHandler.retriveCell("configs", "1", "sc_ang_beam");
-		val2 = m_dbHandler.retriveCell("configs", "1", "sc_ang_brd");
-		val3 = m_dbHandler.retriveCell("configs", "1", "sc_ang_run");
-		m_sailCommand.setAngleValues(atoi(val.c_str()), atoi(val2.c_str()), atoi(val3.c_str()));
+		m_sailCommand.setCommandValues( m_dbHandler.retriveCellAsInt("configs", "1", "sc_cmd_clse"),
+			m_dbHandler.retriveCellAsInt("configs", "1", "sc_cmd_beam"),
+			m_dbHandler.retriveCellAsInt("configs", "1", "sc_cmd_brd"),
+			m_dbHandler.retriveCellAsInt("configs", "1", "sc_cmd_run"));
+
+		m_sailCommand.setAngleValues( m_dbHandler.retriveCellAsInt("configs", "1", "sc_ang_beam"),
+			m_dbHandler.retriveCellAsInt("configs", "1", "sc_ang_brd"),
+			m_dbHandler.retriveCellAsInt("configs", "1", "sc_ang_run"));
 	} catch (const char * error) {
 		logMessage("error", error);
 		throw;
@@ -379,14 +359,10 @@ void SailingRobot::setupWaypoint() {
 
 
 void SailingRobot::setupHTTPSync() {
-	std::string val;
 	try {
-		val = m_dbHandler.retriveCell("server", "1", "boat_id");
-		m_httpSync.setShipID(val);
-		val = m_dbHandler.retriveCell("server", "1", "boat_pwd");
-		m_httpSync.setShipPWD(val);
-		val = m_dbHandler.retriveCell("server", "1", "srv_addr");
-		m_httpSync.setServerURL(val);
+		m_httpSync.setShipID( m_dbHandler.retriveCell("server", "1", "boat_id") );
+		m_httpSync.setShipPWD( m_dbHandler.retriveCell("server", "1", "boat_pwd") );
+		m_httpSync.setServerURL( m_dbHandler.retriveCell("server", "1", "srv_addr") );
 	} catch (const char * error) {
 		logMessage("error", error);
 		throw;
