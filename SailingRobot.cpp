@@ -97,20 +97,6 @@ void SailingRobot::run() {
 		m_sailServo.setPosition(sailCommand);
 
 		//logging
-		int sailServoPosition, rudderServoPosition;
-		try {
-			sailServoPosition = m_sailServo.getPosition();
-		} catch (const char * error) {
-			logMessage("error", error);
-			sailServoPosition = 0;
-		}
-		try {
-			rudderServoPosition = m_rudderServo.getPosition();
-		} catch (const char * error) {
-			logMessage("error", error);
-			rudderServoPosition = 0;
-		}
-
 		m_dbHandler.insertDataLog(
 			m_gpsReader.getTimestamp(),
 			m_gpsReader.getLatitude(),
@@ -120,8 +106,8 @@ void SailingRobot::run() {
 			m_gpsReader.getSatellitesUsed(),
 			sailCommand,
 			rudderCommand,
-			sailServoPosition,
-			rudderServoPosition,
+			0, //sailservo getpos, to remove
+			0, //rudderservo getpos, to remove
 			m_courseCalc.getDTW(),
 			m_courseCalc.getBTW(),
 			m_courseCalc.getCTS(),
