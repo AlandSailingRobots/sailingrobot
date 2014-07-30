@@ -7,13 +7,15 @@
 #include <cstring>
 
 SailingRobot::SailingRobot() {
-/*	wiringPiSetup();
+/*	sleepypi stuff
+	wiringPiSetup();
 	pinMode(6, OUTPUT);
 	digitalWrite(6, HIGH);*/
 }
 
 SailingRobot::~SailingRobot() {
-/*	digitalWrite(6, LOW);
+/*	sleepypi stuff
+	digitalWrite(6, LOW);
 	std::cout << "sr destruct\n";*/
 }
 
