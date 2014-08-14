@@ -14,8 +14,8 @@ LIBS = -lsqlite3 -lgps -lrt -lwiringPi -lcurl
 COURSE = coursecalculation/CourseCalculation.o 
 DB = dbhandler/DBHandler.o  dbhandler/JSON.o
 COMMAND = ruddercommand/RudderCommand.o sailcommand/SailCommand.o 
-MAESTRO = servocontroller/MaestroController.o servocontroller/ServoObject.o servocontroller/SensorObject.o 
-CV7 = windsensor/WindSensorController.o windsensor/AdapterWaleswind.o windsensor/AdapterCV7.o
+MAESTRO = servocontroller/MaestroController.o servocontroller/ServoObject.o
+CV7 = CV7/CV7.o
 GPS = gps/GPSReader.o gps/MockGPSReader.o
 HTTP = httpsync/HTTPSync.o
 
@@ -44,7 +44,7 @@ servocontroller :
 	cd servocontroller && $(MAKE)
 
 windsensor :
-	cd windsensor && $(MAKE)
+	cd CV7 && $(MAKE)
 
 gps :
 	cd gps && $(MAKE)

@@ -1,9 +1,8 @@
-#include "windsensor/WindSensorController.h"
+#include "CV7/CV7.h"
 #include "sailcommand/SailCommand.h"
 #include "ruddercommand/RudderCommand.h"
 #include "servocontroller/MaestroController.h"
 #include "servocontroller/ServoObject.h"
-#include "servocontroller/SensorObject.h"
 #include "gps/GPSReader.h"
 #include "gps/MockGPSReader.h"
 #include "dbhandler/DBHandler.h"
@@ -45,17 +44,16 @@ private:
 	void setupHTTPSync();
 
 
-	WindSensorController m_windSensorController;
+	CV7 m_windSensor;
 	CourseCalculation m_courseCalc;
 
 	MaestroController m_maestroController;
 	ServoObject m_rudderServo;
 	ServoObject m_sailServo;
-	SensorObject m_windSensor;
 
 	DBHandler m_dbHandler;
 
-	MockGPSReader m_gpsReader;
+	GPSReader m_gpsReader;
 
 	RudderCommand m_rudderCommand;
 	SailCommand m_sailCommand;

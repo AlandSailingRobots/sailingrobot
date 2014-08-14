@@ -21,7 +21,6 @@ SailingRobot::~SailingRobot() {
 
 
 void SailingRobot::init(string programPath, string dbFileName, string errorFileName) {
-
 	m_errorLogPath = programPath + errorFileName;
 	setupDB(programPath + dbFileName);
 
@@ -29,37 +28,38 @@ void SailingRobot::init(string programPath, string dbFileName, string errorFileN
 
 	updateState();
 
-	setupMaestro();
+	setupMaestro(); //syncServer();
 
-	setupRudderServo();
+	setupRudderServo(); //syncServer();
 
-	setupSailServo();
+	setupSailServo(); //syncServer();
 
-	setupWindSensor();
+	setupWindSensor(); //syncServer();
 
 	setupGPS();
 	readGPS();
 	while (isnan(m_gpsReader.getLatitude())) {
 		readGPS();
 	}
+	//syncServer();
 
-	setupCourseCalculation();
+	setupCourseCalculation(); //syncServer();
 
-	setupRudderCommand();
+	setupRudderCommand(); //syncServer();
 
-	setupSailCommand();
+	setupSailCommand(); //syncServer();
 
-	setupWaypoint();
+	setupWaypoint(); //syncServer();
 }
 
 
 void SailingRobot::run() {
-
 	int rudderCommand, sailCommand, windDir, twd;
 
 	while(!m_waypointId.empty()) {
-
+std::cout << "main loop iteration\n";
 		//read windsensor
+		m_windSensor.refreshData();
 		windDir = m_windSensor.getDirection();
 
 		if ( !isnan(m_gpsReader.getLatitude()) ) {
@@ -69,7 +69,7 @@ void SailingRobot::run() {
 				m_waypointLatitude, m_waypointLongitude);
 
 			//calc & set TWD
-			twd = m_gpsReader.getHeading() + windDir - 180;
+			twd = m_gpsReader.getHeading() + windDir;
 			if (twd > 359) {
 				twd -= 360;
 			}
@@ -115,8 +115,8 @@ void SailingRobot::run() {
 			m_courseCalc.getCTS(),
 			m_courseCalc.getTACK(),
 			windDir,
-			0,
-			0,
+			m_windSensor.getSpeed(),
+			m_windSensor.getTemperature(),
 			atoi(m_waypointId.c_str()) );
 
 		syncServer();
@@ -142,7 +142,7 @@ void SailingRobot::shutdown() {
 void SailingRobot::logMessage(string type, string message) {
 	try {
 		m_dbHandler.insertMessageLog(m_gpsReader.getTimestamp(), type, message);
-	} catch (const char * logError) {
+       	} catch (const char * logError) {
 		std::ofstream errorFile;
 		errorFile.open(m_errorLogPath.c_str(), ios::app);
 		errorFile << "log error: " << logError << "\n";
@@ -190,7 +190,6 @@ void SailingRobot::updateState() {
 		}
 	} catch (const char * error) {
 		logMessage("error", error);
-		throw;
 	}
 }
 
@@ -263,11 +262,13 @@ void SailingRobot::setupSailServo() {
 
 void SailingRobot::setupWindSensor() {
 	try {
-		m_windSensor.setController(&m_maestroController);
-		m_windSensor.setChannel( m_dbHandler.retriveCellAsInt("configs", "1", "ws_chan") );
+		m_windSensor.loadConfig( m_dbHandler.retriveCell("configs", "1", "ws_port"),
+					m_dbHandler.retriveCellAsInt("configs", "1", "ws_baud") );
+
+		m_windSensor.setBufferSize( m_dbHandler.retriveCellAsInt("configs", "1", "ws_buff") );
 	} catch (const char * error) {
 		logMessage("error", error);
-		throw;
+		throw error;
 	}
 	logMessage("message", "setupWindSensor() done");
 }
@@ -352,8 +353,7 @@ void SailingRobot::setupHTTPSync() {
 		m_httpSync.setShipPWD( m_dbHandler.retriveCell("server", "1", "boat_pwd") );
 		m_httpSync.setServerURL( m_dbHandler.retriveCell("server", "1", "srv_addr") );
 	} catch (const char * error) {
-		logMessage("error", error);
-		throw;
+		logMessage("error", "SailingRobot::setupHTTPSync() failed");
 	}
 	logMessage("message", "setupHTTPSync() done");
 }
