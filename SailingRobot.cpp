@@ -24,9 +24,9 @@ void SailingRobot::init(string programPath, string dbFileName, string errorFileN
 	m_errorLogPath = programPath + errorFileName;
 	setupDB(programPath + dbFileName);
 
-	setupHTTPSync();
+//	setupHTTPSync();
 
-	updateState();
+//	updateState();
 
 	setupMaestro(); //syncServer();
 
@@ -119,7 +119,7 @@ std::cout << "main loop iteration\n";
 			m_windSensor.getTemperature(),
 			atoi(m_waypointId.c_str()) );
 
-		syncServer();
+//		syncServer();
 
 		//update gps
 		readGPS();
@@ -134,7 +134,7 @@ std::cout << "main loop iteration\n";
 
 
 void SailingRobot::shutdown() {
-	syncServer();
+//	syncServer();
 	m_dbHandler.closeDatabase();
 }
 
@@ -196,11 +196,11 @@ void SailingRobot::updateState() {
 
 void SailingRobot::nextWaypoint() {
 	try {
-		m_dbHandler.deleteRow("waypoints", m_waypointId);
+//		m_dbHandler.deleteRow("waypoints", m_waypointId);
 	} catch (const char * error) {
 		logMessage("error", error);
 	}
-	logMessage("message", "SailingRobot::nextWaypoint(), waypoint removed");
+	logMessage("message", "SailingRobot::nextWaypoint(), waypoint reached");
 }
 
 
