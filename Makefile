@@ -28,6 +28,10 @@ FILE = sr
 
 all : coursecalculation dbhandler ruddercommand sailcommand servocontroller windsensor gps httpsync $(FILE)
 
+clean :
+	rm -f $(OBJECTS)
+	rm -f $(FILE)
+	
 coursecalculation :
 	cd coursecalculation && $(MAKE)
 
