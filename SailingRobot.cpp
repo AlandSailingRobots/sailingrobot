@@ -60,7 +60,7 @@ void SailingRobot::run() {
 std::cout << "main loop iteration\n";
 		//read windsensor
 		m_windSensor.refreshData();
-		windDir = m_windSensor.getMeanDirection();
+		windDir = m_windSensor.getDirection();
 
 		if ( !isnan(m_gpsReader.getLatitude()) ) {
 
@@ -115,8 +115,8 @@ std::cout << "main loop iteration\n";
 			m_courseCalc.getCTS(),
 			m_courseCalc.getTACK(),
 			windDir,
-			m_windSensor.getMeanSpeed(),
-			m_windSensor.getMeanTemperature(),
+			m_windSensor.getSpeed(),
+			m_windSensor.getTemperature(),
 			atoi(m_waypointId.c_str()) );
 
 //		syncServer();
