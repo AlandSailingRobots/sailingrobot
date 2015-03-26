@@ -8,7 +8,7 @@
 #######################################################
 
 CC = g++
-FLAGS = -Wall -pedantic -Werror -std=c++14 
+FLAGS = -Wall -pedantic -Werror
 LIBS = -lsqlite3 -lgps -lrt -lwiringPi -lcurl
 
 COURSE = coursecalculation/CourseCalculation.o 
