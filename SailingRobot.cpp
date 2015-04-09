@@ -297,13 +297,8 @@ void SailingRobot::setupCourseCalculation() {
 void SailingRobot::setupRudderCommand() {
 	try {
 		m_rudderCommand.setCommandValues( m_dbHandler.retriveCellAsInt("configs", "1", "rc_cmd_xtrm"),
-			m_dbHandler.retriveCellAsInt("configs", "1", "rc_cmd_med"),
-			m_dbHandler.retriveCellAsInt("configs", "1", "rc_cmd_sml"),
 			m_dbHandler.retriveCellAsInt("configs", "1", "rc_cmd_mid"));
 
-		m_rudderCommand.setAngleValues( m_dbHandler.retriveCellAsInt("configs", "1", "rc_ang_med"),
-			m_dbHandler.retriveCellAsInt("configs", "1", "rc_ang_sml"),
-			m_dbHandler.retriveCellAsInt("configs", "1", "rc_ang_mid"));
 	} catch (const char * error) {
 		logMessage("error", error);
 		throw;
@@ -314,13 +309,8 @@ void SailingRobot::setupRudderCommand() {
 void SailingRobot::setupSailCommand() {
 	try {
 		m_sailCommand.setCommandValues( m_dbHandler.retriveCellAsInt("configs", "1", "sc_cmd_clse"),
-			m_dbHandler.retriveCellAsInt("configs", "1", "sc_cmd_beam"),
-			m_dbHandler.retriveCellAsInt("configs", "1", "sc_cmd_brd"),
 			m_dbHandler.retriveCellAsInt("configs", "1", "sc_cmd_run"));
 
-		m_sailCommand.setAngleValues( m_dbHandler.retriveCellAsInt("configs", "1", "sc_ang_beam"),
-			m_dbHandler.retriveCellAsInt("configs", "1", "sc_ang_brd"),
-			m_dbHandler.retriveCellAsInt("configs", "1", "sc_ang_run"));
 	} catch (const char * error) {
 		logMessage("error", error);
 		throw;
