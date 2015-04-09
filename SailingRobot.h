@@ -19,19 +19,19 @@ public:
 
 	SailingRobot();
 	~SailingRobot();
-	void init(string programPath, string dbFileName, string errorFileName);
+	void init(std::string programPath, std::string dbFileName, std::string errorFileName);
 	void run();
 	void shutdown();
 
 private:
 
-	void logMessage(string type, string message);
+	void logMessage(std::string type, std::string message);
 	void readGPS();
 	void syncServer();
 	void updateState();
 	void nextWaypoint();
 
-	void setupDB(string filename);
+	void setupDB(std::string filename);
 	void setupMaestro();
 	void setupRudderServo();
 	void setupSailServo();
@@ -64,5 +64,5 @@ private:
 
 	float m_waypointLatitude;
 	float m_waypointLongitude;
-	string m_waypointId;
+	std::string m_waypointId;
 };

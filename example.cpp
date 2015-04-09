@@ -6,7 +6,7 @@
 int main(int argc, char *argv[]) {
 
 	SailingRobot sr;
-	string path, db, errorLog;
+	std::string path, db, errorLog;
 	if (argc < 2) {
 		path = "";
 		db = "asr.db";

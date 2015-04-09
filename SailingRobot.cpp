@@ -20,7 +20,7 @@ SailingRobot::~SailingRobot() {
 }
 
 
-void SailingRobot::init(string programPath, string dbFileName, string errorFileName) {
+void SailingRobot::init(std::string programPath, std::string dbFileName, std::string errorFileName) {
 	m_errorLogPath = programPath + errorFileName;
 	setupDB(programPath + dbFileName);
 
@@ -139,12 +139,12 @@ void SailingRobot::shutdown() {
 }
 
 
-void SailingRobot::logMessage(string type, string message) {
+void SailingRobot::logMessage(std::string type, std::string message) {
 	try {
 		m_dbHandler.insertMessageLog(m_gpsReader.getTimestamp(), type, message);
        	} catch (const char * logError) {
 		std::ofstream errorFile;
-		errorFile.open(m_errorLogPath.c_str(), ios::app);
+		errorFile.open(m_errorLogPath.c_str(), std::ios::app);
 		errorFile << "log error: " << logError << "\n";
 		errorFile << "when logging " << type << ": " << message << "\n";
 		errorFile.close();
@@ -163,7 +163,7 @@ void SailingRobot::readGPS() {
 
 void SailingRobot::syncServer() {
 	try {
-		string response = m_httpSync.pushLogs( m_dbHandler.getLogs() );
+		std::string response = m_httpSync.pushLogs( m_dbHandler.getLogs() );
 		m_dbHandler.removeLogs(response);
 	} catch (const char * error) {
 		logMessage("error", error);
@@ -208,7 +208,7 @@ void SailingRobot::nextWaypoint() {
 /////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////
 
-void SailingRobot::setupDB(string filename) {
+void SailingRobot::setupDB(std::string filename) {
 	try {
 		m_dbHandler.openDatabase(filename);
 	} catch (const char * error) {
@@ -223,7 +223,7 @@ void SailingRobot::setupMaestro() {
 		m_maestroController.setPort( m_dbHandler.retriveCell("configs", "1", "mc_port") );
 		int maestroErrorCode = m_maestroController.getError();
 		if (maestroErrorCode != 0) {
-			stringstream stream;
+			std::stringstream stream;
 			stream << "maestro errorcode: " << maestroErrorCode;
 			logMessage("error", stream.str());
 		}
@@ -325,9 +325,9 @@ void SailingRobot::setupWaypoint() {
 			return;
 		}
 
-		string lat = m_dbHandler.retriveCell("waypoints", m_waypointId, "lat");
+		std::string lat = m_dbHandler.retriveCell("waypoints", m_waypointId, "lat");
 		m_waypointLatitude = atof(lat.c_str());
-		string lon = m_dbHandler.retriveCell("waypoints", m_waypointId, "lon");
+		std::string lon = m_dbHandler.retriveCell("waypoints", m_waypointId, "lon");
 		m_waypointLongitude = atof(lon.c_str());
 	} catch (const char * error) {
 		logMessage("error", error);
