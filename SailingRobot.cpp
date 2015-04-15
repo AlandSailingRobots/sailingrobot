@@ -117,7 +117,9 @@ std::cout << "main loop iteration\n";
 			windDir,
 			m_windSensor.getSpeed(),
 			m_windSensor.getTemperature(),
-			atoi(m_waypointId.c_str()) );
+			atoi(m_waypointId.c_str()),
+			0,0,0
+		);
 
 //		syncServer();
 
