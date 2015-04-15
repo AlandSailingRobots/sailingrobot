@@ -11,6 +11,7 @@ CC = g++
 FLAGS = -Wall -pedantic -Werror -std=c++14 
 LIBS = -lsqlite3 -lgps -lrt -lwiringPi -lcurl
 
+COMPASS = Compass/Compass.o 
 COURSE = coursecalculation/CourseCalculation.o 
 DB = dbhandler/DBHandler.o  dbhandler/JSON.o
 COMMAND = ruddercommand/RudderCommand.o sailcommand/SailCommand.o 
@@ -19,7 +20,7 @@ CV7 = CV7/CV7.o CV7/UtilityLibrary.o
 GPS = gps/GPSReader.o gps/MockGPSReader.o
 HTTP = httpsync/HTTPSync.o
 
-OBJECTS = $(COURSE) $(DB) $(COMMAND) $(MAESTRO) $(CV7) $(GPS) $(HTTP)
+OBJECTS = $(COMPASS) $(COURSE) $(DB) $(COMMAND) $(MAESTRO) $(CV7) $(GPS) $(HTTP)
 SOURCES = SailingRobot.cpp example.cpp
 HEADERS = SailingRobot.h
 FILE = sr
