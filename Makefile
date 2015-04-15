@@ -58,7 +58,7 @@ sailcommand :
 servocontroller :
 	cd servocontroller && $(MAKE)
 
-windsensor :
+CV7 :
 	cd CV7 && $(MAKE)
 
 gps :
