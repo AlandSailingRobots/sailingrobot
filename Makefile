@@ -29,6 +29,7 @@ FILE = sr
 all : coursecalculation dbhandler ruddercommand sailcommand servocontroller windsensor gps httpsync $(FILE)
 
 clean :
+	cd Compass && $(MAKE) clean
 	cd coursecalculation && $(MAKE) clean
 	cd dbhandler && $(MAKE) clean
 	cd ruddercommand && $(MAKE) clean
@@ -38,6 +39,9 @@ clean :
 	cd gps && $(MAKE) clean
 	cd httpsync && $(MAKE) clean
 	rm -f $(FILE)
+	
+Compass :
+	cd Compass && $(MAKE)
 	
 coursecalculation :
 	cd coursecalculation && $(MAKE)
