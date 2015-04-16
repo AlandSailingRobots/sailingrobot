@@ -64,7 +64,7 @@ void SailingRobot::run() {
 		m_windSensor.refreshData();
 		windDir = m_windSensor.getDirection();
 
-		m_Compass.readHeading();
+		m_Compass.readValues();
 
 		if ( !isnan(m_gpsReader.getLatitude()) ) {
 
@@ -123,8 +123,8 @@ void SailingRobot::run() {
 			m_windSensor.getTemperature(),
 			atoi(m_waypointId.c_str()),
 			m_Compass.getHeading(),
-			0,//Pitch
-			0//Roll
+			m_Compass.getPitch(),
+			m_Compass.getRoll()
 		);
 
 //		syncServer();
