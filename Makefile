@@ -11,12 +11,12 @@ CC = g++
 FLAGS = -Wall -pedantic -Werror -std=c++14 
 LIBS = -lsqlite3 -lgps -lrt -lwiringPi -lcurl
 
-COMPASS = Compass/HMC6343.o Compass/Utility.o 
+COMPASS = Compass/Compass.o Compass/MockCompass.o
 COURSE = coursecalculation/CourseCalculation.o 
 DB = dbhandler/DBHandler.o  dbhandler/JSON.o
 COMMAND = ruddercommand/RudderCommand.o sailcommand/SailCommand.o 
 MAESTRO = servocontroller/MaestroController.o servocontroller/ServoObject.o
-CV7 = CV7/CV7.o CV7/UtilityLibrary.o
+CV7 = CV7/UtilityLibrary.o CV7/CV7.o
 GPS = gps/GPSReader.o gps/MockGPSReader.o
 HTTP = httpsync/HTTPSync.o
 
@@ -24,10 +24,13 @@ OBJECTS = $(COMPASS) $(COURSE) $(DB) $(COMMAND) $(MAESTRO) $(CV7) $(GPS) $(HTTP)
 SOURCES = SailingRobot.cpp example.cpp
 HEADERS = SailingRobot.h
 FILE = sr
+MAKE = make
 
 
 
-all : Compass coursecalculation dbhandler ruddercommand sailcommand servocontroller CV7 gps httpsync $(FILE)
+all : runall $(FILE)
+
+runall : Compass coursecalculation dbhandler ruddercommand sailcommand servocontroller CV7 gps httpsync
 
 clean :
 	cd Compass && $(MAKE) clean
@@ -42,34 +45,46 @@ clean :
 	rm -f $(FILE)
 	
 Compass :
-	cd Compass && $(MAKE)
+	$(MAKE) -C ./Compass
+	
+
 	
 coursecalculation :
-	cd coursecalculation && $(MAKE)
+	$(MAKE) -C ./coursecalculation
+
+#Needed for proper subfolder make writing
+.PHONY : Compass runall coursecalculation dbhandler ruddercommand sailcommand servocontroller CV7 gps httpsync
+	
+
+
 
 dbhandler :
-	cd dbhandler && $(MAKE)
+	$(MAKE) -C ./dbhandler
+
 
 ruddercommand :
-	cd ruddercommand && $(MAKE)
+	$(MAKE) -C ./ruddercommand
+
 
 sailcommand :
-	cd sailcommand && $(MAKE)
+	$(MAKE) -C ./sailcommand
+
 
 servocontroller :
-	cd servocontroller && $(MAKE)
+	$(MAKE) -C ./servocontroller
+
 
 CV7 :
-	cd CV7 && $(MAKE)
+	$(MAKE) -C ./CV7
+
 
 gps :
-	cd gps && $(MAKE)
+	$(MAKE) -C ./gps
+
 
 httpsync :
-	cd httpsync && $(MAKE)
+	$(MAKE) -C ./httpsync
 
-example : $(SOURCES) $(HEADERS) example.cpp
-	$(CC) $(SOURCES) $(OBJECTS) example.cpp $(FLAGS) $(LIBS) -o example
-	
+
 $(FILE) : $(SOURCES) $(HEADERS) $(OBJECTS)
 	$(CC) $(SOURCES) $(OBJECTS) $(FLAGS) $(LIBS) -o $(FILE)
