@@ -5,9 +5,10 @@
 int main(int argc, char *argv[]) {
 
 	printf("Sailing robot example\n");
+	printf("=====================\n");
 
 	SailingRobot sr;
-	printf("CONFIG");
+	printf("CONFIG\n");
 	std::string path, db, errorLog;
 	if (argc < 2) {
 		path = "";
@@ -18,18 +19,18 @@ int main(int argc, char *argv[]) {
 		db = "/asr.db";
 		errorLog = "/errors.log";
 	}
-	printf("END");
+	printf("START\n");
 	try {
-		printf("INIT");
+		printf("-INIT\n");
 		sr.init(path, db, errorLog);
-		printf("RUN");
+		printf("-RUN\n");
 		sr.run();
 	} catch (const char * e) {
-		printf("ERR");
+		printf("-ERR\n");
 		sr.shutdown();
 		return 1;
 	}
 	sr.shutdown();
-	printf("END");
+	printf("END\n");
 	return 0;
 }
