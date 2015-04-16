@@ -344,9 +344,10 @@ void SailingRobot::setupWaypoint() {
 		}
 
 		std::string lat = m_dbHandler.retriveCell("waypoints", m_waypointId, "lat");
-		if(lat!=NULL)m_waypointLatitude = atof(lat.c_str());
+		std::cout << "lat:" << lat << std::endl;
+		m_waypointLatitude = atof(lat.c_str());
 		std::string lon = m_dbHandler.retriveCell("waypoints", m_waypointId, "lon");
-		if(lon!=NULL)m_waypointLongitude = atof(lon.c_str());
+		m_waypointLongitude = atof(lon.c_str());
 	} catch (const char * error) {
 		logMessage("error", error);
 		throw;
