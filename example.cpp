@@ -8,13 +8,15 @@ int main(int argc, char *argv[]) {
 	printf("=====================\n");
 
 	SailingRobot sr;
-	printf("CONFIG\n");
+	printf("CONFIG: ");
 	std::string path, db, errorLog;
 	if (argc < 2) {
+		printf("1\n");
 		path = "";
 		db = "asr.db";
 		errorLog = "errors.log";
 	} else {
+		printf("2\n");
 		path = std::string(argv[1]);
 		db = "/asr.db";
 		errorLog = "/errors.log";
@@ -27,7 +29,7 @@ int main(int argc, char *argv[]) {
 		sr.run();
 	} catch (const char * e) {
 		printf("-ERR\n");
-		printf(" -e: %s\n",e);
+		printf("-:%s\n",e);
 		sr.shutdown();
 		return 1;
 	}
