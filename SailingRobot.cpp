@@ -54,7 +54,7 @@ void SailingRobot::init(std::string programPath, std::string dbFileName, std::st
 
 
 void SailingRobot::run() {
-	int rudderCommand, sailCommand, windDir, compDir, twd;
+	int rudderCommand, sailCommand, windDir, twd;
 
 	while(!m_waypointId.empty()) {
 std::cout << "main loop iteration\n";
@@ -63,7 +63,6 @@ std::cout << "main loop iteration\n";
 		windDir = m_windSensor.getDirection();
 
 		m_Compass.readHeading();
-		compDir = m_Compass.getHeading();
 
 		if ( !isnan(m_gpsReader.getLatitude()) ) {
 
