@@ -29,14 +29,19 @@ void SailingRobot::init(std::string programPath, std::string dbFileName, std::st
 //	updateState();
 
 	setupCompass();  //syncServer();
+	printf("Compass OK\n");
 
 	setupMaestro();  //syncServer();
+	printf("Maestro OK\n");
 
 	setupRudderServo(); //syncServer();
+	printf("Rudder OK\n");
 
 	setupSailServo(); //syncServer();
+	printf("SailServo OK\n");
 
 	setupWindSensor(); //syncServer();
+	printf("Wind sensor OK\n");
 
 	setupGPS();
 	readGPS();
@@ -46,12 +51,16 @@ void SailingRobot::init(std::string programPath, std::string dbFileName, std::st
 	//syncServer();
 
 	setupCourseCalculation(); //syncServer();
+	printf("Course Calc OK\n");
 
 	setupRudderCommand(); //syncServer();
+	printf("Rudder Command OK\n");
 
 	setupSailCommand(); //syncServer();
+	printf("SAil Command OK\n");
 
 	setupWaypoint(); //syncServer();
+	printf("Waypoint OK\n");
 }
 
 
