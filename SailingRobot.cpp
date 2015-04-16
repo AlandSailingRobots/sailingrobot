@@ -349,3 +349,12 @@ void SailingRobot::setupHTTPSync() {
 	}
 	logMessage("message", "setupHTTPSync() done");
 }
+
+void SailingRobot::setupCompass() {
+	try {
+		m_Compass.init();
+	} catch (const char * error) {
+		logMessage("error", "SailingRobot::setupCompass() failed");
+	}
+	logMessage("message", "setupCompass() done");
+}

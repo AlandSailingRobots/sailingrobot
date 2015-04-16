@@ -1,3 +1,4 @@
+#include "Compass/HMC6343.h"
 #include "CV7/CV7.h"
 #include "sailcommand/SailCommand.h"
 #include "ruddercommand/RudderCommand.h"
@@ -42,7 +43,9 @@ private:
 	void setupSailCommand();
 	void setupWaypoint();
 	void setupHTTPSync();
+	void setupCompass();
 
+	HMC6343 m_Compass;
 
 	CV7 m_windSensor;
 	CourseCalculation m_courseCalc;
