@@ -337,6 +337,7 @@ void SailingRobot::setupSailCommand() {
 }
 
 void SailingRobot::setupWaypoint() {
+	std::cout << "setting up waypoints" << std::endl;
 	try {
 		m_waypointId = m_dbHandler.getMinIdFromTable("waypoints");
 		if (m_waypointId.empty()) {
