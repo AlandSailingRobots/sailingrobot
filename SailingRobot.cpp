@@ -23,6 +23,7 @@ SailingRobot::~SailingRobot() {
 void SailingRobot::init(std::string programPath, std::string dbFileName, std::string errorFileName) {
 	m_errorLogPath = programPath + errorFileName;
 	setupDB(programPath + dbFileName);
+	printf("DB OK\n");
 
 //	setupHTTPSync();
 
@@ -344,6 +345,7 @@ void SailingRobot::setupWaypoint() {
 			return;
 		}
 
+		std::cout << "retriveCell" << std::endl;
 		std::string lat = m_dbHandler.retriveCell("waypoints", m_waypointId, "lat");
 		std::cout << "lat:" << lat << std::endl;
 		m_waypointLatitude = atof(lat.c_str());
