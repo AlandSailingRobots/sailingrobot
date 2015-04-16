@@ -57,7 +57,7 @@ void SailingRobot::init(std::string programPath, std::string dbFileName, std::st
 	printf("Rudder Command OK\n");
 
 	setupSailCommand(); //syncServer();
-	printf("SAil Command OK\n");
+	printf("Sail Command OK\n");
 
 	setupWaypoint(); //syncServer();
 	printf("Waypoint OK\n");
@@ -344,8 +344,10 @@ void SailingRobot::setupWaypoint() {
 		}
 
 		std::string lat = m_dbHandler.retriveCell("waypoints", m_waypointId, "lat");
+		printf("lat:%s\n",lat);
 		m_waypointLatitude = atof(lat.c_str());
 		std::string lon = m_dbHandler.retriveCell("waypoints", m_waypointId, "lon");
+		printf("lon:%s\n",lon);
 		m_waypointLongitude = atof(lon.c_str());
 	} catch (const char * error) {
 		logMessage("error", error);
