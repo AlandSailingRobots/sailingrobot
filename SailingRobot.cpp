@@ -28,6 +28,8 @@ void SailingRobot::init(std::string programPath, std::string dbFileName, std::st
 
 //	updateState();
 
+	setupCompass();  //syncServer();
+
 	setupMaestro();  //syncServer();
 
 	setupRudderServo(); //syncServer();
