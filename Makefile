@@ -27,7 +27,7 @@ FILE = sr
 
 
 
-all : coursecalculation dbhandler ruddercommand sailcommand servocontroller CV7 gps httpsync $(FILE)
+all : Compass coursecalculation dbhandler ruddercommand sailcommand servocontroller CV7 gps httpsync $(FILE)
 
 clean :
 	cd Compass && $(MAKE) clean
