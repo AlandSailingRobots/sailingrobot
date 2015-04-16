@@ -21,7 +21,7 @@ GPS = gps/GPSReader.o gps/MockGPSReader.o
 HTTP = httpsync/HTTPSync.o
 
 OBJECTS = $(COMPASS) $(COURSE) $(DB) $(COMMAND) $(MAESTRO) $(CV7) $(GPS) $(HTTP)
-SOURCES = SailingRobot.cpp example.cpp
+SOURCES = SailingRobot.cpp
 HEADERS = SailingRobot.h
 FILE = sr
 
@@ -47,7 +47,8 @@ Compass :
 coursecalculation :
 	cd coursecalculation && $(MAKE)
 
-dbhandler :
+dbhandler :4
+
 	cd dbhandler && $(MAKE)
 
 ruddercommand :
@@ -68,5 +69,8 @@ gps :
 httpsync :
 	cd httpsync && $(MAKE)
 
+example : $(SOURCES) $(HEADERS) example.cpp
+	$(CC) $(SOURCES) $(OBJECTS) example.cpp $(FLAGS) $(LIBS) -o example
+	
 $(FILE) : $(SOURCES) $(HEADERS) $(OBJECTS)
 	$(CC) $(SOURCES) $(OBJECTS) $(FLAGS) $(LIBS) -o $(FILE)

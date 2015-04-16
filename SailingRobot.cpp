@@ -138,6 +138,7 @@ std::cout << "main loop iteration\n";
 			setupWaypoint();
 		}
 	}
+	std::cout << "NO WAYPOINTS !\n";
 }
 
 
