@@ -2,8 +2,9 @@
 
 
 
-
 int main(int argc, char *argv[]) {
+
+	std::cout << "Sailing robot example" << "\n";
 
 	SailingRobot sr;
 	std::string path, db, errorLog;
@@ -25,5 +26,6 @@ int main(int argc, char *argv[]) {
 		return 1;
 	}
 	sr.shutdown();
+	std::cout << "END" << "\n";
 	return 0;
 }
