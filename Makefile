@@ -47,8 +47,7 @@ Compass :
 coursecalculation :
 	cd coursecalculation && $(MAKE)
 
-dbhandler :4
-
+dbhandler :
 	cd dbhandler && $(MAKE)
 
 ruddercommand :
