@@ -59,7 +59,7 @@ void SailingRobot::run() {
 	int rudderCommand, sailCommand, windDir, twd;
 
 	while(!m_waypointId.empty()) {
-std::cout << "main loop iteration\n";
+		printf("main loop iteration\n");
 		//read windsensor
 		m_windSensor.refreshData();
 		windDir = m_windSensor.getDirection();

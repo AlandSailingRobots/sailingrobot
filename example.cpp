@@ -27,6 +27,7 @@ int main(int argc, char *argv[]) {
 		sr.run();
 	} catch (const char * e) {
 		printf("-ERR\n");
+		printf(" -e: %s",e);
 		sr.shutdown();
 		return 1;
 	}
