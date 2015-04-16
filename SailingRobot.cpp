@@ -138,7 +138,7 @@ void SailingRobot::run() {
 			setupWaypoint();
 		}
 	}
-	std::cout << "NO WAYPOINTS !\n";
+	printf("NO WAYPOINTS !\n");
 }
 
 
