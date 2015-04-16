@@ -11,7 +11,7 @@ CC = g++
 FLAGS = -Wall -pedantic -Werror -std=c++14 
 LIBS = -lsqlite3 -lgps -lrt -lwiringPi -lcurl
 
-COMPASS = Compass/Compass.o 
+COMPASS = Compass/HMC6343.o Compass/Utility.o 
 COURSE = coursecalculation/CourseCalculation.o 
 DB = dbhandler/DBHandler.o  dbhandler/JSON.o
 COMMAND = ruddercommand/RudderCommand.o sailcommand/SailCommand.o 
