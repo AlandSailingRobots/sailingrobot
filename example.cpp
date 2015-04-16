@@ -4,7 +4,7 @@
 
 int main(int argc, char *argv[]) {
 
-	std::cout << "Sailing robot example" << "\n";
+	printf("Sailing robot example\n");
 
 	SailingRobot sr;
 	std::string path, db, errorLog;
