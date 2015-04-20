@@ -28,40 +28,90 @@ void SailingRobot::init(std::string programPath, std::string dbFileName, std::st
 //	setupHTTPSync();
 
 //	updateState();
-
-	setupCompass();  //syncServer();
-	printf("Compass OK\n");
-
-	setupMaestro();  //syncServer();
-	printf("Maestro OK\n");
-
-	setupRudderServo(); //syncServer();
-	printf("Rudder OK\n");
-
-	setupSailServo(); //syncServer();
-	printf("SailServo OK\n");
-
-	setupWindSensor(); //syncServer();
-	printf("Wind sensor OK\n");
-
-	setupGPS();
-	readGPS();
-	while (isnan(m_gpsReader.getLatitude())) {
-		readGPS();
+	if(1){
+		setupCompass();
+		//syncServer();
+		printf("Compass initialized ok.\n");
+	} else {
+		printf("Compass mocked.\n");
 	}
-	//syncServer();
 
-	setupCourseCalculation(); //syncServer();
-	printf("Course Calc OK\n");
+	if(1){
+		setupMaestro();
+		//syncServer();
+		printf("Maestro initialized ok.\n");
+	} else {
+		printf("Maestro mocked.\n");
+	}
 
-	setupRudderCommand(); //syncServer();
-	printf("Rudder Command OK\n");
+	if(1){
+		setupRudderServo();
+		//syncServer();
+		printf("Rudder Servo initialized ok.\n");
+	} else {
+		printf("Rudder Servo mocked.\n");
+	}
 
-	setupSailCommand(); //syncServer();
-	printf("Sail Command OK\n");
+	if(1){
+		setupSailServo();
+		//syncServer();
+		printf("Sail Servo initialized ok.\n");
+	} else {
+		printf("Sail Servo mocked.\n");
+	}
 
-	setupWaypoint(); //syncServer();
-	printf("Waypoint OK\n");
+	if(1){
+		setupWindSensor();
+		//syncServer();
+		printf("Wind Sensor initialized ok.\n");
+	} else {
+		printf("Wind Sensor mocked.\n");
+	}
+
+	if(1){
+		setupGPS();
+		readGPS();
+		//syncServer();
+		while (isnan(m_gpsReader.getLatitude())) {
+			readGPS();
+		}
+		printf("GPS initialized ok.\n");
+	} else {
+		printf("GPS mocked.\n");
+	}
+
+	if(1){
+		setupCourseCalculation();
+		//syncServer();
+		printf("Course Calculation initialized ok.\n");
+	} else {
+		printf("Course Calculation mocked.\n");
+	}
+
+	if(1){
+		setupRudderCommand();
+		//syncServer();
+		printf("Rudder Command initialized ok.\n");
+	} else {
+		printf("Rudder Command mocked.\n");
+	}
+
+	if(1){
+		setupSailCommand();
+		//syncServer();
+		printf("Sail Command initialized ok.\n");
+	} else {
+		printf("Sail Command mocked.\n");
+	}
+
+	if(1){
+		setupWaypoint();
+		//syncServer();
+		printf("Waypoint initialized ok.\n");
+	} else {
+		printf("Waypoint mocked.\n");
+	}
+
 }
 
 
