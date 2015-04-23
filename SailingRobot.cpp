@@ -40,6 +40,10 @@ void SailingRobot::init(std::string programPath, std::string dbFileName, std::st
 	setupGPS();
 	printf("OK\n");
 
+	printf(" Starting WindSensor\t");
+	setupWindSensor();
+	printf("OK\n");
+
 	printf(" Starting Maestro\t");
 	setupMaestro();
 	printf("OK\n");
@@ -50,10 +54,6 @@ void SailingRobot::init(std::string programPath, std::string dbFileName, std::st
 
 	printf(" Starting SailServo\t");
 	setupSailServo();
-	printf("OK\n");
-
-	printf(" Starting WindSensor\t");
-	setupWindSensor();
 	printf("OK\n");
 
 	printf(" Starting CourseCalculation\t");

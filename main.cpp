@@ -29,7 +29,7 @@ int main(int argc, char *argv[]) {
 		sr.run();
 		printf("-DONE\n");
 	} catch (const char * e) {
-		printf("-ERROR[%s]\n",e);
+		printf("ERROR[%s]\n\n",e);
 		sr.shutdown();
 		return 1;
 	}

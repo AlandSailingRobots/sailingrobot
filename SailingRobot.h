@@ -1,7 +1,9 @@
 #include "Compass/Compass.h"
 #include "Compass/MockCompass.h"
 
-#include "CV7/CV7.h"
+#include "CV7/Windsensor.h"
+#include "CV7/MockWindsensor.h"
+
 #include "sailcommand/SailCommand.h"
 #include "ruddercommand/RudderCommand.h"
 #include "servocontroller/MaestroController.h"
@@ -47,18 +49,17 @@ private:
 	void setupHTTPSync();
 	void setupCompass();
 
-	MockCompass m_Compass;
-
-	CV7 m_windSensor;
-	CourseCalculation m_courseCalc;
-
-	MaestroController m_maestroController;
-	ServoObject m_rudderServo;
-	ServoObject m_sailServo;
-
 	DBHandler m_dbHandler;
 
-	GPSReader m_gpsReader;
+	MockCompass m_Compass;
+	MockGPSReader m_gpsReader;
+	MockWindsensor m_windSensor;
+
+	CourseCalculation m_courseCalc;
+	MaestroController m_maestroController;
+
+	ServoObject m_rudderServo;
+	ServoObject m_sailServo;
 
 	RudderCommand m_rudderCommand;
 	SailCommand m_sailCommand;
