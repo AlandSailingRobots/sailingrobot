@@ -40,7 +40,7 @@ void SailingRobot::init(std::string programPath, std::string dbFileName, std::st
 	setupGPS();
 	printf("OK\n");
 
-	printf(" Starting WindSensor\t");
+	printf(" Starting Windsensor\t");
 	setupWindSensor();
 	printf("OK\n");
 
@@ -290,11 +290,22 @@ void SailingRobot::setupSailServo() {
 }
 
 void SailingRobot::setupWindSensor() {
-	try {
-		m_windSensor.loadConfig( m_dbHandler.retriveCell("configs", "1", "ws_port"),
-					m_dbHandler.retriveCellAsInt("configs", "1", "ws_baud") );
+	std::string port_name = "non";
+	int baud_rate = 1;
+	int buff_size = 1;
 
-		m_windSensor.setBufferSize( m_dbHandler.retriveCellAsInt("configs", "1", "ws_buff") );
+	try {
+		port_name = m_dbHandler.retriveCell("configs", "1", "ws_port");
+		baud_rate = m_dbHandler.retriveCellAsInt("configs", "1", "ws_baud");
+		buff_size = m_dbHandler.retriveCellAsInt("configs", "1", "ws_buff");
+	} catch (const char * error) {
+		logMessage("error", error);
+		std::cout << error;
+	}
+
+	try {
+		m_windSensor.loadConfig( port_name, baud_rate );
+		m_windSensor.setBufferSize( buff_size );
 	} catch (const char * error) {
 		logMessage("error", error);
 		throw error;
