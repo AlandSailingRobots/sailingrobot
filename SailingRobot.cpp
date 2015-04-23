@@ -52,16 +52,12 @@ void SailingRobot::init(std::string programPath, std::string dbFileName, std::st
 	setupRudderServo();
 	printf("OK\n");
 
-	printf(" Starting SailServo\t");
-	setupSailServo();
-	printf("OK\n");
-
-	printf(" Starting CourseCalculation\t");
-	setupCourseCalculation();
-	printf("OK\n");
-
 	printf(" Starting RudderCommand\t");
 	setupRudderCommand();
+	printf("OK\n");
+
+	printf(" Starting SailServo\t");
+	setupSailServo();
 	printf("OK\n");
 
 	printf(" Starting SailCommand\t");
@@ -70,6 +66,10 @@ void SailingRobot::init(std::string programPath, std::string dbFileName, std::st
 
 	printf(" Starting Waypoint\t");
 	setupWaypoint();
+	printf("OK\n");
+
+	printf(" Starting CourseCalculation\t");
+	setupCourseCalculation();
 	printf("OK\n");
 
 }
@@ -248,8 +248,15 @@ void SailingRobot::setupDB(std::string filename) {
 }
 
 void SailingRobot::setupMaestro() {
+	std::string port_name;
 	try {
-		m_maestroController.setPort( m_dbHandler.retriveCell("configs", "1", "mc_port") );
+		port_name = m_dbHandler.retriveCell("configs", "1", "mc_port");
+	} catch (const char * error) {
+		logMessage("error", error);
+	}
+
+	try {
+		m_maestroController.setPort( port_name );
 		int maestroErrorCode = m_maestroController.getError();
 		if (maestroErrorCode != 0) {
 			std::stringstream stream;
@@ -300,7 +307,6 @@ void SailingRobot::setupWindSensor() {
 		buff_size = m_dbHandler.retriveCellAsInt("configs", "1", "ws_buff");
 	} catch (const char * error) {
 		logMessage("error", error);
-		std::cout << error;
 	}
 
 	try {

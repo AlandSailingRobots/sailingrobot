@@ -16,7 +16,7 @@ COURSE = coursecalculation/CourseCalculation.o
 DB = dbhandler/DBHandler.o  dbhandler/JSON.o
 COMMAND = ruddercommand/RudderCommand.o sailcommand/SailCommand.o 
 MAESTRO = servocontroller/MaestroController.o servocontroller/ServoObject.o
-CV7 = CV7/UtilityLibrary.o CV7/CV7.o CV7/Windsensor.o CV7/MockWindsensor.o
+CV7 = CV7/Windsensor.o CV7/MockWindsensor.o CV7/UtilityLibrary.o CV7/CV7.o
 GPS = gps/GPSReader.o gps/MockGPSReader.o
 HTTP = httpsync/HTTPSync.o
 

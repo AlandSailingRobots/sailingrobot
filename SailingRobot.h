@@ -4,12 +4,13 @@
 #include "CV7/Windsensor.h"
 #include "CV7/MockWindsensor.h"
 
+#include "gps/GPSReader.h"
+#include "gps/MockGPSReader.h"
+
 #include "sailcommand/SailCommand.h"
 #include "ruddercommand/RudderCommand.h"
 #include "servocontroller/MaestroController.h"
 #include "servocontroller/ServoObject.h"
-#include "gps/GPSReader.h"
-#include "gps/MockGPSReader.h"
 #include "dbhandler/DBHandler.h"
 #include "dbhandler/JSON.h"
 #include "coursecalculation/CourseCalculation.h"
@@ -51,9 +52,9 @@ private:
 
 	DBHandler m_dbHandler;
 
-	MockCompass m_Compass;
-	MockGPSReader m_gpsReader;
-	MockWindsensor m_windSensor;
+	Compass m_Compass;
+	GPSReader m_gpsReader;
+	Windsensor m_windSensor;
 
 	CourseCalculation m_courseCalc;
 	MaestroController m_maestroController;
