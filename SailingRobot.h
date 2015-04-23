@@ -1,4 +1,5 @@
 #include "Compass/Compass.h"
+#include "Compass/MockCompass.h"
 #include "CV7/CV7.h"
 #include "sailcommand/SailCommand.h"
 #include "ruddercommand/RudderCommand.h"
@@ -45,7 +46,7 @@ private:
 	void setupHTTPSync();
 	void setupCompass();
 
-	Compass m_Compass;
+	MockCompass m_Compass;
 
 	CV7 m_windSensor;
 	CourseCalculation m_courseCalc;
