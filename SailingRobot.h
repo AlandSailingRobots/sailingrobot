@@ -1,5 +1,6 @@
 #include "Compass/Compass.h"
 #include "Compass/MockCompass.h"
+
 #include "CV7/CV7.h"
 #include "sailcommand/SailCommand.h"
 #include "ruddercommand/RudderCommand.h"
