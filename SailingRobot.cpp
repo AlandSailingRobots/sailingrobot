@@ -28,12 +28,21 @@ void SailingRobot::init(std::string programPath, std::string dbFileName, std::st
 //	setupHTTPSync();
 
 //	updateState();
+
 	if(1){
 		setupCompass();
 		//syncServer();
 		printf("Compass initialized ok.\n");
 	} else {
 		printf("Compass mocked.\n");
+	}
+
+	if(1){
+		setupGPS();
+		printf("GPS initialized ok.\n");
+	} else {
+
+		printf("GPS mocked.\n");
 	}
 
 	if(1){
@@ -66,18 +75,6 @@ void SailingRobot::init(std::string programPath, std::string dbFileName, std::st
 		printf("Wind Sensor initialized ok.\n");
 	} else {
 		printf("Wind Sensor mocked.\n");
-	}
-
-	if(1){
-		setupGPS();
-		readGPS();
-		//syncServer();
-		while (isnan(m_gpsReader.getLatitude())) {
-			readGPS();
-		}
-		printf("GPS initialized ok.\n");
-	} else {
-		printf("GPS mocked.\n");
 	}
 
 	if(1){
