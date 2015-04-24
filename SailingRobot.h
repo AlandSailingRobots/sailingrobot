@@ -1,3 +1,6 @@
+#include "dbhandler/DBHandler.h"
+#include "dbhandler/JSON.h"
+
 #include "Compass/Compass.h"
 #include "Compass/MockCompass.h"
 
@@ -7,12 +10,16 @@
 #include "gps/GPSReader.h"
 #include "gps/MockGPSReader.h"
 
-#include "sailcommand/SailCommand.h"
-#include "ruddercommand/RudderCommand.h"
 #include "servocontroller/MaestroController.h"
+#include "servocontroller/MockMaestroController.h"
+
 #include "servocontroller/ServoObject.h"
-#include "dbhandler/DBHandler.h"
-#include "dbhandler/JSON.h"
+#include "servocontroller/MockServoObject.h"
+
+#include "sailcommand/SailCommand.h"
+
+#include "ruddercommand/RudderCommand.h"
+
 #include "coursecalculation/CourseCalculation.h"
 #include "httpsync/HTTPSync.h"
 
@@ -52,18 +59,19 @@ private:
 
 	DBHandler m_dbHandler;
 
-	Compass m_Compass;
-	GPSReader m_gpsReader;
-	Windsensor m_windSensor;
+	MockCompass m_Compass;
+	MockGPSReader m_gpsReader;
+	MockWindsensor m_windSensor;
 
-	CourseCalculation m_courseCalc;
-	MaestroController m_maestroController;
+	MockMaestroController m_maestroController;
 
-	ServoObject m_rudderServo;
-	ServoObject m_sailServo;
+	MockServoObject m_rudderServo;
+	MockServoObject m_sailServo;
 
 	RudderCommand m_rudderCommand;
 	SailCommand m_sailCommand;
+
+	CourseCalculation m_courseCalc;
 
 	HTTPSync m_httpSync;
 

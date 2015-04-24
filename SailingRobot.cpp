@@ -23,7 +23,7 @@ SailingRobot::~SailingRobot() {
 void SailingRobot::init(std::string programPath, std::string dbFileName, std::string errorFileName) {
 	m_errorLogPath = programPath + errorFileName;
 
-	printf(" Starting Database\t");
+	printf(" Starting Database\t\t");
 	setupDB(programPath + dbFileName);
 	printf("OK\n");
 
@@ -32,39 +32,39 @@ void SailingRobot::init(std::string programPath, std::string dbFileName, std::st
 //	updateState();
 
 //syncServer();
-	printf(" Starting Compass\t");
+	printf(" Starting Compass\t\t");
 	setupCompass();
 	printf("OK\n");
 
-	printf(" Starting GPS\t\t");
+	printf(" Starting GPS\t\t\t");
 	setupGPS();
 	printf("OK\n");
 
-	printf(" Starting Windsensor\t");
+	printf(" Starting Windsensor\t\t");
 	setupWindSensor();
 	printf("OK\n");
 
-	printf(" Starting Maestro\t");
+	printf(" Starting Maestro\t\t");
 	setupMaestro();
 	printf("OK\n");
 
-	printf(" Starting RudderServo\t");
+	printf(" Starting RudderServo\t\t");
 	setupRudderServo();
 	printf("OK\n");
 
-	printf(" Starting RudderCommand\t");
+	printf(" Starting RudderCommand\t\t");
 	setupRudderCommand();
 	printf("OK\n");
 
-	printf(" Starting SailServo\t");
+	printf(" Starting SailServo\t\t");
 	setupSailServo();
 	printf("OK\n");
 
-	printf(" Starting SailCommand\t");
+	printf(" Starting SailCommand\t\t");
 	setupSailCommand();
 	printf("OK\n");
 
-	printf(" Starting Waypoint\t");
+	printf(" Starting Waypoint\t\t");
 	setupWaypoint();
 	printf("OK\n");
 
@@ -365,21 +365,23 @@ void SailingRobot::setupSailCommand() {
 }
 
 void SailingRobot::setupWaypoint() {
-	std::cout << "setting up waypoints" << std::endl;
+	std::string id;
+	std::string lat;
+	std::string lon;
 	try {
-		std::cout << "get" << std::endl;
-		m_waypointId = m_dbHandler.getMinIdFromTable("waypoints");
-		std::cout << "check" << std::endl;
-		if (m_waypointId.empty()) {
-			std::cout << "empty" << std::endl;
-			return;
-		}
+		id = m_dbHandler.getMinIdFromTable("waypoints");
+		lat = m_dbHandler.retriveCell("waypoints", m_waypointId, "lat");
+		lon = m_dbHandler.retriveCell("waypoints", m_waypointId, "lon");
+	} catch (const char * error) {
+		logMessage("error", error);
+	}
 
-		std::cout << "retriveCell" << std::endl;
-		std::string lat = m_dbHandler.retriveCell("waypoints", m_waypointId, "lat");
-		std::cout << "lat:" << lat << std::endl;
+	try {
+		m_waypointId = id;
+		if (m_waypointId.empty()) {
+			throw "No waypoint found!";
+		}
 		m_waypointLatitude = atof(lat.c_str());
-		std::string lon = m_dbHandler.retriveCell("waypoints", m_waypointId, "lon");
 		m_waypointLongitude = atof(lon.c_str());
 	} catch (const char * error) {
 		logMessage("error", error);
