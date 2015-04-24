@@ -59,14 +59,14 @@ private:
 
 	DBHandler m_dbHandler;
 
-	Compass m_Compass;
-	GPSReader m_gpsReader;
-	Windsensor m_windSensor;
+	MockCompass m_Compass;
+	MockGPSReader m_gpsReader;
+	MockWindsensor m_windSensor;
 
-	MaestroController m_maestroController;
+	MockMaestroController m_maestroController;
 
-	ServoObject m_rudderServo;
-	ServoObject m_sailServo;
+	MockServoObject m_rudderServo;
+	MockServoObject m_sailServo;
 
 	RudderCommand m_rudderCommand;
 	SailCommand m_sailCommand;

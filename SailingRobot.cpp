@@ -77,9 +77,8 @@ void SailingRobot::init(std::string programPath, std::string dbFileName, std::st
 
 void SailingRobot::run() {
 	int rudderCommand, sailCommand, windDir, twd;
-
+	printf("SailingRobot main loop started.\n");
 	while(!m_waypointId.empty()) {
-		printf("main loop iteration\n");
 		//read windsensor
 		m_windSensor.refreshData();
 		windDir = m_windSensor.getDirection();
