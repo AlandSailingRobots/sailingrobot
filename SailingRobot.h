@@ -17,9 +17,7 @@
 #include "servocontroller/MockServoObject.h"
 
 #include "sailcommand/SailCommand.h"
-
 #include "ruddercommand/RudderCommand.h"
-
 #include "coursecalculation/CourseCalculation.h"
 #include "httpsync/HTTPSync.h"
 

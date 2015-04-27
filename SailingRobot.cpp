@@ -27,11 +27,10 @@ void SailingRobot::init(std::string programPath, std::string dbFileName, std::st
 	setupDB(programPath + dbFileName);
 	printf("OK\n");
 
-//	setupHTTPSync();
+	printf(" Starting HTTPSync\t\t");
+	setupHTTPSync();
+	printf("OK\n");
 
-//	updateState();
-
-//syncServer();
 	printf(" Starting Compass\t\t");
 	setupCompass();
 	printf("OK\n");
@@ -72,6 +71,8 @@ void SailingRobot::init(std::string programPath, std::string dbFileName, std::st
 	setupCourseCalculation();
 	printf("OK\n");
 
+	//updateState();
+	//syncServer();
 }
 
 
