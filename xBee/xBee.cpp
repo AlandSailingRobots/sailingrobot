@@ -13,19 +13,32 @@ std::string xBee::readOutput(int fd){
 
 	std::string printer;
 
+	int available = serialDataAvail(fd);
 
-	while (serialGetchar(fd) != -1){
+	if (available != -1){
 
-		printer += serialGetchar(fd);
-		printer += "x";
+		while (available > 0){
+
+			printer += serialGetchar(fd);
+			available--;
 
 
+
+		}
+
+
+
+
+
+	}else{
+
+		printer = "No data";
 
 
 	}
 
-	
-	printer = "";
+
+
 
 	return printer;
 
