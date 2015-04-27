@@ -1,5 +1,9 @@
 #include "dbhandler/DBHandler.h"
 #include "dbhandler/JSON.h"
+#include "sailcommand/SailCommand.h"
+#include "ruddercommand/RudderCommand.h"
+#include "coursecalculation/CourseCalculation.h"
+#include "httpsync/HTTPSync.h"
 
 #include "Compass/Compass.h"
 #include "Compass/MockCompass.h"
@@ -16,10 +20,6 @@
 #include "servocontroller/ServoObject.h"
 #include "servocontroller/MockServoObject.h"
 
-#include "sailcommand/SailCommand.h"
-#include "ruddercommand/RudderCommand.h"
-#include "coursecalculation/CourseCalculation.h"
-#include "httpsync/HTTPSync.h"
 
 
 
@@ -55,27 +55,23 @@ private:
 	void setupHTTPSync();
 	void setupCompass();
 
-	DBHandler m_dbHandler;
-
-	MockCompass m_Compass;
-	MockGPSReader m_gpsReader;
-	MockWindsensor m_windSensor;
-
-	MockMaestroController m_maestroController;
-
-	MockServoObject m_rudderServo;
-	MockServoObject m_sailServo;
-
-	RudderCommand m_rudderCommand;
-	SailCommand m_sailCommand;
-
-	CourseCalculation m_courseCalc;
-
-	HTTPSync m_httpSync;
-
 	std::string m_errorLogPath;
 
 	float m_waypointLatitude;
 	float m_waypointLongitude;
 	std::string m_waypointId;
+
+	DBHandler m_dbHandler;
+	RudderCommand m_rudderCommand;
+	SailCommand m_sailCommand;
+	CourseCalculation m_courseCalc;
+	HTTPSync m_httpSync;
+
+	MockCompass m_Compass;
+	MockGPSReader m_gpsReader;
+	MockWindsensor m_windSensor;
+	MockMaestroController m_maestroController;
+	MockServoObject m_rudderServo;
+	MockServoObject m_sailServo;
+
 };
