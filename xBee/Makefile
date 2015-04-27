@@ -1,0 +1,26 @@
+#######################################################
+#
+#    Aland Sailing Robot
+#    ===========================================
+#    sailingrobot
+#    -------------------------------------------
+#
+#######################################################
+
+CC = g++ 
+FLAGS = -Wall -pedantic -Werror -std=c++14 
+LIBS = -lsqlite3 -lgps -lrt -lwiringPi -lcurl
+SOURCES = xBee.cpp
+HEADERS = xBee.h
+
+
+
+
+all : $(SOURCES) $(HEADERS)
+	$(CC) $(SOURCES) $(FLAGS) $(LIBS) -c -o xbee
+
+example : $(SOURCES) $(HEADERS) example.cpp
+	$(CC) $(SOURCES) example.cpp $(FLAGS) $(LIBS) -o example
+
+
+
