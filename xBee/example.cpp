@@ -39,6 +39,8 @@ int main(int argc, char** argv){
 
 	}
 
+	
+
 
 
 
@@ -102,9 +104,18 @@ int main(int argc, char** argv){
 
 	}else if (option == 2){
 
-		xbee.sendXML(port);
-		cout << "Sent a file string" << endl;
+		while (true){
 
+
+			xbee.sendXML(port);
+			cout << "Sent a file string" << endl;
+
+			usleep(1000000);
+
+
+		}
+
+		
 
 
 

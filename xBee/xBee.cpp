@@ -79,13 +79,12 @@ void xBee::sendXML(int fd){
     stringfile += tmp;
 	}
 
-	int loops = 6;
+	int loops = 1;
 
 	while (loops > 0){
 
 	serialPuts(fd, stringfile.c_str());
 	loops--;
-	usleep(100);
 
 	}
 
