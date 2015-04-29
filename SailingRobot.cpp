@@ -146,7 +146,20 @@ void SailingRobot::run() {
 			m_Compass.getPitch(),
 			m_Compass.getRoll()
 		);
-
+  		
+  		m_XML_log.log_to_file("2015-04-10T10:53:15.1234Z", //Timestamp
+        		              (double)270.2, //winddir degrees
+                		      (double)4.3, //windspeed ms
+                      		  (double)11.3, //Heading deg
+      						  (double)3.2, //Pitch deg
+                      		  (double)5.3, //Roll deg
+                      		  (double)49.40, // gml:pos arg1
+                      		  (double)-123.26, // gml:pos arg2
+                      		  (double)15.4, // cog_deg
+                      		  (double)2.0, //sog_ms
+                      		  (int)5341,//Rudderpos
+                      		  (int)3256 //Sailpos
+                      		  );
 //		syncServer();
 
 		//update gps
