@@ -19,8 +19,10 @@ MAESTRO = servocontroller/MaestroController.o servocontroller/MockMaestroControl
 CV7 = CV7/Windsensor.o CV7/MockWindsensor.o CV7/UtilityLibrary.o CV7/CV7.o
 GPS = gps/GPSReader.o gps/MockGPSReader.o
 HTTP = httpsync/HTTPSync.o
+XML_LOG = xmlparser/pugi.o xmlparser/XML_log.o
 
-OBJECTS = $(COMPASS) $(COURSE) $(DB) $(COMMAND) $(MAESTRO) $(CV7) $(GPS) $(HTTP)
+
+OBJECTS = $(COMPASS) $(COURSE) $(DB) $(COMMAND) $(MAESTRO) $(CV7) $(GPS) $(HTTP) $(XML_LOG)
 SOURCES = SailingRobot.cpp main.cpp
 HEADERS = SailingRobot.h
 FILE = sr
@@ -42,6 +44,7 @@ clean :
 	cd CV7 && $(MAKE) clean
 	cd gps && $(MAKE) clean
 	cd httpsync && $(MAKE) clean
+	cd xmlparser && $(MAKE) clean
 	rm -f $(FILE)
 	
 Compass :
@@ -53,7 +56,7 @@ coursecalculation :
 	$(MAKE) -C ./coursecalculation
 
 #Needed for proper subfolder make writing
-.PHONY : Compass runall coursecalculation dbhandler ruddercommand sailcommand servocontroller CV7 gps httpsync xmlparser
+.PHONY : Compass runall coursecalculation dbhandler ruddercommand sailcommand servocontroller CV7 gps httpsync xmlparser 
 	
 
 xmlparser :
@@ -86,6 +89,8 @@ gps :
 httpsync :
 	$(MAKE) -C ./httpsync
 
+xmlparser :
+	$(MAKE) -C ./xmlparser
 
 $(FILE) : $(SOURCES) $(HEADERS) $(OBJECTS)
 	$(CC) $(SOURCES) $(OBJECTS) $(FLAGS) $(LIBS) -o $(FILE)
