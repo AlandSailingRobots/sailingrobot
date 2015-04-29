@@ -70,13 +70,12 @@ void xBee::sendXML(int fd){
 
 	std::string stringfile, tmp;
 
-	std::ifstream input("./sourcefile.txt");
+	std::ifstream input("./sourcefile.xml");
 
 	while(!input.eof()) {
 
     getline(input, tmp);
     stringfile += tmp;
-    stringfile += "\n";
 	}
 
 	serialPuts(fd, stringfile.c_str());
