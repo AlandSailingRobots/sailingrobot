@@ -146,7 +146,7 @@ void SailingRobot::run() {
 			m_Compass.getPitch(),
 			m_Compass.getRoll()
 		);
-  		
+
 		m_XML_log.log_to_file(m_gpsReader.getTimestamp(), //Timestamp
 							  windDir, //winddir degrees
 							  m_windSensor.getSpeed(), //windspeed ms
@@ -157,8 +157,8 @@ void SailingRobot::run() {
 							  m_gpsReader.getLongitude(), // gml:pos arg2
 							  (double)15.4, // cog_deg..TODO getter
 							  (double)2.0, //sog_ms..TODO getter
-							  (int)5341,//Rudderpos..TODO getter
-							  (int)3256 //Sailpos..TODO getter
+							  rudderCommand,//Rudderpos
+							  sailCommand //Sailpos
 							  );
 //		syncServer();
 
