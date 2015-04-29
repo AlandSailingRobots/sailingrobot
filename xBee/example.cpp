@@ -8,6 +8,22 @@ int main(int argc, char** argv){
 
 	xBee xbee;
 	int port = -1;
+	int option = -1;
+	string someString;
+
+	
+	
+	while (option != 1 && option != 0){
+
+		cout << "Please select read or write mode (0/1)" << endl;
+		cin >> option;
+
+
+
+
+
+	}
+
 
 	try {
 		port = xbee.init();
@@ -17,20 +33,59 @@ int main(int argc, char** argv){
 	}
 
 	
-	cout << port << endl;
+	if (port != -1){
 
-	int tics = 10;
-	string outPut = "0";
+		cout << "Connection successful." << endl;
+		
+		
 
-	while (tics > 0){
+	}else{
+
+		cout << "Connection failed!" << endl;
+
+	}
+
+	if (option == 1){
+
+		while(true){
+
+			cout << "Please enter a message" << endl;
+			cin >> someString;
+			xbee.printInput(someString, port);
+			cout << someString + " printed to xBee reciever" << endl;
+
+
+
+		}
+
+
+		
+
+
+	}else if (option == 0){
+
+
+		//int tics = 10;
+		string outPut = "0";
+
+		while (true){
 
 		outPut = xbee.readOutput(port);
 		cout << outPut << endl;
-		tics--;
+		//tics--;
 		usleep(1000000);
 
 
+		}
+
+
+
 	}
+
+	
+	
+
+	
 	
 
 	

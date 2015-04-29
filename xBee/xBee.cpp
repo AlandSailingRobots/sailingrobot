@@ -32,7 +32,7 @@ std::string xBee::readOutput(int fd){
 
 	}else{
 
-		printer = "No data";
+		printer = "Data reception failed.";
 
 
 	}
@@ -49,10 +49,26 @@ std::string xBee::readOutput(int fd){
 
 }
 
+void xBee::printInput(std::string input, int fd){
+
+	int loops = 10;
+
+	while (loops > 0){
+
+		serialPuts(fd, input.c_str());
+		loops--;
+
+	}
+
+	
+
+
+}
+
 
 int xBee::init(){
 
-	std::string portName = "/dev/ttyUSB0";
+	std::string portName = "/dev/ttyUSB1";
 
 
 
