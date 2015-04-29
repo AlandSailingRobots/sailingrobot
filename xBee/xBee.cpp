@@ -4,6 +4,7 @@
 #include <cstring>
 #include <string>
 #include <sstream>
+#include <fstream>
 #include <wiringSerial.h>
 #include <iostream>
 
@@ -51,7 +52,7 @@ std::string xBee::readOutput(int fd){
 
 void xBee::printInput(std::string input, int fd){
 
-	int loops = 10;
+	int loops = 1;
 
 	while (loops > 0){
 
@@ -65,10 +66,28 @@ void xBee::printInput(std::string input, int fd){
 
 }
 
+void xBee::sendXML(int fd){
+
+	std::string stringfile, tmp;
+
+	std::ifstream input("./sourcefile.txt");
+
+	while(!input.eof()) {
+
+    getline(input, tmp);
+    stringfile += tmp;
+    stringfile += "\n";
+	}
+
+
+
+
+}
+
 
 int xBee::init(){
 
-	std::string portName = "/dev/ttyUSB1";
+	std::string portName = "/dev/ttyUSB0";
 
 
 

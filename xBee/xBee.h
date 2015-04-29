@@ -8,6 +8,7 @@ public:
 	int init();
 	std::string readOutput(int fd);
 	void printInput(std::string input, int fd);
+	void sendXML(int fd);
 
 	int m_fd = -1;
 

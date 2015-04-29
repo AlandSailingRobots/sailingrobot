@@ -13,7 +13,7 @@ int main(int argc, char** argv){
 
 	
 	
-	while (option != 1 && option != 0){
+	while (option != 2 && option != 1 && option != 0){
 
 		cout << "Please select read or write mode (0/1)" << endl;
 		cin >> option;
@@ -77,6 +77,14 @@ int main(int argc, char** argv){
 
 
 		}
+
+
+
+	}else if (option == 2){
+
+		xbee.sendXML(port);
+		cout << "Sent a file string" << endl;
+
 
 
 
