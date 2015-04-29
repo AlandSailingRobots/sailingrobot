@@ -7,6 +7,7 @@
 #include <fstream>
 #include <wiringSerial.h>
 #include <iostream>
+#include <unistd.h>
 
 
 
@@ -78,7 +79,15 @@ void xBee::sendXML(int fd){
     stringfile += tmp;
 	}
 
+	int loops = 6;
+
+	while (loops > 0){
+
 	serialPuts(fd, stringfile.c_str());
+	loops--;
+	usleep(100);
+
+	}
 
 
 
@@ -86,13 +95,18 @@ void xBee::sendXML(int fd){
 }
 
 
-int xBee::init(){
+int xBee::init(int usbPort, int baudRate){
 
-	std::string portName = "/dev/ttyUSB0";
+	std::string deviceName = "/dev/ttyUSB";
+	deviceName += usbPort;
 
 
 
-	if((m_fd = serialOpen(portName.c_str(), 57600)) < 0) {
+
+
+
+
+	if((m_fd = serialOpen(deviceName.c_str(), baudRate)) < 0) {
 		throw "CV7::openPort: Unable to connect";
 	}
 

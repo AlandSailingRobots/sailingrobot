@@ -9,6 +9,7 @@ int main(int argc, char** argv){
 	xBee xbee;
 	int port = -1;
 	int option = -1;
+	int usbNumber = 5;
 	string someString;
 
 	
@@ -24,9 +25,28 @@ int main(int argc, char** argv){
 
 	}
 
+	while (usbNumber != 0 && usbNumber != 1){
+
+		cout << "Please select usb slot (0/1)" << endl;
+		
+		cin >> usbNumber;
+
+		
+
+
+
+
+
+	}
+
+
+
+
+
+
 
 	try {
-		port = xbee.init();
+		port = xbee.init(usbNumber, 57600);
 	}
 	catch (const char* exception) {
 		cout << exception << endl;
