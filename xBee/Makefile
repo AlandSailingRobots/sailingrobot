@@ -22,5 +22,13 @@ all : $(SOURCES) $(HEADERS)
 example : $(SOURCES) $(HEADERS) example.cpp
 	$(CC) $(SOURCES) example.cpp $(FLAGS) $(LIBS) -o example
 
+clean :
+	rm -f ./example
+
+gitclean :
+	rm -f ./example
+	rm -f ./*.cpp
+	rm -f ./*.h
+
 
 
