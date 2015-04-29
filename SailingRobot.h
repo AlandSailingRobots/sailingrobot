@@ -20,6 +20,7 @@
 #include "servocontroller/ServoObject.h"
 #include "servocontroller/MockServoObject.h"
 
+#include "xmlparser/src/xml_log.h"
 
 
 
@@ -74,4 +75,5 @@ private:
 	MockServoObject m_rudderServo;
 	MockServoObject m_sailServo;
 
+	XML_log m_XML_log;
 };
