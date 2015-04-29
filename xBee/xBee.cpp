@@ -97,8 +97,8 @@ void xBee::sendXML(int fd){
 
 int xBee::init(int usbPort, int baudRate){
 
-	std::string deviceName = "/dev/ttyUSB0";
-	//deviceName += usbPort;
+	std::string deviceName = "/dev/ttyUSB";
+	deviceName += std::to_string(usbPort);
 
 
 
