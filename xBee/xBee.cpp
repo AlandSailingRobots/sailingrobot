@@ -72,7 +72,7 @@ int xBee::init(){
 
 
 
-	if((m_fd = serialOpen(portName.c_str(), 115200)) < 0) {
+	if((m_fd = serialOpen(portName.c_str(), 57600)) < 0) {
 		throw "CV7::openPort: Unable to connect";
 	}
 
