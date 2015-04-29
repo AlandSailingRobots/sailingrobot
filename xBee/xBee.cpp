@@ -79,6 +79,8 @@ void xBee::sendXML(int fd){
     stringfile += "\n";
 	}
 
+	serialPuts(fd, stringfile.c_str());
+
 
 
 
