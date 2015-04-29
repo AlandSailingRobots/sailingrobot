@@ -71,7 +71,7 @@ void xBee::sendXML(int fd){
 
 	std::string stringfile, tmp;
 
-	std::ifstream input("./sourcefile.xml");
+	std::ifstream input("../log_output.xml");
 
 	while(!input.eof()) {
 
