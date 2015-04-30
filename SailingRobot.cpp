@@ -71,6 +71,10 @@ void SailingRobot::init(std::string programPath, std::string dbFileName, std::st
 	setupCourseCalculation();
 	printf("OK\n");
 
+	//XBEE PRINTING ################################################################
+	//	skapa ny xBee och kör xbee.init(int usbPort (0/1), int baudRate (57600))
+	//	
+
 	//updateState();
 	//syncServer();
 }
@@ -160,6 +164,14 @@ void SailingRobot::run() {
 							  rudderCommand,//Rudderpos
 							  sailCommand //Sailpos
 							  );
+
+		//XBEE PRINTING ######################################################################
+		//Kan skicka loggen direkt med:
+		//xbee.sendXML();
+		// (MEN DET KANSKE GÅR FÖR FORT...)
+
+
+
 //		syncServer();
 
 		//update gps
