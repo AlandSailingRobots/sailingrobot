@@ -150,13 +150,13 @@ void SailingRobot::run() {
 		m_XML_log.log_to_file(m_gpsReader.getTimestamp(), //Timestamp
 							  windDir, //winddir degrees
 							  m_windSensor.getSpeed(), //windspeed ms
-							  m_gpsReader.getHeading(), //Heading deg
+							  m_Compass.getHeading(), //Heading deg
 							  m_Compass.getPitch(), //Pitch deg
 							  m_Compass.getRoll(), //Roll deg
-							  m_gpsReader.getLatitude(), // gml:pos arg1
-							  m_gpsReader.getLongitude(), // gml:pos arg2
-							  (double)15.4, // cog_deg..TODO getter
-							  (double)2.0, //sog_ms..TODO getter
+							  m_gpsReader.getLatitude(), // gml:pos arg1, lat
+							  m_gpsReader.getLongitude(), // gml:pos arg2, long
+							  m_gpsReader.getHeading(), // course over ground(deg)
+							  m_gpsReader.getSpeed(), //speed over ground(ms)
 							  rudderCommand,//Rudderpos
 							  sailCommand //Sailpos
 							  );
