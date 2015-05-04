@@ -11,7 +11,7 @@ int main(int argc, char *argv[]) {
 
 	std::string path, db, errorLog;
 	if (argc < 2) {
-		path = "/root/sailingrobot";
+		path = "/root/sailingrobot/";
 		db = "asr.db";
 		errorLog = "errors.log";
 	} else {
