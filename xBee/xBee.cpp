@@ -86,20 +86,22 @@ int xBee::init(int baudRate){
 	// see: http://hintshop.ludvig.co.nz/show/persistent-names-usb-serial-devices/
 	std::string deviceName = "/dev/xbee";
 
+	int fd;
 
 
 
 
 
 
-	if((m_fd = serialOpen(deviceName.c_str(), baudRate)) < 0) {
+
+	if((fd = serialOpen(deviceName.c_str(), baudRate)) < 0) {
 		throw "CV7::openPort: Unable to connect";
 	}
 
 
 	
 
-	return m_fd;
+	return fd;
 	
 
 
