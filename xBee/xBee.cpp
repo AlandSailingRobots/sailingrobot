@@ -67,31 +67,16 @@ void xBee::printInput(std::string input, int fd){
 
 }
 
-void xBee::sendXML(int fd){
+void xBee::sendXML(int fd, std::string output){
 
-	std::string stringfile, tmp;
 
-	std::ifstream input("../log_output.xml");
-
-	while(!input.eof()) {
-
-    getline(input, tmp);
-    stringfile += tmp;
-	}
-
-	int loops = 1;
-
-	while (loops > 0){
-
-	serialPuts(fd, stringfile.c_str());
-	loops--;
-
-	}
-
+	serialPuts(fd, output.c_str());
 
 
 
 }
+
+
 
 
 int xBee::init(int usbPort, int baudRate){
