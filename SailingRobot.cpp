@@ -151,7 +151,7 @@ void SailingRobot::run() {
 			m_Compass.getRoll()
 		);
 
-		m_XML_log.log_to_file(m_gpsReader.getTimestamp(), //Timestamp
+		std::string res_xml = m_XML_log.log_to_file(m_gpsReader.getTimestamp(), //Timestamp
 							  windDir, //winddir degrees
 							  m_windSensor.getSpeed(), //windspeed ms
 							  m_Compass.getHeading(), //Heading deg
@@ -164,6 +164,8 @@ void SailingRobot::run() {
 							  rudderCommand,//Rudderpos
 							  sailCommand //Sailpos
 							  );
+
+		std::cout << res_xml << std::endl;
 
 		//XBEE PRINTING ######################################################################
 		//Kan skicka loggen direkt med:
