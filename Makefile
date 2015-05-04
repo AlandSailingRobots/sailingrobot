@@ -20,9 +20,10 @@ CV7 = CV7/Windsensor.o CV7/MockWindsensor.o CV7/UtilityLibrary.o CV7/CV7.o
 GPS = gps/GPSReader.o gps/MockGPSReader.o
 HTTP = httpsync/HTTPSync.o
 XML_LOG = xmlparser/pugi.o xmlparser/XML_log.o
+XBEE = xBee/xBee.o
 
 
-OBJECTS = $(COMPASS) $(COURSE) $(DB) $(COMMAND) $(MAESTRO) $(CV7) $(GPS) $(HTTP) $(XML_LOG)
+OBJECTS = $(COMPASS) $(COURSE) $(DB) $(COMMAND) $(MAESTRO) $(CV7) $(GPS) $(HTTP) $(XML_LOG) $(XBEE)
 SOURCES = SailingRobot.cpp main.cpp
 HEADERS = SailingRobot.h
 FILE = sr
@@ -45,6 +46,7 @@ clean :
 	cd gps && $(MAKE) clean
 	cd httpsync && $(MAKE) clean
 	cd xmlparser && $(MAKE) clean
+	cd xBee && $(MAKE) clean
 	rm -f $(FILE)
 	
 Compass :
@@ -87,6 +89,9 @@ httpsync :
 
 xmlparser :
 	$(MAKE) -C ./xmlparser
+
+xbee :
+	$(MAKE) -C ./xbee
 
 $(FILE) : $(SOURCES) $(HEADERS) $(OBJECTS)
 	$(CC) $(SOURCES) $(OBJECTS) $(FLAGS) $(LIBS) -o $(FILE)
