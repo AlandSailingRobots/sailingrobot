@@ -81,6 +81,9 @@ void xBee::sendXML(int fd, std::string output){
 
 int xBee::init(int baudRate){
 
+
+	// this setting needs a udev rule in host system to work (alternative is dynamic USB-slot)
+	// see: http://hintshop.ludvig.co.nz/show/persistent-names-usb-serial-devices/
 	std::string deviceName = "/dev/xbee";
 
 
