@@ -28,7 +28,6 @@ public:
 	*/
 	void sendXML(int fd, std::string);
 
-	int m_fd = -1;
 
 
 
