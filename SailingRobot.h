@@ -22,7 +22,7 @@
 
 #include "xmlparser/src/xml_log.h"
 
-
+#include "xBee/xBee.h"
 
 
 class SailingRobot {
@@ -76,4 +76,7 @@ private:
 	MockServoObject m_sailServo;
 
 	XML_log m_XML_log;
+
+	xBee m_xBee;
+	int m_fd;
 };
