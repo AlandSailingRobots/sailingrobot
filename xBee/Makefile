@@ -25,6 +25,7 @@ example : $(SOURCES) $(HEADERS) example.cpp
 
 clean :
 	rm -f ./example
+	rm -f ./xBee.o
 
 gitclean :
 	rm -f ./example
