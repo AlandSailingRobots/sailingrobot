@@ -165,8 +165,6 @@ void SailingRobot::run() {
 							  sailCommand //Sailpos
 							  );
 
-		std::cout << res_xml << std::endl;
-
 		//XBEE PRINTING ######################################################################
 		//Kan skicka loggen direkt med:
 		//xbee.sendXML();
