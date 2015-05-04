@@ -10,14 +10,14 @@ int main(int argc, char** argv){
 	xBee xbee;
 	int port = -1;
 	int option = -1;
-	int usbNumber = 5;
 	string someString;
 
 	
 	
 	while (option != 2 && option != 1 && option != 0){
 
-		cout << "Please select read or write mode (0/1)" << endl;
+		cout << "Please select read or write mode (0/1/2)" << endl;
+		cout << "Selecting 2 will write a predefined XML-string" << endl;
 		cin >> option;
 
 
@@ -26,19 +26,7 @@ int main(int argc, char** argv){
 
 	}
 
-	while (usbNumber != 0 && usbNumber != 1){
-
-		cout << "Please select usb slot (0/1)" << endl;
-		
-		cin >> usbNumber;
-
-		
-
-
-
-
-
-	}
+	
 
 	
 
@@ -49,7 +37,7 @@ int main(int argc, char** argv){
 
 
 	try {
-		port = xbee.init(usbNumber, 57600);
+		port = xbee.init(57600);
 	}
 	catch (const char* exception) {
 		cout << exception << endl;
@@ -120,7 +108,7 @@ int main(int argc, char** argv){
 			
 
 			xbee.sendXML(port, stringfile);
-			cout << "Sent a file string" << endl;
+			cout << "Sent a predefined XML-string" << endl;
 
 			usleep(1000000);
 
