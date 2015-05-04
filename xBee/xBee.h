@@ -7,9 +7,9 @@ public:
 
 
 	/*
-		initializes the xBee with given number of usbport and baudrate
+		initializes the xBee with given baudrate 
 	*/
-	int init(int usbPort, int baudRate);
+	int init(int baudRate);
 
 	/*
 		Reads incoming echoes for the specified device
