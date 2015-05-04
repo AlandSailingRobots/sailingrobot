@@ -72,8 +72,8 @@ void SailingRobot::init(std::string programPath, std::string dbFileName, std::st
 	printf("OK\n");
 
 	//XBEE PRINTING ################################################################
-	//	skapa ny xBee och kör xbee.init(int usbPort (0/1), int baudRate (57600))
-	//	
+	//	skapa ny xBee och kör xbee.init(baudRate (57600))
+	m_fd = m_xBee.init(57600);
 
 	//updateState();
 	//syncServer();
@@ -167,8 +167,7 @@ void SailingRobot::run() {
 
 		//XBEE PRINTING ######################################################################
 		//Kan skicka loggen direkt med:
-		//xbee.sendXML();
-		// (MEN DET KANSKE GÅR FÖR FORT...)
+		m_xBee.sendXML(m_fd,res_xml);
 
 
 
