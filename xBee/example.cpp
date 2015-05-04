@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <unistd.h>
+#include <fstream>
 #include "xBee.h"
 
 using namespace std;
@@ -106,8 +107,19 @@ int main(int argc, char** argv){
 
 		while (true){
 
+			std::string stringfile, tmp;
 
-			xbee.sendXML(port);
+			std::ifstream input("../log_output.xml");
+
+			while(!input.eof()) {
+
+    			getline(input, tmp);
+    			stringfile += tmp;
+			}
+
+			
+
+			xbee.sendXML(port, stringfile);
 			cout << "Sent a file string" << endl;
 
 			usleep(1000000);
