@@ -24,9 +24,9 @@ public:
 
 
 	/*
-		Sends sourcefile.xml as string through specified device
+		Sends a string to output with a given id
 	*/
-	void sendXML(int fd);
+	void sendXML(int fd, std::string);
 
 	int m_fd = -1;
 
