@@ -58,10 +58,6 @@ coursecalculation :
 #Needed for proper subfolder make writing
 .PHONY : Compass runall coursecalculation dbhandler ruddercommand sailcommand servocontroller CV7 gps httpsync xmlparser 
 	
-
-xmlparser :
-	$(MAKE) -C ./xmlparser
-
 dbhandler :
 	$(MAKE) -C ./dbhandler
 
