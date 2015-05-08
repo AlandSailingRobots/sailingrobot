@@ -95,7 +95,7 @@ int xBee::init(int baudRate){
 
 
 	if((fd = serialOpen(deviceName.c_str(), baudRate)) < 0) {
-		throw "xBee::openPort: Unable to connect";
+		throw "xBee::init: Unable to connect";
 	}
 
 
