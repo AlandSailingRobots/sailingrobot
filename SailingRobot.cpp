@@ -85,7 +85,7 @@ void SailingRobot::run() {
 	printf("SailingRobot main loop started.\n");
 	while(!m_waypointId.empty()) {
 		//read windsensor
-		m_windSensor.refreshData();
+		m_windSensor.parseData(m_windSensor.refreshData());
 		windDir = m_windSensor.getDirection();
 
 		m_Compass.readValues();
