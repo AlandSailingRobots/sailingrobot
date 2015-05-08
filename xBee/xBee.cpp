@@ -83,7 +83,7 @@ int xBee::init(int baudRate){
 
 
 	// this setting needs a udev rule in host system to work (alternative is dynamic USB-slot)
-	// see: http://hintshop.ludvig.co.nz/show/persistent-names-usb-serial-devices/
+	// see Static_USB_Device_Names in project installation folder
 	std::string deviceName = "/dev/xbee";
 
 	int fd;
@@ -95,7 +95,7 @@ int xBee::init(int baudRate){
 
 
 	if((fd = serialOpen(deviceName.c_str(), baudRate)) < 0) {
-		throw "CV7::openPort: Unable to connect";
+		throw "xBee::init: Unable to connect";
 	}
 
 
