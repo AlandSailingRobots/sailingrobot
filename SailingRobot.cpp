@@ -155,7 +155,7 @@ void SailingRobot::run() {
 			m_Compass.getRoll()
 		);
 
-		std::string res_xml = m_XML_log.log_to_file(m_gpsReader.getTimestamp(), //Timestamp
+		std::string res_xml = m_XML_log.log_xml(m_gpsReader.getTimestamp(), //Timestamp
 							  windDir, //winddir degrees
 							  m_windSensor.getSpeed(), //windspeed ms
 							  m_Compass.getHeading(), //Heading deg
