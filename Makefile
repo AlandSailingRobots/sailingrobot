@@ -21,11 +21,12 @@ GPS = gps/GPSReader.o gps/MockGPSReader.o
 HTTP = httpsync/HTTPSync.o
 XML_LOG = xmlparser/pugi.o xmlparser/XML_log.o
 XBEE = xBee/xBee.o
+THREAD = thread/SystemState.o
 
 
-OBJECTS = $(COMPASS) $(COURSE) $(DB) $(COMMAND) $(MAESTRO) $(CV7) $(GPS) $(HTTP) $(XML_LOG) $(XBEE)
-SOURCES = SailingRobot.cpp main.cpp
-HEADERS = SailingRobot.h
+OBJECTS = $(COMPASS) $(COURSE) $(DB) $(COMMAND) $(MAESTRO) $(CV7) $(GPS) $(HTTP) $(XML_LOG) $(XBEE) $(THREAD)
+SOURCES = SailingRobot.cpp main.cpp xBeeSync.cpp
+HEADERS = SailingRobot.h xBeeSync.h
 FILE = sr
 MAKE = make
 
@@ -33,7 +34,7 @@ MAKE = make
 
 all : runall $(FILE)
 
-runall : Compass coursecalculation dbhandler ruddercommand sailcommand servocontroller CV7 gps httpsync xmlparser
+runall : Compass coursecalculation dbhandler ruddercommand sailcommand servocontroller CV7 gps httpsync xmlparser thread
 
 clean :
 	cd Compass && $(MAKE) clean
@@ -47,18 +48,17 @@ clean :
 	cd httpsync && $(MAKE) clean
 	cd xmlparser && $(MAKE) clean
 	cd xBee && $(MAKE) clean
+	cd thread && $(MAKE) clean
 	rm -f $(FILE)
 	
 Compass :
 	$(MAKE) -C ./Compass
 	
-
-	
 coursecalculation :
 	$(MAKE) -C ./coursecalculation
 
 #Needed for proper subfolder make writing
-.PHONY : Compass runall coursecalculation dbhandler ruddercommand sailcommand servocontroller CV7 gps httpsync xmlparser 
+.PHONY : Compass runall coursecalculation dbhandler ruddercommand sailcommand servocontroller CV7 gps httpsync xmlparser thread
 	
 dbhandler :
 	$(MAKE) -C ./dbhandler
@@ -92,6 +92,9 @@ xmlparser :
 
 xbee :
 	$(MAKE) -C ./xbee
+
+thread :
+	$(MAKE) -C ./thread
 
 $(FILE) : $(SOURCES) $(HEADERS) $(OBJECTS)
 	$(CC) $(SOURCES) $(OBJECTS) $(FLAGS) $(LIBS) -o $(FILE)
