@@ -74,9 +74,4 @@ private:
 	MockMaestroController m_maestroController;
 	MockServoObject m_rudderServo;
 	MockServoObject m_sailServo;
-
-	XML_log m_XML_log;
-
-	xBee m_xBee;
-	int m_fd;
 };

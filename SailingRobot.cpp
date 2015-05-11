@@ -71,10 +71,6 @@ void SailingRobot::init(std::string programPath, std::string dbFileName, std::st
 	setupCourseCalculation();
 	printf("OK\n");
 
-	//XBEE PRINTING ################################################################
-	//	skapa ny xBee och kör xbee.init(baudRate (57600))
-	m_fd = m_xBee.init(57600);
-
 	//*	Hämtar ett heltal (1 eller 0) som visar om xbeen skall skicka och ta emot data.
 	//	m_dbHandler.retriveCellAsInt("configs", "1", "xb_send")
 	//	m_dbHandler.retriveCellAsInt("configs", "1", "xb_recv")
@@ -154,26 +150,6 @@ void SailingRobot::run() {
 			m_Compass.getPitch(),
 			m_Compass.getRoll()
 		);
-
-		std::string res_xml = m_XML_log.log_xml(m_gpsReader.getTimestamp(), //Timestamp
-							  windDir, //winddir degrees
-							  m_windSensor.getSpeed(), //windspeed ms
-							  m_Compass.getHeading(), //Heading deg
-							  m_Compass.getPitch(), //Pitch deg
-							  m_Compass.getRoll(), //Roll deg
-							  m_gpsReader.getLatitude(), // gml:pos arg1, lat
-							  m_gpsReader.getLongitude(), // gml:pos arg2, long
-							  m_gpsReader.getHeading(), // course over ground(deg)
-							  m_gpsReader.getSpeed(), //speed over ground(ms)
-							  rudderCommand,//Rudderpos
-							  sailCommand //Sailpos
-							  );
-
-		//XBEE PRINTING ######################################################################
-		//Kan skicka loggen direkt med:
-		m_xBee.sendXML(m_fd,res_xml);
-
-
 
 //		syncServer();
 
