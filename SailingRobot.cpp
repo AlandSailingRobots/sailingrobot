@@ -75,6 +75,10 @@ void SailingRobot::init(std::string programPath, std::string dbFileName, std::st
 	//	skapa ny xBee och kör xbee.init(baudRate (57600))
 	m_fd = m_xBee.init(57600);
 
+	//*	Hämtar ett heltal (1 eller 0) som visar om xbeen skall skicka och ta emot data.
+	//	m_dbHandler.retriveCellAsInt("configs", "1", "xb_send")
+	//	m_dbHandler.retriveCellAsInt("configs", "1", "xb_recv")
+
 	//updateState();
 	//syncServer();
 }
