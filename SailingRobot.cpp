@@ -87,7 +87,13 @@ void SailingRobot::run() {
 		//read windsensor
 
 		printf("m_windSensor.refreshData()\n");
-		m_windSensor.parseData(m_windSensor.refreshData());
+		std::string tmp = m_windSensor.refreshData();
+		printf("ok\n");
+
+		printf("m_windSensor.parseData()\n");
+		m_windSensor.parseData(tmp);
+		printf("ok\n");
+
 		windDir = m_windSensor.getDirection();
 
 		printf("m_Compass.readValues()\n");
