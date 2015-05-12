@@ -43,7 +43,7 @@ int main(int argc, char *argv[]) {
 
 		printf("-Executing...\n");
 		// start xBeeSync thread
-		std::thread xbee_sync_thread (threadXBeeSyncRun, &xbee_sync);
+		//std::thread xbee_sync_thread (threadXBeeSyncRun, &xbee_sync);
 		sr.run();
 		printf("-DONE\n");
 
