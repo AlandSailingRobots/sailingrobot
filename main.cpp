@@ -3,9 +3,10 @@
 #include "xBeeSync.h"
 #include <thread>
 
+/*
 static void threadXBeeSyncRun(xBeeSync *xbee_sync) {
 	xbee_sync->run();
-}
+}*/
 
 int main(int argc, char *argv[]) {
 
@@ -38,7 +39,7 @@ int main(int argc, char *argv[]) {
 	try {
 		printf("-Initializing...\n");
 		sr.init(path, db, errorLog);
-		xBeeSync xbee_sync(&systemstate);
+		//xBeeSync xbee_sync(&systemstate);
 		printf("-OK\n");
 
 		printf("-Executing...\n");
@@ -47,8 +48,8 @@ int main(int argc, char *argv[]) {
 		sr.run();
 		printf("-DONE\n");
 
-		xbee_sync.close();
-		xbee_sync_thread.join();
+		//xbee_sync.close();
+		//xbee_sync_thread.join();
 
 	} catch (const char * e) {
 		printf("ERROR[%s]\n\n",e);
