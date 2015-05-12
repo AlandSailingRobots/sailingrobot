@@ -86,20 +86,12 @@ void SailingRobot::run() {
 	while(!m_waypointId.empty()) {
 		//read windsensor
 
-		printf("m_windSensor.refreshData()\n");
-		std::string tmp = m_windSensor.refreshData();
-		printf("ok\n");
-
-		printf("m_windSensor.parseData()\n");
-		m_windSensor.parseData(tmp);
-		printf("ok\n");
+		m_windSensor.parseData(m_windSensor.refreshData());
 
 		windDir = m_windSensor.getDirection();
 
-		printf("m_Compass.readValues()\n");
 		m_Compass.readValues();
 
-		printf("readGPS()\n");
 		readGPS();
 
 		if ( !isnan(m_gpsReader.getLatitude()) ) {
