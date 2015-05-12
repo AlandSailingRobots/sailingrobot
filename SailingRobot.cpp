@@ -85,10 +85,16 @@ void SailingRobot::run() {
 	printf("SailingRobot main loop started.\n");
 	while(!m_waypointId.empty()) {
 		//read windsensor
+
+		printf("m_windSensor.refreshData()\n");
 		m_windSensor.parseData(m_windSensor.refreshData());
 		windDir = m_windSensor.getDirection();
 
+		printf("m_Compass.readValues()\n");
 		m_Compass.readValues();
+
+		printf("readGPS()\n");
+		readGPS();
 
 		if ( !isnan(m_gpsReader.getLatitude()) ) {
 
