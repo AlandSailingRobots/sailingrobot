@@ -7,9 +7,11 @@
 
 #include "Compass/Compass.h"
 #include "Compass/MockCompass.h"
+#include "Compass/HMC6343.h"
 
 #include "CV7/Windsensor.h"
 #include "CV7/MockWindsensor.h"
+#include "CV7/CV7.h"
 
 #include "gps/GPSReader.h"
 #include "gps/MockGPSReader.h"
@@ -62,15 +64,21 @@ private:
 	float m_waypointLongitude;
 	std::string m_waypointId;
 
+	/**
+	 *  bool flags for signaling the use of mock objects
+	 */
+	bool m_mockWindsensor;
+	bool m_mockCompass;
+
 	DBHandler m_dbHandler;
 	RudderCommand m_rudderCommand;
 	SailCommand m_sailCommand;
 	CourseCalculation m_courseCalc;
 	HTTPSync m_httpSync;
 
-	Compass m_Compass;
+	Compass* m_Compass;
 	GPSReader m_gpsReader;
-	Windsensor m_windSensor;
+	Windsensor* m_windSensor;
 	MockMaestroController m_maestroController;
 	MockServoObject m_rudderServo;
 	MockServoObject m_sailServo;

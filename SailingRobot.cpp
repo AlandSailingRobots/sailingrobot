@@ -8,6 +8,8 @@
 
 
 SailingRobot::SailingRobot() {
+	m_mockWindsensor = false;
+	m_mockCompass = false;
 /*	sleepypi stuff
 	wiringPiSetup();
 	pinMode(6, OUTPUT);
@@ -87,11 +89,11 @@ void SailingRobot::run() {
 	while(!m_waypointId.empty()) {
 		//read windsensor
 
-		m_windSensor.parseData(m_windSensor.refreshData());
+		m_windSensor->parseData(m_windSensor->refreshData());
 
-		windDir = m_windSensor.getDirection();
+		windDir = m_windSensor->getDirection();
 
-		m_Compass.readValues();
+		m_Compass->readValues();
 
 		readGPS();
 
@@ -148,12 +150,12 @@ void SailingRobot::run() {
 			m_courseCalc.getCTS(),
 			m_courseCalc.getTACK(),
 			windDir,
-			m_windSensor.getSpeed(),
-			m_windSensor.getTemperature(),
+			m_windSensor->getSpeed(),
+			m_windSensor->getTemperature(),
 			atoi(m_waypointId.c_str()),
-			m_Compass.getHeading(),
-			m_Compass.getPitch(),
-			m_Compass.getRoll()
+			m_Compass->getHeading(),
+			m_Compass->getPitch(),
+			m_Compass->getRoll()
 		);
 
 //		syncServer();
@@ -317,10 +319,18 @@ void SailingRobot::setupWindSensor() {
 	} catch (const char * error) {
 		logMessage("error", error);
 	}
+	if (m_mockWindsensor) {
+		CV7 real_w;
+		m_windSensor = &real_w;
+	}
+	else {
+		MockWindsensor mock_w;
+		m_windSensor = &mock_w;
+	}
 
 	try {
-		m_windSensor.loadConfig( port_name, baud_rate );
-		m_windSensor.setBufferSize( buff_size );
+		m_windSensor->loadConfig( port_name, baud_rate );
+		m_windSensor->setBufferSize( buff_size );
 	} catch (const char * error) {
 		logMessage("error", error);
 		throw error;
@@ -412,8 +422,16 @@ void SailingRobot::setupHTTPSync() {
 }
 
 void SailingRobot::setupCompass() {
+	if (m_mockCompass) {
+		HMC6343 real_c;
+		m_Compass = &real_c;
+	}
+	else {
+		MockCompass mock_c;
+		m_Compass = &mock_c;
+	}
 	try {
-		m_Compass.init();
+		m_Compass->init();
 	} catch (const char * error) {
 		logMessage("error", "SailingRobot::setupCompass() failed");
 	}

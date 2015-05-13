@@ -3,15 +3,9 @@
 #include "xBeeSync.h"
 #include <thread>
 
-/*
+
 static void threadXBeeSyncRun(xBeeSync *xbee_sync) {
 	xbee_sync->run();
-}*/
-
-static void xbee_sendXML(SystemState *systemstate) {
-	xBeeSync xbee_sync(systemstate);
-	xbee_sync.run();
-	printf("xbee_sync running\n");
 }
 
 int main(int argc, char *argv[]) {
@@ -45,23 +39,19 @@ int main(int argc, char *argv[]) {
 	try {
 		printf("-Initializing...\n");
 		sr.init(path, db, errorLog);
-		//xBeeSync xbee_sync(&systemstate);
+		xBeeSync xbee_sync(&systemstate);
 		printf("-OK\n");
 
 		printf("-Executing...\n");
 		//start xBeeSync thread
-		//std::thread xbee_sync_thread (threadXBeeSyncRun, &xbee_sync);
-		
-		//Jon - start xbee thread
-		std::thread xbee_thread(xbee_sendXML, &systemstate);
+		std::thread xbee_sync_thread (threadXBeeSyncRun, &xbee_sync);
 		printf("xBee thread started\n");		
 
 		sr.run();
 		printf("-DONE\n");
 
 		//xbee_sync.close();
-		//xbee_sync_thread.join();
-		xbee_thread.join();
+		xbee_sync_thread.join();
 
 	} catch (const char * e) {
 		printf("ERROR[%s]\n\n",e);
