@@ -1,4 +1,5 @@
 #include "xBeeSync.h"
+#include <unistd.h>		//sleep
 
 xBeeSync::xBeeSync(SystemState *systemState) :
 	m_model(
@@ -19,7 +20,8 @@ xBeeSync::xBeeSync(SystemState *systemState) :
 
 void xBeeSync::run()
 {
-	while(isRunning()) {
+	while(isRunning()) 
+	{
 		m_system_state->setData(m_model);
 
 		std::string res_xml = m_XML_log.log_xml(
@@ -39,6 +41,9 @@ void xBeeSync::run()
 
 		// Kan skicka loggen direkt med:
 		m_xBee.sendXML(m_xbee_fd,res_xml);
+		
+		//make sure there are at least one second between each xml message
+		sleep(1);
 	}
 }
 

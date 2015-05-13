@@ -68,9 +68,9 @@ private:
 	CourseCalculation m_courseCalc;
 	HTTPSync m_httpSync;
 
-	MockCompass m_Compass;
-	MockGPSReader m_gpsReader;
-	MockWindsensor m_windSensor;
+	Compass m_Compass;
+	GPSReader m_gpsReader;
+	Windsensor m_windSensor;
 	MockMaestroController m_maestroController;
 	MockServoObject m_rudderServo;
 	MockServoObject m_sailServo;

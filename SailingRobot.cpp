@@ -6,6 +6,7 @@
 #include <fstream>
 #include <cstring>
 
+
 SailingRobot::SailingRobot() {
 /*	sleepypi stuff
 	wiringPiSetup();
@@ -158,7 +159,7 @@ void SailingRobot::run() {
 //		syncServer();
 
 		//update gps
-		readGPS();
+		//readGPS();
 
 		//check if we are within 15meters of the waypoint and move to next wp in that case
 		if (m_courseCalc.getDTW() < 15) {
