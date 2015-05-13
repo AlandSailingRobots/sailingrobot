@@ -74,9 +74,12 @@ private:
 	CourseCalculation m_courseCalc;
 	HTTPSync m_httpSync;
 
+	//Compass* m_compass;
 	HMC6343 m_compass;
 	GPSReader m_gpsReader;
-	Windsensor* m_windSensor;
+	//Windsensor* m_windSensor;
+	CV7 m_windSensor;
+
 	MockMaestroController m_maestroController;
 	MockServoObject m_rudderServo;
 	MockServoObject m_sailServo;
