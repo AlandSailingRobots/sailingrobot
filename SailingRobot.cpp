@@ -95,7 +95,7 @@ void SailingRobot::run() {
 
 		windDir = m_windSensor->getDirection();
 
-		m_Compass->readValues();
+		m_compass.readValues();
 
 		readGPS();
 
@@ -144,9 +144,9 @@ void SailingRobot::run() {
 				m_windSensor->getTemperature()
 			),
 			CompassModel(
-				m_Compass->getHeading(),
-				m_Compass->getPitch(),
-				m_Compass->getRoll()
+				m_compass.getHeading(),
+				m_compass.getPitch(),
+				m_compass.getRoll()
 			),
 			rudderCommand,
 			sailCommand
@@ -173,9 +173,9 @@ void SailingRobot::run() {
 			m_windSensor->getSpeed(),
 			m_windSensor->getTemperature(),
 			atoi(m_waypointId.c_str()),
-			m_Compass->getHeading(),
-			m_Compass->getPitch(),
-			m_Compass->getRoll()
+			m_compass.getHeading(),
+			m_compass.getPitch(),
+			m_compass.getRoll()
 		);
 
 //		syncServer();
@@ -339,7 +339,7 @@ void SailingRobot::setupWindSensor() {
 	} catch (const char * error) {
 		logMessage("error", error);
 	}
-	if (m_mockWindsensor) {
+	if (!m_mockWindsensor) {
 		CV7 real_w;
 		m_windSensor = &real_w;
 	}
@@ -442,16 +442,16 @@ void SailingRobot::setupHTTPSync() {
 }
 
 void SailingRobot::setupCompass() {
-	if (m_mockCompass) {
-		HMC6343 real_c;
-		m_Compass = &real_c;
-	}
-	else {
-		MockCompass mock_c;
-		m_Compass = &mock_c;
-	}
+//	if (!m_mockCompass) {
+//		HMC6343 real_c;
+//		m_compass = &real_c;
+//	}
+//	else {
+//		MockCompass mock_c;
+//		m_compass = &mock_c;
+//	}
 	try {
-		m_Compass->init();
+		m_compass.init();
 	} catch (const char * error) {
 		logMessage("error", "SailingRobot::setupCompass() failed");
 	}
