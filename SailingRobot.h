@@ -22,16 +22,14 @@
 #include "servocontroller/ServoObject.h"
 #include "servocontroller/MockServoObject.h"
 
-#include "xmlparser/src/xml_log.h"
-
-#include "xBee/xBee.h"
+#include "thread/SystemState.h"
 
 
 class SailingRobot {
 
 public:
 
-	SailingRobot();
+	SailingRobot(SystemState *systemState);
 	~SailingRobot();
 	void init(std::string programPath, std::string dbFileName, std::string errorFileName);
 	void run();
@@ -82,4 +80,6 @@ private:
 	MockMaestroController m_maestroController;
 	MockServoObject m_rudderServo;
 	MockServoObject m_sailServo;
+
+	SystemState *m_systemState;
 };

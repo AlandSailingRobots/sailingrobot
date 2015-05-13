@@ -7,7 +7,9 @@
 #include <cstring>
 
 
-SailingRobot::SailingRobot() {
+SailingRobot::SailingRobot(SystemState *systemState) :
+	m_systemState(systemState)
+{
 	m_mockWindsensor = false;
 	m_mockCompass = false;
 /*	sleepypi stuff
@@ -132,6 +134,24 @@ void SailingRobot::run() {
 		m_rudderServo.setPosition(rudderCommand);
 		//sail adjustment
 		m_sailServo.setPosition(sailCommand);
+
+		//update system state
+		SystemStateModel systemStateModel(
+			m_gpsReader.getModel(),
+			WindsensorModel(
+				m_windSensor->getDirection(),
+				m_windSensor->getSpeed(),
+				m_windSensor->getTemperature()
+			),
+			CompassModel(
+				m_Compass->getHeading(),
+				m_Compass->getPitch(),
+				m_Compass->getRoll()
+			),
+			rudderCommand,
+			sailCommand
+		)
+		m_systemState->setData(systemStateModel);
 
 		//logging
 		m_dbHandler.insertDataLog(

@@ -23,7 +23,7 @@ int main(int argc, char *argv[]) {
 			0
 		)
 	);
-	SailingRobot sr;
+	SailingRobot sr(&systemstate);
 
 	std::string path, db, errorLog;
 	if (argc < 2) {
