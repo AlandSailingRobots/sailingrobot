@@ -10,8 +10,8 @@
 SailingRobot::SailingRobot(SystemState *systemState) :
 	m_systemState(systemState)
 {
-	m_mockWindsensor = true;
-	m_mockCompass = true;
+	m_mockWindsensor = false;
+	m_mockCompass = false;
 /*	sleepypi stuff
 	wiringPiSetup();
 	pinMode(6, OUTPUT);
@@ -86,6 +86,7 @@ void SailingRobot::init(std::string programPath, std::string dbFileName, std::st
 
 
 void SailingRobot::run() {
+	sleep(3);
 	int rudderCommand, sailCommand, windDir, twd;
 	printf("SailingRobot main loop started.\n");
 	while(!m_waypointId.empty()) {
@@ -97,7 +98,9 @@ void SailingRobot::run() {
 
 		m_compass->readValues();
 
-		readGPS();
+		//readGPS();
+		//usleep(500000);
+
 
 		if ( !isnan(m_gpsReader.getLatitude()) ) {
 

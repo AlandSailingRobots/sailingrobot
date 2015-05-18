@@ -34,11 +34,13 @@ public:
 	void init(std::string programPath, std::string dbFileName, std::string errorFileName);
 	void run();
 	void shutdown();
-
+	
+	void readGPS();
+	
 private:
 
 	void logMessage(std::string type, std::string message);
-	void readGPS();
+	//void readGPS();
 	void syncServer();
 	void updateState();
 	void nextWaypoint();
@@ -75,7 +77,7 @@ private:
 	HTTPSync m_httpSync;
 
 	Compass* m_compass;
-	MockGPSReader m_gpsReader;
+	GPSReader m_gpsReader;
 	Windsensor* m_windSensor;
 
 	MockMaestroController m_maestroController;

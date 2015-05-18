@@ -22,7 +22,7 @@ void xBeeSync::run()
 {
 	while(isRunning()) 
 	{
-		m_system_state->setData(m_model);
+		m_system_state->getData(&m_model);
 
 		std::string res_xml = m_XML_log.log_xml(
 			m_model.gpsModel.timestamp,			// Timestamp

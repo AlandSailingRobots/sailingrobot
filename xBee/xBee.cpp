@@ -20,35 +20,13 @@ std::string xBee::readOutput(int fd){
 	if (available != -1){
 
 		while (available > 0){
-
 			printer += serialGetchar(fd);
 			available--;
-
-
-
 		}
-
-
-
-
-
 	}else{
-
 		printer = "Data reception failed.";
-
-
 	}
-
-
-
-
 	return printer;
-
-
-
-
-
-
 }
 
 void xBee::printInput(std::string input, int fd){
@@ -61,22 +39,12 @@ void xBee::printInput(std::string input, int fd){
 		loops--;
 
 	}
-
-	
-
-
 }
 
 void xBee::sendXML(int fd, std::string output){
 
-
 	serialPuts(fd, output.c_str());
-
-
-
 }
-
-
 
 
 int xBee::init(int baudRate){
@@ -89,23 +57,10 @@ int xBee::init(int baudRate){
 	int fd;
 
 
-
-
-
-
-
 	if((fd = serialOpen(deviceName.c_str(), baudRate)) < 0) {
 		throw "xBee::init: Unable to connect";
 	}
-
-
 	
-
 	return fd;
 	
-
-
-
-
-
 }

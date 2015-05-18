@@ -2,10 +2,19 @@
 #include "thread/SystemState.h"
 #include "xBeeSync.h"
 #include <thread>
-
+#include <unistd.h>
 
 static void threadXBeeSyncRun(xBeeSync *xbee_sync) {
 	xbee_sync->run();
+}
+
+static void threadGPSupdate(SailingRobot *sr) {
+	while (true) 
+	{	
+		sr->readGPS();
+		printf("GPS thread: readGPS executed\n");
+		//usleep(500000);
+	}
 }
 
 int main(int argc, char *argv[]) {
@@ -46,6 +55,10 @@ int main(int argc, char *argv[]) {
 		//start xBeeSync thread
 		std::thread xbee_sync_thread (threadXBeeSyncRun, &xbee_sync);
 		printf("xBee thread started\n");		
+
+		std::thread gps_reader_thread (threadGPSupdate, &sr);
+		printf("GPSreader thread started \n");
+
 
 		sr.run();
 		printf("-DONE\n");
