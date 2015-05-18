@@ -16,25 +16,11 @@ int main(int argc, char** argv){
 	
 	while (option != 2 && option != 1 && option != 0){
 
-		cout << "Please select read or write mode (0/1/2)" << endl;
+		cout << "Please select read (0), manual write (1) or XML-write (2)" << endl;
 		cout << "Selecting 2 will write a predefined XML-string" << endl;
 		cin >> option;
 
-
-
-
-
 	}
-
-	
-
-	
-
-
-
-
-
-
 
 	try {
 		port = xbee.init(57600);
@@ -47,12 +33,12 @@ int main(int argc, char** argv){
 	if (port != -1){
 
 		cout << "Connection successful." << endl;
-		
-		
 
 	}else{
 
 		cout << "Connection failed!" << endl;
+		cout << "- are you running on r-pi with the xBee connected?" << endl;
+		cout << "- does the running device have a static reference to /dev/xbee?" << endl;
 
 	}
 
@@ -69,26 +55,18 @@ int main(int argc, char** argv){
 
 		}
 
-
-		
-
-
 	}else if (option == 0){
 
-
-		//int tics = 10;
 		string outPut = "0";
 
 		while (true){
 
 		outPut = xbee.readOutput(port);
 		cout << outPut << endl;
-		//tics--;
 		usleep(1000000);
 
 
 		}
-
 
 
 	}else if (option == 2){
@@ -105,8 +83,6 @@ int main(int argc, char** argv){
     			stringfile += tmp;
 			}
 
-			
-
 			xbee.sendXML(port, stringfile);
 			cout << "Sent a predefined XML-string" << endl;
 
@@ -115,26 +91,8 @@ int main(int argc, char** argv){
 
 		}
 
-		
-
-
-
 	}
-
-	
-	
-
-	
-	
-
 	
 	cout << "Done" << endl;
-
-
-
-
-
-
-
 
 }
