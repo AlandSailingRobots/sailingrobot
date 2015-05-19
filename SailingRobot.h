@@ -29,7 +29,7 @@ class SailingRobot {
 
 public:
 
-	SailingRobot(SystemState *systemState);
+	SailingRobot(SystemState *systemState, GPSReader *reader);
 	~SailingRobot();
 	void init(std::string programPath, std::string dbFileName, std::string errorFileName);
 	void run();
@@ -77,7 +77,7 @@ private:
 	HTTPSync m_httpSync;
 
 	Compass* m_compass;
-	GPSReader m_gpsReader;
+	GPSReader* m_gpsReader;
 	Windsensor* m_windSensor;
 
 	MockMaestroController m_maestroController;

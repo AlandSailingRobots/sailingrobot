@@ -10,9 +10,9 @@
 
 
 GPSupdater::GPSupdater(GPSReader* reader):
+m_gpsReader(reader),
 m_running(true)
 {
-	m_gpsReader = reader;
 	try {
 		m_gpsReader->connectToGPS();
 	} catch (const char * error) {

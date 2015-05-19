@@ -7,7 +7,8 @@
 #include <cstring>
 
 
-SailingRobot::SailingRobot(SystemState *systemState) :
+SailingRobot::SailingRobot(SystemState *systemState, GPSReader *reader) :
+	m_gpsReader(reader),
 	m_systemState(systemState)
 {
 	m_mockWindsensor = false;
@@ -39,11 +40,11 @@ void SailingRobot::init(std::string programPath, std::string dbFileName, std::st
 	printf(" Starting Compass\t\t");
 	setupCompass();
 	printf("OK\n");
-
+	/*
 	printf(" Starting GPS\t\t\t");
 	setupGPS();
 	printf("OK\n");
-
+	*/
 	printf(" Starting Windsensor\t\t");
 	setupWindSensor();
 	printf("OK\n");
@@ -102,14 +103,14 @@ void SailingRobot::run() {
 		//usleep(500000);
 
 
-		if ( !isnan(m_gpsReader.getLatitude()) ) {
+		if ( !isnan(m_gpsReader->getLatitude()) ) {
 
 			//calc DTW
-			m_courseCalc.calculateDTW(m_gpsReader.getLatitude(), m_gpsReader.getLongitude(),
+			m_courseCalc.calculateDTW(m_gpsReader->getLatitude(), m_gpsReader->getLongitude(),
 				m_waypointLatitude, m_waypointLongitude);
 
 			//calc & set TWD
-			twd = m_gpsReader.getHeading() + windDir;
+			twd = m_gpsReader->getHeading() + windDir;
 			if (twd > 359) {
 				twd -= 360;
 			}
@@ -119,12 +120,12 @@ void SailingRobot::run() {
 			m_courseCalc.setTWD(twd);
 
 			//calc BTW & CTS
-			m_courseCalc.calculateBTW(m_gpsReader.getLatitude(), m_gpsReader.getLongitude(),
+			m_courseCalc.calculateBTW(m_gpsReader->getLatitude(), m_gpsReader->getLongitude(),
 				m_waypointLatitude, m_waypointLongitude);
 			m_courseCalc.calculateCTS();
 
 			//rudder position calculation
-			rudderCommand = m_rudderCommand.getCommand(m_courseCalc.getCTS(), m_gpsReader.getHeading());
+			rudderCommand = m_rudderCommand.getCommand(m_courseCalc.getCTS(), m_gpsReader->getHeading());
 
 		} else {
 			logMessage("error", "SailingRobot::run(), gps NaN. Using values from last iteration.");
@@ -140,7 +141,7 @@ void SailingRobot::run() {
 
 		//update system state
 		SystemStateModel systemStateModel(
-			m_gpsReader.getModel(),
+			m_gpsReader->getModel(),
 			WindsensorModel(
 				m_windSensor->getDirection(),
 				m_windSensor->getSpeed(),
@@ -158,12 +159,12 @@ void SailingRobot::run() {
 
 		//logging
 		m_dbHandler.insertDataLog(
-			m_gpsReader.getTimestamp(),
-			m_gpsReader.getLatitude(),
-			m_gpsReader.getLongitude(),
-			m_gpsReader.getSpeed(),
-			m_gpsReader.getHeading(),
-			m_gpsReader.getSatellitesUsed(),
+			m_gpsReader->getTimestamp(),
+			m_gpsReader->getLatitude(),
+			m_gpsReader->getLongitude(),
+			m_gpsReader->getSpeed(),
+			m_gpsReader->getHeading(),
+			m_gpsReader->getSatellitesUsed(),
 			sailCommand,
 			rudderCommand,
 			0, //sailservo getpos, to remove
@@ -204,7 +205,7 @@ void SailingRobot::shutdown() {
 
 void SailingRobot::logMessage(std::string type, std::string message) {
 	try {
-		m_dbHandler.insertMessageLog(m_gpsReader.getTimestamp(), type, message);
+		m_dbHandler.insertMessageLog(m_gpsReader->getTimestamp(), type, message);
        	} catch (const char * logError) {
 		std::ofstream errorFile;
 		errorFile.open(m_errorLogPath.c_str(), std::ios::app);
@@ -217,7 +218,7 @@ void SailingRobot::logMessage(std::string type, std::string message) {
 
 void SailingRobot::readGPS() {
 	try {
-		m_gpsReader.readGPS(50000000); //microseconds
+		m_gpsReader->readGPS(50000000); //microseconds
 	} catch (const char * error) {
 		logMessage("error", error);
 	}
@@ -361,7 +362,7 @@ void SailingRobot::setupWindSensor() {
 
 void SailingRobot::setupGPS() {
 	try {
-		m_gpsReader.connectToGPS();
+		m_gpsReader->connectToGPS();
 	} catch (const char * error) {
 		logMessage("error", error);
 		throw;

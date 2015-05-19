@@ -29,7 +29,7 @@ int main(int argc, char *argv[]) {
 		)
 	);
 	GPSReader gps_r;
-	SailingRobot sr(&systemstate);
+	SailingRobot sr(&systemstate,&gps_r);
 
 	std::string path, db, errorLog;
 	if (argc < 2) {
@@ -44,9 +44,6 @@ int main(int argc, char *argv[]) {
 
 	try {
 		printf("-Initializing...\n");
-
-		//* måste skicka in &gps_r till sr.init så den får tillgång till GPSen.
-		//* samt ändra så pekaren används inuti SailingRobot klassen.
 		sr.init(path, db, errorLog);
 
 		// Thread objects
