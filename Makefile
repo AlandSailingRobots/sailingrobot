@@ -25,8 +25,8 @@ THREAD = thread/SystemState.o
 
 
 OBJECTS = $(COMPASS) $(COURSE) $(DB) $(COMMAND) $(MAESTRO) $(CV7) $(GPS) $(HTTP) $(XML_LOG) $(XBEE) $(THREAD)
-SOURCES = SailingRobot.cpp main.cpp xBeeSync.cpp
-HEADERS = SailingRobot.h xBeeSync.h
+SOURCES = SailingRobot.cpp main.cpp xBeeSync.cpp GPSupdater.cpp
+HEADERS = SailingRobot.h xBeeSync.h GPSupdater.h
 FILE = sr
 MAKE = make
 

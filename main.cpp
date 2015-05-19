@@ -1,6 +1,7 @@
 #include "SailingRobot.h"
 #include "thread/SystemState.h"
 #include "xBeeSync.h"
+#include "GPSupdater.h"
 #include <thread>
 #include <unistd.h>
 
@@ -8,13 +9,8 @@ static void threadXBeeSyncRun(xBeeSync *xbee_sync) {
 	xbee_sync->run();
 }
 
-static void threadGPSupdate(SailingRobot *sr) {
-	while (true) 
-	{	
-		sr->readGPS();
-		printf("GPS thread: readGPS executed\n");
-		//usleep(500000);
-	}
+static void threadGPSupdate(GPSupdater *gps_updater) {
+	gps_updater->run();
 }
 
 int main(int argc, char *argv[]) {
@@ -32,6 +28,7 @@ int main(int argc, char *argv[]) {
 			0
 		)
 	);
+	GPSReader gps_r;
 	SailingRobot sr(&systemstate);
 
 	std::string path, db, errorLog;
@@ -47,24 +44,31 @@ int main(int argc, char *argv[]) {
 
 	try {
 		printf("-Initializing...\n");
+
+		//* måste skicka in &gps_r till sr.init så den får tillgång till GPSen.
+		//* samt ändra så pekaren används inuti SailingRobot klassen.
 		sr.init(path, db, errorLog);
+
+		// Thread objects
 		xBeeSync xbee_sync(&systemstate);
+		GPSupdater gps_u(&gps_r);
+
 		printf("-OK\n");
 
 		printf("-Executing...\n");
 		//start xBeeSync thread
 		std::thread xbee_sync_thread (threadXBeeSyncRun, &xbee_sync);
 		printf("xBee thread started\n");		
-
-		std::thread gps_reader_thread (threadGPSupdate, &sr);
+		//start GPSupdater thread
+		std::thread gps_reader_thread (threadGPSupdate, &gps_u);
 		printf("GPSreader thread started \n");
-
 
 		sr.run();
 		printf("-DONE\n");
 
 		//xbee_sync.close();
 		xbee_sync_thread.join();
+		gps_reader_thread.join();
 
 	} catch (const char * e) {
 		printf("ERROR[%s]\n\n",e);
