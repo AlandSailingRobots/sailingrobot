@@ -4,7 +4,7 @@
 
 class xBee {
 private:
-	std::string receivedBuffer;
+	std::string m_receivedBuffer;
 public:
 
 
