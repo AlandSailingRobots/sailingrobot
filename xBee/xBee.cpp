@@ -21,15 +21,15 @@ std::string xBee::readOutput(int fd){
 			printer += serialGetchar(fd);
 			available--;
 		}
-		receivedBuffer += printer;
+		m_receivedBuffer += printer;
 	}else{
 		printer = "Data reception failed.";
 	}
 
 
 
-	std::size_t pos_start = receivedBuffer.find("<message>");
-	std::size_t pos_end = receivedBuffer.find("</message>");
+	std::size_t pos_start = m_receivedBuffer.find("<message>");
+	std::size_t pos_end = m_receivedBuffer.find("</message>");
 
 	if (pos_start != std::string::npos &&
 		pos_end != std::string::npos &&
@@ -37,14 +37,14 @@ std::string xBee::readOutput(int fd){
     	std::cout << "XML message start and end tags found!" << '\n' << 
     			     "Start tag pos: " << pos_start << '\n' << "End tag pos: " << pos_end << std::endl;
 
-		std::string result = receivedBuffer.substr(pos_start, pos_end + pos_start); 
+		std::string result = m_receivedBuffer.substr(pos_start, pos_end + pos_start); 
 		std::cout << "Resulting XML: " << result << std::endl;
 
-		receivedBuffer.clear();
+		m_receivedBuffer.clear();
 	}
 
-	if(receivedBuffer.size() > 500) {
-		receivedBuffer.clear();
+	if(m_receivedBuffer.size() > 500) {
+		m_receivedBuffer.clear();
 	}
 
 	return printer;
