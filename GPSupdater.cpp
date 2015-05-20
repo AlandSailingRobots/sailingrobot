@@ -22,7 +22,7 @@ m_running(true)
 
 void GPSupdater::run()
 {
-	std::cout << " GPSupdater thread started." << std::endl;
+	std::cout << "*GPSupdater thread started." << std::endl;
 	while(isRunning())
 	{
 		//std::cout << "GPSupdater : run() : exec" << std::endl;
@@ -32,7 +32,7 @@ void GPSupdater::run()
 			std::cout << "GPSupdater : readGPS() : " << error << std::endl;
 		}
 	}
-	std::cout << " GPSupdater thread exited." << std::endl;
+	std::cout << "*GPSupdater thread exited." << std::endl;
 }
 
 void GPSupdater::close()

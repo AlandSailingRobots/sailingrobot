@@ -29,6 +29,17 @@ void term(int signum)
 
 int main(int argc, char *argv[]) {
 
+	std::string path, db_name, errorLog;
+	if (argc < 2) {
+		path = "/root/sailingrobot/";
+		db_name = "asr.db";
+		errorLog = "errors.log";
+	} else {
+		path = std::string(argv[1]);
+		db_name = "/asr.db";
+		errorLog = "/errors.log";
+	}
+
     struct sigaction action;
     memset(&action, 0, sizeof(struct sigaction));
     action.sa_handler = term;
@@ -49,8 +60,17 @@ int main(int argc, char *argv[]) {
 	);
 	GPSReader gps_reader;
 
+	DBHandler db;
+	try {
+		db.openDatabase(path+db_name);
+	} catch (const char * error) {
+		printf("!DB ERROR:%s\n", error);
+		throw;
+	}
+	db_handle = &db;
+
 	// Create main sailing robot controller
-	SailingRobot sr(&systemstate,&gps_reader);
+	SailingRobot sr(&systemstate,&gps_reader,&db);
 	sr_handle = &sr;
 
 	// Create thread controllers
@@ -59,20 +79,9 @@ int main(int argc, char *argv[]) {
 	GPSupdater gps_updater(&gps_reader);
 	gps_handle = &gps_updater;
 
-	std::string path, db, errorLog;
-	if (argc < 2) {
-		path = "/root/sailingrobot/";
-		db = "asr.db";
-		errorLog = "errors.log";
-	} else {
-		path = std::string(argv[1]);
-		db = "/asr.db";
-		errorLog = "/errors.log";
-	}
-
 	try {
 		printf("-Initializing...\n");
-		sr.init(path, db, errorLog);
+		sr.init(path, errorLog);
 		printf("-DONE\n");
 
 		printf("-Starting threads...\n");

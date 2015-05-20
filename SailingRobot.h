@@ -29,9 +29,9 @@ class SailingRobot {
 
 public:
 
-	SailingRobot(SystemState *systemState, GPSReader *reader);
+	SailingRobot(SystemState *systemState, GPSReader *gps, DBHandler *db);
 	~SailingRobot();
-	void init(std::string programPath, std::string dbFileName, std::string errorFileName);
+	void init(std::string programPath, std::string errorFileName);
 	void run();
 	void shutdown();
 	
@@ -72,7 +72,7 @@ private:
 	bool m_mockWindsensor;
 	bool m_mockCompass;
 
-	DBHandler m_dbHandler;
+	DBHandler *m_dbHandler;
 	RudderCommand m_rudderCommand;
 	SailCommand m_sailCommand;
 	CourseCalculation m_courseCalc;
