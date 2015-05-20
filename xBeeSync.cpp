@@ -20,6 +20,7 @@ xBeeSync::xBeeSync(SystemState *systemState) :
 
 void xBeeSync::run()
 {
+	std::cout << "*xBeeSync thread started." << std::endl;
 	while(isRunning()) 
 	{
 		m_system_state->getData(&m_model);
@@ -46,6 +47,7 @@ void xBeeSync::run()
 		//make sure there are at least one second between each xml message
 		sleep(1);
 	}
+	std::cout << "*xBeeSync thread exited." << std::endl;
 }
 
 void xBeeSync::close()

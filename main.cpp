@@ -89,9 +89,9 @@ int main(int argc, char *argv[]) {
 		printf("-Starting threads...\n");
 		//start xBeeSync thread
 		std::thread xbee_sync_thread (threadXBeeSyncRun);
-		printf(" xBee thread started\n");
 		//start GPSupdater thread
 		std::thread gps_reader_thread (threadGPSupdate);
+
 		printf("-Starting main loop...\n");
 		sr.run();
 		printf("-DONE\n");
@@ -99,7 +99,6 @@ int main(int argc, char *argv[]) {
 	} catch (const char * e) {
 		printf("ERROR[%s]\n\n",e);
 		term(1);
-		//sr.shutdown();
 		return 1;
 	}
 
