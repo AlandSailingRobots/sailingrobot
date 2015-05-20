@@ -8,8 +8,10 @@
 #ifndef GLOBAL_H_
 #define GLOBAL_H_
 
+#include "SailingRobot.h"
 #include "xBeeSync.h"
 #include "GPSupdater.h"
+#include "dbhandler/DBHandler.h"
 
 SailingRobot *sr_handle;
 xBeeSync *xbee_handle;

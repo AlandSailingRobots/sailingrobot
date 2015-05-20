@@ -1,3 +1,6 @@
+#ifndef __SAILINGROBOT_H__
+#define __SAILINGROBOT_H__
+
 #include "dbhandler/DBHandler.h"
 #include "dbhandler/JSON.h"
 #include "sailcommand/SailCommand.h"
@@ -24,7 +27,6 @@
 
 #include "thread/SystemState.h"
 
-
 class SailingRobot {
 
 public:
@@ -35,7 +37,7 @@ public:
 	void run();
 	void shutdown();
 	
-	void readGPS();
+	//void readGPS();
 	
 private:
 
@@ -45,12 +47,12 @@ private:
 	void updateState();
 	void nextWaypoint();
 
-	void setupDB(std::string filename);
+	//void setupDB(std::string filename);
 	void setupMaestro();
 	void setupRudderServo();
 	void setupSailServo();
 	void setupWindSensor();
-	void setupGPS();
+	//void setupGPS();
 	void setupCourseCalculation();
 	void setupRudderCommand();
 	void setupSailCommand();
@@ -88,3 +90,4 @@ private:
 
 	SystemState *m_systemState;
 };
+#endif

@@ -1,12 +1,10 @@
 #include "SailingRobot.h"
-//#include "global.h"
 #include <cstdlib>
 #include <iostream>
 #include <wiringPi.h>
 #include <unistd.h>
 #include <fstream>
 #include <cstring>
-
 
 SailingRobot::SailingRobot(SystemState *systemState, GPSReader *gps, DBHandler *db) :
 	m_dbHandler(db),
