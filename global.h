@@ -10,9 +10,10 @@
 
 #include <thread>
 
+SailingRobot *sr_handle;
+
+
 xBeeSync *xbee_handle;
 GPSupdater *gps_handle;
-
-GPSReader gps_r;
 
 #endif /* GLOBAL_H_ */
