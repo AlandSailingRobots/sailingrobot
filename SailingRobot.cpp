@@ -77,10 +77,6 @@ void SailingRobot::init(std::string programPath, std::string dbFileName, std::st
 	setupCourseCalculation();
 	printf("OK\n");
 
-	//*	Hämtar ett heltal (1 eller 0) som visar om xbeen skall skicka och ta emot data.
-	//	m_dbHandler.retriveCellAsInt("configs", "1", "xb_send")
-	//	m_dbHandler.retriveCellAsInt("configs", "1", "xb_recv")
-
 	//updateState();
 	//syncServer();
 }
@@ -215,7 +211,7 @@ void SailingRobot::logMessage(std::string type, std::string message) {
 	}
 }
 
-
+/*
 void SailingRobot::readGPS() {
 	try {
 		m_gpsReader->readGPS(50000000); //microseconds
@@ -223,7 +219,7 @@ void SailingRobot::readGPS() {
 		logMessage("error", error);
 	}
 }
-
+*/
 
 void SailingRobot::syncServer() {
 	try {
@@ -360,6 +356,7 @@ void SailingRobot::setupWindSensor() {
 	logMessage("message", "setupWindSensor() done");
 }
 
+/*
 void SailingRobot::setupGPS() {
 	try {
 		m_gpsReader->connectToGPS();
@@ -369,6 +366,7 @@ void SailingRobot::setupGPS() {
 	}
 	logMessage("message", "setupGPS() done");
 }
+*/
 
 void SailingRobot::setupCourseCalculation() {
 	try {
