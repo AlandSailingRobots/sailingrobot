@@ -60,6 +60,7 @@ int main(int argc, char *argv[]) {
 	);
 	GPSReader gps_reader;
 
+	printf("-Creating database connection...\n");
 	DBHandler db;
 	try {
 		db.openDatabase(path+db_name);
@@ -68,6 +69,7 @@ int main(int argc, char *argv[]) {
 		throw;
 	}
 	db_handle = &db;
+	printf("-DONE\n");
 
 	// Create main sailing robot controller
 	SailingRobot sr(&systemstate,&gps_reader,&db);
