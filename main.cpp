@@ -18,8 +18,8 @@ static void threadGPSupdate(GPSupdater *gps_updater) {
 void term(int signum)
 {
 	std::cout << "SIGINT detected, trying to exit cleanly.." << std::endl;
-	xbee_sync->close();
-	gps_updater->close();
+	xbee_handle->close();
+	gps_handle->close();
 }
 
 int main(int argc, char *argv[]) {
@@ -62,8 +62,9 @@ int main(int argc, char *argv[]) {
 
 		// Thread objects
 		xBeeSync xbee_sync(&systemstate);
+		xbee_handle = &xbee_sync;
 		GPSupdater gps_u(&gps_r);
-		gps_updater = &gps_u;
+		gps_handle = &gps_u;
 
 		printf("-OK\n");
 

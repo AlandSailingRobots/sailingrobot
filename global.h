@@ -10,8 +10,8 @@
 
 #include <thread>
 
-xBeeSync *xbee_sync;
-GPSupdater *gps_updater;
+xBeeSync *xbee_handle;
+GPSupdater *gps_handle;
 
 GPSReader gps_r;
 
