@@ -29,7 +29,8 @@ std::string xBee::readOutput(int fd){
 	std::size_t pos_end = printer.find("</message>");
 
 	if (pos_start != std::string::npos &&
-		pos_end != std::string::npos) {
+		pos_end != std::string::npos &&
+		pos_start < pos_end) {
     	std::cout << "XML message start and end tags found!" << '\n' << 
     			     "Start tag pos: " << pos_start << '\n' << "End tag pos: " << pos_end << std::endl;
 
