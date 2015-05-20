@@ -13,6 +13,7 @@
 std::string xBee::readOutput(int fd){
 
 	std::string printer;
+	std::string result;
 
 	int available = serialDataAvail(fd);
 
@@ -37,7 +38,7 @@ std::string xBee::readOutput(int fd){
     	std::cout << "XML message start and end tags found!" << '\n' << 
     			     "Start tag pos: " << pos_start << '\n' << "End tag pos: " << pos_end << std::endl;
 
-		std::string result = m_receivedBuffer.substr(pos_start, pos_end + pos_start); 
+		result = m_receivedBuffer.substr(pos_start, pos_end + pos_start); 
 		std::cout << "Resulting XML: " << result << std::endl;
 
 		m_receivedBuffer.clear();
@@ -47,7 +48,7 @@ std::string xBee::readOutput(int fd){
 		m_receivedBuffer.clear();
 	}
 
-	return printer;
+	return result;
 }
 
 void xBee::printInput(std::string input, int fd){
