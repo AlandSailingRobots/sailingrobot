@@ -42,6 +42,7 @@ void xBeeSync::run()
 		// Kan skicka loggen direkt med:
 		m_xBee.sendXML(m_xbee_fd,res_xml);
 		
+		m_xBee.readOutput(m_xbee_fd);
 		//make sure there are at least one second between each xml message
 		sleep(1);
 	}

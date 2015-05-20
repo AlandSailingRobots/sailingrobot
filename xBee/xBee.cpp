@@ -18,7 +18,6 @@ std::string xBee::readOutput(int fd){
 	int available = serialDataAvail(fd);
 
 	if (available != -1){
-
 		while (available > 0){
 			printer += serialGetchar(fd);
 			available--;
@@ -26,6 +25,13 @@ std::string xBee::readOutput(int fd){
 	}else{
 		printer = "Data reception failed.";
 	}
+
+
+	if (printer.find("<message>") != std::string::npos &&
+		printer.find("</message>") != std::string::npos) {
+    	std::cout << "XML message start and end tags found!" << '\n';
+	}
+
 	return printer;
 }
 
