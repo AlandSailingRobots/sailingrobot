@@ -37,6 +37,14 @@ std::string xBee::readOutput(int fd){
 		std::string result = printer.substr(pos_start, pos_end + pos_start); 
 		std::cout << "Resulting XML: " << result << std::endl;
 	}
+	else if(pos_start != std::string::npos) {
+    	std::cout << "XML message start tag found!" << '\n' << 
+    			     "Start tag pos: " << pos_start << std::cout;
+	}
+	else if(pos_end != std::string::npos) {
+    	std::cout << "XML message end tag found!" << '\n' << 
+    			     "End tag pos: " << pos_end << std::cout;
+	}
 
 	return printer;
 }
