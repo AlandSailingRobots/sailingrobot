@@ -17,13 +17,14 @@ static void threadGPSupdate() {
 
 void term(int signum)
 {
-	std::cout << "SIGINT detected, trying to exit cleanly.." << std::endl;
-
+	printf("\n-SIGINT detected, trying to exit cleanly...\n");
+	printf(" stopping xBee thread\n");
 	xbee_handle->close();
+	printf(" stopping GPS thread\n");
 	gps_handle->close();
-
+	printf(" stopping main loop\n");
 	sr_handle->shutdown();
-
+	printf("-DONE\n");
 }
 
 int main(int argc, char *argv[]) {
@@ -46,17 +47,17 @@ int main(int argc, char *argv[]) {
 			0
 		)
 	);
-	GPSReader gps_r;
+	GPSReader gps_reader;
 
 	// Create main sailing robot controller
-	SailingRobot sr(&systemstate,&gps_r);
+	SailingRobot sr(&systemstate,&gps_reader);
 	sr_handle = &sr;
 
-	// Create thread controller
+	// Create thread controllers
 	xBeeSync xbee_sync(&systemstate);
 	xbee_handle = &xbee_sync;
-	GPSupdater gps_u(&gps_r);
-	gps_handle = &gps_u;
+	GPSupdater gps_updater(&gps_reader);
+	gps_handle = &gps_updater;
 
 	std::string path, db, errorLog;
 	if (argc < 2) {
@@ -72,22 +73,17 @@ int main(int argc, char *argv[]) {
 	try {
 		printf("-Initializing...\n");
 		sr.init(path, db, errorLog);
-
 		printf("-DONE\n");
 
-		printf("-Executing...\n");
+		printf("-Starting threads...\n");
 		//start xBeeSync thread
 		std::thread xbee_sync_thread (threadXBeeSyncRun);
-		printf("xBee thread started\n");		
+		printf(" xBee thread started\n");
 		//start GPSupdater thread
 		std::thread gps_reader_thread (threadGPSupdate);
-
+		printf("-Starting main loop...\n");
 		sr.run();
 		printf("-DONE\n");
-
-		//xbee_sync.close();
-		//xbee_sync_thread.join();
-		//gps_reader_thread.join();
 
 	} catch (const char * e) {
 		printf("ERROR[%s]\n\n",e);
