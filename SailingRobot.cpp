@@ -84,9 +84,11 @@ void SailingRobot::init(std::string programPath, std::string dbFileName, std::st
 
 void SailingRobot::run() {
 	sleep(3);
+	m_running=true;
 	int rudderCommand, sailCommand, windDir, twd;
 	printf("SailingRobot main loop started.\n");
-	while(!m_waypointId.empty()) {
+	while(m_running) {
+		//m_waypointId.empty()
 		//read windsensor
 
 		m_windSensor->parseData(m_windSensor->refreshData());
@@ -189,12 +191,13 @@ void SailingRobot::run() {
 			setupWaypoint();
 		}
 	}
-	printf("NO WAYPOINTS !\n");
+	printf("SailingRobot::run() exiting\n");
 }
 
 
 void SailingRobot::shutdown() {
 //	syncServer();
+	m_running=false;
 	m_dbHandler.closeDatabase();
 }
 

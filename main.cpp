@@ -23,6 +23,7 @@ void term(int signum)
 	gps_handle->close();
 
 	sr_handle->shutdown();
+
 }
 
 int main(int argc, char *argv[]) {
@@ -90,11 +91,10 @@ int main(int argc, char *argv[]) {
 
 	} catch (const char * e) {
 		printf("ERROR[%s]\n\n",e);
-		sr.shutdown();
+		term(1);
+		//sr.shutdown();
 		return 1;
 	}
-
-	sr.shutdown();
 
 	printf("-Finished.\n");
 	return 0;

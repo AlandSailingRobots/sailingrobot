@@ -64,6 +64,8 @@ private:
 	float m_waypointLongitude;
 	std::string m_waypointId;
 
+	bool m_running;
+
 	/**
 	 *  bool flags for signaling the use of mock objects
 	 */
