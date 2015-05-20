@@ -2,6 +2,7 @@
 #include "thread/SystemState.h"
 #include "xBeeSync.h"
 #include "GPSupdater.h"
+#include "global.h"
 #include <thread>
 #include <unistd.h>
 #include <signal.h>
@@ -16,7 +17,9 @@ static void threadGPSupdate(GPSupdater *gps_updater) {
 
 void term(int signum)
 {
-	std::cout << "SIGTERM detected, try to exit cleanly.." << std::endl;
+	std::cout << "SIGINT detected, trying to exit cleanly.." << std::endl;
+	xbee_sync->close();
+	gps_updater->close();
 }
 
 int main(int argc, char *argv[]) {
@@ -24,7 +27,7 @@ int main(int argc, char *argv[]) {
     struct sigaction action;
     memset(&action, 0, sizeof(struct sigaction));
     action.sa_handler = term;
-    sigaction(SIGTERM, &action, NULL);
+    sigaction(SIGINT, &action, NULL);
 
 	printf("\n");
 	printf("  Sailing Robot\n");
@@ -39,7 +42,7 @@ int main(int argc, char *argv[]) {
 			0
 		)
 	);
-	GPSReader gps_r;
+	//GPSReader gps_r;
 	SailingRobot sr(&systemstate,&gps_r);
 
 	std::string path, db, errorLog;
@@ -60,6 +63,7 @@ int main(int argc, char *argv[]) {
 		// Thread objects
 		xBeeSync xbee_sync(&systemstate);
 		GPSupdater gps_u(&gps_r);
+		gps_updater = &gps_u;
 
 		printf("-OK\n");
 
