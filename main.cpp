@@ -18,12 +18,12 @@ static void threadGPSupdate() {
 void term(int signum)
 {
 	printf("\n-SIGINT detected, trying to exit cleanly...\n");
+	printf(" stopping main loop\n");
+	sr_handle->shutdown();
 	printf(" stopping xBee thread\n");
 	xbee_handle->close();
 	printf(" stopping GPS thread\n");
 	gps_handle->close();
-	printf(" stopping main loop\n");
-	sr_handle->shutdown();
 	printf("-DONE\n");
 }
 
