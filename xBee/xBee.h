@@ -3,6 +3,8 @@
 #include <string>
 
 class xBee {
+private:
+	std::string receivedBuffer;
 public:
 
 
