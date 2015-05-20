@@ -10,7 +10,6 @@
 #include <unistd.h>
 
 
-
 std::string xBee::readOutput(int fd){
 
 	std::string printer;
@@ -26,10 +25,13 @@ std::string xBee::readOutput(int fd){
 		printer = "Data reception failed.";
 	}
 
+	std::size_t pos_start = printer.find("<message>");
+	std::size_t pos_end = printer.find("</message>");
 
-	if (printer.find("<message>") != std::string::npos &&
-		printer.find("</message>") != std::string::npos) {
-    	std::cout << "XML message start and end tags found!" << '\n';
+	if (pos_start != std::string::npos &&
+		pos_end != std::string::npos) {
+    	std::cout << "XML message start and end tags found!" << '\n' << 
+    			     "Start tag pos: " << pos_start << '\n' << "End tag pos: " << pos_end << std::endl;
 	}
 
 	return printer;
