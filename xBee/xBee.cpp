@@ -13,6 +13,7 @@
 std::string xBee::readOutput(int fd){
 
 	std::string printer;
+	std::string result;
 
 	int available = serialDataAvail(fd);
 
@@ -47,7 +48,7 @@ std::string xBee::readOutput(int fd){
 		m_receivedBuffer.clear();
 	}
 
-	return printer;
+	return result;
 }
 
 void xBee::printInput(std::string input, int fd){
