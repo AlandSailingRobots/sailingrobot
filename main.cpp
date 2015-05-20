@@ -4,6 +4,7 @@
 #include "GPSupdater.h"
 #include <thread>
 #include <unistd.h>
+#include <signal.h>
 
 static void threadXBeeSyncRun(xBeeSync *xbee_sync) {
 	xbee_sync->run();
@@ -13,7 +14,17 @@ static void threadGPSupdate(GPSupdater *gps_updater) {
 	gps_updater->run();
 }
 
+void term(int signum)
+{
+	std::cout << "SIGTERM detected, try to exit cleanly.." << std::endl;
+}
+
 int main(int argc, char *argv[]) {
+
+    struct sigaction action;
+    memset(&action, 0, sizeof(struct sigaction));
+    action.sa_handler = term;
+    sigaction(SIGTERM, &action, NULL);
 
 	printf("\n");
 	printf("  Sailing Robot\n");
@@ -64,8 +75,8 @@ int main(int argc, char *argv[]) {
 		printf("-DONE\n");
 
 		//xbee_sync.close();
-		xbee_sync_thread.join();
-		gps_reader_thread.join();
+		//xbee_sync_thread.join();
+		//gps_reader_thread.join();
 
 	} catch (const char * e) {
 		printf("ERROR[%s]\n\n",e);
