@@ -54,7 +54,18 @@ void xBeeSync::run()
 		
 		if(m_receiving)
 		{
-			m_xBee.readOutput(m_xbee_fd);
+			std::string res_xml = m_xBee.readOutput(m_xbee_fd);
+ 			
+			//If return value equals -1, parsing failed...
+ 			int rudder_cmd = m_XML_log.parse_rudCMD(res_xml);
+	 		int sail_cmd = m_XML_log.parse_saiCMD(res_xml);
+
+	 		if(rudder_cmd != -1) {
+	 			std::cout << "Rudder command in xBeeSync::run = " << rudder_cmd << std::endl;	
+	 		}
+	 		if(sail_cmd != -1) {
+	 			std::cout << "Sail command in xBeeSync::run = " << sail_cmd << std::endl;	
+	 		}
 		}
 
 		//make sure there are at least one second between each xml message
