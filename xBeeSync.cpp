@@ -21,6 +21,7 @@ xBeeSync::xBeeSync(SystemState *systemState, DBHandler *db) :
 
 	//	skapa ny xBee och kör xbee.init(baudRate (57600))
 	m_xbee_fd = m_xBee.init(57600);
+	std::cout << "*xBee initialized - receiving:" << m_receiving << " sending:" << m_sending << std::endl;
 }
 
 void xBeeSync::run()
