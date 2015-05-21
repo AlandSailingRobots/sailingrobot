@@ -30,12 +30,6 @@ SailingRobot::~SailingRobot() {
 void SailingRobot::init(std::string programPath, std::string errorFileName) {
 	m_errorLogPath = programPath + errorFileName;
 
-	/*
-	printf(" Starting Database\t\t");
-	setupDB(programPath + dbFileName);
-	printf("OK\n");
-	*/
-
 	printf(" Starting HTTPSync\t\t");
 	setupHTTPSync();
 	printf("OK\n");
@@ -43,11 +37,7 @@ void SailingRobot::init(std::string programPath, std::string errorFileName) {
 	printf(" Starting Compass\t\t");
 	setupCompass();
 	printf("OK\n");
-	/*
-	printf(" Starting GPS\t\t\t");
-	setupGPS();
-	printf("OK\n");
-	*/
+
 	printf(" Starting Windsensor\t\t");
 	setupWindSensor();
 	printf("OK\n");
@@ -92,17 +82,12 @@ void SailingRobot::run() {
 	printf("*SailingRobot::run() started.\n");
 	while(m_running) {
 		//m_waypointId.empty()
-		//read windsensor
 
 		m_windSensor->parseData(m_windSensor->refreshData());
 
 		windDir = m_windSensor->getDirection();
 
 		m_compass->readValues();
-
-		//readGPS();
-		//usleep(500000);
-
 
 		if ( !isnan(m_gpsReader->getLatitude()) ) {
 
@@ -185,9 +170,6 @@ void SailingRobot::run() {
 
 //		syncServer();
 
-		//update gps
-		//readGPS();
-
 		//check if we are within 15meters of the waypoint and move to next wp in that case
 		if (m_courseCalc.getDTW() < 15) {
 			nextWaypoint();
@@ -216,16 +198,6 @@ void SailingRobot::logMessage(std::string type, std::string message) {
 		errorFile.close();
 	}
 }
-
-/*
-void SailingRobot::readGPS() {
-	try {
-		m_gpsReader->readGPS(50000000); //microseconds
-	} catch (const char * error) {
-		logMessage("error", error);
-	}
-}
-*/
 
 void SailingRobot::syncServer() {
 	try {
@@ -273,18 +245,6 @@ void SailingRobot::nextWaypoint() {
 ///////// setup crap
 /////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////
-
-/*
-void SailingRobot::setupDB(std::string filename) {
-	try {
-		m_dbHandler->openDatabase(filename);
-	} catch (const char * error) {
-		logMessage("error", error);
-		throw;
-	}
-	logMessage("message", "setupDB() done");
-}
-*/
 
 void SailingRobot::setupMaestro() {
 	std::string port_name;
@@ -363,18 +323,6 @@ void SailingRobot::setupWindSensor() {
 	}
 	logMessage("message", "setupWindSensor() done");
 }
-
-/*
-void SailingRobot::setupGPS() {
-	try {
-		m_gpsReader->connectToGPS();
-	} catch (const char * error) {
-		logMessage("error", error);
-		throw;
-	}
-	logMessage("message", "setupGPS() done");
-}
-*/
 
 void SailingRobot::setupCourseCalculation() {
 	try {
