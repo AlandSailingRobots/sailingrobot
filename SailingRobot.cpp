@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include <fstream>
 #include <cstring>
+#include <cmath>
 
 SailingRobot::SailingRobot(SystemState *systemState, GPSReader *gps, DBHandler *db) :
 	m_dbHandler(db),
