@@ -1,8 +1,9 @@
+#include "main.h"
+
 #include "SailingRobot.h"
 #include "thread/SystemState.h"
 #include "xBeeSync.h"
 #include "GPSupdater.h"
-#include "global.h"
 #include <thread>
 #include <unistd.h>
 #include <signal.h>
@@ -68,7 +69,6 @@ int main(int argc, char *argv[]) {
 		printf("!DB ERROR:%s\n", error);
 		throw;
 	}
-	db_handle = &db;
 	printf("-DONE\n");
 
 	// Create main sailing robot controller
@@ -76,7 +76,7 @@ int main(int argc, char *argv[]) {
 	sr_handle = &sr;
 
 	// Create thread controllers
-	xBeeSync xbee_sync(&systemstate);
+	xBeeSync xbee_sync(&systemstate,&db);
 	xbee_handle = &xbee_sync;
 	GPSupdater gps_updater(&gps_reader);
 	gps_handle = &gps_updater;

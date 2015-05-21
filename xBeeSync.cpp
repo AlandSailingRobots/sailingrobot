@@ -1,7 +1,7 @@
 #include "xBeeSync.h"
 #include <unistd.h>		//sleep
 
-xBeeSync::xBeeSync(SystemState *systemState) :
+xBeeSync::xBeeSync(SystemState *systemState, DBHandler *db) :
 	m_model(
 		SystemStateModel(
 			GPSModel("",0,0,0,0,0,0),

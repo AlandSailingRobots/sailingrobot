@@ -5,12 +5,13 @@
 #include "xmlparser/src/xml_log.h"
 #include "thread/SystemState.h"
 #include "models/SystemStateModel.h"
+#include "dbhandler/DBHandler.h"
 #include <mutex>
 
 class xBeeSync
 {
 public:
-	xBeeSync(SystemState *systemState);
+	xBeeSync(SystemState *systemState, DBHandler *db);
 	~xBeeSync() {};
 
 	void run();
