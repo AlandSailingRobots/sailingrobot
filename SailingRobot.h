@@ -1,3 +1,6 @@
+#ifndef __SAILINGROBOT_H__
+#define __SAILINGROBOT_H__
+
 #include "dbhandler/DBHandler.h"
 #include "dbhandler/JSON.h"
 #include "sailcommand/SailCommand.h"
@@ -24,18 +27,17 @@
 
 #include "thread/SystemState.h"
 
-
 class SailingRobot {
 
 public:
 
-	SailingRobot(SystemState *systemState, GPSReader *reader);
+	SailingRobot(SystemState *systemState, GPSReader *gps, DBHandler *db);
 	~SailingRobot();
-	void init(std::string programPath, std::string dbFileName, std::string errorFileName);
+	void init(std::string programPath, std::string errorFileName);
 	void run();
 	void shutdown();
 	
-	void readGPS();
+	//void readGPS();
 	
 private:
 
@@ -45,12 +47,12 @@ private:
 	void updateState();
 	void nextWaypoint();
 
-	void setupDB(std::string filename);
+	//void setupDB(std::string filename);
 	void setupMaestro();
 	void setupRudderServo();
 	void setupSailServo();
 	void setupWindSensor();
-	void setupGPS();
+	//void setupGPS();
 	void setupCourseCalculation();
 	void setupRudderCommand();
 	void setupSailCommand();
@@ -64,13 +66,15 @@ private:
 	float m_waypointLongitude;
 	std::string m_waypointId;
 
+	bool m_running;
+
 	/**
 	 *  bool flags for signaling the use of mock objects
 	 */
 	bool m_mockWindsensor;
 	bool m_mockCompass;
 
-	DBHandler m_dbHandler;
+	DBHandler *m_dbHandler;
 	RudderCommand m_rudderCommand;
 	SailCommand m_sailCommand;
 	CourseCalculation m_courseCalc;
@@ -86,3 +90,4 @@ private:
 
 	SystemState *m_systemState;
 };
+#endif

@@ -6,9 +6,9 @@
 #include <fstream>
 #include <cstring>
 
-
-SailingRobot::SailingRobot(SystemState *systemState, GPSReader *reader) :
-	m_gpsReader(reader),
+SailingRobot::SailingRobot(SystemState *systemState, GPSReader *gps, DBHandler *db) :
+	m_dbHandler(db),
+	m_gpsReader(gps),
 	m_systemState(systemState)
 {
 	m_mockWindsensor = false;
@@ -26,12 +26,14 @@ SailingRobot::~SailingRobot() {
 }
 
 
-void SailingRobot::init(std::string programPath, std::string dbFileName, std::string errorFileName) {
+void SailingRobot::init(std::string programPath, std::string errorFileName) {
 	m_errorLogPath = programPath + errorFileName;
 
+	/*
 	printf(" Starting Database\t\t");
 	setupDB(programPath + dbFileName);
 	printf("OK\n");
+	*/
 
 	printf(" Starting HTTPSync\t\t");
 	setupHTTPSync();
@@ -77,10 +79,6 @@ void SailingRobot::init(std::string programPath, std::string dbFileName, std::st
 	setupCourseCalculation();
 	printf("OK\n");
 
-	//*	Hämtar ett heltal (1 eller 0) som visar om xbeen skall skicka och ta emot data.
-	//	m_dbHandler.retriveCellAsInt("configs", "1", "xb_send")
-	//	m_dbHandler.retriveCellAsInt("configs", "1", "xb_recv")
-
 	//updateState();
 	//syncServer();
 }
@@ -88,9 +86,11 @@ void SailingRobot::init(std::string programPath, std::string dbFileName, std::st
 
 void SailingRobot::run() {
 	sleep(3);
+	m_running=true;
 	int rudderCommand, sailCommand, windDir, twd;
-	printf("SailingRobot main loop started.\n");
-	while(!m_waypointId.empty()) {
+	printf("*SailingRobot::run() started.\n");
+	while(m_running) {
+		//m_waypointId.empty()
 		//read windsensor
 
 		m_windSensor->parseData(m_windSensor->refreshData());
@@ -158,7 +158,7 @@ void SailingRobot::run() {
 		m_systemState->setData(systemStateModel);
 
 		//logging
-		m_dbHandler.insertDataLog(
+		m_dbHandler->insertDataLog(
 			m_gpsReader->getTimestamp(),
 			m_gpsReader->getLatitude(),
 			m_gpsReader->getLongitude(),
@@ -193,19 +193,20 @@ void SailingRobot::run() {
 			setupWaypoint();
 		}
 	}
-	printf("NO WAYPOINTS !\n");
+	printf("*SailingRobot::run() exiting\n");
 }
 
 
 void SailingRobot::shutdown() {
 //	syncServer();
-	m_dbHandler.closeDatabase();
+	m_running=false;
+	m_dbHandler->closeDatabase();
 }
 
 
 void SailingRobot::logMessage(std::string type, std::string message) {
 	try {
-		m_dbHandler.insertMessageLog(m_gpsReader->getTimestamp(), type, message);
+		m_dbHandler->insertMessageLog(m_gpsReader->getTimestamp(), type, message);
        	} catch (const char * logError) {
 		std::ofstream errorFile;
 		errorFile.open(m_errorLogPath.c_str(), std::ios::app);
@@ -215,7 +216,7 @@ void SailingRobot::logMessage(std::string type, std::string message) {
 	}
 }
 
-
+/*
 void SailingRobot::readGPS() {
 	try {
 		m_gpsReader->readGPS(50000000); //microseconds
@@ -223,12 +224,12 @@ void SailingRobot::readGPS() {
 		logMessage("error", error);
 	}
 }
-
+*/
 
 void SailingRobot::syncServer() {
 	try {
-		std::string response = m_httpSync.pushLogs( m_dbHandler.getLogs() );
-		m_dbHandler.removeLogs(response);
+		std::string response = m_httpSync.pushLogs( m_dbHandler->getLogs() );
+		m_dbHandler->removeLogs(response);
 	} catch (const char * error) {
 		logMessage("error", error);
 	}
@@ -239,18 +240,18 @@ void SailingRobot::updateState() {
 	try {
 		std::string setup = m_httpSync.getSetup();
 		bool stateChanged = false;
-		if (m_dbHandler.revChanged("cfg_rev", setup) ) {
-			m_dbHandler.updateTable("configs", m_httpSync.getConfig());
+		if (m_dbHandler->revChanged("cfg_rev", setup) ) {
+			m_dbHandler->updateTable("configs", m_httpSync.getConfig());
 			stateChanged = true;
 			logMessage("message", "config state updated");
 		}
-		if (m_dbHandler.revChanged("rte_rev", setup) ) {
-			m_dbHandler.updateTable("waypoints", m_httpSync.getRoute());
+		if (m_dbHandler->revChanged("rte_rev", setup) ) {
+			m_dbHandler->updateTable("waypoints", m_httpSync.getRoute());
 			stateChanged = true;
 			logMessage("message", "route state updated");
 		}
 		if (stateChanged)  {
-			m_dbHandler.updateTable("state", m_httpSync.getSetup());
+			m_dbHandler->updateTable("state", m_httpSync.getSetup());
 		}
 	} catch (const char * error) {
 		logMessage("error", error);
@@ -260,7 +261,7 @@ void SailingRobot::updateState() {
 
 void SailingRobot::nextWaypoint() {
 	try {
-//		m_dbHandler.deleteRow("waypoints", m_waypointId);
+//		m_dbHandler->deleteRow("waypoints", m_waypointId);
 	} catch (const char * error) {
 		logMessage("error", error);
 	}
@@ -272,20 +273,22 @@ void SailingRobot::nextWaypoint() {
 /////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////
 
+/*
 void SailingRobot::setupDB(std::string filename) {
 	try {
-		m_dbHandler.openDatabase(filename);
+		m_dbHandler->openDatabase(filename);
 	} catch (const char * error) {
 		logMessage("error", error);
 		throw;
 	}
 	logMessage("message", "setupDB() done");
 }
+*/
 
 void SailingRobot::setupMaestro() {
 	std::string port_name;
 	try {
-		port_name = m_dbHandler.retriveCell("configs", "1", "mc_port");
+		port_name = m_dbHandler->retriveCell("configs", "1", "mc_port");
 	} catch (const char * error) {
 		logMessage("error", error);
 	}
@@ -308,9 +311,9 @@ void SailingRobot::setupMaestro() {
 void SailingRobot::setupRudderServo() {
 	try {
 		m_rudderServo.setController(&m_maestroController);
-		m_rudderServo.setChannel( m_dbHandler.retriveCellAsInt("configs", "1", "rs_chan") );
-		m_rudderServo.setSpeed( m_dbHandler.retriveCellAsInt("configs", "1", "rs_spd") );
-		m_rudderServo.setAcceleration( m_dbHandler.retriveCellAsInt("configs", "1", "rs_acc") );
+		m_rudderServo.setChannel( m_dbHandler->retriveCellAsInt("configs", "1", "rs_chan") );
+		m_rudderServo.setSpeed( m_dbHandler->retriveCellAsInt("configs", "1", "rs_spd") );
+		m_rudderServo.setAcceleration( m_dbHandler->retriveCellAsInt("configs", "1", "rs_acc") );
 	} catch (const char * error) {
 		logMessage("error", error);
 		throw;
@@ -321,9 +324,9 @@ void SailingRobot::setupRudderServo() {
 void SailingRobot::setupSailServo() {
 	try {
 		m_sailServo.setController(&m_maestroController);
-		m_sailServo.setChannel( m_dbHandler.retriveCellAsInt("configs", "1", "ss_chan") );
-		m_sailServo.setSpeed( m_dbHandler.retriveCellAsInt("configs", "1", "ss_spd") );
-		m_sailServo.setAcceleration( m_dbHandler.retriveCellAsInt("configs", "1", "ss_acc") );
+		m_sailServo.setChannel( m_dbHandler->retriveCellAsInt("configs", "1", "ss_chan") );
+		m_sailServo.setSpeed( m_dbHandler->retriveCellAsInt("configs", "1", "ss_spd") );
+		m_sailServo.setAcceleration( m_dbHandler->retriveCellAsInt("configs", "1", "ss_acc") );
 	} catch (const char * error) {
 		logMessage("error", error);
 		throw;
@@ -337,9 +340,9 @@ void SailingRobot::setupWindSensor() {
 	int buff_size = 1;
 
 	try {
-		port_name = m_dbHandler.retriveCell("configs", "1", "ws_port");
-		baud_rate = m_dbHandler.retriveCellAsInt("configs", "1", "ws_baud");
-		buff_size = m_dbHandler.retriveCellAsInt("configs", "1", "ws_buff");
+		port_name = m_dbHandler->retriveCell("configs", "1", "ws_port");
+		baud_rate = m_dbHandler->retriveCellAsInt("configs", "1", "ws_baud");
+		buff_size = m_dbHandler->retriveCellAsInt("configs", "1", "ws_buff");
 	} catch (const char * error) {
 		logMessage("error", error);
 	}
@@ -360,6 +363,7 @@ void SailingRobot::setupWindSensor() {
 	logMessage("message", "setupWindSensor() done");
 }
 
+/*
 void SailingRobot::setupGPS() {
 	try {
 		m_gpsReader->connectToGPS();
@@ -369,11 +373,12 @@ void SailingRobot::setupGPS() {
 	}
 	logMessage("message", "setupGPS() done");
 }
+*/
 
 void SailingRobot::setupCourseCalculation() {
 	try {
-		m_courseCalc.setTACK_ANGLE( m_dbHandler.retriveCellAsInt("configs", "1", "cc_ang_tack") );
-		m_courseCalc.setSECTOR_ANGLE( m_dbHandler.retriveCellAsInt("configs", "1", "cc_ang_sect") );
+		m_courseCalc.setTACK_ANGLE( m_dbHandler->retriveCellAsInt("configs", "1", "cc_ang_tack") );
+		m_courseCalc.setSECTOR_ANGLE( m_dbHandler->retriveCellAsInt("configs", "1", "cc_ang_sect") );
 	} catch (const char * error) {
 		logMessage("error", error);
 		throw;
@@ -383,8 +388,8 @@ void SailingRobot::setupCourseCalculation() {
 
 void SailingRobot::setupRudderCommand() {
 	try {
-		m_rudderCommand.setCommandValues( m_dbHandler.retriveCellAsInt("configs", "1", "rc_cmd_xtrm"),
-			m_dbHandler.retriveCellAsInt("configs", "1", "rc_cmd_mid"));
+		m_rudderCommand.setCommandValues( m_dbHandler->retriveCellAsInt("configs", "1", "rc_cmd_xtrm"),
+			m_dbHandler->retriveCellAsInt("configs", "1", "rc_cmd_mid"));
 
 	} catch (const char * error) {
 		logMessage("error", error);
@@ -395,8 +400,8 @@ void SailingRobot::setupRudderCommand() {
 
 void SailingRobot::setupSailCommand() {
 	try {
-		m_sailCommand.setCommandValues( m_dbHandler.retriveCellAsInt("configs", "1", "sc_cmd_clse"),
-			m_dbHandler.retriveCellAsInt("configs", "1", "sc_cmd_run"));
+		m_sailCommand.setCommandValues( m_dbHandler->retriveCellAsInt("configs", "1", "sc_cmd_clse"),
+			m_dbHandler->retriveCellAsInt("configs", "1", "sc_cmd_run"));
 
 	} catch (const char * error) {
 		logMessage("error", error);
@@ -410,9 +415,9 @@ void SailingRobot::setupWaypoint() {
 	std::string lat;
 	std::string lon;
 	try {
-		id = m_dbHandler.getMinIdFromTable("waypoints");
-		lat = m_dbHandler.retriveCell("waypoints", m_waypointId, "lat");
-		lon = m_dbHandler.retriveCell("waypoints", m_waypointId, "lon");
+		id = m_dbHandler->getMinIdFromTable("waypoints");
+		lat = m_dbHandler->retriveCell("waypoints", m_waypointId, "lat");
+		lon = m_dbHandler->retriveCell("waypoints", m_waypointId, "lon");
 	} catch (const char * error) {
 		logMessage("error", error);
 	}
@@ -434,9 +439,9 @@ void SailingRobot::setupWaypoint() {
 
 void SailingRobot::setupHTTPSync() {
 	try {
-		m_httpSync.setShipID( m_dbHandler.retriveCell("server", "1", "boat_id") );
-		m_httpSync.setShipPWD( m_dbHandler.retriveCell("server", "1", "boat_pwd") );
-		m_httpSync.setServerURL( m_dbHandler.retriveCell("server", "1", "srv_addr") );
+		m_httpSync.setShipID( m_dbHandler->retriveCell("server", "1", "boat_id") );
+		m_httpSync.setShipPWD( m_dbHandler->retriveCell("server", "1", "boat_pwd") );
+		m_httpSync.setServerURL( m_dbHandler->retriveCell("server", "1", "srv_addr") );
 	} catch (const char * error) {
 		logMessage("error", "SailingRobot::setupHTTPSync() failed");
 	}

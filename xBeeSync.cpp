@@ -14,12 +14,19 @@ xBeeSync::xBeeSync(SystemState *systemState) :
 	m_system_state(systemState),
 	m_running(true)
 {
+	// Måste få in ett handtag till databas hanteraren som nu bara finns i SailingRobot klassen.
+
+	//	Hämtar ett heltal (1 eller 0) som visar om xbeen skall skicka och ta emot data.
+	//	m_dbHandler.retriveCellAsInt("configs", "1", "xb_send")
+	//	m_dbHandler.retriveCellAsInt("configs", "1", "xb_recv")
+
 	//	skapa ny xBee och kör xbee.init(baudRate (57600))
 	m_xbee_fd = m_xBee.init(57600);
 }
 
 void xBeeSync::run()
 {
+	std::cout << "*xBeeSync thread started." << std::endl;
 	while(isRunning()) 
 	{
 		m_system_state->getData(&m_model);
@@ -42,9 +49,11 @@ void xBeeSync::run()
 		// Kan skicka loggen direkt med:
 		m_xBee.sendXML(m_xbee_fd,res_xml);
 		
+		m_xBee.readOutput(m_xbee_fd);
 		//make sure there are at least one second between each xml message
 		sleep(1);
 	}
+	std::cout << "*xBeeSync thread exited." << std::endl;
 }
 
 void xBeeSync::close()

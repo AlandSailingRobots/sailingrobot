@@ -2,18 +2,48 @@
 #include "thread/SystemState.h"
 #include "xBeeSync.h"
 #include "GPSupdater.h"
+#include "global.h"
 #include <thread>
 #include <unistd.h>
+#include <signal.h>
 
-static void threadXBeeSyncRun(xBeeSync *xbee_sync) {
-	xbee_sync->run();
+static void threadXBeeSyncRun() {
+	xbee_handle->run();
 }
 
-static void threadGPSupdate(GPSupdater *gps_updater) {
-	gps_updater->run();
+static void threadGPSupdate() {
+	gps_handle->run();
+}
+
+void term(int signum)
+{
+	printf("\n-SIGINT detected, shutting down...\n");
+	printf(" stopping main loop\n");
+	sr_handle->shutdown();
+	printf(" stopping xBee thread\n");
+	xbee_handle->close();
+	printf(" stopping GPS thread\n");
+	gps_handle->close();
+	printf("-DONE\n");
 }
 
 int main(int argc, char *argv[]) {
+
+	std::string path, db_name, errorLog;
+	if (argc < 2) {
+		path = "/root/sailingrobot/";
+		db_name = "asr.db";
+		errorLog = "errors.log";
+	} else {
+		path = std::string(argv[1]);
+		db_name = "/asr.db";
+		errorLog = "/errors.log";
+	}
+
+    struct sigaction action;
+    memset(&action, 0, sizeof(struct sigaction));
+    action.sa_handler = term;
+    sigaction(SIGINT, &action, NULL);
 
 	printf("\n");
 	printf("  Sailing Robot\n");
@@ -28,52 +58,49 @@ int main(int argc, char *argv[]) {
 			0
 		)
 	);
-	GPSReader gps_r;
-	SailingRobot sr(&systemstate,&gps_r);
+	GPSReader gps_reader;
 
-	std::string path, db, errorLog;
-	if (argc < 2) {
-		path = "/root/sailingrobot/";
-		db = "asr.db";
-		errorLog = "errors.log";
-	} else {
-		path = std::string(argv[1]);
-		db = "/asr.db";
-		errorLog = "/errors.log";
+	printf("-Creating database connection...\n");
+	DBHandler db;
+	try {
+		db.openDatabase(path+db_name);
+	} catch (const char * error) {
+		printf("!DB ERROR:%s\n", error);
+		throw;
 	}
+	db_handle = &db;
+	printf("-DONE\n");
+
+	// Create main sailing robot controller
+	SailingRobot sr(&systemstate,&gps_reader,&db);
+	sr_handle = &sr;
+
+	// Create thread controllers
+	xBeeSync xbee_sync(&systemstate);
+	xbee_handle = &xbee_sync;
+	GPSupdater gps_updater(&gps_reader);
+	gps_handle = &gps_updater;
 
 	try {
 		printf("-Initializing...\n");
-		sr.init(path, db, errorLog);
+		sr.init(path, errorLog);
+		printf("-DONE\n");
 
-		// Thread objects
-		xBeeSync xbee_sync(&systemstate);
-		GPSupdater gps_u(&gps_r);
-
-		printf("-OK\n");
-
-		printf("-Executing...\n");
+		printf("-Starting threads...\n");
 		//start xBeeSync thread
-		std::thread xbee_sync_thread (threadXBeeSyncRun, &xbee_sync);
-		printf("xBee thread started\n");		
+		std::thread xbee_sync_thread (threadXBeeSyncRun);
 		//start GPSupdater thread
-		std::thread gps_reader_thread (threadGPSupdate, &gps_u);
-		printf("GPSreader thread started \n");
+		std::thread gps_reader_thread (threadGPSupdate);
 
+		printf("-Starting main loop...\n");
 		sr.run();
 		printf("-DONE\n");
 
-		//xbee_sync.close();
-		xbee_sync_thread.join();
-		gps_reader_thread.join();
-
 	} catch (const char * e) {
 		printf("ERROR[%s]\n\n",e);
-		sr.shutdown();
+		term(1);
 		return 1;
 	}
-
-	sr.shutdown();
 
 	printf("-Finished.\n");
 	return 0;
