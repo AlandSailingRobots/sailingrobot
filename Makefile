@@ -9,7 +9,7 @@
 
 CC = g++ 
 FLAGS = -Wall -pedantic -Werror -std=c++14 
-LIBS = -lsqlite3 -lgps -lrt -lwiringPi -lcurl
+LIBS = -lsqlite3 -lgps -lrt -lwiringPi -lcurl -I$(SAILINGROBOTS_HOME)
 
 COMPASS = Compass/Compass.o Compass/MockCompass.o Compass/Utility.o Compass/HMC6343.o
 COURSE = coursecalculation/CourseCalculation.o 
@@ -29,6 +29,9 @@ SOURCES = SailingRobot.cpp main.cpp xBeeSync.cpp GPSupdater.cpp
 HEADERS = SailingRobot.h xBeeSync.h GPSupdater.h
 FILE = sr
 MAKE = make
+
+#Needed for proper subfolder make writing
+.PHONY : Compass runall coursecalculation dbhandler ruddercommand sailcommand servocontroller CV7 gps httpsync xmlparser thread
 
 
 
@@ -57,8 +60,7 @@ Compass :
 coursecalculation :
 	$(MAKE) -C ./coursecalculation
 
-#Needed for proper subfolder make writing
-.PHONY : Compass runall coursecalculation dbhandler ruddercommand sailcommand servocontroller CV7 gps httpsync xmlparser thread
+
 	
 dbhandler :
 	$(MAKE) -C ./dbhandler
