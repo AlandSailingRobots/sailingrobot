@@ -23,9 +23,12 @@ private:
 	int m_xbee_fd;
 	SystemStateModel m_model;
 	SystemState *m_system_state;
+	DBHandler *m_dbHandler;
 
 	std::mutex m_mutex;
 	bool m_running;
+	bool m_sending;
+	bool m_receiving;
 
 	bool isRunning();
 };
