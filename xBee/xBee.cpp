@@ -71,12 +71,6 @@ void xBee::sendXML(int fd, std::string output){
 
 int xBee::init(int baudRate){
 
-	// Måste få in ett handtag till databas hanteraren som nu bara finns i SailingRobot klassen.
-
-	//	Hämtar ett heltal (1 eller 0) som visar om xbeen skall skicka och ta emot data.
-	//	m_dbHandler.retriveCellAsInt("configs", "1", "xb_send")
-	//	m_dbHandler.retriveCellAsInt("configs", "1", "xb_recv")
-
 	// this setting needs a udev rule in host system to work (alternative is dynamic USB-slot)
 	// see Static_USB_Device_Names in project installation folder
 	std::string deviceName = "/dev/xbee";
