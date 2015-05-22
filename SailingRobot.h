@@ -84,9 +84,9 @@ private:
 	GPSReader* m_gpsReader;
 	Windsensor* m_windSensor;
 
-	MockMaestroController m_maestroController;
-	MockServoObject m_rudderServo;
-	MockServoObject m_sailServo;
+	MaestroController m_maestroController;
+	ServoObject m_rudderServo;
+	ServoObject m_sailServo;
 
 	SystemState *m_systemState;
 };
