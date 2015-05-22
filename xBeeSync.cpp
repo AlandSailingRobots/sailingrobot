@@ -62,9 +62,11 @@ void xBeeSync::run()
 
 	 		if(rudder_cmd != -1) {
 	 			std::cout << "Rudder command in xBeeSync::run = " << rudder_cmd << std::endl;	
+	 			m_model.rudder = rudder_cmd;
 	 		}
 	 		if(sail_cmd != -1) {
 	 			std::cout << "Sail command in xBeeSync::run = " << sail_cmd << std::endl;	
+	 			m_model.sail = sail_cmd;
 	 		}
 		}
 
