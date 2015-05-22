@@ -4,7 +4,7 @@
     #--------------------------------#
     # Add waypoints
 
-    printf "This will insert waypoints in the database\n"
+    printf "\nThis will insert waypoints in the database\n"
     read -p "Enter number of waypoints you wish to enter:" COUNT
 
     COUNTER=1
@@ -13,7 +13,7 @@
         printf "\nWaypoint $COUNTER/$COUNT\n"
         read -p " enter LAT:" LAT
         read -p " enter LON:" LON
-        echo "sqlite3 asr.db INSERT INTO waypoints (id,lat,lon) VALUES ('$COUNTER',$LAT,'$LON');"
+        sqlite3 asr.db "INSERT INTO waypoints (id,lat,lon) VALUES ('$COUNTER',$LAT,'$LON');"
         let COUNTER=COUNTER+1
         let C=C+1 
     done
