@@ -91,6 +91,9 @@ void SailingRobot::run() {
 	int rudderCommand, sailCommand, windDir, twd, heading = 0;
 	double longitude = 0, latitude = 0;
 	printf("*SailingRobot::run() started.\n");
+	std::cout << "waypoint target." << std::endl 
+		<< "long: " << m_waypointLongitude << std::endl
+		<< "lat : " << m_waypointLatitude << std::endl;
 	while(m_running) {
 		//m_waypointId.empty()
 
