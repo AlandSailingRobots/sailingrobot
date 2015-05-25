@@ -96,7 +96,7 @@ void SailingRobot::run() {
 				m_waypointLatitude, m_waypointLongitude);
 
 			//calc & set TWD
-			twd = m_gpsReader->getHeading() + windDir;
+			twd = m_compass->getHeading() + windDir;
 			if (twd > 359) {
 				twd -= 360;
 			}
@@ -111,7 +111,7 @@ void SailingRobot::run() {
 			m_courseCalc.calculateCTS();
 
 			//rudder position calculation
-			rudderCommand = m_rudderCommand.getCommand(m_courseCalc.getCTS(), m_gpsReader->getHeading());
+			rudderCommand = m_rudderCommand.getCommand(m_courseCalc.getCTS(), m_compass->getHeading());
 
 		} else {
 			logMessage("error", "SailingRobot::run(), gps NaN. Using values from last iteration.");
