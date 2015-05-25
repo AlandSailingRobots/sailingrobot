@@ -14,6 +14,8 @@ SailingRobot::SailingRobot(SystemState *systemState, GPSReader *gps, DBHandler *
 {
 	m_mockWindsensor = false;
 	m_mockCompass = false;
+	m_getHeadingFromCompass = true;
+
 /*	sleepypi stuff
 	wiringPiSetup();
 	pinMode(6, OUTPUT);
@@ -78,7 +80,7 @@ void SailingRobot::init(std::string programPath, std::string errorFileName) {
 void SailingRobot::run() {
 	sleep(3);
 	m_running=true;
-	int rudderCommand, sailCommand, windDir, twd;
+	int rudderCommand, sailCommand, windDir, twd, heading = 0;
 	printf("*SailingRobot::run() started.\n");
 	while(m_running) {
 		//m_waypointId.empty()
@@ -88,6 +90,12 @@ void SailingRobot::run() {
 		windDir = m_windSensor->getDirection();
 
 		m_compass->readValues();
+		if (m_getHeadingFromCompass) {
+			heading = m_compass->getHeading();
+		}
+		else {
+			heading = m_gpsReader->getHeading();
+		}
 
 		if ( !isnan(m_gpsReader->getLatitude()) ) {
 
@@ -96,7 +104,8 @@ void SailingRobot::run() {
 				m_waypointLatitude, m_waypointLongitude);
 
 			//calc & set TWD
-			twd = m_compass->getHeading() + windDir;
+			twd = heading + windDir;
+
 			if (twd > 359) {
 				twd -= 360;
 			}
@@ -111,7 +120,7 @@ void SailingRobot::run() {
 			m_courseCalc.calculateCTS();
 
 			//rudder position calculation
-			rudderCommand = m_rudderCommand.getCommand(m_courseCalc.getCTS(), m_compass->getHeading());
+			rudderCommand = m_rudderCommand.getCommand(m_courseCalc.getCTS(), heading);
 
 		} else {
 			logMessage("error", "SailingRobot::run(), gps NaN. Using values from last iteration.");

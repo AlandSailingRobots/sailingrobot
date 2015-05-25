@@ -74,6 +74,10 @@ private:
 	bool m_mockWindsensor;
 	bool m_mockCompass;
 
+	/* true  = get heading from compass
+	 * false = get heading from gps	 */
+	bool m_getHeadingFromCompass;
+
 	DBHandler *m_dbHandler;
 	RudderCommand m_rudderCommand;
 	SailCommand m_sailCommand;
