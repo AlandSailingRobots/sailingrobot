@@ -32,7 +32,7 @@ SailingRobot::SailingRobot(SystemState *systemState, GPSReader *gps, DBHandler *
 
 SailingRobot::~SailingRobot() {
 /*	sleepypi stuff
-	digitalWrite(6, LOW);
+	digitalWrite(6, LOW);gtk
 	std::cout << "sr destruct\n";*/
 }
 
@@ -183,8 +183,8 @@ void SailingRobot::run() {
 		//logging
 		m_dbHandler->insertDataLog(
 			m_gpsReader->getTimestamp(),
-			m_gpsReader->getLatitude(),
-			m_gpsReader->getLongitude(),
+			latitude,
+			longitude,
 			m_gpsReader->getSpeed(),
 			m_gpsReader->getHeading(),
 			m_gpsReader->getSatellitesUsed(),
