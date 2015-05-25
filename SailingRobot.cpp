@@ -14,8 +14,11 @@ SailingRobot::SailingRobot(SystemState *systemState, GPSReader *gps, DBHandler *
 {
 	m_mockWindsensor = false;
 	m_mockCompass = false;
-	m_getHeadingFromCompass = true;
+	m_getHeadingFromCompass = m_dbHandler->retriveCellAsInt("configs", "1", "flag_heading_compass");
 
+	if(m_getHeadingFromCompass == 1) {
+		std::cout << "Retrive compass from database: OK" << std::endl;
+	}
 /*	sleepypi stuff
 	wiringPiSetup();
 	pinMode(6, OUTPUT);
