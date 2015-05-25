@@ -15,6 +15,7 @@ SailingRobot::SailingRobot(SystemState *systemState, GPSReader *gps, DBHandler *
 	m_mockWindsensor = false;
 	m_mockCompass = false;
 	m_getHeadingFromCompass = true;
+	m_mockPosition = false;
 	//Använd flaggan från databasen istället för hårdkodat för m_getHeadingFromCompass. Se kod nedan.
 	// createtables.sql är uppdaterad på GitHub men får inte ner det nya scriptet till Pajen.
 	// Använd kod nedan när nya MySQL scriptet är installerat.
@@ -88,6 +89,7 @@ void SailingRobot::run() {
 	sleep(3);
 	m_running=true;
 	int rudderCommand, sailCommand, windDir, twd, heading = 0;
+	double longitude = 0, latitude = 0;
 	printf("*SailingRobot::run() started.\n");
 	while(m_running) {
 		//m_waypointId.empty()
@@ -107,7 +109,26 @@ void SailingRobot::run() {
 		if ( !isnan(m_gpsReader->getLatitude()) ) {
 
 			//calc DTW
-			m_courseCalc.calculateDTW(m_gpsReader->getLatitude(), m_gpsReader->getLongitude(),
+			if (m_mockPosition) {
+
+				if (heading < 180){
+
+						longitude++;
+
+				}else longitude --;
+
+				if(heading > 90 && heading < 270){
+
+					latitude--;	
+				}else latitude ++;
+				
+			}
+			else {
+				longitude = m_gpsReader->getLongitude();
+				latitude = m_gpsReader->getLatitude();
+			}
+
+			m_courseCalc.calculateDTW(latitude, longitude,
 				m_waypointLatitude, m_waypointLongitude);
 
 			//calc & set TWD
@@ -122,7 +143,7 @@ void SailingRobot::run() {
 			m_courseCalc.setTWD(twd);
 
 			//calc BTW & CTS
-			m_courseCalc.calculateBTW(m_gpsReader->getLatitude(), m_gpsReader->getLongitude(),
+			m_courseCalc.calculateBTW(latitude, longitude,
 				m_waypointLatitude, m_waypointLongitude);
 			m_courseCalc.calculateCTS();
 
