@@ -73,6 +73,7 @@ private:
 	 */
 	bool m_mockWindsensor;
 	bool m_mockCompass;
+	bool m_mockPosition;
 
 	/* true  = get heading from compass
 	 * false = get heading from gps	 */
