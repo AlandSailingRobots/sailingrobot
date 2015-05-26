@@ -229,6 +229,9 @@ void SailingRobot::run() {
 
 		//check if we are within 15meters of the waypoint and move to next wp in that case
 		if (m_courseCalc.getDTW() < 15) {
+
+			//remove this cout later
+			std::cout << "Waypoint reached!" << endl;
 			nextWaypoint();
 			setupWaypoint();
 		}
