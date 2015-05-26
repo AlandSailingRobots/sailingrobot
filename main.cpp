@@ -8,6 +8,10 @@
 #include <thread>
 #include <unistd.h>
 #include <signal.h>
+#include <sstream>
+#include <iostream>     
+#include <iomanip>      
+#include <ctime>    
 
 static void threadXBeeSyncRun() {
 	xbee_handle->run();
@@ -51,7 +55,14 @@ int main(int argc, char *argv[]) {
 	printf("  Sailing Robot\n");
 	printf("=================\n");
 
-	ExternalCommand externalCommand("",0,0,0);
+
+	/* Default time */
+	struct std::tm tm;
+  	std::istringstream ss("1970-04-10T10:53:15.1234Z");
+  	ss >> std::get_time(&tm, "%Y-%m-%dT%H:%M:%SZ"); 
+  	time_t res_time = mktime(&tm);
+
+	ExternalCommand externalCommand(res_time,0,0,0);
 	SystemState systemstate(
 		SystemStateModel(
 			GPSModel("",0,0,0,0,0,0),
