@@ -1,6 +1,7 @@
 #include "main.h"
 
 #include "SailingRobot.h"
+#include "thread/ExternalCommand.h"
 #include "thread/SystemState.h"
 #include "xBeeSync.h"
 #include "GPSupdater.h"
@@ -50,6 +51,7 @@ int main(int argc, char *argv[]) {
 	printf("  Sailing Robot\n");
 	printf("=================\n");
 
+	ExternalCommand externalCommand("",0,0,0);
 	SystemState systemstate(
 		SystemStateModel(
 			GPSModel("",0,0,0,0,0,0),
@@ -76,7 +78,7 @@ int main(int argc, char *argv[]) {
 	sr_handle = &sr;
 
 	// Create thread controllers
-	xBeeSync xbee_sync(&systemstate,&db);
+	xBeeSync xbee_sync(&externalCommand, &systemstate, &db);
 	xbee_handle = &xbee_sync;
 	GPSupdater gps_updater(&gps_reader);
 	gps_handle = &gps_updater;

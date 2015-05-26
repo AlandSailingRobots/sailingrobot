@@ -1,7 +1,8 @@
 #include "xBeeSync.h"
 #include <unistd.h>		//sleep
 
-xBeeSync::xBeeSync(SystemState *systemState, DBHandler *db) :
+xBeeSync::xBeeSync(ExternalCommand* externalCommand, SystemState *systemState, DBHandler *db) :
+	m_external_command(externalCommand),
 	m_model(
 		SystemStateModel(
 			GPSModel("",0,0,0,0,0,0),
@@ -62,7 +63,7 @@ void xBeeSync::run()
 			std::string timestamp = m_XML_log.parse_time(res_xml);
 	 		
 	 		if(timestamp.length() > 0) {
-	 			std::cout << "Timestamp in xBeeSync::run = " << timestamp << std::endl;	
+	 			std::cout << "Timestamp in xBeeSync::run = " << timestamp << std::endl;
 	 		}
 	 		if(rudder_cmd != -1) {
 	 			std::cout << "Rudder command in xBeeSync::run = " << rudder_cmd << std::endl;	
@@ -72,6 +73,9 @@ void xBeeSync::run()
 	 			std::cout << "Sail command in xBeeSync::run = " << sail_cmd << std::endl;	
 	 			m_model.sail = sail_cmd;
 	 		}
+
+	 		bool autorun = false;
+	 		m_external_command->setData(timestamp, autorun, rudder_cmd, sail_cmd);
 		}
 
 		//make sure there are at least one second between each xml message

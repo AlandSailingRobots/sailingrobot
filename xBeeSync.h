@@ -3,6 +3,7 @@
 
 #include "xBee/xBee.h"
 #include "xmlparser/src/xml_log.h"
+#include "thread/ExternalCommand.h"
 #include "thread/SystemState.h"
 #include "models/SystemStateModel.h"
 #include "dbhandler/DBHandler.h"
@@ -11,7 +12,8 @@
 class xBeeSync
 {
 public:
-	xBeeSync(SystemState *systemState, DBHandler *db);
+	xBeeSync(ExternalCommand* externalCommand, 
+		SystemState *systemState, DBHandler *db);
 	~xBeeSync() {};
 
 	void run();
@@ -21,6 +23,7 @@ private:
 	XML_log m_XML_log;
 	xBee m_xBee;
 	int m_xbee_fd;
+	ExternalCommand* m_external_command;
 	SystemStateModel m_model;
 	SystemState *m_system_state;
 	DBHandler *m_dbHandler;
