@@ -14,12 +14,8 @@ SailingRobot::SailingRobot(SystemState *systemState, GPSReader *gps, DBHandler *
 {
 	m_mockWindsensor = false;
 	m_mockCompass = false;
-	m_getHeadingFromCompass = true;
 	m_mockPosition = false;
-	//Använd flaggan från databasen istället för hårdkodat för m_getHeadingFromCompass. Se kod nedan.
-	// createtables.sql är uppdaterad på GitHub men får inte ner det nya scriptet till Pajen.
-	// Använd kod nedan när nya MySQL scriptet är installerat.
-	//m_getHeadingFromCompass = m_dbHandler->retriveCellAsInt("configs", "1", "flag_heading_compass");
+	m_getHeadingFromCompass = m_dbHandler->retriveCellAsInt("configs", "1", "flag_heading_compass");
 
 	if(m_getHeadingFromCompass == 1) {
 		std::cout << "Retrive compass from database: OK" << std::endl;
