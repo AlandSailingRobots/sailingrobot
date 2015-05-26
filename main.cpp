@@ -18,7 +18,13 @@ static void threadXBeeSyncRun() {
 }
 
 static void threadGPSupdate() {
-	gps_handle->run();
+	try {
+		gps_handle->run();
+	}
+	catch (const char * e) {
+		std::cout << "ERROR while running static void threadGPSupdate()" << e << std::endl;
+	}
+
 }
 
 void term(int signum)
