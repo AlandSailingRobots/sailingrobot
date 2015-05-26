@@ -130,17 +130,17 @@ void SailingRobot::run() {
 
 				if (courseToSteer < 180 && courseToSteer != 0){
 
-						longitude++;
+						longitude += 0.1;
 
 				}else if (courseToSteer != 0){
-					longitude --;
+					longitude -= 0.1;
 				}
 
 				if(courseToSteer > 90 && courseToSteer < 270 && courseToSteer != 0){
 
-					latitude--;	
+					latitude -= 0.1;
 				}else if (courseToSteer != 0){
-					latitude ++;
+					latitude += 0.1;
 				}
 			}
 			else {
