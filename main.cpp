@@ -57,12 +57,7 @@ int main(int argc, char *argv[]) {
 
 
 	/* Default time */
-	struct std::tm tm;
-  	std::istringstream ss("1970-04-10T10:53:15.1234Z");
-  	ss >> std::get_time(&tm, "%Y-%m-%dT%H:%M:%SZ"); 
-  	time_t res_time = mktime(&tm);
-
-	ExternalCommand externalCommand(res_time,0,0,0);
+	ExternalCommand externalCommand("1970-04-10T10:53:15.1234Z",0,0,0);
 	SystemState systemstate(
 		SystemStateModel(
 			GPSModel("",0,0,0,0,0,0),

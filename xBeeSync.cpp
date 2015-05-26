@@ -1,6 +1,5 @@
 #include "xBeeSync.h"
 #include <unistd.h>		//sleep
-#include <ctime>  
 
 xBeeSync::xBeeSync(ExternalCommand* externalCommand, SystemState *systemState, DBHandler *db) :
 	m_external_command(externalCommand),
@@ -61,9 +60,9 @@ void xBeeSync::run()
 			//If return value equals -1, parsing failed...
  			int rudder_cmd = m_XML_log.parse_rudCMD(res_xml);
 	 		int sail_cmd = m_XML_log.parse_saiCMD(res_xml);
-			std::time_t timestamp = m_XML_log.parse_time(res_xml);
+			std::string timestamp = m_XML_log.parse_time(res_xml);
 	 		
-	 		if(timestamp != 0) {
+	 		if(timestamp.length() > 0) {
 	 			std::cout << "Timestamp in xBeeSync::run = " << timestamp << std::endl;
 	 		}
 	 		if(rudder_cmd != -1) {
