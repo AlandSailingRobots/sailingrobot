@@ -446,7 +446,7 @@ void SailingRobot::setupWaypoint() {
 	}
 	logMessage("message", "setupWaypoint() done");
 
-	std::cout << "New waypoint picked!" << std::endl;
+	std::cout << "New waypoint picked!" << lat << lon << std::endl;
 }
 
 
