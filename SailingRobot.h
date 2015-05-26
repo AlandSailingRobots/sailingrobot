@@ -40,6 +40,10 @@ public:
 	//void readGPS();
 	
 private:
+	int getHeading();
+
+	int mockLongitude(int oldLong);
+	int mockLatitude(int oldLat);
 
 	void logMessage(std::string type, std::string message);
 	//void readGPS();
