@@ -440,13 +440,15 @@ void SailingRobot::setupWaypoint() {
 		}
 		m_waypointLatitude = atof(lat.c_str());
 		m_waypointLongitude = atof(lon.c_str());
+
+		std::cout << "New waypoint picked!" << m_waypointLatitude << m_waypointLongitude << std::endl;
 	} catch (const char * error) {
 		logMessage("error", error);
 		throw;
 	}
 	logMessage("message", "setupWaypoint() done");
 
-	std::cout << "New waypoint picked!" << lat << lon << std::endl;
+	
 }
 
 
