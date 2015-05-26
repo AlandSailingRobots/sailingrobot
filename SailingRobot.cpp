@@ -115,7 +115,16 @@ void SailingRobot::run() {
 			if (m_mockPosition) {
 
 				double courseToSteer = m_courseCalc.getCTS();
-				heading = courseToSteer;
+
+
+				if (heading > courseToSteer){
+
+					heading--;
+
+				}else if (heading < courseToSteer){
+
+					heading++;
+				}else heading = courseToSteer;
 
 
 
