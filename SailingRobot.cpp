@@ -116,17 +116,22 @@ void SailingRobot::run() {
 
 				double courseToSteer = m_courseCalc.getCTS();
 
-				if (courseToSteer < 180){
+
+
+				if (courseToSteer < 180 && courseToSteer != 0){
 
 						longitude++;
 
-				}else longitude --;
+				}else if (courseToSteer != 0){
+					longitude --;
+				}
 
-				if(courseToSteer > 90 && courseToSteer < 270){
+				if(courseToSteer > 90 && courseToSteer < 270 && courseToSteer != 0){
 
 					latitude--;	
-				}else latitude ++;
-				
+				}else if (courseToSteer != 0){
+					latitude ++;
+				}
 			}
 			else {
 				longitude = m_gpsReader->getLongitude();
