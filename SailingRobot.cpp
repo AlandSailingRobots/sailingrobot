@@ -231,7 +231,7 @@ void SailingRobot::run() {
 		if (m_courseCalc.getDTW() < 15) {
 
 			//remove this cout later
-			std::cout << "Waypoint reached!" << endl;
+			
 			nextWaypoint();
 			setupWaypoint();
 		}
@@ -293,12 +293,14 @@ void SailingRobot::updateState() {
 
 
 void SailingRobot::nextWaypoint() {
+
 	try {
-//		m_dbHandler->deleteRow("waypoints", m_waypointId);
+		m_dbHandler->deleteRow("waypoints", m_waypointId);
 	} catch (const char * error) {
 		logMessage("error", error);
 	}
 	logMessage("message", "SailingRobot::nextWaypoint(), waypoint reached");
+	std::cout << "Waypoint reached!" << std::endl;
 }
 
 
@@ -425,8 +427,8 @@ void SailingRobot::setupWaypoint() {
 	std::string lon;
 	try {
 		id = m_dbHandler->getMinIdFromTable("waypoints");
-		lat = m_dbHandler->retriveCell("waypoints", m_waypointId, "lat");
-		lon = m_dbHandler->retriveCell("waypoints", m_waypointId, "lon");
+		lat = m_dbHandler->retriveCell("waypoints", id, "lat");
+		lon = m_dbHandler->retriveCell("waypoints", id, "lon");
 	} catch (const char * error) {
 		logMessage("error", error);
 	}
@@ -443,6 +445,8 @@ void SailingRobot::setupWaypoint() {
 		throw;
 	}
 	logMessage("message", "setupWaypoint() done");
+
+	std::cout << "New waypoint picked!" << std::endl;
 }
 
 
