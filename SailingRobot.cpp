@@ -77,6 +77,51 @@ void SailingRobot::init(std::string programPath, std::string errorFileName) {
 	//syncServer();
 }
 
+int SailingRobot::getHeading(){
+
+	int newHeading = 0;
+
+	if (m_getHeadingFromCompass) {
+			newHeading = m_compass->getHeading();
+		}
+		else {
+			newHeading = m_gpsReader->getHeading();
+		}
+
+	return newHeading;
+
+}
+
+int SailingRobot::mockLatitude(int oldLat){
+
+	double courseToSteer = m_courseCalc.getCTS();
+
+	if(courseToSteer > 90 && courseToSteer < 270 && courseToSteer != 0){
+
+			oldLat -= 0.1;
+	}else if (courseToSteer != 0){
+			oldLat += 0.1;
+	}
+
+	return oldLat;
+
+}
+
+int SailingRobot::mockLongitude(int oldLong){
+
+	double courseToSteer = m_courseCalc.getCTS();
+
+	if (courseToSteer < 180 && courseToSteer != 0){
+
+			oldLong += 0.1;
+
+	}else if (courseToSteer != 0){
+					oldLong -= 0.1;
+	}
+
+	return oldLong;
+
+}
 
 void SailingRobot::run() {
 	sleep(3);
@@ -94,19 +139,23 @@ void SailingRobot::run() {
 
 		windDir = m_windSensor->getDirection();
 
+
+		
+
+
 		m_compass->readValues();
-		if (m_getHeadingFromCompass) {
-			heading = m_compass->getHeading();
-		}
-		else {
-			heading = m_gpsReader->getHeading();
-		}
+		heading = getHeading();
+		
 
 		if ( !isnan(m_gpsReader->getLatitude()) ) {
 
 			//calc DTW
 			if (m_mockPosition) {
 
+
+				longitude = mockLongitude(longitude);
+				latitude = mockLatitude(latitude);
+				
 				double courseToSteer = m_courseCalc.getCTS();
 
 
@@ -119,22 +168,6 @@ void SailingRobot::run() {
 					heading++;
 				}else heading = courseToSteer;
 
-
-
-				if (courseToSteer < 180 && courseToSteer != 0){
-
-						longitude += 0.1;
-
-				}else if (courseToSteer != 0){
-					longitude -= 0.1;
-				}
-
-				if(courseToSteer > 90 && courseToSteer < 270 && courseToSteer != 0){
-
-					latitude -= 0.1;
-				}else if (courseToSteer != 0){
-					latitude += 0.1;
-				}
 			}
 			else {
 				longitude = m_gpsReader->getLongitude();
@@ -296,11 +329,6 @@ void SailingRobot::nextWaypoint() {
 	std::cout << "Waypoint reached!" << std::endl;
 }
 
-
-///////// setup crap
-/////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////
-
 void SailingRobot::setupMaestro() {
 	std::string port_name;
 	try {
@@ -443,7 +471,6 @@ void SailingRobot::setupWaypoint() {
 
 	
 }
-
 
 void SailingRobot::setupHTTPSync() {
 	try {
