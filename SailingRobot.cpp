@@ -89,7 +89,7 @@ void SailingRobot::run() {
 	sleep(3);
 	m_running=true;
 	int rudderCommand, sailCommand, windDir, twd, heading = 0;
-	double longitude = 0, latitude = 0;
+	double longitude = 4, latitude = -3;
 	printf("*SailingRobot::run() started.\n");
 	std::cout << "waypoint target." << std::endl 
 		<< "long: " << m_waypointLongitude << std::endl
