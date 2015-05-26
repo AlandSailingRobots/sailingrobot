@@ -114,13 +114,15 @@ void SailingRobot::run() {
 			//calc DTW
 			if (m_mockPosition) {
 
-				if (heading < 180){
+				double courseToSteer = m_courseCalc.getCTS();
+
+				if (courseToSteer < 180){
 
 						longitude++;
 
 				}else longitude --;
 
-				if(heading > 90 && heading < 270){
+				if(courseToSteer > 90 && courseToSteer < 270){
 
 					latitude--;	
 				}else latitude ++;
