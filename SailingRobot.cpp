@@ -135,7 +135,12 @@ void SailingRobot::run() {
 	while(m_running) {
 		//m_waypointId.empty()
 
-		m_windSensor->parseData(m_windSensor->refreshData());
+		try {
+			m_windSensor->parseData(m_windSensor->refreshData());	
+		} catch(const char * e) {
+			std::cout << "ERROR: SailingRobot::Run m_windSensor->parseData " << e << std::endl;
+		}
+		
 
 		windDir = m_windSensor->getDirection();
 
