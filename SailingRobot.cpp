@@ -15,7 +15,7 @@ SailingRobot::SailingRobot(SystemState *systemState, GPSReader *gps, DBHandler *
 	m_mockWindsensor = false;
 	m_mockCompass = false;
 	m_mockPosition = false;
-	m_getHeadingFromCompass = m_dbHandler->retriveCellAsInt("configs", "1", "flag_heading_compass");
+
 
 /*	sleepypi stuff
 	wiringPiSetup();
@@ -32,6 +32,8 @@ SailingRobot::~SailingRobot() {
 
 void SailingRobot::init(std::string programPath, std::string errorFileName) {
 	m_errorLogPath = programPath + errorFileName;
+
+	m_getHeadingFromCompass = m_dbHandler->retriveCellAsInt("configs", "1", "flag_heading_compass");
 
 	printf(" Starting HTTPSync\t\t");
 	setupHTTPSync();
