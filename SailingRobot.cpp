@@ -7,9 +7,10 @@
 #include <cstring>
 #include <cmath>
 
-SailingRobot::SailingRobot(SystemState *systemState, GPSReader *gps, DBHandler *db) :
+SailingRobot::SailingRobot(ExternalCommand* externalCommand, SystemState *systemState, GPSReader *gps, DBHandler *db) :
 	m_dbHandler(db),
 	m_gpsReader(gps),
+	m_externalCommand(externalCommand),
 	m_systemState(systemState)
 {
 	m_mockWindsensor = false;
@@ -202,6 +203,9 @@ void SailingRobot::run() {
 
 			//rudder position calculation
 			rudderCommand = m_rudderCommand.getCommand(m_courseCalc.getCTS(), heading);
+			if(!m_externalCommand->getAutorun()){
+				rudderCommand = m_externalCommand->getRudderCommand();
+			}
 
 		} else {
 			logMessage("error", "SailingRobot::run(), gps NaN. Using values from last iteration.");
@@ -209,6 +213,9 @@ void SailingRobot::run() {
 
 		//sail position calculation
 		sailCommand = m_sailCommand.getCommand(windDir);
+		if(!m_externalCommand->getAutorun()){
+			sailCommand = m_externalCommand->getSailCommand();
+		}
 
 		//rudder adjustment
 		m_rudderServo.setPosition(rudderCommand);

@@ -25,13 +25,14 @@
 #include "servocontroller/ServoObject.h"
 #include "servocontroller/MockServoObject.h"
 
+#include "thread/ExternalCommand.h"
 #include "thread/SystemState.h"
 
 class SailingRobot {
 
 public:
 
-	SailingRobot(SystemState *systemState, GPSReader *gps, DBHandler *db);
+	SailingRobot(ExternalCommand* externalCommand, SystemState *systemState, GPSReader *gps, DBHandler *db);
 	~SailingRobot();
 	void init(std::string programPath, std::string errorFileName);
 	void run();
@@ -97,6 +98,7 @@ private:
 	ServoObject m_rudderServo;
 	ServoObject m_sailServo;
 
+	ExternalCommand* m_externalCommand;
 	SystemState *m_systemState;
 };
 #endif

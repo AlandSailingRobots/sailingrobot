@@ -63,7 +63,7 @@ int main(int argc, char *argv[]) {
 
 
 	/* Default time */
-	ExternalCommand externalCommand("1970-04-10T10:53:15.1234Z",0,0,0);
+	ExternalCommand externalCommand("1970-04-10T10:53:15.1234Z",true,0,0);
 	SystemState systemstate(
 		SystemStateModel(
 			GPSModel("",0,0,0,0,0,0),
@@ -86,7 +86,7 @@ int main(int argc, char *argv[]) {
 	printf("-DONE\n");
 
 	// Create main sailing robot controller
-	SailingRobot sr(&systemstate,&gps_reader,&db);
+	SailingRobot sr(&externalCommand,&systemstate,&gps_reader,&db);
 	sr_handle = &sr;
 
 	// Create thread controllers
