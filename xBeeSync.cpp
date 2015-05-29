@@ -75,7 +75,10 @@ void xBeeSync::run()
 	 		}
 
 	 		bool autorun = false;
-	 		m_external_command->setData(timestamp, autorun, rudder_cmd, sail_cmd);
+	 		
+	 		if(sail_cmd != -1 && rudder_cmd != -1){
+	 			m_external_command->setData(timestamp, autorun, rudder_cmd, sail_cmd);
+	 		}
 		}
 
 		//make sure there are at least one second between each xml message
