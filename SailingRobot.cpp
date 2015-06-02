@@ -8,16 +8,18 @@
 #include <cmath>
 
 SailingRobot::SailingRobot(ExternalCommand* externalCommand, SystemState *systemState, GPSReader *gps, DBHandler *db) :
+	m_mockWindsensor(true),
+	m_mockCompass(true),
+	m_mockPosition(false),
+	m_mockMaestro(true),
+
 	m_dbHandler(db),
+	
 	m_gpsReader(gps),
+
 	m_externalCommand(externalCommand),
 	m_systemState(systemState)
 {
-	m_mockWindsensor = false;
-	m_mockCompass = false;
-	m_mockPosition = false;
-
-
 /*	sleepypi stuff
 	wiringPiSetup();
 	pinMode(6, OUTPUT);
@@ -344,6 +346,13 @@ void SailingRobot::nextWaypoint() {
 }
 
 void SailingRobot::setupMaestro() {
+	if (m_mockMaestro) {
+		m_maestroController.reset(new MockMaestroController());
+	}
+	else {
+		m_maestroController.reset(new MaestroController());
+	}
+
 	std::string port_name;
 	try {
 		port_name = m_dbHandler->retriveCell("configs", "1", "mc_port");
@@ -352,8 +361,8 @@ void SailingRobot::setupMaestro() {
 	}
 
 	try {
-		m_maestroController.setPort( port_name );
-		int maestroErrorCode = m_maestroController.getError();
+		m_maestroController->setPort( port_name );
+		int maestroErrorCode = m_maestroController->getError();
 		if (maestroErrorCode != 0) {
 			std::stringstream stream;
 			stream << "maestro errorcode: " << maestroErrorCode;
@@ -368,7 +377,7 @@ void SailingRobot::setupMaestro() {
 
 void SailingRobot::setupRudderServo() {
 	try {
-		m_rudderServo.setController(&m_maestroController);
+		m_rudderServo.setController(m_maestroController.get());
 		m_rudderServo.setChannel( m_dbHandler->retriveCellAsInt("configs", "1", "rs_chan") );
 		m_rudderServo.setSpeed( m_dbHandler->retriveCellAsInt("configs", "1", "rs_spd") );
 		m_rudderServo.setAcceleration( m_dbHandler->retriveCellAsInt("configs", "1", "rs_acc") );
@@ -381,7 +390,7 @@ void SailingRobot::setupRudderServo() {
 
 void SailingRobot::setupSailServo() {
 	try {
-		m_sailServo.setController(&m_maestroController);
+		m_sailServo.setController(m_maestroController.get());
 		m_sailServo.setChannel( m_dbHandler->retriveCellAsInt("configs", "1", "ss_chan") );
 		m_sailServo.setSpeed( m_dbHandler->retriveCellAsInt("configs", "1", "ss_spd") );
 		m_sailServo.setAcceleration( m_dbHandler->retriveCellAsInt("configs", "1", "ss_acc") );

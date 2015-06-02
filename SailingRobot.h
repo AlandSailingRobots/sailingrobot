@@ -1,6 +1,8 @@
 #ifndef __SAILINGROBOT_H__
 #define __SAILINGROBOT_H__
 
+#include <memory>
+
 #include "dbhandler/DBHandler.h"
 #include "dbhandler/JSON.h"
 #include "sailcommand/SailCommand.h"
@@ -19,6 +21,7 @@
 #include "gps/GPSReader.h"
 #include "gps/MockGPSReader.h"
 
+#include "servocontroller/Actuator.h"
 #include "servocontroller/MaestroController.h"
 #include "servocontroller/MockMaestroController.h"
 
@@ -79,6 +82,7 @@ private:
 	bool m_mockWindsensor;
 	bool m_mockCompass;
 	bool m_mockPosition;
+	bool m_mockMaestro;
 
 	/* true  = get heading from compass
 	 * false = get heading from gps	 */
@@ -94,7 +98,7 @@ private:
 	GPSReader* m_gpsReader;
 	Windsensor* m_windSensor;
 
-	MaestroController m_maestroController;
+	std::unique_ptr<Actuator> m_maestroController;
 	ServoObject m_rudderServo;
 	ServoObject m_sailServo;
 
