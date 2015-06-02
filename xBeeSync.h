@@ -12,8 +12,8 @@
 class xBeeSync
 {
 public:
-	xBeeSync(ExternalCommand* externalCommand, 
-		SystemState *systemState, DBHandler *db);
+	xBeeSync(ExternalCommand* externalCommand, SystemState *systemState,
+			 bool sending, bool receiving);
 	~xBeeSync() {};
 
 	void run();

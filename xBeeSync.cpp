@@ -1,7 +1,8 @@
 #include "xBeeSync.h"
 #include <unistd.h>		//sleep
 
-xBeeSync::xBeeSync(ExternalCommand* externalCommand, SystemState *systemState, DBHandler *db) :
+xBeeSync::xBeeSync(ExternalCommand* externalCommand, SystemState *systemState,
+				   bool sending, bool receiving) :
 	m_external_command(externalCommand),
 	m_model(
 		SystemStateModel(
@@ -13,13 +14,10 @@ xBeeSync::xBeeSync(ExternalCommand* externalCommand, SystemState *systemState, D
 		)
 	),
 	m_system_state(systemState),
-	m_dbHandler(db),
-	m_running(true)
+	m_running(true),
+	m_sending(sending),
+	m_receiving(receiving)
 {
-	//	Hämtar ett heltal (1 eller 0) som visar om xbeen skall skicka och ta emot data.
-	m_sending = m_dbHandler->retriveCellAsInt("configs", "1", "xb_send");
-	m_receiving = m_dbHandler->retriveCellAsInt("configs", "1", "xb_recv");
-
 	//	skapa ny xBee och kör xbee.init(baudRate (57600))
 	m_xbee_fd = m_xBee.init(57600);
 	std::cout << "*xBee initialized - receiving:" << m_receiving << " sending:" << m_sending << std::endl;

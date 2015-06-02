@@ -32,8 +32,10 @@ void term(int signum)
 	printf("\n-SIGINT detected, shutting down...\n");
 	printf(" stopping main loop\n");
 	sr_handle->shutdown();
-	printf(" stopping xBee thread\n");
-	xbee_handle->close();
+	if (xbee_handle) {
+		printf(" stopping xBee thread\n");
+		xbee_handle->close();
+	}
 	printf(" stopping GPS thread\n");
 	gps_handle->close();
 	printf("-DONE\n");
@@ -89,9 +91,10 @@ int main(int argc, char *argv[]) {
 	SailingRobot sr(&externalCommand,&systemstate,&gps_reader,&db);
 	sr_handle = &sr;
 
-	// Create thread controllers
-	xBeeSync xbee_sync(&externalCommand, &systemstate, &db);
-	xbee_handle = &xbee_sync;
+	//	Hämtar ett heltal (1 eller 0) som visar om xbeen skall skicka och ta emot data.
+	bool xBee_sending = db.retriveCellAsInt("configs", "1", "xb_send");
+	bool xBee_receiving = db.retriveCellAsInt("configs", "1", "xb_recv");
+
 	GPSupdater gps_updater(&gps_reader);
 	gps_handle = &gps_updater;
 
@@ -102,7 +105,10 @@ int main(int argc, char *argv[]) {
 
 		printf("-Starting threads...\n");
 		//start xBeeSync thread
-		std::thread xbee_sync_thread (threadXBeeSyncRun);
+		if (xBee_sending || xBee_receiving) {
+			xbee_handle.reset(new xBeeSync(&externalCommand, &systemstate, xBee_sending, xBee_receiving));
+			std::thread xbee_sync_thread (threadXBeeSyncRun);
+		}
 		//start GPSupdater thread
 		std::thread gps_reader_thread (threadGPSupdate);
 

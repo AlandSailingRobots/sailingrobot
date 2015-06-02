@@ -8,12 +8,13 @@
 #ifndef MAIN_H_
 #define MAIN_H_
 
+#include <memory>
 #include "SailingRobot.h"
 #include "xBeeSync.h"
 #include "GPSupdater.h"
 
 SailingRobot *sr_handle;
-xBeeSync *xbee_handle;
+std::unique_ptr<xBeeSync> xbee_handle;
 GPSupdater *gps_handle;
 
 #endif /* MAIN_H_ */
