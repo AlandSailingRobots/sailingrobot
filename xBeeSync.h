@@ -6,7 +6,6 @@
 #include "thread/ExternalCommand.h"
 #include "thread/SystemState.h"
 #include "models/SystemStateModel.h"
-#include "dbhandler/DBHandler.h"
 #include <mutex>
 
 class xBeeSync
@@ -26,7 +25,6 @@ private:
 	ExternalCommand* m_external_command;
 	SystemStateModel m_model;
 	SystemState *m_system_state;
-	DBHandler *m_dbHandler;
 
 	std::mutex m_mutex;
 	bool m_running;
