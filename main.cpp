@@ -14,7 +14,11 @@
 #include <ctime>    
 
 static void threadXBeeSyncRun() {
-	xbee_handle->run();
+	try {
+		xbee_handle->run();
+	} catch (const char * e) {
+		std::cout << "ERROR while running static void threadXBeeSyncRun()" << e << std::endl;
+	}
 }
 
 static void threadGPSupdate() {
@@ -31,18 +35,20 @@ void term(int signum)
 	printf("\n-Interupt signal detected, shutting down...\n");
 	printf(" Sending stop signal to main loop\n");
 	sr_handle->shutdown();
+	printf(" Sending stop signal to GPS thread\n");
+	gps_handle->close();
 	if (xbee_handle) {
 		printf(" Sending stop signal to xBee thread\n");
 		xbee_handle->close();
 	}
-	printf(" Sending stop signal to GPS thread\n");
-	gps_handle->close();
 	printf("-DONE\n");
 }
 
 int main(int argc, char *argv[]) {
 
+	// Change to false when running on RaspberrPi
 	m_mockGPS=true;
+	m_xBeeOFF=true;
 
 	std::string path, db_name, errorLog;
 	if (argc < 2) {
@@ -102,21 +108,25 @@ int main(int argc, char *argv[]) {
 
 		printf("-Starting threads...\n");
 
-		//start xBeeSync thread
+		// Start xBeeSync thread
 
 		//	Hämtar ett heltal (1 eller 0) som visar om xbeen skall skicka och ta emot data.
 		bool xBee_sending = db.retriveCellAsInt("configs", "1", "xb_send");
 		bool xBee_receiving = db.retriveCellAsInt("configs", "1", "xb_recv");
 
-		xBee_sending = false;
-		xBee_receiving = false;
+		// Used to force xBee off without changes in database when running on desktop or testing.
+		if(m_xBeeOFF){
+			xBee_sending = false;
+			xBee_receiving = false;
+		}
 
 		if (xBee_sending || xBee_receiving) {
 			xbee_handle.reset(new xBeeSync(&externalCommand, &systemstate, xBee_sending, xBee_receiving));
 			std::thread xbee_sync_thread (threadXBeeSyncRun);
 			xbee_sync_thread.detach();
 		}
-		//start GPSupdater thread
+
+		// Start GPSupdater thread
 		std::thread gps_reader_thread (threadGPSupdate);
 		gps_reader_thread.detach();
 

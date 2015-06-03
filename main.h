@@ -18,5 +18,6 @@ std::unique_ptr<xBeeSync> xbee_handle;
 GPSupdater *gps_handle;
 
 bool m_mockGPS;
+bool m_xBeeOFF;
 
 #endif /* MAIN_H_ */
