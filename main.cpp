@@ -86,25 +86,12 @@ int main(int argc, char *argv[]) {
 	}
 	printf("-DONE\n");
 
-	std::unique_ptr<GPS> gps_reader;
-	bool mockGPS = true;
-	
-	if (mockGPS) {
-		gps_reader.reset(new MockGPSReader());
-	}
-	else {
-		gps_reader.reset(new GPSReader());
-	}
 
 	// Create main sailing robot controller
-	SailingRobot sr(&externalCommand,&systemstate,gps_reader.get(),&db);
+	SailingRobot sr(&externalCommand, &systemstate, &db);
 	sr_handle = &sr;
 
-	//	Hämtar ett heltal (1 eller 0) som visar om xbeen skall skicka och ta emot data.
-	bool xBee_sending = db.retriveCellAsInt("configs", "1", "xb_send");
-	bool xBee_receiving = db.retriveCellAsInt("configs", "1", "xb_recv");
-
-	GPSupdater gps_updater(gps_reader.get());
+	GPSupdater gps_updater(&systemstate,false);
 	gps_handle = &gps_updater;
 
 	try {
@@ -114,6 +101,10 @@ int main(int argc, char *argv[]) {
 
 		printf("-Starting threads...\n");
 		//start xBeeSync thread
+		//	Hämtar ett heltal (1 eller 0) som visar om xbeen skall skicka och ta emot data.
+		bool xBee_sending = db.retriveCellAsInt("configs", "1", "xb_send");
+		bool xBee_receiving = db.retriveCellAsInt("configs", "1", "xb_recv");
+
 		if (xBee_sending || xBee_receiving) {
 			xbee_handle.reset(new xBeeSync(&externalCommand, &systemstate, xBee_sending, xBee_receiving));
 			std::thread xbee_sync_thread (threadXBeeSyncRun);

@@ -9,13 +9,21 @@
 #include <iostream>
 
 
-GPSupdater::GPSupdater(GPS* reader):
-m_gpsReader(reader),
-m_running(true)
+GPSupdater::GPSupdater(SystemState *systemState, bool mockIt)
 {
+	m_running(true);
+
+	if (mockIt) {
+		m_gpsReader = MockGPSReader();
+	}
+	else {
+		m_gpsReader = GPSReader();
+	}
+
 	try {
-		m_gpsReader->connectToGPS();
+		m_gpsReader.connectToGPS();
 	} catch (const char * error) {
+		m_running=false;
 		std::cout << "GPSupdater : connnectToGPS() : " << error << std::endl;
 	}
 }
@@ -27,7 +35,15 @@ void GPSupdater::run()
 	{
 		//std::cout << "GPSupdater : run() : exec" << std::endl;
 		try {
-			m_gpsReader->readGPS(50000000); //microseconds
+			m_gpsReader.readGPS(50000000); //microseconds
+			systemState.setGPSModel(GPSModel(m_gpsReader.getTimestamp(),
+											m_gpsReader.getLatitude(),
+											m_gpsReader.getLongitude(),
+											m_gpsReader.getAltitude(),
+											m_gpsReader.getSpeed(),
+											m_gpsReader.getHeading(),
+											m_gpsReader.getSatellitesUsed()
+										));
 		} catch (const char *error) {
 			std::cout << "GPSupdater : readGPS() : " << error << std::endl;
 		}

@@ -35,7 +35,7 @@ class SailingRobot {
 
 public:
 
-	SailingRobot(ExternalCommand* externalCommand, SystemState *systemState, GPS *gps, DBHandler *db);
+	SailingRobot(ExternalCommand* externalCommand, SystemState *systemState, DBHandler *db);
 	~SailingRobot();
 	void init(std::string programPath, std::string errorFileName);
 	void run();

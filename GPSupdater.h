@@ -14,13 +14,13 @@
 class GPSupdater {
 
 	public:
-		GPSupdater(GPS *reader);
+		GPSupdater(SystemState *systemState, bool mockIt);
 		~GPSupdater(){};
 		void run();
 		void close();
 
 	private:
-		GPS *m_gpsReader;
+		GPS m_gpsReader;
 		std::mutex m_mutex;
 		bool m_running;
 

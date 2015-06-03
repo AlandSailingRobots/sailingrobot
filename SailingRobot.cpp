@@ -8,15 +8,13 @@
 #include <cmath>
 
 SailingRobot::SailingRobot(ExternalCommand* externalCommand,
-						   SystemState *systemState, GPS *gps, DBHandler *db) :
+						   SystemState *systemState, DBHandler *db) :
 	m_mockWindsensor(true),
 	m_mockCompass(true),
 	m_mockPosition(true),
 	m_mockMaestro(true),
 
 	m_dbHandler(db),
-	
-	m_gpsReader(gps),
 
 	m_externalCommand(externalCommand),
 	m_systemState(systemState)
@@ -158,6 +156,7 @@ void SailingRobot::run() {
 		heading = getHeading();
 		
 
+
 		if ( !isnan(m_gpsReader->getLatitude()) ) {
 
 			//calc DTW
@@ -226,22 +225,19 @@ void SailingRobot::run() {
 		m_sailServo.setPosition(sailCommand);
 
 		//update system state
-		SystemStateModel systemStateModel(
-			m_gpsReader->getModel(),
-			WindsensorModel(
+		m_systemState->setWindsensorModel(WindsensorModel(
 				m_windSensor->getDirection(),
 				m_windSensor->getSpeed(),
 				m_windSensor->getTemperature()
-			),
-			CompassModel(
+			));
+		m_systemState->setCompassModel(CompassModel(
 				m_compass->getHeading(),
 				m_compass->getPitch(),
 				m_compass->getRoll()
-			),
-			rudderCommand,
-			sailCommand
-		);
-		m_systemState->setData(systemStateModel);
+			));
+		m_systemState->setRudder(rudderCommand);
+		m_systemState->setSail(sailCommand);
+
 
 		//logging
 		m_dbHandler->insertDataLog(
