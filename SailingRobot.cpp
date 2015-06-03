@@ -153,7 +153,7 @@ void SailingRobot::run() {
 		m_compass->readValues();
 		heading = getHeading();
 
-		if ( !isnan(m_systemStateModel.gpsModel.latitude) ) {
+		if (m_systemStateModel.gpsModel.online) {
 
 			//calc DTW
 			if (m_mockPosition) {

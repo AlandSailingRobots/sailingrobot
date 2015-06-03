@@ -37,14 +37,7 @@ void GPSupdater::run()
 		//std::cout << "GPSupdater : run() : exec" << std::endl;
 		try {
 			m_gpsReader->readGPS(50000000); //microseconds
-			m_systemState->setGPSModel(GPSModel(m_gpsReader->getTimestamp(),
-											m_gpsReader->getLatitude(),
-											m_gpsReader->getLongitude(),
-											m_gpsReader->getAltitude(),
-											m_gpsReader->getSpeed(),
-											m_gpsReader->getHeading(),
-											m_gpsReader->getSatellitesUsed()
-										));
+			m_systemState->setGPSModel(m_gpsReader->getModel());
 		} catch (const char *error) {
 			std::cout << "GPSupdater : readGPS() : " << error << std::endl;
 		}
