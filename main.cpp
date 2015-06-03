@@ -28,19 +28,21 @@ static void threadGPSupdate() {
 
 void term(int signum)
 {
-	printf("\n-SIGINT detected, shutting down...\n");
-	printf(" stopping main loop\n");
+	printf("\n-Interupt signal detected, shutting down...\n");
+	printf(" Sending stop signal to main loop\n");
 	sr_handle->shutdown();
 	if (xbee_handle) {
-		printf(" stopping xBee thread\n");
+		printf(" Sending stop signal to xBee thread\n");
 		xbee_handle->close();
 	}
-	printf(" stopping GPS thread\n");
+	printf(" Sending stop signal to GPS thread\n");
 	gps_handle->close();
 	printf("-DONE\n");
 }
 
 int main(int argc, char *argv[]) {
+
+	m_mockGPS=true;
 
 	std::string path, db_name, errorLog;
 	if (argc < 2) {
@@ -90,7 +92,7 @@ int main(int argc, char *argv[]) {
 	SailingRobot sr(&externalCommand, &systemstate, &db);
 	sr_handle = &sr;
 
-	GPSupdater gps_updater(&systemstate,true);
+	GPSupdater gps_updater(&systemstate, m_mockGPS);
 	gps_handle = &gps_updater;
 
 	try {

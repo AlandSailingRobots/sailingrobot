@@ -17,4 +17,6 @@ SailingRobot *sr_handle;
 std::unique_ptr<xBeeSync> xbee_handle;
 GPSupdater *gps_handle;
 
+bool m_mockGPS;
+
 #endif /* MAIN_H_ */
