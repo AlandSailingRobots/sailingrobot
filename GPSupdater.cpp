@@ -9,19 +9,20 @@
 #include <iostream>
 
 
-GPSupdater::GPSupdater(SystemState *systemState, bool mockIt)
+GPSupdater::GPSupdater(SystemState *systemState, bool mockIt):
+m_systemState(systemState),
+m_running(true)
 {
-	m_running(true);
 
 	if (mockIt) {
-		m_gpsReader = MockGPSReader();
+		m_gpsReader = new MockGPSReader();
 	}
 	else {
-		m_gpsReader = GPSReader();
+		m_gpsReader = new GPSReader();
 	}
 
 	try {
-		m_gpsReader.connectToGPS();
+		m_gpsReader->connectToGPS();
 	} catch (const char * error) {
 		m_running=false;
 		std::cout << "GPSupdater : connnectToGPS() : " << error << std::endl;
@@ -35,14 +36,14 @@ void GPSupdater::run()
 	{
 		//std::cout << "GPSupdater : run() : exec" << std::endl;
 		try {
-			m_gpsReader.readGPS(50000000); //microseconds
-			systemState.setGPSModel(GPSModel(m_gpsReader.getTimestamp(),
-											m_gpsReader.getLatitude(),
-											m_gpsReader.getLongitude(),
-											m_gpsReader.getAltitude(),
-											m_gpsReader.getSpeed(),
-											m_gpsReader.getHeading(),
-											m_gpsReader.getSatellitesUsed()
+			m_gpsReader->readGPS(50000000); //microseconds
+			m_systemState->setGPSModel(GPSModel(m_gpsReader->getTimestamp(),
+											m_gpsReader->getLatitude(),
+											m_gpsReader->getLongitude(),
+											m_gpsReader->getAltitude(),
+											m_gpsReader->getSpeed(),
+											m_gpsReader->getHeading(),
+											m_gpsReader->getSatellitesUsed()
 										));
 		} catch (const char *error) {
 			std::cout << "GPSupdater : readGPS() : " << error << std::endl;

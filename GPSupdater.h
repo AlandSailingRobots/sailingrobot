@@ -10,6 +10,9 @@
 
 #include <mutex>
 #include "gps/GPS.h"
+#include "thread/SystemState.h"
+#include "gps/GPSReader.h"
+#include "gps/MockGPSReader.h"
 
 class GPSupdater {
 
@@ -20,7 +23,8 @@ class GPSupdater {
 		void close();
 
 	private:
-		GPS m_gpsReader;
+		GPS *m_gpsReader;
+		SystemState *m_systemState;
 		std::mutex m_mutex;
 		bool m_running;
 
