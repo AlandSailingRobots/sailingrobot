@@ -7,8 +7,7 @@
 #include <cstring>
 #include <cmath>
 
-SailingRobot::SailingRobot(ExternalCommand* externalCommand,
-						   SystemState *systemState, DBHandler *db) :
+SailingRobot::SailingRobot(ExternalCommand* externalCommand, SystemState *systemState, DBHandler *db) :
 	m_mockWindsensor(true),
 	m_mockCompass(true),
 	m_mockPosition(true),
@@ -142,8 +141,6 @@ void SailingRobot::run() {
 
 		//Get data from SystemStateModel to local object
 		m_systemState->getData(&m_systemStateModel);
-
-		//m_waypointId.empty()
 
 		try {
 			m_windSensor->parseData(m_windSensor->refreshData());	
@@ -287,7 +284,7 @@ void SailingRobot::shutdown() {
 
 void SailingRobot::logMessage(std::string type, std::string message) {
 	try {
-		m_dbHandler->insertMessageLog(m_gpsReader->getTimestamp(), type, message);
+		m_dbHandler->insertMessageLog(m_systemStateModel.gpsModel.timestamp, type, message);
        	} catch (const char * logError) {
 		std::ofstream errorFile;
 		errorFile.open(m_errorLogPath.c_str(), std::ios::app);

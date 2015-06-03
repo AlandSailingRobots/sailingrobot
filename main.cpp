@@ -24,7 +24,6 @@ static void threadGPSupdate() {
 	catch (const char * e) {
 		std::cout << "ERROR while running static void threadGPSupdate()" << e << std::endl;
 	}
-	//chages chages.....
 }
 
 void term(int signum)
@@ -45,9 +44,9 @@ int main(int argc, char *argv[]) {
 
 	std::string path, db_name, errorLog;
 	if (argc < 2) {
-		path = "/root/sailingrobot/";
-		db_name = "asr.db";
-		errorLog = "errors.log";
+		path = "/root/sailingrobot";
+		db_name = "/asr.db";
+		errorLog = "/errors.log";
 	} else {
 		path = std::string(argv[1]);
 		db_name = "/asr.db";
@@ -86,12 +85,15 @@ int main(int argc, char *argv[]) {
 	}
 	printf("-DONE\n");
 
+	//	Hämtar ett heltal (1 eller 0) som visar om xbeen skall skicka och ta emot data.
+	bool xBee_sending = db.retriveCellAsInt("configs", "1", "xb_send");
+	bool xBee_receiving = db.retriveCellAsInt("configs", "1", "xb_recv");
 
 	// Create main sailing robot controller
 	SailingRobot sr(&externalCommand, &systemstate, &db);
 	sr_handle = &sr;
 
-	GPSupdater gps_updater(&systemstate,false);
+	GPSupdater gps_updater(&systemstate,true);
 	gps_handle = &gps_updater;
 
 	try {
@@ -100,10 +102,9 @@ int main(int argc, char *argv[]) {
 		printf("-DONE\n");
 
 		printf("-Starting threads...\n");
+
 		//start xBeeSync thread
-		//	Hämtar ett heltal (1 eller 0) som visar om xbeen skall skicka och ta emot data.
-		bool xBee_sending = db.retriveCellAsInt("configs", "1", "xb_send");
-		bool xBee_receiving = db.retriveCellAsInt("configs", "1", "xb_recv");
+
 
 		if (xBee_sending || xBee_receiving) {
 			xbee_handle.reset(new xBeeSync(&externalCommand, &systemstate, xBee_sending, xBee_receiving));
