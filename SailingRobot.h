@@ -104,5 +104,14 @@ private:
 
 	ExternalCommand* m_externalCommand;
 	SystemState *m_systemState;
+
+	SystemStateModel m_systemStateModel = SystemStateModel(
+												GPSModel("",0,0,0,0,0,0),
+												WindsensorModel(0,0,0),
+												CompassModel(0,0,0),
+												0,
+												0
+											);
+
 };
 #endif

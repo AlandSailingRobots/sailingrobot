@@ -19,6 +19,7 @@ SailingRobot::SailingRobot(ExternalCommand* externalCommand,
 	m_externalCommand(externalCommand),
 	m_systemState(systemState)
 {
+
 /*	sleepypi stuff
 	wiringPiSetup();
 	pinMode(6, OUTPUT);
@@ -136,7 +137,12 @@ void SailingRobot::run() {
 	std::cout << "waypoint target." << std::endl 
 		<< "long: " << m_waypointLongitude << std::endl
 		<< "lat : " << m_waypointLatitude << std::endl;
+
 	while(m_running) {
+
+		//Get data from SystemStateModel to local object
+		m_systemState->getData(&m_systemStateModel);
+
 		//m_waypointId.empty()
 
 		try {
@@ -145,19 +151,12 @@ void SailingRobot::run() {
 			std::cout << "ERROR: SailingRobot::Run m_windSensor->parseData " << e << std::endl;
 		}
 		
-
 		windDir = m_windSensor->getDirection();
-
-
-		
-
 
 		m_compass->readValues();
 		heading = getHeading();
-		
 
-
-		if ( !isnan(m_gpsReader->getLatitude()) ) {
+		if ( !isnan(m_systemStateModel.gpsModel.latitude) ) {
 
 			//calc DTW
 			if (m_mockPosition) {
@@ -180,8 +179,8 @@ void SailingRobot::run() {
 
 			}
 			else {
-				longitude = m_gpsReader->getLongitude();
-				latitude = m_gpsReader->getLatitude();
+				longitude = m_systemStateModel.gpsModel.longitude;
+				latitude = m_systemStateModel.gpsModel.latitude;
 			}
 
 			m_courseCalc.calculateDTW(latitude, longitude,
@@ -241,12 +240,12 @@ void SailingRobot::run() {
 
 		//logging
 		m_dbHandler->insertDataLog(
-			m_gpsReader->getTimestamp(),
+			m_systemStateModel.gpsModel.timestamp,
 			latitude,
 			longitude,
-			m_gpsReader->getSpeed(),
-			m_gpsReader->getHeading(),
-			m_gpsReader->getSatellitesUsed(),
+			m_systemStateModel.gpsModel.speed,
+			m_systemStateModel.gpsModel.heading,
+			m_systemStateModel.gpsModel.satellitesUsed,
 			sailCommand,
 			rudderCommand,
 			0, //sailservo getpos, to remove
