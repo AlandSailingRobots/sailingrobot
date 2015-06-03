@@ -24,7 +24,7 @@ static void threadGPSupdate() {
 	catch (const char * e) {
 		std::cout << "ERROR while running static void threadGPSupdate()" << e << std::endl;
 	}
-
+	//chages chages.....
 }
 
 void term(int signum)
