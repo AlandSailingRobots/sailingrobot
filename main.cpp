@@ -85,9 +85,6 @@ int main(int argc, char *argv[]) {
 	}
 	printf("-DONE\n");
 
-	//	Hämtar ett heltal (1 eller 0) som visar om xbeen skall skicka och ta emot data.
-	bool xBee_sending = db.retriveCellAsInt("configs", "1", "xb_send");
-	bool xBee_receiving = db.retriveCellAsInt("configs", "1", "xb_recv");
 
 	// Create main sailing robot controller
 	SailingRobot sr(&externalCommand, &systemstate, &db);
@@ -105,13 +102,21 @@ int main(int argc, char *argv[]) {
 
 		//start xBeeSync thread
 
+		//	Hämtar ett heltal (1 eller 0) som visar om xbeen skall skicka och ta emot data.
+		bool xBee_sending = db.retriveCellAsInt("configs", "1", "xb_send");
+		bool xBee_receiving = db.retriveCellAsInt("configs", "1", "xb_recv");
+
+		xBee_sending = false;
+		xBee_receiving = false;
 
 		if (xBee_sending || xBee_receiving) {
 			xbee_handle.reset(new xBeeSync(&externalCommand, &systemstate, xBee_sending, xBee_receiving));
 			std::thread xbee_sync_thread (threadXBeeSyncRun);
+			xbee_sync_thread.detach();
 		}
 		//start GPSupdater thread
 		std::thread gps_reader_thread (threadGPSupdate);
+		gps_reader_thread.detach();
 
 		printf("-Starting main loop...\n");
 		sr.run();
