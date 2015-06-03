@@ -35,7 +35,7 @@ class SailingRobot {
 
 public:
 
-	SailingRobot(ExternalCommand* externalCommand, SystemState *systemState, GPSReader *gps, DBHandler *db);
+	SailingRobot(ExternalCommand* externalCommand, SystemState *systemState, GPS *gps, DBHandler *db);
 	~SailingRobot();
 	void init(std::string programPath, std::string errorFileName);
 	void run();
@@ -95,7 +95,7 @@ private:
 	HTTPSync m_httpSync;
 
 	Compass* m_compass;
-	GPSReader* m_gpsReader;
+	GPS* m_gpsReader;
 	Windsensor* m_windSensor;
 
 	std::unique_ptr<Actuator> m_maestroController;

@@ -9,7 +9,7 @@
 #include <iostream>
 
 
-GPSupdater::GPSupdater(GPSReader* reader):
+GPSupdater::GPSupdater(GPS* reader):
 m_gpsReader(reader),
 m_running(true)
 {

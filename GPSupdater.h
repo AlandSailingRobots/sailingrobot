@@ -9,18 +9,18 @@
 #define GPS_GPSUPDATER_H_
 
 #include <mutex>
-#include "gps/GPSReader.h"
+#include "gps/GPS.h"
 
 class GPSupdater {
 
 	public:
-		GPSupdater(GPSReader *reader);
+		GPSupdater(GPS *reader);
 		~GPSupdater(){};
 		void run();
 		void close();
 
 	private:
-		GPSReader *m_gpsReader;
+		GPS *m_gpsReader;
 		std::mutex m_mutex;
 		bool m_running;
 

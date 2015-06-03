@@ -7,10 +7,11 @@
 #include <cstring>
 #include <cmath>
 
-SailingRobot::SailingRobot(ExternalCommand* externalCommand, SystemState *systemState, GPSReader *gps, DBHandler *db) :
+SailingRobot::SailingRobot(ExternalCommand* externalCommand,
+						   SystemState *systemState, GPS *gps, DBHandler *db) :
 	m_mockWindsensor(true),
 	m_mockCompass(true),
-	m_mockPosition(false),
+	m_mockPosition(true),
 	m_mockMaestro(true),
 
 	m_dbHandler(db),
