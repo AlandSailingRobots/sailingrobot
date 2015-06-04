@@ -13,7 +13,6 @@
 std::string xBee::readOutput(int fd){
 
 	std::string printer;
-	std::string result;
 
 	int available = serialDataAvail(fd);
 
@@ -27,28 +26,7 @@ std::string xBee::readOutput(int fd){
 		printer = "Data reception failed.";
 	}
 
-
-
-	std::size_t pos_start = m_receivedBuffer.find("<message>");
-	std::size_t pos_end = m_receivedBuffer.find("</message>");
-
-	if (pos_start != std::string::npos &&
-		pos_end != std::string::npos &&
-		pos_start < pos_end) {
-    	std::cout << "XML message start and end tags found!" << '\n' << 
-    			     "Start tag pos: " << pos_start << '\n' << "End tag pos: " << pos_end << std::endl;
-
-		result = m_receivedBuffer.substr(pos_start, pos_end + pos_start); 
-		std::cout << "Resulting XML: " << result << std::endl;
-
-		m_receivedBuffer.clear();
-	}
-
-	if(m_receivedBuffer.size() > 500) {
-		m_receivedBuffer.clear();
-	}
-
-	return result;
+	return findXmlMessage(&m_receivedBuffer);
 }
 
 void xBee::printInput(std::string input, int fd){
@@ -84,4 +62,43 @@ int xBee::init(int baudRate){
 	
 	return fd;
 	
+}
+
+
+std::string xBee::findXmlMessage(std::string* buffer) {
+
+	std::string result = "";
+
+	std::string messageStartTag = "<message>";
+	std::string messageEndTag = "</message>";
+	std::size_t pos_start = buffer->rfind(messageStartTag);
+	std::size_t pos_end = buffer->rfind(messageEndTag);
+
+	// in case the start of an incomplete message comes after a complete message
+	std::size_t pos_start2 = buffer->rfind(messageStartTag, pos_start-1);
+
+	//std::cout << "Start tag pos: " << pos_start << '\n' << 
+    //			 "End tag pos: " << pos_end << std::endl;
+
+	if (pos_start != std::string::npos &&
+		pos_end != std::string::npos) {
+
+		if (pos_start < pos_end) {
+			result = buffer->substr(pos_start, 
+				pos_end - pos_start + messageEndTag.size());
+			buffer->erase(0, pos_end + messageEndTag.size());
+		}
+		else if (pos_start2 < pos_end) {
+			result = buffer->substr(pos_start2, 
+				pos_end - pos_start2 + messageEndTag.size());
+			buffer->erase(0, pos_end + messageEndTag.size());
+		}
+	}
+
+	if(buffer->size() > 500) {
+
+		buffer->clear();
+	}
+
+	return result;
 }
