@@ -7,7 +7,9 @@
 #include <cstring>
 #include <cmath>
 
-SailingRobot::SailingRobot(ExternalCommand* externalCommand, SystemState *systemState, DBHandler *db) :
+SailingRobot::SailingRobot(ExternalCommand* externalCommand,
+						   SystemState *systemState, DBHandler *db) :
+
 	m_mockWindsensor(true),
 	m_mockCompass(true),
 	m_mockPosition(true),
@@ -16,26 +18,31 @@ SailingRobot::SailingRobot(ExternalCommand* externalCommand, SystemState *system
 	m_dbHandler(db),
 
 	m_externalCommand(externalCommand),
-	m_systemState(systemState)
+	m_systemState(systemState),
+
+	m_systemStateModel(
+		SystemStateModel(
+			GPSModel("",0,0,0,0,0,0),
+			WindsensorModel(0,0,0),
+			CompassModel(0,0,0),
+			0,
+			0
+		)
+	)
 {
 
-/*	sleepypi stuff
-	wiringPiSetup();
-	pinMode(6, OUTPUT);
-	digitalWrite(6, HIGH);*/
 }
 
 SailingRobot::~SailingRobot() {
-/*	sleepypi stuff
-	digitalWrite(6, LOW);gtk
-	std::cout << "sr destruct\n";*/
+
 }
 
 
 void SailingRobot::init(std::string programPath, std::string errorFileName) {
 	m_errorLogPath = programPath + errorFileName;
 
-	m_getHeadingFromCompass = m_dbHandler->retriveCellAsInt("configs", "1", "flag_heading_compass");
+	m_getHeadingFromCompass = m_dbHandler->retriveCellAsInt("configs", "1",
+		"flag_heading_compass");
 
 	printf(" Starting HTTPSync\t\t");
 	setupHTTPSync();
@@ -81,57 +88,59 @@ void SailingRobot::init(std::string programPath, std::string errorFileName) {
 	//syncServer();
 }
 
-int SailingRobot::getHeading(){
+int SailingRobot::getHeading() {
 
 	int newHeading = 0;
 
 	if (m_getHeadingFromCompass) {
-			newHeading = m_compass->getHeading();
-		}
-		else {
-			newHeading = m_gpsReader->getHeading();
-		}
+		newHeading = m_compass->getHeading();
+	}
+	else {
+		newHeading = m_gpsReader->getHeading();
+	}
 
 	return newHeading;
-
 }
 
-int SailingRobot::mockLatitude(int oldLat){
+int SailingRobot::mockLatitude(int oldLat) {
 
 	double courseToSteer = m_courseCalc.getCTS();
 
-	if(courseToSteer > 90 && courseToSteer < 270 && courseToSteer != 0){
+	if(courseToSteer > 90 && courseToSteer < 270 && courseToSteer != 0) {
 
-			oldLat -= 0.1;
-	}else if (courseToSteer != 0){
-			oldLat += 0.1;
+		oldLat -= 0.1;
+	}
+	else if (courseToSteer != 0) {
+		oldLat += 0.1;
 	}
 
 	return oldLat;
-
 }
 
-int SailingRobot::mockLongitude(int oldLong){
+int SailingRobot::mockLongitude(int oldLong) {
 
 	double courseToSteer = m_courseCalc.getCTS();
 
-	if (courseToSteer < 180 && courseToSteer != 0){
+	if (courseToSteer < 180 && courseToSteer != 0) {
 
-			oldLong += 0.1;
-
-	}else if (courseToSteer != 0){
-					oldLong -= 0.1;
+		oldLong += 0.1;
+	}
+	else if (courseToSteer != 0) {
+		
+		oldLong -= 0.1;
 	}
 
 	return oldLong;
-
 }
 
 void SailingRobot::run() {
+
 	sleep(3);
-	m_running=true;
+
+	m_running = true;
 	int rudderCommand, sailCommand, windDir, twd, heading = 0;
 	double longitude = 4, latitude = -3;
+
 	printf("*SailingRobot::run() started.\n");
 	std::cout << "waypoint target." << std::endl 
 		<< "long: " << m_waypointLongitude << std::endl
@@ -158,21 +167,20 @@ void SailingRobot::run() {
 			//calc DTW
 			if (m_mockPosition) {
 
-
 				longitude = mockLongitude(longitude);
 				latitude = mockLatitude(latitude);
 				
 				double courseToSteer = m_courseCalc.getCTS();
 
-
-				if (heading > courseToSteer){
+				if (heading > courseToSteer) {
 
 					heading--;
-
-				}else if (heading < courseToSteer){
+				}
+				else if (heading < courseToSteer) {
 
 					heading++;
-				}else heading = courseToSteer;
+				}
+				else heading = courseToSteer;
 
 			}
 			else {
@@ -201,17 +209,18 @@ void SailingRobot::run() {
 
 			//rudder position calculation
 			rudderCommand = m_rudderCommand.getCommand(m_courseCalc.getCTS(), heading);
-			if(!m_externalCommand->getAutorun()){
+			if(!m_externalCommand->getAutorun()) {
 				rudderCommand = m_externalCommand->getRudderCommand();
 			}
 
-		} else {
+		}
+		else {
 			logMessage("error", "SailingRobot::run(), gps NaN. Using values from last iteration.");
 		}
 
 		//sail position calculation
 		sailCommand = m_sailCommand.getCommand(windDir);
-		if(!m_externalCommand->getAutorun()){
+		if(!m_externalCommand->getAutorun()) {
 			sailCommand = m_externalCommand->getSailCommand();
 		}
 
@@ -274,18 +283,16 @@ void SailingRobot::run() {
 	printf("*SailingRobot::run() exiting\n");
 }
 
-
 void SailingRobot::shutdown() {
 //	syncServer();
 	m_running=false;
 	m_dbHandler->closeDatabase();
 }
 
-
 void SailingRobot::logMessage(std::string type, std::string message) {
 	try {
 		m_dbHandler->insertMessageLog(m_systemStateModel.gpsModel.timestamp, type, message);
-       	} catch (const char * logError) {
+    } catch (const char * logError) {
 		std::ofstream errorFile;
 		errorFile.open(m_errorLogPath.c_str(), std::ios::app);
 		errorFile << "log error: " << logError << "\n";
