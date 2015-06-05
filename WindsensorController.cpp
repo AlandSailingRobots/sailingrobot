@@ -46,7 +46,6 @@ void WindsensorController::run()
 			)
 		);
 	}
-	std::cout << " - Windsensor shutdown." << std::endl;
 }
 
 void WindsensorController::close()

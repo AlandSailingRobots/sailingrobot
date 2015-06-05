@@ -32,6 +32,7 @@ static void threadGPSupdate() {
 
 static void threadWindsensor() {
 	windsensor_handle->run();
+	std::cout << " * Windsensor thread exited." << std::endl;
 }
 
 void term(int signum)
@@ -114,6 +115,7 @@ int main(int argc, char *argv[]) {
 		
 		sr.init(path, errorLog);
 		
+		printf(" Starting Windsensor\t\t");
 		windsensor_handle.reset(
 			new WindsensorController(
 				&systemstate,
@@ -123,6 +125,7 @@ int main(int argc, char *argv[]) {
 				db.retriveCellAsInt("configs", "1", "ws_buff")
 			)
 		);
+		printf("OK\n");
 
 		printf("-DONE\n");
 
