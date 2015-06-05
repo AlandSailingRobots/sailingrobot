@@ -30,6 +30,10 @@ static void threadGPSupdate() {
 	}
 }
 
+static void threadWindsensor() {
+	windsensor_handle->run();
+}
+
 void term(int signum)
 {
 	printf("\n-Interupt signal detected, shutting down...\n");
@@ -41,6 +45,9 @@ void term(int signum)
 		printf(" Sending stop signal to xBee thread\n");
 		xbee_handle->close();
 	}
+	printf(" Sending stop signal to windsensor thread\n");
+	windsensor_handle->close();
+	windsensor_thread.join();
 	printf("-DONE\n");
 }
 
@@ -49,6 +56,7 @@ int main(int argc, char *argv[]) {
 	// Change to false when running on RaspberrPi
 	m_mockGPS=true;
 	m_xBeeOFF=true;
+	m_mockWindsensor = true;
 
 	std::string path, db_name, errorLog;
 	if (argc < 2) {
@@ -103,7 +111,19 @@ int main(int argc, char *argv[]) {
 
 	try {
 		printf("-Initializing...\n");
+		
 		sr.init(path, errorLog);
+		
+		windsensor_handle.reset(
+			new WindsensorController(
+				&systemstate,
+				m_mockWindsensor, 
+				db.retriveCell("configs", "1", "ws_port"),
+				db.retriveCellAsInt("configs", "1", "ws_baud"),
+				db.retriveCellAsInt("configs", "1", "ws_buff")
+			)
+		);
+
 		printf("-DONE\n");
 
 		printf("-Starting threads...\n");
@@ -129,6 +149,8 @@ int main(int argc, char *argv[]) {
 		// Start GPSupdater thread
 		std::thread gps_reader_thread (threadGPSupdate);
 		gps_reader_thread.detach();
+
+		windsensor_thread = std::thread(threadWindsensor);
 
 		printf("-Starting main loop...\n");
 		sr.run();

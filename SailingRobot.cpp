@@ -10,7 +10,6 @@
 SailingRobot::SailingRobot(ExternalCommand* externalCommand,
 						   SystemState *systemState, DBHandler *db) :
 
-	m_mockWindsensor(true),
 	m_mockCompass(true),
 	m_mockPosition(true),
 	m_mockMaestro(true),
@@ -50,10 +49,6 @@ void SailingRobot::init(std::string programPath, std::string errorFileName) {
 
 	printf(" Starting Compass\t\t");
 	setupCompass();
-	printf("OK\n");
-
-	printf(" Starting Windsensor\t\t");
-	setupWindSensor();
 	printf("OK\n");
 
 	printf(" Starting Maestro\t\t");
@@ -135,8 +130,6 @@ int SailingRobot::mockLongitude(int oldLong) {
 
 void SailingRobot::run() {
 
-	sleep(3);
-
 	m_running = true;
 	int rudderCommand, sailCommand, windDir, twd, heading = 0;
 	double longitude = 4, latitude = -3;
@@ -150,14 +143,8 @@ void SailingRobot::run() {
 
 		//Get data from SystemStateModel to local object
 		m_systemState->getData(&m_systemStateModel);
-
-		try {
-			m_windSensor->parseData(m_windSensor->refreshData());	
-		} catch(const char * e) {
-			std::cout << "ERROR: SailingRobot::Run m_windSensor->parseData " << e << std::endl;
-		}
 		
-		windDir = m_windSensor->getDirection();
+		windDir = m_systemStateModel.windsensorModel.direction;
 
 		m_compass->readValues();
 		heading = getHeading();
@@ -230,11 +217,6 @@ void SailingRobot::run() {
 		m_sailServo.setPosition(sailCommand);
 
 		//update system state
-		m_systemState->setWindsensorModel(WindsensorModel(
-				m_windSensor->getDirection(),
-				m_windSensor->getSpeed(),
-				m_windSensor->getTemperature()
-			));
 		m_systemState->setCompassModel(CompassModel(
 				m_compass->getHeading(),
 				m_compass->getPitch(),
@@ -261,8 +243,8 @@ void SailingRobot::run() {
 			m_courseCalc.getCTS(),
 			m_courseCalc.getTACK(),
 			windDir,
-			m_windSensor->getSpeed(),
-			m_windSensor->getTemperature(),
+			m_systemStateModel.windsensorModel.speed,
+			m_systemStateModel.windsensorModel.temperature,
 			atoi(m_waypointId.c_str()),
 			m_compass->getHeading(),
 			m_compass->getPitch(),
@@ -279,6 +261,8 @@ void SailingRobot::run() {
 			nextWaypoint();
 			setupWaypoint();
 		}
+
+		sleep(0.2);
 	}
 	printf("*SailingRobot::run() exiting\n");
 }
@@ -399,35 +383,6 @@ void SailingRobot::setupSailServo() {
 		throw;
 	}
 	logMessage("message", "setupSailServo() done");
-}
-
-void SailingRobot::setupWindSensor() {
-	std::string port_name = "non";
-	int baud_rate = 1;
-	int buff_size = 1;
-
-	try {
-		port_name = m_dbHandler->retriveCell("configs", "1", "ws_port");
-		baud_rate = m_dbHandler->retriveCellAsInt("configs", "1", "ws_baud");
-		buff_size = m_dbHandler->retriveCellAsInt("configs", "1", "ws_buff");
-	} catch (const char * error) {
-		logMessage("error", error);
-	}
-	if (!m_mockWindsensor) {
-		m_windSensor = new CV7;
-	}
-	else {
-		m_windSensor = new MockWindsensor;
-	}
-
-	try {
-		m_windSensor->loadConfig( port_name, baud_rate );
-		m_windSensor->setBufferSize( buff_size );
-	} catch (const char * error) {
-		logMessage("error", error);
-		throw error;
-	}
-	logMessage("message", "setupWindSensor() done");
 }
 
 void SailingRobot::setupCourseCalculation() {

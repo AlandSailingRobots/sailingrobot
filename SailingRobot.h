@@ -14,10 +14,6 @@
 #include "Compass/MockCompass.h"
 #include "Compass/HMC6343.h"
 
-#include "CV7/Windsensor.h"
-#include "CV7/MockWindsensor.h"
-#include "CV7/CV7.h"
-
 #include "gps/GPSReader.h"
 #include "gps/MockGPSReader.h"
 
@@ -59,7 +55,6 @@ private:
 	void setupMaestro();
 	void setupRudderServo();
 	void setupSailServo();
-	void setupWindSensor();
 	//void setupGPS();
 	void setupCourseCalculation();
 	void setupRudderCommand();
@@ -79,7 +74,6 @@ private:
 	/**
 	 *  bool flags for signaling the use of mock objects
 	 */
-	bool m_mockWindsensor;
 	bool m_mockCompass;
 	bool m_mockPosition;
 	bool m_mockMaestro;
@@ -96,7 +90,6 @@ private:
 
 	Compass* m_compass;
 	GPS* m_gpsReader;
-	Windsensor* m_windSensor;
 
 	std::unique_ptr<Actuator> m_maestroController;
 	ServoObject m_rudderServo;
