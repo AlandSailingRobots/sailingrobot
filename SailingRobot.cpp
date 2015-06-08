@@ -6,6 +6,8 @@
 #include <fstream>
 #include <cstring>
 #include <cmath>
+#include <chrono>
+#include <thread>
 
 SailingRobot::SailingRobot(ExternalCommand* externalCommand,
 						   SystemState *systemState, DBHandler *db) :
@@ -262,7 +264,7 @@ void SailingRobot::run() {
 			setupWaypoint();
 		}
 
-		sleep(0.2);
+		std::this_thread::sleep_for(std::chrono::milliseconds(200));
 	}
 	printf("*SailingRobot::run() exiting\n");
 }
