@@ -16,19 +16,14 @@ FILE = xBee.o
 
 
 
-
 all : $(SOURCES) $(HEADERS)
 	$(CC) $(SOURCES) $(FLAGS) $(LIBS) -c -o $(FILE)
 
-example : $(SOURCES) $(HEADERS) example.cpp
-	$(CC) $(SOURCES) example.cpp $(FLAGS) $(LIBS) -o example
 
 clean :
-	rm -f ./example
 	rm -f ./xBee.o
 
 gitclean :
-	rm -f ./example
 	rm -f ./*.cpp
 	rm -f ./*.h
 
