@@ -9,7 +9,7 @@
 
 CC = g++ 
 FLAGS = -Wall -pedantic -Werror -std=c++14 
-LIBS = -lsqlite3 -lgps -lrt -lwiringPi -lcurl -I$(SAILINGROBOTS_HOME)
+LIBS = -lsqlite3 -lgps -lrt -lwiringPi -lcurl -lpthread -I$(SAILINGROBOTS_HOME)
 
 COMPASS = Compass/Compass.o Compass/MockCompass.o Compass/Utility.o Compass/HMC6343.o
 COURSE = coursecalculation/CourseCalculation.o 
