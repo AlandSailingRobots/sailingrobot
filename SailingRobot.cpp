@@ -11,7 +11,9 @@
 
 SailingRobot::SailingRobot(ExternalCommand* externalCommand,
 						   SystemState *systemState, DBHandler *db) :
-
+	
+	m_waypointRadius(15),
+	
 	m_mockCompass(true),
 	m_mockPosition(true),
 	m_mockMaestro(true),
@@ -256,7 +258,7 @@ void SailingRobot::run() {
 //		syncServer();
 
 		//check if we are within 15meters of the waypoint and move to next wp in that case
-		if (m_courseCalc.getDTW() < 15) {
+		if (m_courseCalc.getDTW() < m_waypointRadius) {
 
 			//remove this cout later
 			
@@ -425,11 +427,13 @@ void SailingRobot::setupSailCommand() {
 void SailingRobot::setupWaypoint() {
 	std::string id;
 	std::string lat;
-	std::string lon;
+	std::string lon, radius;
+
 	try {
 		id = m_dbHandler->getMinIdFromTable("waypoints");
 		lat = m_dbHandler->retriveCell("waypoints", id, "lat");
 		lon = m_dbHandler->retriveCell("waypoints", id, "lon");
+		radius = m_dbHandler->retriveCell("waypoints", id, "radius");
 	} catch (const char * error) {
 		logMessage("error", error);
 	}
@@ -441,15 +445,16 @@ void SailingRobot::setupWaypoint() {
 		}
 		m_waypointLatitude = atof(lat.c_str());
 		m_waypointLongitude = atof(lon.c_str());
+		m_waypointRadius = atoi(radius.c_str());
 
-		std::cout << "New waypoint picked!" << m_waypointLatitude << m_waypointLongitude << std::endl;
+		std::cout << "New waypoint picked!" << m_waypointLatitude << " " << 
+			m_waypointLongitude << " " << m_waypointRadius << std::endl;
 	} catch (const char * error) {
 		logMessage("error", error);
 		throw;
 	}
-	logMessage("message", "setupWaypoint() done");
 
-	
+	logMessage("message", "setupWaypoint() done");
 }
 
 void SailingRobot::setupHTTPSync() {

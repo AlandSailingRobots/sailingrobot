@@ -68,6 +68,7 @@ private:
 	float m_waypointLatitude;
 	float m_waypointLongitude;
 	std::string m_waypointId;
+	int m_waypointRadius;
 
 	bool m_running;
 
