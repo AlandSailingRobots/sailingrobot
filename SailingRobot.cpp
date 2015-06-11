@@ -138,12 +138,19 @@ void SailingRobot::run() {
 	int rudderCommand, sailCommand, windDir, twd, heading = 0;
 	double longitude = 4, latitude = -3;
 
+	std::chrono::duration<double> loop_time(0.2);
+	std::chrono::steady_clock::time_point start, end;
+	std::chrono::duration<double> time_span;
+	int nanoSecondsToSleep;
+	int toNano = 1000*1000*1000;
+
 	printf("*SailingRobot::run() started.\n");
 	std::cout << "waypoint target." << std::endl 
 		<< "long: " << m_waypointLongitude << std::endl
 		<< "lat : " << m_waypointLatitude << std::endl;
 
 	while(m_running) {
+		start = std::chrono::steady_clock::now();
 
 		//Get data from SystemStateModel to local object
 		m_systemState->getData(&m_systemStateModel);
@@ -266,7 +273,20 @@ void SailingRobot::run() {
 			setupWaypoint();
 		}
 
-		std::this_thread::sleep_for(std::chrono::milliseconds(200));
+		end = std::chrono::steady_clock::now();
+		time_span = std::chrono::duration_cast<std::chrono::duration<double>>(end - start);
+		time_span = loop_time - time_span;
+		nanoSecondsToSleep = time_span.count() * toNano;
+
+		std::this_thread::sleep_for(std::chrono::nanoseconds(nanoSecondsToSleep));
+
+		end = std::chrono::steady_clock::now();
+
+		time_span = 
+			std::chrono::duration_cast<std::chrono::duration<double>>(end - start);
+
+		std::cout << "Sailingrobot loop took: " << time_span.count() << " seconds.";
+		std::cout << std::endl;
 	}
 	printf("*SailingRobot::run() exiting\n");
 }
