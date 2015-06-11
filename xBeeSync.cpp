@@ -28,7 +28,7 @@ void xBeeSync::run()
 	std::cout << "*xBeeSync thread started." << std::endl;
 	while(isRunning()) 
 	{
-		m_system_state->getData(&m_model);
+		m_system_state->getData(m_model);
 
 		if(m_sending)
 		{

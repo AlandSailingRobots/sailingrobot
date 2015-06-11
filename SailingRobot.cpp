@@ -153,7 +153,7 @@ void SailingRobot::run() {
 		start = std::chrono::steady_clock::now();
 
 		//Get data from SystemStateModel to local object
-		m_systemState->getData(&m_systemStateModel);
+		m_systemState->getData(m_systemStateModel);
 		
 		windDir = m_systemStateModel.windsensorModel.direction;
 
@@ -266,8 +266,6 @@ void SailingRobot::run() {
 
 		//check if we are within 15meters of the waypoint and move to next wp in that case
 		if (m_courseCalc.getDTW() < m_waypointRadius) {
-
-			//remove this cout later
 			
 			nextWaypoint();
 			setupWaypoint();
@@ -285,7 +283,7 @@ void SailingRobot::run() {
 		time_span = 
 			std::chrono::duration_cast<std::chrono::duration<double>>(end - start);
 
-		std::cout << "Sailingrobot loop took: " << time_span.count() << " seconds.";
+		std::cout << "Sailingrobot loop took " << time_span.count() << " seconds.";
 		std::cout << std::endl;
 	}
 	printf("*SailingRobot::run() exiting\n");
