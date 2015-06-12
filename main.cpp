@@ -144,14 +144,11 @@ int main(int argc, char *argv[]) {
 			xBee_receiving = false;
 		}
 
+		std::unique_ptr<ThreadRAII> xbee_sync_thread;
 		if (xBee_sending || xBee_receiving) {
 			xbee_handle.reset(new xBeeSync(&externalCommand, &systemstate, xBee_sending, xBee_receiving));
-			//std::thread xbee_sync_thread (threadXBeeSyncRun);
-			//xbee_sync_thread.detach();
-			ThreadRAII xbee_sync_thread(
-				std::thread(threadXBeeSyncRun),
-				ThreadRAII::DtorAction::detach
-			);
+			xbee_sync_thread = std::unique_ptr<ThreadRAII>(
+				new ThreadRAII(std::thread(threadXBeeSyncRun), ThreadRAII::DtorAction::detach));
 		}
 
 		// Start GPSupdater thread
