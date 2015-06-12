@@ -1,5 +1,6 @@
 #include "xBeeSync.h"
-#include <unistd.h>		//sleep
+#include <chrono>
+#include <thread>
 
 xBeeSync::xBeeSync(ExternalCommand* externalCommand, SystemState *systemState,
 				   bool sending, bool receiving) :
@@ -79,8 +80,9 @@ void xBeeSync::run()
 	 		}
 		}
 
-		//make sure there are at least one second between each xml message
-		sleep(1);
+		//make sure there are at least 0.4 seconds between each xml message
+		std::this_thread::sleep_for(
+			std::chrono::milliseconds(400));
 	}
 	std::cout << "*xBeeSync thread exited." << std::endl;
 }
