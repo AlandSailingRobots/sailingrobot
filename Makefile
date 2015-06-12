@@ -21,7 +21,7 @@ GPS = gps/GPSReader.o gps/MockGPSReader.o
 HTTP = httpsync/HTTPSync.o
 XML_LOG = xmlparser/pugi.o xmlparser/XML_log.o
 XBEE = xBee/xBee.o
-THREAD = thread/SystemState.o thread/ExternalCommand.o
+THREAD = thread/SystemState.o thread/ExternalCommand.o thread/ThreadRAII.o
 
 
 OBJECTS = $(COMPASS) $(COURSE) $(DB) $(COMMAND) $(MAESTRO) $(CV7) $(GPS) $(HTTP) $(XML_LOG) $(XBEE) $(THREAD)

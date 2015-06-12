@@ -3,6 +3,7 @@
 #include "SailingRobot.h"
 #include "thread/ExternalCommand.h"
 #include "thread/SystemState.h"
+#include "thread/ThreadRAII.h"
 #include "xBeeSync.h"
 #include "GPSupdater.h"
 #include <thread>
@@ -48,7 +49,7 @@ void term(int signum)
 	}
 	printf(" Sending stop signal to windsensor thread\n");
 	windsensor_handle->close();
-	windsensor_thread.join();
+	windsensor_thread->get().join();
 	printf("-DONE\n");
 }
 
@@ -145,15 +146,31 @@ int main(int argc, char *argv[]) {
 
 		if (xBee_sending || xBee_receiving) {
 			xbee_handle.reset(new xBeeSync(&externalCommand, &systemstate, xBee_sending, xBee_receiving));
-			std::thread xbee_sync_thread (threadXBeeSyncRun);
-			xbee_sync_thread.detach();
+			//std::thread xbee_sync_thread (threadXBeeSyncRun);
+			//xbee_sync_thread.detach();
+			ThreadRAII xbee_sync_thread(
+				std::thread(threadXBeeSyncRun),
+				ThreadRAII::DtorAction::detach
+			);
 		}
 
 		// Start GPSupdater thread
-		std::thread gps_reader_thread (threadGPSupdate);
-		gps_reader_thread.detach();
+		//std::thread gps_reader_thread (threadGPSupdate);
+		//gps_reader_thread.detach();
 
-		windsensor_thread = std::thread(threadWindsensor);
+		// With RAII instead:
+		
+		ThreadRAII gps_reader_thread(
+			std::thread(threadGPSupdate),
+			ThreadRAII::DtorAction::detach
+		);
+
+		//windsensor_thread = std::thread(threadWindsensor);
+
+		windsensor_thread = new ThreadRAII(
+			std::thread(threadWindsensor),
+			ThreadRAII::DtorAction::detach
+		);
 
 		printf("-Starting main loop...\n");
 		sr.run();

@@ -14,13 +14,14 @@
 #include "xBeeSync.h"
 #include "GPSupdater.h"
 #include "WindsensorController.h"
+#include "thread/ThreadRAII.h"
 
 SailingRobot *sr_handle;
 std::unique_ptr<xBeeSync> xbee_handle;
 GPSupdater *gps_handle;
 std::unique_ptr<WindsensorController> windsensor_handle;
 
-std::thread windsensor_thread;
+ThreadRAII *windsensor_thread;
 
 bool m_mockGPS;
 bool m_xBeeOFF;
