@@ -138,7 +138,9 @@ void SailingRobot::run() {
 	int rudderCommand, sailCommand, windDir, twd, heading = 0;
 	double longitude = 4, latitude = -3;
 
-	std::chrono::duration<double> loop_time(0.2);
+	std::string sr_loop_time =
+		m_dbHandler->retriveCell("configs", "1", "sr_loop_time");
+	std::chrono::duration<double> loop_time(atof(sr_loop_time.c_str()));
 	std::chrono::steady_clock::time_point start, end;
 	std::chrono::duration<double> time_span;
 	int nanoSecondsToSleep;
@@ -264,7 +266,8 @@ void SailingRobot::run() {
 
 //		syncServer();
 
-		//check if we are within 15meters of the waypoint and move to next wp in that case
+		// check if we are within the radius of the waypoint
+		// and move to next wp in that case
 		if (m_courseCalc.getDTW() < m_waypointRadius) {
 			
 			nextWaypoint();
@@ -272,20 +275,15 @@ void SailingRobot::run() {
 		}
 
 		end = std::chrono::steady_clock::now();
-		time_span = std::chrono::duration_cast<std::chrono::duration<double>>(end - start);
+		time_span = std::chrono::duration_cast<
+			std::chrono::duration<double>>(end - start);
 		time_span = loop_time - time_span;
 		nanoSecondsToSleep = time_span.count() * toNano;
 
-		std::this_thread::sleep_for(std::chrono::nanoseconds(nanoSecondsToSleep));
-
-		end = std::chrono::steady_clock::now();
-
-		time_span = 
-			std::chrono::duration_cast<std::chrono::duration<double>>(end - start);
-
-		std::cout << "Sailingrobot loop took " << time_span.count() << " seconds.";
-		std::cout << std::endl;
+		std::this_thread::sleep_for(
+			std::chrono::nanoseconds(nanoSecondsToSleep));
 	}
+
 	printf("*SailingRobot::run() exiting\n");
 }
 
@@ -445,13 +443,14 @@ void SailingRobot::setupSailCommand() {
 void SailingRobot::setupWaypoint() {
 	std::string id;
 	std::string lat;
-	std::string lon, radius;
+	std::string lon;
 
 	try {
 		id = m_dbHandler->getMinIdFromTable("waypoints");
 		lat = m_dbHandler->retriveCell("waypoints", id, "lat");
 		lon = m_dbHandler->retriveCell("waypoints", id, "lon");
-		radius = m_dbHandler->retriveCell("waypoints", id, "radius");
+		m_waypointRadius =
+			m_dbHandler->retriveCellAsInt("waypoints",id, "radius");
 	} catch (const char * error) {
 		logMessage("error", error);
 	}
@@ -463,10 +462,9 @@ void SailingRobot::setupWaypoint() {
 		}
 		m_waypointLatitude = atof(lat.c_str());
 		m_waypointLongitude = atof(lon.c_str());
-		m_waypointRadius = atoi(radius.c_str());
 
-		std::cout << "New waypoint picked!" << m_waypointLatitude << " " << 
-			m_waypointLongitude << " " << m_waypointRadius << std::endl;
+		//std::cout << "New waypoint picked!" << m_waypointLatitude << " " << 
+		//	m_waypointLongitude << " " << m_waypointRadius << std::endl;
 	} catch (const char * error) {
 		logMessage("error", error);
 		throw;
