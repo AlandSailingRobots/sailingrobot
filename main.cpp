@@ -36,22 +36,6 @@ static void threadWindsensor() {
 	std::cout << " * Windsensor thread exited." << std::endl;
 }
 
-void term(int signum)
-{
-	printf("\n-Interupt signal detected, shutting down...\n");
-	printf(" Sending stop signal to main loop\n");
-	sr_handle->shutdown();
-	printf(" Sending stop signal to GPS thread\n");
-	gps_handle->close();
-	if (xbee_handle) {
-		printf(" Sending stop signal to xBee thread\n");
-		xbee_handle->close();
-	}
-	printf(" Sending stop signal to windsensor thread\n");
-	windsensor_handle->close();
-//	windsensor_thread->get().join();
-	printf("-DONE\n");
-}
 
 int main(int argc, char *argv[]) {
 
@@ -70,11 +54,6 @@ int main(int argc, char *argv[]) {
 		db_name = "/asr.db";
 		errorLog = "/errors.log";
 	}
-
-    struct sigaction action;
-    memset(&action, 0, sizeof(struct sigaction));
-    action.sa_handler = term;
-    sigaction(SIGINT, &action, NULL);
 
 	printf("\n");
 	printf("  Sailing Robot\n");
@@ -152,18 +131,12 @@ int main(int argc, char *argv[]) {
 		}
 
 		// Start GPSupdater thread
-		//std::thread gps_reader_thread (threadGPSupdate);
-		//gps_reader_thread.detach();
-
-		// With RAII instead:
-		
 		ThreadRAII gps_reader_thread(
 			std::thread(threadGPSupdate),
 			ThreadRAII::DtorAction::detach
 		);
 
-		//windsensor_thread = std::thread(threadWindsensor);
-
+		// Start windsensor thread
 		windsensor_thread = new ThreadRAII(
 			std::thread(threadWindsensor),
 			ThreadRAII::DtorAction::join
@@ -175,7 +148,6 @@ int main(int argc, char *argv[]) {
 
 	} catch (const char * e) {
 		printf("ERROR[%s]\n\n",e);
-		//term(1);
 		return 1;
 	}
 
