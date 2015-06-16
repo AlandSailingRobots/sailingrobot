@@ -49,7 +49,7 @@ void term(int signum)
 	}
 	printf(" Sending stop signal to windsensor thread\n");
 	windsensor_handle->close();
-	windsensor_thread->get().join();
+//	windsensor_thread->get().join();
 	printf("-DONE\n");
 }
 
@@ -58,7 +58,7 @@ int main(int argc, char *argv[]) {
 	// Change to false when running on RaspberrPi
 	m_mockGPS=true;
 	m_xBeeOFF=true;
-	m_mockWindsensor = true;
+	m_mockWindsensor = false;
 
 	std::string path, db_name, errorLog;
 	if (argc < 2) {
@@ -166,7 +166,7 @@ int main(int argc, char *argv[]) {
 
 		windsensor_thread = new ThreadRAII(
 			std::thread(threadWindsensor),
-			ThreadRAII::DtorAction::detach
+			ThreadRAII::DtorAction::join
 		);
 
 		printf("-Starting main loop...\n");
