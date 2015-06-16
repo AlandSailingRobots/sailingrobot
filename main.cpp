@@ -42,7 +42,7 @@ int main(int argc, char *argv[]) {
 	// Change to false when running on RaspberrPi
 	m_mockGPS=true;
 	m_xBeeOFF=true;
-	m_mockWindsensor = false;
+	m_mockWindsensor = true;
 
 	std::string path, db_name, errorLog;
 	if (argc < 2) {
