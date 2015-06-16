@@ -175,7 +175,7 @@ int main(int argc, char *argv[]) {
 
 	} catch (const char * e) {
 		printf("ERROR[%s]\n\n",e);
-		term(1);
+		//term(1);
 		return 1;
 	}
 
