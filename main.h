@@ -15,6 +15,7 @@
 #include "GPSupdater.h"
 #include "WindsensorController.h"
 #include "thread/ThreadRAII.h"
+#include "logger/Logger.h"
 
 SailingRobot *sr_handle;
 std::unique_ptr<xBeeSync> xbee_handle;
@@ -26,5 +27,7 @@ ThreadRAII *windsensor_thread;
 bool m_mockGPS;
 bool m_xBeeOFF;
 bool m_mockWindsensor;
+
+Logger m_logger;
 
 #endif /* MAIN_H_ */

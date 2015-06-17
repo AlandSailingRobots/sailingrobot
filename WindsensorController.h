@@ -5,6 +5,8 @@
 
 #include "CV7/Windsensor.h"
 #include "thread/SystemState.h"
+#include "logger/Logger.h"
+
 
 class WindsensorController
 {
@@ -24,6 +26,8 @@ private:
 
 	std::mutex m_mutex;
 	bool m_running;
+
+	Logger m_logger;
 
 	bool isRunning();
 };

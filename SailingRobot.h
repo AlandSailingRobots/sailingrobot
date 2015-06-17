@@ -27,6 +27,8 @@
 #include "thread/ExternalCommand.h"
 #include "thread/SystemState.h"
 
+#include "logger/Logger.h"
+
 class SailingRobot {
 
 public:
@@ -45,7 +47,6 @@ private:
 	int mockLongitude(int oldLong);
 	int mockLatitude(int oldLat);
 
-	void logMessage(std::string type, std::string message);
 	//void readGPS();
 	void syncServer();
 	void updateState();
@@ -100,6 +101,8 @@ private:
 	SystemState *m_systemState;
 
 	SystemStateModel m_systemStateModel;
+
+	Logger m_logger;
 
 };
 #endif

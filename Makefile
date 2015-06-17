@@ -10,6 +10,8 @@
 CC = g++ 
 FLAGS = -Wall -pedantic -Werror -std=c++14 
 LIBS = -lsqlite3 -lgps -lrt -lwiringPi -lcurl -lpthread -I$(SAILINGROBOTS_HOME)
+LIBS_BOOST = -lboost_system -lboost_log -lboost_thread -I$(SAILINGROBOTS_HOME)
+
 
 COMPASS = Compass/Compass.o Compass/MockCompass.o Compass/Utility.o Compass/HMC6343.o
 COURSE = coursecalculation/CourseCalculation.o 
@@ -24,7 +26,9 @@ XBEE = xBee/xBee.o
 THREAD = thread/SystemState.o thread/ExternalCommand.o thread/ThreadRAII.o
 
 
-OBJECTS = $(COMPASS) $(COURSE) $(DB) $(COMMAND) $(MAESTRO) $(CV7) $(GPS) $(HTTP) $(XML_LOG) $(XBEE) $(THREAD)
+OBJECTS = $(COMPASS) $(COURSE) $(DB) $(COMMAND) $(MAESTRO) $(CV7) $(GPS) \
+		  $(HTTP) $(XML_LOG) $(XBEE) $(THREAD) \
+		  logger/Logger.o
 SOURCES = SailingRobot.cpp main.cpp xBeeSync.cpp GPSupdater.cpp WindsensorController.cpp
 HEADERS = SailingRobot.h main.h xBeeSync.h GPSupdater.h WindsensorController.h
 FILE = sr
@@ -99,4 +103,4 @@ thread :
 	$(MAKE) -C ./thread
 
 $(FILE) : $(SOURCES) $(HEADERS) $(OBJECTS)
-	$(CC) $(SOURCES) $(OBJECTS) $(FLAGS) $(LIBS) -o $(FILE)
+	$(CC) $(SOURCES) $(OBJECTS) $(FLAGS) $(LIBS) $(LIBS_BOOST) -o $(FILE)

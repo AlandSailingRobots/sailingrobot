@@ -22,10 +22,10 @@ WindsensorController::WindsensorController(SystemState *systemState, bool mockIt
 		m_windSensor->loadConfig( port_name, baud_rate );
 		m_windSensor->setBufferSize( buff_size );
 	} catch (const char * error) {
-		//logMessage("error", error);
+		m_logger.error(error);
 		throw error;
 	}
-	//logMessage("message", "setupWindSensor() done");
+	m_logger.info("setupWindSensor() done");
 }
 
 void WindsensorController::run()

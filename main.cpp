@@ -42,7 +42,7 @@ int main(int argc, char *argv[]) {
 	// Change to false when running on RaspberrPi
 	m_mockGPS=true;
 	m_xBeeOFF=true;
-	m_mockWindsensor = false;
+	m_mockWindsensor = true;
 
 	std::string path, db_name, errorLog;
 	if (argc < 2) {
@@ -59,6 +59,17 @@ int main(int argc, char *argv[]) {
 	printf("  Sailing Robot\n");
 	printf("=================\n");
 
+	try {
+		if (m_logger.init("sailingrobot")) {
+			std::cout<< "successfull logger init"<<std::endl;
+		}
+		else {
+			std::cout<< "error in logger init"<<std::endl;
+		}
+	}
+	catch (const char* e) {
+		std::cout<< "logger exeption thrown: "<< e <<std::endl;
+	}
 
 	/* Default time */
 	ExternalCommand externalCommand("1970-04-10T10:53:15.1234Z",true,0,0);

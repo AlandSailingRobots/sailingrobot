@@ -215,7 +215,7 @@ void SailingRobot::run() {
 
 		}
 		else {
-			logMessage("error", "SailingRobot::run(), gps NaN. Using values from last iteration.");
+			m_logger.error("SailingRobot::run(), gps NaN. Using values from last iteration.");
 		}
 
 		//sail position calculation
@@ -293,27 +293,14 @@ void SailingRobot::shutdown() {
 	m_dbHandler->closeDatabase();
 }
 
-void SailingRobot::logMessage(std::string type, std::string message) {
-	try {
-		m_dbHandler->insertMessageLog(m_systemStateModel.gpsModel.timestamp, type, message);
-    } catch (const char * logError) {
-		std::ofstream errorFile;
-		errorFile.open(m_errorLogPath.c_str(), std::ios::app);
-		errorFile << "log error: " << logError << "\n";
-		errorFile << "when logging " << type << ": " << message << "\n";
-		errorFile.close();
-	}
-}
-
 void SailingRobot::syncServer() {
 	try {
 		std::string response = m_httpSync.pushLogs( m_dbHandler->getLogs() );
 		m_dbHandler->removeLogs(response);
 	} catch (const char * error) {
-		logMessage("error", error);
+		m_logger.error(error);
 	}
 }
-
 
 void SailingRobot::updateState() {
 	try {
@@ -322,18 +309,18 @@ void SailingRobot::updateState() {
 		if (m_dbHandler->revChanged("cfg_rev", setup) ) {
 			m_dbHandler->updateTable("configs", m_httpSync.getConfig());
 			stateChanged = true;
-			logMessage("message", "config state updated");
+			m_logger.info("config state updated");
 		}
 		if (m_dbHandler->revChanged("rte_rev", setup) ) {
 			m_dbHandler->updateTable("waypoints", m_httpSync.getRoute());
 			stateChanged = true;
-			logMessage("message", "route state updated");
+			m_logger.info("route state updated");
 		}
 		if (stateChanged)  {
 			m_dbHandler->updateTable("state", m_httpSync.getSetup());
 		}
 	} catch (const char * error) {
-		logMessage("error", error);
+		m_logger.error(error);
 	}
 }
 
@@ -343,9 +330,9 @@ void SailingRobot::nextWaypoint() {
 	try {
 		m_dbHandler->deleteRow("waypoints", m_waypointId);
 	} catch (const char * error) {
-		logMessage("error", error);
+		m_logger.error(error);
 	}
-	logMessage("message", "SailingRobot::nextWaypoint(), waypoint reached");
+	m_logger.info("SailingRobot::nextWaypoint(), waypoint reached");
 	std::cout << "Waypoint reached!" << std::endl;
 }
 
@@ -361,7 +348,7 @@ void SailingRobot::setupMaestro() {
 	try {
 		port_name = m_dbHandler->retriveCell("configs", "1", "mc_port");
 	} catch (const char * error) {
-		logMessage("error", error);
+		m_logger.error(error);
 	}
 
 	try {
@@ -370,13 +357,13 @@ void SailingRobot::setupMaestro() {
 		if (maestroErrorCode != 0) {
 			std::stringstream stream;
 			stream << "maestro errorcode: " << maestroErrorCode;
-			logMessage("error", stream.str());
+			m_logger.error(stream.str());
 		}
 	} catch (const char * error) {
-		logMessage("error", error);
+		m_logger.error(error);
 		throw;
 	}
-	logMessage("message", "setupMaestro() done");
+	m_logger.info("setupMaestro() done");
 }
 
 void SailingRobot::setupRudderServo() {
@@ -386,10 +373,10 @@ void SailingRobot::setupRudderServo() {
 		m_rudderServo.setSpeed( m_dbHandler->retriveCellAsInt("configs", "1", "rs_spd") );
 		m_rudderServo.setAcceleration( m_dbHandler->retriveCellAsInt("configs", "1", "rs_acc") );
 	} catch (const char * error) {
-		logMessage("error", error);
+		m_logger.error(error);
 		throw;
 	}
-	logMessage("message", "setupRudderServo() done");
+	m_logger.info("setupRudderServo() done");
 }
 
 void SailingRobot::setupSailServo() {
@@ -399,10 +386,10 @@ void SailingRobot::setupSailServo() {
 		m_sailServo.setSpeed( m_dbHandler->retriveCellAsInt("configs", "1", "ss_spd") );
 		m_sailServo.setAcceleration( m_dbHandler->retriveCellAsInt("configs", "1", "ss_acc") );
 	} catch (const char * error) {
-		logMessage("error", error);
+		m_logger.error(error);
 		throw;
 	}
-	logMessage("message", "setupSailServo() done");
+	m_logger.info("setupSailServo() done");
 }
 
 void SailingRobot::setupCourseCalculation() {
@@ -410,10 +397,10 @@ void SailingRobot::setupCourseCalculation() {
 		m_courseCalc.setTACK_ANGLE( m_dbHandler->retriveCellAsInt("configs", "1", "cc_ang_tack") );
 		m_courseCalc.setSECTOR_ANGLE( m_dbHandler->retriveCellAsInt("configs", "1", "cc_ang_sect") );
 	} catch (const char * error) {
-		logMessage("error", error);
+		m_logger.error(error);
 		throw;
 	}
-	logMessage("message", "setupCourseCalculation() done");
+	m_logger.info("setupCourseCalculation() done");
 }
 
 void SailingRobot::setupRudderCommand() {
@@ -422,10 +409,10 @@ void SailingRobot::setupRudderCommand() {
 			m_dbHandler->retriveCellAsInt("configs", "1", "rc_cmd_mid"));
 
 	} catch (const char * error) {
-		logMessage("error", error);
+		m_logger.error(error);
 		throw;
 	}
-	logMessage("message", "setupRudderCommand() done");
+	m_logger.info("setupRudderCommand() done");
 }
 
 void SailingRobot::setupSailCommand() {
@@ -434,10 +421,10 @@ void SailingRobot::setupSailCommand() {
 			m_dbHandler->retriveCellAsInt("configs", "1", "sc_cmd_run"));
 
 	} catch (const char * error) {
-		logMessage("error", error);
+		m_logger.error(error);
 		throw;
 	}
-	logMessage("message", "setupSailCommand() done");
+	m_logger.info("setupSailCommand() done");
 }
 
 void SailingRobot::setupWaypoint() {
@@ -452,7 +439,7 @@ void SailingRobot::setupWaypoint() {
 		m_waypointRadius =
 			m_dbHandler->retriveCellAsInt("waypoints",id, "radius");
 	} catch (const char * error) {
-		logMessage("error", error);
+		m_logger.error(error);
 	}
 
 	try {
@@ -466,11 +453,11 @@ void SailingRobot::setupWaypoint() {
 		//std::cout << "New waypoint picked!" << m_waypointLatitude << " " << 
 		//	m_waypointLongitude << " " << m_waypointRadius << std::endl;
 	} catch (const char * error) {
-		logMessage("error", error);
+		m_logger.error(error);
 		throw;
 	}
 
-	logMessage("message", "setupWaypoint() done");
+	m_logger.info("setupWaypoint() done");
 }
 
 void SailingRobot::setupHTTPSync() {
@@ -479,9 +466,9 @@ void SailingRobot::setupHTTPSync() {
 		m_httpSync.setShipPWD( m_dbHandler->retriveCell("server", "1", "boat_pwd") );
 		m_httpSync.setServerURL( m_dbHandler->retriveCell("server", "1", "srv_addr") );
 	} catch (const char * error) {
-		logMessage("error", "SailingRobot::setupHTTPSync() failed");
+		m_logger.error("SailingRobot::setupHTTPSync() failed");
 	}
-	logMessage("message", "setupHTTPSync() done");
+	m_logger.info("setupHTTPSync() done");
 }
 
 void SailingRobot::setupCompass() {
@@ -494,7 +481,7 @@ void SailingRobot::setupCompass() {
 	try {
 		m_compass->init();
 	} catch (const char * error) {
-		logMessage("error", "SailingRobot::setupCompass() failed");
+		m_logger.error("SailingRobot::setupCompass() failed");
 	}
-	logMessage("message", "setupCompass() done");
+	m_logger.info("setupCompass() done");
 }
