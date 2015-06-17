@@ -35,13 +35,16 @@ FILE = sr
 MAKE = make
 
 #Needed for proper subfolder make writing
-.PHONY : Compass runall coursecalculation dbhandler ruddercommand sailcommand servocontroller CV7 gps httpsync xmlparser thread
+.PHONY : Compass runall coursecalculation dbhandler ruddercommand \
+		 sailcommand servocontroller CV7 gps httpsync xmlparser thread \
+		 logger
 
 
 
 all : runall $(FILE)
 
-runall : Compass coursecalculation dbhandler ruddercommand sailcommand servocontroller CV7 gps httpsync xmlparser thread
+runall : Compass coursecalculation dbhandler ruddercommand sailcommand \
+		 servocontroller CV7 gps httpsync xmlparser thread logger
 
 clean :
 	cd Compass && $(MAKE) clean
@@ -56,6 +59,7 @@ clean :
 	cd xmlparser && $(MAKE) clean
 	cd xBee && $(MAKE) clean
 	cd thread && $(MAKE) clean
+	cd logger && $(MAKE) clean
 	rm -f $(FILE)
 	
 Compass :
@@ -63,7 +67,6 @@ Compass :
 	
 coursecalculation :
 	$(MAKE) -C ./coursecalculation
-
 
 	
 dbhandler :
@@ -81,14 +84,12 @@ sailcommand :
 servocontroller :
 	$(MAKE) -C ./servocontroller
 
-
 CV7 :
 	$(MAKE) -C ./CV7
 
 
 gps :
 	$(MAKE) -C ./gps
-
 
 httpsync :
 	$(MAKE) -C ./httpsync
@@ -101,6 +102,9 @@ xbee :
 
 thread :
 	$(MAKE) -C ./thread
+
+logger:
+	$(MAKE) -C ./logger
 
 $(FILE) : $(SOURCES) $(HEADERS) $(OBJECTS)
 	$(CC) $(SOURCES) $(OBJECTS) $(FLAGS) $(LIBS) $(LIBS_BOOST) -o $(FILE)
