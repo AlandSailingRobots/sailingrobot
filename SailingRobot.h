@@ -69,7 +69,6 @@ private:
 	std::string m_errorLogPath;
 
 
-	std::string m_waypointId;
 	
 
 	bool m_running;
