@@ -29,6 +29,8 @@
 
 #include "logger/Logger.h"
 
+#include "models/WaypointModel.h"
+
 class SailingRobot {
 
 public:
@@ -66,10 +68,9 @@ private:
 
 	std::string m_errorLogPath;
 
-	float m_waypointLatitude;
-	float m_waypointLongitude;
+
 	std::string m_waypointId;
-	int m_waypointRadius;
+	
 
 	bool m_running;
 
@@ -85,6 +86,7 @@ private:
 	bool m_getHeadingFromCompass;
 
 	DBHandler *m_dbHandler;
+	WaypointModel m_waypointModel;
 	RudderCommand m_rudderCommand;
 	SailCommand m_sailCommand;
 	CourseCalculation m_courseCalc;
@@ -101,6 +103,8 @@ private:
 	SystemState *m_systemState;
 
 	SystemStateModel m_systemStateModel;
+
+	
 
 	Logger m_logger;
 

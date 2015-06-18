@@ -9,16 +9,18 @@
 #include <chrono>
 #include <thread>
 
+
 SailingRobot::SailingRobot(ExternalCommand* externalCommand,
 						   SystemState *systemState, DBHandler *db) :
-	
-	m_waypointRadius(15),
-	
+			
 	m_mockCompass(true),
 	m_mockPosition(true),
 	m_mockMaestro(true),
 
 	m_dbHandler(db),
+
+
+	m_waypointModel(0,0,0,""),
 
 	m_externalCommand(externalCommand),
 	m_systemState(systemState),
@@ -148,8 +150,8 @@ void SailingRobot::run() {
 
 	printf("*SailingRobot::run() started.\n");
 	std::cout << "waypoint target." << std::endl 
-		<< "long: " << m_waypointLongitude << std::endl
-		<< "lat : " << m_waypointLatitude << std::endl;
+		<< "long: " << m_waypointModel.longitude << std::endl
+		<< "lat : " << m_waypointModel.latitude << std::endl;
 
 	while(m_running) {
 		start = std::chrono::steady_clock::now();
@@ -189,7 +191,7 @@ void SailingRobot::run() {
 			}
 
 			m_courseCalc.calculateDTW(latitude, longitude,
-				m_waypointLatitude, m_waypointLongitude);
+				m_waypointModel.latitude, m_waypointModel.longitude);
 
 			//calc & set TWD
 			twd = heading + windDir;
@@ -204,7 +206,7 @@ void SailingRobot::run() {
 
 			//calc BTW & CTS
 			m_courseCalc.calculateBTW(latitude, longitude,
-				m_waypointLatitude, m_waypointLongitude);
+				m_waypointModel.latitude, m_waypointModel.longitude);
 			m_courseCalc.calculateCTS();
 
 			//rudder position calculation
@@ -258,7 +260,7 @@ void SailingRobot::run() {
 			windDir,
 			m_systemStateModel.windsensorModel.speed,
 			m_systemStateModel.windsensorModel.temperature,
-			atoi(m_waypointId.c_str()),
+			atoi(m_waypointModel.id.c_str()),
 			m_compass->getHeading(),
 			m_compass->getPitch(),
 			m_compass->getRoll()
@@ -268,7 +270,7 @@ void SailingRobot::run() {
 
 		// check if we are within the radius of the waypoint
 		// and move to next wp in that case
-		if (m_courseCalc.getDTW() < m_waypointRadius) {
+		if (m_courseCalc.getDTW() < m_waypointModel.radius) {
 			
 			nextWaypoint();
 			setupWaypoint();
@@ -328,7 +330,7 @@ void SailingRobot::updateState() {
 void SailingRobot::nextWaypoint() {
 
 	try {
-		m_dbHandler->deleteRow("waypoints", m_waypointId);
+		m_dbHandler->deleteRow("waypoints", m_waypointModel.id);
 	} catch (const char * error) {
 		m_logger.error(error);
 	}
@@ -428,30 +430,20 @@ void SailingRobot::setupSailCommand() {
 }
 
 void SailingRobot::setupWaypoint() {
-	std::string id;
-	std::string lat;
-	std::string lon;
 
 	try {
-		id = m_dbHandler->getMinIdFromTable("waypoints");
-		lat = m_dbHandler->retriveCell("waypoints", id, "lat");
-		lon = m_dbHandler->retriveCell("waypoints", id, "lon");
-		m_waypointRadius =
-			m_dbHandler->retriveCellAsInt("waypoints",id, "radius");
+		m_dbHandler->getWaypointFromTable(m_waypointModel);		
 	} catch (const char * error) {
 		m_logger.error(error);
 	}
-
 	try {
-		m_waypointId = id;
-		if (m_waypointId.empty()) {
+		if (m_waypointModel.id.empty() ) {
 			throw "No waypoint found!";
 		}
-		m_waypointLatitude = atof(lat.c_str());
-		m_waypointLongitude = atof(lon.c_str());
 
-		//std::cout << "New waypoint picked!" << m_waypointLatitude << " " << 
-		//	m_waypointLongitude << " " << m_waypointRadius << std::endl;
+
+		std::cout << "New waypoint picked!" << m_waypointModel.latitude << " " << 
+		m_waypointModel.longitude << " " << m_waypointModel.radius << std::endl;
 	} catch (const char * error) {
 		m_logger.error(error);
 		throw;
