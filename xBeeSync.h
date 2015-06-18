@@ -6,6 +6,7 @@
 #include "thread/ExternalCommand.h"
 #include "thread/SystemState.h"
 #include "models/SystemStateModel.h"
+#include "logger/Logger.h"
 #include <mutex>
 
 class xBeeSync
@@ -30,6 +31,7 @@ private:
 	bool m_running;
 	bool m_sending;
 	bool m_receiving;
+	Logger m_logger;
 
 	bool isRunning();
 };

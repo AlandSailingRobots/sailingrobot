@@ -21,12 +21,18 @@ xBeeSync::xBeeSync(ExternalCommand* externalCommand, SystemState *systemState,
 {
 	//	skapa ny xBee och kör xbee.init(baudRate (57600))
 	m_xbee_fd = m_xBee.init(57600);
-	std::cout << "*xBee initialized - receiving:" << m_receiving << " sending:" << m_sending << std::endl;
+	std::cout << "*xBee initialized - receiving:" << m_receiving
+			  << " sending:" << m_sending << std::endl;
+	m_logger.info(std::string(
+		"*xBee initialized - receiving:") +	std::to_string(m_receiving)	+
+		" sending:" + std::to_string(m_sending));
 }
 
 void xBeeSync::run()
 {
 	std::cout << "*xBeeSync thread started." << std::endl;
+	m_logger.info("*xBeeSync thread started.");
+
 	while(isRunning()) 
 	{
 		m_system_state->getData(m_model);
@@ -60,16 +66,21 @@ void xBeeSync::run()
  			int rudder_cmd = m_XML_log.parse_rudCMD(res_xml);
 	 		int sail_cmd = m_XML_log.parse_saiCMD(res_xml);
 			std::string timestamp = m_XML_log.parse_time(res_xml);
-	 		
+
 	 		if(timestamp.length() > 0) {
 	 			std::cout << "Timestamp in xBeeSync::run = " << timestamp << std::endl;
+				m_logger.info("Timestamp in xBeeSync::run = " + timestamp);
 	 		}
 	 		if(rudder_cmd != -1) {
 	 			std::cout << "Rudder command in xBeeSync::run = " << rudder_cmd << std::endl;	
+	 			m_logger.info(std::string("Rudder command in xBeeSync::run = ")
+	 				+ std::to_string(rudder_cmd));
 	 			m_model.rudder = rudder_cmd;
 	 		}
 	 		if(sail_cmd != -1) {
 	 			std::cout << "Sail command in xBeeSync::run = " << sail_cmd << std::endl;	
+	 			m_logger.info(std::string("Sail command in xBeeSync::run = ")
+	 				+ std::to_string(sail_cmd));
 	 			m_model.sail = sail_cmd;
 	 		}
 
@@ -85,6 +96,7 @@ void xBeeSync::run()
 			std::chrono::milliseconds(400));
 	}
 	std::cout << "*xBeeSync thread exited." << std::endl;
+	m_logger.info("*xBeeSync thread exited.");
 }
 
 void xBeeSync::close()
