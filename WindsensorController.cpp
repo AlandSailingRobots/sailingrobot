@@ -35,7 +35,10 @@ void WindsensorController::run()
 		try {
 			m_windSensor->parseData(m_windSensor->refreshData());	
 		} catch(const char * e) {
-			std::cout << "ERROR: SailingRobot::Run m_windSensor->parseData " << e << std::endl;
+			std::cout << "ERROR: SailingRobot::Run m_windSensor->parseData "
+					  << e << std::endl;
+			m_logger.error(std::string(
+				"WindsensorController::Run m_windSensor->parseData ") + e);
 		}
 
 		m_systemState->setWindsensorModel(
