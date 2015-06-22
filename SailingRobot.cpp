@@ -12,8 +12,6 @@
 
 SailingRobot::SailingRobot(ExternalCommand* externalCommand,
 						   SystemState *systemState, DBHandler *db) :
-
-	m_waypointRadius(15),
 	
 	m_mockCompass(db->retriveCellAsInt("mock", "1", "Compass")),
 	m_mockPosition(db->retriveCellAsInt("mock", "1", "Position")),
