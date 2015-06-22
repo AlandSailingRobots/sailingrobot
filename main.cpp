@@ -39,11 +39,6 @@ static void threadWindsensor() {
 
 int main(int argc, char *argv[]) {
 
-	// Change to false when running on RaspberrPi
-	m_mockGPS=true;
-	m_xBeeOFF=true;
-	m_mockWindsensor = true;
-
 	std::string path, db_name, errorLog;
 	if (argc < 2) {
 		path = "/root/sailingrobot";
@@ -93,6 +88,8 @@ int main(int argc, char *argv[]) {
 	}
 	printf("-DONE\n");
 
+	m_mockGPS = db.retriveCellAsInt("mock", "1", "GPS");
+	m_mockWindsensor = db.retriveCellAsInt("mock", "1", "Windsensor");
 
 	// Create main sailing robot controller
 	SailingRobot sr(&externalCommand, &systemstate, &db);
@@ -127,12 +124,6 @@ int main(int argc, char *argv[]) {
 		//	Hämtar ett heltal (1 eller 0) som visar om xbeen skall skicka och ta emot data.
 		bool xBee_sending = db.retriveCellAsInt("configs", "1", "xb_send");
 		bool xBee_receiving = db.retriveCellAsInt("configs", "1", "xb_recv");
-
-		// Used to force xBee off without changes in database when running on desktop or testing.
-		if(m_xBeeOFF){
-			xBee_sending = false;
-			xBee_receiving = false;
-		}
 
 		std::unique_ptr<ThreadRAII> xbee_sync_thread;
 		if (xBee_sending || xBee_receiving) {

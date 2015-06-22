@@ -12,10 +12,12 @@
 
 SailingRobot::SailingRobot(ExternalCommand* externalCommand,
 						   SystemState *systemState, DBHandler *db) :
-			
-	m_mockCompass(true),
-	m_mockPosition(true),
-	m_mockMaestro(true),
+
+	m_waypointRadius(15),
+	
+	m_mockCompass(db->retriveCellAsInt("mock", "1", "Compass")),
+	m_mockPosition(db->retriveCellAsInt("mock", "1", "Position")),
+	m_mockMaestro(db->retriveCellAsInt("mock", "1", "Maestro")),
 
 	m_dbHandler(db),
 

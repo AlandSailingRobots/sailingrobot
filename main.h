@@ -25,7 +25,6 @@ std::unique_ptr<WindsensorController> windsensor_handle;
 ThreadRAII *windsensor_thread;
 
 bool m_mockGPS;
-bool m_xBeeOFF;
 bool m_mockWindsensor;
 
 Logger m_logger;
