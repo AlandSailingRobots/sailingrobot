@@ -8,10 +8,9 @@
 #include "GPSupdater.h"
 #include <thread>
 #include <unistd.h>
-#include <signal.h>
 #include <sstream>
 #include <iostream>     
-#include <iomanip>      
+#include <iomanip>
 #include <ctime>    
 
 static void threadXBeeSyncRun() {
