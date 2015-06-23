@@ -190,8 +190,6 @@ void SailingRobot::run() {
 				latitude = m_systemStateModel.gpsModel.latitude;
 			}
 
-			m_courseCalc.calculateDTW(latitude, longitude,
-				m_waypointModel.latitude, m_waypointModel.longitude);
 
 			//calc & set TWD
 			twd = heading + windDir;
@@ -205,9 +203,8 @@ void SailingRobot::run() {
 			m_courseCalc.setTWD(twd);
 
 			//calc BTW & CTS
-			m_courseCalc.calculateBTW(latitude, longitude,
-				m_waypointModel.latitude, m_waypointModel.longitude);
-			m_courseCalc.calculateCTS();
+			m_courseCalc.calculateCTS(PositionModel(latitude, longitude),
+				PositionModel(m_waypointModel.latitude, m_waypointModel.longitude));
 
 			//rudder position calculation
 			rudderCommand = m_rudderCommand.getCommand(m_courseCalc.getCTS(), heading);
