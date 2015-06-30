@@ -19,8 +19,7 @@ SailingRobot::SailingRobot(ExternalCommand* externalCommand,
 
 	m_dbHandler(db),
 
-
-	m_waypointModel(0,0,0,""),
+	m_waypointModel(PositionModel(0,0),0,""),
 
 	m_externalCommand(externalCommand),
 	m_systemState(systemState),
@@ -150,8 +149,8 @@ void SailingRobot::run() {
 
 	printf("*SailingRobot::run() started.\n");
 	std::cout << "waypoint target." << std::endl 
-		<< "long: " << m_waypointModel.longitude << std::endl
-		<< "lat : " << m_waypointModel.latitude << std::endl;
+		<< "long: " << m_waypointModel.positionModel.longitude << std::endl
+		<< "lat : " << m_waypointModel.positionModel.latitude << std::endl;
 
 	while(m_running) {
 		start = std::chrono::steady_clock::now();
@@ -203,8 +202,8 @@ void SailingRobot::run() {
 			m_courseCalc.setTWD(twd);
 
 			//calc BTW & CTS
-			m_courseCalc.calculateCTS(PositionModel(latitude, longitude),
-				PositionModel(m_waypointModel.latitude, m_waypointModel.longitude));
+			m_courseCalc.calculateCTS(PositionModel(latitude, longitude), m_waypointModel.positionModel);
+				
 
 			//rudder position calculation
 			rudderCommand = m_rudderCommand.getCommand(m_courseCalc.getCTS(), heading);
@@ -439,8 +438,8 @@ void SailingRobot::setupWaypoint() {
 		}
 
 
-		std::cout << "New waypoint picked!" << m_waypointModel.latitude << " " << 
-		m_waypointModel.longitude << " " << m_waypointModel.radius << std::endl;
+		std::cout << "New waypoint picked!" << m_waypointModel.positionModel.latitude << " " << 
+		m_waypointModel.positionModel.longitude << " " << m_waypointModel.radius << std::endl;
 	} catch (const char * error) {
 		m_logger.error(error);
 		throw;

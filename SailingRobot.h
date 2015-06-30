@@ -29,7 +29,7 @@
 
 #include "logger/Logger.h"
 
-#include "models/WaypointModel.h"
+//#include "models/WaypointModel.h"
 
 class SailingRobot {
 
