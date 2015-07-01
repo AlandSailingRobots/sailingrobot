@@ -199,10 +199,11 @@ void SailingRobot::run() {
 			if (twd < 0) {
 				twd += 360;
 			}
-			m_courseCalc.setTWD(twd);
+			m_courseCalc.setTrueWindDirection(twd);
 
 			//calc BTW & CTS
-			m_courseCalc.calculateCTS(PositionModel(latitude, longitude), m_waypointModel.positionModel);
+			m_courseCalc.calculateCourseToSteer(PositionModel(latitude, longitude),
+				m_waypointModel.positionModel);
 				
 
 			//rudder position calculation
@@ -252,7 +253,7 @@ void SailingRobot::run() {
 			m_courseCalc.getDTW(),
 			m_courseCalc.getBTW(),
 			m_courseCalc.getCTS(),
-			m_courseCalc.getTACK(),
+			m_courseCalc.getTack(),
 			windDir,
 			m_systemStateModel.windsensorModel.speed,
 			m_systemStateModel.windsensorModel.temperature,
@@ -392,8 +393,8 @@ void SailingRobot::setupSailServo() {
 
 void SailingRobot::setupCourseCalculation() {
 	try {
-		m_courseCalc.setTACK_ANGLE( m_dbHandler->retriveCellAsInt("configs", "1", "cc_ang_tack") );
-		m_courseCalc.setSECTOR_ANGLE( m_dbHandler->retriveCellAsInt("configs", "1", "cc_ang_sect") );
+		m_courseCalc.setTackAngle( m_dbHandler->retriveCellAsInt("configs", "1", "cc_ang_tack") );
+		m_courseCalc.setSectorAngle( m_dbHandler->retriveCellAsInt("configs", "1", "cc_ang_sect") );
 	} catch (const char * error) {
 		m_logger.error(error);
 		throw;
