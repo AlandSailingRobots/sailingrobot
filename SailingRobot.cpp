@@ -203,7 +203,7 @@ void SailingRobot::run() {
 
 			//calc BTW & CTS
 			m_courseCalc.calculateCourseToSteer(PositionModel(latitude, longitude),
-				m_waypointModel.positionModel);
+				m_waypointModel);
 				
 
 			//rudder position calculation
