@@ -254,6 +254,7 @@ void SailingRobot::run() {
 			m_courseCalc.getBTW(),
 			m_courseCalc.getCTS(),
 			m_courseCalc.getTack(),
+			m_courseCalc.getGoingStarboard(),
 			windDir,
 			m_systemStateModel.windsensorModel.speed,
 			m_systemStateModel.windsensorModel.temperature,
