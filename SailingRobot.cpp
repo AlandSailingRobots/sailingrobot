@@ -271,6 +271,24 @@ void SailingRobot::run() {
 		// and move to next wp in that case
 		if (m_courseCalc.getDTW() < m_waypointModel.radius) {
 			
+			if (m_dbHandler->retriveCellAsInt("configs", "1", "scanning"))
+			{
+				std::ostringstream fields;
+				fields << "waypoint_id,"
+					<< "latitude,"
+					<< "longitude,"
+					<< "air_temperature";
+
+				std::ostringstream values;
+				values << m_waypointModel.id << ","
+					<< latitude << ","
+					<< longitude << ","
+					<< m_systemStateModel.windsensorModel.temperature;
+
+				m_dbHandler->insert("scanning_measurements",
+					fields.str(), values.str());
+			}
+
 			nextWaypoint();
 			setupWaypoint();
 		}
