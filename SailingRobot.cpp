@@ -8,6 +8,7 @@
 #include <cmath>
 #include <chrono>
 #include <thread>
+#include "CV7/UtilityLibrary.h"
 
 
 SailingRobot::SailingRobot(ExternalCommand* externalCommand,
@@ -136,7 +137,9 @@ int SailingRobot::mockLongitude(int oldLong) {
 void SailingRobot::run() {
 
 	m_running = true;
-	int rudderCommand, sailCommand, windDir, twd, heading = 0;
+	int rudderCommand, sailCommand, windDir, heading = 0;
+	std::vector<float> twdBuffer;
+	const unsigned int twdBufferMaxSize = 10;
 	double longitude = 4, latitude = -3;
 
 	std::string sr_loop_time =
@@ -189,17 +192,14 @@ void SailingRobot::run() {
 				latitude = m_systemStateModel.gpsModel.latitude;
 			}
 
-
 			//calc & set TWD
-			twd = heading + windDir;
+			twdBuffer.push_back(heading + windDir);
+			while (twdBuffer.size() > twdBufferMaxSize) {
+				twdBuffer.erase(twdBuffer.begin());
+			}
 
-			if (twd > 359) {
-				twd -= 360;
-			}
-			if (twd < 0) {
-				twd += 360;
-			}
-			m_courseCalc.setTrueWindDirection(twd);
+			m_courseCalc.setTrueWindDirection(
+				UtilityLibrary::meanOfAngles(twdBuffer));
 
 			//calc BTW & CTS
 			m_courseCalc.calculateCourseToSteer(PositionModel(latitude, longitude),
