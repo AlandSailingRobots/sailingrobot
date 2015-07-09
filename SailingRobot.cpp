@@ -139,7 +139,8 @@ void SailingRobot::run() {
 	m_running = true;
 	int rudderCommand, sailCommand, windDir, heading = 0;
 	std::vector<float> twdBuffer;
-	const unsigned int twdBufferMaxSize = 10;
+	const unsigned int twdBufferMaxSize =
+		m_dbHandler->retriveCellAsInt("buffer_configs", "1", "true_wind");
 	double longitude = 4, latitude = -3;
 
 	std::string sr_loop_time =
@@ -463,7 +464,8 @@ void SailingRobot::setupHTTPSync() {
 
 void SailingRobot::setupCompass() {
 	if (!m_mockCompass) {
-		m_compass = new HMC6343;
+		m_compass = new HMC6343(
+			m_dbHandler->retriveCellAsInt("buffer_configs", "1", "compass") );
 	}
 	else {
 		m_compass = new MockCompass;

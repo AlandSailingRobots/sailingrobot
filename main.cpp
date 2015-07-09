@@ -109,7 +109,7 @@ int main(int argc, char *argv[]) {
 				m_mockWindsensor, 
 				db.retriveCell("configs", "1", "ws_port"),
 				db.retriveCellAsInt("configs", "1", "ws_baud"),
-				db.retriveCellAsInt("configs", "1", "ws_buff")
+				db.retriveCellAsInt("buffer_configs", "1", "windsensor")
 			)
 		);
 		printf("OK\n");
