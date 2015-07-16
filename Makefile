@@ -13,7 +13,7 @@ LIBS = -lsqlite3 -lgps -lrt -lwiringPi -lcurl -lpthread -I$(SAILINGROBOTS_HOME)
 LIBS_BOOST = -lboost_system -lboost_log -lboost_thread -I$(SAILINGROBOTS_HOME)
 
 
-COMPASS = Compass/Compass.o Compass/MockCompass.o Compass/Utility.o Compass/HMC6343.o
+COMPASS = Compass/Compass.o Compass/MockCompass.o Compass/HMC6343.o
 COURSE = coursecalculation/CourseCalculation.o coursecalculation/CourseMath.o 
 DB = dbhandler/DBHandler.o  dbhandler/JSON.o
 COMMAND = ruddercommand/RudderCommand.o sailcommand/SailCommand.o 
@@ -28,7 +28,7 @@ THREAD = thread/SystemState.o thread/ExternalCommand.o thread/ThreadRAII.o
 
 OBJECTS = $(COMPASS) $(COURSE) $(DB) $(COMMAND) $(MAESTRO) $(CV7) $(GPS) \
 		  $(HTTP) $(XML_LOG) $(XBEE) $(THREAD) \
-		  logger/Logger.o
+		  logger/Logger.o utility/Utility.o
 SOURCES = SailingRobot.cpp main.cpp xBeeSync.cpp GPSupdater.cpp WindsensorController.cpp
 HEADERS = SailingRobot.h main.h xBeeSync.h GPSupdater.h WindsensorController.h
 FILE = sr
@@ -37,14 +37,13 @@ MAKE = make
 #Needed for proper subfolder make writing
 .PHONY : Compass runall coursecalculation dbhandler ruddercommand \
 		 sailcommand servocontroller CV7 gps httpsync xmlparser thread \
-		 logger
-
+		 logger utility
 
 
 all : runall $(FILE)
 
 runall : Compass coursecalculation dbhandler ruddercommand sailcommand \
-		 servocontroller CV7 gps httpsync xmlparser thread logger
+		 servocontroller CV7 gps httpsync xmlparser thread logger utility
 
 clean :
 	cd Compass && $(MAKE) clean
@@ -60,6 +59,7 @@ clean :
 	cd xBee && $(MAKE) clean
 	cd thread && $(MAKE) clean
 	cd logger && $(MAKE) clean
+	cd utility && $(MAKE) clean
 	rm -f $(FILE)
 	
 Compass :
@@ -105,6 +105,9 @@ thread :
 
 logger:
 	$(MAKE) -C ./logger
+
+utility:
+	$(MAKE) -C utility
 
 $(FILE) : $(SOURCES) $(HEADERS) $(OBJECTS)
 	$(CC) $(SOURCES) $(OBJECTS) $(FLAGS) $(LIBS) $(LIBS_BOOST) -o $(FILE)

@@ -8,7 +8,7 @@
 #include <cmath>
 #include <chrono>
 #include <thread>
-#include "CV7/UtilityLibrary.h"
+#include "utility/Utility.h"
 
 
 SailingRobot::SailingRobot(ExternalCommand* externalCommand,
@@ -201,7 +201,7 @@ void SailingRobot::run() {
 			}
 
 			m_courseCalc.setTrueWindDirection(
-				UtilityLibrary::meanOfAngles(twdBuffer));
+				Utility::meanOfAngles(twdBuffer));
 
 			//calc BTW & CTS
 			m_courseCalc.calculateCourseToSteer(PositionModel(latitude, longitude),
