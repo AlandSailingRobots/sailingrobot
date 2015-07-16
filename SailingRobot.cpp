@@ -274,20 +274,13 @@ void SailingRobot::run() {
 			
 			if (m_dbHandler->retriveCellAsInt("configs", "1", "scanning"))
 			{
-				std::ostringstream fields;
-				fields << "waypoint_id,"
-					<< "latitude,"
-					<< "longitude,"
-					<< "air_temperature";
-
-				std::ostringstream values;
-				values << m_waypointModel.id << ","
-					<< latitude << ","
-					<< longitude << ","
-					<< m_systemStateModel.windsensorModel.temperature;
-
-				m_dbHandler->insert("scanning_measurements",
-					fields.str(), values.str());
+				try {
+					m_dbHandler->insertScan(PositionModel(latitude,longitude),
+						m_systemStateModel.windsensorModel.temperature);
+				} catch (const char * error) {
+					m_logger.error(error);
+					std::cout << error << std::endl;
+				}
 			}
 
 			nextWaypoint();
