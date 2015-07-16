@@ -27,7 +27,7 @@ SailingRobot::SailingRobot(ExternalCommand* externalCommand,
 
 	m_systemStateModel(
 		SystemStateModel(
-			GPSModel(false,"",0,0,0,0,0,0),
+			GPSModel("",0,0,0,0,0,0),
 			WindsensorModel(0,0,0),
 			CompassModel(0,0,0),
 			0,
@@ -143,7 +143,7 @@ void SailingRobot::run() {
 		m_dbHandler->retriveCellAsInt("buffer_configs", "1", "true_wind");
 	
 	//double longitude = 4, latitude = -3;
-	double longitude = 19.89288243, latitude = 60.07506317;
+	double latitude = 60.07506317, longitude = 19.89288243;
 	
 	std::string sr_loop_time =
 		m_dbHandler->retriveCell("configs", "1", "sr_loop_time");
@@ -154,7 +154,7 @@ void SailingRobot::run() {
 	int toNano = 1000*1000*1000;
 
 	printf("*SailingRobot::run() started.\n");
-	std::cout << "waypoint target." << " lon: " << m_waypointModel.positionModel.longitude  
+	std::cout << "Waypoint target - ID: " << m_waypointModel.id << " lon: " << m_waypointModel.positionModel.longitude  
 		<< " lat : " << m_waypointModel.positionModel.latitude << std::endl;
 
 	while(m_running) {
@@ -294,8 +294,8 @@ void SailingRobot::run() {
 			setupWaypoint();
 		}
 
-		//nextWaypoint();
-		//setupWaypoint();
+		nextWaypoint();
+		setupWaypoint();
 
 		end = std::chrono::steady_clock::now();
 		time_span = std::chrono::duration_cast<
