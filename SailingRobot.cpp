@@ -294,8 +294,8 @@ void SailingRobot::run() {
 			setupWaypoint();
 		}
 
-		nextWaypoint();
-		setupWaypoint();
+		//nextWaypoint();
+		//setupWaypoint();
 
 		end = std::chrono::steady_clock::now();
 		time_span = std::chrono::duration_cast<
