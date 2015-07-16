@@ -20,14 +20,14 @@ SailingRobot::SailingRobot(ExternalCommand* externalCommand,
 
 	m_dbHandler(db),
 
-	m_waypointModel(PositionModel(0,0),0,""),
+	m_waypointModel(PositionModel(1.5,2.7),100,""),
 
 	m_externalCommand(externalCommand),
 	m_systemState(systemState),
 
 	m_systemStateModel(
 		SystemStateModel(
-			GPSModel("",0,0,0,0,0,0),
+			GPSModel(false,"",0,0,0,0,0,0),
 			WindsensorModel(0,0,0),
 			CompassModel(0,0,0),
 			0,
@@ -141,8 +141,10 @@ void SailingRobot::run() {
 	std::vector<float> twdBuffer;
 	const unsigned int twdBufferMaxSize =
 		m_dbHandler->retriveCellAsInt("buffer_configs", "1", "true_wind");
-	double longitude = 4, latitude = -3;
-
+	
+	//double longitude = 4, latitude = -3;
+	double longitude = 19.89288243, latitude = 60.07506317;
+	
 	std::string sr_loop_time =
 		m_dbHandler->retriveCell("configs", "1", "sr_loop_time");
 	std::chrono::duration<double> loop_time(atof(sr_loop_time.c_str()));
@@ -152,9 +154,8 @@ void SailingRobot::run() {
 	int toNano = 1000*1000*1000;
 
 	printf("*SailingRobot::run() started.\n");
-	std::cout << "waypoint target." << std::endl 
-		<< "long: " << m_waypointModel.positionModel.longitude << std::endl
-		<< "lat : " << m_waypointModel.positionModel.latitude << std::endl;
+	std::cout << "waypoint target." << " lon: " << m_waypointModel.positionModel.longitude  
+		<< " lat : " << m_waypointModel.positionModel.latitude << std::endl;
 
 	while(m_running) {
 		start = std::chrono::steady_clock::now();
@@ -293,6 +294,9 @@ void SailingRobot::run() {
 			setupWaypoint();
 		}
 
+		//nextWaypoint();
+		//setupWaypoint();
+
 		end = std::chrono::steady_clock::now();
 		time_span = std::chrono::duration_cast<
 			std::chrono::duration<double>>(end - start);
@@ -343,16 +347,43 @@ void SailingRobot::updateState() {
 	}
 }
 
-
 void SailingRobot::nextWaypoint() {
 
 	try {
-		m_dbHandler->deleteRow("waypoints", m_waypointModel.id);
+		m_dbHandler->changeOneValue("waypoints", m_waypointModel.id,"1","harvested");
 	} catch (const char * error) {
 		m_logger.error(error);
 	}
 	m_logger.info("SailingRobot::nextWaypoint(), waypoint reached");
 	std::cout << "Waypoint reached!" << std::endl;
+	
+}
+
+void SailingRobot::setupWaypoint() {
+
+	try {
+		m_dbHandler->getWaypointFromTable(m_waypointModel);		
+	} catch (const char * error) {
+		m_logger.error(error);
+	}
+	try {
+		if (m_waypointModel.id.empty() ) {
+			std::cout << "No waypoint found!"<< std::endl;			
+			throw "No waypoint found!";			
+		}
+		else{
+			std::cout << "New waypoint picked! ID:" << m_waypointModel.id <<" lat: "
+			<< m_waypointModel.positionModel.latitude 
+			<< " lon: " << m_waypointModel.positionModel.longitude << " rad: " 
+			<< m_waypointModel.radius << std::endl;
+		}
+	} catch (const char * error) {
+		m_logger.error(error);		
+		//m_dbHandler->insertMessageLog("NOTIME", "NOTYPE", "NO WAYPOINT FOUND!");
+		//throw;
+	}
+
+	m_logger.info("setupWaypoint() done");
 }
 
 void SailingRobot::setupMaestro() {
@@ -444,29 +475,6 @@ void SailingRobot::setupSailCommand() {
 		throw;
 	}
 	m_logger.info("setupSailCommand() done");
-}
-
-void SailingRobot::setupWaypoint() {
-
-	try {
-		m_dbHandler->getWaypointFromTable(m_waypointModel);		
-	} catch (const char * error) {
-		m_logger.error(error);
-	}
-	try {
-		if (m_waypointModel.id.empty() ) {
-			throw "No waypoint found!";
-		}
-
-
-		std::cout << "New waypoint picked!" << m_waypointModel.positionModel.latitude << " " << 
-		m_waypointModel.positionModel.longitude << " " << m_waypointModel.radius << std::endl;
-	} catch (const char * error) {
-		m_logger.error(error);
-		throw;
-	}
-
-	m_logger.info("setupWaypoint() done");
 }
 
 void SailingRobot::setupHTTPSync() {

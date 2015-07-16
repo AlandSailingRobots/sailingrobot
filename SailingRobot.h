@@ -53,6 +53,7 @@ private:
 	void syncServer();
 	void updateState();
 	void nextWaypoint();
+	void setupWaypoint();
 
 	//void setupDB(std::string filename);
 	void setupMaestro();
@@ -61,8 +62,7 @@ private:
 	//void setupGPS();
 	void setupCourseCalculation();
 	void setupRudderCommand();
-	void setupSailCommand();
-	void setupWaypoint();
+	void setupSailCommand();	
 	void setupHTTPSync();
 	void setupCompass();
 
