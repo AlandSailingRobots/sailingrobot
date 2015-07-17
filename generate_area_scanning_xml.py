@@ -1,39 +1,69 @@
 #!/usr/bin/env python3.4
 
+# Creates xml from db table scanning_measurements
+
 import sqlite3
+import xml.etree.ElementTree as ET
+from xml.dom import minidom
+from xml.dom import expatbuilder
+
+def add(parent, element, text):
+	"add SubElement"
+	sub_element = ET.SubElement(parent, element)
+	sub_element.text = text
+
 
 print ("\nGenerating xml...")
 
-teamname = "Team name"
-
+# open db and file
 db = sqlite3.connect('asr.db')
-xml = open('area_scanning.xml', 'w')
+xml = open('area_scanning.xml', 'wb')
+# clear file
 xml.truncate()
 
-xml.write('\
-<?xml version="1.0" encoding="UTF-8"?>\n\
-<AreaScanning Teamid="" xmlns:gml="http://www.opengis.net/gml"\n\
-	xmlns:smil20="http://www.w3.org/2001/SMIL20/"\n\
-	xmlns:smil20lang="http://www.w3.org/2001/SMIL20/Language"\n\
-	xmlns:xlink="http://www.w3.org/1999/xlink"\n\
-	xmlns:xml="http://www.w3.org/XML/1998/namespace"\n\
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"\n\
-	xsi:noNamespaceSchemaLocation="AreaScanningResult.xsd">\n\n\
-	<TeamName>')
-xml.write(teamname)
-xml.write('</TeamName>\n\n')
+# ----------------
+# create xml
+# ----------------
+
+area_scanning = ET.Element("AreaScanning",
+	{"Teamid":"",
+	 "xmlns:gml":"http://www.opengis.net/gml",
+	 "xmlns:smil20":"http://www.w3.org/2001/SMIL20/",
+	 "xmlns:smil20lang":"http://www.w3.org/2001/SMIL20/Language",
+	 "xmlns:xlink":"http://www.w3.org/1999/xlink",
+	 "xmlns:xml":"http://www.w3.org/XML/1998/namespace",
+	 "xmlns:xsi":"http://www.w3.org/2001/XMLSchema-instance",
+	 "xsi:noNamespaceSchemaLocation":"AreaScanningResult.xsd"
+	 })
+
+add(area_scanning, "TeamName", "Team Name")
 
 for row in db.execute('SELECT * FROM scanning_measurements'):
-	xml.write('\t<Section>\n')
-	xml.write('\t\t<scanId>{}</scanId>\n'.format(row[0]))
-	xml.write('\t\t<dateTime>{}</dateTime>\n'.format(row[1]))
-	xml.write('\t\t<waypointId>{}</waypointId>\n'.format(row[2]))
-	xml.write('\t\t<latitude>{}</latitude>\n'.format(row[3]))
-	xml.write('\t\t<longitude>{}</longitude>\n'.format(row[4]))
-	xml.write('\t\t<airtemp>{}</airtemp>\n'.format(row[5]))
-	xml.write('\t</Section>\n\n')
+	section = ET.SubElement(area_scanning, "Section")
 
-xml.write('</AreaScanning>')
+	add(section, "sectioni", str(row[2]))
+	add(section, "sectionj", str(row[3]))
+
+	dateTime = row[4] + "Z"
+	dateTime = dateTime.replace(" ","T")
+	add(section, "dateTime", dateTime)
+
+	sub_element = ET.SubElement(section, "gml:pos",
+		{"srsDimension":"2",
+		 "srsName":"urn:ogc:def:crs:EPSG:6.6:4326",
+		 })
+	sub_element.text = str(row[5]) + " " + str(row[6])
+
+	add(section, "airtemp", str(row[7]))
+
+
+# make it pretty
+rough_string = ET.tostring(area_scanning, 'UTF-8')
+reparsed = minidom.parseString(rough_string)
+pretty = reparsed.toprettyxml(indent="\t",encoding="UTF-8")
+
+# write to file and close everything
+xml.write(pretty)
 
 xml.close()
 db.close()
