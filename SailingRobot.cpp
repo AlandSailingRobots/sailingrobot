@@ -20,7 +20,11 @@ SailingRobot::SailingRobot(ExternalCommand* externalCommand,
 
 	m_dbHandler(db),
 
-	m_waypointModel(PositionModel(1.5,2.7),100,"",0),
+	m_waypointModel(PositionModel(1.5,2.7),100,""),
+	m_waypointRouting(m_waypointModel,
+		0.5/*innerRadiusRatio*/,
+		m_dbHandler->retriveCellAsInt("configs", "1", "cc_ang_tack"),
+		m_dbHandler->retriveCellAsInt("configs", "1", "cc_ang_sect")),
 
 	m_externalCommand(externalCommand),
 	m_systemState(systemState),
@@ -81,10 +85,6 @@ void SailingRobot::init(std::string programPath, std::string errorFileName) {
 	setupWaypoint();
 	printf("OK\n");
 
-	printf(" Starting CourseCalculation\t");
-	setupCourseCalculation();
-	printf("OK\n");
-
 	//updateState();
 	//syncServer();
 }
@@ -105,7 +105,7 @@ int SailingRobot::getHeading() {
 
 int SailingRobot::mockLatitude(int oldLat) {
 
-	double courseToSteer = m_courseCalc.getCTS();
+	double courseToSteer = m_waypointRouting.getCTS();
 
 	if(courseToSteer > 90 && courseToSteer < 270 && courseToSteer != 0) {
 
@@ -120,7 +120,7 @@ int SailingRobot::mockLatitude(int oldLat) {
 
 int SailingRobot::mockLongitude(int oldLong) {
 
-	double courseToSteer = m_courseCalc.getCTS();
+	double courseToSteer = m_waypointRouting.getCTS();
 
 	if (courseToSteer < 180 && courseToSteer != 0) {
 
@@ -176,7 +176,7 @@ void SailingRobot::run() {
 				longitude = mockLongitude(longitude);
 				latitude = mockLatitude(latitude);
 				
-				double courseToSteer = m_courseCalc.getCTS();
+				double courseToSteer = m_waypointRouting.getCTS();
 
 				if (heading > courseToSteer) {
 
@@ -200,16 +200,13 @@ void SailingRobot::run() {
 				twdBuffer.erase(twdBuffer.begin());
 			}
 
-			m_courseCalc.setTrueWindDirection(
-				Utility::meanOfAngles(twdBuffer));
-
 			//calc BTW & CTS
-			m_courseCalc.calculateCourseToSteer(PositionModel(latitude, longitude),
-				m_waypointModel);
+			m_waypointRouting.calculateCourseToSteer(PositionModel(latitude, longitude),
+				Utility::meanOfAngles(twdBuffer));
 				
 
 			//rudder position calculation
-			rudderCommand = m_rudderCommand.getCommand(m_courseCalc.getCTS(), heading);
+			rudderCommand = m_rudderCommand.getCommand(m_waypointRouting.getCTS(), heading);
 			if(!m_externalCommand->getAutorun()) {
 				rudderCommand = m_externalCommand->getRudderCommand();
 			}
@@ -252,11 +249,11 @@ void SailingRobot::run() {
 			rudderCommand,
 			0, //sailservo getpos, to remove
 			0, //rudderservo getpos, to remove
-			m_courseCalc.getDTW(),
-			m_courseCalc.getBTW(),
-			m_courseCalc.getCTS(),
-			m_courseCalc.getTack(),
-			m_courseCalc.getGoingStarboard(),
+			m_waypointRouting.getDTW(),
+			m_waypointRouting.getBTW(),
+			m_waypointRouting.getCTS(),
+			m_waypointRouting.getTack(),
+			m_waypointRouting.getGoingStarboard(),
 			windDir,
 			m_systemStateModel.windsensorModel.speed,
 			m_systemStateModel.windsensorModel.temperature,
@@ -270,7 +267,7 @@ void SailingRobot::run() {
 
 		// check if we are within the radius of the waypoint
 		// and move to next wp in that case
-		if (m_courseCalc.getDTW() < m_waypointModel.radius) {
+		if (m_waypointRouting.nextWaypoint(PositionModel(latitude, longitude))) {
 			
 			if (m_dbHandler->retriveCellAsInt("configs", "1", "scanning"))
 			{
@@ -285,6 +282,7 @@ void SailingRobot::run() {
 
 			nextWaypoint();
 			setupWaypoint();
+			m_waypointRouting.setWaypoint(m_waypointModel);
 		}
 
 		//nextWaypoint();
@@ -433,17 +431,6 @@ void SailingRobot::setupSailServo() {
 		throw;
 	}
 	m_logger.info("setupSailServo() done");
-}
-
-void SailingRobot::setupCourseCalculation() {
-	try {
-		m_courseCalc.setTackAngle( m_dbHandler->retriveCellAsInt("configs", "1", "cc_ang_tack") );
-		m_courseCalc.setSectorAngle( m_dbHandler->retriveCellAsInt("configs", "1", "cc_ang_sect") );
-	} catch (const char * error) {
-		m_logger.error(error);
-		throw;
-	}
-	m_logger.info("setupCourseCalculation() done");
 }
 
 void SailingRobot::setupRudderCommand() {

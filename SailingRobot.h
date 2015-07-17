@@ -29,6 +29,8 @@
 
 #include "logger/Logger.h"
 
+#include "waypointrouting/WaypointRouting.h"
+
 //#include "models/WaypointModel.h"
 
 class SailingRobot {
@@ -60,7 +62,6 @@ private:
 	void setupRudderServo();
 	void setupSailServo();
 	//void setupGPS();
-	void setupCourseCalculation();
 	void setupRudderCommand();
 	void setupSailCommand();	
 	void setupHTTPSync();
@@ -86,9 +87,9 @@ private:
 
 	DBHandler *m_dbHandler;
 	WaypointModel m_waypointModel;
+	WaypointRouting m_waypointRouting;
 	RudderCommand m_rudderCommand;
 	SailCommand m_sailCommand;
-	CourseCalculation m_courseCalc;
 	HTTPSync m_httpSync;
 
 	Compass* m_compass;

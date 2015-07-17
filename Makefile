@@ -24,10 +24,11 @@ HTTP = httpsync/HTTPSync.o
 XML_LOG = xmlparser/pugi.o xmlparser/XML_log.o
 XBEE = xBee/xBee.o
 THREAD = thread/SystemState.o thread/ExternalCommand.o thread/ThreadRAII.o
+WAYPOINTROUTING = waypointrouting/WaypointRouting.o
 
 
 OBJECTS = $(COMPASS) $(COURSE) $(DB) $(COMMAND) $(MAESTRO) $(CV7) $(GPS) \
-		  $(HTTP) $(XML_LOG) $(XBEE) $(THREAD) \
+		  $(HTTP) $(XML_LOG) $(XBEE) $(THREAD) $(WAYPOINTROUTING) \
 		  logger/Logger.o utility/Utility.o
 SOURCES = SailingRobot.cpp main.cpp xBeeSync.cpp GPSupdater.cpp WindsensorController.cpp
 HEADERS = SailingRobot.h main.h xBeeSync.h GPSupdater.h WindsensorController.h
@@ -37,13 +38,14 @@ MAKE = make
 #Needed for proper subfolder make writing
 .PHONY : Compass runall coursecalculation dbhandler ruddercommand \
 		 sailcommand servocontroller CV7 gps httpsync xmlparser thread \
-		 logger utility
+		 logger utility waypointrouting
 
 
 all : runall $(FILE)
 
 runall : Compass coursecalculation dbhandler ruddercommand sailcommand \
-		 servocontroller CV7 gps httpsync xmlparser thread logger utility
+		 servocontroller CV7 gps httpsync xmlparser thread logger utility \
+		 waypointrouting
 
 clean :
 	cd Compass && $(MAKE) clean
@@ -60,6 +62,7 @@ clean :
 	cd thread && $(MAKE) clean
 	cd logger && $(MAKE) clean
 	cd utility && $(MAKE) clean
+	cd waypointrouting && $(MAKE) clean
 	rm -f $(FILE)
 	
 Compass :
@@ -102,6 +105,9 @@ xbee :
 
 thread :
 	$(MAKE) -C ./thread
+
+waypointrouting :
+	$(MAKE) -C ./waypointrouting
 
 logger:
 	$(MAKE) -C ./logger
