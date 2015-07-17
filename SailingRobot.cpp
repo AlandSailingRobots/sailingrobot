@@ -20,7 +20,7 @@ SailingRobot::SailingRobot(ExternalCommand* externalCommand,
 
 	m_dbHandler(db),
 
-	m_waypointModel(PositionModel(1.5,2.7),100,""),
+	m_waypointModel(PositionModel(1.5,2.7),100,"",0),
 
 	m_externalCommand(externalCommand),
 	m_systemState(systemState),
