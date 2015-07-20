@@ -29,7 +29,8 @@ WAYPOINTROUTING = waypointrouting/WaypointRouting.o
 
 OBJECTS = $(COMPASS) $(COURSE) $(DB) $(COMMAND) $(MAESTRO) $(CV7) $(GPS) \
 		  $(HTTP) $(XML_LOG) $(XBEE) $(THREAD) $(WAYPOINTROUTING) \
-		  logger/Logger.o utility/Utility.o
+		  logger/Logger.o utility/Utility.o utility/Timer.o
+		  
 SOURCES = SailingRobot.cpp main.cpp xBeeSync.cpp GPSupdater.cpp WindsensorController.cpp
 HEADERS = SailingRobot.h main.h xBeeSync.h GPSupdater.h WindsensorController.h
 FILE = sr

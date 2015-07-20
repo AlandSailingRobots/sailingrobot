@@ -1,14 +1,12 @@
 #include "SailingRobot.h"
 #include <cstdlib>
 #include <iostream>
-#include <wiringPi.h>
 #include <unistd.h>
 #include <fstream>
 #include <cstring>
 #include <cmath>
-#include <chrono>
-#include <thread>
 #include "utility/Utility.h"
+#include "utility/Timer.h"
 
 
 SailingRobot::SailingRobot(ExternalCommand* externalCommand,
@@ -128,20 +126,17 @@ void SailingRobot::run() {
 	//double longitude = 4, latitude = -3;
 	double latitude = 60.098933, longitude = 19.921028;
 	
+	Timer timer;
 	std::string sr_loop_time =
 		m_dbHandler->retriveCell("configs", "1", "sr_loop_time");
-	std::chrono::duration<double> loop_time(atof(sr_loop_time.c_str()));
-	std::chrono::steady_clock::time_point start, end;
-	std::chrono::duration<double> time_span;
-	int nanoSecondsToSleep;
-	int toNano = 1000*1000*1000;
+	double loop_time = std::stod(sr_loop_time);
 
 	printf("*SailingRobot::run() started.\n");
 	std::cout << "Waypoint target - ID: " << m_waypointModel.id << " lon: " << m_waypointModel.positionModel.longitude  
 		<< " lat : " << m_waypointModel.positionModel.latitude << std::endl;
 
 	while(m_running) {
-		start = std::chrono::steady_clock::now();
+		timer.start();
 
 		//Get data from SystemStateModel to local object
 		m_systemState->getData(m_systemStateModel);
@@ -271,14 +266,7 @@ void SailingRobot::run() {
 		//nextWaypoint();
 		//setupWaypoint();
 
-		end = std::chrono::steady_clock::now();
-		time_span = std::chrono::duration_cast<
-			std::chrono::duration<double>>(end - start);
-		time_span = loop_time - time_span;
-		nanoSecondsToSleep = time_span.count() * toNano;
-
-		std::this_thread::sleep_for(
-			std::chrono::nanoseconds(nanoSecondsToSleep));
+		timer.sleepUntil(loop_time);
 	}
 
 	printf("*SailingRobot::run() exiting\n");
