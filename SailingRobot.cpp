@@ -85,6 +85,8 @@ void SailingRobot::init(std::string programPath, std::string errorFileName) {
 	setupWaypoint();
 	printf("OK\n");
 
+	m_waypointRouting.setWaypoint(m_waypointModel);
+
 	//updateState();
 	//syncServer();
 }
@@ -103,34 +105,13 @@ int SailingRobot::getHeading() {
 	return newHeading;
 }
 
-int SailingRobot::mockLatitude(int oldLat) {
-
-	double courseToSteer = m_waypointRouting.getCTS();
-
-	if(courseToSteer > 90 && courseToSteer < 270 && courseToSteer != 0) {
-
-		oldLat -= 0.1;
-	}
-	else if (courseToSteer != 0) {
-		oldLat += 0.1;
-	}
-
+double SailingRobot::mockLatitude(double oldLat) {
+	oldLat += cos(m_waypointRouting.getCTS()) * 0.0002;
 	return oldLat;
 }
 
-int SailingRobot::mockLongitude(int oldLong) {
-
-	double courseToSteer = m_waypointRouting.getCTS();
-
-	if (courseToSteer < 180 && courseToSteer != 0) {
-
-		oldLong += 0.1;
-	}
-	else if (courseToSteer != 0) {
-		
-		oldLong -= 0.1;
-	}
-
+double SailingRobot::mockLongitude(double oldLong) {
+	oldLong += sin(m_waypointRouting.getCTS()) * 0.0002;
 	return oldLong;
 }
 
@@ -143,7 +124,7 @@ void SailingRobot::run() {
 		m_dbHandler->retriveCellAsInt("buffer_configs", "1", "true_wind");
 	
 	//double longitude = 4, latitude = -3;
-	double latitude = 60.07506317, longitude = 19.89288243;
+	double latitude = 60.098933, longitude = 19.921028;
 	
 	std::string sr_loop_time =
 		m_dbHandler->retriveCell("configs", "1", "sr_loop_time");

@@ -48,8 +48,8 @@ public:
 private:
 	int getHeading();
 
-	int mockLongitude(int oldLong);
-	int mockLatitude(int oldLat);
+	double mockLongitude(double oldLong);
+	double mockLatitude(double oldLat);
 
 	//void readGPS();
 	void syncServer();
