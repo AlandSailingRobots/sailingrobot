@@ -106,12 +106,14 @@ int SailingRobot::getHeading() {
 }
 
 double SailingRobot::mockLatitude(double oldLat) {
-	oldLat += cos(m_waypointRouting.getCTS()) * 0.0002;
+	CourseMath cm;
+	oldLat += cos(cm.degreeToRadian(m_waypointRouting.getCTS())) * 0.0002;
 	return oldLat;
 }
 
 double SailingRobot::mockLongitude(double oldLong) {
-	oldLong += sin(m_waypointRouting.getCTS()) * 0.0002;
+	CourseMath cm;
+	oldLong += sin(cm.degreeToRadian(m_waypointRouting.getCTS())) * 0.0002;
 	return oldLong;
 }
 
