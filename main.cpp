@@ -91,8 +91,13 @@ int main(int argc, char *argv[]) {
 	m_mockWindsensor = db.retriveCellAsInt("mock", "1", "Windsensor");
 
 	// Create main sailing robot controller
-	SailingRobot sr(&externalCommand, &systemstate, &db);
-	sr_handle = &sr;
+	try {
+		SailingRobot sr(&externalCommand, &systemstate, &db);
+		sr_handle = &sr;
+	} catch (const char * error) {
+		printf("!SR INIT ERROR: %s\n", error);
+		return 1;
+	}
 
 	GPSupdater gps_updater(&systemstate, m_mockGPS);
 	gps_handle = &gps_updater;
@@ -100,7 +105,7 @@ int main(int argc, char *argv[]) {
 	try {
 		printf("-Initializing...\n");
 		
-		sr.init(path, errorLog);
+		sr_handle->init(path, errorLog);
 		
 		printf(" Starting Windsensor\t\t");
 		windsensor_handle.reset(
@@ -144,7 +149,7 @@ int main(int argc, char *argv[]) {
 		);
 
 		printf("-Starting main loop...\n");
-		sr.run();
+		sr_handle->run();
 		printf("-DONE\n");
 
 	} catch (const char * e) {

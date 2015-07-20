@@ -217,14 +217,7 @@ void SailingRobot::run() {
 
 		//logging
 		m_dbHandler->insertDataLog(
-			m_systemStateModel.gpsModel.timestamp,
-			latitude,
-			longitude,
-			m_systemStateModel.gpsModel.speed,
-			m_systemStateModel.gpsModel.heading,
-			m_systemStateModel.gpsModel.satellitesUsed,
-			sailCommand,
-			rudderCommand,
+			m_systemStateModel,
 			0, //sailservo getpos, to remove
 			0, //rudderservo getpos, to remove
 			m_waypointRouting.getDTW(),
@@ -232,13 +225,7 @@ void SailingRobot::run() {
 			m_waypointRouting.getCTS(),
 			m_waypointRouting.getTack(),
 			m_waypointRouting.getGoingStarboard(),
-			windDir,
-			m_systemStateModel.windsensorModel.speed,
-			m_systemStateModel.windsensorModel.temperature,
-			atoi(m_waypointModel.id.c_str()),
-			m_compass->getHeading(),
-			m_compass->getPitch(),
-			m_compass->getRoll()
+			atoi(m_waypointModel.id.c_str())
 		);
 
 //		syncServer();
