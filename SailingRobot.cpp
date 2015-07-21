@@ -154,8 +154,9 @@ void SailingRobot::run() {
 	int toNano = 1000*1000*1000;
 
 	printf("*SailingRobot::run() started.\n");
-	std::cout << "Waypoint target - ID: " << m_waypointModel.id << " lon: " << m_waypointModel.positionModel.longitude  
-		<< " lat : " << m_waypointModel.positionModel.latitude << std::endl;
+	std::cout << "Waypoint target - ID: " << m_waypointModel.id << " lon: " << 
+	m_waypointModel.positionModel.longitude	<< " lat : " << 
+	m_waypointModel.positionModel.latitude << std::endl;
 
 	while(m_running) {
 		start = std::chrono::steady_clock::now();

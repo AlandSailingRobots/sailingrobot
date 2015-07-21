@@ -1,6 +1,7 @@
 #include "xBeeSync.h"
 #include <chrono>
 #include <thread>
+#include <iostream>
 
 xBeeSync::xBeeSync(ExternalCommand* externalCommand, SystemState *systemState,
 				   bool sending, bool receiving) :
