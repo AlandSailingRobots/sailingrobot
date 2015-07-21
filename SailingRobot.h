@@ -4,25 +4,16 @@
 #include <memory>
 
 #include "dbhandler/DBHandler.h"
-#include "dbhandler/JSON.h"
 #include "sailcommand/SailCommand.h"
 #include "ruddercommand/RudderCommand.h"
 #include "coursecalculation/CourseCalculation.h"
 #include "httpsync/HTTPSync.h"
 
 #include "Compass/Compass.h"
-#include "Compass/MockCompass.h"
-#include "Compass/HMC6343.h"
-
-#include "gps/GPSReader.h"
-#include "gps/MockGPSReader.h"
+#include "gps/GPS.h"
 
 #include "servocontroller/Actuator.h"
-#include "servocontroller/MaestroController.h"
-#include "servocontroller/MockMaestroController.h"
-
 #include "servocontroller/ServoObject.h"
-#include "servocontroller/MockServoObject.h"
 
 #include "thread/ExternalCommand.h"
 #include "thread/SystemState.h"
@@ -104,9 +95,7 @@ private:
 
 	SystemStateModel m_systemStateModel;
 
-	
-
 	Logger m_logger;
-
 };
+
 #endif

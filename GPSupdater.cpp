@@ -7,6 +7,8 @@
 
 #include "GPSupdater.h"
 #include <iostream>
+#include "gps/MockGPSReader.h"
+#include "gps/GPSReader.h"
 
 
 GPSupdater::GPSupdater(SystemState *systemState, bool mockIt):

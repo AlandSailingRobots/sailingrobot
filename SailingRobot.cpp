@@ -7,6 +7,9 @@
 #include <cmath>
 #include "utility/Utility.h"
 #include "utility/Timer.h"
+#include "servocontroller/MockMaestroController.h"
+#include "Compass/HMC6343.h"
+#include "Compass/MockCompass.h"
 
 
 SailingRobot::SailingRobot(ExternalCommand* externalCommand,

@@ -1,5 +1,6 @@
 #ifndef H_XBEE
 #define H_XBEE
+
 #include <string>
 
 class xBee {

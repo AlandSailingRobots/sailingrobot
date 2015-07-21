@@ -11,8 +11,6 @@
 #include <mutex>
 #include "gps/GPS.h"
 #include "thread/SystemState.h"
-#include "gps/GPSReader.h"
-#include "gps/MockGPSReader.h"
 #include "logger/Logger.h"
 
 class GPSupdater {

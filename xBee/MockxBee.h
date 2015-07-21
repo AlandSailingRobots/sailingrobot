@@ -1,5 +1,6 @@
 #ifndef H_MOCKXBEE
 #define H_MOCKXBEE
+
 #include <string>
 
 class MockxBee {
