@@ -17,7 +17,7 @@
 #include "thread/ThreadRAII.h"
 #include "logger/Logger.h"
 
-SailingRobot *sr_handle;
+std::unique_ptr<SailingRobot> sr_handle;
 std::unique_ptr<xBeeSync> xbee_handle;
 GPSupdater *gps_handle;
 std::unique_ptr<WindsensorController> windsensor_handle;

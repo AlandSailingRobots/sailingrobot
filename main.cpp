@@ -92,8 +92,7 @@ int main(int argc, char *argv[]) {
 
 	// Create main sailing robot controller
 	try {
-		SailingRobot sr(&externalCommand, &systemstate, &db);
-		sr_handle = &sr;
+		sr_handle = std::make_unique<SailingRobot>(&externalCommand, &systemstate, &db);
 	} catch (const char * error) {
 		printf("!SR INIT ERROR: %s\n", error);
 		return 1;
