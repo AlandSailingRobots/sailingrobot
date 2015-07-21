@@ -4,30 +4,23 @@
 #include <memory>
 
 #include "dbhandler/DBHandler.h"
-#include "dbhandler/JSON.h"
 #include "sailcommand/SailCommand.h"
 #include "ruddercommand/RudderCommand.h"
 #include "coursecalculation/CourseCalculation.h"
 #include "httpsync/HTTPSync.h"
 
 #include "Compass/Compass.h"
-#include "Compass/MockCompass.h"
-#include "Compass/HMC6343.h"
-
-#include "gps/GPSReader.h"
-#include "gps/MockGPSReader.h"
+#include "gps/GPS.h"
 
 #include "servocontroller/Actuator.h"
-#include "servocontroller/MaestroController.h"
-#include "servocontroller/MockMaestroController.h"
-
 #include "servocontroller/ServoObject.h"
-#include "servocontroller/MockServoObject.h"
 
 #include "thread/ExternalCommand.h"
 #include "thread/SystemState.h"
 
 #include "logger/Logger.h"
+
+#include "waypointrouting/WaypointRouting.h"
 
 //#include "models/WaypointModel.h"
 
@@ -46,8 +39,8 @@ public:
 private:
 	int getHeading();
 
-	int mockLongitude(int oldLong);
-	int mockLatitude(int oldLat);
+	double mockLongitude(double oldLong);
+	double mockLatitude(double oldLat);
 
 	//void readGPS();
 	void syncServer();
@@ -60,7 +53,6 @@ private:
 	void setupRudderServo();
 	void setupSailServo();
 	//void setupGPS();
-	void setupCourseCalculation();
 	void setupRudderCommand();
 	void setupSailCommand();	
 	void setupHTTPSync();
@@ -86,9 +78,9 @@ private:
 
 	DBHandler *m_dbHandler;
 	WaypointModel m_waypointModel;
+	WaypointRouting m_waypointRouting;
 	RudderCommand m_rudderCommand;
 	SailCommand m_sailCommand;
-	CourseCalculation m_courseCalc;
 	HTTPSync m_httpSync;
 
 	Compass* m_compass;
@@ -103,9 +95,7 @@ private:
 
 	SystemStateModel m_systemStateModel;
 
-	
-
 	Logger m_logger;
-
 };
+
 #endif
