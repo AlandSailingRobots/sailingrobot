@@ -226,7 +226,8 @@ void SailingRobot::run() {
 			courseToSteer,
 			m_waypointRouting.getTack(),
 			m_waypointRouting.getGoingStarboard(),
-			atoi(m_waypointModel.id.c_str())
+			atoi(m_waypointModel.id.c_str()),
+			Utility::meanOfAngles(twdBuffer)
 		);
 
 //		syncServer();
