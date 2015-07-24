@@ -106,13 +106,13 @@ int SailingRobot::getHeading() {
 	return newHeading;
 }
 
-double SailingRobot::mockLatitude(double oldLat) {
-	oldLat += cos(Utility::degreeToRadian(m_waypointRouting.getCTS())) * 0.0002;
+double SailingRobot::mockLatitude(double oldLat, double cts) {
+	oldLat += cos(Utility::degreeToRadian(cts)) * 0.0002;
 	return oldLat;
 }
 
-double SailingRobot::mockLongitude(double oldLong) {
-	oldLong += sin(Utility::degreeToRadian(m_waypointRouting.getCTS())) * 0.0002;
+double SailingRobot::mockLongitude(double oldLong, double cts) {
+	oldLong += sin(Utility::degreeToRadian(cts)) * 0.0002;
 	return oldLong;
 }
 
@@ -125,7 +125,7 @@ void SailingRobot::run() {
 		m_dbHandler->retriveCellAsInt("buffer_configs", "1", "true_wind");
 	
 	//double longitude = 4, latitude = -3;
-	double latitude = 60.098933, longitude = 19.921028;
+	double latitude = 60.098933, longitude = 19.921028, courseToSteer = 0.0;
 	
 	Timer timer;
 	std::string sr_loop_time =
@@ -153,10 +153,8 @@ void SailingRobot::run() {
 			//calc DTW
 			if (m_mockPosition) {
 
-				longitude = mockLongitude(longitude);
-				latitude = mockLatitude(latitude);
-				
-				double courseToSteer = m_waypointRouting.getCTS();
+				longitude = mockLongitude(longitude, courseToSteer);
+				latitude = mockLatitude(latitude, courseToSteer);
 
 				if (heading > courseToSteer) {
 
@@ -181,12 +179,13 @@ void SailingRobot::run() {
 			}
 
 			//calc BTW & CTS
-			m_waypointRouting.calculateCourseToSteer(PositionModel(latitude, longitude),
+			courseToSteer =m_waypointRouting.calculateCourseToSteer(
+				PositionModel(latitude, longitude),
 				Utility::meanOfAngles(twdBuffer));
 				
 
 			//rudder position calculation
-			rudderCommand = m_rudderCommand.getCommand(m_waypointRouting.getCTS(), heading);
+			rudderCommand = m_rudderCommand.getCommand(courseToSteer, heading);
 			if(!m_externalCommand->getAutorun()) {
 				rudderCommand = m_externalCommand->getRudderCommand();
 			}
@@ -224,7 +223,7 @@ void SailingRobot::run() {
 			0, //rudderservo getpos, to remove
 			m_waypointRouting.getDTW(),
 			m_waypointRouting.getBTW(),
-			m_waypointRouting.getCTS(),
+			courseToSteer,
 			m_waypointRouting.getTack(),
 			m_waypointRouting.getGoingStarboard(),
 			atoi(m_waypointModel.id.c_str())
