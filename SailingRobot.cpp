@@ -138,7 +138,7 @@ void SailingRobot::run() {
 	m_waypointModel.positionModel.latitude << std::endl;
 
 	while(m_running) {
-		timer.start();
+		timer.reset();
 
 		//Get data from SystemStateModel to local object
 		m_systemState->getData(m_systemStateModel);
