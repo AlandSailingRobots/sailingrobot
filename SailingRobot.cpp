@@ -125,7 +125,7 @@ void SailingRobot::run() {
 		m_dbHandler->retriveCellAsInt("buffer_configs", "1", "true_wind");
 	
 	//double longitude = 4, latitude = -3;
-	double latitude = 60.098933, longitude = 19.921028, courseToSteer = 0.0;
+	double latitude = 60.098933, longitude = 19.921028;
 	
 	Timer timer;
 	std::string sr_loop_time =
@@ -153,18 +153,18 @@ void SailingRobot::run() {
 			//calc DTW
 			if (m_mockPosition) {
 
-				longitude = mockLongitude(longitude, courseToSteer);
-				latitude = mockLatitude(latitude, courseToSteer);
+				longitude = mockLongitude(longitude, m_waypointRouting.getCTS());
+				latitude = mockLatitude(latitude, m_waypointRouting.getCTS());
 
-				if (heading > courseToSteer) {
+				if (heading > m_waypointRouting.getCTS()) {
 
 					heading--;
 				}
-				else if (heading < courseToSteer) {
+				else if (heading < m_waypointRouting.getCTS()) {
 
 					heading++;
 				}
-				else heading = courseToSteer;
+				else heading = m_waypointRouting.getCTS();
 
 			}
 			else {
@@ -178,27 +178,24 @@ void SailingRobot::run() {
 				twdBuffer.erase(twdBuffer.begin());
 			}
 
-			//calc BTW & CTS
-			courseToSteer =m_waypointRouting.calculateCourseToSteer(
+			double rudder = 0, sail = 0;
+			m_waypointRouting.getCommands(rudder, sail,
 				PositionModel(latitude, longitude),
-				Utility::meanOfAngles(twdBuffer));
+				Utility::meanOfAngles(twdBuffer), heading, windDir);
 				
 
-			//rudder position calculation
-			rudderCommand = m_rudderCommand.getCommand(courseToSteer, heading);
+			rudderCommand = m_rudderCommand.getCommand(rudder);
 			if(!m_externalCommand->getAutorun()) {
 				rudderCommand = m_externalCommand->getRudderCommand();
+			}
+			sailCommand = m_sailCommand.getCommand(sail);
+			if(!m_externalCommand->getAutorun()) {
+				sailCommand = m_externalCommand->getSailCommand();
 			}
 
 		}
 		else {
 			m_logger.error("SailingRobot::run(), gps NaN. Using values from last iteration.");
-		}
-
-		//sail position calculation
-		sailCommand = m_sailCommand.getCommand(windDir);
-		if(!m_externalCommand->getAutorun()) {
-			sailCommand = m_externalCommand->getSailCommand();
 		}
 
 		//rudder adjustment
@@ -223,7 +220,7 @@ void SailingRobot::run() {
 			0, //rudderservo getpos, to remove
 			m_waypointRouting.getDTW(),
 			m_waypointRouting.getBTW(),
-			courseToSteer,
+			m_waypointRouting.getCTS(),
 			m_waypointRouting.getTack(),
 			m_waypointRouting.getGoingStarboard(),
 			atoi(m_waypointModel.id.c_str()),
