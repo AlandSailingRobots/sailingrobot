@@ -24,7 +24,9 @@ SailingRobot::SailingRobot(ExternalCommand* externalCommand,
 	m_waypointModel(PositionModel(1.5,2.7),100,""),
 	m_waypointRouting(m_waypointModel,
 		atof(m_dbHandler->retriveCell("configs", "1", "wp_inner_radius_ratio").c_str()),
-		m_dbHandler->retriveCellAsInt("configs", "1", "cc_ang_tack"),
+		m_dbHandler->retriveCellAsInt("configs", "1", "cc_tack_ang"),
+		m_dbHandler->retriveCellAsInt("configs", "1", "cc_tack_max_ang"),
+		atof(m_dbHandler->retriveCell("configs", "1", "cc_tack_min_spd").c_str()),
 		m_dbHandler->retriveCellAsInt("configs", "1", "cc_ang_sect")),
 
 	m_externalCommand(externalCommand),
@@ -181,7 +183,7 @@ void SailingRobot::run() {
 			double rudder = 0, sail = 0;
 			m_waypointRouting.getCommands(rudder, sail,
 				PositionModel(latitude, longitude),
-				Utility::meanOfAngles(twdBuffer), heading, windDir);
+				Utility::meanOfAngles(twdBuffer), heading, m_systemStateModel);
 				
 
 			rudderCommand = m_rudderCommand.getCommand(rudder);
