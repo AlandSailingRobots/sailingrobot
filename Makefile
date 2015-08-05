@@ -24,7 +24,9 @@ HTTP = httpsync/HTTPSync.o
 XML_LOG = xmlparser/pugi.o xmlparser/XML_log.o
 XBEE = xBee/xBee.o
 THREAD = thread/SystemState.o thread/ExternalCommand.o thread/ThreadRAII.o
-WAYPOINTROUTING = waypointrouting/WaypointRouting.o
+WAYPOINTROUTING = waypointrouting/WaypointRouting.o \
+	waypointrouting/Commands.o \
+	waypointrouting/TackAngle.o
 
 
 OBJECTS = $(COMPASS) $(COURSE) $(DB) $(COMMAND) $(MAESTRO) $(CV7) $(GPS) \
