@@ -8,7 +8,7 @@ xBeeSync::xBeeSync(ExternalCommand* externalCommand, SystemState *systemState,
 	m_external_command(externalCommand),
 	m_model(
 		SystemStateModel(
-			GPSModel("",0,0,0,0,0,0),
+			GPSModel("",PositionModel(0,0),0,0,0,0),
 			WindsensorModel(0,0,0),
 			CompassModel(0,0,0),
 			0,
@@ -47,8 +47,8 @@ void xBeeSync::run()
 				m_model.compassModel.heading, 		// Heading deg
 				m_model.compassModel.pitch, 		// Pitch deg
 				m_model.compassModel.roll, 			// Roll deg
-				m_model.gpsModel.latitude, 			// gml:pos arg1, lat
-				m_model.gpsModel.longitude, 		// gml:pos arg2, long
+				m_model.gpsModel.positionModel.latitude, 			// gml:pos arg1, lat
+				m_model.gpsModel.positionModel.longitude, 		// gml:pos arg2, long
 				m_model.gpsModel.heading, 			// course over ground(deg)
 				m_model.gpsModel.speed, 			// speed over ground(ms)
 				m_model.rudder,						// Rudderpos

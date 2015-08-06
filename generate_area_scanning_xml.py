@@ -38,6 +38,7 @@ area_scanning = ET.Element("AreaScanning",
 
 add(area_scanning, "TeamName", "Team Name")
 
+
 for row in db.execute('SELECT * FROM scanning_measurements'):
 	section = ET.SubElement(area_scanning, "Section")
 
@@ -45,6 +46,7 @@ for row in db.execute('SELECT * FROM scanning_measurements'):
 	add(section, "sectionj", str(row[3]))
 
 	dateTime = row[4] + "Z"
+	
 	dateTime = dateTime.replace(" ","T")
 	add(section, "dateTime", dateTime)
 
@@ -67,5 +69,6 @@ xml.write(pretty)
 
 xml.close()
 db.close()
+
 
 print ("DONE\n")

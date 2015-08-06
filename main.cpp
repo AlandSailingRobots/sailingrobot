@@ -48,6 +48,7 @@ int main(int argc, char *argv[]) {
 		db_name = "/asr.db";
 		errorLog = "/errors.log";
 	}
+	fadsf
 
 	printf("\n");
 	printf("  Sailing Robot\n");
@@ -69,7 +70,7 @@ int main(int argc, char *argv[]) {
 	ExternalCommand externalCommand("1970-04-10T10:53:15.1234Z",true,0,0);
 	SystemState systemstate(
 		SystemStateModel(
-			GPSModel("",0,0,0,0,0,0),
+			GPSModel("",PositionModel(0,0),0,0,0,0),
 			WindsensorModel(0,0,0),
 			CompassModel(0,0,0),
 			0,

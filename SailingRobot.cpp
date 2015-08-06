@@ -34,7 +34,7 @@ SailingRobot::SailingRobot(ExternalCommand* externalCommand,
 
 	m_systemStateModel(
 		SystemStateModel(
-			GPSModel("",0,0,0,0,0,0),
+			GPSModel("",PositionModel(0,0),0,0,0,0),
 			WindsensorModel(0,0,0),
 			CompassModel(0,0,0),
 			0,
@@ -170,8 +170,8 @@ void SailingRobot::run() {
 
 			}
 			else {
-				longitude = m_systemStateModel.gpsModel.longitude;
-				latitude = m_systemStateModel.gpsModel.latitude;
+				longitude = m_systemStateModel.gpsModel.positionModel.longitude;
+				latitude = m_systemStateModel.gpsModel.positionModel.latitude;
 			}
 
 			//calc & set TWD
