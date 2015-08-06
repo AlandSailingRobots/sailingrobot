@@ -48,7 +48,6 @@ int main(int argc, char *argv[]) {
 		db_name = "/asr.db";
 		errorLog = "/errors.log";
 	}
-	fadsf
 
 	printf("\n");
 	printf("  Sailing Robot\n");
