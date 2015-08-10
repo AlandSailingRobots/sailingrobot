@@ -235,10 +235,12 @@ void SailingRobot::run() {
 		// and move to next wp in that case
 		if (m_waypointRouting.nextWaypoint(PositionModel(latitude, longitude))) {
 			
-			if (m_dbHandler->retriveCellAsInt("configs", "1", "scanning"))
+			// should perhaps be a check if m_waypointModel.id exists in waypoint_index
+			int i = m_dbHandler->retriveCellAsInt("waypoint_index", m_waypointModel.id, "id");
+			if (m_dbHandler->retriveCellAsInt("configs", "1", "scanning") && i != 0)
 			{
 				try {
-					m_dbHandler->insertScan(PositionModel(latitude,longitude),
+					m_dbHandler->insertScan(m_waypointModel.id, PositionModel(latitude,longitude),
 						m_systemStateModel.windsensorModel.temperature);
 				} catch (const char * error) {
 					m_logger.error(error);
