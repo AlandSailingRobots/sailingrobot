@@ -121,7 +121,7 @@ double SailingRobot::mockLongitude(double oldLong, double cts) {
 void SailingRobot::run() {
 
 	m_running = true;
-	int rudderCommand, sailCommand, windDir, heading = 0;
+	int rudderCommand, sailCommand, windDir, heading = 0, insertScanOnce = 0;
 	std::vector<float> twdBuffer;
 	const unsigned int twdBufferMaxSize =
 		m_dbHandler->retriveCellAsInt("buffer_configs", "1", "true_wind");
@@ -237,8 +237,9 @@ void SailingRobot::run() {
 			
 			// should perhaps be a check if m_waypointModel.id exists in waypoint_index
 			int i = m_dbHandler->retriveCellAsInt("waypoint_index", m_waypointModel.id, "id");
-			if (m_dbHandler->retriveCellAsInt("configs", "1", "scanning") && i != 0)
+			if (m_dbHandler->retriveCellAsInt("configs", "1", "scanning") && i != 0 && insertScanOnce != i)
 			{
+				insertScanOnce = i;
 				try {
 					m_dbHandler->insertScan(m_waypointModel.id, PositionModel(latitude,longitude),
 						m_systemStateModel.windsensorModel.temperature);
