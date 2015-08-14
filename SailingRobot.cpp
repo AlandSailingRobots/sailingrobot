@@ -53,12 +53,13 @@ SailingRobot::~SailingRobot() {
 void SailingRobot::init(std::string programPath, std::string errorFileName) {
 	m_errorLogPath = programPath + errorFileName;
 
-	m_getHeadingFromCompass = m_dbHandler->retriveCellAsInt("configs", "1",
-		"flag_heading_compass");
-
+	m_getHeadingFromCompass = m_dbHandler->retriveCellAsInt("configs", "1", "flag_heading_compass");
+	
+	/* 
 	printf(" Starting HTTPSync\t\t");
 	setupHTTPSync();
 	printf("OK\n");
+	*/
 
 	printf(" Starting Compass\t\t");
 	setupCompass();
@@ -269,36 +270,7 @@ void SailingRobot::shutdown() {
 	m_dbHandler->closeDatabase();
 }
 
-void SailingRobot::syncServer() {
-	try {
-		std::string response = m_httpSync.pushLogs( m_dbHandler->getLogs() );
-		m_dbHandler->removeLogs(response);
-	} catch (const char * error) {
-		m_logger.error(error);
-	}
-}
 
-void SailingRobot::updateState() {
-	try {
-		std::string setup = m_httpSync.getSetup();
-		bool stateChanged = false;
-		if (m_dbHandler->revChanged("cfg_rev", setup) ) {
-			m_dbHandler->updateTable("configs", m_httpSync.getConfig());
-			stateChanged = true;
-			m_logger.info("config state updated");
-		}
-		if (m_dbHandler->revChanged("rte_rev", setup) ) {
-			m_dbHandler->updateTable("waypoints", m_httpSync.getRoute());
-			stateChanged = true;
-			m_logger.info("route state updated");
-		}
-		if (stateChanged)  {
-			m_dbHandler->updateTable("state", m_httpSync.getSetup());
-		}
-	} catch (const char * error) {
-		m_logger.error(error);
-	}
-}
 
 void SailingRobot::nextWaypoint() {
 
@@ -419,16 +391,8 @@ void SailingRobot::setupSailCommand() {
 	m_logger.info("setupSailCommand() done");
 }
 
-void SailingRobot::setupHTTPSync() {
-	try {
-		m_httpSync.setShipID( m_dbHandler->retriveCell("server", "1", "boat_id") );
-		m_httpSync.setShipPWD( m_dbHandler->retriveCell("server", "1", "boat_pwd") );
-		m_httpSync.setServerURL( m_dbHandler->retriveCell("server", "1", "srv_addr") );
-	} catch (const char * error) {
-		m_logger.error("SailingRobot::setupHTTPSync() failed");
-	}
-	m_logger.info("setupHTTPSync() done");
-}
+
+
 
 void SailingRobot::setupCompass() {
 	if (!m_mockCompass) {

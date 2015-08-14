@@ -7,7 +7,7 @@
 #include "sailcommand/SailCommand.h"
 #include "ruddercommand/RudderCommand.h"
 #include "coursecalculation/CourseCalculation.h"
-#include "httpsync/HTTPSync.h"
+//#include "httpsync/HTTPSync.h"
 
 #include "Compass/Compass.h"
 #include "gps/GPS.h"
@@ -43,8 +43,8 @@ private:
 	double mockLatitude(double oldLat, double cts);
 
 	//void readGPS();
-	void syncServer();
-	void updateState();
+	//void syncServer();
+	//void updateState();
 	void nextWaypoint();
 	void setupWaypoint();
 
@@ -55,7 +55,7 @@ private:
 	//void setupGPS();
 	void setupRudderCommand();
 	void setupSailCommand();	
-	void setupHTTPSync();
+	//void setupHTTPSync();
 	void setupCompass();
 
 	std::string m_errorLogPath;
@@ -81,7 +81,7 @@ private:
 	WaypointRouting m_waypointRouting;
 	RudderCommand m_rudderCommand;
 	SailCommand m_sailCommand;
-	HTTPSync m_httpSync;
+	//HTTPSync m_httpSync;
 
 	Compass* m_compass;
 	GPS* m_gpsReader;

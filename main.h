@@ -16,13 +16,21 @@
 #include "WindsensorController.h"
 #include "thread/ThreadRAII.h"
 #include "logger/Logger.h"
+#include "httpsync/HTTPSync.h"
 
 std::unique_ptr<SailingRobot> sr_handle;
 std::unique_ptr<xBeeSync> xbee_handle;
 GPSupdater *gps_handle;
 std::unique_ptr<WindsensorController> windsensor_handle;
+std::unique_ptr<HTTPSync> httpsync_handle;
 
 ThreadRAII *windsensor_thread;
+
+ThreadRAII *httpsync_thread;
+
+//HTTPSync *httpsync_handle;
+
+
 
 bool m_mockGPS;
 bool m_mockWindsensor;
