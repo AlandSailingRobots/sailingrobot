@@ -234,13 +234,13 @@ void SailingRobot::run() {
 
 		// check if we are within the radius of the waypoint
 		// and move to next wp in that case
-		if (m_waypointRouting.nextWaypoint(PositionModel(latitude, longitude))) {
-			
-			// should perhaps be a check if m_waypointModel.id exists in waypoint_index
+		//if (m_waypointRouting.nextWaypoint(PositionModel(latitude, longitude))) {
+		
+			// check if m_waypointModel.id exists in waypoint_index
 			int i = m_dbHandler->retriveCellAsInt("waypoint_index", m_waypointModel.id, "id");
 			if (m_dbHandler->retriveCellAsInt("configs", "1", "scanning") && i != 0 && insertScanOnce != i)
 			{
-				insertScanOnce = i;
+				insertScanOnce = i;				
 				try {
 					m_dbHandler->insertScan(m_waypointModel.id, PositionModel(latitude,longitude),
 						m_systemStateModel.windsensorModel.temperature,
@@ -251,13 +251,15 @@ void SailingRobot::run() {
 				}
 			}
 
-			//nextWaypoint();
-			//setupWaypoint();
+			nextWaypoint();
+			setupWaypoint();
 			m_waypointRouting.setWaypoint(m_waypointModel);
-		}
-
-		nextWaypoint();
-		setupWaypoint();
+ 		//}
+	
+		//m_waypointRouting.setWaypoint(m_waypointModel);	
+		
+		//nextWaypoint();
+		//setupWaypoint();	
 
 		timer.sleepUntil(loop_time);
 	}
