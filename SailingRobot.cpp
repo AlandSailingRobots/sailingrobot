@@ -234,7 +234,7 @@ void SailingRobot::run() {
 
 		// check if we are within the radius of the waypoint
 		// and move to next wp in that case
-		//if (m_waypointRouting.nextWaypoint(PositionModel(latitude, longitude))) {
+		if (m_waypointRouting.nextWaypoint(PositionModel(latitude, longitude))) {
 		
 			// check if m_waypointModel.id exists in waypoint_index
 			int i = m_dbHandler->retriveCellAsInt("waypoint_index", m_waypointModel.id, "id");
@@ -254,7 +254,7 @@ void SailingRobot::run() {
 			nextWaypoint();
 			setupWaypoint();
 			m_waypointRouting.setWaypoint(m_waypointModel);
- 		//}
+ 		}
 	
 		//m_waypointRouting.setWaypoint(m_waypointModel);	
 		
