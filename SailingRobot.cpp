@@ -243,20 +243,21 @@ void SailingRobot::run() {
 				insertScanOnce = i;
 				try {
 					m_dbHandler->insertScan(m_waypointModel.id, PositionModel(latitude,longitude),
-						m_systemStateModel.windsensorModel.temperature);
+						m_systemStateModel.windsensorModel.temperature,
+						m_systemStateModel.gpsModel.utc_timestamp);
 				} catch (const char * error) {
 					m_logger.error(error);
 					std::cout << error << std::endl;
 				}
 			}
 
-			nextWaypoint();
-			setupWaypoint();
+			//nextWaypoint();
+			//setupWaypoint();
 			m_waypointRouting.setWaypoint(m_waypointModel);
 		}
 
-		//nextWaypoint();
-		//setupWaypoint();
+		nextWaypoint();
+		setupWaypoint();
 
 		timer.sleepUntil(loop_time);
 	}
