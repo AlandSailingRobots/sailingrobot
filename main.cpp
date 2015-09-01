@@ -30,6 +30,11 @@ static void threadGPSupdate() {
 	}
 }
 
+static void threadHTTPSyncRun() {	
+	//httpsync_handle->run();
+	std::cout << " httpsync thread exited." << std::endl;
+}
+
 static void threadWindsensor() {
 	windsensor_handle->run();
 	std::cout << " * Windsensor thread exited." << std::endl;
@@ -101,8 +106,9 @@ int main(int argc, char *argv[]) {
 	GPSupdater gps_updater(&systemstate, m_mockGPS);
 	gps_handle = &gps_updater;
 
+
 	try {
-		printf("-Initializing...\n");
+		printf("-Initializing...\n");		
 		
 		sr_handle->init(path, errorLog);
 		
@@ -115,12 +121,14 @@ int main(int argc, char *argv[]) {
 				db.retriveCellAsInt("configs", "1", "ws_baud"),
 				db.retriveCellAsInt("buffer_configs", "1", "windsensor")
 			)
-		);
+		);		
 		printf("OK\n");
 
 		printf("-DONE\n");
 
 		printf("-Starting threads...\n");
+
+		httpsync_handle.reset(new HTTPSync(&db));
 
 		// Start xBeeSync thread
 
@@ -139,6 +147,12 @@ int main(int argc, char *argv[]) {
 		ThreadRAII gps_reader_thread(
 			std::thread(threadGPSupdate),
 			ThreadRAII::DtorAction::detach
+		);	
+
+		// Start httpsync thread
+		httpsync_thread = new ThreadRAII(
+			std::thread(threadHTTPSyncRun),
+			ThreadRAII::DtorAction::join
 		);
 
 		// Start windsensor thread

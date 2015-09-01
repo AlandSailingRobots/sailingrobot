@@ -53,12 +53,13 @@ SailingRobot::~SailingRobot() {
 void SailingRobot::init(std::string programPath, std::string errorFileName) {
 	m_errorLogPath = programPath + errorFileName;
 
-	m_getHeadingFromCompass = m_dbHandler->retriveCellAsInt("configs", "1",
-		"flag_heading_compass");
-
+	m_getHeadingFromCompass = m_dbHandler->retriveCellAsInt("configs", "1", "flag_heading_compass");
+	
+	/* 
 	printf(" Starting HTTPSync\t\t");
 	setupHTTPSync();
 	printf("OK\n");
+	*/
 
 	printf(" Starting Compass\t\t");
 	setupCompass();
@@ -121,7 +122,7 @@ double SailingRobot::mockLongitude(double oldLong, double cts) {
 void SailingRobot::run() {
 
 	m_running = true;
-	int rudderCommand, sailCommand, windDir, heading = 0;
+	int rudderCommand, sailCommand, windDir, heading = 0, insertScanOnce = 0;
 	std::vector<float> twdBuffer;
 	const unsigned int twdBufferMaxSize =
 		m_dbHandler->retriveCellAsInt("buffer_configs", "1", "true_wind");
@@ -234,12 +235,16 @@ void SailingRobot::run() {
 		// check if we are within the radius of the waypoint
 		// and move to next wp in that case
 		if (m_waypointRouting.nextWaypoint(PositionModel(latitude, longitude))) {
-			
-			if (m_dbHandler->retriveCellAsInt("configs", "1", "scanning"))
+		
+			// check if m_waypointModel.id exists in waypoint_index
+			int i = m_dbHandler->retriveCellAsInt("waypoint_index", m_waypointModel.id, "id");
+			if (m_dbHandler->retriveCellAsInt("configs", "1", "scanning") && i != 0 && insertScanOnce != i)
 			{
+				insertScanOnce = i;				
 				try {
-					m_dbHandler->insertScan(PositionModel(latitude,longitude),
-						m_systemStateModel.windsensorModel.temperature);
+					m_dbHandler->insertScan(m_waypointModel.id, PositionModel(latitude,longitude),
+						m_systemStateModel.windsensorModel.temperature,
+						m_systemStateModel.gpsModel.utc_timestamp);
 				} catch (const char * error) {
 					m_logger.error(error);
 					std::cout << error << std::endl;
@@ -249,10 +254,12 @@ void SailingRobot::run() {
 			nextWaypoint();
 			setupWaypoint();
 			m_waypointRouting.setWaypoint(m_waypointModel);
-		}
-
+ 		}
+	
+		//m_waypointRouting.setWaypoint(m_waypointModel);	
+		
 		//nextWaypoint();
-		//setupWaypoint();
+		//setupWaypoint();	
 
 		timer.sleepUntil(loop_time);
 	}
@@ -266,36 +273,7 @@ void SailingRobot::shutdown() {
 	m_dbHandler->closeDatabase();
 }
 
-void SailingRobot::syncServer() {
-	try {
-		std::string response = m_httpSync.pushLogs( m_dbHandler->getLogs() );
-		m_dbHandler->removeLogs(response);
-	} catch (const char * error) {
-		m_logger.error(error);
-	}
-}
 
-void SailingRobot::updateState() {
-	try {
-		std::string setup = m_httpSync.getSetup();
-		bool stateChanged = false;
-		if (m_dbHandler->revChanged("cfg_rev", setup) ) {
-			m_dbHandler->updateTable("configs", m_httpSync.getConfig());
-			stateChanged = true;
-			m_logger.info("config state updated");
-		}
-		if (m_dbHandler->revChanged("rte_rev", setup) ) {
-			m_dbHandler->updateTable("waypoints", m_httpSync.getRoute());
-			stateChanged = true;
-			m_logger.info("route state updated");
-		}
-		if (stateChanged)  {
-			m_dbHandler->updateTable("state", m_httpSync.getSetup());
-		}
-	} catch (const char * error) {
-		m_logger.error(error);
-	}
-}
 
 void SailingRobot::nextWaypoint() {
 
@@ -416,16 +394,8 @@ void SailingRobot::setupSailCommand() {
 	m_logger.info("setupSailCommand() done");
 }
 
-void SailingRobot::setupHTTPSync() {
-	try {
-		m_httpSync.setShipID( m_dbHandler->retriveCell("server", "1", "boat_id") );
-		m_httpSync.setShipPWD( m_dbHandler->retriveCell("server", "1", "boat_pwd") );
-		m_httpSync.setServerURL( m_dbHandler->retriveCell("server", "1", "srv_addr") );
-	} catch (const char * error) {
-		m_logger.error("SailingRobot::setupHTTPSync() failed");
-	}
-	m_logger.info("setupHTTPSync() done");
-}
+
+
 
 void SailingRobot::setupCompass() {
 	if (!m_mockCompass) {
