@@ -150,7 +150,10 @@ void SailingRobot::run() {
 
 		m_compass->readValues();
 		heading = getHeading();
-
+		
+		std::cout << "heading: " << heading << "\n";
+		std::cout << "headeing ssm compass:" << m_systemStateModel.compassModel.heading<<"\n";
+		
 		if (m_systemStateModel.gpsModel.online) {
 
 			//calc DTW
@@ -212,6 +215,9 @@ void SailingRobot::run() {
 				m_compass->getPitch(),
 				m_compass->getRoll()
 			));
+
+		std::cout << "headeing ssm compass after setmodel:" << m_systemStateModel.compassModel.heading<<"\n";
+
 		m_systemState->setRudder(rudderCommand);
 		m_systemState->setSail(sailCommand);
 
@@ -235,7 +241,7 @@ void SailingRobot::run() {
 		// check if we are within the radius of the waypoint
 		// and move to next wp in that case
 		if (m_waypointRouting.nextWaypoint(PositionModel(latitude, longitude))) {
-		
+				
 			// check if m_waypointModel.id exists in waypoint_index
 			int i = m_dbHandler->retriveCellAsInt("waypoint_index", m_waypointModel.id, "id");
 			if (m_dbHandler->retriveCellAsInt("configs", "1", "scanning") && i != 0 && insertScanOnce != i)
@@ -254,12 +260,10 @@ void SailingRobot::run() {
 			nextWaypoint();
 			setupWaypoint();
 			m_waypointRouting.setWaypoint(m_waypointModel);
- 		}
-	
-		//m_waypointRouting.setWaypoint(m_waypointModel);	
 		
-		//nextWaypoint();
-		//setupWaypoint();	
+		}
+	
+			
 
 		timer.sleepUntil(loop_time);
 	}

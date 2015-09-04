@@ -1,0 +1,704 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<AreaScanning Teamid="" xmlns:gml="http://www.opengis.net/gml" xmlns:smil20="http://www.w3.org/2001/SMIL20/" xmlns:smil20lang="http://www.w3.org/2001/SMIL20/Language" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xml="http://www.w3.org/XML/1998/namespace" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="AreaScanningResult.xsd">
+	<TeamName>Team Name</TeamName>
+	<Section>
+		<sectioni>0</sectioni>
+		<sectionj>0</sectionj>
+		<dateTime>2015-09-03T13:24:58Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1052 19.9506</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>0</sectioni>
+		<sectionj>1</sectionj>
+		<dateTime>2015-09-03T13:25:17Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1053 19.9503</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>0</sectioni>
+		<sectionj>2</sectionj>
+		<dateTime>2015-09-03T13:25:44Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1056 19.9503</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>0</sectioni>
+		<sectionj>3</sectionj>
+		<dateTime>2015-09-03T13:26:12Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1059 19.9503</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>0</sectioni>
+		<sectionj>4</sectionj>
+		<dateTime>2015-09-03T13:26:47Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1062 19.9503</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>0</sectioni>
+		<sectionj>5</sectionj>
+		<dateTime>2015-09-03T13:27:31Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1065 19.9503</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>0</sectioni>
+		<sectionj>6</sectionj>
+		<dateTime>2015-09-03T13:28:09Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1068 19.9503</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>0</sectioni>
+		<sectionj>7</sectionj>
+		<dateTime>2015-09-03T13:28:43Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1071 19.9503</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>0</sectioni>
+		<sectionj>8</sectionj>
+		<dateTime>2015-09-03T13:29:21Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1074 19.9503</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>0</sectioni>
+		<sectionj>9</sectionj>
+		<dateTime>2015-09-03T13:30:01Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1077 19.9503</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>1</sectioni>
+		<sectionj>0</sectionj>
+		<dateTime>2015-09-03T13:34:31Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1051 19.9512</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>1</sectioni>
+		<sectionj>1</sectionj>
+		<dateTime>2015-09-03T13:34:52Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1053 19.951</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>1</sectioni>
+		<sectionj>2</sectionj>
+		<dateTime>2015-09-03T13:35:22Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1056 19.9509</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>1</sectioni>
+		<sectionj>3</sectionj>
+		<dateTime>2015-09-03T13:35:57Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1059 19.9509</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>1</sectioni>
+		<sectionj>4</sectionj>
+		<dateTime>2015-09-03T13:36:21Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1062 19.9508</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>1</sectioni>
+		<sectionj>5</sectionj>
+		<dateTime>2015-09-03T13:36:53Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1065 19.9509</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>1</sectioni>
+		<sectionj>6</sectionj>
+		<dateTime>2015-09-03T13:37:41Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1068 19.9509</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>1</sectioni>
+		<sectionj>7</sectionj>
+		<dateTime>2015-09-03T13:38:50Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1071 19.9509</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>1</sectioni>
+		<sectionj>8</sectionj>
+		<dateTime>2015-09-03T13:39:44Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1074 19.9509</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>1</sectioni>
+		<sectionj>9</sectionj>
+		<dateTime>2015-09-03T13:40:25Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1077 19.9509</gml:pos>
+		<airtemp>20.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>2</sectioni>
+		<sectionj>0</sectionj>
+		<dateTime>2015-09-03T13:44:56Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1051 19.9518</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>2</sectioni>
+		<sectionj>1</sectionj>
+		<dateTime>2015-09-03T13:45:15Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1053 19.9516</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>2</sectioni>
+		<sectionj>2</sectionj>
+		<dateTime>2015-09-03T13:45:36Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1056 19.9515</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>2</sectioni>
+		<sectionj>3</sectionj>
+		<dateTime>2015-09-03T13:45:59Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1059 19.9515</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>2</sectioni>
+		<sectionj>4</sectionj>
+		<dateTime>2015-09-03T13:46:26Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1062 19.9515</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>2</sectioni>
+		<sectionj>5</sectionj>
+		<dateTime>2015-09-03T13:46:56Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1065 19.9515</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>2</sectioni>
+		<sectionj>6</sectionj>
+		<dateTime>2015-09-03T13:47:32Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1068 19.9515</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>2</sectioni>
+		<sectionj>7</sectionj>
+		<dateTime>2015-09-03T13:48:10Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1071 19.9515</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>2</sectioni>
+		<sectionj>8</sectionj>
+		<dateTime>2015-09-03T13:48:37Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1074 19.9515</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>2</sectioni>
+		<sectionj>9</sectionj>
+		<dateTime>2015-09-03T13:49:02Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1077 19.9515</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>3</sectioni>
+		<sectionj>0</sectionj>
+		<dateTime>2015-09-03T13:53:58Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1052 19.9523</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>3</sectioni>
+		<sectionj>1</sectionj>
+		<dateTime>2015-09-03T13:54:18Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1053 19.9521</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>3</sectioni>
+		<sectionj>2</sectionj>
+		<dateTime>2015-09-03T13:54:46Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1056 19.9521</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>3</sectioni>
+		<sectionj>3</sectionj>
+		<dateTime>2015-09-03T13:55:21Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1059 19.9521</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>3</sectioni>
+		<sectionj>4</sectionj>
+		<dateTime>2015-09-03T13:56:03Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1062 19.9521</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>3</sectioni>
+		<sectionj>5</sectionj>
+		<dateTime>2015-09-03T13:56:49Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1065 19.9521</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>3</sectioni>
+		<sectionj>6</sectionj>
+		<dateTime>2015-09-03T13:57:47Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1068 19.9521</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>3</sectioni>
+		<sectionj>7</sectionj>
+		<dateTime>2015-09-03T13:58:42Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1071 19.9521</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>3</sectioni>
+		<sectionj>8</sectionj>
+		<dateTime>2015-09-03T13:59:19Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1074 19.9521</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>3</sectioni>
+		<sectionj>9</sectionj>
+		<dateTime>2015-09-03T13:59:54Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1077 19.9521</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>4</sectioni>
+		<sectionj>0</sectionj>
+		<dateTime>2015-09-03T14:04:52Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1053 19.9526</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>4</sectioni>
+		<sectionj>1</sectionj>
+		<dateTime>2015-09-03T14:05:09Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1053 19.9528</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>4</sectioni>
+		<sectionj>2</sectionj>
+		<dateTime>2015-09-03T14:05:35Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1056 19.9527</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>4</sectioni>
+		<sectionj>3</sectionj>
+		<dateTime>2015-09-03T14:06:04Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1059 19.9527</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>4</sectioni>
+		<sectionj>4</sectionj>
+		<dateTime>2015-09-03T14:06:32Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1062 19.9527</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>4</sectioni>
+		<sectionj>5</sectionj>
+		<dateTime>2015-09-03T14:07:00Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1065 19.9527</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>4</sectioni>
+		<sectionj>6</sectionj>
+		<dateTime>2015-09-03T14:07:29Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1068 19.9527</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>4</sectioni>
+		<sectionj>7</sectionj>
+		<dateTime>2015-09-03T14:08:09Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1071 19.9527</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>4</sectioni>
+		<sectionj>8</sectionj>
+		<dateTime>2015-09-03T14:08:49Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1074 19.9527</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>4</sectioni>
+		<sectionj>9</sectionj>
+		<dateTime>2015-09-03T14:09:27Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1077 19.9527</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>5</sectioni>
+		<sectionj>0</sectionj>
+		<dateTime>2015-09-03T14:16:07Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1052 19.9531</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>5</sectioni>
+		<sectionj>1</sectionj>
+		<dateTime>2015-09-03T14:16:27Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1053 19.9533</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>5</sectioni>
+		<sectionj>2</sectionj>
+		<dateTime>2015-09-03T14:17:06Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1056 19.9533</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>5</sectioni>
+		<sectionj>3</sectionj>
+		<dateTime>2015-09-03T14:17:45Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1059 19.9532</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>5</sectioni>
+		<sectionj>4</sectionj>
+		<dateTime>2015-09-03T14:18:23Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1062 19.9533</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>5</sectioni>
+		<sectionj>5</sectionj>
+		<dateTime>2015-09-03T14:19:04Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1065 19.9533</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>5</sectioni>
+		<sectionj>6</sectionj>
+		<dateTime>2015-09-03T14:19:41Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1068 19.9533</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>5</sectioni>
+		<sectionj>7</sectionj>
+		<dateTime>2015-09-03T14:20:13Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1071 19.9533</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>5</sectioni>
+		<sectionj>8</sectionj>
+		<dateTime>2015-09-03T14:20:48Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1074 19.9534</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>5</sectioni>
+		<sectionj>9</sectionj>
+		<dateTime>2015-09-03T14:21:19Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1077 19.9533</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>6</sectioni>
+		<sectionj>0</sectionj>
+		<dateTime>2015-09-03T14:27:10Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1052 19.9537</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>6</sectioni>
+		<sectionj>1</sectionj>
+		<dateTime>2015-09-03T14:27:29Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1053 19.9539</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>6</sectioni>
+		<sectionj>2</sectionj>
+		<dateTime>2015-09-03T14:28:04Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1056 19.9539</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>6</sectioni>
+		<sectionj>3</sectionj>
+		<dateTime>2015-09-03T14:28:45Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1059 19.9539</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>6</sectioni>
+		<sectionj>4</sectionj>
+		<dateTime>2015-09-03T14:29:15Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1062 19.9539</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>6</sectioni>
+		<sectionj>5</sectionj>
+		<dateTime>2015-09-03T14:29:45Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1065 19.9539</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>6</sectioni>
+		<sectionj>6</sectionj>
+		<dateTime>2015-09-03T14:30:27Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1068 19.9539</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>6</sectioni>
+		<sectionj>7</sectionj>
+		<dateTime>2015-09-03T14:31:02Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1071 19.9539</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>6</sectioni>
+		<sectionj>8</sectionj>
+		<dateTime>2015-09-03T14:31:37Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1074 19.9539</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>6</sectioni>
+		<sectionj>9</sectionj>
+		<dateTime>2015-09-03T14:32:21Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1077 19.9539</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>7</sectioni>
+		<sectionj>0</sectionj>
+		<dateTime>2015-09-03T14:37:44Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1053 19.9547</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>7</sectioni>
+		<sectionj>1</sectionj>
+		<dateTime>2015-09-03T14:38:05Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1053 19.9545</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>7</sectioni>
+		<sectionj>2</sectionj>
+		<dateTime>2015-09-03T14:38:34Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1056 19.9545</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>7</sectioni>
+		<sectionj>3</sectionj>
+		<dateTime>2015-09-03T14:39:02Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1059 19.9545</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>7</sectioni>
+		<sectionj>4</sectionj>
+		<dateTime>2015-09-03T14:39:32Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1062 19.9545</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>7</sectioni>
+		<sectionj>5</sectionj>
+		<dateTime>2015-09-03T14:40:01Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1065 19.9545</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>7</sectioni>
+		<sectionj>6</sectionj>
+		<dateTime>2015-09-03T14:40:30Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1068 19.9544</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>7</sectioni>
+		<sectionj>7</sectionj>
+		<dateTime>2015-09-03T14:40:57Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1071 19.9544</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>7</sectioni>
+		<sectionj>8</sectionj>
+		<dateTime>2015-09-03T14:41:24Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1074 19.9545</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>7</sectioni>
+		<sectionj>9</sectionj>
+		<dateTime>2015-09-03T14:41:57Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1077 19.9545</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>8</sectioni>
+		<sectionj>0</sectionj>
+		<dateTime>2015-09-03T14:47:12Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1052 19.9553</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>8</sectioni>
+		<sectionj>1</sectionj>
+		<dateTime>2015-09-03T14:47:30Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1053 19.9551</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>8</sectioni>
+		<sectionj>2</sectionj>
+		<dateTime>2015-09-03T14:48:06Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1056 19.9551</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>8</sectioni>
+		<sectionj>3</sectionj>
+		<dateTime>2015-09-03T14:48:43Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1059 19.9551</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>8</sectioni>
+		<sectionj>4</sectionj>
+		<dateTime>2015-09-03T14:49:21Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1062 19.9551</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>8</sectioni>
+		<sectionj>5</sectionj>
+		<dateTime>2015-09-03T14:49:51Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1065 19.955</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>8</sectioni>
+		<sectionj>6</sectionj>
+		<dateTime>2015-09-03T14:50:24Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1068 19.9551</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>8</sectioni>
+		<sectionj>7</sectionj>
+		<dateTime>2015-09-03T14:51:00Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1071 19.9551</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>8</sectioni>
+		<sectionj>8</sectionj>
+		<dateTime>2015-09-03T14:51:32Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1074 19.9551</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>8</sectioni>
+		<sectionj>9</sectionj>
+		<dateTime>2015-09-03T14:52:07Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1077 19.9551</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>9</sectioni>
+		<sectionj>0</sectionj>
+		<dateTime>2015-09-03T14:57:08Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1053 19.9555</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>9</sectioni>
+		<sectionj>1</sectionj>
+		<dateTime>2015-09-03T14:57:30Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1053 19.9557</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>9</sectioni>
+		<sectionj>2</sectionj>
+		<dateTime>2015-09-03T14:58:12Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1056 19.9557</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>9</sectioni>
+		<sectionj>3</sectionj>
+		<dateTime>2015-09-03T14:59:04Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1059 19.9557</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>9</sectioni>
+		<sectionj>4</sectionj>
+		<dateTime>2015-09-03T14:59:47Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1062 19.9557</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>9</sectioni>
+		<sectionj>5</sectionj>
+		<dateTime>2015-09-03T15:00:27Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1065 19.9556</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>9</sectioni>
+		<sectionj>6</sectionj>
+		<dateTime>2015-09-03T15:01:06Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1068 19.9556</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>9</sectioni>
+		<sectionj>7</sectionj>
+		<dateTime>2015-09-03T15:01:45Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1071 19.9557</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>9</sectioni>
+		<sectionj>8</sectionj>
+		<dateTime>2015-09-03T15:02:17Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1074 19.9558</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+	<Section>
+		<sectioni>9</sectioni>
+		<sectionj>9</sectionj>
+		<dateTime>2015-09-03T15:02:44Z</dateTime>
+		<gml:pos srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326">60.1077 19.9557</gml:pos>
+		<airtemp>19.0</airtemp>
+	</Section>
+</AreaScanning>
