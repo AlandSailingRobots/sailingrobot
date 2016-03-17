@@ -150,16 +150,16 @@ int main(int argc, char *argv[]) {
 		);	
 
 		// Start httpsync thread
-		httpsync_thread = new ThreadRAII(
+		httpsync_thread = std::unique_ptr<ThreadRAII>(new ThreadRAII(
 			std::thread(threadHTTPSyncRun),
-			ThreadRAII::DtorAction::join
-		);
+			ThreadRAII::DtorAction::detach
+		) );
 
 		// Start windsensor thread
-		windsensor_thread = new ThreadRAII(
+		windsensor_thread = std::unique_ptr<ThreadRAII>(new ThreadRAII(
 			std::thread(threadWindsensor),
-			ThreadRAII::DtorAction::join
-		);
+			ThreadRAII::DtorAction::detach
+		) );
 
 		printf("-Starting main loop...\n");
 		sr_handle->run();
