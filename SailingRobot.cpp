@@ -21,7 +21,7 @@ SailingRobot::SailingRobot(ExternalCommand* externalCommand,
 
 	m_dbHandler(db),
 
-	m_waypointModel(PositionModel(1.5,2.7),100,""),
+	m_waypointModel(PositionModel(1.5,2.7), 100, "", 6),
 	m_waypointRouting(m_waypointModel,
 		atof(m_dbHandler->retriveCell("configs", "1", "wp_inner_radius_ratio").c_str()),
 		m_dbHandler->retriveCellAsInt("configs", "1", "cc_tack_ang"),
