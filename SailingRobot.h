@@ -37,7 +37,7 @@ public:
 	//void readGPS();
 	
 private:
-	int getHeading();
+	int getHeading(int declination);
 
 	double mockLongitude(double oldLong, double cts);
 	double mockLatitude(double oldLat, double cts);

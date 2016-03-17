@@ -95,12 +95,12 @@ void SailingRobot::init(std::string programPath, std::string errorFileName) {
 	//syncServer();
 }
 
-int SailingRobot::getHeading() {
+int SailingRobot::getHeading(int declination) {
 
 	int newHeading = 0;
 
 	if (m_getHeadingFromCompass) {
-		newHeading = m_compass->getHeading();
+		newHeading = Utility::addDeclinationToHeading(m_compass->getHeading(), m_waypointModel.declination);
 	}
 	else {
 		newHeading = m_gpsReader->getHeading();
@@ -149,7 +149,7 @@ void SailingRobot::run() {
 		windDir = m_systemStateModel.windsensorModel.direction;
 
 		m_compass->readValues();
-		heading = getHeading();
+		heading = getHeading(m_waypointModel.declination);
 		
 		std::cout << "heading: " << heading << "\n";
 		std::cout << "headeing ssm compass:" << m_systemStateModel.compassModel.heading<<"\n";
