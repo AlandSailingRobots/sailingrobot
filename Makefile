@@ -27,10 +27,11 @@ THREAD = thread/SystemState.o thread/ExternalCommand.o thread/ThreadRAII.o
 WAYPOINTROUTING = waypointrouting/WaypointRouting.o \
 	waypointrouting/Commands.o \
 	waypointrouting/TackAngle.o
+WINDVANECONTROLLER = windvanecontroller/WindVaneController.o
 
 
 OBJECTS = $(COMPASS) $(COURSE) $(DB) $(COMMAND) $(MAESTRO) $(CV7) $(GPS) \
-		  $(HTTP) $(XML_LOG) $(XBEE) $(THREAD) $(WAYPOINTROUTING) \
+		  $(HTTP) $(XML_LOG) $(XBEE) $(THREAD) $(WAYPOINTROUTING) $(WINDVANECONTROLLER) \
 		  logger/Logger.o utility/Utility.o utility/Timer.o
 		  
 SOURCES = SailingRobot.cpp main.cpp xBeeSync.cpp GPSupdater.cpp WindsensorController.cpp
@@ -41,14 +42,14 @@ MAKE = make
 #Needed for proper subfolder make writing
 .PHONY : Compass runall coursecalculation dbhandler ruddercommand \
 		 sailcommand servocontroller CV7 gps httpsync xmlparser thread \
-		 logger utility waypointrouting
+		 logger utility waypointrouting windvanecontroller
 
 
 all : runall $(FILE)
 
 runall : Compass coursecalculation dbhandler ruddercommand sailcommand \
 		 servocontroller CV7 gps httpsync xmlparser thread logger utility \
-		 waypointrouting
+		 waypointrouting windvanecontroller
 
 clean :
 	cd Compass && $(MAKE) clean
@@ -111,6 +112,9 @@ thread :
 
 waypointrouting :
 	$(MAKE) -C ./waypointrouting
+
+windvanecontroller :
+	$(MAKE) -C ./windvanecontroller
 
 logger:
 	$(MAKE) -C ./logger

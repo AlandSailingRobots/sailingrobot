@@ -10,6 +10,7 @@
 #include "servocontroller/MockMaestroController.h"
 #include "Compass/HMC6343.h"
 #include "Compass/MockCompass.h"
+#include "windvanecontroller/WindVaneController.h"
 
 
 SailingRobot::SailingRobot(ExternalCommand* externalCommand,
@@ -198,6 +199,19 @@ void SailingRobot::run() {
 			if(!m_externalCommand->getAutorun()) {
 				sailCommand = m_externalCommand->getSailCommand();
 			}
+
+			if(m_dbHandler->retriveCellAsInt("configs", "1", "use_self_steering")) {
+				if(m_dbHandler->retriveCellAsInt("configs", "1", "wind_sensor_self_steering")) {
+					m_windVaneController.setVaneAngle(m_waypointRouting.getTWD(), m_waypointRouting.getCTS());
+				} else {
+
+				}
+			}
+
+			//WindVaneController windVaneController;
+			//windVaneController.method(m_waypointRouting);
+
+
 
 		}
 		else {

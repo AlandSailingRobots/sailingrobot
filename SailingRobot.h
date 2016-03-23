@@ -79,6 +79,7 @@ private:
 	DBHandler *m_dbHandler;
 	WaypointModel m_waypointModel;
 	WaypointRouting m_waypointRouting;
+	WindVaneController m_windVaneController;
 	RudderCommand m_rudderCommand;
 	SailCommand m_sailCommand;
 	//HTTPSync m_httpSync;
