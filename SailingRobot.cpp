@@ -43,7 +43,11 @@ SailingRobot::SailingRobot(ExternalCommand* externalCommand,
 		)
 	)
 {
+	m_waypointRouting.setUpdateInterval(
+		atof(m_dbHandler->retriveCell("configs", "1", "sail_adjust_time").c_str()));
 
+	m_waypointRouting.setMinimumDegreeLimit(
+		atof(m_dbHandler->retriveCell("configs", "1", "sail_adjust_degree_limit").c_str()));
 }
 
 SailingRobot::~SailingRobot() {
