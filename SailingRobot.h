@@ -21,7 +21,7 @@
 #include "logger/Logger.h"
 
 #include "waypointrouting/WaypointRouting.h"
-
+#include "windvanecontroller/WindVaneController.h"
 //#include "models/WaypointModel.h"
 
 class SailingRobot {
