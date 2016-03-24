@@ -166,15 +166,12 @@ void SailingRobot::run() {
 				if (heading > m_waypointRouting.getCTS()) {
 
 					heading--;
-				}
-				else if (heading < m_waypointRouting.getCTS()) {
+				} else if (heading < m_waypointRouting.getCTS()) {
 
 					heading++;
-				}
-				else heading = m_waypointRouting.getCTS();
+				} else heading = m_waypointRouting.getCTS();
 
-			}
-			else {
+			} else {
 				longitude = m_systemStateModel.gpsModel.positionModel.longitude;
 				latitude = m_systemStateModel.gpsModel.positionModel.latitude;
 			}
@@ -191,6 +188,16 @@ void SailingRobot::run() {
 				Utility::meanOfAngles(twdBuffer), heading, m_systemStateModel);
 				
 
+			if(m_dbHandler->retriveCellAsInt("configs", "1", "use_self_steering")) {
+				if(m_dbHandler->retriveCellAsInt("configs", "1", "wind_sensor_self_steering")) {
+					m_windVaneController.setVaneAngle(m_waypointRouting.getTWD(), m_waypointRouting.getCTS());
+					// WindVaneController::getAngle() will fetch set angle of vane.
+					// To do: Pass angle to engine controlling wind vane.
+				} else {
+					// For steering without wind sensor.
+				}
+			}
+
 			rudderCommand = m_rudderCommand.getCommand(rudder);
 			if(!m_externalCommand->getAutorun()) {
 				rudderCommand = m_externalCommand->getRudderCommand();
@@ -200,21 +207,7 @@ void SailingRobot::run() {
 				sailCommand = m_externalCommand->getSailCommand();
 			}
 
-			if(m_dbHandler->retriveCellAsInt("configs", "1", "use_self_steering")) {
-				if(m_dbHandler->retriveCellAsInt("configs", "1", "wind_sensor_self_steering")) {
-					m_windVaneController.setVaneAngle(m_waypointRouting.getTWD(), m_waypointRouting.getCTS());
-				} else {
-
-				}
-			}
-
-			//WindVaneController windVaneController;
-			//windVaneController.method(m_waypointRouting);
-
-
-
-		}
-		else {
+		} else {
 			m_logger.error("SailingRobot::run(), gps NaN. Using values from last iteration.");
 		}
 
@@ -335,8 +328,7 @@ void SailingRobot::setupWaypoint() {
 void SailingRobot::setupMaestro() {
 	if (m_mockMaestro) {
 		m_maestroController.reset(new MockMaestroController());
-	}
-	else {
+	} else {
 		m_maestroController.reset(new MaestroController());
 	}
 
@@ -419,8 +411,7 @@ void SailingRobot::setupCompass() {
 	if (!m_mockCompass) {
 		m_compass = new HMC6343(
 			m_dbHandler->retriveCellAsInt("buffer_configs", "1", "compass") );
-	}
-	else {
+	} else {
 		m_compass = new MockCompass;
 	}
 	try {
