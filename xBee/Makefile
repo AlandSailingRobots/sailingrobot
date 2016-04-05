@@ -1,31 +1,35 @@
-#######################################################
-#
-#    Aland Sailing Robot
-#    ===========================================
-#    sailingrobot
-#    -------------------------------------------
-#
-#######################################################
+#####################################################
+#                                                   #
+#    Aland Sailing Robot                            #
+#    ===========================================    #
+#    sailingrobot                                   #
+#    -------------------------------------------    #
+#                                                   #
+#####################################################
 
 CC = g++ 
-FLAGS = -Wall -pedantic -Werror -std=c++14 
+FLAGS = -Wall -pedantic -Werror -std=c++14 -I$(SAILINGROBOTS_HOME)
+
 LIBS = -lsqlite3 -lgps -lrt -lwiringPi -lcurl
-SOURCES = xBee.cpp
-HEADERS = xBee.h
-FILE = xBee.o
+
+SOURCES = xBee.cpp 
+HEADERS = xBee.h 
+
+SOURCES_SYNC = xBeeSync.cpp
+HEADERS_SYNC = xBeeSync.h
+
+FILE = xBee.o 
+FILE_SYNC = xBeeSync.o
 
 
+all : $(FILE) $(FILE_SYNC)
+	
 
-all : $(SOURCES) $(HEADERS)
-	$(CC) $(SOURCES) $(FLAGS) $(LIBS) -c -o $(FILE)
+$(FILE) : $(SOURCES) $(HEADERS)
+	 $(CC) $(SOURCES) $(FLAGS) $(LIBS) -c -o $(FILE)
 
+$(FILE_SYNC) : $(SOURCES_SYNC) $(HEADERS_SYNC)
+	 $(CC) $(SOURCES_SYNC) $(FLAGS) $(LIBS) -c -o $(FILE_SYNC)
 
 clean :
-	rm -f ./xBee.o
-
-gitclean :
-	rm -f ./*.cpp
-	rm -f ./*.h
-
-
-
+	rm -f ./*.o

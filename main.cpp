@@ -4,7 +4,6 @@
 #include "thread/ExternalCommand.h"
 #include "thread/SystemState.h"
 #include "thread/ThreadRAII.h"
-#include "xBeeSync.h"
 #include "GPSupdater.h"
 #include <thread>
 #include <unistd.h>
@@ -135,10 +134,11 @@ int main(int argc, char *argv[]) {
 		//	Hämtar ett heltal (1 eller 0) som visar om xbeen skall skicka och ta emot data.
 		bool xBee_sending = db.retriveCellAsInt("configs", "1", "xb_send");
 		bool xBee_receiving = db.retriveCellAsInt("configs", "1", "xb_recv");
+		bool xBee_sendLogs = db.retriveCellAsInt("configs", "1", "xb_sendLogs");
 
 		std::unique_ptr<ThreadRAII> xbee_sync_thread;
 		if (xBee_sending || xBee_receiving) {
-			xbee_handle.reset(new xBeeSync(&externalCommand, &systemstate, xBee_sending, xBee_receiving));
+			xbee_handle.reset(new xBeeSync(&externalCommand, &systemstate, &db, xBee_sendLogs, xBee_sending, xBee_receiving));
 			xbee_sync_thread = std::unique_ptr<ThreadRAII>(
 				new ThreadRAII(std::thread(threadXBeeSyncRun), ThreadRAII::DtorAction::detach));
 		}

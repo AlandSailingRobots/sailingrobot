@@ -22,7 +22,7 @@ CV7 = CV7/Windsensor.o CV7/MockWindsensor.o CV7/UtilityLibrary.o CV7/CV7.o
 GPS = gps/GPSReader.o gps/MockGPSReader.o
 HTTP = httpsync/HTTPSync.o
 XML_LOG = xmlparser/pugi.o xmlparser/XML_log.o
-XBEE = xBee/xBee.o
+XBEE = xBee/xBeeSync.o xBee/xBee.o 
 THREAD = thread/SystemState.o thread/ExternalCommand.o thread/ThreadRAII.o
 WAYPOINTROUTING = waypointrouting/WaypointRouting.o \
 	waypointrouting/Commands.o \
@@ -34,8 +34,8 @@ OBJECTS = $(COMPASS) $(COURSE) $(DB) $(COMMAND) $(MAESTRO) $(CV7) $(GPS) \
 		  $(HTTP) $(XML_LOG) $(XBEE) $(THREAD) $(WAYPOINTROUTING) $(WINDVANECONTROLLER) \
 		  logger/Logger.o utility/Utility.o utility/Timer.o
 		  
-SOURCES = SailingRobot.cpp main.cpp xBeeSync.cpp GPSupdater.cpp WindsensorController.cpp
-HEADERS = SailingRobot.h main.h xBeeSync.h GPSupdater.h WindsensorController.h
+SOURCES = SailingRobot.cpp main.cpp GPSupdater.cpp WindsensorController.cpp
+HEADERS = SailingRobot.h main.h GPSupdater.h WindsensorController.h
 FILE = sr
 MAKE = make
 

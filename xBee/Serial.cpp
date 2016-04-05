@@ -3,8 +3,7 @@
 #include "stdafx.h"
 #include "Serial.h"
 
-CSerial::CSerial()
-{
+CSerial::CSerial() {
 
 	memset( &m_OverlappedRead, 0, sizeof( OVERLAPPED ) );
  	memset( &m_OverlappedWrite, 0, sizeof( OVERLAPPED ) );
@@ -13,16 +12,12 @@ CSerial::CSerial()
 
 }
 
-CSerial::~CSerial()
-{
-
+CSerial::~CSerial() {
 	Close();
-
 }
 
-BOOL CSerial::Open( int nPort, int nBaud )
-{
-
+BOOL CSerial::Open( int nPort, int nBaud ) {
+	
 	if( m_bOpened ) return( TRUE );
 
 	char szPort[15];
@@ -57,6 +52,7 @@ BOOL CSerial::Open( int nPort, int nBaud )
 	ucSet = (unsigned char) ( ( FC_RTSCTS & FC_DTRDSR ) != 0 );
 	ucSet = (unsigned char) ( ( FC_RTSCTS & FC_RTSCTS ) != 0 );
 	ucSet = (unsigned char) ( ( FC_RTSCTS & FC_XONXOFF ) != 0 );
+
 	if( !SetCommState( m_hIDComDev, &dcb ) ||
 		!SetupComm( m_hIDComDev, 10000, 10000 ) ||
 		m_OverlappedRead.hEvent == NULL ||
@@ -71,11 +67,9 @@ BOOL CSerial::Open( int nPort, int nBaud )
 	m_bOpened = TRUE;
 
 	return( m_bOpened );
-
 }
 
-BOOL CSerial::Close( void )
-{
+BOOL CSerial::Close( void ) {
 
 	if( !m_bOpened || m_hIDComDev == NULL ) return( TRUE );
 
@@ -89,8 +83,7 @@ BOOL CSerial::Close( void )
 
 }
 
-BOOL CSerial::WriteCommByte( unsigned char ucByte )
-{
+BOOL CSerial::WriteCommByte( unsigned char ucByte ) {
 	BOOL bWriteStat;
 	DWORD dwBytesWritten;
 
@@ -107,8 +100,7 @@ BOOL CSerial::WriteCommByte( unsigned char ucByte )
 
 }
 
-int CSerial::SendData( const char *buffer, int size )
-{
+int CSerial::SendData( const char *buffer, int size ) {
 
 	if( !m_bOpened || m_hIDComDev == NULL ) return( 0 );
 
@@ -123,8 +115,7 @@ int CSerial::SendData( const char *buffer, int size )
 
 }
 
-int CSerial::ReadDataWaiting( void )
-{
+int CSerial::ReadDataWaiting( void ) {
 
 	if( !m_bOpened || m_hIDComDev == NULL ) return( 0 );
 
@@ -137,8 +128,7 @@ int CSerial::ReadDataWaiting( void )
 
 }
 
-int CSerial::ReadData( void *buffer, int limit )
-{
+int CSerial::ReadData( void *buffer, int limit ) {
 
 	if( !m_bOpened || m_hIDComDev == NULL ) return( 0 );
 

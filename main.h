@@ -11,7 +11,7 @@
 #include <memory>
 #include <thread>
 #include "SailingRobot.h"
-#include "xBeeSync.h"
+#include "xBee/xBeeSync.h"
 #include "GPSupdater.h"
 #include "WindsensorController.h"
 #include "thread/ThreadRAII.h"
