@@ -8,7 +8,7 @@
 #######################################################
 
 CC = g++ 
-FLAGS = -Wall -pedantic -Werror -std=c++14 
+FLAGS = -g -Wall -pedantic -Werror -std=c++14 
 LIBS = -lsqlite3 -lgps -lrt -lwiringPi -lcurl -lpthread -I$(SAILINGROBOTS_HOME)
 LIBS_BOOST = -lboost_system -lboost_log -lboost_thread -I$(SAILINGROBOTS_HOME)
 
