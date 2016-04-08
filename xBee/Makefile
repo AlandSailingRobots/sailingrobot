@@ -8,7 +8,7 @@
 #####################################################
 
 CC = g++ 
-FLAGS = -Wall -pedantic -Werror -std=c++14 -I$(SAILINGROBOTS_HOME)
+FLAGS = -g -Wall -pedantic -Werror -std=c++14 -I$(SAILINGROBOTS_HOME)
 
 LIBS = -lsqlite3 -lgps -lrt -lwiringPi -lcurl
 
