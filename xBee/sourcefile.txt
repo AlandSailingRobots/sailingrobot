@@ -1,4 +1,0 @@
- THIS IS
- A 
- MESSAGE FROM A 
- /n TXT FILE

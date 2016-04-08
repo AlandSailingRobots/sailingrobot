@@ -19,10 +19,12 @@ class xBee {
 
 		std::string m_receivedBuffer;
 
-		// searches the buffer for a message and returns it
-		std::string findXmlMessage(std::string* buffer);
+
 	public:
 
+		// searches the buffer for a message and returns it
+		std::string findXmlMessage(std::string* buffer);
+		
 		// Initializes the xBee with given baudrate 
 		int init(int baudRate);
 
