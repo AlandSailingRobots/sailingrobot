@@ -12,7 +12,7 @@ FLAGS = -g -Wall -pedantic -Werror -std=c++14
 LIBS = -lsqlite3 -lgps -lrt -lwiringPi -lcurl -lpthread -I$(SAILINGROBOTS_HOME)
 LIBS_BOOST = -lboost_system -lboost_log -lboost_thread -I$(SAILINGROBOTS_HOME)
 
-
+XBEE = xBee/xBeeSync.o xBee/xBee.o 
 COMPASS = Compass/Compass.o Compass/MockCompass.o Compass/HMC6343.o
 COURSE = coursecalculation/CourseCalculation.o coursecalculation/CourseMath.o 
 DB = dbhandler/DBHandler.o  dbhandler/JSON.o
@@ -22,7 +22,6 @@ CV7 = CV7/Windsensor.o CV7/MockWindsensor.o CV7/UtilityLibrary.o CV7/CV7.o
 GPS = gps/GPSReader.o gps/MockGPSReader.o
 HTTP = httpsync/HTTPSync.o
 XML_LOG = xmlparser/pugi.o xmlparser/XML_log.o
-XBEE = xBee/xBeeSync.o xBee/xBee.o 
 THREAD = thread/SystemState.o thread/ExternalCommand.o thread/ThreadRAII.o
 WAYPOINTROUTING = waypointrouting/WaypointRouting.o \
 	waypointrouting/Commands.o \
@@ -30,8 +29,8 @@ WAYPOINTROUTING = waypointrouting/WaypointRouting.o \
 WINDVANECONTROLLER = windvanecontroller/WindVaneController.o
 
 
-OBJECTS = $(COMPASS) $(COURSE) $(DB) $(COMMAND) $(MAESTRO) $(CV7) $(GPS) \
-		  $(HTTP) $(XML_LOG) $(XBEE) $(THREAD) $(WAYPOINTROUTING) $(WINDVANECONTROLLER) \
+OBJECTS = $(XBEE) $(COMPASS) $(COURSE) $(DB) $(COMMAND) $(MAESTRO) $(CV7) $(GPS) \
+		  $(HTTP) $(XML_LOG) $(THREAD) $(WAYPOINTROUTING) $(WINDVANECONTROLLER) \
 		  logger/Logger.o utility/Utility.o utility/Timer.o
 		  
 SOURCES = SailingRobot.cpp main.cpp GPSupdater.cpp WindsensorController.cpp
@@ -40,18 +39,19 @@ FILE = sr
 MAKE = make
 
 #Needed for proper subfolder make writing
-.PHONY : Compass runall coursecalculation dbhandler ruddercommand \
+.PHONY : xBee Compass runall coursecalculation dbhandler ruddercommand \
 		 sailcommand servocontroller CV7 gps httpsync xmlparser thread \
 		 logger utility waypointrouting windvanecontroller
 
 
 all : runall $(FILE)
 
-runall : Compass coursecalculation dbhandler ruddercommand sailcommand \
+runall : xBee Compass coursecalculation dbhandler ruddercommand sailcommand \
 		 servocontroller CV7 gps httpsync xmlparser thread logger utility \
 		 waypointrouting windvanecontroller
 
 clean :
+	cd xBee && $(MAKE) clean
 	cd Compass && $(MAKE) clean
 	cd coursecalculation && $(MAKE) clean
 	cd dbhandler && $(MAKE) clean
@@ -62,7 +62,6 @@ clean :
 	cd gps && $(MAKE) clean
 	cd httpsync && $(MAKE) clean
 	cd xmlparser && $(MAKE) clean
-	cd xBee && $(MAKE) clean
 	cd thread && $(MAKE) clean
 	cd logger && $(MAKE) clean
 	cd utility && $(MAKE) clean
@@ -104,8 +103,8 @@ httpsync :
 xmlparser :
 	$(MAKE) -C ./xmlparser
 
-xbee :
-	$(MAKE) -C ./xbee
+xBee :
+	$(MAKE) -C ./xBee
 
 thread :
 	$(MAKE) -C ./thread
