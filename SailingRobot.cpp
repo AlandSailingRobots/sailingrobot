@@ -37,7 +37,7 @@ SailingRobot::SailingRobot(ExternalCommand* externalCommand,
 		SystemStateModel(
 			GPSModel("",PositionModel(0,0),0,0,0,0),
 			WindsensorModel(0,0,0),
-			CompassModel(0,0,0),
+			CompassModel(0,0,0,0,0,0),
 			0,
 			0
 		)
