@@ -91,8 +91,10 @@ int main(int argc, char *argv[]) {
 	}
 	printf("-DONE\n");
 
-	m_mockGPS = db.retriveCellAsInt("mock", "1", "GPS");
-	m_mockWindsensor = db.retriveCellAsInt("mock", "1", "Windsensor");
+	bool mockGPS = db.retriveCellAsInt("mock","1","GPS");
+        bool mockWindsensor = db.retriveCellAsInt("mock","1","Windsensor");
+        bool mockCompass = db.retriveCellAsInt("mock","1","Compass");
+        int  headningBufferSize = db.retriveCellAsInt("buffer_configs", "1", "compass");
 
 	// Create main sailing robot controller
 	try {
@@ -102,7 +104,7 @@ int main(int argc, char *argv[]) {
 		return 1;
 	}
 
-	GPSupdater gps_updater(&systemstate, m_mockGPS);
+	GPSupdater gps_updater(&systemstate,mockGPS);
 	gps_handle = &gps_updater;
 
 
@@ -115,10 +117,12 @@ int main(int argc, char *argv[]) {
 		windsensor_handle.reset(
 			new WindsensorController(
 				&systemstate,
-				m_mockWindsensor, 
+				mockWindsensor, 
+                                mockCompass,
 				db.retriveCell("configs", "1", "ws_port"),
 				db.retriveCellAsInt("configs", "1", "ws_baud"),
-				db.retriveCellAsInt("buffer_configs", "1", "windsensor")
+				db.retriveCellAsInt("buffer_configs", "1", "windsensor"),
+                                headningBufferSize                 
 			)
 		);		
 		printf("OK\n");

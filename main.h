@@ -29,9 +29,6 @@ std::unique_ptr<ThreadRAII> httpsync_thread;
 
 //HTTPSync *httpsync_handle;
 
-bool m_mockGPS;
-bool m_mockWindsensor;
-
 Logger m_logger;
 
 #endif /* MAIN_H_ */

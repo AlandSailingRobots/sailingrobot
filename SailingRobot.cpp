@@ -15,8 +15,6 @@
 
 SailingRobot::SailingRobot(ExternalCommand* externalCommand,
 						   SystemState *systemState, DBHandler *db) :
-
-	m_mockCompass(db->retriveCellAsInt("mock", "1", "Compass")),
 	m_mockPosition(db->retriveCellAsInt("mock", "1", "Position")),
 	m_mockMaestro(db->retriveCellAsInt("mock", "1", "Maestro")),
 
@@ -66,10 +64,6 @@ void SailingRobot::init(std::string programPath, std::string errorFileName) {
 	printf("OK\n");
 	*/
 
-	printf(" Starting Compass\t\t");
-	setupCompass();
-	printf("OK\n");
-
 	printf(" Starting Maestro\t\t");
 	setupMaestro();
 	printf("OK\n");
@@ -105,7 +99,7 @@ int SailingRobot::getHeading(int declination) {
 	int newHeading = 0;
 
 	if (m_getHeadingFromCompass) {
-		newHeading = Utility::addDeclinationToHeading(m_compass->getHeading(), m_waypointModel.declination);
+		newHeading = Utility::addDeclinationToHeading(m_systemStateModel.compassModel.heading, m_waypointModel.declination);
 	}
 	else {
 		newHeading = m_gpsReader->getHeading();
@@ -153,7 +147,6 @@ void SailingRobot::run() {
 		
 		windDir = m_systemStateModel.windsensorModel.direction;
 
-		m_compass->readValues();
 		heading = getHeading(m_waypointModel.declination);
 		
 		std::cout << "heading: " << heading << "\n";
@@ -219,15 +212,6 @@ void SailingRobot::run() {
 		m_rudderServo.setPosition(rudderCommand);
 		//sail adjustment
 		m_sailServo.setPosition(sailCommand);
-
-		//update system state
-		m_systemState->setCompassModel(CompassModel(
-				m_compass->getHeading(),
-				m_compass->getPitch(),
-				m_compass->getRoll()
-			));
-
-		std::cout << "headeing ssm compass after setmodel:" << m_systemStateModel.compassModel.heading<<"\n";
 
 		m_systemState->setRudder(rudderCommand);
 		m_systemState->setSail(sailCommand);
@@ -406,22 +390,4 @@ void SailingRobot::setupSailCommand() {
 		throw;
 	}
 	m_logger.info("setupSailCommand() done");
-}
-
-
-
-
-void SailingRobot::setupCompass() {
-	if (!m_mockCompass) {
-		m_compass = new HMC6343(
-			m_dbHandler->retriveCellAsInt("buffer_configs", "1", "compass") );
-	} else {
-		m_compass = new MockCompass;
-	}
-	try {
-		m_compass->init();
-	} catch (const char * error) {
-		m_logger.error("SailingRobot::setupCompass() failed");
-	}
-	m_logger.info("setupCompass() done");
 }

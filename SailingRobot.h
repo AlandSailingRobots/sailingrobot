@@ -56,19 +56,14 @@ private:
 	void setupRudderCommand();
 	void setupSailCommand();	
 	//void setupHTTPSync();
-	void setupCompass();
 
 	std::string m_errorLogPath;
-
-
-	
 
 	bool m_running;
 
 	/**
 	 *  bool flags for signaling the use of mock objects
 	 */
-	bool m_mockCompass;
 	bool m_mockPosition;
 	bool m_mockMaestro;
 
@@ -84,7 +79,6 @@ private:
 	SailCommand m_sailCommand;
 	//HTTPSync m_httpSync;
 
-	Compass* m_compass;
 	GPS* m_gpsReader;
 
 	std::unique_ptr<Actuator> m_maestroController;
