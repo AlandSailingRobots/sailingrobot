@@ -10,7 +10,7 @@ xBeeSync::xBeeSync(ExternalCommand* externalCommand, SystemState *systemState,
 		SystemStateModel(
 			GPSModel("",PositionModel(0,0),0,0,0,0),
 			WindsensorModel(0,0,0),
-			CompassModel(0,0,0),
+			CompassModel(0,0,0,0,0,0),
 			0,
 			0
 		)
