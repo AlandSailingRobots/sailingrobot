@@ -66,6 +66,7 @@ clean :
 	cd logger && $(MAKE) clean
 	cd utility && $(MAKE) clean
 	cd waypointrouting && $(MAKE) clean
+	cd windvanecontroller && $(MAKE) clean
 	rm -f $(FILE)
 	
 Compass :
