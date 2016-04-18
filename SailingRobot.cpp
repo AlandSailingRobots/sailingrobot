@@ -46,10 +46,12 @@ SailingRobot::SailingRobot(ExternalCommand* externalCommand,
 
 	m_waypointRouting.setMinimumDegreeLimit(
 		atof(m_dbHandler->retriveCell("configs", "1", "sail_adjust_degree_limit").c_str()));
+
+	
 }
 
 SailingRobot::~SailingRobot() {
-
+	
 }
 
 
@@ -102,7 +104,7 @@ int SailingRobot::getHeading() {
 		newHeading = Utility::addDeclinationToHeading(m_systemStateModel.compassModel.heading, m_waypointModel.declination);
 	}
 	else {
-		newHeading = m_gpsReader->getHeading();
+		newHeading = m_systemStateModel.gpsModel.heading;
 	}
 
 	return newHeading;

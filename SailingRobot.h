@@ -79,8 +79,6 @@ private:
 	SailCommand m_sailCommand;
 	//HTTPSync m_httpSync;
 
-	GPS* m_gpsReader;
-
 	std::unique_ptr<Actuator> m_maestroController;
 	ServoObject m_rudderServo;
 	ServoObject m_sailServo;
