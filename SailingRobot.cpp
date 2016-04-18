@@ -147,7 +147,7 @@ void SailingRobot::run() {
 		
 		windDir = m_systemStateModel.windsensorModel.direction;
 
-		heading = getHeading(m_waypointModel.declination);
+		heading = getHeading();
 		
 		std::cout << "heading: " << heading << "\n";
 		std::cout << "headeing ssm compass:" << m_systemStateModel.compassModel.heading<<"\n";
