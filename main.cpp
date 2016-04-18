@@ -87,6 +87,7 @@ int main(int argc, char *argv[]) {
 		db.openDatabase(path+db_name);
 	} catch (const char * error) {
 		printf("!DB ERROR:%s\n", error);
+		std::cout << error << std::endl;
 		throw;
 	}
 	printf("-DONE\n");

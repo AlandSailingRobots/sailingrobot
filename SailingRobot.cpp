@@ -94,7 +94,7 @@ void SailingRobot::init(std::string programPath, std::string errorFileName) {
 	//syncServer();
 }
 
-int SailingRobot::getHeading(int declination) {
+int SailingRobot::getHeading() {
 
 	int newHeading = 0;
 

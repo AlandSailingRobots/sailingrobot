@@ -53,9 +53,9 @@ void xBeeSync::run()
 					m_model.compassModel.heading, 				// Heading deg
 					m_model.compassModel.pitch, 				// Pitch deg
 					m_model.compassModel.roll, 					// Roll deg
-                                        m_model.compassModel.accelX,                            //Accel X
-                                        m_model.compassModel.accelY,                            //Accel Y
-                                        m_model.compassModel.accelZ,                            //Accel Z
+                    m_model.compassModel.accelX,                // Accel X
+                    m_model.compassModel.accelY,                // Accel Y
+                    m_model.compassModel.accelZ,                // Accel Z
 					m_model.gpsModel.positionModel.latitude, 	// gml:pos arg1, lat
 					m_model.gpsModel.positionModel.longitude, 	// gml:pos arg2, long
 					m_model.gpsModel.heading, 					// course over ground(deg)
