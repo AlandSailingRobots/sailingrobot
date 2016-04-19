@@ -197,7 +197,9 @@ void SailingRobot::run() {
 					// WindVaneController::getAngle() will fetch set angle of vane.
 					// To do: Pass angle to engine controlling wind vane.
 				} else {
-					// For steering without wind sensor.
+                                    double heading = getHeading();
+                                    
+                                    m_windVaneController.adjustAngle(heading,m_waypointRouting.getCTS() );
 				}
 			}
 
