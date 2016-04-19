@@ -120,6 +120,12 @@ double SailingRobot::mockLongitude(double oldLong, double cts) {
 	return oldLong;
 }
 
+PositionModel SailingRobot::mockPositionModel(PositionModel oldPositionModel,double cts) {
+            oldPositionModel.latitude = mockLatitude(oldPositionModel.latitude,cts);
+            oldPositionModel.longitude = mockLongitude(oldPositionModel.longitude,cts);
+            return oldPositionModel;
+}
+
 void SailingRobot::run() {
 
 	m_running = true;
@@ -129,7 +135,7 @@ void SailingRobot::run() {
 		m_dbHandler->retriveCellAsInt("buffer_configs", "1", "true_wind");
 	
 	//double longitude = 4, latitude = -3;
-	double latitude = 60.098933, longitude = 19.921028;
+	PositionModel positionModel(19.921028,60.098933);
 	
 	Timer timer;
 	std::string sr_loop_time =
@@ -158,9 +164,7 @@ void SailingRobot::run() {
 
 			//calc DTW
 			if (m_mockPosition) {
-
-				longitude = mockLongitude(longitude, m_waypointRouting.getCTS());
-				latitude = mockLatitude(latitude, m_waypointRouting.getCTS());
+                                positionModel = mockPositionModel(positionModel,m_waypointRouting.getCTS() );
 
 				if (heading > m_waypointRouting.getCTS()) {
 
@@ -171,8 +175,8 @@ void SailingRobot::run() {
 				} else heading = m_waypointRouting.getCTS();
 
 			} else {
-				longitude = m_systemStateModel.gpsModel.positionModel.longitude;
-				latitude = m_systemStateModel.gpsModel.positionModel.latitude;
+				positionModel.longitude = m_systemStateModel.gpsModel.positionModel.longitude;
+				positionModel.latitude = m_systemStateModel.gpsModel.positionModel.latitude;
 			}
 
 			//calc & set TWD
@@ -183,7 +187,7 @@ void SailingRobot::run() {
 
 			double rudder = 0, sail = 0;
 			m_waypointRouting.getCommands(rudder, sail,
-				PositionModel(latitude, longitude),
+				positionModel,
 				Utility::meanOfAngles(twdBuffer), heading, m_systemStateModel);
 				
 
@@ -237,7 +241,7 @@ void SailingRobot::run() {
 
 		// check if we are within the radius of the waypoint
 		// and move to next wp in that case
-		if (m_waypointRouting.nextWaypoint(PositionModel(latitude, longitude))) {
+		if (m_waypointRouting.nextWaypoint(positionModel) ) {
 				
 			// check if m_waypointModel.id exists in waypoint_index
 			int i = m_dbHandler->retriveCellAsInt("waypoint_index", m_waypointModel.id, "id");
@@ -245,7 +249,7 @@ void SailingRobot::run() {
 			{
 				insertScanOnce = i;				
 				try {
-					m_dbHandler->insertScan(m_waypointModel.id, PositionModel(latitude,longitude),
+					m_dbHandler->insertScan(m_waypointModel.id,positionModel,
 						m_systemStateModel.windsensorModel.temperature,
 						m_systemStateModel.gpsModel.utc_timestamp);
 				} catch (const char * error) {

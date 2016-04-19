@@ -42,6 +42,8 @@ private:
 	double mockLongitude(double oldLong, double cts);
 	double mockLatitude(double oldLat, double cts);
 
+        PositionModel mockPositionModel(PositionModel oldPositionModel,double cts);
+        
 	//void readGPS();
 	//void syncServer();
 	//void updateState();
