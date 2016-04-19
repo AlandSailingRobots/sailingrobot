@@ -44,9 +44,9 @@ void WindsensorController::run()
 				m_compass->getHeading(),
 				m_compass->getPitch(),
 				m_compass->getRoll(),
-                                m_compass->getAccelX(),
+                                AccelerationModel(m_compass->getAccelX(),
                                 m_compass->getAccelY(),
-                                m_compass->getAccelZ()
+                                m_compass->getAccelZ() )
                 ));
 
 		try {
