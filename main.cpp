@@ -30,7 +30,7 @@ static void threadGPSupdate() {
 }
 
 static void threadHTTPSyncRun() {
-	httpsync_handle->run();
+	// httpsync_handle->run();
 	std::cout << " httpsync thread exited." << std::endl;
 }
 
