@@ -8,9 +8,9 @@
 #include <thread>
 #include <unistd.h>
 #include <sstream>
-#include <iostream>     
+#include <iostream>
 #include <iomanip>
-#include <ctime>    
+#include <ctime>
 
 static void threadXBeeSyncRun() {
 	try {
@@ -29,8 +29,8 @@ static void threadGPSupdate() {
 	}
 }
 
-static void threadHTTPSyncRun() {	
-	//httpsync_handle->run();
+static void threadHTTPSyncRun() {
+	httpsync_handle->run();
 	std::cout << " httpsync thread exited." << std::endl;
 }
 
@@ -110,22 +110,22 @@ int main(int argc, char *argv[]) {
 
 
 	try {
-		printf("-Initializing...\n");		
-		
+		printf("-Initializing...\n");
+
 		sr_handle->init(path, errorLog);
-		
+
 		printf(" Starting Windsensor\t\t");
 		windsensor_handle.reset(
 			new WindsensorController(
 				&systemstate,
-				mockWindsensor, 
+				mockWindsensor,
                                 mockCompass,
 				db.retriveCell("configs", "1", "ws_port"),
 				db.retriveCellAsInt("configs", "1", "ws_baud"),
 				db.retriveCellAsInt("buffer_configs", "1", "windsensor"),
-                                headningBufferSize                 
+                                headningBufferSize
 			)
-		);		
+		);
 		printf("OK\n");
 
 		printf("-DONE\n");
@@ -152,7 +152,7 @@ int main(int argc, char *argv[]) {
 		ThreadRAII gps_reader_thread(
 			std::thread(threadGPSupdate),
 			ThreadRAII::DtorAction::detach
-		);	
+		);
 
 		// Start httpsync thread
 		httpsync_thread = std::unique_ptr<ThreadRAII>(new ThreadRAII(
