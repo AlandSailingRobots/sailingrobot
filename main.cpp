@@ -86,21 +86,14 @@ int main(int argc, char *argv[]) {
 		)
 	);
 
-	printf("-Creating database connection...\n");
-	DBHandler db;
-	try {
-		db.openDatabase(path+db_name);
-	} catch (const char * error) {
-		printf("!DB ERROR:%s\n", error);
-		std::cout << error << std::endl;
-		throw;
-	}
+	printf("-Creating database...\n");
+	DBHandler db(path+db_name);
 	printf("-DONE\n");
 
 	bool mockGPS = db.retriveCellAsInt("mock","1","GPS");
-        bool mockWindsensor = db.retriveCellAsInt("mock","1","Windsensor");
-        bool mockCompass = db.retriveCellAsInt("mock","1","Compass");
-        int  headningBufferSize = db.retriveCellAsInt("buffer_configs", "1", "compass");
+    bool mockWindsensor = db.retriveCellAsInt("mock","1","Windsensor");
+    bool mockCompass = db.retriveCellAsInt("mock","1","Compass");
+    int  headningBufferSize = db.retriveCellAsInt("buffer_configs", "1", "compass");
 
 	// Create main sailing robot controller
 	try {
@@ -124,11 +117,11 @@ int main(int argc, char *argv[]) {
 			new WindsensorController(
 				&systemstate,
 				mockWindsensor,
-                                mockCompass,
+                mockCompass,
 				db.retriveCell("windsensor_config", "1", "port"),
 				db.retriveCellAsInt("windsensor_config", "1", "baud_rate"),
 				db.retriveCellAsInt("buffer_configs", "1", "windsensor"),
-                                headningBufferSize
+                headningBufferSize
 			)
 		);
 		printf("OK\n");
