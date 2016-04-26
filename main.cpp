@@ -30,7 +30,12 @@ static void threadGPSupdate() {
 }
 
 static void threadHTTPSyncRun() {
+	try {
 	// httpsync_handle->run();
+	}
+	catch (const char * error) {
+		std::cout << "ERROR while running static void threadHTTPSyncRun() : " << error << std::endl;
+	}
 	std::cout << " httpsync thread exited." << std::endl;
 }
 
@@ -120,8 +125,8 @@ int main(int argc, char *argv[]) {
 				&systemstate,
 				mockWindsensor,
                                 mockCompass,
-				db.retriveCell("configs", "1", "ws_port"),
-				db.retriveCellAsInt("configs", "1", "ws_baud"),
+				db.retriveCell("windsensor_config", "1", "port"),
+				db.retriveCellAsInt("windsensor_config", "1", "baud_rate"),
 				db.retriveCellAsInt("buffer_configs", "1", "windsensor"),
                                 headningBufferSize
 			)
@@ -137,9 +142,9 @@ int main(int argc, char *argv[]) {
 		// Start xBeeSync thread
 
 		//	Hämtar ett heltal (1 eller 0) som visar om xbeen skall skicka och ta emot data.
-		bool xBee_sending = db.retriveCellAsInt("configs", "1", "xb_send");
-		bool xBee_receiving = db.retriveCellAsInt("configs", "1", "xb_recv");
-		bool xBee_sendLogs = db.retriveCellAsInt("configs", "1", "xb_sendLogs");
+		bool xBee_sending = db.retriveCellAsInt("xbee_config", "1", "send");
+		bool xBee_receiving = db.retriveCellAsInt("xbee_config", "1", "recieve");
+		bool xBee_sendLogs = db.retriveCellAsInt("xbee_config", "1", "send_logs");
 
 		std::unique_ptr<ThreadRAII> xbee_sync_thread;
 		if (xBee_sending || xBee_receiving) {
