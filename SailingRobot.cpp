@@ -278,7 +278,7 @@ void SailingRobot::run() {
 void SailingRobot::shutdown() {
 //	syncServer();
 	m_running=false;
-	delete m_dbHandler;
+	m_dbHandler->closeDatabase(); 
 }
 
 
