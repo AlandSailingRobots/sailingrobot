@@ -33,8 +33,8 @@ OBJECTS = $(XBEE) $(COMPASS) $(COURSE) $(DB) $(COMMAND) $(MAESTRO) $(CV7) $(GPS)
 		  $(HTTP) $(XML_LOG) $(THREAD) $(WAYPOINTROUTING) $(WINDVANECONTROLLER) \
 		  logger/Logger.o utility/Utility.o utility/Timer.o
 		  
-SOURCES = SailingRobot.cpp main.cpp GPSupdater.cpp WindsensorController.cpp MockPosition.cpp RealPosition.cpp
-HEADERS = SailingRobot.h main.h GPSupdater.h WindsensorController.h Position.h MockPosition.h RealPosition.h
+SOURCES = SailingRobot.cpp main.cpp GPSupdater.cpp WindsensorController.cpp 
+HEADERS = SailingRobot.h main.h GPSupdater.h WindsensorController.h 
 FILE = sr
 MAKE = make
 
