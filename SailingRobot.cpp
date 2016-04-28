@@ -229,8 +229,8 @@ void SailingRobot::run() {
 		//logging
 		m_dbHandler->insertDataLog(
 			m_systemStateModel,
-			0, //sailservo getpos, to remove
-			0, //rudderservo getpos, to remove
+			m_sailServo.getPosition(),
+			m_rudderServo.getPosition(),
 			m_waypointRouting.getDTW(),
 			m_waypointRouting.getBTW(),
 			m_waypointRouting.getCTS(),
