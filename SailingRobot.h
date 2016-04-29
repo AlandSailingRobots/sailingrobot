@@ -23,6 +23,8 @@
 #include "waypointrouting/WaypointRouting.h"
 #include "windvanecontroller/WindVaneController.h"
 //#include "models/WaypointModel.h"
+#include "utility/RealPosition.h"
+#include "utility/MockPosition.h"
 
 class SailingRobot {
 
@@ -38,11 +40,6 @@ public:
 	
 private:
 	int getHeading();
-
-	double mockLongitude(double oldLong, double cts);
-	double mockLatitude(double oldLat, double cts);
-
-        PositionModel mockPositionModel(PositionModel oldPositionModel,double cts);
         
 	//void readGPS();
 	//void syncServer();
@@ -87,6 +84,7 @@ private:
 
 	ExternalCommand* m_externalCommand;
 	SystemState *m_systemState;
+        std::unique_ptr<Position> position;
 
 	SystemStateModel m_systemStateModel;
 

@@ -14,6 +14,7 @@ LIBS_BOOST = -lboost_system -lboost_log -lboost_thread -I$(SAILINGROBOTS_HOME)
 
 XBEE = xBee/xBeeSync.o xBee/xBee.o 
 COMPASS = Compass/Compass.o Compass/MockCompass.o Compass/HMC6343.o
+POSITION = utility/Position.o utility/MockPosition.o utility/RealPosition.o
 COURSE = coursecalculation/CourseCalculation.o coursecalculation/CourseMath.o 
 DB = dbhandler/DBHandler.o  dbhandler/JSON.o
 COMMAND = ruddercommand/RudderCommand.o sailcommand/SailCommand.o 
@@ -29,7 +30,7 @@ WAYPOINTROUTING = waypointrouting/WaypointRouting.o \
 WINDVANECONTROLLER = windvanecontroller/WindVaneController.o
 
 
-OBJECTS = $(XBEE) $(COMPASS) $(COURSE) $(DB) $(COMMAND) $(MAESTRO) $(CV7) $(GPS) \
+OBJECTS = $(XBEE) $(COMPASS) $(POSITION) $(COURSE) $(DB) $(COMMAND) $(MAESTRO) $(CV7) $(GPS) \
 		  $(HTTP) $(XML_LOG) $(THREAD) $(WAYPOINTROUTING) $(WINDVANECONTROLLER) \
 		  logger/Logger.o utility/Utility.o utility/Timer.o
 		  

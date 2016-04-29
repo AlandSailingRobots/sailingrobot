@@ -48,7 +48,8 @@ SailingRobot::SailingRobot(ExternalCommand* externalCommand,
 	m_waypointRouting.setMinimumDegreeLimit(
 		atof(m_dbHandler->retriveCell("waypoint_routing_config", "1", "adjust_degree_limit").c_str()));
 
-
+        if(m_mockPosition) { position.reset(new MockPosition() );  }
+        else { position.reset(new RealPosition(m_systemStateModel) );  }
 }
 
 SailingRobot::~SailingRobot() {
@@ -98,33 +99,14 @@ void SailingRobot::init(std::string programPath, std::string errorFileName) {
 }
 
 int SailingRobot::getHeading() {
-
-	int newHeading = 0;
-
+        if(m_mockPosition) {
+            return position->getHeading();
+        }
 	if (m_getHeadingFromCompass) {
-		newHeading = Utility::addDeclinationToHeading(m_systemStateModel.compassModel.heading, m_waypointModel.declination);
+            return Utility::addDeclinationToHeading(m_systemStateModel.compassModel.heading, m_waypointModel.declination);
 	}
-	else {
-		newHeading = m_systemStateModel.gpsModel.heading;
-	}
-
-	return newHeading;
-}
-
-double SailingRobot::mockLatitude(double oldLat, double cts) {
-	oldLat += cos(Utility::degreeToRadian(cts)) * 0.0002;
-	return oldLat;
-}
-
-double SailingRobot::mockLongitude(double oldLong, double cts) {
-	oldLong += sin(Utility::degreeToRadian(cts)) * 0.0002;
-	return oldLong;
-}
-
-PositionModel SailingRobot::mockPositionModel(PositionModel oldPositionModel,double cts) {
-            oldPositionModel.latitude = mockLatitude(oldPositionModel.latitude,cts);
-            oldPositionModel.longitude = mockLongitude(oldPositionModel.longitude,cts);
-            return oldPositionModel;
+	
+        return m_systemStateModel.gpsModel.heading;
 }
 
 void SailingRobot::run() {
@@ -134,9 +116,6 @@ void SailingRobot::run() {
 	std::vector<float> twdBuffer;
 	const unsigned int twdBufferMaxSize =
 		m_dbHandler->retriveCellAsInt("buffer_configs", "1", "true_wind");
-
-	//double longitude = 4, latitude = -3;
-	PositionModel positionModel(19.921028,60.098933);
 
 	Timer timer;
 	std::string sr_loop_time =
@@ -161,25 +140,13 @@ void SailingRobot::run() {
 		std::cout << "heading: " << heading << "\n";
 		std::cout << "headeing ssm compass:" << m_systemStateModel.compassModel.heading<<"\n";
 
+                if (m_mockPosition) {
+                    position->setCourseToSteer(m_waypointRouting.getCTS());
+                }
+                
+                position->updatePosition();
+                
 		if (m_systemStateModel.gpsModel.online) {
-
-			//calc DTW
-			if (m_mockPosition) {
-                                positionModel = mockPositionModel(positionModel,m_waypointRouting.getCTS() );
-
-				if (heading > m_waypointRouting.getCTS()) {
-
-					heading--;
-				} else if (heading < m_waypointRouting.getCTS()) {
-
-					heading++;
-				} else heading = m_waypointRouting.getCTS();
-
-			} else {
-				positionModel.longitude = m_systemStateModel.gpsModel.positionModel.longitude;
-				positionModel.latitude = m_systemStateModel.gpsModel.positionModel.latitude;
-			}
-
 			//calc & set TWD
 			twdBuffer.push_back(heading + windDir);
 			while (twdBuffer.size() > twdBufferMaxSize) {
@@ -188,7 +155,7 @@ void SailingRobot::run() {
 
 			double rudder = 0, sail = 0;
 			m_waypointRouting.getCommands(rudder, sail,
-				positionModel,
+				position->getModel(),
 				Utility::meanOfAngles(twdBuffer), heading, m_systemStateModel);
 
 
@@ -244,7 +211,7 @@ void SailingRobot::run() {
 
 		// check if we are within the radius of the waypoint
 		// and move to next wp in that case
-		if (m_waypointRouting.nextWaypoint(positionModel) ) {
+		if (m_waypointRouting.nextWaypoint(position->getModel() ) ) {
 
 			// check if m_waypointModel.id exists in waypoint_index
 			int i = m_dbHandler->retriveCellAsInt("waypoint_index", m_waypointModel.id, "id");
@@ -252,7 +219,7 @@ void SailingRobot::run() {
 			{
 				insertScanOnce = i;
 				try {
-					m_dbHandler->insertScan(m_waypointModel.id,positionModel,
+					m_dbHandler->insertScan(m_waypointModel.id,position->getModel(),
 						m_systemStateModel.windsensorModel.temperature,
 						m_systemStateModel.gpsModel.utc_timestamp);
 				} catch (const char * error) {
