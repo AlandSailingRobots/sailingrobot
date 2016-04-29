@@ -88,13 +88,6 @@ int main(int argc, char *argv[]) {
 
 	printf("-Creating database...\n");
 	DBHandler db(path+db_name); 
-	try { 
-		db.openDatabase(path+db_name); 
-	} catch (const char * error) { 
-		printf("!DB ERROR:%s\n", error); 
-		std::cout << error << std::endl; 
-		throw; 
-	} 
 	printf("-DONE\n");
 
 	bool mockGPS = db.retriveCellAsInt("mock","1","GPS");
