@@ -13,10 +13,10 @@ WindsensorController::WindsensorController(SystemState *systemState, bool mockIt
 	m_running(true)
 {
 	if (!mockIt) {
-		m_windSensor = new CV7;
+		m_windSensor.reset(new CV7);
 	}
 	else {
-		m_windSensor = new MockWindsensor;
+		m_windSensor.reset(new MockWindsensor);
 	}
 
 	try {
@@ -26,10 +26,10 @@ WindsensorController::WindsensorController(SystemState *systemState, bool mockIt
 		m_logger.error(error);
 		throw error;
 	}
-	m_logger.info("setupWindSensor() done");
+	m_logger.info("setupWindSensor() done\t\t");
         
-        printf(" Starting Compass\t\t");
-        initCompass(mockCompass,headningBufferSize);
+    m_logger.info("Starting Compass\t\t");
+    initCompass(mockCompass,headningBufferSize);
 }
 
 void WindsensorController::run()
@@ -87,16 +87,16 @@ bool WindsensorController::isRunning()
 
  void WindsensorController::initCompass(bool mockCompass,int headningBufferSize) {
     if (!mockCompass) {
-            m_compass = new HMC6343(headningBufferSize);
+        m_compass.reset(new HMC6343(headningBufferSize) );
     } else {
-            m_compass = new MockCompass;
+        m_compass.reset(new MockCompass);
     }
     
     try {
-            m_compass->init();
+        m_compass->init();
     } catch (const char * error) {
-            m_logger.error("SailingRobot::setupCompass() failed");
+        m_logger.error("SailingRobot::setupCompass() failed");
     }
     
-    m_logger.info("setupCompass() done");
+    m_logger.info("setupCompass() done\t\t");
  }

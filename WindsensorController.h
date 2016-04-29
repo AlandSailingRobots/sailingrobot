@@ -1,6 +1,7 @@
 #ifndef __WINDSENSORCONTROLLER_H__
 #define __WINDSENSORCONTROLLER_H__
 
+#include <memory>
 #include <mutex>
 
 #include "CV7/Windsensor.h"
@@ -21,13 +22,13 @@ public:
 	
 private:
 
-	Windsensor* m_windSensor;
+	std::unique_ptr<Windsensor> m_windSensor;
 	SystemState* m_systemState;
 
 	std::mutex m_mutex;
 	bool m_running;
         
-        Compass* m_compass;
+    std::unique_ptr<Compass> m_compass;
 
 	Logger m_logger;
 
