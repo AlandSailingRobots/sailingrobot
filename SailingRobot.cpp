@@ -38,6 +38,7 @@ SailingRobot::SailingRobot(ExternalCommand* externalCommand,
 			WindsensorModel(0,0,0),
 			CompassModel(0,0,0,AccelerationModel(0,0,0) ),
 			0,
+			0,
 			0
 		)
 	)
