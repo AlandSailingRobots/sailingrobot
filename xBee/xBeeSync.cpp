@@ -12,6 +12,7 @@ xBeeSync::xBeeSync(ExternalCommand* externalCommand, SystemState *systemState,
 			WindsensorModel(0,0,0),
 			CompassModel(0,0,0,AccelerationModel(0,0,0) ),
 			0,
+			0,
 			0
 		)
 	),
@@ -47,21 +48,22 @@ void xBeeSync::run()
 
 			} else {
 				std::string res_xml = m_XML_log.log_xml(
-					m_model.gpsModel.timestamp,					// Timestamp
-					m_model.windsensorModel.direction,			// winddir degrees
-					m_model.windsensorModel.speed, 				// windspeed ms
-					m_model.compassModel.heading, 				// Heading deg
-					m_model.compassModel.pitch, 				// Pitch deg
-					m_model.compassModel.roll, 					// Roll deg
-                                        m_model.compassModel.accelerationModel.accelX,                // Accel X
-                                        m_model.compassModel.accelerationModel.accelY,                // Accel Y
-                                        m_model.compassModel.accelerationModel.accelZ,                // Accel Z
-					m_model.gpsModel.positionModel.latitude, 	// gml:pos arg1, lat
-					m_model.gpsModel.positionModel.longitude, 	// gml:pos arg2, long
-					m_model.gpsModel.heading, 					// course over ground(deg)
-					m_model.gpsModel.speed, 					// speed over ground(ms)
-					m_model.rudder,								// Rudderpos
-					m_model.sail								// Sailpos
+					m_model.gpsModel.timestamp,						// Timestamp
+					m_model.windsensorModel.direction,				// winddir degrees
+					m_model.windsensorModel.speed, 					// windspeed ms
+					m_model.compassModel.heading, 					// Heading deg
+					m_model.compassModel.pitch, 					// Pitch deg
+					m_model.compassModel.roll, 						// Roll deg
+                    m_model.compassModel.accelerationModel.accelX,  // Accel X
+                    m_model.compassModel.accelerationModel.accelY,  // Accel Y
+                    m_model.compassModel.accelerationModel.accelZ,  // Accel Z
+					m_model.gpsModel.positionModel.latitude, 		// gml:pos arg1, lat
+					m_model.gpsModel.positionModel.longitude, 		// gml:pos arg2, long
+					m_model.gpsModel.heading, 						// course over ground(deg)
+					m_model.gpsModel.speed, 						// speed over ground(ms)
+					m_model.rudder,									// Rudderpos
+					m_model.sail,									// Sailpos
+					m_model.pressure								// Value from pressure sensor
 				);
 
 				// Kan skicka loggen direkt med:
