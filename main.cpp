@@ -31,7 +31,7 @@ static void threadGPSupdate() {
 
 static void threadHTTPSyncRun() {
 	try {
-	// httpsync_handle->run();
+		//httpsync_handle->run();
 	}
 	catch (const char * error) {
 		std::cout << "ERROR while running static void threadHTTPSyncRun() : " << error << std::endl;
@@ -89,13 +89,6 @@ int main(int argc, char *argv[]) {
 
 	printf("-Creating database...\n");
 	DBHandler db(path+db_name); 
-	try { 
-		db.openDatabase(path+db_name); 
-	} catch (const char * error) { 
-		printf("!DB ERROR:%s\n", error); 
-		std::cout << error << std::endl; 
-		throw; 
-	} 
 	printf("-DONE\n");
 
 	bool mockGPS = db.retriveCellAsInt("mock","1","GPS");
@@ -113,7 +106,6 @@ int main(int argc, char *argv[]) {
 
 	GPSupdater gps_updater(&systemstate,mockGPS);
 	gps_handle = &gps_updater;
-
 
 	try {
 		printf("-Initializing...\n");

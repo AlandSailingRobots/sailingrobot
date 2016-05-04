@@ -24,13 +24,10 @@ SailingRobot::SailingRobot(ExternalCommand* externalCommand,
 	m_waypointModel(PositionModel(1.5,2.7), 100, "", 6),
 	m_waypointRouting(m_waypointModel,
 		atof(m_dbHandler->retriveCell("waypoint_routing_config", "1", "radius_ratio").c_str()),
-		atof(m_dbHandler->retriveCell("course_calculation_config", "1", "tack_angle").c_str()),
-		atof(m_dbHandler->retriveCell("course_calculation_config", "1", "tack_max_angle").c_str()),
+		m_dbHandler->retriveCellAsInt("course_calculation_config", "1", "tack_angle"),
+		m_dbHandler->retriveCellAsInt("course_calculation_config", "1", "tack_max_angle"),
 		atof(m_dbHandler->retriveCell("course_calculation_config", "1", "tack_min_speed").c_str()),
-		atof(m_dbHandler->retriveCell("course_calculation_config", "1", "sector_angle").c_str()),
-	  	atof(m_dbHandler->retriveCell("waypoint_routing_config", "1", "max_command_angle").c_str()),
-	  	atof(m_dbHandler->retriveCell("waypoint_routing_config", "1", "rudder_speed_min").c_str()) 
-	),
+		m_dbHandler->retriveCellAsInt("course_calculation_config", "1", "sector_angle")),
 
 	m_externalCommand(externalCommand),
 	m_systemState(systemState),
@@ -144,11 +141,11 @@ void SailingRobot::run() {
 		std::cout << "heading: " << heading << "\n";
 		std::cout << "headeing ssm compass:" << m_systemStateModel.compassModel.heading<<"\n";
 
-                if (m_mockPosition) {
-                    position->setCourseToSteer(m_waypointRouting.getCTS());
-                }
-                
-                position->updatePosition();
+        if (m_mockPosition) {
+            position->setCourseToSteer(m_waypointRouting.getCTS());
+        }
+        
+        position->updatePosition();
                 
 		if (m_systemStateModel.gpsModel.online) {
 			//calc & set TWD
@@ -169,9 +166,9 @@ void SailingRobot::run() {
 					// WindVaneController::getAngle() will fetch set angle of vane.
 					// To do: Pass angle to engine controlling wind vane.
 				} else {
-                                    double heading = getHeading();
+                    double heading = getHeading();
 
-                                    m_windVaneController.adjustAngle(heading,m_waypointRouting.getCTS() );
+                    m_windVaneController.adjustAngle(heading,m_waypointRouting.getCTS() );
 				}
 			}
 
@@ -249,7 +246,7 @@ void SailingRobot::run() {
 void SailingRobot::shutdown() {
 //	syncServer();
 	m_running=false;
-	m_dbHandler->closeDatabase(); 
+	//m_dbHandler->closeDatabase(); 
 }
 
 
