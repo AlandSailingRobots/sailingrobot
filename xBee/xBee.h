@@ -14,6 +14,8 @@
 
 #include <errno.h>
 
+#define BAUD_RATE 57600
+
 class xBee {
 	private:
 
@@ -25,8 +27,8 @@ class xBee {
 		// searches the buffer for a message and returns it
 		std::string findXmlMessage(std::string* buffer);
 		
-		// Initializes the xBee with given baudrate 
-		int init(int baudRate);
+		// Initializes the xBee
+		int init();
 
 		// Reads incoming echoes for the specified device
 		std::string receiveData(int fd);

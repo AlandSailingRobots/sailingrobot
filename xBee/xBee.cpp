@@ -38,7 +38,7 @@ std::string xBee::findXmlMessage(std::string* buffer) {
 	return result;
 }
 
-int xBee::init(int baudRate){
+int xBee::init(){
 
 	// this setting needs a udev rule in host system to work (alternative is dynamic USB-slot)
 	// see Static_USB_Device_Names in project installation folder
@@ -46,7 +46,7 @@ int xBee::init(int baudRate){
 
 	int fd;
 
-	if((fd = serialOpen(deviceName.c_str(), baudRate)) < 0) {
+	if((fd = serialOpen(deviceName.c_str(), BAUD_RATE)) < 0) {
 		printf("errno: %d\n", errno);
 		throw "xBee::init: Unable to connect";
 	}

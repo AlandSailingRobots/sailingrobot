@@ -23,8 +23,8 @@ xBeeSync::xBeeSync(ExternalCommand* externalCommand, SystemState *systemState,
 	m_receiving(receiving),
 	m_sendLogs(sendLogs)
 {
-	//	skapa ny xBee och kör xbee.init(baudRate (57600))
-	m_xbee_fd = m_xBee.init(57600);
+	//	skapa ny xBee och kör xbee.init()
+	m_xbee_fd = m_xBee.init();
 	std::cout << "*xBee initialized - receiving:" << m_receiving
 			  << " sending:" << m_sending << std::endl;
 	m_logger.info(std::string(
