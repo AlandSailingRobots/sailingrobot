@@ -31,7 +31,7 @@ static void threadGPSupdate() {
 
 static void threadHTTPSyncRun() {
 	try {
-		//httpsync_handle->run();
+		httpsync_handle->run();
 	}
 	catch (const char * error) {
 		std::cout << "ERROR while running static void threadHTTPSyncRun() : " << error << std::endl;
@@ -88,13 +88,13 @@ int main(int argc, char *argv[]) {
 	);
 
 	printf("-Creating database...\n");
-	DBHandler db(path+db_name); 
+	DBHandler db(path+db_name);
 	printf("-DONE\n");
 
-	bool mockGPS = db.retriveCellAsInt("mock","1","GPS");
-    bool mockWindsensor = db.retriveCellAsInt("mock","1","Windsensor");
-    bool mockCompass = db.retriveCellAsInt("mock","1","Compass");
-    int  headningBufferSize = db.retriveCellAsInt("buffer_configs", "1", "compass");
+	bool mockGPS = db.retrieveCellAsInt("mock","1","GPS");
+    bool mockWindsensor = db.retrieveCellAsInt("mock","1","Windsensor");
+    bool mockCompass = db.retrieveCellAsInt("mock","1","Compass");
+    int  headningBufferSize = db.retrieveCellAsInt("buffer_configs", "1", "compass");
 
 	// Create main sailing robot controller
 	try {
@@ -118,9 +118,9 @@ int main(int argc, char *argv[]) {
 				&systemstate,
 				mockWindsensor,
                 mockCompass,
-				db.retriveCell("windsensor_config", "1", "port"),
-				db.retriveCellAsInt("windsensor_config", "1", "baud_rate"),
-				db.retriveCellAsInt("buffer_configs", "1", "windsensor"),
+				db.retrieveCell("windsensor_config", "1", "port"),
+				db.retrieveCellAsInt("windsensor_config", "1", "baud_rate"),
+				db.retrieveCellAsInt("buffer_configs", "1", "windsensor"),
                 headningBufferSize
 			)
 		);
@@ -135,9 +135,9 @@ int main(int argc, char *argv[]) {
 		// Start xBeeSync thread
 
 		//	Hämtar ett heltal (1 eller 0) som visar om xbeen skall skicka och ta emot data.
-		bool xBee_sending = db.retriveCellAsInt("xbee_config", "1", "send");
-		bool xBee_receiving = db.retriveCellAsInt("xbee_config", "1", "recieve");
-		bool xBee_sendLogs = db.retriveCellAsInt("xbee_config", "1", "send_logs");
+		bool xBee_sending = db.retrieveCellAsInt("xbee_config", "1", "send");
+		bool xBee_receiving = db.retrieveCellAsInt("xbee_config", "1", "recieve");
+		bool xBee_sendLogs = db.retrieveCellAsInt("xbee_config", "1", "send_logs");
 
 		std::unique_ptr<ThreadRAII> xbee_sync_thread;
 		if (xBee_sending || xBee_receiving) {
