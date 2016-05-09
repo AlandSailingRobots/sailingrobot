@@ -31,7 +31,7 @@ static void threadGPSupdate() {
 
 static void threadHTTPSyncRun() {
 	try {
-		httpsync_handle->run();
+		//httpsync_handle->run();
 	}
 	catch (const char * error) {
 		std::cout << "ERROR while running static void threadHTTPSyncRun() : " << error << std::endl;
