@@ -351,7 +351,7 @@ void SailingRobot::setupSailServo() {
 void SailingRobot::setupRudderCommand() {
 	try {
 		m_rudderCommand.setCommandValues( m_dbHandler->retrieveCellAsInt("rudder_command_config", "1", "extreme_command"),
-			m_dbHandler->retrieveCellAsInt("rudder_command_config", "1", "midships_command"));
+			m_dbHandler->retrieveCellAsInt("rudder_command_config", "1", "midship_command"));
 
 	} catch (const char * error) {
 		m_logger.error(error);
