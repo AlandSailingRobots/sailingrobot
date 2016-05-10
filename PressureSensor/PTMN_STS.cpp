@@ -44,6 +44,7 @@ bool PTMN_STS::init()
 
 int PTMN_STS::getPressure()
 {
+	m_model.pressure = readPressure();
 	return m_model.pressure;
 }
 
