@@ -9,7 +9,7 @@
 PTMN_STS::PTMN_STS():
 	m_model(PressureSensorModel(0))
 {
-	m_address = DEFAULT_I2C_ADDRESS;
+	m_address = DEFAULT_I2C_ADDRESS_PRESSURE;
 	m_fd = -1;
 }
 
@@ -34,7 +34,7 @@ bool PTMN_STS::init()
 		data = readAddress();
 
 		// Check if value read in EEPROM is the expected value for the PTMN_STS I2C address
-		if (data != DEFAULT_I2C_ADDRESS)	{
+		if (data != DEFAULT_I2C_ADDRESS_PRESSURE)	{
 			success = false; // Init failed, EEPROM did not read expected I2C address value
 		}
 	}
@@ -71,12 +71,12 @@ int PTMN_STS::getPressure()
 uint8_t PTMN_STS::readAddress(){
 
 
- wiringPiI2CWrite(m_fd, STARTBYTE);
- delay(1); // wait for processing of command
- wiringPiI2CWrite(m_fd, COM_READ_ADDR);
- delay(1); // wait for processing of command
+	wiringPiI2CWrite(m_fd, STARTBYTE);
+	delay(1); // wait for processing of command
+	wiringPiI2CWrite(m_fd, COM_READ_ADDR);
+	delay(1); // wait for processing of command
 
- return wiringPiI2CRead(m_fd);
+	return wiringPiI2CRead(m_fd);
 }
 
 PressureSensorModel PTMN_STS::getModel() {

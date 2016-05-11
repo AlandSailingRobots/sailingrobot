@@ -8,18 +8,20 @@
 #include "thread/SystemState.h"
 #include "logger/Logger.h"
 #include "Compass/Compass.h"
+#include "PressureSensor/PressureSensor.h"
 
 class WindsensorController
 {
 public:
 
 	WindsensorController(SystemState *systemState, bool mockIt, bool mockCompass,
-		std::string port_name, int baud_rate, int buff_size, int headningBufferSize);
+		bool mockPressure, std::string port_name, int baud_rate,
+		int buff_size, int headningBufferSize);
 	~WindsensorController() {};
 
 	void run();
 	void close();
-	
+
 private:
 
 	std::unique_ptr<Windsensor> m_windSensor;
@@ -27,14 +29,15 @@ private:
 
 	std::mutex m_mutex;
 	bool m_running;
-        
+
     std::unique_ptr<Compass> m_compass;
+	std::unique_ptr<PressureSensor> m_pressure;
 
 	Logger m_logger;
 
 	bool isRunning();
-        
-        void initCompass(bool mockCompass,int headningBufferSize);
+
+    void initCompass(bool mockCompass,int headningBufferSize);
 };
 
 #endif

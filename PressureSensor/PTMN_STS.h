@@ -7,7 +7,7 @@
 #include "models/PressureSensorModel.h"
 
 
-#define DEFAULT_I2C_ADDRESS 0x07
+#define DEFAULT_I2C_ADDRESS_PRESSURE 0x07
 
 #define STARTBYTE 0x0F
 // PTMN_STS Commands

@@ -94,7 +94,9 @@ int main(int argc, char *argv[]) {
 	bool mockGPS = db.retrieveCellAsInt("mock","1","GPS");
     bool mockWindsensor = db.retrieveCellAsInt("mock","1","Windsensor");
     bool mockCompass = db.retrieveCellAsInt("mock","1","Compass");
-    int  headningBufferSize = db.retrieveCellAsInt("buffer_configs", "1", "compass");
+	bool mockPressure = db.retrieveCellAsInt("mock","1","Pressure");
+	int  headningBufferSize = db.retrieveCellAsInt("buffer_configs", "1", "compass");
+
 
 	// Create main sailing robot controller
 	try {
@@ -118,6 +120,7 @@ int main(int argc, char *argv[]) {
 				&systemstate,
 				mockWindsensor,
                 mockCompass,
+				mockPressure,
 				db.retrieveCell("windsensor_config", "1", "port"),
 				db.retrieveCellAsInt("windsensor_config", "1", "baud_rate"),
 				db.retrieveCellAsInt("buffer_configs", "1", "windsensor"),
