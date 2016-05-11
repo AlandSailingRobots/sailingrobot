@@ -141,10 +141,11 @@ int main(int argc, char *argv[]) {
 		bool xBee_sending = db.retrieveCellAsInt("xbee_config", "1", "send");
 		bool xBee_receiving = db.retrieveCellAsInt("xbee_config", "1", "recieve");
 		bool xBee_sendLogs = db.retrieveCellAsInt("xbee_config", "1", "send_logs");
+		int xBee_delay =  db.retrieveCellAsInt("xbee_config", "1", "delay");
 
 		std::unique_ptr<ThreadRAII> xbee_sync_thread;
 		if (xBee_sending || xBee_receiving) {
-			xbee_handle.reset(new xBeeSync(&externalCommand, &systemstate, &db, xBee_sendLogs, xBee_sending, xBee_receiving));
+			xbee_handle.reset(new xBeeSync(&externalCommand, &systemstate, &db, xBee_sendLogs, xBee_sending, xBee_receiving,xBee_delay));
 			xbee_sync_thread = std::unique_ptr<ThreadRAII>(
 				new ThreadRAII(std::thread(threadXBeeSyncRun), ThreadRAII::DtorAction::detach));
 		}
