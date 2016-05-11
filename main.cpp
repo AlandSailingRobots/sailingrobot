@@ -133,7 +133,9 @@ int main(int argc, char *argv[]) {
 
 		printf("-Starting threads...\n");
 
-		httpsync_handle.reset(new HTTPSync(&db));
+		int http_delay =  db.retrieveCellAsInt("httpsync_config", "1", "delay");
+		
+		httpsync_handle.reset(new HTTPSync(&db,http_delay ));
 
 		// Start xBeeSync thread
 
