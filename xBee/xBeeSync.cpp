@@ -4,7 +4,7 @@
 #include <iostream>
 
 xBeeSync::xBeeSync(ExternalCommand* externalCommand, SystemState *systemState,
-				   DBHandler* db, bool sendLogs, bool sending, bool receiving) :
+				   DBHandler* db, bool sendLogs, bool sending, bool receiving,int delay) :
 	m_external_command(externalCommand),
 	m_model(
 		SystemStateModel(
@@ -21,7 +21,8 @@ xBeeSync::xBeeSync(ExternalCommand* externalCommand, SystemState *systemState,
 	m_running(true),
 	m_sending(sending),
 	m_receiving(receiving),
-	m_sendLogs(sendLogs)
+	m_sendLogs(sendLogs),
+	m_delay(delay)
 {
 	//	skapa ny xBee och kör xbee.init()
 	m_xbee_fd = m_xBee.init();
@@ -106,7 +107,7 @@ void xBeeSync::run()
 
 		//make sure there are at least 0.4 seconds between each xml message
 		std::this_thread::sleep_for(
-			std::chrono::milliseconds(400));
+			std::chrono::milliseconds(m_delay));
 	}
 	std::cout << "*xBeeSync thread exited." << std::endl;
 	m_logger.info("*xBeeSync thread exited.");

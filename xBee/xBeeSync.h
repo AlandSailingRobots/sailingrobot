@@ -14,7 +14,7 @@ class xBeeSync
 {
 public:
 	xBeeSync(ExternalCommand* externalCommand, SystemState *systemState,
-			 DBHandler* db, bool sendLogs, bool sending, bool receiving);
+			 DBHandler* db, bool sendLogs, bool sending, bool receiving,int delay);
 	~xBeeSync() {};
 
 	void run();
@@ -35,6 +35,7 @@ private:
 	bool m_receiving;
 	bool m_sendLogs;
 	Logger m_logger;
+	int m_delay;
 
 	bool isRunning();
 };
