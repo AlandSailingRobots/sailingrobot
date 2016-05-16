@@ -11,13 +11,13 @@ CC = g++
 FLAGS = -g -Wall -pedantic -Werror -std=c++14
 LIBS = -lpthread -lwiringPi -lrt -I$(SAILINGROBOTS_HOME)
 
-SOURCES_MOCK = MockPressureSensor.cpp
-HEADERS_MOCK = MockPressureSensor.h
-FILE_MOCK = MockPressureSensor.o
+SOURCES_MOCK = MockAnalogArduino.cpp
+HEADERS_MOCK = MockAnalogArduino.h
+FILE_MOCK = MockAnalogArduino.o
 
-SOURCES_COMP = PressureSensor.cpp
-HEADERS_COMP = PressureSensor.h
-FILE_COMP = PressureSensor.o
+SOURCES_COMP = AnalogArduino.cpp
+HEADERS_COMP = AnalogArduino.h
+FILE_COMP = AnalogArduino.o
 
 SOURCES_HMC = PTMN_STS.cpp
 HEADERS_HMC = PTMN_STS.h

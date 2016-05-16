@@ -8,11 +8,11 @@
 #ifndef PRESSURESENSOR_MOCKPRESSURESENSOR_H_
 #define PRESSURESENSOR_MOCKPRESSURESENSOR_H_
 
-#include "PressureSensor.h"
+#include "AnalogArduino.h"
 
-class PressureSensorModel;
+class AnalogArduinoModel;
 
-class MockPressureSensor:public PressureSensor {
+class MockPressureSensor:public AnalogArduino {
 public:
 	MockPressureSensor();
 	~MockPressureSensor();
@@ -24,7 +24,7 @@ public:
 	int getPressure();
 
 	// returns model
-	PressureSensorModel getModel();
+	AnalogArduinoModel getModel();
 };
 
-#endif /* PressureSensor_MOCKPressureSensor_H_ */
+#endif /* AnalogArduino_MOCKPressureSensor_H_ */

@@ -3,7 +3,7 @@
 
 #include <stdint.h> // uint8_t
 #include <vector>
-#include "PressureSensor.h"
+#include "AnalogArduino.h"
 #include "models/PressureSensorModel.h"
 
 
@@ -17,7 +17,7 @@
 
 
 
-class PTMN_STS:public PressureSensor{
+class PTMN_STS:public AnalogArduino {
 public:
         PTMN_STS();
 	~PTMN_STS();
