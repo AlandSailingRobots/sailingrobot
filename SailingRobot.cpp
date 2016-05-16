@@ -200,8 +200,8 @@ void SailingRobot::run() {
 		//logging
 		m_dbHandler->insertDataLog(
 			m_systemStateModel,
-			m_sailServo.getPosition(),
-			m_rudderServo.getPosition(),
+			0,
+			0,
 			m_waypointRouting.getDTW(),
 			m_waypointRouting.getBTW(),
 			m_waypointRouting.getCTS(),
