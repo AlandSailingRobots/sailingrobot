@@ -20,10 +20,10 @@ bool MockAnalogArduino::init(){
 	return true;
 }
 
-int MockAnalogArduino::getPressure(){
+int MockAnalogArduino::getValue(){
 	return analogValue;
 }
 
-PressureSensorModel MockAnalogArduino::getModel(){
+AnalogArduinoModel MockAnalogArduino::getModel(){
 	return AnalogArduinoModel(analogValue);
 }

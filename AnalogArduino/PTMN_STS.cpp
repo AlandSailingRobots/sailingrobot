@@ -7,7 +7,7 @@
 
 
 PTMN_STS::PTMN_STS():
-	m_model(PressureSensorModel(0))
+	m_model(AnalogArduinoModel(0))
 {
 	m_address = DEFAULT_I2C_ADDRESS_PRESSURE;
 	m_fd = -1;
@@ -44,8 +44,8 @@ bool PTMN_STS::init()
 
 int PTMN_STS::getPressure()
 {
-	m_model.pressure = readPressure();
-	return m_model.pressure;
+	m_model.analogValue = readPressure();
+	return m_model.analogValue;
 }
 
  uint16_t PTMN_STS::readPressure(){
@@ -79,6 +79,6 @@ uint8_t PTMN_STS::readAddress(){
 	return wiringPiI2CRead(m_fd);
 }
 
-PressureSensorModel PTMN_STS::getModel() {
+AnalogArduinoModel PTMN_STS::getModel() {
 	return m_model;
 }

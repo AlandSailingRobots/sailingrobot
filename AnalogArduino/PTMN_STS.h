@@ -4,7 +4,7 @@
 #include <stdint.h> // uint8_t
 #include <vector>
 #include "AnalogArduino.h"
-#include "models/PressureSensorModel.h"
+#include "models/AnalogArduinoModel.h"
 
 
 #define DEFAULT_I2C_ADDRESS_PRESSURE 0x07
@@ -29,14 +29,14 @@ public:
 	int getPressure();
 
 	// returns model
-	PressureSensorModel getModel();
+	AnalogArduinoModel getModel();
 
 private:
 	// file descriptor
 	int m_fd;
 	uint8_t m_address;
 
-	PressureSensorModel m_model;
+	AnalogArduinoModel m_model;
 
 	int m_pressure;
 

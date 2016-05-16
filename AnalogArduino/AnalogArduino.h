@@ -8,7 +8,7 @@
 
 #include <stdint.h> // uint8_t
 
-class PressureSensorModel;
+class AnalogArduinoModel;
 
 class AnalogArduino {
 public:
@@ -19,7 +19,7 @@ public:
 	
 	virtual int getValue()=0;
 	// returns m_pressure
-	virtual PressureSensorModel getModel()=0;
+	virtual AnalogArduinoModel getModel()=0;
 };
 
 #endif
