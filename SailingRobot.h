@@ -35,12 +35,12 @@ public:
 	void init(std::string programPath, std::string errorFileName);
 	void run();
 	void shutdown();
-	
+
 	//void readGPS();
-	
+
 private:
 	int getHeading();
-        
+
 	//void readGPS();
 	//void syncServer();
 	//void updateState();
@@ -53,7 +53,7 @@ private:
 	void setupSailServo();
 	//void setupGPS();
 	void setupRudderCommand();
-	void setupSailCommand();	
+	void setupSailCommand();
 	//void setupHTTPSync();
 
 	std::string m_errorLogPath;
@@ -78,7 +78,7 @@ private:
 	SailCommand m_sailCommand;
 	//HTTPSync m_httpSync;
 
-	std::unique_ptr<Actuator> m_maestroController;
+	std::shared_ptr<Actuator> m_maestroController;
 	ServoObject m_rudderServo;
 	ServoObject m_sailServo;
 
