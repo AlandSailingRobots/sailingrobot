@@ -13,7 +13,7 @@ LIBS = -lsqlite3 -lgps -lrt -lwiringPi -lcurl -lpthread -I$(SAILINGROBOTS_HOME)
 LIBS_BOOST = -lboost_system -lboost_log -lboost_thread -I$(SAILINGROBOTS_HOME)
 
 XBEE = xBee/xBeeSync.o xBee/xBee.o 
-PRESSURESENSOR = PressureSensor/PressureSensor.o PressureSensor/MockPressureSensor.o PressureSensor/PTMN_STS.o
+AnalogArduino = AnalogArduino/AnalogArduino.o AnalogArduino/MockAnalogArduino.o AnalogArduino/PTMN_STS.o
 COMPASS = Compass/Compass.o Compass/MockCompass.o Compass/HMC6343.o
 POSITION = utility/Position.o utility/MockPosition.o utility/RealPosition.o
 COURSE = coursecalculation/CourseCalculation.o coursecalculation/CourseMath.o 
@@ -31,7 +31,7 @@ WAYPOINTROUTING = waypointrouting/WaypointRouting.o \
 WINDVANECONTROLLER = windvanecontroller/WindVaneController.o
 
 
-OBJECTS = $(XBEE) $(PRESSURESENSOR) $(COMPASS) $(POSITION) $(COURSE) $(DB) $(COMMAND) $(MAESTRO) $(CV7) $(GPS) \
+OBJECTS = $(XBEE) $(AnalogArduino) $(COMPASS) $(POSITION) $(COURSE) $(DB) $(COMMAND) $(MAESTRO) $(CV7) $(GPS) \
 		  $(HTTP) $(XML_LOG) $(THREAD) $(WAYPOINTROUTING) $(WINDVANECONTROLLER) \
 		  logger/Logger.o utility/Utility.o utility/Timer.o
 		  
@@ -41,20 +41,20 @@ FILE = sr
 MAKE = make
 
 #Needed for proper subfolder make writing
-.PHONY : xBee PressureSensor Compass runall coursecalculation dbhandler ruddercommand \
+.PHONY : xBee AnalogArduino Compass runall coursecalculation dbhandler ruddercommand \
 		 sailcommand servocontroller CV7 gps httpsync xmlparser thread \
 		 logger utility waypointrouting windvanecontroller
 
 
 all : runall $(FILE)
 
-runall : xBee PressureSensor Compass coursecalculation dbhandler ruddercommand sailcommand \
+runall : xBee AnalogArduino Compass coursecalculation dbhandler ruddercommand sailcommand \
 		 servocontroller CV7 gps httpsync xmlparser thread logger utility \
 		 waypointrouting windvanecontroller
 
 clean :
 	cd xBee && $(MAKE) clean
-	cd PressureSensor && $(MAKE) clean
+	cd AnalogArduino && $(MAKE) clean
 	cd Compass && $(MAKE) clean
 	cd coursecalculation && $(MAKE) clean
 	cd dbhandler && $(MAKE) clean
@@ -72,8 +72,8 @@ clean :
 	cd windvanecontroller && $(MAKE) clean
 	rm -f $(FILE)
 
-PressureSensor :
-	$(MAKE) -C ./PressureSensor
+AnalogArduino :
+	$(MAKE) -C ./AnalogArduino
 
 Compass :
 	$(MAKE) -C ./Compass
