@@ -5,26 +5,26 @@
  *      Author: sailbot
  */
 
-#ifndef PRESSURESENSOR_MOCKPRESSURESENSOR_H_
-#define PRESSURESENSOR_MOCKPRESSURESENSOR_H_
+#ifndef __MOCK_ANALOG_ARDUINO_H__
+#define __MOCK_ANALOG_ARDUINO_H__
 
 #include "AnalogArduino.h"
 
 class AnalogArduinoModel;
 
-class MockPressureSensor:public AnalogArduino {
+class MockAnalogArduino:public AnalogArduino {
 public:
-	MockPressureSensor();
-	~MockPressureSensor();
+	MockAnalogArduino();
+	~MockAnalogArduino();
 
 	// initialize module
 	bool init();
 
 	// returns heading
-	int getPressure();
+	int getValue();
 
 	// returns model
 	AnalogArduinoModel getModel();
 };
 
-#endif /* AnalogArduino_MOCKPressureSensor_H_ */
+#endif /* AnalogArduino_MOCKAnalogArduino_H_ */
