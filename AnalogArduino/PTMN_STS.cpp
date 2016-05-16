@@ -42,7 +42,7 @@ bool PTMN_STS::init()
 	return success;
 }
 
-int PTMN_STS::getPressure()
+int PTMN_STS::getValue()
 {
 	m_model.analogValue = readPressure();
 	return m_model.analogValue;

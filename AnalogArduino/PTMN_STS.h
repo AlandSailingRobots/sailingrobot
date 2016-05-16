@@ -26,7 +26,7 @@ public:
 	bool init();
 
 	// returns m_pressure
-	int getPressure();
+	int getValue();
 
 	// returns model
 	AnalogArduinoModel getModel();

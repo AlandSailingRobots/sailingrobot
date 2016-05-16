@@ -8,7 +8,7 @@
 #include "thread/SystemState.h"
 #include "logger/Logger.h"
 #include "Compass/Compass.h"
-#include "PressureSensor/PressureSensor.h"
+#include "AnalogArduino/AnalogArduino.h"
 
 class WindsensorController
 {
@@ -31,7 +31,7 @@ private:
 	bool m_running;
 
     std::unique_ptr<Compass> m_compass;
-	std::unique_ptr<PressureSensor> m_pressure;
+	std::unique_ptr<AnalogArduino> m_pressure;
 
 	Logger m_logger;
 
