@@ -24,6 +24,7 @@ WindsensorController::WindsensorController(SystemState *systemState, bool mockIt
 
 	if(!mockPressure) {
 		m_pressure.reset(new PTMN_STS());
+		m_pressure->init();
 	} else {
 		m_pressure.reset(new MockAnalogArduino());
 	}
