@@ -5,7 +5,7 @@
 #include "CV7/MockWindsensor.h"
 #include "Compass/HMC6343.h"
 #include "Compass/MockCompass.h"
-#include "AnalogArduino/PTMN_STS.h"
+#include "AnalogArduino/AR_UNO.h"
 #include "AnalogArduino/MockAnalogArduino.h"
 
 WindsensorController::WindsensorController(SystemState *systemState, bool mockIt, bool mockCompass,
@@ -23,8 +23,8 @@ WindsensorController::WindsensorController(SystemState *systemState, bool mockIt
 	}
 
 	if(!mockPressure) {
-		m_pressure.reset(new PTMN_STS());
-		m_pressure->init();
+		//m_pressure.reset(new AR_UNO();
+		//m_pressure->init();
 	} else {
 		m_pressure.reset(new MockAnalogArduino());
 	}
@@ -70,7 +70,7 @@ void WindsensorController::run() {
 										  m_windSensor->getTemperature() )
 		);
 
-		m_systemState->setPressure(m_pressure->getValue());
+		//m_systemState->setPressure(m_pressure->getValue());
 	}
 }
 
