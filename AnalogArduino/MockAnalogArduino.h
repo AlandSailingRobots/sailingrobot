@@ -20,8 +20,14 @@ public:
 	// initialize module
 	bool init();
 
-	// returns heading
-	int getValue();
+	// returns pressure
+	int getValue0();
+	// returns rudder
+	int getValue1();
+	// returns sheet
+	int getValue2();
+	// returns battery
+	int getValue3();
 
 	// returns model
 	AnalogArduinoModel getModel();
