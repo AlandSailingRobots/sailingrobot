@@ -13,7 +13,7 @@ LIBS = -lsqlite3 -lgps -lrt -lwiringPi -lcurl -lpthread -I$(SAILINGROBOTS_HOME)
 LIBS_BOOST = -lboost_system -lboost_log -lboost_thread -I$(SAILINGROBOTS_HOME)
 
 XBEE = xBee/xBeeSync.o xBee/xBee.o 
-AnalogArduino = AnalogArduino/AnalogArduino.o AnalogArduino/MockAnalogArduino.o AnalogArduino/PTMN_STS.o
+AnalogArduino = AnalogArduino/AnalogArduino.o AnalogArduino/MockAnalogArduino.o AnalogArduino/AU_UNO.o
 COMPASS = Compass/Compass.o Compass/MockCompass.o Compass/HMC6343.o
 POSITION = utility/Position.o utility/MockPosition.o utility/RealPosition.o
 COURSE = coursecalculation/CourseCalculation.o coursecalculation/CourseMath.o 
