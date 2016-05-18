@@ -116,7 +116,7 @@ int SailingRobot::getHeading() {
 void SailingRobot::run() {
 
 	m_running = true;
-	int rudderCommand, sailCommand, heading = 0, insertScanOnce = 0;
+	int rudderCommand, sailCommand, windDir = 0 ,heading = 0, insertScanOnce = 0;
 	std::vector<float> twdBuffer;
 	const unsigned int twdBufferMaxSize =
 		m_dbHandler->retrieveCellAsInt("buffer_configs", "1", "true_wind");
@@ -137,6 +137,8 @@ void SailingRobot::run() {
 		//Get data from SystemStateModel to local object
 		m_systemState->getData(m_systemStateModel);
 
+		windDir = m_systemStateModel.windsensorModel.direction;
+
 		heading = getHeading();
 
 		std::cout << "heading: " << heading << "\n";
@@ -150,9 +152,11 @@ void SailingRobot::run() {
 
 		if (m_systemStateModel.gpsModel.online) {
 			//calc & set TWD
-			double twd = Utility::calculateTrueWindDirection(m_systemStateModel,heading);
+			//double twd = Utility::calculateTrueWindDirection(m_systemStateModel,heading);
+			//twdBuffer.push_back(twd);// new wind calculation
 
-			twdBuffer.push_back(twd);
+			twdBuffer.push_back(heading + windDir);// old wind calculation
+
 			while (twdBuffer.size() > twdBufferMaxSize) {
 				twdBuffer.erase(twdBuffer.begin());
 			}
