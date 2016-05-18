@@ -95,7 +95,7 @@ int main(int argc, char *argv[]) {
     bool mockWindsensor = db.retrieveCellAsInt("mock","1","Windsensor");
     bool mockCompass = db.retrieveCellAsInt("mock","1","Compass");
 	bool mockPressure = db.retrieveCellAsInt("mock","1","Pressure");
-	int  headningBufferSize = db.retrieveCellAsInt("buffer_configs", "1", "compass");
+	int  headningBufferSize = db.retrieveCellAsInt("buffer_config", "1", "compass");
 
 
 	// Create main sailing robot controller
@@ -123,7 +123,7 @@ int main(int argc, char *argv[]) {
 				mockPressure,
 				db.retrieveCell("windsensor_config", "1", "port"),
 				db.retrieveCellAsInt("windsensor_config", "1", "baud_rate"),
-				db.retrieveCellAsInt("buffer_configs", "1", "windsensor"),
+				db.retrieveCellAsInt("buffer_config", "1", "windsensor"),
                 headningBufferSize
 			)
 		);
@@ -134,7 +134,7 @@ int main(int argc, char *argv[]) {
 		printf("-Starting threads...\n");
 
 		int http_delay =  db.retrieveCellAsInt("httpsync_config", "1", "delay");
-		
+
 		httpsync_handle.reset(new HTTPSync(&db,http_delay ));
 
 		// Start xBeeSync thread

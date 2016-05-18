@@ -119,7 +119,7 @@ void SailingRobot::run() {
 	int rudderCommand, sailCommand, windDir = 0 ,heading = 0, insertScanOnce = 0;
 	std::vector<float> twdBuffer;
 	const unsigned int twdBufferMaxSize =
-		m_dbHandler->retrieveCellAsInt("buffer_configs", "1", "true_wind");
+		m_dbHandler->retrieveCellAsInt("buffer_config", "1", "true_wind");
 
 	Timer timer;
 	std::string sr_loop_time =
