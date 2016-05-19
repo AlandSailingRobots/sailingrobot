@@ -1,8 +1,10 @@
+#include "myWiringI2C.h"
 #include "AR_UNO.h"
 #include <wiringPiI2C.h>
 #include <wiringPi.h> // delay
 #include <unistd.h> // close
 #include <vector>
+#include <cstring>
 #include "utility/Utility.h"
 
 
@@ -62,66 +64,34 @@ int AR_UNO::getValue3()
 	return m_model.analogValue3;
 }
 
-
-void AR_UNO::readPressure()
-{
-  m_model.analogValue0 = readAnalog(COM_READ_PRESSURE);
-}
-
-void AR_UNO::readRudder()
-{
-	m_model.analogValue1 = readAnalog(COM_READ_RUDDER);
-}
-
-void AR_UNO::readSheet()
-{
-	m_model.analogValue2 = readAnalog(COM_READ_SHEET);
-}
-
-void AR_UNO::readBattery()
-{
-	m_model.analogValue3 = readAnalog(COM_READ_BATTERY);
-}
-
 void AR_UNO::readValues()
 {
-	readPressure();
-	readSheet();
-	readRudder();
-	readBattery();
-}
+  uint8_t block[40];
+  uint16_t reVal;
+  memset(block,0xFF,40);
+  wiringPiI2CReadBlock(m_fd,block);
 
-uint16_t AR_UNO::readAnalog(uint8_t command){
-
-	const int transferSize = 2;
-	std::vector<uint8_t> tempVector;
-	// DATA (MSB/LSB)
-
-	wiringPiI2CWrite(m_fd, STARTBYTE);
-	delay(1); // wait for processing of command
-	wiringPiI2CWrite(m_fd, command);
-	delay(1); // wait for processing of command
-
-	for(int i = 0; i < transferSize; i++) {
-		tempVector.push_back( wiringPiI2CRead(m_fd) );
-
-	}
-	delay(1);
-	uint16_t returnVal = tempVector[0]<<8;
-	returnVal += (uint16_t) tempVector[1];
-	return returnVal;
+  reVal = block[2]<<8;
+  reVal+=(uint16_t) block[3];
+  m_model.analogValue0 = reVal;
+  reVal = block[4]<<8;
+  reVal+=(uint16_t) block[5];
+  m_model.analogValue1 = reVal;
+  reVal = block[6]<<8;
+  reVal+=(uint16_t) block[7];
+  m_model.analogValue2 = reVal;
+  reVal = block[8]<<8;
+  reVal+=(uint16_t) block[9];
+  m_model.analogValue3 = reVal;
 }
 
 uint8_t AR_UNO::readAddress(){
 
-
-	wiringPiI2CWrite(m_fd, STARTBYTE);
-	delay(1); // wait for processing of command
-	wiringPiI2CWrite(m_fd, COM_READ_ADDR);
-	delay(1); // wait for processing of command
-
-	return wiringPiI2CRead(m_fd);
+  uint8_t block[40];
+	wiringPiI2CReadBlock(m_fd,block);
+	return block[10];
 }
+
 
 AnalogArduinoModel AR_UNO::getModel() {
 	return m_model;

@@ -12,13 +12,6 @@
 #define STARTBYTE 0x0F
 // AR_UNO Commands
 
-#define COM_READ_PRESSURE 0x01
-#define COM_READ_RUDDER 0x02
-#define COM_READ_SHEET 0x03
-#define COM_READ_BATTERY 0x04
-#define COM_READ_ADDR 0x22
-
-
 
 class AR_UNO:public AnalogArduino {
 public:
@@ -39,10 +32,6 @@ public:
 
 	// returns model
 	AnalogArduinoModel getModel();
-  void readPressure();
-  void readRudder();
-  void readSheet();
-  void readBattery();
   void readValues();
 private:
 	// file descriptor
@@ -53,7 +42,6 @@ private:
 
 	int m_pressure;
 
-	uint16_t readAnalog(uint8_t command);
 
 	uint8_t readAddress();
 };
