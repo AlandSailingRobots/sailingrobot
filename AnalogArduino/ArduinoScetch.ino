@@ -1,32 +1,33 @@
 #include <Wire.h>                                      // interrupt based I2C library
 #include <EEPROM.h>                                    // library to access EEPROM memory
+
 #define startbyte 0x0F                                 // for i2c communications each datapacket must start with this byte
-#define PRESSUREBYTE 0x01                              // request byte for pressure data
+#define PRESSUREBYTE 0x01                              // request byte for pressure data 
 #define ADDRESSBYTE 0x22                               // request byte for i2c address store in eeprom
-#define RUDDERBYTE 0x02                               // request byte for rudder data
-#define SHEETBYTE 0x03                               // request byte for sheet data
-#define BATTERYBYTE 0x04                               // request byte  for battery data
-#define ERRORBYTE 0x00                                 // error byte if byte receiving wrong
- 
+#define RUDDERBYTE 0x02                               // request byte for rudder data 
+#define SHEETBYTE 0x03                               // request byte for sheet data 
+#define BATTERYBYTE 0x04                               // request byte  for battery data 
+#define ERRORBYTE 0x0B                                // error byte if byte receiving wrong
+
 int pressurePin = A0;
 int rudderPin = A1;
 int sheetPin = A2;
 int batteryPin = A3;
- 
+
 byte mask = 1;
 byte LSB[4] = {0,0,0,0};
 byte MSB[4] = {0,0,0,0};
- 
+
 byte i2cfreq;                                          // I2C clock frequency can be 100kHz(default) or 400kHz
 byte I2Caddress;                                       // I2C slave address
-byte datapacket[2];
+byte datapacket[34];
 byte errorflag;
 bool request_activated = false;
 bool request = true;
-bool end_request=false;
+bool end_request=false; 
 byte b;                                                                      // byte from buffer
- 
- 
+
+
 void setup() {
   Serial.begin(9600);
   TWBR=72;                                           //i2c 100khz 72 100Khz 12 400Khz
@@ -50,6 +51,7 @@ void setup() {
   Wire.onReceive(I2Ccommand);                        // specify ISR for data received
   Wire.onRequest(I2Cstatus);                         // specify ISR for data to be sent
   Serial.println("Finish setup I2c");
+  datapacket[0] =0x0B;
 }
  
 void loop() {
@@ -59,7 +61,7 @@ void loop() {
   splitValue(analogRead(batteryPin),BATTERYBYTE);
   delay(100);
 }
- 
+  
 void splitValue(int inputValue,byte sensor) {
   LSB[sensor-1] = inputValue & 0xFF;
   MSB[sensor-1] = inputValue >> 8;
@@ -69,57 +71,28 @@ void splitValue(int inputValue,byte sensor) {
   Serial.print("  LSB: "); Serial.print(LSB[sensor-1], BIN);
   Serial.print("  value: "); Serial.println(inputValue);
 }
- 
+
 void I2Ccommand(int recvflag){
- 
-  int i;                                                                       // integer from buffer
-  if (!request_activated)
-  {
+  
      do                                                                           // check for start byte
      {
        b=Wire.read();                                                             // read a byte from the buffer
        if(b!=startbyte || recvflag!=1)errorflag = errorflag | 1;                 // if byte does not equal startbyte or Master request incorrect number of bytes then generate error
      } while (errorflag>0 && Wire.available()>0);                               // if errorflag>0 then empty buffer of corrupt data
-     if (b==startbyte)
-        request_activated = true;
-  }
-  else{
-    b = Wire.read();
-    if (b == PRESSUREBYTE || b == ADDRESSBYTE || b == RUDDERBYTE || b == SHEETBYTE || b == BATTERYBYTE){                         //
-      request = true;
-      end_request=false;
-    }
-    else{                                                               // wrong byte received flushing i2c buffer
-       do                                                                           // check for start byte
-       {
-         Wire.read();                                                             // read a byte from the buffer
-       } while (Wire.available()>0);
-       b=ERRORBYTE;
-    }
-    request_activated=false;
-  }
 }
- 
- 
- 
+
+
+
 void I2Cstatus(){
-  if (!end_request &&(b == PRESSUREBYTE || b == RUDDERBYTE || b == SHEETBYTE || b == BATTERYBYTE)){
-    if (request){
-      datapacket[0] = MSB[b-1];
-      request = false;
-    }
-    else{
-      datapacket[0] =LSB[b-1];
-      end_request = true;
-    }
-  }
- 
-  else if (!end_request && b==ADDRESSBYTE){
-     datapacket[0] =I2Caddress;
-     end_request = true;
-     request=false;
-  }
-  else
-    datapacket[0] = ERRORBYTE;
-  Wire.write(datapacket,1);
+  int j=0;
+  datapacket[1]=MSB[PRESSUREBYTE-1];
+  datapacket[2]=LSB[PRESSUREBYTE-1];
+  datapacket[3]=MSB[RUDDERBYTE-1];
+  datapacket[4]=LSB[RUDDERBYTE-1];
+  datapacket[5]=MSB[SHEETBYTE-1];
+  datapacket[6]=LSB[SHEETBYTE-1];
+  datapacket[7]=MSB[BATTERYBYTE-1];
+  datapacket[8]=LSB[BATTERYBYTE-1];
+  datapacket[9]=I2Caddress;
+  Wire.write(datapacket,11);
 }
