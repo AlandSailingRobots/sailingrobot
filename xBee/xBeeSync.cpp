@@ -11,7 +11,7 @@ xBeeSync::xBeeSync(ExternalCommand* externalCommand, SystemState *systemState,
 			GPSModel("",PositionModel(0,0),0,0,0,0),
 			WindsensorModel(0,0,0),
 			CompassModel(0,0,0,AccelerationModel(0,0,0) ),
-			0,
+			AnalogArduinoModel(0, 0, 0, 0),
 			0,
 			0
 		)
@@ -62,9 +62,12 @@ void xBeeSync::run()
 					m_model.gpsModel.positionModel.longitude, 		// gml:pos arg2, long
 					m_model.gpsModel.heading, 						// course over ground(deg)
 					m_model.gpsModel.speed, 						// speed over ground(ms)
+					m_model.arduinoModel.analogValue0,				// pressure
+					m_model.arduinoModel.analogValue1,				// rudder
+					m_model.arduinoModel.analogValue2,				// sheet
+					m_model.arduinoModel.analogValue3,				// current
 					m_model.rudder,									// Rudderpos
-					m_model.sail,									// Sailpos
-					m_model.pressure								// Value from pressure sensor
+					m_model.sail									// Sailpos
 				);
 
 				// Kan skicka loggen direkt med:
