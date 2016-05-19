@@ -81,7 +81,7 @@ int main(int argc, char *argv[]) {
 			GPSModel("",PositionModel(0,0),0,0,0,0),
 			WindsensorModel(0,0,0),
 			CompassModel(0,0,0,AccelerationModel(0,0,0) ),
-			0,
+			AnalogArduinoModel(0, 0, 0, 0),
 			0,
 			0
 		)
