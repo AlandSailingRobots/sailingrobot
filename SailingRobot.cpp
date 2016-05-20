@@ -116,6 +116,7 @@ int SailingRobot::getHeading() {
 void SailingRobot::run() {
 
 	m_running = true;
+	routeStarted = true;
 	int rudderCommand, sailCommand, windDir = 0 ,heading = 0, insertScanOnce = 0;
 	std::vector<float> twdBuffer;
 	const unsigned int twdBufferMaxSize =
