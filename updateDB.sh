@@ -5,7 +5,7 @@
     # Database updates after resets
 
     printf "\nChoose what you want to change in the Database\n"
-    printf " 1. Turn off mock settings,\n 2. Set tack_min_speed in course_calculation_config,\n 3. Set loop_time in sailing_robot_config,\n \033[32m4. Do all of the above,\033[0m\n 5. Manually change waypoint routing\n"
+    printf " 1. Turn off mock settings,\n 2. Set tack_min_speed in course_calculation_config(1),\n 3. Set loop_time in sailing_robot_config(0.1),\n \033[32m4. Do all of the above,\033[0m\n 5. Manually change waypoint routing,\n 6. Set database server settings\n"
     read -p " Choice: " C
 
     if [ $C -eq 1 ]
@@ -60,7 +60,16 @@
                 printf "\n \033[32m rudder_speed_min SET to $RSM\033[0m\n\n" 
             fi
 
-    fi
+    elif [ $C -eq 6 ]
+    then
+
+        sqlite3 asr.db "UPDATE server SET boat_id='BOAT02';"
+        printf "\n \033[32m Server id set to BOAT02\033[0m"
+        sqlite3 asr.db "UPDATE server SET boat_pwd='PWD02';"
+        printf "\n \033[32m Server password set to PWD02\033[0m"
+        sqlite3 asr.db "UPDATE server SET srv_addr='http://www.sailingrobots.com/testdata/sync/';"
+        printf "\n \033[32m Server address set to http://www.sailingrobots.com/testdata/sync/\033[0m\n\n"
+
+fi
     
 # chmod +x updateDB.sh 
-
