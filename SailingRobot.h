@@ -59,7 +59,7 @@ private:
 	std::string m_errorLogPath;
 
 	bool m_running;
-
+	bool routeStarted;
 	/**
 	 *  bool flags for signaling the use of mock objects
 	 */

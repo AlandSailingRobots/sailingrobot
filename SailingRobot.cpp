@@ -212,8 +212,11 @@ void SailingRobot::run() {
 			m_waypointRouting.getTack(),
 			m_waypointRouting.getGoingStarboard(),
 			atoi(m_waypointModel.id.c_str()),
-			Utility::meanOfAngles(twdBuffer)
+			Utility::meanOfAngles(twdBuffer),
+			routeStarted
 		);
+
+		routeStarted = false;
 
 //		syncServer();
 
