@@ -29,6 +29,8 @@ public:
 	// returns battery
 	int getValue3();
 
+	void readValues();
+
 	// returns model
 	AnalogArduinoModel getModel();
 };

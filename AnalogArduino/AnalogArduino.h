@@ -14,7 +14,7 @@ class AnalogArduino {
 public:
 	AnalogArduino(){};
 	virtual ~AnalogArduino(){};
-	// setup for the connection between Raspberry Pi and the PressureSensor
+	// setup for the connection between Raspberry Pi and the Arduino
 	virtual bool init()=0;
 
 	virtual int getValue0()=0;
@@ -25,6 +25,8 @@ public:
 	// returns m_sheet
 	virtual int getValue3()=0;
 	// returns m_battery
+	virtual void readValues()=0;
+	
 	virtual AnalogArduinoModel getModel()=0;
 };
 

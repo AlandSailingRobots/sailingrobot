@@ -15,7 +15,7 @@
 
 class AR_UNO:public AnalogArduino {
 public:
-        AR_UNO();
+    AR_UNO();
 	~AR_UNO();
 
 	// setup for the connection between Raspberry Pi and the PressureSensor
@@ -23,16 +23,16 @@ public:
 
 	// returns m_pressure
 	int getValue0();
-  // returns m_rudder
+  	// returns m_rudder
 	int getValue1();
-  // returns m_sheet
+  	// returns m_sheet
 	int getValue2();
-  // returns m_battery
+  	// returns m_battery
 	int getValue3();
 
 	// returns model
 	AnalogArduinoModel getModel();
-  void readValues();
+  	void readValues();
 private:
 	// file descriptor
 	int m_fd;

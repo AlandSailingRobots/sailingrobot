@@ -9,14 +9,15 @@
 #include "logger/Logger.h"
 #include "Compass/Compass.h"
 #include "AnalogArduino/AnalogArduino.h"
+#include "AnalogArduino/MockAnalogArduino.h"
 
 class WindsensorController
 {
 public:
 
-	WindsensorController(SystemState *systemState, bool mockIt, bool mockCompass,
-		bool mockPressure, std::string port_name, int baud_rate,
-		int buff_size, int headningBufferSize);
+	WindsensorController(SystemState *systemState, bool mockIt, 
+		std::string port_name, int baud_rate,
+		int buff_size);
 	~WindsensorController() {};
 
 	void run();
@@ -36,8 +37,6 @@ private:
 	Logger m_logger;
 
 	bool isRunning();
-
-    void initCompass(bool mockCompass,int headningBufferSize);
 };
 
 #endif

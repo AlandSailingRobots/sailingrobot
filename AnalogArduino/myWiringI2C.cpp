@@ -129,7 +129,7 @@ int wiringPiI2CReadBlock (int fd,uint8_t  *block)
 //        std::cout<<(int) data.block[i]<< " ";
         *(block+i) = data.block[i];
     }
-    std::cout<<std::endl;
+    //std::cout<<std::endl;
     return 1 ;
   }
 }

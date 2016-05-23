@@ -8,9 +8,9 @@
 #include "AnalogArduino/AR_UNO.h"
 #include "AnalogArduino/MockAnalogArduino.h"
 
-WindsensorController::WindsensorController(SystemState *systemState, bool mockIt, bool mockCompass,
-	bool mockPressure, std::string port_name = "non", int baud_rate = 1,
-	int buff_size = 1, int headningBufferSize = 1):
+WindsensorController::WindsensorController(SystemState *systemState, bool mockIt,
+  	std::string port_name = "non", int baud_rate = 1,
+	int buff_size = 1):
 
 	m_systemState(systemState),
 	m_running(true)
@@ -22,13 +22,6 @@ WindsensorController::WindsensorController(SystemState *systemState, bool mockIt
 		m_windSensor.reset(new MockWindsensor);
 	}
 
-	if(!mockPressure) {
-		//m_pressure.reset(new AR_UNO();
-		//m_pressure->init();
-	} else {
-		m_pressure.reset(new MockAnalogArduino());
-	}
-
 	try {
 		m_windSensor->loadConfig( port_name, baud_rate );
 		m_windSensor->setBufferSize( buff_size );
@@ -37,26 +30,10 @@ WindsensorController::WindsensorController(SystemState *systemState, bool mockIt
 		throw error;
 	}
 	m_logger.info("setupWindSensor() done\t\t");
-
-    m_logger.info("Starting Compass\t\t");
-    initCompass(mockCompass,headningBufferSize);
 }
 
 void WindsensorController::run() {
 	while(isRunning()){
-        m_compass->readValues();
-        m_compass->readAccel();
-
-        //update system state
-		m_systemState->setCompassModel(CompassModel(
-		m_compass->getHeading(),
-		m_compass->getPitch(),
-		m_compass->getRoll(),
-        AccelerationModel(m_compass->getAccelX(),
-                          m_compass->getAccelY(),
-                          m_compass->getAccelZ() )
-		));
-
 		try {
 			m_windSensor->parseData(m_windSensor->refreshData());
 		} catch(const char * e) {
@@ -69,8 +46,6 @@ void WindsensorController::run() {
 										  m_windSensor->getSpeed(),
 										  m_windSensor->getTemperature() )
 		);
-
-		//m_systemState->setPressure(m_pressure->getValue());
 	}
 }
 
@@ -89,20 +64,3 @@ bool WindsensorController::isRunning()
 	m_mutex.unlock();
 	return running;
 }
-
-
- void WindsensorController::initCompass(bool mockCompass,int headningBufferSize) {
-    if (!mockCompass) {
-        m_compass.reset(new HMC6343(headningBufferSize) );
-    } else {
-        m_compass.reset(new MockCompass);
-    }
-
-    try {
-        m_compass->init();
-    } catch (const char * error) {
-        m_logger.error("SailingRobot::setupCompass() failed");
-    }
-
-    m_logger.info("setupCompass() done\t\t");
- }

@@ -31,7 +31,7 @@ static void threadGPSupdate() {
 
 static void threadHTTPSyncRun() {
 	try {
-		// httpsync_handle->run();
+		httpsync_handle->run();
 	}
 	catch (const char * error) {
 		std::cout << "ERROR while running static void threadHTTPSyncRun() : " << error << std::endl;
@@ -44,6 +44,15 @@ static void threadWindsensor() {
 	std::cout << " * Windsensor thread exited." << std::endl;
 }
 
+static void threadI2CController() {
+	try {
+		i2cController_handle->run();
+	}
+	catch (const char * error) {
+		std::cout << "ERROR while running static void threadI2CController() : " << error << std::endl;
+	}
+	std::cout << " I2Ccontroller thread exited." << std::endl;
+}
 
 int main(int argc, char *argv[]) {
 
@@ -93,10 +102,6 @@ int main(int argc, char *argv[]) {
 
 	bool mockGPS = db.retrieveCellAsInt("mock","1","gps");
     bool mockWindsensor = db.retrieveCellAsInt("mock","1","windsensor");
-    bool mockCompass = db.retrieveCellAsInt("mock","1","compass");
-	bool mockPressure = db.retrieveCellAsInt("mock","1","analog_arduino");
-	int  headningBufferSize = db.retrieveCellAsInt("buffer_config", "1", "compass");
-
 
 	// Create main sailing robot controller
 	try {
@@ -119,12 +124,9 @@ int main(int argc, char *argv[]) {
 			new WindsensorController(
 				&systemstate,
 				mockWindsensor,
-                mockCompass,
-				mockPressure,
 				db.retrieveCell("windsensor_config", "1", "port"),
 				db.retrieveCellAsInt("windsensor_config", "1", "baud_rate"),
-				db.retrieveCellAsInt("buffer_config", "1", "windsensor"),
-                headningBufferSize
+				db.retrieveCellAsInt("buffer_config", "1", "windsensor")
 			)
 		);
 		printf("OK\n");
@@ -152,6 +154,20 @@ int main(int argc, char *argv[]) {
 			xbee_sync_thread = std::unique_ptr<ThreadRAII>(
 				new ThreadRAII(std::thread(threadXBeeSyncRun), ThreadRAII::DtorAction::detach));
 		}
+
+		// I2CController thread
+		bool mockArduino = db.retrieveCellAsInt("mock","1","analog_arduino");
+    	bool mockCompass = db.retrieveCellAsInt("mock","1","compass");
+		int  headningBufferSize = db.retrieveCellAsInt("buffer_config", "1", "compass");
+
+		i2cController_handle.reset(new I2CController(&systemstate, mockArduino, mockCompass, headningBufferSize));
+		i2cController_handle->init();
+
+		// Start i2cController thread
+		i2cController_thread = std::unique_ptr<ThreadRAII>(new ThreadRAII(
+			std::thread(threadI2CController),
+			ThreadRAII::DtorAction::detach
+		) );
 
 		// Start GPSupdater thread
 		ThreadRAII gps_reader_thread(

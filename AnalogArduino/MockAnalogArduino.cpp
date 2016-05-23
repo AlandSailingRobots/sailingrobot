@@ -39,6 +39,10 @@ int MockAnalogArduino::getValue3(){
 	return analogValue3;
 }
 
+void MockAnalogArduino::readValues() {
+	
+}
+
 AnalogArduinoModel MockAnalogArduino::getModel(){
 	return AnalogArduinoModel(analogValue0, analogValue1, analogValue2, analogValue3);
 }
