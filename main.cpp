@@ -91,10 +91,10 @@ int main(int argc, char *argv[]) {
 	DBHandler db(path+db_name);
 	printf("-DONE\n");
 
-	bool mockGPS = db.retrieveCellAsInt("mock","1","GPS");
-    bool mockWindsensor = db.retrieveCellAsInt("mock","1","Windsensor");
-    bool mockCompass = db.retrieveCellAsInt("mock","1","Compass");
-	bool mockPressure = db.retrieveCellAsInt("mock","1","Pressure");
+	bool mockGPS = db.retrieveCellAsInt("mock","1","gps");
+    bool mockWindsensor = db.retrieveCellAsInt("mock","1","windsensor");
+    bool mockCompass = db.retrieveCellAsInt("mock","1","compass");
+	bool mockPressure = db.retrieveCellAsInt("mock","1","analog_arduino");
 	int  headningBufferSize = db.retrieveCellAsInt("buffer_config", "1", "compass");
 
 

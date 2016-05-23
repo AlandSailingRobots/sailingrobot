@@ -1,4 +1,4 @@
-  
+
     #      Aland Sailing Robot       #
     # RaspberryPi Management Scripts #
     #--------------------------------#
@@ -10,7 +10,7 @@
 
     if [ $C -eq 1 ]
     then
-            sqlite3 asr.db "UPDATE mock SET GPS="0", Windsensor="0", Pressure="1", Compass="0", Position="0", Maestro="0";"
+            sqlite3 asr.db "UPDATE mock SET gps="0", windsensor="0", analog_arduino="1", compass="0", position="0", maestro="0";"
             printf "\n\033[32m mock updated.\033[0m\n\n"
 
     elif [ $C -eq 2 ]
@@ -23,7 +23,7 @@
             printf "\n\033[32m sailing_robot_config updated.\033[0m\n\n"
     elif [ $C -eq 4 ]
     then
-            sqlite3 asr.db "UPDATE mock SET GPS="0", Windsensor="0", Pressure="1", Compass="0", Position="0", Maestro="0";"
+            sqlite3 asr.db "UPDATE mock SET gps="0", windsensor="0", analog_arduino="1", compass="0", position="0", maestro="0";"
             printf "\n\033[36m mock updated.\033[0m\n"
 
             sqlite3 asr.db "UPDATE course_calculation_config SET tack_min_speed="1";"
@@ -57,7 +57,7 @@
                 printf "\nSet rudder_speed_min(default=1.0): "
                 read -p " Choice: " RSM
                 sqlite3 asr.db "UPDATE waypoint_routing_config SET rudder_speed_min="$RSM";"
-                printf "\n \033[32m rudder_speed_min SET to $RSM\033[0m\n\n" 
+                printf "\n \033[32m rudder_speed_min SET to $RSM\033[0m\n\n"
             fi
 
     elif [ $C -eq 6 ]
@@ -71,5 +71,5 @@
         printf "\n \033[32m Server address set to http://www.sailingrobots.com/testdata/sync/\033[0m\n\n"
 
 fi
-    
-# chmod +x updateDB.sh 
+
+# chmod +x updateDB.sh

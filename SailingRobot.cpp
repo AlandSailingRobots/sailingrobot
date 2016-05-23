@@ -16,8 +16,8 @@
 
 SailingRobot::SailingRobot(ExternalCommand* externalCommand,
 						   SystemState *systemState, DBHandler *db) :
-	m_mockPosition(db->retrieveCellAsInt("mock", "1", "Position")),
-	m_mockMaestro(db->retrieveCellAsInt("mock", "1", "Maestro")),
+	m_mockPosition(db->retrieveCellAsInt("mock", "1", "position")),
+	m_mockMaestro(db->retrieveCellAsInt("mock", "1", "maestro")),
 
 	m_dbHandler(db),
 
