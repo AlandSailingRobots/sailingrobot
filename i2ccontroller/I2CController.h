@@ -10,6 +10,7 @@
 #include "AnalogArduino/MockAnalogArduino.h"
 #include "dbhandler/DBHandler.h"
 #include "thread/SystemState.h"
+#include "utility/Timer.h"
 
 #include <chrono>
 #include <thread>
@@ -21,7 +22,7 @@ class I2CController {
 
 	public:
 
-		I2CController(SystemState *systemState, bool mockArduino, bool mockCompass, int headingBufferSize);
+		I2CController(SystemState *systemState, bool mockArduino, bool mockCompass, int headingBufferSize, double loopTime);
 		~I2CController();
 
 		void init();
@@ -32,7 +33,9 @@ class I2CController {
 		bool m_mockArduino;
 		bool m_mockCompass;
 		int m_headingBufferSize;
+		double m_loopTime;
 		Logger m_logger;
+		Timer m_timer;
 		std::mutex m_mutex;
 		bool m_running;
 

@@ -1,11 +1,12 @@
 #include "I2CController.h"
 
 
-I2CController::I2CController(SystemState *systemState, bool mockArduino, bool mockCompass, int headingBufferSize) {
+I2CController::I2CController(SystemState *systemState, bool mockArduino, bool mockCompass, int headingBufferSize, double loopTime) {
     m_systemState = systemState;
     m_mockArduino = mockArduino;
     m_mockCompass = mockCompass;
     m_headingBufferSize = headingBufferSize;
+    m_loopTime = loopTime;
 }
 
 I2CController::~I2CController() {
@@ -22,6 +23,7 @@ void I2CController::run() {
     std::cout << "-I2CController thread started." << std::endl;
     m_logger.info("-I2CController thread started.");
     while(isRunning()) {
+        m_timer.reset();
         //update system state
         m_systemState->setCompassModel(CompassModel(
         m_compass->getHeading(),
@@ -33,6 +35,8 @@ void I2CController::run() {
         ));
         m_arduino->readValues();
         m_systemState->setAnalogArduinoModel(m_arduino->getModel());
+
+        m_timer.sleepUntil(m_loopTime);
     }
 }
 

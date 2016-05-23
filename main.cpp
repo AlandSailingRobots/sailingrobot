@@ -159,7 +159,7 @@ int main(int argc, char *argv[]) {
 		bool mockArduino = db.retrieveCellAsInt("mock","1","analog_arduino");
     	bool mockCompass = db.retrieveCellAsInt("mock","1","compass");
 		int  headningBufferSize = db.retrieveCellAsInt("buffer_config", "1", "compass");
-		double i2cLoopTime = db.retrieveCellAsInt("i2c_config", "1", "loop_time");
+		double i2cLoopTime = stod(db.retrieveCell("i2c_config", "1", "loop_time"));
 
 		i2cController_handle.reset(new I2CController(&systemstate, mockArduino, mockCompass, headningBufferSize, i2cLoopTime));
 		i2cController_handle->init();
