@@ -31,7 +31,7 @@ static void threadGPSupdate() {
 
 static void threadHTTPSyncRun() {
 	try {
-		//httpsync_handle->run();
+		// httpsync_handle->run();
 	}
 	catch (const char * error) {
 		std::cout << "ERROR while running static void threadHTTPSyncRun() : " << error << std::endl;
@@ -134,8 +134,9 @@ int main(int argc, char *argv[]) {
 		printf("-Starting threads...\n");
 
 		int http_delay =  db.retrieveCellAsInt("httpsync_config", "1", "delay");
+		bool removeLogs = db.retrieveCellAsInt("httpsync_config", "1", "remove_logs");
 
-		httpsync_handle.reset(new HTTPSync(&db,http_delay ));
+		httpsync_handle.reset(new HTTPSync( &db, http_delay, removeLogs ));
 
 		// Start xBeeSync thread
 
