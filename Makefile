@@ -7,8 +7,8 @@
 #
 #######################################################
 
-CC = g++ 
-FLAGS = -g -Wall -pedantic -Werror -std=c++14 
+CC = g++
+FLAGS = -g -Wall -pedantic -Werror -std=c++14
 LIBS = -lsqlite3 -lgps -lrt -lwiringPi -lcurl -lpthread -I$(SAILINGROBOTS_HOME)
 LIBS_BOOST = -lboost_system -lboost_log -lboost_thread -I$(SAILINGROBOTS_HOME)
 
@@ -16,17 +16,17 @@ XBEE = 					xBee/xBeeSync.o xBee/xBee.o
 
 ANALOGARDUINO = 		AnalogArduino/AnalogArduino.o AnalogArduino/MockAnalogArduino.o AnalogArduino/AR_UNO.o AnalogArduino/myWiringI2C.o
 
-COMPASS = 				Compass/Compass.o Compass/MockCompass.o Compass/HMC6343.o 
+COMPASS = 				Compass/Compass.o Compass/MockCompass.o Compass/HMC6343.o
 
 I2CCONTROLLER = 		i2ccontroller/I2CController.o
 
 POSITION = 				utility/Position.o utility/MockPosition.o utility/RealPosition.o
 
-COURSE = 				coursecalculation/CourseCalculation.o coursecalculation/CourseMath.o 
+COURSE = 				coursecalculation/CourseCalculation.o coursecalculation/CourseMath.o
 
-DB = 					dbhandler/DBHandler.o dbhandler/JSON.o
+DB = 					dbhandler/DBHandler.o
 
-COMMAND = 				ruddercommand/RudderCommand.o sailcommand/SailCommand.o 
+COMMAND = 				ruddercommand/RudderCommand.o sailcommand/SailCommand.o
 
 MAESTRO = 				servocontroller/MaestroController.o servocontroller/MockMaestroController.o servocontroller/ServoObject.o servocontroller/MockServoObject.o
 
@@ -48,9 +48,9 @@ WINDVANECONTROLLER = 	windvanecontroller/WindVaneController.o
 OBJECTS = $(XBEE) $(ANALOGARDUINO) $(COMPASS) $(I2CCONTROLLER) $(POSITION) $(COURSE) $(DB) $(COMMAND) $(MAESTRO) $(CV7) $(GPS) \
 		  $(HTTP) $(XML_LOG) $(THREAD) $(WAYPOINTROUTING) $(WINDVANECONTROLLER) \
 		  logger/Logger.o utility/Utility.o utility/Timer.o
-		  
-SOURCES = SailingRobot.cpp main.cpp GPSupdater.cpp WindsensorController.cpp 
-HEADERS = SailingRobot.h main.h GPSupdater.h WindsensorController.h 
+
+SOURCES = SailingRobot.cpp main.cpp GPSupdater.cpp WindsensorController.cpp
+HEADERS = SailingRobot.h main.h GPSupdater.h WindsensorController.h
 FILE = sr
 MAKE = make
 
@@ -95,11 +95,11 @@ AnalogArduino :
 
 Compass :
 	$(MAKE) -C ./Compass
-	
+
 coursecalculation :
 	$(MAKE) -C ./coursecalculation
 
-	
+
 dbhandler :
 	$(MAKE) -C ./dbhandler
 
