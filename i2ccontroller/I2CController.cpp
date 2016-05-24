@@ -24,6 +24,10 @@ void I2CController::run() {
     m_logger.info("-I2CController thread started.");
     while(isRunning()) {
         m_timer.reset();
+
+        m_compass->readValues();
+        m_compass->readAccel();
+
         //update system state
         m_systemState->setCompassModel(CompassModel(
         m_compass->getHeading(),
