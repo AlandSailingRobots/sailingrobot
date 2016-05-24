@@ -8,13 +8,14 @@
 #include "models/SystemStateModel.h"
 #include "logger/Logger.h"
 #include "dbhandler/DBHandler.h"
+#include "utility/Timer.h"
 #include <mutex>
 
 class xBeeSync
 {
 public:
 	xBeeSync(ExternalCommand* externalCommand, SystemState *systemState,
-			 DBHandler* db, bool sendLogs, bool sending, bool receiving,int delay);
+			 DBHandler* db, bool sendLogs, bool sending, bool receiving, int loopTime);
 	~xBeeSync() {};
 
 	void run();
@@ -28,6 +29,7 @@ private:
 	SystemStateModel m_model;
 	SystemState *m_system_state;
 	DBHandler *m_db;
+	Timer m_timer;
 
 	std::mutex m_mutex;
 	bool m_running;
@@ -35,7 +37,7 @@ private:
 	bool m_receiving;
 	bool m_sendLogs;
 	Logger m_logger;
-	int m_delay;
+	int m_loopTime;
 
 	bool isRunning();
 };

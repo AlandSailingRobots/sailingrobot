@@ -4,7 +4,7 @@
 #include <iostream>
 
 xBeeSync::xBeeSync(ExternalCommand* externalCommand, SystemState *systemState,
-				   DBHandler* db, bool sendLogs, bool sending, bool receiving,int delay) :
+				   DBHandler* db, bool sendLogs, bool sending, bool receiving, int loopTime) :
 	m_external_command(externalCommand),
 	m_model(
 		SystemStateModel(
@@ -22,7 +22,7 @@ xBeeSync::xBeeSync(ExternalCommand* externalCommand, SystemState *systemState,
 	m_sending(sending),
 	m_receiving(receiving),
 	m_sendLogs(sendLogs),
-	m_delay(delay)
+	m_loopTime(loopTime)
 {
 	//	skapa ny xBee och kör xbee.init()
 	m_xbee_fd = m_xBee.init();
@@ -33,13 +33,12 @@ xBeeSync::xBeeSync(ExternalCommand* externalCommand, SystemState *systemState,
 		" sending:" + std::to_string(m_sending));
 }
 
-void xBeeSync::run()
-{
+void xBeeSync::run() {
 	std::cout << "*xBeeSync thread started." << std::endl;
 	m_logger.info("*xBeeSync thread started.");
 
-	while(isRunning()) 
-	{
+	while(isRunning()) {
+		m_timer.reset();
 		m_system_state->getData(m_model);
 
 		if(m_sending) {
@@ -75,8 +74,7 @@ void xBeeSync::run()
 			}
 		}
 		
-		if(m_receiving)
-		{
+		if(m_receiving) {
 			std::string res_xml = m_xBee.receiveXMLData(m_xbee_fd);
  			
 			//If return value equals -1, parsing failed...
@@ -103,28 +101,24 @@ void xBeeSync::run()
 
 	 		bool autorun = false;
 	 		
-	 		if(sail_cmd != -1 && rudder_cmd != -1){
+	 		if(sail_cmd != -1 && rudder_cmd != -1) {
 	 			m_external_command->setData(timestamp, autorun, rudder_cmd, sail_cmd);
 	 		}
 		}
 
-		//make sure there are at least 0.4 seconds between each xml message
-		std::this_thread::sleep_for(
-			std::chrono::milliseconds(m_delay));
+		m_timer.sleepUntil(m_loopTime);
 	}
 	std::cout << "*xBeeSync thread exited." << std::endl;
 	m_logger.info("*xBeeSync thread exited.");
 }
 
-void xBeeSync::close()
-{
+void xBeeSync::close() {
 	m_mutex.lock();
 	m_running = false;
 	m_mutex.unlock();
 }
 
-bool xBeeSync::isRunning()
-{
+bool xBeeSync::isRunning() {
 	bool running;
 	m_mutex.lock();
 	running = m_running;
