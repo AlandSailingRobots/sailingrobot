@@ -146,7 +146,7 @@ int main(int argc, char *argv[]) {
 		bool xBee_sending = db.retrieveCellAsInt("xbee_config", "1", "send");
 		bool xBee_receiving = db.retrieveCellAsInt("xbee_config", "1", "recieve");
 		bool xBee_sendLogs = db.retrieveCellAsInt("xbee_config", "1", "send_logs");
-		int xBee_loopTime =  db.retrieveCellAsInt("xbee_config", "1", "loop_time");
+		double xBee_loopTime = stod(db.retrieveCell("xbee_config", "1", "loop_time"));
 
 		std::unique_ptr<ThreadRAII> xbee_sync_thread;
 		if (xBee_sending || xBee_receiving) {

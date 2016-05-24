@@ -4,7 +4,7 @@
 #include <iostream>
 
 xBeeSync::xBeeSync(ExternalCommand* externalCommand, SystemState *systemState,
-				   DBHandler* db, bool sendLogs, bool sending, bool receiving, int loopTime) :
+				   DBHandler* db, bool sendLogs, bool sending, bool receiving, double loopTime) :
 	m_external_command(externalCommand),
 	m_model(
 		SystemStateModel(
