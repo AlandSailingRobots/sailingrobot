@@ -114,7 +114,8 @@ int SailingRobot::getHeading() {
 }
 
 void SailingRobot::run() {
-
+	
+	m_dbHandler->clearLogs();
 	m_running = true;
 	routeStarted = true;
 	int rudderCommand, sailCommand, windDir = 0 ,heading = 0, insertScanOnce = 0;
