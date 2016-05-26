@@ -66,12 +66,6 @@ void SailingRobot::init(std::string programPath, std::string errorFileName) {
 
 	m_getHeadingFromCompass = m_dbHandler->retrieveCellAsInt("sailing_robot_config", "1", "flag_heading_compass");
 
-	/*
-	printf(" Starting HTTPSync\t\t");
-	setupHTTPSync();
-	printf("OK\n");
-	*/
-
 	printf(" Starting Maestro\t\t");
 	setupMaestro();
 	printf("OK\n");
@@ -98,8 +92,6 @@ void SailingRobot::init(std::string programPath, std::string errorFileName) {
 
 	m_waypointRouting.setWaypoint(m_waypointModel);
 
-	//updateState();
-	//syncServer();
 }
 
 int SailingRobot::getHeading() {
@@ -114,11 +106,12 @@ int SailingRobot::getHeading() {
 }
 
 void SailingRobot::run() {
-	
+
 	m_dbHandler->clearLogs();
 	m_running = true;
 	routeStarted = true;
-	int rudderCommand, sailCommand, windDir = 0 ,heading = 0, insertScanOnce = 0;
+	int rudderCommand, sailCommand,heading = 0, insertScanOnce = 0;
+	int windDir = 0; // outComment if use of tureWindDirCalculation
 	std::vector<float> twdBuffer;
 	const unsigned int twdBufferMaxSize =
 		m_dbHandler->retrieveCellAsInt("buffer_config", "1", "true_wind");
@@ -139,7 +132,7 @@ void SailingRobot::run() {
 		//Get data from SystemStateModel to local object
 		m_systemState->getData(m_systemStateModel);
 
-		windDir = m_systemStateModel.windsensorModel.direction;
+		windDir = m_systemStateModel.windsensorModel.direction; // outComment if use of tureWindDirCalculation
 
 		heading = getHeading();
 
@@ -220,8 +213,6 @@ void SailingRobot::run() {
 
 		routeStarted = false;
 
-//		syncServer();
-
 		// check if we are within the radius of the waypoint
 		// and move to next wp in that case
 		if (m_waypointRouting.nextWaypoint(position->getModel() ) ) {
@@ -256,7 +247,6 @@ void SailingRobot::run() {
 }
 
 void SailingRobot::shutdown() {
-//	syncServer();
 	m_running=false;
 	//m_dbHandler->closeDatabase();
 }
