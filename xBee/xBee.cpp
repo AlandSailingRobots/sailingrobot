@@ -42,7 +42,7 @@ int xBee::init(){
 
 	// this setting needs a udev rule in host system to work (alternative is dynamic USB-slot)
 	// see Static_USB_Device_Names in project installation folder
-	std::string deviceName = "/dev/ttyUSB0";
+	std::string deviceName = "/dev/xbee";
 
 	int fd;
 
