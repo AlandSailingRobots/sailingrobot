@@ -5,7 +5,7 @@
     # Database updates after resets
 
     printf "\nChoose what you want to change in the Database\n"
-    printf " 1. Turn off mock settings,\n 2. Set tack_min_speed in course_calculation_config(1),\n 3. Set loop_time in sailing_robot_config(0.1),\n \033[32m4. Do all of the above,\033[0m\n 5. Manually change waypoint routing,\n 6. Set database server settings\n 7. Set course calculation source to GPS\n"
+    printf " 1. Turn off mock settings,\n 2. Set tack_min_speed in course_calculation_config(1),\n 3. Set loop_time in sailing_robot_config(0.1),\n \033[32m4. Do all of the above,\033[0m\n 5. Manually change waypoint routing,\n 6. Set database server settings,\n 7. Set course calculation source to GPS,\n 8. Turn off automatic httpsync log clearing\n"
     read -p " Choice: " C
 
     if [ $C -eq 1 ]
@@ -73,6 +73,10 @@
     then
         sqlite3 asr.db "UPDATE sailing_robot_config SET flag_heading_compass="0";"
         printf "\n\033[36m sailing_robot_config updated.\033[0m\n\n"
+    elif [ $C -eq 8 ]
+    then
+        sqlite3 asr.db "UPDATE httpsync_config SET remove_logs="0";"
+        printf "\n\033[36m httpsync_config updated.\033[0m\n\n"
 fi
 
 # chmod +x updateDB.sh
