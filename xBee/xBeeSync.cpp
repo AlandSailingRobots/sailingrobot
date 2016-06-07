@@ -43,7 +43,8 @@ void xBeeSync::run() {
 
 		if(m_sending) {
 			if(m_sendLogs) {
-				std::string logs = m_db->getLogs();
+				//"true" should be variable; see HTTPSync
+				std::string logs = m_db->getLogs(true);
 				m_xBee.transmitData(m_xbee_fd, logs);
 
 			} else {
