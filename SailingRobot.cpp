@@ -95,19 +95,24 @@ void SailingRobot::init(std::string programPath, std::string errorFileName) {
 }
 
 int SailingRobot::getHeading() {
-        if(m_mockPosition) {
-            return position->getHeading();
-        }
-	if (m_getHeadingFromCompass) {
-            return Utility::addDeclinationToHeading(m_systemStateModel.compassModel.heading, m_waypointModel.declination);
-	}
 
-        return m_systemStateModel.gpsModel.heading;
+	int useGpsForHeadingKnotSpeed = 1;
+	bool acceptedCompassSpeed = Utility::directionAdjustedSpeed(m_systemStateModel.gpsModel.heading, m_systemStateModel.compassModel.heading, m_systemStateModel.gpsModel.speed) < useGpsForHeadingKnotSpeed;
+
+    if(m_mockPosition) {
+        return position->getHeading();
+    }
+
+    //only accept getHeadingFromCompass if speed less than 1
+	if (m_getHeadingFromCompass && acceptedCompassSpeed) {
+    	return Utility::addDeclinationToHeading(m_systemStateModel.compassModel.heading, m_waypointModel.declination);
+	}
+    return m_systemStateModel.gpsModel.heading;
 }
 
 void SailingRobot::run() {
 
-	m_dbHandler->clearLogs();
+	//m_dbHandler->clearLogs();
 	m_running = true;
 	routeStarted = true;
 	int rudderCommand, sailCommand,heading = 0, insertScanOnce = 0;
