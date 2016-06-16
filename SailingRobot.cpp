@@ -96,15 +96,15 @@ void SailingRobot::init(std::string programPath, std::string errorFileName) {
 
 int SailingRobot::getHeading() {
 
+	//Use GPS for heading only if speed is higher than 1 knot
 	int useGpsForHeadingKnotSpeed = 1;
-	bool acceptedCompassSpeed = Utility::directionAdjustedSpeed(m_systemStateModel.gpsModel.heading, m_systemStateModel.compassModel.heading, m_systemStateModel.gpsModel.speed) < useGpsForHeadingKnotSpeed;
+	bool gpsForbidden = Utility::directionAdjustedSpeed(m_systemStateModel.gpsModel.heading, m_systemStateModel.compassModel.heading, m_systemStateModel.gpsModel.speed) < useGpsForHeadingKnotSpeed;
 
     if(m_mockPosition) {
         return position->getHeading();
     }
 
-    //only accept getHeadingFromCompass if speed less than 1
-	if (m_getHeadingFromCompass && acceptedCompassSpeed) {
+	if (m_getHeadingFromCompass || gpsForbidden) {
     	return Utility::addDeclinationToHeading(m_systemStateModel.compassModel.heading, m_waypointModel.declination);
 	}
     return m_systemStateModel.gpsModel.heading;
