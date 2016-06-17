@@ -5,7 +5,7 @@
     # Database updates after resets
 
     printf "\nChoose what you want to change in the Database\n"
-    printf " 1. Turn off mock settings,\n 2. Set tack_min_speed in course_calculation_config(1),\n 3. Set loop_time in sailing_robot_config(0.1),\n \033[32m4. Do all of the above,\033[0m\n 5. Manually change waypoint routing,\n 6. Set database server settings,\n 7. Set course calculation source to GPS,\n 8. Turn off automatic httpsync log clearing\n"
+    printf " 1. Turn off mock settings,\n 2. Set tack_min_speed in course_calculation_config(1),\n 3. Set loop_time in sailing_robot_config(0.1),\n \033[32m4. Do all of the above,\033[0m\n 5. Manually change waypoint routing,\n 6. Set database server settings,\n 7. Set heading main source (Compass/GPS),\n 8. Turn off automatic httpsync log clearing,\n 9. Clear all log tables\n"
     read -p " Choice: " C
 
     if [ $C -eq 1 ]
@@ -62,7 +62,6 @@
 
     elif [ $C -eq 6 ]
     then
-
         sqlite3 asr.db "UPDATE server SET boat_id='BOAT02';"
         printf "\n \033[32m Server id set to BOAT02\033[0m"
         sqlite3 asr.db "UPDATE server SET boat_pwd='PWD02';"
@@ -71,12 +70,38 @@
         printf "\n \033[32m Server address set to http://www.sailingrobots.com/testdata/sync/\033[0m\n\n"
     elif [ $C -eq 7 ]
     then
-        sqlite3 asr.db "UPDATE sailing_robot_config SET flag_heading_compass="0";"
-        printf "\n\033[36m sailing_robot_config updated.\033[0m\n\n"
+        printf "\033[36m Use compass for heading?\033[0m\n"
+        printf " 1. yes,\n 0. no (use GPS instead)\n"
+        read -p " Choice: " C
+
+        if [ $C -eq 0 ]
+        then
+            sqlite3 asr.db "UPDATE sailing_robot_config SET flag_heading_compass="0";"
+            printf "\n\033[36m sailing_robot_config updated.\033[0m\n\n"
+        elif [ $C -eq 1 ]
+        then
+            sqlite3 asr.db "UPDATE sailing_robot_config SET flag_heading_compass="1";"
+            printf "\n\033[36m sailing_robot_config updated.\033[0m\n\n"
+        fi
     elif [ $C -eq 8 ]
     then
-        sqlite3 asr.db "UPDATE httpsync_config SET remove_logs="0";"
-        printf "\n\033[36m httpsync_config updated.\033[0m\n\n"
+        printf "\033[36m Set automatic log clearing: \033[0m\n"
+        printf " 1. on,\n 0. off\n"
+        read -p " Choice: " C
+
+        if [ $C -eq 0 ]
+        then
+            sqlite3 asr.db "UPDATE httpsync_config SET remove_logs="0";"
+            printf "\n\033[36m httpsync_config updated.\033[0m\n\n"
+        elif [ $C -eq 1 ]
+        then
+            sqlite3 asr.db "UPDATE httpsync_config SET remove_logs="1";"
+            printf "\n\033[36m httpsync_config updated.\033[0m\n\n"
+        fi
+    elif [ $C -eq 9 ]
+    then
+        sqlite3 asr.db "DELETE FROM system_datalogs;"
+        printf "\n\033[36m logs cleared.\033[0m\n\n"
 fi
 
 # chmod +x updateDB.sh
