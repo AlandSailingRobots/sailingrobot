@@ -152,10 +152,10 @@ void SailingRobot::run() {
 
 		if (m_systemStateModel.gpsModel.online) {
 			//calc & set TWD
-			//double twd = Utility::calculateTrueWindDirection(m_systemStateModel,heading);
-			//twdBuffer.push_back(twd);// new wind calculation
+			double twd = Utility::calculateTrueWindDirection(m_systemStateModel,heading);
+			twdBuffer.push_back(twd);// new wind calculation
 
-			twdBuffer.push_back(heading + windDir);// old wind calculation
+			//twdBuffer.push_back(heading + windDir);// old wind calculation
 
 			while (twdBuffer.size() > twdBufferMaxSize) {
 				twdBuffer.erase(twdBuffer.begin());
