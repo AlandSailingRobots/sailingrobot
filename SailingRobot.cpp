@@ -137,7 +137,7 @@ void SailingRobot::run() {
 		//Get data from SystemStateModel to local object
 		m_systemState->getData(m_systemStateModel);
 
-		windDir = m_systemStateModel.windsensorModel.direction; // outComment if use of tureWindDirCalculation
+		//windDir = m_systemStateModel.windsensorModel.direction; // outComment if use of tureWindDirCalculation
 
 		heading = getHeading();
 
