@@ -44,8 +44,6 @@ private:
 	//void readGPS();
 	//void syncServer();
 	//void updateState();
-	void nextWaypoint();
-	void setupWaypoint();
 
 	//void setupDB(std::string filename);
 	void setupMaestro();
@@ -71,8 +69,6 @@ private:
 	bool m_getHeadingFromCompass;
 
 	DBHandler *m_dbHandler;
-	WaypointModel m_waypointModel;
-	WaypointRouting m_waypointRouting;
 	WindVaneController m_windVaneController;
 	RudderCommand m_rudderCommand;
 	SailCommand m_sailCommand;

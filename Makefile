@@ -6,7 +6,7 @@
 #    -------------------------------------------
 #
 #######################################################
-
+export SAILINGROBOTS_HOME = /home/sailbot/sailingrobot
 CC = g++
 FLAGS = -g -Wall -pedantic -Werror -std=c++14
 LIBS = -lsqlite3 -lgps -lrt -lwiringPi -lcurl -lpthread -I$(SAILINGROBOTS_HOME)
@@ -44,9 +44,11 @@ WAYPOINTROUTING = 		waypointrouting/WaypointRouting.o waypointrouting/Commands.o
 
 WINDVANECONTROLLER = 	windvanecontroller/WindVaneController.o
 
+BEHAVIOURCLASS = 	behaviourclass/RoutingBehaviour.o  behaviourclass/WaypointBehaviour.o behaviourclass/LineFollowBehaviour.o
+
 
 OBJECTS = $(XBEE) $(ANALOGARDUINO) $(COMPASS) $(I2CCONTROLLER) $(POSITION) $(COURSE) $(DB) $(COMMAND) $(MAESTRO) $(CV7) $(GPS) \
-		  $(HTTP) $(XML_LOG) $(THREAD) $(WAYPOINTROUTING) $(WINDVANECONTROLLER) \
+		  $(HTTP) $(XML_LOG) $(THREAD) $(WAYPOINTROUTING) $(WINDVANECONTROLLER) $(BEHAVIOURCLASS) \
 		  logger/Logger.o utility/Utility.o utility/Timer.o
 
 SOURCES = SailingRobot.cpp main.cpp GPSupdater.cpp WindsensorController.cpp
@@ -57,14 +59,14 @@ MAKE = make
 #Needed for proper subfolder make writing
 .PHONY : xBee AnalogArduino Compass i2ccontroller runall coursecalculation dbhandler ruddercommand \
 		 sailcommand servocontroller CV7 gps httpsync xmlparser thread \
-		 logger utility waypointrouting windvanecontroller
+		 logger utility waypointrouting windvanecontroller behaviourclass
 
 
 all : runall $(FILE)
 
 runall : xBee AnalogArduino Compass i2ccontroller coursecalculation dbhandler ruddercommand sailcommand \
 		 servocontroller CV7 gps httpsync xmlparser thread logger utility \
-		 waypointrouting windvanecontroller
+		 waypointrouting windvanecontroller behaviourclass
 
 clean :
 	cd xBee && $(MAKE) clean
@@ -85,6 +87,7 @@ clean :
 	cd utility && $(MAKE) clean
 	cd waypointrouting && $(MAKE) clean
 	cd windvanecontroller && $(MAKE) clean
+	cd behaviourclass && $(MAKE) clean
 	rm -f $(FILE)
 
 i2ccontroller :
@@ -139,6 +142,10 @@ waypointrouting :
 
 windvanecontroller :
 	$(MAKE) -C ./windvanecontroller
+
+behaviourclass :
+		$(MAKE) -C ./behaviourclass
+
 
 logger:
 	$(MAKE) -C ./logger
