@@ -113,6 +113,8 @@ public:
 
 	void getWaypointFromTable(WaypointModel &waypointModel);
 
+	WaypointModel getPreviouslyHarvestedWaypoint();
+
 	void insert(std::string table, std::string fields, std::string values);
 
 	// inserts area scanning measurements into db

@@ -729,6 +729,42 @@ void DBHandler::getWaypointFromTable(WaypointModel &waypointModel){
 
 }
 
+
+WaypointModel DBHandler::getPreviouslyHarvestedWaypoint()
+{
+	int rows, columns;
+	std::vector<std::string> results; 
+	results = retrieveFromTable("SELECT MAX(id) FROM waypoints WHERE harvested = 1;", rows, columns); 
+	
+	WaypointModel waypointModel(PositionModel(0,0), 0, "", 0);
+	if (rows * columns < 1 || results[1] == "\0") {
+		waypointModel.id = "";
+	}
+	else {
+		waypointModel.id = results[1];
+	}
+
+	if(!waypointModel.id.empty())
+	{
+		waypointModel.positionModel.latitude = atof(retrieveCell("waypoints", waypointModel.id, "latitude").c_str());
+		waypointModel.positionModel.longitude = atof(retrieveCell("waypoints", waypointModel.id, "longitude").c_str());
+		waypointModel.radius = retrieveCellAsInt("waypoints", waypointModel.id, "radius");
+		waypointModel.declination = retrieveCellAsInt("waypoints", waypointModel.id, "declination");
+
+		results = retrieveFromTable("SELECT time FROM waypoint_stationary WHERE id = " +
+			waypointModel.id + ";", rows, columns);
+
+		if (rows * columns < 1 || results[1] == "\0") {
+			waypointModel.time = 0;
+		}
+		else {
+			waypointModel.time = retrieveCellAsInt("waypoint_stationary", waypointModel.id, "time");
+		}
+	}
+
+    return waypointModel;
+}
+
 std::string DBHandler::getConfigs() {
 	Json json;
 

@@ -16,6 +16,7 @@ public:
 	static float getMedianValue(std::vector<float> v);
 	static float mean(std::vector<float> values);
 	static float meanOfAngles(std::vector<float> anglesInDegrees);
+	static int sgn(double value);
 	
 	/*
 	 * Converts an angle in degrees to cartesian coordinates (x,y) on the
@@ -37,6 +38,7 @@ public:
 	static double directionAdjustedSpeed(double gpsHeading,double compassHeading,double gpsSpeed);
 
 	static double calculateTrueWindDirection(const SystemStateModel& systemStateModel , double heading);
+	static double getTrueWindDirection(SystemStateModel systemStateModel, std::vector<float> &twdBuffer, const unsigned int twdBufferMaxSize);
 	
 };
 

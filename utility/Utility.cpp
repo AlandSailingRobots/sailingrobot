@@ -110,6 +110,15 @@ float Utility::meanOfAngles(std::vector<float> anglesInDegrees)
 	return meanAngleRadians * 180/M_PI;
 }
 
+int Utility::sgn(double value)
+{
+	if(value == 0) return 0;
+	if(value < 0) return -1;
+	if(value > 1) return 1;
+
+	return 0;
+}
+
 void Utility::polarToCartesian(float degrees, float& x, float& y)
 {
 	x = cos(degrees * M_PI/180);
@@ -216,4 +225,17 @@ double Utility::calculateTrueWindDirection(const SystemStateModel& systemStateMo
 	}
 
 	return twd;
+}
+
+double Utility::getTrueWindDirection(SystemStateModel systemStateModel, std::vector<float> &twdBuffer, const unsigned int twdBufferMaxSize)
+{
+		double twd = calculateTrueWindDirection(systemStateModel, systemStateModel.compassModel.heading);
+		twdBuffer.push_back(twd);// new wind calculation
+		//twdBuffer.push_back(systemStateModel.gpsModel.heading + systemStateModel.windsensorModel.direction);// old wind calculation
+
+		while (twdBuffer.size() > twdBufferMaxSize) {
+			twdBuffer.erase(twdBuffer.begin());
+		}
+
+		return meanOfAngles(twdBuffer);
 }
