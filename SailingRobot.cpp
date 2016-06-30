@@ -116,7 +116,7 @@ void SailingRobot::run() {
 	m_running = true;
 	routeStarted = true;
 	int rudderCommand, sailCommand,heading = 0, insertScanOnce = 0;
-	int windDir = 0; // outComment if use of tureWindDirCalculation
+	//int windDir = 0; // outComment if use of tureWindDirCalculation
 	std::vector<float> twdBuffer;
 	const unsigned int twdBufferMaxSize =
 		m_dbHandler->retrieveCellAsInt("buffer_config", "1", "true_wind");
@@ -137,7 +137,7 @@ void SailingRobot::run() {
 		//Get data from SystemStateModel to local object
 		m_systemState->getData(m_systemStateModel);
 
-		windDir = m_systemStateModel.windsensorModel.direction; // outComment if use of tureWindDirCalculation
+		//windDir = m_systemStateModel.windsensorModel.direction; // outComment if use of tureWindDirCalculation
 
 		heading = getHeading();
 
@@ -152,10 +152,10 @@ void SailingRobot::run() {
 
 		if (m_systemStateModel.gpsModel.online) {
 			//calc & set TWD
-			//double twd = Utility::calculateTrueWindDirection(m_systemStateModel,heading);
-			//twdBuffer.push_back(twd);// new wind calculation
+			double twd = Utility::calculateTrueWindDirection(m_systemStateModel,heading);
+			twdBuffer.push_back(twd);// new wind calculation
 
-			twdBuffer.push_back(heading + windDir);// old wind calculation
+			//twdBuffer.push_back(heading + windDir);// old wind calculation
 
 			while (twdBuffer.size() > twdBufferMaxSize) {
 				twdBuffer.erase(twdBuffer.begin());
