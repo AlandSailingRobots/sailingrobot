@@ -1,0 +1,6 @@
+[submodule "tests"]
+	path = tests
+	url = https://github.com/pophaax/tests.git
+[submodule "xbeerelay"]
+	path = xbeerelay
+	url = https://github.com/pophaax/xbeerelay.git
