@@ -78,7 +78,9 @@ void SailingRobot::run() {
 	//m_dbHandler->clearLogs();
 	m_running = true;
 	routeStarted = true;
+
 	int rudderCommand, sailCommand;//,heading = 0, insertScanOnce = 0;
+
 	//int windDir = 0; // outComment if use of tureWindDirCalculation
 	std::vector<float> twdBuffer;
 	const unsigned int twdBufferMaxSize =
