@@ -1,4 +1,5 @@
 #include "xBee.h"
+#include "logger/Logger.h"
 
 std::string xBee::findXmlMessage(std::string* buffer) {
 
@@ -46,7 +47,7 @@ int xBee::init(){
 	int fd;
 
 	if( (fd = serialOpen(deviceName.c_str(), BAUD_RATE) ) < 0) {
-		printf("errno: %d\n", errno);
+		Logger::log(LogType::ERROR, "xBee Error: %d", errno);
 	}
 
 	return fd;

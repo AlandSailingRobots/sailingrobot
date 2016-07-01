@@ -33,10 +33,7 @@ bool xBeeSync::init()
 
 	if(m_xbee_fd < 0)
 	{
-		std::cout <<"Failed to initialise xBee module\n";
-
-		//TODO - Jordan: FIX THIS, it dosn't print out?
-		m_logger.error("Failed to initialise xBee module");
+		CLASS_ERROR("Failed to initialise xBee module");
 	}
 	else
 	{

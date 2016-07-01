@@ -17,6 +17,14 @@ BOOST_LOG_INLINE_GLOBAL_LOGGER_DEFAULT(global_logger,
 		boost::log::sources::severity_logger_mt<
 			boost::log::trivial::severity_level>)
 
+enum class LogType {
+ 	INFO,
+ 	WARNING,
+ 	ERROR
+};
+
+#define CLASS_ERROR(...) Logger::log(LogType::ERROR, "%s::%d %s", __PRETTY_FUNCTION__, __LINE__, ##__VA_ARGS__)
+
 class Logger {
 public:
 	Logger();
@@ -33,6 +41,16 @@ public:
 	 * log error messages
 	 */
 	void error(std::string message);
+
+	/////////////////////////////////////////////////////////////////////////////////////
+ 	/// A globally accessable function to log messages to that works exactly like printf.
+ 	///
+ 	/// @params logType 			The type of log message
+ 	/// @params message 			The log message.
+ 	/// @params ...					A variable list, this allows printf like behaviour
+ 	/////////////////////////////////////////////////////////////////////////////////////
+ 	static void log(LogType logType, std::string message, ...);
+
 	virtual ~Logger();
 
 private:
