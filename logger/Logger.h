@@ -50,6 +50,7 @@ public:
  	/// @params ...					A variable list, this allows printf like behaviour
  	/////////////////////////////////////////////////////////////////////////////////////
  	static void log(LogType logType, std::string message, ...);
+ 	static void log(std::string message, ...);
 
 	virtual ~Logger();
 

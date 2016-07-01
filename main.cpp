@@ -87,6 +87,8 @@ int main(int argc, char *argv[]) {
 		std::cout<< "logger exeption thrown: "<< e <<std::endl;
 	}
 
+	Logger::log("Built on %s at %s", __DATE__, __TIME__);
+
 	/* Default time */
 	ExternalCommand externalCommand("1970-04-10T10:53:15.1234Z",true,0,0);
 	SystemState systemstate(
