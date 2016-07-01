@@ -1,2 +1,0 @@
-# Compass
-Compass module

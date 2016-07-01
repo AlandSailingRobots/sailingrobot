@@ -17,8 +17,8 @@
 #		linux_local = For a local linux machine (MOCK objects used)
 #		raspi_cc = For cross compiling to the PI on a linux machine
 #		raspi_local = For compiling on the PI itself
-TOOLCHAIN = linux_local 
-C_TOOLCHAIN = 1
+TOOLCHAIN = linux-local
+C_TOOLCHAIN = 0
 
 
 #######################################################
@@ -29,6 +29,10 @@ C_TOOLCHAIN = 1
 BUILD_DIR = build
 SRC_DIR = ./
 OUTPUT_DIR = ./
+
+# External Libraries
+
+JSON = 					libs/json
 
 # Sources
 
@@ -56,7 +60,7 @@ GPS = 					gps/GPSReader.cpp gps/MockGPSReader.cpp
 
 HTTP = 					httpsync/HTTPSync.cpp
 
-XML_LOG = 				xmlparser/pugi.cpp xmlparser/XML_log.cpp
+XML_LOG = 				xmlparser/pugi/pugixml.cpp xmlparser/src/xml_log.cpp
 
 THREAD = 				thread/SystemState.cpp thread/ExternalCommand.cpp thread/ThreadRAII.cpp
 
@@ -65,22 +69,21 @@ WAYPOINTROUTING = 		waypointrouting/WaypointRouting.cpp waypointrouting/Commands
 WINDVANECONTROLLER = 	windvanecontroller/WindVaneController.cpp
 
 
-SRC = GPSupdater.cpp SailingRobot.cpp WindsensorController.cpp logger/Logger.cpp utility/Utility.cpp utility/Timer.cpp $(XBEE) \
+SRC = 	main.cpp GPSupdater.cpp SailingRobot.cpp WindsensorController.cpp logger/Logger.cpp utility/Utility.cpp utility/Timer.cpp $(XBEE) \
 		$(ANALOGARDUINO) $(COMPASS) $(I2CCONTROLLER) $(POSITION) $(COURSE) $(DB) $(COMMAND) $(MAESTRO) $(CV7) $(GPS) $(HTTP) \
 		$(XML_LOG) $(THREAD) $(WAYPOINTROUTING) $(WINDVANECONTROLLER)
 
-SOURCES = $(addprefix src/, $(SRC))
+#SOURCES = $(addprefix src/, $(SRC))
 
 # Includes
 
-INC = -I./
-
+INC = -I./ -I./libs
 
 # Object files
 OBJECTS = $(addprefix $(BUILD_DIR)/, $(SRC:.cpp=.o))
 
 # Target Output
-EXECUTABLE = $(OUTPUT_DIR)sr
+EXECUTABLE = sr
 OBJECT_FILE = $(BUILD_DIR)/objects.tmp
 
 
@@ -90,17 +93,17 @@ OBJECT_FILE = $(BUILD_DIR)/objects.tmp
 
 
 CFLAGS = -Wall -g -o2
-CPPFLAGS = -g -Wall -pedantic -Werror -std=c++14
+CPPFLAGS = -g -Wall -pedantic -Werror -std=c++11
 
 LIBS = -lsqlite3 -lgps -lrt -lwiringPi -lcurl -lpthread
 LIBS_BOOST = -lboost_system -lboost_log -lboost_thread
 
-ifeq ($(TOOLCHAIN), raspi_cc)
+ifeq ($(TOOLCHAIN),raspi_cc)
 C_TOOLCHAIN = 0
 CC = arm-linux-gnueabihf-gcc
 CXX = arm-linux-gnueabihf-g++
 SIZE = arm-linux-gnueabihf-size
-else ifeq ($(TOOLCHAIN), linux_local)
+else ifeq ($(TOOLCHAIN),linux-local)
 C_TOOLCHAIN = 1
 CC = gcc
 CXX = g++
@@ -127,7 +130,7 @@ $(EXECUTABLE) : $(BUILD_DIR) $(OBJECTS)
 	rm -f $(OBJECT_FILE)
 	@echo Linking object files
 	@echo -n " " $(OBJECTS) >> $(OBJECT_FILE)
-	$(CXX) $(LDFLAGS) @$(OBJECT_FILE) -o $@
+	$(CXX) $(LDFLAGS) @$(OBJECT_FILE) -o $@ $(LIBS) $(LIBS_BOOST)
 	@echo Built using toolchain: $(TOOLCHAIN)
 
 # Compile CPP files into the build folder
@@ -147,9 +150,10 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
 # Tool Rules
 
 stats:$(EXECUTABLE)
-	@echo Final executable size:
-	@$(SIZE) $(EXECUTABLE)
+	@echo Final executable size: $(TOOLCHAIN)
+	$(SIZE) $(EXECUTABLE) 
 
 clean:
-	rm -f -r $(BUILD_DIR)
-	rm -f $(EXECUTABLE)
+	@echo Removing existing object files and executable
+	@rm -f -r $(BUILD_DIR)
+	@rm -f $(EXECUTABLE)

@@ -14,7 +14,6 @@
 
 #include <chrono>
 #include <thread>
-#include <curl/curl.h>
 #include <string>
 #include <mutex>
 

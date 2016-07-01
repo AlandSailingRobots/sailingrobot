@@ -104,12 +104,7 @@ int main(int argc, char *argv[]) {
     bool mockWindsensor = db.retrieveCellAsInt("mock","1","windsensor");
 
 	// Create main sailing robot controller
-	try {
-		sr_handle = std::make_unique<SailingRobot>(&externalCommand, &systemstate, &db);
-	} catch (const char * error) {
-		printf("!SR INIT ERROR: %s\n", error);
-		return 1;
-	}
+    SailingRobot sr_handle(&externalCommand, &systemstate, &db);
 
 	GPSupdater gps_updater(&systemstate,mockGPS);
 	gps_handle = &gps_updater;
@@ -117,7 +112,7 @@ int main(int argc, char *argv[]) {
 	try {
 		printf("-Initializing...\n");
 
-		sr_handle->init(path, errorLog);
+		sr_handle.init(path, errorLog);
 
 		printf(" Starting Windsensor\t\t");
 		windsensor_handle.reset(
@@ -188,7 +183,7 @@ int main(int argc, char *argv[]) {
 		) );
 
 		printf("-Starting main loop...\n");
-		sr_handle->run();
+		sr_handle.run();
 		printf("-DONE\n");
 
 	} catch (const char * e) {
