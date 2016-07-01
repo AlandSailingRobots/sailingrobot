@@ -5,7 +5,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
-#include "sqlite3.h"
+#include <sqlite3.h>
 #include "logger/Logger.h"
 
 #include "json/src/json.hpp"

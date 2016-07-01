@@ -7,144 +7,149 @@
 #
 #######################################################
 
-CC = g++
-FLAGS = -g -Wall -pedantic -Werror -std=c++14
-LIBS = -lsqlite3 -lgps -lrt -lwiringPi -lcurl -lpthread -I$(SAILINGROBOTS_HOME)
-LIBS_BOOST = -lboost_system -lboost_log -lboost_thread -I$(SAILINGROBOTS_HOME)
 
-XBEE = 					xBee/xBeeSync.o xBee/xBee.o
-
-ANALOGARDUINO = 		AnalogArduino/AnalogArduino.o AnalogArduino/MockAnalogArduino.o AnalogArduino/AR_UNO.o AnalogArduino/myWiringI2C.o
-
-COMPASS = 				Compass/Compass.o Compass/MockCompass.o Compass/HMC6343.o
-
-I2CCONTROLLER = 		i2ccontroller/I2CController.o
-
-POSITION = 				utility/Position.o utility/MockPosition.o utility/RealPosition.o
-
-COURSE = 				coursecalculation/CourseCalculation.o coursecalculation/CourseMath.o
-
-DB = 					dbhandler/DBHandler.o
-
-COMMAND = 				ruddercommand/RudderCommand.o sailcommand/SailCommand.o
-
-MAESTRO = 				servocontroller/MaestroController.o servocontroller/MockMaestroController.o servocontroller/ServoObject.o servocontroller/MockServoObject.o
-
-CV7 = 					CV7/Windsensor.o CV7/MockWindsensor.o CV7/UtilityLibrary.o CV7/CV7.o
-
-GPS = 					gps/GPSReader.o gps/MockGPSReader.o
-
-HTTP = 					httpsync/HTTPSync.o
-
-XML_LOG = 				xmlparser/pugi.o xmlparser/XML_log.o
-
-THREAD = 				thread/SystemState.o thread/ExternalCommand.o thread/ThreadRAII.o
-
-WAYPOINTROUTING = 		waypointrouting/WaypointRouting.o waypointrouting/Commands.o waypointrouting/TackAngle.o
-
-WINDVANECONTROLLER = 	windvanecontroller/WindVaneController.o
+#######################################################
+# TOOLCHAINS
+#######################################################
 
 
-OBJECTS = $(XBEE) $(ANALOGARDUINO) $(COMPASS) $(I2CCONTROLLER) $(POSITION) $(COURSE) $(DB) $(COMMAND) $(MAESTRO) $(CV7) $(GPS) \
-		  $(HTTP) $(XML_LOG) $(THREAD) $(WAYPOINTROUTING) $(WINDVANECONTROLLER) \
-		  logger/Logger.o utility/Utility.o utility/Timer.o
-
-SOURCES = SailingRobot.cpp main.cpp GPSupdater.cpp WindsensorController.cpp
-HEADERS = SailingRobot.h main.h GPSupdater.h WindsensorController.h
-FILE = sr
-MAKE = make
-
-#Needed for proper subfolder make writing
-.PHONY : xBee AnalogArduino Compass i2ccontroller runall coursecalculation dbhandler ruddercommand \
-		 sailcommand servocontroller CV7 gps httpsync xmlparser thread \
-		 logger utility waypointrouting windvanecontroller
+# Options include:
+#		linux_local = For a local linux machine (MOCK objects used)
+#		raspi_cc = For cross compiling to the PI on a linux machine
+#		raspi_local = For compiling on the PI itself
+TOOLCHAIN = linux_local 
+C_TOOLCHAIN = 1
 
 
-all : runall $(FILE)
+#######################################################
+# FILES
+#######################################################
 
-runall : xBee AnalogArduino Compass i2ccontroller coursecalculation dbhandler ruddercommand sailcommand \
-		 servocontroller CV7 gps httpsync xmlparser thread logger utility \
-		 waypointrouting windvanecontroller
+# Directories
+BUILD_DIR = build
+SRC_DIR = ./
+OUTPUT_DIR = ./
 
-clean :
-	cd xBee && $(MAKE) clean
-	cd AnalogArduino && $(MAKE) clean
-	cd Compass && $(MAKE) clean
-	cd i2ccontroller && $(MAKE) clean
-	cd coursecalculation && $(MAKE) clean
-	cd dbhandler && $(MAKE) clean
-	cd ruddercommand && $(MAKE) clean
-	cd sailcommand && $(MAKE) clean
-	cd servocontroller && $(MAKE) clean
-	cd CV7 && $(MAKE) clean
-	cd gps && $(MAKE) clean
-	cd httpsync && $(MAKE) clean
-	cd xmlparser && $(MAKE) clean
-	cd thread && $(MAKE) clean
-	cd logger && $(MAKE) clean
-	cd utility && $(MAKE) clean
-	cd waypointrouting && $(MAKE) clean
-	cd windvanecontroller && $(MAKE) clean
-	rm -f $(FILE)
+# Sources
 
-i2ccontroller :
-	$(MAKE) -C ./i2ccontroller
+XBEE = 					xBee/xBeeSync.cpp xBee/xBee.cpp
 
-AnalogArduino :
-	$(MAKE) -C ./AnalogArduino
+ANALOGARDUINO = 		AnalogArduino/AnalogArduino.cpp AnalogArduino/MockAnalogArduino.cpp AnalogArduino/AR_UNO.cpp AnalogArduino/myWiringI2C.cpp
 
-Compass :
-	$(MAKE) -C ./Compass
+COMPASS = 				Compass/Compass.cpp Compass/MockCompass.cpp Compass/HMC6343.cpp
 
-coursecalculation :
-	$(MAKE) -C ./coursecalculation
+I2CCONTROLLER = 		i2ccontroller/I2CController.cpp
 
+POSITION = 				utility/Position.cpp utility/MockPosition.cpp utility/RealPosition.cpp
 
-dbhandler :
-	$(MAKE) -C ./dbhandler
+COURSE = 				coursecalculation/CourseCalculation.cpp coursecalculation/CourseMath.cpp
 
+DB = 					dbhandler/DBHandler.cpp
 
-ruddercommand :
-	$(MAKE) -C ./ruddercommand
+COMMAND = 				ruddercommand/RudderCommand.cpp sailcommand/SailCommand.cpp
+
+MAESTRO = 				servocontroller/MaestroController.cpp servocontroller/MockMaestroController.cpp servocontroller/ServoObject.cpp servocontroller/MockServoObject.cpp
+
+CV7 = 					CV7/Windsensor.cpp CV7/MockWindsensor.cpp CV7/UtilityLibrary.cpp CV7/CV7.cpp
+
+GPS = 					gps/GPSReader.cpp gps/MockGPSReader.cpp
+
+HTTP = 					httpsync/HTTPSync.cpp
+
+XML_LOG = 				xmlparser/pugi.cpp xmlparser/XML_log.cpp
+
+THREAD = 				thread/SystemState.cpp thread/ExternalCommand.cpp thread/ThreadRAII.cpp
+
+WAYPOINTROUTING = 		waypointrouting/WaypointRouting.cpp waypointrouting/Commands.cpp waypointrouting/TackAngle.cpp
+
+WINDVANECONTROLLER = 	windvanecontroller/WindVaneController.cpp
 
 
-sailcommand :
-	$(MAKE) -C ./sailcommand
+SRC = GPSupdater.cpp SailingRobot.cpp WindsensorController.cpp logger/Logger.cpp utility/Utility.cpp utility/Timer.cpp $(XBEE) \
+		$(ANALOGARDUINO) $(COMPASS) $(I2CCONTROLLER) $(POSITION) $(COURSE) $(DB) $(COMMAND) $(MAESTRO) $(CV7) $(GPS) $(HTTP) \
+		$(XML_LOG) $(THREAD) $(WAYPOINTROUTING) $(WINDVANECONTROLLER)
+
+SOURCES = $(addprefix src/, $(SRC))
+
+# Includes
+
+INC = -I./
 
 
-servocontroller :
-	$(MAKE) -C ./servocontroller
+# Object files
+OBJECTS = $(addprefix $(BUILD_DIR)/, $(SRC:.cpp=.o))
 
-CV7 :
-	$(MAKE) -C ./CV7
+# Target Output
+EXECUTABLE = $(OUTPUT_DIR)sr
+OBJECT_FILE = $(BUILD_DIR)/objects.tmp
 
 
-gps :
-	$(MAKE) -C ./gps
+#######################################################
+# TOOLS
+#######################################################
 
-httpsync :
-	$(MAKE) -C ./httpsync
 
-xmlparser :
-	$(MAKE) -C ./xmlparser
+CFLAGS = -Wall -g -o2
+CPPFLAGS = -g -Wall -pedantic -Werror -std=c++14
 
-xBee :
-	$(MAKE) -C ./xBee
+LIBS = -lsqlite3 -lgps -lrt -lwiringPi -lcurl -lpthread
+LIBS_BOOST = -lboost_system -lboost_log -lboost_thread
 
-thread :
-	$(MAKE) -C ./thread
+ifeq ($(TOOLCHAIN), raspi_cc)
+C_TOOLCHAIN = 0
+CC = arm-linux-gnueabihf-gcc
+CXX = arm-linux-gnueabihf-g++
+SIZE = arm-linux-gnueabihf-size
+else ifeq ($(TOOLCHAIN), linux_local)
+C_TOOLCHAIN = 1
+CC = gcc
+CXX = g++
+SIZE = size
+endif
 
-waypointrouting :
-	$(MAKE) -C ./waypointrouting
+MKDIR_P = mkdir -p
 
-windvanecontroller :
-	$(MAKE) -C ./windvanecontroller
 
-logger:
-	$(MAKE) -C ./logger
+#######################################################
+# Rules
+#######################################################
 
-utility:
-	$(MAKE) -C utility
+.PHONY: clean
 
-$(FILE) : $(SOURCES) $(HEADERS) $(OBJECTS)
-	$(CC) $(SOURCES) $(OBJECTS) $(FLAGS) $(LIBS) $(LIBS_BOOST) -o $(FILE)
+all: $(EXECUTABLE) stats
+
+#  Create the directories needed
+$(BUILD_DIR):
+	$(MKDIR_P) $(BUILD_DIR)
+
+# Link and build
+$(EXECUTABLE) : $(BUILD_DIR) $(OBJECTS)
+	rm -f $(OBJECT_FILE)
+	@echo Linking object files
+	@echo -n " " $(OBJECTS) >> $(OBJECT_FILE)
+	$(CXX) $(LDFLAGS) @$(OBJECT_FILE) -o $@
+	@echo Built using toolchain: $(TOOLCHAIN)
+
+# Compile CPP files into the build folder
+$(BUILD_DIR)/%.o:$(SRC_DIR)/%.cpp
+	@mkdir -p $(dir $@)
+	@echo Compiling CPP File: $@
+	@$(CXX) -c $(CPPFLAGS) $(INC) -o ./$@ $< -DTOOLCHAIN=$(TOOLCHAIN) $(LIBS) $(LIBS_BOOST)
+ 
+ # Compile C files into the build folder
+$(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
+	@mkdir -p $(dir $@)
+	@echo Compiling C File: $@
+	@$(C) -c $(CFLAGS) $(INC) -o $@ $ -DTOOLCHAIN=$(C_TOOLCHAIN)
+
+
+#####################################################################
+# Tool Rules
+
+stats:$(EXECUTABLE)
+	@echo Final executable size:
+	@$(SIZE) $(EXECUTABLE)
+
+clean:
+	rm -f -r $(BUILD_DIR)
+	rm -f $(EXECUTABLE)
