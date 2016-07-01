@@ -40,7 +40,7 @@ bool WaypointBehaviour::init(){
 }
 
 
-bool WaypointBehaviour::computeCommands(SystemStateModel &systemStateModel,std::unique_ptr<Position> const& position,
+void WaypointBehaviour::computeCommands(SystemStateModel &systemStateModel,std::unique_ptr<Position> const& position,
                                       double trueWindDirection, bool mockPosition, bool getHeadingFromCompass){
 
   double heading = getHeading(systemStateModel,mockPosition,getHeadingFromCompass,position, m_waypointModel);
@@ -50,16 +50,16 @@ bool WaypointBehaviour::computeCommands(SystemStateModel &systemStateModel,std::
   std::cout << "heading: " << heading << "\n";
   std::cout << "heading ssm compass:" << systemStateModel.compassModel.heading<<"\n";
 
-      if (mockPosition) {
-          position->setCourseToSteer(m_waypointRouting.getCTS());
-      }
+  if (mockPosition) {
+      position->setCourseToSteer(m_waypointRouting.getCTS());
+  }
 
-      position->updatePosition();
+  position->updatePosition();
 
   if (systemStateModel.gpsModel.online) {
 
-    m_waypointRouting.getCommands(m_rudderCommand, m_sailCommand,
-      position->getModel(),
+      m_waypointRouting.getCommands(m_rudderCommand, m_sailCommand,
+        position->getModel(),
       trueWindDirection, heading, systemStateModel);
 
   } else {
@@ -78,21 +78,19 @@ bool WaypointBehaviour::computeCommands(SystemStateModel &systemStateModel,std::
     {
       insertScanOnce = i;
       try {
-        m_dbHandler->insertScan(m_waypointModel.id,position->getModel(),
+          m_dbHandler->insertScan(m_waypointModel.id,position->getModel(),
           systemStateModel.windsensorModel.temperature,
           systemStateModel.gpsModel.utc_timestamp);
       } catch (const char * error) {
-        m_logger.error(error);
-        std::cout << error << std::endl;
+          m_logger.error(error);
+          std::cout << error << std::endl;
       }
     }
 
     harvestWaypoint(m_waypointModel);
     setNextWaypoint(m_waypointModel);
     m_waypointRouting.setWaypoint(m_waypointModel);
-    return true;
   }
-  return true;
 }
 
 

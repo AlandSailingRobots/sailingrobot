@@ -84,7 +84,7 @@ double LineFollowBehaviour::calculateAngleOfDesiredTrajectory(std::unique_ptr<Po
     return phi;
 }
 
-bool LineFollowBehaviour::computeCommands(SystemStateModel &systemStateModel,std::unique_ptr<Position> const& position,
+void LineFollowBehaviour::computeCommands(SystemStateModel &systemStateModel,std::unique_ptr<Position> const& position,
                                       double trueWindDirection, bool mockPosition, bool getHeadingFromCompass){
 
     if(m_previousWaypointModel.id == "")
@@ -162,8 +162,6 @@ bool LineFollowBehaviour::computeCommands(SystemStateModel &systemStateModel,std
         m_logger.error("SailingRobot::run(), gps NaN. Using values from last iteration.\n");
         printf("GPS not online\n");
     }
-    
-    return true;
 }
 
 

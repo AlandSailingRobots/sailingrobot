@@ -18,7 +18,7 @@ public:
 
 	virtual bool init()=0; //if  function doesn't have the data required to function properly it return false
 
-  virtual bool computeCommands(SystemStateModel &systemStateModel,std::unique_ptr<Position> const& position,
+  virtual void computeCommands(SystemStateModel &systemStateModel,std::unique_ptr<Position> const& position,
                                       double trueWindDirection, bool mockPosition,
                                       bool getHeadingFromCompass) =0;  //make the computation of the commands return true if the computation was successfull
 

@@ -20,19 +20,15 @@ void RoutingBehaviour::setNextWaypoint(WaypointModel &waypointModel)
 	} catch (const char * error) {
 		m_logger.error(error);
 	}
-	try {
-		if (waypointModel.id.empty() ) {
-			std::cout << "No waypoint found!"<< std::endl;
-			throw "No waypoint found!";
-		}
-		else{
-			std::cout << "New waypoint picked! ID:" << waypointModel.id <<" lon: "
-			<< waypointModel.positionModel.longitude
-			<< " lat: " << waypointModel.positionModel.latitude << " rad: "
-			<< waypointModel.radius << std::endl;
-		}
-	} catch (const char * error) {
-		m_logger.error(error);
+
+	if (waypointModel.id.empty() ) {
+		std::cout << "No waypoint found!"<< std::endl;
+	}
+	else{
+		std::cout << "New waypoint picked! ID:" << waypointModel.id <<" lon: "
+		<< waypointModel.positionModel.longitude
+		<< " lat: " << waypointModel.positionModel.latitude << " rad: "
+		<< waypointModel.radius << std::endl;
 	}
 
 	m_logger.info("setupWaypoint() done");
