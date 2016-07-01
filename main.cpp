@@ -12,6 +12,10 @@
 #include <iomanip>
 #include <ctime>
 
+
+xBeeSync* xbee_handle;
+
+
 static void threadXBeeSyncRun() {
 	try {
 		xbee_handle->run();
@@ -58,13 +62,13 @@ int main(int argc, char *argv[]) {
 
 	std::string path, db_name, errorLog;
 	if (argc < 2) {
-		path = "/root/sailingrobot";
-		db_name = "/asr.db";
-		errorLog = "/errors.log";
+		path = "./";
+		db_name = "asr.db";
+		errorLog = "errors.log";
 	} else {
 		path = std::string(argv[1]);
-		db_name = "/asr.db";
-		errorLog = "/errors.log";
+		db_name = "asr.db";
+		errorLog = "errors.log";
 	}
 
 	printf("\n");
@@ -136,17 +140,23 @@ int main(int argc, char *argv[]) {
 
 		httpsync_handle.reset(new HTTPSync( &db, http_delay, removeLogs ));
 
+
 		bool xBee_sending = db.retrieveCellAsInt("xbee_config", "1", "send");
 		bool xBee_receiving = db.retrieveCellAsInt("xbee_config", "1", "recieve");
 		bool xBee_sendLogs = db.retrieveCellAsInt("xbee_config", "1", "send_logs");
 		double xBee_loopTime = stod(db.retrieveCell("xbee_config", "1", "loop_time"));
+
+		xbee_handle = new xBeeSync(&externalCommand, &systemstate, &db, xBee_sendLogs, xBee_sending, xBee_receiving,xBee_loopTime);
 		
-		// Start xBeeSync thread
-		std::unique_ptr<ThreadRAII> xbee_sync_thread;
-		if (xBee_sending || xBee_receiving) {
-			xbee_handle.reset(new xBeeSync(&externalCommand, &systemstate, &db, xBee_sendLogs, xBee_sending, xBee_receiving,xBee_loopTime));
-			xbee_sync_thread = std::unique_ptr<ThreadRAII>(
-				new ThreadRAII(std::thread(threadXBeeSyncRun), ThreadRAII::DtorAction::detach));
+		if(xbee_handle->init())
+		{
+			// Start xBeeSync thread
+			std::unique_ptr<ThreadRAII> xbee_sync_thread;
+
+			if (xBee_sending || xBee_receiving) 
+			{
+				xbee_sync_thread = std::unique_ptr<ThreadRAII>(new ThreadRAII(std::thread(threadXBeeSyncRun), ThreadRAII::DtorAction::detach));
+			}
 		}
 
 		// I2CController thread
@@ -190,6 +200,9 @@ int main(int argc, char *argv[]) {
 		printf("ERROR[%s]\n\n",e);
 		return 1;
 	}
+
+
+	delete xbee_handle;
 
 	printf("-Finished.\n");
 	return 0;

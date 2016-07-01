@@ -19,7 +19,6 @@
 #include "httpsync/HTTPSync.h"
 #include "i2ccontroller/I2CController.h"
 
-std::unique_ptr<xBeeSync> xbee_handle;
 GPSupdater* gps_handle;
 std::unique_ptr<WindsensorController> windsensor_handle;
 std::unique_ptr<HTTPSync> httpsync_handle;

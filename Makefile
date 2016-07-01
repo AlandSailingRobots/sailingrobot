@@ -150,7 +150,7 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
 # Tool Rules
 
 stats:$(EXECUTABLE)
-	@echo Final executable size: $(TOOLCHAIN)
+	@echo Final executable size:
 	$(SIZE) $(EXECUTABLE) 
 
 clean:

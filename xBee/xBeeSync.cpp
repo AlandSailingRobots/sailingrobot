@@ -23,14 +23,28 @@ xBeeSync::xBeeSync(ExternalCommand* externalCommand, SystemState *systemState,
 	m_receiving(receiving),
 	m_sendLogs(sendLogs),
 	m_loopTime(loopTime)
+{ }
+
+bool xBeeSync::init()
 {
-	//	skapa ny xBee och kör xbee.init()
+	bool rv = false;
+
 	m_xbee_fd = m_xBee.init();
-	std::cout << "*xBee initialized - receiving:" << m_receiving
-			  << " sending:" << m_sending << std::endl;
-	m_logger.info(std::string(
-		"*xBee initialized - receiving:") +	std::to_string(m_receiving)	+
-		" sending:" + std::to_string(m_sending));
+
+	if(m_xbee_fd < 0)
+	{
+		std::cout <<"Failed to initialise xBee module\n";
+
+		//TODO - Jordan: FIX THIS, it dosn't print out?
+		m_logger.error("Failed to initialise xBee module");
+	}
+	else
+	{
+		rv = true;
+		std::cout << "*xBee initialized - receiving:" << m_receiving << " sending:" << m_sending << std::endl;
+		m_logger.info(std::string("*xBee initialized - receiving:") +	std::to_string(m_receiving)	+ " sending:" + std::to_string(m_sending));
+	}
+	return rv;
 }
 
 void xBeeSync::run() {
