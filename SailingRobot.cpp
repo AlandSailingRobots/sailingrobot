@@ -52,6 +52,10 @@ void SailingRobot::init(std::string programPath, std::string errorFileName) {
 
 	m_getHeadingFromCompass = m_dbHandler->retrieveCellAsInt("sailing_robot_config", "1", "flag_heading_compass");
 
+	if (m_getHeadingFromCompass){
+		m_gpsHeadingWeight = 0.0;
+	}else m_gpsHeadingWeight = 1.0;
+
 	printf(" Starting Maestro\t\t");
 	setupMaestro();
 	printf("OK\n");
@@ -71,6 +75,67 @@ void SailingRobot::init(std::string programPath, std::string errorFileName) {
 	printf(" Starting SailCommand\t\t");
 	setupSailCommand();
 	printf("OK\n");
+}
+
+int SailingRobot::getHeading() {
+
+	//Use GPS for heading only if speed is higher than 1 knot
+	int useGpsForHeadingKnotSpeed = 1;
+	bool gpsForbidden = Utility::directionAdjustedSpeed(m_systemStateModel.gpsModel.heading, m_systemStateModel.compassModel.heading, m_systemStateModel.gpsModel.speed) < useGpsForHeadingKnotSpeed;
+
+	getMergedHeading(true); //decrease compass weight on each iteration
+
+    if(m_mockPosition) {
+        return position->getHeading();
+    }
+
+	if (m_getHeadingFromCompass) {
+		//Should return compass heading if below one knot and not currently merging and vice versa
+    	return Utility::addDeclinationToHeading(getMergedHeading(gpsForbidden), m_waypointModel.declination);
+	}
+    return m_systemStateModel.gpsModel.heading;
+}
+
+int SailingRobot::getMergedHeading(bool increaseCompassWeight){
+
+	float compassHeadingWeight;
+	//Shouldn't be hardcoded
+	float tickRate = 0.01;
+
+	int headingCompass = Utility::addDeclinationToHeading(m_systemStateModel.compassModel.heading, m_waypointModel.declination);
+	int headingGps = m_systemStateModel.gpsModel.heading;
+
+	if (increaseCompassWeight){
+		m_gpsHeadingWeight = m_gpsHeadingWeight - tickRate; //Decrease gps weight
+		if (m_gpsHeadingWeight < 0.0) m_gpsHeadingWeight = 0;
+	}else{
+		m_gpsHeadingWeight = m_gpsHeadingWeight + tickRate;
+		if (m_gpsHeadingWeight > 1.0) m_gpsHeadingWeight = 1.0;
+	}
+
+	compassHeadingWeight = 1.0 - m_gpsHeadingWeight;
+
+	//Debugging - remove later
+	std::cout << "\nHEADING: gps heading weight: " << std::to_string(m_gpsHeadingWeight) << "\n";
+	std::cout << "HEADING: Compass percentage = " << std::to_string(compassHeadingWeight) << "\n";
+	std::cout << "HEADING: Gps value = " << std::to_string(headingGps) << ", weight: " << std::to_string(headingGps * m_gpsHeadingWeight) << "\n";
+	std::cout << "HEADING: Compass value = " << std::to_string(headingCompass) << ", weight: " << std::to_string(headingCompass * compassHeadingWeight) << "\n";
+
+	//Difference calculation
+	float diff = ((headingGps - headingCompass) + 180 + 360);
+	while (diff > 360) diff -= 360;
+	diff -= 180;
+
+	//Merge angle calculation
+	int returnValue = 360 + headingCompass + (diff * m_gpsHeadingWeight);
+	while (returnValue > 360) returnValue -= 360;
+
+	//Debugging, remove later
+	std::cout << "HEADING: Difference in degrees: " << std::to_string(diff) << "\n";
+	std::cout << "HEADING: MERGED HEADING: " << std::to_string(returnValue) << "\n";
+
+	return returnValue;
+
 }
 
 void SailingRobot::run() {
@@ -128,9 +193,55 @@ void SailingRobot::run() {
 		behave->computeCommands(m_systemStateModel,position, trueWindDirection ,m_mockPosition, m_getHeadingFromCompass);
 
 
-		rudderCommand = m_rudderCommand.getCommand(behave->getRudderCommand());
-		if(!m_externalCommand->getAutorun()) {
-			rudderCommand = m_externalCommand->getRudderCommand();
+		std::cout << "heading: " << heading << "\n";
+		std::cout << "heading ssm compass:" << m_systemStateModel.compassModel.heading<<"\n";
+
+        if (m_mockPosition) {
+            position->setCourseToSteer(m_waypointRouting.getCTS());
+        }
+
+        position->updatePosition();
+
+		if (m_systemStateModel.gpsModel.online) {
+			//calc & set TWD
+			double twd = Utility::calculateTrueWindDirection(m_systemStateModel,heading);
+			twdBuffer.push_back(twd);// new wind calculation
+
+			//twdBuffer.push_back(heading + windDir);// old wind calculation
+
+			while (twdBuffer.size() > twdBufferMaxSize) {
+				twdBuffer.erase(twdBuffer.begin());
+			}
+
+			double rudder = 0, sail = 0;
+			m_waypointRouting.getCommands(rudder, sail,
+				position->getModel(),
+				Utility::meanOfAngles(twdBuffer), heading, m_systemStateModel);
+
+
+			if(m_dbHandler->retrieveCellAsInt("wind_vane_config", "1", "use_self_steering")) {
+				if(m_dbHandler->retrieveCellAsInt("wind_vane_config", "1", "wind_sensor_self_steering")) {
+					m_windVaneController.setVaneAngle(m_waypointRouting.getTWD(), m_waypointRouting.getCTS());
+					// WindVaneController::getAngle() will fetch set angle of vane.
+					// To do: Pass angle to engine controlling wind vane.
+				} else {
+                    double heading = getHeading();
+
+                    m_windVaneController.adjustAngle(heading,m_waypointRouting.getCTS() );
+				}
+			}
+
+			rudderCommand = m_rudderCommand.getCommand(rudder);
+			if(!m_externalCommand->getAutorun()) {
+				rudderCommand = m_externalCommand->getRudderCommand();
+			}
+			sailCommand = m_sailCommand.getCommand(sail);
+			if(!m_externalCommand->getAutorun()) {
+				sailCommand = m_externalCommand->getSailCommand();
+			}
+
+		} else {
+			m_logger.error("SailingRobot::run(), gps NaN. Using values from last iteration.");
 		}
 		sailCommand = m_sailCommand.getCommand(behave->getSailCommand());
 		if(!m_externalCommand->getAutorun()) {
