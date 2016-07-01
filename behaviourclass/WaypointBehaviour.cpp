@@ -31,7 +31,7 @@ bool WaypointBehaviour::init(){
 
 	m_waypointRouting.setWaypoint(m_waypointModel);
 
-  printf("*SailingRobot::run() started.\n");
+  printf("*SailingRobot::run() WaypointBehaviour started.\n");
   std::cout << "Waypoint target - ID: " << m_waypointModel.id << " lon: " <<
   m_waypointModel.positionModel.longitude	<< " lat : " <<
   m_waypointModel.positionModel.latitude << std::endl;
@@ -79,8 +79,8 @@ void WaypointBehaviour::computeCommands(SystemStateModel &systemStateModel,std::
       insertScanOnce = i;
       try {
           m_dbHandler->insertScan(m_waypointModel.id,position->getModel(),
-          systemStateModel.windsensorModel.temperature,
-          systemStateModel.gpsModel.utc_timestamp);
+              systemStateModel.windsensorModel.temperature,
+              systemStateModel.gpsModel.utc_timestamp);
       } catch (const char * error) {
           m_logger.error(error);
           std::cout << error << std::endl;

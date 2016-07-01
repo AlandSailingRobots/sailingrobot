@@ -58,5 +58,6 @@ int RoutingBehaviour::getHeading(SystemStateModel &systemStateModel,bool mockPos
 	if (getHeadingFromCompass && acceptedCompassSpeed) {
     	return Utility::addDeclinationToHeading(systemStateModel.compassModel.heading, waypointModel.declination);
 	}
+	
     return systemStateModel.gpsModel.heading;
 }

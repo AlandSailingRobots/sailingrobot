@@ -79,7 +79,7 @@ void SailingRobot::run() {
 	m_running = true;
 	routeStarted = true;
 
-	int rudderCommand, sailCommand;//,heading = 0, insertScanOnce = 0;
+	double rudderCommand, sailCommand;//,heading = 0, insertScanOnce = 0;
 
 	//int windDir = 0; // outComment if use of tureWindDirCalculation
 	std::vector<float> twdBuffer;
@@ -95,7 +95,6 @@ void SailingRobot::run() {
 	bool usingLineFollow = std::stoi(m_dbHandler->retrieveCell("sailing_robot_config", "1", "line_follow"));
 	//bool previousBehaviour = usingLineFollow; //Used in while-loop to see if waypoint routing has changed
 
-
   	WaypointBehaviour waypB(m_dbHandler); 
   	LineFollowBehaviour LineFollowB(m_dbHandler);
 	RoutingBehaviour *behave;
@@ -104,6 +103,8 @@ void SailingRobot::run() {
 	else
 		behave = &waypB;
   	behave->init();
+	  int count = 0;
+	  bool once;
 	while(m_running) {
 		timer.reset();
 
@@ -117,16 +118,19 @@ void SailingRobot::run() {
 		// 	behave->init();
 		// 	previousBehaviour = usingLineFollow;
 		// }
-		
+		if(count > 500 && !once)
+		{
+			behave = &waypB;
+			behave->init();
+		 	once = true;
+		}
 		//Get data from SystemStateModel to local object
 		m_systemState->getData(m_systemStateModel);
-
 		//calc & set TWD
 		trueWindDirection = Utility::getTrueWindDirection(m_systemStateModel, twdBuffer, twdBufferMaxSize);
-		
+
 		//Compute the commands to send
 		behave->computeCommands(m_systemStateModel,position, trueWindDirection ,m_mockPosition, m_getHeadingFromCompass);
-
 
 		rudderCommand = m_rudderCommand.getCommand(behave->getRudderCommand());
 		if(!m_externalCommand->getAutorun()) {
@@ -136,8 +140,6 @@ void SailingRobot::run() {
 		if(!m_externalCommand->getAutorun()) {
 			sailCommand = m_externalCommand->getSailCommand();
 		}
-
-		printf("sailCommand: "); printf(std::to_string(sailCommand).c_str()); printf("    : rudderCommand: "); printf(std::to_string(rudderCommand).c_str()); printf("\n");
 
 		//rudder adjustment
 		m_rudderServo.setPosition(rudderCommand);
@@ -150,6 +152,7 @@ void SailingRobot::run() {
 		//Save data in database
 		behave->manageDatabase(twdBuffer,m_systemStateModel);
 
+		count++;
 		timer.sleepUntil(loop_time);
 	}
 

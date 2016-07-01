@@ -89,15 +89,6 @@ void LineFollowBehaviour::computeCommands(SystemStateModel &systemStateModel,std
 
     if(m_previousWaypointModel.id == "")
         setPreviousWayPoint(systemStateModel);
-    
-    printf("next waypoint ID: "); printf(m_nextWaypointModel.id.c_str()); 
-    printf("     next waypoint lat: "); printf(std::to_string(m_nextWaypointModel.positionModel.longitude).c_str()); 
-    printf("     next waypoint long: "); printf(std::to_string(m_nextWaypointModel.positionModel.latitude).c_str());
-    printf("\n");
-    printf("previous waypoint ID: "); printf(m_previousWaypointModel.id.c_str()); 
-    printf("  previous waypoint lat: "); printf(std::to_string(m_previousWaypointModel.positionModel.longitude).c_str()); 
-    printf("  previous waypoint long: "); printf(std::to_string(m_previousWaypointModel.positionModel.latitude).c_str());
-    printf("\n");
 
     position->updatePosition();
     bearingToNextWaypoint = m_courseMath.calculateBTW(position->getModel(), m_nextWaypointModel.positionModel); //calculated for database
@@ -127,7 +118,7 @@ void LineFollowBehaviour::computeCommands(SystemStateModel &systemStateModel,std
             m_tackingDirection = Utility::sgn(signedDistance);
             m_tack = false;
         }
-
+        
         //To stop the boat from oscillating during tack, we set the boat to tack from one maxTackDistance of the line to the other, not letting it switch direction in between.
         double desiredHeading2 = desiredHeading; //Save desiredHeading into a temp variable so we don't have faulty values for the if-statements
         if(cos(trueWindDirection - desiredHeading) + cos(m_tackAngle + M_PI/8) > 0)
@@ -147,16 +138,17 @@ void LineFollowBehaviour::computeCommands(SystemStateModel &systemStateModel,std
 
         //SET RUDDER
         if(cos(currentHeading - desiredHeading) < 0) //if boat is going the wrong direction
+        {
             m_rudderCommand = Utility::sgn(systemStateModel.gpsModel.speed) * m_maxCommandAngle * Utility::sgn(sin(currentHeading - desiredHeading));
-        else                                
+        }
+        else                      
+        {
             m_rudderCommand = Utility::sgn(systemStateModel.gpsModel.speed) * m_maxCommandAngle * sin(currentHeading - desiredHeading);
+        }          
 
-        //SET SAIL                          //Calculate apparent wind from true wind.
-        std::array<double, 2> wcaw = { systemStateModel.windsensorModel.speed * cos(trueWindDirection - currentHeading) - systemStateModel.gpsModel.speed, 
-                                        systemStateModel.windsensorModel.speed * sin(trueWindDirection - currentHeading)}; 
-        double apparentWindAngle = atan2(wcaw[0], wcaw[1]); 
-
-        m_sailCommand = -Utility::sgn(apparentWindAngle) * ( ((m_minSailAngle - m_maxSailAngle) / M_PI) * abs(apparentWindAngle) + m_maxSailAngle);
+        //SET SAIL
+        double apparentWindDirection = Utility::getApparentWindDirection(systemStateModel, currentHeading, trueWindDirection);
+        m_sailCommand = -Utility::sgn(apparentWindDirection) * ( ((m_minSailAngle - m_maxSailAngle) / M_PI) * abs(apparentWindDirection) + m_maxSailAngle);
 
     } else {
         m_logger.error("SailingRobot::run(), gps NaN. Using values from last iteration.\n");
