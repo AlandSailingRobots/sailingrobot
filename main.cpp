@@ -110,7 +110,14 @@ int main(int argc, char *argv[]) {
     bool mockWindsensor = db.retrieveCellAsInt("mock","1","windsensor");
 
 	// Create main sailing robot controller
-    SailingRobot sr_handle(&externalCommand, &systemstate, &db);
+	int http_delay =  db.retrieveCellAsInt("httpsync_config", "1", "delay");
+	bool removeLogs = db.retrieveCellAsInt("httpsync_config", "1", "remove_logs");
+	//bool removeLogs = true;
+
+	httpsync_handle = new HTTPSync( &db, http_delay, removeLogs );
+
+
+    SailingRobot sr_handle(&externalCommand, &systemstate, &db, httpsync_handle);
 
 	GPSupdater gps_updater(&systemstate,mockGPS);
 	gps_handle = &gps_updater;
@@ -136,11 +143,7 @@ int main(int argc, char *argv[]) {
 
 		printf("-Starting threads...\n");
 
-		int http_delay =  db.retrieveCellAsInt("httpsync_config", "1", "delay");
-		bool removeLogs = db.retrieveCellAsInt("httpsync_config", "1", "remove_logs");
-		//bool removeLogs = true;
 
-		httpsync_handle.reset(new HTTPSync( &db, http_delay, removeLogs ));
 
 
 		bool xBee_sending = db.retrieveCellAsInt("xbee_config", "1", "send");

@@ -107,6 +107,12 @@ void HTTPSync::setServerURL(std::string URL) {
     serverURL = URL;
 }
 
+void HTTPSync::setWaypointUpdateCallback(waypointUpdateCallback callBack){
+    if (callBack != NULL){
+        m_callBack = callBack;
+    }
+}
+
 std::string HTTPSync::getData(std::string call) {
     return serve("",call);
 }
@@ -150,6 +156,9 @@ void HTTPSync::updateWaypoints() {
             std::string waypoints = getData("getWaypoints"); //Waypoints call implemented? //SERVE("", "getWaypoints")'
             m_dbHandler->updateWaypoints(waypoints);
             m_logger.info("Waypoints fetched from web");
+            if (m_callBack != NULL){
+                m_callBack();
+            } 
         }catch(const char* error){
             m_logger.error("Error in HTTPSync::updateWaypoints");
         }

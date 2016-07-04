@@ -15,12 +15,17 @@
 
 
 SailingRobot::SailingRobot(ExternalCommand* externalCommand,
-						   SystemState *systemState, DBHandler *db) :
+						   SystemState *systemState, DBHandler *db, HTTPSync* httpSync) :
 	m_mockPosition(db->retrieveCellAsInt("mock", "1", "position")),
 	m_mockMaestro(db->retrieveCellAsInt("mock", "1", "maestro")),
 
-	m_dbHandler(db),
+	
 
+	
+	m_externalCommand(externalCommand),
+	m_systemState(systemState),
+	m_dbHandler(db),
+	m_httpSync(httpSync),
 	m_waypointModel(PositionModel(1.5,2.7), 100, "", 6),
 	m_waypointRouting(m_waypointModel,
 		atof(m_dbHandler->retrieveCell("waypoint_routing_config", "1", "radius_ratio").c_str()),
@@ -32,8 +37,7 @@ SailingRobot::SailingRobot(ExternalCommand* externalCommand,
 		 atof(m_dbHandler->retrieveCell("waypoint_routing_config", "1", "rudder_speed_min").c_str())
 		),
 
-	m_externalCommand(externalCommand),
-	m_systemState(systemState),
+
 
 	m_systemStateModel(
 		SystemStateModel(

@@ -21,7 +21,7 @@
 
 GPSupdater* gps_handle;
 std::unique_ptr<WindsensorController> windsensor_handle;
-std::unique_ptr<HTTPSync> httpsync_handle;
+HTTPSync* httpsync_handle;
 std::unique_ptr<I2CController> i2cController_handle;
 
 std::unique_ptr<ThreadRAII> windsensor_thread;
