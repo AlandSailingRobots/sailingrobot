@@ -16,7 +16,7 @@ double RoutingBehaviour::getRudderCommand()
 
 void RoutingBehaviour::setWaypointsChanged()
 {
-	waypointsChanged = true;
+	waypointsChanged = true; //if waypoints changed in Database during run, bool set true
 }
 
 void RoutingBehaviour::setNextWaypoint(WaypointModel &waypointModel)

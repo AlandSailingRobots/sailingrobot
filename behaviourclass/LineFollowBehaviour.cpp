@@ -93,7 +93,7 @@ void LineFollowBehaviour::computeCommands(SystemStateModel &systemStateModel,std
     if(waypointsChanged)
     {
         m_wayPointCount = 0;
-        setPreviousWayPoint(m_nextWaypointModel);
+        setPreviousWayPoint(systemStateModel);
         setNextWaypoint(m_nextWaypointModel);
         waypointsChanged = false;
     }
