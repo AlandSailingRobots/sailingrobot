@@ -140,15 +140,22 @@ void LineFollowBehaviour::computeCommands(SystemStateModel &systemStateModel,std
         if(cos(currentHeading - desiredHeading) < 0) //if boat is going the wrong direction
         {
             m_rudderCommand = Utility::sgn(systemStateModel.gpsModel.speed) * m_maxCommandAngle * Utility::sgn(sin(currentHeading - desiredHeading));
+            std::cout << "                  Boat is going the       WRONG       direction" << std::endl;
         }
         else                      
         {
             m_rudderCommand = Utility::sgn(systemStateModel.gpsModel.speed) * m_maxCommandAngle * sin(currentHeading - desiredHeading);
+                        std::cout << "                  Boat is going the       RIGHT        direction" << std::endl;
         }          
 
         //SET SAIL
         double apparentWindDirection = Utility::getApparentWindDirection(systemStateModel, currentHeading, trueWindDirection);
         m_sailCommand = -Utility::sgn(apparentWindDirection) * ( ((m_minSailAngle - m_maxSailAngle) / M_PI) * abs(apparentWindDirection) + m_maxSailAngle);
+
+        std::cout << "speed: " << systemStateModel.gpsModel.speed << "   desiredHeading: " << desiredHeading << "   maxCommand: " << m_maxCommandAngle << 
+        "   rudderCommand: " << m_rudderCommand  << "    SailCommand: " << m_sailCommand << std::endl;
+        std::cout << "heading: " << currentHeading << std::endl;
+        printf("Tacking: "); printf(std::to_string(m_tack).c_str()); printf("    TackingDirection: "); printf(std::to_string(m_tackingDirection).c_str()); printf("\n");
 
     } else {
         m_logger.error("SailingRobot::run(), gps NaN. Using values from last iteration.\n");
@@ -157,7 +164,7 @@ void LineFollowBehaviour::computeCommands(SystemStateModel &systemStateModel,std
 }
 
 
-void LineFollowBehaviour::manageDatabase(std::vector<float> &twdBuffer,SystemStateModel &systemStateModel){
+void LineFollowBehaviour::manageDatabase(double trueWindDirection, SystemStateModel &systemStateModel){
   //logging
   bool routeStarted = false;
   m_dbHandler->insertDataLog(
@@ -170,7 +177,7 @@ void LineFollowBehaviour::manageDatabase(std::vector<float> &twdBuffer,SystemSta
     m_tack,
     getGoingStarboard(),
     atoi(m_nextWaypointModel.id.c_str()),
-    Utility::meanOfAngles(twdBuffer),
+    trueWindDirection,
     routeStarted
   );
 }

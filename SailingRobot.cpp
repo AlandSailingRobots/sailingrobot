@@ -93,7 +93,8 @@ void SailingRobot::run() {
 	double loop_time = std::stod(sr_loop_time);
 
 	bool usingLineFollow = std::stoi(m_dbHandler->retrieveCell("sailing_robot_config", "1", "line_follow"));
-	//bool previousBehaviour = usingLineFollow; //Used in while-loop to see if waypoint routing has changed
+	// bool previousBehaviour = usingLineFollow; //Used in while-loop to see if waypoint routing has changed
+	// int checkDBcounter = 0;  
 
   	WaypointBehaviour waypB(m_dbHandler); 
   	LineFollowBehaviour LineFollowB(m_dbHandler);
@@ -103,27 +104,26 @@ void SailingRobot::run() {
 	else
 		behave = &waypB;
   	behave->init();
-	  int count = 0;
-	  bool once;
+
 	while(m_running) {
 		timer.reset();
 
-		// usingLineFollow = std::stoi(m_dbHandler->retrieveCell("sailing_robot_config", "1", "line_follow"));
-		// if (usingLineFollow != previousBehaviour){ //If following behaviour changes in database
-		// 	if(previousBehaviour)
-		// 		behave = &waypB;						
-		// 	else									//AN OPTION TO CHANGE ROUTING BEHAVIOUR DURING RUN. NOT SMART TO CHECK DBHandler EVERY TIME??? /Oliver
-		// 		behave = &LineFollowB;
 
-		// 	behave->init();
-		// 	previousBehaviour = usingLineFollow;
+		// if(checkDBcounter > 200)
+		// {
+		// 	checkDBcounter = 0;
+		// 	usingLineFollow = std::stoi(m_dbHandler->retrieveCell("sailing_robot_config", "1", "line_follow"));
+		// 	if (usingLineFollow != previousBehaviour){ //If following behaviour changes in database
+		// 		if(previousBehaviour)
+		// 			behave = &waypB;						
+		// 		else									
+		// 			behave = &LineFollowB;
+
+		// 		behave->init();
+		// 		previousBehaviour = usingLineFollow;
+		// 	}
 		// }
-		if(count > 500 && !once)
-		{
-			behave = &waypB;
-			behave->init();
-		 	once = true;
-		}
+
 		//Get data from SystemStateModel to local object
 		m_systemState->getData(m_systemStateModel);
 		//calc & set TWD
@@ -131,6 +131,7 @@ void SailingRobot::run() {
 
 		//Compute the commands to send
 		behave->computeCommands(m_systemStateModel,position, trueWindDirection ,m_mockPosition, m_getHeadingFromCompass);
+
 
 		rudderCommand = m_rudderCommand.getCommand(behave->getRudderCommand());
 		if(!m_externalCommand->getAutorun()) {
@@ -150,9 +151,9 @@ void SailingRobot::run() {
 		m_systemState->setSail(sailCommand);
 
 		//Save data in database
-		behave->manageDatabase(twdBuffer,m_systemStateModel);
+		behave->manageDatabase(trueWindDirection,m_systemStateModel);
 
-		count++;
+		// checkDBcounter++;
 		timer.sleepUntil(loop_time);
 	}
 

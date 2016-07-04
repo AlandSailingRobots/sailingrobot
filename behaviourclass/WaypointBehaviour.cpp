@@ -94,7 +94,7 @@ void WaypointBehaviour::computeCommands(SystemStateModel &systemStateModel,std::
 }
 
 
-void WaypointBehaviour::manageDatabase(std::vector<float> &twdBuffer,SystemStateModel &systemStateModel){
+void WaypointBehaviour::manageDatabase(double trueWindDirection, SystemStateModel &systemStateModel){
   //logging
   bool routeStarted = false;
   m_dbHandler->insertDataLog(
@@ -107,7 +107,7 @@ void WaypointBehaviour::manageDatabase(std::vector<float> &twdBuffer,SystemState
     m_waypointRouting.getTack(),
     m_waypointRouting.getGoingStarboard(),
     atoi(m_waypointModel.id.c_str()),
-    Utility::meanOfAngles(twdBuffer),
+    trueWindDirection,
     routeStarted
   );
 }

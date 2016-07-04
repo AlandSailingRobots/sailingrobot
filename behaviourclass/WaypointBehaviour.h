@@ -21,7 +21,7 @@ public:
                                       double trueWindDirection, bool mockPosition,
                                       bool getHeadingFromCompass);  //make the computation of the commands return true if the computation was successfull
 
-  void manageDatabase(std::vector<float> &twdBuffer,SystemStateModel &systemStateModel);
+  void manageDatabase(double trueWindDirection, SystemStateModel &systemStateModel);
 
 private:
   WaypointModel m_waypointModel;

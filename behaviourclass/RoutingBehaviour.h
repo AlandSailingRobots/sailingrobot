@@ -24,7 +24,7 @@ public:
 
 	virtual double getSailCommand();
   virtual double getRudderCommand();
-  virtual void manageDatabase(std::vector<float> &twdBuffer,SystemStateModel &systemStateModel)=0;
+  virtual void manageDatabase(double trueWindDirection, SystemStateModel &systemStateModel)=0;
 
 protected:
   DBHandler *m_dbHandler;
