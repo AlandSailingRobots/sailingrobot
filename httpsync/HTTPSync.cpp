@@ -163,7 +163,6 @@ void HTTPSync::updateWaypoints() {
             m_logger.error("Error in HTTPSync::updateWaypoints");
         }
     }
-
 }
 
 std::string HTTPSync::serve(std::string data, std::string call) {

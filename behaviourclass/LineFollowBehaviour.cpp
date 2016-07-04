@@ -90,12 +90,14 @@ void LineFollowBehaviour::computeCommands(SystemStateModel &systemStateModel,std
     if(m_previousWaypointModel.id == "")
         setPreviousWayPoint(systemStateModel);
     
-    if(waypointsChanged)
+    if(waypointsChanged) //if waypoints changed during run, check to see if current targeted waypoints have changed
     {
-        m_wayPointCount = 0;
+        int temp = m_wayPointCount;
+        m_wayPointCount = 0; //set 0 so it doesn't set previous to next.
         setPreviousWayPoint(systemStateModel);
         setNextWaypoint(m_nextWaypointModel);
         waypointsChanged = false;
+        m_wayPointCount = temp;
     }
 
     position->updatePosition();
@@ -146,15 +148,10 @@ void LineFollowBehaviour::computeCommands(SystemStateModel &systemStateModel,std
 
         //SET RUDDER
         if(cos(currentHeading - desiredHeading) < 0) //if boat is going the wrong direction
-        {
             m_rudderCommand = Utility::sgn(systemStateModel.gpsModel.speed) * m_maxCommandAngle * Utility::sgn(sin(currentHeading - desiredHeading));
-            std::cout << "                  Boat is going the       WRONG       direction" << std::endl;
-        }
         else                      
-        {
             m_rudderCommand = Utility::sgn(systemStateModel.gpsModel.speed) * m_maxCommandAngle * sin(currentHeading - desiredHeading);
-                        std::cout << "                  Boat is going the       RIGHT        direction" << std::endl;
-        }          
+       
 
         //SET SAIL
         double apparentWindDirection = Utility::getApparentWindDirection(systemStateModel, currentHeading, trueWindDirection);
@@ -162,7 +159,7 @@ void LineFollowBehaviour::computeCommands(SystemStateModel &systemStateModel,std
 
         std::cout << "speed: " << systemStateModel.gpsModel.speed << "   desiredHeading: " << desiredHeading << "   maxCommand: " << m_maxCommandAngle << 
         "   rudderCommand: " << m_rudderCommand  << "    SailCommand: " << m_sailCommand << std::endl;
-        std::cout << "heading: " << currentHeading << std::endl;
+        std::cout << "heading: " << currentHeading << "     SignedDistance: " << signedDistance << std::endl;
         printf("Tacking: "); printf(std::to_string(m_tack).c_str()); printf("    TackingDirection: "); printf(std::to_string(m_tackingDirection).c_str()); printf("\n");
 
     } else {
@@ -206,6 +203,11 @@ void LineFollowBehaviour::setPreviousWayPoint(SystemStateModel &systemStateModel
     }
     else if(m_wayPointCount > 0) //if waypoints passed, set previous waypoint to the one recently passed
         m_previousWaypointModel = m_nextWaypointModel;
+
+    std::cout << "Previous waypoint picked! ID:" << m_previousWaypointModel.id <<" lon: "
+    << m_previousWaypointModel.positionModel.longitude
+    << " lat: " << m_previousWaypointModel.positionModel.latitude << " rad: "
+    << m_previousWaypointModel.radius << std::endl;
 }
 
 bool LineFollowBehaviour::getGoingStarboard()
