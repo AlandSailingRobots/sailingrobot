@@ -68,10 +68,12 @@ WAYPOINTROUTING = 		waypointrouting/WaypointRouting.cpp waypointrouting/Commands
 
 WINDVANECONTROLLER = 	windvanecontroller/WindVaneController.cpp
 
+BEHAVINGCLASS = 	behavingclass/behavingclass.o  behavingclass/waypointBehave.o behavingclass/LineFollowBehave.o behavingclass/CollisionAvoidanceBehave.o
+
 
 SRC = 	main.cpp GPSupdater.cpp SailingRobot.cpp WindsensorController.cpp logger/Logger.cpp utility/Utility.cpp utility/Timer.cpp $(XBEE) \
 		$(ANALOGARDUINO) $(COMPASS) $(I2CCONTROLLER) $(POSITION) $(COURSE) $(DB) $(COMMAND) $(MAESTRO) $(CV7) $(GPS) $(HTTP) \
-		$(XML_LOG) $(THREAD) $(WAYPOINTROUTING) $(WINDVANECONTROLLER)
+		$(XML_LOG) $(THREAD) $(WAYPOINTROUTING) $(WINDVANECONTROLLER) $(BEHAVINGCLASS) \
 
 #SOURCES = $(addprefix src/, $(SRC))
 
@@ -138,7 +140,7 @@ $(BUILD_DIR)/%.o:$(SRC_DIR)/%.cpp
 	@mkdir -p $(dir $@)
 	@echo Compiling CPP File: $@
 	@$(CXX) -c $(CPPFLAGS) $(INC) -o ./$@ $< -DTOOLCHAIN=$(TOOLCHAIN) $(LIBS) $(LIBS_BOOST)
- 
+
  # Compile C files into the build folder
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
 	@mkdir -p $(dir $@)
@@ -151,7 +153,7 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
 
 stats:$(EXECUTABLE)
 	@echo Final executable size:
-	$(SIZE) $(EXECUTABLE) 
+	$(SIZE) $(EXECUTABLE)
 
 clean:
 	@echo Removing existing object files and executable
