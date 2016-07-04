@@ -89,6 +89,14 @@ void LineFollowBehaviour::computeCommands(SystemStateModel &systemStateModel,std
 
     if(m_previousWaypointModel.id == "")
         setPreviousWayPoint(systemStateModel);
+    
+    if(waypointsChanged)
+    {
+        m_wayPointCount = 0;
+        setPreviousWayPoint(m_nextWaypointModel);
+        setNextWaypoint(m_nextWaypointModel);
+        waypointsChanged = false;
+    }
 
     position->updatePosition();
     bearingToNextWaypoint = m_courseMath.calculateBTW(position->getModel(), m_nextWaypointModel.positionModel); //calculated for database

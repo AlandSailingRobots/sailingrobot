@@ -50,6 +50,12 @@ void WaypointBehaviour::computeCommands(SystemStateModel &systemStateModel,std::
   std::cout << "heading: " << heading << "\n";
   std::cout << "heading ssm compass:" << systemStateModel.compassModel.heading<<"\n";
 
+  if(waypointsChanged)
+  {
+    setNextWaypoint(m_waypointModel);
+    waypointsChanged = false;
+  }
+
   if (mockPosition) {
       position->setCourseToSteer(m_waypointRouting.getCTS());
   }

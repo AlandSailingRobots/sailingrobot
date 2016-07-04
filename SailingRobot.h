@@ -7,7 +7,7 @@
 #include "sailcommand/SailCommand.h"
 #include "ruddercommand/RudderCommand.h"
 #include "coursecalculation/CourseCalculation.h"
-//#include "httpsync/HTTPSync.h"
+#include "httpsync/HTTPSync.h"
 
 #include "Compass/Compass.h"
 #include "gps/GPS.h"
@@ -30,7 +30,7 @@ class SailingRobot {
 
 public:
 
-	SailingRobot(ExternalCommand* externalCommand, SystemState *systemState, DBHandler *db);
+	SailingRobot(ExternalCommand* externalCommand, SystemState *systemState, DBHandler *db, HTTPSync* httpSync);
 	~SailingRobot();
 	void init(std::string programPath, std::string errorFileName);
 	void run();
@@ -68,18 +68,24 @@ private:
 	 * false = get heading from gps	 */
 	bool m_getHeadingFromCompass;
 
+	ExternalCommand* m_externalCommand;
+	SystemState *m_systemState;
 	DBHandler *m_dbHandler;
+
+	HTTPSync* m_httpSync;
+	WaypointModel m_waypointModel;
+	WaypointRouting m_waypointRouting;
 	WindVaneController m_windVaneController;
 	RudderCommand m_rudderCommand;
 	SailCommand m_sailCommand;
-	//HTTPSync m_httpSync;
+	
 
 	std::shared_ptr<Actuator> m_maestroController;
 	ServoObject m_rudderServo;
 	ServoObject m_sailServo;
 
-	ExternalCommand* m_externalCommand;
-	SystemState *m_systemState;
+	
+	
         std::unique_ptr<Position> position;
 
 	SystemStateModel m_systemStateModel;

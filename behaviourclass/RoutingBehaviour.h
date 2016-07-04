@@ -25,6 +25,7 @@ public:
 	virtual double getSailCommand();
   virtual double getRudderCommand();
   virtual void manageDatabase(double trueWindDirection, SystemStateModel &systemStateModel)=0;
+  static void setWaypointsChanged();
 
 protected:
   DBHandler *m_dbHandler;
@@ -33,6 +34,7 @@ protected:
   virtual void setNextWaypoint(WaypointModel &waypointModel);
   virtual void harvestWaypoint(WaypointModel waypointModel);
   virtual int getHeading(SystemStateModel &systemStateModel,bool mockPosition,bool getHeadingFromCompass,std::unique_ptr<Position> const& position, WaypointModel waypointModel);
+  static bool waypointsChanged;
 };
 
 #endif

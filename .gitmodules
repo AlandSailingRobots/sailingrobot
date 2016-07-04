@@ -4,3 +4,6 @@
 [submodule "xbeerelay"]
 	path = xbeerelay
 	url = https://github.com/pophaax/xbeerelay.git
+[submodule "libs/json"]
+	path = libs/json
+	url = https://github.com/nlohmann/json.git

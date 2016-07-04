@@ -36,5 +36,5 @@ void MockServoObject::setPosition(unsigned short position) {
 }
 
 int MockServoObject::getPosition() {
-
+	return 0;
 }

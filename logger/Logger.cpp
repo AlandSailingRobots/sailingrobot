@@ -59,6 +59,55 @@ void Logger::error(std::string message) {
 }
 
 
+#define MAX_LOG_SIZE	256
+
+void Logger::log(LogType logType, std::string message, ...)
+{
+	va_list args;
+	char logBuffer[MAX_LOG_SIZE];
+
+	// Put together the formatted string
+	va_start(args, message);
+    vsnprintf(logBuffer, MAX_LOG_SIZE, message.c_str(), args);
+    va_end(args);
+
+    std::string logTypeText;
+
+    switch(logType)
+    {
+    	case LogType::INFO:
+    		logTypeText = "[INFO]";
+    		break;
+ 		case LogType::WARNING:
+ 			logTypeText = "[WARNING]";
+ 			break;
+ 		case LogType::ERROR:
+ 			logTypeText = "[ERROR]";
+ 			break;
+ 		default:
+ 			logTypeText = "";
+    }
+
+	std::cout << logTypeText << " " << logBuffer << "\n";
+
+	//TODO - Jordan: Log to file.
+}
+
+void Logger::log(std::string message, ...)
+{
+	va_list args;
+	char logBuffer[MAX_LOG_SIZE];
+
+	// Put together the formatted string
+	va_start(args, message);
+    vsnprintf(logBuffer, MAX_LOG_SIZE, message.c_str(), args);
+    va_end(args);
+
+	std::cout << logBuffer << "\n";
+
+	//TODO - Jordan: Log to file.
+}
+
 
 
 

@@ -44,8 +44,8 @@ void DBHandler::getDataAsJson(std::string select, std::string table, std::string
 	}
 
 	Json jsonEntry;
-	for (auto i = 0; i < rows; i++) {
-		for(auto j = 0; j < columnNames.size(); j++) {
+	for (int i = 0; i < rows; i++) {
+		for(unsigned int j = 0; j < columnNames.size(); j++) {
 			int index = j+(columns*i);
 			jsonEntry[columnNames.at(j)] = values.at(index);
 		}

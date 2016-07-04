@@ -1,4 +1,5 @@
 #include "RoutingBehaviour.h"
+bool RoutingBehaviour::waypointsChanged = false;
 
 RoutingBehaviour::RoutingBehaviour(DBHandler *db):  m_dbHandler(db){
 }
@@ -11,6 +12,11 @@ double RoutingBehaviour::getSailCommand()
 double RoutingBehaviour::getRudderCommand()
 {
     return m_rudderCommand;
+}
+
+void RoutingBehaviour::setWaypointsChanged()
+{
+	waypointsChanged = true;
 }
 
 void RoutingBehaviour::setNextWaypoint(WaypointModel &waypointModel)

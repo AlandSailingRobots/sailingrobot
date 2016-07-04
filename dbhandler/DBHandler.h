@@ -5,10 +5,10 @@
 #include <sstream>
 #include <string>
 #include <vector>
-#include "sqlite3.h"
+#include <sqlite3.h>
 #include "logger/Logger.h"
 
-#include "json/src/json.hpp"
+#include "libs/json/src/json.hpp"
 using Json = nlohmann::json;
 
 class SystemStateModel;
