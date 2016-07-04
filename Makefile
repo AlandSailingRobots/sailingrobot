@@ -98,7 +98,7 @@ OBJECT_FILE = $(BUILD_DIR)/objects.tmp
 CFLAGS = -Wall -g -o2
 CPPFLAGS = -g -Wall -pedantic -Werror -std=c++11
 
-LIBS = -lsqlite3 -lgps -lrt -lwiringPi -lcurl -lpthread
+LIBS = -lsqlite3 -lgps -lrt -lcurl -lpthread
 LIBS_BOOST = -lboost_system -lboost_log -lboost_thread
 
 ifeq ($(TOOLCHAIN),raspi_cc)
@@ -129,7 +129,7 @@ $(BUILD_DIR):
 	$(MKDIR_P) $(BUILD_DIR)
 
 $(WIRING_PI_STATIC):
-	$(MAKE) -C $(WIRING_PI_PATH) static
+	$(MAKE) -C $(WIRING_PI_PATH)
 
 # Link and build
 $(EXECUTABLE) : $(BUILD_DIR) $(OBJECTS) $(WIRING_PI_STATIC)

@@ -5,7 +5,7 @@
 * Wiring PI (Can be found in the libs directory)
 * sqlite3-dev
 * libgps-dev
-* libboast-all-dev
+* libboost-all-dev
 * libcurl-openssl-dev
 * arm-linux-gnueabihf (For cross compiling to the PI)
 
