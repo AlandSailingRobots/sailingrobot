@@ -75,16 +75,11 @@ int main(int argc, char *argv[]) {
 	printf("  Sailing Robot\n");
 	printf("=================\n");
 
-	try {
-		if (m_logger.init("sailingrobot")) {
-			std::cout<< "successfull logger init"<<std::endl;
-		}
-		else {
-			std::cout<< "error in logger init"<<std::endl;
-		}
+	if (m_logger.init("sailingrobot")) {
+		Logger::log(LogType::INFO, "Logger 		[OK]")
 	}
-	catch (const char* e) {
-		std::cout<< "logger exeption thrown: "<< e <<std::endl;
+	else {
+		Logger::log(LogType::INFO, "Logger 		[FAILED]")
 	}
 
 	Logger::log("Built on %s at %s", __DATE__, __TIME__);
