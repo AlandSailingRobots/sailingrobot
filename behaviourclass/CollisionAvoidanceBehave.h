@@ -9,7 +9,7 @@
 #include "utility/Utility.h"
 #include "waypointrouting/WaypointRouting.h"
 #include "behaviourclass/LineFollowBehaviour.h"
-#include <libs/Eigen>
+#include "libs/Eigen/Dense"
 using Eigen::MatrixXd;
 
 class CollisionAvoidanceBehave:public RoutingBehaviour{
@@ -24,9 +24,10 @@ public:
                                       bool getHeadingFromCompass);  //make the computation of the commands return true if the computation was successfull
 
     void manageDatabase(double trueWindDirection, SystemStateModel &systemStateModel);
+/*
     double getRudderCommand();
     double getSailCommand();
-
+*/
 private:
 
     void setupWaypoints();

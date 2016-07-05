@@ -104,7 +104,7 @@ OBJECT_FILE = $(BUILD_DIR)/objects.tmp
 
 
 CFLAGS = -Wall -g -o2
-CPPFLAGS = -g -Wall -pedantic -Werror -std=c++11
+CPPFLAGS = -g -Wall -pedantic -std=c++11
 
 LIBS = -lsqlite3 -lgps -lrt -lcurl -lpthread
 LIBS_BOOST = -lboost_system -lboost_log -lboost_thread
