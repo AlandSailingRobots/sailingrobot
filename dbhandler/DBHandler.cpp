@@ -243,7 +243,7 @@ void DBHandler::updateWaypoints(std::string waypoints){
 	Json json = Json::parse(waypoints);
 	std::string DBPrinter = "";
 	std::string tempValue = "";
-	int valuesLimit = 4; //"Dirty" fix for limiting the amount of values requested from server waypoint entries (amount of fields n = valuesLimit + 1)
+	int valuesLimit = 5; //"Dirty" fix for limiting the amount of values requested from server waypoint entries (amount of fields n = valuesLimit + 1)
 	int limitCounter;
 
 	try {
@@ -273,7 +273,7 @@ void DBHandler::updateWaypoints(std::string waypoints){
 			}
 
 			//if (DBPrinter.size () > 0)  DBPrinter.resize (DBPrinter.size () - 1);
-			DBPrinter = DBPrinter + "0,0);";
+			DBPrinter = DBPrinter + "0);";
 
 			try {
 				queryTable(DBPrinter);
