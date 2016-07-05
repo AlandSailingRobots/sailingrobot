@@ -118,7 +118,7 @@ void LineFollowBehaviour::computeCommands(SystemStateModel &systemStateModel,std
         //GET DIRECTION - From the book Robotic Sailing 2012 and Robotic Sailing 2015
         double currentHeading = getHeading(systemStateModel,mockPosition,getHeadingFromCompass,position, m_nextWaypointModel);
         double signedDistance = calculateSignedDistance(position); // 'e'
-        int maxTackDistance = 10; //'r'
+        int maxTackDistance = 25; //'r'
         double phi = calculateAngleOfDesiredTrajectory(position);
         desiredHeading = phi - (2 * (M_PI / 4)/M_PI) * atan2(signedDistance,maxTackDistance);
 
