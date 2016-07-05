@@ -10,14 +10,13 @@ bool CollisionAvoidanceBehave::init()
     return true;
 }
 
-bool CollisionAvoidanceBehave::computeCommands((SystemStateModel &systemStateModel,std::unique_ptr<Position> const& position,
+void CollisionAvoidanceBehave::computeCommands(SystemStateModel &systemStateModel,std::unique_ptr<Position> const& position,
                                   double trueWindDirection, bool mockPosition,
                                   bool getHeadingFromCompass){
-    return true;
 }
 
 
-void CollisionAvoidanceBehave::manageDatabase(std::vector<float> &twdBuffer,SystemStateModel &m_systemStateModel){
+void CollisionAvoidanceBehave::manageDatabase(double trueWindDirection,SystemStateModel &m_systemStateModel){
 
 }
 void CollisionAvoidanceBehave::setupWaypoints(){}
