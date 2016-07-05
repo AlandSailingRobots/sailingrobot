@@ -2,22 +2,44 @@
 CollisionAvoidanceBehave::CollisionAvoidanceBehave(DBHandler *db):
   RoutingBehaviour(db)//super class call
 {
-    potential_field_dim(1,4);//Matlab name: dim //xmin xmax ymin ymax
-    potential_field_dim(0,1)=-100;
-    potential_field_dim(0,2)=100;
-    potential_field_dim(0,3)=-100;
-    potential_field_dim(0,4)=100;
+    potential_field_dim = Eigen::MatrixXd::Zero(1,4);//Matlab name: dim //xmin xmax ymin ymax
+    potential_field_dim(0,0)=-100;
+    potential_field_dim(0,1)=100;
+    potential_field_dim(0,2)=-100;
+    potential_field_dim(0,3)=100;
+    std::cout << "potential_field_dim: "<< std::endl;
+    std::cout << potential_field_dim<< std::endl;
+
     int step=5;
-    int rows_Z = (int)(abs(potential_field_dim(0,3)-potential_field_dim(0,4))/step)+1;
-    int cols_Z = (int)(abs(potential_field_dim(0,3)-potential_field_dim(0,4))/step)+1;
-    potential_Z(rows_Z,cols_Z);//Matlab name: Z
-    Eigen::VectorXd::LinSpaced(cols_Z,potential_field_dim(0,1),potential_field_dim(0,2));
-    /*
-    Eigen::MatrixXd point_x;//Matlab name: P1
-    Eigen::MatrixXd point_y;//Matlab name: P2
-    float step_coeff;//Matlab name: eta //In direction mode length of the repulsion of the obstacle
+    int rows_Z = (int)(abs(potential_field_dim(0,2)-potential_field_dim(0,3))/step)+1;
+    int cols_Z = (int)(abs(potential_field_dim(0,2)-potential_field_dim(0,3))/step)+1;
+    potential_Z = Eigen::MatrixXd::Zero(rows_Z,cols_Z);//Matlab name: Z
+    Eigen::VectorXd v = Eigen::VectorXd::LinSpaced(cols_Z,potential_field_dim(0,0),potential_field_dim(0,1));
+
+    std::cout << "rows_Z: "<< rows_Z << std::endl;
+    std::cout << "cols_Z: "<< cols_Z << std::endl;
+
+    std::cout << "potential_Z: "<< std::endl;
+    std::cout << potential_Z<< std::endl;
+
+    std::cout << "v "<< v.adjoint() << std::endl;
+
+    point_x = Eigen::MatrixXd::Zero(rows_Z,cols_Z);//Matlab name: P1
+    point_y = Eigen::MatrixXd::Zero(rows_Z,cols_Z);//Matlab name: P2
+
+    for(int i=0; i<rows_Z; i++){
+        point_x.row(i)=v.adjoint();
+        point_y.col(i)=v;
+    }
+    std::cout << "point_x: "<< std::endl;
+    std::cout << point_x<< std::endl;
+    std::cout << "point_y: "<< std::endl;
+    std::cout << point_y<< std::endl;
+
+    step_coeff=3;//Matlab name: eta //In direction mode length of the repulsion of the obstacle
 
 
+/*
     //Obstacles
     std::vector<Eigen::MatrixXd> mock_obstacle_list;//Matlab name: posObstacles //position qnd speed of mock obstacles
     std::vector<Eigen::MatrixXd> detected_obstacle_list_qhat;//Matlab name:  qhat
