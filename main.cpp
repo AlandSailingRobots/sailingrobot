@@ -75,16 +75,11 @@ int main(int argc, char *argv[]) {
 	printf("  Sailing Robot\n");
 	printf("=================\n");
 
-	try {
-		if (m_logger.init("sailingrobot")) {
-			std::cout<< "successfull logger init"<<std::endl;
-		}
-		else {
-			std::cout<< "error in logger init"<<std::endl;
-		}
+	if (m_logger.init("sailingrobot")) {
+		Logger::log(LogType::INFO, "Logger 		[OK]");
 	}
-	catch (const char* e) {
-		std::cout<< "logger exeption thrown: "<< e <<std::endl;
+	else {
+		Logger::log(LogType::INFO, "Logger 		[FAILED]");
 	}
 
 	Logger::log("Built on %s at %s", __DATE__, __TIME__);
@@ -110,7 +105,14 @@ int main(int argc, char *argv[]) {
     bool mockWindsensor = db.retrieveCellAsInt("mock","1","windsensor");
 
 	// Create main sailing robot controller
-    SailingRobot sr_handle(&externalCommand, &systemstate, &db);
+	int http_delay =  db.retrieveCellAsInt("httpsync_config", "1", "delay");
+	bool removeLogs = db.retrieveCellAsInt("httpsync_config", "1", "remove_logs");
+	//bool removeLogs = true;
+
+	httpsync_handle = new HTTPSync( &db, http_delay, removeLogs );
+
+
+    SailingRobot sr_handle(&externalCommand, &systemstate, &db, httpsync_handle);
 
 	GPSupdater gps_updater(&systemstate,mockGPS);
 	gps_handle = &gps_updater;
@@ -136,11 +138,7 @@ int main(int argc, char *argv[]) {
 
 		printf("-Starting threads...\n");
 
-		int http_delay =  db.retrieveCellAsInt("httpsync_config", "1", "delay");
-		bool removeLogs = db.retrieveCellAsInt("httpsync_config", "1", "remove_logs");
-		//bool removeLogs = true;
 
-		httpsync_handle.reset(new HTTPSync( &db, http_delay, removeLogs ));
 
 
 		bool xBee_sending = db.retrieveCellAsInt("xbee_config", "1", "send");
@@ -149,13 +147,13 @@ int main(int argc, char *argv[]) {
 		double xBee_loopTime = stod(db.retrieveCell("xbee_config", "1", "loop_time"));
 
 		xbee_handle = new xBeeSync(&externalCommand, &systemstate, &db, xBee_sendLogs, xBee_sending, xBee_receiving,xBee_loopTime);
-		
+
 		if(xbee_handle->init())
 		{
 			// Start xBeeSync thread
 			std::unique_ptr<ThreadRAII> xbee_sync_thread;
 
-			if (xBee_sending || xBee_receiving) 
+			if (xBee_sending || xBee_receiving)
 			{
 				xbee_sync_thread = std::unique_ptr<ThreadRAII>(new ThreadRAII(std::thread(threadXBeeSyncRun), ThreadRAII::DtorAction::detach));
 			}
