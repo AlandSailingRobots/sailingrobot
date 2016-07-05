@@ -28,7 +28,7 @@ void RoutingBehaviour::setNextWaypoint(WaypointModel &waypointModel)
 	}
 
 	if (waypointModel.id.empty() ) {
-		std::cout << "No waypoint found!"<< std::endl;
+		std::cout << "No waypoint found! Keeping last waypoint coordinates..."<< std::endl;
 	}
 	else{
 		std::cout << "New waypoint picked! ID:" << waypointModel.id <<" lon: "

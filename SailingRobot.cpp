@@ -106,8 +106,8 @@ void SailingRobot::run() {
 	double loop_time = std::stod(sr_loop_time);
 
 	bool usingLineFollow = std::stoi(m_dbHandler->retrieveCell("sailing_robot_config", "1", "line_follow"));
-	// bool previousBehaviour = usingLineFollow; //Used in while-loop to see if waypoint routing has changed
-	// int checkDBcounter = 0;  
+	//bool previousBehaviour = usingLineFollow; //Used in while-loop to see if waypoint routing has changed
+	//int checkDBcounter = 0;  
 
   	WaypointBehaviour waypB(m_dbHandler); 
   	LineFollowBehaviour LineFollowB(m_dbHandler);
@@ -123,7 +123,7 @@ void SailingRobot::run() {
 		timer.reset();
 
 
-		// if(checkDBcounter > 200)
+		// if(checkDBcounter > 15)
 		// {
 		// 	checkDBcounter = 0;
 		// 	usingLineFollow = std::stoi(m_dbHandler->retrieveCell("sailing_robot_config", "1", "line_follow"));
@@ -167,7 +167,6 @@ void SailingRobot::run() {
 		//Save data in database
 		behave->manageDatabase(trueWindDirection,m_systemStateModel);
 
-		// checkDBcounter++;
 		timer.sleepUntil(loop_time);
 	}
 
