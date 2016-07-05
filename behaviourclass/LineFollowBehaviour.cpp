@@ -163,8 +163,7 @@ void LineFollowBehaviour::computeCommands(SystemStateModel &systemStateModel,std
         std::cout << "speed: " << systemStateModel.gpsModel.speed << "   desiredHeading: " << desiredHeading << "   maxCommand: " << m_maxCommandAngle << 
         "   rudderCommand: " << m_rudderCommand  << "    SailCommand: " << m_sailCommand << std::endl;
         std::cout << "heading: " << currentHeading << std::endl;
-        printf("Tacking: "); printf(std::to_string(m_tack).c_str()); printf("    TackingDirection: "); printf(std::to_string(m_tackingDirection).c_str()); printf("\n");
-
+        printf("Tacking: %d     TackingDirection: %d\n", m_tack, m_tackingDirection);
     } else {
         m_logger.error("SailingRobot::run(), gps NaN. Using values from last iteration.\n");
         printf("GPS not online\n");
