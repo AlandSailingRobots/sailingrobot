@@ -42,13 +42,14 @@ private:
     MatrixXd potential_field_dim; //xmin xmax ymin ymax
 
     //Obstacles
-    std::vector<MatrixXd> mock_obstacle_list;
+    std::vector<MatrixXd> mock_obstacle_list;//position qnd speed of mock obstacles
     std::vector<MatrixXd> detected_obstacle_list_qhat;
     std::vector<MatrixXd> detected_obstacles;
     std::vector<MatrixXd> collisioned_obstacle;//Incle a memory of the previous encountered obstacles if not in direction mode
     float direction_boat_obstacle;
     float radius_obstacle;//security radius around the obstacle
     MatrixXd collision_avoidance_point;// Point to follow when an obstacle is detected
+    int is_obstacle_detected; //1 if an obstacle is detected
 
     //Targets
     std::vector<MatrixXd> target_list;
@@ -105,10 +106,12 @@ private:
                                     std::vector<Eigen::MatrixXd> const& detected_obstacle_list_qhat,
                                     float radius_obstacle,
                                     int can_compute_a_new_avoidance_point);
-    MatrixXd createWall(MatrixXd const& starting_point,MatrixXd const& ending_point,float step);
+
 
 
 */
+MatrixXd createWall(MatrixXd const& starting_point,MatrixXd const& ending_point,float step);
+moveObstacle(std::vector<MatrixXd>& mock_obstacle_list,std::vector<int> elements, float dt);
 
 };
 
