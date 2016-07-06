@@ -35,7 +35,6 @@ CollisionAvoidanceBehave::CollisionAvoidanceBehave(DBHandler *db):
     obs(1,0)=70;
     mock_obstacle_list.push_back(obs);
 
-    direction_boat_obstacle = 0;//Matlab name: directionObstacleDetected
     radius_obstacle = 10;//Matlab name: rq  //security radius around the obstacle
     collision_avoidance_point(2,1);//Matlab name: avoidCollisionPoint // Point to follow when an obstacle is detected
     collision_avoidance_point(0,0)=potential_field_dim(0,0);
@@ -100,7 +99,23 @@ int CollisionAvoidanceBehave::getHeading(SystemStateModel &m_systemStateModel,bo
     return 1;
 }
 
-void CollisionAvoidanceBehave::mockObstacleDetection(){}//Matlab name: calculate_potField
+//Matlab name: obstacle_detection
+void CollisionAvoidanceBehave::mockObstacleDetection(){
+    std::vector<Eigen::MatrixXd> a;
+    std::vector<float> b;
+    detected_obstacles=a;
+    direction_boat_obstacle=b;
+    float theta0 = 0;
+    for(int i=0; i<(int)mock_obstacle_list.size();i++){
+        if(sqrt(pow((mock_obstacle_list[i](0,0)-boat_state(0,0)),2)+pow((mock_obstacle_list[i](1,0)-boat_state(0,1)),2)) < mock_detection_distance ){
+            theta0=atan2(mock_obstacle_list[i](1,0)-boat_state(0,1),mock_obstacle_list[i](0,0)-boat_state(0,0))-(fmod((boat_state(0,2)+M_PI),(2.0*M_PI))-M_PI);
+            if(abs(theta0)<=(mock_detection_angle)){
+                detected_obstacles.push_back(mock_obstacle_list[i]);
+                direction_boat_obstacle.push_back(theta0);
+            }
+        }
+    }
+}
 void CollisionAvoidanceBehave::calculatePotentialField(){}//Matlab name: calculate_potField
 void CollisionAvoidanceBehave::avoidObstacle(){}//Matlab name: avoid_obstacle
 void CollisionAvoidanceBehave::obstacleOnACollisionCourse(){}//Matlab name: boat_on_collision_course
@@ -117,6 +132,17 @@ void CollisionAvoidanceBehave::moveObstacle(std::vector<Eigen::MatrixXd>& mock_o
 
 
 void CollisionAvoidanceBehave::printStdVectorMat(std::string const& name, std::vector<Eigen::MatrixXd> const& v){
+
+    std::cout << " " << std::endl;
+    std::cout << name << " : " << std::endl;
+    std::cout << " " << std::endl;
+    for(int i=0; i<(int)v.size(); ++i){
+        std::cout <<v[i] << std::endl;
+        std::cout << " " << std::endl;
+    }
+}
+
+void printStdVectorFloat(std::string const& name, std::vector<float> const& v){
 
     std::cout << " " << std::endl;
     std::cout << name << " : " << std::endl;
@@ -152,7 +178,7 @@ void  CollisionAvoidanceBehave::printCollisionAvoidanceBehave(int rows_Z,int col
     std::cout << "size detected_obstacle_list_qhat : " << detected_obstacle_list_qhat.size() << std::endl;
     std::cout << "size detected_obstacles : " << detected_obstacles.size() << std::endl;
     std::cout << "size collisioned_obstacle : " << collisioned_obstacle.size() << std::endl;
-    std::cout << "direction_boat_obstacle : " << direction_boat_obstacle << std::endl;
+    std::cout << "size direction_boat_obstacle : " << direction_boat_obstacle.size() << std::endl;
     std::cout << "radius_obstacle : " << radius_obstacle << std::endl;
     printMat("collision_avoidance_point",collision_avoidance_point);
     std::cout << "is_obstacle_detected : " << is_obstacle_detected << std::endl;

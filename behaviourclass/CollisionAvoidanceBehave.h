@@ -45,7 +45,7 @@ private:
     std::vector<Eigen::MatrixXd> detected_obstacle_list_qhat;//Matlab name:  qhat
     std::vector<Eigen::MatrixXd> detected_obstacles;//Matlab name: detectedObstacles
     std::vector<Eigen::MatrixXd> collisioned_obstacle;//Matlab name: collisionedObstacle//Incle a memory of the previous encountered obstacles if not in direction mode
-    float direction_boat_obstacle;//Matlab name: directionObstacleDetected
+    std::vector<float> direction_boat_obstacle;//Matlab name: directionObstacleDetected //Empty when no direction
     float radius_obstacle;//Matlab name: rq  //security radius around the obstacle
     Eigen::MatrixXd collision_avoidance_point;//Matlab name: avoidCollisionPoint // Point to follow when an obstacle is detected
     int is_obstacle_detected;//Matlab name: is_obstacle_detected //1 if an obstacle is detected
@@ -81,7 +81,7 @@ private:
         std::vector<Eigen::MatrixXd> detected_obstacles,
         float direction_boat_obstacle
     */
-    void mockObstacleDetection();//Matlab name: calculate_potField
+    void mockObstacleDetection();//Matlab name: obstacle_detection
 
 /*
     calculatePotentialField : Potential field computation to place a collision_avoidance_point in its global minimum
