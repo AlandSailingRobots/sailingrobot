@@ -4,12 +4,14 @@
 #include <math.h>
 #include <algorithm>
 #include <cmath>
+#include <iostream>
 #include "coursecalculation/CourseCalculation.h"
 #include "RoutingBehaviour.h"
 #include "utility/Utility.h"
 #include "waypointrouting/WaypointRouting.h"
 #include "behaviourclass/LineFollowBehaviour.h"
 #include "libs/Eigen/Dense"
+#include <vector>
 
 class CollisionAvoidanceBehave:public RoutingBehaviour{
 public:
@@ -19,7 +21,7 @@ public:
     bool init();
     void computeCommands(SystemStateModel &systemStateModel,std::unique_ptr<Position> const& position,
                                         double trueWindDirection, bool mockPosition,
-                                        bool getHeadingFromCompass); 
+                                        bool getHeadingFromCompass);
     void manageDatabase(double trueWindDirection, SystemStateModel &systemStateModel);
 /*
     double getRudderCommand();
@@ -153,6 +155,10 @@ private:
     Eigen::MatrixXd createWall(Eigen::MatrixXd const& starting_point,Eigen::MatrixXd const& ending_point,float step);
 
     void moveObstacle(std::vector<Eigen::MatrixXd>& mock_obstacle_list,std::vector<int> elements, float dt);
+
+    void printStdVectorMat(std::string const& name, std::vector<Eigen::MatrixXd> const& v);
+    void printMat(std::string const& name,Eigen::MatrixXd const& mat);
+    void printCollisionAvoidanceBehave(int rows_Z,int cols_Z,Eigen::VectorXd v);
 
 };
 
