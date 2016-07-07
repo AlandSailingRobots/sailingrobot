@@ -75,14 +75,14 @@ int main(int argc, char *argv[]) {
 	printf("  Sailing Robot\n");
 	printf("=================\n");
 
-	if (m_logger.init("sailingrobot")) {
-		Logger::log(LogType::INFO, "Logger 		[OK]");
+	printf("\nBuilt on %s at %s\n\n", __DATE__, __TIME__);
+
+	if (Logger::init()) {
+		Logger::log(LogType::INFO, "Logger init 		[OK]");
 	}
 	else {
-		Logger::log(LogType::INFO, "Logger 		[FAILED]");
+		Logger::log(LogType::INFO, "Logger init 		[FAILED]");
 	}
-
-	Logger::log("Built on %s at %s", __DATE__, __TIME__);
 
 	/* Default time */
 	ExternalCommand externalCommand("1970-04-10T10:53:15.1234Z",true,0,0);
