@@ -41,9 +41,8 @@ void HTTPSync::run() {
 
 void HTTPSync::setupHTTPSync() {
 
-    m_pushOnlyLatestLogs = true;
-    //Not yet implemented in database:
-    //m_onlyLatestLogs = m_dbHandler->retrieveCellAsInt("httpsync_config", "1", "push_only_latest_logs");
+    m_pushOnlyLatestLogs = m_dbHandler->retrieveCellAsInt("httpsync_config", "1", "push_only_latest_logs");
+    Logger::log("httpSync latest set to " + std::to_string(m_pushOnlyLatestLogs));
 
     try {
         setShipID( m_dbHandler->retrieveCell("server", "1", "boat_id") );
