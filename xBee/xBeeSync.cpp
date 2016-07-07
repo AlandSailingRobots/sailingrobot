@@ -47,6 +47,7 @@ bool xBeeSync::init()
 void xBeeSync::run() {
 	std::cout << "*xBeeSync thread started." << std::endl;
 	m_logger.info("*xBeeSync thread started.");
+	m_pushOnlyLatestLogs = m_db->retrieveCellAsInt("xbee_config", "1", "push_only_latest_logs");
 
 	while(isRunning()) {
 		m_timer.reset();
@@ -54,8 +55,7 @@ void xBeeSync::run() {
 
 		if(m_sending) {
 			if(m_sendLogs) {
-				//"true" should be variable; see HTTPSync
-				std::string logs = m_db->getLogs(true);
+				std::string logs = m_db->getLogs(m_pushOnlyLatestLogs);
 				m_xBee.transmitData(m_xbee_fd, logs);
 
 			} else {

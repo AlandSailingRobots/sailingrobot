@@ -84,6 +84,11 @@ SRC = 	GPSupdater.cpp SailingRobot.cpp WindsensorController.cpp logger/Logger.cp
 
 export INC = -I./ -I./libs
 
+INC = -I./ -I./libs -I./libs/wiringPi/wiringPi
+
+WIRING_PI_PATH = ./libs/wiringPi/wiringPi/
+WIRING_PI_STATIC = ./libs/wiringPi/wiringPi/libwiringPi.so.2.32
+
 # Object files
 OBJECTS = $(addprefix $(BUILD_DIR)/, $(SRC:.cpp=.o))
 OBJECT_MAIN = $(addprefix $(BUILD_DIR)/, $(SRC_MAIN:.cpp=.o))
@@ -131,7 +136,7 @@ export MKDIR_P = mkdir -p
 all: $(EXECUTABLE) stats
 
 # Builds the intergration test, requires the whole system to be built before
-build_tests: $(OBJECTS)
+build_tests: $(OBJECTS) $(EXECUTABLE)
 	@echo Building tests...
 	@$(MAKE) -f $(TEST_MAKEFILE)
 
@@ -143,12 +148,15 @@ clean_tests:
 $(BUILD_DIR):
 	@$(MKDIR_P) $(BUILD_DIR)
 
+$(WIRING_PI_STATIC):
+	$(MAKE) -C $(WIRING_PI_PATH)
+
 # Link and build
-$(EXECUTABLE) : $(BUILD_DIR) $(OBJECTS) $(OBJECT_MAIN)
+$(EXECUTABLE) : $(BUILD_DIR) $(OBJECTS) $(WIRING_PI_STATIC) $(OBJECT_MAIN)
 	rm -f $(OBJECT_FILE)
 	@echo Linking object files
 	@echo -n " " $(OBJECTS) >> $(OBJECT_FILE)
-	@$(CXX) $(LDFLAGS) @$(OBJECT_FILE) $(OBJECT_MAIN) -o $@ $(LIBS) $(LIBS_BOOST)
+	$(CXX) $(LDFLAGS) @$(OBJECT_FILE) $(WIRING_PI_STATIC) $(OBJECT_MAIN) -o $@ $(LIBS) $(LIBS_BOOST)
 	@echo Built using toolchain: $(TOOLCHAIN)
 
 # Compile CPP files into the build folder
