@@ -44,8 +44,8 @@ void DBHandler::getDataAsJson(std::string select, std::string table, std::string
 	}
 
 	Json jsonEntry;
-	for (auto i = 0; i < rows; i++) {
-		for(auto j = 0; j < columnNames.size(); j++) {
+	for (int i = 0; i < rows; i++) {
+		for(unsigned int j = 0; j < columnNames.size(); j++) {
 			int index = j+(columns*i);
 			jsonEntry[columnNames.at(j)] = values.at(index);
 		}
@@ -243,7 +243,7 @@ void DBHandler::updateWaypoints(std::string waypoints){
 	Json json = Json::parse(waypoints);
 	std::string DBPrinter = "";
 	std::string tempValue = "";
-	int valuesLimit = 4; //"Dirty" fix for limiting the amount of values requested from server waypoint entries (amount of fields n = valuesLimit + 1)
+	int valuesLimit = 5; //"Dirty" fix for limiting the amount of values requested from server waypoint entries (amount of fields n = valuesLimit + 1)
 	int limitCounter;
 
 	try {
@@ -273,7 +273,7 @@ void DBHandler::updateWaypoints(std::string waypoints){
 			}
 
 			//if (DBPrinter.size () > 0)  DBPrinter.resize (DBPrinter.size () - 1);
-			DBPrinter = DBPrinter + "0,0);";
+			DBPrinter = DBPrinter + "0);";
 
 			try {
 				queryTable(DBPrinter);
@@ -435,9 +435,9 @@ std::string DBHandler::getWaypoints() {
 	try {
 		rows = getRows("waypoints");
 		for(auto i = 1; i < rows; ++i) {
-			getDataAsJson("id,latitude,longitude,radius","waypoints",wp+std::to_string(i),std::to_string(i),json,true);
+			getDataAsJson("id,latitude,longitude,declination,radius","waypoints",wp+std::to_string(i),std::to_string(i),json,true);
 		}
-		getDataAsJson("id,latitude,longitude,radius","waypoints",wp+std::to_string(rows),std::to_string(rows),json,true);
+		getDataAsJson("id,latitude,longitude,declination,radius","waypoints",wp+std::to_string(rows),std::to_string(rows),json,true);
 	} catch (const char * error) {
 		m_logger.error("error in DBHandler::getWaypoints()");
 		std::stringstream ss;

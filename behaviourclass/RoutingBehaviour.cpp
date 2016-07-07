@@ -1,4 +1,5 @@
 #include "RoutingBehaviour.h"
+bool RoutingBehaviour::waypointsChanged = false;
 
 RoutingBehaviour::RoutingBehaviour(DBHandler *db):  m_dbHandler(db){
 }
@@ -13,6 +14,11 @@ double RoutingBehaviour::getRudderCommand()
     return m_rudderCommand;
 }
 
+void RoutingBehaviour::setWaypointsChanged()
+{
+	waypointsChanged = true; //if waypoints changed in Database during run, bool set true
+}
+
 void RoutingBehaviour::setNextWaypoint(WaypointModel &waypointModel)
 {
     try {
@@ -20,19 +26,15 @@ void RoutingBehaviour::setNextWaypoint(WaypointModel &waypointModel)
 	} catch (const char * error) {
 		m_logger.error(error);
 	}
-	try {
-		if (waypointModel.id.empty() ) {
-			std::cout << "No waypoint found!"<< std::endl;
-			throw "No waypoint found!";
-		}
-		else{
-			std::cout << "New waypoint picked! ID:" << waypointModel.id <<" lon: "
-			<< waypointModel.positionModel.longitude
-			<< " lat: " << waypointModel.positionModel.latitude << " rad: "
-			<< waypointModel.radius << std::endl;
-		}
-	} catch (const char * error) {
-		m_logger.error(error);
+
+	if (waypointModel.id.empty() ) {
+		std::cout << "No waypoint found! Keeping last waypoint coordinates..."<< std::endl;
+	}
+	else{
+		std::cout << "New waypoint picked! ID:" << waypointModel.id <<" lon: "
+		<< waypointModel.positionModel.longitude
+		<< " lat: " << waypointModel.positionModel.latitude << " rad: "
+		<< waypointModel.radius << std::endl;
 	}
 
 	m_logger.info("setupWaypoint() done");
@@ -62,5 +64,6 @@ int RoutingBehaviour::getHeading(SystemStateModel &systemStateModel,bool mockPos
 	if (getHeadingFromCompass && acceptedCompassSpeed) {
     	return Utility::addDeclinationToHeading(systemStateModel.compassModel.heading, waypointModel.declination);
 	}
+	
     return systemStateModel.gpsModel.heading;
 }

@@ -12,6 +12,10 @@
 #include <iomanip>
 #include <ctime>
 
+
+xBeeSync* xbee_handle;
+
+
 static void threadXBeeSyncRun() {
 	try {
 		xbee_handle->run();
@@ -58,30 +62,27 @@ int main(int argc, char *argv[]) {
 
 	std::string path, db_name, errorLog;
 	if (argc < 2) {
-		path = "/root/sailingrobot";
-		db_name = "/asr.db";
-		errorLog = "/errors.log";
+		path = "./";
+		db_name = "asr.db";
+		errorLog = "errors.log";
 	} else {
 		path = std::string(argv[1]);
-		db_name = "/asr.db";
-		errorLog = "/errors.log";
+		db_name = "asr.db";
+		errorLog = "errors.log";
 	}
 
 	printf("\n");
 	printf("  Sailing Robot\n");
 	printf("=================\n");
 
-	try {
-		if (m_logger.init("sailingrobot")) {
-			std::cout<< "successfull logger init"<<std::endl;
-		}
-		else {
-			std::cout<< "error in logger init"<<std::endl;
-		}
+	if (m_logger.init("sailingrobot")) {
+		Logger::log(LogType::INFO, "Logger 		[OK]");
 	}
-	catch (const char* e) {
-		std::cout<< "logger exeption thrown: "<< e <<std::endl;
+	else {
+		Logger::log(LogType::INFO, "Logger 		[FAILED]");
 	}
+
+	Logger::log("Built on %s at %s", __DATE__, __TIME__);
 
 	/* Default time */
 	ExternalCommand externalCommand("1970-04-10T10:53:15.1234Z",true,0,0);
@@ -104,12 +105,14 @@ int main(int argc, char *argv[]) {
     bool mockWindsensor = db.retrieveCellAsInt("mock","1","windsensor");
 
 	// Create main sailing robot controller
-	try {
-		sr_handle = std::make_unique<SailingRobot>(&externalCommand, &systemstate, &db);
-	} catch (const char * error) {
-		printf("!SR INIT ERROR: %s\n", error);
-		return 1;
-	}
+	int http_delay =  db.retrieveCellAsInt("httpsync_config", "1", "delay");
+	bool removeLogs = db.retrieveCellAsInt("httpsync_config", "1", "remove_logs");
+	//bool removeLogs = true;
+
+	httpsync_handle = new HTTPSync( &db, http_delay, removeLogs );
+
+
+    SailingRobot sr_handle(&externalCommand, &systemstate, &db, httpsync_handle);
 
 	GPSupdater gps_updater(&systemstate,mockGPS);
 	gps_handle = &gps_updater;
@@ -117,7 +120,7 @@ int main(int argc, char *argv[]) {
 	try {
 		printf("-Initializing...\n");
 
-		sr_handle->init(path, errorLog);
+		sr_handle.init(path, errorLog);
 
 		printf(" Starting Windsensor\t\t");
 		windsensor_handle.reset(
@@ -135,23 +138,25 @@ int main(int argc, char *argv[]) {
 
 		printf("-Starting threads...\n");
 
-		int http_delay =  db.retrieveCellAsInt("httpsync_config", "1", "delay");
-		bool removeLogs = db.retrieveCellAsInt("httpsync_config", "1", "remove_logs");
-		//bool removeLogs = true;
 
-		httpsync_handle.reset(new HTTPSync( &db, http_delay, removeLogs ));
+
 
 		bool xBee_sending = db.retrieveCellAsInt("xbee_config", "1", "send");
 		bool xBee_receiving = db.retrieveCellAsInt("xbee_config", "1", "recieve");
 		bool xBee_sendLogs = db.retrieveCellAsInt("xbee_config", "1", "send_logs");
 		double xBee_loopTime = stod(db.retrieveCell("xbee_config", "1", "loop_time"));
+
+		xbee_handle = new xBeeSync(&externalCommand, &systemstate, &db, xBee_sendLogs, xBee_sending, xBee_receiving,xBee_loopTime);
 		
-		// Start xBeeSync thread
-		std::unique_ptr<ThreadRAII> xbee_sync_thread;
-		if (xBee_sending || xBee_receiving) {
-			xbee_handle.reset(new xBeeSync(&externalCommand, &systemstate, &db, xBee_sendLogs, xBee_sending, xBee_receiving,xBee_loopTime));
-			xbee_sync_thread = std::unique_ptr<ThreadRAII>(
-				new ThreadRAII(std::thread(threadXBeeSyncRun), ThreadRAII::DtorAction::detach));
+		if(xbee_handle->init())
+		{
+			// Start xBeeSync thread
+			std::unique_ptr<ThreadRAII> xbee_sync_thread;
+
+			if (xBee_sending || xBee_receiving) 
+			{
+				xbee_sync_thread = std::unique_ptr<ThreadRAII>(new ThreadRAII(std::thread(threadXBeeSyncRun), ThreadRAII::DtorAction::detach));
+			}
 		}
 
 		// I2CController thread
@@ -188,13 +193,16 @@ int main(int argc, char *argv[]) {
 		) );
 
 		printf("-Starting main loop...\n");
-		sr_handle->run();
+		sr_handle.run();
 		printf("-DONE\n");
 
 	} catch (const char * e) {
 		printf("ERROR[%s]\n\n",e);
 		return 1;
 	}
+
+
+	delete xbee_handle;
 
 	printf("-Finished.\n");
 	return 0;

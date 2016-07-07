@@ -18,6 +18,13 @@ public:
 			 DBHandler* db, bool sendLogs, bool sending, bool receiving, double loopTime);
 	~xBeeSync() {};
 
+	/////////////////////////////////////////////////////////////////////////////////////
+ 	/// Initialises the xBee module and returns false if the function fails to setup the
+ 	/// xbee. 
+ 	///
+ 	/////////////////////////////////////////////////////////////////////////////////////
+	bool init();
+
 	void run();
 	void close();
 	
@@ -36,6 +43,7 @@ private:
 	bool m_sending;
 	bool m_receiving;
 	bool m_sendLogs;
+	bool m_pushOnlyLatestLogs;
 	Logger m_logger;
 	double m_loopTime;
 

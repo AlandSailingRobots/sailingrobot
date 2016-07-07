@@ -17,11 +17,11 @@ public:
 
     bool init();
 
-    bool computeCommands(SystemStateModel &systemStateModel,std::unique_ptr<Position> const& position,
+    void computeCommands(SystemStateModel &systemStateModel,std::unique_ptr<Position> const& position,
                                       double trueWindDirection, bool mockPosition,
                                       bool getHeadingFromCompass);  //make the computation of the commands return true if the computation was successfull
 
-    void manageDatabase(std::vector<float> &twdBuffer,SystemStateModel &systemStateModel);
+    void manageDatabase(double trueWindDirection, SystemStateModel &systemStateModel);
     double calculateSignedDistance(std::unique_ptr<Position> const& position);
     double calculateAngleOfDesiredTrajectory(std::unique_ptr<Position> const& position);
 

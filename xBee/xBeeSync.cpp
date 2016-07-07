@@ -23,19 +23,31 @@ xBeeSync::xBeeSync(ExternalCommand* externalCommand, SystemState *systemState,
 	m_receiving(receiving),
 	m_sendLogs(sendLogs),
 	m_loopTime(loopTime)
+{ }
+
+bool xBeeSync::init()
 {
-	//	skapa ny xBee och kör xbee.init()
+	bool rv = false;
+
 	m_xbee_fd = m_xBee.init();
-	std::cout << "*xBee initialized - receiving:" << m_receiving
-			  << " sending:" << m_sending << std::endl;
-	m_logger.info(std::string(
-		"*xBee initialized - receiving:") +	std::to_string(m_receiving)	+
-		" sending:" + std::to_string(m_sending));
+
+	if(m_xbee_fd < 0)
+	{
+		CLASS_ERROR("Failed to initialise xBee module");
+	}
+	else
+	{
+		rv = true;
+		std::cout << "*xBee initialized - receiving:" << m_receiving << " sending:" << m_sending << std::endl;
+		m_logger.info(std::string("*xBee initialized - receiving:") +	std::to_string(m_receiving)	+ " sending:" + std::to_string(m_sending));
+	}
+	return rv;
 }
 
 void xBeeSync::run() {
 	std::cout << "*xBeeSync thread started." << std::endl;
 	m_logger.info("*xBeeSync thread started.");
+	m_pushOnlyLatestLogs = m_db->retrieveCellAsInt("xbee_config", "1", "push_only_latest_logs");
 
 	while(isRunning()) {
 		m_timer.reset();
@@ -43,8 +55,7 @@ void xBeeSync::run() {
 
 		if(m_sending) {
 			if(m_sendLogs) {
-				//"true" should be variable; see HTTPSync
-				std::string logs = m_db->getLogs(true);
+				std::string logs = m_db->getLogs(m_pushOnlyLatestLogs);
 				m_xBee.transmitData(m_xbee_fd, logs);
 
 			} else {

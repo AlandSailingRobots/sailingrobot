@@ -17,14 +17,28 @@
 
 
 SailingRobot::SailingRobot(ExternalCommand* externalCommand,
-						   SystemState *systemState, DBHandler *db) :
+						   SystemState *systemState, DBHandler *db, HTTPSync* httpSync) :
 	m_mockPosition(db->retrieveCellAsInt("mock", "1", "position")),
 	m_mockMaestro(db->retrieveCellAsInt("mock", "1", "maestro")),
 
-	m_dbHandler(db),
+	
 
+	
 	m_externalCommand(externalCommand),
 	m_systemState(systemState),
+	m_dbHandler(db),
+	m_httpSync(httpSync),
+	m_waypointModel(PositionModel(1.5,2.7), 100, "", 6),
+	m_waypointRouting(m_waypointModel,
+		atof(m_dbHandler->retrieveCell("waypoint_routing_config", "1", "radius_ratio").c_str()),
+		atof(m_dbHandler->retrieveCell("course_calculation_config", "1", "tack_angle").c_str()),
+		atof(m_dbHandler->retrieveCell("course_calculation_config", "1", "tack_max_angle").c_str()),
+		atof(m_dbHandler->retrieveCell("course_calculation_config", "1", "tack_min_speed").c_str()),
+		atof(m_dbHandler->retrieveCell("course_calculation_config", "1", "sector_angle").c_str()),
+		 atof(m_dbHandler->retrieveCell("waypoint_routing_config", "1", "max_command_angle ").c_str()),
+		 atof(m_dbHandler->retrieveCell("waypoint_routing_config", "1", "rudder_speed_min").c_str())
+		),
+
 
 	m_systemStateModel(
 		SystemStateModel(
@@ -37,9 +51,8 @@ SailingRobot::SailingRobot(ExternalCommand* externalCommand,
 		)
 	)
 {
-        if(m_mockPosition) { position.reset(new MockPosition() );  }
-        else { position.reset(new RealPosition(m_systemStateModel) );  }
-			
+	if(m_mockPosition) { position.reset(new MockPosition() );  }
+	else { position.reset(new RealPosition(m_systemStateModel) );  }			
 }
 
 SailingRobot::~SailingRobot() {
@@ -144,7 +157,7 @@ void SailingRobot::run() {
 	m_running = true;
 	routeStarted = true;
 
-	int rudderCommand, sailCommand;//,heading = 0, insertScanOnce = 0;
+	double rudderCommand, sailCommand;//,heading = 0, insertScanOnce = 0;
 
 	//int windDir = 0; // outComment if use of tureWindDirCalculation
 	std::vector<float> twdBuffer;
@@ -159,7 +172,7 @@ void SailingRobot::run() {
 
 	bool usingLineFollow = std::stoi(m_dbHandler->retrieveCell("sailing_robot_config", "1", "line_follow"));
 	//bool previousBehaviour = usingLineFollow; //Used in while-loop to see if waypoint routing has changed
-
+	//int checkDBcounter = 0;  
 
   	WaypointBehaviour waypB(m_dbHandler); 
   	LineFollowBehaviour LineFollowB(m_dbHandler);
@@ -169,26 +182,32 @@ void SailingRobot::run() {
 	else
 		behave = &waypB;
   	behave->init();
+	m_httpSync->setWaypointUpdateCallback(behave->setWaypointsChanged);
+
 	while(m_running) {
 		timer.reset();
 
-		// usingLineFollow = std::stoi(m_dbHandler->retrieveCell("sailing_robot_config", "1", "line_follow"));
-		// if (usingLineFollow != previousBehaviour){ //If following behaviour changes in database
-		// 	if(previousBehaviour)
-		// 		behave = &waypB;						
-		// 	else									//AN OPTION TO CHANGE ROUTING BEHAVIOUR DURING RUN. NOT SMART TO CHECK DBHandler EVERY TIME??? /Oliver
-		// 		behave = &LineFollowB;
 
-		// 	behave->init();
-		// 	previousBehaviour = usingLineFollow;
+		// if(checkDBcounter > 15)
+		// {
+		// 	checkDBcounter = 0;
+		// 	usingLineFollow = std::stoi(m_dbHandler->retrieveCell("sailing_robot_config", "1", "line_follow"));
+		// 	if (usingLineFollow != previousBehaviour){ //If following behaviour changes in database
+		// 		if(previousBehaviour)
+		// 			behave = &waypB;						
+		// 		else									
+		// 			behave = &LineFollowB;
+
+		// 		behave->init();
+		// 		previousBehaviour = usingLineFollow;
+		// 	}
 		// }
-		
+
 		//Get data from SystemStateModel to local object
 		m_systemState->getData(m_systemStateModel);
-
 		//calc & set TWD
 		trueWindDirection = Utility::getTrueWindDirection(m_systemStateModel, twdBuffer, twdBufferMaxSize);
-		
+
 		//Compute the commands to send
 		behave->computeCommands(m_systemStateModel,position, trueWindDirection ,m_mockPosition, m_getHeadingFromCompass);
 
@@ -248,8 +267,6 @@ void SailingRobot::run() {
 			sailCommand = m_externalCommand->getSailCommand();
 		}
 
-		printf("sailCommand: "); printf(std::to_string(sailCommand).c_str()); printf("    : rudderCommand: "); printf(std::to_string(rudderCommand).c_str()); printf("\n");
-
 		//rudder adjustment
 		m_rudderServo.setPosition(rudderCommand);
 		//sail adjustment
@@ -259,7 +276,7 @@ void SailingRobot::run() {
 		m_systemState->setSail(sailCommand);
 
 		//Save data in database
-		behave->manageDatabase(twdBuffer,m_systemStateModel);
+		behave->manageDatabase(trueWindDirection,m_systemStateModel);
 
 		timer.sleepUntil(loop_time);
 	}

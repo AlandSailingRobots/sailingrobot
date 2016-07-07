@@ -41,9 +41,7 @@ void HTTPSync::run() {
 
 void HTTPSync::setupHTTPSync() {
 
-    m_pushOnlyLatestLogs = true;
-    //Not yet implemented in database:
-    //m_onlyLatestLogs = m_dbHandler->retrieveCellAsInt("httpsync_config", "1", "push_only_latest_logs");
+    m_pushOnlyLatestLogs = m_dbHandler->retrieveCellAsInt("httpsync_config", "1", "push_only_latest_logs");
 
     try {
         setShipID( m_dbHandler->retrieveCell("server", "1", "boat_id") );
@@ -107,6 +105,12 @@ void HTTPSync::setServerURL(std::string URL) {
     serverURL = URL;
 }
 
+void HTTPSync::setWaypointUpdateCallback(waypointUpdateCallback callBack){
+    if (callBack != NULL){
+        m_callBack = callBack;
+    }
+}
+
 std::string HTTPSync::getData(std::string call) {
     return serve("",call);
 }
@@ -150,11 +154,13 @@ void HTTPSync::updateWaypoints() {
             std::string waypoints = getData("getWaypoints"); //Waypoints call implemented? //SERVE("", "getWaypoints")'
             m_dbHandler->updateWaypoints(waypoints);
             m_logger.info("Waypoints fetched from web");
+            if (m_callBack != NULL){
+                m_callBack();
+            } 
         }catch(const char* error){
             m_logger.error("Error in HTTPSync::updateWaypoints");
         }
     }
-
 }
 
 std::string HTTPSync::serve(std::string data, std::string call) {

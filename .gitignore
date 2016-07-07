@@ -1,0 +1,14 @@
+
+# Build files
+build/
+sr
+
+# Database and log files
+*.db
+*.db-journal
+*.log
+
+
+# Other
+*.vim
+libs/wiringPi/wiringPi/libwiringPi.a

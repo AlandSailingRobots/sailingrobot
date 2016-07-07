@@ -84,20 +84,21 @@ double LineFollowBehaviour::calculateAngleOfDesiredTrajectory(std::unique_ptr<Po
     return phi;
 }
 
-bool LineFollowBehaviour::computeCommands(SystemStateModel &systemStateModel,std::unique_ptr<Position> const& position,
+void LineFollowBehaviour::computeCommands(SystemStateModel &systemStateModel,std::unique_ptr<Position> const& position,
                                       double trueWindDirection, bool mockPosition, bool getHeadingFromCompass){
 
     if(m_previousWaypointModel.id == "")
         setPreviousWayPoint(systemStateModel);
     
-    printf("next waypoint ID: "); printf(m_nextWaypointModel.id.c_str()); 
-    printf("     next waypoint lat: "); printf(std::to_string(m_nextWaypointModel.positionModel.longitude).c_str()); 
-    printf("     next waypoint long: "); printf(std::to_string(m_nextWaypointModel.positionModel.latitude).c_str());
-    printf("\n");
-    printf("previous waypoint ID: "); printf(m_previousWaypointModel.id.c_str()); 
-    printf("  previous waypoint lat: "); printf(std::to_string(m_previousWaypointModel.positionModel.longitude).c_str()); 
-    printf("  previous waypoint long: "); printf(std::to_string(m_previousWaypointModel.positionModel.latitude).c_str());
-    printf("\n");
+    if(waypointsChanged) //if waypoints changed during run, check to see if current targeted waypoints have changed
+    {
+        int temp = m_wayPointCount;
+        m_wayPointCount = 0; //set 0 so it doesn't set previous to next.
+        setPreviousWayPoint(systemStateModel);
+        setNextWaypoint(m_nextWaypointModel);
+        waypointsChanged = false;
+        m_wayPointCount = temp;
+    }
 
     position->updatePosition();
     bearingToNextWaypoint = m_courseMath.calculateBTW(position->getModel(), m_nextWaypointModel.positionModel); //calculated for database
@@ -127,7 +128,7 @@ bool LineFollowBehaviour::computeCommands(SystemStateModel &systemStateModel,std
             m_tackingDirection = Utility::sgn(signedDistance);
             m_tack = false;
         }
-
+        
         //To stop the boat from oscillating during tack, we set the boat to tack from one maxTackDistance of the line to the other, not letting it switch direction in between.
         double desiredHeading2 = desiredHeading; //Save desiredHeading into a temp variable so we don't have faulty values for the if-statements
         if(cos(trueWindDirection - desiredHeading) + cos(m_tackAngle + M_PI/8) > 0)
@@ -148,26 +149,26 @@ bool LineFollowBehaviour::computeCommands(SystemStateModel &systemStateModel,std
         //SET RUDDER
         if(cos(currentHeading - desiredHeading) < 0) //if boat is going the wrong direction
             m_rudderCommand = Utility::sgn(systemStateModel.gpsModel.speed) * m_maxCommandAngle * Utility::sgn(sin(currentHeading - desiredHeading));
-        else                                
+        else                      
             m_rudderCommand = Utility::sgn(systemStateModel.gpsModel.speed) * m_maxCommandAngle * sin(currentHeading - desiredHeading);
+       
 
-        //SET SAIL                          //Calculate apparent wind from true wind.
-        std::array<double, 2> wcaw = { systemStateModel.windsensorModel.speed * cos(trueWindDirection - currentHeading) - systemStateModel.gpsModel.speed, 
-                                        systemStateModel.windsensorModel.speed * sin(trueWindDirection - currentHeading)}; 
-        double apparentWindAngle = atan2(wcaw[0], wcaw[1]); 
+        //SET SAIL
+        double apparentWindDirection = Utility::getApparentWindDirection(systemStateModel, currentHeading, trueWindDirection);
+        m_sailCommand = -Utility::sgn(apparentWindDirection) * ( ((m_minSailAngle - m_maxSailAngle) / M_PI) * abs(apparentWindDirection) + m_maxSailAngle);
 
-        m_sailCommand = -Utility::sgn(apparentWindAngle) * ( ((m_minSailAngle - m_maxSailAngle) / M_PI) * abs(apparentWindAngle) + m_maxSailAngle);
-
+        std::cout << "speed: " << systemStateModel.gpsModel.speed << "   desiredHeading: " << desiredHeading << "   maxCommand: " << m_maxCommandAngle << 
+        "   rudderCommand: " << m_rudderCommand  << "    SailCommand: " << m_sailCommand << std::endl;
+        std::cout << "heading: " << currentHeading << std::endl;
+        printf("Tacking: %d     TackingDirection: %d\n", m_tack, m_tackingDirection);
     } else {
         m_logger.error("SailingRobot::run(), gps NaN. Using values from last iteration.\n");
         printf("GPS not online\n");
     }
-    
-    return true;
 }
 
 
-void LineFollowBehaviour::manageDatabase(std::vector<float> &twdBuffer,SystemStateModel &systemStateModel){
+void LineFollowBehaviour::manageDatabase(double trueWindDirection, SystemStateModel &systemStateModel){
   //logging
   bool routeStarted = false;
   m_dbHandler->insertDataLog(
@@ -180,7 +181,7 @@ void LineFollowBehaviour::manageDatabase(std::vector<float> &twdBuffer,SystemSta
     m_tack,
     getGoingStarboard(),
     atoi(m_nextWaypointModel.id.c_str()),
-    Utility::meanOfAngles(twdBuffer),
+    trueWindDirection,
     routeStarted
   );
 }
@@ -201,6 +202,11 @@ void LineFollowBehaviour::setPreviousWayPoint(SystemStateModel &systemStateModel
     }
     else if(m_wayPointCount > 0) //if waypoints passed, set previous waypoint to the one recently passed
         m_previousWaypointModel = m_nextWaypointModel;
+
+    std::cout << "Previous waypoint picked! ID:" << m_previousWaypointModel.id <<" lon: "
+    << m_previousWaypointModel.positionModel.longitude
+    << " lat: " << m_previousWaypointModel.positionModel.latitude << " rad: "
+    << m_previousWaypointModel.radius << std::endl;
 }
 
 bool LineFollowBehaviour::getGoingStarboard()
