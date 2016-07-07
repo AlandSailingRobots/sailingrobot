@@ -40,6 +40,8 @@ public:
 
 private:
 	int getHeading();
+	//Calculates a smooth transition between the compass and the gps. Do not call directly, use getHeading()
+	int getMergedHeading(bool increaseCompassWeight);
 
 	//void readGPS();
 	//void syncServer();
@@ -67,6 +69,7 @@ private:
 	/* true  = get heading from compass
 	 * false = get heading from gps	 */
 	bool m_getHeadingFromCompass;
+	float m_gpsHeadingWeight;
 
 	ExternalCommand* m_externalCommand;
 	SystemState *m_systemState;
