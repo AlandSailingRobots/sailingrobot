@@ -159,6 +159,11 @@ private:
     void printStdVectorMat(std::string const& name, std::vector<Eigen::MatrixXd> const& v);
     void printMat(std::string const& name,Eigen::MatrixXd const& mat);
     void printCollisionAvoidanceBehave(int rows_Z,int cols_Z,Eigen::VectorXd v);
+    Eigen::MatrixXd atanMat(Eigen::MatrixXd mat);
+    float heaviside(float num);
+    Eigen::MatrixXd heavisideMat(Eigen::MatrixXd mat);
+    Eigen::MatrixXd rectangularPulse(float a, float b, Eigen::MatrixXd x);
+
 
 };
 

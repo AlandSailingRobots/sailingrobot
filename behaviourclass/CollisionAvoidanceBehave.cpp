@@ -116,7 +116,79 @@ void CollisionAvoidanceBehave::mockObstacleDetection(){
         }
     }
 }
-void CollisionAvoidanceBehave::calculatePotentialField(){}//Matlab name: calculate_potField
+//Matlab name: calculate_potField
+void CollisionAvoidanceBehave::calculatePotentialField(){
+    //Init
+    Eigen::MatrixXd ObsP = 0*point_x, ObjP = 0*point_x, xObs = 0*point_x, yObs = 0*point_x, xObj = 0*point_x, yObj = 0*point_x, xo = 0*point_x, yo = 0*point_x;
+    Eigen::MatrixXd tHoleR = 0*point_x, tHoleL = 0*point_x, tPike = 0*point_x, tR = 0*point_x, tL = 0*point_x, tP = 0*point_x, ep1 = 0*point_x,ep2 = 0*point_x, xb = 0*point_x;
+    Eigen::MatrixXd yb = 0*point_x, x1 = 0*point_x, y1 = 0*point_x, xw = 0*point_x, yw = 0*point_x, WindP = 0*point_x, BoatP = 0*point_x;
+    float boatHeading =  boat_state(0,2), bearingObstacle = 0, T = 0,Ao = 1.6, strengthBoat = 3, strengthHoleBoat = 1.5, strengthPikeBoat = 5, lengthObstacle=radius_obstacle*step_coeff;
+    int scaleHole = 50, scalePike = 550, strengthHoles = 2, strengthPike = 4, strength = 5, isObsPEmpty = 1;
+
+    //Obstacle potential function
+    if(only_direction_mode==0){
+        if(detected_obstacle_list_qhat.size()!=0){
+            isObsPEmpty = 0;
+            for(int i=0;i<(int)detected_obstacle_list_qhat.size();i++){
+                xObs = point_x.array()-detected_obstacle_list_qhat[i](0,0);
+                yObs = point_y.array()-detected_obstacle_list_qhat[i](1,0);
+                T = (boatHeading+M_PI/2)*0.3+(atan2(target_phat(0,0)-detected_obstacle_list_qhat[i](0,0),target_phat(1,0)-detected_obstacle_list_qhat[i](1,0))+M_PI/2)*0.7;
+                xo =  xObs*cos(T) + yObs*sin(T);
+                yo = -xObs*sin(T) + yObs*cos(T);
+                tHoleR = ((xo.array()-35).array().square()+(yo*1).array().square())/scaleHole;
+                tHoleL = ((xo.array()+35).array().square()+(yo*1).array().square())/scaleHole;
+                tPike = ((xo*1).array().square()+(yo*1).array().square())/scalePike;
+
+                tR=(-(tHoleR).array().square()).array().exp();
+                tL=(-(tHoleL).array().square()).array().exp();
+                tP=(-(tPike).array().square()).array().exp();
+                ObsP = ObsP + strength*(strengthHoles*(-tR-tL)+strengthPike*tP);
+            }
+        }
+    }
+    else if(only_direction_mode==1){
+        if( have_to_avoid_obstacle == 1){
+             isObsPEmpty = 0;
+             bearingObstacle=boat_state(0,2)+direction_boat_obstacle[0]-M_PI/2;
+
+             x1 = point_x.array()-boat_state(0,0);
+             y1 = point_y.array()-boat_state(0,1);
+             xb =  x1*cos(bearingObstacle) + y1*sin(bearingObstacle);
+             yb = -x1*sin(bearingObstacle) + y1*cos(bearingObstacle);
+             ObsP = 15*rectangularPulse(-lengthObstacle,lengthObstacle,xb).array() * heavisideMat(yb).array()-5*rectangularPulse(-lengthObstacle*2,lengthObstacle*2,xb).array() *  heavisideMat(yb).array();
+        }
+    }
+
+    //Objective potential function
+    ObjP = Ao*((-(point_x.array()-target_phat(0,0)).array().square() - (point_y.array()-target_phat(1,0)).array().square())/25000).array().exp();
+    // Wind preference potential function
+    x1 = point_x.array()-boat_state(0,0);
+    y1 = point_y.array()-boat_state(0,1);
+    T = wind_direction+3.0*M_PI/4.0;
+    xw =  x1*cos(T) + y1*sin(T);
+    yw = -x1*sin(T) + y1*cos(T);
+    WindP = 3*atanMat(xw).array() * heavisideMat(xw).array() * atanMat(yw).array() * heavisideMat(yw).array();
+
+    // Boat preference
+    ep1 = ((-(point_x.array()-boat_state(0,0)).array().square() - (point_y.array()-boat_state(0,1)).array().square())/4000).array().exp();
+    ep2 = ((-(point_x.array()-boat_state(0,0)).array().square() - (point_y.array()-boat_state(0,1)).array().square())/200).array().exp();
+    BoatP = strengthBoat*(-strengthHoleBoat*ep1 + strengthPikeBoat*ep2);
+
+    //Computation of the field
+    if(isObsPEmpty==1){
+        potential_Z = 10*(-ObjP);
+    }
+    else{
+        potential_Z = ObsP - ObjP + BoatP + WindP;
+    }
+    printMat("ObsP",ObsP);
+    printMat("ObjP",ObjP);
+    printMat("BoatP",BoatP);
+    printMat("WindP",WindP);
+    printMat("potential_Z",potential_Z);
+
+}
+
 void CollisionAvoidanceBehave::avoidObstacle(){}//Matlab name: avoid_obstacle
 void CollisionAvoidanceBehave::obstacleOnACollisionCourse(){}//Matlab name: boat_on_collision_course
 void CollisionAvoidanceBehave::calculate_collision_avoidance_point(){}//Matlab name: calculate_avoidCollisionPoint
@@ -194,4 +266,48 @@ void  CollisionAvoidanceBehave::printCollisionAvoidanceBehave(int rows_Z,int col
     std::cout << "have_to_avoid_obstacle : " << have_to_avoid_obstacle << std::endl;
     std::cout << "can_compute_a_new_avoidance_point : " << can_compute_a_new_avoidance_point << std::endl;
     std::cout << " " << std::endl;
+}
+Eigen::MatrixXd CollisionAvoidanceBehave::atanMat(Eigen::MatrixXd mat){
+    for(int i = 0; i<mat.rows();i++){
+        for(int j = 0; j<mat.cols();j++){
+            mat(i,j)=atan(mat(i,j));
+        }
+    }
+    return mat;
+}
+float CollisionAvoidanceBehave::heaviside(float num){
+    if(num < 0){
+        num = 0;
+    }
+    else if(num > 0){
+        num = 1;
+    }
+    else{
+        num= 0.5;
+    }
+    return num;
+}
+Eigen::MatrixXd CollisionAvoidanceBehave::heavisideMat(Eigen::MatrixXd mat){
+    for(int i = 0; i<mat.rows();i++){
+        for(int j = 0; j<mat.cols();j++){
+            mat(i,j)=heaviside(mat(i,j));
+        }
+    }
+    return mat;
+}
+Eigen::MatrixXd CollisionAvoidanceBehave::rectangularPulse(float a, float b, Eigen::MatrixXd x){
+    for(int i = 0; i<x.rows();i++){
+        for(int j = 0; j<x.cols();j++){
+            if(a < x(i,j) && b > x(i,j)){
+                x(i,j)=1;
+            }
+            if(x(i,j) < a || x(i,j) > b || a==b){
+                x(i,j)=0;
+            }
+            if(a < b && (x(i,j)==a || x(i,j) ==b)){
+                x(i,j)=0.5;
+            }
+        }
+    }
+    return x;
 }
