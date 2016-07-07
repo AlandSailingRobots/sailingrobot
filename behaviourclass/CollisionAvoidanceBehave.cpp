@@ -191,7 +191,22 @@ void CollisionAvoidanceBehave::calculatePotentialField(){
 
 void CollisionAvoidanceBehave::avoidObstacle(){}//Matlab name: avoid_obstacle
 void CollisionAvoidanceBehave::obstacleOnACollisionCourse(){}//Matlab name: boat_on_collision_course
-void CollisionAvoidanceBehave::calculate_collision_avoidance_point(){}//Matlab name: calculate_avoidCollisionPoint
+void CollisionAvoidanceBehave::calculate_collision_avoidance_point(){
+    int xmin = potential_field_dim(0,0);
+    int xmax = potential_field_dim(0,1);
+    int ymin = potential_field_dim(0,2);
+    int ymax = potential_field_dim(0,3);
+    float I_row = 0, I_col = 0;
+    float minZ = potential_Z.minCoeff(&I_row, &I_col);
+    float I_x = I_col*(ymax-ymin)/potential_Z.cols()-(abs(ymin));
+    float I_y = I_row*(xmax-xmin)/potential_Z.rows()-(abs(xmin));
+    collision_avoidance_point(0,0) = I_x ;
+    collision_avoidance_point(1,0) = I_y ;
+    std::cout << "minZ: " << minZ << std::endl;
+    std::cout << "I_row: " << I_row << std::endl;
+    std::cout << "I_col: " << I_col << std::endl;
+    printMat("collision_avoidance_point", collision_avoidance_point);
+}//Matlab name: calculate_avoidCollisionPoint
 Eigen::MatrixXd CollisionAvoidanceBehave::createWall(Eigen::MatrixXd const& starting_point,Eigen::MatrixXd const& ending_point,float step){
     Eigen::MatrixXd m(2,2);
     m(0,0) = 3;
