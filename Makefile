@@ -85,7 +85,10 @@ SRC = 	main.cpp GPSupdater.cpp SailingRobot.cpp WindsensorController.cpp logger/
 
 # Includes
 
-INC = -I./ -I./libs
+INC = -I./ -I./libs -I./libs/wiringPi/wiringPi
+
+WIRING_PI_PATH = ./libs/wiringPi/wiringPi/
+WIRING_PI_STATIC = ./libs/wiringPi/wiringPi/libwiringPi.so.2.32
 
 # Object files
 OBJECTS = $(addprefix $(BUILD_DIR)/, $(SRC:.cpp=.o))
@@ -103,7 +106,7 @@ OBJECT_FILE = $(BUILD_DIR)/objects.tmp
 CFLAGS = -Wall -g -o2
 CPPFLAGS = -g -Wall -pedantic -Werror -std=c++11
 
-LIBS = -lsqlite3 -lgps -lrt -lwiringPi -lcurl -lpthread
+LIBS = -lsqlite3 -lgps -lrt -lcurl -lpthread
 LIBS_BOOST = -lboost_system -lboost_log -lboost_thread
 
 ifeq ($(TOOLCHAIN),raspi_cc)
@@ -133,12 +136,15 @@ all: $(EXECUTABLE) stats
 $(BUILD_DIR):
 	$(MKDIR_P) $(BUILD_DIR)
 
+$(WIRING_PI_STATIC):
+	$(MAKE) -C $(WIRING_PI_PATH)
+
 # Link and build
-$(EXECUTABLE) : $(BUILD_DIR) $(OBJECTS)
+$(EXECUTABLE) : $(BUILD_DIR) $(OBJECTS) $(WIRING_PI_STATIC)
 	rm -f $(OBJECT_FILE)
 	@echo Linking object files
 	@echo -n " " $(OBJECTS) >> $(OBJECT_FILE)
-	$(CXX) $(LDFLAGS) @$(OBJECT_FILE) -o $@ $(LIBS) $(LIBS_BOOST)
+	$(CXX) $(LDFLAGS) @$(OBJECT_FILE) $(WIRING_PI_STATIC) -o $@ $(LIBS) $(LIBS_BOOST)
 	@echo Built using toolchain: $(TOOLCHAIN)
 
 # Compile CPP files into the build folder

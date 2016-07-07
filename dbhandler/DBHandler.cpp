@@ -435,9 +435,9 @@ std::string DBHandler::getWaypoints() {
 	try {
 		rows = getRows("waypoints");
 		for(auto i = 1; i < rows; ++i) {
-			getDataAsJson("id,latitude,longitude,radius","waypoints",wp+std::to_string(i),std::to_string(i),json,true);
+			getDataAsJson("id,latitude,longitude,declination,radius","waypoints",wp+std::to_string(i),std::to_string(i),json,true);
 		}
-		getDataAsJson("id,latitude,longitude,radius","waypoints",wp+std::to_string(rows),std::to_string(rows),json,true);
+		getDataAsJson("id,latitude,longitude,declination,radius","waypoints",wp+std::to_string(rows),std::to_string(rows),json,true);
 	} catch (const char * error) {
 		m_logger.error("error in DBHandler::getWaypoints()");
 		std::stringstream ss;
