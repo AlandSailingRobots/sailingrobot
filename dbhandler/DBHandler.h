@@ -22,7 +22,6 @@ private:
 	char* m_error;
 	int m_latestDataLogId;
 	std::string m_currentWaypointId = "";
-	Logger m_logger;
 	std::string m_filePath;
 
 	//execute INSERT query and add new row into table
@@ -62,6 +61,8 @@ public:
 
 	DBHandler(std::string filePath);
 	~DBHandler(void);
+
+	bool initialise();
 
 	int getRows(std::string table);
 

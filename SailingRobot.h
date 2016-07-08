@@ -32,7 +32,7 @@ public:
 
 	SailingRobot(ExternalCommand* externalCommand, SystemState *systemState, DBHandler *db, HTTPSync* httpSync);
 	~SailingRobot();
-	void init(std::string programPath, std::string errorFileName);
+	bool init(std::string programPath, std::string errorFileName);
 	void run();
 	void shutdown();
 
@@ -44,12 +44,12 @@ private:
 	//void updateState();
 
 	//void setupDB(std::string filename);
-	void setupMaestro();
-	void setupRudderServo();
-	void setupSailServo();
+	bool setupMaestro();
+	bool setupRudderServo();
+	bool setupSailServo();
 	//void setupGPS();
-	void setupRudderCommand();
-	void setupSailCommand();
+	bool setupRudderCommand();
+	bool setupSailCommand();
 	//void setupHTTPSync();
 
 	std::string m_errorLogPath;
@@ -87,8 +87,6 @@ private:
     std::unique_ptr<Position> position;
 
 	SystemStateModel m_systemStateModel;
-
-	Logger m_logger;
 };
 
 #endif

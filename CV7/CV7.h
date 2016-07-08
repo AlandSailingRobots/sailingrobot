@@ -17,7 +17,7 @@ class CV7:public Windsensor {
 		/*
 			Loads the CV7 windsensor.
 		*/
-		void loadConfig(std::string portName, int baudRate);
+		bool loadConfig(std::string portName, int baudRate);
 		/*
 			Sets vector sizes. Must be greater than 0 and default value is 30.
 		*/
@@ -41,7 +41,7 @@ class CV7:public Windsensor {
 		/*
 			parses the data from windsensor and puts values in vectors
 		*/
-		void parseData(std::string data);
+		bool parseData(std::string data);
 		/*
 			Returns an average wind direction value, depending on how many values that is in vector.
 		*/

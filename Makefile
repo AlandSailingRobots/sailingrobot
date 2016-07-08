@@ -107,7 +107,6 @@ export CFLAGS = -Wall -g -o2
 export CPPFLAGS = -g -Wall -pedantic -Werror -std=c++11
 
 export LIBS = -lsqlite3 -lgps -lrt -lwiringPi -lcurl -lpthread
-export LIBS_BOOST = -lboost_system -lboost_log -lboost_thread
 
 ifeq ($(TOOLCHAIN),raspi_cc)
 C_TOOLCHAIN = 0

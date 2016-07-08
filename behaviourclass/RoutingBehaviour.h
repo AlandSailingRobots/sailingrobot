@@ -29,7 +29,6 @@ public:
 
 protected:
   DBHandler *m_dbHandler;
-  Logger m_logger;
   double m_rudderCommand, m_sailCommand;
   float m_gpsHeadingWeight;
   virtual void setNextWaypoint(WaypointModel &waypointModel);

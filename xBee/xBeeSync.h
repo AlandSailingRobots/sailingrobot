@@ -44,7 +44,6 @@ private:
 	bool m_receiving;
 	bool m_sendLogs;
 	bool m_pushOnlyLatestLogs;
-	Logger m_logger;
 	double m_loopTime;
 
 	bool isRunning();

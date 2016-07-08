@@ -17,11 +17,9 @@ xBeeSync* xbee_handle;
 
 
 static void threadXBeeSyncRun() {
-	try {
-		xbee_handle->run();
-	} catch (const char * e) {
-		std::cout << "ERROR while running static void threadXBeeSyncRun()" << e << std::endl;
-	}
+	xbee_handle->run();
+
+	Logger::warning("Xbee Sync thread has exited");
 }
 
 static void threadGPSupdate() {
@@ -38,9 +36,8 @@ static void threadHTTPSyncRun() {
 		httpsync_handle->run();
 	}
 	catch (const char * error) {
-		std::cout << "ERROR while running static void threadHTTPSyncRun() : " << error << std::endl;
+		Logger::warning("Xbee Sync thread has exited");
 	}
-	std::cout << " httpsync thread exited." << std::endl;
 }
 
 static void threadWindsensor() {
@@ -71,18 +68,18 @@ int main(int argc, char *argv[]) {
 		errorLog = "errors.log";
 	}
 
+	printf("================================================================================\n");
+	printf("\t\t\t\tSailing Robot\n");
 	printf("\n");
-	printf("  Sailing Robot\n");
-	printf("=================\n");
+	printf("================================================================================\n");
 
-	if (m_logger.init("sailingrobot")) {
-		Logger::log(LogType::INFO, "Logger 		[OK]");
+	if (Logger::init()) {
+		Logger::info("Built on %s at %s", __DATE__, __TIME__);
+		Logger::info("Logger init 		[OK]");
 	}
 	else {
-		Logger::log(LogType::INFO, "Logger 		[FAILED]");
+		Logger::info("Logger init 		[FAILED]");
 	}
-
-	Logger::log("Built on %s at %s", __DATE__, __TIME__);
 
 	/* Default time */
 	ExternalCommand externalCommand("1970-04-10T10:53:15.1234Z",true,0,0);
@@ -97,9 +94,12 @@ int main(int argc, char *argv[]) {
 		)
 	);
 
-	printf("-Creating database...\n");
 	DBHandler db(path+db_name);
-	printf("-DONE\n");
+
+	if(db.initialise())
+	{
+		Logger::info("Successful database connection established");
+	}
 
 	bool mockGPS = db.retrieveCellAsInt("mock","1","gps");
     bool mockWindsensor = db.retrieveCellAsInt("mock","1","windsensor");
@@ -110,19 +110,19 @@ int main(int argc, char *argv[]) {
 	//bool removeLogs = true;
 
 	httpsync_handle = new HTTPSync( &db, http_delay, removeLogs );
-
-
+	
     SailingRobot sr_handle(&externalCommand, &systemstate, &db, httpsync_handle);
 
 	GPSupdater gps_updater(&systemstate,mockGPS);
 	gps_handle = &gps_updater;
 
 	try {
-		printf("-Initializing...\n");
+		if( not sr_handle.init(path, errorLog) )
+		{
+			Logger::error("Failed to initialise SailingRobot, exiting...");
+			return 1;
+		}
 
-		sr_handle.init(path, errorLog);
-
-		printf(" Starting Windsensor\t\t");
 		windsensor_handle.reset(
 			new WindsensorController(
 				&systemstate,
@@ -132,14 +132,6 @@ int main(int argc, char *argv[]) {
 				db.retrieveCellAsInt("buffer_config", "1", "windsensor")
 			)
 		);
-		printf("OK\n");
-
-		printf("-DONE\n");
-
-		printf("-Starting threads...\n");
-
-
-
 
 		bool xBee_sending = db.retrieveCellAsInt("xbee_config", "1", "send");
 		bool xBee_receiving = db.retrieveCellAsInt("xbee_config", "1", "recieve");
@@ -164,6 +156,9 @@ int main(int argc, char *argv[]) {
     	bool mockCompass = db.retrieveCellAsInt("mock","1","compass");
 		int  headningBufferSize = db.retrieveCellAsInt("buffer_config", "1", "compass");
 		double i2cLoopTime = stod(db.retrieveCell("i2c_config", "1", "loop_time"));
+
+		if(mockArduino) { Logger::warning("Using mock Arduino"); }
+		if(mockArduino) { Logger::warning("Using mock compass"); }
 
 		i2cController_handle.reset(new I2CController(&systemstate, mockArduino, mockCompass, headningBufferSize, i2cLoopTime));
 		i2cController_handle->init();
@@ -192,11 +187,9 @@ int main(int argc, char *argv[]) {
 			ThreadRAII::DtorAction::detach
 		) );
 
-		printf("-Starting main loop...\n");
 		sr_handle.run();
-		printf("-DONE\n");
-
-	} catch (const char * e) {
+	} 
+	catch (const char * e) {
 		printf("ERROR[%s]\n\n",e);
 		return 1;
 	}
