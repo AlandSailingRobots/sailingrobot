@@ -32,8 +32,7 @@ void DBHandler::getDataAsJson(std::string select, std::string table, std::string
 		else
 			results = retrieveFromTable("SELECT " + select + " FROM " + table + " WHERE ID = " + id + ";", rows, columns);
 	} catch(const char * error) {
-		std::cout << "error in DBHandler::getDataAsJson: " << error << std::endl;
-		m_logger.error("errors in dbhandler::getrowasjson : " + select + " table : " + table);
+		Logger::error("%s, %s table: %s Error: %s", __PRETTY_FUNCTION__, select.c_str(), table.c_str(), error);
 	}
 
 	for(int i = 0; i < columns*(rows+1); ++i) {
@@ -182,7 +181,7 @@ void DBHandler::updateTableJson(std::string table, std::string data) {
 		queryTable("UPDATE " + table + " " + values + " WHERE ID = " + id + ";");
 	}
 	catch( const char * error) {
-		m_logger.error(std::string("Error in DBHandler::updateTable" + std::string(error)));
+		Logger::error("%s Error: %s", __PRETTY_FUNCTION__, error);
 	}
 }
 
@@ -191,7 +190,7 @@ void DBHandler::updateTable(std::string table, std::string column, std::string v
 		queryTable("UPDATE " + table + " SET " + column + " = " + value + " WHERE ID = " + id + ";");
 	}
 	catch( const char * error) {
-		m_logger.error(std::string("Error in DBHandler::updateTable" + std::string(error)));
+		Logger::error("%s Error: %s", __PRETTY_FUNCTION__, error);
 	}
 }
 
@@ -204,15 +203,11 @@ std::string DBHandler::retrieveCell(std::string table, std::string id, std::stri
     results = retrieveFromTable(query, rows, columns);
 
     if (columns < 1) {
-		std::stringstream errorStream;
-		errorStream << "DBHandler::retrieveCell(), no columns from Query: " << query;
-    	throw errorStream.str().c_str();
+    	Logger::error("%s No columns from Query: %s", __PRETTY_FUNCTION__, query.c_str());
     }
 
     if (rows < 1) {
-		std::stringstream errorStream;
-		errorStream << "DBHandler::retrieveCell(), no rows from Query: " << query;
-    	throw errorStream.str().c_str();
+		Logger::error("%s No rows from Query: %s", __PRETTY_FUNCTION__, query.c_str());
     }
 
     return results[1];
@@ -250,7 +245,7 @@ void DBHandler::updateWaypoints(std::string waypoints){
 		queryTable("DELETE FROM waypoints;");
 	}
 	catch( const char * error) {
-		m_logger.error(std::string("Error in DBHandler::updateWaypoints" + std::string(error)));
+		Logger::error("%s, Error: %s", __PRETTY_FUNCTION__, error);
 	}
 
 	for (auto i : Json::iterator_wrapper(json))  {
@@ -279,7 +274,7 @@ void DBHandler::updateWaypoints(std::string waypoints){
 				queryTable(DBPrinter);
 			}
 			catch( const char * error) {
-				m_logger.error(std::string("Error in DBHandler::updateWaypoints" + std::string(error)));
+				Logger::error("%s, Error: %s", __PRETTY_FUNCTION__, error);
 			}
 
 			//Insert output
@@ -298,7 +293,7 @@ void DBHandler::updateWaypoints(std::string waypoints){
 			queryTable(updateHarvested);
 		}
 		catch( const char * error) {
-			m_logger.error(std::string("Error in DBHandler::updateWaypoints" + std::string(error)));
+			Logger::error("%s, Error: %s", __PRETTY_FUNCTION__, error);
 		}
 	}
 
@@ -310,7 +305,7 @@ int DBHandler::retrieveCellAsInt(std::string table, std::string id, std::string 
 		return atoi(retrieveCell(table, id, column).c_str());
 	}
 	catch (const char *  e) {
-		std::cout << "exception thrown in retrieveCellAsInt, is returned cell a int?  " << e << std::endl;
+		Logger::error("%s, Error: %s", __PRETTY_FUNCTION__, e);
 		return 0;
 	}
 
@@ -348,7 +343,7 @@ std::string DBHandler::getLogs(bool onlyLatest) {
 		}
 
 	} catch(const char * error) {
-		m_logger.error("Error DBHandler::getLogs : " + std::string(error));
+		Logger::error("%s, Error: %s", __PRETTY_FUNCTION__, error);
 	}
 
 	return json.dump();
@@ -361,7 +356,7 @@ void DBHandler::removeLogs(std::string data) {
 	//Check for a valid parsing format
 	//Should probably create som kind of function to check if a string is json
 	if(data == "" || data.at(0) != '[') {
-		m_logger.error("Error in DBHandler::removeLogs with response : " + data);
+		Logger::error("%s, Response: %s", __PRETTY_FUNCTION__, data.c_str());
 		return;
 	}
 
@@ -402,7 +397,7 @@ void DBHandler::insertScan(std::string waypoint_id, PositionModel position, floa
 		i = retrieveCell("waypoint_index", waypoint_id, "i");
 		j = retrieveCell("waypoint_index", waypoint_id, "j");
 	} catch (const char * error) {
-		m_logger.error(error);
+		Logger::error("%s, Error: %s", __PRETTY_FUNCTION__, error);
 	}
 
 	std::ostringstream fields;
@@ -439,10 +434,8 @@ std::string DBHandler::getWaypoints() {
 		}
 		getDataAsJson("id,latitude,longitude,radius","waypoints",wp+std::to_string(rows),std::to_string(rows),json,true);
 	} catch (const char * error) {
-		m_logger.error("error in DBHandler::getWaypoints()");
-		std::stringstream ss;
-		ss << "error in DBHandler::getWaypoints() : " << error;
-		throw ss.str();
+		Logger::error("%s, Error: %s", __PRETTY_FUNCTION__, error);
+		throw "getWaypoints";
 	}
 
 	return json.dump();
@@ -482,9 +475,7 @@ sqlite3* DBHandler::openDatabase() {
 	// check if file exists
 	FILE* db_file = fopen(m_filePath.c_str(), "r");
 	if (!db_file) {
-		std::string error = "DBHandler::openDatabase(), " + m_filePath +
-			" not found.";
-		throw error.c_str();
+		Logger::error("%s %s not found", __PRETTY_FUNCTION__, m_filePath.c_str());
 	}
 	fclose(db_file);
 
@@ -493,10 +484,8 @@ sqlite3* DBHandler::openDatabase() {
 	} while(resultcode == SQLITE_BUSY);
 
 	if (resultcode) {
-		std::stringstream errorStream;
-		errorStream << "DBHandler::openDatabase(), " << sqlite3_errmsg(connection);
-
-		throw errorStream.str().c_str();
+		Logger::error("%s Failed to open the database Error %s", __PRETTY_FUNCTION__, sqlite3_errmsg(connection));
+		return 0;
 	}
 
 	// set a 10 millisecond timeout
@@ -580,7 +569,7 @@ int DBHandler::insertLog(std::string table, std::string values) {
 		lastInsertedId = atoi(getIdFromTable(table,true).c_str());
 
 	} catch(const char * error) {
-		m_logger.error( "error in DBHandler::insertLog : " + std::string(error));
+		Logger::error("%s Error: %s", __PRETTY_FUNCTION__, error);
 	}
 	return lastInsertedId;
 }
@@ -601,11 +590,10 @@ void DBHandler::queryTable(std::string sqlINSERT) {
 			resultcode = sqlite3_exec(db, sqlINSERT.c_str(), NULL, NULL, &m_error);
 		} while(resultcode == SQLITE_BUSY);
 		if (m_error != NULL) {
-			std::stringstream errorStream;
-			errorStream << "DBHandler::queryTable(), " << sqlite3_errmsg(db);
+			Logger::error("%s Error: %s", __PRETTY_FUNCTION__, sqlite3_errmsg(db));
+
 			sqlite3_free(m_error);
-			m_logger.error(errorStream.str());
-			throw errorStream.str().c_str();
+			throw "Query error";
 		}
 	}
 	else {
@@ -633,11 +621,8 @@ std::vector<std::string> DBHandler::retrieveFromTable(std::string sqlSELECT, int
 		}
 
 		if (resultcode != SQLITE_OK) {
-			std::cout << sqlSELECT << std::endl;
-			std::stringstream errorStream;
-			errorStream << "DBHandler::retrieveFromTable(), " << sqlite3_errstr(resultcode);
-			std::cout << errorStream.str().c_str() << std::endl;
-			throw errorStream.str().c_str();
+			Logger::error("%s SQL statement: %s Error: %s", __PRETTY_FUNCTION__, sqlSELECT.c_str(), sqlite3_errstr(resultcode));
+			throw "retrieveFromTable";
 		}
 	}
 	else {
@@ -778,7 +763,7 @@ std::string DBHandler::getConfigs() {
 			getDataAsJson("*",table,table,"1",json,false);
 		}
 	} catch(const char * error) {
-		m_logger.error("Error in DBHandler::getConfigs : " + std::string(error));
+		Logger::error("%s Error: %s", __PRETTY_FUNCTION__, error);
 	}
 	return json.dump();
 }

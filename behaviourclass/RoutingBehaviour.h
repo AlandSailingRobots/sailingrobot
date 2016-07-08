@@ -29,7 +29,6 @@ public:
 
 protected:
   DBHandler *m_dbHandler;
-  Logger m_logger;
   double m_rudderCommand, m_sailCommand;
   virtual void setNextWaypoint(WaypointModel &waypointModel);
   virtual void harvestWaypoint(WaypointModel waypointModel);

@@ -18,10 +18,12 @@ MockGPSReader::~MockGPSReader() {
 }
 
 
-void MockGPSReader::connectToGPS() {
+bool MockGPSReader::connectToGPS() {
+	return true;
 }
 
-void MockGPSReader::readGPS(int timeout) {
+bool MockGPSReader::readGPS(int timeout) {
+	return true;
 }
 
 bool MockGPSReader::isOnline() {

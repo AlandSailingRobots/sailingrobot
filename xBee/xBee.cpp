@@ -47,7 +47,7 @@ int xBee::init(){
 	int fd;
 
 	if( (fd = serialOpen(deviceName.c_str(), BAUD_RATE) ) < 0) {
-		Logger::log(LogType::ERROR, "xBee Error: %d", errno);
+		Logger::error("XbeeSync::%d Error: %d", (int)__LINE__, errno);
 	}
 
 	return fd;

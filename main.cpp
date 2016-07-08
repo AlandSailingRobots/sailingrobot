@@ -75,14 +75,14 @@ int main(int argc, char *argv[]) {
 	printf("  Sailing Robot\n");
 	printf("=================\n");
 
-	printf("\nBuilt on %s at %s\n\n", __DATE__, __TIME__);
-
 	if (Logger::init()) {
-		Logger::log(LogType::INFO, "Logger init 		[OK]");
+		Logger::info("Logger init 		[OK]");
 	}
 	else {
-		Logger::log(LogType::INFO, "Logger init 		[FAILED]");
+		Logger::info("Logger init 		[FAILED]");
 	}
+
+	Logger::info("Built on %s at %s\n\n", __DATE__, __TIME__);;
 
 	/* Default time */
 	ExternalCommand externalCommand("1970-04-10T10:53:15.1234Z",true,0,0);
@@ -110,8 +110,7 @@ int main(int argc, char *argv[]) {
 	//bool removeLogs = true;
 
 	httpsync_handle = new HTTPSync( &db, http_delay, removeLogs );
-
-
+	
     SailingRobot sr_handle(&externalCommand, &systemstate, &db, httpsync_handle);
 
 	GPSupdater gps_updater(&systemstate,mockGPS);
@@ -120,9 +119,13 @@ int main(int argc, char *argv[]) {
 	try {
 		printf("-Initializing...\n");
 
-		sr_handle.init(path, errorLog);
+		if( not sr_handle.init(path, errorLog) )
+		{
+			Logger::error("Failed to initialise SailingRobot, exiting...");
+			return 1;
+		}
 
-		printf(" Starting Windsensor\t\t");
+		printf(" Starting Windsensor\n");
 		windsensor_handle.reset(
 			new WindsensorController(
 				&systemstate,

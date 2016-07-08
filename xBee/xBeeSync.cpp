@@ -33,20 +33,18 @@ bool xBeeSync::init()
 
 	if(m_xbee_fd < 0)
 	{
-		CLASS_ERROR("Failed to initialise xBee module");
+		Logger::error("XbeeSync::%d Failed to initalise", __LINE__);
 	}
 	else
 	{
 		rv = true;
-		std::cout << "*xBee initialized - receiving:" << m_receiving << " sending:" << m_sending << std::endl;
-		m_logger.info(std::string("*xBee initialized - receiving:") +	std::to_string(m_receiving)	+ " sending:" + std::to_string(m_sending));
+		Logger::info("Xbee initialised - receiving: %d sending: %d", m_receiving, m_sending);
 	}
 	return rv;
 }
 
 void xBeeSync::run() {
-	std::cout << "*xBeeSync thread started." << std::endl;
-	m_logger.info("*xBeeSync thread started.");
+	Logger::info("*xBeeSync thread started.");
 
 	while(isRunning()) {
 		m_timer.reset();
@@ -95,19 +93,15 @@ void xBeeSync::run() {
 			std::string timestamp = m_XML_log.parse_time(res_xml);
 
 	 		if(timestamp.length() > 0) {
-	 			std::cout << "Timestamp in xBeeSync::run = " << timestamp << std::endl;
-				m_logger.info("Timestamp in xBeeSync::run = " + timestamp);
+				Logger::info("Timestamp in xBeeSync::run = %s", timestamp.c_str());
 	 		}
+
 	 		if(rudder_cmd != -1) {
-	 			std::cout << "Rudder command in xBeeSync::run = " << rudder_cmd << std::endl;	
-	 			m_logger.info(std::string("Rudder command in xBeeSync::run = ")
-	 				+ std::to_string(rudder_cmd));
+	 			Logger::info("Rudder command in xBeeSync::run = %d", rudder_cmd);
 	 			m_model.rudder = rudder_cmd;
 	 		}
 	 		if(sail_cmd != -1) {
-	 			std::cout << "Sail command in xBeeSync::run = " << sail_cmd << std::endl;	
-	 			m_logger.info(std::string("Sail command in xBeeSync::run = ")
-	 				+ std::to_string(sail_cmd));
+	 			Logger::info("Sail command in xBeeSync::run = %d", sail_cmd);
 	 			m_model.sail = sail_cmd;
 	 		}
 
@@ -120,8 +114,7 @@ void xBeeSync::run() {
 
 		m_timer.sleepUntil(m_loopTime);
 	}
-	std::cout << "*xBeeSync thread exited." << std::endl;
-	m_logger.info("*xBeeSync thread exited.");
+	Logger::info("*xBeeSync thread exited.");
 }
 
 void xBeeSync::close() {

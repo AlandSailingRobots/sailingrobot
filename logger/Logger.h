@@ -31,6 +31,7 @@
 
 #include <iostream>
 #include <fstream>
+#include "models/GPSModel.h"
 
 BOOST_LOG_INLINE_GLOBAL_LOGGER_DEFAULT(global_logger,
 		boost::log::sources::severity_logger_mt<
@@ -48,29 +49,13 @@ enum class LogType {
 
 
 // Uncomment for a WRSC2016 position log file
-#define ENABLE_WRSC_LOGGING
+//#define ENABLE_WRSC_LOGGING
 
 // Provide a error string
 #define CLASS_ERROR(...) Logger::log(LogType::ERROR, "%s::%d %s", __PRETTY_FUNCTION__, __LINE__, ##__VA_ARGS__)
 
 class Logger {
 public:
-	Logger();
-	~Logger();
-	/**
-	 * set the name of the file you want to log to
-	 * return 1 one success
-	 */
-	//bool init(std::string name);
-	/**
-	 * log info messages
-	 */
-	void info(std::string message);
-	/**
-	 * log error messages
-	 */
-	void error(std::string message);
-
 	/////////////////////////////////////////////////////////////////////////////////////
  	/// Initialises the singleton logger system, returns false if it is unable to 
  	/// generate a log file.
@@ -92,18 +77,25 @@ public:
 	/////////////////////////////////////////////////////////////////////////////////////
  	/// A globally accessable function to log messages to that works exactly like printf.
  	///
- 	/// @params logType 			The type of log message
  	/// @params message 			The log message.
  	/// @params ...					A variable list, this allows printf like behaviour
  	///
  	/////////////////////////////////////////////////////////////////////////////////////
- 	static void log(LogType logType, std::string message, ...);
- 	static void log(std::string message, ...);
+ 	static void info(std::string message, ...);
+ 	static void error(std::string message, ...);
+ 	static void warning(std::string message, ...);
 
  	static void logWRSC(const GPSModel* const gps);
 
 private:
+	Logger();
+	~Logger();
+
+	static void log(std::string message);
+
 	bool createLogFiles(const char* filename = 0);
+
+	void writeBufferedLogs();
 
 	/////////////////////////////////////////////////////////////////////////////////////
  	/// Returns a time stamp in the format YYYY-MM-DD HH:MM:SS.
@@ -128,6 +120,8 @@ private:
 	unsigned long m_LastClockStamp;
 	unsigned long m_LastTimeStamp;
 	std::ofstream* m_LogFile;
+
+	std::vector<std::string> m_LogBuffer;
 
 	#ifdef ENABLE_WRSC_LOGGING
 	std::ofstream* m_LogFileWRSC;

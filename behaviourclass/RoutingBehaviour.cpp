@@ -22,22 +22,20 @@ void RoutingBehaviour::setWaypointsChanged()
 void RoutingBehaviour::setNextWaypoint(WaypointModel &waypointModel)
 {
     try {
-    m_dbHandler->getWaypointFromTable(waypointModel);
+    	m_dbHandler->getWaypointFromTable(waypointModel);
 	} catch (const char * error) {
-		m_logger.error(error);
+		Logger::error("%s Error: %s", __func__, error);
 	}
 
 	if (waypointModel.id.empty() ) {
-		std::cout << "No waypoint found!"<< std::endl;
+		Logger::warning("%s No Waypoint Found", __func__);
 	}
 	else{
-		std::cout << "New waypoint picked! ID:" << waypointModel.id <<" lon: "
-		<< waypointModel.positionModel.longitude
-		<< " lat: " << waypointModel.positionModel.latitude << " rad: "
-		<< waypointModel.radius << std::endl;
+		Logger::info("New Waypoint picked! ID: %s, Lon: %f, Lat: %f, Rad: %d",  waypointModel.id.c_str(), 
+                                                                				waypointModel.positionModel.longitude, 
+                                                                				waypointModel.positionModel.latitude,
+                                                               					waypointModel.radius);
 	}
-
-	m_logger.info("setupWaypoint() done");
 }
 
 void RoutingBehaviour::harvestWaypoint(WaypointModel waypointModel)
@@ -45,10 +43,9 @@ void RoutingBehaviour::harvestWaypoint(WaypointModel waypointModel)
 	try {
 		m_dbHandler->changeOneValue("waypoints", waypointModel.id,"1","harvested");
 	} catch (const char * error) {
-		m_logger.error(error);
+		Logger::error("%s Error: %s", __func__, error);
 	}
-	m_logger.info("SailingRobot::nextWaypoint(), waypoint reached");
-	std::cout << "Waypoint reached!" << std::endl;
+	Logger::info("Reached waypoint");
 }
 
 int RoutingBehaviour::getHeading(SystemStateModel &systemStateModel,bool mockPosition,bool getHeadingFromCompass,std::unique_ptr<Position> const& position, WaypointModel waypointModel) {

@@ -33,7 +33,7 @@ bool Logger::m_GPSTimeSet = false;
 Logger::Logger() 
 	:m_LogFilePath(), m_LastClockStamp(0), m_LastTimeStamp(0)
 {
-	m_logger = global_logger::get();
+	
 }
 
 Logger::~Logger() 
@@ -49,36 +49,10 @@ Logger::~Logger()
 	}
 }
 
-/*bool Logger::init(std::string name) {
-	if (name.compare("") == 0 ) {
-		std::cout << "error in name"<<std::endl;
-		return false;
-	}
-	logging::add_file_log(
-		keywords::auto_flush = true,
-		keywords::file_name = name + "_%N.log",
-	    keywords::format = (
-	        expr::stream
-	        << expr::format_date_time< boost::posix_time::ptime >("TimeStamp", "%d-%m-%Y %H:%M:%S.%f ")
-	        << ": <" << logging::trivial::severity
-	        << "> " << expr::smessage
-	    )
-	);
-	logging::add_common_attributes();
-
-	return true;
-}*/
-
-void Logger::info(std::string message) {
-	BOOST_LOG_SEV(m_logger, logging::trivial::info) << message ;
-}
-void Logger::error(std::string message) {
-	BOOST_LOG_SEV(m_logger, logging::trivial::error) << message;
-}
 
 bool Logger::init(const char* filename)
 {
-	if(m_instance != NULL)
+	if(m_instance == NULL)
 	{
 		m_instance = new Logger();
 
@@ -93,17 +67,6 @@ bool Logger::init(const char* filename)
 			return false;
 		}
 	}
-	logging::add_file_log(
-		keywords::auto_flush = true,
-		keywords::file_name = "name_N.log",
-	    keywords::format = (
-	        expr::stream
-	        << expr::format_date_time< boost::posix_time::ptime >("TimeStamp", "%d-%m-%Y %H:%M:%S.%f ")
-	        << ": <" << logging::trivial::severity
-	        << "> " << expr::smessage
-	    )
-	);
-	logging::add_common_attributes();
 
 	// Assumes the logger is already setup and going
 	return true;
@@ -119,65 +82,85 @@ void Logger::setTime(unsigned long seconds)
 	}
 }
 
-void Logger::log(LogType logType, std::string message, ...)
+void Logger::log(std::string message)
 {
-	va_list args;
-	char logBuffer[MAX_LOG_SIZE];
+    printf("%s", message.c_str());
 
-	// Put together the formatted string
-	va_start(args, message);
-    vsnprintf(logBuffer, MAX_LOG_SIZE, message.c_str(), args);
-    va_end(args);
-
-    std::string logTypeText;
-
-    switch(logType)
+    if(m_instance != NULL)
     {
-    	case LogType::INFO:
-    		logTypeText = "<INFO>";
-    		break;
- 		case LogType::WARNING:
- 			logTypeText = "<WARNING>";
- 			break;
- 		case LogType::ERROR:
- 			logTypeText = "<ERROR>";
- 			break;
- 		default:
- 			logTypeText = "";
-    }
-
-    char buff[256];
-
-    snprintf(buff, 256, "[%s] %s %s\n", m_instance->getTimeStamp().c_str(), logTypeText.c_str(), logBuffer);
-
-    printf("%s", buff);
-
-    if(m_instance != NULL && m_instance->m_LogFile != NULL)
-    {
-    	*m_instance->m_LogFile << buff;
+    	if(m_instance->m_LogFile != NULL)
+    	{
+    		*m_instance->m_LogFile << message.c_str();
+    		m_instance->m_LogFile->flush();
+    	}
+    	else
+    	{
+    		m_instance->m_LogBuffer.push_back(message);
+    	}
     }
 }
 
-void Logger::log(std::string message, ...)
+void Logger::info(std::string message, ...)
 {
 	va_list args;
 	char logBuffer[MAX_LOG_SIZE];
-
 	// Put together the formatted string
 	va_start(args, message);
     vsnprintf(logBuffer, MAX_LOG_SIZE, message.c_str(), args);
     va_end(args);
 
-	std::cout << m_instance->getTimeStamp() << logBuffer << "\n";
+    char buff[256];
 
-	//m_LogFile << m_instance->getTimeStamp() << logBuffer << "\n";
+    snprintf(buff, 256, "[%s] <info>\t %s\n", m_instance->getTimeStamp().c_str(), logBuffer);
 
-	//TODO - Jordan: Log to file.
+    Logger::log(buff);
+}
+
+void Logger::error(std::string message, ...)
+{
+	va_list args;
+	char logBuffer[MAX_LOG_SIZE];
+	// Put together the formatted string
+	va_start(args, message);
+    vsnprintf(logBuffer, MAX_LOG_SIZE, message.c_str(), args);
+    va_end(args);
+
+    char buff[256];
+
+    snprintf(buff, 256, "[%s] <error>\t %s\n", m_instance->getTimeStamp().c_str(), logBuffer);
+
+    Logger::log(buff);
+
+}
+
+void Logger::warning(std::string message, ...)
+{
+	va_list args;
+	char logBuffer[MAX_LOG_SIZE];
+	// Put together the formatted string
+	va_start(args, message);
+    vsnprintf(logBuffer, MAX_LOG_SIZE, message.c_str(), args);
+    va_end(args);
+
+    char buff[256];
+
+    snprintf(buff, 256, "[%s] <warning>\t %s\n", m_instance->getTimeStamp().c_str(), logBuffer);
+
+    Logger::log(buff);
 }
 
 void Logger::logWRSC(const GPSModel* const gps)
 {
+	#ifdef ENABLE_WRSC_LOGGING
+	char logBuffer[MAX_LOG_SIZE];
+	snprintf(logBuffer, MAX_LOG_SIZE, "%s, %d, %d\n", 	m_instance->getTimeStampWRSC().c_str(), 
+														(int)(gps->positionModel.latitude*10000000), 
+														(int)(gps->positionModel.longitude*10000000));
 
+	std::string msg(logBuffer);
+	*m_instance->m_LogFileWRSC << logBuffer;
+	m_instance->m_LogFileWRSC->flush();
+	#endif
 }
 
 bool Logger::createLogFiles(const char* filename)
@@ -200,25 +183,40 @@ bool Logger::createLogFiles(const char* filename)
 
 		if(m_LogFile->is_open() && m_LogFileWRSC->is_open())
 		{
+			Logger::info("Log files %s, %s have been created", filePath.c_str(), DEFAULT_LOG_NAME_WRSC);
+			writeBufferedLogs();
 			return true;
 		}
 		else
 		{
+			Logger::info("Failed to create Log files %s, %s", filePath.c_str(), DEFAULT_LOG_NAME_WRSC);
 			delete m_LogFile;
 			delete m_LogFileWRSC;
 		}
 	#else
 		if(m_LogFile->is_open())
 		{
+			Logger::info("Log file %s has been created", filePath.c_str());
+			writeBufferedLogs();
 			return true;
 		}
 		else
 		{
+			Logger::info("Failed to create Log file %s", filePath.c_str());
 			delete m_LogFile;
 		}
 	#endif
 
 	return false;
+}
+
+void Logger::writeBufferedLogs()
+{
+	for(std::string log : m_LogBuffer)
+	{
+		*m_LogFile << log.c_str();
+	} 
+	m_LogFile->flush();
 }
 
 std::string Logger::getTimeStamp()

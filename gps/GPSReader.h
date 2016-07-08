@@ -6,6 +6,7 @@
 #include "GPS.h"
 #include "models/PositionModel.h"
 #include "models/GPSModel.h"
+#include "logger/Logger.h"
 
 
 /**---------------------------------------
@@ -38,10 +39,10 @@ public:
 	~GPSReader();
 
 	/*Sets up a connection to the USB-connected GPS*/
-	void connectToGPS();
+	bool connectToGPS();
 
 	/*reads data from the GPS given a number of attempts and timeout for each attempt*/
-	void readGPS(int timeout);
+	bool readGPS(int timeout);
 
 	/*Returns true if gps is online.*/
 	bool isOnline();

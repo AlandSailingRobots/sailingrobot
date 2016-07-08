@@ -33,7 +33,6 @@ class I2CController {
 		bool m_mockCompass;
 		int m_headingBufferSize;
 		double m_loopTime;
-		Logger m_logger;
 		Timer m_timer;
 		std::mutex m_mutex;
 		bool m_running;
@@ -42,8 +41,8 @@ class I2CController {
 		std::unique_ptr<AnalogArduino> m_arduino;
 
 		bool isRunning();
-		void initCompass(bool mockCompass,int headningBufferSize);
-		void initArduino(bool mockArduino);
+		bool initCompass(bool mockCompass,int headningBufferSize);
+		bool initArduino(bool mockArduino);
 		void close();
 };
 

@@ -7,8 +7,8 @@
 
 #include "MockWindsensor.h"
 
-void MockWindsensor::loadConfig(std::string portName, int baudRate){
-
+bool MockWindsensor::loadConfig(std::string portName, int baudRate){
+	return true;
 }
 
 void MockWindsensor::setBufferSize(unsigned int bufferSize) {
@@ -31,8 +31,8 @@ std::string MockWindsensor::refreshData() {
 	return "";
 }
 
-void MockWindsensor::parseData(std::string data) {
-
+bool MockWindsensor::parseData(std::string data) {
+	return true;
 }
 
 float MockWindsensor::getDirection() {

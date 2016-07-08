@@ -8,6 +8,7 @@
 #include <utility/Utility.h>
 #include "UtilityLibrary.h"
 #include "models/WindsensorModel.h"
+#include "logger/Logger.h"
 
 CV7::CV7() {
 		m_bufferSize = 30;
@@ -23,23 +24,26 @@ CV7::~CV7()
 	}
 }
 
-void CV7::loadConfig(std::string portName, int baudRate)
+bool CV7::loadConfig(std::string portName, int baudRate)
 {	
 	setPortName(portName);
 	
 	m_fd = serialOpen(portName.c_str(), baudRate);
 
 	if(m_fd < 0) {
-		throw "CV7::openPort: Unable to connect";
+		Logger::error("%s Unable to connect", __PRETTY_FUNCTION__);
+		return false;
 	}
+	return true;
 }
 
 void CV7::setBufferSize(unsigned int bufferSize)
 {
 	if(bufferSize < 1)
 	{
-		throw "CV7::setBufferSize: bufferSize must be 1 or higher";
+		Logger::warning("%s Buffer size should be greater than 0", __PRETTY_FUNCTION__);
 	}
+
 	m_bufferSize = bufferSize;
 }
 
@@ -88,8 +92,13 @@ std::string CV7::refreshData()
 	return buffer;
 }
 
-void CV7::parseData(std::string data) {
-	if(data.size()==0) return;
+bool CV7::parseData(std::string data) {
+	if( data.size()==0 )
+	{
+		Logger::warning("%s Nothing to parse", __PRETTY_FUNCTION__);
+		return true;
+	}
+
 	try {
 		std::map<std::string, float> result = UtilityLibrary::parseString(data.c_str());
 		m_windDirection.push_back(result.find("windDirection")->second);
@@ -97,15 +106,17 @@ void CV7::parseData(std::string data) {
 		m_windTemperature.push_back(result.find("windTemperature")->second);
 	}
 	catch (const char* e) {
-		std::stringstream text;
-		text << "CV7::parseData() [" << e << "]";
-		throw text.str().c_str();
+		Logger::error("%s Failed to parse, error: %s", __PRETTY_FUNCTION__, e);
+		return false;
 	}
+
 	while (m_windDirection.size() > m_bufferSize) {
 		m_windDirection.erase(m_windDirection.begin());
 		m_windSpeed.erase(m_windSpeed.begin());
 		m_windTemperature.erase(m_windTemperature.begin());
 	}
+
+	return true;
 }
 
 bool CV7::isUseMean() {

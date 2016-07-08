@@ -24,14 +24,13 @@ bool LineFollowBehaviour::init()
 	setNextWaypoint(m_nextWaypointModel);
     printf("Setting up: OK\n");
 
-    printf("*SailingRobot::run() LineFollow started.\n");
-    std::cout << "Waypoint target - ID: " << m_nextWaypointModel.id << " lon: " <<
-    m_nextWaypointModel.positionModel.longitude	<< " lat : " <<
-    m_nextWaypointModel.positionModel.latitude << std::endl;
+    Logger::info("LineFollow Behaviour started");
+    Logger::info("Waypoint target - ID: %s, Lon: %f, Lat: %f",  m_nextWaypointModel.id.c_str(), 
+                                                                m_nextWaypointModel.positionModel.longitude, 
+                                                                m_nextWaypointModel.positionModel.latitude);
 
     return true;
 }
-
 
 double LineFollowBehaviour::calculateSignedDistance(std::unique_ptr<Position> const& position)
 {
@@ -165,8 +164,7 @@ void LineFollowBehaviour::computeCommands(SystemStateModel &systemStateModel,std
         std::cout << "heading: " << currentHeading << std::endl;
         printf("Tacking: %d     TackingDirection: %d\n", m_tack, m_tackingDirection);
     } else {
-        m_logger.error("SailingRobot::run(), gps NaN. Using values from last iteration.\n");
-        printf("GPS not online\n");
+        Logger::warning("%s gps NaN. Using values from last iteration", __PRETTY_FUNCTION__);
     }
 }
 
