@@ -151,6 +151,19 @@ private:
 
     void calculate_collision_avoidance_point();//Matlab name: calculate_avoidCollisionPoint
 
+    /*
+    calculate_collision_avoidance_point: compute the global minimu of the Z field and return it
+    Uses:
+        std::vector<Eigen::MatrixXd> detected_obstacles,
+        MatrixXd boat_state,
+        float mock_detection_distance,
+        float mock_detection_angle,
+    Modified attributes:
+        std::vector<Eigen::MatrixXd> detected_obstacle_list_qhat,
+    */
+
+    void update_obstacles();//MATLAB name : update_obstacles
+
 
     Eigen::MatrixXd createWall(Eigen::MatrixXd const& starting_point,Eigen::MatrixXd const& ending_point,float step);
 
