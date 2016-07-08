@@ -17,7 +17,7 @@
 #		linux_local = For a local linux machine (MOCK objects used)
 #		raspi_cc = For cross compiling to the PI on a linux machine
 #		raspi_local = For compiling on the PI itself
-TOOLCHAIN = linux-local
+export TOOLCHAIN = linux-local
 C_TOOLCHAIN = 0
 
 
@@ -26,9 +26,11 @@ C_TOOLCHAIN = 0
 #######################################################
 
 # Directories
-BUILD_DIR = build
+export BUILD_DIR = build
 SRC_DIR = ./
 OUTPUT_DIR = ./
+
+TEST_MAKEFILE = ./Makefile.tests
 
 # External Libraries
 
@@ -40,18 +42,13 @@ XBEE = 					xBee/xBeeSync.cpp xBee/xBee.cpp
 
 BEHAVIOURCLASS = 	behaviourclass/RoutingBehaviour.cpp  behaviourclass/WaypointBehaviour.cpp behaviourclass/LineFollowBehaviour.cpp
 
-
-
 ANALOGARDUINO = 		AnalogArduino/AnalogArduino.cpp AnalogArduino/MockAnalogArduino.cpp AnalogArduino/AR_UNO.cpp AnalogArduino/myWiringI2C.cpp
 
 COMPASS = 				Compass/Compass.cpp Compass/MockCompass.cpp Compass/HMC6343.cpp
 
-
 I2CCONTROLLER = 		i2ccontroller/I2CController.cpp
 
-
 POSITION = 				utility/Position.cpp utility/MockPosition.cpp utility/RealPosition.cpp
-
 
 COURSE = 				coursecalculation/CourseCalculation.cpp coursecalculation/CourseMath.cpp
 
@@ -59,8 +56,7 @@ DB = 					dbhandler/DBHandler.cpp
 
 COMMAND = 				ruddercommand/RudderCommand.cpp sailcommand/SailCommand.cpp
 
-MAESTRO = 				servocontroller/MaestroController.cpp servocontroller/MockMaestroController.cpp servocontroller/ServoObject.cpp servocontroller/MockServoObject.cpp
-
+MAESTRO = 				servocontroller/MaestroController.cpp servocontroller/MockMaestroController.cpp servocontroller/ServoObject.cpp servocontroller/SensorObject.cpp servocontroller/MockServoObject.cpp
 
 CV7 = 					CV7/Windsensor.cpp CV7/MockWindsensor.cpp CV7/UtilityLibrary.cpp CV7/CV7.cpp
 
@@ -76,8 +72,9 @@ WAYPOINTROUTING = 		waypointrouting/WaypointRouting.cpp waypointrouting/Commands
 
 WINDVANECONTROLLER = 	windvanecontroller/WindVaneController.cpp
 
+SRC_MAIN = main.cpp
 
-SRC = 	main.cpp GPSupdater.cpp SailingRobot.cpp WindsensorController.cpp logger/Logger.cpp utility/Utility.cpp utility/Timer.cpp $(XBEE) \
+SRC = 	GPSupdater.cpp SailingRobot.cpp WindsensorController.cpp logger/Logger.cpp utility/Utility.cpp utility/Timer.cpp $(XBEE) \
 		$(ANALOGARDUINO) $(COMPASS) $(I2CCONTROLLER) $(POSITION) $(COURSE) $(DB) $(COMMAND) $(MAESTRO) $(CV7) $(GPS) $(HTTP) \
 		$(XML_LOG) $(THREAD) $(WAYPOINTROUTING) $(WINDVANECONTROLLER) $(BEHAVIOURCLASS)
 
@@ -85,14 +82,20 @@ SRC = 	main.cpp GPSupdater.cpp SailingRobot.cpp WindsensorController.cpp logger/
 
 # Includes
 
-INC = -I./ -I./libs
+export INC = -I./ -I./libs
+
+INC = -I./ -I./libs -I./libs/wiringPi/wiringPi
+
+WIRING_PI_PATH = ./libs/wiringPi/wiringPi/
+WIRING_PI_STATIC = ./libs/wiringPi/wiringPi/libwiringPi.so.2.32
 
 # Object files
 OBJECTS = $(addprefix $(BUILD_DIR)/, $(SRC:.cpp=.o))
+OBJECT_MAIN = $(addprefix $(BUILD_DIR)/, $(SRC_MAIN:.cpp=.o))
 
 # Target Output
 EXECUTABLE = sr
-OBJECT_FILE = $(BUILD_DIR)/objects.tmp
+export OBJECT_FILE = $(BUILD_DIR)/objects.tmp
 
 
 #######################################################
@@ -100,45 +103,60 @@ OBJECT_FILE = $(BUILD_DIR)/objects.tmp
 #######################################################
 
 
-CFLAGS = -Wall -g -o2
-CPPFLAGS = -g -Wall -pedantic -Werror -std=c++11
+export CFLAGS = -Wall -g -o2
+export CPPFLAGS = -g -Wall -pedantic -Werror -std=c++11
 
-LIBS = -lsqlite3 -lgps -lrt -lwiringPi -lcurl -lpthread
-LIBS_BOOST = -lboost_system -lboost_log -lboost_thread
+export LIBS = -lsqlite3 -lgps -lrt -lwiringPi -lcurl -lpthread
+export LIBS_BOOST = -lboost_system -lboost_log -lboost_thread
 
 ifeq ($(TOOLCHAIN),raspi_cc)
 C_TOOLCHAIN = 0
 CC = arm-linux-gnueabihf-gcc
 CXX = arm-linux-gnueabihf-g++
 SIZE = arm-linux-gnueabihf-size
-else ifeq ($(TOOLCHAIN),linux-local)
+else 
 C_TOOLCHAIN = 1
 CC = gcc
 CXX = g++
 SIZE = size
 endif
 
-MKDIR_P = mkdir -p
+export CC
+export CXX
+
+export MKDIR_P = mkdir -p
 
 
 #######################################################
 # Rules
 #######################################################
 
-.PHONY: clean
+.PHONY: clean clean_tests
 
 all: $(EXECUTABLE) stats
 
+# Builds the intergration test, requires the whole system to be built before
+build_tests: $(OBJECTS) $(EXECUTABLE)
+	@echo Building tests...
+	@$(MAKE) -f $(TEST_MAKEFILE)
+
+clean_tests:
+	@echo Cleaning tests...
+	@$(MAKE) -f $(TEST_MAKEFILE) clean
+
 #  Create the directories needed
 $(BUILD_DIR):
-	$(MKDIR_P) $(BUILD_DIR)
+	@$(MKDIR_P) $(BUILD_DIR)
+
+$(WIRING_PI_STATIC):
+	$(MAKE) -C $(WIRING_PI_PATH)
 
 # Link and build
-$(EXECUTABLE) : $(BUILD_DIR) $(OBJECTS)
+$(EXECUTABLE) : $(BUILD_DIR) $(OBJECTS) $(WIRING_PI_STATIC) $(OBJECT_MAIN)
 	rm -f $(OBJECT_FILE)
 	@echo Linking object files
 	@echo -n " " $(OBJECTS) >> $(OBJECT_FILE)
-	$(CXX) $(LDFLAGS) @$(OBJECT_FILE) -o $@ $(LIBS) $(LIBS_BOOST)
+	$(CXX) $(LDFLAGS) @$(OBJECT_FILE) $(WIRING_PI_STATIC) $(OBJECT_MAIN) -o $@ $(LIBS) $(LIBS_BOOST)
 	@echo Built using toolchain: $(TOOLCHAIN)
 
 # Compile CPP files into the build folder
@@ -161,7 +179,8 @@ stats:$(EXECUTABLE)
 	@echo Final executable size:
 	$(SIZE) $(EXECUTABLE) 
 
-clean:
+clean: clean_tests
 	@echo Removing existing object files and executable
 	@rm -f -r $(BUILD_DIR)
 	@rm -f $(EXECUTABLE)
+	@echo DONE
