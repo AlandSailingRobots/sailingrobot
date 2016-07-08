@@ -42,7 +42,7 @@ XBEE = 					xBee/xBeeSync.cpp xBee/xBee.cpp
 
 BEHAVIOURCLASS = 	behaviourclass/RoutingBehaviour.cpp  behaviourclass/WaypointBehaviour.cpp behaviourclass/LineFollowBehaviour.cpp
 
-ANALOGARDUINO = 		AnalogArduino/AnalogArduino.cpp AnalogArduino/MockAnalogArduino.cpp AnalogArduino/AR_UNO.cpp AnalogArduino/myWiringI2C.cpp
+ANALOGARDUINO = 		AnalogArduino/AnalogArduino.cpp AnalogArduino/MockAnalogArduino.cpp AnalogArduino/AR_UNO.cpp
 
 COMPASS = 				Compass/Compass.cpp Compass/MockCompass.cpp Compass/HMC6343.cpp
 
@@ -90,7 +90,7 @@ WIRING_PI_PATH = ./libs/wiringPi/wiringPi/
 WIRING_PI_STATIC = ./libs/wiringPi/wiringPi/libwiringPi.so.2.32
 
 # Object files
-OBJECTS = $(addprefix $(BUILD_DIR)/, $(SRC:.cpp=.o))
+OBJECTS = $(addprefix $(BUILD_DIR)/, $(SRC:.cpp=.o)) $(BUILD_DIR)/AnalogArduino/libmyWiringI2C.so
 OBJECT_MAIN = $(addprefix $(BUILD_DIR)/, $(SRC_MAIN:.cpp=.o))
 
 # Target Output
@@ -106,14 +106,14 @@ export OBJECT_FILE = $(BUILD_DIR)/objects.tmp
 export CFLAGS = -Wall -g -o2
 export CPPFLAGS = -g -Wall -pedantic -Werror -std=c++11
 
-export LIBS = -lsqlite3 -lgps -lrt -lwiringPi -lcurl -lpthread
+export LIBS = -lsqlite3 -lgps -lrt -lcurl -lpthread
 
 ifeq ($(TOOLCHAIN),raspi_cc)
 C_TOOLCHAIN = 0
 CC = arm-linux-gnueabihf-gcc
 CXX = arm-linux-gnueabihf-g++
 SIZE = arm-linux-gnueabihf-size
-else 
+else
 C_TOOLCHAIN = 1
 CC = gcc
 CXX = g++
@@ -155,7 +155,7 @@ $(EXECUTABLE) : $(BUILD_DIR) $(OBJECTS) $(WIRING_PI_STATIC) $(OBJECT_MAIN)
 	rm -f $(OBJECT_FILE)
 	@echo Linking object files
 	@echo -n " " $(OBJECTS) >> $(OBJECT_FILE)
-	$(CXX) $(LDFLAGS) @$(OBJECT_FILE) $(WIRING_PI_STATIC) $(OBJECT_MAIN) -o $@ $(LIBS) $(LIBS_BOOST)
+	$(CXX) $(LDFLAGS) -Wl,-rpath,./ @$(OBJECT_FILE) $(WIRING_PI_STATIC) $(OBJECT_MAIN) -o $@ $(LIBS) $(LIBS_BOOST)
 	@echo Built using toolchain: $(TOOLCHAIN)
 
 # Compile CPP files into the build folder
@@ -163,20 +163,26 @@ $(BUILD_DIR)/%.o:$(SRC_DIR)/%.cpp
 	@mkdir -p $(dir $@)
 	@echo Compiling CPP File: $@
 	@$(CXX) -c $(CPPFLAGS) $(INC) -o ./$@ $< -DTOOLCHAIN=$(TOOLCHAIN) $(LIBS) $(LIBS_BOOST)
- 
+
  # Compile C files into the build folder
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
 	@mkdir -p $(dir $@)
 	@echo Compiling C File: $@
 	@$(C) -c $(CFLAGS) $(INC) -o $@ $ -DTOOLCHAIN=$(C_TOOLCHAIN)
 
+#SPECIAL COMPILATION FOR mywiringI2C.cpp to be overload when doing simulation AnalogArduino/myWiringI2C.cpp
+$(BUILD_DIR)/AnalogArduino/libmyWiringI2C.so: $(SRC_DIR)/AnalogArduino/myWiringI2C.cpp
+	@echo Compiling CPP File to Shared library: $(SRC_DIR)/AnalogArduino/myWiringI2C.cpp
+	$(CXX) -c -fPIC $(CPPFLAGS) $(INC) $(SRC_DIR)/AnalogArduino/myWiringI2C.cpp -o $(BUILD_DIR)/AnalogArduino/myWiringI2C.o -DTOOLCHAIN=$(TOOLCHAIN) $(LIBS)
+	$(CXX) -shared -Wl,-soname,libmyWiringI2C.so -o $(BUILD_DIR)/AnalogArduino/libmyWiringI2C.so $(BUILD_DIR)/AnalogArduino/myWiringI2C.o -ldl
+	cp $(BUILD_DIR)/AnalogArduino/libmyWiringI2C.so  $(SRC_DIR)/
 
 #####################################################################
 # Tool Rules
 
 stats:$(EXECUTABLE)
 	@echo Final executable size:
-	$(SIZE) $(EXECUTABLE) 
+	$(SIZE) $(EXECUTABLE)
 
 clean: clean_tests
 	@echo Removing existing object files and executable

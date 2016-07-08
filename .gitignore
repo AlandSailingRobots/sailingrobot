@@ -12,3 +12,4 @@ sr
 # Other
 *.vim
 libs/wiringPi/wiringPi/libwiringPi.a
+*.so
