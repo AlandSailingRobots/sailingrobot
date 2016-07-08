@@ -39,10 +39,6 @@ public:
 	//void readGPS();
 
 private:
-	int getHeading();
-	//Calculates a smooth transition between the compass and the gps. Do not call directly, use getHeading()
-	int getMergedHeading(bool increaseCompassWeight);
-
 	//void readGPS();
 	//void syncServer();
 	//void updateState();
@@ -69,7 +65,6 @@ private:
 	/* true  = get heading from compass
 	 * false = get heading from gps	 */
 	bool m_getHeadingFromCompass;
-	float m_gpsHeadingWeight;
 
 	ExternalCommand* m_externalCommand;
 	SystemState *m_systemState;
@@ -89,7 +84,7 @@ private:
 
 	
 	
-        std::unique_ptr<Position> position;
+    std::unique_ptr<Position> position;
 
 	SystemStateModel m_systemStateModel;
 
