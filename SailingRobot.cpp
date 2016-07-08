@@ -60,10 +60,7 @@ bool SailingRobot::init(std::string programPath, std::string errorFileName) {
 	m_errorLogPath = programPath + errorFileName;
 
 	m_getHeadingFromCompass = m_dbHandler->retrieveCellAsInt("sailing_robot_config", "1", "flag_heading_compass");
-
-	if (m_getHeadingFromCompass) 	{ m_gpsHeadingWeight = 0.0; }
-	else 							{ m_gpsHeadingWeight = 1.0; }
-
+	
 	if(not setupMaestro()) 			{ return false; }
 	if(not setupRudderServo()) 		{ return false; }
 	if(not setupRudderCommand()) 	{ return false; }
