@@ -19,6 +19,21 @@ DBHandler::~DBHandler(void) {
 
 }
 
+bool DBHandler::initialise()
+{
+	sqlite3* connection = openDatabase();
+
+	if(connection != 0)
+	{
+		closeDatabase(connection);
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
 
 void DBHandler::getDataAsJson(std::string select, std::string table, std::string key, std::string id, Json& json, bool useArray) {
 	int rows = 0, columns = 0;

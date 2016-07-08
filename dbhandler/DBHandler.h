@@ -62,6 +62,8 @@ public:
 	DBHandler(std::string filePath);
 	~DBHandler(void);
 
+	bool initialise();
+
 	int getRows(std::string table);
 
 	void insertDataLog(

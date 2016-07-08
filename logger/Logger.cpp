@@ -5,26 +5,14 @@
  *      Author: sailbot
  */
 
-#define BOOST_LOG_DYN_LINK
-
 #include "Logger.h"
 #include <iostream>
-#include <boost/date_time/posix_time/posix_time_types.hpp>
-#include <boost/log/expressions.hpp>
-#include <boost/log/sources/record_ostream.hpp>
-#include <boost/log/utility/setup/file.hpp>
-#include <boost/log/utility/setup/common_attributes.hpp>
-#include <boost/log/support/date_time.hpp>
 
 #include <ctime>
 
 #define GET_UNIX_TIME() static_cast<long int>(std::time(0))
 #define MAX_LOG_SIZE	256
-
-namespace logging = boost::log;
-namespace src = boost::log::sources;
-namespace expr = boost::log::expressions;
-namespace keywords = boost::log::keywords;
+#define MAX_MSG_BUFFER 100
 
 Logger* Logger::m_instance = NULL;
 bool Logger::m_GPSTimeSet = false;
@@ -43,10 +31,12 @@ Logger::~Logger()
 		m_LogFile->close();
 	}
 
+	#ifdef ENABLE_WRSC_LOGGING
 	if(m_LogFileWRSC != NULL)
 	{
 		m_LogFileWRSC->close();
 	}
+	#endif
 }
 
 
@@ -84,20 +74,24 @@ void Logger::setTime(unsigned long seconds)
 
 void Logger::log(std::string message)
 {
-    printf("%s", message.c_str());
-
-    if(m_instance != NULL)
-    {
-    	if(m_instance->m_LogFile != NULL)
-    	{
-    		*m_instance->m_LogFile << message.c_str();
-    		m_instance->m_LogFile->flush();
-    	}
-    	else
-    	{
-    		m_instance->m_LogBuffer.push_back(message);
-    	}
-    }
+	m_Mutex.lock();
+	if(m_LogFile->is_open())
+	{
+		(*m_LogFile) << message.c_str();
+		m_LogFile->flush();
+	}
+	else
+	{
+		if(m_LogBuffer.size() < MAX_MSG_BUFFER)
+		{
+			m_LogBuffer.push_back(message);
+		}
+		else
+		{
+			printf(" === NO ROOM IN BUFFER FOR MORE MESSAGES ===\n");
+		}
+	}
+	m_Mutex.unlock();
 }
 
 void Logger::info(std::string message, ...)
@@ -113,7 +107,12 @@ void Logger::info(std::string message, ...)
 
     snprintf(buff, 256, "[%s] <info>\t %s\n", m_instance->getTimeStamp().c_str(), logBuffer);
 
-    Logger::log(buff);
+    printf("%s", buff);
+
+    if(m_instance != NULL)
+    {
+    	m_instance->log(buff);
+    }
 }
 
 void Logger::error(std::string message, ...)
@@ -129,8 +128,11 @@ void Logger::error(std::string message, ...)
 
     snprintf(buff, 256, "[%s] <error>\t %s\n", m_instance->getTimeStamp().c_str(), logBuffer);
 
-    Logger::log(buff);
-
+    printf("%s", buff);
+    if(m_instance != NULL)
+    {
+    	m_instance->log(buff);
+    }
 }
 
 void Logger::warning(std::string message, ...)
@@ -146,20 +148,38 @@ void Logger::warning(std::string message, ...)
 
     snprintf(buff, 256, "[%s] <warning>\t %s\n", m_instance->getTimeStamp().c_str(), logBuffer);
 
-    Logger::log(buff);
+    printf("%s", buff);
+    if(m_instance != NULL)
+    {
+    	m_instance->log(buff);
+    };
 }
 
 void Logger::logWRSC(const GPSModel* const gps)
 {
 	#ifdef ENABLE_WRSC_LOGGING
-	char logBuffer[MAX_LOG_SIZE];
-	snprintf(logBuffer, MAX_LOG_SIZE, "%s, %d, %d\n", 	m_instance->getTimeStampWRSC().c_str(), 
-														(int)(gps->positionModel.latitude*10000000), 
-														(int)(gps->positionModel.longitude*10000000));
+	// Flag so that we only issue one error about the log file not existing
+	static bool errorMsgUsge = false;
 
-	std::string msg(logBuffer);
-	*m_instance->m_LogFileWRSC << logBuffer;
-	m_instance->m_LogFileWRSC->flush();
+	m_Mutex.lock();
+	if(m_instance != NULL)
+	{
+		if(m_instance->m_LogFileWRSC->is_open())
+		{
+			char logBuffer[MAX_LOG_SIZE];
+			snprintf(logBuffer, MAX_LOG_SIZE, "%s, %d, %d\n", 	m_instance->getTimeStampWRSC().c_str(), 
+																(int)(gps->positionModel.latitude*10000000), 
+																(int)(gps->positionModel.longitude*10000000));
+			*(m_instance->m_LogFileWRSC) << logBuffer;
+			m_instance->m_LogFileWRSC->flush();
+		}
+	}
+	else if(not errorMsgUsge)
+	{
+		Logger::error("WRSC log file is not open! Cannot log WRSC messages");
+		errorMsgUsge = true;
+	}
+	m_Mutex.unlock();
 	#endif
 }
 

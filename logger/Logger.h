@@ -25,28 +25,15 @@
 #define LOGGER_LOGGER_H_
 
 #include <string>
-#include <boost/log/trivial.hpp>
-#include <boost/log/sources/severity_logger.hpp>
-#include <boost/log/sources/global_logger_storage.hpp>
-
+#include <vector>
+#include <cstdarg>
+#include <mutex>
 #include <iostream>
 #include <fstream>
 #include "models/GPSModel.h"
 
-BOOST_LOG_INLINE_GLOBAL_LOGGER_DEFAULT(global_logger,
-		boost::log::sources::severity_logger_mt<
-			boost::log::trivial::severity_level>)
-
 #define DEFAULT_LOG_NAME			"./sailing-log.log"
 #define DEFAULT_LOG_NAME_WRSC		"./wrsc-log.log"
-
-
-enum class LogType {
- 	INFO,
- 	WARNING,
- 	ERROR
-};
-
 
 // Uncomment for a WRSC2016 position log file
 //#define ENABLE_WRSC_LOGGING
@@ -91,7 +78,7 @@ private:
 	Logger();
 	~Logger();
 
-	static void log(std::string message);
+	void log(std::string message);
 
 	bool createLogFiles(const char* filename = 0);
 
@@ -115,13 +102,13 @@ private:
 
 	static Logger* m_instance;
 	static bool m_GPSTimeSet;
-	boost::log::sources::severity_logger_mt<boost::log::trivial::severity_level> m_logger;
+
 	std::string m_LogFilePath;
 	unsigned long m_LastClockStamp;
 	unsigned long m_LastTimeStamp;
 	std::ofstream* m_LogFile;
-
 	std::vector<std::string> m_LogBuffer;
+	std::mutex m_Mutex;
 
 	#ifdef ENABLE_WRSC_LOGGING
 	std::ofstream* m_LogFileWRSC;

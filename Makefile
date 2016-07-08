@@ -104,7 +104,7 @@ CFLAGS = -Wall -g -o2
 CPPFLAGS = -g -Wall -pedantic -Werror -std=c++11
 
 LIBS = -lsqlite3 -lgps -lrt -lwiringPi -lcurl -lpthread
-LIBS_BOOST = -lboost_system -lboost_log -lboost_thread
+#LIBS_BOOST = -lboost_system -lboost_log -lboost_thread
 
 ifeq ($(TOOLCHAIN),raspi_cc)
 C_TOOLCHAIN = 0
