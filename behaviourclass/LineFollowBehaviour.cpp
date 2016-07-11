@@ -90,9 +90,6 @@ double LineFollowBehaviour::calculateAngleOfDesiredTrajectory(std::unique_ptr<Po
 
 void LineFollowBehaviour::computeCommands(SystemStateModel &systemStateModel,std::unique_ptr<Position> const& position,
                                       double trueWindDirection, bool mockPosition, bool getHeadingFromCompass){
-
-    // if(m_previousWaypointModel.id == "")
-    //     setPreviousWayPoint(systemStateModel);
     
     trueWindDirection = Utility::degreeToRadian(trueWindDirection);
 
@@ -130,7 +127,7 @@ void LineFollowBehaviour::computeCommands(SystemStateModel &systemStateModel,std
         int maxTackDistance = 20; //'r'
         double phi = calculateAngleOfDesiredTrajectory(position);
         double desiredHeading = phi - (2 * (M_PI / 4)/M_PI) * atan2(signedDistance,maxTackDistance);
-      
+        desiredHeading = Utility::limitRadianAngleRange(desiredHeading);
         //CHECK IF TACKING IS NEEDED
         if(abs(signedDistance) > maxTackDistance)
             m_tackingDirection = Utility::sgn(signedDistance);
@@ -142,6 +139,7 @@ void LineFollowBehaviour::computeCommands(SystemStateModel &systemStateModel,std
                 m_tack = true;
             }
             desiredHeading = M_PI + trueWindDirection - m_tackingDirection * m_tackAngle;
+            desiredHeading = Utility::limitRadianAngleRange(desiredHeading);
         }
 // else if( (cos(trueWindDirection + M_PI - desiredHeading) + cos(0) < 0) ||  //Check if boat direction is same as truewind. NOT TESTED
         //              ( (abs(signedDistance) < maxTackDistance) && (cos(trueWindDirection + M_PI - phi) + cos(0) < 0) ) )
