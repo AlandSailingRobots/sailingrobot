@@ -85,6 +85,7 @@ void SailingRobot::run() {
 		m_dbHandler->retrieveCellAsInt("buffer_config", "1", "true_wind");
 	double trueWindDirection;
 
+
 	Timer timer;
 	std::string sr_loop_time =
 		m_dbHandler->retrieveCell("sailing_robot_config", "1", "loop_time");
@@ -102,6 +103,11 @@ void SailingRobot::run() {
 		behave = &waypB;
   	behave->init();
 	m_httpSync->setWaypointUpdateCallback(behave->setWaypointsChanged);
+	
+	if (m_getHeadingFromCompass){
+		behave->m_gpsHeadingWeight = 0.0;
+	}else behave->m_gpsHeadingWeight = 1.0;
+
 
 	while(m_running) {
 		timer.reset();
