@@ -164,6 +164,20 @@ double Utility::limitAngleRange(double angle)
 	return angle;
 }
 
+double Utility::limitRadianAngleRange(double angle)
+{
+	const double fullRevolution = 2 * M_PI;
+	const double minAngle = 0;
+
+	while (angle < minAngle)
+		angle += fullRevolution;
+
+	while (angle >= minAngle + fullRevolution)
+		angle -= fullRevolution;
+
+	return angle;
+}
+
 
 double Utility::degreeToRadian(double degrees)
 {
