@@ -86,6 +86,7 @@ export INC = -I./ -I./libs
 
 INC = -I./ -I./libs -I./libs/wiringPi/wiringPi
 
+WIRING_PI = libwiringPi.so
 WIRING_PI_PATH = ./libs/wiringPi/wiringPi/
 WIRING_PI_STATIC = ./libs/wiringPi/wiringPi/libwiringPi.so.2.32
 
@@ -106,7 +107,7 @@ export OBJECT_FILE = $(BUILD_DIR)/objects.tmp
 export CFLAGS = -Wall -g -o2
 export CPPFLAGS = -g -Wall -pedantic -Werror -std=c++11
 
-export LIBS = -lsqlite3 -lgps -lrt -lwiringPi -lcurl -lpthread
+export LIBS = -lsqlite3 -lgps -lrt -lcurl -lpthread
 
 ifeq ($(TOOLCHAIN),raspi_cc)
 C_TOOLCHAIN = 0
@@ -147,15 +148,16 @@ clean_tests:
 $(BUILD_DIR):
 	@$(MKDIR_P) $(BUILD_DIR)
 
-$(WIRING_PI_STATIC):
+$(WIRING_PI):
 	$(MAKE) -C $(WIRING_PI_PATH)
+	@mv $(WIRING_PI_STATIC) ./libwiringPi.so
 
 # Link and build
-$(EXECUTABLE) : $(BUILD_DIR) $(OBJECTS) $(WIRING_PI_STATIC) $(OBJECT_MAIN)
+$(EXECUTABLE) : $(BUILD_DIR) $(OBJECTS) $(WIRING_PI) $(OBJECT_MAIN)
 	rm -f $(OBJECT_FILE)
 	@echo Linking object files
 	@echo -n " " $(OBJECTS) >> $(OBJECT_FILE)
-	$(CXX) $(LDFLAGS) @$(OBJECT_FILE) $(WIRING_PI_STATIC) $(OBJECT_MAIN) -o $@ $(LIBS) $(LIBS_BOOST)
+	$(CXX) $(LDFLAGS) @$(OBJECT_FILE) ./libwiringPi.so $(OBJECT_MAIN) -Wl,-rpath=./ -o $@ $(LIBS) $(LIBS_BOOST)
 	@echo Built using toolchain: $(TOOLCHAIN)
 
 # Compile CPP files into the build folder
