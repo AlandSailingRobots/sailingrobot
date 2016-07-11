@@ -56,6 +56,8 @@ static void threadI2CController() {
 }
 
 int main(int argc, char *argv[]) {
+	// This is for eclipse development so the output is constantly pumped out.
+	setbuf(stdout, NULL); 
 
 	std::string path, db_name, errorLog;
 	if (argc < 2) {
