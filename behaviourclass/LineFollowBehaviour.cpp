@@ -125,16 +125,16 @@ void LineFollowBehaviour::computeCommands(SystemStateModel &systemStateModel,std
             setPreviousWayPoint(systemStateModel);
 
         //GET DIRECTION - From the book Robotic Sailing 2012 and Robotic Sailing 2015
-        double currentHeading = Utility::degreeToRadian(getHeading(systemStateModel,mockPosition,getHeadingFromCompass,position, m_nextWaypointModel));
+        currentHeading = Utility::degreeToRadian(getHeading(systemStateModel,mockPosition,getHeadingFromCompass,position, m_nextWaypointModel));
         double signedDistance = calculateSignedDistance(position); // 'e'
         int maxTackDistance = 20; //'r'
         double phi = calculateAngleOfDesiredTrajectory(position);
-        desiredHeading = phi - (2 * (M_PI / 4)/M_PI) * atan2(signedDistance,maxTackDistance);
-        // printf("boat positon lon: %f       lat: %f\n", position->getModel().longitude, position->getModel().latitude);
-        // printf("CurrentHeading: %f       signedDistance: %f        Phi: %f        Desired heading: %f \n", currentHeading, signedDistance, phi, desiredHeading);
-        // printf("bearingToNextWaypoint: %f\n", Utility::degreeToRadian(bearingToNextWaypoint));
+        double desiredHeading = phi - (2 * (M_PI / 4)/M_PI) * atan2(signedDistance,maxTackDistance);
       
         //CHECK IF TACKING IS NEEDED
+        if(abs(signedDistance) > maxTackDistance)
+            m_tackingDirection = Utility::sgn(signedDistance);
+
         if( (cos(trueWindDirection - desiredHeading) + cos(m_tackAngle) < 0) || (cos(trueWindDirection - phi) + cos(m_tackAngle) < 0))
         {
             if(!m_tack){
@@ -188,10 +188,11 @@ void LineFollowBehaviour::computeCommands(SystemStateModel &systemStateModel,std
         double apparentWindDirection = Utility::getApparentWindDirection(systemStateModel, currentHeading, trueWindDirection);
         m_sailCommand = -Utility::sgn(apparentWindDirection) * ( ((m_minSailAngle - m_maxSailAngle) / M_PI) * abs(apparentWindDirection) + m_maxSailAngle);
 
-        // std::cout << "speed: " << systemStateModel.gpsModel.speed << "   desiredHeading: " << desiredHeading << "   maxCommand: " << m_maxCommandAngle << 
-        // "   rudderCommand: " << m_rudderCommand  << "    SailCommand: " << m_sailCommand << std::endl;
-        // std::cout  << "heading: " << currentHeading << std::endl;
-        // printf("Tacking: %d     TackingDirection: %d\n", m_tack, m_tackingDirection);
+        printf("CurrentHeading: %f       signedDistance: %f        Phi: %f        Desired heading: %f \n", currentHeading, signedDistance, phi, desiredHeading);
+        printf("bearingToNextWaypoint: %f\n", Utility::degreeToRadian(bearingToNextWaypoint));
+        printf("Speed: %f      RudderCommand: %f     SailCommand: %f       TrueWindDirection: %f \n", systemStateModel.gpsModel.speed, m_rudderCommand, m_sailCommand, trueWindDirection);
+        printf("Tacking: %d     TackingDirection: %d\n", m_tack, m_tackingDirection);
+        
     } else {
         Logger::warning("%s gps NaN. Using values from last iteration", __PRETTY_FUNCTION__);
     }
@@ -207,7 +208,7 @@ void LineFollowBehaviour::manageDatabase(double trueWindDirection, SystemStateMo
     0,                                               
     distanceToNextWaypoint,
     bearingToNextWaypoint,
-    desiredHeading,
+    currentHeading,
     m_tack,
     getGoingStarboard(),
     atoi(m_nextWaypointModel.id.c_str()),

@@ -29,7 +29,7 @@ private:
     bool m_tack; 
     int m_wayPointCount;
     double distanceToNextWaypoint, bearingToNextWaypoint;
-    double desiredHeading, desiredHeadingTackMode;
+    double currentHeading, desiredHeadingTackMode;
     double m_maxCommandAngle, m_maxSailAngle, m_minSailAngle;
     double m_tackAngle;
     int m_tackingDirection;
