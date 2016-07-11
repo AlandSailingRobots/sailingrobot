@@ -140,8 +140,9 @@ void LineFollowBehaviour::computeCommands(SystemStateModel &systemStateModel,std
             }
             desiredHeading = M_PI + trueWindDirection - m_tackingDirection * m_tackAngle;
             desiredHeading = Utility::limitRadianAngleRange(desiredHeading);
+
         }
-// else if( (cos(trueWindDirection + M_PI - desiredHeading) + cos(0) < 0) ||  //Check if boat direction is same as truewind. NOT TESTED
+// else if( (cos(trueWindDirection + M_PI - desiredHeading_star) + cos(0) < 0) ||  //Check if boat direction is same as truewind. NOT TESTED
         //              ( (abs(signedDistance) < maxTackDistance) && (cos(trueWindDirection + M_PI - phi) + cos(0) < 0) ) )
         // {
         //     if(!m_tack)              //NOT TESTED, TRY AT ANOTHER STAGE. SIMONS CODE
@@ -186,11 +187,12 @@ void LineFollowBehaviour::computeCommands(SystemStateModel &systemStateModel,std
         double apparentWindDirection = Utility::getApparentWindDirection(systemStateModel, currentHeading, trueWindDirection);
         m_sailCommand = -Utility::sgn(apparentWindDirection) * ( ((m_minSailAngle - m_maxSailAngle) / M_PI) * abs(apparentWindDirection) + m_maxSailAngle);
 
+
         printf("CurrentHeading: %f       signedDistance: %f        Phi: %f        Desired heading: %f \n", currentHeading, signedDistance, phi, desiredHeading);
         printf("bearingToNextWaypoint: %f\n", Utility::degreeToRadian(bearingToNextWaypoint));
         printf("Speed: %f      RudderCommand: %f     SailCommand: %f       TrueWindDirection: %f \n", systemStateModel.gpsModel.speed, m_rudderCommand, m_sailCommand, trueWindDirection);
         printf("Tacking: %d     TackingDirection: %d\n", m_tack, m_tackingDirection);
-        
+
     } else {
         Logger::warning("%s gps NaN. Using values from last iteration", __PRETTY_FUNCTION__);
     }
