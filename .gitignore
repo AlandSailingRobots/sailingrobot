@@ -2,6 +2,7 @@
 # Build files
 build/
 sr
+*.so
 
 # Database and log files
 *.db
@@ -11,4 +12,3 @@ sr
 
 # Other
 *.vim
-libs/wiringPi/wiringPi/libwiringPi.a
