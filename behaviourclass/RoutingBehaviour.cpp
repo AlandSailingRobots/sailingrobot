@@ -40,10 +40,9 @@ void RoutingBehaviour::setNextWaypoint(WaypointModel &waypointModel)
 
 void RoutingBehaviour::harvestWaypoint(WaypointModel waypointModel)
 {
-	try {
-		m_dbHandler->changeOneValue("waypoints", waypointModel.id,"1","harvested");
-	} catch (const char * error) {
-		Logger::error("%s Error: %s", __func__, error);
+	if(not m_dbHandler->changeOneValue("waypoints", waypointModel.id,"1","harvested"))
+	{
+		Logger::error("Failed to harvest waypoint");
 	}
 	Logger::info("Reached waypoint");
 }

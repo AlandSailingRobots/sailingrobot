@@ -1,5 +1,5 @@
 #include "HTTPSync.h"
-
+//TODO - Oliver/Jordan: Sort this shit out
 size_t write_to_string(void *ptr, size_t size, size_t count, void *stream) {
     ((std::string*)stream)->append((char*)ptr, 0, size*count);
     return size*count;
@@ -131,16 +131,20 @@ bool HTTPSync::checkIfNewWaypoints(){
 
 void HTTPSync::updateConfigs() {
     if(checkIfNewConfig()) {
+
         try {
-            std::string configs = getData("getAllConfigs");
-            m_dbHandler->updateConfigs(configs);
-            m_dbHandler->updateTable("state", "configs_updated", "1","1");
-            Logger::info("Configuration retrieved from remote server");
-            pushConfigs();
-        } catch(const char* error) {
-            Logger::error("%s Error: %s", __PRETTY_FUNCTION__, error);
-        }
-    }
+			std::string configs = getData("getAllConfigs");
+	    	m_dbHandler->updateConfigs(configs);
+	    	if(not m_dbHandler->updateTable("state", "configs_updated", "1","1"))
+	    	{
+				Logger::error("%s Error updating state table", __PRETTY_FUNCTION__);
+	    	}
+			Logger::info("Configuration retrieved from remote server");
+			pushConfigs();
+		} catch (const char* error) {
+			Logger::error("%s Error: %s", __PRETTY_FUNCTION__, error);
+		}
+	}
 }
 
 void HTTPSync::updateWaypoints() {
@@ -148,11 +152,13 @@ void HTTPSync::updateWaypoints() {
     if(checkIfNewWaypoints()){
         try{
             std::string waypoints = getData("getWaypoints"); //Waypoints call implemented? //SERVE("", "getWaypoints")'
-            m_dbHandler->updateWaypoints(waypoints);
-            Logger::info("Waypoints retrieved from remote server");
-            if (m_callBack != NULL){
-                m_callBack();
-            } 
+            if(m_dbHandler->updateWaypoints(waypoints))
+            {
+				Logger::info("Waypoints retrieved from remote server");
+				if (m_callBack != NULL) {
+					m_callBack();
+				}
+            }
         }catch(const char* error){
             Logger::error("%s Error: %s", __PRETTY_FUNCTION__, error);
         }

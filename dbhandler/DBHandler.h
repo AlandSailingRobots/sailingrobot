@@ -25,7 +25,7 @@ private:
 	std::string m_filePath;
 
 	//execute INSERT query and add new row into table
-	void queryTable(std::string sqlINSERT);
+	bool queryTable(std::string sqlINSERT);
 
 	//retrieve data from given table/tables, return value is a C 2D char array
 	//rows and columns also return values (through a reference) about rows and columns in the result set
@@ -82,15 +82,15 @@ public:
 	void insertMessageLog(std::string gps_time, std::string type, std::string msg);
 
 	//updates table with json string (data)
-	void updateTableJson(std::string table, std::string data);
+	bool updateTableJson(std::string table, std::string data);
 
 	//updates table using values given
-	void updateTable(std::string table, std::string column, std::string value, std::string id);
+	bool updateTable(std::string table, std::string column, std::string value, std::string id);
 
 	void clearTable(std::string table);
 
 	void updateConfigs(std::string configs);
-	void updateWaypoints(std::string waypoints);
+	bool updateWaypoints(std::string waypoints);
 
     //retrieve one value from a table as string
 	std::string retrieveCell(std::string table, std::string id, std::string column);
@@ -101,7 +101,6 @@ public:
 	// returns all logs in database as json; supply onlyLatest to get only the ones with the highest id
 	std::string getLogs(bool onlyLatest);
 
-	void removeLogs(std::string data);
 
 	void clearLogs();
 
@@ -116,12 +115,12 @@ public:
 
 	WaypointModel getPreviouslyHarvestedWaypoint();
 
-	void insert(std::string table, std::string fields, std::string values);
+	bool insert(std::string table, std::string fields, std::string values);
 
 	// inserts area scanning measurements into db
 	void insertScan(std::string waypoint_id, PositionModel position, float temperature, std::string timestamp);
 
-	void changeOneValue(std::string table, std::string id, std::string newValue, std::string colName);
+	bool changeOneValue(std::string table, std::string id, std::string newValue, std::string colName);
 
 	std::string getWaypoints();
 

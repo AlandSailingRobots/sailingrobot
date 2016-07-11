@@ -153,7 +153,7 @@ void DBHandler::insertDataLog(
 			<< trueWindDirectionCalc;
 		m_latestDataLogId = insertLog("system_datalogs", systemValues.str());
 }
-
+//TODO -Oliver: make private
 void DBHandler::insertMessageLog(std::string gps_time, std::string type, std::string msg) {
 	std::string result;
 	std::stringstream sstm;
@@ -164,13 +164,14 @@ void DBHandler::insertMessageLog(std::string gps_time, std::string type, std::st
 }
 
 
-void DBHandler::updateTableJson(std::string table, std::string data) {
+bool DBHandler::updateTableJson(std::string table, std::string data) {
 
 	//m_logger.info(" updateTableJson:\n"+data);
 	std::vector<std::string> columns = getColumnInfo("name", table);
 
 	if(columns.size() <= 0 ){
- 		throw "ERROR in DBHandler::updateTable no such table " + table;
+		Logger::error("%s Error: no such table %s", __PRETTY_FUNCTION__, table);
+		return false;
 	}
 
 
@@ -192,21 +193,21 @@ void DBHandler::updateTableJson(std::string table, std::string data) {
 
 	std::string id = json["id"];
 
-	try {
-		queryTable("UPDATE " + table + " " + values + " WHERE ID = " + id + ";");
+	if(not queryTable("UPDATE " + table + " " + values + " WHERE ID = " + id + ";"))
+	{
+		Logger::error("%s Error: ", __PRETTY_FUNCTION__);
+		return false;
 	}
-	catch( const char * error) {
-		Logger::error("%s Error: %s", __PRETTY_FUNCTION__, error);
-	}
+	return true;
 }
 
-void DBHandler::updateTable(std::string table, std::string column, std::string value, std::string id) {
-	try {
-		queryTable("UPDATE " + table + " SET " + column + " = " + value + " WHERE ID = " + id + ";");
+bool DBHandler::updateTable(std::string table, std::string column, std::string value, std::string id) {
+	if(not queryTable("UPDATE " + table + " SET " + column + " = " + value + " WHERE ID = " + id + ";"))
+	{
+		Logger::error("%s Error updating table", __PRETTY_FUNCTION__);
+		return false;
 	}
-	catch( const char * error) {
-		Logger::error("%s Error: %s", __PRETTY_FUNCTION__, error);
-	}
+	return true;
 }
 
 
@@ -248,7 +249,7 @@ void DBHandler::updateConfigs(std::string configs) {
 }
 
 
-void DBHandler::updateWaypoints(std::string waypoints){
+bool DBHandler::updateWaypoints(std::string waypoints){
 
 	Json json = Json::parse(waypoints);
 	std::string DBPrinter = "";
@@ -256,12 +257,11 @@ void DBHandler::updateWaypoints(std::string waypoints){
 	int valuesLimit = 5; //"Dirty" fix for limiting the amount of values requested from server waypoint entries (amount of fields n = valuesLimit + 1)
 	int limitCounter;
 
-	try {
-		queryTable("DELETE FROM waypoints;");
+	if(not queryTable("DELETE FROM waypoints;"))
+	{
+		Logger::error("%s, Error: failed to delete waypoints", __PRETTY_FUNCTION__);
 	}
-	catch( const char * error) {
-		Logger::error("%s, Error: %s", __PRETTY_FUNCTION__, error);
-	}
+
 
 	for (auto i : Json::iterator_wrapper(json))  {
 		//m_logger.info(i.value().dump());
@@ -285,16 +285,12 @@ void DBHandler::updateWaypoints(std::string waypoints){
 			//if (DBPrinter.size () > 0)  DBPrinter.resize (DBPrinter.size () - 1);
 			DBPrinter = DBPrinter + "0);";
 
-			try {
-				queryTable(DBPrinter);
-			}
-			catch( const char * error) {
-				Logger::error("%s, Error: %s", __PRETTY_FUNCTION__, error);
-			}
 
-			//Insert output
-			//m_logger.info(DBPrinter);
-
+			if(not queryTable(DBPrinter))
+			{
+				Logger::error("%s, Error: failed to add waypoints", __PRETTY_FUNCTION__);
+				return false;
+			}
 		}
 	}
 
@@ -304,14 +300,13 @@ void DBHandler::updateWaypoints(std::string waypoints){
 		std::string updateHarvested = "UPDATE waypoints SET harvested = 1 WHERE id < ";
 		updateHarvested += m_currentWaypointId + ";";
 
-		try {
-			queryTable(updateHarvested);
-		}
-		catch( const char * error) {
-			Logger::error("%s, Error: %s", __PRETTY_FUNCTION__, error);
+		if(not queryTable(updateHarvested))
+		{
+			Logger::error("%s, Error: failed to harvest waypoints", __PRETTY_FUNCTION__);
+			return false;
 		}
 	}
-
+	return true;
 }
 
 
@@ -328,6 +323,7 @@ int DBHandler::retrieveCellAsInt(std::string table, std::string id, std::string 
 
 
 void DBHandler::clearTable(std::string table) {
+	//If no table to delete, doesn't matter
 	queryTable("DELETE FROM " + table + ";");
 }
 
@@ -365,24 +361,6 @@ std::string DBHandler::getLogs(bool onlyLatest) {
 }
 
 
-
-void DBHandler::removeLogs(std::string data) {
-
-	//Check for a valid parsing format
-	//Should probably create som kind of function to check if a string is json
-	if(data == "" || data.at(0) != '[') {
-		Logger::error("%s, Response: %s", __PRETTY_FUNCTION__, data.c_str());
-		return;
-	}
-
-	Json json = Json::parse(data);
-	for (auto data : json) {
-		std::string table = data["table"];
-		std::string id = data["id"];
-		queryTable("DELETE FROM " + table + " WHERE id = " + id + ";");
-	}
-}
-
 void DBHandler::clearLogs() {
 	std::vector<std::string> datalogTables = getTableNames("%_datalogs");
 
@@ -396,10 +374,14 @@ void DBHandler::deleteRow(std::string table, std::string id) {
 	queryTable("DELETE FROM " + table + " WHERE id = " + id + ";");
 }
 
-void DBHandler::insert(std::string table, std::string fields, std::string values)
+bool DBHandler::insert(std::string table, std::string fields, std::string values)
 {
-	queryTable("INSERT INTO " + table + "(" + fields +
-		") VALUES(" + values + ");");
+	if(not queryTable("INSERT INTO " + table + "(" + fields + ") VALUES(" + values + ");"))
+	{
+		Logger::error("%s, Failed to insert into table", __PRETTY_FUNCTION__);
+		return false;
+	}
+	return true;
 }
 
 void DBHandler::insertScan(std::string waypoint_id, PositionModel position, float temperature, std::string timestamp)
@@ -579,17 +561,20 @@ int DBHandler::insertLog(std::string table, std::string values) {
 	ss << "INSERT INTO " << table << " VALUES(NULL, " << values << ");";
 	int lastInsertedId = 0;
 
-	try {
-		queryTable(ss.str());
-		lastInsertedId = atoi(getIdFromTable(table,true).c_str());
-
-	} catch(const char * error) {
-		Logger::error("%s Error: %s", __PRETTY_FUNCTION__, error);
+	if(queryTable(ss.str()))
+	{
+		std::string tableId = getIdFromTable(table,true);
+		return (int)strtol(tableId.c_str(), NULL, 10);
 	}
+	else
+	{
+		Logger::error("%s Error, failed to insert log", __PRETTY_FUNCTION__);
+	}
+
 	return lastInsertedId;
 }
 
-void DBHandler::queryTable(std::string sqlINSERT) {
+bool DBHandler::queryTable(std::string sqlINSERT) {
 	sqlite3* db = openDatabase();
 	m_error = NULL;
 
@@ -608,13 +593,15 @@ void DBHandler::queryTable(std::string sqlINSERT) {
 			Logger::error("%s Error: %s", __PRETTY_FUNCTION__, sqlite3_errmsg(db));
 
 			sqlite3_free(m_error);
-			throw "Query error";
+			return false;
 		}
 	}
 	else {
-		throw "DBHandler::queryTable(), no db connection";
+		Logger::error("%s Error: no database found", __PRETTY_FUNCTION__);
+		return false;
 	}
 	closeDatabase(db);
+	return true;
 }
 
 std::vector<std::string> DBHandler::retrieveFromTable(std::string sqlSELECT, int &rows, int &columns) {
@@ -784,8 +771,12 @@ std::string DBHandler::getConfigs() {
 }
 
 
-void DBHandler::changeOneValue(std::string table, std::string id,std::string newValue, std::string colName){
+bool DBHandler::changeOneValue(std::string table, std::string id,std::string newValue, std::string colName){
 
-	queryTable("UPDATE " + table + " SET "+ colName + " = "+ newValue +" WHERE id = " + id +";");
-
+	if(not queryTable("UPDATE " + table + " SET "+ colName + " = "+ newValue +" WHERE id = " + id +";"))
+	{
+		Logger::error("Error %s", __PRETTY_FUNCTION__);
+		return false;
+	}
+	return true;
 }
