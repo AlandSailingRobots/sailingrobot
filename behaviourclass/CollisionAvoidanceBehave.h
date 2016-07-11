@@ -3,6 +3,7 @@
 #include <stdint.h> //uint8_t
 #include <math.h>
 #include <algorithm>
+#include <math.h>
 #include <cmath>
 #include <iostream>
 #include "coursecalculation/CourseCalculation.h"
@@ -169,13 +170,15 @@ private:
 
     void moveObstacle(std::vector<Eigen::MatrixXd>& mock_obstacle_list,std::vector<int> elements, float dt);
 
-    void printStdVectorMat(std::string const& name, std::vector<Eigen::MatrixXd> const& v);
-    void printMat(std::string const& name,Eigen::MatrixXd const& mat);
-    void printCollisionAvoidanceBehave(int rows_Z,int cols_Z,Eigen::VectorXd v);
+
     Eigen::MatrixXd atanMat(Eigen::MatrixXd mat);
     float heaviside(float num);
     Eigen::MatrixXd heavisideMat(Eigen::MatrixXd mat);
     Eigen::MatrixXd rectangularPulse(float a, float b, Eigen::MatrixXd x);
+    void printStdVectorMat(std::string const& name, std::vector<Eigen::MatrixXd> const& v);
+    void printMat(std::string const& name,Eigen::MatrixXd const& mat);
+    void printStdVectorFloat(std::string const& name, std::vector<float> const& v);
+    void printCollisionAvoidanceBehave(int rows_Z,int cols_Z,Eigen::VectorXd v);
 
 
 };
