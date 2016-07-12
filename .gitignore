@@ -13,3 +13,4 @@ sr
 *.vim
 libs/wiringPi/wiringPi/libwiringPi.a
 *.so
+*.tags
