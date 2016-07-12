@@ -26,14 +26,16 @@ public:
     virtual double getRudderCommand();
     virtual void manageDatabase(double trueWindDirection, SystemStateModel &systemStateModel)=0;
     static void setWaypointsChanged();
+    float m_gpsHeadingWeight;
 
 protected:
     DBHandler *m_dbHandler;
-    Logger m_logger;
     double m_rudderCommand, m_sailCommand;
     virtual void setNextWaypoint(WaypointModel &waypointModel);
     virtual void harvestWaypoint(WaypointModel waypointModel);
     virtual int getHeading(SystemStateModel &systemStateModel,bool mockPosition,bool getHeadingFromCompass,std::unique_ptr<Position> const& position, WaypointModel waypointModel);
+    //Calculates a smooth transition between the compass and the gps. Do not call directly, use getHeading()
+    int getMergedHeading(SystemStateModel &systemStateModel, WaypointModel waypointModel, bool increaseCompassWeight);
     static bool waypointsChanged;
 };
 
