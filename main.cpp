@@ -109,7 +109,6 @@ int main(int argc, char *argv[]) {
 	// Create main sailing robot controller
 	int http_delay =  db.retrieveCellAsInt("httpsync_config", "1", "delay");
 	bool removeLogs = db.retrieveCellAsInt("httpsync_config", "1", "remove_logs");
-	//bool removeLogs = true;
 
 	httpsync_handle = new HTTPSync( &db, http_delay, removeLogs );
 	
