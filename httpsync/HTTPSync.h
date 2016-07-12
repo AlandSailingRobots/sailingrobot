@@ -47,7 +47,6 @@ class HTTPSync {
 		bool m_removeLogs;
 		int m_delay;
 		int m_pushOnlyLatestLogs;
-		Logger m_logger;
 		std::mutex m_mutex;
 
 		waypointUpdateCallback m_callBack;

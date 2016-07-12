@@ -34,8 +34,6 @@ private:
     std::unique_ptr<Compass> m_compass;
 	std::unique_ptr<AnalogArduino> m_pressure;
 
-	Logger m_logger;
-
 	bool isRunning();
 };
 

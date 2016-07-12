@@ -11,7 +11,7 @@ LineFollowBehaviour::LineFollowBehaviour(DBHandler *db):
     m_maxCommandAngle = M_PI / 6;
     m_maxSailAngle = M_PI / 32;
     m_minSailAngle = M_PI / 5.2f;
-    m_tackAngle = M_PI / 3;
+    m_tackAngle = 0.872665; //50°
     desiredHeadingTackMode = 0;
 }
 
@@ -24,58 +24,63 @@ bool LineFollowBehaviour::init()
 	setNextWaypoint(m_nextWaypointModel);
     printf("Setting up: OK\n");
 
-    printf("*SailingRobot::run() LineFollow started.\n");
-    std::cout << "Waypoint target - ID: " << m_nextWaypointModel.id << " lon: " <<
-    m_nextWaypointModel.positionModel.longitude	<< " lat : " <<
-    m_nextWaypointModel.positionModel.latitude << std::endl;
-
+    Logger::info("LineFollow Behaviour started");
+    Logger::info("Waypoint target - ID: %s, Lon: %f, Lat: %f",  m_nextWaypointModel.id.c_str(), 
+                                                                m_nextWaypointModel.positionModel.longitude, 
+                                                                m_nextWaypointModel.positionModel.latitude);
     return true;
 }
 
 double LineFollowBehaviour::calculateSignedDistance(std::unique_ptr<Position> const& position)
 {
-
     int earthRadius = 6371000;
-    std::array<double, 3> a =
-     {  earthRadius * Utility::degreeToRadian(cos(m_previousWaypointModel.positionModel.latitude)) * Utility::degreeToRadian(cos(m_previousWaypointModel.positionModel.longitude)),
-        earthRadius * Utility::degreeToRadian(cos(m_previousWaypointModel.positionModel.latitude)) * Utility::degreeToRadian(cos(m_previousWaypointModel.positionModel.longitude)),
-        earthRadius * Utility::degreeToRadian(sin(m_previousWaypointModel.positionModel.latitude))};
-    std::array<double, 3> b =
-     {  earthRadius * Utility::degreeToRadian(cos(m_nextWaypointModel.positionModel.latitude)) * Utility::degreeToRadian(cos(m_nextWaypointModel.positionModel.longitude)),
-        earthRadius * Utility::degreeToRadian(cos(m_nextWaypointModel.positionModel.latitude)) * Utility::degreeToRadian(cos(m_nextWaypointModel.positionModel.longitude)),
-        earthRadius * Utility::degreeToRadian(sin(m_nextWaypointModel.positionModel.latitude))};
-    std::array<double, 3> m = 
-    {   earthRadius * Utility::degreeToRadian(cos(position->getModel().latitude)) * Utility::degreeToRadian(cos(position->getModel().longitude)),
-        earthRadius * Utility::degreeToRadian(cos(position->getModel().latitude)) * Utility::degreeToRadian(cos(position->getModel().longitude)),
-        earthRadius * Utility::degreeToRadian(sin(position->getModel().latitude))};
-                // a^b / ||a|| * ||b||
-    double n = ( (a[1]*b[2] - a[2]*b[1]) + (a[2]*b[0] - a[0]*b[2]) + (a[0]*b[2] - a[1]*b[0]) ) /   //Vector product: A^B divided by
-                ( sqrt(a[0]*a[0] + a[1]*a[1] + a[2]*a[2])   *   sqrt(b[0]*b[0] + b[1]*b[1] + b[2]*b[2])); // norm a * norm b
+    
+    std::array<double, 3> prevWPCoord = //a
+     {  earthRadius * cos(Utility::degreeToRadian(m_previousWaypointModel.positionModel.latitude)) * cos(Utility::degreeToRadian(m_previousWaypointModel.positionModel.longitude)),
+        earthRadius * cos(Utility::degreeToRadian(m_previousWaypointModel.positionModel.latitude)) * sin(Utility::degreeToRadian(m_previousWaypointModel.positionModel.longitude)),
+        earthRadius * sin(Utility::degreeToRadian(m_previousWaypointModel.positionModel.latitude))};
+    std::array<double, 3> nextWPCoord = //b
+     {  earthRadius * cos(Utility::degreeToRadian(m_nextWaypointModel.positionModel.latitude)) * cos(Utility::degreeToRadian(m_nextWaypointModel.positionModel.longitude)),
+        earthRadius * cos(Utility::degreeToRadian(m_nextWaypointModel.positionModel.latitude)) * sin(Utility::degreeToRadian(m_nextWaypointModel.positionModel.longitude)),
+        earthRadius * sin(Utility::degreeToRadian(m_nextWaypointModel.positionModel.latitude))};
+        std::array<double, 3> boatCoord = //m
+     {  earthRadius * cos(Utility::degreeToRadian(position->getModel().latitude)) * cos(Utility::degreeToRadian(position->getModel().longitude)),
+        earthRadius * cos(Utility::degreeToRadian(position->getModel().latitude)) * sin(Utility::degreeToRadian(position->getModel().longitude)),
+        earthRadius * sin(Utility::degreeToRadian(position->getModel().latitude))};
+    
+    double normAB = sqrt(prevWPCoord[0]*prevWPCoord[0] + prevWPCoord[1]*prevWPCoord[1] + prevWPCoord[2]*prevWPCoord[2])   * //||a|| 
+                       sqrt(nextWPCoord[0]*nextWPCoord[0] + nextWPCoord[1]*nextWPCoord[1] + nextWPCoord[2]*nextWPCoord[2]); //||b||
+                
+    std::array<double, 3> oab = //vector normal to plane
+    {   (prevWPCoord[1]*nextWPCoord[2] - prevWPCoord[2]*nextWPCoord[1]) / normAB,       //Vector product: A^B divided by norm a * norm b        a^b / ||a|| ||b||
+        (prevWPCoord[2]*nextWPCoord[0] - prevWPCoord[0]*nextWPCoord[2]) / normAB,
+        (prevWPCoord[0]*nextWPCoord[1] - prevWPCoord[1]*nextWPCoord[0]) / normAB };
 
-    double e = m[0]*n + m[1]*n + m[2]*n; //dot product       
+    double signedDistance = boatCoord[0]*oab[0] + boatCoord[1]*oab[1] + boatCoord[2]*oab[2]; 
 
-    return e;
+    return signedDistance;
 }
 
 double LineFollowBehaviour::calculateAngleOfDesiredTrajectory(std::unique_ptr<Position> const& position)
 {
     int earthRadius = 6371000;
-    std::array<double, 3> a =
-     {  earthRadius * Utility::degreeToRadian(cos(m_previousWaypointModel.positionModel.latitude)) * Utility::degreeToRadian(cos(m_previousWaypointModel.positionModel.longitude)),
-        earthRadius * Utility::degreeToRadian(cos(m_previousWaypointModel.positionModel.latitude)) * Utility::degreeToRadian(cos(m_previousWaypointModel.positionModel.longitude)),
-        earthRadius * Utility::degreeToRadian(sin(m_previousWaypointModel.positionModel.latitude))};
-    std::array<double, 3> b =
-     {  earthRadius * Utility::degreeToRadian(cos(m_nextWaypointModel.positionModel.latitude)) * Utility::degreeToRadian(cos(m_nextWaypointModel.positionModel.longitude)),
-        earthRadius * Utility::degreeToRadian(cos(m_nextWaypointModel.positionModel.latitude)) * Utility::degreeToRadian(cos(m_nextWaypointModel.positionModel.longitude)),
-        earthRadius * Utility::degreeToRadian(sin(m_nextWaypointModel.positionModel.latitude))};
+
+    std::array<double, 3> prevWPCoord =
+     {  earthRadius * cos(Utility::degreeToRadian(m_previousWaypointModel.positionModel.latitude)) * cos(Utility::degreeToRadian(m_previousWaypointModel.positionModel.longitude)),
+        earthRadius * cos(Utility::degreeToRadian(m_previousWaypointModel.positionModel.latitude)) * sin(Utility::degreeToRadian(m_previousWaypointModel.positionModel.longitude)),
+        earthRadius * sin(Utility::degreeToRadian(m_previousWaypointModel.positionModel.latitude))};
+    std::array<double, 3> nextWPCoord =
+     {  earthRadius * cos(Utility::degreeToRadian(m_nextWaypointModel.positionModel.latitude)) * cos(Utility::degreeToRadian(m_nextWaypointModel.positionModel.longitude)),
+        earthRadius * cos(Utility::degreeToRadian(m_nextWaypointModel.positionModel.latitude)) * sin(Utility::degreeToRadian(m_nextWaypointModel.positionModel.longitude)),
+        earthRadius * sin(Utility::degreeToRadian(m_nextWaypointModel.positionModel.latitude))};
 
     double M[2][3] = 
-    {   {Utility::degreeToRadian(-sin(position->getModel().longitude)), Utility::degreeToRadian(cos(position->getModel().longitude)), 0},
-        {Utility::degreeToRadian(-cos(position->getModel().longitude))*Utility::degreeToRadian(sin(position->getModel().latitude)),
-         Utility::degreeToRadian(-sin(position->getModel().longitude))*Utility::degreeToRadian(sin(position->getModel().latitude)), 
-         Utility::degreeToRadian(cos(position->getModel().latitude))}};
+    {   {-sin(Utility::degreeToRadian(position->getModel().longitude)), cos(Utility::degreeToRadian(position->getModel().longitude)), 0},
+        {-cos(Utility::degreeToRadian(position->getModel().longitude))*sin(Utility::degreeToRadian(position->getModel().latitude)),
+         -sin(Utility::degreeToRadian(position->getModel().longitude))*sin(Utility::degreeToRadian(position->getModel().latitude)), 
+         cos(Utility::degreeToRadian(position->getModel().latitude))}};
 
-    std::array<double, 3> bMinusA = { b[0]-a[0], b[1]-a[1], b[2]-a[2]};
+    std::array<double, 3> bMinusA = { nextWPCoord[0]-prevWPCoord[0], nextWPCoord[1]-prevWPCoord[1], nextWPCoord[2]-prevWPCoord[2]};
 
                         // 2x3 * 1x3
     double phi = atan2(M[0][0]*bMinusA[0] + M[0][1]*bMinusA[1] + M[0][2]*bMinusA[2],   M[1][0]*bMinusA[0] + M[1][1]*bMinusA[1] + M[1][2]*bMinusA[2]);
@@ -85,16 +90,17 @@ double LineFollowBehaviour::calculateAngleOfDesiredTrajectory(std::unique_ptr<Po
 
 void LineFollowBehaviour::computeCommands(SystemStateModel &systemStateModel,std::unique_ptr<Position> const& position,
                                       double trueWindDirection, bool mockPosition, bool getHeadingFromCompass){
-
-    if(m_previousWaypointModel.id == "")
-        setPreviousWayPoint(systemStateModel);
     
-    if(waypointsChanged)
+    trueWindDirection = Utility::degreeToRadian(trueWindDirection);
+
+    if(waypointsChanged) //if waypoints changed during run, check to see if current targeted waypoints have changed
     {
-        m_wayPointCount = 0;
+        int temp = m_wayPointCount;
+        m_wayPointCount = 0; //set 0 so it doesn't set previous to next.
         setPreviousWayPoint(systemStateModel);
         setNextWaypoint(m_nextWaypointModel);
         waypointsChanged = false;
+        m_wayPointCount = temp;
     }
 
     position->updatePosition();
@@ -112,61 +118,81 @@ void LineFollowBehaviour::computeCommands(SystemStateModel &systemStateModel,std
 
     //GOTTA CHECK IF GPS IS ONLINE
     if (systemStateModel.gpsModel.online) {
-        //GET DIRECTION - From the book Robotic Sailing 2012 and Robotic Sailing 2015
-        double currentHeading = getHeading(systemStateModel,mockPosition,getHeadingFromCompass,position, m_nextWaypointModel);
-        double signedDistance = calculateSignedDistance(position); // 'e'
-        int maxTackDistance = 10; //'r'
-        double phi = calculateAngleOfDesiredTrajectory(position);
-        desiredHeading = phi - (2 * (M_PI / 4)/M_PI) * atan2(signedDistance,maxTackDistance);
+        if(m_previousWaypointModel.id == "")
+            setPreviousWayPoint(systemStateModel);
 
+        //GET DIRECTION - From the book Robotic Sailing 2012 and Robotic Sailing 2015
+        currentHeading = Utility::degreeToRadian(getHeading(systemStateModel,mockPosition,getHeadingFromCompass,position, m_nextWaypointModel));
+        double signedDistance = calculateSignedDistance(position); // 'e'
+        int maxTackDistance = 20; //'r'
+        double phi = calculateAngleOfDesiredTrajectory(position);
+        double desiredHeading = phi - (2 * (M_PI / 4)/M_PI) * atan2(signedDistance,maxTackDistance);
+        desiredHeading = Utility::limitRadianAngleRange(desiredHeading);
         //CHECK IF TACKING IS NEEDED
         if(abs(signedDistance) > maxTackDistance)
-        {
             m_tackingDirection = Utility::sgn(signedDistance);
-            m_tack = false;
-        }
-        
-        //To stop the boat from oscillating during tack, we set the boat to tack from one maxTackDistance of the line to the other, not letting it switch direction in between.
-        double desiredHeading2 = desiredHeading; //Save desiredHeading into a temp variable so we don't have faulty values for the if-statements
-        if(cos(trueWindDirection - desiredHeading) + cos(m_tackAngle + M_PI/8) > 0)
-            m_tack = false;
-        else if(m_tack)
-            desiredHeading2 = desiredHeadingTackMode;
-        else if(cos(trueWindDirection - desiredHeading) + cos(m_tackAngle) < 0)
-        {
-            m_tack = true;
-            desiredHeading2 = M_PI + trueWindDirection - m_tackAngle * m_tackingDirection;
-            desiredHeadingTackMode = desiredHeading2;
-        }
 
-        if(abs(signedDistance) > maxTackDistance)
-            desiredHeading2 = M_PI + trueWindDirection - m_tackAngle * m_tackingDirection;
-        desiredHeading = desiredHeading2; //set the value back from the temp variable
+        if( (cos(trueWindDirection - desiredHeading) + cos(m_tackAngle) < 0) || (cos(trueWindDirection - phi) + cos(m_tackAngle) < 0))
+        {
+            if(!m_tack){
+                m_tackingDirection = Utility::sgn(currentHeading-(fmod(trueWindDirection, M_PI) - M_PI));
+                m_tack = true;
+            }
+            desiredHeading = M_PI + trueWindDirection - m_tackingDirection * m_tackAngle;
+            desiredHeading = Utility::limitRadianAngleRange(desiredHeading);
+        }
+// else if( (cos(trueWindDirection + M_PI - desiredHeading) + cos(0) < 0) ||  //Check if boat direction is same as truewind. NOT TESTED
+        //              ( (abs(signedDistance) < maxTackDistance) && (cos(trueWindDirection + M_PI - phi) + cos(0) < 0) ) )
+        // {
+        //     if(!m_tack)              //NOT TESTED, TRY AT ANOTHER STAGE. SIMONS CODE
+        //     {
+        //         m_tackingDirection = Utility::sgn(currentHeading-(fmod(trueWindDirection + M_PI, M_PI) - M_PI));
+        //         m_tack = true;
+        //     }
+        //     desiredHeading = trueWindDirection - m_tackingDirection * m_tackAngle;
+// }
+        else
+            m_tack = false;
+
+// if(abs(signedDistance) > maxTackDistance) //OLD VERSION, OUTCOMMENTED TO TEST SIMONS NEW ^
+        // {
+        //     m_tackingDirection = Utility::sgn(signedDistance);
+        //     m_tack = false;
+        // }
+        //To stop the boat from oscillating during tack, we set the boat to tack from one maxTackDistance of the line to the other, not letting it switch direction in between.
+        // double desiredHeading2 = desiredHeading; //Save desiredHeading into a temp variable so we don't have faulty values for the if-statements
+        // if(cos(trueWindDirection - desiredHeading) + cos(m_tackAngle + M_PI/8) > 0)
+        //     m_tack = false;
+        // else if(m_tack)
+        //     desiredHeading2 = desiredHeadingTackMode;
+        // else if(cos(trueWindDirection - desiredHeading) + cos(m_tackAngle) < 0)                 
+        // {
+        //     m_tack = true;
+        //     desiredHeading2 = M_PI + trueWindDirection - m_tackAngle * m_tackingDirection;               
+        //     desiredHeadingTackMode = desiredHeading2;
+        // }
+
+        // if(abs(signedDistance) > maxTackDistance)
+        //     desiredHeading2 = M_PI + trueWindDirection - m_tackAngle * m_tackingDirection;
+// desiredHeading = desiredHeading2; //set the value back from the temp variable //END OF OLD VERSION^
 
         //SET RUDDER
         if(cos(currentHeading - desiredHeading) < 0) //if boat is going the wrong direction
-        {
             m_rudderCommand = Utility::sgn(systemStateModel.gpsModel.speed) * m_maxCommandAngle * Utility::sgn(sin(currentHeading - desiredHeading));
-            std::cout << "                  Boat is going the       WRONG       direction" << std::endl;
-        }
         else                      
-        {
             m_rudderCommand = Utility::sgn(systemStateModel.gpsModel.speed) * m_maxCommandAngle * sin(currentHeading - desiredHeading);
-                        std::cout << "                  Boat is going the       RIGHT        direction" << std::endl;
-        }          
-
+       
         //SET SAIL
         double apparentWindDirection = Utility::getApparentWindDirection(systemStateModel, currentHeading, trueWindDirection);
         m_sailCommand = -Utility::sgn(apparentWindDirection) * ( ((m_minSailAngle - m_maxSailAngle) / M_PI) * abs(apparentWindDirection) + m_maxSailAngle);
 
-        std::cout << "speed: " << systemStateModel.gpsModel.speed << "   desiredHeading: " << desiredHeading << "   maxCommand: " << m_maxCommandAngle << 
-        "   rudderCommand: " << m_rudderCommand  << "    SailCommand: " << m_sailCommand << std::endl;
-        std::cout << "heading: " << currentHeading << std::endl;
-        printf("Tacking: "); printf(std::to_string(m_tack).c_str()); printf("    TackingDirection: "); printf(std::to_string(m_tackingDirection).c_str()); printf("\n");
-
+        printf("CurrentHeading: %f       signedDistance: %f        Phi: %f        Desired heading: %f \n", currentHeading, signedDistance, phi, desiredHeading);
+        printf("bearingToNextWaypoint: %f\n", Utility::degreeToRadian(bearingToNextWaypoint));
+        printf("Speed: %f      RudderCommand: %f     SailCommand: %f       TrueWindDirection: %f \n", systemStateModel.gpsModel.speed, m_rudderCommand, m_sailCommand, trueWindDirection);
+        printf("Tacking: %d     TackingDirection: %d\n", m_tack, m_tackingDirection);
+        
     } else {
-        m_logger.error("SailingRobot::run(), gps NaN. Using values from last iteration.\n");
-        printf("GPS not online\n");
+        Logger::warning("%s gps NaN. Using values from last iteration", __PRETTY_FUNCTION__);
     }
 }
 
@@ -179,7 +205,7 @@ void LineFollowBehaviour::manageDatabase(double trueWindDirection, SystemStateMo
     0,                                               
     distanceToNextWaypoint,
     bearingToNextWaypoint,
-    desiredHeading,
+    currentHeading,
     m_tack,
     getGoingStarboard(),
     atoi(m_nextWaypointModel.id.c_str()),
@@ -198,12 +224,19 @@ void LineFollowBehaviour::setPreviousWayPoint(SystemStateModel &systemStateModel
         if(waypointModel.id == ""){//If no waypoints had been harvested, set previouspoint to boats startingposition
             m_previousWaypointModel.positionModel.longitude = systemStateModel.gpsModel.positionModel.longitude;
             m_previousWaypointModel.positionModel.latitude = systemStateModel.gpsModel.positionModel.latitude;
+            m_previousWaypointModel.id = '0';
+            printf("Set m_previousWaypointModel to boat position\n");
         }
         else 
             m_previousWaypointModel = waypointModel;
     }
     else if(m_wayPointCount > 0) //if waypoints passed, set previous waypoint to the one recently passed
         m_previousWaypointModel = m_nextWaypointModel;
+
+    std::cout << "Previous waypoint picked! ID:" << m_previousWaypointModel.id <<" lon: "
+    << m_previousWaypointModel.positionModel.longitude
+    << " lat: " << m_previousWaypointModel.positionModel.latitude << " rad: "
+    << m_previousWaypointModel.radius << std::endl;
 }
 
 bool LineFollowBehaviour::getGoingStarboard()

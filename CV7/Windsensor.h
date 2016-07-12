@@ -16,13 +16,13 @@ class Windsensor{
 public:
 	Windsensor() {};
 	virtual ~Windsensor() {};
-	virtual void loadConfig(std::string portName, int baudRate)=0;
+	virtual bool loadConfig(std::string portName, int baudRate)=0;
 	virtual void setBufferSize(unsigned int bufferSize)=0;
 	virtual void setBaudRate(unsigned int baudRate)=0;
 	virtual void setPortName(std::string portName)=0;
 	virtual unsigned int getBufferSize()=0;
 	virtual std::string refreshData()=0;
-	virtual void parseData(std::string data)=0;
+	virtual bool parseData(std::string data)=0;
 	virtual float getDirection()=0;
 	virtual float getSpeed()=0;
 	virtual float getTemperature()=0;

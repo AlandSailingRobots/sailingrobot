@@ -19,13 +19,15 @@
 SailingRobot::SailingRobot(ExternalCommand* externalCommand,
 						   SystemState *systemState, DBHandler *db, HTTPSync* httpSync) :
 	m_mockPosition(db->retrieveCellAsInt("mock", "1", "position")),
-	m_mockMaestro(db->retrieveCellAsInt("mock", "1", "maestro")),
+
+	m_mockMaestro(db->retrieveCellAsInt("mock", "1", "maestro")),	
 
 	m_externalCommand(externalCommand),
 	m_systemState(systemState),
 	m_dbHandler(db),
 	m_httpSync(httpSync),
 	m_waypointModel(PositionModel(1.5,2.7), 100, "", 6),
+	
 	m_waypointRouting(m_waypointModel,
 		atof(m_dbHandler->retrieveCell("waypoint_routing_config", "1", "radius_ratio").c_str()),
 		atof(m_dbHandler->retrieveCell("course_calculation_config", "1", "tack_angle").c_str()),
@@ -35,7 +37,6 @@ SailingRobot::SailingRobot(ExternalCommand* externalCommand,
 		 atof(m_dbHandler->retrieveCell("waypoint_routing_config", "1", "max_command_angle ").c_str()),
 		 atof(m_dbHandler->retrieveCell("waypoint_routing_config", "1", "rudder_speed_min").c_str())
 		),
-
 
 	m_systemStateModel(
 		SystemStateModel(
@@ -57,31 +58,20 @@ SailingRobot::~SailingRobot() {
 }
 
 
-void SailingRobot::init(std::string programPath, std::string errorFileName) {
+bool SailingRobot::init(std::string programPath, std::string errorFileName) {
 	m_errorLogPath = programPath + errorFileName;
 
 	m_getHeadingFromCompass = m_dbHandler->retrieveCellAsInt("sailing_robot_config", "1", "flag_heading_compass");
+	
+	if(not setupMaestro()) 			{ return false; }
+	if(not setupRudderServo()) 		{ return false; }
+	if(not setupRudderCommand()) 	{ return false; }
+	if(not setupSailServo()) 		{ return false; }
+	if(not setupSailCommand()) 		{ return false; }
 
-	printf(" Starting Maestro\t\t");
-	setupMaestro();
-	printf("OK\n");
-
-	printf(" Starting RudderServo\t\t");
-	setupRudderServo();
-	printf("OK\n");
-
-	printf(" Starting RudderCommand\t\t");
-	setupRudderCommand();
-	printf("OK\n");
-
-	printf(" Starting SailServo\t\t");
-	setupSailServo();
-	printf("OK\n");
-
-	printf(" Starting SailCommand\t\t");
-	setupSailCommand();
-	printf("OK\n");
+	return true;
 }
+
 
 void SailingRobot::run() {
 
@@ -97,14 +87,14 @@ void SailingRobot::run() {
 		m_dbHandler->retrieveCellAsInt("buffer_config", "1", "true_wind");
 	double trueWindDirection;
 
+
 	Timer timer;
 	std::string sr_loop_time =
 		m_dbHandler->retrieveCell("sailing_robot_config", "1", "loop_time");
 	double loop_time = std::stod(sr_loop_time);
 
 	bool usingLineFollow = std::stoi(m_dbHandler->retrieveCell("sailing_robot_config", "1", "line_follow"));
-	// bool previousBehaviour = usingLineFollow; //Used in while-loop to see if waypoint routing has changed
-	// int checkDBcounter = 0;  
+	//bool previousBehaviour = usingLineFollow; //Used in while-loop to see if waypoint routing has changed
 
   	WaypointBehaviour waypB(m_dbHandler); 
   	LineFollowBehaviour LineFollowB(m_dbHandler);
@@ -115,12 +105,16 @@ void SailingRobot::run() {
 		behave = &waypB;
   	behave->init();
 	m_httpSync->setWaypointUpdateCallback(behave->setWaypointsChanged);
+	
+	if (m_getHeadingFromCompass){
+		behave->m_gpsHeadingWeight = 0.0;
+	}else behave->m_gpsHeadingWeight = 1.0;
+
 
 	while(m_running) {
 		timer.reset();
 
-
-		// if(checkDBcounter > 200)
+		// if(checkDBcounter > 15)
 		// {
 		// 	checkDBcounter = 0;
 		// 	usingLineFollow = std::stoi(m_dbHandler->retrieveCell("sailing_robot_config", "1", "line_follow"));
@@ -137,6 +131,9 @@ void SailingRobot::run() {
 
 		//Get data from SystemStateModel to local object
 		m_systemState->getData(m_systemStateModel);
+
+		Logger::logWRSC(&m_systemStateModel.gpsModel);
+
 		//calc & set TWD
 		trueWindDirection = Utility::getTrueWindDirection(m_systemStateModel, twdBuffer, twdBufferMaxSize);
 
@@ -148,6 +145,7 @@ void SailingRobot::run() {
 		if(!m_externalCommand->getAutorun()) {
 			rudderCommand = m_externalCommand->getRudderCommand();
 		}
+
 		sailCommand = m_sailCommand.getCommand(behave->getSailCommand());
 		if(!m_externalCommand->getAutorun()) {
 			sailCommand = m_externalCommand->getSailCommand();
@@ -164,7 +162,6 @@ void SailingRobot::run() {
 		//Save data in database
 		behave->manageDatabase(trueWindDirection,m_systemStateModel);
 
-		// checkDBcounter++;
 		timer.sleepUntil(loop_time);
 	}
 
@@ -176,7 +173,7 @@ void SailingRobot::shutdown() {
 	//m_dbHandler->closeDatabase();
 }
 
-void SailingRobot::setupMaestro() {
+bool SailingRobot::setupMaestro() {
 	if (m_mockMaestro) {
 		m_maestroController.reset(new MockMaestroController());
 	} else {
@@ -187,70 +184,74 @@ void SailingRobot::setupMaestro() {
 	try {
 		port_name = m_dbHandler->retrieveCell("maestro_controller_config", "1", "port");
 	} catch (const char * error) {
-		m_logger.error(error);
+		Logger::error("SailingRobot::%d %s", __LINE__, error);
+		return false;
 	}
 
-	try {
-		m_maestroController->setPort( port_name );
-		int maestroErrorCode = m_maestroController->getError();
-		if (maestroErrorCode != 0) {
-			std::stringstream stream;
-			stream << "maestro errorcode: " << maestroErrorCode;
-			m_logger.error(stream.str());
-		}
-	} catch (const char * error) {
-		m_logger.error(error);
-		throw;
+	m_maestroController->setPort( port_name );
+	int maestroErrorCode = m_maestroController->getError();
+
+	if (maestroErrorCode != 0) 
+	{
+		Logger::error("SailingRobot::%d Maestro Error code: %d",__LINE__, maestroErrorCode);
+		return false;
 	}
-	m_logger.info("setupMaestro() done");
+	else
+	{
+		Logger::info("Maestro Controller setup");
+		return true;
+	}
 }
 
-void SailingRobot::setupRudderServo() {
+bool SailingRobot::setupRudderServo() {
 	try {
 		m_rudderServo.setController(m_maestroController.get());
 		m_rudderServo.setChannel( m_dbHandler->retrieveCellAsInt("rudder_servo_config", "1", "channel") );
 		m_rudderServo.setSpeed( m_dbHandler->retrieveCellAsInt("rudder_servo_config", "1", "speed") );
 		m_rudderServo.setAcceleration( m_dbHandler->retrieveCellAsInt("rudder_servo_config", "1", "acceleration") );
 	} catch (const char * error) {
-		m_logger.error(error);
-		throw;
+		Logger::error("SailingRobot::%d %s", __LINE__, error);
+		return false;
 	}
-	m_logger.info("setupRudderServo() done");
+	Logger::info("Rudder servo setup");
+	return true;
 }
 
-void SailingRobot::setupSailServo() {
+bool SailingRobot::setupSailServo() {
 	try {
 		m_sailServo.setController(m_maestroController.get());
 		m_sailServo.setChannel( m_dbHandler->retrieveCellAsInt("sail_servo_config", "1", "channel") );
 		m_sailServo.setSpeed( m_dbHandler->retrieveCellAsInt("sail_servo_config", "1", "speed") );
 		m_sailServo.setAcceleration( m_dbHandler->retrieveCellAsInt("sail_servo_config", "1", "acceleration") );
 	} catch (const char * error) {
-		m_logger.error(error);
-		throw;
+		Logger::error("SailingRobot::%d %s", __LINE__, error);
+		return false;
 	}
-	m_logger.info("setupSailServo() done");
+
+	Logger::info("Sail servo setup");
+	return true;
 }
 
-void SailingRobot::setupRudderCommand() {
+bool SailingRobot::setupRudderCommand() {
 	try {
 		m_rudderCommand.setCommandValues( m_dbHandler->retrieveCellAsInt("rudder_command_config", "1", "extreme_command"),
-			m_dbHandler->retrieveCellAsInt("rudder_command_config", "1", "midship_command"));
+		m_dbHandler->retrieveCellAsInt("rudder_command_config", "1", "midship_command"));
 
 	} catch (const char * error) {
-		m_logger.error(error);
-		throw;
+		Logger::error("SailingRobot::%d %s", __LINE__, error);
+		return false;
 	}
-	m_logger.info("setupRudderCommand() done");
+	return true;
 }
 
-void SailingRobot::setupSailCommand() {
+bool SailingRobot::setupSailCommand() {
 	try {
 		m_sailCommand.setCommandValues( m_dbHandler->retrieveCellAsInt("sail_command_config", "1", "close_reach_command"),
-			m_dbHandler->retrieveCellAsInt("sail_command_config", "1", "run_command"));
+		m_dbHandler->retrieveCellAsInt("sail_command_config", "1", "run_command"));
 
 	} catch (const char * error) {
-		m_logger.error(error);
-		throw;
+		Logger::error("SailingRobot::%d %s", __LINE__, error);
+		return false;
 	}
-	m_logger.info("setupSailCommand() done");
+	return true;
 }

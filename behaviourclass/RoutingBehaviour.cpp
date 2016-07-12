@@ -22,22 +22,20 @@ void RoutingBehaviour::setWaypointsChanged()
 void RoutingBehaviour::setNextWaypoint(WaypointModel &waypointModel)
 {
     try {
-    m_dbHandler->getWaypointFromTable(waypointModel);
+    	m_dbHandler->getWaypointFromTable(waypointModel);
 	} catch (const char * error) {
-		m_logger.error(error);
+		Logger::error("%s Error: %s", __func__, error);
 	}
 
 	if (waypointModel.id.empty() ) {
-		std::cout << "No waypoint found!"<< std::endl;
+		Logger::warning("%s No waypoint found, holding last waypoint", __func__);
 	}
 	else{
-		std::cout << "New waypoint picked! ID:" << waypointModel.id <<" lon: "
-		<< waypointModel.positionModel.longitude
-		<< " lat: " << waypointModel.positionModel.latitude << " rad: "
-		<< waypointModel.radius << std::endl;
+		Logger::info("New Waypoint picked! ID: %s, Lon: %f, Lat: %f, Rad: %d",  waypointModel.id.c_str(), 
+                                                                				waypointModel.positionModel.longitude, 
+                                                                				waypointModel.positionModel.latitude,
+                                                               					waypointModel.radius);
 	}
-
-	m_logger.info("setupWaypoint() done");
 }
 
 void RoutingBehaviour::harvestWaypoint(WaypointModel waypointModel)
@@ -45,25 +43,52 @@ void RoutingBehaviour::harvestWaypoint(WaypointModel waypointModel)
 	try {
 		m_dbHandler->changeOneValue("waypoints", waypointModel.id,"1","harvested");
 	} catch (const char * error) {
-		m_logger.error(error);
+		Logger::error("%s Error: %s", __func__, error);
 	}
-	m_logger.info("SailingRobot::nextWaypoint(), waypoint reached");
-	std::cout << "Waypoint reached!" << std::endl;
+	Logger::info("Reached waypoint");
 }
 
 int RoutingBehaviour::getHeading(SystemStateModel &systemStateModel,bool mockPosition,bool getHeadingFromCompass,std::unique_ptr<Position> const& position, WaypointModel waypointModel) {
-
+	//Use GPS for heading only if speed is higher than 1 knot
 	int useGpsForHeadingKnotSpeed = 1;
-	bool acceptedCompassSpeed = Utility::directionAdjustedSpeed(systemStateModel.gpsModel.heading, systemStateModel.compassModel.heading, systemStateModel.gpsModel.speed) < useGpsForHeadingKnotSpeed;
+	bool gpsForbidden = Utility::directionAdjustedSpeed(systemStateModel.gpsModel.heading, systemStateModel.compassModel.heading, systemStateModel.gpsModel.speed) < useGpsForHeadingKnotSpeed;
+
+	getMergedHeading(systemStateModel, waypointModel, true); //decrease compass weight on each iteration
 
     if(mockPosition) {
         return position->getHeading();
     }
 
-    //only accept getHeadingFromCompass if speed less than 1
-	if (getHeadingFromCompass && acceptedCompassSpeed) {
-    	return Utility::addDeclinationToHeading(systemStateModel.compassModel.heading, waypointModel.declination);
+	if (getHeadingFromCompass) {
+		//Should return compass heading if below one knot and not currently merging and vice versa
+    	return Utility::addDeclinationToHeading(getMergedHeading(systemStateModel, waypointModel, gpsForbidden), waypointModel.declination);
 	}
-	
     return systemStateModel.gpsModel.heading;
+}
+
+int RoutingBehaviour::getMergedHeading(SystemStateModel &systemStateModel, WaypointModel waypointModel, bool increaseCompassWeight){
+	//Shouldn't be hardcoded
+	float tickRate = 0.01;
+
+	int headingCompass = Utility::addDeclinationToHeading(systemStateModel.compassModel.heading, waypointModel.declination);
+	int headingGps = systemStateModel.gpsModel.heading;
+
+	if (increaseCompassWeight){
+		m_gpsHeadingWeight = m_gpsHeadingWeight - tickRate; //Decrease gps weight
+		if (m_gpsHeadingWeight < 0.0) m_gpsHeadingWeight = 0;
+	}else{
+		m_gpsHeadingWeight = m_gpsHeadingWeight + tickRate;
+		if (m_gpsHeadingWeight > 1.0) m_gpsHeadingWeight = 1.0;
+	}
+
+	//Difference calculation
+	float diff = ((headingGps - headingCompass) + 180 + 360);
+	while (diff > 360) diff -= 360;
+	diff -= 180;
+
+	//Merge angle calculation
+	int returnValue = 360 + headingCompass + (diff * m_gpsHeadingWeight);
+	while (returnValue > 360) returnValue -= 360;
+
+	return returnValue;
 }

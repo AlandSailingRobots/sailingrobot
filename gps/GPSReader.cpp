@@ -32,28 +32,36 @@ std::string GPSReader::secondsToTimeStamp(double seconds, bool utc) {
 	return timeStamp;
 }
 
-void GPSReader::connectToGPS() {
+bool GPSReader::connectToGPS() {
 
 	//system(("sudo pkill gpsd; gpsd " + portName).c_str());
 	//system("sudo gpsd /dev/ttyUSB0 -F /var/run/gpsd.sock");
 
 	m_gpsConnection = new gpsmm("localhost", DEFAULT_GPSD_PORT);
-	if (m_gpsConnection->stream(WATCH_ENABLE | WATCH_JSON) == NULL) {
 
-		throw "GPSReader::connectToGPS(), unable to connect to GPS.";
+	if (m_gpsConnection->stream(WATCH_ENABLE | WATCH_JSON) == NULL) {
+		Logger::error("GPSReader::connectToGPS Failed to connect to GPS");
+		return false;
 	}
+
+	return true;
 }
 
-void GPSReader::readGPS(int timeout) {
+bool GPSReader::readGPS(int timeout) 
+{
 	struct gps_data_t* newdata;
 
 	if (!m_gpsConnection->waiting(timeout)) {
-		throw "GPSReader::readGPS(), timeout.";
+		Logger::error("GPSReader::readGPS timed out!");
+		return false;
 	}
 
 	if ((newdata = m_gpsConnection->read()) == NULL) {
-		throw "GPSReader::readGPS(), read error.";
-	} else {
+		Logger::error("GPSReader::readGPS read error!");
+		return false;
+	} 
+	else 
+	{
 
 		//* Get status flags
 		unsigned long int flags = newdata->set;
@@ -104,8 +112,9 @@ void GPSReader::readGPS(int timeout) {
 		{
 			m_mode = newdata->fix.mode;
 		}
-
 	}
+
+	return true;
 }
 
 bool GPSReader::isOnline() {

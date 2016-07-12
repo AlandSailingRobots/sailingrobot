@@ -25,16 +25,16 @@ WaypointBehaviour::WaypointBehaviour(DBHandler *db):
 
 bool WaypointBehaviour::init(){
 
-  printf(" Starting Waypoint\t\t");
+  printf("Starting Waypoint\n");
 	setNextWaypoint(m_waypointModel);
 	printf("OK\n");
 
 	m_waypointRouting.setWaypoint(m_waypointModel);
 
-  printf("*SailingRobot::run() WaypointBehaviour started.\n");
-  std::cout << "Waypoint target - ID: " << m_waypointModel.id << " lon: " <<
-  m_waypointModel.positionModel.longitude	<< " lat : " <<
-  m_waypointModel.positionModel.latitude << std::endl;
+  Logger::info("Waypoint Behaviour started");
+  Logger::info("Waypoint target - ID: %s, Lon: %f, Lat: %f",  m_waypointModel.id.c_str(), 
+                                                              m_waypointModel.positionModel.longitude, 
+                                                              m_waypointModel.positionModel.latitude);
 
  return true;
 }
@@ -69,7 +69,7 @@ void WaypointBehaviour::computeCommands(SystemStateModel &systemStateModel,std::
       trueWindDirection, heading, systemStateModel);
 
   } else {
-    m_logger.error("SailingRobot::run(), gps NaN. Using values from last iteration.");
+    Logger::warning("WaypointBehaviour::computeCommands gps NaN. Using values from last iteration");
   }
 
 
@@ -88,8 +88,7 @@ void WaypointBehaviour::computeCommands(SystemStateModel &systemStateModel,std::
               systemStateModel.windsensorModel.temperature,
               systemStateModel.gpsModel.utc_timestamp);
       } catch (const char * error) {
-          m_logger.error(error);
-          std::cout << error << std::endl;
+          Logger::error("%s Error: %s", __PRETTY_FUNCTION__, error);
       }
     }
 

@@ -22,30 +22,24 @@ WindsensorController::WindsensorController(SystemState *systemState, bool mockIt
 		m_windSensor.reset(new MockWindsensor);
 	}
 
-	try {
-		m_windSensor->loadConfig( port_name, baud_rate );
-		m_windSensor->setBufferSize( buff_size );
-	} catch (const char * error) {
-		m_logger.error(error);
-		throw error;
+
+	if(m_windSensor->loadConfig(port_name, baud_rate))
+	{
+		Logger::info("WindSensor setup");
 	}
-	m_logger.info("setupWindSensor() done\t\t");
 }
 
 void WindsensorController::run() {
-	while(isRunning()){
-		try {
-			m_windSensor->parseData(m_windSensor->refreshData());
-		} catch(const char * e) {
-			std::cout << "ERROR: SailingRobot::Run m_windSensor->parseData " << e << std::endl;
-			m_logger.error(std::string("WindsensorController::Run m_windSensor->parseData ") + e);
+	while(isRunning())
+	{
+
+		if( m_windSensor->parseData(m_windSensor->refreshData()) )
+		{
+			m_systemState->setWindsensorModel(WindsensorModel( m_windSensor->getDirection(), m_windSensor->getSpeed(),
+										  m_windSensor->getTemperature() ));
 		}
 
-		m_systemState->setWindsensorModel(WindsensorModel(
-										  m_windSensor->getDirection(),
-										  m_windSensor->getSpeed(),
-										  m_windSensor->getTemperature() )
-		);
+		//TODO - Jordan: Might want to do something if we keep failing to parse wind data.
 	}
 }
 

@@ -18,8 +18,7 @@ HTTPSync::~HTTPSync() {
 }
 
 void HTTPSync::run() {
-    std::cout << "HTTPSync thread started." << std::endl;
-    m_logger.info("HTTPSync thread started.");
+    Logger::info("HTTPSync thread has started");
 
     setupHTTPSync();
     updateConfigs();
@@ -35,27 +34,23 @@ void HTTPSync::run() {
         std::this_thread::sleep_for(std::chrono::milliseconds(m_delay));
     }
 
-    std::cout << "HTTPSync thread exited." << std::endl;
-    m_logger.info("HTTPSync thread exited.");
+    Logger::info("HTTPSync thread has exited");
 }
 
 void HTTPSync::setupHTTPSync() {
 
-    m_pushOnlyLatestLogs = true;
-    //Not yet implemented in database:
-    //m_onlyLatestLogs = m_dbHandler->retrieveCellAsInt("httpsync_config", "1", "push_only_latest_logs");
+    m_pushOnlyLatestLogs = m_dbHandler->retrieveCellAsInt("httpsync_config", "1", "push_only_latest_logs");
 
     try {
         setShipID( m_dbHandler->retrieveCell("server", "1", "boat_id") );
         setShipPWD( m_dbHandler->retrieveCell("server", "1", "boat_pwd") );
         setServerURL( m_dbHandler->retrieveCell("server", "1", "srv_addr") );
-
     } catch (const char * error) {
-        m_logger.error("SailingRobot::setupHTTPSync() failed");
-        //Kill thraed if setup fails
+        Logger::error("%s Failed to get server configuration Error: %s", __PRETTY_FUNCTION__, error);
+        //Kill thread if setup fails
         std::terminate();
     }
-    m_logger.info("setupHTTPSync() done");
+    Logger::info("HTTPSync setup successfully");
 }
 
 void HTTPSync::pushDatalogs() {
@@ -70,28 +65,27 @@ void HTTPSync::pushDatalogs() {
             //m_logger.info("response code: " + response);
         }
 
-        m_logger.info("Logs pushed to server");
+        Logger::info("Logs pushed to server");
     } catch (const char * error) {
-         m_logger.error("Error in HTTPSync::syncserver , response : " + response);
+        Logger::error("%s Error: %s", __PRETTY_FUNCTION__, error);
     }
 }
 
 void HTTPSync::pushWaypoints() {
     try {
         std::string response = pushData(m_dbHandler->getWaypoints(), "pushWaypoints");
-        m_logger.info("waypoints pushed to server");
-
+        Logger::info("Waypoints pushed to server");
     } catch(const char* error) {
-        m_logger.error("Error in HTTPSync::pushWaypoints ");
+       Logger::error("%s Error: %s", __PRETTY_FUNCTION__, error);
     }
 }
 
 void HTTPSync::pushConfigs() {
     try {
         pushData(m_dbHandler->getConfigs(), "pushConfigs");
-        m_logger.info("Configs pushed to server");
+        Logger::info("Configs pushed to server");
     } catch(const char* error) {
-        m_logger.error("Error in HTTPSync::pushWaypoints ");
+        Logger::error("%s Error: %s", __PRETTY_FUNCTION__, error);
     }
 }
 
@@ -141,10 +135,10 @@ void HTTPSync::updateConfigs() {
             std::string configs = getData("getAllConfigs");
             m_dbHandler->updateConfigs(configs);
             m_dbHandler->updateTable("state", "configs_updated", "1","1");
-            m_logger.info("Configs fetched from web");
+            Logger::info("Configuration retrieved from remote server");
             pushConfigs();
         } catch(const char* error) {
-            m_logger.error("Error in HTTPSync::updateConfigs : " + std::string(error));
+            Logger::error("%s Error: %s", __PRETTY_FUNCTION__, error);
         }
     }
 }
@@ -155,15 +149,14 @@ void HTTPSync::updateWaypoints() {
         try{
             std::string waypoints = getData("getWaypoints"); //Waypoints call implemented? //SERVE("", "getWaypoints")'
             m_dbHandler->updateWaypoints(waypoints);
-            m_logger.info("Waypoints fetched from web");
+            Logger::info("Waypoints retrieved from remote server");
             if (m_callBack != NULL){
                 m_callBack();
             } 
         }catch(const char* error){
-            m_logger.error("Error in HTTPSync::updateWaypoints");
+            Logger::error("%s Error: %s", __PRETTY_FUNCTION__, error);
         }
     }
-
 }
 
 std::string HTTPSync::serve(std::string data, std::string call) {
@@ -209,7 +202,7 @@ std::string HTTPSync::performCURLCall(std::string serverCall) {
     res = curl_easy_perform(curl);
     /* Check for errors */
     if(res != CURLE_OK) {
-        m_logger.error("Error in HTTPSync::serve() " + std::string("HTTPSync::serve(): ") + curl_easy_strerror(res));
+        Logger::error("%s Error: %s", __PRETTY_FUNCTION__, curl_easy_strerror(res));
         throw ( std::string("HTTPSync::serve(): ") + curl_easy_strerror(res) ).c_str();
     }
 

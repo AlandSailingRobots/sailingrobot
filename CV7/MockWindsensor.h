@@ -17,13 +17,13 @@ class MockWindsensor:public Windsensor {
 	public:
 		MockWindsensor() {};
 		~MockWindsensor() {};
-		void loadConfig(std::string portName, int baudRate);
+		bool loadConfig(std::string portName, int baudRate);
 		void setBufferSize(unsigned int bufferSize);
 		void setBaudRate(unsigned int baudRate);
 		void setPortName(std::string portName);
 		unsigned int getBufferSize();
 		std::string refreshData();
-		void parseData(std::string data);
+		bool parseData(std::string data);
 		float getDirection();
 		float getSpeed();
 		float getTemperature();

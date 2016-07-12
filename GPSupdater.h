@@ -26,7 +26,6 @@ class GPSupdater {
 		SystemState *m_systemState;
 		std::mutex m_mutex;
 		bool m_running;
-		Logger m_logger;
 
 		bool isRunning();
 };
