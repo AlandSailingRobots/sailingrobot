@@ -170,7 +170,7 @@ bool DBHandler::updateTableJson(std::string table, std::string data) {
 	std::vector<std::string> columns = getColumnInfo("name", table);
 
 	if(columns.size() <= 0 ){
-		Logger::error("%s Error: no such table %s", __PRETTY_FUNCTION__, table);
+		Logger::error("%s Error: no such table %s", __PRETTY_FUNCTION__, table.c_str());
 		return false;
 	}
 
@@ -216,7 +216,12 @@ std::string DBHandler::retrieveCell(std::string table, std::string id, std::stri
 
 	int rows, columns;
     std::vector<std::string> results;
-    results = retrieveFromTable(query, rows, columns);
+    try {
+    	results = retrieveFromTable(query, rows, columns);
+    }
+    catch(const char* error) {
+
+    }
 
     if (columns < 1) {
     	Logger::error("%s No columns from Query: %s", __PRETTY_FUNCTION__, query.c_str());
@@ -329,7 +334,11 @@ void DBHandler::clearTable(std::string table) {
 
 int DBHandler::getRows(std::string table) {
 	int columns, rows;
-	retrieveFromTable("SELECT * FROM " + table + ";", rows, columns);
+	try {
+		retrieveFromTable("SELECT * FROM " + table + ";", rows, columns);
+	}
+	catch(const char* error)
+	{}
 	return rows;
 }
 
@@ -444,11 +453,16 @@ std::string DBHandler::getWaypoints() {
 std::string DBHandler::getIdFromTable(std::string table, bool max) {
 	int rows, columns;
     std::vector<std::string> results;
-	if(max) {
-    	results = retrieveFromTable("SELECT MAX(id) FROM " + table + ";", rows, columns);
-	} else {
-		results = retrieveFromTable("SELECT MIN(id) FROM " + table + ";", rows, columns);
-	}
+    try {
+		if(max) {
+			results = retrieveFromTable("SELECT MAX(id) FROM " + table + ";", rows, columns);
+		} else {
+			results = retrieveFromTable("SELECT MIN(id) FROM " + table + ";", rows, columns);
+		}
+}
+    catch(const char* error) {
+
+    }
 
     if (rows * columns < 1) {
     	return "";
@@ -638,7 +652,11 @@ std::vector<std::string> DBHandler::retrieveFromTable(std::string sqlSELECT, int
 std::vector<std::string> DBHandler::getTableIds(std::string table) {
 	int rows, columns;
     std::vector<std::string> results;
+    try {
     results = retrieveFromTable("SELECT id FROM " + table + ";", rows, columns);
+    }
+    catch(const char* error)
+    {}
 
     std::vector<std::string> ids;
     for (int i = 1; i <= rows; i++) {
@@ -651,7 +669,12 @@ std::vector<std::string> DBHandler::getTableIds(std::string table) {
 std::vector<std::string> DBHandler::getTableNames(std::string like) {
 	int rows, columns;
     std::vector<std::string> results;
+    try {
     results = retrieveFromTable("SELECT name FROM sqlite_master WHERE type='table' AND name LIKE '"+ like +"';", rows, columns);
+    }
+    catch(const char* error) {
+
+    }
 
     std::vector<std::string> tableNames;
     for (int i = 1; i <= rows; i++) {
@@ -667,7 +690,12 @@ std::vector<std::string> DBHandler::getColumnInfo(std::string info, std::string 
 
 	std::string pragmaQuery = "PRAGMA table_info(" + table + ");";
 
-    results = retrieveFromTable(pragmaQuery, rows, columns);
+	try {
+		results = retrieveFromTable(pragmaQuery, rows, columns);
+	}
+	catch(const char* error) {
+
+	}
 
     std::vector<std::string> types;
     int infoIndex = 0;
@@ -687,7 +715,10 @@ void DBHandler::getWaypointFromTable(WaypointModel &waypointModel){
 
 	int rows, columns;
     std::vector<std::string> results;
-    results = retrieveFromTable("SELECT MIN(id) FROM waypoints WHERE harvested = 0;", rows, columns);
+    try {
+    	results = retrieveFromTable("SELECT MIN(id) FROM waypoints WHERE harvested = 0;", rows, columns);
+    }
+    catch(const char* error) { }
     if (rows * columns < 1 || results[1] == "\0") {
     	waypointModel.id = "";
     }
@@ -721,7 +752,11 @@ WaypointModel DBHandler::getPreviouslyHarvestedWaypoint()
 {
 	int rows, columns;
 	std::vector<std::string> results; 
-	results = retrieveFromTable("SELECT MAX(id) FROM waypoints WHERE harvested = 1;", rows, columns); 
+	try {
+		results = retrieveFromTable("SELECT MAX(id) FROM waypoints WHERE harvested = 1;", rows, columns);
+	}
+	catch(const char* error)
+	{}
 	
 	WaypointModel waypointModel(PositionModel(0,0), 0, "", 0);
 	if (rows * columns < 1 || results[1] == "\0") {
