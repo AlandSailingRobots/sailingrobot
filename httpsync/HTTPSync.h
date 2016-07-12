@@ -39,7 +39,7 @@ class HTTPSync {
 
 		CURL *curl;
 		CURLcode res;
-
+		bool reportedConnectError;
 		std::string shipID;
 		std::string shipPWD;
 		std::string serverURL;

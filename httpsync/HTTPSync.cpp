@@ -10,6 +10,7 @@ HTTPSync::HTTPSync(DBHandler *db,int delay, bool removeLogs) : m_dbHandler(db) {
     m_removeLogs = removeLogs;
     curl = curl_easy_init();
     m_delay = delay;
+    reportedConnectError = false;
 }
 
 HTTPSync::~HTTPSync() {
@@ -67,7 +68,7 @@ void HTTPSync::pushDatalogs() {
 
         Logger::info("Logs pushed to server");
     }
-    else
+    else if(!reportedConnectError)
     {
         Logger::warning("%s Could not push logs to server:", __PRETTY_FUNCTION__);
     }
@@ -83,7 +84,7 @@ void HTTPSync::pushWaypoints() {
 		{
 			Logger::info("Waypoints pushed to server");
 		}
-		else
+		else if(!reportedConnectError)
 		{
 			Logger::warning("%s Failed to push waypoints to server", __PRETTY_FUNCTION__);
 		}
@@ -96,7 +97,7 @@ void HTTPSync::pushConfigs() {
 	{
 		Logger::info("Configs pushed to server");
 	}
-	else
+	else if(!reportedConnectError)
 	{
 		Logger::warning("%s Error: ", __PRETTY_FUNCTION__);
 	}
@@ -162,7 +163,7 @@ void HTTPSync::updateConfigs() {
 			Logger::info("Configuration retrieved from remote server");
 			pushConfigs();
 		}
-		else
+		else if(!reportedConnectError)
 		{
 			Logger::error("%s Error: %s", __PRETTY_FUNCTION__);
 		}
@@ -185,7 +186,7 @@ void HTTPSync::updateWaypoints() {
 				}
 			}
 		}
-		else
+		else if(!reportedConnectError)
 		{
 			Logger::warning("%s Could not updated waypoints",__PRETTY_FUNCTION__);
 		}
@@ -227,8 +228,23 @@ bool HTTPSync::performCURLCall(std::string data, std::string call, std::string& 
 		/* Check for errors */
 		if (res != CURLE_OK)
 		{
-			Logger::error("%s Error: %s response: %s", __PRETTY_FUNCTION__, curl_easy_strerror(res), response);
+			if(!reportedConnectError)
+			{
+				Logger::error("%s Error: %s", __PRETTY_FUNCTION__, curl_easy_strerror(res));
+			}
+			if(res == CURLE_COULDNT_CONNECT && reportedConnectError)
+			{
+				return false;
+			}
+			else if(res == CURLE_COULDNT_CONNECT)
+			{
+				reportedConnectError = true;
+			}
 			return false;
+		}
+		else
+		{
+			reportedConnectError = false;
 		}
     }
 
