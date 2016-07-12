@@ -584,10 +584,8 @@ int main()
     //printStdVectorFloat("direction_boat_obstacle",direction_boat_obstacle);
 
     Eigen::MatrixXd test_atan_x = Eigen::MatrixXd::Ones(rows_Z,cols_Z);
-<<<<<<< HEAD
 
     printMat("test_atan_x",test_atan_x);
-=======
     Eigen::MatrixXd t = atanMat(test_atan_x);
     //printMat("test_atan_x",t);
 
@@ -605,9 +603,7 @@ int main()
     //printMat("test_rectP_x",ObsP);
     float tim=0.0;
     float dt=0.01;
-=======
     float delay = 0;
->>>>>>> 0fbc87eff90c0f7808b8439a93fc609e00d0cb55
 
     while(tim<100){
         if (delay == 10){
@@ -620,7 +616,7 @@ int main()
         //calculate_collision_avoidance_point(potential_Z,potential_field_dim,collision_avoidance_point);
         avoidObstacle(target_phat, boat_state, point_x, point_y, wind_direction,radius_obstacle, radius_corridor, only_direction_mode,have_to_avoid_obstacle, step_coeff, direction_boat_obstacle, can_compute_a_new_avoidance_point, line_to_follow,collisioned_obstacle,
                         detected_obstacle_list_qhat, potential_Z,potential_field_dim,collision_avoidance_point);
-=======
+
         if (delay == 0){
             printSimul( boat_state, collision_avoidance_point,collisioned_obstacle,target_phat);
         }
@@ -630,5 +626,4 @@ int main()
         usleep(100000);
 
     }
->>>>>>> 0fbc87eff90c0f7808b8439a93fc609e00d0cb55
 }
