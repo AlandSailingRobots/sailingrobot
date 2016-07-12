@@ -7,7 +7,7 @@
 #include "sailcommand/SailCommand.h"
 #include "ruddercommand/RudderCommand.h"
 #include "coursecalculation/CourseCalculation.h"
-//#include "httpsync/HTTPSync.h"
+#include "httpsync/HTTPSync.h"
 
 #include "Compass/Compass.h"
 #include "gps/GPS.h"
@@ -30,30 +30,26 @@ class SailingRobot {
 
 public:
 
-	SailingRobot(ExternalCommand* externalCommand, SystemState *systemState, DBHandler *db);
+	SailingRobot(ExternalCommand* externalCommand, SystemState *systemState, DBHandler *db, HTTPSync* httpSync);
 	~SailingRobot();
-	void init(std::string programPath, std::string errorFileName);
+	bool init(std::string programPath, std::string errorFileName);
 	void run();
 	void shutdown();
 
 	//void readGPS();
 
 private:
-	int getHeading();
-
 	//void readGPS();
 	//void syncServer();
 	//void updateState();
-	void nextWaypoint();
-	void setupWaypoint();
 
 	//void setupDB(std::string filename);
-	void setupMaestro();
-	void setupRudderServo();
-	void setupSailServo();
+	bool setupMaestro();
+	bool setupRudderServo();
+	bool setupSailServo();
 	//void setupGPS();
-	void setupRudderCommand();
-	void setupSailCommand();
+	bool setupRudderCommand();
+	bool setupSailCommand();
 	//void setupHTTPSync();
 
 	std::string m_errorLogPath;
@@ -70,25 +66,27 @@ private:
 	 * false = get heading from gps	 */
 	bool m_getHeadingFromCompass;
 
+	ExternalCommand* m_externalCommand;
+	SystemState *m_systemState;
 	DBHandler *m_dbHandler;
+
+	HTTPSync* m_httpSync;
 	WaypointModel m_waypointModel;
 	WaypointRouting m_waypointRouting;
 	WindVaneController m_windVaneController;
 	RudderCommand m_rudderCommand;
 	SailCommand m_sailCommand;
-	//HTTPSync m_httpSync;
+	
 
 	std::shared_ptr<Actuator> m_maestroController;
 	ServoObject m_rudderServo;
 	ServoObject m_sailServo;
 
-	ExternalCommand* m_externalCommand;
-	SystemState *m_systemState;
-        std::unique_ptr<Position> position;
+	
+	
+    std::unique_ptr<Position> position;
 
 	SystemStateModel m_systemStateModel;
-
-	Logger m_logger;
 };
 
 #endif

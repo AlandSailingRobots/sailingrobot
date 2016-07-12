@@ -43,7 +43,7 @@ private:
 	bool m_sending;
 	bool m_receiving;
 	bool m_sendLogs;
-	Logger m_logger;
+	bool m_pushOnlyLatestLogs;
 	double m_loopTime;
 
 	bool isRunning();

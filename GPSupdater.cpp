@@ -23,33 +23,23 @@ m_running(true)
 		m_gpsReader = new GPSReader();
 	}
 
-	try {
-		m_gpsReader->connectToGPS();
-	} catch (const char * error) {
-		m_running=false;
-		std::cout << "GPSupdater : connnectToGPS() : " << error << std::endl;
-		m_logger.error(std::string("GPSupdater : connnectToGPS() : ") + error);
+	if(not m_gpsReader->connectToGPS())
+	{
+		m_running = false;
 	}
 }
 
 void GPSupdater::run()
 {
-	std::cout << "*GPSupdater thread started." << std::endl;
-	m_logger.info("*GPSupdater thread started.");
+	Logger::info("*GPSupdater thread started.");
 
 	while(isRunning())
 	{
-		try {
-			m_gpsReader->readGPS(50000000); //microseconds
-			m_systemState->setGPSModel(m_gpsReader->getModel());
-		} catch (const char *error) {
-			std::cout << "GPSupdater : readGPS() : " << error << std::endl;
-			m_logger.error(std::string("GGPSupdater : readGPS() : ") + error);
-		}
+		m_gpsReader->readGPS(50000000); //microseconds
+		m_systemState->setGPSModel(m_gpsReader->getModel());
 	}
 
-	std::cout << "*GPSupdater thread exited." << std::endl;
-	m_logger.info("*GPSupdater thread exited.");
+	Logger::info("*GPSupdater thread exited.");
 }
 
 void GPSupdater::close()

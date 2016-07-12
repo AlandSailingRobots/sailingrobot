@@ -114,7 +114,7 @@ int Utility::sgn(double value)
 {
 	if(value == 0) return 0;
 	if(value < 0) return -1;
-	if(value > 1) return 1;
+	if(value > 0) return 1;
 
 	return 0;
 }
@@ -153,6 +153,20 @@ double Utility::angleDifference(double angle1, double angle2)
 double Utility::limitAngleRange(double angle)
 {
 	const double fullRevolution = 360;
+	const double minAngle = 0;
+
+	while (angle < minAngle)
+		angle += fullRevolution;
+
+	while (angle >= minAngle + fullRevolution)
+		angle -= fullRevolution;
+
+	return angle;
+}
+
+double Utility::limitRadianAngleRange(double angle)
+{
+	const double fullRevolution = 2 * M_PI;
 	const double minAngle = 0;
 
 	while (angle < minAngle)
@@ -227,15 +241,62 @@ double Utility::calculateTrueWindDirection(const SystemStateModel& systemStateMo
 	return twd;
 }
 
+double Utility::calculateTrueWindSpeed(const SystemStateModel& systemStateModel , double heading)
+{
+	//double knots = 1.94384;
+	double apparentWindSpeed = systemStateModel.windsensorModel.speed; //* knots; // Converting m/s to knots
+	double apparentWindAngle = systemStateModel.windsensorModel.direction;
+	double boatSpeed = systemStateModel.gpsModel.speed;
+
+	if (apparentWindAngle < 0.001 ){
+		apparentWindAngle = 0.001;
+	} else if ( apparentWindAngle > 359.999 ){
+		apparentWindAngle = 359.999 ;
+	}
+
+	if(apparentWindSpeed < 0.001){
+		return heading;
+	}
+
+	double trueWindSpeed = sqrt((apparentWindSpeed * apparentWindSpeed) + (boatSpeed * boatSpeed)
+						 - (2 * boatSpeed * apparentWindSpeed * cos(apparentWindAngle/180*M_PI)));
+
+	return trueWindSpeed;
+}
+
 double Utility::getTrueWindDirection(SystemStateModel systemStateModel, std::vector<float> &twdBuffer, const unsigned int twdBufferMaxSize)
 {
-		double twd = calculateTrueWindDirection(systemStateModel, systemStateModel.compassModel.heading);
-		twdBuffer.push_back(twd);// new wind calculation
-		//twdBuffer.push_back(systemStateModel.gpsModel.heading + systemStateModel.windsensorModel.direction);// old wind calculation
+	double twd = calculateTrueWindDirection(systemStateModel, systemStateModel.compassModel.heading);
+	twdBuffer.push_back(twd);// new wind calculation
+	//twdBuffer.push_back(systemStateModel.gpsModel.heading + systemStateModel.windsensorModel.direction);// old wind calculation
 
-		while (twdBuffer.size() > twdBufferMaxSize) {
-			twdBuffer.erase(twdBuffer.begin());
-		}
+	while (twdBuffer.size() > twdBufferMaxSize) {
+		twdBuffer.erase(twdBuffer.begin());
+	}
 
-		return meanOfAngles(twdBuffer);
+	return meanOfAngles(twdBuffer);
+}
+
+std::array<double, 2> Utility::calculateApparentWind(const SystemStateModel systemStateModel, const double heading, const double trueWindDirection)
+{ //referenced from "Modeling, control and state-estimation for an autonomous sailboat" by Jon Melin
+	std::array<double, 2> apparentWind;
+	std::array<double, 2> wcaw = { calculateTrueWindSpeed(systemStateModel, heading) * cos(trueWindDirection - heading) - systemStateModel.gpsModel.speed, //wcaw[0]
+									calculateTrueWindSpeed(systemStateModel, heading) * sin(trueWindDirection - heading)}; //wcaw[1] Cartesian Apparent Wind
+
+	double apparentWindSpeed = sqrt(pow(wcaw[0], 2) + pow(wcaw[1], 2));
+	double apparentWindDirection = atan2(wcaw[0], wcaw[1]);
+
+	apparentWind[0] = apparentWindSpeed;
+	apparentWind[1] = apparentWindDirection;
+
+	return apparentWind;
+}
+
+double Utility::getApparentWindSpeed(const SystemStateModel systemStateModel, const double heading, const double trueWindDirection)
+{
+	return calculateApparentWind(systemStateModel, heading, trueWindDirection)[0];
+}
+double Utility::getApparentWindDirection(const SystemStateModel systemStateModel, const double heading, const double trueWindDirection)
+{
+	return calculateApparentWind(systemStateModel, heading, trueWindDirection)[1];
 }

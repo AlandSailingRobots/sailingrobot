@@ -15,10 +15,10 @@ public:
 	virtual ~GPS() {};
 
 	/*Sets up a connection to the USB-connected GPS*/
-	virtual void connectToGPS()=0;
+	virtual bool connectToGPS()=0;
 
 	/*reads data from the GPS given a number of attempts and timeout for each attempt*/
-	virtual void readGPS(int timeout)=0;
+	virtual bool readGPS(int timeout)=0;
 
 	/*Returns true if gps is online.*/
 	virtual bool isOnline()=0;

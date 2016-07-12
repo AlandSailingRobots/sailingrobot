@@ -11,8 +11,12 @@
 #include <string>
 #include <mutex>
 
+typedef void (*waypointUpdateCallback) ();
+
 
 class HTTPSync {
+
+
 
 	public:
 
@@ -29,6 +33,7 @@ class HTTPSync {
 		void setShipID(std::string shipID);
 		void setShipPWD(std::string shipPWD);
 		void setServerURL(std::string URL);
+		void setWaypointUpdateCallback(waypointUpdateCallback callBack);
 
 	private:
 
@@ -42,8 +47,9 @@ class HTTPSync {
 		bool m_removeLogs;
 		int m_delay;
 		int m_pushOnlyLatestLogs;
-		Logger m_logger;
 		std::mutex m_mutex;
+
+		waypointUpdateCallback m_callBack;
 
 		DBHandler *m_dbHandler;
 
@@ -53,6 +59,8 @@ class HTTPSync {
 		std::string getData(std::string call);
 		void updateConfigs();
 		void updateWaypoints();
+
+
 
 		std::string performCURLCall(std::string serverCall);
 		bool checkIfNewConfig();

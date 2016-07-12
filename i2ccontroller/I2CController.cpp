@@ -15,13 +15,15 @@ I2CController::~I2CController() {
 
 void I2CController::init() {
     m_running = true;
+
+    // NOTE - Jordan - I think the I2C device code should interact via the I2C controller that way we can make it thread safe.
+
     initCompass(m_mockCompass, m_headingBufferSize);
     initArduino(m_mockArduino);
 }
 
 void I2CController::run() {
-    std::cout << "-I2CController thread started." << std::endl;
-    m_logger.info("-I2CController thread started.");
+    Logger::info("I2CController thread started");
     while(isRunning()) {
         m_timer.reset();
 
@@ -44,38 +46,38 @@ void I2CController::run() {
     }
 }
 
-void I2CController::initCompass(bool mockCompass, int headningBufferSize) {
+bool I2CController::initCompass(bool mockCompass, int headningBufferSize) {
     if (!mockCompass) {
         m_compass.reset(new HMC6343(headningBufferSize) );
     } else {
         m_compass.reset(new MockCompass());
     }
 
-    try {
-        m_compass->init();
-    } catch (const char * error) {
-        std::cout << "-I2CController::setupCompass()\tFailed" << std::endl;
-        m_logger.error("-I2CController::setupCompass()\tFailed");
+    if(not m_compass->init())
+    {
+        Logger::error("%s Failed to initialise the compass", __PRETTY_FUNCTION__);
+        return false;
     }
-    std::cout << "-I2CController::setupCompass()\tOK" << std::endl;
-    m_logger.info("-I2CController::setupCompass()\tOK");
+
+    Logger::info("Compass initialised");
+    return true;
 }
 
-void I2CController::initArduino(bool mockArduino) {
+bool I2CController::initArduino(bool mockArduino) {
     if(!mockArduino) {
         m_arduino.reset(new AR_UNO());
     } else {
         m_arduino.reset(new MockAnalogArduino());
     }
 
-    try {
-        m_arduino->init();
-    } catch (const char * error) {
-        std::cout << "-I2CController::initArduino()\tFailed" << std::endl;
-        m_logger.error("I2CController::initArduino()\tFailed");
+    if(not m_arduino->init())
+    {
+        Logger::error("%s Failed to communicate with the arduino", __PRETTY_FUNCTION__);
+        return false;
     }
-    std::cout << "-I2CController::initArduino()\tOK" << std::endl;
-    m_logger.info("-I2CController::initArduino()\tOK");
+
+    Logger::info("Arduino initialised");
+    return true;
 }
 
 bool I2CController::isRunning() {
