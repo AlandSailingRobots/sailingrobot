@@ -111,14 +111,13 @@ public:
 
 	void deleteRow(std::string table, std::string id);
 
-	void getWaypointFromTable(WaypointModel &waypointModel);
-
-	WaypointModel getPreviouslyHarvestedWaypoint();
+	bool getWaypointFromTable(WaypointModel &waypointModel, bool max);
 
 	bool insert(std::string table, std::string fields, std::string values);
 
 	// inserts area scanning measurements into db
-	void insertScan(std::string waypoint_id, PositionModel position, float temperature, std::string timestamp);
+	//TODO - remove here as well yeyeye
+	//void insertScan(std::string waypoint_id, PositionModel position, float temperature, std::string timestamp);
 
 	bool changeOneValue(std::string table, std::string id, std::string newValue, std::string colName);
 

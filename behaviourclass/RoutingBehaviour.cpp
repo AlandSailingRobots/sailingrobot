@@ -21,16 +21,12 @@ void RoutingBehaviour::setWaypointsChanged()
 
 void RoutingBehaviour::setNextWaypoint(WaypointModel &waypointModel)
 {
-    try {
-    	m_dbHandler->getWaypointFromTable(waypointModel);
-	} catch (const char * error) {
-		Logger::error("%s Error: %s", __func__, error);
-	}
-
-	if (waypointModel.id.empty() ) {
+    if(not m_dbHandler->getWaypointFromTable(waypointModel, false))
+    {
 		Logger::warning("%s No waypoint found, holding last waypoint", __func__);
 	}
-	else{
+	else
+	{
 		Logger::info("New Waypoint picked! ID: %s, Lon: %f, Lat: %f, Rad: %d",  waypointModel.id.c_str(), 
                                                                 				waypointModel.positionModel.longitude, 
                                                                 				waypointModel.positionModel.latitude,

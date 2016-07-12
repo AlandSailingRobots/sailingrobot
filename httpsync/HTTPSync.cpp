@@ -55,8 +55,8 @@ void HTTPSync::setupHTTPSync() {
 
 void HTTPSync::pushDatalogs() {
     std::string response = "";
-    try {
-        response = pushData(m_dbHandler->getLogs(m_pushOnlyLatestLogs), "pushAllLogs");
+    if(performCURLCall(m_dbHandler->getLogs(m_pushOnlyLatestLogs), "pushAllLogs", response))
+    {
          //remove logs after push
          //m_logger.info(response);
         if(m_removeLogs) {
@@ -66,27 +66,40 @@ void HTTPSync::pushDatalogs() {
         }
 
         Logger::info("Logs pushed to server");
-    } catch (const char * error) {
-        Logger::error("%s Error: %s", __PRETTY_FUNCTION__, error);
+    }
+    else
+    {
+        Logger::warning("%s Could not push logs to server:", __PRETTY_FUNCTION__);
     }
 }
 
 void HTTPSync::pushWaypoints() {
-    try {
-        std::string response = pushData(m_dbHandler->getWaypoints(), "pushWaypoints");
-        Logger::info("Waypoints pushed to server");
-    } catch(const char* error) {
-       Logger::error("%s Error: %s", __PRETTY_FUNCTION__, error);
-    }
+
+	std::string waypointsData = m_dbHandler->getWaypoints();
+	if (waypointsData.size() > 0)
+	{
+		std::string response;
+		if(performCURLCall(waypointsData,"pushWaypoints", response))
+		{
+			Logger::info("Waypoints pushed to server");
+		}
+		else
+		{
+			Logger::warning("%s Failed to push waypoints to server", __PRETTY_FUNCTION__);
+		}
+	}
 }
 
 void HTTPSync::pushConfigs() {
-    try {
-        pushData(m_dbHandler->getConfigs(), "pushConfigs");
-        Logger::info("Configs pushed to server");
-    } catch(const char* error) {
-        Logger::error("%s Error: %s", __PRETTY_FUNCTION__, error);
-    }
+    std::string response;
+	if(performCURLCall(m_dbHandler->getConfigs(), "pushConfigs", response))
+	{
+		Logger::info("Configs pushed to server");
+	}
+	else
+	{
+		Logger::warning("%s Error: ", __PRETTY_FUNCTION__);
+	}
 }
 
 void HTTPSync::setShipID(std::string ID) {
@@ -108,12 +121,17 @@ void HTTPSync::setWaypointUpdateCallback(waypointUpdateCallback callBack){
 }
 
 std::string HTTPSync::getData(std::string call) {
-    return serve("",call);
+	std::string response;
+    if(performCURLCall("",call, response))
+    {
+    	return response;
+    }
+    else
+    {
+    	return "";
+    }
 }
 
-std::string HTTPSync::pushData(std::string data, std::string call) {
-    return serve(data, call);
-}
 
 bool HTTPSync::checkIfNewConfig() {
     if (getData("checkIfNewConfigs") == "1")
@@ -132,17 +150,21 @@ bool HTTPSync::checkIfNewWaypoints(){
 void HTTPSync::updateConfigs() {
     if(checkIfNewConfig()) {
 
-        try {
-			std::string configs = getData("getAllConfigs");
-	    	m_dbHandler->updateConfigs(configs);
-	    	if(not m_dbHandler->updateTable("state", "configs_updated", "1","1"))
-	    	{
-				Logger::error("%s Error updating state table", __PRETTY_FUNCTION__);
-	    	}
+		std::string configs = getData("getAllConfigs");
+		if (configs.size() > 0)
+		{
+			m_dbHandler->updateConfigs(configs);
+			if (not m_dbHandler->updateTable("state", "configs_updated", "1", "1"))
+			{
+				Logger::error("%s Error updating state table",__PRETTY_FUNCTION__);
+				return;
+			}
 			Logger::info("Configuration retrieved from remote server");
 			pushConfigs();
-		} catch (const char* error) {
-			Logger::error("%s Error: %s", __PRETTY_FUNCTION__, error);
+		}
+		else
+		{
+			Logger::error("%s Error: %s", __PRETTY_FUNCTION__);
 		}
 	}
 }
@@ -150,36 +172,26 @@ void HTTPSync::updateConfigs() {
 void HTTPSync::updateWaypoints() {
 
     if(checkIfNewWaypoints()){
-        try{
-            std::string waypoints = getData("getWaypoints"); //Waypoints call implemented? //SERVE("", "getWaypoints")'
-            if(m_dbHandler->updateWaypoints(waypoints))
-            {
+
+		std::string waypoints = getData("getWaypoints"); //Waypoints call implemented? //performCURLCall("", "getWaypoints")'
+		if (waypoints.size() > 0)
+		{
+			if (m_dbHandler->updateWaypoints(waypoints))
+			{
 				Logger::info("Waypoints retrieved from remote server");
-				if (m_callBack != NULL) {
+				if (m_callBack != NULL)
+				{
 					m_callBack();
 				}
-            }
-        }catch(const char* error){
-            Logger::error("%s Error: %s", __PRETTY_FUNCTION__, error);
-        }
+			}
+		}
+		else
+		{
+			Logger::warning("%s Could not updated waypoints",__PRETTY_FUNCTION__);
+		}
     }
 }
 
-std::string HTTPSync::serve(std::string data, std::string call) {
-    std::string serverCall = "";
-    std::string response = "";
-
-    if(data != "")
-        serverCall = "serv="+call + "&id="+shipID+"&pwd="+shipPWD+"&data="+data;
-    else
-        serverCall = "serv="+call + "&id="+shipID+"&pwd="+shipPWD;
-        //serv=getAllConfigs&id=BOATID&pwd=BOATPW
-
-    if(curl) {
-        response = performCURLCall(serverCall);
-    }
-    return response;
-}
 
 bool HTTPSync::isRunning() {
     bool running;
@@ -195,22 +207,30 @@ void HTTPSync::close() {
     m_mutex.unlock();
 }
 
-std::string HTTPSync::performCURLCall(std::string serverCall) {
+bool HTTPSync::performCURLCall(std::string data, std::string call, std::string& response) {
+    std::string serverCall = "";
 
-    std::string response = "";
+    if(data != "")
+        serverCall = "serv="+call + "&id="+shipID+"&pwd="+shipPWD+"&data="+data;
+    else
+        serverCall = "serv="+call + "&id="+shipID+"&pwd="+shipPWD;
+        //serv=getAllConfigs&id=BOATID&pwd=BOATPW
 
-    //Send data through curl with POST
-    curl_easy_setopt(curl, CURLOPT_URL, serverURL.c_str());
-    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, serverCall.c_str());
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_to_string);
-    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response);
-    /* Perform the request, res will get the return code */
-    res = curl_easy_perform(curl);
-    /* Check for errors */
-    if(res != CURLE_OK) {
-        Logger::error("%s Error: %s", __PRETTY_FUNCTION__, curl_easy_strerror(res));
-        throw ( std::string("HTTPSync::serve(): ") + curl_easy_strerror(res) ).c_str();
+    if(curl) {
+    	//Send data through curl with POST
+		curl_easy_setopt(curl, CURLOPT_URL, serverURL.c_str());
+		curl_easy_setopt(curl, CURLOPT_POSTFIELDS, serverCall.c_str());
+		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_to_string);
+		curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response);
+		/* Perform the request, res will get the return code */
+		res = curl_easy_perform(curl);
+		/* Check for errors */
+		if (res != CURLE_OK)
+		{
+			Logger::error("%s Error: %s response: %s", __PRETTY_FUNCTION__, curl_easy_strerror(res), response);
+			return false;
+		}
     }
 
-    return response;
+    return true;
 }

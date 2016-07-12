@@ -222,16 +222,14 @@ void LineFollowBehaviour::setPreviousWayPoint(SystemStateModel &systemStateModel
     if(m_wayPointCount == 0) //if no waypoints have been passed yet
     {
         //Check list if any waypoints have been passed earlier (incase hardreset has been made earlier, resulting in wayPointCount resetting)
-        WaypointModel waypointModel = m_dbHandler->getPreviouslyHarvestedWaypoint();
-        
-        if(waypointModel.id == ""){//If no waypoints had been harvested, set previouspoint to boats startingposition
+        if(not m_dbHandler->getWaypointFromTable(m_previousWaypointModel, true))
+        {//If no waypoints had been harvested, set previouspoint to boats startingposition
             m_previousWaypointModel.positionModel.longitude = systemStateModel.gpsModel.positionModel.longitude;
             m_previousWaypointModel.positionModel.latitude = systemStateModel.gpsModel.positionModel.latitude;
             m_previousWaypointModel.id = '0';
             printf("Set m_previousWaypointModel to boat position\n");
         }
-        else 
-            m_previousWaypointModel = waypointModel;
+        //if true sets m_previousWaypointModel to latest harvested waypoint.
     }
     else if(m_wayPointCount > 0) //if waypoints passed, set previous waypoint to the one recently passed
         m_previousWaypointModel = m_nextWaypointModel;

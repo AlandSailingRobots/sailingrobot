@@ -163,7 +163,7 @@ void DBHandler::insertMessageLog(std::string gps_time, std::string type, std::st
 	queryTable(sstm.str());
 }
 
-
+//TODO - make private
 bool DBHandler::updateTableJson(std::string table, std::string data) {
 
 	//m_logger.info(" updateTableJson:\n"+data);
@@ -220,15 +220,18 @@ std::string DBHandler::retrieveCell(std::string table, std::string id, std::stri
     	results = retrieveFromTable(query, rows, columns);
     }
     catch(const char* error) {
-
+    	rows = 0;
+    	columns = 0;
     }
 
     if (columns < 1) {
     	Logger::error("%s No columns from Query: %s", __PRETTY_FUNCTION__, query.c_str());
+    	return "";
     }
 
     if (rows < 1) {
 		Logger::error("%s No rows from Query: %s", __PRETTY_FUNCTION__, query.c_str());
+		return "";
     }
 
     return results[1];
@@ -299,8 +302,7 @@ bool DBHandler::updateWaypoints(std::string waypoints){
 		}
 	}
 
-	//Make sure waypoints at beginning are harvested
-
+	//Make sure waypoints before the current waypoint are harvested
 	if (!m_currentWaypointId.empty()){
 		std::string updateHarvested = "UPDATE waypoints SET harvested = 1 WHERE id < ";
 		updateHarvested += m_currentWaypointId + ";";
@@ -316,11 +318,15 @@ bool DBHandler::updateWaypoints(std::string waypoints){
 
 
 int DBHandler::retrieveCellAsInt(std::string table, std::string id, std::string column) {
-	try {
-		return atoi(retrieveCell(table, id, column).c_str());
+
+	std::string data = retrieveCell(table, id, column);
+	if (data.size() > 0)
+	{
+		return strtol(data.c_str(), NULL, 10);
 	}
-	catch (const char *  e) {
-		Logger::error("%s, Error: %s", __PRETTY_FUNCTION__, e);
+	else
+	{
+		Logger::error("%s, Error: No data in cell ", __PRETTY_FUNCTION__);
 		return 0;
 	}
 
@@ -338,7 +344,9 @@ int DBHandler::getRows(std::string table) {
 		retrieveFromTable("SELECT * FROM " + table + ";", rows, columns);
 	}
 	catch(const char* error)
-	{}
+	{
+		return 0;
+	}
 	return rows;
 }
 
@@ -392,59 +400,58 @@ bool DBHandler::insert(std::string table, std::string fields, std::string values
 	}
 	return true;
 }
-
-void DBHandler::insertScan(std::string waypoint_id, PositionModel position, float temperature, std::string timestamp)
-{
-	//std::string waypoint_id = getMinIdFromTable("waypoints");
-
-	std::string i = "null", j = "null";
-
-	try {
-		i = retrieveCell("waypoint_index", waypoint_id, "i");
-		j = retrieveCell("waypoint_index", waypoint_id, "j");
-	} catch (const char * error) {
-		Logger::error("%s, Error: %s", __PRETTY_FUNCTION__, error);
-	}
-
-	std::ostringstream fields;
-	fields << "waypoint_id,"
-		<< "time_UTC,"
-		<< "latitude,"
-		<< "longitude,"
-		<< "air_temperature,"
-		<< "i,"
-		<< "j";
-
-	std::ostringstream values;
-	values << waypoint_id << ",'"
-		<< timestamp << "',"
-		<< position.latitude << ","
-		<< position.longitude << ","
-		<< temperature << ","
-		<< i << ","
-		<< j;
-
-	insert("scanning_measurements", fields.str(), values.str());
-}
+//TODO - Oliver/Jordan - REMOVE this function if not needed
+//void DBHandler::insertScan(std::string waypoint_id, PositionModel position, float temperature, std::string timestamp)
+//{
+//	//std::string waypoint_id = getMinIdFromTable("waypoints");
+//
+//	std::string i = "null", j = "null";
+//
+//
+//	i = retrieveCell("waypoint_index", waypoint_id, "i");
+//	j = retrieveCell("waypoint_index", waypoint_id, "j");
+//
+//	Logger::error("%s, Error: %s", __PRETTY_FUNCTION__);
+//
+//
+//	std::ostringstream fields;
+//	fields << "waypoint_id,"
+//		<< "time_UTC,"
+//		<< "latitude,"
+//		<< "longitude,"
+//		<< "air_temperature,"
+//		<< "i,"
+//		<< "j";
+//
+//	std::ostringstream values;
+//	values << waypoint_id << ",'"
+//		<< timestamp << "',"
+//		<< position.latitude << ","
+//		<< position.longitude << ","
+//		<< temperature << ","
+//		<< i << ","
+//		<< j;
+//
+//	insert("scanning_measurements", fields.str(), values.str());
+//}
 
 std::string DBHandler::getWaypoints() {
 	int rows = 0;
 	Json json;
-	//The way waypoints are stored should probably be changed to
-	//work similary to the datalogs, non of the string cropping is necessary
 	std::string wp = "waypoint_";
-	try {
-		rows = getRows("waypoints");
-		for(auto i = 1; i < rows; ++i) {
-			getDataAsJson("id,latitude,longitude,declination,radius","waypoints",wp+std::to_string(i),std::to_string(i),json,true);
-		}
-		getDataAsJson("id,latitude,longitude,declination,radius","waypoints",wp+std::to_string(rows),std::to_string(rows),json,true);
-	} catch (const char * error) {
-		Logger::error("%s, Error: %s", __PRETTY_FUNCTION__, error);
-		throw "getWaypoints";
-	}
 
-	return json.dump();
+	rows = getRows("waypoints");
+	if (rows > 0) {
+		for (auto i = 1; i <= rows; ++i) {
+			getDataAsJson("id,latitude,longitude,declination,radius", "waypoints", wp + std::to_string(i), std::to_string(i),json, true);
+		}
+		return json.dump();
+	}
+	else
+	{
+		Logger::warning("No waypoints in database");
+		return "";
+	}
 }
 
 //get id from table returns either max or min id from table.
@@ -461,7 +468,8 @@ std::string DBHandler::getIdFromTable(std::string table, bool max) {
 		}
 }
     catch(const char* error) {
-
+    	rows = 0;
+    	columns = 0;
     }
 
     if (rows * columns < 1) {
@@ -573,19 +581,21 @@ int DBHandler::getTable(sqlite3* db, const std::string &sql, std::vector<std::st
 int DBHandler::insertLog(std::string table, std::string values) {
 	std::stringstream ss;
 	ss << "INSERT INTO " << table << " VALUES(NULL, " << values << ");";
-	int lastInsertedId = 0;
 
 	if(queryTable(ss.str()))
 	{
 		std::string tableId = getIdFromTable(table,true);
-		return (int)strtol(tableId.c_str(), NULL, 10);
+		if(tableId.size() > 0)
+		{
+			return (int)strtol(tableId.c_str(), NULL, 10);
+		}
 	}
 	else
 	{
 		Logger::error("%s Error, failed to insert log", __PRETTY_FUNCTION__);
 	}
 
-	return lastInsertedId;
+	return 0;
 }
 
 bool DBHandler::queryTable(std::string sqlINSERT) {
@@ -711,81 +721,51 @@ std::vector<std::string> DBHandler::getColumnInfo(std::string info, std::string 
     return types;
 }
 
-void DBHandler::getWaypointFromTable(WaypointModel &waypointModel){
+bool DBHandler::getWaypointFromTable(WaypointModel &waypointModel, bool max){
 
 	int rows, columns;
     std::vector<std::string> results;
     try {
-    	results = retrieveFromTable("SELECT MIN(id) FROM waypoints WHERE harvested = 0;", rows, columns);
+    	if(max)
+    	{
+    		results = retrieveFromTable("SELECT MAX(id) FROM waypoints WHERE harvested = 1;", rows, columns);
+    	}
+    	else
+    	{
+    		results = retrieveFromTable("SELECT MIN(id) FROM waypoints WHERE harvested = 0;", rows, columns);
+    	}
     }
-    catch(const char* error) { }
+    catch(const char* error)
+    {
+    	Logger::error("%s Error: %s", __PRETTY_FUNCTION__, error);
+    	return false;
+    }
     if (rows * columns < 1 || results[1] == "\0") {
-    	waypointModel.id = "";
-    }
-    else {
-    	waypointModel.id = results[1];
+    	return false;
     }
 
-	if(!waypointModel.id.empty())
-	{
-		m_currentWaypointId = waypointModel.id;
-		waypointModel.positionModel.latitude = atof(retrieveCell("waypoints", waypointModel.id, "latitude").c_str());
-		waypointModel.positionModel.longitude = atof(retrieveCell("waypoints", waypointModel.id, "longitude").c_str());
-		waypointModel.radius = retrieveCellAsInt("waypoints", waypointModel.id, "radius");
-		waypointModel.declination = retrieveCellAsInt("waypoints", waypointModel.id, "declination");
 
-		results = retrieveFromTable("SELECT time FROM waypoint_stationary WHERE id = " +
-			waypointModel.id + ";", rows, columns);
+    waypointModel.id = results[1];
 
-		if (rows * columns < 1 || results[1] == "\0") {
-			waypointModel.time = 0;
-		}
-		else {
-			waypointModel.time = retrieveCellAsInt("waypoint_stationary", waypointModel.id, "time");
-		}
-	}
+	m_currentWaypointId = waypointModel.id;
+	waypointModel.positionModel.latitude = atof(retrieveCell("waypoints", waypointModel.id, "latitude").c_str());
+	waypointModel.positionModel.longitude = atof(retrieveCell("waypoints", waypointModel.id, "longitude").c_str());
+	waypointModel.radius = retrieveCellAsInt("waypoints", waypointModel.id, "radius");
+	waypointModel.declination = retrieveCellAsInt("waypoints", waypointModel.id, "declination");
 
-}
+	results = retrieveFromTable("SELECT time FROM waypoint_stationary WHERE id = " +
+		waypointModel.id + ";", rows, columns);
 
-
-WaypointModel DBHandler::getPreviouslyHarvestedWaypoint()
-{
-	int rows, columns;
-	std::vector<std::string> results; 
-	try {
-		results = retrieveFromTable("SELECT MAX(id) FROM waypoints WHERE harvested = 1;", rows, columns);
-	}
-	catch(const char* error)
-	{}
-	
-	WaypointModel waypointModel(PositionModel(0,0), 0, "", 0);
 	if (rows * columns < 1 || results[1] == "\0") {
-		waypointModel.id = "";
+		waypointModel.time = 0;
 	}
 	else {
-		waypointModel.id = results[1];
+		waypointModel.time = retrieveCellAsInt("waypoint_stationary", waypointModel.id, "time");
 	}
 
-	if(!waypointModel.id.empty())
-	{
-		waypointModel.positionModel.latitude = atof(retrieveCell("waypoints", waypointModel.id, "latitude").c_str());
-		waypointModel.positionModel.longitude = atof(retrieveCell("waypoints", waypointModel.id, "longitude").c_str());
-		waypointModel.radius = retrieveCellAsInt("waypoints", waypointModel.id, "radius");
-		waypointModel.declination = retrieveCellAsInt("waypoints", waypointModel.id, "declination");
-
-		results = retrieveFromTable("SELECT time FROM waypoint_stationary WHERE id = " +
-			waypointModel.id + ";", rows, columns);
-
-		if (rows * columns < 1 || results[1] == "\0") {
-			waypointModel.time = 0;
-		}
-		else {
-			waypointModel.time = retrieveCellAsInt("waypoint_stationary", waypointModel.id, "time");
-		}
-	}
-
-    return waypointModel;
+	return true;
 }
+
 
 std::string DBHandler::getConfigs() {
 	Json json;
@@ -793,15 +773,12 @@ std::string DBHandler::getConfigs() {
 	//Fetch all table names ending with "_config"
 	std::vector<std::string> configTables = getTableNames("%_config");
 
-	try {
-		//Query config tables and select all from config tables with id "1"
-		//This json structure does not use arrays
-		for (auto table : configTables) {
-			getDataAsJson("*",table,table,"1",json,false);
-		}
-	} catch(const char * error) {
-		Logger::error("%s Error: %s", __PRETTY_FUNCTION__, error);
+	//Query config tables and select all from config tables with id "1"
+	//This json structure does not use arrays
+	for (auto table : configTables) {
+		getDataAsJson("*",table,table,"1",json,false);
 	}
+
 	return json.dump();
 }
 
