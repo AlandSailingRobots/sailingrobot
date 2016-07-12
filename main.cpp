@@ -111,7 +111,6 @@ int main(int argc, char *argv[]) {
 
 	httpsync_handle = new HTTPSync( &db, http_delay, removeLogs );
 
-
     SailingRobot sr_handle(&externalCommand, &systemstate, &db, httpsync_handle);
 
 	GPSupdater gps_updater(&systemstate,mockGPS);

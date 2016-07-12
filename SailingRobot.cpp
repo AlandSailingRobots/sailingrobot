@@ -21,9 +21,6 @@ SailingRobot::SailingRobot(ExternalCommand* externalCommand,
 	m_mockPosition(db->retrieveCellAsInt("mock", "1", "position")),
 	m_mockMaestro(db->retrieveCellAsInt("mock", "1", "maestro")),
 
-	
-
-	
 	m_externalCommand(externalCommand),
 	m_systemState(systemState),
 	m_dbHandler(db),
@@ -178,7 +175,6 @@ void SailingRobot::shutdown() {
 	m_running=false;
 	//m_dbHandler->closeDatabase();
 }
-
 
 void SailingRobot::setupMaestro() {
 	if (m_mockMaestro) {

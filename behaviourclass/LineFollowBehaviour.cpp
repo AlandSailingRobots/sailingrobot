@@ -32,7 +32,6 @@ bool LineFollowBehaviour::init()
     return true;
 }
 
-
 double LineFollowBehaviour::calculateSignedDistance(std::unique_ptr<Position> const& position)
 {
 
@@ -170,7 +169,6 @@ void LineFollowBehaviour::computeCommands(SystemStateModel &systemStateModel,std
         printf("GPS not online\n");
     }
 }
-
 
 void LineFollowBehaviour::manageDatabase(double trueWindDirection, SystemStateModel &systemStateModel){
   //logging

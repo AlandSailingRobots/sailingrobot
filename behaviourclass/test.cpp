@@ -1,5 +1,5 @@
 #include <iostream>
-#include <Eigen/Dense>
+#include "../libs/Eigen/Dense"
 #include <math.h>
 #include <cmath>
 #include <stdint.h> //uint8_t
@@ -118,6 +118,7 @@ void  printCollisionAvoidanceBehave(Eigen::MatrixXd potential_Z,Eigen::MatrixXd 
     std::cout << "can_compute_a_new_avoidance_point : " << can_compute_a_new_avoidance_point << std::endl;
     std::cout << " " << std::endl;
 }
+
 void mockObstacleDetection(std::vector<Eigen::MatrixXd> const& mock_obstacle_list, std::vector<Eigen::MatrixXd>& detected_obstacles, std::vector<float>& direction_boat_obstacle,
                             Eigen::MatrixXd const& boat_state,float const& mock_detection_distance,float const& mock_detection_angle){
     std::cout <<""<<std::endl;
@@ -223,7 +224,6 @@ void calculatePotentialField(float const& radius_obstacle, Eigen::MatrixXd const
     std::cout << "EXIT calculatePotentialField" << std::endl;
 }
 
-
 void calculate_collision_avoidance_point(Eigen::MatrixXd potential_Z,Eigen::MatrixXd potential_field_dim,Eigen::MatrixXd& collision_avoidance_point){
         std::cout <<""<<std::endl;
         std::cout << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$" << std::endl;
@@ -245,7 +245,6 @@ void calculate_collision_avoidance_point(Eigen::MatrixXd potential_Z,Eigen::Matr
         std::cout << "EXIT calculate_collision_avoidance_point" << std::endl;
 
 }
-
 
 void update_obstacles(std::vector<Eigen::MatrixXd> detected_obstacles,Eigen::MatrixXd boat_state,float mock_detection_distance,float mock_detection_angle,std::vector<Eigen::MatrixXd>& detected_obstacle_list_qhat){
     std::cout <<""<<std::endl;
@@ -344,7 +343,6 @@ void obstacleOnACollisionCourse(Eigen::MatrixXd boat_state,std::vector<Eigen::Ma
     }
     std::cout << "EXIT obstacleOnACollisionCourse" << std::endl;
 }//Matlab name: boat_on_collision_course
-
 
 void printSimul(Eigen::MatrixXd boat_state,Eigen::MatrixXd collision_avoidance_point,std::vector<Eigen::MatrixXd> collisioned_obstacle,Eigen::MatrixXd target_phat){
 
@@ -575,6 +573,7 @@ int main()
     //printStdVectorFloat("direction_boat_obstacle",direction_boat_obstacle);
 
     Eigen::MatrixXd test_atan_x = Eigen::MatrixXd::Ones(rows_Z,cols_Z);
+
     printMat("test_atan_x",test_atan_x);
     Eigen::MatrixXd t = atanMat(test_atan_x);
     printMat("test_atan_x",t);
@@ -593,7 +592,7 @@ int main()
     printMat("test_rectP_x",ObsP);
     float tim=0.0;
     float dt=0.01;
-    while(tim<100){
+//    while(tim<100){
 
         mockObstacleDetection(mock_obstacle_list, detected_obstacles, direction_boat_obstacle,boat_state, mock_detection_distance, mock_detection_angle);
         //calculatePotentialField( radius_obstacle,point_x, point_y,  boat_state, target_phat, detected_obstacle_list_qhat, wind_direction, only_direction_mode, have_to_avoid_obstacle, step_coeff, direction_boat_obstacle, potential_Z);
@@ -603,7 +602,7 @@ int main()
         avoidObstacle(target_phat, boat_state, point_x, point_y, wind_direction,radius_obstacle, radius_corridor, only_direction_mode,have_to_avoid_obstacle, step_coeff, direction_boat_obstacle, can_compute_a_new_avoidance_point, line_to_follow,collisioned_obstacle,
                         detected_obstacle_list_qhat, potential_Z,potential_field_dim,collision_avoidance_point);
         printSimul( boat_state, collision_avoidance_point,collisioned_obstacle,target_phat);
-        boat_state= boat_state + f(boat_state, inputs, wind_speed,wind_direction)*dt;
+//        boat_state= boat_state + f(boat_state, inputs, wind_speed,wind_direction)*dt;
         tim=tim+dt;
-    }
+//    }
 }

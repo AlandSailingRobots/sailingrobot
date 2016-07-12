@@ -14,11 +14,9 @@ DBHandler::DBHandler(std::string filePath) :
 	m_latestDataLogId = 1;
 }
 
-
 DBHandler::~DBHandler(void) {
 
 }
-
 
 void DBHandler::getDataAsJson(std::string select, std::string table, std::string key, std::string id, Json& json, bool useArray) {
 	int rows = 0, columns = 0;
@@ -149,7 +147,6 @@ void DBHandler::insertMessageLog(std::string gps_time, std::string type, std::st
 	queryTable(sstm.str());
 }
 
-
 void DBHandler::updateTableJson(std::string table, std::string data) {
 
 	//m_logger.info(" updateTableJson:\n"+data);
@@ -195,7 +192,6 @@ void DBHandler::updateTable(std::string table, std::string column, std::string v
 	}
 }
 
-
 std::string DBHandler::retrieveCell(std::string table, std::string id, std::string column) {
 	std::string query = "SELECT " + column + " FROM " + table +" WHERE id=" + id + ";";
 
@@ -236,7 +232,6 @@ void DBHandler::updateConfigs(std::string configs) {
 		}
 	}
 }
-
 
 void DBHandler::updateWaypoints(std::string waypoints){
 
