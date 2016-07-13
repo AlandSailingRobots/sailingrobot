@@ -30,7 +30,9 @@ class CollisionAvoidanceBehaviour:public RoutingBehaviour{
 
 public:
     bool init(); //Nothing to init for now
-    SensorData update_sensor(SystemStateModel &systemStateModel, bool simulation);
+
+    SensorData update_sensors(SystemStateModel &systemStateModel, bool simulation);
+
     void computeCommands(
             SystemStateModel &systemStateModel,std::unique_ptr<Position> const& position,
             double trueWindDirection, bool mockPosition, bool getHeadingFromCompass);

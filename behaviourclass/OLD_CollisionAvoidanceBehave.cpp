@@ -421,37 +421,6 @@ Eigen::MatrixXd CollisionAvoidanceBehave::rectangularPulse(float a, float b, Eig
     return x;
 }
 
-void CollisionAvoidanceBehave::printStdVectorMat(std::string const& name, std::vector<Eigen::MatrixXd> const& v){
-
-    std::cout << " " << std::endl;
-    std::cout << name << " : " << std::endl;
-    std::cout << " " << std::endl;
-    for(int i=0; i<(int)v.size(); ++i){
-        std::cout <<v[i] << std::endl;
-        std::cout << " " << std::endl;
-    }
-}
-
-void CollisionAvoidanceBehave::printStdVectorFloat(std::string const& name, std::vector<float> const& v){
-
-    std::cout << " " << std::endl;
-    std::cout << name << " : " << std::endl;
-    std::cout << " " << std::endl;
-    for(int i=0; i<(int)v.size(); ++i){
-        std::cout <<v[i] << std::endl;
-        std::cout << " " << std::endl;
-    }
-}
-
-void CollisionAvoidanceBehave::printMat(std::string const& name,Eigen::MatrixXd const& mat){
-
-    std::cout << " " << std::endl;
-    std::cout << name << " : " << std::endl;
-    std::cout << " " << std::endl;
-    std::cout << mat<< std::endl;
-    std::cout << " " << std::endl;
-}
-
 void  CollisionAvoidanceBehave::printCollisionAvoidanceBehave(int rows_Z,int cols_Z,Eigen::VectorXd v){
     printMat("potential_field_dim",potential_field_dim);
     std::cout << "rows_Z: "<< rows_Z << std::endl;

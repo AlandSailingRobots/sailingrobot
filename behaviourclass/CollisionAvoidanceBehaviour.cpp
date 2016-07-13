@@ -46,11 +46,48 @@
 
 */
 
+//UTILITY FUNCTIONS
+/*
+ * Might be put into Utility class soon. Need to check that.
+ */
+double angleDiff(double angle1, double angle2){
+
+}
+void CollisionAvoidanceBehaviour::printStdVectorMat(std::string const& name, std::vector<Eigen::MatrixXd> const& v){
+
+    std::cout << " " << std::endl;
+    std::cout << name << " : " << std::endl;
+    std::cout << " " << std::endl;
+    for(int i=0; i<(int)v.size(); ++i){
+        std::cout <<v[i] << std::endl;
+        std::cout << " " << std::endl;
+    }
+}
+void CollisionAvoidanceBehaviour::printStdVectorFloat(std::string const& name, std::vector<float> const& v){
+
+    std::cout << " " << std::endl;
+    std::cout << name << " : " << std::endl;
+    std::cout << " " << std::endl;
+    for(int i=0; i<(int)v.size(); ++i){
+        std::cout <<v[i] << std::endl;
+        std::cout << " " << std::endl;
+    }
+}
+void CollisionAvoidanceBehaviour::printMat(std::string const& name,Eigen::MatrixXd const& mat){
+
+    std::cout << " " << std::endl;
+    std::cout << name << " : " << std::endl;
+    std::cout << " " << std::endl;
+    std::cout << mat<< std::endl;
+    std::cout << " " << std::endl;
+}
+
+//MAIN FUNCTIONS
 /*
  * Makes the interface between the old code and the new one. This is make the code more modular
  * since changes in the architecture might come.
  */
-SensorData CollisionAvoidanceBehaviour::update_sensor(SystemStateModel &systemStateModel, bool simulation) {
+SensorData CollisionAvoidanceBehaviour::update_sensors(SystemStateModel &systemStateModel, bool simulation) {
     //Extraction of data
     SensorData sensorData;
 
@@ -97,7 +134,12 @@ bool CollisionAvoidanceBehaviour::these_obstacles_are_a_problem(
 }
 
 /*
+ * Compute the potential field for the obstacles, the sailing zone,
+ * the boat, the objective, and the wind.
  *
+ * For now it creates the matrix at each loop (easier for code review)
+ * The size of the matrix needs to be adapted to the size of the sailing zone
+ * (with the max and mins for example)
  */
 Eigen::MatrixXd CollisionAvoidanceBehaviour::compute_potential_field(
         std::vector<Obstacle> seen_obstacles, sailing_zone, FollowedLine) {
@@ -105,9 +147,10 @@ Eigen::MatrixXd CollisionAvoidanceBehaviour::compute_potential_field(
 }
 
 /*
- *
+ * Find the minimum in the potential field and return its coordinates in the matrix
+ * as well as its real gps coordinates.
  */
-MinPotField CollisionAvoidanceBehaviour::find_minimum_potential_field(Potential_field) {
+MinPotField CollisionAvoidanceBehaviour::find_minimum_potential_field(Eigen::MatrixXd Potential_field) {
 
 }
 
@@ -119,14 +162,22 @@ CommandOutput CollisionAvoidanceBehaviour::compute_new_path() {
 }
 
 /*
- * Main function of the class. Should be replaced by run as soon as possible.
+ * The most important function of the class, it calls al the others.
+ * Should be replaced by run as soon as possible.
  */
 void CollisionAvoidanceBehaviour::computeCommands(
         SystemStateModel &systemStateModel, std::unique_ptr<Position> const &position,
         double trueWindDirection, bool mockPosition, bool getHeadingFromCompass) {
 
-    sensorsOutput = update_sensors(SystemStateModel & systemStateModel, bool
-    simulation); //=> gives sensors output or compute an easier way to handle them
+    //Note
+    /*
+     * For now i don't know of any place in the code where it specified if the code is
+     * in a simulated environement or not. So this variable is temporary.
+     */
+    bool simulation = 0;
+
+    //Gives sensors output or compute an easier way to handle them
+    SensorData sensOutput = CollisionAvoidanceBehaviour::update_sensors(&systemStateModel, simulation);
 
     //update_waypoints(); //=> update waypoints or compute an easier way to handle them
 
