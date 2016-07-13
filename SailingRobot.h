@@ -45,11 +45,11 @@ private:
 
 	//void setupDB(std::string filename);
 	bool setupMaestro();
-	bool setupRudderServo();
-	bool setupSailServo();
+	void setupRudderServo();
+	void setupSailServo();
 	//void setupGPS();
-	bool setupRudderCommand();
-	bool setupSailCommand();
+	void setupRudderCommand();
+	void setupSailCommand();
 	//void setupHTTPSync();
 
 	std::string m_errorLogPath;
@@ -71,8 +71,6 @@ private:
 	DBHandler *m_dbHandler;
 
 	HTTPSync* m_httpSync;
-	WaypointModel m_waypointModel;
-	WaypointRouting m_waypointRouting;
 	WindVaneController m_windVaneController;
 	RudderCommand m_rudderCommand;
 	SailCommand m_sailCommand;

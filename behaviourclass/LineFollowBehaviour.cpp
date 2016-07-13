@@ -11,7 +11,7 @@ LineFollowBehaviour::LineFollowBehaviour(DBHandler *db):
     m_maxCommandAngle = M_PI / 6;
     m_maxSailAngle = M_PI / 32;
     m_minSailAngle = M_PI / 5.2f;
-    m_tackAngle = M_PI / 3;
+    m_tackAngle = 0.872665; //50°
     desiredHeadingTackMode = 0;
 }
 
@@ -90,9 +90,6 @@ double LineFollowBehaviour::calculateAngleOfDesiredTrajectory(std::unique_ptr<Po
 
 void LineFollowBehaviour::computeCommands(SystemStateModel &systemStateModel,std::unique_ptr<Position> const& position,
                                       double trueWindDirection, bool mockPosition, bool getHeadingFromCompass){
-
-    // if(m_previousWaypointModel.id == "")
-    //     setPreviousWayPoint(systemStateModel);
     
     trueWindDirection = Utility::degreeToRadian(trueWindDirection);
 
@@ -125,40 +122,60 @@ void LineFollowBehaviour::computeCommands(SystemStateModel &systemStateModel,std
             setPreviousWayPoint(systemStateModel);
 
         //GET DIRECTION - From the book Robotic Sailing 2012 and Robotic Sailing 2015
-        double currentHeading = Utility::degreeToRadian(getHeading(systemStateModel,mockPosition,getHeadingFromCompass,position, m_nextWaypointModel));
+        currentHeading = Utility::degreeToRadian(getHeading(systemStateModel,mockPosition,getHeadingFromCompass,position, m_nextWaypointModel));
         double signedDistance = calculateSignedDistance(position); // 'e'
         int maxTackDistance = 20; //'r'
         double phi = calculateAngleOfDesiredTrajectory(position);
-        desiredHeading = phi - (2 * (M_PI / 4)/M_PI) * atan2(signedDistance,maxTackDistance);
-        printf("boat positon lon: %f       lat: %f\n", position->getModel().longitude, position->getModel().latitude);
-        printf("CurrentHeading: %f       signedDistance: %f        Phi: %f        Desired heading: %f \n", currentHeading, signedDistance, phi, desiredHeading);
-        printf("bearingToNextWaypoint: %f\n", Utility::degreeToRadian(bearingToNextWaypoint));
-
-        
+        double desiredHeading = phi - (2 * (M_PI / 4)/M_PI) * atan2(signedDistance,maxTackDistance);
+        desiredHeading = Utility::limitRadianAngleRange(desiredHeading);
         //CHECK IF TACKING IS NEEDED
         if(abs(signedDistance) > maxTackDistance)
-        {
             m_tackingDirection = Utility::sgn(signedDistance);
-            m_tack = false;
-        }
-        
-        //To stop the boat from oscillating during tack, we set the boat to tack from one maxTackDistance of the line to the other, not letting it switch direction in between.
-        double desiredHeading2 = desiredHeading; //Save desiredHeading into a temp variable so we don't have faulty values for the if-statements
-        if(cos(trueWindDirection - desiredHeading) + cos(m_tackAngle + M_PI/8) > 0)
-            m_tack = false;
-        else if(m_tack)
-            desiredHeading2 = desiredHeadingTackMode;
-        else if(cos(trueWindDirection - desiredHeading) + cos(m_tackAngle) < 0)
+
+        if( (cos(trueWindDirection - desiredHeading) + cos(m_tackAngle) < 0) || (cos(trueWindDirection - phi) + cos(m_tackAngle) < 0))
         {
-            m_tack = true;
-            desiredHeading2 = M_PI + trueWindDirection - m_tackAngle * m_tackingDirection;
-            desiredHeadingTackMode = desiredHeading2;
+            if(!m_tack){
+                m_tackingDirection = Utility::sgn(currentHeading-(fmod(trueWindDirection, M_PI) - M_PI));
+                m_tack = true;
+            }
+            desiredHeading = M_PI + trueWindDirection - m_tackingDirection * m_tackAngle;
+            desiredHeading = Utility::limitRadianAngleRange(desiredHeading);
+
         }
+// else if( (cos(trueWindDirection + M_PI - desiredHeading_star) + cos(0) < 0) ||  //Check if boat direction is same as truewind. NOT TESTED
+        //              ( (abs(signedDistance) < maxTackDistance) && (cos(trueWindDirection + M_PI - phi) + cos(0) < 0) ) )
+        // {
+        //     if(!m_tack)              //NOT TESTED, TRY AT ANOTHER STAGE. SIMONS CODE
+        //     {
+        //         m_tackingDirection = Utility::sgn(currentHeading-(fmod(trueWindDirection + M_PI, M_PI) - M_PI));
+        //         m_tack = true;
+        //     }
+        //     desiredHeading = trueWindDirection - m_tackingDirection * m_tackAngle;
+// }
+        else
+            m_tack = false;
 
-        if(abs(signedDistance) > maxTackDistance)
-            desiredHeading2 = M_PI + trueWindDirection - m_tackAngle * m_tackingDirection;
+// if(abs(signedDistance) > maxTackDistance) //OLD VERSION, OUTCOMMENTED TO TEST SIMONS NEW ^
+        // {
+        //     m_tackingDirection = Utility::sgn(signedDistance);
+        //     m_tack = false;
+        // }
+        //To stop the boat from oscillating during tack, we set the boat to tack from one maxTackDistance of the line to the other, not letting it switch direction in between.
+        // double desiredHeading2 = desiredHeading; //Save desiredHeading into a temp variable so we don't have faulty values for the if-statements
+        // if(cos(trueWindDirection - desiredHeading) + cos(m_tackAngle + M_PI/8) > 0)
+        //     m_tack = false;
+        // else if(m_tack)
+        //     desiredHeading2 = desiredHeadingTackMode;
+        // else if(cos(trueWindDirection - desiredHeading) + cos(m_tackAngle) < 0)                 
+        // {
+        //     m_tack = true;
+        //     desiredHeading2 = M_PI + trueWindDirection - m_tackAngle * m_tackingDirection;               
+        //     desiredHeadingTackMode = desiredHeading2;
+        // }
 
-        desiredHeading = desiredHeading2; //set the value back from the temp variable
+        // if(abs(signedDistance) > maxTackDistance)
+        //     desiredHeading2 = M_PI + trueWindDirection - m_tackAngle * m_tackingDirection;
+// desiredHeading = desiredHeading2; //set the value back from the temp variable //END OF OLD VERSION^
 
         //SET RUDDER
         if(cos(currentHeading - desiredHeading) < 0) //if boat is going the wrong direction
@@ -166,15 +183,16 @@ void LineFollowBehaviour::computeCommands(SystemStateModel &systemStateModel,std
         else                      
             m_rudderCommand = Utility::sgn(systemStateModel.gpsModel.speed) * m_maxCommandAngle * sin(currentHeading - desiredHeading);
        
-
         //SET SAIL
         double apparentWindDirection = Utility::getApparentWindDirection(systemStateModel, currentHeading, trueWindDirection);
         m_sailCommand = -Utility::sgn(apparentWindDirection) * ( ((m_minSailAngle - m_maxSailAngle) / M_PI) * abs(apparentWindDirection) + m_maxSailAngle);
 
-        std::cout << "speed: " << systemStateModel.gpsModel.speed << "   desiredHeading: " << desiredHeading << "   maxCommand: " << m_maxCommandAngle << 
-        "   rudderCommand: " << m_rudderCommand  << "    SailCommand: " << m_sailCommand << std::endl;
-        std::cout << "heading: " << currentHeading << std::endl;
+
+        printf("CurrentHeading: %f       signedDistance: %f        Phi: %f        Desired heading: %f \n", currentHeading, signedDistance, phi, desiredHeading);
+        printf("bearingToNextWaypoint: %f\n", Utility::degreeToRadian(bearingToNextWaypoint));
+        printf("Speed: %f      RudderCommand: %f     SailCommand: %f       TrueWindDirection: %f \n", systemStateModel.gpsModel.speed, m_rudderCommand, m_sailCommand, trueWindDirection);
         printf("Tacking: %d     TackingDirection: %d\n", m_tack, m_tackingDirection);
+
     } else {
         Logger::warning("%s gps NaN. Using values from last iteration", __PRETTY_FUNCTION__);
     }
@@ -190,7 +208,7 @@ void LineFollowBehaviour::manageDatabase(double trueWindDirection, SystemStateMo
     0,                                               
     distanceToNextWaypoint,
     bearingToNextWaypoint,
-    desiredHeading,
+    currentHeading,
     m_tack,
     getGoingStarboard(),
     atoi(m_nextWaypointModel.id.c_str()),
@@ -204,16 +222,14 @@ void LineFollowBehaviour::setPreviousWayPoint(SystemStateModel &systemStateModel
     if(m_wayPointCount == 0) //if no waypoints have been passed yet
     {
         //Check list if any waypoints have been passed earlier (incase hardreset has been made earlier, resulting in wayPointCount resetting)
-        WaypointModel waypointModel = m_dbHandler->getPreviouslyHarvestedWaypoint();
-        
-        if(waypointModel.id == ""){//If no waypoints had been harvested, set previouspoint to boats startingposition
+        if(not m_dbHandler->getWaypointFromTable(m_previousWaypointModel, true))
+        {//If no waypoints had been harvested, set previouspoint to boats startingposition
             m_previousWaypointModel.positionModel.longitude = systemStateModel.gpsModel.positionModel.longitude;
             m_previousWaypointModel.positionModel.latitude = systemStateModel.gpsModel.positionModel.latitude;
             m_previousWaypointModel.id = '0';
             printf("Set m_previousWaypointModel to boat position\n");
         }
-        else 
-            m_previousWaypointModel = waypointModel;
+        //if true sets m_previousWaypointModel to latest harvested waypoint.
     }
     else if(m_wayPointCount > 0) //if waypoints passed, set previous waypoint to the one recently passed
         m_previousWaypointModel = m_nextWaypointModel;
