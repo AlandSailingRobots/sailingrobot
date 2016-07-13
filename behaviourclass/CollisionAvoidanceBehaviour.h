@@ -31,17 +31,32 @@ class CollisionAvoidanceBehaviour:public RoutingBehaviour{
 public:
     bool init(); //Nothing to init for now
 
-    SensorData update_sensors(SystemStateModel &systemStateModel, bool simulation);
-
     void computeCommands(
             SystemStateModel &systemStateModel,std::unique_ptr<Position> const& position,
             double trueWindDirection, bool mockPosition, bool getHeadingFromCompass);
             //make the computation of the commands return true if the computation was successfull
 
 
+
+
+
+
+private:
     std::vector<Obstacle> seenObstacles;
     FollowedLine followedLine;
+    std::vector<Eigen::Vector2d> sailingZone;
 
+    struct SensorData{
+        double gpsLon; //x
+        double gpsLat; //y
+        double gpsSpeed;
+        double compHeading;
+        double gpsHeading;
+        double windDirection;
+        double windSpeed;
+        int pitch;
+        int roll;
+    };
     struct Obstacle{
         double x;
         double y;
@@ -64,17 +79,13 @@ public:
         double row;
         double col;
     };
-    struct SensorData{
-        double gpsLon; //x
-        double gpsLat; //y
-        double gpsSpeed;
-        double compHeading;
-        double gpsHeading;
-        double windDirection;
-        double windSpeed;
-        int pitch;
-        int roll;
-    };
-private:
 
+    SensorData update_sensors(SystemStateModel &systemStateModel, bool simulation);
+    std::vector<Obstacle> check_obstacles(SensorData sensorData);
+    bool these_obstacles_are_a_problem(
+            std::vector<Obstacle> seenObstacles);
+    Eigen::MatrixXd compute_potential_field(
+            std::vector<Obstacle> seen_obstacles, std::vector<Eigen::Vector2d> sailing_zone, FollowedLine);
+    MinPotField find_minimum_potential_field(Eigen::MatrixXd Potential_field);
+    CommandOutput compute_new_path();
 };

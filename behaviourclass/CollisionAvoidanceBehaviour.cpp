@@ -46,13 +46,25 @@
 
 */
 
+//CONSTRUCTOR
+
+/*
+ * Super class call. Calls the database
+ */
+CollisionAvoidanceBehaviour::CollisionAvoidanceBehaviour(DBHandler *db):
+        RoutingBehaviour(db){
+
+}
+
 //UTILITY FUNCTIONS
+
 /*
  * Might be put into Utility class soon. Need to check that.
  */
 double angleDiff(double angle1, double angle2){
 
 }
+
 void CollisionAvoidanceBehaviour::printStdVectorMat(std::string const& name, std::vector<Eigen::MatrixXd> const& v){
 
     std::cout << " " << std::endl;
@@ -63,6 +75,7 @@ void CollisionAvoidanceBehaviour::printStdVectorMat(std::string const& name, std
         std::cout << " " << std::endl;
     }
 }
+
 void CollisionAvoidanceBehaviour::printStdVectorFloat(std::string const& name, std::vector<float> const& v){
 
     std::cout << " " << std::endl;
@@ -73,6 +86,7 @@ void CollisionAvoidanceBehaviour::printStdVectorFloat(std::string const& name, s
         std::cout << " " << std::endl;
     }
 }
+
 void CollisionAvoidanceBehaviour::printMat(std::string const& name,Eigen::MatrixXd const& mat){
 
     std::cout << " " << std::endl;
@@ -83,6 +97,7 @@ void CollisionAvoidanceBehaviour::printMat(std::string const& name,Eigen::Matrix
 }
 
 //MAIN FUNCTIONS
+
 /*
  * Makes the interface between the old code and the new one. This is make the code more modular
  * since changes in the architecture might come.
@@ -116,7 +131,11 @@ SensorData CollisionAvoidanceBehaviour::update_sensors(SystemStateModel &systemS
     return sensorData;
 }
 
+/*
+ * Update waypoints or compute an easier way to handle them
+ */
 //    void update_waypoints(){}
+
 /*
  * Is there any obstacles ? If yes, which information can i gather on them.
  */
@@ -124,7 +143,12 @@ std::vector<Obstacle> CollisionAvoidanceBehaviour::check_obstacles(SensorData se
     //Is there any obstacles ?
 
 }
+
+/*
+ *
+ */
 //map update_map(){}
+
 /*
  * Check if there is intersection between the current path+security radius and the obstacle
  */
@@ -142,7 +166,7 @@ bool CollisionAvoidanceBehaviour::these_obstacles_are_a_problem(
  * (with the max and mins for example)
  */
 Eigen::MatrixXd CollisionAvoidanceBehaviour::compute_potential_field(
-        std::vector<Obstacle> seen_obstacles, sailing_zone, FollowedLine) {
+        std::vector<Obstacle> seen_obstacles, std::vector<Eigen::Vector2d> sailing_zone, FollowedLine) {
 
 }
 
@@ -162,14 +186,25 @@ CommandOutput CollisionAvoidanceBehaviour::compute_new_path() {
 }
 
 /*
+ * Initialize values :
+ *  sailingZone
+ */
+bool CollisionAvoidanceBehaviour::init() {
+
+}
+
+/*
  * The most important function of the class, it calls al the others.
  * Should be replaced by run as soon as possible.
+ *
+ * Some inputs of the function are class variables. This is to improve
+ * the readability of the code and its modularity in case of architectural modifications.
  */
 void CollisionAvoidanceBehaviour::computeCommands(
         SystemStateModel &systemStateModel, std::unique_ptr<Position> const &position,
         double trueWindDirection, bool mockPosition, bool getHeadingFromCompass) {
 
-    //Note
+    //Note on simulation
     /*
      * For now i don't know of any place in the code where it specified if the code is
      * in a simulated environement or not. So this variable is temporary.
@@ -177,15 +212,15 @@ void CollisionAvoidanceBehaviour::computeCommands(
     bool simulation = 0;
 
     //Gives sensors output or compute an easier way to handle them
-    SensorData sensOutput = CollisionAvoidanceBehaviour::update_sensors(&systemStateModel, simulation);
+    SensorData sensOutput = update_sensors(systemStateModel, simulation);
 
-    //update_waypoints(); //=> update waypoints or compute an easier way to handle them
+    //update_waypoints(); //Update waypoints or compute an easier way to handle them
 
-    seenObstacles = check_obstacles(sensorsOutput);
+    seenObstacles = check_obstacles(sensOutput);
     //    update_map();
-    if (these_obstacles_are_a_problem()) {
-        Eigen::MatrixXd potential_field = compute_potential_field();
-        minPotField min = find_minimum_potential_field(potential_field);
+    if (these_obstacles_are_a_problem(seenObstacles)) {
+        Eigen::MatrixXd potential_field = compute_potential_field(seenObstacles, sailingZone, followedLine);
+        MinPotField min = find_minimum_potential_field(potential_field);
         compute_new_path();
     }
     return compute_commands();
