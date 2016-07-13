@@ -31,20 +31,21 @@ class CollisionAvoidanceBehaviour:public RoutingBehaviour{
 public:
     bool init(); //Nothing to init for now
 
-    void computeCommands(
-            SystemStateModel &systemStateModel,std::unique_ptr<Position> const& position,
-            double trueWindDirection, bool mockPosition, bool getHeadingFromCompass);
-            //make the computation of the commands return true if the computation was successfull
-
-
-
-
-
+    void computeCommands(SystemStateModel &systemStateModel,
+                         std::unique_ptr<Position> const& position,
+                         double trueWindDirection,
+                         bool mockPosition,
+                         bool getHeadingFromCompass);
+            //make the computation of the commands
 
 private:
+    //Boate state vector
+    double gpsBoatLon;
+
     std::vector<Obstacle> seenObstacles;
     FollowedLine followedLine;
     std::vector<Eigen::Vector2d> sailingZone;
+    SensorData sensorOutput;
 
     struct SensorData{
         double gpsLon; //x
@@ -56,13 +57,23 @@ private:
         double windSpeed;
         int pitch;
         int roll;
+
+        //TODO : put the real inputs here (video, sonar or whatever)
+        std::vector<ObstacleData> detectedObstacles;
+    };
+    struct ObstacleData{
+        double minDistanceToObstacle;
+        double maxDistanceToObstacle;
+        double LeftBoundheadingRelativeToBoat;
+        double RightBoundheadingRelativeToBoat;
     };
     struct Obstacle{
-        double x;
-        double y;
-        double direction;
-        double directionInterval;
-        double distanceInterval;
+        double leftBoundHeading;
+        double rightBoundHeading;
+        double upperBoundDistance;
+        double lowerBoundDistance;
+        double xGPSBoatPositionAtDetection;
+        double yGPSBoatPositionAtDetection;
         std::string color;
     };
     struct FollowedLine{
@@ -79,13 +90,36 @@ private:
         double row;
         double col;
     };
+    const struct Simulation{
+        const bool waypoints;
+        const bool obstacles;
+    };
 
-    SensorData update_sensors(SystemStateModel &systemStateModel, bool simulation);
+    double angleDiff(double angle1,
+                     double angle2);
+    void printStdVectorMat(std::string const& name,
+                           std::vector<Eigen::MatrixXd> const& v);
+    void printStdVectorFloat(std::string const& name,
+                             std::vector<float> const& v);
+    void printMat(std::string const& name,
+                  Eigen::MatrixXd const& mat);
+
+    SensorData update_sensors(SystemStateModel &systemStateModel,
+                              Simulation sim);
+
     std::vector<Obstacle> check_obstacles(SensorData sensorData);
-    bool these_obstacles_are_a_problem(
-            std::vector<Obstacle> seenObstacles);
-    Eigen::MatrixXd compute_potential_field(
-            std::vector<Obstacle> seen_obstacles, std::vector<Eigen::Vector2d> sailing_zone, FollowedLine);
+
+    bool these_obstacles_are_a_problem(std::vector<Obstacle> seenObstacles);
+
+    Eigen::MatrixXd compute_potential_field(std::vector<Obstacle> seen_obstacles,
+                                            std::vector<Eigen::Vector2d> sailing_zone,
+                                            FollowedLine followedLine);
+
     MinPotField find_minimum_potential_field(Eigen::MatrixXd Potential_field);
-    CommandOutput compute_new_path();
+
+    FollowedLine compute_new_path(MinPotField min);
+
+    CommandOutput compute_commands(FollowedLine line);
+
+    CommandOutput run(SystemStateModel &systemStateModel);
 };
