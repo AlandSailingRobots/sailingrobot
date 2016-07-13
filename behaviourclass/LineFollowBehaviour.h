@@ -19,7 +19,7 @@ public:
 
     void computeCommands(SystemStateModel &systemStateModel,std::unique_ptr<Position> const& position,
                                       double trueWindDirection, bool mockPosition,
-                                      bool getHeadingFromCompass);  //make the computation of the commands return true if the computation was successfull
+                                      bool getHeadingFromCompass);
 
     void manageDatabase(double trueWindDirection, SystemStateModel &systemStateModel);
     double calculateSignedDistance(std::unique_ptr<Position> const& position);
