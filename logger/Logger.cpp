@@ -39,7 +39,6 @@ Logger::~Logger()
 	#endif
 }
 
-
 bool Logger::init(const char* filename)
 {
 	if(m_instance == NULL)
@@ -60,6 +59,14 @@ bool Logger::init(const char* filename)
 
 	// Assumes the logger is already setup and going
 	return true;
+}
+
+void Logger::shutdown()
+{
+	if(m_instance != NULL)
+	{
+		delete m_instance;
+	}
 }
 
 void Logger::setTime(unsigned long seconds)

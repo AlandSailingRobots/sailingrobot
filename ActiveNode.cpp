@@ -1,21 +1,20 @@
 /****************************************************************************************
  *
  * File:
- * 		NodeIDs.h
+ * 		ActiveNode.cpp
  *
  * Purpose:
- *		Contains all the Node IDs
+ *		A active node is a base(passive) node that has a thread.
  *
  * Developer Notes:
  *
  *
  ***************************************************************************************/
 
-#pragma once
+#include "ActiveNode.h"
 
-enum class NodeID {
-	None = 0,
-	MessageLogger,
-	Compass,
-	GPS
-};
+
+void ActiveNode::runThread(ActiveNodeFunc func)
+{
+	m_Thread = new std::thread(func, this);
+}

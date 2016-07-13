@@ -37,7 +37,7 @@ public:
  	/// @param msgSource		Which node posted this message.
  	///----------------------------------------------------------------------------------
 	Message(MessageType msgType, NodeID msgSource)
-		:m_MessageType(msgType), m_SourceID(msgSource), m_DestinationID(NodeID::NONE)
+		:m_MessageType(msgType), m_SourceID(msgSource), m_DestinationID(NodeID::None)
 	{ }
 
 	///----------------------------------------------------------------------------------
@@ -46,7 +46,7 @@ public:
  	/// @param msgType 			The type of message this is.
  	///----------------------------------------------------------------------------------
 	Message(MessageType msgType)
-		:m_MessageType(msgType), m_SourceID(NodeID::NONE), m_DestinationID(NodeID::NONE)
+		:m_MessageType(msgType), m_SourceID(NodeID::None), m_DestinationID(NodeID::None)
 	{ }
 
 	virtual ~Message() { }
@@ -55,22 +55,22 @@ public:
  	/// Returns the type of message this is.
  	///
  	///----------------------------------------------------------------------------------
-	const MessageType messageType() { return m_MessageType; }
+	MessageType messageType() const { return m_MessageType; }
 
 	///----------------------------------------------------------------------------------
  	/// Returns the node which generated this message.
  	///
  	///----------------------------------------------------------------------------------
-	const NodeID sourceID() { return m_SourceID; }
+	NodeID sourceID() const { return m_SourceID; }
 
 	///----------------------------------------------------------------------------------
  	/// Returns the message's destination.
  	///
  	///----------------------------------------------------------------------------------
-	const NodeID destinationID() { return m_DestinationID; }
+	NodeID destinationID() const { return m_DestinationID; }
 
 private:
-	const MessageType m_MessageType;		// The message type
-	const NodeID m_SourceID;				// Which node generated the message
-	const NodeID m_DestinationID;			// The desintation of the message
+	MessageType m_MessageType;		// The message type
+	NodeID m_SourceID;				// Which node generated the message
+	NodeID m_DestinationID;			// The desintation of the message
 };

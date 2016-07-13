@@ -24,12 +24,24 @@ public:
 	Node(NodeID id, MessageBus& msgBus) : m_MsgBus(msgBus), m_NodeID(id)
 	{ }
 
+	///----------------------------------------------------------------------------------
+ 	/// This function should attempt to initialise or setup any resources it may need to
+ 	/// function. If this was successful this function should return true.
+ 	///
+ 	///----------------------------------------------------------------------------------
+	virtual bool init() = 0;
+
+	///----------------------------------------------------------------------------------
+ 	/// Called by the MessageBus when it has a message the node might be interested in.
+ 	/// A node should register for messages it wants to receive using 
+ 	/// MessageBus::registerNode(Node*, MessageType)
+ 	///
+ 	///----------------------------------------------------------------------------------
+	virtual void processMessage(const Message* message) = 0;
 
 	NodeID nodeID() { return m_NodeID; }
-
-	virtual void processMessage(Message* message) = 0;
 protected:
 	MessageBus& m_MsgBus;
 private:
-	const NodeID m_NodeID;
+	NodeID m_NodeID;
 };

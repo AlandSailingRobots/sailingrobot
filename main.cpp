@@ -1,19 +1,95 @@
-#include "main.h"
 
-#include "SailingRobot.h"
-#include "thread/ExternalCommand.h"
-#include "thread/SystemState.h"
-#include "thread/ThreadRAII.h"
-#include "GPSupdater.h"
-#include <thread>
-#include <unistd.h>
-#include <sstream>
-#include <iostream>
-#include <iomanip>
-#include <ctime>
+#include <string>
+#include "logger/Logger.h"
+#include "MessageBus.h"
+#include "Nodes/MessageLoggerNode.h"
+#include "Messages/DataRequestMsg.h"
+
+enum class NodeImportance {
+	CRITICAL,
+	NOT_CRITICAL
+};
+
+///----------------------------------------------------------------------------------
+/// Initialises a node and shutsdown the program if a critical node fails.
+///
+/// @param node 			A pointer to the node to initialise
+/// @param nodeName 		A string name of the node, for logging purposes.
+/// @param importance 		Whether the node is a critcal node or not critical. If a
+///							critical node fails to initialise the program will
+///							shutdown.
+///
+///----------------------------------------------------------------------------------
+void initialiseNode(Node& node, const char* nodeName, NodeImportance importance)
+{
+	if(node.init())
+	{
+		Logger::info("Node: %s - init\t[OK]", nodeName);
+	}
+	else
+	{
+		Logger::error("Node: %s - init\t[FAILED]", nodeName);
+
+		if(importance == NodeImportance::CRITICAL)
+		{
+			Logger::error("Critical node failed to initialise, shutting down");
+			Logger::shutdown();
+			exit(1);
+		}
+	}
+}
+
+///----------------------------------------------------------------------------------
+/// Entry point, can accept one argument containing a relative path to the database.
+///
+///----------------------------------------------------------------------------------
+int main(int argc, char *argv[]) 
+{
+	// This is for eclipse development so the output is constantly pumped out.
+	setbuf(stdout, NULL); 
+
+	// Database Path
+	std::string db_path;
+	if (argc < 2) {
+		db_path = "./asr.db";
+	} else {
+		db_path = std::string(argv[1]);
+	}
+
+	printf("================================================================================\n");
+	printf("\t\t\t\tSailing Robot\n");
+	printf("\n");
+	printf("================================================================================\n");
+
+	if (Logger::init()) {
+		Logger::info("Built on %s at %s", __DATE__, __TIME__);
+		Logger::info("Logger init\t\t[OK]");
+	}
+	else {
+		Logger::error("Logger init\t\t[FAILED]");
+	}
+
+	MessageBus messageBus;
+
+	// Create nodes
+	MessageLoggerNode msgLogger(messageBus);
+
+	// Initialise nodes
+	initialiseNode(msgLogger, "Message Logger", NodeImportance::NOT_CRITICAL);
+
+	// NOTE - Jordan: Just to ensure messages are following through the system
+	DataRequestMsg* dataRequest = new DataRequestMsg(NodeID::MessageLogger);
+	messageBus.sendMessage(dataRequest);
+
+	Logger::info("Message bus started!");
+	messageBus.run();
+	exit(0);
+}
 
 
-xBeeSync* xbee_handle;
+// Purely for reference, remove once complete
+
+/*xBeeSync* xbee_handle;
 
 
 static void threadXBeeSyncRun() {
@@ -83,7 +159,7 @@ int main(int argc, char *argv[]) {
 		Logger::info("Logger init 		[FAILED]");
 	}
 
-	/* Default time */
+	// Default time
 	ExternalCommand externalCommand("1970-04-10T10:53:15.1234Z",true,0,0);
 	SystemState systemstate(
 		SystemStateModel(
@@ -200,4 +276,4 @@ int main(int argc, char *argv[]) {
 
 	printf("-Finished.\n");
 	return 0;
-}
+}*/

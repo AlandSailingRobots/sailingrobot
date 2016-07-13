@@ -38,7 +38,9 @@ JSON = 					libs/json
 
 # Sources
 
-CORE =					MessageBus.cpp 
+CORE =					MessageBus.cpp ActiveNode.cpp
+
+NODES =					Nodes/MessageLoggerNode.cpp
 
 XBEE = 					xBee/xBeeSync.cpp xBee/xBee.cpp
 
@@ -77,7 +79,7 @@ WINDVANECONTROLLER = 	windvanecontroller/WindVaneController.cpp
 SRC_MAIN = main.cpp
 
 SRC = 	GPSupdater.cpp SailingRobot.cpp WindsensorController.cpp logger/Logger.cpp utility/Utility.cpp utility/Timer.cpp $(XBEE) \
-		$(CORE) $(ANALOGARDUINO) $(COMPASS) $(I2CCONTROLLER) $(POSITION) $(COURSE) $(DB) $(COMMAND) $(MAESTRO) $(CV7) $(GPS) $(HTTP) \
+		$(CORE) $(NODES) $(ANALOGARDUINO) $(COMPASS) $(I2CCONTROLLER) $(POSITION) $(COURSE) $(DB) $(COMMAND) $(MAESTRO) $(CV7) $(GPS) $(HTTP) \
 		$(XML_LOG) $(THREAD) $(WAYPOINTROUTING) $(WINDVANECONTROLLER) $(BEHAVIOURCLASS)
 
 #SOURCES = $(addprefix src/, $(SRC))

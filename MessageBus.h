@@ -20,6 +20,10 @@
 #include "Node.h"
 #include "Messages/Message.h"
 #include <vector>
+#include <queue>
+#include <mutex>
+
+class Node;
 
 
 class MessageBus {
@@ -31,6 +35,8 @@ public:
 	MessageBus();
 
 	///----------------------------------------------------------------------------------
+	/// We really don't need to do memory cleanup here as this class will only be
+	/// cleaned up when the program ends
 	///----------------------------------------------------------------------------------
 	~MessageBus();
 
@@ -73,7 +79,7 @@ private:
 	struct RegisteredNode {
 		RegisteredNode(Node* node) : nodePtr(node) { }
 
-		const Node* nodePtr;
+		Node* nodePtr;
 
 		///------------------------------------------------------------------------------
  		/// Returns true if a registered node is interested in a message type.
@@ -111,6 +117,17 @@ private:
  	///----------------------------------------------------------------------------------
 	RegisteredNode* getRegisteredNode(Node* node);
 
+	///----------------------------------------------------------------------------------
+ 	/// Goes through the back message queue and distributes messages, calling 
+ 	/// Node::processMessage(Message*) on nodes that are interested in any given message.
+ 	///----------------------------------------------------------------------------------
+	void processMessages();
+
 	bool 							m_Running;
 	std::vector<RegisteredNode*> 	m_RegisteredNodes;
+	std::queue<Message*>* 			m_FrontMessages; 	// The forward facing message queue 
+													 	// which messages are append to.
+	std::queue<Message*>*			m_BackMessages; 	// The backend message queue which 
+														// contains messages to distribute.
+	std::mutex						m_FrontQueueMutex;	// Guards the front message queue.
 };
