@@ -16,6 +16,7 @@ HMC6343::HMC6343(unsigned int headningBufferSize) :
 	m_magX = 0;
 	m_magY = 0;
 	m_magZ = 0;
+	m_temperature = 0;
 }
 
 HMC6343::~HMC6343()
@@ -132,7 +133,7 @@ std::vector<uint8_t> HMC6343::readGeneric(uint8_t command){
 
 	for(int i = 0; i < transferSize; i++) {
 		returnVector.push_back( wiringPiI2CRead(m_fd) );
-		
+
 	}
         delay(1);
 	return returnVector;

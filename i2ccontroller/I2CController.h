@@ -1,49 +1,33 @@
 #ifndef __I2CCONTROLLER_H__
 #define __I2CCONTROLLER_H__
 
-#include <iostream>
-#include "CV7/CV7.h"
-#include "CV7/MockWindsensor.h"
-#include "Compass/HMC6343.h"
-#include "Compass/MockCompass.h"
-#include "AnalogArduino/AR_UNO.h"
-#include "AnalogArduino/MockAnalogArduino.h"
-#include "dbhandler/DBHandler.h"
-#include "thread/SystemState.h"
-#include "utility/Timer.h"
-
-#include <chrono>
-#include <thread>
+#include <vector>
+#include <stdint.h>
+#include <wiringPiI2C.h>
+#include <wiringPi.h> // delay
 #include <string>
 #include <mutex>
+#include "AnalogArduino/myWiringI2C.h"
 
 class I2CController {
 
 	public:
-
-		I2CController(SystemState *systemState, bool mockArduino, bool mockCompass, int headingBufferSize, double loopTime);
+		I2CController(int fd);
 		~I2CController();
 
-		void init();
-		void run();
+		int setup(int address);
+		std::vector<uint8_t> readGeneric(uint8_t command);
+		int write(int data);
+		int read();
+		int readBlock();
+
+		void beginTransmission();
+		void endTransmission();
 
 	private:
-		SystemState* m_systemState;
-		bool m_mockArduino;
-		bool m_mockCompass;
-		int m_headingBufferSize;
-		double m_loopTime;
-		Timer m_timer;
-		std::mutex m_mutex;
-		bool m_running;
-
-		std::unique_ptr<Compass> m_compass;
-		std::unique_ptr<AnalogArduino> m_arduino;
-
-		bool isRunning();
-		bool initCompass(bool mockCompass,int headningBufferSize);
-		bool initArduino(bool mockArduino);
-		void close();
+		static std::mutex m_mutex;
+		bool locked;
+		int m_fd;
 };
 
 #endif
