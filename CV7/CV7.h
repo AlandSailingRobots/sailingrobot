@@ -4,11 +4,8 @@
 #include <string>
 #include <vector>
 #include <map>
-#include "Windsensor.h"
 
-class WindsensorModel;
-
-class CV7:public Windsensor {
+class CV7 {
 	
 	public:
 

@@ -16,6 +16,7 @@
 enum class NodeID {
 	None = 0,
 	MessageLogger,
+	WindSensor,
 	Compass,
 	GPS
 };

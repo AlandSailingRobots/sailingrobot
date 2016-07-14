@@ -40,7 +40,7 @@ JSON = 					libs/json
 
 CORE =					MessageBus.cpp ActiveNode.cpp
 
-NODES =					Nodes/MessageLoggerNode.cpp
+NODES =					Nodes/MessageLoggerNode.cpp CV7/CV7Node.cpp
 
 XBEE = 					xBee/xBeeSync.cpp xBee/xBee.cpp
 

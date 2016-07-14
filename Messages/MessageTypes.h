@@ -15,5 +15,6 @@
 
 
 enum class MessageType {
-	DataRequest = 0
+	DataRequest = 0,
+	WindData
 };
