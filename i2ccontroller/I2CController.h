@@ -2,8 +2,6 @@
 #define __I2CCONTROLLER_H__
 
 #include <iostream>
-#include "CV7/CV7.h"
-#include "CV7/MockWindsensor.h"
 #include "Compass/HMC6343.h"
 #include "Compass/MockCompass.h"
 #include "AnalogArduino/AR_UNO.h"
