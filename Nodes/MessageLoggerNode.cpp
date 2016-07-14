@@ -22,6 +22,7 @@ MessageLoggerNode::MessageLoggerNode(MessageBus& msgBus)
 	:Node(NodeID::MessageLogger, msgBus)
 {
 	msgBus.registerNode(this);
+	msgBus.registerNode(this, MessageType::WindData);
 }
 
 bool MessageLoggerNode::init()
@@ -37,6 +38,11 @@ void MessageLoggerNode::processMessage(const Message* message)
 	{
 		case MessageType::DataRequest:
 			Logger::info("DataRequest message received");
+			break;
+		case MessageType::WindData:
+			Logger::info("WindData message received");
+			break;
+		default:
 			break;
 	}
 }

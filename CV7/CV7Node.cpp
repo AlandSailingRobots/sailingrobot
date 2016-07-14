@@ -15,6 +15,8 @@
 #include "logger/Logger.h"
 #include "dbhandler/DBHandler.h"
 #include "Messages/WindDataMsg.h"
+#include "utility/Utility.h"
+#include <cstring>
 
 // For std::this_thread
 #include <chrono>
@@ -24,10 +26,12 @@
 
 
 #define WIND_SENSOR_SLEEP_MS	100
+#define DATA_OUT_OF_RANGE		-2000.
 
 
 CV7Node::CV7Node(MessageBus& msgBus, std::string portName, unsigned int baudRate)
-	:ActiveNode(NodeID::WindSensor, msgBus), m_Initialised(false), m_fd(-1), m_PortName(portName), m_BaudRate(baudRate)
+	:ActiveNode(NodeID::WindSensor, msgBus), m_Initialised(false), m_fd(-1), m_PortName(portName), m_BaudRate(baudRate),
+	 m_MeanWindDir(DATA_OUT_OF_RANGE), m_MeanWindSpeed(DATA_OUT_OF_RANGE), m_MeanWindTemp(DATA_OUT_OF_RANGE)
 {
 
 }
@@ -61,7 +65,15 @@ void CV7Node::start()
 
 void CV7Node::processMessage(const Message* message)
 {
-
+	if(message->messageType() == MessageType::DataRequest)
+	{
+		// On system startup we won't have any valid data, so don't send any
+		if(m_MeanWindDir != DATA_OUT_OF_RANGE ||  m_MeanWindTemp != DATA_OUT_OF_RANGE || m_MeanWindSpeed != DATA_OUT_OF_RANGE)
+		{
+			WindDataMsg* windData = new WindDataMsg(message->sourceID(), this->nodeID(), m_MeanWindDir, m_MeanWindTemp, m_MeanWindSpeed);
+			m_MsgBus.sendMessage(windData);
+		}
+	}
 }
 
 void CV7Node::WindSensorThread(void* nodePtr)
@@ -71,34 +83,46 @@ void CV7Node::WindSensorThread(void* nodePtr)
 	const int DATA_BUFFER_SIZE = 30;
 	const int NON_BREAKING_SPACE = 255;
 	const int BUFF_SIZE = 256;
+	const short MAX_NO_DATA_ERROR_COUNT = 100; // 10 seconds of no data
 	char buffer[BUFF_SIZE];
 
 	std::vector<float> windDirData(DATA_BUFFER_SIZE);
 	std::vector<float> windSpeedData(DATA_BUFFER_SIZE);
 	std::vector<float> windTempData(DATA_BUFFER_SIZE);
 	unsigned int dataIndex = 0;
+	unsigned short noDataCount = 0;
 
 	Logger::info("Wind sensor thread started");
 
 	while(true)
 	{
+		if(noDataCount >= MAX_NO_DATA_ERROR_COUNT)
+		{
+			Logger::error("%s No data on the CV7 serial line!", __PRETTY_FUNCTION__);
+			noDataCount = 0;
+		}
+
 		// Controls how often we pump out messages
 		std::this_thread::sleep_for(std::chrono::milliseconds(WIND_SENSOR_SLEEP_MS));
 
 		// Extract data from the CV7 serial port
 		int index = 0;
-		while(index < BUFF_SIZE) {
+		for(int i = 0; i < BUFF_SIZE; i++) {
 
-			buffer[index] = serialGetchar(node->m_fd);
-			fflush(stdout);
-
-			if(NON_BREAKING_SPACE == (int)buffer[index])
+			int data = serialGetchar(node->m_fd);
+			if(data != -1)
 			{
-				Logger::warning("Wind sensor serial timeout!");
-				index = 0;
-				break;
+				buffer[index] = data;
+				fflush(stdout);
+
+				if(NON_BREAKING_SPACE == (int)buffer[index])
+				{
+					Logger::warning("Wind sensor serial timeout!");
+					index = 0;
+					break;
+				}
+				index++;
 			}
-			index++;
 		}
 
 		// Parse the data and send out messages
@@ -110,6 +134,7 @@ void CV7Node::WindSensorThread(void* nodePtr)
 
 			if(CV7Node::parseString(buffer, windDir, windSpeed, windTemp))
 			{
+				noDataCount = 0;
 				if(windDirData.size() < DATA_BUFFER_SIZE)
 				{
 					windDirData.push_back(windDir);
@@ -129,14 +154,23 @@ void CV7Node::WindSensorThread(void* nodePtr)
 					dataIndex++;
 				}
 
+				node->m_MeanWindDir = Utility::meanOfAngles(windDirData);
+				node->m_MeanWindTemp = Utility::mean(windTempData);
+				node->m_MeanWindSpeed = Utility::mean(windSpeedData);
+
 				// Send a wind sensor message out
-				WindDataMsg* windData = new WindDataMsg()
+				WindDataMsg* windData = new WindDataMsg(node->m_MeanWindDir, node->m_MeanWindTemp, node->m_MeanWindSpeed);
+				node->m_MsgBus.sendMessage(windData);
 			}
+		}
+		else
+		{
+			noDataCount++;
 		}
 	}
 }
 
-static bool CV7Node::parseString(const char* buffer, float& windDir, float& windSpeed, float& windTemp)
+bool CV7Node::parseString(const char* buffer, float& windDir, float& windSpeed, float& windTemp)
 {
 	const int IIMWV = 0;
 	const int WIXDR = 1;

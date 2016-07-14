@@ -47,10 +47,17 @@ private:
  	///----------------------------------------------------------------------------------
 	static void WindSensorThread(void* nodePtr);
 
+	///----------------------------------------------------------------------------------
+ 	/// The CV7 Node's thread function.
+ 	///
+ 	///----------------------------------------------------------------------------------
 	static bool parseString(const char* buffer, float& windDir, float& windSpeed, float& windTemp);
 
 	bool m_Initialised;		// Indicates that the node was correctly initialised
 	int m_fd;
 	std::string m_PortName;
 	unsigned int m_BaudRate;
+	float m_MeanWindDir;
+	float m_MeanWindSpeed;
+	float m_MeanWindTemp;
 };
