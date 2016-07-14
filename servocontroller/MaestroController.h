@@ -42,8 +42,9 @@ public:
 	int getError();
 
 private:
-	int ioDeviceHandle;
-	std::string ioDeviceHandlePath;
+	int m_ioDeviceHandle;
+	std::mutex m_mutex;
+	std::string m_ioDeviceHandlePath;
 
 	void openPort();
 	bool isOpenPort();

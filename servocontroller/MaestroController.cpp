@@ -3,18 +3,22 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <termios.h>
+#include <mutex>
 
 
 
 MaestroController::MaestroController() {
-	ioDeviceHandle = -1;
+	m_ioDeviceHandle = -1;
 }
 
 void MaestroController::setPort(std::string portName)
 {
-	ioDeviceHandlePath = portName;
+	m_mutex.lock();
+	m_ioDeviceHandlePath = portName;
+	m_mutex.unlock();
 }
 
+//
 void MaestroController::writeCommand(unsigned char type, int channel = -1, int value = -1)
 {
 	// Each DATA byte can only transmit seven bits of information.
@@ -31,7 +35,7 @@ void MaestroController::writeCommand(unsigned char type, int channel = -1, int v
 		openPort();
 	}
 
-	if (write(ioDeviceHandle, command, sizeof (command)) == -1)
+	if (write(m_ioDeviceHandle, command, sizeof (command)) == -1)
 	{
 		throw "MaestroController::writeCommand()";
 	}
@@ -45,7 +49,7 @@ int MaestroController::readRespons()
 	}
 
 	unsigned short dataHandle = 0;
-	if (read(ioDeviceHandle, &dataHandle, sizeof (dataHandle)) != sizeof (dataHandle))
+	if (read(m_ioDeviceHandle, &dataHandle, sizeof (dataHandle)) != sizeof (dataHandle))
 	{
 		throw "MaestroController::readRespons()";
 	}
@@ -59,13 +63,15 @@ int MaestroController::getError() {
 
 void MaestroController::openPort()
 {
-	ioDeviceHandle = open(ioDeviceHandlePath.c_str(), O_RDWR | O_NOCTTY);
+	m_mutex.lock();
+	m_ioDeviceHandle = open(m_ioDeviceHandlePath.c_str(), O_RDWR | O_NOCTTY);
+	m_mutex.unlock();
 
 	struct termios options;
-	tcgetattr(ioDeviceHandle, &options);
+	tcgetattr(m_ioDeviceHandle, &options);
 	options.c_lflag &= ~(ECHO | ECHONL | ICANON | ISIG | IEXTEN);
 	options.c_oflag &= ~(ONLCR | OCRNL);
-	tcsetattr(ioDeviceHandle, TCSANOW, &options);
+	tcsetattr(m_ioDeviceHandle, TCSANOW, &options);
 
 	if (isOpenPort() == false)
 	{
@@ -75,7 +81,7 @@ void MaestroController::openPort()
 
 bool MaestroController::isOpenPort()
 {
-	if (ioDeviceHandle == -1)
+	if (m_ioDeviceHandle == -1)
 	{
 		return false;
 	}
@@ -86,6 +92,6 @@ MaestroController::~MaestroController()
 {
 	if (isOpenPort())
 	{
-		close(ioDeviceHandle);
+		close(m_ioDeviceHandle);
 	}
 }
