@@ -1,19 +1,20 @@
 /****************************************************************************************
  *
  * File:
- * 		MessageTypes.h
+ * 		ActiveNode.cpp
  *
  * Purpose:
- *		Provides a enum containing all the message types.
+ *		A active node is a base(passive) node that has a thread.
  *
  * Developer Notes:
  *
  *
  ***************************************************************************************/
 
-#pragma once
+#include "ActiveNode.h"
 
 
-enum class MessageType {
-	DataRequest = 0
-};
+void ActiveNode::runThread(ActiveNodeFunc func)
+{
+	m_Thread = new std::thread(func, this);
+}

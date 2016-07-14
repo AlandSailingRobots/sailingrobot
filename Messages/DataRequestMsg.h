@@ -26,7 +26,7 @@ public:
 		:Message(MessageType::DataRequest, sourceID, destinationID) { }
 
 	DataRequestMsg(NodeID destinationID)
-		:Message(MessageType::DataRequest, NodeID::NONE, destinationID) { }
+		:Message(MessageType::DataRequest, NodeID::None, destinationID) { }
 
 	virtual ~DataRequestMsg() { }
 };

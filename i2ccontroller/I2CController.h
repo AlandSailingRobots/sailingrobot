@@ -1,6 +1,7 @@
 #ifndef __I2CCONTROLLER_H__
 #define __I2CCONTROLLER_H__
 
+
 #include <vector>
 #include <stdint.h>
 #include <wiringPiI2C.h>
