@@ -3,8 +3,8 @@
 #include "logger/Logger.h"
 #include "MessageBus.h"
 #include "Nodes/MessageLoggerNode.h"
+#include "Nodes/CV7Node.h"
 #include "Messages/DataRequestMsg.h"
-#include "CV7/CV7Node.h"
 #include "dbhandler/DBHandler.h"
 
 enum class NodeImportance {
