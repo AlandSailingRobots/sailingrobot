@@ -64,7 +64,12 @@ int main(int argc, char *argv[]) {
 		path = "./";
 		db_name = "asr.db";
 		errorLog = "errors.log";
-	} else {
+	} else if (argc == 3 ) {
+		path = std::string(argv[1]);
+		db_name = std::string(argv[2]);
+		errorLog = "errors.log";
+	}
+  else {
 		path = std::string(argv[1]);
 		db_name = "asr.db";
 		errorLog = "errors.log";
@@ -111,7 +116,8 @@ int main(int argc, char *argv[]) {
 	bool removeLogs = db.retrieveCellAsInt("httpsync_config", "1", "remove_logs");
 
 	httpsync_handle = new HTTPSync( &db, http_delay, removeLogs );
-	
+
+
     SailingRobot sr_handle(&externalCommand, &systemstate, &db, httpsync_handle);
 
 	GPSupdater gps_updater(&systemstate,mockGPS);
@@ -140,13 +146,13 @@ int main(int argc, char *argv[]) {
 		double xBee_loopTime = stod(db.retrieveCell("xbee_config", "1", "loop_time"));
 
 		xbee_handle = new xBeeSync(&externalCommand, &systemstate, &db, xBee_sendLogs, xBee_sending, xBee_receiving,xBee_loopTime);
-		
+
 		if(xbee_handle->init())
 		{
 			// Start xBeeSync thread
 			std::unique_ptr<ThreadRAII> xbee_sync_thread;
 
-			if (xBee_sending || xBee_receiving) 
+			if (xBee_sending || xBee_receiving)
 			{
 				xbee_sync_thread = std::unique_ptr<ThreadRAII>(new ThreadRAII(std::thread(threadXBeeSyncRun), ThreadRAII::DtorAction::detach));
 			}
@@ -189,7 +195,7 @@ int main(int argc, char *argv[]) {
 		) );
 
 		sr_handle.run();
-	} 
+	}
 	catch (const char * e) {
 		printf("ERROR[%s]\n\n",e);
 		return 1;
