@@ -3,7 +3,9 @@
 #include "logger/Logger.h"
 #include "MessageBus.h"
 #include "Nodes/MessageLoggerNode.h"
+#include "Nodes/CV7Node.h"
 #include "Messages/DataRequestMsg.h"
+#include "dbhandler/DBHandler.h"
 
 enum class NodeImportance {
 	CRITICAL,
@@ -70,12 +72,29 @@ int main(int argc, char *argv[])
 	}
 
 	MessageBus messageBus;
+	DBHandler dbHandler(db_path);
+
+	if(dbHandler.initialise())
+	{
+		Logger::info("Database init\t\t[OK]");
+	}
+	else
+	{
+		Logger::error("Database init\t\t[FAILED]");
+		Logger::shutdown();
+		exit(1);
+	}
 
 	// Create nodes
 	MessageLoggerNode msgLogger(messageBus);
+	CV7Node windSensor(messageBus, dbHandler.retrieveCell("windsensor_config", "1", "port"), dbHandler.retrieveCellAsInt("windsensor_config", "1", "baud_rate"));
 
 	// Initialise nodes
 	initialiseNode(msgLogger, "Message Logger", NodeImportance::NOT_CRITICAL);
+	initialiseNode(windSensor, "Wind Sensor", NodeImportance::CRITICAL);
+
+	// Start active nodes
+	windSensor.start();
 
 	// NOTE - Jordan: Just to ensure messages are following through the system
 	DataRequestMsg* dataRequest = new DataRequestMsg(NodeID::MessageLogger);
