@@ -46,7 +46,7 @@ bool CV7Node::init()
 		success = false;
 	}
 
-	m_Initialised = true;
+	m_Initialised = success;
 
 	return success;
 }
