@@ -19,4 +19,4 @@ sqlite3 simu_asr.db "UPDATE windsensor_config SET port='$CV7_PORT_SIMU';"
 
 sleep 1
 
-LD_PRELOAD=$SIMU_PATH/i2c_fake/lib/libwiringPiH.so ./sr ./ simu_asr.db
+LD_PRELOAD=$SIMU_PATH/libwiringPiH.so ./sr ./ simu_asr.db
