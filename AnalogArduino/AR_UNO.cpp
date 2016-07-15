@@ -6,8 +6,8 @@
 #include <cstring>
 #include "utility/Utility.h"
 
-#define BLOCK_READ_SIZE 10
-#define BLOCK_I2C_ADDRESS_LOC 9
+#define BLOCK_READ_SIZE 9
+#define BLOCK_I2C_ADDRESS_LOC 8
 
 
 AR_UNO::AR_UNO():
@@ -72,17 +72,17 @@ void AR_UNO::readValues()
   uint16_t reVal;
   wiringPiI2CReadBlock(m_fd, (char*)block, BLOCK_READ_SIZE);
 
+  reVal = block[0]<<8;
+  reVal+=(uint16_t) block[1];
+  m_model.analogValue0 = reVal;
   reVal = block[2]<<8;
   reVal+=(uint16_t) block[3];
-  m_model.analogValue0 = reVal;
+  m_model.analogValue1 = reVal;
   reVal = block[4]<<8;
   reVal+=(uint16_t) block[5];
-  m_model.analogValue1 = reVal;
+  m_model.analogValue2 = reVal;
   reVal = block[6]<<8;
   reVal+=(uint16_t) block[7];
-  m_model.analogValue2 = reVal;
-  reVal = block[8]<<8;
-  reVal+=(uint16_t) block[9];
   m_model.analogValue3 = reVal;
 }
 
