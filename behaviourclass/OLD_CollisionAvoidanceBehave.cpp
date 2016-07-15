@@ -333,6 +333,7 @@ void CollisionAvoidanceBehave::update_obstacles(){
     int i=0;
     float T = 0;
     printStdVectorMat("detected_obstacle_list_qhat",detected_obstacle_list_qhat);
+
     while(i<(int)detected_obstacle_list_qhat.size()){
         T = atan2((detected_obstacle_list_qhat[i](1,0)-boat_state(0,1)),(detected_obstacle_list_qhat[i](0,0)-boat_state(0,0)))-boat_state(0,2);
         std::cout << "T angle boat obstacle : " << T << std::endl;

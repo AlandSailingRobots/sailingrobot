@@ -24,19 +24,20 @@
 
 */
 
-class CollisionAvoidanceBehaviour:public RoutingBehaviour{
+class CollisionAvoidanceBehaviour : public RoutingBehaviour {
     CollisionAvoidanceBehaviour(DBHandler *db);
-    ~CollisionAvoidanceBehaviour(){};
+
+    ~CollisionAvoidanceBehaviour() { };
 
 public:
     bool init(); //Nothing to init for now
 
     void computeCommands(SystemStateModel &systemStateModel,
-                         std::unique_ptr<Position> const& position,
+                         std::unique_ptr<Position> const &position,
                          double trueWindDirection,
                          bool mockPosition,
                          bool getHeadingFromCompass);
-            //make the computation of the commands
+    //make the computation of the commands
 
 private:
     //Boate state vector
@@ -47,7 +48,14 @@ private:
     std::vector<Eigen::Vector2d> sailingZone;
     SensorData sensorOutput;
 
-    struct SensorData{
+    // For now this is hardcoded but it should be in the database.
+    // TODO : Receive these values from the database
+    const double distNotTheSameObstacle = 2;
+    const double maxRangeSensor = 100;
+    const double sensorHeadingRelativeToBoat = 0; // There might be several sensors
+    const double sensorArcAngle = Utility::degreeToRadian(90); // Every angle is in radian
+
+    struct SensorData {
         double gpsLon; //x
         double gpsLat; //y
         double gpsSpeed;
@@ -61,13 +69,13 @@ private:
         //TODO : put the real inputs here (video, sonar or whatever)
         std::vector<ObstacleData> detectedObstacles;
     };
-    struct ObstacleData{
+    struct ObstacleData {
         double minDistanceToObstacle;
-        double maxDistanceToObstacle;
-        double LeftBoundheadingRelativeToBoat;
-        double RightBoundheadingRelativeToBoat;
+        double maxDistanceToObstacle; // -1 = infinite
+        double LeftBoundHeadingRelativeToBoat;
+        double RightBoundHeadingRelativeToBoat;
     };
-    struct Obstacle{
+    struct Obstacle {
         double leftBoundHeading;
         double rightBoundHeading;
         double upperBoundDistance;
@@ -76,33 +84,38 @@ private:
         double yGPSBoatPositionAtDetection;
         std::string color;
     };
-    struct FollowedLine{
+    struct FollowedLine {
         Eigen::Vector2d startPoint;
         Eigen::Vector2d endPoint;
     };
-    struct CommandOutput{
+    struct CommandOutput {
         double deltaRudder;
         double deltaSail;
     };
-    struct MinPotField{
+    struct MinPotField {
         double x;
         double y;
         double row;
         double col;
     };
-    const struct Simulation{
+    const struct Simulation {
         const bool waypoints;
         const bool obstacles;
     };
 
-    double angleDiff(double angle1,
-                     double angle2);
-    void printStdVectorMat(std::string const& name,
-                           std::vector<Eigen::MatrixXd> const& v);
-    void printStdVectorFloat(std::string const& name,
-                             std::vector<float> const& v);
-    void printMat(std::string const& name,
-                  Eigen::MatrixXd const& mat);
+    double angleDiff(double radAngle1,
+                     double radAngle2);
+
+    double calculateDistance(Eigen::Vector2d, Eigen::Vector2d);
+
+    void printStdVectorMat(std::string const &name,
+                           std::vector<Eigen::MatrixXd> const &v);
+
+    void printStdVectorFloat(std::string const &name,
+                             std::vector<float> const &v);
+
+    void printMat(std::string const &name,
+                  Eigen::MatrixXd const &mat);
 
     SensorData update_sensors(SystemStateModel &systemStateModel,
                               Simulation sim);
