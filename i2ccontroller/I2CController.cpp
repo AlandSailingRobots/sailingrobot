@@ -2,6 +2,8 @@
 #include "logger/Logger.h"
 #include <unistd.h> // close
 
+#include <wiringPiI2C.h>
+
 std::mutex I2CController::m_mutex;
 
 
