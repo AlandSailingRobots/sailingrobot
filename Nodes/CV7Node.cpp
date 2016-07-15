@@ -123,6 +123,10 @@ void CV7Node::WindSensorThread(void* nodePtr)
 				}
 				index++;
 			}
+			else
+			{
+				Logger::error("%s No data on the CV7 serial line!", __PRETTY_FUNCTION__);
+			}
 		}
 
 		// Parse the data and send out messages
