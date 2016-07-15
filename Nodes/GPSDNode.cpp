@@ -26,6 +26,11 @@ GPSDNode::GPSDNode(MessageBus& msgBus)
 
 }
 
+GPSDNode::~GPSDNode()
+{
+	delete m_GpsConnection;
+}
+
 bool GPSDNode::init()
 {
 	m_Initialised = false;
