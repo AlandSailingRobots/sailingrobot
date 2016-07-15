@@ -40,6 +40,17 @@ bool I2CController::write(uint8_t data)
 	return false;
 }
 
+bool I2CController::writeReg(uint8_t reg, uint8_t data)
+{
+	if (m_Locked)
+	{
+		return wiringPiI2CWriteReg8(m_DeviceFD, reg, data);
+	}
+
+	Logger::error("I2C controller transmission has not begun, call I2CController::beginTransmission!");
+	return false;
+}
+
 int I2CController::read()
 {
 	if (m_Locked)
@@ -86,8 +97,11 @@ void I2CController::beginTransmission()
 	{
 		Logger::error("%s Invalid device file descriptor, I2CController::init wasn't called or failed!", __PRETTY_FUNCTION__);
 	}
-	m_mutex.lock();
-	m_Locked = true;
+	else
+	{
+		m_mutex.lock();
+		m_Locked = true;
+	}
 }
 
 void I2CController::endTransmission()

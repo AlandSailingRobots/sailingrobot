@@ -28,11 +28,13 @@
 #define I2C_ADDRESS 0x19
 
 // HMC6343 Commands
-#define COM_POST_HEADING 0x50
-#define COM_POST_TILT 0x55
-#define COM_POST_MAG 0x45
-#define COM_POST_ACCEL 0x40
-#define COM_READ_EEPROM 0xE1
+#define COM_POST_HEADING 	0x50
+#define COM_POST_TILT 		0x55
+#define COM_POST_MAG 		0x45
+#define COM_POST_ACCEL 		0x40
+#define COM_READ_EEPROM 	0xE1
+
+#define EEPROM_ADDRESS		0x00
 
 
 #define COM_ORIENT_LEVEL 0x72
@@ -63,8 +65,7 @@ bool HMC6343Node::init()
 	{
 		m_I2C.beginTransmission();
 
-		m_I2C.write(COM_READ_EEPROM);
-		m_I2C.write(0x00);
+		m_I2C.writeReg(COM_READ_EEPROM, EEPROM_ADDRESS);
 		delay(10);
 		uint8_t deviceID = m_I2C.read();
 

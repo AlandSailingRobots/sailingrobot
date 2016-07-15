@@ -49,6 +49,15 @@ class I2CController {
 		bool write(uint8_t data);
 
 		///----------------------------------------------------------------------------------
+		/// A simple I2C write, a wrapper for wiringPI wiringPiI2CWrite(int, int).
+		///
+		/// @param data 			The byte to write to the device.
+		///
+		/// @returns				Returns true if the operation was a success.
+		///----------------------------------------------------------------------------------
+		bool writeReg(uint8_t reg, uint8_t data2);
+
+		///----------------------------------------------------------------------------------
 		/// A simple I2C read, a wrapper for wiringPI wiringPiI2CRead(int)
 		///
 		/// @returns 				Returns a byte from the read, or a -1 if there was a
