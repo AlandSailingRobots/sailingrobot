@@ -34,7 +34,7 @@ public:
 	/// Processes DataRequest messages.
 	///
 	///----------------------------------------------------------------------------------
-	void processMessage(Message* msgPtr);
+	void processMessage(const Message* msgPtr);
 
 	///----------------------------------------------------------------------------------
  	/// This function starts the GPS thread
@@ -46,4 +46,9 @@ private:
 
 	bool 	m_Initialised;
 	gpsmm* 	m_GpsConnection;
+
+	double	m_Lat;
+	double	m_Lon;
+	double	m_Speed;
+	double	m_Heading;
 };

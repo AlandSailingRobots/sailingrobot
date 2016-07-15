@@ -12,6 +12,12 @@
  ***************************************************************************************/
 
 #include "GPSDNode.h"
+#include "logger/Logger.h"
+#include "Messages/GPSDataMsg.h"
+
+
+#define GPS_SENSOR_SLEEP_MS			50
+#define GPS_TIMEOUT_MICRO_SECS		50000000
 
 
 GPSDNode::GPSDNode(MessageBus& msgBus)
@@ -28,11 +34,15 @@ bool GPSDNode::init()
 	if (m_GpsConnection->stream(WATCH_ENABLE | WATCH_JSON) != NULL) {
 		m_Initialised = true;
 	}
+	else
+	{
+		Logger::warning("Is GPSD running?");
+	}
 
 	return m_Initialised;
 }
 
-void GPSDNode::processMessage(Message* msgPtr)
+void GPSDNode::processMessage(const Message* msgPtr)
 {
 
 }
@@ -41,7 +51,7 @@ void GPSDNode::start()
 {
 	if(m_Initialised)
 	{
-		runThread(WindSensorThread);
+		runThread(GPSThreadFunc);
 	}
 	else
 	{
@@ -51,5 +61,69 @@ void GPSDNode::start()
 
 void GPSDNode::GPSThreadFunc(void* nodePtr)
 {
+	GPSDNode* node = (GPSDNode*)nodePtr;
 
+	Logger::info("GPSD thread started");
+
+	while(true)
+	{
+		// Controls how often we pump out messages
+		std::this_thread::sleep_for(std::chrono::milliseconds(GPS_SENSOR_SLEEP_MS));
+
+		if(node->m_GpsConnection->waiting(GPS_TIMEOUT_MICRO_SECS))
+		{
+			Logger::warning("%s GPSD read time out!", __PRETTY_FUNCTION__);
+			continue;
+		}
+
+		struct gps_data_t* newData;
+		if ((newData = node->m_GpsConnection->read()) == NULL)
+		{
+			Logger::error("%s GPSD read error out!", __PRETTY_FUNCTION__);
+			continue;
+		}
+
+		// Get status flags
+		unsigned long int flags = newData->set;
+
+		bool gps_online = flags & ONLINE_SET;
+		bool gps_hasFix = (newData->status > 0);
+		double unixTime = 0;
+
+		if(flags & TIME_SET)
+		{
+			unixTime = newData->fix.time;
+		}
+
+		if(flags & LATLON_SET)
+		{
+			node->m_Lat = newData->fix.latitude;
+			node->m_Lon = newData->fix.longitude;
+		}
+
+		if(flags & SPEED_SET)
+		{
+			node->m_Speed = newData->fix.speed;
+		}
+
+		if(flags & TRACK_SET)
+		{
+			node->m_Heading = newData->fix.track;
+		}
+
+		int satCount = 0;
+		if(flags & SATELLITE_SET)
+		{
+			satCount = newData->satellites_used;
+		}
+
+		GPSMode mode = GPSMode::NoUpdate;
+		if(flags & MODE_SET)
+		{
+			mode = static_cast<GPSMode>(newData->fix.mode);
+		}
+
+		GPSDataMsg* msg = new GPSDataMsg(gps_hasFix, gps_online, unixTime, node->m_Lat, node->m_Lon, node->m_Speed, node->m_Heading, satCount, mode);
+		node->m_MsgBus.sendMessage(msg);
+	}
 }
