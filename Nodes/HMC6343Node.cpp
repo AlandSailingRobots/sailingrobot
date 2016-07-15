@@ -15,6 +15,7 @@
 #include "HMC6343Node.h"
 #include "Messages/CompassDataMsg.h"
 #include "logger/Logger.h"
+#include "wiringPi.h"
 #include "utility/Utility.h"
 
 // For std::this_thread
@@ -63,7 +64,9 @@ bool HMC6343Node::init()
 		m_I2C.beginTransmission();
 
 		m_I2C.write(COM_READ_EEPROM);
-		int deviceID = m_I2C.read();
+		m_I2C.write(0x00);
+		delay(10);
+		uint8_t deviceID = m_I2C.read();
 
 		m_I2C.endTransmission();
 
