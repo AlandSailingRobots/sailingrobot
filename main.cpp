@@ -140,15 +140,6 @@ static void threadWindsensor() {
 	std::cout << " * Windsensor thread exited." << std::endl;
 }
 
-static void threadI2CController() {
-	try {
-		i2cController_handle->run();
-	}
-	catch (const char * error) {
-		std::cout << "ERROR while running static void threadI2CController() : " << error << std::endl;
-	}
-	std::cout << " I2Ccontroller thread exited." << std::endl;
-}
 
 int main(int argc, char *argv[]) {
 	// This is for eclipse development so the output is constantly pumped out.
@@ -248,22 +239,17 @@ int main(int argc, char *argv[]) {
 		}
 
 		// I2CController thread
-		bool mockArduino = db.retrieveCellAsInt("mock","1","analog_arduino");
-    	bool mockCompass = db.retrieveCellAsInt("mock","1","compass");
-		int  headningBufferSize = db.retrieveCellAsInt("buffer_config", "1", "compass");
-		double i2cLoopTime = stod(db.retrieveCell("i2c_config", "1", "loop_time"));
+//		bool mockArduino = db.retrieveCellAsInt("mock","1","analog_arduino");
+//    	bool mockCompass = db.retrieveCellAsInt("mock","1","compass");
+//		int  headningBufferSize = db.retrieveCellAsInt("buffer_config", "1", "compass");
+//		double i2cLoopTime = stod(db.retrieveCell("i2c_config", "1", "loop_time"));
+//
+//		if(mockArduino) { Logger::warning("Using mock Arduino"); }
+//		if(mockArduino) { Logger::warning("Using mock compass"); }
+//
+//
+//		// Start i2cController thread
 
-		if(mockArduino) { Logger::warning("Using mock Arduino"); }
-		if(mockArduino) { Logger::warning("Using mock compass"); }
-
-		i2cController_handle.reset(new I2CController(&systemstate, mockArduino, mockCompass, headningBufferSize, i2cLoopTime));
-		i2cController_handle->init();
-
-		// Start i2cController thread
-		i2cController_thread = std::unique_ptr<ThreadRAII>(new ThreadRAII(
-			std::thread(threadI2CController),
-			ThreadRAII::DtorAction::detach
-		) );
 
 		// Start GPSupdater thread
 		ThreadRAII gps_reader_thread(

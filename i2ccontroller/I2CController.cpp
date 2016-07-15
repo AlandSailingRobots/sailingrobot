@@ -1,95 +1,97 @@
 #include "I2CController.h"
+#include "logger/Logger.h"
+#include <unistd.h> // close
+
+#include <wiringPiI2C.h>
+
+std::mutex I2CController::m_mutex;
 
 
-I2CController::I2CController(SystemState *systemState, bool mockArduino, bool mockCompass, int headingBufferSize, double loopTime) {
-    m_systemState = systemState;
-    m_mockArduino = mockArduino;
-    m_mockCompass = mockCompass;
-    m_headingBufferSize = headingBufferSize;
-    m_loopTime = loopTime;
+I2CController::I2CController()
+	: m_Locked(false), m_DeviceFD(-1)
+{
+
 }
 
-I2CController::~I2CController() {
-
+I2CController::~I2CController()
+{
+	close(m_DeviceFD);
 }
 
-void I2CController::init() {
-    m_running = true;
+bool I2CController::init(const int deviceAddress)
+{
+	beginTransmission();
 
-    // NOTE - Jordan - I think the I2C device code should interact via the I2C controller that way we can make it thread safe.
+	m_DeviceFD = wiringPiI2CSetup(deviceAddress);
 
-    initCompass(m_mockCompass, m_headingBufferSize);
-    initArduino(m_mockArduino);
+	endTransmission();
+
+	return (m_DeviceFD < 0) ? false : true;
 }
 
-void I2CController::run() {
-    Logger::info("I2CController thread started");
-    while(isRunning()) {
-        m_timer.reset();
+bool I2CController::write(uint8_t data)
+{
+	if (m_Locked)
+	{
+		return wiringPiI2CWrite(m_DeviceFD, data);
+	}
 
-        m_compass->readValues();
-        m_compass->readAccel();
-
-        //update system state
-        m_systemState->setCompassModel(CompassModel(
-        m_compass->getHeading(),
-        m_compass->getPitch(),
-        m_compass->getRoll(),
-        AccelerationModel(m_compass->getAccelX(),
-                          m_compass->getAccelY(),
-                          m_compass->getAccelZ())
-        ));
-        m_arduino->readValues();
-        m_systemState->setAnalogArduinoModel(m_arduino->getModel());
-
-        m_timer.sleepUntil(m_loopTime);
-    }
+	Logger::error("I2C controller transmission has not begun, call I2CController::beginTransmission!");
+	return false;
 }
 
-bool I2CController::initCompass(bool mockCompass, int headningBufferSize) {
-    if (!mockCompass) {
-        m_compass.reset(new HMC6343(headningBufferSize) );
-    } else {
-        m_compass.reset(new MockCompass());
-    }
+int I2CController::read()
+{
+	if (m_Locked)
+	{
+		return wiringPiI2CRead(m_DeviceFD);
+	}
 
-    if(not m_compass->init())
-    {
-        Logger::error("%s Failed to initialise the compass", __PRETTY_FUNCTION__);
-        return false;
-    }
-
-    Logger::info("Compass initialised");
-    return true;
+	Logger::error("I2C controller transmission has not begun, call I2CController::beginTransmission!");
+	return -1;
 }
 
-bool I2CController::initArduino(bool mockArduino) {
-    if(!mockArduino) {
-        m_arduino.reset(new AR_UNO());
-    } else {
-        m_arduino.reset(new MockAnalogArduino());
-    }
+int I2CController::readReg(int regAddress)
+{
+	if (m_Locked)
+	{
+		return wiringPiI2CReadReg8(m_DeviceFD, regAddress);
+	}
 
-    if(not m_arduino->init())
-    {
-        Logger::error("%s Failed to communicate with the arduino", __PRETTY_FUNCTION__);
-        return false;
-    }
-
-    Logger::info("Arduino initialised");
-    return true;
+	Logger::error("I2C controller transmission has not begun, call I2CController::beginTransmission!");
+	return -1;
 }
 
-bool I2CController::isRunning() {
-    bool running;
-    m_mutex.lock();
-    running = m_running;
-    m_mutex.unlock();
-    return running;
+int I2CController::readBlock(uint8_t* block, uint8_t size)
+{
+	if(m_Locked)
+	{
+		if(block == NULL)
+		{
+			Logger::error("%s char* block is a null pointer!", __PRETTY_FUNCTION__);
+			return -1;
+		}
+
+		return wiringPiI2CReadBlock(m_DeviceFD, (char*)block, size);
+	}
+
+	Logger::error("I2C controller transmission has not begun, call I2CController::beginTransmission!");
+	return -1;
 }
 
-void I2CController::close() {
-    m_mutex.lock();
-    m_running = false;
-    m_mutex.unlock();
+
+void I2CController::beginTransmission()
+{
+	if(m_DeviceFD == -1)
+	{
+		Logger::error("%s Invalid device file descriptor, I2CController::init wasn't called or failed!", __PRETTY_FUNCTION__);
+	}
+	m_mutex.lock();
+	m_Locked = true;
+}
+
+void I2CController::endTransmission()
+{
+	m_Locked = false;
+	m_mutex.unlock();
 }
