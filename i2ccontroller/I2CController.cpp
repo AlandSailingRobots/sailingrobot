@@ -1,94 +1,95 @@
 #include "I2CController.h"
+#include "logger/Logger.h"
 #include <unistd.h> // close
 
 std::mutex I2CController::m_mutex;
 
 
-I2CController::I2CController(int fd) : m_fd(fd)
+I2CController::I2CController()
+	: m_Locked(false), m_DeviceFD(-1)
 {
-	locked = false;
+
 }
 
 I2CController::~I2CController()
 {
-	close(m_fd);
+	close(m_DeviceFD);
 }
 
-int I2CController::setup(int address)
+bool I2CController::init(const int deviceAddress)
 {
-	if (locked)
-	{
-		return wiringPiI2CSetup(address);
-	}
+	beginTransmission();
 
-	return 0; //This should never happen unless you are silly. beginTransmission needs to be called before this function
+	m_DeviceFD = wiringPiI2CSetup(deviceAddress);
+
+	endTransmission();
+
+	return (m_DeviceFD < 0) ? false : true;
 }
 
-std::vector<uint8_t> I2CController::readGeneric(uint8_t command){
-
-	if(locked)
-	{
-		const int transferSize = 6;
-		std::vector<uint8_t> returnVector;
-		// head(MSB/LSB), pitch(MSB/LSB), roll(MSB/LSB)
-
-		wiringPiI2CWrite(m_fd, command);
-		delay(1); // wait for processing of command
-
-		for (int i = 0; i < transferSize; i++)
-		{
-			returnVector.push_back(wiringPiI2CRead(m_fd));
-		}
-		delay(1);
-
-		return returnVector;
-	}
-
-	return {}; //This should never happen unless you are silly. beginTransmission needs to be called before this function
-}
-
-int I2CController::write(int data)
+bool I2CController::write(uint8_t data)
 {
-	if (locked)
+	if (m_Locked)
 	{
-		return wiringPiI2CWrite(m_fd, data);
+		return wiringPiI2CWrite(m_DeviceFD, data);
 	}
 
-	return 0; //This should never happen unless you are silly. beginTransmission needs to be called before this function
+	Logger::error("I2C controller transmission has not begun, call I2CController::beginTransmission!");
+	return false;
 }
 
 int I2CController::read()
 {
-	if (locked)
+	if (m_Locked)
 	{
-		return wiringPiI2CRead(m_fd);
+		return wiringPiI2CRead(m_DeviceFD);
 	}
 
-	return 0; //This should never happen unless you are silly. beginTransmission needs to be called before this function
+	Logger::error("I2C controller transmission has not begun, call I2CController::beginTransmission!");
+	return -1;
 }
 
-int I2CController::readBlock()
+int I2CController::readReg(int regAddress)
 {
-	if(locked)
+	if (m_Locked)
 	{
-		uint8_t block[40];
-		wiringPiI2CReadBlock(m_fd, block);
-
-		return block[10];
+		return wiringPiI2CReadReg8(m_DeviceFD, regAddress);
 	}
 
-	return 0; //This should never happen unless you are silly. beginTransmission needs to be called before this function
+	Logger::error("I2C controller transmission has not begun, call I2CController::beginTransmission!");
+	return -1;
+}
+
+int I2CController::readBlock(uint8_t* block, uint8_t size)
+{
+	if(m_Locked)
+	{
+		if(block == NULL)
+		{
+			Logger::error("%s char* block is a null pointer!", __PRETTY_FUNCTION__);
+			return -1;
+		}
+
+		return wiringPiI2CReadBlock(m_DeviceFD, (char*)block, size);
+	}
+
+	Logger::error("I2C controller transmission has not begun, call I2CController::beginTransmission!");
+	return -1;
 }
 
 
 void I2CController::beginTransmission()
 {
+	if(m_DeviceFD == -1)
+	{
+		Logger::error("%s Invalid device file descriptor, I2CController::init wasn't called or failed!", __PRETTY_FUNCTION__);
+	}
 	m_mutex.lock();
-	locked = true;
+	m_Locked = true;
 }
 
 void I2CController::endTransmission()
 {
-	locked = false;
+	m_Locked = false;
 	m_mutex.unlock();
 }
