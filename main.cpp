@@ -4,6 +4,7 @@
 #include "MessageBus.h"
 #include "Nodes/MessageLoggerNode.h"
 #include "Nodes/CV7Node.h"
+#include "Nodes/GPSDNode.h"
 #include "Messages/DataRequestMsg.h"
 #include "dbhandler/DBHandler.h"
 
@@ -30,7 +31,7 @@ void initialiseNode(Node& node, const char* nodeName, NodeImportance importance)
 	}
 	else
 	{
-		Logger::error("Node: %s - init\t[FAILED]", nodeName);
+		Logger::error("Node: %s - init\t\t[FAILED]", nodeName);
 
 		if(importance == NodeImportance::CRITICAL)
 		{
@@ -88,13 +89,16 @@ int main(int argc, char *argv[])
 	// Create nodes
 	MessageLoggerNode msgLogger(messageBus);
 	CV7Node windSensor(messageBus, dbHandler.retrieveCell("windsensor_config", "1", "port"), dbHandler.retrieveCellAsInt("windsensor_config", "1", "baud_rate"));
+	GPSDNode gpsd(messageBus);
 
 	// Initialise nodes
 	initialiseNode(msgLogger, "Message Logger", NodeImportance::NOT_CRITICAL);
 	initialiseNode(windSensor, "Wind Sensor", NodeImportance::CRITICAL);
+	initialiseNode(gpsd, "GPSD Node", NodeImportance::CRITICAL);
 
 	// Start active nodes
 	windSensor.start();
+	gpsd.start();
 
 	// NOTE - Jordan: Just to ensure messages are following through the system
 	DataRequestMsg* dataRequest = new DataRequestMsg(NodeID::MessageLogger);
