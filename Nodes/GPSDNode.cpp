@@ -70,7 +70,7 @@ void GPSDNode::GPSThreadFunc(void* nodePtr)
 		// Controls how often we pump out messages
 		std::this_thread::sleep_for(std::chrono::milliseconds(GPS_SENSOR_SLEEP_MS));
 
-		if(node->m_GpsConnection->waiting(GPS_TIMEOUT_MICRO_SECS))
+		if(not node->m_GpsConnection->waiting(GPS_TIMEOUT_MICRO_SECS))
 		{
 			Logger::warning("%s GPSD read time out!", __PRETTY_FUNCTION__);
 			continue;
