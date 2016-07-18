@@ -9,8 +9,16 @@
 
 #include <vector>
 #include <math.h>
+#include <stdlib.h>
 #include "libs/Eigen/Dense"
 #include "RoutingBehaviour.h"
+
+// TODO : Receive these values from the database
+#define DISTANCE_NOT_THE_SAME_OBSTACLE 2.0
+#define MAXIMUM_SENSOR_RANGE 100.0
+#define SENSOR_HEADING_RELATIVE_TO_BOAT 0.0 // There might be several sensors
+#define SENSOR_ARC_ANGLE 90.0 // Every angle is in radian
+#define CHANNEL_WIDTH 15.0
 
 // SAVED CODE IN CASE OF ARCHITECTURAL CHANGE
 /*
@@ -49,15 +57,9 @@ private:
     SensorData sensorOutput;
 
     // For now this is hardcoded but it should be in the database.
-    // TODO : Receive these values from the database
-    const double distNotTheSameObstacle = 2;
-    const double maxRangeSensor = 100;
-    const double sensorHeadingRelativeToBoat = 0; // There might be several sensors
-    const double sensorArcAngle = Utility::degreeToRadian(90); // Every angle is in radian
 
     struct SensorData {
-        double gpsLon; //x
-        double gpsLat; //y
+        Eigen::Vector2d gpsPos;
         double gpsSpeed;
         double compHeading;
         double gpsHeading;
@@ -76,12 +78,14 @@ private:
         double RightBoundHeadingRelativeToBoat;
     };
     struct Obstacle {
-        double leftBoundHeading;
-        double rightBoundHeading;
-        double upperBoundDistance;
-        double lowerBoundDistance;
-        double xGPSBoatPositionAtDetection;
-        double yGPSBoatPositionAtDetection;
+        //Polygon
+        std::vector<Eigen::Vector2d> polygon;
+//        double leftBoundHeading;
+//        double rightBoundHeading;
+//        double upperBoundDistance;
+//        double lowerBoundDistance;
+//        double xGPSBoatPositionAtDetection;
+//        double yGPSBoatPositionAtDetection;
         std::string color;
     };
     struct FollowedLine {
@@ -106,7 +110,13 @@ private:
     double angleDiff(double radAngle1,
                      double radAngle2);
 
-    double calculateDistance(Eigen::Vector2d, Eigen::Vector2d);
+    double calculateGPSDistance(Eigen::Vector2d, Eigen::Vector2d);
+
+    Eigen::Vector2d findCenter(const std::vector<Eigen::Vector2d> polygon);
+
+    double getArea(std::vector<Eigen::Vector2d> polygon);
+
+    double computeSignedDistanceFromLine(Eigen::Vector2d linePt1,Eigen::Vector2d linePt2,Eigen::Vector2d point);
 
     void printStdVectorMat(std::string const &name,
                            std::vector<Eigen::MatrixXd> const &v);

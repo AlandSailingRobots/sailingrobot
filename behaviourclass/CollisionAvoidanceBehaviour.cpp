@@ -57,6 +57,7 @@ CollisionAvoidanceBehaviour::CollisionAvoidanceBehaviour(DBHandler *db) :
 /*
  * Might be put into Utility class soon. TODO : Utility class ?
  * The angles must be in radians. It's radAngle1-radAngle2.
+ * I don't trust the one from Utility
  */
 double CollisionAvoidanceBehaviour::angleDiff(
         double radAngle1,
@@ -73,7 +74,7 @@ double CollisionAvoidanceBehaviour::angleDiff(
  *
  * Maybe this function should as well be in the Utility class. TODO : Utility class ?
  */
-double CollisionAvoidanceBehaviour::calculateDistance(
+double CollisionAvoidanceBehaviour::calculateGPSDistance(
         Eigen::Vector2d point1,
         Eigen::Vector2d point2) {
     //...(1) : latitude //...(2) : longitude
@@ -84,6 +85,44 @@ double CollisionAvoidanceBehaviour::calculateDistance(
                       + cos(point1(1))*cos(point2(1))*sin(deltaLon/2)*sin(deltaLon/2);
     const double c = 2*atan2(sqrt(a),sqrt(1-a));
     return Rearth*c;
+}
+/*
+ * TODO : Utility class ?
+ */
+Eigen::Vector2d CollisionAvoidanceBehaviour::findCenter(const std::vector<Eigen::Vector2d> polygon) {
+    double sumOfX = 0;
+    double sumOfY = 0;
+    for(auto & vec : polygon){
+        sumOfX += vec(0);
+        sumOfY += vec(1);
+    }
+    const Eigen::Vector2d meanPolygon(sumOfX/polygon.size(),sumOfY/polygon.size());
+    return meanPolygon;
+}
+
+/*
+ * Le polygone doit être créé dans le sens trigonométrique
+ * TODO move to Utility ?
+ */
+double getArea(std::vector<Eigen::Vector2d> polygon){
+    double sum = 0;
+    for(int i = 0;i<polygon.size()-1;i++){
+        sum += polygon[i](0)*polygon[i+1](1)-polygon[i+1](0)*polygon[i](1);
+    }
+    return sum/2;
+}
+
+/*
+ *
+ */
+double computeSignedDistanceFromLine(Eigen::Vector2d linePt1,Eigen::Vector2d linePt2,Eigen::Vector2d point){
+
+    // Don't care of earth radius for now.
+    // TODO change to use GPSdistance
+    Eigen::Matrix2d detMatrix;
+    detMatrix << (linePt2-linePt1)/(linePt2-linePt1).norm(),point-linePt1;
+    const double signedDistance = detMatrix.determinant();
+    return signedDistance;
 }
 
 /*
@@ -144,8 +183,10 @@ SensorData CollisionAvoidanceBehaviour::update_sensors(
 
         //Position and speed
         //The latitude and longitude are easier to compute in radians
-        sensorData.gpsLat = Utility::degreeToRadian(systemStateModel.gpsModel.positionModel.latitude);
-        sensorData.gpsLon = Utility::degreeToRadian(systemStateModel.gpsModel.positionModel.longitude);
+        sensorData.gpsPos(0) = // x
+                Utility::degreeToRadian(systemStateModel.gpsModel.positionModel.latitude);
+        sensorData.gpsPos(1) = // y
+                Utility::degreeToRadian(systemStateModel.gpsModel.positionModel.longitude);
         sensorData.gpsSpeed = systemStateModel.gpsModel.speed;
 
         //Heading
@@ -230,75 +271,115 @@ std::vector<Obstacle> CollisionAvoidanceBehaviour::check_obstacles(SensorData se
          * obstacle and is not detected : that would mean that it doesn't exist any more and then need
          * to be cleaned from the memory
          */
-        const double headingCenterOfMemorizedObstacle =
-                angleDiff(seenObstacles[i].leftBoundHeading,seenObstacles[i].rightBoundHeading);
-        const double widthOfMemorizedObstacleAtClosest =
-                seenObstacles[i].lowerBoundDistance
-                * tan(angleDiff(seenObstacles[i].leftBoundHeading,seenObstacles[i].rightBoundHeading)/2);
 
-        const Eigen::Vector2d closestCenterOfMemorizedObstacleAtDetection(
-                seenObstacles[i].xGPSBoatPositionAtDetection
-                + seenObstacles[i].lowerBoundDistance*cos(headingCenterOfMemorizedObstacle),// x
-                seenObstacles[i].yGPSBoatPositionAtDetection
-                + seenObstacles[i].lowerBoundDistance*sin(headingCenterOfMemorizedObstacle) // y
-        );
 
-        for(int j = 0;j<sensorData.detectedObstacles.size();j++) {
+        const Eigen::Vector2d centerOfMemorizedObstacle = findCenter(seenObstacles[i].polygon);
+
+        bool obstaclesAreNotTooCloseWithCurrentMemorizedObstacle;
+        for(auto & sensDatObstacle : sensorData.detectedObstacles) {
             const double headingCenterOfDetectedObstacle =
-                    angleDiff(sensorData.detectedObstacles[j].LeftBoundHeadingRelativeToBoat,
-                              sensorData.detectedObstacles[j].RightBoundHeadingRelativeToBoat)
+                    angleDiff(sensDatObstacle.LeftBoundHeadingRelativeToBoat,
+                              sensDatObstacle.RightBoundHeadingRelativeToBoat)
                     + sensorData.compHeading;
             const double widthOfCurrentDetectedObstacleAtClosest =
-                    sensorData.detectedObstacles[j].minDistanceToObstacle
-                    * tan(angleDiff(sensorData.detectedObstacles[j].LeftBoundHeadingRelativeToBoat,
-                                    sensorData.detectedObstacles[j].RightBoundHeadingRelativeToBoat)
-                          /2);
+                    sensDatObstacle.minDistanceToObstacle
+                    * tan(angleDiff(sensDatObstacle.LeftBoundHeadingRelativeToBoat,
+                                    sensDatObstacle.RightBoundHeadingRelativeToBoat)
+                          / 2);
 
-            const Eigen::Vector2d closestCenterOfCurrentlyDetectedObstacle(
-                    sensorData.gpsLat
-                    + sensorData.detectedObstacles[j].minDistanceToObstacle
+            const Eigen::Vector2d centerOfCurrentlyDetectedObstacle(
+                    sensorData.gpsPos(0)
+                    + sensDatObstacle.minDistanceToObstacle
                       * cos(headingCenterOfDetectedObstacle),// x
-                    sensorData.gpsLon
-                    + sensorData.detectedObstacles[j].minDistanceToObstacle
+                    sensorData.gpsPos(1)
+                    + sensDatObstacle.minDistanceToObstacle
                       * sin(headingCenterOfDetectedObstacle) // y
             );
 
-            const Eigen::Vector2d vectorBetweenClosestPointFromObstacles =
-                    closestCenterOfMemorizedObstacleAtDetection
-                    - closestCenterOfCurrentlyDetectedObstacle;
-            // the IDE says there is an error here but it seems correct
-
-            //Conditions
-            const bool theObstaclesAreNotTooClose = vectorBetweenClosestPointFromObstacles.norm()
-                                                    + widthOfCurrentDetectedObstacleAtClosest
-                                                    + widthOfMemorizedObstacleAtClosest
-                                                    > distNotTheSameObstacle;
-            const bool theObstacleShouldHaveBeenDetected =
+            const Eigen::Vector2d vectorBetweenObstacles = // the IDE says there is an error
+                    centerOfMemorizedObstacle              // here but it seems correct
+                    - centerOfCurrentlyDetectedObstacle;
 
 
-            if(){
-                // Remove the undetected obstacle from the memory
-            }
+            // 1rst Condition
+            const bool currentObstaclesIsNotTooClose = vectorBetweenObstacles.norm()
+                                                    + widthOfCurrentDetectedObstacleAtClosest * 2
+                                                    > DISTANCE_NOT_THE_SAME_OBSTACLE;
+            obstaclesAreNotTooCloseWithCurrentMemorizedObstacle =
+                    obstaclesAreNotTooCloseWithCurrentMemorizedObstacle && currentObstaclesIsNotTooClose;
+        }
+        // 2nd condition
+        const bool obstacleInsideRange =  // Same error given by the IDE
+                (centerOfMemorizedObstacle - sensorData.gpsPos).norm() < MAXIMUM_SENSOR_RANGE;
+        const bool obstacleInsideArc =
+                std::abs(angleDiff(
+                        atan2(centerOfMemorizedObstacle(1)-sensorData.gpsPos(1),
+                              centerOfMemorizedObstacle(0)-sensorData.gpsPos(0)),
+                        sensorData.compHeading + SENSOR_HEADING_RELATIVE_TO_BOAT))
+                < SENSOR_ARC_ANGLE;
+        const bool obstacleShouldHaveBeenDetected =
+                (obstacleInsideRange)
+                &&(obstacleInsideArc);
+
+        if(obstacleShouldHaveBeenDetected && obstaclesAreNotTooCloseWithCurrentMemorizedObstacle){
+            // Remove the undetected obstacle from the memory
+            seenObstacles.erase(seenObstacles.begin()+i);
         }
         i++;
     }
 
     //Register new obstacles
-    for(i = 0;i<sensorData.detectedObstacles.size();i++){
+    for(auto & sensDatObstacle : sensorData.detectedObstacles){
+        // Currently obstacles are added without merge.
+        // polygon is initialized anti-clockwise
         Obstacle newObstacle;
-        newObstacle.xGPSBoatPositionAtDetection = sensorData.gpsLat;
-        newObstacle.yGPSBoatPositionAtDetection = sensorData.gpsLon;
 
-        newObstacle.leftBoundHeading = sensorData.detectedObstacles[i].LeftBoundHeadingRelativeToBoat
-                                       + sensorData.compHeading;
-        newObstacle.rightBoundHeading = sensorData.detectedObstacles[i].RightBoundHeadingRelativeToBoat
-                                        + sensorData.compHeading;
-        newObstacle.lowerBoundDistance = sensorData.detectedObstacles[i].minDistanceToObstacle;
-        newObstacle.upperBoundDistance = sensorData.detectedObstacles[i].maxDistanceToObstacle;
+        //Obstacle from scratch for now
+        const Eigen::Matrix2d rotation(cos(sensorData.compHeading + SENSOR_HEADING_RELATIVE_TO_BOAT),
+                                       -sin(sensorData.compHeading+ SENSOR_HEADING_RELATIVE_TO_BOAT),
+                                       cos(sensorData.compHeading + SENSOR_HEADING_RELATIVE_TO_BOAT),
+                                       sin(sensorData.compHeading + SENSOR_HEADING_RELATIVE_TO_BOAT));
+
+        // Point 1
+        const double x1RelativeToBoat = sensDatObstacle.minDistanceToObstacle
+                                        * tan(sensDatObstacle.RightBoundHeadingRelativeToBoat);
+        const double y1RelativeToBoat = sensDatObstacle.minDistanceToObstacle;
+        Eigen::Vector2d pt1(x1RelativeToBoat,y1RelativeToBoat);
+        pt1 = pt1*rotation;
+        newObstacle.polygon.push_back(pt1);
+
+        // Point 2
+        const double x2RelativeToBoat = sensDatObstacle.maxDistanceToObstacle
+                                        * tan(sensDatObstacle.RightBoundHeadingRelativeToBoat);
+        const double y2RelativeToBoat = sensDatObstacle.maxDistanceToObstacle;
+        Eigen::Vector2d pt2(x1RelativeToBoat,y1RelativeToBoat);
+        pt2 = pt2*rotation;
+        newObstacle.polygon.push_back(pt2);
+
+        // Point 3
+        const double x3RelativeToBoat = sensDatObstacle.maxDistanceToObstacle
+                                        * tan(sensDatObstacle.LeftBoundHeadingRelativeToBoat);
+        const double y3RelativeToBoat = sensDatObstacle.maxDistanceToObstacle;
+        Eigen::Vector2d pt3(x1RelativeToBoat,y1RelativeToBoat);
+        pt3 = pt3*rotation;
+        newObstacle.polygon.push_back(pt3);
+
+        // Point 4
+        const double x4RelativeToBoat = sensDatObstacle.minDistanceToObstacle
+                                        * tan(sensDatObstacle.LeftBoundHeadingRelativeToBoat);
+        const double y4RelativeToBoat = sensDatObstacle.minDistanceToObstacle;
+        Eigen::Vector2d pt4(x4RelativeToBoat,y4RelativeToBoat);
+        pt4 = pt4*rotation;
+        newObstacle.polygon.push_back(pt4);
+
         newObstacle.color = "Null";
 
         // Add new obstacle to the list
         seenObstacles.push_back(newObstacle);
+    }
+
+    for(auto & sensDatObstacle : sensorData.detectedObstacles){
+        // TODO update of the obtacles with polygon intersection
     }
 }
 
@@ -312,8 +393,22 @@ std::vector<Obstacle> CollisionAvoidanceBehaviour::check_obstacles(SensorData se
  */
 bool CollisionAvoidanceBehaviour::these_obstacles_are_a_problem(
         std::vector<Obstacle> seenObstacles) { // OUTPUT if these obstacles are a problem
-    bool theseObstaclesAreAProblem;
+    bool theseObstaclesAreAProblem = false;
+    // We have polygons. We need to see if there is an intersection between
+    // the channel and the polygons. That is to say : one of the points of the
+    // polygon is inside the channel
 
+    for(auto & obstacle : seenObstacles){
+        for(auto & point : obstacle.polygon){
+            // compute the distance between the line and the point.
+            double signedDistance = computeSignedDistanceFromLine(followedLine.startPoint,
+                                                                  followedLine.endPoint,
+                                                                  point);
+            if(std::abs(signedDistance)< CHANNEL_WIDTH ){
+                theseObstaclesAreAProblem = theseObstaclesAreAProblem || true
+            }
+        }
+    }
 
     return theseObstaclesAreAProblem;
 }
@@ -436,5 +531,8 @@ void CollisionAvoidanceBehaviour::computeCommands(
     m_rudderCommand = out.deltaRudder;
     m_sailCommand = out.deltaSail;
 }
+
+
+
 
 
