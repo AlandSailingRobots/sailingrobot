@@ -25,16 +25,17 @@
 
 // The device datasheet mentions that this is 0x32. In our case this doesn't seem to be
 // correct, so stick with 0x19.
-#define I2C_ADDRESS 0x19
+#define I2C_ADDRESS 			0x19
+#define I2C_DATASHEET_ADDRESS	0x50
 
 // HMC6343 Commands
-#define COM_POST_HEADING 	0x50
-#define COM_POST_TILT 		0x55
-#define COM_POST_MAG 		0x45
-#define COM_POST_ACCEL 		0x40
-#define COM_READ_EEPROM 	0xE1
+#define COM_POST_HEADING 		0x50
+#define COM_POST_TILT 			0x55
+#define COM_POST_MAG 			0x45
+#define COM_POST_ACCEL 			0x40
+#define COM_READ_EEPROM 		0xE1
 
-#define EEPROM_ADDRESS		0x00
+#define EEPROM_ADDRESS			0x00
 
 
 #define COM_ORIENT_LEVEL 0x72
@@ -64,14 +65,14 @@ bool HMC6343Node::init()
 	if(m_I2C.init(I2C_ADDRESS))
 	{
 		m_I2C.beginTransmission();
-
 		m_I2C.writeReg(COM_READ_EEPROM, EEPROM_ADDRESS);
 		delay(10);
 		uint8_t deviceID = m_I2C.read();
 
 		m_I2C.endTransmission();
 
-		if(deviceID == I2C_ADDRESS)
+		// The Device reports the I2C address that is mentioned in the datasheet
+		if(deviceID == I2C_DATASHEET_ADDRESS)
 		{
 			m_Initialised = true;
 		}

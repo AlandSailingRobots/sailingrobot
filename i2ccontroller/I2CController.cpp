@@ -20,11 +20,7 @@ I2CController::~I2CController()
 
 bool I2CController::init(const int deviceAddress)
 {
-	beginTransmission();
-
 	m_DeviceFD = wiringPiI2CSetup(deviceAddress);
-
-	endTransmission();
 
 	return (m_DeviceFD < 0) ? false : true;
 }
