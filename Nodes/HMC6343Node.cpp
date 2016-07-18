@@ -26,7 +26,7 @@
 // The device datasheet mentions that this is 0x32. In our case this doesn't seem to be
 // correct, so stick with 0x19.
 #define I2C_ADDRESS 			0x19
-#define I2C_DATASHEET_ADDRESS	0x50
+#define I2C_DATASHEET_ADDRESS	0x32
 
 // HMC6343 Commands
 #define COM_POST_HEADING 		0x50
