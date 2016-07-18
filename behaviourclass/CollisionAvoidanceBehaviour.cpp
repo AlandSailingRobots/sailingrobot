@@ -403,13 +403,13 @@ bool CollisionAvoidanceBehaviour::these_obstacles_are_a_problem(
             // compute the distance between the line and the point.
             double signedDistance = computeSignedDistanceFromLine(followedLine.startPoint,
                                                                   followedLine.endPoint,
-                                                                  point);
+            bool thisObstacleIsAProblem = false;                                                      point);
             if(std::abs(signedDistance)< CHANNEL_WIDTH ){
-                theseObstaclesAreAProblem = theseObstaclesAreAProblem || true
+                thisObstacleIsAProblem = true;
             }
+            theseObstaclesAreAProblem = theseObstaclesAreAProblem || thisObstacleIsAProblem;
         }
     }
-
     return theseObstaclesAreAProblem;
 }
 
@@ -425,7 +425,49 @@ Eigen::MatrixXd CollisionAvoidanceBehaviour::compute_potential_field(
         std::vector<Obstacle> seen_obstacles,
         std::vector<Eigen::Vector2d> sailing_zone,
         FollowedLine) {
+    // Set up of the matrix of 100*100 around the boat.
+    Eigen::MatrixXd potField;
 
+    // Init
+
+    // TODO Obstacle potential function
+    const double scaleHole = 50;
+    const double scalePike = 550;
+    const double scale = 0.5;
+    const double strengthHoles = 2;
+    const double strengthPike = 4;
+    const double strength = 5;
+    const double offsetObstacle = 15;
+    // Add the pikes
+    for i=1:size(qhat,2)
+    xObs = P1-qhat(1,i);
+    yObs = P2-qhat(2,i);
+    tPike = ((xObs*1).^2+(yObs-offsetObstacle*scale).^2)/scalePike/scale;
+    ObsP = max(ObsP, strength*strengthPike*exp(-(tPike).^2));
+    end
+    % Then add the holes
+    for i=1:size(qhat,2)
+    T = mod(boatHeading,2*pi)*0.3 + mod( atan2(phat(2)-qhat(2,i),phat(1)-qhat(1,i)) ,2*pi)*0.7 + pi/2;
+    xObs = P1-qhat(1,i);
+    yObs = P2-qhat(2,i);
+    xo =  xObs*cos(T) + yObs*sin(T);
+    yo = -xObs*sin(T) + yObs*cos(T);
+    tHoleR = ((xo-35*scale).^2+(yo-offsetObstacle*scale).^2)/scaleHole/scale;
+    tHoleL = ((xo+35*scale).^2+(yo-offsetObstacle*scale).^2)/scaleHole/scale;
+
+    ObsP = ObsP - strength*strengthHoles*exp(-(tHoleR).^2) - strength*strengthHoles*exp(-(tHoleL).^2);
+    end
+
+
+    // TODO Objective potential function
+
+    // TODO Windpreference potential function
+
+    // TODO Boat preference
+
+    // TODO Computation of the field
+
+    // TODO Adding Sailing Zone
 }
 
 /*
