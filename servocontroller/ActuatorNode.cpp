@@ -11,8 +11,12 @@ ActuatorNode::~ActuatorNode() {
 
 }
 
+ActuatorNode::init(){
+    
+}
+
 //Mostly done, given we don't need to change acceleration or speed on the go
-ActuatorNode::processMessage(const Message* message){
+void ActuatorNode::processMessage(const Message* message){
     MessageType msgType = message->getType();
 
     switch(msgType){

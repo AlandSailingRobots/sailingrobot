@@ -19,11 +19,12 @@ public:
 	ActuatorNode();
 	~ActuatorNode();
 
-    void processPositionData(ActuatorPositionMessage* msg)
+	void processMessage(const Message* message);
+    void processPositionData(ActuatorPositionMessage* msg);
+	bool init();
 
 private:
 	int m_channel;
-
 	int m_range;
 	int m_speed;
 	int m_acceleration;
