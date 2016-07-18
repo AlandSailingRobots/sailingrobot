@@ -37,8 +37,8 @@ public:
 
 private:
 	///----------------------------------------------------------------------------------
-	 /// Reads the heading, pitch and roll from the compass.
-	 ///----------------------------------------------------------------------------------
+	/// Reads the heading, pitch and roll from the compass.
+	///----------------------------------------------------------------------------------
 	bool readData(float& heading, float& pitch, float& roll);
 
 	static void HMC6343ThreadFunc(void* nodePtr);

@@ -38,17 +38,14 @@ CV7Node::CV7Node(MessageBus& msgBus, std::string portName, unsigned int baudRate
 
 bool CV7Node::init()
 {
-	bool success = true;
 	m_fd = serialOpen(m_PortName.c_str(), m_BaudRate);
 
-	if(m_fd < 0)
+	if(m_fd != 0)
 	{
-		success = false;
+		m_Initialised = true;
 	}
 
-	m_Initialised = success;
-
-	return success;
+	return m_Initialised;
 }
 
 void CV7Node::start()

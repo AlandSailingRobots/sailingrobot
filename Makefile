@@ -40,15 +40,11 @@ JSON = 					libs/json
 
 CORE =					MessageBus.cpp ActiveNode.cpp
 
-NODES =					Nodes/MessageLoggerNode.cpp Nodes/CV7Node.cpp Nodes/HMC6343Node.cpp
+NODES =					Nodes/MessageLoggerNode.cpp Nodes/CV7Node.cpp Nodes/HMC6343Node.cpp Nodes/GPSDNode.cpp
 
 XBEE = 					xBee/xBeeSync.cpp xBee/xBee.cpp
 
 BEHAVIOURCLASS = 	behaviourclass/RoutingBehaviour.cpp  behaviourclass/WaypointBehaviour.cpp behaviourclass/LineFollowBehaviour.cpp
-
-ANALOGARDUINO = 		AnalogArduino/AnalogArduino.cpp AnalogArduino/MockAnalogArduino.cpp AnalogArduino/AR_UNO.cpp
-
-COMPASS = 				Compass/Compass.cpp Compass/MockCompass.cpp Compass/HMC6343.cpp
 
 I2CCONTROLLER = 		i2ccontroller/I2CController.cpp
 
@@ -62,8 +58,6 @@ COMMAND = 				ruddercommand/RudderCommand.cpp sailcommand/SailCommand.cpp
 
 MAESTRO = 				servocontroller/MaestroController.cpp servocontroller/MockMaestroController.cpp servocontroller/ServoObject.cpp servocontroller/SensorObject.cpp servocontroller/MockServoObject.cpp
 
-GPS = 					gps/GPSReader.cpp gps/MockGPSReader.cpp
-
 HTTP = 					httpsync/HTTPSync.cpp
 
 XML_LOG = 				xmlparser/pugi/pugixml.cpp xmlparser/src/xml_log.cpp
@@ -76,8 +70,8 @@ WINDVANECONTROLLER = 	windvanecontroller/WindVaneController.cpp
 
 SRC_MAIN = main.cpp
 
-SRC = 	GPSupdater.cpp SailingRobot.cpp logger/Logger.cpp utility/Utility.cpp utility/Timer.cpp $(XBEE) \
-		$(CORE) $(NODES) $(ANALOGARDUINO) $(COMPASS) $(I2CCONTROLLER) $(POSITION) $(COURSE) $(DB) $(COMMAND) $(MAESTRO) $(GPS) $(HTTP) \
+SRC = 	logger/Logger.cpp utility/Utility.cpp utility/Timer.cpp $(XBEE) \
+		$(CORE) $(NODES) $(I2CCONTROLLER) $(POSITION) $(COURSE) $(DB) $(COMMAND) $(MAESTRO) $(GPS) $(HTTP) \
 		$(XML_LOG) $(THREAD) $(WAYPOINTROUTING) $(WINDVANECONTROLLER) $(BEHAVIOURCLASS)
 
 #SOURCES = $(addprefix src/, $(SRC))
