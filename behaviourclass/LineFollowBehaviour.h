@@ -22,11 +22,11 @@ public:
                                       bool getHeadingFromCompass);  //make the computation of the commands return true if the computation was successfull
 
     void manageDatabase(double trueWindDirection, SystemStateModel &systemStateModel);
-    double calculateSignedDistance(std::unique_ptr<Position> const& position);
+    double calculateSignedDistance(std::unique_ptr<Position> const& position, float *afterWaypoint);
     double calculateAngleOfDesiredTrajectory(std::unique_ptr<Position> const& position);
 
 private:
-    bool m_tack; 
+    bool m_tack;
     int m_wayPointCount;
     double distanceToNextWaypoint, bearingToNextWaypoint;
     double currentHeading, desiredHeadingTackMode;

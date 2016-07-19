@@ -16,8 +16,8 @@ LineFollowBehaviour::LineFollowBehaviour(DBHandler *db):
 }
 
 bool LineFollowBehaviour::init()
-{                                                        
-    m_wayPointCount = 0;                                                                 //|   If changed back to LineFollow during run, 
+{
+    m_wayPointCount = 0;                                                                 //|   If changed back to LineFollow during run,
     m_previousWaypointModel.id = "";                                                     //|   reset values.
 
     printf("Setting up next Waypoint\n");
@@ -25,16 +25,16 @@ bool LineFollowBehaviour::init()
     printf("Setting up: OK\n");
 
     Logger::info("LineFollow Behaviour started");
-    Logger::info("Waypoint target - ID: %s, Lon: %f, Lat: %f",  m_nextWaypointModel.id.c_str(), 
-                                                                m_nextWaypointModel.positionModel.longitude, 
+    Logger::info("Waypoint target - ID: %s, Lon: %f, Lat: %f",  m_nextWaypointModel.id.c_str(),
+                                                                m_nextWaypointModel.positionModel.longitude,
                                                                 m_nextWaypointModel.positionModel.latitude);
     return true;
 }
 
-double LineFollowBehaviour::calculateSignedDistance(std::unique_ptr<Position> const& position)
+double LineFollowBehaviour::calculateSignedDistance(std::unique_ptr<Position> const& position,float *afterWaypoint)
 {
     int earthRadius = 6371000;
-    
+
     std::array<double, 3> prevWPCoord = //a
      {  earthRadius * cos(Utility::degreeToRadian(m_previousWaypointModel.positionModel.latitude)) * cos(Utility::degreeToRadian(m_previousWaypointModel.positionModel.longitude)),
         earthRadius * cos(Utility::degreeToRadian(m_previousWaypointModel.positionModel.latitude)) * sin(Utility::degreeToRadian(m_previousWaypointModel.positionModel.longitude)),
@@ -47,16 +47,40 @@ double LineFollowBehaviour::calculateSignedDistance(std::unique_ptr<Position> co
      {  earthRadius * cos(Utility::degreeToRadian(position->getModel().latitude)) * cos(Utility::degreeToRadian(position->getModel().longitude)),
         earthRadius * cos(Utility::degreeToRadian(position->getModel().latitude)) * sin(Utility::degreeToRadian(position->getModel().longitude)),
         earthRadius * sin(Utility::degreeToRadian(position->getModel().latitude))};
-    
-    double normAB = sqrt(prevWPCoord[0]*prevWPCoord[0] + prevWPCoord[1]*prevWPCoord[1] + prevWPCoord[2]*prevWPCoord[2])   * //||a|| 
+
+    double normAB = sqrt(prevWPCoord[0]*prevWPCoord[0] + prevWPCoord[1]*prevWPCoord[1] + prevWPCoord[2]*prevWPCoord[2])   * //||a||
                        sqrt(nextWPCoord[0]*nextWPCoord[0] + nextWPCoord[1]*nextWPCoord[1] + nextWPCoord[2]*nextWPCoord[2]); //||b||
-                
+
     std::array<double, 3> oab = //vector normal to plane
     {   (prevWPCoord[1]*nextWPCoord[2] - prevWPCoord[2]*nextWPCoord[1]) / normAB,       //Vector product: A^B divided by norm a * norm b        a^b / ||a|| ||b||
         (prevWPCoord[2]*nextWPCoord[0] - prevWPCoord[0]*nextWPCoord[2]) / normAB,
         (prevWPCoord[0]*nextWPCoord[1] - prevWPCoord[1]*nextWPCoord[0]) / normAB };
 
-    double signedDistance = boatCoord[0]*oab[0] + boatCoord[1]*oab[1] + boatCoord[2]*oab[2]; 
+    double verif =  sqrt(pow(oab[0],2)+ pow(oab[1],2) + pow(oab[2],2));
+
+    oab[0] = oab[0]/verif;
+    oab[1] = oab[1]/verif;
+    oab[2] = oab[2]/verif;
+
+    double signedDistance = boatCoord[0]*oab[0] + boatCoord[1]*oab[1] + boatCoord[2]*oab[2];
+
+        //compute if boat is after waypointModel
+    std::array<double, 3> orthogonalCoord = //C the point such as  BC is orthogonal to AB
+    {  nextWPCoord[0]+oab[0],
+       nextWPCoord[1]+oab[1],
+       nextWPCoord[2]+oab[2]
+    };
+
+    std::array<double, 3> obc = //vector normal to plane
+    {   (orthogonalCoord[1]*nextWPCoord[2] - orthogonalCoord[2]*nextWPCoord[1]) ,       //Vector product: A^B divided by norm a * norm b        a^b / ||a|| ||b||
+        (orthogonalCoord[2]*nextWPCoord[0] - orthogonalCoord[0]*nextWPCoord[2]) ,
+        (orthogonalCoord[0]*nextWPCoord[1] - orthogonalCoord[1]*nextWPCoord[0])};
+
+
+    //float temp = boatCoord[0]*obc[0] + boatCoord[1]*obc[1] + boatCoord[2]*obc[2];
+    printf("temp afert %f lat %f %f %f \n",normAB,verif,m_nextWaypointModel.positionModel.latitude,position->getModel().latitude);
+    *afterWaypoint = boatCoord[0]*obc[0] + boatCoord[1]*obc[1] + boatCoord[2]*obc[2];
+
 
     return signedDistance;
 }
@@ -74,10 +98,10 @@ double LineFollowBehaviour::calculateAngleOfDesiredTrajectory(std::unique_ptr<Po
         earthRadius * cos(Utility::degreeToRadian(m_nextWaypointModel.positionModel.latitude)) * sin(Utility::degreeToRadian(m_nextWaypointModel.positionModel.longitude)),
         earthRadius * sin(Utility::degreeToRadian(m_nextWaypointModel.positionModel.latitude))};
 
-    double M[2][3] = 
+    double M[2][3] =
     {   {-sin(Utility::degreeToRadian(position->getModel().longitude)), cos(Utility::degreeToRadian(position->getModel().longitude)), 0},
         {-cos(Utility::degreeToRadian(position->getModel().longitude))*sin(Utility::degreeToRadian(position->getModel().latitude)),
-         -sin(Utility::degreeToRadian(position->getModel().longitude))*sin(Utility::degreeToRadian(position->getModel().latitude)), 
+         -sin(Utility::degreeToRadian(position->getModel().longitude))*sin(Utility::degreeToRadian(position->getModel().latitude)),
          cos(Utility::degreeToRadian(position->getModel().latitude))}};
 
     std::array<double, 3> bMinusA = { nextWPCoord[0]-prevWPCoord[0], nextWPCoord[1]-prevWPCoord[1], nextWPCoord[2]-prevWPCoord[2]};
@@ -90,8 +114,11 @@ double LineFollowBehaviour::calculateAngleOfDesiredTrajectory(std::unique_ptr<Po
 
 void LineFollowBehaviour::computeCommands(SystemStateModel &systemStateModel,std::unique_ptr<Position> const& position,
                                       double trueWindDirection, bool mockPosition, bool getHeadingFromCompass){
-    
-    trueWindDirection = Utility::degreeToRadian(trueWindDirection);
+
+    trueWindDirection = Utility::degreeToRadian(trueWindDirection+M_PI);
+
+    if (!systemStateModel.gpsModel.online)
+        return;
 
     if(waypointsChanged) //if waypoints changed during run, check to see if current targeted waypoints have changed
     {
@@ -107,8 +134,10 @@ void LineFollowBehaviour::computeCommands(SystemStateModel &systemStateModel,std
     bearingToNextWaypoint = m_courseMath.calculateBTW(position->getModel(), m_nextWaypointModel.positionModel); //calculated for database
     distanceToNextWaypoint = m_courseMath.calculateDTW(position->getModel(), m_nextWaypointModel.positionModel);
 
+    float afterNextWaypoint[1];
+    double signedDistance = calculateSignedDistance(position,afterNextWaypoint); // 'e'
     //Check to see if waypoint is reached
-    if(distanceToNextWaypoint < m_nextWaypointModel.radius)
+    if(distanceToNextWaypoint < m_nextWaypointModel.radius || *afterNextWaypoint > 0)
     {
         m_wayPointCount++;
         harvestWaypoint(m_nextWaypointModel);
@@ -123,10 +152,10 @@ void LineFollowBehaviour::computeCommands(SystemStateModel &systemStateModel,std
 
         //GET DIRECTION - From the book Robotic Sailing 2012 and Robotic Sailing 2015
         currentHeading = Utility::degreeToRadian(getHeading(systemStateModel,mockPosition,getHeadingFromCompass,position, m_nextWaypointModel));
-        double signedDistance = calculateSignedDistance(position); // 'e'
+
         int maxTackDistance = 20; //'r'
         double phi = calculateAngleOfDesiredTrajectory(position);
-        double desiredHeading = phi - (2 * (M_PI / 4)/M_PI) * atan2(signedDistance,maxTackDistance);
+        double desiredHeading = phi + (2 * (M_PI / 4)/M_PI) * atan(signedDistance/maxTackDistance);
         desiredHeading = Utility::limitRadianAngleRange(desiredHeading);
         //CHECK IF TACKING IS NEEDED
         if(abs(signedDistance) > maxTackDistance)
@@ -135,9 +164,12 @@ void LineFollowBehaviour::computeCommands(SystemStateModel &systemStateModel,std
         if( (cos(trueWindDirection - desiredHeading) + cos(m_tackAngle) < 0) || (cos(trueWindDirection - phi) + cos(m_tackAngle) < 0))
         {
             if(!m_tack){
-                m_tackingDirection = Utility::sgn(currentHeading-(fmod(trueWindDirection, M_PI) - M_PI));
+                m_tackingDirection = Utility::sgn(currentHeading-(fmod(trueWindDirection+M_PI, 2*M_PI) - M_PI));
                 m_tack = true;
             }
+            printf("fisrt check %d second %d\n",cos(trueWindDirection - desiredHeading) + cos(m_tackAngle) < 0,cos(trueWindDirection - phi) + cos(m_tackAngle) < 0);
+            printf("fisrt check %d second %d\n",cos(trueWindDirection+M_PI - desiredHeading) + cos(m_tackAngle) < 0,cos(trueWindDirection+M_PI - phi) + cos(m_tackAngle) < 0);
+
             desiredHeading = M_PI + trueWindDirection - m_tackingDirection * m_tackAngle;
             desiredHeading = Utility::limitRadianAngleRange(desiredHeading);
 
@@ -166,10 +198,10 @@ void LineFollowBehaviour::computeCommands(SystemStateModel &systemStateModel,std
         //     m_tack = false;
         // else if(m_tack)
         //     desiredHeading2 = desiredHeadingTackMode;
-        // else if(cos(trueWindDirection - desiredHeading) + cos(m_tackAngle) < 0)                 
+        // else if(cos(trueWindDirection - desiredHeading) + cos(m_tackAngle) < 0)
         // {
         //     m_tack = true;
-        //     desiredHeading2 = M_PI + trueWindDirection - m_tackAngle * m_tackingDirection;               
+        //     desiredHeading2 = M_PI + trueWindDirection - m_tackAngle * m_tackingDirection;
         //     desiredHeadingTackMode = desiredHeading2;
         // }
 
@@ -179,19 +211,19 @@ void LineFollowBehaviour::computeCommands(SystemStateModel &systemStateModel,std
 
         //SET RUDDER
         if(cos(currentHeading - desiredHeading) < 0) //if boat is going the wrong direction
-            m_rudderCommand = Utility::sgn(systemStateModel.gpsModel.speed) * m_maxCommandAngle * Utility::sgn(sin(currentHeading - desiredHeading));
-        else                      
-            m_rudderCommand = Utility::sgn(systemStateModel.gpsModel.speed) * m_maxCommandAngle * sin(currentHeading - desiredHeading);
-       
+            m_rudderCommand = -Utility::sgn(systemStateModel.gpsModel.speed) * m_maxCommandAngle * Utility::sgn(sin(currentHeading - desiredHeading));
+        else
+            m_rudderCommand = -Utility::sgn(systemStateModel.gpsModel.speed) * m_maxCommandAngle * sin(currentHeading - desiredHeading);
+
         //SET SAIL
         double apparentWindDirection = Utility::getApparentWindDirection(systemStateModel, currentHeading, trueWindDirection);
         m_sailCommand = -Utility::sgn(apparentWindDirection) * ( ((m_minSailAngle - m_maxSailAngle) / M_PI) * abs(apparentWindDirection) + m_maxSailAngle);
 
 
-        printf("CurrentHeading: %f       signedDistance: %f        Phi: %f        Desired heading: %f \n", currentHeading, signedDistance, phi, desiredHeading);
+        printf("CurrentHeading: %f       signedDistance: %f        Phi: %f        Desired heading: %f Diff heading: %f \n", currentHeading, signedDistance, phi, desiredHeading, desiredHeading-phi);
         printf("bearingToNextWaypoint: %f\n", Utility::degreeToRadian(bearingToNextWaypoint));
         printf("Speed: %f      RudderCommand: %f     SailCommand: %f       TrueWindDirection: %f \n", systemStateModel.gpsModel.speed, m_rudderCommand, m_sailCommand, trueWindDirection);
-        printf("Tacking: %d     TackingDirection: %d\n", m_tack, m_tackingDirection);
+        printf("Tacking: %d     TackingDirection: %d Afterwaypoint: %.4f\n", m_tack, m_tackingDirection,*afterNextWaypoint);
 
     } else {
         Logger::warning("%s gps NaN. Using values from last iteration", __PRETTY_FUNCTION__);
@@ -205,7 +237,7 @@ void LineFollowBehaviour::manageDatabase(double trueWindDirection, SystemStateMo
   m_dbHandler->insertDataLog(
     systemStateModel,
     0,
-    0,                                               
+    0,
     distanceToNextWaypoint,
     bearingToNextWaypoint,
     currentHeading,
