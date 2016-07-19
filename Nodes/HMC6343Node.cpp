@@ -116,7 +116,7 @@ bool HMC6343Node::readData(float& heading, float& pitch, float& roll)
 		// Extract the data from the compass, each piece of data is made up of two bytes, and their are
 		// 3 pieces of data.
 		m_I2C.beginTransmission();
-		m_I2C.writeReg(COM_POST_HEADING, 0x00);
+		m_I2C.write(COM_POST_HEADING);
 
 		int val = 0;
 		for(int i = 0; i < BYTES_TO_READ; i++)
