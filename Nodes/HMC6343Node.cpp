@@ -118,6 +118,8 @@ bool HMC6343Node::readData(float& heading, float& pitch, float& roll)
 		m_I2C.beginTransmission();
 		m_I2C.write(COM_POST_HEADING);
 
+		delay(1);
+
 		int val = 0;
 		for(int i = 0; i < BYTES_TO_READ; i++)
 		{
