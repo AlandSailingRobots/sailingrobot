@@ -139,9 +139,9 @@ bool HMC6343Node::readData(float& heading, float& pitch, float& roll)
 		m_I2C.endTransmission();
 
 		// The data is stretched across two separate bytes in big endian format
-		heading = ((buffer[0] << 8) + buffer[1]) / 10;
-		pitch = ((buffer[2] << 8) + buffer[3]) / 10;
-		roll = ((buffer[4] << 8) + buffer[5]) / 10;
+		heading = ((buffer[0] << 8) + buffer[1]) / 10.f;
+		pitch = ((buffer[2] << 8) + buffer[3]) / 10.f;
+		roll = ((buffer[4] << 8) + buffer[5]) / 10.f;
 
 		return true;
 	}
