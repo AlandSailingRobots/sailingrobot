@@ -152,6 +152,22 @@ bool HMC6343Node::readData(float& heading, float& pitch, float& roll)
 	}
 }
 
+bool HMC6343Node::setOrientation(CompassOrientation orientation)
+{
+	if(m_Initialised)
+	{
+		m_I2C.beginTransmission();
+		m_I2C.write((uint8_t)orientation);
+		m_I2C.endTransmission();
+		return true;
+	}
+	else
+	{
+		Logger::error("%s Cannot set compass orientation as the node was not correctly initialised!", __PRETTY_FUNCTION__);
+		return false;
+	}
+}
+
 void HMC6343Node::HMC6343ThreadFunc(void* nodePtr)
 {
 	const int MAX_ERROR_COUNT = 100;

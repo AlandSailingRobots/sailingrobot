@@ -18,6 +18,13 @@
 #include "ActiveNode.h"
 #include "i2ccontroller/I2CController.h"
 
+// Magic numbers correspond to the compass commands, see the datasheet for more info.
+enum class CompassOrientation {
+	COM_ORIENT_LEVEL = 0x72,
+	COM_ORIENT_SIDEWAYS = 0x73,
+	COM_ORIENT_FLATFRONT = 0x74
+};
+
 
 class HMC6343Node : public ActiveNode {
 public:
@@ -34,6 +41,11 @@ public:
 	void start();
 
 	void processMessage(const Message* msg);
+
+	///----------------------------------------------------------------------------------
+	/// Sets the compass's orientation.
+	///----------------------------------------------------------------------------------
+	bool setOrientation(CompassOrientation orientation);
 
 private:
 	///----------------------------------------------------------------------------------
