@@ -23,6 +23,7 @@ MessageLoggerNode::MessageLoggerNode(MessageBus& msgBus)
 {
 	msgBus.registerNode(this);
 	msgBus.registerNode(this, MessageType::WindData);
+	msgBus.registerNode(this, MessageType::CompassData);
 	msgBus.registerNode(this, MessageType::GPSData);
 }
 
@@ -43,6 +44,8 @@ void MessageLoggerNode::processMessage(const Message* message)
 		case MessageType::WindData:
 			Logger::info("WindData message received");
 			break;
+		case MessageType::CompassData:
+			Logger::info("CompassData message received");
 		case MessageType::GPSData:
 			Logger::info("GPSData message received");
 			break;
