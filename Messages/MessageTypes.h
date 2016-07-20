@@ -20,5 +20,6 @@ enum class MessageType {
 	DataRequest = 0,
 	WindData,
 	CompassData,
-	GPSData
+	GPSData,
+	ArduinoData
 };
