@@ -5,7 +5,11 @@
 #include <termios.h>
 #include <mutex>
 
+//TODO: Make everythign static for shared maestro functiion among actuatornodes
+//TODO: Static maestro, check i2c-controller
+	// Implemented, but a reference here is for some reason needed, like so:
 
+std::mutex MaestroController::m_mutex;
 
 MaestroController::MaestroController() {
 	m_ioDeviceHandle = -1;
@@ -77,6 +81,25 @@ void MaestroController::openPort()
 	{
 		throw "MaestroController::openPort()";
 	}
+}
+
+//Static idea: returns isopenport thingie (false if failed)
+static bool MaestroController::openPortPROPOSAL(std::string ioDeviceHandlePath)
+{
+
+	int ioDeviceHandle = open(ioDeviceHandlePath.c_str(), O_RDWR | O_NOCTTY);
+
+	struct termios options;
+	tcgetattr(ioDeviceHandle, &options);
+	options.c_lflag &= ~(ECHO | ECHONL | ICANON | ISIG | IEXTEN);
+	options.c_oflag &= ~(ONLCR | OCRNL);
+	tcsetattr(ioDeviceHandle, TCSANOW, &options);
+
+	if (m_ioDeviceHandle == -1)
+	{
+		return false;
+	}
+	return true;
 }
 
 bool MaestroController::isOpenPort()

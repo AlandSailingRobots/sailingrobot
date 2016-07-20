@@ -2,7 +2,6 @@
  * File:   ActuatorNode.h
  * Author: pophaax
  *
- * Created on 20 March 2014, 11:17
  * Mostly a rewrite of servoObject
  *
  */

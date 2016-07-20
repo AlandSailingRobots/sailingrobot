@@ -43,7 +43,7 @@ public:
 
 private:
 	int m_ioDeviceHandle;
-	std::mutex m_mutex;
+	static std::mutex m_mutex;
 	std::string m_ioDeviceHandlePath;
 
 	void openPort();
