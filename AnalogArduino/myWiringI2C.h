@@ -28,7 +28,7 @@
 
 #include <stdint.h>
 
-int wiringPiI2CReadBlock      (int fd, uint8_t *block) ;
+//int wiringPiI2CReadBlock      (int fd, uint8_t *block) ;
 
 //#ifdef __cplusplus
 //}
