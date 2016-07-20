@@ -47,11 +47,22 @@ bool xBeeSyncNode::init()
 		rv = true;
 		Logger::info("Xbee initialised - receiving: %d sending: %d", m_receiving, m_sending);
 	}
+
+	//TODO: Implement m_initialized
 	return rv;
 }
 
+void xBeeSync::start(){
+
+	//Todo: INit check, thread start
+
+}
+
+
+
 //Not done: Mostly copied from xbeeSync.cpp - implement when a replacement exists for system state model
-void xBeeSync::xBeeSyncThread() {
+//TODO: Send back message
+void xBeeSync::xBeeSyncThread(void nodePtr) {
 	m_pushOnlyLatestLogs = m_db->retrieveCellAsInt("xbee_config", "1", "push_only_latest_logs");
 	Logger::info("*xBeeSync thread started.");
 
