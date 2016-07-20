@@ -9,6 +9,8 @@
 #include "Messages/DataRequestMsg.h"
 #include "dbhandler/DBHandler.h"
 
+#define DISABLE_LOGGING 0
+
 enum class NodeImportance {
 	CRITICAL,
 	NOT_CRITICAL

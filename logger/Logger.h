@@ -53,6 +53,9 @@ public:
  	/////////////////////////////////////////////////////////////////////////////////////
 	static bool init(const char* filename = 0);
 
+	/// SHOULD ONLY BE USED FOR UNIT TESTS!
+	static void DisableLogging();
+
 	static void shutdown();
 
 	/////////////////////////////////////////////////////////////////////////////////////
@@ -104,6 +107,7 @@ private:
 
 	static Logger* m_instance;
 	static bool m_GPSTimeSet;
+	static bool m_DisableLogging;
 
 	std::string m_LogFilePath;
 	unsigned long m_LastClockStamp;

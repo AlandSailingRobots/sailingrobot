@@ -21,6 +21,7 @@
 #######################################################
 
 TEST_SUITE = ./testsuite.run
+UNIT_TEST = ./unit-tests.run
 
 INT_TEST_FOLDER = ./tests/integration/IntegrationTests
 
@@ -61,7 +62,7 @@ INTEGRATION_TESTS = $(addprefix $(INT_TEST_FOLDER)/output/, $(INT_TESTS:.cpp=.ru
 
 .PHONY: clean
 
-all: $(TEST_SUITE) $(INTEGRATION_TESTS)
+all: $(UNIT_TEST)
 
 $(TEST_SUITE):
 	@echo Building test suite ... this may take awhile
@@ -73,6 +74,10 @@ $(INT_TEST_FOLDER)/output/%.run:$(INT_TEST_FOLDER)/%.cpp
 	@mkdir -p $(dir $@)
 	@echo Building test $@
 	@$(CXX) $(CPPFLAGS) $(INC) -o ./$@ $< @$(OBJECT_FILE) $(LIBS) $(LIBS_BOOST)
+
+$(UNIT_TEST):
+	$(MAKE) -C libs/cxxtest
+	$(CXX) $(CXXFLAGS) libs/cxxtest/runner.o @$(OBJECT_FILE) -Wl,-rpath=./ ./libwiringPi.so -o $(UNIT_TEST) $(LIBS)
 
 clean:
 	@rm -f $(INTEGRATION_TESTS)

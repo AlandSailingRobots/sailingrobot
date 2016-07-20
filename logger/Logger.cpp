@@ -16,6 +16,7 @@
 
 Logger* Logger::m_instance = NULL;
 bool Logger::m_GPSTimeSet = false;
+bool Logger::m_DisableLogging = false;
 
 
 Logger::Logger() 
@@ -41,6 +42,8 @@ Logger::~Logger()
 
 bool Logger::init(const char* filename)
 {
+	if(m_DisableLogging) { return true; }
+
 	if(m_instance == NULL)
 	{
 		m_instance = new Logger();
@@ -61,8 +64,15 @@ bool Logger::init(const char* filename)
 	return true;
 }
 
+void Logger::DisableLogging()
+{
+	m_DisableLogging = true;
+}
+
 void Logger::shutdown()
 {
+	if(m_DisableLogging) { return; }
+
 	if(m_instance != NULL)
 	{
 		delete m_instance;
@@ -71,6 +81,8 @@ void Logger::shutdown()
 
 void Logger::setTime(unsigned long seconds)
 {
+	if(m_DisableLogging) { return; }
+
 	if(not m_GPSTimeSet && m_instance != NULL)
 	{
 		m_instance->m_LastTimeStamp = seconds;
@@ -81,6 +93,8 @@ void Logger::setTime(unsigned long seconds)
 
 void Logger::log(std::string message)
 {
+	if(m_DisableLogging) { return; }
+
 	m_Mutex.lock();
 	if(m_LogFile->is_open())
 	{
@@ -104,6 +118,9 @@ void Logger::log(std::string message)
 void Logger::info(std::string message, ...)
 {
 	va_list args;
+
+	if(m_DisableLogging) { return; }
+
 	char logBuffer[MAX_LOG_SIZE];
 	// Put together the formatted string
 	va_start(args, message);
@@ -125,6 +142,9 @@ void Logger::info(std::string message, ...)
 void Logger::error(std::string message, ...)
 {
 	va_list args;
+
+	if(m_DisableLogging) { return; }
+
 	char logBuffer[MAX_LOG_SIZE];
 	// Put together the formatted string
 	va_start(args, message);
@@ -145,6 +165,9 @@ void Logger::error(std::string message, ...)
 void Logger::warning(std::string message, ...)
 {
 	va_list args;
+
+	if(m_DisableLogging) { return; }
+
 	char logBuffer[MAX_LOG_SIZE];
 	// Put together the formatted string
 	va_start(args, message);
@@ -159,11 +182,13 @@ void Logger::warning(std::string message, ...)
     if(m_instance != NULL)
     {
     	m_instance->log(buff);
-    };
+    }
 }
 
 void Logger::logWRSC(const GPSModel* const gps)
 {
+	if(m_DisableLogging) { return; }
+
 	#ifdef ENABLE_WRSC_LOGGING
 	// Flag so that we only issue one error about the log file not existing
 	static bool errorMsgUsge = false;
@@ -192,6 +217,8 @@ void Logger::logWRSC(const GPSModel* const gps)
 
 bool Logger::createLogFiles(const char* filename)
 {
+	if(m_DisableLogging) { return true; }
+
 	std::string filePath;
 
 	if(filename == 0)
@@ -239,6 +266,8 @@ bool Logger::createLogFiles(const char* filename)
 
 void Logger::writeBufferedLogs()
 {
+	if(m_DisableLogging) { return; }
+
 	for(std::string log : m_LogBuffer)
 	{
 		*m_LogFile << log.c_str();
@@ -248,6 +277,8 @@ void Logger::writeBufferedLogs()
 
 std::string Logger::getTimeStamp()
 {
+	if(m_DisableLogging) { return ""; }
+
 	unsigned long seconds = 0;
 	char buff[90];
 
@@ -270,6 +301,8 @@ std::string Logger::getTimeStamp()
 
 std::string Logger::getTimeStampWRSC()
 {
+	if(m_DisableLogging) { return ""; }
+
 	unsigned long seconds = 0;
 	char buff[9];
 
