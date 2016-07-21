@@ -52,7 +52,7 @@
 
 
 HMC6343Node::HMC6343Node(MessageBus& msgBus, const int headingBufferSize)
-: ActiveNode(NodeID::Compass, msgBus), m_I2C(), m_Initialised(false), m_HeadingBufferSize(headingBufferSize)
+: ActiveNode(NodeID::Compass, msgBus), m_Initialised(false), m_HeadingBufferSize(headingBufferSize)
 {
 
 }

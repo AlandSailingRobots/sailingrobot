@@ -24,6 +24,10 @@ enum class NodeID {
 	Compass,
 	GPS,
 	VesselState,
-    ObstacleDetection,
+	SailActuator,
+	RudderActuator,
+	Arduino,
+	VesselState,
+	ObstacleDetection,
     CollisionAvoidanceBehaviour
 };

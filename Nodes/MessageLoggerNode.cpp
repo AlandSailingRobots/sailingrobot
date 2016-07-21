@@ -25,6 +25,7 @@ MessageLoggerNode::MessageLoggerNode(MessageBus& msgBus)
 	msgBus.registerNode(this, MessageType::WindData);
 	msgBus.registerNode(this, MessageType::CompassData);
 	msgBus.registerNode(this, MessageType::GPSData);
+	msgBus.registerNode(this, MessageType::ArduinoData);
 }
 
 bool MessageLoggerNode::init()
@@ -48,6 +49,9 @@ void MessageLoggerNode::processMessage(const Message* message)
 			Logger::info("CompassData message received");
 		case MessageType::GPSData:
 			Logger::info("GPSData message received");
+			break;
+		case MessageType::ArduinoData:
+			Logger::info("ArduinoData message received");
 			break;
 		default:
 			break;
