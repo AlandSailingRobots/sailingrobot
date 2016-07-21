@@ -85,11 +85,11 @@ void HTTPSyncNode::HTTPSyncThread(void* nodePtr){
 
     while(true)
     {
+        std::this_thread::sleep_for(std::chrono::milliseconds(node->m_delay));
+
         node->getConfigsFromServer();
         node->getWaypointsFromServer();
         node->pushDatalogs();
-
-        std::this_thread::sleep_for(std::chrono::milliseconds(node->m_delay));
     }
 
     Logger::info("HTTPSync thread has exited");
