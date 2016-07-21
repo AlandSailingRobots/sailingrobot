@@ -2,15 +2,17 @@
 
 /*
 
-    ALRIGHT SO THIS STUFF IS UNIMPLEMENTED COPY-PASTE STUFF
-    I'LL PUT A BARRIER ON THE OTHER SIDE OF THE DONE STUFF
-    SO THAT I'LL REMEMBER
-
-    ACTUALLY I'LL JUST MARK EACH FUNCTION TODO/CO/DONE
+    PURPOSE:
+        HANDLE RETRIEVAL AND WRITING TO DATABASE AUTONOMOUSLY UPON LOCAL OR SERVERSIDE CHANGES
+        PUSH LOGS ON AN INTERVAL
+        NOTIFY MESSAGEBUS WHEN NEW SERVERDATA ARRIVES
 
     TODO, GENERAL
 
         -   IMPLEMENT HEADER
+        -   m_ for global variables
+            - curl
+            - server data
 
 */
 
@@ -21,16 +23,31 @@ size_t write_to_string(void *ptr, size_t size, size_t count, void *stream) {
 }
 
 //CO
+HTTPSyncNode::HTTPSyncNode(MessageBus& msgBus, DBHandler *db, int delay, bool removeLogs)
+    :ActiveNode(NodeID::HttpSync, msgBus), m_removeLogs(removeLogs), m_delay(delay), m_dbHandler(db);
+    {}
+
+//TODO - DESTRUCTOR?
+
+//CO
 HTTPSyncNode::init()
 {
 
-    //Imported from setupHttpSync
+    m_initialised = false;
+
+    //previously in constructor
+    curl = curl_easy_init();
+    reportedConnectError = false;
+
     m_pushOnlyLatestLogs = m_dbHandler->retrieveCellAsInt("httpsync_config", "1", "push_only_latest_logs");
 
     try {
         setShipID( m_dbHandler->retrieveCell("server", "1", "boat_id") );
         setShipPWD( m_dbHandler->retrieveCell("server", "1", "boat_pwd") );
         setServerURL( m_dbHandler->retrieveCell("server", "1", "srv_addr") );
+
+        m_initialised = true;
+
     } catch (const char * error) {
         Logger::error("%s Failed to get server configuration Error: %s", __PRETTY_FUNCTION__, error);
         //Kill thread if setup fails
@@ -38,12 +55,15 @@ HTTPSyncNode::init()
     }
     Logger::info("HTTPSyncNode init() successful");
 
+    return m_initialised;
+
 }
 
 //CO
 HTTPSyncNode::start(){
 
-    if (m_initialised){ //TODO: Does variable exist in header?
+    if (m_initialised)
+    { //TODO: Does m_initialised variable exist in header? Spelling?
         runThread(HTTPSyncThread);
     }
     else
@@ -56,87 +76,54 @@ HTTPSyncNode::start(){
 //CO
 HTTPSyncNode::processMessage(const Message* msgPtr)
 {
-    //Messages: WaypointDataMessage, ConfigDataMessage?
     //Messages not implemented
-    //Done when parts implemented
 
     MessageType msgType = message->getType();
 
     switch(msgType)
     {
-        case MessageType::WaypointData:
-            processWaypointData( (WaypointDataMessage*)message );
+        case MessageType::LocalWaypointChange:
+            pushWaypoints();
             break;
-        case MessageType::ConfigData:
-            processConfigData( (ConfigDataMessage*)message );
+        case MessageType::LocalConfigChange:
+            pushConfigs();
             break;
+        //Potentially: on new log data. Currently sending constantly in thread
     }
 
 }
 
-//CO
+//CO - MOSTLY DONE, DOUBLE CHECK
 HTTPSyncNode::HTTPSyncThread(void* nodePtr){
 
-    //Init check
+    HTTPSyncNode* node = (HTTPSyncNode*)(nodePtr);
+
+    const int HTTPSYNC_SLEEP_MS = m_delay;
 
     Logger::info("HTTPSync thread has started");
 
-    //setupHTTPSync(); //Should be handled in init
-    updateConfigs();
-
-    pushWaypoints();
-    pushConfigs();
-
-    while(isRunning()) //Not sure if isRunning is the correct check, maybe just run infinite loop like in GPSNode?
+    while(true)
     {
-        updateWaypoints();
-        updateConfigs();
-        pushDatalogs();
-        std::this_thread::sleep_for(std::chrono::milliseconds(m_delay));
+        node->getWaypointsFromServer();
+        node->getConfigsFromServer();
+        node->pushDatalogs();
+        std::this_thread::sleep_for(std::chrono::milliseconds(HTTPSYNC_SLEEP_MS));
     }
 
     Logger::info("HTTPSync thread has exited");
 }
 
-//TODO
-HTTPSync::HTTPSync(DBHandler *db,int delay, bool removeLogs) : m_dbHandler(db) {
-    m_running = true;
-    m_removeLogs = removeLogs;
-    curl = curl_easy_init();
-    m_delay = delay;
-    reportedConnectError = false;
-}
 
-//TODO
-HTTPSync::~HTTPSync() {
-    curl_easy_cleanup(curl);
-    curl_global_cleanup();
-}
 
-//TODO
-void HTTPSync::run() {
 
-    //Ported to thread
-}
-
-//TODO
-void HTTPSync::setupHTTPSync() {
-
-    //Ported to init()
-
-}
-
-//TODO
-void HTTPSync::pushDatalogs() {
+//CO
+void HTTPSyncNode::pushDatalogs() {
     std::string response = "";
     if(performCURLCall(m_dbHandler->getLogs(m_pushOnlyLatestLogs), "pushAllLogs", response))
     {
          //remove logs after push
-         //m_logger.info(response);
         if(m_removeLogs) {
-            //m_dbHandler->removeLogs(response);
             m_dbHandler->clearLogs();
-            //m_logger.info("response code: " + response);
         }
 
         Logger::info("Logs pushed to server");
@@ -147,9 +134,9 @@ void HTTPSync::pushDatalogs() {
     }
 }
 
-//TODO
-void HTTPSync::pushWaypoints() {
-
+//CO: MOSTLY DONE? DOUBLE CHECK
+void HTTPSyncNode::pushWaypoints() 
+{
 	std::string waypointsData = m_dbHandler->getWaypoints();
 	if (waypointsData.size() > 0)
 	{
@@ -165,9 +152,10 @@ void HTTPSync::pushWaypoints() {
 	}
 }
 
-//TODO
-void HTTPSync::pushConfigs() {
+//CO - MOSTLY DONE
+void HTTPSyncNode::pushConfigs() {
     std::string response;
+
 	if(performCURLCall(m_dbHandler->getConfigs(), "pushConfigs", response))
 	{
 		Logger::info("Configs pushed to server");
@@ -178,30 +166,25 @@ void HTTPSync::pushConfigs() {
 	}
 }
 
+//ALL OF THESE SETTERS SHOULD FRIG OFF
+//OR SHOULD THEY?
 //TODO
-void HTTPSync::setShipID(std::string ID) {
-    shipID = ID;
+void HTTPSyncNode::setShipID(std::string ID) {
+    m_shipID = ID;
 }
 
 //TODO
-void HTTPSync::setShipPWD(std::string PWD) {
-    shipPWD = PWD;
+void HTTPSyncNode::setShipPWD(std::string PWD) {
+    m_shipPWD = PWD;
 }
 
 //TODO
-void HTTPSync::setServerURL(std::string URL) {
-    serverURL = URL;
+void HTTPSyncNode::setServerURL(std::string URL) {
+    m_serverURL = URL;
 }
 
 //TODO
-void HTTPSync::setWaypointUpdateCallback(waypointUpdateCallback callBack){
-    if (callBack != NULL){
-        m_callBack = callBack;
-    }
-}
-
-//TODO
-std::string HTTPSync::getData(std::string call) {
+std::string HTTPSyncNode::getData(std::string call) {
 	std::string response;
     if(performCURLCall("",call, response))
     {
@@ -214,7 +197,7 @@ std::string HTTPSync::getData(std::string call) {
 }
 
 //TODO
-bool HTTPSync::checkIfNewConfig() {
+bool HTTPSyncNode::checkIfNewConfigs() {
     if (getData("checkIfNewConfigs") == "1")
         return true;
 
@@ -222,7 +205,7 @@ bool HTTPSync::checkIfNewConfig() {
 }
 
 //TODO
-bool HTTPSync::checkIfNewWaypoints(){
+bool HTTPSyncNode::checkIfNewWaypoints(){
     if (getData("checkIfNewWaypoints") == "1")
    	    return true;
 
@@ -230,82 +213,71 @@ bool HTTPSync::checkIfNewWaypoints(){
 }
 
 
-//TODO
-void HTTPSync::updateConfigs() {
-    if(checkIfNewConfig()) {
+//CO: DONE WHEN CLEANED COMMENTS
+void HTTPSyncNode::getConfigsFromServer() {
 
-		std::string configs = getData("getAllConfigs");
-		if (configs.size() > 0)
-		{
-			m_dbHandler->updateConfigs(configs);
-			if (not m_dbHandler->updateTable("state", "configs_updated", "1", "1"))
-			{
-				Logger::error("%s Error updating state table",__PRETTY_FUNCTION__);
-				return;
-			}
-			Logger::info("Configuration retrieved from remote server");
-			pushConfigs();
-		}
-		else if(!reportedConnectError)
-		{
-			Logger::error("%s Error: %s", __PRETTY_FUNCTION__);
-		}
-	}
+    if(checkIfNewConfigs())
+    {
+        std::string configs = getData("getAllConfigs");
+        if (configs.size() > 0)
+        {
+            m_dbHandler->updateConfigs(configs);
+            if (not m_dbHandler->updateTable("state", "configs_updated", "1", "1"))
+            {
+                Logger::error("%s Error updating state table",__PRETTY_FUNCTION__);
+                return;
+            }
+            //EVENT MESSAGE
+            ServerConfigsReceivedMsg* newServerConfigs = new ServerConfigsReceivedMsg();
+            node->m_MsgBus.sendMessage(newServerConfigs);
+            Logger::info("Configuration retrieved from remote server");
+        }
+        else if(!reportedConnectError)
+        {
+            Logger::error("%s Error: %s", __PRETTY_FUNCTION__);
+        }
+    }
 }
 
-//TODO
-void HTTPSync::updateWaypoints() {
+//CO: done when comments handled
+//Renamed!
+void HTTPSyncNode::getWaypointsFromServer() {
 
     if(checkIfNewWaypoints()){
 
-		std::string waypoints = getData("getWaypoints"); //Waypoints call implemented? //performCURLCall("", "getWaypoints")'
+		std::string waypoints = getData("getWaypoints");
 		if (waypoints.size() > 0)
 		{
 			if (m_dbHandler->updateWaypoints(waypoints))
 			{
+                //EVENT MESSAGE - REPLACES OLD CALLBACK, CLEAN OUT CALLBACK REMNANTS IN OTHER CLASSES
+                ServerWaypointsReceivedMsg* newServerWaypoints = new ServerWaypointsReceivedMsg();
+                node->m_MsgBus.sendMessage(newServerWaypoints);
+
 				Logger::info("Waypoints retrieved from remote server");
-				if (m_callBack != NULL)
-				{
-					m_callBack();
-				}
 			}
 		}
 		else if(!reportedConnectError)
 		{
-			Logger::warning("%s Could not updated waypoints",__PRETTY_FUNCTION__);
+			Logger::warning("%s Could not fetch any new waypoints",__PRETTY_FUNCTION__);
 		}
     }
 }
 
 //TODO
-bool HTTPSync::isRunning() {
-    bool running;
-    m_mutex.lock();
-    running = m_running;
-    m_mutex.unlock();
-    return running;
-}
-
-//TODO
-void HTTPSync::close() {
-    m_mutex.lock();
-    m_running = false;
-    m_mutex.unlock();
-}
-
-//TODO
-bool HTTPSync::performCURLCall(std::string data, std::string call, std::string& response) {
+//Did the node rename
+bool HTTPSyncNode::performCURLCall(std::string data, std::string call, std::string& response) {
     std::string serverCall = "";
 
     if(data != "")
-        serverCall = "serv="+call + "&id="+shipID+"&pwd="+shipPWD+"&data="+data;
+        serverCall = "serv="+call + "&id="+m_shipID+"&pwd="+m_shipPWD+"&data="+m_data;
     else
-        serverCall = "serv="+call + "&id="+shipID+"&pwd="+shipPWD;
-        //serv=getAllConfigs&id=BOATID&pwd=BOATPW
+        serverCall = "serv="+call + "&id="+m_shipID+"&pwd="+m_shipPWD;
+        //example: serv=getAllConfigs&id=BOATID&pwd=BOATPW
 
     if(curl) {
     	//Send data through curl with POST
-		curl_easy_setopt(curl, CURLOPT_URL, serverURL.c_str());
+		curl_easy_setopt(curl, CURLOPT_URL, m_serverURL.c_str());
 		curl_easy_setopt(curl, CURLOPT_POSTFIELDS, serverCall.c_str());
 		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_to_string);
 		curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response);
