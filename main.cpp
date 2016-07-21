@@ -6,8 +6,10 @@
 #include "Nodes/CV7Node.h"
 #include "Nodes/HMC6343Node.h"
 #include "Nodes/GPSDNode.h"
+#include "Nodes/ActuatorNode.h"
 #include "Messages/DataRequestMsg.h"
 #include "dbhandler/DBHandler.h"
+#include "SystemServices/MaestroController.h"
 
 enum class NodeImportance {
 	CRITICAL,
@@ -93,11 +95,29 @@ int main(int argc, char *argv[])
 	HMC6343Node compass(messageBus, dbHandler.retrieveCellAsInt("buffer_config", "1", "compass"));
 	GPSDNode gpsd(messageBus);
 
+	int channel = dbHandler.retrieveCellAsInt("sail_servo_config", "1", "channel");
+	int speed = dbHandler.retrieveCellAsInt("sail_servo_config", "1", "speed");
+	int acceleration = dbHandler.retrieveCellAsInt("sail_servo_config", "1", "acceleration");
+
+	ActuatorNode sail(messageBus, NodeID::SailActuator, channel, speed, acceleration);
+
+	channel = dbHandler.retrieveCellAsInt("rudder_servo_config", "1", "channel");
+	speed = dbHandler.retrieveCellAsInt("rudder_servo_config", "1", "speed");
+	acceleration = dbHandler.retrieveCellAsInt("rudder_servo_config", "1", "acceleration");
+
+	ActuatorNode rudder(messageBus, NodeID::RudderActuator, channel, speed, acceleration);
+
+	// System services
+
+	MaestroController::init(dbHandler.retrieveCell("maestro_controller_config", "1", "port"));
+
 	// Initialise nodes
 	initialiseNode(msgLogger, "Message Logger", NodeImportance::NOT_CRITICAL);
 	initialiseNode(windSensor, "Wind Sensor", NodeImportance::CRITICAL);
 	initialiseNode(compass, "Compass", NodeImportance::CRITICAL);
 	initialiseNode(gpsd, "GPSD Node", NodeImportance::CRITICAL);
+	initialiseNode(sail, "Sail Actuator", NodeImportance::CRITICAL);
+	initialiseNode(rudder, "Rudder Actuator", NodeImportance::CRITICAL);
 
 	// Start active nodes
 	windSensor.start();

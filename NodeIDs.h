@@ -22,5 +22,7 @@ enum class NodeID {
 	MessageLogger,
 	WindSensor,
 	Compass,
-	GPS
+	GPS,
+	SailActuator,
+	RudderActuator
 };
