@@ -24,5 +24,6 @@ enum class NodeID {
 	Compass,
 	GPS,
 	SailActuator,
-	RudderActuator
+	RudderActuator,
+	VesselState
 };
