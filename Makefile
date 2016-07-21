@@ -70,11 +70,13 @@ WAYPOINTROUTING = 		waypointrouting/WaypointRouting.cpp waypointrouting/Commands
 
 WINDVANECONTROLLER = 	windvanecontroller/WindVaneController.cpp
 
+OBSTACLEDETECTION = obstacledetection/colorDetect.cpp obstacledetection/colorDetectUtility.cpp
+
 SRC_MAIN = main.cpp
 
 SRC = 	logger/Logger.cpp utility/Utility.cpp utility/Timer.cpp $(XBEE) \
 		$(CORE) $(NODES) $(I2CCONTROLLER) $(POSITION) $(COURSE) $(DB) $(COMMAND) $(MAESTRO) $(GPS) $(HTTP) \
-		$(XML_LOG) $(THREAD) $(WAYPOINTROUTING) $(WINDVANECONTROLLER) $(BEHAVIOURCLASS)
+		$(XML_LOG) $(THREAD) $(WAYPOINTROUTING) $(WINDVANECONTROLLER) $(BEHAVIOURCLASS) $(OBSTACLEDETECTION)
 
 #SOURCES = $(addprefix src/, $(SRC))
 
@@ -102,10 +104,10 @@ export OBJECT_FILE = $(BUILD_DIR)/objects.tmp
 #######################################################
 
 
-export CFLAGS = -Wall -g -o2
+export CFLAGS = -Wall -g -o2 `pkg-config --cflags opencv`
 export CPPFLAGS = -g -Wall -pedantic -Werror -std=c++11
 
-export LIBS = -lsqlite3 -lgps -lrt -lcurl -lpthread
+export LIBS = -lsqlite3 -lgps -lrt -lcurl -lpthread `pkg-config --libs opencv`
 
 ifeq ($(TOOLCHAIN),raspi_cc)
 C_TOOLCHAIN = 0

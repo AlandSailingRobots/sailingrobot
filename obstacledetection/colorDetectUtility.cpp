@@ -1,4 +1,4 @@
-#include "detectUtility.h"
+#include "colorDetectUtility.h"
 using namespace cv;
 using namespace std;
 
@@ -153,7 +153,7 @@ vector<vector<int> > findHsvTreshold(vector<string> colors, vector<Scalar>& colo
     vector<vector<int> > hsvValues;
     /*Hsv low nd min values*/
     string color = "red";
-    for(int i = 0; i < colors.size();i ++){
+    for(int i = 0; i <(int)colors.size();i ++){
         color = colors[i];
         if(color.compare("red")==0){
             hsvValues.push_back(red);
@@ -230,7 +230,7 @@ void computeContoursCentersRectangles(Mat const& imgThresholded,vector<Point2f>&
     vector<Point2f> mc1( contoursMerged.size() );
     mc=mc1;
     double dArea = 0;
-    for( int i = 0; i < contoursMerged.size(); i++ ){
+    for( int i = 0; i <(int)contoursMerged.size(); i++ ){
         mu[i] = moments( contoursMerged[i], false );
         dArea=mu[i].m00;
 
@@ -244,7 +244,7 @@ void computeContoursCentersRectangles(Mat const& imgThresholded,vector<Point2f>&
 }
 
 void drawCentersRectangles(Mat& imgOriginal,vector<Point2f> const& mc,vector<Rect> const& rotated_bounding_rects,Scalar const& aColorDrawing ){
-    Point2f rect_points[4];
+    //Point2f rect_points[4];
     for(int i = 0; i<(int)rotated_bounding_rects.size(); i++ ){
         circle( imgOriginal, mc[i], 10, aColorDrawing, 1, 8, 0 );
         rectangle(imgOriginal, rotated_bounding_rects[i], aColorDrawing,4, 8,0);
@@ -327,10 +327,10 @@ void computeObstaclesAnglePosition(cv::Mat const& imgOriginal, std::vector<Obsta
     ObstacleData currentObstacle;
     Size imageSize=imgOriginal.size(), rectangleSize;
     Point topLeftCorner, leftPoint, rightPoint, imageCenter(imageSize.width/2.0,imageSize.height/2.0);
-    int imgHeight=imageSize.height;
-    int imgWidth=imageSize.width;
+    //int imgHeight=imageSize.height;
+    //int imgWidth=imageSize.width;
     float webcamAngleApertureXPerPixel = webcamAngleApertureX/imageSize.width;
-    float webcamAngleApertureYPerPixel = webcamAngleApertureY/imageSize.height;
+    //float webcamAngleApertureYPerPixel = webcamAngleApertureY/imageSize.height;
     for(int i = 0; i<(int)rotated_bounding_rects_several_captures.size(); i++){
         for(int j = 0; j<(int)rotated_bounding_rects_several_captures[i].size(); j++){
             rectangleSize=rotated_bounding_rects_several_captures[i][j].size();

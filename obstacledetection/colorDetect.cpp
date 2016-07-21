@@ -1,4 +1,4 @@
-#include "detectUtility.h"
+#include "colorDetectUtility.h"
 using namespace cv;
 using namespace std;
 
@@ -128,7 +128,7 @@ void initWindowsAndTrackbars(int numberOfColorsToTrack){
     moveWindow("Detection", 1300,0);
 }
 
-int main( int argc, char** argv )
+int colorDetect( int argc, char** argv )
 {
     initHsvColors();
     vector<Scalar> colorDrawing;
@@ -188,7 +188,7 @@ int main( int argc, char** argv )
             //supressSmallRectangles(rotated_bounding_rects_several_captures[i], minAreaToDetect);
             rotated_bounding_rects_merged_list[i] = compareRects(imgOriginal,rotated_bounding_rects_several_captures[i]);
             centers[i]=findRectanglesCenters(rotated_bounding_rects_merged_list[i]);
-            for(int j = 0; j < rotated_bounding_rects_merged_list[i].size(); j++){
+            for(int j = 0; j <(int)rotated_bounding_rects_merged_list[i].size(); j++){
                 rectangle(imgOriginal, rotated_bounding_rects_merged_list[i][j],colorDrawing[i] ,4, 8,0);
                 circle( imgOriginal, centers[i][j], 10,colorDrawing[i] , 4, 8, 0 );
             }
