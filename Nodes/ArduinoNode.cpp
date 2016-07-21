@@ -87,11 +87,6 @@ void ArduinoNode::ArduinoThreadFunc(void* nodePtr)
 {
     ArduinoNode* node = (ArduinoNode*)nodePtr;
 
-    if(node->m_Initialised == false)
-    {
-        Logger::error("Arduino node not initialised, thread not started!");
-        return;
-    }
     Logger::info("Arduino thread started");
 
     while(true)

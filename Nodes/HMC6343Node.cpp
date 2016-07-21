@@ -174,11 +174,6 @@ void HMC6343Node::HMC6343ThreadFunc(void* nodePtr)
 
 	HMC6343Node* node = (HMC6343Node*)nodePtr;
 
-    if(node->m_Initialised == false)
-    {
-        Logger::error("HMC6343 node not initialised, thread not started!");
-        return;
-    }
 	Logger::info("HMC6343 compass thread started!");
 	unsigned int errorCount = 0;
 	std::vector<float> headingData(node->m_HeadingBufferSize);

@@ -77,12 +77,6 @@ void CV7Node::WindSensorThread(void* nodePtr)
 {
 	CV7Node* node = (CV7Node*)(nodePtr);
 
-	if(node->m_Initialised == false)
-    {
-        Logger::error("CV7 node not initialised, thread not started!");
-        return;
-    }
-
 	const int DATA_BUFFER_SIZE = 30;
 	const int NON_BREAKING_SPACE = 255;
 	const int BUFF_SIZE = 256;
