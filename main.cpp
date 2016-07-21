@@ -6,7 +6,11 @@
 #include "Nodes/CV7Node.h"
 #include "Nodes/HMC6343Node.h"
 #include "Nodes/GPSDNode.h"
+<<<<<<< HEAD
 #include "Nodes/ActuatorNode.h"
+=======
+#include "Nodes/ArduinoNode.h"
+>>>>>>> srcs-144_message_architecture
 #include "Messages/DataRequestMsg.h"
 #include "dbhandler/DBHandler.h"
 #include "SystemServices/MaestroController.h"
@@ -94,6 +98,7 @@ int main(int argc, char *argv[])
 	CV7Node windSensor(messageBus, dbHandler.retrieveCell("windsensor_config", "1", "port"), dbHandler.retrieveCellAsInt("windsensor_config", "1", "baud_rate"));
 	HMC6343Node compass(messageBus, dbHandler.retrieveCellAsInt("buffer_config", "1", "compass"));
 	GPSDNode gpsd(messageBus);
+	ArduinoNode arduino(messageBus);
 
 	int channel = dbHandler.retrieveCellAsInt("sail_servo_config", "1", "channel");
 	int speed = dbHandler.retrieveCellAsInt("sail_servo_config", "1", "speed");
@@ -118,11 +123,13 @@ int main(int argc, char *argv[])
 	initialiseNode(gpsd, "GPSD Node", NodeImportance::CRITICAL);
 	initialiseNode(sail, "Sail Actuator", NodeImportance::CRITICAL);
 	initialiseNode(rudder, "Rudder Actuator", NodeImportance::CRITICAL);
+	initialiseNode(arduino, "Arduino Node", NodeImportance::NOT_CRITICAL);
 
 	// Start active nodes
 	windSensor.start();
 	compass.start();
 	gpsd.start();
+	arduino.start();
 
 	// NOTE - Jordan: Just to ensure messages are following through the system
 	DataRequestMsg* dataRequest = new DataRequestMsg(NodeID::MessageLogger);

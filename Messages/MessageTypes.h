@@ -22,5 +22,6 @@ enum class MessageType {
 	CompassData,
 	GPSData,
 	ActuatorPosition,
+	ArduinoData,
 	VesselState
 };
