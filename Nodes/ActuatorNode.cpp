@@ -4,7 +4,7 @@
  * 		ActuatorNode.cpp
  *
  * Purpose:
- *		Controls a actuator on the vessel.
+ *		Controls an actuator on the vessel.
  *
  * Developer Notes:
  *
