@@ -1,9 +1,9 @@
 [submodule "tests"]
 	path = tests
-	url = https://github.com/pophaax/tests.git
+	url = https://github.com/AlandSailingRobots/tests.git
 [submodule "xbeerelay"]
 	path = xbeerelay
-	url = https://github.com/pophaax/xbeerelay.git
+	url = https://github.com/AlandSailingRobots/xbeerelay.git
 [submodule "libs/json"]
 	path = libs/json
 	url = https://github.com/nlohmann/json.git
