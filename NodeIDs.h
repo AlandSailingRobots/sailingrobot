@@ -23,5 +23,6 @@ enum class NodeID {
 	WindSensor,
 	Compass,
 	GPS,
+	Arduino,
 	VesselState
 };

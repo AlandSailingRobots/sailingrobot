@@ -6,6 +6,7 @@
 #include "Nodes/CV7Node.h"
 #include "Nodes/HMC6343Node.h"
 #include "Nodes/GPSDNode.h"
+#include "Nodes/ArduinoNode.h"
 #include "Messages/DataRequestMsg.h"
 #include "dbhandler/DBHandler.h"
 
@@ -92,17 +93,20 @@ int main(int argc, char *argv[])
 	CV7Node windSensor(messageBus, dbHandler.retrieveCell("windsensor_config", "1", "port"), dbHandler.retrieveCellAsInt("windsensor_config", "1", "baud_rate"));
 	HMC6343Node compass(messageBus, dbHandler.retrieveCellAsInt("buffer_config", "1", "compass"));
 	GPSDNode gpsd(messageBus);
+	ArduinoNode arduino(messageBus);
 
 	// Initialise nodes
 	initialiseNode(msgLogger, "Message Logger", NodeImportance::NOT_CRITICAL);
 	initialiseNode(windSensor, "Wind Sensor", NodeImportance::CRITICAL);
 	initialiseNode(compass, "Compass", NodeImportance::CRITICAL);
 	initialiseNode(gpsd, "GPSD Node", NodeImportance::CRITICAL);
+	initialiseNode(arduino, "Arduino Node", NodeImportance::NOT_CRITICAL);
 
 	// Start active nodes
 	windSensor.start();
 	compass.start();
 	gpsd.start();
+	arduino.start();
 
 	// NOTE - Jordan: Just to ensure messages are following through the system
 	DataRequestMsg* dataRequest = new DataRequestMsg(NodeID::MessageLogger);
