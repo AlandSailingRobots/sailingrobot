@@ -1,9 +1,11 @@
-#ifndef __HTTPSYNCNODE_H__
-#define __HTTPSYNCNODE_H__
 
+#pragma once
+
+#include "ActiveNode.h"
 #include "../dbhandler/DBHandler.h"
 #include "logger/Logger.h"
 #include "models/SystemStateModel.h"
+
 
 #include <chrono>
 #include <thread>
@@ -12,28 +14,30 @@
 #include <mutex>
 
 
-class HTTPSyncNode {
+class HTTPSyncNode : public ActiveNode{
 
 
 	public:
 
-		HTTPSyncNode(DBHandler *db,int delay, bool removeLogs);
+		HTTPSyncNode(MessageBus& msgBus,DBHandler *db,int delay, bool removeLogs);
         
         bool init();
-        bool start();
-        void ProcessMessage(const Message* message);
+        void start();
+        void processMessage(const Message* message);
 
 
 	private:
 
         bool m_initialised;
 
-		CURL *curl;
-		CURLcode m_res;
-		bool m_reportedConnectError;
 		std::string m_shipID;
 		std::string m_shipPWD;
 		std::string m_serverURL;
+
+		CURL *curl;
+		CURLcode m_res;
+		bool m_reportedConnectError;
+
 		bool m_removeLogs;
 		int m_delay;
 		int m_pushOnlyLatestLogs;
@@ -59,4 +63,3 @@ class HTTPSyncNode {
         static void HTTPSyncThread(void* nodePtr);
 };
 
-#endif
