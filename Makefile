@@ -42,7 +42,7 @@ CORE =					MessageBus.cpp ActiveNode.cpp
 
 BEHAVIOURCLASS = 	behaviourclass/RoutingBehaviour.cpp  behaviourclass/WaypointBehaviour.cpp behaviourclass/LineFollowBehaviour.cpp behaviourclass/CollisionAvoidanceBehave.cpp
 
-NODES =					Nodes/MessageLoggerNode.cpp Nodes/CV7Node.cpp Nodes/HMC6343Node.cpp Nodes/GPSDNode.cpp Nodes/VesselStateNode.cpp
+NODES =					Nodes/MessageLoggerNode.cpp Nodes/CV7Node.cpp Nodes/HMC6343Node.cpp Nodes/GPSDNode.cpp Nodes/VesselStateNode.cpp Nodes/obstacledetection/colorDetect.cpp Nodes/obstacledetection/colorDetectUtility.cpp
 
 XBEE = 					xBee/xBeeSync.cpp xBee/xBee.cpp
 
@@ -70,13 +70,12 @@ WAYPOINTROUTING = 		waypointrouting/WaypointRouting.cpp waypointrouting/Commands
 
 WINDVANECONTROLLER = 	windvanecontroller/WindVaneController.cpp
 
-OBSTACLEDETECTION = obstacledetection/colorDetect.cpp obstacledetection/colorDetectUtility.cpp
 
 SRC_MAIN = main.cpp
 
 SRC = 	logger/Logger.cpp utility/Utility.cpp utility/Timer.cpp $(XBEE) \
 		$(CORE) $(NODES) $(I2CCONTROLLER) $(POSITION) $(COURSE) $(DB) $(COMMAND) $(MAESTRO) $(GPS) $(HTTP) \
-		$(XML_LOG) $(THREAD) $(WAYPOINTROUTING) $(WINDVANECONTROLLER) $(BEHAVIOURCLASS) $(OBSTACLEDETECTION)
+		$(XML_LOG) $(THREAD) $(WAYPOINTROUTING) $(WINDVANECONTROLLER) $(BEHAVIOURCLASS)
 
 #SOURCES = $(addprefix src/, $(SRC))
 

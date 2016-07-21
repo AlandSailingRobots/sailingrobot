@@ -21,7 +21,7 @@
 class GPSDNode : public ActiveNode {
 public:
 	GPSDNode(MessageBus& msgBus);
-	
+
 	~GPSDNode();
 
 	///----------------------------------------------------------------------------------
