@@ -6,11 +6,11 @@
 class ServerConfigsReceivedMsg : public Message {
 public:
 	ServerConfigsReceivedMsg(NodeID destinationID, NodeID sourceID)
-		:Message(MessageType::ServerConfigReceived, sourceID, destinationID)
+		:Message(MessageType::ServerConfigsReceived, sourceID, destinationID)
 	{ }
 
 	ServerConfigsReceivedMsg()
-		:Message(MessageType::ServerConfigReceived, NodeID::None, NodeID::None)
+		:Message(MessageType::ServerConfigsReceived, NodeID::None, NodeID::None)
 	{ }
 
 	virtual ~ServerConfigsReceivedMsg() { }
