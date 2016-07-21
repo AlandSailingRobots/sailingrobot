@@ -25,7 +25,8 @@
 #define BLOCK_READ_SIZE 9
 #define BLOCK_I2C_ADDRESS_LOC 8
 
-// AR_UNO Commands
+#define ARDUINO_SENSOR_SLEEP_MS	100
+
 
 ArduinoNode::ArduinoNode(MessageBus& msgBus)
 : ActiveNode(NodeID::Arduino, msgBus), m_I2C(), m_Initialised(false)
@@ -90,6 +91,8 @@ void ArduinoNode::ArduinoThreadFunc(void* nodePtr)
 
     while(true)
     {
+        std::this_thread::sleep_for(std::chrono::milliseconds(ARDUINO_SENSOR_SLEEP_MS));
+
         uint8_t block[BLOCK_READ_SIZE];
         uint16_t reVal;       
         //readValues(block)
@@ -114,6 +117,7 @@ void ArduinoNode::ArduinoThreadFunc(void* nodePtr)
         reVal+=(uint16_t) block[7];
         node->m_battery = reVal;
 
+        Logger::info("Sending Arduino Message: Pressure: %d     Rudder: %d      Sheet: %d      Battery: %d", m_pressure, m_rudder, m_sheet, m_battery);
         ArduinoDataMsg* msg = new ArduinoDataMsg(node->m_pressure, node->m_rudder, node->m_sheet, node->m_battery);
         node->m_MsgBus.sendMessage(msg);
     }
