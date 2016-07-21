@@ -1,0 +1,55 @@
+/tmp/cc5DF8Re.o: dans la fonction « merge2Contours(std::vector<cv::Point_<int>, std::allocator<cv::Point_<int> > >, std::vector<cv::Point_<int>, std::allocator<cv::Point_<int> > >, cv::RotatedRect&) »:
+detect.cpp:(.text+0x2f4): référence indéfinie vers « cv::convexHull(cv::_InputArray const&, cv::_OutputArray const&, bool, bool) »
+detect.cpp:(.text+0x368): référence indéfinie vers « cv::minAreaRect(cv::_InputArray const&) »
+/tmp/cc5DF8Re.o: dans la fonction « main »:
+detect.cpp:(.text+0xf0e): référence indéfinie vers « cv::VideoCapture::VideoCapture(int) »
+detect.cpp:(.text+0xf1d): référence ind��finie vers « cv::VideoCapture::isOpened() const »
+detect.cpp:(.text+0xf72): référence indéfinie vers « cv::namedWindow(cv::String const&, int) »
+detect.cpp:(.text+0x1013): référence indéfinie vers « cv::createTrackbar(cv::String const&, cv::String const&, int*, int, void (*)(int, void*), void*) »
+detect.cpp:(.text+0x1087): référence indéfinie vers �� cv::createTrackbar(cv::String const&, cv::String const&, int*, int, void (*)(int, void*), void*) »
+detect.cpp:(.text+0x10fb): référence indéfinie vers �� cv::createTrackbar(cv::String const&, cv::String const&, int*, int, void (*)(int, void*), void*) »
+detect.cpp:(.text+0x116f): référence indéfinie vers « cv::createTrackbar(cv::String const&, cv::String const&, int*, int, void (*)(int, void*), void*) »
+detect.cpp:(.text+0x11e3): référence indéfinie vers « cv::createTrackbar(cv::String const&, cv::String const&, int*, int, void (*)(int, void*), void*) »
+/tmp/cc5DF8Re.o:detect.cpp:(.text+0x1257): encore plus de références indéfinies suivent vers « cv::createTrackbar(cv::String const&, cv::String const&, int*, int, void (*)(int, void*), void*) »
+/tmp/cc5DF8Re.o: dans la fonction « main »:
+detect.cpp:(.text+0x12de): référence indéfinie vers « cv::VideoCapture::read(cv::_OutputArray const&) »
+detect.cpp:(.text+0x1328): référence indéfinie vers « cv::Mat::zeros(cv::Size_<int>, int) »
+detect.cpp:(.text+0x1391): réf��rence indéfinie vers « cv::VideoCapture::read(cv::_OutputArray const&) »
+detect.cpp:(.text+0x143b): référence indéfinie vers « cv::cvtColor(cv::_InputArray const&, cv::_OutputArray const&, int, int) »
+detect.cpp:(.text+0x1552): référence indéfinie vers « cv::inRange(cv::_InputArray const&, cv::_InputArray const&, cv::_InputArray const&, cv::_OutputArray const&) »
+detect.cpp:(.text+0x160a): référence indéfinie vers « cv::getStructuringElement(int, cv::Size_<int>, cv::Point_<int>) »
+detect.cpp:(.text+0x1690): référence indéfinie vers « cv::erode(cv::_InputArray const&, cv::_OutputArray const&, cv::_InputArray const&, cv::Point_<int>, int, int, cv::Scalar_<double> const&) »
+detect.cpp:(.text+0x1748): référence indéfinie vers « cv::getStructuringElement(int, cv::Size_<int>, cv::Point_<int>) »
+detect.cpp:(.text+0x17ce): référence indéfinie vers « cv::dilate(cv::_InputArray const&, cv::_OutputArray const&, cv::_InputArray const&, cv::Point_<int>, int, int, cv::Scalar_<double> const&) »
+detect.cpp:(.text+0x1886): référence indéfinie vers « cv::getStructuringElement(int, cv::Size_<int>, cv::Point_<int>) »
+detect.cpp:(.text+0x190c): référence indéfinie vers « cv::dilate(cv::_InputArray const&, cv::_OutputArray const&, cv::_InputArray const&, cv::Point_<int>, int, int, cv::Scalar_<double> const&) »
+detect.cpp:(.text+0x19c4): référence indéfinie vers « cv::getStructuringElement(int, cv::Size_<int>, cv::Point_<int>) »
+detect.cpp:(.text+0x1a4a): référence indéfinie vers « cv::erode(cv::_InputArray const&, cv::_OutputArray const&, cv::_InputArray const&, cv::Point_<int>, int, int, cv::Scalar_<double> const&) »
+detect.cpp:(.text+0x1abd): référence indéfinie vers « cv::moments(cv::_InputArray const&, bool) »
+detect.cpp:(.text+0x1bf1): référence indéfinie vers « cv::Mat::copyTo(cv::_OutputArray const&) const »
+detect.cpp:(.text+0x1d26): référence indéfinie vers « cv::findContours(cv::_InputOutputArray const&, cv::_OutputArray const&, cv::_OutputArray const&, int, int, cv::Point_<int>) »
+detect.cpp:(.text+0x1dfb): référence indéfinie vers « cv::Moments::Moments() »
+detect.cpp:(.text+0x1eb4): référence indéfinie vers « cv::moments(cv::_InputArray const&, bool) »
+detect.cpp:(.text+0x21f4): référence indéfinie vers « cv::circle(cv::_InputOutputArray const&, cv::Point_<int>, int, cv::Scalar_<double> const&, int, int, int) »
+detect.cpp:(.text+0x2230): référence indéfinie vers « cv::RotatedRect::points(cv::Point_<float>*) const »
+detect.cpp:(.text+0x22f7): r��férence indéfinie vers « cv::line(cv::_InputOutputArray const&, cv::Point_<int>, cv::Point_<int>, cv::Scalar_<double> const&, int, int, int) »
+detect.cpp:(.text+0x2423): référence indéfinie vers « cv::imshow(cv::String const&, cv::_InputArray const&) »
+detect.cpp:(.text+0x2461): référence indéfinie vers « cv::operator+(cv::Mat const&, cv::Mat const&) »
+detect.cpp:(.text+0x24cf): référence indéfinie vers « cv::imshow(cv::String const&, cv::_InputArray const&) »
+detect.cpp:(.text+0x24f7): référence indéfinie vers « cv::waitKey(int) »
+detect.cpp:(.text+0x25b7): référence indéfinie vers « cv::VideoCapture::~VideoCapture() »
+detect.cpp:(.text+0x2b67): référence indéfinie vers « cv::VideoCapture::~VideoCapture() »
+/tmp/cc5DF8Re.o: dans la fonction « cv::String::String(char const*) »:
+detect.cpp:(.text._ZN2cv6StringC2EPKc[_ZN2cv6StringC5EPKc]+0x4f): référence indéfinie vers « cv::String::allocate(unsigned long) »
+/tmp/cc5DF8Re.o: dans la fonction « cv::String::~String() »:
+detect.cpp:(.text._ZN2cv6StringD2Ev[_ZN2cv6StringD5Ev]+0x14): référence indéfinie vers « cv::String::deallocate() »
+/tmp/cc5DF8Re.o: dans la fonction « cv::Mat::Mat(int, int, int, void*, unsigned long) »:
+detect.cpp:(.text._ZN2cv3MatC2EiiiPvm[_ZN2cv3MatC5EiiiPvm]+0x121): référence indéfinie vers « cv::error(int, cv::String const&, char const*, char const*, int) »
+detect.cpp:(.text._ZN2cv3MatC2EiiiPvm[_ZN2cv3MatC5EiiiPvm]+0x228): référence indéfinie vers « cv::error(int, cv::String const&, char const*, char const*, int) »
+/tmp/cc5DF8Re.o: dans la fonction « cv::Mat::~Mat() »:
+detect.cpp:(.text._ZN2cv3MatD2Ev[_ZN2cv3MatD5Ev]+0x39): référence indéfinie vers « cv::fastFree(void*) »
+/tmp/cc5DF8Re.o: dans la fonction « cv::Mat::release() »:
+detect.cpp:(.text._ZN2cv3Mat7releaseEv[_ZN2cv3Mat7releaseEv]+0x4b): référence indéfinie vers « cv::Mat::deallocate() »
+/tmp/cc5DF8Re.o: dans la fonction « cv::Mat::Mat<cv::Point_<int> >(std::vector<cv::Point_<int>, std::allocator<cv::Point_<int> > > const&, bool) »:
+detect.cpp:(.text._ZN2cv3MatC2INS_6Point_IiEEEERKSt6vectorIT_SaIS5_EEb[_ZN2cv3MatC5INS_6Point_IiEEEERKSt6vectorIT_SaIS5_EEb]+0x259): référence indéfinie vers « cv::Mat::copyTo(cv::_OutputArray const&) const »
+collect2: error: ld returned 1 exit status
