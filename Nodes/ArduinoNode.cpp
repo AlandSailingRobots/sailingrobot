@@ -117,7 +117,7 @@ void ArduinoNode::ArduinoThreadFunc(void* nodePtr)
         reVal+=(uint16_t) block[7];
         node->m_battery = reVal;
 
-        Logger::info("Sending Arduino Message: Pressure: %d     Rudder: %d      Sheet: %d      Battery: %d", m_pressure, m_rudder, m_sheet, m_battery);
+        Logger::info("Sending Arduino Message: Pressure: %d     Rudder: %d      Sheet: %d      Battery: %d", node->m_pressure, node->m_rudder, node->m_sheet, node->m_battery);
         ArduinoDataMsg* msg = new ArduinoDataMsg(node->m_pressure, node->m_rudder, node->m_sheet, node->m_battery);
         node->m_MsgBus.sendMessage(msg);
     }
