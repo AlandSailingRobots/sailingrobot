@@ -117,7 +117,7 @@ void ArduinoNode::ArduinoThreadFunc(void* nodePtr)
         reVal+=(uint16_t) block[7];
         node->m_battery = reVal;
 
-        ArduinoDataMsg* msg = new ArduinoDataMsg(node->m_pressure, node->m_rudder, node->m_sheet, node->m_battery);
-        node->m_MsgBus.sendMessage(msg);
+        MessagePtr msg = std::make_unique<ArduinoDataMsg>(node->m_pressure, node->m_rudder, node->m_sheet, node->m_battery);
+        node->m_MsgBus.sendMessage(std::move(msg));
     }
 }

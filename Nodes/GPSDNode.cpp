@@ -128,7 +128,7 @@ void GPSDNode::GPSThreadFunc(void* nodePtr)
 			mode = static_cast<GPSMode>(newData->fix.mode);
 		}
 
-		GPSDataMsg* msg = new GPSDataMsg(gps_hasFix, gps_online, unixTime, node->m_Lat, node->m_Lon, node->m_Speed, node->m_Heading, satCount, mode);
-		node->m_MsgBus.sendMessage(msg);
+		MessagePtr msg = std::make_unique<GPSDataMsg>(gps_hasFix, gps_online, unixTime, node->m_Lat, node->m_Lon, node->m_Speed, node->m_Heading, satCount, mode);
+		node->m_MsgBus.sendMessage(std::move(msg));
 	}
 }

@@ -23,8 +23,8 @@
 MessageBus::MessageBus()
 	:m_Running(false)
 {
-	m_FrontMessages = new std::queue<Message*>();
-	m_BackMessages = new std::queue<Message*>();
+	m_FrontMessages = new std::queue<MessagePtr>();
+	m_BackMessages = new std::queue<MessagePtr>();
 }
 
 MessageBus::~MessageBus()
@@ -55,12 +55,12 @@ void MessageBus::registerNode(Node* node, MessageType msgType)
 	}
 }
 
-void MessageBus::sendMessage(Message* msg)
+void MessageBus::sendMessage(MessagePtr msg)
 {
 	if(msg != NULL)
 	{
 		m_FrontQueueMutex.lock();
-		m_FrontMessages->push(msg);
+		m_FrontMessages->push(std::move(msg));
 		m_FrontQueueMutex.unlock();
 	}
 }
@@ -79,7 +79,7 @@ void MessageBus::run()
 		// If we have messages, flip the two queues and begin processing messages
 		if(m_FrontMessages->size() > 0)
 		{
-			std::queue<Message*>* tmpPtr;
+			std::queue<MessagePtr>* tmpPtr;
 
 			m_FrontQueueMutex.lock();
 			
@@ -115,7 +115,7 @@ void MessageBus::processMessages()
 {
 	while(m_BackMessages->size() > 0)
 	{
-		Message* msg = m_BackMessages->front();
+		Message* msg = m_BackMessages->front().get();
 
 		for(auto node : m_RegisteredNodes)
 		{
@@ -139,6 +139,6 @@ void MessageBus::processMessages()
 		}
 
 		m_BackMessages->pop();
-		delete msg;
+		// delete msg; Don't need for unique pointers
 	}
 }

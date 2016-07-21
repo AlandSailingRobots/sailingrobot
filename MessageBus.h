@@ -22,6 +22,10 @@
 #include <vector>
 #include <queue>
 #include <mutex>
+#include <memory>
+
+
+typedef std::unique_ptr<Message> MessagePtr;
 
 class Node;
 
@@ -64,7 +68,7 @@ public:
  	/// @param msg 				Pointer to the message that should be enqeued, this
  	///							passes ownership to the MessageBus.
  	///----------------------------------------------------------------------------------
-	void sendMessage(Message* msg);
+	void sendMessage(MessagePtr msg);
 
 	///----------------------------------------------------------------------------------
  	/// Begins running the message bus and distributing messages to nodes that have been
@@ -125,9 +129,9 @@ private:
 
 	bool 							m_Running;
 	std::vector<RegisteredNode*> 	m_RegisteredNodes;
-	std::queue<Message*>* 			m_FrontMessages; 	// The forward facing message queue 
+	std::queue<MessagePtr>* 		m_FrontMessages; 	// The forward facing message queue 
 													 	// which messages are append to.
-	std::queue<Message*>*			m_BackMessages; 	// The backend message queue which 
+	std::queue<MessagePtr>*			m_BackMessages; 	// The backend message queue which 
 														// contains messages to distribute.
 	std::mutex						m_FrontQueueMutex;	// Guards the front message queue.
 };

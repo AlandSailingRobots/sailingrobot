@@ -67,8 +67,8 @@ void CV7Node::processMessage(const Message* message)
 		// On system startup we won't have any valid data, so don't send any
 		if(m_MeanWindDir != DATA_OUT_OF_RANGE ||  m_MeanWindTemp != DATA_OUT_OF_RANGE || m_MeanWindSpeed != DATA_OUT_OF_RANGE)
 		{
-			WindDataMsg* windData = new WindDataMsg(message->sourceID(), this->nodeID(), m_MeanWindDir, m_MeanWindTemp, m_MeanWindSpeed);
-			m_MsgBus.sendMessage(windData);
+			MessagePtr windData = std::make_unique<WindDataMsg>(message->sourceID(), this->nodeID(), m_MeanWindDir, m_MeanWindTemp, m_MeanWindSpeed);
+			m_MsgBus.sendMessage(std::move(windData));
 		}
 	}
 }
@@ -160,8 +160,8 @@ void CV7Node::WindSensorThread(void* nodePtr)
 				node->m_MeanWindSpeed = Utility::mean(windSpeedData);
 
 				// Send a wind sensor message out
-				WindDataMsg* windData = new WindDataMsg(node->m_MeanWindDir, node->m_MeanWindTemp, node->m_MeanWindSpeed);
-				node->m_MsgBus.sendMessage(windData);
+				MessagePtr windData = std::make_unique<WindDataMsg>(node->m_MeanWindDir, node->m_MeanWindTemp, node->m_MeanWindSpeed);
+				node->m_MsgBus.sendMessage(std::move(windData));
 			}
 		}
 		else

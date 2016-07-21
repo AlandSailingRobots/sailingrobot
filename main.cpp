@@ -109,8 +109,8 @@ int main(int argc, char *argv[])
 	arduino.start();
 
 	// NOTE - Jordan: Just to ensure messages are following through the system
-	DataRequestMsg* dataRequest = new DataRequestMsg(NodeID::MessageLogger);
-	messageBus.sendMessage(dataRequest);
+	MessagePtr dataRequest = std::make_unique<DataRequestMsg>(NodeID::MessageLogger);
+	messageBus.sendMessage(std::move(dataRequest));
 
 	Logger::info("Message bus started!");
 	messageBus.run();
