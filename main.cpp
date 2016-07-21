@@ -6,11 +6,8 @@
 #include "Nodes/CV7Node.h"
 #include "Nodes/HMC6343Node.h"
 #include "Nodes/GPSDNode.h"
-<<<<<<< HEAD
 #include "Nodes/ActuatorNode.h"
-=======
 #include "Nodes/ArduinoNode.h"
->>>>>>> srcs-144_message_architecture
 #include "Messages/DataRequestMsg.h"
 #include "dbhandler/DBHandler.h"
 #include "SystemServices/MaestroController.h"
