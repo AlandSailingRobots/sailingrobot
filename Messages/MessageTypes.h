@@ -24,5 +24,8 @@ enum class MessageType {
 	ServerConfigsReceived,
 	ServerWaypointsReceived,
 	LocalConfigChange,
-	LocalWaypointChange
+	LocalWaypointChange,
+	ActuatorPosition,
+	ArduinoData,
+	VesselState
 };
