@@ -68,6 +68,11 @@ void GPSDNode::GPSThreadFunc(void* nodePtr)
 {
 	GPSDNode* node = (GPSDNode*)nodePtr;
 
+	if(node->m_Initialised == false)
+    {
+        Logger::error("GPSD node not initialised, thread not started!");
+        return;
+    }
 	Logger::info("GPSD thread started");
 
 	while(true)
