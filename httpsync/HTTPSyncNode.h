@@ -23,9 +23,6 @@ class HTTPSyncNode {
         bool start();
         void ProcessMessage(const Message* message);
 
-        
-
-
 
 	private:
 

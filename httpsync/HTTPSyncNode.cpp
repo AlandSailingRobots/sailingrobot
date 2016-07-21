@@ -7,13 +7,6 @@
         PUSH LOGS ON AN INTERVAL
         NOTIFY MESSAGEBUS WHEN NEW SERVERDATA ARRIVES
 
-    TODO, GENERAL
-
-        -   IMPLEMENT HEADER
-        -   m_ for global variables
-            - curl
-            - server data
-
 */
 
 //TODO
@@ -227,8 +220,8 @@ void HTTPSyncNode::getConfigsFromServer() {
                 Logger::error("%s Error updating state table",__PRETTY_FUNCTION__);
                 return;
             }
-            //EVENT MESSAGE
-            ServerConfigsReceivedMsg* newServerConfigs = new ServerConfigsReceivedMsg();
+
+            ServerConfigsReceivedMsg* newServerConfigs = new ServerConfigsReceivedMsg(message->sourceID(), this->nodeID());
             node->m_MsgBus.sendMessage(newServerConfigs);
             Logger::info("Configuration retrieved from remote server");
         }
@@ -251,7 +244,7 @@ void HTTPSyncNode::getWaypointsFromServer() {
 			if (m_dbHandler->updateWaypoints(waypoints))
 			{
                 //EVENT MESSAGE - REPLACES OLD CALLBACK, CLEAN OUT CALLBACK REMNANTS IN OTHER CLASSES
-                ServerWaypointsReceivedMsg* newServerWaypoints = new ServerWaypointsReceivedMsg();
+                ServerWaypointsReceivedMsg* newServerWaypoints = new ServerWaypointsReceivedMsg(message->sourceID(), this->nodeID());
                 node->m_MsgBus.sendMessage(newServerWaypoints);
 
 				Logger::info("Waypoints retrieved from remote server");
