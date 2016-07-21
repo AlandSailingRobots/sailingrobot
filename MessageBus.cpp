@@ -147,5 +147,6 @@ void MessageBus::processMessages()
 
 		m_BackMessages->pop();
 		delete msg;
+		msg = NULL;
 	}
 }

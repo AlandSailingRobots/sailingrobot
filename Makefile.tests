@@ -60,7 +60,7 @@ INTEGRATION_TESTS = $(addprefix $(INT_TEST_FOLDER)/output/, $(INT_TESTS:.cpp=.ru
 #######################################################
 
 
-.PHONY: clean
+.PHONY: clean $(UNIT_TEST)
 
 all: $(UNIT_TEST)
 
@@ -77,7 +77,7 @@ $(INT_TEST_FOLDER)/output/%.run:$(INT_TEST_FOLDER)/%.cpp
 
 $(UNIT_TEST):
 	$(MAKE) -C libs/cxxtest
-	$(CXX) $(CXXFLAGS) libs/cxxtest/runner.o @$(OBJECT_FILE) -Wl,-rpath=./ ./libwiringPi.so -o $(UNIT_TEST) $(LIBS)
+	$(CXX) $(CPPFLAGS) libs/cxxtest/runner.o @$(OBJECT_FILE) -Wl,-rpath=./ ./libwiringPi.so -o $(UNIT_TEST) $(LIBS)
 
 clean:
 	@rm -f $(INTEGRATION_TESTS)
