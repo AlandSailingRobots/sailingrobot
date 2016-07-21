@@ -14,35 +14,36 @@
 #pragma once
 
 
-#include "ActiveNode.h"
+#include "Node.h"
 #include "httpsync/HTTPSync.h"
+#include "Messages/GPSDataMsg.h"
+#include "coursecalculation/CourseMath.h"
 
 
 
-class WaypointNode : public ActiveNode {
+class WaypointNode : public Node {
 public:
-	WaypointNode(MessageBus& msgBus);
-    ~WaypointNode(){};
+	WaypointNode(MessageBus& msgBus, DBHandler& db);
+    virtual ~WaypointNode(){};
 
 	bool init();
 
-
-	void processMessage(const Message* msg);
-
-    int id() { return m_id; }
-    float longitude() { return m_longitude; }
-    float latitude() { return m_latitude; }
-    int declination() { return m_declination; }
-    int radius() { return m_radius; }
-    bool harvested() { return m_harvested; }
+	void processMessage(const Message* message);
 
 private:
-    void getWaypointValues();
+	void processGPSMessage(GPSDataMsg* msg);
+    bool waypointReached();
+    void sendMessage();
+
+    DBHandler m_db;
+    CourseMath m_courseMath;
 
     int m_id;
     float m_longitude;
     float m_latitude;
     int m_declination;
     int m_radius;
-    bool m_harvested;
+
+    float m_gps_longitude;
+    float m_gps_latitude;
 };

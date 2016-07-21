@@ -113,6 +113,8 @@ public:
 
 	bool getWaypointFromTable(WaypointModel &waypointModel, bool max);
 
+	bool getWaypointValues(int& id, float& longitude, float& latitude, int& declination, int& radius);
+
 	bool insert(std::string table, std::string fields, std::string values);
 
 	// inserts area scanning measurements into db
