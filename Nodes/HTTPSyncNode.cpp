@@ -24,31 +24,21 @@ HTTPSyncNode::HTTPSyncNode(MessageBus& msgBus, DBHandler *db, int delay, bool re
     
 }
 
-//TODO - DESTRUCTOR?
-
 bool HTTPSyncNode::init()
 {
 
     m_initialised = false;
 
-    //previously in constructor
     curl = curl_easy_init();
     m_reportedConnectError = false;
 
     m_pushOnlyLatestLogs = m_dbHandler->retrieveCellAsInt("httpsync_config", "1", "push_only_latest_logs");
 
-    try {
-        setShipID( m_dbHandler->retrieveCell("server", "1", "boat_id") );
-        setShipPWD( m_dbHandler->retrieveCell("server", "1", "boat_pwd") );
-        setServerURL( m_dbHandler->retrieveCell("server", "1", "srv_addr") );
+    setShipID( m_dbHandler->retrieveCell("server", "1", "boat_id") );
+    setShipPWD( m_dbHandler->retrieveCell("server", "1", "boat_pwd") );
+    setServerURL( m_dbHandler->retrieveCell("server", "1", "srv_addr") );
 
-        m_initialised = true;
-
-    } catch (const char * error) {
-        Logger::error("%s Failed to get server configuration Error: %s", __PRETTY_FUNCTION__, error);
-        //Kill thread if setup fails
-        std::terminate();
-    }
+    m_initialised = true;
     Logger::info("HTTPSyncNode init() successful");
 
     return m_initialised;
