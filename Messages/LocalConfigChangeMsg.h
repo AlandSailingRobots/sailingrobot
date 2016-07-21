@@ -1,4 +1,12 @@
 
+/****************************************************************************************
+ * Purpose:
+ *		Notify receivers that the configuration settings in the local database have changed
+ *
+ * Developer Notes:
+ *
+ ***************************************************************************************/
+
 #pragma once
 
 #include "Message.h"

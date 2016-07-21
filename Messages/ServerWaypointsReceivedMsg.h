@@ -1,4 +1,12 @@
 
+/****************************************************************************************
+ * Purpose:
+ *		Notify receivers that new waypoints have been downloaded from the server
+ *
+ * Developer Notes:
+ *
+ ***************************************************************************************/
+
 #pragma once
 
 #include "Message.h"
