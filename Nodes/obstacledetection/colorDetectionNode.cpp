@@ -276,7 +276,11 @@ void colorDetectionNode::colorDetectionThreadFunc(void* nodePtr)
         }
         //cout << rotated_bounding_rects_merged_list.size() << endl;
         computeObstaclesAnglePosition(node->m_imgOriginal, obstacles, rotated_bounding_rects_merged_list );
-        printObstacleVector(obstacles);
+        //printObstacleVector(obstacles);
+
+		ObstacleVectorMsg* msg = new ObstacleVectorMsg(obstacles);
+		node->m_MsgBus.sendMessage(msg);
+
         rotated_bounding_rects_several_captures.erase(rotated_bounding_rects_several_captures.begin(),rotated_bounding_rects_several_captures.end());
         rotated_bounding_rects_several_captures.resize(node->m_numberOfColorsToTrack);
         obstacles.erase(obstacles.begin(),obstacles.end());
@@ -284,14 +288,9 @@ void colorDetectionNode::colorDetectionThreadFunc(void* nodePtr)
         imshow("Thresholded Image", imgsThresholded[node->m_iColor]); //show the thresholded image
         imshow("Detection", node->m_imgOriginal); //show the original image
         setMouseCallback( "Detection", get_on_click_hsv_pixel_values, nodePtr );
-		/*
-        if (waitKey(30) == 27) //wait for 'esc' key press for 30ms. If 'esc' key is pressed, break loop
-        {
-            cout << "esc key is pressed by user" << endl;
-            break;
-        }
-		*/
-        waitKey(node->m_delay);
+
+		// Controls how often we pump out messages
+		std::this_thread::sleep_for(std::chrono::milliseconds(node->m_delay));
     }
 
 }
