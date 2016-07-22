@@ -9,19 +9,7 @@
 #include <cmath>
 #include <string>
 #include <cstdio>
-
-struct ObstacleData {
-
-       double minDistanceToObstacle;
-
-       double maxDistanceToObstacle; // -1 = infinite
-
-       double LeftBoundheadingRelativeToBoat;
-
-       double RightBoundheadingRelativeToBoat;
-
-   };
-
+#include "Messages/ObstacleVectorMsg.h"
 bool is_valid_double(double x);
 
 bool find_if_close(std::vector<cv::Point>  cnt1,

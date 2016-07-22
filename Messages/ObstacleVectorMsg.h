@@ -31,10 +31,9 @@ public:
 		:Message(MessageType::ObstacleVector, sourceID, destinationID),m_obstacles(obstacles)
 	{ }
 
-    ObstacleVectorMsg(NodeID sourceID,std::vector<ObstacleData> obstacles )
+    ObstacleVectorMsg(NodeID sourceID,std::vector<ObstacleData> obstacles)
 
-    Message(MessageType msgType, NodeID msgSource)
-		:Message(MessageType::ObstacleVector, NodeID::msgSource, NodeID::None), m_obstacles(obstacles)
+		:Message(MessageType::ObstacleVector,sourceID, NodeID::None), m_obstacles(obstacles)
 	{ }
 
 	ObstacleVectorMsg(std::vector<ObstacleData> obstacles)

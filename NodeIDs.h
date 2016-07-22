@@ -27,6 +27,6 @@ enum class NodeID {
 	RudderActuator,
 	Arduino,
 	VesselState,
-	ObstacleDetection,
+	ColorDetection,
     CollisionAvoidanceBehaviour
 };
