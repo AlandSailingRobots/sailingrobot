@@ -1,10 +1,10 @@
 /****************************************************************************************
  *
  * File:
- * 		ArduinoNode.cp
+ * 		ArduinoNode.cpp
  *
  * Purpose:
- *		The Arduino node communicates with a _______
+ *		The Arduino node communicates with the arduino. Sends data about the pressure, rudder, sheet and battery.
  *
  *
  * Developer Notes:
@@ -15,8 +15,6 @@
 #include "ArduinoNode.h"
 #include "Messages/ArduinoDataMsg.h"
 #include "logger/Logger.h"
-#include "wiringPi.h"
-#include "utility/Utility.h"
 
 // For std::this_thread
 #include <chrono>
@@ -25,11 +23,13 @@
 #define BLOCK_READ_SIZE 9
 #define BLOCK_I2C_ADDRESS_LOC 8
 
+#define DEFAULT_I2C_ADDRESS_PRESSURE 0x07
+
 #define ARDUINO_SENSOR_SLEEP_MS	100
 
 
 ArduinoNode::ArduinoNode(MessageBus& msgBus)
-: ActiveNode(NodeID::Arduino, msgBus), m_I2C(), m_Initialised(false)
+: ActiveNode(NodeID::Arduino, msgBus), m_Initialised(false)
 {
     
 }
@@ -55,7 +55,7 @@ bool ArduinoNode::init()
 		}
 		else
 		{
-			Logger::error("%s Failed to successfully read from the HMC6343 compass, check connection!", __PRETTY_FUNCTION__);
+			Logger::error("%s Failed to successfully read from the Arduino, check connection!", __PRETTY_FUNCTION__);
 		}
 	}
 	else

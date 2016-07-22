@@ -21,6 +21,7 @@ enum class MessageType {
 	WindData,
 	CompassData,
 	GPSData,
+	ActuatorPosition,
 	ArduinoData,
 	VesselState,
 	WaypointData

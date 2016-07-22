@@ -4,7 +4,7 @@
  * 		ArduinoNode.h
  *
  * Purpose:
- *		The Arduino node communicates with a _______
+ *		The Arduino node communicates with the arduino. Sends data about the pressure, rudder, sheet and battery.
  *
  * Developer Notes:
  *
@@ -17,9 +17,6 @@
 #include "ActiveNode.h"
 #include "i2ccontroller/I2CController.h"
 
-#define DEFAULT_I2C_ADDRESS_PRESSURE 0x07
-
-#define STARTBYTE 0x0F
 
 
 class ArduinoNode : public ActiveNode {
