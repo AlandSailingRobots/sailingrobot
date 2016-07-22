@@ -76,8 +76,8 @@ $(INT_TEST_FOLDER)/output/%.run:$(INT_TEST_FOLDER)/%.cpp
 	@$(CXX) $(CPPFLAGS) $(INC) -o ./$@ $< @$(OBJECT_FILE) $(LIBS) $(LIBS_BOOST)
 
 $(UNIT_TEST):
-	$(MAKE) -C libs/cxxtest
-	$(CXX) $(CPPFLAGS) libs/cxxtest/runner.o @$(OBJECT_FILE) -Wl,-rpath=./ ./libwiringPi.so -o $(UNIT_TEST) $(LIBS)
+	$(MAKE) -C tests/cxxtest
+	$(CXX) $(CPPFLAGS) tests/cxxtest/runner.o @$(OBJECT_FILE) -Wl,-rpath=./ ./libwiringPi.so -o $(UNIT_TEST) $(LIBS)
 
 clean:
 	@rm -f $(INTEGRATION_TESTS)

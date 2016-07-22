@@ -23,6 +23,7 @@ WaypointBehaviour::WaypointBehaviour(DBHandler *db):
     atof(db->retrieveCell("waypoint_routing_config", "1", "adjust_degree_limit").c_str()));
 }
 
+// ????
 bool WaypointBehaviour::init(){
 
   printf("Starting Waypoint\n");
@@ -40,6 +41,10 @@ bool WaypointBehaviour::init(){
 }
 
 
+// Needs GPS, true wind direction,
+
+
+// Called every loop
 void WaypointBehaviour::computeCommands(SystemStateModel &systemStateModel,std::unique_ptr<Position> const& position,
                                       double trueWindDirection, bool mockPosition, bool getHeadingFromCompass){
 
@@ -50,23 +55,25 @@ void WaypointBehaviour::computeCommands(SystemStateModel &systemStateModel,std::
   std::cout << "heading: " << heading << "\n";
   std::cout << "heading ssm compass:" << systemStateModel.compassModel.heading<<"\n";
 
+  // Waypoint message change
   if(waypointsChanged)
   {
     setNextWaypoint(m_waypointModel);
     waypointsChanged = false;
   }
 
+  // ----------------------mock position ignore
   if (mockPosition) {
       position->setCourseToSteer(m_waypointRouting.getCTS());
   }
 
+  // Updates the position from the system state model
   position->updatePosition();
 
   if (systemStateModel.gpsModel.online) {
 
-      m_waypointRouting.getCommands(m_rudderCommand, m_sailCommand,
-        position->getModel(),
-      trueWindDirection, heading, systemStateModel);
+	  // Works out what to set the rudder and sail to
+      m_waypointRouting.getCommands(m_rudderCommand, m_sailCommand,position->getModel(), trueWindDirection, heading, systemStateModel);
 
   } else {
     Logger::warning("WaypointBehaviour::computeCommands gps NaN. Using values from last iteration");
@@ -78,20 +85,6 @@ void WaypointBehaviour::computeCommands(SystemStateModel &systemStateModel,std::
   // and move to next wp in that case
  if (m_waypointRouting.nextWaypoint(position->getModel() ) )
  {
-
-    // check if m_waypointModel.id exists in waypoint_index
-    /*int i = m_dbHandler->retrieveCellAsInt("waypoint_index", m_waypointModel.id, "id");
-    if (m_dbHandler->retrieveCellAsInt("sailing_robot_config", "1", "scanning") && i != 0 && insertScanOnce != i)
-    {
-      insertScanOnce = i;
-      try {
-          m_dbHandler->insertScan(m_waypointModel.id,position->getModel(),
-              systemStateModel.windsensorModel.temperature,
-              systemStateModel.gpsModel.utc_timestamp);
-      } catch (const char * error) {
-          Logger::error("%s Error: %s", __PRETTY_FUNCTION__, error);
-      }
-    }*/
 
     harvestWaypoint(m_waypointModel);
     setNextWaypoint(m_waypointModel);

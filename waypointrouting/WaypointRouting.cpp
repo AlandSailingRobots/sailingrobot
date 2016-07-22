@@ -32,6 +32,11 @@ WaypointRouting::~WaypointRouting()
 {
 }
 
+/* Uses:
+	* GPS heading
+	* compass heading
+	* GPS speed
+*/
 
 void WaypointRouting::getCommands(double & rudder, double & sail, PositionModel boat,
 	double trueWindDirection, double heading, SystemStateModel systemStateModel) {
@@ -41,17 +46,21 @@ void WaypointRouting::getCommands(double & rudder, double & sail, PositionModel 
 												  										systemStateModel.gpsModel.speed);
 	double commandAngle = m_maxCommandAngle;
 	
+	// If we have reached the waypoint but want to stay there for a bit we want to sail into the
+	// wind so we "hover" at the waypoint
 	if (m_waypoint.time > 0 && reachedRadius(m_waypoint.radius * m_innerRadiusRatio, boat)) {
 		
 		if(speed > m_rudderSpeedMin) {
-			commandAngle = speed/m_rudderSpeedMin * m_maxCommandAngle;		
+			commandAngle = speed / m_rudderSpeedMin * m_maxCommandAngle;
 		}
 		
 		m_courseToSteer = trueWindDirection;
 		rudder = m_commandHandler.rudderCommand(m_courseToSteer, heading,commandAngle);
 		sail = m_commandHandler.runningSailCommand();
 	} 
+	//  Normal sailing towards a waypoint
 	else {
+
 		m_courseCalc.setTackAngle(m_tackAngleHandler.adjustedTackAngle(systemStateModel));
 
 		if(speed > m_rudderSpeedMin) {
