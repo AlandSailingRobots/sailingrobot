@@ -43,11 +43,11 @@ private:
     CourseMath m_courseMath;
 
     int m_id;
-    float m_longitude;
-    float m_latitude;
+    double m_longitude;
+    double m_latitude;
     int m_declination;
     int m_radius;
 
-    float m_gps_longitude;
-    float m_gps_latitude;
+    double m_gps_longitude;
+    double m_gps_latitude;
 };

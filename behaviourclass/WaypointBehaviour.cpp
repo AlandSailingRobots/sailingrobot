@@ -64,9 +64,9 @@ void WaypointBehaviour::computeCommands(SystemStateModel &systemStateModel,std::
 
   if (systemStateModel.gpsModel.online) {
 
-      m_waypointRouting.getCommands(m_rudderCommand, m_sailCommand,
-        position->getModel(),
-      trueWindDirection, heading, systemStateModel);
+      // m_waypointRouting.getCommands(m_rudderCommand, m_sailCommand,
+      //   position->getModel(),
+      // trueWindDirection, heading, systemStateModel);
 
   } else {
     Logger::warning("WaypointBehaviour::computeCommands gps NaN. Using values from last iteration");

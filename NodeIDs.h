@@ -27,5 +27,6 @@ enum class NodeID {
 	RudderActuator,
 	Arduino,
 	VesselState,
-	Waypoint
+	Waypoint,
+	SailingLogic
 };

@@ -61,7 +61,7 @@ public:
 	~CourseCalculation();
 
 	/* Calculates course to steer which is the direction the boat is supposed to sail */
-	double calculateCourseToSteer(PositionModel boat, WaypointModel waypoint, double trueWindDirection);
+	double calculateCourseToSteer(double gpsLon, double gpsLat, double waypLon, double waypLat, int radius, double trueWindDirection);
 
 	/* Sets true wind direction */
 	void setTrueWindDirection(double degrees);

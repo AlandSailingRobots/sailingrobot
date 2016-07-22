@@ -208,12 +208,12 @@ double Utility::directionAdjustedSpeed(double gpsHeading,double compassHeading,d
  * uses formula for calculating true Wind Direction
  * https://en.wikipedia.org/wiki/Apparent_wind
  */
-double Utility::calculateTrueWindDirection(const SystemStateModel& systemStateModel , double heading){
+double Utility::calculateTrueWindDirection(const int windsensorDir, const int windsensorSpeed, const double gpsSpeed, const double heading){
 
 	//double knots = 1.94384;
-	double apparentWindSpeed = systemStateModel.windsensorModel.speed; //* knots; // Converting m/s to knots
-	double apparentWindAngle = systemStateModel.windsensorModel.direction;
-	double boatSpeed = systemStateModel.gpsModel.speed;
+	double apparentWindSpeed = windsensorSpeed; //* knots; // Converting m/s to knots
+	double apparentWindAngle = windsensorDir;
+	double boatSpeed = gpsSpeed;
 
 	if (apparentWindAngle < 0.001 ){
 		apparentWindAngle = 0.001;
@@ -264,14 +264,25 @@ double Utility::calculateTrueWindSpeed(const SystemStateModel& systemStateModel 
 	return trueWindSpeed;
 }
 
-double Utility::getTrueWindDirection(SystemStateModel systemStateModel, std::vector<float> &twdBuffer, const unsigned int twdBufferMaxSize)
+double Utility::getTrueWindDirection(int windsensorDir, int windsensorSpeed, double gpsSpeed, int compassHeading, 
+			std::vector<float> &twdBuffer, const unsigned int twdBufferMaxSize)
 {
-	double twd = calculateTrueWindDirection(systemStateModel, systemStateModel.compassModel.heading);
-	twdBuffer.push_back(twd);// new wind calculation
-	//twdBuffer.push_back(systemStateModel.gpsModel.heading + systemStateModel.windsensorModel.direction);// old wind calculation
+	static unsigned int trueWindIndex;
+	double twd = calculateTrueWindDirection(windsensorDir, windsensorSpeed, gpsSpeed, compassHeading);
 
-	while (twdBuffer.size() > twdBufferMaxSize) {
-		twdBuffer.erase(twdBuffer.begin());
+	if(twdBuffer.size() < twdBufferMaxSize)
+	{
+		twdBuffer.push_back(twd);
+	}
+	else
+	{
+		if(trueWindIndex >= twdBufferMaxSize)
+		{
+			trueWindIndex = 0;
+		}
+
+		twdBuffer[trueWindIndex] = twd;
+		trueWindIndex++;
 	}
 
 	return meanOfAngles(twdBuffer);

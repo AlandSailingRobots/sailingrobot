@@ -144,6 +144,16 @@ int main(int argc, char *argv[])
 	exit(0);
 }
 
+//SAVED FOR LATER
+//     atof(db.retrieveCell("waypoint_routing_config", "1", "radius_ratio").c_str()),
+//     atof(db.retrieveCell("course_calculation_config", "1", "tack_angle").c_str()),
+//     atof(db.retrieveCell("course_calculation_config", "1", "tack_max_angle").c_str()),
+//     atof(db.retrieveCell("course_calculation_config", "1", "tack_min_speed").c_str()),
+//     atof(db.retrieveCell("course_calculation_config", "1", "sector_angle").c_str()),
+//      atof(db.retrieveCell("waypoint_routing_config", "1", "max_command_angle ").c_str()),
+//      atof(db.retrieveCell("waypoint_routing_config", "1", "rudder_speed_min").c_str())
+//    )
+
 
 // Purely for reference, remove once complete
 

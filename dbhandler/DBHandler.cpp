@@ -766,7 +766,7 @@ bool DBHandler::getWaypointFromTable(WaypointModel &waypointModel, bool max){
 	return true;
 }
 
-bool DBHandler::getWaypointValues(int& id, float& longitude, float& latitude, int& declination, int& radius)
+bool DBHandler::getWaypointValues(int& id, double& longitude, double& latitude, int& declination, int& radius)
 {
 	int rows, columns;
     std::vector<std::string> results;
