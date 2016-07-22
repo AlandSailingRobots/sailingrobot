@@ -165,7 +165,7 @@ void HTTPSync::updateConfigs() {
 		}
 		else if(!reportedConnectError)
 		{
-			Logger::error("%s Error: %s", __PRETTY_FUNCTION__);
+			Logger::error("Error: %s", __PRETTY_FUNCTION__);
 		}
 	}
 }
