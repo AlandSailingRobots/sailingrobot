@@ -44,36 +44,19 @@
 
 //CONSTRUCTOR
 
-/*
- * Super class call. Calls the database
- */
 CollisionAvoidanceBehaviour::CollisionAvoidanceBehaviour(DBHandler *db) :
-        RoutingBehaviour(db) {
+        RoutingBehaviour(db) {}
 
-}
+// UTILITY FUNCTIONS
 
-//UTILITY FUNCTIONS
-
-/*
- * Might be put into Utility class soon. TODO : Utility class ?
- * The angles must be in radians. It's radAngle1-radAngle2.
- * I don't trust the one from Utility
- */
+// Might be put into Utility class soon. TODO : Utility class ?
 double CollisionAvoidanceBehaviour::angleDiff(
         double radAngle1,
         double radAngle2) {
     return fmod(radAngle1-radAngle2+M_PI,2*M_PI)+M_PI;
 }
 
-/*
- * Haversine algorithm for distance computation on Earth.
- * Took on http://www.movable-type.co.uk/scripts/latlong.html
- * a = sin²(Δφ/2) + cos φ1 ⋅ cos φ2 ⋅ sin²(Δλ/2)
- * c = 2 ⋅ atan2( √a, √(1−a) )
- * distance = Rearth ⋅ c
- *
- * Maybe this function should as well be in the Utility class. TODO : Utility class ?
- */
+// Maybe this function should as well be in the Utility class. TODO : Utility class ?
 double CollisionAvoidanceBehaviour::calculateGPSDistance(
         Eigen::Vector2d point1,
         Eigen::Vector2d point2) {
@@ -89,7 +72,8 @@ double CollisionAvoidanceBehaviour::calculateGPSDistance(
 /*
  * TODO : Utility class ?
  */
-Eigen::Vector2d CollisionAvoidanceBehaviour::findCenter(const std::vector<Eigen::Vector2d> polygon) {
+Eigen::Vector2d CollisionAvoidanceBehaviour::findCenter(
+        const std::vector<Eigen::Vector2d> polygon) {
     double sumOfX = 0;
     double sumOfY = 0;
     for(auto & vec : polygon){
@@ -100,11 +84,10 @@ Eigen::Vector2d CollisionAvoidanceBehaviour::findCenter(const std::vector<Eigen:
     return meanPolygon;
 }
 
-/*
- * Le polygone doit être créé dans le sens trigonométrique
- * TODO move to Utility ?
- */
-double getArea(std::vector<Eigen::Vector2d> polygon){
+
+// TODO : move to Utility ?
+double CollisionAvoidanceBehaviour::getArea(
+        std::vector<Eigen::Vector2d> polygon){
     double sum = 0;
     for(int i = 0;i<polygon.size()-1;i++){
         sum += polygon[i](0)*polygon[i+1](1)-polygon[i+1](0)*polygon[i](1);
@@ -112,17 +95,95 @@ double getArea(std::vector<Eigen::Vector2d> polygon){
     return sum/2;
 }
 
-/*
- *
- */
-double computeSignedDistanceFromLine(Eigen::Vector2d linePt1,Eigen::Vector2d linePt2,Eigen::Vector2d point){
+double CollisionAvoidanceBehaviour::signedDistanceFromLine(
+        Eigen::Vector2d linePt1,
+        Eigen::Vector2d linePt2,
+        Eigen::Vector2d point){
 
-    // Don't care of earth radius for now.
-    // TODO change to use GPSdistance
-    Eigen::Matrix2d detMatrix;
-    detMatrix << (linePt2-linePt1)/(linePt2-linePt1).norm(),point-linePt1;
-    const double signedDistance = detMatrix.determinant();
-    return signedDistance;
+    //Lat Lon to Cartesian coordinates
+    const Eigen::Vector3d a = latLonToCartesian(linePt1);
+    const Eigen::Vector3d b = latLonToCartesian(linePt2);
+    const Eigen::Vector3d m = latLonToCartesian(point);
+
+    const Eigen::Vector3d n = (a.cross(b)) / (a.norm() * b.norm());
+    const double distFromTriangle = m.transpose() * n;
+    const double arcLenght = EARTH_RADIUS * asin(distFromTriangle / EARTH_RADIUS);
+    return arcLenght;
+}
+
+Eigen::Vector2d CollisionAvoidanceBehaviour::getClosestPoint(
+        std::vector<Eigen::Vector2d> polygon, Eigen::Vector2d point){
+    int idClosestPoint = -1;
+    double minDistance = 40000;
+    double distance;
+    for(int i = 0;i<polygon.size();i++) {
+        distance = calculateGPSDistance(polygon[i], point);
+        minDistance = std::min(minDistance, distance);
+        if (minDistance == distance) {
+            idClosestPoint = i;
+        }
+    }
+    return polygon[idClosestPoint];
+}
+
+double CollisionAvoidanceBehaviour::distanceFromSegment(
+        Eigen::Vector2d segmentPt1,
+        Eigen::Vector2d segmentPt2,
+        Eigen::Vector2d point) {
+
+    // Return minimum distance between line segment vw and point p
+    const double lengthSegment = calculateGPSDistance(segmentPt2, segmentPt1);
+    if (lengthSegment == 0.0) return calculateGPSDistance(point, segmentPt1);   // v == w case
+
+    //Lat Lon to Cartesian coordinates
+    const Eigen::Vector3d a = latLonToCartesian(segmentPt1);
+    const Eigen::Vector3d b = latLonToCartesian(segmentPt2);
+    const Eigen::Vector3d m = latLonToCartesian(point);
+
+    const Eigen::Vector3d worldOrigin(0, 0, 0);
+    //Creation of the triangle
+    const Eigen::Vector3d triangle[3] = {worldOrigin, a, b};
+
+    if (projectionInside3DTriangle(triangle, m)) {
+        return std::abs(signedDistanceFromLine(segmentPt1,segmentPt2,point));
+    }
+    else { //projection is not inside the triangle
+        const std::vector<Eigen::Vector2d> line = {segmentPoint1,segmentPoint2};
+        const Eigen::Vector2d closestPoint = getClosestPoint(line,point);
+        return calculateGPSDistance(point, closestPoint);
+    }
+}
+
+Eigen::Vector2d CollisionAvoidanceBehaviour::cartesianToLatLon(Eigen::Vector3d vector){
+    const Eigen::Vector2d gpsCoord(atan2(vector(1),vector(0)),
+                                   asin(vector(2)/EARTH_RADIUS));
+    return gpsCoord;
+}
+
+Eigen::Vector3d CollisionAvoidanceBehaviour::latLonToCartesian(Eigen::Vector2d vector){
+    const Eigen::Vector3d cartesianVector(EARTH_RADIUS*cos(vector(1))*cos(vector(0)),
+                                          EARTH_RADIUS*cos(vector(1))*sin(vector(0)),
+                                          EARTH_RADIUS*sin(vector(1)));
+    return cartesianVector;
+}
+
+bool CollisionAvoidanceBehaviour::projectionInside3DTriangle(Eigen::Vector3d triangle[3],Eigen::Vector3d point){
+    const Eigen::Vector3d u = triangle[1]-triangle[0];*
+    const Eigen::Vector3d v = triangle[2]-triangle[0];
+    const Eigen::Vector3d n = u.cross(v);
+    const Eigen::Vector3d w = point-triangle[0];
+    const double coord0 = (u.cross(w).dot(n))/(n.norm()*n.norm());
+    const double coord1 = (w.cross(v).dot(n))/(n.norm()*n.norm());
+    const double coord2 = 1-coord0-coord1;
+
+    if(   0<=coord0 && coord0<1
+       && 0<=coord1 && coord1<1
+       && 0<=coord2 && coord2<1){
+        return true;
+    }
+    else{
+        return false;
+    }
 }
 
 /*
@@ -271,8 +332,6 @@ std::vector<Obstacle> CollisionAvoidanceBehaviour::check_obstacles(SensorData se
          * obstacle and is not detected : that would mean that it doesn't exist any more and then need
          * to be cleaned from the memory
          */
-
-
         const Eigen::Vector2d centerOfMemorizedObstacle = findCenter(seenObstacles[i].polygon);
 
         bool obstaclesAreNotTooCloseWithCurrentMemorizedObstacle;
@@ -296,13 +355,9 @@ std::vector<Obstacle> CollisionAvoidanceBehaviour::check_obstacles(SensorData se
                       * sin(headingCenterOfDetectedObstacle) // y
             );
 
-            const Eigen::Vector2d vectorBetweenObstacles = // the IDE says there is an error
-                    centerOfMemorizedObstacle              // here but it seems correct
-                    - centerOfCurrentlyDetectedObstacle;
-
-
             // 1rst Condition
-            const bool currentObstaclesIsNotTooClose = vectorBetweenObstacles.norm()
+            const bool currentObstaclesIsNotTooClose = calculateGPSDistance(centerOfMemorizedObstacle,
+                                                                            centerOfCurrentlyDetectedObstacle)
                                                     + widthOfCurrentDetectedObstacleAtClosest * 2
                                                     > DISTANCE_NOT_THE_SAME_OBSTACLE;
             obstaclesAreNotTooCloseWithCurrentMemorizedObstacle =
@@ -310,7 +365,7 @@ std::vector<Obstacle> CollisionAvoidanceBehaviour::check_obstacles(SensorData se
         }
         // 2nd condition
         const bool obstacleInsideRange =  // Same error given by the IDE
-                (centerOfMemorizedObstacle - sensorData.gpsPos).norm() < MAXIMUM_SENSOR_RANGE;
+                calculateGPSDistance(centerOfMemorizedObstacle,sensorData.gpsPos) < MAXIMUM_SENSOR_RANGE;
         const bool obstacleInsideArc =
                 std::abs(angleDiff(
                         atan2(centerOfMemorizedObstacle(1)-sensorData.gpsPos(1),
@@ -401,10 +456,12 @@ bool CollisionAvoidanceBehaviour::these_obstacles_are_a_problem(
     for(auto & obstacle : seenObstacles){
         for(auto & point : obstacle.polygon){
             // compute the distance between the line and the point.
-            double signedDistance = computeSignedDistanceFromLine(followedLine.startPoint,
+            double signedDistance = signedDistanceFromLine(followedLine.startPoint,
                                                                   followedLine.endPoint,
-            bool thisObstacleIsAProblem = false;                                                      point);
-            if(std::abs(signedDistance)< CHANNEL_WIDTH ){
+                                                                  point);
+            bool thisObstacleIsAProblem = false;
+            if(std::abs(signedDistance)< CHANNEL_WIDTH
+               && calculateGPSDistance(sensorOutput.gpsPos,getClosestPoint(obstacle.polygon)) < SAFE_DISTANCE){
                 thisObstacleIsAProblem = true;
             }
             theseObstaclesAreAProblem = theseObstaclesAreAProblem || thisObstacleIsAProblem;
@@ -431,6 +488,10 @@ Eigen::MatrixXd CollisionAvoidanceBehaviour::compute_potential_field(
     // Init
 
     // TODO Obstacle potential function
+    /*
+     * Since the obstacle is a polygon, only the closest point from
+     * the polygon will be counted as an obstacle
+     */
     const double scaleHole = 50;
     const double scalePike = 550;
     const double scale = 0.5;
@@ -439,6 +500,8 @@ Eigen::MatrixXd CollisionAvoidanceBehaviour::compute_potential_field(
     const double strength = 5;
     const double offsetObstacle = 15;
     // Add the pikes
+
+    /*
     for i=1:size(qhat,2)
     xObs = P1-qhat(1,i);
     yObs = P2-qhat(2,i);
@@ -457,6 +520,7 @@ Eigen::MatrixXd CollisionAvoidanceBehaviour::compute_potential_field(
 
     ObsP = ObsP - strength*strengthHoles*exp(-(tHoleR).^2) - strength*strengthHoles*exp(-(tHoleL).^2);
     end
+    */
 
 
     // TODO Objective potential function
