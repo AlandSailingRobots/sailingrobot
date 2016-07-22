@@ -32,10 +32,11 @@ WaypointNode::WaypointNode(MessageBus& msgBus, DBHandler& db)
 }
 
 bool WaypointNode::init()
-{
+{ 
     sendMessage();
-    return false;
+    return true;
 }
+
 
 void WaypointNode::processMessage(const Message* msg)
 {

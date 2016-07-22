@@ -33,6 +33,10 @@ public:
 private:
 	void processGPSMessage(GPSDataMsg* msg);
     bool waypointReached();
+
+	///----------------------------------------------------------------------------------
+ 	/// Sends message with data about the next waypoint
+ 	///----------------------------------------------------------------------------------
     void sendMessage();
 
     DBHandler m_db;

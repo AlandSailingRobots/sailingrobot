@@ -7,6 +7,8 @@
 #include "Nodes/HMC6343Node.h"
 #include "Nodes/GPSDNode.h"
 #include "Nodes/ArduinoNode.h"
+#include "Nodes/WaypointNode.h"
+#include "Nodes/VesselStateNode.h"
 #include "Messages/DataRequestMsg.h"
 #include "dbhandler/DBHandler.h"
 
@@ -94,6 +96,8 @@ int main(int argc, char *argv[])
 	HMC6343Node compass(messageBus, dbHandler.retrieveCellAsInt("buffer_config", "1", "compass"));
 	GPSDNode gpsd(messageBus);
 	ArduinoNode arduino(messageBus);
+	VesselStateNode vessel(messageBus);
+	WaypointNode waypoint(messageBus, dbHandler);
 
 	// Initialise nodes
 	initialiseNode(msgLogger, "Message Logger", NodeImportance::NOT_CRITICAL);
@@ -101,12 +105,15 @@ int main(int argc, char *argv[])
 	initialiseNode(compass, "Compass", NodeImportance::CRITICAL);
 	initialiseNode(gpsd, "GPSD Node", NodeImportance::CRITICAL);
 	initialiseNode(arduino, "Arduino Node", NodeImportance::NOT_CRITICAL);
+	initialiseNode(vessel, "Vessel State Node", NodeImportance::CRITICAL);
+	initialiseNode(waypoint, "Waypoint Node", NodeImportance::CRITICAL);
 
 	// Start active nodes
 	windSensor.start();
 	compass.start();
 	gpsd.start();
 	arduino.start();
+	vessel.start();
 
 	// NOTE - Jordan: Just to ensure messages are following through the system
 	DataRequestMsg* dataRequest = new DataRequestMsg(NodeID::MessageLogger);
