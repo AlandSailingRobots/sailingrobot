@@ -277,26 +277,30 @@ double Utility::getTrueWindDirection(SystemStateModel systemStateModel, std::vec
 	return meanOfAngles(twdBuffer);
 }
 
-std::array<double, 2> Utility::calculateApparentWind(const SystemStateModel systemStateModel, const double heading, const double trueWindDirection)
+
+void Utility::calculateApparentWind(const SystemStateModel systemStateModel, const double heading,
+	           const double trueWindDirection,double &apparentWindSpeed, double &apparentWindDirection)
 { //referenced from "Modeling, control and state-estimation for an autonomous sailboat" by Jon Melin
-	std::array<double, 2> apparentWind;
-	std::array<double, 2> wcaw = { calculateTrueWindSpeed(systemStateModel, heading) * cos(trueWindDirection - heading) - systemStateModel.gpsModel.speed, //wcaw[0]
-									calculateTrueWindSpeed(systemStateModel, heading) * sin(trueWindDirection - heading)}; //wcaw[1] Cartesian Apparent Wind
+  /* the trueWindDirection is the origin of the wind but the computation suppose its the direction so we change it during the function*/
 
-	double apparentWindSpeed = sqrt(pow(wcaw[0], 2) + pow(wcaw[1], 2));
-	double apparentWindDirection = atan2(wcaw[0], wcaw[1]);
+  double trueWindDirection_ = trueWindDirection+M_PI;
+	std::array<double, 2> wcaw = { calculateTrueWindSpeed(systemStateModel, heading) * cos(trueWindDirection_ - heading) - systemStateModel.gpsModel.speed, //wcaw[0]
+									calculateTrueWindSpeed(systemStateModel, heading) * sin(trueWindDirection_ - heading)}; //wcaw[1] Cartesian Apparent Wind
 
-	apparentWind[0] = apparentWindSpeed;
-	apparentWind[1] = apparentWindDirection;
-
-	return apparentWind;
+	apparentWindSpeed = sqrt(pow(wcaw[0], 2) + pow(wcaw[1], 2));
+	apparentWindDirection = -atan2(wcaw[0], wcaw[1])*180/M_PI;
 }
 
 double Utility::getApparentWindSpeed(const SystemStateModel systemStateModel, const double heading, const double trueWindDirection)
 {
-	return calculateApparentWind(systemStateModel, heading, trueWindDirection)[0];
+	double apparentWindSpeed,apparentWindDirection;
+	calculateApparentWind(systemStateModel, heading, trueWindDirection,apparentWindSpeed,apparentWindDirection);
+	return apparentWindSpeed;
 }
+
 double Utility::getApparentWindDirection(const SystemStateModel systemStateModel, const double heading, const double trueWindDirection)
 {
-	return calculateApparentWind(systemStateModel, heading, trueWindDirection)[1];
+	double apparentWindSpeed,apparentWindDirection;
+	calculateApparentWind(systemStateModel, heading, trueWindDirection,apparentWindSpeed,apparentWindDirection);
+	return apparentWindDirection;
 }

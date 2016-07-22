@@ -18,7 +18,7 @@ public:
 	static float mean(std::vector<float> values);
 	static float meanOfAngles(std::vector<float> anglesInDegrees);
 	static int sgn(double value);
-	
+
 	/*
 	 * Converts an angle in degrees to cartesian coordinates (x,y) on the
 	 * unit circle
@@ -43,10 +43,11 @@ public:
 	static double calculateTrueWindSpeed(const SystemStateModel& systemStateModel , double heading);
 	static double getTrueWindDirection(const SystemStateModel systemStateModel, std::vector<float> &twdBuffer, const unsigned int twdBufferMaxSize);
 
-	static std::array<double, 2> calculateApparentWind(const SystemStateModel systemStateModel, const double heading, const double trueWindDirection);
+	static void calculateApparentWind(const SystemStateModel systemStateModel, const double heading, const double trueWindDirection,
+		                                         double &apparentWindSpeed, double &apparentWindDirection);
 	static double getApparentWindSpeed(const SystemStateModel systemStateModel, const double heading, const double trueWindDirection);
 	static double getApparentWindDirection(const SystemStateModel systemStateModel, const double heading, const double trueWindDirection);
-	
+
 };
 
 #endif
