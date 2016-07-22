@@ -8,6 +8,12 @@
  *		to the message bus.
  *
  * Developer Notes:
+ * 		I2C Address
+ *
+ * 		The I2C address is different from what is mentioned in the datasheet. The
+ * 		datasheet mentions it is 0x32, however when accessing the device you need to use
+ * 		0x19 for successful communications. The register on the HMC6343 that contains the
+ * 		I2C address returns 0x32, the address mentioned in the datasheet.
  *
  *
  ***************************************************************************************/
@@ -32,6 +38,9 @@ public:
 
 	///----------------------------------------------------------------------------------
 	/// Attempts to connect to the HMC6343 compass.
+	///
+	/// @returns		Returns false if it is unable to read the compass's own I2C
+	///					address from its EPROM.
 	///----------------------------------------------------------------------------------
 	bool init();
 
@@ -40,6 +49,9 @@ public:
  	///----------------------------------------------------------------------------------
 	void start();
 
+	///----------------------------------------------------------------------------------
+	/// Doesn't process any messages.
+	///----------------------------------------------------------------------------------
 	void processMessage(const Message* msg);
 
 	///----------------------------------------------------------------------------------
@@ -53,6 +65,11 @@ private:
 	///----------------------------------------------------------------------------------
 	bool readData(float& heading, float& pitch, float& roll);
 
+	///----------------------------------------------------------------------------------
+	/// Reads the I2C Compass's state every x milliseconds, see COMPASS_SENSOR_SLEEP_MS
+	/// for information on the timing in HMC6343Node.cpp. The state is then published to
+	/// the message bus
+	///----------------------------------------------------------------------------------
 	static void HMC6343ThreadFunc(void* nodePtr);
 
 	I2CController 	m_I2C;
