@@ -186,9 +186,7 @@ bool CollisionAvoidanceBehaviour::projectionInside3DTriangle(Eigen::Vector3d tri
     }
 }
 
-/*
- * Debugging functions, specific to Eigen
- */
+
 void CollisionAvoidanceBehaviour::printStdVectorMat(
         std::string const &name,
         std::vector<Eigen::MatrixXd> const &v) {
@@ -201,7 +199,6 @@ void CollisionAvoidanceBehaviour::printStdVectorMat(
         std::cout << " " << std::endl;
     }
 }
-
 void CollisionAvoidanceBehaviour::printStdVectorFloat(
         std::string const &name,
         std::vector<float> const &v) {
@@ -214,7 +211,6 @@ void CollisionAvoidanceBehaviour::printStdVectorFloat(
         std::cout << " " << std::endl;
     }
 }
-
 void CollisionAvoidanceBehaviour::printMat(
         std::string const &name,
         Eigen::MatrixXd const &mat) {
@@ -228,10 +224,6 @@ void CollisionAvoidanceBehaviour::printMat(
 
 //PRIVATE MAIN FUNCTIONS
 
-/*
- * Makes the interface between the old code and the new one. This is make the code more modular
- * since changes in the architecture might come.
- */
 SensorData CollisionAvoidanceBehaviour::update_sensors(
         SystemStateModel &systemStateModel,
         const Simulation sim) {
@@ -316,12 +308,6 @@ SensorData CollisionAvoidanceBehaviour::update_sensors(
  */
 //    void update_waypoints(){}
 
-/*
- * Is there any obstacles ? If yes, which information can i gather on them.
- * OUTPUT a list of obstacles (struct) with all their characteristics.
- *
- * For now transform hardcoded obstacles to something more usable.
- */
 std::vector<Obstacle> CollisionAvoidanceBehaviour::check_obstacles(SensorData sensorData) {
     //Clean obstacles
     int i = 0;
@@ -443,9 +429,6 @@ std::vector<Obstacle> CollisionAvoidanceBehaviour::check_obstacles(SensorData se
  */
 //map update_map(){}
 
-/*
- * Check if there is intersection between the current path+security radius and the obstacle
- */
 bool CollisionAvoidanceBehaviour::these_obstacles_are_a_problem(
         std::vector<Obstacle> seenObstacles) { // OUTPUT if these obstacles are a problem
     bool theseObstaclesAreAProblem = false;
@@ -470,14 +453,6 @@ bool CollisionAvoidanceBehaviour::these_obstacles_are_a_problem(
     return theseObstaclesAreAProblem;
 }
 
-/*
- * Compute the potential field for the obstacles, the sailing zone,
- * the boat, the objective, and the wind.
- *
- * For now it creates the matrix at each loop (easier for code review)
- * The size of the matrix needs to be adapted to the size of the sailing zone
- * (with the max and mins for example)
- */
 Eigen::MatrixXd CollisionAvoidanceBehaviour::compute_potential_field(
         std::vector<Obstacle> seen_obstacles,
         std::vector<Eigen::Vector2d> sailing_zone,
@@ -534,46 +509,22 @@ Eigen::MatrixXd CollisionAvoidanceBehaviour::compute_potential_field(
     // TODO Adding Sailing Zone
 }
 
-/*
- * Find the minimum in the potential field and return its coordinates in the matrix
- * as well as its real gps coordinates.
- */
 MinPotField CollisionAvoidanceBehaviour::find_minimum_potential_field(
         Eigen::MatrixXd Potential_field) {
 
 }
 
-/*
- * Gives the new line to follow. It would be better if it added a WP in the DataBase as well.
- */
 FollowedLine CollisionAvoidanceBehaviour::compute_new_path(
         MinPotField min) {
 
 }
 
-/*
- * Compute the commands according to the new path.
- * Follow the line between the last waypoint and the next
- */
 CommandOutput CollisionAvoidanceBehaviour::compute_commands(
         FollowedLine line) {
 
 }
 
-/*
- * The most important function of the class, it calls al the others.
- *
- * Some inputs of the function are class variables. This is to improve
- * the readability of the code and its modularity in case of architectural
- * modifications.
- *
- * I don't think inputing system state into this function is the best idea.
- * But update_sensors need it. Either I move update_sensors out of run(), in
- * that case isn't any more a modular function since it lacks update_sensors,
- * or systemStateModel stays where it is for the same result.
- *
- * TODO : When the message architecture will be done, modify all this.
- */
+// TODO : When the message architecture will be done, modify all this.
 CommandOutput CollisionAvoidanceBehaviour::run(
         SystemStateModel &systemStateModel) {
     //Note on simulation
@@ -604,12 +555,7 @@ CommandOutput CollisionAvoidanceBehaviour::run(
 
 //PUBLIC FUNCTIONS
 
-/*
- * Initialize values :
- *  sailingZone
- *
- *  TODO : replace hardcoded sailing zone by an import from the database
- */
+// TODO : replace hardcoded sailing zone by an import from the database
 bool CollisionAvoidanceBehaviour::init() {
 
     //SailingZone initialization clockwise (x,y)
@@ -624,9 +570,6 @@ bool CollisionAvoidanceBehaviour::init() {
 
 }
 
-/*
- * This is a trick to interface this code and the rest of the c++ code
- */
 void CollisionAvoidanceBehaviour::computeCommands(
         SystemStateModel &systemStateModel,
         std::unique_ptr<Position> const &position,
