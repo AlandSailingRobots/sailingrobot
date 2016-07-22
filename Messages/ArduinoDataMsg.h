@@ -4,7 +4,7 @@
  * 		ArduinoDataMsg.h
  *
  * Purpose:
- *		A ArduinoDataMsg contains arduino data such as pressure, rudder, sheet, battery.
+ *		An ArduinoDataMsg contains arduino data such as pressure, rudder, sheet, battery.
  *
  * Developer Notes:
  *

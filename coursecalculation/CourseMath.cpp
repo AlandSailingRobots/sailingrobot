@@ -49,3 +49,25 @@ double CourseMath::calculateDTW(PositionModel boat, PositionModel waypoint) cons
 	
 	return distanceToWaypoint;
 }
+
+double CourseMath::calculateDTW(float boatLon, float boatLat, float waypointLon, float waypointLat) const
+{
+	const double radiusOfEarth = 6371.0;
+
+	double deltaLatitudeRadians = Utility::degreeToRadian(waypointLat - boatLat);
+	double boatLatitudeInRadian = Utility::degreeToRadian(boatLat);
+	double waypointLatitudeInRadian = Utility::degreeToRadian(waypointLat);
+	double deltaLongitudeRadians = Utility::degreeToRadian(waypointLon - boatLon);
+
+	double a = sin(deltaLatitudeRadians/2)
+			* sin(deltaLatitudeRadians/2)
+			+ cos(boatLatitudeInRadian)
+			* cos(waypointLatitudeInRadian)
+			* sin(deltaLongitudeRadians/2)
+			* sin(deltaLongitudeRadians/2); 			
+
+	double b = 2 * atan2(sqrt(a), sqrt(1 - a));
+	double distanceToWaypoint = radiusOfEarth * b * 1000;
+	
+	return distanceToWaypoint;
+}
