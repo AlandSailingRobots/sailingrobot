@@ -241,12 +241,12 @@ double Utility::calculateTrueWindDirection(const int windsensorDir, const int wi
 	return twd;
 }
 
-double Utility::calculateTrueWindSpeed(const SystemStateModel& systemStateModel , double heading)
+double Utility::calculateTrueWindSpeed(int windsensorDir, int windsensorSpeed, double gpsSpeed, double heading)
 {
 	//double knots = 1.94384;
-	double apparentWindSpeed = systemStateModel.windsensorModel.speed; //* knots; // Converting m/s to knots
-	double apparentWindAngle = systemStateModel.windsensorModel.direction;
-	double boatSpeed = systemStateModel.gpsModel.speed;
+	double apparentWindSpeed = windsensorSpeed; //* knots; // Converting m/s to knots
+	double apparentWindAngle = windsensorDir;
+	double boatSpeed = gpsSpeed;
 
 	if (apparentWindAngle < 0.001 ){
 		apparentWindAngle = 0.001;
@@ -288,11 +288,11 @@ double Utility::getTrueWindDirection(int windsensorDir, int windsensorSpeed, dou
 	return meanOfAngles(twdBuffer);
 }
 
-std::array<double, 2> Utility::calculateApparentWind(const SystemStateModel systemStateModel, const double heading, const double trueWindDirection)
+std::array<double, 2> Utility::calculateApparentWind(int windsensorDir, int windsensorSpeed, double gpsSpeed, const double heading, const double trueWindDirection)
 { //referenced from "Modeling, control and state-estimation for an autonomous sailboat" by Jon Melin
 	std::array<double, 2> apparentWind;
-	std::array<double, 2> wcaw = { calculateTrueWindSpeed(systemStateModel, heading) * cos(trueWindDirection - heading) - systemStateModel.gpsModel.speed, //wcaw[0]
-									calculateTrueWindSpeed(systemStateModel, heading) * sin(trueWindDirection - heading)}; //wcaw[1] Cartesian Apparent Wind
+	std::array<double, 2> wcaw = { calculateTrueWindSpeed(windsensorDir, windsensorSpeed, gpsSpeed, heading) * cos(trueWindDirection - heading) - gpsSpeed, //wcaw[0]
+									calculateTrueWindSpeed(windsensorDir, windsensorSpeed, gpsSpeed, heading) * sin(trueWindDirection - heading)}; //wcaw[1] Cartesian Apparent Wind
 
 	double apparentWindSpeed = sqrt(pow(wcaw[0], 2) + pow(wcaw[1], 2));
 	double apparentWindDirection = atan2(wcaw[0], wcaw[1]);
@@ -303,11 +303,11 @@ std::array<double, 2> Utility::calculateApparentWind(const SystemStateModel syst
 	return apparentWind;
 }
 
-double Utility::getApparentWindSpeed(const SystemStateModel systemStateModel, const double heading, const double trueWindDirection)
+double Utility::getApparentWindSpeed(int windsensorDir, int windsensorSpeed, double gpsSpeed, const double heading, const double trueWindDirection)
 {
-	return calculateApparentWind(systemStateModel, heading, trueWindDirection)[0];
+	return calculateApparentWind(windsensorDir, windsensorSpeed, gpsSpeed, heading, trueWindDirection)[0];
 }
-double Utility::getApparentWindDirection(const SystemStateModel systemStateModel, const double heading, const double trueWindDirection)
+double Utility::getApparentWindDirection(int windsensorDir, int windsensorSpeed, double gpsSpeed, const double heading, const double trueWindDirection)
 {
-	return calculateApparentWind(systemStateModel, heading, trueWindDirection)[1];
+	return calculateApparentWind(windsensorDir, windsensorSpeed, gpsSpeed, heading, trueWindDirection)[1];
 }

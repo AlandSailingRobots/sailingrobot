@@ -40,13 +40,13 @@ public:
 	static double directionAdjustedSpeed(double gpsHeading,double compassHeading,double gpsSpeed);
 
 	static double calculateTrueWindDirection(const int windsensorDir, const int windsensorSpeed, const double gpsSpeed, const double heading);
-	static double calculateTrueWindSpeed(const SystemStateModel& systemStateModel , double heading);
+	static double calculateTrueWindSpeed(int windsensorDir, int windsensorSpeed, double gpsSpeed, double heading);
 	static double getTrueWindDirection(int windsensorDir, int windsensorSpeed, double gpsSpeed, int compassHeading, 
 			std::vector<float> &twdBuffer, const unsigned int twdBufferMaxSize);
 
-	static std::array<double, 2> calculateApparentWind(const SystemStateModel systemStateModel, const double heading, const double trueWindDirection);
-	static double getApparentWindSpeed(const SystemStateModel systemStateModel, const double heading, const double trueWindDirection);
-	static double getApparentWindDirection(const SystemStateModel systemStateModel, const double heading, const double trueWindDirection);
+	static std::array<double, 2> calculateApparentWind(int windsensorDir, int windsensorSpeed, double gpsSpeed, const double heading, const double trueWindDirection);
+	static double getApparentWindSpeed(int windsensorDir, int windsensorSpeed, double gpsSpeed, const double heading, const double trueWindDirection);
+	static double getApparentWindDirection(int windsensorDir, int windsensorSpeed, double gpsSpeed, const double heading, const double trueWindDirection);
 };
 
 #endif

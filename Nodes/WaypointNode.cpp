@@ -19,16 +19,20 @@
 #include <vector>
 
 WaypointNode::WaypointNode(MessageBus& msgBus, DBHandler& db)
-: Node(NodeID::Waypoint, msgBus), m_db(db)
-{
-    m_id = 0;
-    m_longitude = 0;
-    m_latitude = 0;
-    m_declination = 0;
-    m_radius = 0;
+: Node(NodeID::Waypoint, msgBus), m_db(db),     
+    m_nextId(0),
+    m_nextLongitude(0),
+    m_nextLatitude(0),
+    m_nextDeclination(0),
+    m_nextRadius(0),
 
-    m_gps_longitude = 0;
-    m_gps_latitude = 0;
+    m_prevId(0),
+    m_prevLongitude(0),
+    m_prevLatitude(0),
+    m_prevDeclination(0),
+    m_prevRadius(0)
+{
+
 }
 
 bool WaypointNode::init()
@@ -65,9 +69,9 @@ void WaypointNode::processGPSMessage(GPSDataMsg* msg)
 
 bool WaypointNode::waypointReached()
 {
-    if(m_courseMath.calculateDTW(m_gps_longitude, m_gps_latitude, m_longitude, m_latitude) < m_radius)
+    if(m_courseMath.calculateDTW(m_gps_longitude, m_gps_latitude, m_nextLongitude, m_nextLatitude) < m_nextRadius)
     {
-        if(not m_db.changeOneValue("waypoints", std::to_string(m_id),"1","harvested"))
+        if(not m_db.changeOneValue("waypoints", std::to_string(m_nextId),"1","harvested"))
         {
             Logger::error("Failed to harvest waypoint");
         }
@@ -85,9 +89,11 @@ void WaypointNode::sendMessage()
 {
     Logger::info("Preparing to send WaypointNode");
 
-    if(m_db.getWaypointValues(m_id, m_longitude, m_latitude, m_declination, m_radius))
+    if(m_db.getWaypointValues(m_nextId, m_nextLongitude, m_nextLatitude, m_nextDeclination, m_nextRadius,
+                        m_prevId, m_prevLongitude, m_prevLatitude, m_prevDeclination, m_prevRadius))
     {
-        WaypointDataMsg* msg = new WaypointDataMsg(m_id, m_longitude, m_latitude, m_declination, m_radius);
+        WaypointDataMsg* msg = new WaypointDataMsg(m_nextId, m_nextLongitude, m_nextLatitude, m_nextDeclination, m_nextRadius,
+                        m_prevId, m_prevLongitude, m_prevLatitude, m_prevDeclination, m_prevRadius);
         m_MsgBus.sendMessage(msg);
     }
     else

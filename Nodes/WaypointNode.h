@@ -42,12 +42,18 @@ private:
     DBHandler m_db;
     CourseMath m_courseMath;
 
-    int m_id;
-    double m_longitude;
-    double m_latitude;
-    int m_declination;
-    int m_radius;
+    int     m_nextId;
+    double  m_nextLongitude;
+    double  m_nextLatitude;
+    int     m_nextDeclination;
+    int     m_nextRadius;
 
-    double m_gps_longitude;
-    double m_gps_latitude;
+    int     m_prevId;
+    double  m_prevLongitude;
+    double  m_prevLatitude;
+    int     m_prevDeclination;
+    int     m_prevRadius;
+
+    double  m_gps_longitude;
+    double  m_gps_latitude;
 };

@@ -41,7 +41,7 @@ JSON = 					libs/json
 CORE =					MessageBus.cpp ActiveNode.cpp
 
 NODES =					Nodes/MessageLoggerNode.cpp Nodes/CV7Node.cpp Nodes/HMC6343Node.cpp Nodes/GPSDNode.cpp Nodes/ActuatorNode.cpp  Nodes/ArduinoNode.cpp \
-						Nodes/VesselStateNode.cpp Nodes/WaypointNode.cpp Nodes/SailingLogicOldNode.cpp
+						Nodes/VesselStateNode.cpp Nodes/WaypointNode.cpp Nodes/SailingLogicOldNode.cpp Nodes/SailingLogicNewNode.cpp
 
 SYSTEM_SERVICES =		SystemServices/MaestroController.cpp
 

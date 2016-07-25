@@ -18,6 +18,7 @@
 #include "Messages/CompassDataMsg.h"
 #include "Messages/GPSDataMsg.h"
 #include "Messages/WindDataMsg.h"
+#include "Messages/ArduinoDataMsg.h"
 
 
 class VesselStateNode : public ActiveNode {
@@ -39,6 +40,7 @@ public:
 	void processCompassMessage(CompassDataMsg* msg);
 	void processGPSMessage(GPSDataMsg* msg);
 	void processWindMessage(WindDataMsg* msg);
+	void processArduinoMessage(ArduinoDataMsg* msg);
 
 private:
 	///----------------------------------------------------------------------------------
@@ -55,7 +57,12 @@ private:
 	double	m_GPSUnixTime;
 	double	m_GPSSpeed;
 	double	m_GPSHeading;
+	int		m_GPSSatellite;
 	float	m_WindDir;
 	float	m_WindSpeed;
 	float 	m_WindTemp;
+	int 	m_ArduinoPressure;
+	int 	m_ArduinoRudder;
+	int 	m_ArduinoSheet;
+    int 	m_ArduinoBattery;
 };

@@ -90,6 +90,8 @@ void SailingLogicOldNode::calculateActuatorPos(VesselStateMsg* msg)
     ActuatorPositionMsg *sailMsg = new ActuatorPositionMsg(NodeID::SailActuator, nodeID(), sailCommand);
     m_MsgBus.sendMessage(rudderMsg);
     m_MsgBus.sendMessage(sailMsg);
+
+    manageDatabase(msg, trueWindDirection, rudderCommand, sailCommand);
 }
 
 int SailingLogicOldNode::getHeading(int gpsHeading, int compassHeading, double gpsSpeed, bool mockPosition,bool getHeadingFromCompass) {
@@ -99,7 +101,7 @@ int SailingLogicOldNode::getHeading(int gpsHeading, int compassHeading, double g
 
 	getMergedHeading(gpsHeading, compassHeading, true); //decrease compass weight on each iteration
 
-    // if(mockPosition) {
+    // if(mockPosition) { //TODO - MOCK
     //     return position->getHeading(); //OUTCOMMENTED FOR NOW UNTIL WE FIGURE OUT MOCK
     // }
 
@@ -149,11 +151,13 @@ void SailingLogicOldNode::setupSailCommand()
 	        m_db.retrieveCellAsInt("sail_command_config", "1", "run_command"));
 }
 
-void SailingLogicOldNode::manageDatabase(double trueWindDirection, SystemStateModel &systemStateModel){
+void SailingLogicOldNode::manageDatabase(VesselStateMsg* msg, double trueWindDirection, double rudder, double sail){
   //logging
   bool routeStarted = false;
   m_db.insertDataLog(
-    systemStateModel,
+    msg,
+    rudder,
+    sail,
     0,
     0,
     m_waypointRouting.getDTW(),
