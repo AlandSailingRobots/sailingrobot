@@ -12,6 +12,7 @@
 #include "MessageBus.h"
 #include "logger/Logger.h"
 #include <sys/time.h>
+#include "utility/SysClock.h"
 
 // For std::this_thread
 #include <chrono>
@@ -171,7 +172,7 @@ void MessageBus::startMessageLog()
 void MessageBus::logMessageReceived(Message* msg)
 {
 #ifdef LOG_MESSAGES
-	msg->timeReceived = Logger::unixTime();
+	msg->timeReceived = SysClock::timeStamp();
 #endif
 }
 
@@ -181,13 +182,12 @@ void MessageBus::logMessage(Message* msg)
 	if(m_LogFile != NULL)
 	{
 		char buff[256];
-		char timeNow[14];
-		char timeReceived[14];
 
-		messageTimeStamp(Logger::unixTime(), timeNow);
-		messageTimeStamp(msg->timeReceived, timeReceived);
-
-		snprintf(buff, 256, "[%s ID=%d] Type=%s(%d) SourceID=%d Destination=%d Received=%s", timeNow, msg->messageID, msgToString(msg->messageType()).c_str(), msg->messageType(), msg->sourceID(), msg->destinationID(), timeReceived);
+		snprintf(buff, 256, "[%s] Type=%s(%d) SourceID=%d Destination=%d Received=%s", 	SysClock::hh_mm_ss_ms().c_str(),
+																						msgToString(msg->messageType()).c_str(),
+																						msg->messageType(), msg->sourceID(),
+																						msg->destinationID(),
+																						SysClock::hh_mm_ss_ms(msg->timeReceived).c_str());
 		*m_LogFile << buff << "\n";
 		m_LogFile->flush();
 	}
@@ -200,11 +200,8 @@ void MessageBus::logMessageConsumer(NodeID id)
 	if(m_LogFile != NULL)
 	{
 		char buff[256];
-		char timeNow[14];
 
-		messageTimeStamp(Logger::unixTime(), timeNow);
-
-		snprintf(buff, 256, "\t%s Consumed by Node: %s(%d)", timeNow, nodeToString(id).c_str(), id);
+		snprintf(buff, 256, "\t%s Consumed by Node: %s(%d)", SysClock::hh_mm_ss_ms().c_str(), nodeToString(id).c_str(), id);
 		*m_LogFile << buff << "\n";
 		m_LogFile->flush();
 	}

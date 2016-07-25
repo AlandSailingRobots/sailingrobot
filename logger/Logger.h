@@ -56,14 +56,6 @@ public:
 	static void shutdown();
 
 	/////////////////////////////////////////////////////////////////////////////////////
- 	/// Updates the current time.
- 	///
- 	/// @params seconds 			The unix time in seconds.
- 	///
- 	/////////////////////////////////////////////////////////////////////////////////////
-	static void setTime(unsigned long seconds);
-
-	/////////////////////////////////////////////////////////////////////////////////////
  	/// A globally accessable function to log messages to that works exactly like printf.
  	///
  	/// @params message 			The log message.
@@ -105,11 +97,8 @@ private:
 	std::string getTimeStampWRSC();
 
 	static Logger* m_instance;
-	static bool m_GPSTimeSet;
 
 	std::string m_LogFilePath;
-	unsigned long m_LastClockStamp;
-	unsigned long m_LastTimeStamp;
 	std::ofstream* m_LogFile;
 	std::vector<std::string> m_LogBuffer;
 	std::mutex m_Mutex;

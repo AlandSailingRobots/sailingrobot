@@ -7,19 +7,16 @@
 
 #include "Logger.h"
 #include <iostream>
+#include "utility/SysClock.h"
 
-#include <ctime>
-
-#define GET_UNIX_TIME() static_cast<long int>(std::time(0))
 #define MAX_LOG_SIZE	256
 #define MAX_MSG_BUFFER 100
 
 Logger* Logger::m_instance = NULL;
-bool Logger::m_GPSTimeSet = false;
 
 
 Logger::Logger() 
-	:m_LogFilePath(), m_LastClockStamp(0), m_LastTimeStamp(0)
+	:m_LogFilePath()
 {
 	
 }
@@ -45,12 +42,9 @@ bool Logger::init(const char* filename)
 	{
 		m_instance = new Logger();
 
-		// Set the timestamp to the system's unix time.
-		m_instance->m_LastClockStamp = GET_UNIX_TIME();
-
 		if(not m_instance->createLogFiles(filename))
 		{
-			std::cout << "[" <<m_instance->getTimeStamp() << "] Failed to create log files\n";
+			std::cout << "[" << SysClock::timeStampStr().c_str() << "] Failed to create log files\n";
 			delete m_instance;
 			m_instance = NULL;
 			return false;
@@ -66,16 +60,6 @@ void Logger::shutdown()
 	if(m_instance != NULL)
 	{
 		delete m_instance;
-	}
-}
-
-void Logger::setTime(unsigned long seconds)
-{
-	if(not m_GPSTimeSet && m_instance != NULL)
-	{
-		m_instance->m_LastTimeStamp = seconds;
-		m_instance->m_LastClockStamp = GET_UNIX_TIME();
-		m_GPSTimeSet = true;
 	}
 }
 
@@ -112,7 +96,7 @@ void Logger::info(std::string message, ...)
 
     char buff[256];
 
-    snprintf(buff, 256, "[%s] <info>\t %s\n", m_instance->getTimeStamp().c_str(), logBuffer);
+    snprintf(buff, 256, "[%s] <info>\t %s\n", SysClock::timeStampStr().c_str(), logBuffer);
 
     printf("%s", buff);
 
@@ -133,7 +117,7 @@ void Logger::error(std::string message, ...)
 
     char buff[256];
 
-    snprintf(buff, 256, "[%s] <error>\t %s\n", m_instance->getTimeStamp().c_str(), logBuffer);
+    snprintf(buff, 256, "[%s] <error>\t %s\n", SysClock::timeStampStr().c_str(), logBuffer);
 
     printf("%s", buff);
     if(m_instance != NULL)
@@ -153,7 +137,7 @@ void Logger::warning(std::string message, ...)
 
     char buff[256];
 
-    snprintf(buff, 256, "[%s] <warning>\t %s\n", m_instance->getTimeStamp().c_str(), logBuffer);
+    snprintf(buff, 256, "[%s] <warning>\t %s\n", SysClock::timeStampStr().c_str(), logBuffer);
 
     printf("%s", buff);
     if(m_instance != NULL)
@@ -174,7 +158,7 @@ void Logger::logWRSC(const GPSModel* const gps)
 		if(m_instance->m_LogFileWRSC->is_open())
 		{
 			char logBuffer[MAX_LOG_SIZE];
-			snprintf(logBuffer, MAX_LOG_SIZE, "%s, %d, %d\n", 	m_instance->getTimeStampWRSC().c_str(), 
+			snprintf(logBuffer, MAX_LOG_SIZE, "%s%d, %d, %d\n", SysClock::hh_mm_ss().c_str(), SysClock::day(),
 																(int)(gps->positionModel.latitude*10000000), 
 																(int)(gps->positionModel.longitude*10000000));
 			*(m_instance->m_LogFileWRSC) << logBuffer;
@@ -188,23 +172,6 @@ void Logger::logWRSC(const GPSModel* const gps)
 	}
 	m_Mutex.unlock();
 	#endif
-}
-
-unsigned long Logger::unixTime()
-{
-	unsigned long seconds = 0;
-
-	if(m_GPSTimeSet)
-	{
-		seconds = m_instance->m_LastTimeStamp + (GET_UNIX_TIME() - m_instance->m_LastClockStamp);
-		m_instance->m_LastTimeStamp = seconds;
-	}
-	else
-	{
-		seconds = GET_UNIX_TIME();
-	}
-
-	return seconds;
 }
 
 bool Logger::createLogFiles(const char* filename)
@@ -261,48 +228,4 @@ void Logger::writeBufferedLogs()
 		*m_LogFile << log.c_str();
 	} 
 	m_LogFile->flush();
-}
-
-std::string Logger::getTimeStamp()
-{
-	unsigned long seconds = 0;
-	char buff[90];
-
-	if(m_GPSTimeSet)
-	{
-		seconds = m_LastTimeStamp + (GET_UNIX_TIME() - m_LastClockStamp);
-		m_LastTimeStamp = seconds;
-	}
-	else
-	{
-		seconds = GET_UNIX_TIME();
-	}
-
-	time_t unix_time = (time_t)seconds;
-
-	strftime(buff, sizeof(buff), "%F %T", gmtime(&unix_time));
-
-	return std::string(buff);
-}
-
-std::string Logger::getTimeStampWRSC()
-{
-	unsigned long seconds = 0;
-	char buff[9];
-
-	if(m_GPSTimeSet)
-	{
-		seconds = m_LastTimeStamp + (GET_UNIX_TIME() - m_LastClockStamp);
-		m_LastTimeStamp = seconds;
-	}
-	else
-	{
-		seconds = GET_UNIX_TIME();
-	}
-
-	time_t unix_time = (time_t)seconds;
-
-	strftime(buff, sizeof(buff), "%H%M%S%d", gmtime(&unix_time));
-
-	return std::string(buff);
 }

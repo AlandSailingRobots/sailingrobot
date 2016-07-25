@@ -19,6 +19,10 @@
 
 #define LOG_MESSAGES
 
+#ifdef LOG_MESSAGES
+#include "utility/SysClock.h"
+#endif
+
 
 class Message {
 public:
@@ -74,7 +78,7 @@ public:
 	NodeID destinationID() const { return m_DestinationID; }
 
 #ifdef LOG_MESSAGES
-	unsigned long timeReceived;
+	TimeStamp timeReceived;
 #endif
 
 private:

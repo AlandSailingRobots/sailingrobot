@@ -72,7 +72,7 @@ WINDVANECONTROLLER = 	windvanecontroller/WindVaneController.cpp
 
 SRC_MAIN = main.cpp
 
-SRC = 	logger/Logger.cpp utility/Utility.cpp utility/Timer.cpp $(SYSTEM_SERVICES) $(XBEE) \
+SRC = 	logger/Logger.cpp utility/Utility.cpp utility/Timer.cpp utility/SysClock.cpp $(SYSTEM_SERVICES) $(XBEE) \
 		$(CORE) $(NODES) $(I2CCONTROLLER) $(POSITION) $(COURSE) $(DB) $(COMMAND) $(GPS) \
 		$(XML_LOG) $(THREAD) $(WAYPOINTROUTING) $(WINDVANECONTROLLER) $(BEHAVIOURCLASS)
 
