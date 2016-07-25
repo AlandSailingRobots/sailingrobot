@@ -46,9 +46,6 @@ class HTTPSyncNode : public ActiveNode{
 		DBHandler *m_dbHandler;
 
 		std::string getData(std::string call);
-        void setShipID(std::string shipID);
-		void setShipPWD(std::string shipPWD);
-		void setServerURL(std::string URL);
 
 		bool performCURLCall(std::string data, std::string call, std::string& response);
         void getWaypointsFromServer();

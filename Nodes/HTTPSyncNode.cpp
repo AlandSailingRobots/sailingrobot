@@ -39,9 +39,9 @@ bool HTTPSyncNode::init()
 
     m_pushOnlyLatestLogs = m_dbHandler->retrieveCellAsInt("httpsync_config", "1", "push_only_latest_logs");
 
-    setShipID( m_dbHandler->retrieveCell("server", "1", "boat_id") );
-    setShipPWD( m_dbHandler->retrieveCell("server", "1", "boat_pwd") );
-    setServerURL( m_dbHandler->retrieveCell("server", "1", "srv_addr") );
+    m_shipID = m_dbHandler->retrieveCell("server", "1", "boat_id");
+    m_serverURL = m_dbHandler->retrieveCell("server", "1", "boat_pwd");
+    m_shipPWD = m_dbHandler->retrieveCell("server", "1", "boat_pwd");
 
     m_initialised = true;
     Logger::info("HTTPSyncNode init() successful");
@@ -145,19 +145,6 @@ void HTTPSyncNode::pushConfigs() {
 	{
 		Logger::warning("%s Error: ", __PRETTY_FUNCTION__);
 	}
-}
-
-
-void HTTPSyncNode::setShipID(std::string ID) {
-    m_shipID = ID;
-}
-
-void HTTPSyncNode::setShipPWD(std::string PWD) {
-    m_shipPWD = PWD;
-}
-
-void HTTPSyncNode::setServerURL(std::string URL) {
-    m_serverURL = URL;
 }
 
 std::string HTTPSyncNode::getData(std::string call) {
