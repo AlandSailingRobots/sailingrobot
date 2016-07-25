@@ -102,19 +102,17 @@ int main(int argc, char *argv[])
 	ArduinoNode arduino(messageBus);
 	VesselStateNode vessel(messageBus);
 	WaypointNode waypoint(messageBus, dbHandler);
-	RoutingNode routing(messageBus, dbHandler);
-	LineFollowNode lineFollow(messageBus, dbHandler);
 	Node* sailingLogic;
 
 
 	bool usingLineFollow = (bool)(dbHandler.retrieveCellAsInt("sailing_robot_config", "1", "line_follow"));
 	if(usingLineFollow)
 	{
-		sailingLogic = &lineFollow;
+		sailingLogic = new LineFollowNode(messageBus, dbHandler);
 	}
 	else
 	{
-		sailingLogic = &routing;
+		sailingLogic = new RoutingNode(messageBus, dbHandler);
 	}
 
 	int channel = dbHandler.retrieveCellAsInt("sail_servo_config", "1", "channel");
@@ -166,6 +164,7 @@ int main(int argc, char *argv[])
 
 	Logger::info("Message bus started!");
 	messageBus.run();
+	delete sailingLogic;
 	exit(0);
 }
 

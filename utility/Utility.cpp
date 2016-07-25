@@ -354,7 +354,7 @@ double Utility::calculateTrueWindSpeed(int windsensorDir, int windsensorSpeed, d
 double Utility::getTrueWindDirection(int windsensorDir, int windsensorSpeed, double gpsSpeed, int compassHeading, 
 			std::vector<float> &twdBuffer, const unsigned int twdBufferMaxSize)
 {
-	static unsigned int trueWindIndex;
+	static unsigned int trueWindIndex = 0;
 	double twd = calculateTrueWindDirection(windsensorDir, windsensorSpeed, gpsSpeed, compassHeading);
 
 	if(twdBuffer.size() < twdBufferMaxSize)
