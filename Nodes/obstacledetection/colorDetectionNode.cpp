@@ -4,21 +4,11 @@ using namespace cv;
 using namespace std;
 
 colorDetectionNode::colorDetectionNode(MessageBus& msgBus,std::vector<string> colors_input)
-	: ActiveNode(NodeID::ColorDetection, msgBus),m_minAreaToDetect(2000),
-	m_maxAreaToDetect(20000),m_numberOfCapturesPerDetection(5)
+	: ActiveNode(NodeID::ColorDetection, msgBus),m_hsvDiff(10),m_iLowH(0),
+	m_iHighH(179),m_iLowS(0),m_iHighS(255),m_iLowV(0),m_iHighV(255),m_iColor(0),
+	m_numberOfColorsToTrack(0),m_Initialised(false),m_minAreaToDetect(2000),
+	m_maxAreaToDetect(20000),m_numberOfCapturesPerDetection(5),m_delay(5000),m_port(1)
 {
-	m_hsvDiff=10;
-	m_iLowH = 0;
-	m_iHighH = 179;
-	m_iLowS = 0;
-	m_iHighS = 255;
-	m_iLowV = 0;
-	m_iHighV = 255;
-	m_iColor = 0;
-	m_numberOfColorsToTrack=0;
-
-	m_delay=5000;
-	m_Initialised=false;
 	vector<string> colors;
 	m_trackBarHSV = Mat3b(100, 300, Vec3b(0,0,0));
 
@@ -49,22 +39,12 @@ colorDetectionNode::colorDetectionNode(MessageBus& msgBus,std::vector<string> co
 }
 
 colorDetectionNode::colorDetectionNode(MessageBus& msgBus,int port, int delay,std::vector<string> colors_input)
-	: ActiveNode(NodeID::ColorDetection, msgBus),m_minAreaToDetect(2000),
-	m_maxAreaToDetect(20000),m_numberOfCapturesPerDetection(5)
+	: ActiveNode(NodeID::ColorDetection, msgBus),m_hsvDiff(10),m_iLowH(0),
+	m_iHighH(179),m_iLowS(0),m_iHighS(255),m_iLowV(0),m_iHighV(255),m_iColor(0),
+	m_numberOfColorsToTrack(0),m_Initialised(false),m_minAreaToDetect(2000),
+	m_maxAreaToDetect(20000),m_numberOfCapturesPerDetection(5),m_delay(delay),m_port(port)
 {
-	m_hsvDiff=10;
-	m_iLowH = 0;
-	m_iHighH = 179;
-	m_iLowS = 0;
-	m_iHighS = 255;
-	m_iLowV = 0;
-	m_iHighV = 255;
-	m_iColor = 0;
-	m_numberOfColorsToTrack=0;
 
-	m_delay=delay;
-	m_port=port;
-	m_Initialised=false;
 	vector<string> colors;
 	m_trackBarHSV = Mat3b(100, 300, Vec3b(0,0,0));
 
