@@ -49,14 +49,16 @@ CollisionAvoidanceBehaviour::CollisionAvoidanceBehaviour(DBHandler *db) :
 
 // UTILITY FUNCTIONS
 
-// Might be put into Utility class soon. TODO : Utility class ?
+// Might be put into Utility class soon.
+// TODO : Utility class ?
 double CollisionAvoidanceBehaviour::angleDiff(
         double radAngle1,
         double radAngle2) {
     return fmod(radAngle1-radAngle2+M_PI,2*M_PI)+M_PI;
 }
 
-// Maybe this function should as well be in the Utility class. TODO : Utility class ?
+// Maybe this function should as well be in the Utility class.
+// TODO : Utility class ?
 double CollisionAvoidanceBehaviour::calculateGPSDistance(
         Eigen::Vector2d point1,
         Eigen::Vector2d point2) {
@@ -69,9 +71,8 @@ double CollisionAvoidanceBehaviour::calculateGPSDistance(
     const double c = 2*atan2(sqrt(a),sqrt(1-a));
     return Rearth*c;
 }
-/*
- * TODO : Utility class ?
- */
+
+// TODO : Utility class ?
 Eigen::Vector2d CollisionAvoidanceBehaviour::findCenter(
         const std::vector<Eigen::Vector2d> polygon) {
     double sumOfX = 0;
@@ -95,6 +96,7 @@ double CollisionAvoidanceBehaviour::getArea(
     return sum/2;
 }
 
+// TODO : Utility class ?
 double CollisionAvoidanceBehaviour::signedDistanceFromLine(
         Eigen::Vector2d linePt1,
         Eigen::Vector2d linePt2,
@@ -111,8 +113,10 @@ double CollisionAvoidanceBehaviour::signedDistanceFromLine(
     return arcLenght;
 }
 
-Eigen::Vector2d CollisionAvoidanceBehaviour::getClosestPoint(
-        std::vector<Eigen::Vector2d> polygon, Eigen::Vector2d point){
+// TODO : Utility class ?
+Eigen::Vector2d CollisionAvoidanceBehaviour::getClosestVertex(
+        std::vector<Eigen::Vector2d> polygon,
+        Eigen::Vector2d point){
     int idClosestPoint = -1;
     double minDistance = 40000;
     double distance;
@@ -126,15 +130,73 @@ Eigen::Vector2d CollisionAvoidanceBehaviour::getClosestPoint(
     return polygon[idClosestPoint];
 }
 
-double CollisionAvoidanceBehaviour::distanceFromSegment(
+Eigen::Vector2d CollisionAvoidanceBehaviour::getClosestPoint(
+        std::vector<Eigen::Vector2d> polygon,
+        Eigen::Vector2d point){
+
+    bool computeMidPoint; // Used to lighten the computations.
+    int closestPointId0;
+    int closestPointId1;
+    double min = 40000000; // 40M should be sufficient (~>perimeter of Earth)
+    Eigen::Vector2d closestPoint;
+    const Eigen::Vector3d worldOrigin(0,0,0);
+
+    for(int i = 0;i<polygon.size();i++){
+        const int iPlusOne = static_cast<const int>((i+1)%polygon.size());
+        const std::vector<double> distInfo = distanceFromSegment(polygon[i],
+                                                                 polygon[iPlusOne],
+                                                                 point);
+        min = std::min(min,distInfo[0]);
+
+        if(min==distInfo[0] && distInfo[1]==2){
+            computeMidPoint = true;
+            closestPointId0 = i;
+            closestPointId1 = iPlusOne;
+        }
+        else if(min==distInfo[0] && distInfo[1]==0){
+            closestPoint = polygon[i];
+            computeMidPoint = false;
+        }
+        else if(min==distInfo[0] && distInfo[1]==1){
+            closestPoint = polygon[i];
+            computeMidPoint = false;
+        }
+    }
+
+    if(computeMidPoint){
+        //get the projection in 3D on the plan created by the center of Earth and the segment
+        //get its gps coordinates by cartesian to latLon
+        //3D vector necessary for calculations.
+        const Eigen::Vector3d segPt0 = latLonToCartesian(polygon[closestPointId0]);
+        const Eigen::Vector3d segPt1 = latLonToCartesian(polygon[closestPointId1]);
+        const Eigen::Vector3d pointCartesian = latLonToCartesian(point);
+
+        //normal unit vector to the plane
+        const Eigen::Vector3d planeNormal = ((segPt0-worldOrigin).cross(segPt1-worldOrigin))
+                                            /((segPt0-worldOrigin).cross(segPt1-worldOrigin).norm());
+        const Eigen::Vector3d projection = (-pointCartesian.dot(planeNormal)) * planeNormal;
+
+        closestPoint = cartesianToLatLon(projection);
+        // Since altitude isn't used in the calculations, this is the right
+        // latitude and longitude
+    }
+
+    return closestPoint;
+}
+
+// TODO : Utility class ?
+std::vector<double> CollisionAvoidanceBehaviour::distanceFromSegment(
         Eigen::Vector2d segmentPt1,
         Eigen::Vector2d segmentPt2,
         Eigen::Vector2d point) {
 
     // Return minimum distance between line segment vw and point p
     const double lengthSegment = calculateGPSDistance(segmentPt2, segmentPt1);
-    if (lengthSegment == 0.0) return calculateGPSDistance(point, segmentPt1);   // v == w case
-
+    if (lengthSegment == 0.0){
+        const double gpsDistance = calculateGPSDistance(point, segmentPt1);
+        const std::vector<double> result = {gpsDistance,0};
+        return result; // v == w case
+    }
     //Lat Lon to Cartesian coordinates
     const Eigen::Vector3d a = latLonToCartesian(segmentPt1);
     const Eigen::Vector3d b = latLonToCartesian(segmentPt2);
@@ -144,48 +206,61 @@ double CollisionAvoidanceBehaviour::distanceFromSegment(
     //Creation of the triangle
     const Eigen::Vector3d triangle[3] = {worldOrigin, a, b};
 
-    if (projectionInside3DTriangle(triangle, m)) {
-        return std::abs(signedDistanceFromLine(segmentPt1,segmentPt2,point));
+    if (projectionInsideSlice(triangle, m)) {
+        const double gpsDistance = std::abs(signedDistanceFromLine(segmentPt1,segmentPt2,point));
+        const std::vector<double> result = {gpsDistance,2};
+        return result;
     }
-    else { //projection is not inside the triangle
-        const std::vector<Eigen::Vector2d> line = {segmentPoint1,segmentPoint2};
+    else { //projection is not inside the slice
+        const std::vector<Eigen::Vector2d> line = {segmentPt1,segmentPt2};
         const Eigen::Vector2d closestPoint = getClosestPoint(line,point);
-        return calculateGPSDistance(point, closestPoint);
+        const double gpsDistance = calculateGPSDistance(point, closestPoint);
+        if(closestPoint==segmentPt1){
+            const std::vector<double> result = {gpsDistance,0};
+            return result;
+        }
+        else{
+            const std::vector<double> result = {gpsDistance,1};
+            return result;
+        }
+
     }
 }
 
-Eigen::Vector2d CollisionAvoidanceBehaviour::cartesianToLatLon(Eigen::Vector3d vector){
+Eigen::Vector2d CollisionAvoidanceBehaviour::cartesianToLatLon(
+        Eigen::Vector3d vector){
     const Eigen::Vector2d gpsCoord(atan2(vector(1),vector(0)),
-                                   asin(vector(2)/EARTH_RADIUS));
+                                   asin(vector(2)/vector.norm()));
     return gpsCoord;
 }
 
-Eigen::Vector3d CollisionAvoidanceBehaviour::latLonToCartesian(Eigen::Vector2d vector){
+Eigen::Vector3d CollisionAvoidanceBehaviour::latLonToCartesian(
+        Eigen::Vector2d vector){
     const Eigen::Vector3d cartesianVector(EARTH_RADIUS*cos(vector(1))*cos(vector(0)),
                                           EARTH_RADIUS*cos(vector(1))*sin(vector(0)),
                                           EARTH_RADIUS*sin(vector(1)));
     return cartesianVector;
 }
 
-bool CollisionAvoidanceBehaviour::projectionInside3DTriangle(Eigen::Vector3d triangle[3],Eigen::Vector3d point){
-    const Eigen::Vector3d u = triangle[1]-triangle[0];*
+bool CollisionAvoidanceBehaviour::projectionInsideSlice(
+        Eigen::Vector3d triangle[3],
+        Eigen::Vector3d point){
+    // If this is not a slice
+    if( std::abs((triangle[1]-triangle[0]).norm()-(triangle[2]-triangle[0]).norm()) <= 0){
+        return false;
+        //TODO find a way to stop the program here.
+    }
+
+    const Eigen::Vector3d u = triangle[1]-triangle[0];
     const Eigen::Vector3d v = triangle[2]-triangle[0];
     const Eigen::Vector3d n = u.cross(v);
     const Eigen::Vector3d w = point-triangle[0];
     const double coord0 = (u.cross(w).dot(n))/(n.norm()*n.norm());
     const double coord1 = (w.cross(v).dot(n))/(n.norm()*n.norm());
-    const double coord2 = 1-coord0-coord1;
+    //const double coord2 = 1-coord0-coord1;
 
-    if(   0<=coord0 && coord0<1
-       && 0<=coord1 && coord1<1
-       && 0<=coord2 && coord2<1){
-        return true;
-    }
-    else{
-        return false;
-    }
+    return 0 <= coord0 && 0 <= coord1;
 }
-
 
 void CollisionAvoidanceBehaviour::printStdVectorMat(
         std::string const &name,
@@ -341,7 +416,7 @@ std::vector<Obstacle> CollisionAvoidanceBehaviour::check_obstacles(SensorData se
                       * sin(headingCenterOfDetectedObstacle) // y
             );
 
-            // 1rst Condition
+            // 1rst Condition : current obstacle is not too close from the boat
             const bool currentObstaclesIsNotTooClose = calculateGPSDistance(centerOfMemorizedObstacle,
                                                                             centerOfCurrentlyDetectedObstacle)
                                                     + widthOfCurrentDetectedObstacleAtClosest * 2
@@ -474,8 +549,24 @@ Eigen::MatrixXd CollisionAvoidanceBehaviour::compute_potential_field(
     const double strengthPike = 4;
     const double strength = 5;
     const double offsetObstacle = 15;
-    // Add the pikes
 
+    // Where are the pikes and the holes ? The closest to the boat.
+    /*
+     * Algo : check which segment of the polygone is the closest.
+     * Then compute the projection on the segment
+     */
+    // TODO : check the closest position of the obstacle with a function.
+
+    // Add the pikes
+    for(auto & obstacle : seen_obstacles){ //for each seen_obstacle add the pikes
+
+
+    }
+
+    //Add the holes
+    for(auto & obstacle : seen_obstacles){ //for each seen_obstacle add the holes
+
+    }
     /*
     for i=1:size(qhat,2)
     xObs = P1-qhat(1,i);

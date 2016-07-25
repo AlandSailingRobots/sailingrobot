@@ -85,7 +85,7 @@ private:
         double compHeading;
         double gpsHeading;
         double windDirection;
-        double windSpeed;
+        double windSpeed; /**< meter par second */
         int pitch;
         int roll;
 
@@ -136,11 +136,11 @@ private:
 
     /**
      * \Brief Compute the distance between 2 GPS points
-     * Haversine algorithm for distance computation on Earth.
-     * Took on http://www.movable-type.co.uk/scripts/latlong.html
-     * a = sin²(Δφ/2) + cos φ1 ⋅ cos φ2 ⋅ sin²(Δλ/2)
-     * c = 2 ⋅ atan2( √a, √(1−a) )
-     * distance = Rearth ⋅ c
+     * Haversine algorithm for distance computation on Earth. \n
+     * Took on http://www.movable-type.co.uk/scripts/latlong.html \n
+     * a = sin²(Δφ/2) + cos φ1 ⋅ cos φ2 ⋅ sin²(Δλ/2) \n
+     * c = 2 ⋅ atan2( √a, √(1−a) ) \n
+     * distance = Rearth ⋅ c \n
      * @return
      */
     double calculateGPSDistance(Eigen::Vector2d, Eigen::Vector2d);
@@ -164,6 +164,8 @@ private:
     /**
      * Compute the signed distance between a line and a point
      * Uses eigen::vector2d in GPS coordinates
+     * Got from http://stackoverflow.com/questions/849211/shortest-distance-between-a-point-and-a-line-segment
+     * and implemented it for this code.
      * @param linePt1
      * @param linePt2
      * @param point
@@ -172,9 +174,17 @@ private:
     double signedDistanceFromLine(Eigen::Vector2d linePt1,Eigen::Vector2d linePt2,Eigen::Vector2d point);
 
     /**
+     * Get the closest vertex between the given polygon and a point.
+     *
+     * The coordinates of the points of the polygon are in latitude and longitude
+     * @param polygon
+     * @param point
+     * @return
+     */
+    Eigen::Vector2d getClosestVertex(std::vector<Eigen::Vector2d> polygon, Eigen::Vector2d point);
+
+    /**
      * Get the closest point between the given polygon and a point.
-     * Got from http://stackoverflow.com/questions/849211/shortest-distance-between-a-point-and-a-line-segment
-     * and implemented it for this code.
      *
      * the coordinates of the points of the polygon are in latitude and longitude
      * @param polygon
@@ -201,8 +211,15 @@ private:
     Eigen::Vector3d latLonToCartesian(Eigen::Vector2d vector);
 
     /**
-     * Distance from a segment on a sphere (the earth)
+     * Distance from a segment on a sphere (the earth).
      * Got from Robotic Sailing 2012 by Colin Sauzé and James Finnis
+     *
+     * output a std::vector<double>
+     *  the distance
+     *  from what
+     *      0 : the first point
+     *      1 : the second point
+     *      2 : a point in the line segment
      *
      *  Uses getClosestPoint
      * @param segmentPoint1
@@ -210,19 +227,24 @@ private:
      * @param point
      * @return
      */
-    double distanceFromSegment(Eigen::Vector2d segmentPoint1,Eigen::Vector2d segmentPoint2,Eigen::Vector2d point);
+    std::vector<double> distanceFromSegment(Eigen::Vector2d segmentPoint1,Eigen::Vector2d segmentPoint2,Eigen::Vector2d point);
 
     /**
-     * Verify if the projection of a point on a plane is inside a trigle of the plane
+     * Verify if the projection of a point on a plane is inside a slice of Earth
      * Got from
      * http://math.stackexchange.com/questions/544946/determine-if-projection-of-3d-point-onto-plane-is-within-a-triangle
      *
+     * The first point of the triangle is the origin of the slice.
+     * Ouput an error if this is not a slice (left side not the same length as right side)
      * Every polygon in this program is defined anti-clockwise
+     *
+     * The function verify only if the projection of the point is inside an infinite triangle.
+     * So the segment shouldn't be larger than half the permimeter of the earth.
      * @param triangle
      * @param point
      * @return
      */
-    bool projectionInside3DTriangle(Eigen::Vector3d triangle[3],Eigen::Vector3d point);
+    bool projectionInsideSlice(Eigen::Vector3d triangle[3],Eigen::Vector3d point);
 
     /**
      * Debugging function, specific to Eigen
