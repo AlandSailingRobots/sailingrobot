@@ -11,6 +11,7 @@
 
 #include "MessageBus.h"
 #include "logger/Logger.h"
+#include <sys/time.h>
 
 // For std::this_thread
 #include <chrono>
@@ -61,6 +62,7 @@ void MessageBus::sendMessage(Message* msg)
 	{
 		m_FrontQueueMutex.lock();
 		m_FrontMessages->push(msg);
+		logMessageReceived(msg);
 		m_FrontQueueMutex.unlock();
 	}
 }
@@ -69,6 +71,8 @@ void MessageBus::run()
 {
 	// Prevent nodes from being registered now
 	m_Running = true;
+
+	startMessageLog();
 
 	while(m_Running)
 	{
@@ -117,6 +121,8 @@ void MessageBus::processMessages()
 	{
 		Message* msg = m_BackMessages->front();
 
+		logMessage(msg);
+
 		for(auto node : m_RegisteredNodes)
 		{
 			// Distribute to everyone interested
@@ -125,6 +131,7 @@ void MessageBus::processMessages()
 				if(node->isInterested( msg->messageType() ))
 				{
 					node->nodePtr->processMessage(msg);
+					logMessageConsumer(node->nodePtr->nodeID());
 				}
 			}
 			// Distribute to the node the message is directed at then move onto the next message
@@ -133,6 +140,7 @@ void MessageBus::processMessages()
 				if(node->nodePtr->nodeID() == msg->destinationID())
 				{
 					node->nodePtr->processMessage(msg);
+					logMessageConsumer(node->nodePtr->nodeID());
 					continue;
 				}
 			}
@@ -141,4 +149,78 @@ void MessageBus::processMessages()
 		m_BackMessages->pop();
 		delete msg;
 	}
+}
+
+void MessageBus::startMessageLog()
+{
+#ifdef LOG_MESSAGES
+	m_LogFile = new std::ofstream("./Messages.log", std::ios::out | std::ios::trunc);
+	if(m_LogFile->is_open())
+	{
+		Logger::info("Message log file created!");
+	}
+	else
+	{
+		Logger::error("Message log file not created!");
+		delete m_LogFile;
+		m_LogFile = NULL;
+	}
+#endif
+}
+
+void MessageBus::logMessageReceived(Message* msg)
+{
+#ifdef LOG_MESSAGES
+	msg->timeReceived = Logger::unixTime();
+#endif
+}
+
+void MessageBus::logMessage(Message* msg)
+{
+#ifdef LOG_MESSAGES
+	if(m_LogFile != NULL)
+	{
+		char buff[256];
+		char timeNow[14];
+		char timeReceived[14];
+
+		messageTimeStamp(Logger::unixTime(), timeNow);
+		messageTimeStamp(msg->timeReceived, timeReceived);
+
+		snprintf(buff, 256, "[%s ID=%d] Type=%s(%d) SourceID=%d Destination=%d Received=%s", timeNow, msg->messageID, msgToString(msg->messageType()).c_str(), msg->messageType(), msg->sourceID(), msg->destinationID(), timeReceived);
+		*m_LogFile << buff << "\n";
+		m_LogFile->flush();
+	}
+#endif
+}
+
+void MessageBus::logMessageConsumer(NodeID id)
+{
+#ifdef LOG_MESSAGES
+	if(m_LogFile != NULL)
+	{
+		char buff[256];
+		char timeNow[14];
+
+		messageTimeStamp(Logger::unixTime(), timeNow);
+
+		snprintf(buff, 256, "\t%s Consumed by Node: %s(%d)", timeNow, nodeToString(id).c_str(), id);
+		*m_LogFile << buff << "\n";
+		m_LogFile->flush();
+	}
+#endif
+}
+
+void MessageBus::messageTimeStamp(unsigned long unixTime, char* buffer)
+{
+	char buff[9];
+	time_t unix_time = (time_t)unixTime;
+	strftime(buff, 9, "%H:%M:%S", gmtime(&unix_time));
+
+	// Get Milliseconds
+	timeval curTime;
+	gettimeofday(&curTime, NULL);
+	int milli = curTime.tv_usec / 1000;
+
+	sprintf(buffer, "%s:%d", buff, milli);
 }

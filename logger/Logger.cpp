@@ -190,6 +190,23 @@ void Logger::logWRSC(const GPSModel* const gps)
 	#endif
 }
 
+unsigned long Logger::unixTime()
+{
+	unsigned long seconds = 0;
+
+	if(m_GPSTimeSet)
+	{
+		seconds = m_instance->m_LastTimeStamp + (GET_UNIX_TIME() - m_instance->m_LastClockStamp);
+		m_instance->m_LastTimeStamp = seconds;
+	}
+	else
+	{
+		seconds = GET_UNIX_TIME();
+	}
+
+	return seconds;
+}
+
 bool Logger::createLogFiles(const char* filename)
 {
 	std::string filePath;

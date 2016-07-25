@@ -16,6 +16,10 @@
 #include "MessageTypes.h"
 #include "NodeIDs.h"
 
+
+#define LOG_MESSAGES
+
+
 class Message {
 public:
 	///----------------------------------------------------------------------------------
@@ -68,6 +72,10 @@ public:
  	///
  	///----------------------------------------------------------------------------------
 	NodeID destinationID() const { return m_DestinationID; }
+
+#ifdef LOG_MESSAGES
+	unsigned long timeReceived;
+#endif
 
 private:
 	MessageType m_MessageType;		// The message type

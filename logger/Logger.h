@@ -76,6 +76,8 @@ public:
 
  	static void logWRSC(const GPSModel* const gps);
 
+ 	static unsigned long unixTime();
+
 private:
 	Logger();
 	~Logger();

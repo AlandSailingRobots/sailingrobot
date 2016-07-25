@@ -115,24 +115,24 @@ int main(int argc, char *argv[])
 
 	// System services
 
-	MaestroController::init(dbHandler.retrieveCell("maestro_controller_config", "1", "port"));
+	//MaestroController::init(dbHandler.retrieveCell("maestro_controller_config", "1", "port"));
 
 	// Initialise nodes
 	initialiseNode(msgLogger, "Message Logger", NodeImportance::NOT_CRITICAL);
-	initialiseNode(windSensor, "Wind Sensor", NodeImportance::CRITICAL);
-	initialiseNode(compass, "Compass", NodeImportance::CRITICAL);
-	initialiseNode(gpsd, "GPSD Node", NodeImportance::CRITICAL);
-	initialiseNode(sail, "Sail Actuator", NodeImportance::CRITICAL);
-	initialiseNode(rudder, "Rudder Actuator", NodeImportance::CRITICAL);
-	initialiseNode(arduino, "Arduino Node", NodeImportance::NOT_CRITICAL);
+	//initialiseNode(windSensor, "Wind Sensor", NodeImportance::CRITICAL);
+	//initialiseNode(compass, "Compass", NodeImportance::CRITICAL);
+	//initialiseNode(gpsd, "GPSD Node", NodeImportance::CRITICAL);
+	//initialiseNode(sail, "Sail Actuator", NodeImportance::CRITICAL);
+	//initialiseNode(rudder, "Rudder Actuator", NodeImportance::CRITICAL);
+	//initialiseNode(arduino, "Arduino Node", NodeImportance::NOT_CRITICAL);
 	initialiseNode(vessel, "Vessel State Node", NodeImportance::CRITICAL);
 	initialiseNode(waypoint, "Waypoint Node", NodeImportance::CRITICAL);
 
 	// Start active nodes
-	windSensor.start();
+	/*windSensor.start();
 	compass.start();
 	gpsd.start();
-	arduino.start();
+	arduino.start();*/
 	vessel.start();
 
 	// NOTE - Jordan: Just to ensure messages are following through the system
