@@ -14,7 +14,6 @@
 #include "WaypointNode.h"
 #include "Messages/WaypointDataMsg.h"
 #include "logger/Logger.h"
-#include "dbhandler/DBHandler.h"
 #include <string>
 #include <vector>
 

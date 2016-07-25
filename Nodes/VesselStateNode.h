@@ -25,7 +25,7 @@ public:
 	VesselStateNode(MessageBus& msgBus);
 
 	///----------------------------------------------------------------------------------
-	///
+	/// Just returns true, there is nothing to initialise or setup
 	///----------------------------------------------------------------------------------
 	bool init() { return true; }
 
@@ -36,13 +36,25 @@ public:
 
 	void processMessage(const Message* msg);
 
+	///----------------------------------------------------------------------------------
+	/// Stores compass data from a CompassDataMsg.
+	///----------------------------------------------------------------------------------
 	void processCompassMessage(CompassDataMsg* msg);
+
+	///----------------------------------------------------------------------------------
+	/// Stores the GPS data from a GPSDataMsg.
+	///----------------------------------------------------------------------------------
 	void processGPSMessage(GPSDataMsg* msg);
+
+	///----------------------------------------------------------------------------------
+	/// Stores the wind data from a WindDataMsg.
+	///----------------------------------------------------------------------------------
 	void processWindMessage(WindDataMsg* msg);
 
 private:
 	///----------------------------------------------------------------------------------
-	/// Starts the VesselStateNode's thread that pumps out VesselStateMsg's
+	/// Starts the VesselStateNode's thread that pumps out VesselStateMsg which contains
+	/// data collected from the vessel's sensors
 	///----------------------------------------------------------------------------------
 	static void VesselStateThreadFunc(void* nodePtr);
 
