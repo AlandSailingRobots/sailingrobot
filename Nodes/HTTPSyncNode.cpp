@@ -1,9 +1,3 @@
-#include "HTTPSyncNode.h"
-#include "Messages/LocalConfigChangeMsg.h"
-#include "Messages/LocalWaypointChangeMsg.h"
-#include "Messages/ServerConfigsReceivedMsg.h"
-#include "Messages/ServerWaypointsReceivedMsg.h"
-
 
 /****************************************************************************************
  *
@@ -11,12 +5,21 @@
  * 		HTTPSyncNode.cpp
  *
  * Purpose:
- *		Handles retrieval and sending of logs, waypoints and configs between database and server. Also notifies messagebus when new serverdata arrives.
+ *		Handles retrieval and sending of logs, waypoints and configs between database and server. 
+ *      Also notifies messagebus when new serverdata arrives.
  *
  * Developer Notes:
  *
  *
  ***************************************************************************************/
+
+#include "HTTPSyncNode.h"
+#include "Messages/LocalConfigChangeMsg.h"
+#include "Messages/LocalWaypointChangeMsg.h"
+#include "Messages/ServerConfigsReceivedMsg.h"
+#include "Messages/ServerWaypointsReceivedMsg.h"
+
+
 
 size_t write_to_string(void *ptr, size_t size, size_t count, void *stream) {
     ((std::string*)stream)->append((char*)ptr, 0, size*count);
