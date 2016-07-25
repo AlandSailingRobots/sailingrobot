@@ -10,6 +10,8 @@
 #include "Nodes/ArduinoNode.h"
 #include "Nodes/WaypointNode.h"
 #include "Nodes/VesselStateNode.h"
+#include "Nodes/RoutingNode.h"
+#include "Nodes/LineFollowNode.h"
 #include "Messages/DataRequestMsg.h"
 #include "dbhandler/DBHandler.h"
 #include "SystemServices/MaestroController.h"
@@ -100,6 +102,8 @@ int main(int argc, char *argv[])
 	ArduinoNode arduino(messageBus);
 	VesselStateNode vessel(messageBus);
 	WaypointNode waypoint(messageBus, dbHandler);
+	RoutingNode routing(messageBus, dbHandler);
+	LineFollowNode lineFollow(messageBus, dbHandler);
 
 	int channel = dbHandler.retrieveCellAsInt("sail_servo_config", "1", "channel");
 	int speed = dbHandler.retrieveCellAsInt("sail_servo_config", "1", "speed");
@@ -112,6 +116,8 @@ int main(int argc, char *argv[])
 	acceleration = dbHandler.retrieveCellAsInt("rudder_servo_config", "1", "acceleration");
 
 	ActuatorNode rudder(messageBus, NodeID::RudderActuator, channel, speed, acceleration);
+
+	bool usingLineFollow = (bool)(dbHandler.retrieveCellAsInt("sailing_robot_config", "1", "line_follow"));
 
 	// System services
 
@@ -127,6 +133,14 @@ int main(int argc, char *argv[])
 	initialiseNode(arduino, "Arduino Node", NodeImportance::NOT_CRITICAL);
 	initialiseNode(vessel, "Vessel State Node", NodeImportance::CRITICAL);
 	initialiseNode(waypoint, "Waypoint Node", NodeImportance::CRITICAL);
+	if(usingLineFollow)
+	{
+		initialiseNode(lineFollow, "LineFollow Node", NodeImportance::CRITICAL);
+	}
+	else
+	{
+		initialiseNode(routing, "Routing Node", NodeImportance::CRITICAL);
+	}
 
 	// Start active nodes
 	windSensor.start();
@@ -144,15 +158,6 @@ int main(int argc, char *argv[])
 	exit(0);
 }
 
-//SAVED FOR LATER
-//     atof(db.retrieveCell("waypoint_routing_config", "1", "radius_ratio").c_str()),
-//     atof(db.retrieveCell("course_calculation_config", "1", "tack_angle").c_str()),
-//     atof(db.retrieveCell("course_calculation_config", "1", "tack_max_angle").c_str()),
-//     atof(db.retrieveCell("course_calculation_config", "1", "tack_min_speed").c_str()),
-//     atof(db.retrieveCell("course_calculation_config", "1", "sector_angle").c_str()),
-//      atof(db.retrieveCell("waypoint_routing_config", "1", "max_command_angle ").c_str()),
-//      atof(db.retrieveCell("waypoint_routing_config", "1", "rudder_speed_min").c_str())
-//    )
 
 
 // Purely for reference, remove once complete

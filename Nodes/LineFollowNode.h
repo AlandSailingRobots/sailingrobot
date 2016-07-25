@@ -1,12 +1,16 @@
-/****************************************************************************************
+ /****************************************************************************************
  *
  * File:
- * 		SailigLogicNewNode.h
+ * 		LineFollowNode.h
  *
  * Purpose:
- *		Sailing Logic, makes boat sail to the right place with line following
+ *		This class computes the actuator positions of the boat in order to follow
+ *    lines given by the waypoints.
  *
- * Developer Notes:
+ * Developer Notes: algorithm inspired and modified from Luc Jaulin and
+ *    Fabrice Le Bars  "An Experimental Validation of a Robust Controller with the VAIMOS
+ *    Autonomous Sailboat" and "Modeling and Control for an Autonomous Sailboat: A
+ *    Case Study" from Jon Melin, Kjell Dahl and Matia Waller
  *
  *
  ***************************************************************************************/
@@ -22,9 +26,9 @@
 #include "coursecalculation/CourseMath.h"
 
 
-class SailingLogicNewNode : public Node {
+class LineFollowNode : public Node {
 public:
-	SailingLogicNewNode(MessageBus& msgBus, DBHandler& db);
+	LineFollowNode(MessageBus& msgBus, DBHandler& db);
 
 	bool init();
 
@@ -49,7 +53,6 @@ private:
 	int 	m_prevWaypointRadius;
 
     bool    m_tack;
-    int     m_waypointCount;
     double  m_maxCommandAngle, m_maxSailAngle, m_minSailAngle;
     double  m_tackAngle;
     int     m_tackingDirection;
@@ -61,7 +64,6 @@ private:
 	std::vector<float> twdBuffer;
 	unsigned int twdBufferMaxSize;
 
-    double calculateSignedDistance(VesselStateMsg* msg);
     double calculateAngleOfDesiredTrajectory(VesselStateMsg* msg);
 	void calculateActuatorPos(VesselStateMsg* msg);
     void setPrevWaypointData(WaypointDataMsg* waypMsg, VesselStateMsg* vesselMsg);

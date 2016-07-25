@@ -204,6 +204,93 @@ double Utility::directionAdjustedSpeed(double gpsHeading,double compassHeading,d
 
 		return speed;
 }
+
+double Utility::calculateSignedDistanceToLine(const double nextLon, const double nextLat, const double prevLon, const double prevLat, 
+					const double gpsLon, const double gpsLat)
+{
+    int earthRadius = 6371000;
+    
+    std::array<double, 3> prevWPCoord = //a
+     {  earthRadius * cos(degreeToRadian(prevLat)) * cos(degreeToRadian(prevLon)),
+        earthRadius * cos(degreeToRadian(prevLat)) * sin(degreeToRadian(prevLon)),
+        earthRadius * sin(degreeToRadian(prevLat))};
+    std::array<double, 3> nextWPCoord = //b
+     {  earthRadius * cos(degreeToRadian(nextLat)) * cos(degreeToRadian(nextLon)),
+        earthRadius * cos(degreeToRadian(nextLat)) * sin(degreeToRadian(nextLon)),
+        earthRadius * sin(degreeToRadian(nextLat))};
+        std::array<double, 3> boatCoord = //m
+     {  earthRadius * cos(degreeToRadian(gpsLat)) * cos(degreeToRadian(gpsLon)),
+        earthRadius * cos(degreeToRadian(gpsLat)) * sin(degreeToRadian(gpsLon)),
+        earthRadius * sin(degreeToRadian(gpsLat))};
+    
+    std::array<double, 3> oab = //vector normal to plane
+    {   (prevWPCoord[1]*nextWPCoord[2] - prevWPCoord[2]*nextWPCoord[1]),       //Vector product: A^B divided by norm ||a^b||     a^b / ||a^b||
+        (prevWPCoord[2]*nextWPCoord[0] - prevWPCoord[0]*nextWPCoord[2]),
+        (prevWPCoord[0]*nextWPCoord[1] - prevWPCoord[1]*nextWPCoord[0])};
+
+    double normOAB =  sqrt(pow(oab[0],2)+ pow(oab[1],2) + pow(oab[2],2));
+
+    oab[0] = oab[0]/normOAB;
+    oab[1] = oab[1]/normOAB;
+    oab[2] = oab[2]/normOAB;
+
+    double signedDistance = boatCoord[0]*oab[0] + boatCoord[1]*oab[1] + boatCoord[2]*oab[2];
+
+    return signedDistance;
+}
+
+double Utility::calculateWaypointsOrthogonalLine(const double nextLon, const double nextLat, const double prevLon, const double prevLat, 
+					const double gpsLon, const double gpsLat)
+{    /* Check to see if boat has passed the orthogonal to the line
+     * otherwise the boat will continue to follow old line if it passed the waypoint without entering the radius
+     */
+    int earthRadius = 6371000;
+    
+    std::array<double, 3> prevWPCoord = //a
+     {  earthRadius * cos(degreeToRadian(prevLat)) * cos(degreeToRadian(prevLon)),
+        earthRadius * cos(degreeToRadian(prevLat)) * sin(degreeToRadian(prevLon)),
+        earthRadius * sin(degreeToRadian(prevLat))};
+    std::array<double, 3> nextWPCoord = //b
+     {  earthRadius * cos(degreeToRadian(nextLat)) * cos(degreeToRadian(nextLon)),
+        earthRadius * cos(degreeToRadian(nextLat)) * sin(degreeToRadian(nextLon)),
+        earthRadius * sin(degreeToRadian(nextLat))};
+        std::array<double, 3> boatCoord = //m
+     {  earthRadius * cos(degreeToRadian(gpsLat)) * cos(degreeToRadian(gpsLon)),
+        earthRadius * cos(degreeToRadian(gpsLat)) * sin(degreeToRadian(gpsLon)),
+        earthRadius * sin(degreeToRadian(gpsLat))};
+    
+    std::array<double, 3> oab = //vector normal to plane
+    {   (prevWPCoord[1]*nextWPCoord[2] - prevWPCoord[2]*nextWPCoord[1]),       //Vector product: A^B divided by norm ||a^b||     a^b / ||a^b||
+        (prevWPCoord[2]*nextWPCoord[0] - prevWPCoord[0]*nextWPCoord[2]),
+        (prevWPCoord[0]*nextWPCoord[1] - prevWPCoord[1]*nextWPCoord[0])};
+
+    double normOAB =  sqrt(pow(oab[0],2)+ pow(oab[1],2) + pow(oab[2],2));
+
+    oab[0] = oab[0]/normOAB;
+    oab[1] = oab[1]/normOAB;
+    oab[2] = oab[2]/normOAB;
+
+    //compute if boat is after waypointModel
+    std::array<double, 3> orthogonal_to_AB_from_B = //C the point such as  BC is orthogonal to AB
+    {  nextWPCoord[0]+oab[0],
+       nextWPCoord[1]+oab[1],
+       nextWPCoord[2]+oab[2]
+    };
+
+    std::array<double, 3> obc = //vector normal to plane
+    {   (orthogonal_to_AB_from_B[1]*nextWPCoord[2] - orthogonal_to_AB_from_B[2]*nextWPCoord[1]) ,       //Vector product: C^B divided by norm ||c^b||     c^b / ||c^b||
+        (orthogonal_to_AB_from_B[2]*nextWPCoord[0] - orthogonal_to_AB_from_B[0]*nextWPCoord[2]) ,
+        (orthogonal_to_AB_from_B[0]*nextWPCoord[1] - orthogonal_to_AB_from_B[1]*nextWPCoord[0])};
+
+    double normOBC =  sqrt(pow(obc[0],2)+ pow(obc[1],2) + pow(obc[2],2));
+
+	double orthogonalLine;
+    //float temp = boatCoord[0]*obc[0] + boatCoord[1]*obc[1] + boatCoord[2]*obc[2];
+    orthogonalLine = boatCoord[0]*obc[0]/normOBC + boatCoord[1]*obc[1]/normOBC + boatCoord[2]*obc[2]/normOBC;
+
+    return orthogonalLine;
+}
+
 /*
  * uses formula for calculating true Wind Direction
  * https://en.wikipedia.org/wiki/Apparent_wind
@@ -288,26 +375,29 @@ double Utility::getTrueWindDirection(int windsensorDir, int windsensorSpeed, dou
 	return meanOfAngles(twdBuffer);
 }
 
-std::array<double, 2> Utility::calculateApparentWind(int windsensorDir, int windsensorSpeed, double gpsSpeed, const double heading, const double trueWindDirection)
+void Utility::calculateApparentWind(const int windsensorDir, const int windsensorSpeed, const double gpsSpeed, const double heading,
+	           const double trueWindDirection,double &apparentWindSpeed, double &apparentWindDirection)
 { //referenced from "Modeling, control and state-estimation for an autonomous sailboat" by Jon Melin
-	std::array<double, 2> apparentWind;
-	std::array<double, 2> wcaw = { calculateTrueWindSpeed(windsensorDir, windsensorSpeed, gpsSpeed, heading) * cos(trueWindDirection - heading) - gpsSpeed, //wcaw[0]
-									calculateTrueWindSpeed(windsensorDir, windsensorSpeed, gpsSpeed, heading) * sin(trueWindDirection - heading)}; //wcaw[1] Cartesian Apparent Wind
+  /* the trueWindDirection is the origin of the wind but the computation suppose its the direction so we change it during the function*/
 
-	double apparentWindSpeed = sqrt(pow(wcaw[0], 2) + pow(wcaw[1], 2));
-	double apparentWindDirection = atan2(wcaw[0], wcaw[1]);
+  double trueWindDirection_ = trueWindDirection+M_PI;
+	std::array<double, 2> wcaw = { calculateTrueWindSpeed(windsensorDir, windsensorSpeed, gpsSpeed, heading) * cos(trueWindDirection_ - heading) - gpsSpeed, //wcaw[0]
+									calculateTrueWindSpeed(windsensorDir, windsensorSpeed, gpsSpeed, heading) * sin(trueWindDirection_ - heading)}; //wcaw[1] Cartesian Apparent Wind
 
-	apparentWind[0] = apparentWindSpeed;
-	apparentWind[1] = apparentWindDirection;
-
-	return apparentWind;
+	apparentWindSpeed = sqrt(pow(wcaw[0], 2) + pow(wcaw[1], 2));
+	apparentWindDirection = -atan2(wcaw[0], wcaw[1])*180/M_PI;
 }
 
-double Utility::getApparentWindSpeed(int windsensorDir, int windsensorSpeed, double gpsSpeed, const double heading, const double trueWindDirection)
+double Utility::getApparentWindSpeed(const int windsensorDir, const int windsensorSpeed, const double gpsSpeed, const double heading, const double trueWindDirection)
 {
-	return calculateApparentWind(windsensorDir, windsensorSpeed, gpsSpeed, heading, trueWindDirection)[0];
+	double apparentWindSpeed,apparentWindDirection;
+	calculateApparentWind(windsensorDir, windsensorSpeed, gpsSpeed, heading, trueWindDirection,apparentWindSpeed,apparentWindDirection);
+	return apparentWindSpeed;
 }
-double Utility::getApparentWindDirection(int windsensorDir, int windsensorSpeed, double gpsSpeed, const double heading, const double trueWindDirection)
+
+double Utility::getApparentWindDirection(const int windsensorDir, const int windsensorSpeed, const double gpsSpeed, const double heading, const double trueWindDirection)
 {
-	return calculateApparentWind(windsensorDir, windsensorSpeed, gpsSpeed, heading, trueWindDirection)[1];
+	double apparentWindSpeed,apparentWindDirection;
+	calculateApparentWind(windsensorDir, windsensorSpeed, gpsSpeed, heading, trueWindDirection,apparentWindSpeed,apparentWindDirection);
+	return apparentWindDirection;
 }

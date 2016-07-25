@@ -54,6 +54,6 @@ private:
     int     m_prevDeclination;
     int     m_prevRadius;
 
-    double  m_gps_longitude;
-    double  m_gps_latitude;
+    double  m_gpsLongitude;
+    double  m_gpsLatitude;
 };

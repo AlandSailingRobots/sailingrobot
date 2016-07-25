@@ -15,6 +15,7 @@
 #include "Messages/WaypointDataMsg.h"
 #include "logger/Logger.h"
 #include "dbhandler/DBHandler.h"
+#include "utility/Utility.h"
 #include <string>
 #include <vector>
 
@@ -63,13 +64,16 @@ void WaypointNode::processMessage(const Message* msg)
 
 void WaypointNode::processGPSMessage(GPSDataMsg* msg)
 {
-    m_gps_longitude = msg->longitude();
-    m_gps_latitude = msg->latitude();
+    m_gpsLongitude = msg->longitude();
+    m_gpsLatitude = msg->latitude();
 }
 
 bool WaypointNode::waypointReached()
 {
-    if(m_courseMath.calculateDTW(m_gps_longitude, m_gps_latitude, m_nextLongitude, m_nextLatitude) < m_nextRadius)
+    double distanceAfterWaypoint = Utility::calculateWaypointsOrthogonalLine(m_nextLongitude, m_nextLatitude, m_prevLongitude,
+                m_prevLatitude, m_gpsLongitude, m_gpsLatitude); //Checks if boat has passed the waypoint following the line, without entering waypoints radius
+
+    if(m_courseMath.calculateDTW(m_gpsLongitude, m_gpsLatitude, m_nextLongitude, m_nextLatitude) < m_nextRadius || distanceAfterWaypoint > 0)
     {
         if(not m_db.changeOneValue("waypoints", std::to_string(m_nextId),"1","harvested"))
         {

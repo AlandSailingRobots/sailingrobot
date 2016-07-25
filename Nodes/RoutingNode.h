@@ -1,10 +1,10 @@
 /****************************************************************************************
  *
  * File:
- * 		SailigLogicOldNode.h
+ * 		RoutingNode.h
  *
  * Purpose:
- *		Sailing Logic, makes boat sail to the right place
+ *		Sailing Logic, calculates actuator positions to sail to the right direction
  *
  * Developer Notes:
  *
@@ -21,9 +21,9 @@
 #include "ruddercommand/RudderCommand.h"
 
 
-class SailingLogicOldNode : public Node {
+class RoutingNode : public Node {
 public:
-	SailingLogicOldNode(MessageBus& msgBus, DBHandler& db);
+	RoutingNode(MessageBus& msgBus, DBHandler& db);
 
 	bool init();
 

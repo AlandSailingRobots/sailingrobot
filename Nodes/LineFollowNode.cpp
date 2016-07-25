@@ -1,17 +1,21 @@
-/****************************************************************************************
+ /****************************************************************************************
  *
  * File:
- * 		SailigLogicNewNode.h
+ * 		LineFollowNode.cpp
  *
  * Purpose:
- *		Sailing Logic, makes boat sail to the right place with line following
+ *		This class computes the actuator positions of the boat in order to follow
+ *    lines given by the waypoints.
  *
- * Developer Notes:
+ * Developer Notes: algorithm inspired and modified from Luc Jaulin and
+ *    Fabrice Le Bars  "An Experimental Validation of a Robust Controller with the VAIMOS
+ *    Autonomous Sailboat" and "Modeling and Control for an Autonomous Sailboat: A
+ *    Case Study" from Jon Melin, Kjell Dahl and Matia Waller
  *
  *
  ***************************************************************************************/
 
-#include "SailingLogicNewNode.h"
+#include "LineFollowNode.h"
 #include "Messages/ActuatorPositionMsg.h"
 #include "utility/Utility.h"
 #include <math.h>
@@ -20,7 +24,7 @@
 
 #define DEFAULT_TWD_BUFFERSIZE 200
 
-SailingLogicNewNode::SailingLogicNewNode(MessageBus& msgBus, DBHandler& db)
+LineFollowNode::LineFollowNode(MessageBus& msgBus, DBHandler& db)
 :  Node(NodeID::SailingLogic, msgBus), m_db(db),
     m_nextWaypointId(0),  
     m_nextWaypointLon(0), 
@@ -32,16 +36,15 @@ SailingLogicNewNode::SailingLogicNewNode(MessageBus& msgBus, DBHandler& db)
     m_prevWaypointLat(0),
     m_prevWaypointDeclination(0),
     m_prevWaypointRadius(0),
-    m_waypointCount(0),
     m_tackingDirection(1)
 {
     m_maxCommandAngle = M_PI / 6;
-    m_maxSailAngle = M_PI / 32;
-    m_minSailAngle = M_PI / 5.2f;
+    m_maxSailAngle = M_PI / 4.2f;
+    m_minSailAngle = M_PI / 32;
     m_tackAngle = 0.872665; //50°
 }
 
-bool SailingLogicNewNode::init()
+bool LineFollowNode::init()
 {
     setupRudderCommand();
     setupSailCommand();
@@ -51,7 +54,7 @@ bool SailingLogicNewNode::init()
     return true;
 }
 
-void SailingLogicNewNode::processMessage(const Message* msg)
+void LineFollowNode::processMessage(const Message* msg)
 {
     MessageType type = msg->messageType();
 
@@ -69,7 +72,6 @@ void SailingLogicNewNode::processMessage(const Message* msg)
             m_nextWaypointDeclination = waypMsg->nextDeclination();
             m_nextWaypointRadius = waypMsg->nextRadius();
             setPrevWaypointData(waypMsg, (VesselStateMsg*)msg);
-            
         }
 		break;
 	default:
@@ -77,37 +79,7 @@ void SailingLogicNewNode::processMessage(const Message* msg)
 	}
 }
 
-double SailingLogicNewNode::calculateSignedDistance(VesselStateMsg* msg)
-{
-    int earthRadius = 6371000;
-    
-    std::array<double, 3> prevWPCoord = //a
-     {  earthRadius * cos(Utility::degreeToRadian(m_prevWaypointLat)) * cos(Utility::degreeToRadian(m_prevWaypointLon)),
-        earthRadius * cos(Utility::degreeToRadian(m_prevWaypointLat)) * sin(Utility::degreeToRadian(m_prevWaypointLon)),
-        earthRadius * sin(Utility::degreeToRadian(m_prevWaypointLat))};
-    std::array<double, 3> nextWPCoord = //b
-     {  earthRadius * cos(Utility::degreeToRadian(m_nextWaypointLat)) * cos(Utility::degreeToRadian(m_nextWaypointLon)),
-        earthRadius * cos(Utility::degreeToRadian(m_nextWaypointLat)) * sin(Utility::degreeToRadian(m_nextWaypointLon)),
-        earthRadius * sin(Utility::degreeToRadian(m_nextWaypointLat))};
-        std::array<double, 3> boatCoord = //m
-     {  earthRadius * cos(Utility::degreeToRadian(msg->latitude() )) * cos(Utility::degreeToRadian(msg->longitude() )),
-        earthRadius * cos(Utility::degreeToRadian(msg->latitude() )) * sin(Utility::degreeToRadian(msg->longitude() )),
-        earthRadius * sin(Utility::degreeToRadian(msg->latitude() ))};
-    
-    double normAB = sqrt(prevWPCoord[0]*prevWPCoord[0] + prevWPCoord[1]*prevWPCoord[1] + prevWPCoord[2]*prevWPCoord[2])   * //||a|| 
-                       sqrt(nextWPCoord[0]*nextWPCoord[0] + nextWPCoord[1]*nextWPCoord[1] + nextWPCoord[2]*nextWPCoord[2]); //||b||
-                
-    std::array<double, 3> oab = //vector normal to plane
-    {   (prevWPCoord[1]*nextWPCoord[2] - prevWPCoord[2]*nextWPCoord[1]) / normAB,       //Vector product: A^B divided by norm a * norm b        a^b / ||a|| ||b||
-        (prevWPCoord[2]*nextWPCoord[0] - prevWPCoord[0]*nextWPCoord[2]) / normAB,
-        (prevWPCoord[0]*nextWPCoord[1] - prevWPCoord[1]*nextWPCoord[0]) / normAB };
-
-    double signedDistance = boatCoord[0]*oab[0] + boatCoord[1]*oab[1] + boatCoord[2]*oab[2]; 
-
-    return signedDistance;
-}
-
-double SailingLogicNewNode::calculateAngleOfDesiredTrajectory(VesselStateMsg* msg)
+double LineFollowNode::calculateAngleOfDesiredTrajectory(VesselStateMsg* msg)
 {
     int earthRadius = 6371000;
 
@@ -134,29 +106,34 @@ double SailingLogicNewNode::calculateAngleOfDesiredTrajectory(VesselStateMsg* ms
     return phi;
 }
 
-void SailingLogicNewNode::calculateActuatorPos(VesselStateMsg* msg)
+void LineFollowNode::calculateActuatorPos(VesselStateMsg* msg)
 {
     double trueWindDirection = Utility::getTrueWindDirection(msg->windDir(), msg->windSpeed(), msg->speed(), msg->compassHeading(), twdBuffer, twdBufferMaxSize);
+    /* add pi because trueWindDirection is originally origin of wind but algorithm need direction*/
+    trueWindDirection = Utility::degreeToRadian(trueWindDirection)+M_PI;
 
-    //GET DIRECTION - From the book Robotic Sailing 2012 and Robotic Sailing 2015
+    //GET DIRECTION
     double currentHeading = getHeading(msg->gpsHeading(), msg->compassHeading(), msg->speed(), false, false);
-    double signedDistance = calculateSignedDistance(msg); // 'e'
+    double signedDistance = Utility::calculateSignedDistanceToLine(m_nextWaypointLon, m_nextWaypointLat, m_prevWaypointLon,
+            m_prevWaypointLat, msg->longitude(), msg->latitude());
     int maxTackDistance = 20; //'r'
     double phi = calculateAngleOfDesiredTrajectory(msg);
-    double desiredHeading = phi - (2 * (M_PI / 4)/M_PI) * atan2(signedDistance,maxTackDistance);
+    double desiredHeading = phi + (2 * (M_PI / 4)/M_PI) * atan(signedDistance/maxTackDistance); //heading to smoothly join the line
     desiredHeading = Utility::limitRadianAngleRange(desiredHeading);
 
-    //CHECK IF TACKING IS NEEDED
+    //Change tacking direction when reaching max distance
     if(abs(signedDistance) > maxTackDistance)
-        m_tackingDirection = Utility::sgn(signedDistance);
+        m_tackingDirection = -Utility::sgn(signedDistance);
 
+    //Check if tacking is needed
     if( (cos(trueWindDirection - desiredHeading) + cos(m_tackAngle) < 0) || (cos(trueWindDirection - phi) + cos(m_tackAngle) < 0))
     {
-        if(!m_tack){
-            m_tackingDirection = Utility::sgn(currentHeading-(fmod(trueWindDirection, M_PI) - M_PI));
+        if(!m_tack){ /* initialize tacking direction */
+            m_tackingDirection = -Utility::sgn(currentHeading-(fmod(trueWindDirection+M_PI, 2*M_PI) - M_PI));
             m_tack = true;
         }
-        desiredHeading = M_PI + trueWindDirection - m_tackingDirection * m_tackAngle;
+
+        desiredHeading = M_PI + trueWindDirection - m_tackingDirection * m_tackAngle;/* sail around the wind direction */
         desiredHeading = Utility::limitRadianAngleRange(desiredHeading);
     }
     else
@@ -164,14 +141,14 @@ void SailingLogicNewNode::calculateActuatorPos(VesselStateMsg* msg)
 
     double rudderCommand, sailCommand;
     //SET RUDDER
-    if(cos(currentHeading - desiredHeading) < 0) //if boat is going the wrong direction
-        rudderCommand = Utility::sgn(msg->speed()) * m_maxCommandAngle * Utility::sgn(sin(currentHeading - desiredHeading));
-    else                      
-        rudderCommand = Utility::sgn(msg->speed()) * m_maxCommandAngle * sin(currentHeading - desiredHeading);
-    
+    if(cos(currentHeading - desiredHeading) < 0) //if boat heading is too far away from desired heading
+        rudderCommand = -Utility::sgn(msg->speed()) * m_maxCommandAngle * Utility::sgn(sin(currentHeading - desiredHeading));
+    else
+        rudderCommand = -Utility::sgn(msg->speed()) * m_maxCommandAngle * sin(currentHeading - desiredHeading);
+
     //SET SAIL
-    double apparentWindDirection = Utility::getApparentWindDirection(msg->windDir(), msg->windSpeed(), msg->speed(), currentHeading, trueWindDirection);
-    sailCommand = -Utility::sgn(apparentWindDirection) * ( ((m_minSailAngle - m_maxSailAngle) / M_PI) * abs(apparentWindDirection) + m_maxSailAngle);
+    double apparentWindDirection = Utility::getApparentWindDirection(msg->windDir(), msg->windSpeed(), msg->speed(), currentHeading, trueWindDirection)*M_PI/180;
+    sailCommand = abs( ((m_minSailAngle - m_maxSailAngle) / M_PI) * abs(apparentWindDirection) + m_maxSailAngle);
 
     rudderCommand = m_rudderCommand.getCommand(rudderCommand);
 	sailCommand = m_sailCommand.getCommand(sailCommand);
@@ -181,45 +158,34 @@ void SailingLogicNewNode::calculateActuatorPos(VesselStateMsg* msg)
     m_MsgBus.sendMessage(rudderMsg);
     m_MsgBus.sendMessage(sailMsg);
 
-
     double bearingToNextWaypoint = m_courseMath.calculateBTW(msg->longitude(), msg->latitude(), m_nextWaypointLon, m_nextWaypointLat); //calculated for database
     double distanceToNextWaypoint = m_courseMath.calculateDTW(msg->longitude(), msg->latitude(), m_nextWaypointLon, m_nextWaypointLat);
 
     manageDatabase(msg, trueWindDirection, rudderCommand, sailCommand, currentHeading, distanceToNextWaypoint, bearingToNextWaypoint);
 }
 
-void SailingLogicNewNode::setPrevWaypointData(WaypointDataMsg* waypMsg, VesselStateMsg* vesselMsg)
+void LineFollowNode::setPrevWaypointData(WaypointDataMsg* waypMsg, VesselStateMsg* vesselMsg)
 {
-    if(m_waypointCount == 0)
+    if(waypMsg->prevId() == 0) //Set previous waypoint to boat position
     {
-        if(waypMsg->prevId() == 0) //Set previous waypoint to boat position
-        {
-            m_prevWaypointId = 0;
-            m_prevWaypointLon = vesselMsg->longitude();
-            m_prevWaypointLat = vesselMsg->latitude();
-            m_prevWaypointDeclination = 0;
-            m_prevWaypointRadius = 15;
-        }
-        else //Set previous waypoint to previously harvested waypoint
-        {
-            m_prevWaypointId = waypMsg->prevId();
-            m_prevWaypointLon = waypMsg->prevLongitude();
-            m_prevWaypointLat = waypMsg->prevLatitude();
-            m_prevWaypointDeclination = waypMsg->prevDeclination();
-            m_prevWaypointRadius = waypMsg->prevRadius();
-        }
+        m_prevWaypointId = 0;
+        m_prevWaypointLon = vesselMsg->longitude();
+        m_prevWaypointLat = vesselMsg->latitude();
+        m_prevWaypointDeclination = 0;
+        m_prevWaypointRadius = 15;
     }
-    else //Set previous waypoint to next waypoint that was just reached
+    else //Set previous waypoint to previously harvested waypoint
     {
-        m_prevWaypointId = m_nextWaypointId;
-        m_prevWaypointLon = m_nextWaypointLon;
-        m_prevWaypointLat = m_nextWaypointLat;
-        m_prevWaypointDeclination = m_nextWaypointDeclination;
-        m_prevWaypointRadius = m_nextWaypointRadius;
+        m_prevWaypointId = waypMsg->prevId();
+        m_prevWaypointLon = waypMsg->prevLongitude();
+        m_prevWaypointLat = waypMsg->prevLatitude();
+        m_prevWaypointDeclination = waypMsg->prevDeclination();
+        m_prevWaypointRadius = waypMsg->prevRadius();
     }
 }
 
-int SailingLogicNewNode::getHeading(int gpsHeading, int compassHeading, double gpsSpeed, bool mockPosition,bool getHeadingFromCompass) {
+int LineFollowNode::getHeading(int gpsHeading, int compassHeading, double gpsSpeed, bool mockPosition,bool getHeadingFromCompass) 
+{
 	//Use GPS for heading only if speed is higher than 1 knot
 	int useGpsForHeadingKnotSpeed = 1;
 	bool gpsForbidden = Utility::directionAdjustedSpeed(gpsHeading, compassHeading, gpsSpeed) < useGpsForHeadingKnotSpeed;
@@ -237,7 +203,8 @@ int SailingLogicNewNode::getHeading(int gpsHeading, int compassHeading, double g
     return gpsHeading;
 }
 
-int SailingLogicNewNode::getMergedHeading(int gpsHeading, int compassHeading, bool increaseCompassWeight){
+int LineFollowNode::getMergedHeading(int gpsHeading, int compassHeading, bool increaseCompassWeight)
+{
 	//Shouldn't be hardcoded
 	float tickRate = 0.01;
 
@@ -264,25 +231,25 @@ int SailingLogicNewNode::getMergedHeading(int gpsHeading, int compassHeading, bo
 	return returnValue;
 }
 
-void SailingLogicNewNode::setupRudderCommand() 
+void LineFollowNode::setupRudderCommand() 
 {
 	m_rudderCommand.setCommandValues(m_db.retrieveCellAsInt("rudder_command_config", "1","extreme_command"),
 	        m_db.retrieveCellAsInt("rudder_command_config", "1", "midship_command"));
 }
 
-void SailingLogicNewNode::setupSailCommand() 
+void LineFollowNode::setupSailCommand() 
 {
 	m_sailCommand.setCommandValues( m_db.retrieveCellAsInt("sail_command_config", "1", "close_reach_command"),
 	        m_db.retrieveCellAsInt("sail_command_config", "1", "run_command"));
 }
 
-bool SailingLogicNewNode::getGoingStarboard()
+bool LineFollowNode::getGoingStarboard()
 {
     if(m_tackingDirection == 1) return true;
     else return false;
 }
 
-void SailingLogicNewNode::manageDatabase(VesselStateMsg* msg, double trueWindDirection, double rudder, double sail, double heading,
+void LineFollowNode::manageDatabase(VesselStateMsg* msg, double trueWindDirection, double rudder, double sail, double heading,
                         double distanceToNextWaypoint, double bearingToNextWaypoint){
   //logging
   bool routeStarted = false;

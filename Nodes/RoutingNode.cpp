@@ -1,24 +1,24 @@
 /****************************************************************************************
  *
  * File:
- * 		SailigLogicOld.h
+ * 		RoutingNode.h
  *
  * Purpose:
- *		Sailing Logic, makes boat sail to the right place
+ *		Sailing Logic, calculates actuator positions to sail to the right direction
  *
  * Developer Notes:
  *
  *
  ***************************************************************************************/
 
-#include "SailingLogicOldNode.h"
+#include "RoutingNode.h"
 #include "Messages/WaypointDataMsg.h"
 #include "Messages/ActuatorPositionMsg.h"
 #include "utility/Utility.h"
 
 #define DEFAULT_TWD_BUFFERSIZE 200
 
-SailingLogicOldNode::SailingLogicOldNode(MessageBus& msgBus, DBHandler& db)
+RoutingNode::RoutingNode(MessageBus& msgBus, DBHandler& db)
 :  Node(NodeID::SailingLogic, msgBus),   
     m_nextWaypointLon(0), 
     m_nextWaypointLat(0),
@@ -38,7 +38,7 @@ SailingLogicOldNode::SailingLogicOldNode(MessageBus& msgBus, DBHandler& db)
 
 }
 
-bool SailingLogicOldNode::init()
+bool RoutingNode::init()
 {
     setupRudderCommand();
     setupSailCommand();
@@ -48,7 +48,7 @@ bool SailingLogicOldNode::init()
     return true;
 }
 
-void SailingLogicOldNode::processMessage(const Message* msg)
+void RoutingNode::processMessage(const Message* msg)
 {
     MessageType type = msg->messageType();
 
@@ -60,11 +60,11 @@ void SailingLogicOldNode::processMessage(const Message* msg)
 	case MessageType::WaypointData:
         {
             WaypointDataMsg* waypMsg = (WaypointDataMsg*)msg;
-            m_nextWaypointId = waypMsg->id();
-            m_nextWaypointLat = waypMsg->latitude();
-            m_nextWaypointLon = waypMsg->longitude();
-            m_nextWaypointDeclination = waypMsg->declination();
-            m_nextWaypointRadius = waypMsg->radius();
+            m_nextWaypointId = waypMsg->nextId();
+            m_nextWaypointLon = waypMsg->nextLongitude();
+            m_nextWaypointLat = waypMsg->nextLatitude();
+            m_nextWaypointDeclination = waypMsg->nextDeclination();
+            m_nextWaypointRadius = waypMsg->nextRadius();
             m_waypointRouting.setWaypointData(m_nextWaypointLon, m_nextWaypointLat, m_nextWaypointRadius);
         }
 		break;
@@ -73,7 +73,7 @@ void SailingLogicOldNode::processMessage(const Message* msg)
 	}
 }
 
-void SailingLogicOldNode::calculateActuatorPos(VesselStateMsg* msg)
+void RoutingNode::calculateActuatorPos(VesselStateMsg* msg)
 {
     double heading = getHeading(msg->gpsHeading(), msg->compassHeading(), msg->speed(), false, false);
     double trueWindDirection = Utility::getTrueWindDirection(msg->windDir(), msg->windSpeed(), msg->speed(), msg->compassHeading(), twdBuffer, twdBufferMaxSize);
@@ -94,7 +94,7 @@ void SailingLogicOldNode::calculateActuatorPos(VesselStateMsg* msg)
     manageDatabase(msg, trueWindDirection, rudderCommand, sailCommand);
 }
 
-int SailingLogicOldNode::getHeading(int gpsHeading, int compassHeading, double gpsSpeed, bool mockPosition,bool getHeadingFromCompass) {
+int RoutingNode::getHeading(int gpsHeading, int compassHeading, double gpsSpeed, bool mockPosition,bool getHeadingFromCompass) {
 	//Use GPS for heading only if speed is higher than 1 knot
 	int useGpsForHeadingKnotSpeed = 1;
 	bool gpsForbidden = Utility::directionAdjustedSpeed(gpsHeading, compassHeading, gpsSpeed) < useGpsForHeadingKnotSpeed;
@@ -112,7 +112,7 @@ int SailingLogicOldNode::getHeading(int gpsHeading, int compassHeading, double g
     return gpsHeading;
 }
 
-int SailingLogicOldNode::getMergedHeading(int gpsHeading, int compassHeading, bool increaseCompassWeight){
+int RoutingNode::getMergedHeading(int gpsHeading, int compassHeading, bool increaseCompassWeight){
 	//Shouldn't be hardcoded
 	float tickRate = 0.01;
 
@@ -139,19 +139,19 @@ int SailingLogicOldNode::getMergedHeading(int gpsHeading, int compassHeading, bo
 	return returnValue;
 }
 
-void SailingLogicOldNode::setupRudderCommand() 
+void RoutingNode::setupRudderCommand() 
 {
 	m_rudderCommand.setCommandValues(m_db.retrieveCellAsInt("rudder_command_config", "1","extreme_command"),
 	        m_db.retrieveCellAsInt("rudder_command_config", "1", "midship_command"));
 }
 
-void SailingLogicOldNode::setupSailCommand() 
+void RoutingNode::setupSailCommand() 
 {
 	m_sailCommand.setCommandValues( m_db.retrieveCellAsInt("sail_command_config", "1", "close_reach_command"),
 	        m_db.retrieveCellAsInt("sail_command_config", "1", "run_command"));
 }
 
-void SailingLogicOldNode::manageDatabase(VesselStateMsg* msg, double trueWindDirection, double rudder, double sail){
+void RoutingNode::manageDatabase(VesselStateMsg* msg, double trueWindDirection, double rudder, double sail){
   //logging
   bool routeStarted = false;
   m_db.insertDataLog(

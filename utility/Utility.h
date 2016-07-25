@@ -39,14 +39,20 @@ public:
 
 	static double directionAdjustedSpeed(double gpsHeading,double compassHeading,double gpsSpeed);
 
+	static double calculateSignedDistanceToLine(const double nextLon, const double nextLat, const double prevLon, const double prevLat, 
+					const double gpsLon, const double gpsLat);
+	static double calculateWaypointsOrthogonalLine(const double nextLon, const double nextLat, const double prevLon, const double prevLat, 
+					const double gpsLon, const double gpsLat);
+
 	static double calculateTrueWindDirection(const int windsensorDir, const int windsensorSpeed, const double gpsSpeed, const double heading);
 	static double calculateTrueWindSpeed(int windsensorDir, int windsensorSpeed, double gpsSpeed, double heading);
 	static double getTrueWindDirection(int windsensorDir, int windsensorSpeed, double gpsSpeed, int compassHeading, 
 			std::vector<float> &twdBuffer, const unsigned int twdBufferMaxSize);
 
-	static std::array<double, 2> calculateApparentWind(int windsensorDir, int windsensorSpeed, double gpsSpeed, const double heading, const double trueWindDirection);
-	static double getApparentWindSpeed(int windsensorDir, int windsensorSpeed, double gpsSpeed, const double heading, const double trueWindDirection);
-	static double getApparentWindDirection(int windsensorDir, int windsensorSpeed, double gpsSpeed, const double heading, const double trueWindDirection);
+	static void calculateApparentWind(const int windsensorDir, const int windsensorSpeed, const double gpsSpeed, const double heading, const double trueWindDirection,
+		                                         double &apparentWindSpeed, double &apparentWindDirection);
+	static double getApparentWindSpeed(const int windsensorDir, const int windsensorSpeed, const double gpsSpeed, const double heading, const double trueWindDirection);
+	static double getApparentWindDirection(const int windsensorDir, const int windsensorSpeed, const double gpsSpeed, const double heading, const double trueWindDirection);
 };
 
 #endif
