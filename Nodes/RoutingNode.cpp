@@ -35,7 +35,8 @@ RoutingNode::RoutingNode(MessageBus& msgBus, DBHandler& db)
         atof(m_db.retrieveCell("waypoint_routing_config", "1", "rudder_speed_min").c_str())
         )
 {
-
+    msgBus.registerNode(this, MessageType::VesselState);
+    msgBus.registerNode(this, MessageType::WaypointData);
 }
 
 bool RoutingNode::init()

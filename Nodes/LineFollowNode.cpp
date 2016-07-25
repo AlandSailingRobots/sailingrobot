@@ -38,6 +38,9 @@ LineFollowNode::LineFollowNode(MessageBus& msgBus, DBHandler& db)
     m_prevWaypointRadius(0),
     m_tackingDirection(1)
 {
+    msgBus.registerNode(this, MessageType::VesselState);
+    msgBus.registerNode(this, MessageType::WaypointData);
+
     m_maxCommandAngle = M_PI / 6;
     m_maxSailAngle = M_PI / 4.2f;
     m_minSailAngle = M_PI / 32;

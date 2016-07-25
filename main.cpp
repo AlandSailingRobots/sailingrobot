@@ -104,6 +104,18 @@ int main(int argc, char *argv[])
 	WaypointNode waypoint(messageBus, dbHandler);
 	RoutingNode routing(messageBus, dbHandler);
 	LineFollowNode lineFollow(messageBus, dbHandler);
+	Node* sailingLogic;
+
+
+	bool usingLineFollow = (bool)(dbHandler.retrieveCellAsInt("sailing_robot_config", "1", "line_follow"));
+	if(usingLineFollow)
+	{
+		sailingLogic = &lineFollow;
+	}
+	else
+	{
+		sailingLogic = &routing;
+	}
 
 	int channel = dbHandler.retrieveCellAsInt("sail_servo_config", "1", "channel");
 	int speed = dbHandler.retrieveCellAsInt("sail_servo_config", "1", "speed");
@@ -117,7 +129,6 @@ int main(int argc, char *argv[])
 
 	ActuatorNode rudder(messageBus, NodeID::RudderActuator, channel, speed, acceleration);
 
-	bool usingLineFollow = (bool)(dbHandler.retrieveCellAsInt("sailing_robot_config", "1", "line_follow"));
 
 	// System services
 
@@ -135,11 +146,11 @@ int main(int argc, char *argv[])
 	initialiseNode(waypoint, "Waypoint Node", NodeImportance::CRITICAL);
 	if(usingLineFollow)
 	{
-		initialiseNode(lineFollow, "LineFollow Node", NodeImportance::CRITICAL);
+		initialiseNode(*sailingLogic, "LineFollow Node", NodeImportance::CRITICAL);
 	}
 	else
 	{
-		initialiseNode(routing, "Routing Node", NodeImportance::CRITICAL);
+		initialiseNode(*sailingLogic, "Routing Node", NodeImportance::CRITICAL);
 	}
 
 	// Start active nodes

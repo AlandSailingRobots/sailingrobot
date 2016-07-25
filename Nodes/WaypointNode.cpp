@@ -33,7 +33,7 @@ WaypointNode::WaypointNode(MessageBus& msgBus, DBHandler& db)
     m_prevDeclination(0),
     m_prevRadius(0)
 {
-
+    msgBus.registerNode(this, MessageType::GPSData);
 }
 
 bool WaypointNode::init()
