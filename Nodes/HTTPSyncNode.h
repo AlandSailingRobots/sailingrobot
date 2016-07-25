@@ -11,7 +11,6 @@
 #include <thread>
 #include <curl/curl.h>
 #include <string>
-#include <mutex>
 
 
 class HTTPSyncNode : public ActiveNode{
@@ -41,7 +40,6 @@ class HTTPSyncNode : public ActiveNode{
 		bool m_removeLogs;
 		int m_delay;
 		int m_pushOnlyLatestLogs;
-		std::mutex m_mutex;
 
 		DBHandler *m_dbHandler;
 
