@@ -19,16 +19,16 @@
 #include <vector>
 
 WaypointNode::WaypointNode(MessageBus& msgBus, DBHandler& db)
-: Node(NodeID::Waypoint, msgBus), m_db(db)
+: Node(NodeID::Waypoint, msgBus), m_db(db), 
+    m_id(0),
+    m_longitude(0),
+    m_latitude(0),
+    m_declination (0),
+    m_radius(0),
+    m_gps_longitude(0),
+    m_gps_latitude(0)
 {
-    m_id = 0;
-    m_longitude = 0;
-    m_latitude = 0;
-    m_declination = 0;
-    m_radius = 0;
 
-    m_gps_longitude = 0;
-    m_gps_latitude = 0;
 }
 
 bool WaypointNode::init()
@@ -51,6 +51,7 @@ void WaypointNode::processMessage(const Message* msg)
             return;
 	}
     
+    //TODO Oliver - ADD waypoint time to message
     if(waypointReached()/* || httpsync sent info that waypoints have been updated*/)
     {
         sendMessage();
