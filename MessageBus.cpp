@@ -37,7 +37,7 @@ MessageBus::~MessageBus()
 	delete m_BackMessages;
 }
 
-void MessageBus::registerNode(Node* node)
+void MessageBus::registerNode(Node& node)
 {
 	if(not m_Running)
 	{
@@ -46,7 +46,7 @@ void MessageBus::registerNode(Node* node)
 	}
 }
 
-void MessageBus::registerNode(Node* node, MessageType msgType)
+void MessageBus::registerNode(Node& node, MessageType msgType)
 {
 	if(not m_Running)
 	{
@@ -95,11 +95,11 @@ void MessageBus::run()
 	}
 }
 
-MessageBus::RegisteredNode* MessageBus::getRegisteredNode(Node* node)
+MessageBus::RegisteredNode* MessageBus::getRegisteredNode(Node& node)
 {
 	for(auto regNode : m_RegisteredNodes)
 	{
-		if(regNode->nodePtr == node)
+		if(regNode->nodeRef.nodeID() == node.nodeID())
 		{
 			return regNode;
 		}
@@ -124,15 +124,15 @@ void MessageBus::processMessages()
 			{
 				if(node->isInterested( msg->messageType() ))
 				{
-					node->nodePtr->processMessage(msg);
+					node->nodeRef.processMessage(msg);
 				}
 			}
 			// Distribute to the node the message is directed at then move onto the next message
 			else
 			{
-				if(node->nodePtr->nodeID() == msg->destinationID())
+				if(node->nodeRef.nodeID() == msg->destinationID())
 				{
-					node->nodePtr->processMessage(msg);
+					node->nodeRef.processMessage(msg);
 					continue;
 				}
 			}

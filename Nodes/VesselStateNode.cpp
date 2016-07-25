@@ -31,9 +31,9 @@ VesselStateNode::VesselStateNode(MessageBus& msgBus)
 		m_GPSHasFix(false), m_GPSLat(0), m_GPSLon(0), m_GPSUnixTime(0), m_GPSSpeed(0),
 		m_GPSHeading(0), m_WindDir(0), m_WindSpeed(0), m_WindTemp(0)
 {
-	msgBus.registerNode(this, MessageType::CompassData);
-	msgBus.registerNode(this, MessageType::GPSData);
-	msgBus.registerNode(this, MessageType::WindData);
+	msgBus.registerNode(*this, MessageType::CompassData);
+	msgBus.registerNode(*this, MessageType::GPSData);
+	msgBus.registerNode(*this, MessageType::WindData);
 }
 
 void VesselStateNode::start()

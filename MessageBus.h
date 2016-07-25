@@ -50,7 +50,7 @@ public:
  	///
  	/// @param node 			Pointer to the node that should be registered.
  	///----------------------------------------------------------------------------------
-	void registerNode(Node* node);
+	void registerNode(Node& node);
 
 	///----------------------------------------------------------------------------------
  	/// Registers a node onto the message bus allowing it receive direct messages and
@@ -59,7 +59,7 @@ public:
  	/// @param node 			Pointer to the node that should be registered.
  	/// @param msgType 			The type of message to register for
  	///----------------------------------------------------------------------------------
-	void registerNode(Node* node, MessageType msgType);
+	void registerNode(Node& node, MessageType msgType);
 
 	///----------------------------------------------------------------------------------
  	/// Enqueues a message onto the message queue for distribution through the message 
@@ -81,9 +81,9 @@ private:
  	/// in.
  	///----------------------------------------------------------------------------------
 	struct RegisteredNode {
-		RegisteredNode(Node* node) : nodePtr(node) { }
+		RegisteredNode(Node& node) : nodeRef(node) { }
 
-		Node* nodePtr;
+		Node& nodeRef;
 
 		///------------------------------------------------------------------------------
  		/// Returns true if a registered node is interested in a message type.
@@ -119,7 +119,7 @@ private:
  	/// to it. If the node has not yet been registered, it is then registered and a 
  	/// pointer to the new RegisteredNode is returned.
  	///----------------------------------------------------------------------------------
-	RegisteredNode* getRegisteredNode(Node* node);
+	RegisteredNode* getRegisteredNode(Node& node);
 
 	///----------------------------------------------------------------------------------
  	/// Goes through the back message queue and distributes messages, calling 
