@@ -21,6 +21,7 @@
 #define CHANNEL_WIDTH 15.0
 #define SAFE_DISTANCE 30.0
 #define EARTH_RADIUS 6371000
+#define CONVERSION_FACTOR_METER_TO_GPS 0.00000899280575539
 
 // SAVED CODE IN CASE OF ARCHITECTURAL CHANGE
 /*
@@ -171,7 +172,9 @@ private:
      * @param point
      * @return
      */
-    double signedDistanceFromLine(Eigen::Vector2d linePt1,Eigen::Vector2d linePt2,Eigen::Vector2d point);
+    double signedDistanceFromLine(Eigen::Vector2d linePt1,
+                                  Eigen::Vector2d linePt2,
+                                  Eigen::Vector2d point);
 
     /**
      * Get the closest vertex between the given polygon and a point.
@@ -181,7 +184,8 @@ private:
      * @param point
      * @return
      */
-    Eigen::Vector2d getClosestVertex(std::vector<Eigen::Vector2d> polygon, Eigen::Vector2d point);
+    Eigen::Vector2d getClosestVertex(std::vector<Eigen::Vector2d> polygon,
+                                     Eigen::Vector2d point);
 
     /**
      * Get the closest point between the given polygon and a point.
@@ -191,7 +195,8 @@ private:
      * @param point
      * @return
      */
-    Eigen::Vector2d getClosestPoint(std::vector<Eigen::Vector2d> polygon, Eigen::Vector2d point);
+    Eigen::Vector2d getClosestPoint(std::vector<Eigen::Vector2d> polygon,
+                                    Eigen::Vector2d point);
 
     /**
      * Transform GPS coordinates 2d vectors into 3D cartesian vectors

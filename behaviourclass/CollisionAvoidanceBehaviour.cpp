@@ -529,19 +529,44 @@ bool CollisionAvoidanceBehaviour::these_obstacles_are_a_problem(
 }
 
 Eigen::MatrixXd CollisionAvoidanceBehaviour::compute_potential_field(
-        std::vector<Obstacle> seen_obstacles,
-        std::vector<Eigen::Vector2d> sailing_zone,
+        std::vector<Obstacle> seenObstacles,
+        std::vector<Eigen::Vector2d> sailingZone,
         FollowedLine) {
-    // Set up of the matrix of 100*100 around the boat.
-    Eigen::MatrixXd potField;
-
     // Init
+
+    // Set up of the matrix of 100*100 around the boat.
+    //TODO : get these values from the database/elsewhere ?
+    const int matrixHeight   = 100; const int matrixWidth    = 100;
+    const int yUpperMapBound = 100; const int xUpperMapBound = 100; // in meters
+    const int yLowerMapBound = 100; const int xLowerMapBound = 100; // in meters
+
+    // Since the distance computed here is only on one axis,
+    // a simple conversion factor is sufficient
+    const double xLowerBound = sensorOutput.gpsPos(1)
+                               -(xLowerMapBound*CONVERSION_FACTOR_METER_TO_GPS/180*M_PI);
+    const double xUpperBound = sensorOutput.gpsPos(1)
+                               +(xUpperMapBound*CONVERSION_FACTOR_METER_TO_GPS/180*M_PI);
+    const double yLowerBound = sensorOutput.gpsPos(1)
+                               -(yLowerMapBound*CONVERSION_FACTOR_METER_TO_GPS/180*M_PI);
+    const double yUpperBound = sensorOutput.gpsPos(1)
+                               +(yUpperMapBound*CONVERSION_FACTOR_METER_TO_GPS/180*M_PI);
+    Eigen::MatrixXd potField = Eigen::MatrixXd::Zero(matrixHeight,matrixWidth);
+    const Eigen::MatrixXd Px(matrixHeight,matrixWidth)
+            = Eigen::RowVectorXd::LinSpaced(matrixWidth,
+                                            xLowerBound,
+                                            xUpperBound).replicate(matrixHeight,1);
+    const Eigen::MatrixXd Py(matrixHeight,matrixWidth)
+            = Eigen::VectorXd::LinSpaced(   matrixHeight,
+                                            yLowerBound,
+                                            yUpperBound).replicate(1, matrixWidth);
 
     // TODO Obstacle potential function
     /*
      * Since the obstacle is a polygon, only the closest point from
      * the polygon will be counted as an obstacle
      */
+
+    // Maybe we should do a parameter file where we could configure everything
     const double scaleHole = 50;
     const double scalePike = 550;
     const double scale = 0.5;
@@ -558,14 +583,23 @@ Eigen::MatrixXd CollisionAvoidanceBehaviour::compute_potential_field(
     // TODO : check the closest position of the obstacle with a function.
 
     // Add the pikes
-    for(auto & obstacle : seen_obstacles){ //for each seen_obstacle add the pikes
-
-
+    for(auto & obstacle : seenObstacles){ //for each seen_obstacle add the pikes
+        Eigen::Vector2d closestObstaclePoint = getClosestPoint(obstacle.polygon,sensorOutput.gpsPos);
+//        xObs = P1-qhat(1,i);
+//        yObs = P2-qhat(2,i);
+//        tPike = ((xObs*1).^2+(yObs-offsetObstacle*scale).^2)/scalePike/scale;
+//        ObsP = max(ObsP, strength*strengthPike*exp(-(tPike).^2));
     }
 
     //Add the holes
-    for(auto & obstacle : seen_obstacles){ //for each seen_obstacle add the holes
-
+    for(auto & obstacle : seenObstacles){ //for each seen_obstacle add the holes
+//        T = mod(boatHeading,2*pi)*0.3 + mod( atan2(phat(2)-qhat(2,i),phat(1)-qhat(1,i)) ,2*pi)*0.7 + pi/2;
+//        xObs = P1-qhat(1,i);
+//        yObs = P2-qhat(2,i);
+//        xo =  xObs*cos(T) + yObs*sin(T);
+//        yo = -xObs*sin(T) + yObs*cos(T);
+//        tHoleR = ((xo-35*scale).^2+(yo-offsetObstacle*scale).^2)/scaleHole/scale;
+//        tHoleL = ((xo+35*scale).^2+(yo-offsetObstacle*scale).^2)/scaleHole/scale;
     }
     /*
     for i=1:size(qhat,2)
