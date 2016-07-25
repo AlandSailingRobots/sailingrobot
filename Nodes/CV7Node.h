@@ -50,7 +50,15 @@ public:
 
 private:
 	///----------------------------------------------------------------------------------
- 	/// The CV7 Node's thread function.
+ 	/// Parses a NMEA wind sensor string and returns true if the parse was successful.
+	/// The data that is parsed is put into a number of referenced values.
+	///
+	///	@param buffer		Pointer to the char buffer with data in it
+	///	@param windDir		Extracted from the NMEA string, the direction of the wind.
+	///	@param windSpeed	Extracted from the NMEA string, the speed of the wind.
+	/// @param windTemp		Extracted from the NMEA string, the temperature of the wind.
+	///
+	/// @returns			Returns true if the buffer was successfully parsed.
  	///
  	///----------------------------------------------------------------------------------
 	static void WindSensorThread(void* nodePtr);

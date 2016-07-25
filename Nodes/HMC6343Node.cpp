@@ -8,6 +8,12 @@
  *		to the message bus.
  *
  * Developer Notes:
+ * 		I2C Address
+ *
+ * 		The I2C address is different from what is mentioned in the datasheet. The
+ * 		datasheet mentions it is 0x32, however when accessing the device you need to use
+ * 		0x19 for successful communications. The register on the HMC6343 that contains the
+ * 		I2C address returns 0x32, the address mentioned in the datasheet.
  *
  *
  ***************************************************************************************/
@@ -52,7 +58,7 @@
 
 
 HMC6343Node::HMC6343Node(MessageBus& msgBus, const int headingBufferSize)
-: ActiveNode(NodeID::Compass, msgBus), m_I2C(), m_Initialised(false), m_HeadingBufferSize(headingBufferSize)
+: ActiveNode(NodeID::Compass, msgBus), m_Initialised(false), m_HeadingBufferSize(headingBufferSize)
 {
 
 }

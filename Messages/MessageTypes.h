@@ -20,5 +20,13 @@ enum class MessageType {
 	DataRequest = 0,
 	WindData,
 	CompassData,
-	GPSData
+	GPSData,
+	ServerConfigsReceived,
+	ServerWaypointsReceived,
+	LocalConfigChange,
+	LocalWaypointChange,
+	ActuatorPosition,
+	ArduinoData,
+	VesselState,
+	WaypointData
 };
