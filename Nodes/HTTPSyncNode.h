@@ -20,12 +20,58 @@ class HTTPSyncNode : public ActiveNode{
 
 		HTTPSyncNode(MessageBus& msgBus,DBHandler *db,int delay, bool removeLogs);
         
+		///----------------------------------------------------------------------------------
+		/// Retrieves server settings from database and initialises curl
+		///
+		///----------------------------------------------------------------------------------
         bool init();
         void start();
+		        
+		///----------------------------------------------------------------------------------
+		/// Pushes waypoints or configurations on new local changes
+		/// (Example of cause: xbeeSync functions)
+		///----------------------------------------------------------------------------------
         void processMessage(const Message* message);
 
 
 	private:
+
+		        
+		///----------------------------------------------------------------------------------
+		/// Sends server request in curl format - used for all syncing functionality
+		///----------------------------------------------------------------------------------
+		bool performCURLCall(std::string data, std::string call, std::string& response);
+		
+		///----------------------------------------------------------------------------------
+		/// Updates local waypoints using new server data if any
+		///----------------------------------------------------------------------------------
+        void getWaypointsFromServer();
+
+		///----------------------------------------------------------------------------------
+		/// Same as above but for configuration data
+		///----------------------------------------------------------------------------------
+        void getConfigsFromServer();
+
+        bool checkIfNewConfigs();
+		bool checkIfNewWaypoints();
+
+		///----------------------------------------------------------------------------------
+		/// Push functions: sends local data to server using curl
+		///----------------------------------------------------------------------------------
+        void pushDatalogs();
+		void pushWaypoints();
+		void pushConfigs();
+
+		///----------------------------------------------------------------------------------
+		/// Node thread: Calls all syncing functions while running
+		///----------------------------------------------------------------------------------
+        static void HTTPSyncThread(void* nodePtr);
+
+
+		///----------------------------------------------------------------------------------
+		/// Convenience function: creates curl call from argument and returns response (json data)
+		///----------------------------------------------------------------------------------
+		std::string getData(std::string call);
 
         bool m_initialised;
 
@@ -37,24 +83,14 @@ class HTTPSyncNode : public ActiveNode{
 		CURLcode m_res;
 		bool m_reportedConnectError;
 
+		///----------------------------------------------------------------------------------
+		/// Determines wether or not to clear all local logs after a successful push to server
+		///----------------------------------------------------------------------------------
 		bool m_removeLogs;
 		int m_delay;
 		int m_pushOnlyLatestLogs;
 
 		DBHandler *m_dbHandler;
 
-		std::string getData(std::string call);
-
-		bool performCURLCall(std::string data, std::string call, std::string& response);
-        void getWaypointsFromServer();
-        void getConfigsFromServer();
-        bool checkIfNewConfigs();
-		bool checkIfNewWaypoints();
-
-        void pushDatalogs();
-		void pushWaypoints();
-		void pushConfigs();
-
-        static void HTTPSyncThread(void* nodePtr);
 };
 
