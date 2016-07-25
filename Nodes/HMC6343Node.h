@@ -30,6 +30,8 @@ class HMC6343Node : public ActiveNode {
 public:
 	HMC6343Node(MessageBus& msgBus, const int headingBufferSize = 10);
 
+	virtual ~HMC6343Node() { }
+
 	///----------------------------------------------------------------------------------
 	/// Attempts to connect to the HMC6343 compass.
 	///----------------------------------------------------------------------------------
@@ -47,12 +49,12 @@ public:
 	///----------------------------------------------------------------------------------
 	bool setOrientation(CompassOrientation orientation);
 
-private:
 	///----------------------------------------------------------------------------------
 	/// Reads the heading, pitch and roll from the compass.
 	///----------------------------------------------------------------------------------
 	bool readData(float& heading, float& pitch, float& roll);
 
+protected:
 	static void HMC6343ThreadFunc(void* nodePtr);
 
 	I2CController 	m_I2C;

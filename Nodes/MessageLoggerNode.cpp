@@ -46,6 +46,7 @@ void MessageLoggerNode::processMessage(const Message* message)
 			break;
 		case MessageType::CompassData:
 			Logger::info("CompassData message received");
+			break;
 		case MessageType::GPSData:
 			Logger::info("GPSData message received");
 			break;

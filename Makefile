@@ -31,8 +31,7 @@ SRC_DIR = ./
 OUTPUT_DIR = ./
 
 UNIT_TEST = ./unit-tests.run
-
-TEST_MAKEFILE = ./Makefile.tests
+HARDWARE_TEST = ./hardware-tests.run
 
 # External Libraries
 
@@ -137,7 +136,8 @@ all: $(EXECUTABLE) stats
 build_tests: $(OBJECTS) $(EXECUTABLE)
 	@echo Building tests...
 	$(MAKE) -C tests
-	$(CXX) $(CPPFLAGS) tests/cxxtest/runner.o @$(OBJECT_FILE) -Wl,-rpath=./ ./libwiringPi.so -o $(UNIT_TEST) $(LIBS)
+	$(CXX) $(CPPFLAGS) tests/runner.o @$(OBJECT_FILE) -Wl,-rpath=./ ./libwiringPi.so -o $(UNIT_TEST) $(LIBS)
+	$(CXX) $(CPPFLAGS) tests/runnerHardware.o @$(OBJECT_FILE) -Wl,-rpath=./ ./libwiringPi.so -o $(HARDWARE_TEST) $(LIBS)
 
 #  Create the directories needed
 $(BUILD_DIR):

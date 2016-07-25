@@ -133,7 +133,7 @@ void CV7Node::WindSensorThread(void* nodePtr)
 			float windSpeed = 0;
 			float windTemp = 0;
 
-			if(CV7Node::parseString(buffer, windDir, windSpeed, windTemp))
+			if(node->parseString(buffer, windDir, windSpeed, windTemp))
 			{
 				noDataCount = 0;
 				if(windDirData.size() < DATA_BUFFER_SIZE)
@@ -171,7 +171,7 @@ void CV7Node::WindSensorThread(void* nodePtr)
 	}
 }
 
-bool CV7Node::parseString(const char* buffer, float& windDir, float& windSpeed, float& windTemp)
+bool CV7Node::parseString(const char* buffer, float& windDir, float& windSpeed, float& windTemp) const
 {
 	const int IIMWV = 0;
 	const int WIXDR = 1;
