@@ -2,7 +2,7 @@
 #pragma once
 
 #include "ActiveNode.h"
-#include "../dbhandler/DBHandler.h"
+#include "dbhandler/DBHandler.h"
 #include "logger/Logger.h"
 #include "models/SystemStateModel.h"
 
