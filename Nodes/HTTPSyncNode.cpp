@@ -4,14 +4,19 @@
 #include "Messages/ServerConfigsReceivedMsg.h"
 #include "Messages/ServerWaypointsReceivedMsg.h"
 
-/*
 
-    PURPOSE:
-        HANDLE RETRIEVAL AND WRITING TO DATABASE AUTONOMOUSLY UPON LOCAL OR SERVERSIDE CHANGES
-        PUSH LOGS ON AN INTERVAL
-        NOTIFY MESSAGEBUS WHEN NEW SERVERDATA ARRIVES
-
-*/
+/****************************************************************************************
+ *
+ * File:
+ * 		HTTPSyncNode.cpp
+ *
+ * Purpose:
+ *		Handles retrieval and sending of logs, waypoints and configs between database and server. Also notifies messagebus when new serverdata arrives.
+ *
+ * Developer Notes:
+ *
+ *
+ ***************************************************************************************/
 
 size_t write_to_string(void *ptr, size_t size, size_t count, void *stream) {
     ((std::string*)stream)->append((char*)ptr, 0, size*count);
