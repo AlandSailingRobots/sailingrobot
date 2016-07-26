@@ -22,10 +22,14 @@ typedef void (*ActiveNodeFunc) (void*);
 
 class ActiveNode : public Node {
 public:
-	ActiveNode(NodeID id, MessageBus& msgBus) : Node(id,msgBus)
+	ActiveNode(NodeID id, MessageBus& msgBus) : Node(id, msgBus)
 	{ }
 
-	virtual void processMessage(const Message* message) = 0;
+	///----------------------------------------------------------------------------------
+ 	/// This function should be used to start the active nodes thread.
+ 	///
+ 	///----------------------------------------------------------------------------------
+	virtual void start() = 0;
 protected:
 	void runThread(ActiveNodeFunc func);
 private:

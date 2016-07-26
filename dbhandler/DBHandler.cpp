@@ -766,6 +766,35 @@ bool DBHandler::getWaypointFromTable(WaypointModel &waypointModel, bool max){
 	return true;
 }
 
+bool DBHandler::getWaypointValues(int& id, float& longitude, float& latitude, int& declination, int& radius)
+{
+	int rows, columns;
+    std::vector<std::string> results;
+    try 
+    {
+        results = retrieveFromTable("SELECT MIN(id) FROM waypoints WHERE harvested = 0;", rows, columns);
+    }
+    
+    catch(const char* error)
+    {
+        Logger::error("%s Error: %s", __PRETTY_FUNCTION__, error);
+        return false;
+    }
+    if (rows * columns < 1 || results[1] == "\0") {
+        return false;
+    }
+
+
+    id = stoi(results[1]);
+
+    longitude = atof(retrieveCell("waypoints", results[1], "longitude").c_str());
+    latitude = atof(retrieveCell("waypoints", results[1], "latitude").c_str());
+    radius = retrieveCellAsInt("waypoints", results[1], "radius");
+    declination = retrieveCellAsInt("waypoints", results[1], "declination");
+    
+
+    return true;
+}
 
 std::string DBHandler::getConfigs() {
 	Json json;

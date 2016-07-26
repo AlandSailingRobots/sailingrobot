@@ -3,7 +3,16 @@
 #include "logger/Logger.h"
 #include "MessageBus.h"
 #include "Nodes/MessageLoggerNode.h"
+#include "Nodes/CV7Node.h"
+#include "Nodes/HMC6343Node.h"
+#include "Nodes/GPSDNode.h"
+#include "Nodes/ActuatorNode.h"
+#include "Nodes/ArduinoNode.h"
+#include "Nodes/WaypointNode.h"
+#include "Nodes/VesselStateNode.h"
 #include "Messages/DataRequestMsg.h"
+#include "dbhandler/DBHandler.h"
+#include "SystemServices/MaestroController.h"
 
 enum class NodeImportance {
 	CRITICAL,
@@ -28,7 +37,7 @@ void initialiseNode(Node& node, const char* nodeName, NodeImportance importance)
 	}
 	else
 	{
-		Logger::error("Node: %s - init\t[FAILED]", nodeName);
+		Logger::error("Node: %s - init\t\t[FAILED]", nodeName);
 
 		if(importance == NodeImportance::CRITICAL)
 		{
@@ -70,12 +79,61 @@ int main(int argc, char *argv[])
 	}
 
 	MessageBus messageBus;
+	DBHandler dbHandler(db_path);
+
+	if(dbHandler.initialise())
+	{
+		Logger::info("Database init\t\t[OK]");
+	}
+	else
+	{
+		Logger::error("Database init\t\t[FAILED]");
+		Logger::shutdown();
+		exit(1);
+	}
 
 	// Create nodes
 	MessageLoggerNode msgLogger(messageBus);
+	CV7Node windSensor(messageBus, dbHandler.retrieveCell("windsensor_config", "1", "port"), dbHandler.retrieveCellAsInt("windsensor_config", "1", "baud_rate"));
+	HMC6343Node compass(messageBus, dbHandler.retrieveCellAsInt("buffer_config", "1", "compass"));
+	GPSDNode gpsd(messageBus);
+	ArduinoNode arduino(messageBus);
+	VesselStateNode vessel(messageBus);
+	WaypointNode waypoint(messageBus, dbHandler);
+
+	int channel = dbHandler.retrieveCellAsInt("sail_servo_config", "1", "channel");
+	int speed = dbHandler.retrieveCellAsInt("sail_servo_config", "1", "speed");
+	int acceleration = dbHandler.retrieveCellAsInt("sail_servo_config", "1", "acceleration");
+
+	ActuatorNode sail(messageBus, NodeID::SailActuator, channel, speed, acceleration);
+
+	channel = dbHandler.retrieveCellAsInt("rudder_servo_config", "1", "channel");
+	speed = dbHandler.retrieveCellAsInt("rudder_servo_config", "1", "speed");
+	acceleration = dbHandler.retrieveCellAsInt("rudder_servo_config", "1", "acceleration");
+
+	ActuatorNode rudder(messageBus, NodeID::RudderActuator, channel, speed, acceleration);
+
+	// System services
+
+	MaestroController::init(dbHandler.retrieveCell("maestro_controller_config", "1", "port"));
 
 	// Initialise nodes
 	initialiseNode(msgLogger, "Message Logger", NodeImportance::NOT_CRITICAL);
+	initialiseNode(windSensor, "Wind Sensor", NodeImportance::CRITICAL);
+	initialiseNode(compass, "Compass", NodeImportance::CRITICAL);
+	initialiseNode(gpsd, "GPSD Node", NodeImportance::CRITICAL);
+	initialiseNode(sail, "Sail Actuator", NodeImportance::CRITICAL);
+	initialiseNode(rudder, "Rudder Actuator", NodeImportance::CRITICAL);
+	initialiseNode(arduino, "Arduino Node", NodeImportance::NOT_CRITICAL);
+	initialiseNode(vessel, "Vessel State Node", NodeImportance::CRITICAL);
+	initialiseNode(waypoint, "Waypoint Node", NodeImportance::CRITICAL);
+
+	// Start active nodes
+	windSensor.start();
+	compass.start();
+	gpsd.start();
+	arduino.start();
+	vessel.start();
 
 	// NOTE - Jordan: Just to ensure messages are following through the system
 	DataRequestMsg* dataRequest = new DataRequestMsg(NodeID::MessageLogger);
@@ -121,15 +179,6 @@ static void threadWindsensor() {
 	std::cout << " * Windsensor thread exited." << std::endl;
 }
 
-static void threadI2CController() {
-	try {
-		i2cController_handle->run();
-	}
-	catch (const char * error) {
-		std::cout << "ERROR while running static void threadI2CController() : " << error << std::endl;
-	}
-	std::cout << " I2Ccontroller thread exited." << std::endl;
-}
 
 int main(int argc, char *argv[]) {
 	// This is for eclipse development so the output is constantly pumped out.
@@ -229,22 +278,17 @@ int main(int argc, char *argv[]) {
 		}
 
 		// I2CController thread
-		bool mockArduino = db.retrieveCellAsInt("mock","1","analog_arduino");
-    	bool mockCompass = db.retrieveCellAsInt("mock","1","compass");
-		int  headningBufferSize = db.retrieveCellAsInt("buffer_config", "1", "compass");
-		double i2cLoopTime = stod(db.retrieveCell("i2c_config", "1", "loop_time"));
+//		bool mockArduino = db.retrieveCellAsInt("mock","1","analog_arduino");
+//    	bool mockCompass = db.retrieveCellAsInt("mock","1","compass");
+//		int  headningBufferSize = db.retrieveCellAsInt("buffer_config", "1", "compass");
+//		double i2cLoopTime = stod(db.retrieveCell("i2c_config", "1", "loop_time"));
+//
+//		if(mockArduino) { Logger::warning("Using mock Arduino"); }
+//		if(mockArduino) { Logger::warning("Using mock compass"); }
+//
+//
+//		// Start i2cController thread
 
-		if(mockArduino) { Logger::warning("Using mock Arduino"); }
-		if(mockArduino) { Logger::warning("Using mock compass"); }
-
-		i2cController_handle.reset(new I2CController(&systemstate, mockArduino, mockCompass, headningBufferSize, i2cLoopTime));
-		i2cController_handle->init();
-
-		// Start i2cController thread
-		i2cController_thread = std::unique_ptr<ThreadRAII>(new ThreadRAII(
-			std::thread(threadI2CController),
-			ThreadRAII::DtorAction::detach
-		) );
 
 		// Start GPSupdater thread
 		ThreadRAII gps_reader_thread(
