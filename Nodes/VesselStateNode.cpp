@@ -28,7 +28,7 @@
 VesselStateNode::VesselStateNode(MessageBus& msgBus)
 	: ActiveNode(NodeID::VesselState, msgBus),
 		m_CompassHeading(0), m_CompassPitch(0), m_CompassRoll(0),
-		m_GPSHasFix(false), m_GPSLat(0), m_GPSLon(0), m_GPSUnixTime(0), m_GPSSpeed(0),
+		m_GPSHasFix(false), m_GPSOnline(false), m_GPSLat(0), m_GPSLon(0), m_GPSUnixTime(0), m_GPSSpeed(0),
 		m_GPSHeading(0), m_WindDir(0), m_WindSpeed(0), m_WindTemp(0), m_ArduinoPressure(0),
 		m_ArduinoRudder(0),m_ArduinoSheet(0),m_ArduinoBattery(0)
 {
@@ -76,6 +76,7 @@ void VesselStateNode::processCompassMessage(CompassDataMsg* msg)
 void VesselStateNode::processGPSMessage(GPSDataMsg* msg)
 {
 	m_GPSHasFix = msg->hasFix();
+	m_GPSOnline = msg->gpsOnline();
 	m_GPSLat = msg->latitude();
 	m_GPSLon = msg->longitude();
 	m_GPSUnixTime = msg->unixTime();
@@ -113,7 +114,7 @@ void VesselStateNode::VesselStateThreadFunc(void* nodePtr)
 		std::this_thread::sleep_for(std::chrono::milliseconds(VESSEL_STATE_SLEEP_MS));
 
 		VesselStateMsg* vesselState = new VesselStateMsg(	node->m_CompassHeading, node->m_CompassPitch,
-															node->m_CompassRoll, node->m_GPSHasFix, node->m_GPSLat,
+															node->m_CompassRoll, node->m_GPSHasFix, node->m_GPSOnline, node->m_GPSLat,
 															node->m_GPSLon, node->m_GPSUnixTime, node->m_GPSSpeed, node->m_GPSSatellite,
 															node->m_GPSHeading, node->m_WindDir, node->m_WindSpeed,
 															node->m_WindTemp, node->m_ArduinoPressure, node->m_ArduinoRudder,

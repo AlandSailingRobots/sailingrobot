@@ -76,7 +76,13 @@ void RoutingNode::processMessage(const Message* msg)
 
 void RoutingNode::calculateActuatorPos(VesselStateMsg* msg)
 {
-    double heading = getHeading(msg->gpsHeading(), msg->compassHeading(), msg->speed(), false, false);
+    if(not msg->gpsOnline())
+    {
+        Logger::error("GPS not online, using values from last iteration");
+        return;
+    }
+
+    int heading = getHeading(msg->gpsHeading(), msg->compassHeading(), msg->speed(), false, false);
     double trueWindDirection = Utility::getTrueWindDirection(msg->windDir(), msg->windSpeed(), msg->speed(), msg->compassHeading(), twdBuffer, twdBufferMaxSize);
     
     double rudderCommand, sailCommand;
@@ -84,7 +90,6 @@ void RoutingNode::calculateActuatorPos(VesselStateMsg* msg)
     m_waypointRouting.getCommands(rudderCommand, sailCommand, msg->longitude(), msg->latitude(), m_nextWaypointRadius,
 	trueWindDirection, heading, msg->gpsHeading(), msg->speed(), msg->compassHeading(), msg->windDir());
 
-    Logger::info("RudderCommand: %f      SailCommand: %f", rudderCommand, sailCommand);
     rudderCommand = m_rudderCommand.getCommand(rudderCommand);
 	sailCommand = m_sailCommand.getCommand(sailCommand);
 

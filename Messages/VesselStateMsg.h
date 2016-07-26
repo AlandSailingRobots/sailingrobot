@@ -19,22 +19,22 @@
 class VesselStateMsg : public Message {
 public:
 	VesselStateMsg(	NodeID destinationID, NodeID sourceID, int compassHeading, int compassPitch, 
-					int compassRoll, bool gpsFix, double lat, double lon, double unixTime, 
+					int compassRoll, bool gpsFix, bool gpsOnline, double lat, double lon, double unixTime, 
 					double gpsSpeed, int gpsSatellite, double heading, float windDir, float windSpeed, float windTemp,
 					int arduinoPressure, int arduinoRudder, int arduinoSheet, int arduinoBattery)
 		:Message(MessageType::VesselState, sourceID, destinationID),
 		m_CompassHeading(compassHeading), m_CompassPitch(compassPitch), m_CompassRoll(compassRoll), 
-		m_GPSHasFix(gpsFix), m_GPSLat(lat), m_GPSLon(lon), m_GPSUnixTime(unixTime), m_GPSSpeed(gpsSpeed), 
+		m_GPSHasFix(gpsFix), m_GPSOnline(gpsOnline), m_GPSLat(lat), m_GPSLon(lon), m_GPSUnixTime(unixTime), m_GPSSpeed(gpsSpeed), 
 		m_GPSHeading(heading), m_GPSSatellite(gpsSatellite) , m_WindDir(windDir), m_WindSpeed(windSpeed), m_WindTemp(windTemp), m_ArduinoPressure(arduinoPressure),
 		m_ArduinoRudder(arduinoRudder), m_ArduinoSheet(arduinoSheet), m_ArduinoBattery(arduinoBattery)
 		{ }
 
-	VesselStateMsg(	int compassHeading, int compassPitch, int compassRoll, bool gpsFix, double lat,
+	VesselStateMsg(	int compassHeading, int compassPitch, int compassRoll, bool gpsFix, bool gpsOnline, double lat,
 					double lon, double unixTime, double gpsSpeed, int gpsSatellite, double heading, float windDir, 
 					float windSpeed, float windTemp, int arduinoPressure, int arduinoRudder, int arduinoSheet, int arduinoBattery)
 		:Message(MessageType::VesselState, NodeID::None, NodeID::None),
 		m_CompassHeading(compassHeading), m_CompassPitch(compassPitch), m_CompassRoll(compassRoll), 
-		m_GPSHasFix(gpsFix), m_GPSLat(lat), m_GPSLon(lon), m_GPSUnixTime(unixTime), m_GPSSpeed(gpsSpeed), 
+		m_GPSHasFix(gpsFix), m_GPSOnline(gpsOnline), m_GPSLat(lat), m_GPSLon(lon), m_GPSUnixTime(unixTime), m_GPSSpeed(gpsSpeed), 
 		m_GPSHeading(heading), m_GPSSatellite(gpsSatellite), m_WindDir(windDir), m_WindSpeed(windSpeed), m_WindTemp(windTemp), m_ArduinoPressure(arduinoPressure),
 		m_ArduinoRudder(arduinoRudder), m_ArduinoSheet(arduinoSheet), m_ArduinoBattery(arduinoBattery)
 		{ }
@@ -46,6 +46,7 @@ public:
 	int compassRoll() { return m_CompassRoll; }
 	
 	bool gpsHasFix() { return m_GPSHasFix; }
+	bool gpsOnline() { return m_GPSOnline; }
 	double latitude() { return m_GPSLat; }
 	double longitude() { return m_GPSLon; }
 	double unixTime() { return m_GPSUnixTime; }
@@ -67,6 +68,7 @@ private:
 	int 	m_CompassPitch;
 	int 	m_CompassRoll;
 	bool	m_GPSHasFix;
+	bool	m_GPSOnline;
 	double	m_GPSLat;
 	double	m_GPSLon;
 	double	m_GPSUnixTime;

@@ -52,6 +52,7 @@ private:
 	int 	m_CompassPitch;
 	int 	m_CompassRoll;
 	bool	m_GPSHasFix;
+	bool	m_GPSOnline;
 	double	m_GPSLat;
 	double	m_GPSLon;
 	double	m_GPSUnixTime;

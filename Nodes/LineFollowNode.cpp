@@ -111,6 +111,12 @@ double LineFollowNode::calculateAngleOfDesiredTrajectory(VesselStateMsg* msg)
 
 void LineFollowNode::calculateActuatorPos(VesselStateMsg* msg)
 {
+    if(not msg->gpsOnline())
+    {
+        Logger::error("GPS not online, using values from last iteration");
+        return;
+    }
+
     double trueWindDirection = Utility::getTrueWindDirection(msg->windDir(), msg->windSpeed(), msg->speed(), msg->compassHeading(), twdBuffer, twdBufferMaxSize);
     /* add pi because trueWindDirection is originally origin of wind but algorithm need direction*/
     trueWindDirection = Utility::degreeToRadian(trueWindDirection)+M_PI;
