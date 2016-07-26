@@ -1,4 +1,3 @@
-#include "myWiringI2C.h"
 #include "AR_UNO.h"
 #include <wiringPiI2C.h>
 #include <wiringPi.h> // delay
@@ -6,6 +5,9 @@
 #include <vector>
 #include <cstring>
 #include "utility/Utility.h"
+
+#define BLOCK_READ_SIZE 9
+#define BLOCK_I2C_ADDRESS_LOC 8
 
 
 AR_UNO::AR_UNO():
@@ -66,30 +68,28 @@ int AR_UNO::getValue3()
 
 void AR_UNO::readValues()
 {
-  uint8_t block[40];
+  uint8_t block[BLOCK_READ_SIZE];
   uint16_t reVal;
-  memset(block,0xFF,40);
-  wiringPiI2CReadBlock(m_fd,block);
+  wiringPiI2CReadBlock(m_fd, (char*)block, BLOCK_READ_SIZE);
 
+  reVal = block[0]<<8;
+  reVal+=(uint16_t) block[1];
+  m_model.analogValue0 = reVal;
   reVal = block[2]<<8;
   reVal+=(uint16_t) block[3];
-  m_model.analogValue0 = reVal;
+  m_model.analogValue1 = reVal;
   reVal = block[4]<<8;
   reVal+=(uint16_t) block[5];
-  m_model.analogValue1 = reVal;
+  m_model.analogValue2 = reVal;
   reVal = block[6]<<8;
   reVal+=(uint16_t) block[7];
-  m_model.analogValue2 = reVal;
-  reVal = block[8]<<8;
-  reVal+=(uint16_t) block[9];
   m_model.analogValue3 = reVal;
 }
 
 uint8_t AR_UNO::readAddress(){
-
-  uint8_t block[40];
-	wiringPiI2CReadBlock(m_fd,block);
-	return block[10];
+	uint8_t block[BLOCK_READ_SIZE];
+	wiringPiI2CReadBlock(m_fd,(char*)block, BLOCK_READ_SIZE);
+	return block[BLOCK_I2C_ADDRESS_LOC];
 }
 
 

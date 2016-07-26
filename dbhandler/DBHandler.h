@@ -6,7 +6,7 @@
 #include <string>
 #include <vector>
 #include <sqlite3.h>
-#include "logger/Logger.h"
+#include "SystemServices/Logger.h"
 
 #include "libs/json/src/json.hpp"
 using Json = nlohmann::json;
@@ -112,6 +112,8 @@ public:
 	void deleteRow(std::string table, std::string id);
 
 	bool getWaypointFromTable(WaypointModel &waypointModel, bool max);
+
+	bool getWaypointValues(int& id, float& longitude, float& latitude, int& declination, int& radius);
 
 	bool insert(std::string table, std::string fields, std::string values);
 

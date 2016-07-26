@@ -38,13 +38,18 @@ JSON = 					libs/json
 
 # Sources
 
+CORE =					MessageBus.cpp ActiveNode.cpp
+
+
+NODES =					Nodes/MessageLoggerNode.cpp Nodes/CV7Node.cpp Nodes/HMC6343Node.cpp Nodes/GPSDNode.cpp Nodes/ActuatorNode.cpp  Nodes/ArduinoNode.cpp \
+							Nodes/VesselStateNode.cpp Nodes/WaypointNode.cpp Nodes/HTTPSyncNode.cpp
+
+
+SYSTEM_SERVICES =		SystemServices/MaestroController.cpp SystemServices/Logger.cpp
+
 XBEE = 					xBee/xBeeSync.cpp xBee/xBee.cpp
 
-BEHAVIOURCLASS = 	behaviourclass/RoutingBehaviour.cpp  behaviourclass/WaypointBehaviour.cpp behaviourclass/LineFollowBehaviour.cpp
-
-ANALOGARDUINO = 		AnalogArduino/AnalogArduino.cpp AnalogArduino/MockAnalogArduino.cpp AnalogArduino/AR_UNO.cpp AnalogArduino/myWiringI2C.cpp
-
-COMPASS = 				Compass/Compass.cpp Compass/MockCompass.cpp Compass/HMC6343.cpp
+BEHAVIOURCLASS = 		behaviourclass/RoutingBehaviour.cpp  behaviourclass/WaypointBehaviour.cpp behaviourclass/LineFollowBehaviour.cpp
 
 I2CCONTROLLER = 		i2ccontroller/I2CController.cpp
 
@@ -56,14 +61,6 @@ DB = 					dbhandler/DBHandler.cpp
 
 COMMAND = 				ruddercommand/RudderCommand.cpp sailcommand/SailCommand.cpp
 
-MAESTRO = 				servocontroller/MaestroController.cpp servocontroller/MockMaestroController.cpp servocontroller/ServoObject.cpp servocontroller/SensorObject.cpp servocontroller/MockServoObject.cpp
-
-CV7 = 					CV7/Windsensor.cpp CV7/MockWindsensor.cpp CV7/UtilityLibrary.cpp CV7/CV7.cpp
-
-GPS = 					gps/GPSReader.cpp gps/MockGPSReader.cpp
-
-HTTP = 					httpsync/HTTPSync.cpp
-
 XML_LOG = 				xmlparser/pugi/pugixml.cpp xmlparser/src/xml_log.cpp
 
 THREAD = 				thread/SystemState.cpp thread/ExternalCommand.cpp thread/ThreadRAII.cpp
@@ -74,8 +71,8 @@ WINDVANECONTROLLER = 	windvanecontroller/WindVaneController.cpp
 
 SRC_MAIN = main.cpp
 
-SRC = 	GPSupdater.cpp SailingRobot.cpp WindsensorController.cpp logger/Logger.cpp utility/Utility.cpp utility/Timer.cpp $(XBEE) \
-		$(ANALOGARDUINO) $(COMPASS) $(I2CCONTROLLER) $(POSITION) $(COURSE) $(DB) $(COMMAND) $(MAESTRO) $(CV7) $(GPS) $(HTTP) \
+SRC = 	utility/Utility.cpp utility/Timer.cpp utility/SysClock.cpp $(SYSTEM_SERVICES) $(XBEE) \
+		$(CORE) $(NODES) $(I2CCONTROLLER) $(POSITION) $(COURSE) $(DB) $(COMMAND) $(GPS) \
 		$(XML_LOG) $(THREAD) $(WAYPOINTROUTING) $(WINDVANECONTROLLER) $(BEHAVIOURCLASS)
 
 #SOURCES = $(addprefix src/, $(SRC))

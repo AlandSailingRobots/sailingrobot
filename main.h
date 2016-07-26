@@ -15,17 +15,16 @@
 #include "GPSupdater.h"
 #include "WindsensorController.h"
 #include "thread/ThreadRAII.h"
-#include "logger/Logger.h"
+#include "SystemServices/Logger.h"
 #include "httpsync/HTTPSync.h"
 #include "i2ccontroller/I2CController.h"
 
 GPSupdater* gps_handle;
 std::unique_ptr<WindsensorController> windsensor_handle;
 HTTPSync* httpsync_handle;
-std::unique_ptr<I2CController> i2cController_handle;
 
 std::unique_ptr<ThreadRAII> windsensor_thread;
 std::unique_ptr<ThreadRAII> httpsync_thread;
-std::unique_ptr<ThreadRAII> i2cController_thread;
+
 
 #endif /* MAIN_H_ */
