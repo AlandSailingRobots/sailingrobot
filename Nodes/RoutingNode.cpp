@@ -19,13 +19,13 @@
 #define DEFAULT_TWD_BUFFERSIZE 200
 
 RoutingNode::RoutingNode(MessageBus& msgBus, DBHandler& db)
-:  Node(NodeID::SailingLogic, msgBus),   
-    m_nextWaypointLon(0), 
+:  Node(NodeID::SailingLogic, msgBus),
+    m_nextWaypointLon(0),
     m_nextWaypointLat(0),
     m_nextWaypointDeclination(0),
     m_nextWaypointRadius(0),
     m_db(db),
-    m_waypointRouting(m_nextWaypointLon, m_nextWaypointLat, m_nextWaypointRadius,      
+    m_waypointRouting(m_nextWaypointLon, m_nextWaypointLat, m_nextWaypointRadius,
         atof(m_db.retrieveCell("waypoint_routing_config", "1", "radius_ratio").c_str()),
         atof(m_db.retrieveCell("course_calculation_config", "1", "tack_angle").c_str()),
         atof(m_db.retrieveCell("course_calculation_config", "1", "tack_max_angle").c_str()),
@@ -84,7 +84,7 @@ void RoutingNode::calculateActuatorPos(VesselStateMsg* msg)
 
     int heading = getHeading(msg->gpsHeading(), msg->compassHeading(), msg->speed(), false, false);
     double trueWindDirection = Utility::getTrueWindDirection(msg->windDir(), msg->windSpeed(), msg->speed(), msg->compassHeading(), twdBuffer, twdBufferMaxSize);
-    
+
     double rudderCommand, sailCommand;
 
     m_waypointRouting.getCommands(rudderCommand, sailCommand, msg->longitude(), msg->latitude(), m_nextWaypointRadius,
@@ -146,13 +146,13 @@ int RoutingNode::getMergedHeading(int gpsHeading, int compassHeading, bool incre
 	return returnValue;
 }
 
-void RoutingNode::setupRudderCommand() 
+void RoutingNode::setupRudderCommand()
 {
 	m_rudderCommand.setCommandValues(m_db.retrieveCellAsInt("rudder_command_config", "1","extreme_command"),
 	        m_db.retrieveCellAsInt("rudder_command_config", "1", "midship_command"));
 }
 
-void RoutingNode::setupSailCommand() 
+void RoutingNode::setupSailCommand()
 {
 	m_sailCommand.setCommandValues( m_db.retrieveCellAsInt("sail_command_config", "1", "close_reach_command"),
 	        m_db.retrieveCellAsInt("sail_command_config", "1", "run_command"));

@@ -77,7 +77,7 @@ void CV7Node::WindSensorThread(void* nodePtr)
 {
 	CV7Node* node = (CV7Node*)(nodePtr);
 
-	const int DATA_BUFFER_SIZE = 30;
+	const int DATA_BUFFER_SIZE = 1;
 	const int NON_BREAKING_SPACE = 255;
 	const int BUFF_SIZE = 256;
 	const short MAX_NO_DATA_ERROR_COUNT = 100; // 10 seconds of no data
@@ -160,7 +160,7 @@ void CV7Node::WindSensorThread(void* nodePtr)
 				node->m_MeanWindSpeed = Utility::mean(windSpeedData);
 
 				// Send a wind sensor message out
-				WindDataMsg* windData = new WindDataMsg(node->m_MeanWindDir, node->m_MeanWindTemp, node->m_MeanWindSpeed);
+				WindDataMsg* windData = new WindDataMsg(node->m_MeanWindDir, node->m_MeanWindSpeed, node->m_MeanWindTemp);
 				node->m_MsgBus.sendMessage(windData);
 			}
 		}

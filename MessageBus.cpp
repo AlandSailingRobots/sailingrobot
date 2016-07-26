@@ -82,7 +82,7 @@ void MessageBus::run()
 			std::queue<Message*>* tmpPtr;
 
 			m_FrontQueueMutex.lock();
-			
+
 			tmpPtr = m_FrontMessages;
 			m_FrontMessages = m_BackMessages;
 

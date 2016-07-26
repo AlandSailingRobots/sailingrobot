@@ -40,10 +40,8 @@ JSON = 					libs/json
 
 CORE =					MessageBus.cpp ActiveNode.cpp
 
-
 NODES =					Nodes/MessageLoggerNode.cpp Nodes/CV7Node.cpp Nodes/HMC6343Node.cpp Nodes/GPSDNode.cpp Nodes/ActuatorNode.cpp  Nodes/ArduinoNode.cpp \
-							Nodes/VesselStateNode.cpp Nodes/WaypointNode.cpp Nodes/HTTPSyncNode.cpp Nodes/RoutingNode.cpp Nodes/LineFollowNode.cpp
-
+	Nodes/VesselStateNode.cpp Nodes/WaypointNode.cpp Nodes/HTTPSyncNode.cpp Nodes/RoutingNode.cpp Nodes/LineFollowNode.cpp
 SYSTEM_SERVICES =		SystemServices/MaestroController.cpp
 
 XBEE = 					xBee/xBeeSync.cpp xBee/xBee.cpp
@@ -71,13 +69,9 @@ WINDVANECONTROLLER = 	windvanecontroller/WindVaneController.cpp
 SRC_MAIN = main.cpp
 
 SRC = 	logger/Logger.cpp utility/Utility.cpp utility/Timer.cpp $(SYSTEM_SERVICES) $(XBEE) \
-<<<<<<< HEAD
 		$(CORE) $(NODES) $(I2CCONTROLLER) $(POSITION) $(COURSE) $(DB) $(COMMAND) $(GPS) \
-		$(XML_LOG) $(THREAD) $(WAYPOINTROUTING) $(WINDVANECONTROLLER) $(BEHAVIOURCLASS)
-=======
-		$(CORE) $(NODES) $(I2CCONTROLLER) $(POSITION) $(COURSE) $(DB) $(COMMAND) $(GPS) $(HTTP) \
 		$(XML_LOG) $(THREAD) $(WAYPOINTROUTING) $(WINDVANECONTROLLER)
->>>>>>> d638810b77048d1662fdb4ac9b4d291a1c5089a9
+		
 
 #SOURCES = $(addprefix src/, $(SRC))
 

@@ -91,7 +91,7 @@ void GPSDNode::GPSThreadFunc(void* nodePtr)
 		// Get status flags
 		unsigned long int flags = newData->set;
 
-		bool gps_online = flags & ONLINE_SET;
+		bool gps_online =  (flags & ( 1 << 4 )) >> 4; //flags & ONLINE_SET;
 		bool gps_hasFix = (newData->status > 0);
 		double unixTime = 0;
 
@@ -128,7 +128,7 @@ void GPSDNode::GPSThreadFunc(void* nodePtr)
 			mode = static_cast<GPSMode>(newData->fix.mode);
 		}
 
-		GPSDataMsg* msg = new GPSDataMsg(gps_hasFix, gps_online, unixTime, node->m_Lat, node->m_Lon, node->m_Speed, node->m_Heading, satCount, mode);
+		GPSDataMsg* msg = new GPSDataMsg(gps_hasFix, gps_online, node->m_Lat, node->m_Lon, unixTime, node->m_Speed, node->m_Heading, satCount, mode);
 		node->m_MsgBus.sendMessage(msg);
 	}
 }
