@@ -15,7 +15,7 @@
 #include "GPSupdater.h"
 #include "WindsensorController.h"
 #include "thread/ThreadRAII.h"
-#include "logger/Logger.h"
+#include "SystemServices/Logger.h"
 #include "httpsync/HTTPSync.h"
 #include "i2ccontroller/I2CController.h"
 

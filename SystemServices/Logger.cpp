@@ -1,54 +1,50 @@
-/*
- * Logger.cpp
+ /****************************************************************************************
  *
- *  Created on: Apr 29, 2015
- *      Author: sailbot
- */
+ * File:
+ * 		Logger.cpp
+ *
+ * Purpose:
+ *		Provides functions for logging data to file and console. Support for the WRSC2016
+ *		format is also included, see Notes.
+ *
+ *
+ * Developer Notes:
+ *		WRSC2016 Logging:
+ *			The WRSC 2016 logging format is as follows:
+ *
+ *				“hhmmssdd	Lat*10^7		Lon*10^7”
+ *
+ *			The GPS coordinates need to be in the format of degress in decimals, e.g:
+ *			60.3456. When WRSC logging is enabled a separate log file is generated
+ *			containing only this data and is located alongside the program.
+ *
+ ***************************************************************************************/
+
 
 #include "Logger.h"
 #include <iostream>
 #include "utility/SysClock.h"
 
+
 #define MAX_LOG_SIZE	256
 #define MAX_MSG_BUFFER 100
 
-Logger* Logger::m_instance = NULL;
+std::string 				Logger::m_LogFilePath;
+std::ofstream 				Logger::m_LogFile;
+std::vector<std::string> 	Logger::m_LogBuffer;
+std::mutex 					Logger::m_Mutex;
 
+#ifdef ENABLE_WRSC_LOGGING
+static std::ofstream 			m_LogFileWRSC;
+#endif
 
-Logger::Logger() 
-	:m_LogFilePath()
-{
-	
-}
-
-Logger::~Logger() 
-{
-	if(m_LogFile != NULL)
-	{
-		m_LogFile->close();
-	}
-
-	#ifdef ENABLE_WRSC_LOGGING
-	if(m_LogFileWRSC != NULL)
-	{
-		m_LogFileWRSC->close();
-	}
-	#endif
-}
 
 bool Logger::init(const char* filename)
 {
-	if(m_instance == NULL)
+	if(not createLogFiles(filename))
 	{
-		m_instance = new Logger();
-
-		if(not m_instance->createLogFiles(filename))
-		{
-			std::cout << "[" << SysClock::timeStampStr().c_str() << "] Failed to create log files\n";
-			delete m_instance;
-			m_instance = NULL;
-			return false;
-		}
+		std::cout << "[" << SysClock::timeStampStr().c_str() << "] Failed to create log files\n";
+		return false;
 	}
 
 	// Assumes the logger is already setup and going
@@ -57,19 +53,26 @@ bool Logger::init(const char* filename)
 
 void Logger::shutdown()
 {
-	if(m_instance != NULL)
+	if(m_LogFile.is_open())
 	{
-		delete m_instance;
+		m_LogFile.close();
 	}
+
+	#ifdef ENABLE_WRSC_LOGGING
+	if(m_LogFileWRSC.is_open())
+	{
+		m_LogFileWRSC.close();
+	}
+	#endif
 }
 
 void Logger::log(std::string message)
 {
 	m_Mutex.lock();
-	if(m_LogFile->is_open())
+	if(m_LogFile.is_open())
 	{
-		(*m_LogFile) << message.c_str();
-		m_LogFile->flush();
+		m_LogFile << message.c_str();
+		m_LogFile.flush();
 	}
 	else
 	{
@@ -96,14 +99,10 @@ void Logger::info(std::string message, ...)
 
     char buff[256];
 
-    snprintf(buff, 256, "[%s] <info>\t %s\n", SysClock::timeStampStr().c_str(), logBuffer);
+    snprintf(buff, 256, "[%s:%d] <info>\t %s\n", SysClock::timeStampStr().c_str(), SysClock::millis(), logBuffer);
 
     printf("%s", buff);
-
-    if(m_instance != NULL)
-    {
-    	m_instance->log(buff);
-    }
+    log(buff);
 }
 
 void Logger::error(std::string message, ...)
@@ -117,13 +116,10 @@ void Logger::error(std::string message, ...)
 
     char buff[256];
 
-    snprintf(buff, 256, "[%s] <error>\t %s\n", SysClock::timeStampStr().c_str(), logBuffer);
+    snprintf(buff, 256, "[%s:%d] <error>\t %s\n", SysClock::timeStampStr().c_str(), SysClock::millis(), logBuffer);
 
     printf("%s", buff);
-    if(m_instance != NULL)
-    {
-    	m_instance->log(buff);
-    }
+    log(buff);
 }
 
 void Logger::warning(std::string message, ...)
@@ -137,33 +133,28 @@ void Logger::warning(std::string message, ...)
 
     char buff[256];
 
-    snprintf(buff, 256, "[%s] <warning>\t %s\n", SysClock::timeStampStr().c_str(), logBuffer);
+    snprintf(buff, 256, "[%s:%d] <warning>\t %s\n", SysClock::timeStampStr().c_str(), SysClock::millis(), logBuffer);
 
     printf("%s", buff);
-    if(m_instance != NULL)
-    {
-    	m_instance->log(buff);
-    };
+    log(buff);
 }
 
-void Logger::logWRSC(const GPSModel* const gps)
+void Logger::logWRSC(double latitude, double longitude)
 {
 	#ifdef ENABLE_WRSC_LOGGING
 	// Flag so that we only issue one error about the log file not existing
 	static bool errorMsgUsge = false;
 
 	m_Mutex.lock();
-	if(m_instance != NULL)
+
+	if(m_LogFileWRSC.is_open())
 	{
-		if(m_instance->m_LogFileWRSC->is_open())
-		{
-			char logBuffer[MAX_LOG_SIZE];
-			snprintf(logBuffer, MAX_LOG_SIZE, "%s%d, %d, %d\n", SysClock::hh_mm_ss().c_str(), SysClock::day(),
-																(int)(gps->positionModel.latitude*10000000), 
-																(int)(gps->positionModel.longitude*10000000));
-			*(m_instance->m_LogFileWRSC) << logBuffer;
-			m_instance->m_LogFileWRSC->flush();
-		}
+		char logBuffer[MAX_LOG_SIZE];
+		snprintf(logBuffer, MAX_LOG_SIZE, "%s%d, %d, %d\n", SysClock::hh_mm_ss().c_str(), SysClock::day(),
+															(int)(gps->positionModel.latitude*10000000),
+															(int)(gps->positionModel.longitude*10000000));
+		m_LogFileWRSC << logBuffer;
+		m_LogFileWRSC.flush();
 	}
 	else if(not errorMsgUsge)
 	{
@@ -187,12 +178,12 @@ bool Logger::createLogFiles(const char* filename)
 		filePath = filename;
 	}
 
-	m_LogFile = new std::ofstream(filePath, std::ios::out | std::ios::trunc);
+	m_LogFile.open(filePath, std::ios::out | std::ios::trunc);
 
 	#ifdef ENABLE_WRSC_LOGGING
-		m_LogFileWRSC = new std::ofstream(DEFAULT_LOG_NAME_WRSC, std::ios::out | std::ios::trunc);
+		m_LogFileWRSC.open(DEFAULT_LOG_NAME_WRSC, std::ios::out | std::ios::trunc);
 
-		if(m_LogFile->is_open() && m_LogFileWRSC->is_open())
+		if(m_LogFile.is_open() && m_LogFileWRSC.is_open())
 		{
 			Logger::info("Log files %s, %s have been created", filePath.c_str(), DEFAULT_LOG_NAME_WRSC);
 			writeBufferedLogs();
@@ -201,11 +192,9 @@ bool Logger::createLogFiles(const char* filename)
 		else
 		{
 			Logger::info("Failed to create Log files %s, %s", filePath.c_str(), DEFAULT_LOG_NAME_WRSC);
-			delete m_LogFile;
-			delete m_LogFileWRSC;
 		}
 	#else
-		if(m_LogFile->is_open())
+		if(m_LogFile.is_open())
 		{
 			Logger::info("Log file %s has been created", filePath.c_str());
 			writeBufferedLogs();
@@ -214,7 +203,6 @@ bool Logger::createLogFiles(const char* filename)
 		else
 		{
 			Logger::info("Failed to create Log file %s", filePath.c_str());
-			delete m_LogFile;
 		}
 	#endif
 
@@ -225,7 +213,7 @@ void Logger::writeBufferedLogs()
 {
 	for(std::string log : m_LogBuffer)
 	{
-		*m_LogFile << log.c_str();
-	} 
-	m_LogFile->flush();
+		m_LogFile << log.c_str();
+	}
+	m_LogFile.flush();
 }

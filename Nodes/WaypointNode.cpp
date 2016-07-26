@@ -13,7 +13,7 @@
 
 #include "WaypointNode.h"
 #include "Messages/WaypointDataMsg.h"
-#include "logger/Logger.h"
+#include "SystemServices/Logger.h"
 #include <string>
 #include <vector>
 

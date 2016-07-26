@@ -18,7 +18,7 @@
 #include "thread/ExternalCommand.h"
 #include "thread/SystemState.h"
 
-#include "logger/Logger.h"
+#include "SystemServices/Logger.h"
 
 #include "waypointrouting/WaypointRouting.h"
 #include "windvanecontroller/WindVaneController.h"

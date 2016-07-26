@@ -12,7 +12,7 @@
  ***************************************************************************************/
 
 #include "MessageLoggerNode.h"
-#include "logger/Logger.h"
+#include "SystemServices/Logger.h"
 
 
 //TODO - Jordan: File logging
