@@ -10,6 +10,7 @@
 #include "Nodes/ArduinoNode.h"
 #include "Nodes/WaypointNode.h"
 #include "Nodes/VesselStateNode.h"
+#include "Nodes/HTTPSyncNode.h"
 #include "Messages/DataRequestMsg.h"
 #include "dbhandler/DBHandler.h"
 #include "SystemServices/MaestroController.h"
@@ -52,10 +53,10 @@ void initialiseNode(Node& node, const char* nodeName, NodeImportance importance)
 /// Entry point, can accept one argument containing a relative path to the database.
 ///
 ///----------------------------------------------------------------------------------
-int main(int argc, char *argv[]) 
+int main(int argc, char *argv[])
 {
 	// This is for eclipse development so the output is constantly pumped out.
-	setbuf(stdout, NULL); 
+	setbuf(stdout, NULL);
 
 	// Database Path
 	std::string db_path;
@@ -100,6 +101,7 @@ int main(int argc, char *argv[])
 	ArduinoNode arduino(messageBus);
 	VesselStateNode vessel(messageBus);
 	WaypointNode waypoint(messageBus, dbHandler);
+	HTTPSyncNode httpsync(messageBus, &dbHandler, 0, false);
 
 	int channel = dbHandler.retrieveCellAsInt("sail_servo_config", "1", "channel");
 	int speed = dbHandler.retrieveCellAsInt("sail_servo_config", "1", "speed");
@@ -127,6 +129,7 @@ int main(int argc, char *argv[])
 	initialiseNode(arduino, "Arduino Node", NodeImportance::NOT_CRITICAL);
 	initialiseNode(vessel, "Vessel State Node", NodeImportance::CRITICAL);
 	initialiseNode(waypoint, "Waypoint Node", NodeImportance::CRITICAL);
+	initialiseNode(httpsync, "Httpsync Node", NodeImportance::NOT_CRITICAL);
 
 	// Start active nodes
 	windSensor.start();
@@ -134,6 +137,7 @@ int main(int argc, char *argv[])
 	gpsd.start();
 	arduino.start();
 	vessel.start();
+	httpsync.start();
 
 	// NOTE - Jordan: Just to ensure messages are following through the system
 	DataRequestMsg* dataRequest = new DataRequestMsg(NodeID::MessageLogger);
@@ -182,7 +186,7 @@ static void threadWindsensor() {
 
 int main(int argc, char *argv[]) {
 	// This is for eclipse development so the output is constantly pumped out.
-	setbuf(stdout, NULL); 
+	setbuf(stdout, NULL);
 
 	std::string path, db_name, errorLog;
 	if (argc < 2) {
@@ -236,7 +240,7 @@ int main(int argc, char *argv[]) {
 	bool removeLogs = db.retrieveCellAsInt("httpsync_config", "1", "remove_logs");
 
 	httpsync_handle = new HTTPSync( &db, http_delay, removeLogs );
-	
+
     SailingRobot sr_handle(&externalCommand, &systemstate, &db, httpsync_handle);
 
 	GPSupdater gps_updater(&systemstate,mockGPS);
@@ -265,13 +269,13 @@ int main(int argc, char *argv[]) {
 		double xBee_loopTime = stod(db.retrieveCell("xbee_config", "1", "loop_time"));
 
 		xbee_handle = new xBeeSync(&externalCommand, &systemstate, &db, xBee_sendLogs, xBee_sending, xBee_receiving,xBee_loopTime);
-		
+
 		if(xbee_handle->init())
 		{
 			// Start xBeeSync thread
 			std::unique_ptr<ThreadRAII> xbee_sync_thread;
 
-			if (xBee_sending || xBee_receiving) 
+			if (xBee_sending || xBee_receiving)
 			{
 				xbee_sync_thread = std::unique_ptr<ThreadRAII>(new ThreadRAII(std::thread(threadXBeeSyncRun), ThreadRAII::DtorAction::detach));
 			}
@@ -309,7 +313,7 @@ int main(int argc, char *argv[]) {
 		) );
 
 		sr_handle.run();
-	} 
+	}
 	catch (const char * e) {
 		printf("ERROR[%s]\n\n",e);
 		return 1;
