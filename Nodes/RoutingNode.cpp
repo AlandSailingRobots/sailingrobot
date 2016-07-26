@@ -84,6 +84,7 @@ void RoutingNode::calculateActuatorPos(VesselStateMsg* msg)
     m_waypointRouting.getCommands(rudderCommand, sailCommand, msg->longitude(), msg->latitude(), m_nextWaypointRadius,
 	trueWindDirection, heading, msg->gpsHeading(), msg->speed(), msg->compassHeading(), msg->windDir());
 
+    Logger::info("RudderCommand: %f      SailCommand: %f", rudderCommand, sailCommand);
     rudderCommand = m_rudderCommand.getCommand(rudderCommand);
 	sailCommand = m_sailCommand.getCommand(sailCommand);
 
