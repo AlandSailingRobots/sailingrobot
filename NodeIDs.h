@@ -31,7 +31,8 @@ enum class NodeID {
 	RudderActuator,
 	Arduino,
 	VesselState,
-	Waypoint
+	Waypoint,
+	SailingLogic
 };
 
 inline std::string nodeToString(NodeID id)
@@ -60,6 +61,8 @@ inline std::string nodeToString(NodeID id)
 		return "VesselState";
 	case NodeID::Waypoint:
 		return "Waypoint";
+	case NodeID::SailingLogic:
+		return "SailingLogic";
 	}
 	return "";
 }

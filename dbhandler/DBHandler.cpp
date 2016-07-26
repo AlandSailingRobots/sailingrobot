@@ -79,7 +79,9 @@ void DBHandler::getDataAsJson(std::string select, std::string table, std::string
 }
 
 void DBHandler::insertDataLog(
-	SystemStateModel systemState,
+	VesselStateMsg* msg,
+	double rudder,
+	double sail,
 	int sailServoPosition,
 	int rudderServoPosition,
 	double courseCalculationDistanceToWaypoint,
@@ -100,19 +102,18 @@ void DBHandler::insertDataLog(
 
 
 		arduinoValues << std::setprecision(10)
-			<< systemState.arduinoModel.analogValue0 << ", "
-			<< systemState.arduinoModel.analogValue1 << ", "
-			<< systemState.arduinoModel.analogValue2 << ", "
-			<< systemState.arduinoModel.analogValue3;
-
+			<< msg->arduinoPressure() << ", "
+			<< msg->arduinoRudder() << ", "
+			<< msg->arduinoSheet() << ", "
+			<< msg->arduinoBattery();
 
 		gpsValues << std::setprecision(10) << "'"
-			<< systemState.gpsModel.timestamp << "', "
-			<< systemState.gpsModel.positionModel.latitude << ", "
-			<< systemState.gpsModel.positionModel.longitude << ", "
-			<< systemState.gpsModel.speed << ", "
-			<< systemState.gpsModel.heading << ", "
-			<< systemState.gpsModel.satellitesUsed << ", "
+			<< "ADD GPS TIME" << "', "  //TODO - Oliver: Get GPS timestamp
+			<< msg->latitude() << ", "
+			<< msg->longitude() << ", "
+			<< msg->speed() << ", "
+			<< msg->gpsHeading() << ", "
+			<< msg->gpsSatellite() << ", "
 			<< routeStarted;
 
 		courseCalculationValues << std::setprecision(10)
@@ -123,16 +124,16 @@ void DBHandler::insertDataLog(
 			<< courseCalculationGoingStarboard;
 
 		compassModelValues << std::setprecision(10)
-			<< systemState.compassModel.heading << ", "
-			<< systemState.compassModel.pitch << ", "
-			<< systemState.compassModel.roll;
+			<< msg->compassHeading() << ", "
+			<< msg->compassPitch() << ", "
+			<< msg->compassRoll();
 
 		windsensorValues << std::setprecision(10)
-			<< systemState.windsensorModel.direction << ", "
-			<< systemState.windsensorModel.speed << ", "
-			<< systemState.windsensorModel.temperature;
+			<< msg->windDir() << ", "
+			<< msg->windSpeed() << ", "
+			<< msg->windTemp();
 
-		printf("GPS GMT + 3: %s GPS UTC: %s\n",systemState.gpsModel.timestamp.c_str(),systemState.gpsModel.utc_timestamp.c_str());
+		printf("GPS GMT + 3: %s GPS UTC: %s\n","ADD GPS TIME","ADD GPS UTC_TIME"); //TODO - Oliver: Get GPS timestamp
 		int arduinoId = insertLog("arduino_datalogs",arduinoValues.str());
 		int windsensorId = insertLog("windsensor_datalogs",windsensorValues.str());
 		int gpsId = insertLog("gps_datalogs",gpsValues.str());
@@ -145,8 +146,8 @@ void DBHandler::insertDataLog(
 			<< arduinoId << ", "
 			<< windsensorId << ", "
 			<< compassModelId << ", "
-			<< systemState.sail << ", "
-			<< systemState.rudder << ", "
+			<< sail << ", "
+			<< rudder << ", "
 			<< sailServoPosition << ", "
 			<< rudderServoPosition << ", "
 			<< waypointId << ", "
@@ -766,32 +767,50 @@ bool DBHandler::getWaypointFromTable(WaypointModel &waypointModel, bool max){
 	return true;
 }
 
-bool DBHandler::getWaypointValues(int& id, float& longitude, float& latitude, int& declination, int& radius)
+bool DBHandler::getWaypointValues(int& nextId, double& nextLongitude, double& nextLatitude, int& nextDeclination, int& nextRadius,
+                        int& prevId, double& prevLongitude, double& prevLatitude, int& prevDeclination, int& prevRadius)
 {
-	int rows, columns;
+	int rows, columns, rows2, columns2;
     std::vector<std::string> results;
+	std::vector<std::string> results2;
     try 
     {
         results = retrieveFromTable("SELECT MIN(id) FROM waypoints WHERE harvested = 0;", rows, columns);
-    }
-    
+		results2 = retrieveFromTable("SELECT MAX(id) FROM waypoints WHERE harvested = 1;", rows2, columns2);
+    }    
     catch(const char* error)
     {
         Logger::error("%s Error: %s", __PRETTY_FUNCTION__, error);
         return false;
     }
+
     if (rows * columns < 1 || results[1] == "\0") {
         return false;
     }
+	//Do not give values to previous waypoint if no value found in database
+	bool foundPrevWaypoints = true;
+    if (rows2 * columns2 < 1 || results2[1] == "\0") {
+		Logger::info("No previously harvested waypoint found, values set as 0");
+		foundPrevWaypoints = false;
+    }
 
+	//Set values to next waypoint
+    nextId = stoi(results[1]);
 
-    id = stoi(results[1]);
-
-    longitude = atof(retrieveCell("waypoints", results[1], "longitude").c_str());
-    latitude = atof(retrieveCell("waypoints", results[1], "latitude").c_str());
-    radius = retrieveCellAsInt("waypoints", results[1], "radius");
-    declination = retrieveCellAsInt("waypoints", results[1], "declination");
+    nextLongitude = atof(retrieveCell("waypoints", results[1], "longitude").c_str());
+    nextLatitude = atof(retrieveCell("waypoints", results[1], "latitude").c_str());
+    nextDeclination = retrieveCellAsInt("waypoints", results[1], "declination");
+    nextRadius = retrieveCellAsInt("waypoints", results[1], "radius");
     
+	if(foundPrevWaypoints) //Set values to next waypoint if harvested waypoint found
+	{
+		prevId = stoi(results[1]);
+
+		prevLongitude = atof(retrieveCell("waypoints", results2[1], "longitude").c_str());
+		prevLatitude = atof(retrieveCell("waypoints", results2[1], "latitude").c_str());
+		prevDeclination = retrieveCellAsInt("waypoints", results2[1], "declination");
+		prevRadius = retrieveCellAsInt("waypoints", results2[1], "radius");
+	}
 
     return true;
 }

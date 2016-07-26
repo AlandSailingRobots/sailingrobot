@@ -19,7 +19,7 @@
 class WindDataMsg : public Message {
 public:
 	WindDataMsg(NodeID destinationID, NodeID sourceID, float windDir, float windSpeed, float windTemp)
-		:Message(MessageType::WindData, sourceID, destinationID), 
+		:Message(MessageType::WindData, sourceID, destinationID),
 		m_WindDir(windDir), m_WindSpeed(windSpeed), m_WindTemp(windTemp)
 	{ }
 
@@ -37,5 +37,5 @@ public:
 private:
 	float 	m_WindDir;
 	float 	m_WindSpeed;
-	float	m_WindTemp;
+	float	  m_WindTemp;
 };
