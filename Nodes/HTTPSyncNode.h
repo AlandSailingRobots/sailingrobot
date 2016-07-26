@@ -32,7 +32,21 @@ class HTTPSyncNode : public ActiveNode{
 		/// (Example of cause: xbeeSync functions)
 		///----------------------------------------------------------------------------------
         void processMessage(const Message* message);
+		///----------------------------------------------------------------------------------
+		/// Push functions: sends local data to server using curl
+		///----------------------------------------------------------------------------------
+        bool pushDatalogs();
+		bool pushWaypoints();
+		bool pushConfigs();
+		///----------------------------------------------------------------------------------
+		/// Updates local waypoints using new server data if any
+		///----------------------------------------------------------------------------------
+        bool getWaypointsFromServer();
 
+		///----------------------------------------------------------------------------------
+		/// Same as above but for configuration data
+		///----------------------------------------------------------------------------------
+        bool getConfigsFromServer();
 
 	private:
 
@@ -42,25 +56,12 @@ class HTTPSyncNode : public ActiveNode{
 		///----------------------------------------------------------------------------------
 		bool performCURLCall(std::string data, std::string call, std::string& response);
 		
-		///----------------------------------------------------------------------------------
-		/// Updates local waypoints using new server data if any
-		///----------------------------------------------------------------------------------
-        void getWaypointsFromServer();
 
-		///----------------------------------------------------------------------------------
-		/// Same as above but for configuration data
-		///----------------------------------------------------------------------------------
-        void getConfigsFromServer();
 
         bool checkIfNewConfigs();
 		bool checkIfNewWaypoints();
 
-		///----------------------------------------------------------------------------------
-		/// Push functions: sends local data to server using curl
-		///----------------------------------------------------------------------------------
-        void pushDatalogs();
-		void pushWaypoints();
-		void pushConfigs();
+
 
 		///----------------------------------------------------------------------------------
 		/// Node thread: Calls all syncing functions while running
