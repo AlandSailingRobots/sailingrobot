@@ -7,6 +7,7 @@ class CourseMath {
 public:
 	double calculateBTW(PositionModel boat, PositionModel waypoint) const;
 	double calculateDTW(PositionModel boat, PositionModel waypoint) const;
+	double calculateDTW(float boatLon, float boatLat, float waypointLon, float waypointLat) const;
 };
 
 #endif

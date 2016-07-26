@@ -27,5 +27,6 @@ enum class MessageType {
 	LocalWaypointChange,
 	ActuatorPosition,
 	ArduinoData,
-	VesselState
+	VesselState,
+	WaypointData
 };
