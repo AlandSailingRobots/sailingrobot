@@ -7,6 +7,7 @@
 #include <vector>
 #include <sqlite3.h>
 #include "logger/Logger.h"
+#include "Messages/VesselStateMsg.h"
 
 #include "libs/json/src/json.hpp"
 using Json = nlohmann::json;
@@ -67,7 +68,9 @@ public:
 	int getRows(std::string table);
 
 	void insertDataLog(
-		SystemStateModel systemState,
+		VesselStateMsg* msg,
+		double rudder,
+		double sail,
 		int sailServoPosition,
 		int rudderServoPosition,
 		double courseCalculationDistanceToWaypoint,
@@ -113,7 +116,8 @@ public:
 
 	bool getWaypointFromTable(WaypointModel &waypointModel, bool max);
 
-	bool getWaypointValues(int& id, float& longitude, float& latitude, int& declination, int& radius);
+	bool getWaypointValues(int& nextId, double& nextLongitude, double& nextLatitude, int& nextDeclination, int& nextRadius,
+                        int& prevId, double& prevLongitude, double& prevLatitude, int& prevDeclination, int& prevRadius);
 
 	bool insert(std::string table, std::string fields, std::string values);
 

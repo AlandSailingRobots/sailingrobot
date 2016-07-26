@@ -11,6 +11,8 @@
 #include "Nodes/WaypointNode.h"
 #include "Nodes/VesselStateNode.h"
 #include "Nodes/HTTPSyncNode.h"
+#include "Nodes/RoutingNode.h"
+#include "Nodes/LineFollowNode.h"
 #include "Messages/DataRequestMsg.h"
 #include "dbhandler/DBHandler.h"
 #include "SystemServices/MaestroController.h"
@@ -102,6 +104,18 @@ int main(int argc, char *argv[])
 	VesselStateNode vessel(messageBus);
 	WaypointNode waypoint(messageBus, dbHandler);
 	HTTPSyncNode httpsync(messageBus, &dbHandler, 0, false);
+	Node* sailingLogic;
+
+
+	bool usingLineFollow = (bool)(dbHandler.retrieveCellAsInt("sailing_robot_config", "1", "line_follow"));
+	if(usingLineFollow)
+	{
+		sailingLogic = new LineFollowNode(messageBus, dbHandler);
+	}
+	else
+	{
+		sailingLogic = new RoutingNode(messageBus, dbHandler);
+	}
 
 	int channel = dbHandler.retrieveCellAsInt("sail_servo_config", "1", "channel");
 	int speed = dbHandler.retrieveCellAsInt("sail_servo_config", "1", "speed");
@@ -114,6 +128,7 @@ int main(int argc, char *argv[])
 	acceleration = dbHandler.retrieveCellAsInt("rudder_servo_config", "1", "acceleration");
 
 	ActuatorNode rudder(messageBus, NodeID::RudderActuator, channel, speed, acceleration);
+
 
 	// System services
 
@@ -130,6 +145,14 @@ int main(int argc, char *argv[])
 	initialiseNode(vessel, "Vessel State Node", NodeImportance::CRITICAL);
 	initialiseNode(waypoint, "Waypoint Node", NodeImportance::CRITICAL);
 	initialiseNode(httpsync, "Httpsync Node", NodeImportance::NOT_CRITICAL);
+	if(usingLineFollow)
+	{
+		initialiseNode(*sailingLogic, "LineFollow Node", NodeImportance::CRITICAL);
+	}
+	else
+	{
+		initialiseNode(*sailingLogic, "Routing Node", NodeImportance::CRITICAL);
+	}
 
 	// Start active nodes
 	windSensor.start();
@@ -145,8 +168,10 @@ int main(int argc, char *argv[])
 
 	Logger::info("Message bus started!");
 	messageBus.run();
+	delete sailingLogic;
 	exit(0);
 }
+
 
 
 // Purely for reference, remove once complete

@@ -51,7 +51,7 @@ public:
 	double unixTime() { return m_UnixTime; }
 	double speed() { return m_Speed; }
 	double heading() { return m_Heading; }
-	int satelliteCount() { return m_SatCount; }
+	int satellite() { return m_SatCount; }
 	GPSMode gpsMode() { return m_Mode; }
 
 private:

@@ -21,7 +21,7 @@
 
 
 GPSDNode::GPSDNode(MessageBus& msgBus)
-	: ActiveNode(NodeID::GPS, msgBus), m_Initialised(false), m_GpsConnection(0)
+	: ActiveNode(NodeID::GPS, msgBus), m_Initialised(false), m_GpsConnection(0), m_Lat(0), m_Lon(0), m_Speed(0), m_Heading(0)
 {
 
 }
@@ -95,35 +95,35 @@ void GPSDNode::GPSThreadFunc(void* nodePtr)
 		bool gps_hasFix = (newData->status > 0);
 		double unixTime = 0;
 
-		if(flags & TIME_SET)
+		//if(flags & TIME_SET)
 		{
 			unixTime = newData->fix.time;
 		}
 
-		if(flags & LATLON_SET)
+		//if(flags & LATLON_SET)
 		{
 			node->m_Lat = newData->fix.latitude;
 			node->m_Lon = newData->fix.longitude;
 		}
 
-		if(flags & SPEED_SET)
+		//if(flags & SPEED_SET)
 		{
 			node->m_Speed = newData->fix.speed;
 		}
 
-		if(flags & TRACK_SET)
+		// if(flags & TRACK_SET)
 		{
 			node->m_Heading = newData->fix.track;
 		}
 
 		int satCount = 0;
-		if(flags & SATELLITE_SET)
-		{
+		// if(flags & SATELLITE_SET)
+		// {
 			satCount = newData->satellites_used;
-		}
+		//}
 
 		GPSMode mode = GPSMode::NoUpdate;
-		if(flags & MODE_SET)
+		//if(flags & MODE_SET)
 		{
 			mode = static_cast<GPSMode>(newData->fix.mode);
 		}

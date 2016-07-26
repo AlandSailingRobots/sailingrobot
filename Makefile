@@ -42,11 +42,9 @@ CORE =					MessageBus.cpp ActiveNode.cpp
 
 
 NODES =					Nodes/MessageLoggerNode.cpp Nodes/CV7Node.cpp Nodes/HMC6343Node.cpp Nodes/GPSDNode.cpp Nodes/ActuatorNode.cpp  Nodes/ArduinoNode.cpp \
-							Nodes/VesselStateNode.cpp Nodes/WaypointNode.cpp Nodes/HTTPSyncNode.cpp
-
+							Nodes/VesselStateNode.cpp Nodes/WaypointNode.cpp Nodes/HTTPSyncNode.cpp Nodes/RoutingNode.cpp Nodes/LineFollowNode.cpp
 
 SYSTEM_SERVICES =		SystemServices/MaestroController.cpp
-
 
 XBEE = 					xBee/xBeeSync.cpp xBee/xBee.cpp
 
@@ -73,8 +71,13 @@ WINDVANECONTROLLER = 	windvanecontroller/WindVaneController.cpp
 SRC_MAIN = main.cpp
 
 SRC = 	logger/Logger.cpp utility/Utility.cpp utility/Timer.cpp $(SYSTEM_SERVICES) $(XBEE) \
+<<<<<<< HEAD
 		$(CORE) $(NODES) $(I2CCONTROLLER) $(POSITION) $(COURSE) $(DB) $(COMMAND) $(GPS) \
 		$(XML_LOG) $(THREAD) $(WAYPOINTROUTING) $(WINDVANECONTROLLER) $(BEHAVIOURCLASS)
+=======
+		$(CORE) $(NODES) $(I2CCONTROLLER) $(POSITION) $(COURSE) $(DB) $(COMMAND) $(GPS) $(HTTP) \
+		$(XML_LOG) $(THREAD) $(WAYPOINTROUTING) $(WINDVANECONTROLLER)
+>>>>>>> d638810b77048d1662fdb4ac9b4d291a1c5089a9
 
 #SOURCES = $(addprefix src/, $(SRC))
 
@@ -112,7 +115,7 @@ C_TOOLCHAIN = 0
 CC = arm-linux-gnueabihf-gcc
 CXX = arm-linux-gnueabihf-g++
 SIZE = arm-linux-gnueabihf-size
-else 
+else
 C_TOOLCHAIN = 1
 CC = gcc
 CXX = g++
@@ -163,7 +166,7 @@ $(BUILD_DIR)/%.o:$(SRC_DIR)/%.cpp
 	@mkdir -p $(dir $@)
 	@echo Compiling CPP File: $@
 	@$(CXX) -c $(CPPFLAGS) $(INC) -o ./$@ $< -DTOOLCHAIN=$(TOOLCHAIN) $(LIBS) $(LIBS_BOOST)
- 
+
  # Compile C files into the build folder
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
 	@mkdir -p $(dir $@)
@@ -176,7 +179,7 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
 
 stats:$(EXECUTABLE)
 	@echo Final executable size:
-	$(SIZE) $(EXECUTABLE) 
+	$(SIZE) $(EXECUTABLE)
 
 clean: clean_tests
 	@echo Removing existing object files and executable
