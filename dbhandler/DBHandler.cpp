@@ -770,13 +770,13 @@ bool DBHandler::getWaypointFromTable(WaypointModel &waypointModel, bool max){
 bool DBHandler::getWaypointValues(int& nextId, double& nextLongitude, double& nextLatitude, int& nextDeclination, int& nextRadius,
                         int& prevId, double& prevLongitude, double& prevLatitude, int& prevDeclination, int& prevRadius)
 {
-	int rows, columns;
+	int rows, columns, rows2, columns2;
     std::vector<std::string> results;
 	std::vector<std::string> results2;
     try 
     {
         results = retrieveFromTable("SELECT MIN(id) FROM waypoints WHERE harvested = 0;", rows, columns);
-		results2 = retrieveFromTable("SELECT MAX(id) FROM waypoints WHERE harvested = 1;", rows, columns);
+		results2 = retrieveFromTable("SELECT MAX(id) FROM waypoints WHERE harvested = 1;", rows2, columns2);
     }    
     catch(const char* error)
     {
@@ -789,7 +789,7 @@ bool DBHandler::getWaypointValues(int& nextId, double& nextLongitude, double& ne
     }
 	//Do not give values to previous waypoint if no value found in database
 	bool foundPrevWaypoints = true;
-    if (rows * columns < 1 || results2[1] == "\0") {
+    if (rows2 * columns2 < 1 || results2[1] == "\0") {
 		Logger::info("No previously harvested waypoint found, values set as 0");
 		foundPrevWaypoints = false;
     }
