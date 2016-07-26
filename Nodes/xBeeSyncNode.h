@@ -11,7 +11,7 @@
 #include "utility/Timer.h"
 #include <mutex>
 
-class xBeeSyncNode
+class xBeeSyncNode : public ActiveNode
 {
 public:
 	xBeeSyncNode(DBHandler* db, bool sendLogs, bool sending, bool receiving, double loopTime);
@@ -23,9 +23,9 @@ public:
  	///
  	/////////////////////////////////////////////////////////////////////////////////////
 	bool init();
+	void start();
 
 	void xBeeSyncThread();
-	void close();
 	
 private:
 	XML_log m_XML_log;
@@ -41,6 +41,7 @@ private:
 	bool m_receiving;
 	bool m_sendLogs;
 	bool m_pushOnlyLatestLogs;
+	bool m_initialised;
 	double m_loopTime;
 
 	bool isRunning();

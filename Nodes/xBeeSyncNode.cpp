@@ -1,3 +1,17 @@
+/****************************************************************************************
+ *
+ * File:
+ * 		xBeeSyncNode.cpp
+ *
+ * Purpose:
+ *		
+ *
+ * Developer Notes:
+ *
+ *
+ ***************************************************************************************/
+
+
 #include "xBeeSyncNode.h"
 #include <chrono>
 #include <thread>
@@ -32,8 +46,10 @@ xBeeSyncNode::xBeeSyncNode(MessageBus& msgBus, DBHandler* db, bool sendLogs, boo
 
         }
 
+//DONE?
 bool xBeeSyncNode::init()
 {
+
 	bool rv = false;
 
 	m_xbee_fd = m_xBee.init(); //Keep object in message architecture??
@@ -46,90 +62,150 @@ bool xBeeSyncNode::init()
 	{
 		rv = true;
 		Logger::info("Xbee initialised - receiving: %d sending: %d", m_receiving, m_sending);
+		m_initialised = true;
 	}
 
-	//TODO: Implement m_initialized
 	return rv;
 }
 
+//DONE
 void xBeeSync::start(){
 
-	//Todo: INit check, thread start
+	if (m_initialised)
+    {
+		//not implemented
+		m_messageTimeBuffer = m_loopTime;
+        runThread(xBeeSyncThread);
+    }
+    else
+    {
+        Logger::error("%s Cannot start HTTPSYNC thread as the node was not correctly initialised!", __PRETTY_FUNCTION__);
+    }
 
 }
 
+//CO
+void xBeeSyncNode::processMessage(const Message* msgPtr)
+{
+    MessageType msgType = msgPtr->messageType();
 
+    switch(msgType)
+    {
+		case MessageType::VesselState:
+			sendVesselState((VesselStateMsg*)msgPtr);
+			break;
+        default:
+            break;
+    }
+
+}
+
+//CO
+void xBeeSyncNode::sendVesselState(VesselStateMsg* msg){
+
+	//Do not allow sending of vesselstate and logs at the same time; the output turns to mush
+	if (!m_sendLogs && m_sending)
+	{
+		//The amount of seconds between expected calls from VesselStateMsg
+		double messageStateInterval = 0.4;
+		m_messageTimeBuffer -= messageStateInterval;
+
+		//Make sure we do not send to often
+		if (m_messageTimeBuffer <= 0){
+			
+			//TODO: ALL CAPS ARE DUMMIES, PUT IN MOCKS OR GET REAL VALUES
+			std::string res_xml = m_XML_log.log_xml(
+				msg->unixTime(),
+				msg->windDir(),
+				msg->windSpeed(),
+				msg->compassHeading(),
+				msg->compassPitch(),
+				msg->compassRoll(),
+				ACCELERATIONX,
+				ACCELERATIONY,
+				ACCELERATIONZ,
+				msg->latitude(),
+				msg->longitude(),
+				msg->gpsHeading(),
+				msg->speed(),
+				ARDUINOVALUE0,
+				ARDUINOVALUE1,
+				ARDUINOVALUE2,
+				ARDUINOVALUE3,
+				RUDDERSTATE,
+				SAILSTATE
+			);
+
+			m_xBee.transmitData(m_xbee_fd,res_xml);
+
+			//Reset after send
+			m_messageTimeBuffer = m_loopTime;
+		}
+	}
+
+}
+
+//CO
+void xBeeSyncNode::sendLogs(){
+	
+		if(m_sending && m_sendLogs) 
+		{
+			//Transmits latest logs over xbee network
+			std::string logs = m_db->getLogs(m_pushOnlyLatestLogs);
+			m_xBee.transmitData(m_xbee_fd, logs);
+		}
+}
+
+//CO
+void xBeeSyncNode::receiveControl(){
+	if(m_receiving) {
+
+		//Receive settings for rudder and sail by parsing xml message
+		std::string res_xml = m_xBee.receiveXMLData(m_xbee_fd);
+		
+		//If return value equals -1, parsing failed...
+		int rudder_cmd = m_XML_log.parse_rudCMD(res_xml);
+		int sail_cmd = m_XML_log.parse_saiCMD(res_xml);
+		std::string timestamp = m_XML_log.parse_time(res_xml);
+
+		if(timestamp.length() > 0) {
+			Logger::info("Timestamp in xBeeSync::run = %s", timestamp.c_str());
+		}
+
+		//Send both at the same time
+
+		if (rudder_cmd != -1 && sail_cmd != -1){
+			Logger::info("Rudder command in xBeeSync::run = %d", rudder_cmd);
+			Logger::info("Sail command in xBeeSync::run = %d", sail_cmd);
+			ActuatorPositionMsg* actuatorControl = new ActuatorPositionMsg(rudder_cmd, sail_cmd);
+			m_MsgBus.sendMessage(actuatorControl);
+
+			bool autorun = false;
+			//Is external command still used?
+			m_external_command->setData(timestamp, autorun, rudder_cmd, sail_cmd);
+		}
+
+	}
+}
 
 //Not done: Mostly copied from xbeeSync.cpp - implement when a replacement exists for system state model
 //TODO: Send back message
-void xBeeSync::xBeeSyncThread(void nodePtr) {
+void xBeeSyncNode::xBeeSyncThread(void nodePtr) {
+
+	xBeeSyncNode* node = (xBeeSyncNode*)(nodePtr);
+
 	m_pushOnlyLatestLogs = m_db->retrieveCellAsInt("xbee_config", "1", "push_only_latest_logs");
 	Logger::info("*xBeeSync thread started.");
 
-	while(isRunning()) {
+	while(true) {
+
 		m_timer.reset();
-		m_system_state->getData(m_model);
 
-		if(m_sending) {
-			if(m_sendLogs) {
-				std::string logs = m_db->getLogs(m_pushOnlyLatestLogs);
-				m_xBee.transmitData(m_xbee_fd, logs);
+		//Stores current system state in local model (Outdated)
+		//m_system_state->getData(m_model);
 
-			} else {
-				std::string res_xml = m_XML_log.log_xml(
-					m_model.gpsModel.timestamp,						// Timestamp
-					m_model.windsensorModel.direction,				// winddir degrees
-					m_model.windsensorModel.speed, 					// windspeed ms
-					m_model.compassModel.heading, 					// Heading deg
-					m_model.compassModel.pitch, 					// Pitch deg
-					m_model.compassModel.roll, 						// Roll deg
-                    m_model.compassModel.accelerationModel.accelX,  // Accel X
-                    m_model.compassModel.accelerationModel.accelY,  // Accel Y
-                    m_model.compassModel.accelerationModel.accelZ,  // Accel Z
-					m_model.gpsModel.positionModel.latitude, 		// gml:pos arg1, lat
-					m_model.gpsModel.positionModel.longitude, 		// gml:pos arg2, long
-					m_model.gpsModel.heading, 						// course over ground(deg)
-					m_model.gpsModel.speed, 						// speed over ground(ms)
-					m_model.arduinoModel.analogValue0,				// pressure
-					m_model.arduinoModel.analogValue1,				// rudder
-					m_model.arduinoModel.analogValue2,				// sheet
-					m_model.arduinoModel.analogValue3,				// current
-					m_model.rudder,									// Rudderpos
-					m_model.sail									// Sailpos
-				);
-
-				// Kan skicka loggen direkt med:
-				m_xBee.transmitData(m_xbee_fd,res_xml);
-			}
-		}
-		
-		if(m_receiving) {
-			std::string res_xml = m_xBee.receiveXMLData(m_xbee_fd);
- 			
-			//If return value equals -1, parsing failed...
- 			int rudder_cmd = m_XML_log.parse_rudCMD(res_xml);
-	 		int sail_cmd = m_XML_log.parse_saiCMD(res_xml);
-			std::string timestamp = m_XML_log.parse_time(res_xml);
-
-	 		if(timestamp.length() > 0) {
-				Logger::info("Timestamp in xBeeSync::run = %s", timestamp.c_str());
-	 		}
-
-	 		if(rudder_cmd != -1) {
-	 			Logger::info("Rudder command in xBeeSync::run = %d", rudder_cmd);
-	 			m_model.rudder = rudder_cmd;
-	 		}
-	 		if(sail_cmd != -1) {
-	 			Logger::info("Sail command in xBeeSync::run = %d", sail_cmd);
-	 			m_model.sail = sail_cmd;
-	 		}
-
-	 		bool autorun = false;
-	 		
-	 		if(sail_cmd != -1 && rudder_cmd != -1) {
-	 			m_external_command->setData(timestamp, autorun, rudder_cmd, sail_cmd);
-	 		}
-		}
+		node->SendLogs();
+		node->receiveControl();
 
 		m_timer.sleepUntil(m_loopTime);
 	}
