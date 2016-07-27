@@ -28,9 +28,9 @@ public:
 	virtual ~ActuatorPositionMsg() { }
 
 	int sailPosition() { return m_sailPosition; }
-	int rudderPosition() { return m_rudderPosition}
+	int rudderPosition() { return m_rudderPosition; }
 
 private:
-	int m_sailPosition;
 	int m_rudderPosition;
+	int m_sailPosition;
 };
