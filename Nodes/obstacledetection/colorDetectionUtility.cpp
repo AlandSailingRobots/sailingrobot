@@ -79,7 +79,7 @@ bool find_if_close(vector<Point>  cnt1,vector<Point>  cnt2, float dist_is_close)
 /* This function merge two contours and calculate the smallest rectangle
    containing this merged contour. In order to be drawable the function
     convexHull is used to sort the Points in a clockwise order.*/
-vector<Point> merge2Contours(vector<Point>  cnt1,vector<Point>  cnt2,Rect& rotated_bounding_rect){
+vector<Point> merge2Contours(vector<Point>  cnt1,vector<Point>  cnt2){
     vector<Point> mContour = cnt1;
     for(int l=0; l< (int)cnt2.size(); l++){
         mContour.push_back(cnt2[l]);
@@ -87,16 +87,13 @@ vector<Point> merge2Contours(vector<Point>  cnt1,vector<Point>  cnt2,Rect& rotat
     vector<Point> hull;
     convexHull(Mat(mContour),hull);
     Mat hull_points(hull);
-    rotated_bounding_rect = boundingRect(hull_points);
     return hull;
 }
 
 /* This function merge the contours which are close and returns a new vector
     of contours.*/
 vector<vector<Point> > mergeAllContours(vector<vector<Point> > contours,
-                                float const& dist_is_close,
-                                Rect& rotated_bounding_rect,
-                                vector <Rect>& rotated_bounding_rects){
+                                float const& dist_is_close){
 
     vector<vector<Point> > contoursBis;
     vector<vector<Point> > mergedContours;
@@ -108,7 +105,7 @@ vector<vector<Point> > mergeAllContours(vector<vector<Point> > contours,
         while(q < size){
 
             if(q!=0 && find_if_close(contours[0],contours[q], dist_is_close)){
-                contours[0]=merge2Contours(contours[0],contours[q],rotated_bounding_rect);
+                contours[0]=merge2Contours(contours[0],contours[q]);
             }
             else{
                 if(q!=0){
@@ -122,11 +119,9 @@ vector<vector<Point> > mergeAllContours(vector<vector<Point> > contours,
         }
         else{
             mergedContours.push_back(contours[0]);
-            rotated_bounding_rects.push_back(rotated_bounding_rect);
             contours=contoursBis;
             if( contours.size()==1){
                 mergedContours.push_back(contours[0]);
-                rotated_bounding_rects.push_back(rotated_bounding_rect);
                 return mergedContours;
             }
             size =(int)contours.size();
@@ -213,7 +208,7 @@ void morphologicalOperations (Mat& imgThresholded){
     erode(imgThresholded, imgThresholded, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
 }
 
-/*Find the bounding rectangles of the contours and their centers*/
+
 void computeContoursCentersRectangles(Mat const& imgThresholded,vector<Point2f>& mc,vector<Rect>& rotated_bounding_rects, int minAreaToDetect  ){
 
     //findContours
@@ -225,22 +220,26 @@ void computeContoursCentersRectangles(Mat const& imgThresholded,vector<Point2f>&
     Rect rotated_bounding_rect;
     vector<Point> contourMerged;
     vector<Vec4i> hierarchy;
-    findContours(cpImgThresholded, contours, hierarchy,CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE, Point(0, 0) );
-    contoursMerged=mergeAllContours(contours, 150, rotated_bounding_rect,rotated_bounding_rects);
 
+    findContours(cpImgThresholded, contours, hierarchy,CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE, Point(0, 0) );
+    contoursMerged=mergeAllContours(contours, 150);
+    for(int i = 0; i<(int)contoursMerged.size(); i++){
+        rotated_bounding_rects.push_back(boundingRect(contoursMerged[i]));
+    }
     /// Get the moments
     vector<Moments> mu(contoursMerged.size() );
     vector<Point2f> mc1( contoursMerged.size() );
     mc=mc1;
+    cout << "" << endl;
     double dArea = 0;
     for( int i = 0; i <(int)contoursMerged.size(); i++ ){
         mu[i] = moments( contoursMerged[i], false );
         dArea=mu[i].m00;
-
         if (dArea > minAreaToDetect){// if the area <= 20000, I consider that the there are no object in the image and it's because of the noise, the area is not zero
             mc[i] = Point2f( mu[i].m10/mu[i].m00 , mu[i].m01/mu[i].m00 );///  Get the mass centers:
         }
         else{
+            cout << "in" << endl;
             rotated_bounding_rects.erase(rotated_bounding_rects.begin()+i);
         }
     }

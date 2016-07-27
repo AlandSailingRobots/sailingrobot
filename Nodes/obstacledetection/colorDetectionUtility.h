@@ -34,7 +34,7 @@ void morphologicalOperations (cv::Mat& imgThresholded);
 void computeContoursCentersRectangles(cv::Mat const& imgThresholded,std::vector<cv::Point2f>& mc,std::vector<cv::Rect>& rotated_bounding_rects,int minAreaToDetect);
 void drawCentersRectangles(cv::Mat & imgOriginal,std::vector<cv::Point2f> const& mc,std::vector<cv::Rect> const& rotated_bounding_rects,cv::Scalar const& aColorDrawing );
 void initHsvColors();
-
+void createTrackbarHSV(int numberOfColorsToTrack);
 std::vector<cv::Rect> compareRects(cv::Mat& imgOriginal,std::vector<cv::Rect> const& rotated_bounding_rects);
 std::vector<cv::Point> findRectanglesCenters(std::vector<cv::Rect> const& rects);
 void supressSmallRectangles(std::vector<cv::Rect>& rects,int minAreaRectangle);
