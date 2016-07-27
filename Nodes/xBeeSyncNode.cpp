@@ -19,7 +19,6 @@
 #include <iostream>
 #include <sstream>
 
-//Should do most of the required things, see above
 xBeeSyncNode::xBeeSyncNode(MessageBus& msgBus, DBHandler* db) :
 	ActiveNode(NodeID::xBeeSync, msgBus), m_db(db)
 {
@@ -36,7 +35,7 @@ bool xBeeSyncNode::init()
 
 	bool rv = false;
 
-	m_xbee_fd = m_xBee.init(); //Keep object in message architecture??
+	m_xbee_fd = m_xBee.init();
 
 	if(m_xbee_fd < 0)
 	{
@@ -52,12 +51,11 @@ bool xBeeSyncNode::init()
 	return rv;
 }
 
-//DONE
 void xBeeSyncNode::start(){
 
 	if (m_initialised)
     {
-		//not implemented in header
+
 		m_messageTimeBuffer = m_loopTime;
         runThread(xBeeSyncThread);
     }
@@ -68,7 +66,6 @@ void xBeeSyncNode::start(){
 
 }
 
-//DONE
 void xBeeSyncNode::processMessage(const Message* msgPtr)
 {
     MessageType msgType = msgPtr->messageType();
@@ -84,16 +81,16 @@ void xBeeSyncNode::processMessage(const Message* msgPtr)
 
 }
 
-//DONE
 void xBeeSyncNode::sendVesselState(VesselStateMsg* msg){
 
-	//Do not allow sending of vesselstate and logs at the same time; the output turns to mush
+	//Do not allow sending of vesselstate and logs at the same time; double output turns into mush
 	if (!m_sendLogs && m_sending)
 	{
 		//The amount of seconds between expected calls from VesselStateMsg
-		double messageStateInterval = 0.4;
-		m_messageTimeBuffer -= messageStateInterval;
+		double stateMessageInterval = 0.4;
+		m_messageTimeBuffer -= stateMessageInterval;
 
+		//Dummy values are used when not implemented in VesselStateMessage to fill gaps in expected xml string
 		double dummyAccelerationXYZ = -1; //Acceleration values
 		int dummyArduinoValueN = -1; //Arduino values 0-3
 		int dummyRudderState = -1;
@@ -104,10 +101,9 @@ void xBeeSyncNode::sendVesselState(VesselStateMsg* msg){
 		strs << msg->unixTime();
 		std::string timeStampString = strs.str(); 
 
-		//Make sure we do not send to often
+		//Make sure we do not send too often
 		if (m_messageTimeBuffer <= 0){
 			
-			//Dummy values are used when not implemented in VesselStateMessage to fill gaps in expected xml string
 			//If xml reading on the receiving end has been altered to work with other values it is safe to remove the dummy values.
 			//If more variables have been implemented in VesselStateMessage it is safe to replace the dummy values.
 			std::string res_xml = m_XML_log.log_xml(
@@ -141,7 +137,6 @@ void xBeeSyncNode::sendVesselState(VesselStateMsg* msg){
 
 }
 
-//DONE
 void xBeeSyncNode::sendLogs(){
 	
 		if(m_sending && m_sendLogs) 
@@ -152,7 +147,6 @@ void xBeeSyncNode::sendLogs(){
 		}
 }
 
-//CO
 void xBeeSyncNode::receiveControl(){
 	if(m_receiving) {
 
@@ -168,24 +162,17 @@ void xBeeSyncNode::receiveControl(){
 			Logger::info("Timestamp in xBeeSync::run = %s", timestamp.c_str());
 		}
 
-		//Send both at the same time
-
 		if (rudder_cmd != -1 && sail_cmd != -1){
 			Logger::info("Rudder command in xBeeSync::run = %d", rudder_cmd);
 			Logger::info("Sail command in xBeeSync::run = %d", sail_cmd);
 			ActuatorPositionMsg* actuatorControl = new ActuatorPositionMsg(rudder_cmd, sail_cmd);
 			m_MsgBus.sendMessage(actuatorControl);
-
-			//bool autorun = false;
-			//Is external command still used?
-			//m_external_command->setData(timestamp, autorun, rudder_cmd, sail_cmd);
+			//PLANNED: Send externalCommandMsg here when implemented?
 		}
 
 	}
 }
 
-
-//DONE
 void xBeeSyncNode::xBeeSyncThread(void* nodePtr) {
 
 	xBeeSyncNode* node = (xBeeSyncNode*)(nodePtr);
