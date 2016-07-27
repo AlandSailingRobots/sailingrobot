@@ -85,7 +85,6 @@ Eigen::Vector2d CollisionAvoidanceBehaviour::findCenter(
     return meanPolygon;
 }
 
-
 // TODO : move to Utility ?
 double CollisionAvoidanceBehaviour::getArea(
         std::vector<Eigen::Vector2d> polygon){
@@ -142,7 +141,7 @@ Eigen::Vector2d CollisionAvoidanceBehaviour::getClosestPoint(
     const Eigen::Vector3d worldOrigin(0,0,0);
 
     for(int i = 0;i<polygon.size();i++){
-        const int iPlusOne = static_cast<const int>((i+1)%polygon.size());
+        const int iPlusOne = static_cast<const int>((i+1)//polygon.size());
         const std::vector<double> distInfo = distanceFromSegment(polygon[i],
                                                                  polygon[iPlusOne],
                                                                  point);
@@ -379,7 +378,8 @@ SensorData CollisionAvoidanceBehaviour::update_sensors(
 }
 
 /*
- * Update waypoints or compute an easier way to handle them
+ * Update waypoints or compute an easier way to handle them.
+ * Update followedLine ?
  */
 //    void update_waypoints(){}
 
@@ -515,8 +515,8 @@ bool CollisionAvoidanceBehaviour::these_obstacles_are_a_problem(
         for(auto & point : obstacle.polygon){
             // compute the distance between the line and the point.
             double signedDistance = signedDistanceFromLine(followedLine.startPoint,
-                                                                  followedLine.endPoint,
-                                                                  point);
+                                                           followedLine.endPoint,
+                                                           point);
             bool thisObstacleIsAProblem = false;
             if(std::abs(signedDistance)< CHANNEL_WIDTH
                && calculateGPSDistance(sensorOutput.gpsPos,getClosestPoint(obstacle.polygon)) < SAFE_DISTANCE){
@@ -528,7 +528,7 @@ bool CollisionAvoidanceBehaviour::these_obstacles_are_a_problem(
     return theseObstaclesAreAProblem;
 }
 
-Eigen::MatrixXd CollisionAvoidanceBehaviour::compute_potential_field(
+PotentialMap CollisionAvoidanceBehaviour::compute_potential_field(
         std::vector<Obstacle> seenObstacles,
         std::vector<Eigen::Vector2d> sailingZone,
         FollowedLine) {
@@ -542,31 +542,40 @@ Eigen::MatrixXd CollisionAvoidanceBehaviour::compute_potential_field(
 
     // Since the distance computed here is only on one axis,
     // a simple conversion factor is sufficient
-    const double xLowerBound = sensorOutput.gpsPos(1)
-                               -(xLowerMapBound*CONVERSION_FACTOR_METER_TO_GPS/180*M_PI);
-    const double xUpperBound = sensorOutput.gpsPos(1)
-                               +(xUpperMapBound*CONVERSION_FACTOR_METER_TO_GPS/180*M_PI);
-    const double yLowerBound = sensorOutput.gpsPos(1)
-                               -(yLowerMapBound*CONVERSION_FACTOR_METER_TO_GPS/180*M_PI);
-    const double yUpperBound = sensorOutput.gpsPos(1)
-                               +(yUpperMapBound*CONVERSION_FACTOR_METER_TO_GPS/180*M_PI);
-    Eigen::MatrixXd potField = Eigen::MatrixXd::Zero(matrixHeight,matrixWidth);
-    const Eigen::MatrixXd Px(matrixHeight,matrixWidth)
-            = Eigen::RowVectorXd::LinSpaced(matrixWidth,
-                                            xLowerBound,
-                                            xUpperBound).replicate(matrixHeight,1);
-    const Eigen::MatrixXd Py(matrixHeight,matrixWidth)
-            = Eigen::VectorXd::LinSpaced(   matrixHeight,
-                                            yLowerBound,
-                                            yUpperBound).replicate(1, matrixWidth);
+    PotentialMap PotField = {
+            sensorOutput.gpsPos(1)
+             - (xLowerMapBound * CONVERSION_FACTOR_METER_TO_GPS / 180 * M_PI),
+            sensorOutput.gpsPos(1)
+             +(xUpperMapBound*CONVERSION_FACTOR_METER_TO_GPS/180*M_PI),
+            sensorOutput.gpsPos(1)
+             -(yLowerMapBound*CONVERSION_FACTOR_METER_TO_GPS/180*M_PI),
+            sensorOutput.gpsPos(1)
+             +(yUpperMapBound*CONVERSION_FACTOR_METER_TO_GPS/180*M_PI),
+            Eigen::ArrayXXd::Zero(matrixHeight, matrixWidth)
+    };
 
-    // TODO Obstacle potential function
+    const Eigen::ArrayXXd Px(matrixHeight,matrixWidth)
+            = Eigen::RowVectorXd::LinSpaced(matrixWidth,
+                                            PotField.xMin,
+                                            PotField.xMax).replicate(matrixHeight,1);
+    const Eigen::ArrayXXd Py(matrixHeight,matrixWidth)
+            = Eigen::VectorXd::LinSpaced(   matrixHeight,
+                                            PotField.yMin,
+                                            PotField.yMax).replicate(1, matrixWidth);
+    // On a distance of 150m there is an error of approximatively 2 meters, so a linear conversion from
+    // GPS coordinates to meters is possible at this scale
+
+    // Obstacle potential function
     /*
      * Since the obstacle is a polygon, only the closest point from
      * the polygon will be counted as an obstacle
+     *
+     * Maybe we should do a parameter file where we could configure everything
+     * Values found after extensive testing on matlab
+     * The values are scaled for meters.
      */
+    // TODO : conversion to gps coordinates
 
-    // Maybe we should do a parameter file where we could configure everything
     const double scaleHole = 50;
     const double scalePike = 550;
     const double scale = 0.5;
@@ -575,78 +584,242 @@ Eigen::MatrixXd CollisionAvoidanceBehaviour::compute_potential_field(
     const double strength = 5;
     const double offsetObstacle = 15;
 
-    // Where are the pikes and the holes ? The closest to the boat.
-    /*
-     * Algo : check which segment of the polygone is the closest.
-     * Then compute the projection on the segment
-     */
-    // TODO : check the closest position of the obstacle with a function.
+    Eigen::ArrayXXd obsPot = Eigen::ArrayXXd::Zero(matrixHeight,matrixWidth);
+    std::vector<Eigen::Vector2d> closestObstaclesPoints;
+
+    for(auto & obstacle : seenObstacles){
+        Eigen::Vector2d closestObstaclePoint = getClosestPoint(obstacle.polygon,
+                                                               sensorOutput.gpsPos);
+        closestObstaclesPoints.push_back(closestObstaclePoint);
+    }
 
     // Add the pikes
-    for(auto & obstacle : seenObstacles){ //for each seen_obstacle add the pikes
-        Eigen::Vector2d closestObstaclePoint = getClosestPoint(obstacle.polygon,sensorOutput.gpsPos);
-//        xObs = P1-qhat(1,i);
-//        yObs = P2-qhat(2,i);
-//        tPike = ((xObs*1).^2+(yObs-offsetObstacle*scale).^2)/scalePike/scale;
-//        ObsP = max(ObsP, strength*strengthPike*exp(-(tPike).^2));
+    for(auto & obstacle : closestObstaclesPoints){ //for each seen_obstacle add the pikes
+
+        const Eigen::ArrayXXd xObs = Px-obstacle(0);
+        const Eigen::ArrayXXd yObs = Px-obstacle(0);
+        const Eigen::ArrayXXd tPike = ( (xObs*1).square()
+                                       +(yObs-offsetObstacle*scale).square())
+                                      /scalePike/scale;
+
+        obsPot = obsPot.max(strength*strengthPike*(-(tPike.square())).exp());
     }
 
-    //Add the holes
-    for(auto & obstacle : seenObstacles){ //for each seen_obstacle add the holes
-//        T = mod(boatHeading,2*pi)*0.3 + mod( atan2(phat(2)-qhat(2,i),phat(1)-qhat(1,i)) ,2*pi)*0.7 + pi/2;
-//        xObs = P1-qhat(1,i);
-//        yObs = P2-qhat(2,i);
-//        xo =  xObs*cos(T) + yObs*sin(T);
-//        yo = -xObs*sin(T) + yObs*cos(T);
-//        tHoleR = ((xo-35*scale).^2+(yo-offsetObstacle*scale).^2)/scaleHole/scale;
-//        tHoleL = ((xo+35*scale).^2+(yo-offsetObstacle*scale).^2)/scaleHole/scale;
+    // Add the holes
+    for(auto & obstacle : closestObstaclesPoints){ //for each seen_obstacle add the holes
+        const double obstacleHeading = fmod(sensorOutput.compHeading,2*M_PI)*0.3
+                                       + fmod( atan2(followedLine.endPoint(1)-obstacle(1),
+                                                     followedLine.endPoint(1)-obstacle(0)),
+                                               2*M_PI)*0.7
+                                       + M_PI/2;
+        const Eigen::ArrayXXd xObsBeforeRot = Px-obstacle(0);
+        const Eigen::ArrayXXd yObsBeforeRot = Px-obstacle(0);
+        const Eigen::ArrayXXd xObsAfterRot =   xObsBeforeRot * cos(obstacleHeading)
+                                             + yObsBeforeRot * sin(obstacleHeading);
+        const Eigen::ArrayXXd yObsAfterRot = - xObsBeforeRot * sin(obstacleHeading)
+                                             + yObsBeforeRot * cos(obstacleHeading);
+        const Eigen::ArrayXXd tRightHole = ((xObsAfterRot-35*scale).square()
+                                            +(yObsAfterRot-offsetObstacle*scale).square())
+                                           /scaleHole/scale;
+        const Eigen::ArrayXXd tLeftHole  = ((xObsAfterRot+35*scale).square()
+                                            +(yObsAfterRot-offsetObstacle*scale).square())
+                                           /scaleHole/scale;
+
+        obsPot = obsPot
+                 - strength*strengthHoles*(-(tRightHole).square()).exp()
+                 - strength*strengthHoles*(-(tLeftHole).square()).exp();
     }
-    /*
-    for i=1:size(qhat,2)
-    xObs = P1-qhat(1,i);
-    yObs = P2-qhat(2,i);
-    tPike = ((xObs*1).^2+(yObs-offsetObstacle*scale).^2)/scalePike/scale;
-    ObsP = max(ObsP, strength*strengthPike*exp(-(tPike).^2));
-    end
-    % Then add the holes
-    for i=1:size(qhat,2)
-    T = mod(boatHeading,2*pi)*0.3 + mod( atan2(phat(2)-qhat(2,i),phat(1)-qhat(1,i)) ,2*pi)*0.7 + pi/2;
-    xObs = P1-qhat(1,i);
-    yObs = P2-qhat(2,i);
-    xo =  xObs*cos(T) + yObs*sin(T);
-    yo = -xObs*sin(T) + yObs*cos(T);
-    tHoleR = ((xo-35*scale).^2+(yo-offsetObstacle*scale).^2)/scaleHole/scale;
-    tHoleL = ((xo+35*scale).^2+(yo-offsetObstacle*scale).^2)/scaleHole/scale;
 
-    ObsP = ObsP - strength*strengthHoles*exp(-(tHoleR).^2) - strength*strengthHoles*exp(-(tHoleL).^2);
-    end
-    */
+    // Objective potential function
+        // Values found after extensive testing
+    const double objectiveSpread = 25000;
+    const double objectiveStrength = 1.6;
+    const Eigen::ArrayXXd objPot = objectiveStrength*((- (Px-followedLine.endPoint(0)).square()
+                                                       - (Py-followedLine.endPoint(1)).square())
+                                                      /objectiveSpread).exp();
 
+    // Windpreference potential function
+    const double noGoZoneAngle = 3*M_PI/4.0;
 
-    // TODO Objective potential function
+    const Eigen::ArrayXXd xWindBeforeRot = Px-sensorOutput.gpsPos(0);
+    const Eigen::ArrayXXd yWindBeforeRot = Py-sensorOutput.gpsPos(1);
+    const double noGoZoneHeading = sensorOutput.windDirection + noGoZoneAngle;
+    const Eigen::ArrayXXd xWindAfterRot =   xWindBeforeRot*cos(noGoZoneHeading)
+                                          + yWindBeforeRot*sin(noGoZoneAngle);
+    const Eigen::ArrayXXd yWindAfterRot = - xWindBeforeRot*sin(noGoZoneHeading)
+                                          + yWindBeforeRot*cos(noGoZoneHeading);
 
-    // TODO Windpreference potential function
+        // Change from atan to 1/(1+exp(-2*t))
+    const double windChangeSlope = 10; // Higher it is the slopiest it is
+    const Eigen::ArrayXXd windPot = 3 * (1/(1+(-windChangeSlope*xWindAfterRot).exp()))
+                                      * (1/(1+(-windChangeSlope*yWindAfterRot).exp()));
 
-    // TODO Boat preference
+    // Boat preference
+    const double strengthBoat = 3;
+    const double strengthHoleBoat = 1.5;
+    const double spreadHoleBoat = 4000;
+    const double strengthPikeBoat = 5;
+    const double spreadPikeBoat = 200;
 
-    // TODO Computation of the field
+    const Eigen::ArrayXXd boatHolePot = strengthHoleBoat
+                                        * ((-(Px-sensorOutput.gpsPos(0)).square()
+                                            -(Py-sensorOutput.gpsPos(1)).square())
+                                           / spreadHoleBoat).exp();
+    const Eigen::ArrayXXd boatPikePot = strengthPikeBoat
+                                        * ((-(Px-sensorOutput.gpsPos(0)).square()
+                                            -(Py-sensorOutput.gpsPos(1)).square())
+                                           / spreadPikeBoat).exp();
+    const Eigen::ArrayXXd boatPot = strengthBoat*( -boatHolePot + boatPikePot );
 
-    // TODO Adding Sailing Zone
+    // Sailing Zone
+    Eigen::ArrayXXd sailingZoneMatrix = Eigen::ArrayXXd::Zero(matrixHeight,matrixWidth);//New blank matrix
+    for(int i = 0;i<sailingZone.size();i++){
+        // The lines of the polygon are added incrementally
+
+        const int j = fmod(i+1,sailingZone.size()); // index of the next point
+        const Eigen::Vector2d linePt0 = sailingZone[i];
+        const Eigen::Vector2d linePt1 = sailingZone[j];
+        const Eigen::Vector2d origin(0,0);
+
+        // Distance between the origin and the line (AB)
+        // I'm not sure using gsp distance here is the best idea
+        // const double offsetFromOrigin = signedDistanceFromLine(linePt0,linePt1,origin);
+        const Eigen::Matrix2d mat;
+        mat << (linePt1-linePt0)/(linePt1-linePt0).norm(),(origin-linePt0);
+        const double offsetFromOrigin = mat.determinant();
+        const double lineHeading = atan2(linePt1(1)-linePt0(1),
+                                         linePt1(0)-linePt0(0)); // Heading to the line (AB)
+
+        // const Eigen::ArrayXXd xLine = (Px)*cos(lineHeading)+(Py)*sin(lineHeading); // saved in a comment
+        const Eigen::ArrayXXd yLine = (Px)*cos(lineHeading+M_PI/2)+(Py)*sin(lineHeading+M_PI/2);
+        // On one side of the line there is 1, 0 on the other
+        // offsetFromOrigin is used to move the line from the origin
+
+        const double sailingZoneChangeSlope = 10;
+        const Eigen::ArrayXXd line = 1 - (1 / ( 1 + ( - sailingZoneChangeSlope
+                                                      *(  yLine
+                                                        + offsetFromOrigin)
+                                                    ).exp()
+                                              ));
+
+        sailingZoneMatrix = sailingZoneMatrix .* line;
+
+        sailingZoneMatrix = 1-sailingZoneMatrix;
+    }
+    const double strengthSailingZone = 10;
+
+    const Eigen::ArrayXXd sailZonePot = strengthSailingZone*sailingZoneMatrix;
+
+    // Computation of the field
+    PotField.field = obsPot - objPot + boatPot + windPot + sailZonePot;
+    return PotField;
 }
 
-MinPotField CollisionAvoidanceBehaviour::find_minimum_potential_field(
-        Eigen::MatrixXd Potential_field) {
-
+Eigen::Vector2d CollisionAvoidanceBehaviour::find_minimum_potential_field(
+        PotentialMap potField) {
+    const double I_row = 0, I_col = 0;
+    const double minZ = potField.field.minCoeff(&I_row, &I_col);
+    double I_x = I_col*(potField.xMax-potField.xMin)
+                 /potField.field.cols()-(abs(potField.yMin));
+    double I_y = I_row*(potField.yMax-potField.yMin)
+                 /potField.field.rows()-(abs(potField.xMin));
+    const Eigen::Vector2d collision_avoidance_point(I_x,I_y)
+    return collision_avoidance_point;
 }
 
 FollowedLine CollisionAvoidanceBehaviour::compute_new_path(
-        MinPotField min) {
-
+        Eigen::Vector2d collision_avoidance_point) {
+    // TODO initialize the 3 wps
+    // TODO add 3 wp to the database
+    // TODO set endPoint as avoidPoint
+    // TODO set startPoint as special point behind the boat
+    //The waypointNode gives which wps to follow.
+    return followedLine; // return is not necessary
 }
 
 CommandOutput CollisionAvoidanceBehaviour::compute_commands(
         FollowedLine line) {
 
+    //controller_simpleLine Simple line following controller
+    //   Controller based on the paper "A simple controller for line
+    //   following of sailboats" by Luc Jaulin and Fabrice Le Bars
+    // TODO Constans/Parameters
+    Eigen::Vector2d a = line.startPoint;
+    Eigen::Vector2d b = line.endPoint;
+//    m = x(1:2);
+//    theta = x(3);
+//    v_boat = x(4);
+//    r = 5;              // m -   cutoff distance
+//    delta_rMax = pi / 4;  // rad   maximum rudder angle
+//    gamma = pi / 4;       // rad   incidence angle
+//    ngzAngle = pi / 4;    // rad   close hauled angle
+//    ngzAngleBack = 0;    // rad   back wind angle
+    // ngzAngleOUT = ngzAngle+pi/8;   // rad   out of the no-go zone angle
+    // NGZHeading = mod(psi+pi,2*pi); // rad   no-go zone angle
+
+    // TODO Step 3
+//    phi = atan2((b(2) - a(2)), (b(1) - a(1)));
+//    if (abs(angDiff(atan2(m(2) - b(2), m(1) - b(1)), phi)) < pi / 2){
+//        b = followedLine(:,1);
+//        a = followedLine(:,2);
+//        phi = atan2((b(2) - a(2)), (b(1) - a(1)));
+//    }
+
+    // TODO Step 1
+//    u = 1./hypot(b(1)-a(1),b(2)-a(2)).*[b(1)-a(1) b(2)-a(2)];
+//    v = [m(1)-a(1) m(2)-a(2)];
+//    e = u(1)*v(2)-v(1)*u(2);
+
+    // TODO Step 2
+//    if (abs(e) > r){
+//        q = sign(e);
+//        // q = sign(theta-(mod(psi,pi)-pi));
+//    }
+
+    // TODO Step 4
+//    theta_star = phi-2*gamma/pi*atan(e/r); //take care of the incidence angle
+
+    // TODO Step 5-9
+//
+//    if ( ((cos(psi-theta_star)+cos(ngzAngle+pi/8) < 0)&&(tacking)) || // leaving the NGZ
+//         (cos(psi-theta_star)+cos(ngzAngle) < 0) || // entering the NGZ
+//         (cos(psi-phi)+cos(ngzAngle)<0) ){
+//        if(!tacking) {
+//        // v2 = [m(1)+2000*r*cos(theta+pi)-a(1) m(2)+2000*r*sin(theta+pi)-a(2)];
+//        // e2 = u(1)*v2(2)-v2(1)*u(2);
+//        // q = sign(e2);
+//            q = sign(theta - (mod(psi, pi) - pi));
+//            tacking = 1;
+//        }
+//        theta_bar = pi + psi - q * ngzAngle;
+//        // elseif( (cos(psi+pi-theta_star)+cos(ngzAngleBack) < 0) || ...
+//        //       ( (abs(e)<r) && (cos(psi+pi-phi)+cos(ngzAngleBack)<0) ) )
+//        //     if ~tacking
+//        //         v2 = [m(1)+100*cos(theta+pi)-a(1) m(2)+100*sin(theta+pi)-a(2)];
+//        //         e2 = u(1)*v2(2)-v2(1)*u(2);
+//        //         q = sign(e2);
+//        //         tacking = 1;
+//        //     end
+//        //     theta_bar = psi - q*ngzAngleBack;
+//    }
+//    else {
+//        tacking = 0;
+//        theta_bar = theta_star;
+//    }
+
+    // TODO Step 10-11
+//    if(cos(theta-theta_bar) >= 0) {
+//        delta_r = delta_rMax * sin(theta - theta_bar);
+//    }
+//    else {
+//        delta_r = delta_rMax * sign(sin(theta - theta_bar));
+//    }
+
+    // TODO Step 12
+//    delta_sMax = pi/4*(cos(psi-theta_bar)+1);
+
+    // Interfacing with the rest of the program
+//    u = [delta_r;delta_sMax];
 }
 
 // TODO : When the message architecture will be done, modify all this.
@@ -684,14 +857,9 @@ CommandOutput CollisionAvoidanceBehaviour::run(
 bool CollisionAvoidanceBehaviour::init() {
 
     //SailingZone initialization clockwise (x,y)
-    Eigen::Vector2d GPSpoint0(-1, 1);
-    Eigen::Vector2d GPSpoint1(1, 1);
-    Eigen::Vector2d GPSpoint2(1, -1);
-    Eigen::Vector2d GPSpoint3(-1, -1);
-    sailingZone = {GPSpoint0,
-                   GPSpoint1,
-                   GPSpoint2,
-                   GPSpoint3};
+    Eigen::Vector2d GPSpoint0(-1, 1); Eigen::Vector2d GPSpoint3( 1, 1);
+    Eigen::Vector2d GPSpoint1(-1,-1); Eigen::Vector2d GPSpoint2( 1,-1);
+    sailingZone = {GPSpoint0, GPSpoint1, GPSpoint2, GPSpoint3};
 
 }
 
@@ -703,7 +871,7 @@ void CollisionAvoidanceBehaviour::computeCommands(
         bool getHeadingFromCompass) {
     CommandOutput out = run(systemStateModel);
     m_rudderCommand = out.deltaRudder;
-    m_sailCommand = out.deltaSail;
+    m_sailCommand   = out.deltaSail;
 }
 
 

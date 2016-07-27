@@ -72,14 +72,20 @@ public:
 
 private:
 
-    std::vector<Obstacle> seenObstacles;
-    FollowedLine followedLine;
-    std::vector<Eigen::Vector2d> sailingZone;
-    SensorData sensorOutput;
-
     /**
      * Structure which contains every used data from the sensors
      */
+    struct ObstacleData {
+        double minDistanceToObstacle;
+        double maxDistanceToObstacle; /**< -1 = infinite */
+        double LeftBoundHeadingRelativeToBoat;
+        double RightBoundHeadingRelativeToBoat;
+    };
+    struct Obstacle {
+        //Polygon
+        std::vector<Eigen::Vector2d> polygon;
+        std::string color;
+    };
     struct SensorData {
         Eigen::Vector2d gpsPos;
         double gpsSpeed;
@@ -92,17 +98,6 @@ private:
 
         //TODO : put the real inputs here (video, sonar or whatever)
         std::vector<ObstacleData> detectedObstacles;
-    };
-    struct ObstacleData {
-        double minDistanceToObstacle;
-        double maxDistanceToObstacle; /**< -1 = infinite */
-        double LeftBoundHeadingRelativeToBoat;
-        double RightBoundHeadingRelativeToBoat;
-    };
-    struct Obstacle {
-        //Polygon
-        std::vector<Eigen::Vector2d> polygon;
-        std::string color;
     };
     struct FollowedLine {
         Eigen::Vector2d startPoint;
@@ -117,11 +112,23 @@ private:
         double y;
         double row;
         double col;
-    };
-    const struct Simulation {
+    }; //Trash, not used. Could be useful though
+    struct Simulation {
         const bool waypoints;
         const bool obstacles;
     };
+    struct PotentialMap{
+        const double xMin;
+        const double xMax;
+        const double yMin;
+        const double yMax;
+        Eigen::ArrayXXd field;
+    };
+
+    std::vector<Obstacle> seenObstacles;
+    FollowedLine followedLine;
+    std::vector<Eigen::Vector2d> sailingZone;
+    SensorData sensorOutput;
 
     /**
      * Gives the difference between two angles regardless of their definition.
@@ -310,14 +317,20 @@ private:
      * For now it creates the matrix at each loop (easier for code review)
      * The size of the matrix needs to be adapted to the size of the sailing zone
      * (with the max and mins for example)
+     *
+     * Maybe we could create everything in the init function and put it in a
+     * struct. This struct would be a class variable. // TODO potField class variable
+     *
+     * Maybe we should as well put the computation of the potential field in another class
+     * due to the length of the function. // TODO see if a new class is needed
      * @param seen_obstacles
      * @param sailing_zone
      * @param followedLine
      * @return
      */
-    Eigen::MatrixXd compute_potential_field(std::vector<Obstacle> seen_obstacles,
-                                            std::vector<Eigen::Vector2d> sailing_zone,
-                                            FollowedLine followedLine);
+    PotentialMap compute_potential_field(std::vector<Obstacle> seen_obstacles,
+                                         std::vector<Eigen::Vector2d> sailing_zone,
+                                         FollowedLine followedLine);
 
     /**
      * Find the minimum in the potential field and return its coordinates in the matrix
@@ -325,15 +338,19 @@ private:
      * @param Potential_field
      * @return
      */
-    MinPotField find_minimum_potential_field(Eigen::MatrixXd Potential_field);
+    Eigen::Vector2d find_minimum_potential_field(PotentialMap PotentialField);
 
     /**
      * Gives the new line to follow. It would be better if it added a WP in the
      * DataBase as well.
+     *
+     * It add 3 intermediate wp to follow and follow them. Everything will be updated
+     * on the next loop by update waypoint. Then the boat will continue to follow
+     * these waypoints.
      * @param min
      * @return
      */
-    FollowedLine compute_new_path(MinPotField min);
+    FollowedLine compute_new_path(Eigen::Vector2d collision_avoidance_point);
 
     /**
      * Compute the commands according to the new path.

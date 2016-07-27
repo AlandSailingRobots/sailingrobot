@@ -87,11 +87,14 @@ bool CollisionAvoidanceBehave::init()
     return true;
 }
 
-void CollisionAvoidanceBehave::computeCommands(SystemStateModel &systemStateModel,std::unique_ptr<Position> const& position,
-                                    double trueWindDirection, bool mockPosition,
-                                    bool getHeadingFromCompass) {}
+void CollisionAvoidanceBehave::computeCommands(SystemStateModel &systemStateModel,
+                                               std::unique_ptr<Position> const& position,
+                                               double trueWindDirection,
+                                               bool mockPosition,
+                                               bool getHeadingFromCompass) {}
 
-void CollisionAvoidanceBehave::manageDatabase(double trueWindDirection, SystemStateModel &systemStateModel){}
+void CollisionAvoidanceBehave::manageDatabase(double trueWindDirection,
+                                              SystemStateModel &systemStateModel){}
 void CollisionAvoidanceBehave::setupWaypoints(){}
 void CollisionAvoidanceBehave::setNextWaypoint(){}
 void CollisionAvoidanceBehave::setPreviousWayPoint(SystemStateModel &m_systemStateModel){}
@@ -142,10 +145,23 @@ void CollisionAvoidanceBehave::calculatePotentialField(){
     std::cout << "ENTERING calculatePotentialField" << std::endl;
     //Init
     Eigen::MatrixXd ObsP = 0*point_x, ObjP = 0*point_x, xObs = 0*point_x, yObs = 0*point_x, xObj = 0*point_x, yObj = 0*point_x, xo = 0*point_x, yo = 0*point_x;
-    Eigen::MatrixXd tHoleR = 0*point_x, tHoleL = 0*point_x, tPike = 0*point_x, tR = 0*point_x, tL = 0*point_x, tP = 0*point_x, ep1 = 0*point_x,ep2 = 0*point_x, xb = 0*point_x;
+    Eigen::MatrixXd tHoleR = 0*point_x,
+                    tHoleL = 0*point_x,
+                    tPike = 0*point_x,
+                    tR = 0*point_x,
+                    tL = 0*point_x, tP = 0*point_x, ep1 = 0*point_x,ep2 = 0*point_x, xb = 0*point_x;
     Eigen::MatrixXd yb = 0*point_x, x1 = 0*point_x, y1 = 0*point_x, xw = 0*point_x, yw = 0*point_x, WindP = 0*point_x, BoatP = 0*point_x;
-    float boatHeading =  boat_state(0,2), bearingObstacle = 0, T = 0,Ao = 1.6, strengthBoat = 3, strengthHoleBoat = 1.5, strengthPikeBoat = 5, lengthObstacle=radius_obstacle*step_coeff;
-    int scaleHole = 50, scalePike = 550, strengthHoles = 2, strengthPike = 4, strength = 5, isObsPEmpty = 1;
+    float boatHeading =  boat_state(0,2), bearingObstacle = 0, T = 0,Ao = 1.6,
+            strengthBoat = 3,
+            strengthHoleBoat = 1.5,
+            strengthPikeBoat = 5,
+            lengthObstacle=radius_obstacle*step_coeff;
+    int scaleHole = 50,
+            scalePike = 550,
+            strengthHoles = 2,
+            strengthPike = 4,
+            strength = 5,
+            isObsPEmpty = 1;
 
     //Obstacle potential function
     if(only_direction_mode==0){
