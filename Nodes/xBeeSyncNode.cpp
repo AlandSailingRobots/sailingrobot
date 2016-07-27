@@ -17,6 +17,7 @@
 #include <chrono>
 #include <thread>
 #include <iostream>
+#include <sstream>
 
 //Should do most of the required things, see above
 xBeeSyncNode::xBeeSyncNode(MessageBus& msgBus, DBHandler* db) :
@@ -98,6 +99,11 @@ void xBeeSyncNode::sendVesselState(VesselStateMsg* msg){
 		int dummyRudderState = -1;
 		int dummySailState = -1;
 
+		//Timestamp double->string conversion
+		std::ostringstream strs;
+		strs << msg->unixTime();
+		std::string timeStampString = strs.str(); 
+
 		//Make sure we do not send to often
 		if (m_messageTimeBuffer <= 0){
 			
@@ -105,7 +111,7 @@ void xBeeSyncNode::sendVesselState(VesselStateMsg* msg){
 			//If xml reading on the receiving end has been altered to work with other values it is safe to remove the dummy values.
 			//If more variables have been implemented in VesselStateMessage it is safe to replace the dummy values.
 			std::string res_xml = m_XML_log.log_xml(
-				msg->unixTime(),
+				timeStampString,
 				msg->windDir(),
 				msg->windSpeed(),
 				msg->compassHeading(),
@@ -170,7 +176,7 @@ void xBeeSyncNode::receiveControl(){
 			ActuatorPositionMsg* actuatorControl = new ActuatorPositionMsg(rudder_cmd, sail_cmd);
 			m_MsgBus.sendMessage(actuatorControl);
 
-			bool autorun = false;
+			//bool autorun = false;
 			//Is external command still used?
 			//m_external_command->setData(timestamp, autorun, rudder_cmd, sail_cmd);
 		}
@@ -188,7 +194,7 @@ void xBeeSyncNode::xBeeSyncThread(void* nodePtr) {
 
 		node->m_timer.reset();
 
-		node->SendLogs();
+		node->sendLogs();
 		node->receiveControl();
 
 		node->m_timer.sleepUntil(node->m_loopTime);
