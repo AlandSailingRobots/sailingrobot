@@ -14,9 +14,6 @@
  ***************************************************************************************/
 
 #include "xBeeSyncNode.h"
-#include <chrono>
-#include <thread>
-#include <iostream>
 #include <sstream>
 
 xBeeSyncNode::xBeeSyncNode(MessageBus& msgBus, DBHandler* db) :
