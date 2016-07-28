@@ -117,28 +117,34 @@ void LineFollowNode::calculateActuatorPos(VesselStateMsg* msg)
         return;
     }
 
-    double trueWindDirection = Utility::getTrueWindDirection(msg->windDir(), msg->windSpeed(), msg->speed(), msg->compassHeading(), twdBuffer, twdBufferMaxSize);
+    double trueWindDirection = Utility::getTrueWindDirection(msg->windDir(), msg->windSpeed(),
+                                                             msg->speed(), msg->compassHeading(), twdBuffer, twdBufferMaxSize);
     /* add pi because trueWindDirection is originally origin of wind but algorithm need direction*/
     double trueWindDirection_radian = Utility::degreeToRadian(trueWindDirection)+M_PI;
 
-    //GET DIRECTION
+    //GET DIRECTION--------
     double currentHeading = getHeading(msg->gpsHeading(), msg->compassHeading(), msg->speed(), false, false);
     double currentHeading_radian = Utility::degreeToRadian(currentHeading);
     double signedDistance = Utility::calculateSignedDistanceToLine(m_nextWaypointLon, m_nextWaypointLat, m_prevWaypointLon,
-            m_prevWaypointLat, msg->longitude(), msg->latitude());
+                                                                   m_prevWaypointLat, msg->longitude(), msg->latitude());
     int maxTackDistance = 20; //'r'
     double phi = calculateAngleOfDesiredTrajectory(msg);
     double desiredHeading = phi + (2 * (M_PI / 4)/M_PI) * atan(signedDistance/maxTackDistance); //heading to smoothly join the line
     desiredHeading = Utility::limitRadianAngleRange(desiredHeading);
+    //---------------------
 
     //Change tacking direction when reaching max distance
     if(abs(signedDistance) > maxTackDistance)
+    {
         m_tackingDirection = -Utility::sgn(signedDistance);
+    }
+    //--------------------------------------------------
 
-    //Check if tacking is needed
+    //Check if tacking is needed-----
     if( (cos(trueWindDirection_radian - desiredHeading) + cos(m_tackAngle) < 0) || (cos(trueWindDirection_radian - phi) + cos(m_tackAngle) < 0))
     {
-        if(!m_tack){ /* initialize tacking direction */
+        if(!m_tack) /* initialize tacking direction */
+        {
             m_tackingDirection = -Utility::sgn(currentHeading_radian-(fmod(trueWindDirection_radian+M_PI, 2*M_PI) - M_PI));
             m_tack = true;
         }
@@ -147,29 +153,44 @@ void LineFollowNode::calculateActuatorPos(VesselStateMsg* msg)
         desiredHeading = Utility::limitRadianAngleRange(desiredHeading);
     }
     else
+    {
         m_tack = false;
+    }
+    //-------------------------------
 
     double rudderCommand, sailCommand;
-    //SET RUDDER
+
+    //SET RUDDER-------
     if(cos(currentHeading_radian - desiredHeading) < 0) //if boat heading is too far away from desired heading
+    {
         rudderCommand = -Utility::sgn(msg->speed()) * m_maxCommandAngle * Utility::sgn(sin(currentHeading_radian - desiredHeading));
+    }
     else
+    {
         rudderCommand = -Utility::sgn(msg->speed()) * m_maxCommandAngle * sin(currentHeading_radian - desiredHeading);
+    }
+    //-----------------
 
-    //SET SAIL
-    double apparentWindDirection = Utility::getApparentWindDirection(msg->windDir(), msg->windSpeed(), msg->speed(), currentHeading_radian, trueWindDirection_radian)*M_PI/180;
+    //SET SAIL---------
+    double apparentWindDirection = Utility::getApparentWindDirection(msg->windDir(),
+                    msg->windSpeed(), msg->speed(), currentHeading_radian, trueWindDirection_radian)*M_PI/180;
+
+    apparentWindDirection = ( (apparentWindDirection+M_PI>M_PI) ? (apparentWindDirection-M_PI):(apparentWindDirection+M_PI) );
+
     sailCommand = abs( ((m_minSailAngle - m_maxSailAngle) / M_PI) * abs(apparentWindDirection) + m_maxSailAngle);
-
+    //------------------
     int rudderCommand_norm = m_rudderCommand.getCommand(rudderCommand);
     int sailCommand_norm = m_sailCommand.getCommand(sailCommand);
 
+    //Send messages----
     ActuatorPositionMsg *actuatorMsg = new ActuatorPositionMsg(NodeID::RudderActuator, nodeID(), rudderCommand_norm, sailCommand_norm);
     m_MsgBus.sendMessage(actuatorMsg);
+    //------------------
 
     double bearingToNextWaypoint = m_courseMath.calculateBTW(msg->longitude(), msg->latitude(), m_nextWaypointLon, m_nextWaypointLat); //calculated for database
     double distanceToNextWaypoint = m_courseMath.calculateDTW(msg->longitude(), msg->latitude(), m_nextWaypointLon, m_nextWaypointLat);
 
-    manageDatabase(msg, trueWindDirection, rudderCommand, sailCommand, currentHeading, distanceToNextWaypoint, bearingToNextWaypoint);
+    manageDatabase(msg, trueWindDirection, rudderCommand_norm, sailCommand_norm, currentHeading, distanceToNextWaypoint, bearingToNextWaypoint);
 }
 
 void LineFollowNode::setPrevWaypointData(WaypointDataMsg* waypMsg, VesselStateMsg* vesselMsg)
