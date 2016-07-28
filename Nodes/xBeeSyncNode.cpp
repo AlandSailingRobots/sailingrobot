@@ -85,7 +85,7 @@ void xBeeSyncNode::sendVesselState(VesselStateMsg* msg){
 		//check if enough time has passed since last call (determined by loop_time)
 		if (!m_firstMessageCall)
 		{
-			if (msg->unixTime() - m_lastMessageCallTime => m_loopTime){
+			if ((SysClock::unixTime() - m_lastMessageCallTime) >= m_loopTime){
 				enoughTimePassed = true;
 			}
 		}
@@ -94,7 +94,7 @@ void xBeeSyncNode::sendVesselState(VesselStateMsg* msg){
 			m_firstMessageCall = false;
 			enoughTimePassed = true;
 		}
-		m_lastMessageCallTime = msg->unixTime();
+		m_lastMessageCallTime = SysClock::unixTime();
 
 		//Dummy values are used when not implemented in VesselStateMessage to fill gaps in expected xml string
 		double dummyAccelerationXYZ = -1; //Acceleration values

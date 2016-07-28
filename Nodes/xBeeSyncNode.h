@@ -19,7 +19,7 @@
 #include "ActiveNode.h"
 #include "xBee/xBee.h"
 #include "xmlparser/src/xml_log.h"
-#include "logger/Logger.h"
+#include "SystemServices/Logger.h"
 #include "dbhandler/DBHandler.h"
 #include "utility/Timer.h"
 #include "Messages/VesselStateMsg.h"
