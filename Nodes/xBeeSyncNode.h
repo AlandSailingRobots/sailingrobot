@@ -24,11 +24,10 @@
 #include "utility/Timer.h"
 #include "Messages/VesselStateMsg.h"
 #include "Messages/ActuatorPositionMsg.h"
-#include "utility/SysClock.h"
 
 class xBeeSyncNode : public ActiveNode {
 public:
-	xBeeSyncNode(MessageBus& msgBus, DBHandler *db);
+	xBeeSyncNode(MessageBus& msgBus, DBHandler& db);
 
 	///----------------------------------------------------------------------------------
 	/// Gets all settings from database and initializes xbee object
@@ -72,7 +71,7 @@ private:
 	XML_log m_XML_log;
 	xBee m_xBee;
 	int m_xbee_fd;
-	DBHandler *m_db;
+	DBHandler &m_db;
 	Timer m_timer;
 
 	bool m_running;
