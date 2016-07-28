@@ -281,7 +281,7 @@ CREATE TABLE sailing_robot_config (
   loop_time DOUBLE,
   scanning BOOLEAN,
   line_follow BOOLEAN,
-  wait_for_network BOOLEAN
+  require_network BOOLEAN
 );
 
 
