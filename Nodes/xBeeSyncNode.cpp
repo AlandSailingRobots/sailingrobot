@@ -19,16 +19,15 @@
 xBeeSyncNode::xBeeSyncNode(MessageBus& msgBus, DBHandler& db) :
 	ActiveNode(NodeID::xBeeSync, msgBus), m_db(db)
 {
-
-}
-bool xBeeSyncNode::init()
-{
-
+	m_firstMessageCall = true;
 	m_sending = m_db.retrieveCellAsInt("xbee_config", "1", "send");
 	m_receiving = m_db.retrieveCellAsInt("xbee_config", "1", "recieve");
 	m_sendLogs = m_db.retrieveCellAsInt("xbee_config", "1", "send_logs");
 	m_loopTime = stod(m_db.retrieveCell("xbee_config", "1", "loop_time"));
 	m_pushOnlyLatestLogs = m_db.retrieveCellAsInt("xbee_config", "1", "push_only_latest_logs");
+}
+bool xBeeSyncNode::init()
+{
 
 	bool rv = false;
 
@@ -52,8 +51,6 @@ void xBeeSyncNode::start(){
 
 	if (m_initialised)
     {
-
-		m_messageTimeBuffer = m_loopTime;
         runThread(xBeeSyncThread);
     }
     else
@@ -83,9 +80,21 @@ void xBeeSyncNode::sendVesselState(VesselStateMsg* msg){
 	//Do not allow sending of vesselstate and logs at the same time; double output turns into mush
 	if (!m_sendLogs && m_sending)
 	{
-		//The amount of seconds between expected calls from VesselStateMsg
-		double stateMessageInterval = 0.4;
-		m_messageTimeBuffer -= stateMessageInterval;
+		bool enoughTimePassed = false;
+
+		//check if enough time has passed since last call (determined by loop_time)
+		if (!m_firstMessageCall)
+		{
+			if (msg->unixTime() - m_lastMessageCallTime => m_loopTime){
+				enoughTimePassed = true;
+			}
+		}
+		else
+		{
+			m_firstMessageCall = false;
+			enoughTimePassed = true;
+		}
+		m_lastMessageCallTime = msg->unixTime();
 
 		//Dummy values are used when not implemented in VesselStateMessage to fill gaps in expected xml string
 		double dummyAccelerationXYZ = -1; //Acceleration values
@@ -99,7 +108,7 @@ void xBeeSyncNode::sendVesselState(VesselStateMsg* msg){
 		std::string timeStampString = strs.str(); 
 
 		//Make sure we do not send too often
-		if (m_messageTimeBuffer <= 0){
+		if (enoughTimePassed){
 			
 			//If xml reading on the receiving end has been altered to work with other values it is safe to remove the dummy values.
 			//If more variables have been implemented in VesselStateMessage it is safe to replace the dummy values.
@@ -127,8 +136,6 @@ void xBeeSyncNode::sendVesselState(VesselStateMsg* msg){
 
 			m_xBee.transmitData(m_xbee_fd,res_xml);
 
-			//Reset after send, limit sending interval to node-wide loop time
-			m_messageTimeBuffer = m_loopTime;
 		}
 	}
 

@@ -81,7 +81,8 @@ private:
 	bool m_pushOnlyLatestLogs;
 	bool m_initialised;
 	double m_loopTime;
-	int m_messageTimeBuffer;
+	double m_lastMessageCallTime;
+	bool m_firstMessageCall;
 
 };
 
