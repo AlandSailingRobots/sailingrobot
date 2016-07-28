@@ -18,10 +18,10 @@
 #define MAXIMUM_SENSOR_RANGE 100.0
 #define SENSOR_HEADING_RELATIVE_TO_BOAT 0.0 // There might be several sensors
 #define SENSOR_ARC_ANGLE 90.0 // Every angle is in radian
-#define CHANNEL_WIDTH 15.0
-#define SAFE_DISTANCE 30.0
-#define EARTH_RADIUS 6371000
-#define CONVERSION_FACTOR_METER_TO_GPS 0.00000899280575539
+#define CHANNEL_WIDTH 15.0 // in meters
+#define SAFE_DISTANCE 30.0 // in meters
+#define EARTH_RADIUS 6371000 // in meters
+#define CONVERSION_FACTOR_METER_TO_GPS 0.00000899280575539/180*M_PI // in rad/meters
 
 // SAVED CODE IN CASE OF ARCHITECTURAL CHANGE
 /*
@@ -125,10 +125,18 @@ private:
         Eigen::ArrayXXd field;
     };
 
-    std::vector<Obstacle> seenObstacles;
-    FollowedLine followedLine;
-    std::vector<Eigen::Vector2d> sailingZone;
-    SensorData sensorOutput;
+    std::vector<Obstacle> m_seenObstacles;
+    // Since followedLine is updated from the waypointNode at each iteration
+    // maybe it's not necessary to put it as a class variable.
+    // TODO : investigate usefulness of followedLine as a class variable, same for sensorOutput
+    FollowedLine m_followedLine;
+    std::vector<Eigen::Vector2d> m_sailingZone;
+    SensorData m_sensorOutput;
+
+    bool m_tack; //Need init
+    int m_tackingDirection; //Need init
+
+    // UTILITY FUNCTIONS
 
     /**
      * Gives the difference between two angles regardless of their definition.
@@ -206,6 +214,31 @@ private:
                                     Eigen::Vector2d point);
 
     /**
+     * Got from http://www.movable-type.co.uk/scripts/latlong.html
+     * Given a start point, initial bearing, and distance, this will calculate
+     * the destination point and final bearing travelling along
+     * a (shortest distance) great circle arc.
+     *
+     * Formula: 	φ2 = asin( sin φ1 ⋅ cos δ + cos φ1 ⋅ sin δ ⋅ cos θ )
+	 *              λ2 = λ1 + atan2( sin θ ⋅ sin δ ⋅ cos φ1, cos δ − sin φ1 ⋅ sin φ2 )
+     *
+     * where 	φ is latitude, (y)
+     *          λ is longitude, (x)
+     *          θ is the bearing (clockwise from north),
+     *          δ is the angular distance d/R;
+     *          d being the distance travelled,
+     *          R the earth’s radius
+     *
+     * @param distance
+     * @param bearing
+     * @param startPoint
+     * @return
+     */
+    Eigen::Vector2d getPointWithDistanceAndBearing(double distance,
+                                                   double bearing
+                                                   Eigen::Vector2d startPoint);
+
+    /**
      * Transform GPS coordinates 2d vectors into 3D cartesian vectors
      * The earth is seen as a sphere.
      * @param vector
@@ -281,6 +314,8 @@ private:
      */
     void printMat(std::string const &name,
                   Eigen::MatrixXd const &mat);
+
+    //PRIVATE MAIN FUNCTIONS
 
     /**
      * Makes the interface between the old code and the new one. This is make the code more modular
