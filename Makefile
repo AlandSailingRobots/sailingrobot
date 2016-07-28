@@ -55,7 +55,7 @@ POSITION = 				utility/Position.cpp utility/MockPosition.cpp utility/RealPositio
 
 COURSE = 				coursecalculation/CourseCalculation.cpp coursecalculation/CourseMath.cpp
 
-DB = 					dbhandler/DBHandler.cpp
+DB = 					dbhandler/DBHandler.cpp dbhandler/DBLogger.cpp
 
 COMMAND = 				ruddercommand/RudderCommand.cpp sailcommand/SailCommand.cpp
 

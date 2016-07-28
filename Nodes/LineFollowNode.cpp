@@ -25,7 +25,7 @@
 #define DEFAULT_TWD_BUFFERSIZE 200
 
 LineFollowNode::LineFollowNode(MessageBus& msgBus, DBHandler& db)
-:  Node(NodeID::SailingLogic, msgBus), m_db(db),
+:  Node(NodeID::SailingLogic, msgBus), m_db(db), m_dbLogger(5, db),
     m_nextWaypointId(0),  
     m_nextWaypointLon(0), 
     m_nextWaypointLat(0),
@@ -54,6 +54,7 @@ bool LineFollowNode::init()
     twdBufferMaxSize = m_db.retrieveCellAsInt("buffer_config", "1", "true_wind");
 	if(twdBufferMaxSize == 0)
 		twdBufferMaxSize = DEFAULT_TWD_BUFFERSIZE;
+	m_dbLogger.startWorkerThread();
     return true;
 }
 
@@ -170,7 +171,7 @@ void LineFollowNode::calculateActuatorPos(VesselStateMsg* msg)
     double bearingToNextWaypoint = m_courseMath.calculateBTW(msg->longitude(), msg->latitude(), m_nextWaypointLon, m_nextWaypointLat); //calculated for database
     double distanceToNextWaypoint = m_courseMath.calculateDTW(msg->longitude(), msg->latitude(), m_nextWaypointLon, m_nextWaypointLat);
 
-    manageDatabase(msg, trueWindDirection, rudderCommand, sailCommand, currentHeading, distanceToNextWaypoint, bearingToNextWaypoint);
+    m_dbLogger.log(msg, rudderCommand, sailCommand, 0, 0, distanceToNextWaypoint, bearingToNextWaypoint, desiredHeading, m_tack, getGoingStarboard(), m_nextWaypointId, trueWindDirection, false);
 }
 
 void LineFollowNode::setPrevWaypointData(WaypointDataMsg* waypMsg, VesselStateMsg* vesselMsg)
@@ -258,6 +259,7 @@ bool LineFollowNode::getGoingStarboard()
     else return false;
 }
 
+/*
 void LineFollowNode::manageDatabase(VesselStateMsg* msg, double trueWindDirection, double rudder, double sail, double heading,
                         double distanceToNextWaypoint, double bearingToNextWaypoint){
   //logging
@@ -277,4 +279,4 @@ void LineFollowNode::manageDatabase(VesselStateMsg* msg, double trueWindDirectio
     trueWindDirection,
     routeStarted
   );
-}
+}*/

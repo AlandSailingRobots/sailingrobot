@@ -24,7 +24,7 @@ RoutingNode::RoutingNode(MessageBus& msgBus, DBHandler& db)
     m_nextWaypointLat(0),
     m_nextWaypointDeclination(0),
     m_nextWaypointRadius(0),
-    m_db(db),
+    m_db(db), m_dbLogger(10, m_db),
     m_waypointRouting(m_nextWaypointLon, m_nextWaypointLat, m_nextWaypointRadius,
         atof(m_db.retrieveCell("waypoint_routing_config", "1", "radius_ratio").c_str()),
         atof(m_db.retrieveCell("course_calculation_config", "1", "tack_angle").c_str()),
@@ -46,6 +46,7 @@ bool RoutingNode::init()
     twdBufferMaxSize = m_db.retrieveCellAsInt("buffer_config", "1", "true_wind");
 	if(twdBufferMaxSize == 0)
 		twdBufferMaxSize = DEFAULT_TWD_BUFFERSIZE;
+	m_dbLogger.startWorkerThread();
     return true;
 }
 
@@ -98,7 +99,9 @@ void RoutingNode::calculateActuatorPos(VesselStateMsg* msg)
     m_MsgBus.sendMessage(rudderMsg);
     m_MsgBus.sendMessage(sailMsg);
 
-    manageDatabase(msg, trueWindDirection, rudderCommand, sailCommand);
+    //manageDatabase(msg, trueWindDirection, rudderCommand, sailCommand);
+
+    m_dbLogger.log(msg, rudderCommand, sailCommand, 0, 0, m_waypointRouting.getDTW(), m_waypointRouting.getBTW(), m_waypointRouting.getCTS(), m_waypointRouting.getTack(), m_waypointRouting.getGoingStarboard(), m_nextWaypointId, trueWindDirection, false);
 }
 
 int RoutingNode::getHeading(int gpsHeading, int compassHeading, double gpsSpeed, bool mockPosition,bool getHeadingFromCompass) {
@@ -158,7 +161,7 @@ void RoutingNode::setupSailCommand()
 	        m_db.retrieveCellAsInt("sail_command_config", "1", "run_command"));
 }
 
-void RoutingNode::manageDatabase(VesselStateMsg* msg, double trueWindDirection, double rudder, double sail){
+/*void RoutingNode::manageDatabase(VesselStateMsg* msg, double trueWindDirection, double rudder, double sail){
   //logging
   bool routeStarted = false;
   m_db.insertDataLog(
@@ -176,4 +179,4 @@ void RoutingNode::manageDatabase(VesselStateMsg* msg, double trueWindDirection, 
     trueWindDirection,
     routeStarted
   );
-}
+}*/

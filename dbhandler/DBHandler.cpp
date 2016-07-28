@@ -78,21 +78,8 @@ void DBHandler::getDataAsJson(std::string select, std::string table, std::string
 	columnNames.clear();
 }
 
-void DBHandler::insertDataLog(
-	VesselStateMsg* msg,
-	double rudder,
-	double sail,
-	int sailServoPosition,
-	int rudderServoPosition,
-	double courseCalculationDistanceToWaypoint,
-	double courseCalculationBearingToWaypoint,
-	double courseCalculationCourseToSteer,
-	bool courseCalculationTack,
-	bool courseCalculationGoingStarboard,
-	int waypointId,
-	double trueWindDirectionCalc,
-	bool routeStarted) {
-
+void DBHandler::insertDataLogs(std::vector<LogItem>& logs)
+{
 		std::stringstream arduinoValues;
 		std::stringstream gpsValues;
 		std::stringstream courseCalculationValues;
@@ -100,59 +87,71 @@ void DBHandler::insertDataLog(
 		std::stringstream systemValues;
 		std::stringstream windsensorValues;
 
+		sqlite3* db = openDatabase();
 
-		arduinoValues << std::setprecision(10)
-			<< msg->arduinoPressure() << ", "
-			<< msg->arduinoRudder() << ", "
-			<< msg->arduinoSheet() << ", "
-			<< msg->arduinoBattery();
+		if(db == NULL)
+		{
+			Logger::error("%s Database is null!", __PRETTY_FUNCTION__);
+			return;
+		}
 
-		gpsValues << std::setprecision(10) << "'"
-			<< "ADD GPS TIME" << "', "  //TODO - Oliver: Get GPS timestamp
-			<< msg->latitude() << ", "
-			<< msg->longitude() << ", "
-			<< msg->speed() << ", "
-			<< msg->gpsHeading() << ", "
-			<< msg->gpsSatellite() << ", "
-			<< routeStarted;
+		for(auto log: logs)
+		{
+			arduinoValues << std::setprecision(10)
+				<< log.m_arduinoPressure << ", "
+				<< log.m_arduinoRudder << ", "
+				<< log.m_arduinoSheet << ", "
+				<< log.m_arduinoBattery;
 
-		courseCalculationValues << std::setprecision(10)
-			<< courseCalculationDistanceToWaypoint << ", "
-			<< courseCalculationBearingToWaypoint << ", "
-			<< courseCalculationCourseToSteer << ", "
-			<< courseCalculationTack << ", "
-			<< courseCalculationGoingStarboard;
+			gpsValues << std::setprecision(10) << "'"
+				<< "ADD GPS TIME" << "', "  //TODO - Oliver: Get GPS timestamp
+				<< log.m_gpsLat << ", "
+				<< log.m_gpsLon << ", "
+				<< log.m_gpsSpeed << ", "
+				<< log.m_gpsHeading << ", "
+				<< log.m_gpsSatellite << ", "
+				<< log.m_routeStarted;
 
-		compassModelValues << std::setprecision(10)
-			<< msg->compassHeading() << ", "
-			<< msg->compassPitch() << ", "
-			<< msg->compassRoll();
+			courseCalculationValues << std::setprecision(10)
+				<< log.m_distanceToWaypoint << ", "
+				<< log.m_bearingToWaypoint << ", "
+				<< log.m_courseToSteer << ", "
+				<< log.m_tack << ", "
+				<< log.m_goingStarboard;
 
-		windsensorValues << std::setprecision(10)
-			<< msg->windDir() << ", "
-			<< msg->windSpeed() << ", "
-			<< msg->windTemp();
+			compassModelValues << std::setprecision(10)
+				<< log.m_compassHeading << ", "
+				<< log.m_compassPitch << ", "
+				<< log.m_compassRoll;
 
-		printf("GPS GMT + 3: %s GPS UTC: %s\n","ADD GPS TIME","ADD GPS UTC_TIME"); //TODO - Oliver: Get GPS timestamp
-		int arduinoId = insertLog("arduino_datalogs",arduinoValues.str());
-		int windsensorId = insertLog("windsensor_datalogs",windsensorValues.str());
-		int gpsId = insertLog("gps_datalogs",gpsValues.str());
-		int courceCalculationId = insertLog("course_calculation_datalogs",courseCalculationValues.str());
-		int compassModelId = insertLog("compass_datalogs",compassModelValues.str());
+			windsensorValues << std::setprecision(10)
+				<< log.m_windDir << ", "
+				<< log.m_windSpeed << ", "
+				<< log.m_windTemp;
 
-		systemValues << std::setprecision(10)
-			<< gpsId << ", "
-			<< courceCalculationId << ", "
-			<< arduinoId << ", "
-			<< windsensorId << ", "
-			<< compassModelId << ", "
-			<< sail << ", "
-			<< rudder << ", "
-			<< sailServoPosition << ", "
-			<< rudderServoPosition << ", "
-			<< waypointId << ", "
-			<< trueWindDirectionCalc;
-		m_latestDataLogId = insertLog("system_datalogs", systemValues.str());
+			printf("GPS GMT + 3: %s GPS UTC: %s\n","ADD GPS TIME","ADD GPS UTC_TIME"); //TODO - Oliver: Get GPS timestamp
+			int arduinoId = insertLog("arduino_datalogs",arduinoValues.str(), db);
+			int windsensorId = insertLog("windsensor_datalogs",windsensorValues.str(), db);
+			int gpsId = insertLog("gps_datalogs",gpsValues.str(), db);
+			int courceCalculationId = insertLog("course_calculation_datalogs",courseCalculationValues.str(), db);
+			int compassModelId = insertLog("compass_datalogs",compassModelValues.str(), db);
+
+			systemValues << std::setprecision(10)
+				<< gpsId << ", "
+				<< courceCalculationId << ", "
+				<< arduinoId << ", "
+				<< windsensorId << ", "
+				<< compassModelId << ", "
+				<< log.m_sail << ", "
+				<< log.m_rudder << ", "
+				<< log.m_sailServoPosition << ", "
+				<< log.m_rudderServoPosition << ", "
+				<< log.m_waypointId << ", "
+				<< log.m_twd;
+			m_latestDataLogId = insertLog("system_datalogs", systemValues.str(), db);
+
+			closeDatabase(db);
+		}
 }
 //TODO -Oliver: make private
 void DBHandler::insertMessageLog(std::string gps_time, std::string type, std::string msg) {
@@ -579,11 +578,11 @@ int DBHandler::getTable(sqlite3* db, const std::string &sql, std::vector<std::st
 }
 
 
-int DBHandler::insertLog(std::string table, std::string values) {
+int DBHandler::insertLog(std::string table, std::string values, sqlite3* db) {
 	std::stringstream ss;
 	ss << "INSERT INTO " << table << " VALUES(NULL, " << values << ");";
 
-	if(queryTable(ss.str()))
+	if(queryTable(ss.str(), db))
 	{
 		std::string tableId = getIdFromTable(table,true);
 		if(tableId.size() > 0)
@@ -626,6 +625,35 @@ bool DBHandler::queryTable(std::string sqlINSERT) {
 		return false;
 	}
 	closeDatabase(db);
+	return true;
+}
+
+bool DBHandler::queryTable(std::string sqlINSERT, sqlite3* db) {
+	m_error = NULL;
+
+	if (db != NULL) {
+		int resultcode = 0;
+
+		do {
+			if(m_error != NULL) {
+				sqlite3_free(m_error);
+				m_error = NULL;
+			}
+
+			resultcode = sqlite3_exec(db, sqlINSERT.c_str(), NULL, NULL, &m_error);
+		} while(resultcode == SQLITE_BUSY);
+		if (m_error != NULL) {
+			Logger::error("%s Error: %s", __PRETTY_FUNCTION__, sqlite3_errmsg(db));
+
+			sqlite3_free(m_error);
+			return false;
+		}
+	}
+	else {
+		Logger::error("%s Error: no database found", __PRETTY_FUNCTION__);
+		return false;
+	}
+
 	return true;
 }
 
