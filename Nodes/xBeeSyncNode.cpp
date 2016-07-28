@@ -98,7 +98,6 @@ void xBeeSyncNode::sendVesselState(VesselStateMsg* msg){
 
 		//Dummy values are used when not implemented in VesselStateMessage to fill gaps in expected xml string
 		double dummyAccelerationXYZ = -1; //Acceleration values
-		int dummyArduinoValueN = -1; //Arduino values 0-3
 		int dummyRudderState = -1;
 		int dummySailState = -1;
 
@@ -126,10 +125,10 @@ void xBeeSyncNode::sendVesselState(VesselStateMsg* msg){
 				msg->longitude(),
 				msg->gpsHeading(),
 				msg->speed(),
-				dummyArduinoValueN,
-				dummyArduinoValueN,
-				dummyArduinoValueN,
-				dummyArduinoValueN,
+				msg->arduinoPressure(),
+				msg->arduinoRudder(),
+				msg->arduinoSheet(),
+				msg->arduinoBattery(),
 				dummyRudderState,
 				dummySailState
 			);
