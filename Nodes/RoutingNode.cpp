@@ -93,10 +93,8 @@ void RoutingNode::calculateActuatorPos(VesselStateMsg* msg)
     rudderCommand = m_rudderCommand.getCommand(rudderCommand);
 	sailCommand = m_sailCommand.getCommand(sailCommand);
 
-    ActuatorPositionMsg *rudderMsg = new ActuatorPositionMsg(NodeID::RudderActuator, nodeID(), rudderCommand);
-    ActuatorPositionMsg *sailMsg = new ActuatorPositionMsg(NodeID::SailActuator, nodeID(), sailCommand);
-    m_MsgBus.sendMessage(rudderMsg);
-    m_MsgBus.sendMessage(sailMsg);
+    ActuatorPositionMsg *actuatorMsg = new ActuatorPositionMsg(NodeID::RudderActuator, nodeID(), rudderCommand, sailCommand);
+    m_MsgBus.sendMessage(actuatorMsg);
 
     manageDatabase(msg, trueWindDirection, rudderCommand, sailCommand);
 }

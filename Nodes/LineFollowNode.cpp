@@ -183,10 +183,8 @@ void LineFollowNode::calculateActuatorPos(VesselStateMsg* msg)
     int sailCommand_norm = m_sailCommand.getCommand(sailCommand);
 
     //Send messages----
-    ActuatorPositionMsg *rudderMsg = new ActuatorPositionMsg(NodeID::RudderActuator, nodeID(), rudderCommand_norm);
-    ActuatorPositionMsg *sailMsg = new ActuatorPositionMsg(NodeID::SailActuator, nodeID(), sailCommand_norm);
-    m_MsgBus.sendMessage(rudderMsg);
-    m_MsgBus.sendMessage(sailMsg);
+    ActuatorPositionMsg *actuatorMsg = new ActuatorPositionMsg(NodeID::RudderActuator, nodeID(), rudderCommand_norm, sailCommand_norm);
+    m_MsgBus.sendMessage(actuatorMsg);
     //------------------
 
     double bearingToNextWaypoint = m_courseMath.calculateBTW(msg->longitude(), msg->latitude(), m_nextWaypointLon, m_nextWaypointLat); //calculated for database

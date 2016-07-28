@@ -44,7 +44,23 @@ void ActuatorNode::processMessage(const Message* message)
 	{
 		ActuatorPositionMsg* msg = (ActuatorPositionMsg*)message;
 
-		if(not MaestroController::writeCommand(MaestroCommands::SetPosition, m_Channel, msg->position()))
+		//Get relevant command
+		int setPosition = 0;
+
+		if (nodeID() == NodeID::RudderActuator)
+		{
+			setPosition = msg->sailPosition();
+		}
+		else if (nodeID() == NodeID::SailActuator)
+		{
+			setPosition = msg->rudderPosition();
+		}
+		else
+		{
+			Logger::warning("%s Actuator: %d Unknown/Unregistered actuator message NodeID", __PRETTY_FUNCTION__, (int)nodeID());
+		}
+
+		if(not MaestroController::writeCommand(MaestroCommands::SetPosition, m_Channel, setPosition))
 		{
 			Logger::error("%s Actuator: %d Failed to write position command", __PRETTY_FUNCTION__, (int)nodeID());
 		}
