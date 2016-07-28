@@ -36,6 +36,8 @@ LineFollowBehaviour::LineFollowBehaviour(DBHandler *db):
     m_minSailAngle = M_PI / 32;
     m_tackAngle = 0.872665; //50°
     desiredHeadingTackMode = 0;
+    distanceToNextWaypoint=100000;
+    bearingToNextWaypoint =0;
 }
 
 bool LineFollowBehaviour::init()
@@ -208,6 +210,9 @@ void LineFollowBehaviour::computeCommands(SystemStateModel &systemStateModel,std
 
         //SET SAIL
         double apparentWindDirection = Utility::getApparentWindDirection(systemStateModel, currentHeading, trueWindDirection)*M_PI/180;
+        apparentWindDirection = ((apparentWindDirection+M_PI>M_PI) ? (apparentWindDirection-M_PI):(apparentWindDirection+M_PI));
+
+
         m_sailCommand = abs( ((m_minSailAngle - m_maxSailAngle) / M_PI) * abs(apparentWindDirection) + m_maxSailAngle);
 
         /*printf("CurrentHeading: %f       signedDistance: %f        Phi: %f        Desired heading: %f Diff heading: %f \n", currentHeading, signedDistance, phi, desiredHeading, desiredHeading-phi);
