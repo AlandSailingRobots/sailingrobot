@@ -1,4 +1,4 @@
-//
+#include "CollisionAvoidanceBehaviour.h"//
 // Created by Simon CHANU on 11/07/16.
 //
 
@@ -48,17 +48,14 @@ CollisionAvoidanceBehaviour::CollisionAvoidanceBehaviour(DBHandler *db) :
         RoutingBehaviour(db) {}
 
 // UTILITY FUNCTIONS
+// TODO : move to Utility class ?
 
-// Might be put into Utility class soon.
-// TODO : Utility class ?
 double CollisionAvoidanceBehaviour::angleDiff(
         double radAngle1,
         double radAngle2) {
     return fmod(radAngle1-radAngle2+M_PI,2*M_PI)+M_PI;
 }
 
-// Maybe this function should as well be in the Utility class.
-// TODO : Utility class ?
 double CollisionAvoidanceBehaviour::calculateGPSDistance(
         Eigen::Vector2d point1,
         Eigen::Vector2d point2) {
@@ -72,7 +69,6 @@ double CollisionAvoidanceBehaviour::calculateGPSDistance(
     return Rearth*c;
 }
 
-// TODO : Utility class ?
 Eigen::Vector2d CollisionAvoidanceBehaviour::findCenter(
         const std::vector<Eigen::Vector2d> polygon) {
     double sumOfX = 0;
@@ -85,7 +81,6 @@ Eigen::Vector2d CollisionAvoidanceBehaviour::findCenter(
     return meanPolygon;
 }
 
-// TODO : move to Utility ?
 double CollisionAvoidanceBehaviour::getArea(
         std::vector<Eigen::Vector2d> polygon){
     double sum = 0;
@@ -95,7 +90,6 @@ double CollisionAvoidanceBehaviour::getArea(
     return sum/2;
 }
 
-// TODO : Utility class ?
 double CollisionAvoidanceBehaviour::signedDistanceFromLine(
         Eigen::Vector2d linePt1,
         Eigen::Vector2d linePt2,
@@ -112,7 +106,6 @@ double CollisionAvoidanceBehaviour::signedDistanceFromLine(
     return arcLenght;
 }
 
-// TODO : Utility class ?
 Eigen::Vector2d CollisionAvoidanceBehaviour::getClosestVertex(
         std::vector<Eigen::Vector2d> polygon,
         Eigen::Vector2d point){
@@ -141,7 +134,7 @@ Eigen::Vector2d CollisionAvoidanceBehaviour::getClosestPoint(
     const Eigen::Vector3d worldOrigin(0,0,0);
 
     for(int i = 0;i<polygon.size();i++){
-        const int iPlusOne = static_cast<const int>((i+1)//polygon.size());
+        const int iPlusOne = static_cast<const int>((i+1) % polygon.size());
         const std::vector<double> distInfo = distanceFromSegment(polygon[i],
                                                                  polygon[iPlusOne],
                                                                  point);
@@ -183,7 +176,24 @@ Eigen::Vector2d CollisionAvoidanceBehaviour::getClosestPoint(
     return closestPoint;
 }
 
-// TODO : Utility class ?
+Eigen::Vector2d CollisionAvoidanceBehaviour::getPointWithDistanceAndBearing(
+        double distance,
+        double bearing,
+        Eigen::Vector2d startPoint) {
+    // lat in rad, long in rad. Everything from east anticlockwise
+    const double angularDist = distance/EARTH_RADIUS;
+    // Since the bearing is here in radians from east, rightAngleForFormula = pi/2 - bearing
+    // so cos are transformed in sin and inversely the same for sin.
+    const double newLat = asin(cos(bearing)*cos(angularDist)
+                               +cos(startPoint(1))*sin(angularDist)*sin(bearing));
+    const double newLong = startPoint(0) + atan2(cos(bearing)*sin(angularDist)*cos(startPoint(1)),
+                                                 cos(angularDist) - sin(startPoint(1))*sin(newLat));
+    const Eigen::Vector2d endPoint(newLong,newLat);
+
+    return endPoint;
+
+}
+
 std::vector<double> CollisionAvoidanceBehaviour::distanceFromSegment(
         Eigen::Vector2d segmentPt1,
         Eigen::Vector2d segmentPt2,
@@ -575,7 +585,7 @@ PotentialMap CollisionAvoidanceBehaviour::compute_potential_field(
      * The values are scaled for meters.
      */
     // TODO : conversion to gps coordinates
-
+    // TODO : modify obstacle according to its width. ?
     const double scaleHole = 50;
     const double scalePike = 550;
     const double scale = 0.5;
@@ -723,18 +733,35 @@ Eigen::Vector2d CollisionAvoidanceBehaviour::find_minimum_potential_field(
                  /potField.field.cols()-(abs(potField.yMin));
     double I_y = I_row*(potField.yMax-potField.yMin)
                  /potField.field.rows()-(abs(potField.xMin));
-    const Eigen::Vector2d collision_avoidance_point(I_x,I_y)
+    const Eigen::Vector2d collision_avoidance_point(I_x,I_y);
     return collision_avoidance_point;
 }
 
 FollowedLine CollisionAvoidanceBehaviour::compute_new_path(
         Eigen::Vector2d collision_avoidance_point) {
-    // TODO initialize the 3 wps
+    const double avoidDist = 30;
+
+    // Initialize the 3 wps
+        // Behind the obstacle, not sure that using the heading of the boat is the best idea
+        // TODO some test on issue above (using heading of the boat in startCollPoint)
+    const Eigen::Vector2d trigoVect(cos(sensorOutput.compHeading + M_PI),
+                                    sin(sensorOutput.compHeading + M_PI));
+    const Eigen::Vector2d startCollPoint = getPointWithDistanceAndBearing( avoidDist,
+                                                                           sensorOutput.compHeading + M_PI,
+                                                                           sensorOutput.gpsPos);
+        // Avoid point : collision_avoidance_point
+        //Front of the obstacle
+    const Eigen::Vector2d endCollPoint   = getPointWithDistanceAndBearing(-avoidDist,
+                                                                           sensorOutput.compHeading + M_PI,
+                                                                           sensorOutput.gpsPos);
     // TODO add 3 wp to the database
-    // TODO set endPoint as avoidPoint
-    // TODO set startPoint as special point behind the boat
+
+    // Set followedLine accordingly
+    followedLine.startPoint = startCollPoint;
+    followedLine.endPoint = collision_avoidance_point;
+
     //The waypointNode gives which wps to follow.
-    return followedLine; // return is not necessary
+    return followedLine; //return is not necessary if followedLine is still a class variable. Delete it otherwise
 }
 
 CommandOutput CollisionAvoidanceBehaviour::compute_commands(
@@ -744,26 +771,31 @@ CommandOutput CollisionAvoidanceBehaviour::compute_commands(
     //   Controller based on the paper "A simple controller for line
     //   following of sailboats" by Luc Jaulin and Fabrice Le Bars
     // TODO Constans/Parameters
-    Eigen::Vector2d a = line.startPoint;
-    Eigen::Vector2d b = line.endPoint;
 //    m = x(1:2);
 //    theta = x(3);
 //    v_boat = x(4);
-//    r = 5;              // m -   cutoff distance
-//    delta_rMax = pi / 4;  // rad   maximum rudder angle
-//    gamma = pi / 4;       // rad   incidence angle
-//    ngzAngle = pi / 4;    // rad   close hauled angle
-//    ngzAngleBack = 0;    // rad   back wind angle
-    // ngzAngleOUT = ngzAngle+pi/8;   // rad   out of the no-go zone angle
-    // NGZHeading = mod(psi+pi,2*pi); // rad   no-go zone angle
 
-    // TODO Step 3
-//    phi = atan2((b(2) - a(2)), (b(1) - a(1)));
-//    if (abs(angDiff(atan2(m(2) - b(2), m(1) - b(1)), phi)) < pi / 2){
-//        b = followedLine(:,1);
-//        a = followedLine(:,2);
-//        phi = atan2((b(2) - a(2)), (b(1) - a(1)));
-//    }
+    const double delta_rMax = M_PI / 4;     // rad   maximum rudder angle
+    const double incidenceAngle = M_PI / 4; // rad   incidence angle
+    const double ngzAngle = M_PI / 4;       // rad   close hauled angle
+    const double ngzAngleBack = 0;          // rad   back wind angle
+    // ngzAngleOUT = ngzAngle+pi/8;         // rad   out of the no-go zone angle
+    // NGZHeading = mod(psi+pi,2*pi);       // rad   no-go zone angle
+
+    // Step 3
+    double lineHeading = atan2(line.endPoint(1) - line.startPoint(1),
+                               line.endPoint(0) - line.startPoint(0));
+    if (std::abs(angleDiff(atan2(sensorOutput.gpsPos(1) - line.endPoint(1),
+                                 sensorOutput.gpsPos(0) - line.endPoint(0)), lineHeading))
+        < M_PI / 2){
+        // Inverse the followed line if the boat has gone further the waypoint
+        const Eigen::Vector2d tmpStorageVec = line.endPoint;
+        line.endPoint = line.startPoint;
+        line.startPoint = tmpStorageVec;
+
+        lineHeading = atan2(line.endPoint(1) - line.startPoint(1),
+                            line.endPoint(0) - line.startPoint(0));
+    }
 
     // TODO Step 1
 //    u = 1./hypot(b(1)-a(1),b(2)-a(2)).*[b(1)-a(1) b(2)-a(2)];

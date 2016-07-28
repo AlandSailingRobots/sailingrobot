@@ -40,7 +40,7 @@ JSON = 					libs/json
 
 XBEE = 					xBee/xBeeSync.cpp xBee/xBee.cpp
 
-BEHAVIOURCLASS = 	behaviourclass/RoutingBehaviour.cpp  behaviourclass/WaypointBehaviour.cpp behaviourclass/LineFollowBehaviour.cpp behaviourclass/CollisionAvoidanceBehave.cpp
+BEHAVIOURCLASS = 	    behaviourclass/RoutingBehaviour.cpp  behaviourclass/WaypointBehaviour.cpp behaviourclass/LineFollowBehaviour.cpp behaviourclass/CollisionAvoidanceBehaviour.cpp
 
 ANALOGARDUINO = 		AnalogArduino/AnalogArduino.cpp AnalogArduino/MockAnalogArduino.cpp AnalogArduino/AR_UNO.cpp AnalogArduino/myWiringI2C.cpp
 
