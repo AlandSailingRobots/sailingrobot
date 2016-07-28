@@ -48,12 +48,12 @@ void ActuatorNode::processMessage(const Message* message)
 		int setPosition = 0;
 
 		if (nodeID() == NodeID::RudderActuator)
-		{
-			setPosition = msg->sailPosition();
+		{			
+			setPosition = msg->rudderPosition();
 		}
 		else if (nodeID() == NodeID::SailActuator)
 		{
-			setPosition = msg->rudderPosition();
+			setPosition = msg->sailPosition();
 		}
 		else
 		{
