@@ -129,6 +129,7 @@ int main(int argc, char *argv[])
 
 	ActuatorNode rudder(messageBus, NodeID::RudderActuator, channel, speed, acceleration);
 
+	bool requireNetwork = (bool) (dbHandler.retrieveCellAsInt("sailing_robot_config", "1", "require_network"));
 
 	// System services
 
@@ -144,7 +145,14 @@ int main(int argc, char *argv[])
 	initialiseNode(arduino, "Arduino Node", NodeImportance::NOT_CRITICAL);
 	initialiseNode(vessel, "Vessel State Node", NodeImportance::CRITICAL);
 	initialiseNode(waypoint, "Waypoint Node", NodeImportance::CRITICAL);
-	initialiseNode(httpsync, "Httpsync Node", NodeImportance::NOT_CRITICAL);
+	if (requireNetwork)
+	{
+		initialiseNode(httpsync, "Httpsync Node", NodeImportance::CRITICAL);
+	}
+	else
+	{
+		initialiseNode(httpsync, "Httpsync Node", NodeImportance::NOT_CRITICAL);
+	}
 	if(usingLineFollow)
 	{
 		initialiseNode(*sailingLogic, "LineFollow Node", NodeImportance::CRITICAL);
