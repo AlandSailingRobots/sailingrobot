@@ -26,8 +26,8 @@
 
 LineFollowNode::LineFollowNode(MessageBus& msgBus, DBHandler& db)
 :  Node(NodeID::SailingLogic, msgBus), m_db(db), m_dbLogger(5, db),
-    m_nextWaypointId(0),  
-    m_nextWaypointLon(0), 
+    m_nextWaypointId(0),
+    m_nextWaypointLon(0),
     m_nextWaypointLat(0),
     m_nextWaypointDeclination(0),
     m_nextWaypointRadius(0),
@@ -191,7 +191,7 @@ void LineFollowNode::calculateActuatorPos(VesselStateMsg* msg)
     double bearingToNextWaypoint = m_courseMath.calculateBTW(msg->longitude(), msg->latitude(), m_nextWaypointLon, m_nextWaypointLat); //calculated for database
     double distanceToNextWaypoint = m_courseMath.calculateDTW(msg->longitude(), msg->latitude(), m_nextWaypointLon, m_nextWaypointLat);
 
-    m_dbLogger.log(msg, rudderCommand, sailCommand, 0, 0, distanceToNextWaypoint, bearingToNextWaypoint, desiredHeading, m_tack, getGoingStarboard(), m_nextWaypointId, trueWindDirection, false);
+    m_dbLogger.log(msg, rudderCommand_norm, sailCommand_norm, 0, 0, distanceToNextWaypoint, bearingToNextWaypoint, desiredHeading, m_tack, getGoingStarboard(), m_nextWaypointId, trueWindDirection, false);
 }
 
 void LineFollowNode::setPrevWaypointData(WaypointDataMsg* waypMsg, VesselStateMsg* vesselMsg)
