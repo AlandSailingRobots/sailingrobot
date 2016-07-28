@@ -19,7 +19,11 @@
 DBLogger::DBLogger(unsigned int logBufferSize, DBHandler& dbHandler)
 	:m_dbHandler(dbHandler), m_bufferSize(logBufferSize)
 {
-	m_logBuffer.reserve(logBufferSize);
+	m_logBufferFront = new std::vector<LogItem>();
+	m_logBufferFront->reserve(logBufferSize);
+
+	m_logBufferBack = new std::vector<LogItem>();
+	m_logBufferBack->reserve(logBufferSize);
 }
 
 DBLogger::~DBLogger()
@@ -69,11 +73,15 @@ void DBLogger::log(VesselStateMsg* msg, double rudder, double sail, int sailServ
 	item.m_twd = twd;
 	item.m_routeStarted = routeStarted;
 
-	m_logBuffer.push_back(item);
+	m_logBufferFront->push_back(item);
 
 	// Kick off the worker thread
-	if(m_logBuffer.size() == m_bufferSize)
+	if(m_logBufferFront->size() == m_bufferSize)
 	{
+		std::vector<LogItem>* tmp = m_logBufferBack;
+		m_logBufferBack = m_logBufferFront;
+		m_logBufferFront = tmp;
+
 		// Wait for the mutex to be unlocked.
 		{
 			std::lock_guard<std::mutex> lk(m_mutex);
@@ -90,9 +98,10 @@ void DBLogger::workerThread(DBLogger* ptr)
 		std::unique_lock<std::mutex> lk(ptr->m_mutex);
 		ptr->m_cv.wait(lk);
 
-		if(ptr->m_logBuffer.size() > 0)
+		if(ptr->m_logBufferBack->size() > 0)
 		{
-			ptr->m_dbHandler.insertDataLogs(ptr->m_logBuffer);
+			ptr->m_dbHandler.insertDataLogs(*ptr->m_logBufferBack);
+			ptr->m_logBufferBack->clear();
 		}
 	}
 }

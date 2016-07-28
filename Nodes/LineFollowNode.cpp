@@ -302,4 +302,3 @@ void LineFollowNode::manageDatabase(VesselStateMsg* msg, double trueWindDirectio
     routeStarted
   );
 }*/
-}

@@ -45,5 +45,6 @@ private:
 	std::condition_variable m_cv;
 	DBHandler& 				m_dbHandler;
 	unsigned int 			m_bufferSize;
-	std::vector<LogItem> 	m_logBuffer;
+	std::vector<LogItem>* 	m_logBufferFront;
+	std::vector<LogItem>* 	m_logBufferBack;
 };
