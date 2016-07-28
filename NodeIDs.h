@@ -32,6 +32,7 @@ enum class NodeID {
 	Arduino,
 	VesselState,
 	Waypoint,
+	xBeeSync,
 	SailingLogic
 };
 
@@ -63,6 +64,8 @@ inline std::string nodeToString(NodeID id)
 		return "Waypoint";
 	case NodeID::SailingLogic:
 		return "SailingLogic";
+	case NodeID::xBeeSync:
+		return "xBeeSync";
 	}
 	return "";
 }
