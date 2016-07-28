@@ -22,7 +22,7 @@ class GPSDNode : public ActiveNode {
 public:
 	GPSDNode(MessageBus& msgBus);
 	
-	~GPSDNode();
+	virtual ~GPSDNode();
 
 	///----------------------------------------------------------------------------------
 	/// Initialises a connection gpsd.
