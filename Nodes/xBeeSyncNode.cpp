@@ -16,19 +16,18 @@
 #include "xBeeSyncNode.h"
 #include <sstream>
 
-xBeeSyncNode::xBeeSyncNode(MessageBus& msgBus, DBHandler* db) :
+xBeeSyncNode::xBeeSyncNode(MessageBus& msgBus, DBHandler *db) :
 	ActiveNode(NodeID::xBeeSync, msgBus), m_db(db)
 {
-
-}
-bool xBeeSyncNode::init()
-{
-
 	m_sending = m_db->retrieveCellAsInt("xbee_config", "1", "send");
 	m_receiving = m_db->retrieveCellAsInt("xbee_config", "1", "recieve");
 	m_sendLogs = m_db->retrieveCellAsInt("xbee_config", "1", "send_logs");
 	m_loopTime = stod(m_db->retrieveCell("xbee_config", "1", "loop_time"));
 	m_pushOnlyLatestLogs = m_db->retrieveCellAsInt("xbee_config", "1", "push_only_latest_logs");
+
+}
+bool xBeeSyncNode::init()
+{
 
 	bool rv = false;
 
@@ -80,6 +79,12 @@ void xBeeSyncNode::processMessage(const Message* msgPtr)
 
 void xBeeSyncNode::sendVesselState(VesselStateMsg* msg){
 
+	//Dummy values used in xml message (data gaps not allowed)
+	static const double dummyAccelerationXYZ = -1; //Acceleration values
+	static const int dummyArduinoValueN = -1; //Arduino values 0-3
+	static const int dummyRudderState = -1;
+	static const int dummySailState = -1;
+
 	//Do not allow sending of vesselstate and logs at the same time; double output turns into mush
 	if (!m_sendLogs && m_sending)
 	{
@@ -87,15 +92,9 @@ void xBeeSyncNode::sendVesselState(VesselStateMsg* msg){
 		double stateMessageInterval = 0.4;
 		m_messageTimeBuffer -= stateMessageInterval;
 
-		//Dummy values are used when not implemented in VesselStateMessage to fill gaps in expected xml string
-		double dummyAccelerationXYZ = -1; //Acceleration values
-		int dummyArduinoValueN = -1; //Arduino values 0-3
-		int dummyRudderState = -1;
-		int dummySailState = -1;
-
 		//Timestamp double->string conversion
 		std::ostringstream strs;
-		strs << msg->unixTime();
+		strs << SysClock::unixTime();
 		std::string timeStampString = strs.str(); 
 
 		//Make sure we do not send too often
