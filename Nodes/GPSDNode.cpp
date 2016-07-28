@@ -12,7 +12,7 @@
  ***************************************************************************************/
 
 #include "GPSDNode.h"
-#include "logger/Logger.h"
+#include "SystemServices/Logger.h"
 #include "Messages/GPSDataMsg.h"
 
 

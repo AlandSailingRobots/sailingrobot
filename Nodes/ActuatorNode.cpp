@@ -14,7 +14,7 @@
 #include "ActuatorNode.h"
 #include "Messages/ActuatorPositionMsg.h"
 #include "SystemServices/MaestroController.h"
-#include "logger/Logger.h"
+#include "SystemServices/Logger.h"
 
 
 ActuatorNode::ActuatorNode(MessageBus& msgBus, NodeID id, int channel, int speed, int acceleration)

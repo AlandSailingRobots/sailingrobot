@@ -20,7 +20,7 @@
 
 #include "HMC6343Node.h"
 #include "Messages/CompassDataMsg.h"
-#include "logger/Logger.h"
+#include "SystemServices/Logger.h"
 #include "wiringPi.h"
 #include "utility/Utility.h"
 

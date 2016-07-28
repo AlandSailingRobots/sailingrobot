@@ -12,7 +12,7 @@
  ***************************************************************************************/
 
 #include "CV7Node.h"
-#include "logger/Logger.h"
+#include "SystemServices/Logger.h"
 #include "dbhandler/DBHandler.h"
 #include "Messages/WindDataMsg.h"
 #include "utility/Utility.h"

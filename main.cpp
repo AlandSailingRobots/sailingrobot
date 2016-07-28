@@ -1,6 +1,6 @@
 
 #include <string>
-#include "logger/Logger.h"
+#include "SystemServices/Logger.h"
 #include "MessageBus.h"
 #include "Nodes/MessageLoggerNode.h"
 #include "Nodes/CV7Node.h"
@@ -168,6 +168,8 @@ int main(int argc, char *argv[])
 
 	Logger::info("Message bus started!");
 	messageBus.run();
+
+	Logger::shutdown();
 	delete sailingLogic;
 	exit(0);
 }
