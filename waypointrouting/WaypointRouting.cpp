@@ -8,7 +8,7 @@
 
 
 WaypointRouting::WaypointRouting(double lon, double lat, int radius, double innerRadiusRatio,
-		double tackAngle, double maxTackAngle, double minTackSpeed, double sectorAngle, 
+		double tackAngle, double maxTackAngle, double minTackSpeed, double sectorAngle,
 		double maxCommandAngle, double  rudderSpeedMin) :
 	m_lon(lon),
 	m_lat(lat),
@@ -40,18 +40,17 @@ void WaypointRouting::getCommands(double & rudder, double & sail, double gpsLon,
 
 	double speed = Utility::directionAdjustedSpeed(gpsHeading,compassHeading, gpsSpeed);
 	double commandAngle = m_maxCommandAngle;
-	
+
 
 	m_courseCalc.setTackAngle(m_tackAngleHandler.adjustedTackAngle(gpsHeading,compassHeading, gpsSpeed));
 
 	if(speed > m_rudderSpeedMin) {
-		commandAngle = speed/m_rudderSpeedMin * m_maxCommandAngle;		
+		commandAngle = speed/m_rudderSpeedMin * m_maxCommandAngle;
 	}
-	
+
 	m_courseToSteer = m_courseCalc.calculateCourseToSteer(gpsLon, gpsLat, m_lon, m_lat, radius, trueWindDirection);
 	rudder = m_commandHandler.rudderCommand(m_courseToSteer, heading,commandAngle);
 	sail = m_commandHandler.sailCommand(windsensorDir);
-	
 
 	if(!adjustSteering(windsensorDir)) {
 		m_lastRWD = windsensorDir;
@@ -128,7 +127,7 @@ bool WaypointRouting::adjustSteering(double relativeWindDirection) {
 
 		if(Utility::angleDifference(relativeWindDirection, m_lastRWD) > m_degLimit) {
 			m_sailControlTimer.reset();
-			return true;	
+			return true;
 		}
 	}
 

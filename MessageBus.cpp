@@ -185,8 +185,8 @@ void MessageBus::logMessage(Message* msg)
 
 		snprintf(buff, 256, "[%s] Type=%s(%d) SourceID=%d Destination=%d Received=%s", 	SysClock::hh_mm_ss_ms().c_str(),
 																						msgToString(msg->messageType()).c_str(),
-																						msg->messageType(), msg->sourceID(),
-																						msg->destinationID(),
+																						(int) msg->messageType(), (int) msg->sourceID(),
+																						(int) msg->destinationID(),
 																						SysClock::hh_mm_ss_ms(msg->timeReceived).c_str());
 		*m_LogFile << buff << "\n";
 		m_LogFile->flush();
@@ -201,7 +201,7 @@ void MessageBus::logMessageConsumer(NodeID id)
 	{
 		char buff[256];
 
-		snprintf(buff, 256, "\t%s Consumed by Node: %s(%d)", SysClock::hh_mm_ss_ms().c_str(), nodeToString(id).c_str(), id);
+		snprintf(buff, 256, "\t%s Consumed by Node: %s(%d)", SysClock::hh_mm_ss_ms().c_str(), nodeToString(id).c_str(), (int) id);
 		*m_LogFile << buff << "\n";
 		m_LogFile->flush();
 	}
