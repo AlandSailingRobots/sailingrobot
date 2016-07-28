@@ -79,7 +79,7 @@ void CV7Node::WindSensorThread(void* nodePtr)
 
 	const int DATA_BUFFER_SIZE = 1;
 	const int NON_BREAKING_SPACE = 255;
-	const int BUFF_SIZE = 256;
+	const int BUFF_SIZE = 60;
 	const short MAX_NO_DATA_ERROR_COUNT = 100; // 10 seconds of no data
 	char buffer[BUFF_SIZE];
 
@@ -88,7 +88,6 @@ void CV7Node::WindSensorThread(void* nodePtr)
 	std::vector<float> windTempData(DATA_BUFFER_SIZE);
 	unsigned int dataIndex = 0;
 	unsigned short noDataCount = 0;
-
 	Logger::info("Wind sensor thread started");
 
 	while(true)
@@ -110,7 +109,6 @@ void CV7Node::WindSensorThread(void* nodePtr)
 			if(data != -1)
 			{
 				buffer[index] = data;
-				fflush(stdout);
 
 				if(NON_BREAKING_SPACE == (int)buffer[index])
 				{

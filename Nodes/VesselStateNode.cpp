@@ -21,7 +21,7 @@
 #include "Messages/VesselStateMsg.h"
 
 
-#define VESSEL_STATE_SLEEP_MS	400
+#define VESSEL_STATE_SLEEP_MS	600
 #define VESSEL_STATE_INITIAL_SLEEP 2000
 
 
@@ -97,7 +97,7 @@ void VesselStateNode::processArduinoMessage(ArduinoDataMsg* msg)
 	m_ArduinoPressure = msg->pressure();
 	m_ArduinoRudder = msg->rudder();
 	m_ArduinoSheet = msg->sheet();
-	m_ArduinoBattery = msg->battery();	
+	m_ArduinoBattery = msg->battery();
 }
 
 void VesselStateNode::VesselStateThreadFunc(void* nodePtr)

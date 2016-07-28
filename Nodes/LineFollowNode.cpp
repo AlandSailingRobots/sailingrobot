@@ -26,13 +26,13 @@
 
 LineFollowNode::LineFollowNode(MessageBus& msgBus, DBHandler& db)
 :  Node(NodeID::SailingLogic, msgBus), m_db(db),
-    m_nextWaypointId(0),  
-    m_nextWaypointLon(0), 
+    m_nextWaypointId(0),
+    m_nextWaypointLon(0),
     m_nextWaypointLat(0),
     m_nextWaypointDeclination(0),
     m_nextWaypointRadius(0),
     m_prevWaypointId(0),
-    m_prevWaypointLon(0), 
+    m_prevWaypointLon(0),
     m_prevWaypointLat(0),
     m_prevWaypointDeclination(0),
     m_prevWaypointRadius(0),
@@ -86,19 +86,19 @@ double LineFollowNode::calculateAngleOfDesiredTrajectory(VesselStateMsg* msg)
 {
     int earthRadius = 6371000;
 
-    std::array<double, 3> prevWPCoord = 
+    std::array<double, 3> prevWPCoord =
      {  earthRadius * cos(Utility::degreeToRadian(m_prevWaypointLat)) * cos(Utility::degreeToRadian(m_prevWaypointLon)),
         earthRadius * cos(Utility::degreeToRadian(m_prevWaypointLat)) * sin(Utility::degreeToRadian(m_prevWaypointLon)),
         earthRadius * sin(Utility::degreeToRadian(m_prevWaypointLat))};
-    std::array<double, 3> nextWPCoord = 
+    std::array<double, 3> nextWPCoord =
      {  earthRadius * cos(Utility::degreeToRadian(m_nextWaypointLat)) * cos(Utility::degreeToRadian(m_nextWaypointLon)),
         earthRadius * cos(Utility::degreeToRadian(m_nextWaypointLat)) * sin(Utility::degreeToRadian(m_nextWaypointLon)),
         earthRadius * sin(Utility::degreeToRadian(m_nextWaypointLat))};
 
-    double M[2][3] = 
+    double M[2][3] =
     {   {-sin(Utility::degreeToRadian(msg->longitude() )), cos(Utility::degreeToRadian(msg->longitude() )), 0},
         {-cos(Utility::degreeToRadian(msg->longitude() ))*sin(Utility::degreeToRadian(msg->latitude() )),
-         -sin(Utility::degreeToRadian(msg->longitude() ))*sin(Utility::degreeToRadian(msg->latitude() )), 
+         -sin(Utility::degreeToRadian(msg->longitude() ))*sin(Utility::degreeToRadian(msg->latitude() )),
          cos(Utility::degreeToRadian(msg->latitude() ))}};
 
     std::array<double, 3> bMinusA = { nextWPCoord[0]-prevWPCoord[0], nextWPCoord[1]-prevWPCoord[1], nextWPCoord[2]-prevWPCoord[2]};
@@ -119,10 +119,11 @@ void LineFollowNode::calculateActuatorPos(VesselStateMsg* msg)
 
     double trueWindDirection = Utility::getTrueWindDirection(msg->windDir(), msg->windSpeed(), msg->speed(), msg->compassHeading(), twdBuffer, twdBufferMaxSize);
     /* add pi because trueWindDirection is originally origin of wind but algorithm need direction*/
-    trueWindDirection = Utility::degreeToRadian(trueWindDirection)+M_PI;
+    double trueWindDirection_radian = Utility::degreeToRadian(trueWindDirection)+M_PI;
 
     //GET DIRECTION
     double currentHeading = getHeading(msg->gpsHeading(), msg->compassHeading(), msg->speed(), false, false);
+    double currentHeading_radian = Utility::degreeToRadian(currentHeading);
     double signedDistance = Utility::calculateSignedDistanceToLine(m_nextWaypointLon, m_nextWaypointLat, m_prevWaypointLon,
             m_prevWaypointLat, msg->longitude(), msg->latitude());
     int maxTackDistance = 20; //'r'
@@ -135,14 +136,14 @@ void LineFollowNode::calculateActuatorPos(VesselStateMsg* msg)
         m_tackingDirection = -Utility::sgn(signedDistance);
 
     //Check if tacking is needed
-    if( (cos(trueWindDirection - desiredHeading) + cos(m_tackAngle) < 0) || (cos(trueWindDirection - phi) + cos(m_tackAngle) < 0))
+    if( (cos(trueWindDirection_radian - desiredHeading) + cos(m_tackAngle) < 0) || (cos(trueWindDirection_radian - phi) + cos(m_tackAngle) < 0))
     {
         if(!m_tack){ /* initialize tacking direction */
-            m_tackingDirection = -Utility::sgn(currentHeading-(fmod(trueWindDirection+M_PI, 2*M_PI) - M_PI));
+            m_tackingDirection = -Utility::sgn(currentHeading_radian-(fmod(trueWindDirection_radian+M_PI, 2*M_PI) - M_PI));
             m_tack = true;
         }
 
-        desiredHeading = M_PI + trueWindDirection - m_tackingDirection * m_tackAngle;/* sail around the wind direction */
+        desiredHeading = M_PI + trueWindDirection_radian - m_tackingDirection * m_tackAngle;/* sail around the wind direction */
         desiredHeading = Utility::limitRadianAngleRange(desiredHeading);
     }
     else
@@ -150,20 +151,20 @@ void LineFollowNode::calculateActuatorPos(VesselStateMsg* msg)
 
     double rudderCommand, sailCommand;
     //SET RUDDER
-    if(cos(currentHeading - desiredHeading) < 0) //if boat heading is too far away from desired heading
-        rudderCommand = -Utility::sgn(msg->speed()) * m_maxCommandAngle * Utility::sgn(sin(currentHeading - desiredHeading));
+    if(cos(currentHeading_radian - desiredHeading) < 0) //if boat heading is too far away from desired heading
+        rudderCommand = -Utility::sgn(msg->speed()) * m_maxCommandAngle * Utility::sgn(sin(currentHeading_radian - desiredHeading));
     else
-        rudderCommand = -Utility::sgn(msg->speed()) * m_maxCommandAngle * sin(currentHeading - desiredHeading);
+        rudderCommand = -Utility::sgn(msg->speed()) * m_maxCommandAngle * sin(currentHeading_radian - desiredHeading);
 
     //SET SAIL
-    double apparentWindDirection = Utility::getApparentWindDirection(msg->windDir(), msg->windSpeed(), msg->speed(), currentHeading, trueWindDirection)*M_PI/180;
+    double apparentWindDirection = Utility::getApparentWindDirection(msg->windDir(), msg->windSpeed(), msg->speed(), currentHeading_radian, trueWindDirection_radian)*M_PI/180;
     sailCommand = abs( ((m_minSailAngle - m_maxSailAngle) / M_PI) * abs(apparentWindDirection) + m_maxSailAngle);
 
-    rudderCommand = m_rudderCommand.getCommand(rudderCommand);
-	sailCommand = m_sailCommand.getCommand(sailCommand);
+    int rudderCommand_norm = m_rudderCommand.getCommand(rudderCommand);
+    int sailCommand_norm = m_sailCommand.getCommand(sailCommand);
 
-    ActuatorPositionMsg *rudderMsg = new ActuatorPositionMsg(NodeID::RudderActuator, nodeID(), rudderCommand);
-    ActuatorPositionMsg *sailMsg = new ActuatorPositionMsg(NodeID::SailActuator, nodeID(), sailCommand);
+    ActuatorPositionMsg *rudderMsg = new ActuatorPositionMsg(NodeID::RudderActuator, nodeID(), rudderCommand_norm);
+    ActuatorPositionMsg *sailMsg = new ActuatorPositionMsg(NodeID::SailActuator, nodeID(), sailCommand_norm);
     m_MsgBus.sendMessage(rudderMsg);
     m_MsgBus.sendMessage(sailMsg);
 
@@ -193,11 +194,11 @@ void LineFollowNode::setPrevWaypointData(WaypointDataMsg* waypMsg, VesselStateMs
     }
 }
 
-int LineFollowNode::getHeading(int gpsHeading, int compassHeading, double gpsSpeed, bool mockPosition,bool getHeadingFromCompass) 
+int LineFollowNode::getHeading(int gpsHeading, int compassHeading, double gpsSpeed, bool mockPosition,bool getHeadingFromCompass)
 {
-	//Use GPS for heading only if speed is higher than 1 knot
-	int useGpsForHeadingKnotSpeed = 1;
-	bool gpsForbidden = Utility::directionAdjustedSpeed(gpsHeading, compassHeading, gpsSpeed) < useGpsForHeadingKnotSpeed;
+	//Use GPS for heading only if speed is higher than 1 m/s
+	int useGpsForHeadingMeterSecSpeed = 1;
+	bool gpsForbidden = Utility::directionAdjustedSpeed(gpsHeading, compassHeading, gpsSpeed) < useGpsForHeadingMeterSecSpeed;
 
 	getMergedHeading(gpsHeading, compassHeading, true); //decrease compass weight on each iteration
 
@@ -240,13 +241,13 @@ int LineFollowNode::getMergedHeading(int gpsHeading, int compassHeading, bool in
 	return returnValue;
 }
 
-void LineFollowNode::setupRudderCommand() 
+void LineFollowNode::setupRudderCommand()
 {
 	m_rudderCommand.setCommandValues(m_db.retrieveCellAsInt("rudder_command_config", "1","extreme_command"),
 	        m_db.retrieveCellAsInt("rudder_command_config", "1", "midship_command"));
 }
 
-void LineFollowNode::setupSailCommand() 
+void LineFollowNode::setupSailCommand()
 {
 	m_sailCommand.setCommandValues( m_db.retrieveCellAsInt("sail_command_config", "1", "close_reach_command"),
 	        m_db.retrieveCellAsInt("sail_command_config", "1", "run_command"));
@@ -267,7 +268,7 @@ void LineFollowNode::manageDatabase(VesselStateMsg* msg, double trueWindDirectio
     rudder,
     sail,
     0,
-    0,                                               
+    0,
     distanceToNextWaypoint,
     bearingToNextWaypoint,
     heading,
