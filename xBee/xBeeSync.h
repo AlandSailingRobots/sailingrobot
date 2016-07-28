@@ -6,7 +6,7 @@
 #include "thread/ExternalCommand.h"
 #include "thread/SystemState.h"
 #include "models/SystemStateModel.h"
-#include "logger/Logger.h"
+#include "SystemServices/Logger.h"
 #include "dbhandler/DBHandler.h"
 #include "utility/Timer.h"
 #include <mutex>

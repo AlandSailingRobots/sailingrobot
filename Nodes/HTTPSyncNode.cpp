@@ -5,7 +5,7 @@
  * 		HTTPSyncNode.cpp
  *
  * Purpose:
- *		Handles retrieval and sending of logs, waypoints and configs between database and server. 
+ *		Handles retrieval and sending of logs, waypoints and configs between database and server.
  *      Also notifies messagebus when new serverdata arrives.
  *
  * Developer Notes:
@@ -29,7 +29,7 @@ size_t write_to_string(void *ptr, size_t size, size_t count, void *stream) {
 HTTPSyncNode::HTTPSyncNode(MessageBus& msgBus, DBHandler *db, int delay, bool removeLogs)
 	:ActiveNode(NodeID::HTTPSync, msgBus), m_removeLogs(removeLogs), m_delay(delay), m_dbHandler(db)
 {
-    
+
 }
 
 bool HTTPSyncNode::init()
@@ -57,6 +57,7 @@ void HTTPSyncNode::start(){
 
     if (m_initialised)
     {
+        pushWaypoints();
         runThread(HTTPSyncThread);
     }
     else
@@ -123,7 +124,7 @@ bool HTTPSyncNode::pushDatalogs() {
     return false;
 }
 
-bool HTTPSyncNode::pushWaypoints() 
+bool HTTPSyncNode::pushWaypoints()
 {
 	std::string waypointsData = m_dbHandler->getWaypoints();
 	if (waypointsData.size() > 0)
@@ -208,7 +209,7 @@ bool HTTPSyncNode::getConfigsFromServer() {
         {
             Logger::error("%s Error: %s", __PRETTY_FUNCTION__);
         }
-        
+
     }
     return false;
 }
@@ -226,7 +227,7 @@ bool HTTPSyncNode::getWaypointsFromServer() {
                 ServerWaypointsReceivedMsg* newServerWaypoints = new ServerWaypointsReceivedMsg();
                 m_MsgBus.sendMessage(newServerWaypoints);
 
-            
+
                 Logger::info("Waypoints retrieved from remote server");
                 return true;
             }
@@ -236,7 +237,7 @@ bool HTTPSyncNode::getWaypointsFromServer() {
         {
             Logger::warning("%s Could not fetch any new waypoints",__PRETTY_FUNCTION__);
         }
-        
+
     }
     return false;
 }
