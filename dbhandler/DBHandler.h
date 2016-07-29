@@ -44,6 +44,7 @@ struct LogItem {
 		int 	m_waypointId;
 		double 	m_twd;
 		bool 	m_routeStarted;
+		std::string m_timestamp_str;
 	};
 
 class DBHandler {

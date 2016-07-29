@@ -15,6 +15,7 @@
 #include "Messages/WaypointDataMsg.h"
 #include "Messages/ActuatorPositionMsg.h"
 #include "utility/Utility.h"
+#include "utility/SysClock.h"
 
 #define DEFAULT_TWD_BUFFERSIZE 200
 
@@ -97,9 +98,13 @@ void RoutingNode::calculateActuatorPos(VesselStateMsg* msg)
     ActuatorPositionMsg *actuatorMsg = new ActuatorPositionMsg(NodeID::RudderActuator, nodeID(), rudderCommand, sailCommand);
     m_MsgBus.sendMessage(actuatorMsg);
 
-    //manageDatabase(msg, trueWindDirection, rudderCommand, sailCommand);
+    //create timestamp----
+    std::string timestamp_str=SysClock::timeStampStr();
+    timestamp_str+=".";
+    timestamp_str+= std::to_string(SysClock::millis());
+    //--------------------
 
-    m_dbLogger.log(msg, rudderCommand, sailCommand, 0, 0, m_waypointRouting.getDTW(), m_waypointRouting.getBTW(), m_waypointRouting.getCTS(), m_waypointRouting.getTack(), m_waypointRouting.getGoingStarboard(), m_nextWaypointId, trueWindDirection, false);
+    m_dbLogger.log(msg, rudderCommand, sailCommand, 0, 0, m_waypointRouting.getDTW(), m_waypointRouting.getBTW(), m_waypointRouting.getCTS(), m_waypointRouting.getTack(), m_waypointRouting.getGoingStarboard(), m_nextWaypointId, trueWindDirection, false,timestamp_str);
 }
 
 int RoutingNode::getHeading(int gpsHeading, int compassHeading, double gpsSpeed, bool mockPosition,bool getHeadingFromCompass) {

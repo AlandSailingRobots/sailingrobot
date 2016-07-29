@@ -95,8 +95,20 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs)
 			return;
 		}
 
+    if (logs.size()>0)
+		{
+		  Logger::info("Writing in the database last value: %s",logs[0].m_timestamp_str.c_str());
+    }
+
 		for(auto log: logs)
 		{
+			arduinoValues.str("");
+			gpsValues.str("");
+			courseCalculationValues.str("");
+			compassModelValues.str("");
+			systemValues.str("");
+			windsensorValues.str("");
+
 			arduinoValues << std::setprecision(10)
 				<< log.m_arduinoPressure << ", "
 				<< log.m_arduinoRudder << ", "
@@ -104,7 +116,7 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs)
 				<< log.m_arduinoBattery;
 
 			gpsValues << std::setprecision(10) << "'"
-				<< "ADD GPS TIME" << "', "  //TODO - Oliver: Get GPS timestamp
+				<< log.m_timestamp_str.c_str() << "', "
 				<< log.m_gpsLat << ", "
 				<< log.m_gpsLon << ", "
 				<< log.m_gpsSpeed << ", "
@@ -129,7 +141,6 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs)
 				<< log.m_windSpeed << ", "
 				<< log.m_windTemp;
 
-			printf("GPS GMT + 3: %s GPS UTC: %s\n","ADD GPS TIME","ADD GPS UTC_TIME"); //TODO - Oliver: Get GPS timestamp
 			int arduinoId = insertLog("arduino_datalogs",arduinoValues.str(), db);
 			int windsensorId = insertLog("windsensor_datalogs",windsensorValues.str(), db);
 			int gpsId = insertLog("gps_datalogs",gpsValues.str(), db);
@@ -150,8 +161,10 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs)
 				<< log.m_twd;
 			m_latestDataLogId = insertLog("system_datalogs", systemValues.str(), db);
 
-			closeDatabase(db);
 		}
+
+
+	  closeDatabase(db);
 }
 //TODO -Oliver: make private
 void DBHandler::insertMessageLog(std::string gps_time, std::string type, std::string msg) {
@@ -238,13 +251,13 @@ std::string DBHandler::retrieveCell(std::string table, std::string id, std::stri
 }
 
 void DBHandler::updateConfigs(std::string configs) {
-	
+
 	Json json = Json::parse(configs);
 
 	std::vector<std::string> tables;
 
 	for (auto i : Json::iterator_wrapper(json))  {
-		tables.push_back(i.key()); //For each table key 
+		tables.push_back(i.key()); //For each table key
 	}
 
 	//tables = sailing_config buffer_config etc
@@ -275,7 +288,7 @@ bool DBHandler::updateWaypoints(std::string waypoints){
 		//m_logger.info(i.value().dump());
 
 		for (auto y : Json::iterator_wrapper(i.value())){
-			
+
 			limitCounter = valuesLimit;
 			DBPrinter = "INSERT INTO waypoints (id,latitude,longitude,declination,radius,harvested) VALUES (";
 
@@ -287,7 +300,7 @@ bool DBHandler::updateWaypoints(std::string waypoints){
 					limitCounter--;
 					DBPrinter = DBPrinter + tempValue + ",";
 				}
-				
+
 			}
 
 			//if (DBPrinter.size () > 0)  DBPrinter.resize (DBPrinter.size () - 1);
@@ -358,7 +371,7 @@ std::string DBHandler::getLogs(bool onlyLatest) {
 
 	try {
 		//insert all data in these tables as json array
-		
+
 		for (auto table : datalogTables) {
 
 			if(onlyLatest){
@@ -564,7 +577,7 @@ int DBHandler::getTable(sqlite3* db, const std::string &sql, std::vector<std::st
 			}else{
 				results.emplace_back( "NULL" );
 			}
-			
+
 		}
 		rows++;
 	}
@@ -592,7 +605,7 @@ int DBHandler::insertLog(std::string table, std::string values, sqlite3* db) {
 	}
 	else
 	{
-		Logger::error("%s Error, failed to insert log", __PRETTY_FUNCTION__);
+		Logger::error("%s Error, failed to insert log Request: %s", __PRETTY_FUNCTION__,ss.str().c_str());
 	}
 
 	return 0;
@@ -745,7 +758,7 @@ std::vector<std::string> DBHandler::getColumnInfo(std::string info, std::string 
     }
 
 	for (int i = 1; i < rows+1; i++) {
-		types.push_back(results[i * columns + infoIndex]); 
+		types.push_back(results[i * columns + infoIndex]);
 	}
     return types;
 }
@@ -801,11 +814,11 @@ bool DBHandler::getWaypointValues(int& nextId, double& nextLongitude, double& ne
 	int rows, columns, rows2, columns2;
     std::vector<std::string> results;
 	std::vector<std::string> results2;
-    try 
+    try
     {
         results = retrieveFromTable("SELECT MIN(id) FROM waypoints WHERE harvested = 0;", rows, columns);
 		results2 = retrieveFromTable("SELECT MAX(id) FROM waypoints WHERE harvested = 1;", rows2, columns2);
-    }    
+    }
     catch(const char* error)
     {
         Logger::error("%s Error: %s", __PRETTY_FUNCTION__, error);
@@ -829,7 +842,7 @@ bool DBHandler::getWaypointValues(int& nextId, double& nextLongitude, double& ne
     nextLatitude = atof(retrieveCell("waypoints", results[1], "latitude").c_str());
     nextDeclination = retrieveCellAsInt("waypoints", results[1], "declination");
     nextRadius = retrieveCellAsInt("waypoints", results[1], "radius");
-    
+
 	if(foundPrevWaypoints) //Set values to next waypoint if harvested waypoint found
 	{
 		prevId = stoi(results[1]);

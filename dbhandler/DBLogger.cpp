@@ -38,7 +38,7 @@ void DBLogger::startWorkerThread()
 
 void DBLogger::log(VesselStateMsg* msg, double rudder, double sail, int sailServoPosition, int rudderServoPosition,
 		double distanceToWaypoint, double bearingToWaypoint, double courseToSteer, bool tack, bool goingStarboard,
-		int waypointId, double twd, bool routeStarted)
+		int waypointId, double twd, bool routeStarted,std::string timestamp_str)
 {
 	LogItem item;
 
@@ -72,6 +72,7 @@ void DBLogger::log(VesselStateMsg* msg, double rudder, double sail, int sailServ
 	item.m_waypointId = waypointId;
 	item.m_twd = twd;
 	item.m_routeStarted = routeStarted;
+	item.m_timestamp_str = timestamp_str;
 
 	m_logBufferFront->push_back(item);
 

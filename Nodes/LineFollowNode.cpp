@@ -18,6 +18,7 @@
 #include "LineFollowNode.h"
 #include "Messages/ActuatorPositionMsg.h"
 #include "utility/Utility.h"
+#include "utility/SysClock.h"
 #include <math.h>
 #include <algorithm>
 #include <cmath>
@@ -191,7 +192,14 @@ void LineFollowNode::calculateActuatorPos(VesselStateMsg* msg)
     double bearingToNextWaypoint = m_courseMath.calculateBTW(msg->longitude(), msg->latitude(), m_nextWaypointLon, m_nextWaypointLat); //calculated for database
     double distanceToNextWaypoint = m_courseMath.calculateDTW(msg->longitude(), msg->latitude(), m_nextWaypointLon, m_nextWaypointLat);
 
-    m_dbLogger.log(msg, rudderCommand_norm, sailCommand_norm, 0, 0, distanceToNextWaypoint, bearingToNextWaypoint, desiredHeading, m_tack, getGoingStarboard(), m_nextWaypointId, trueWindDirection, false);
+
+    //create timestamp----
+    std::string timestamp_str=SysClock::timeStampStr();
+    timestamp_str+=".";
+    timestamp_str+= std::to_string(SysClock::millis());
+    //--------------------
+
+    m_dbLogger.log(msg, rudderCommand_norm, sailCommand_norm, 0, 0, distanceToNextWaypoint, bearingToNextWaypoint, desiredHeading, m_tack, getGoingStarboard(), m_nextWaypointId, trueWindDirection, false,timestamp_str);
 }
 
 void LineFollowNode::setPrevWaypointData(WaypointDataMsg* waypMsg, VesselStateMsg* vesselMsg)
