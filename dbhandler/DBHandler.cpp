@@ -6,6 +6,7 @@
 #include "models/SystemStateModel.h"
 #include "models/WaypointModel.h"
 #include "models/PositionModel.h"
+#include "utility/Timer.h"
 
 
 DBHandler::DBHandler(std::string filePath) :
@@ -86,6 +87,14 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs)
 		std::stringstream compassModelValues;
 		std::stringstream systemValues;
 		std::stringstream windsensorValues;
+		std::stringstream ss;
+		int logNumber =0;
+		int arduinoId=0;
+		int windsensorId=0;
+		int gpsId=0;
+		int courceCalculationId=0;
+		int compassModelId=0;
+		std::string tableId;
 
 		sqlite3* db = openDatabase();
 
@@ -100,8 +109,36 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs)
 		  Logger::info("Writing in the database last value: %s",logs[0].m_timestamp_str.c_str());
     }
 
+		tableId = getIdFromTable("arduino_datalogs",true,db);
+		if(tableId.size() > 0)
+		{
+			arduinoId = (int)strtol(tableId.c_str(), NULL, 10);
+		}
+		tableId = getIdFromTable("windsensor_datalogs",true,db);
+		if(tableId.size() > 0)
+		{
+			windsensorId = (int)strtol(tableId.c_str(), NULL, 10);
+		}
+		tableId = getIdFromTable("gps_datalogs",true,db);
+		if(tableId.size() > 0)
+		{
+			gpsId = (int)strtol(tableId.c_str(), NULL, 10);
+		}
+		tableId = getIdFromTable("course_calculation_datalogs",true,db);
+		if(tableId.size() > 0)
+		{
+			courceCalculationId = (int)strtol(tableId.c_str(), NULL, 10);
+		}
+		tableId = getIdFromTable("compass_datalogs",true,db);
+		if(tableId.size() > 0)
+		{
+			compassModelId = (int)strtol(tableId.c_str(), NULL, 10);
+		}
+
+
 		for(auto log: logs)
 		{
+      logNumber++;
 			arduinoValues.str("");
 			gpsValues.str("");
 			courseCalculationValues.str("");
@@ -115,6 +152,8 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs)
 				<< log.m_arduinoSheet << ", "
 				<< log.m_arduinoBattery;
 
+		  ss << "INSERT INTO " << "arduino_datalogs" << " VALUES(NULL, " << arduinoValues.str() << ");";
+
 			gpsValues << std::setprecision(10) << "'"
 				<< log.m_timestamp_str.c_str() << "', "
 				<< log.m_gpsLat << ", "
@@ -124,6 +163,8 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs)
 				<< log.m_gpsSatellite << ", "
 				<< log.m_routeStarted;
 
+		  ss << "INSERT INTO " << "gps_datalogs" << " VALUES(NULL, " << gpsValues.str() << ");";
+
 			courseCalculationValues << std::setprecision(10)
 				<< log.m_distanceToWaypoint << ", "
 				<< log.m_bearingToWaypoint << ", "
@@ -131,38 +172,57 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs)
 				<< log.m_tack << ", "
 				<< log.m_goingStarboard;
 
+		  ss << "INSERT INTO " << "course_calculation_datalogs" << " VALUES(NULL, " << courseCalculationValues.str() << ");";
+
 			compassModelValues << std::setprecision(10)
 				<< log.m_compassHeading << ", "
 				<< log.m_compassPitch << ", "
 				<< log.m_compassRoll;
+
+		  ss << "INSERT INTO " << "compass_datalogs" << " VALUES(NULL, " << compassModelValues.str() << ");";
 
 			windsensorValues << std::setprecision(10)
 				<< log.m_windDir << ", "
 				<< log.m_windSpeed << ", "
 				<< log.m_windTemp;
 
-			int arduinoId = insertLog("arduino_datalogs",arduinoValues.str(), db);
-			int windsensorId = insertLog("windsensor_datalogs",windsensorValues.str(), db);
-			int gpsId = insertLog("gps_datalogs",gpsValues.str(), db);
-			int courceCalculationId = insertLog("course_calculation_datalogs",courseCalculationValues.str(), db);
-			int compassModelId = insertLog("compass_datalogs",compassModelValues.str(), db);
+		  ss << "INSERT INTO " << "windsensor_datalogs" << " VALUES(NULL, " << windsensorValues.str() << ");";
 
 			systemValues << std::setprecision(10)
-				<< gpsId << ", "
-				<< courceCalculationId << ", "
-				<< arduinoId << ", "
-				<< windsensorId << ", "
-				<< compassModelId << ", "
+				<< gpsId+logNumber << ", "
+				<< courceCalculationId+logNumber << ", "
+				<< arduinoId+logNumber << ", "
+				<< windsensorId+logNumber << ", "
+				<< compassModelId+logNumber << ", "
 				<< log.m_sail << ", "
 				<< log.m_rudder << ", "
 				<< log.m_sailServoPosition << ", "
 				<< log.m_rudderServoPosition << ", "
 				<< log.m_waypointId << ", "
 				<< log.m_twd;
-			m_latestDataLogId = insertLog("system_datalogs", systemValues.str(), db);
 
+
+		  ss << "INSERT INTO " << "system_datalogs" << " VALUES(NULL, " << systemValues.str() << ");";
 		}
 
+		if(queryTable(ss.str(), db))
+		{
+
+			tableId = getIdFromTable("system_datalogs",true,db);
+			if(tableId.size() > 0)
+			{
+				m_latestDataLogId = (int)strtol(tableId.c_str(), NULL, 10);
+			}
+			else
+			{
+				m_latestDataLogId = 0;
+			}
+		}
+		else
+		{
+			m_latestDataLogId = 0;
+			Logger::error("%s Error, failed to insert log Request: %s", __PRETTY_FUNCTION__,ss.str().c_str());
+		}
 
 	  closeDatabase(db);
 }
@@ -495,6 +555,31 @@ std::string DBHandler::getIdFromTable(std::string table, bool max) {
     }
 }
 
+std::string DBHandler::getIdFromTable(std::string table, bool max,sqlite3* db) {
+	int rows, columns;
+    std::vector<std::string> results;
+    try {
+		if(max) {
+			results = retrieveFromTable("SELECT MAX(id) FROM " + table + ";", rows, columns,db);
+		} else {
+			results = retrieveFromTable("SELECT MIN(id) FROM " + table + ";", rows, columns,db);
+		}
+}
+    catch(const char* error) {
+    	rows = 0;
+    	columns = 0;
+    }
+
+    if (rows * columns < 1) {
+    	return "";
+    }
+    if(results[1] == "\0") {
+    	return "";
+    } else {
+    	return results[1];
+    }
+}
+
 
 ////////////////////////////////////////////////////////////////////
 // private helpers
@@ -597,7 +682,11 @@ int DBHandler::insertLog(std::string table, std::string values, sqlite3* db) {
 
 	if(queryTable(ss.str(), db))
 	{
-		std::string tableId = getIdFromTable(table,true);
+		Timer time_;
+		time_.start();
+		std::string tableId = getIdFromTable(table,true,db);
+		time_.stop();
+		Logger::info("Time passed writing %.5f",time_.timePassed());
 		if(tableId.size() > 0)
 		{
 			return (int)strtol(tableId.c_str(), NULL, 10);
@@ -642,6 +731,7 @@ bool DBHandler::queryTable(std::string sqlINSERT) {
 }
 
 bool DBHandler::queryTable(std::string sqlINSERT, sqlite3* db) {
+
 	m_error = NULL;
 
 	if (db != NULL) {
@@ -652,8 +742,9 @@ bool DBHandler::queryTable(std::string sqlINSERT, sqlite3* db) {
 				sqlite3_free(m_error);
 				m_error = NULL;
 			}
-
+			sqlite3_exec(db, "BEGIN TRANSACTION", NULL, NULL, &m_error);
 			resultcode = sqlite3_exec(db, sqlINSERT.c_str(), NULL, NULL, &m_error);
+			sqlite3_exec(db, "END TRANSACTION", NULL, NULL, &m_error);
 		} while(resultcode == SQLITE_BUSY);
 		if (m_error != NULL) {
 			Logger::error("%s Error: %s", __PRETTY_FUNCTION__, sqlite3_errmsg(db));
@@ -662,7 +753,8 @@ bool DBHandler::queryTable(std::string sqlINSERT, sqlite3* db) {
 			return false;
 		}
 	}
-	else {
+	else
+	{
 		Logger::error("%s Error: no database found", __PRETTY_FUNCTION__);
 		return false;
 	}
@@ -698,6 +790,34 @@ std::vector<std::string> DBHandler::retrieveFromTable(std::string sqlSELECT, int
 	}
 
 	closeDatabase(db);
+	return results;
+}
+
+std::vector<std::string> DBHandler::retrieveFromTable(std::string sqlSELECT, int &rows, int &columns,sqlite3* db) {
+	std::vector<std::string> results;
+
+	if (db != NULL) {
+		int resultcode = 0;
+
+		do {
+			results = std::vector<std::string>();
+			//resultcode = sqlite3_get_table(db, sqlSELECT.c_str(), &results, &rows, &columns, &m_error);
+			resultcode = getTable(db, sqlSELECT, results, rows, columns);
+		} while(resultcode == SQLITE_BUSY);
+
+		if(resultcode == SQLITE_EMPTY) {
+			std::vector<std::string> s;
+			return s;
+		}
+
+		if (resultcode != SQLITE_OK) {
+			Logger::error("%s SQL statement: %s Error: %s", __PRETTY_FUNCTION__, sqlSELECT.c_str(), sqlite3_errstr(resultcode));
+			throw "retrieveFromTable";
+		}
+	}
+	else {
+		throw "DBHandler::retrieveFromTable(), no db connection";
+	}
 	return results;
 }
 

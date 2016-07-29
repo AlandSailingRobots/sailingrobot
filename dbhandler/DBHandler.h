@@ -63,6 +63,7 @@ private:
 	//retrieve data from given table/tables, return value is a C 2D char array
 	//rows and columns also return values (through a reference) about rows and columns in the result set
 	std::vector<std::string> retrieveFromTable(std::string sqlSELECT, int &rows, int &columns);
+	std::vector<std::string> retrieveFromTable(std::string sqlSELECT, int &rows, int &columns,sqlite3* db);
 
 	//adds a table row into the json object as a array if array flag is true,
 	//otherwise it adds the table row as a json object
@@ -130,6 +131,7 @@ public:
 	//max = false -> min id
 	//max = true -> max id
 	std::string getIdFromTable(std::string table, bool max);
+	std::string getIdFromTable(std::string table, bool max,sqlite3* db);
 
 	void deleteRow(std::string table, std::string id);
 
