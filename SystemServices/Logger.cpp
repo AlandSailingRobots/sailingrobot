@@ -33,6 +33,7 @@ std::string 				Logger::m_LogFilePath;
 std::ofstream 				Logger::m_LogFile;
 std::vector<std::string> 	Logger::m_LogBuffer;
 std::mutex 					Logger::m_Mutex;
+bool Logger::m_DisableLogging = false;
 
 #ifdef ENABLE_WRSC_LOGGING
 static std::ofstream 			m_LogFileWRSC;
@@ -41,6 +42,8 @@ static std::ofstream 			m_LogFileWRSC;
 
 bool Logger::init(const char* filename)
 {
+	if(m_DisableLogging) { return true; }
+
 	if(not createLogFiles(filename))
 	{
 		std::cout << "[" << SysClock::timeStampStr().c_str() << "] Failed to create log files\n";
@@ -51,8 +54,15 @@ bool Logger::init(const char* filename)
 	return true;
 }
 
+void Logger::DisableLogging()
+{
+	m_DisableLogging = true;
+}
+
 void Logger::shutdown()
 {
+	if(m_DisableLogging) { return; }
+
 	if(m_LogFile.is_open())
 	{
 		m_LogFile.close();
@@ -68,6 +78,8 @@ void Logger::shutdown()
 
 void Logger::log(std::string message)
 {
+	if(m_DisableLogging) { return; }
+
 	m_Mutex.lock();
 	if(m_LogFile.is_open())
 	{
@@ -91,6 +103,9 @@ void Logger::log(std::string message)
 void Logger::info(std::string message, ...)
 {
 	va_list args;
+
+	if(m_DisableLogging) { return; }
+
 	char logBuffer[MAX_LOG_SIZE];
 	// Put together the formatted string
 	va_start(args, message);
@@ -108,6 +123,9 @@ void Logger::info(std::string message, ...)
 void Logger::error(std::string message, ...)
 {
 	va_list args;
+
+	if(m_DisableLogging) { return; }
+
 	char logBuffer[MAX_LOG_SIZE];
 	// Put together the formatted string
 	va_start(args, message);
@@ -125,6 +143,9 @@ void Logger::error(std::string message, ...)
 void Logger::warning(std::string message, ...)
 {
 	va_list args;
+
+	if(m_DisableLogging) { return; }
+
 	char logBuffer[MAX_LOG_SIZE];
 	// Put together the formatted string
 	va_start(args, message);
@@ -141,6 +162,8 @@ void Logger::warning(std::string message, ...)
 
 void Logger::logWRSC(double latitude, double longitude)
 {
+	if(m_DisableLogging) { return; }
+
 	#ifdef ENABLE_WRSC_LOGGING
 	// Flag so that we only issue one error about the log file not existing
 	static bool errorMsgUsge = false;
@@ -167,6 +190,8 @@ void Logger::logWRSC(double latitude, double longitude)
 
 bool Logger::createLogFiles(const char* filename)
 {
+	if(m_DisableLogging) { return true; }
+
 	std::string filePath;
 
 	if(filename == 0)
@@ -211,6 +236,8 @@ bool Logger::createLogFiles(const char* filename)
 
 void Logger::writeBufferedLogs()
 {
+	if(m_DisableLogging) { return; }
+
 	for(std::string log : m_LogBuffer)
 	{
 		m_LogFile << log.c_str();

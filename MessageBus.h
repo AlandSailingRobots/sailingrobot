@@ -48,7 +48,7 @@ public:
  	///
  	/// @param node 			Pointer to the node that should be registered.
  	///----------------------------------------------------------------------------------
-	void registerNode(Node* node);
+	bool registerNode(Node* node);
 
 	///----------------------------------------------------------------------------------
  	/// Registers a node onto the message bus allowing it receive direct messages and
@@ -57,7 +57,7 @@ public:
  	/// @param node 			Pointer to the node that should be registered.
  	/// @param msgType 			The type of message to register for
  	///----------------------------------------------------------------------------------
-	void registerNode(Node* node, MessageType msgType);
+	bool registerNode(Node* node, MessageType msgType);
 
 	///----------------------------------------------------------------------------------
  	/// Enqueues a message onto the message queue for distribution through the message 
@@ -163,7 +163,7 @@ private:
 	std::queue<Message*>*			m_BackMessages; 	// The backend message queue which 
 														// contains messages to distribute.
 	std::mutex						m_FrontQueueMutex;	// Guards the front message queue.
-
+	
 #ifdef LOG_MESSAGES
 	std::ofstream* 					m_LogFile;
 #endif

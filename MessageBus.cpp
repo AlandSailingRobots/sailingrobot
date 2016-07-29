@@ -39,22 +39,28 @@ MessageBus::~MessageBus()
 	delete m_BackMessages;
 }
 
-void MessageBus::registerNode(Node* node)
+// TODO - Jordan: Log warning if node tries to register after start
+
+bool MessageBus::registerNode(Node* node)
 {
 	if(not m_Running)
 	{
 		// Don't care about the return type, only want to register the node.
 		getRegisteredNode(node);
+		return true;
 	}
+	return false;
 }
 
-void MessageBus::registerNode(Node* node, MessageType msgType)
+bool MessageBus::registerNode(Node* node, MessageType msgType)
 {
 	if(not m_Running)
 	{
 		RegisteredNode* regNode = getRegisteredNode(node);
 		regNode->subscribe(msgType);
+		return true;
 	}
+	return false;
 }
 
 void MessageBus::sendMessage(Message* msg)
@@ -100,6 +106,7 @@ void MessageBus::run()
 	}
 }
 
+//TODO - Jordan: What would cause this to return a null pointer?
 MessageBus::RegisteredNode* MessageBus::getRegisteredNode(Node* node)
 {
 	for(auto regNode : m_RegisteredNodes)
@@ -149,6 +156,7 @@ void MessageBus::processMessages()
 
 		m_BackMessages->pop();
 		delete msg;
+		msg = NULL;
 	}
 }
 

@@ -50,6 +50,9 @@ public:
 	/////////////////////////////////////////////////////////////////////////////////////
 	static bool init(const char* filename = 0);
 
+	/// SHOULD ONLY BE USED FOR UNIT TESTS!
+	static void DisableLogging();
+
 	static void shutdown();
 
 	/////////////////////////////////////////////////////////////////////////////////////
@@ -76,6 +79,7 @@ private:
 	static std::ofstream 			m_LogFile;
 	static std::vector<std::string> m_LogBuffer;
 	static std::mutex 				m_Mutex;
+	static bool						m_DisableLogging;
 
 	#ifdef ENABLE_WRSC_LOGGING
 	static std::ofstream 			m_LogFileWRSC;

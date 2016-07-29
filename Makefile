@@ -30,7 +30,8 @@ export BUILD_DIR = build
 SRC_DIR = ./
 OUTPUT_DIR = ./
 
-TEST_MAKEFILE = ./Makefile.tests
+UNIT_TEST = ./unit-tests.run
+HARDWARE_TEST = ./hardware-tests.run
 
 # External Libraries
 
@@ -127,18 +128,16 @@ export MKDIR_P = mkdir -p
 # Rules
 #######################################################
 
-.PHONY: clean clean_tests
+.PHONY: clean
 
 all: $(EXECUTABLE) stats
 
 # Builds the intergration test, requires the whole system to be built before
 build_tests: $(OBJECTS) $(EXECUTABLE)
 	@echo Building tests...
-	@$(MAKE) -f $(TEST_MAKEFILE)
-
-clean_tests:
-	@echo Cleaning tests...
-	@$(MAKE) -f $(TEST_MAKEFILE) clean
+	$(MAKE) -C tests
+	$(CXX) $(CPPFLAGS) tests/runner.o @$(OBJECT_FILE) -Wl,-rpath=./ ./libwiringPi.so -o $(UNIT_TEST) $(LIBS)
+	$(CXX) $(CPPFLAGS) tests/runnerHardware.o @$(OBJECT_FILE) -Wl,-rpath=./ ./libwiringPi.so -o $(HARDWARE_TEST) $(LIBS)
 
 #  Create the directories needed
 $(BUILD_DIR):
@@ -176,7 +175,7 @@ stats:$(EXECUTABLE)
 	@echo Final executable size:
 	$(SIZE) $(EXECUTABLE)
 
-clean: clean_tests
+clean:
 	@echo Removing existing object files and executable
 	@rm -f -r $(BUILD_DIR)
 	@rm -f $(EXECUTABLE)

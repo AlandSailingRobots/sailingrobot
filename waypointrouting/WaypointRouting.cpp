@@ -34,14 +34,17 @@ WaypointRouting::~WaypointRouting()
 {
 }
 
+/* Uses:
+	* GPS heading
+	* compass heading
+	* GPS speed
+*/
 
 void WaypointRouting::getCommands(double & rudder, double & sail, double gpsLon, double gpsLat, int radius,
 	double trueWindDirection, double heading, double gpsHeading, double gpsSpeed, double compassHeading, double windsensorDir) {
 
 	double speed = Utility::directionAdjustedSpeed(gpsHeading,compassHeading, gpsSpeed);
 	double commandAngle = m_maxCommandAngle;
-
-
 	m_courseCalc.setTackAngle(m_tackAngleHandler.adjustedTackAngle(gpsHeading,compassHeading, gpsSpeed));
 
 	if(speed > m_rudderSpeedMin) {
