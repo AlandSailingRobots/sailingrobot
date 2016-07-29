@@ -1,4 +1,4 @@
-#include "CollisionAvoidanceBehaviour.h"//
+//
 // Created by Simon CHANU on 11/07/16.
 //
 
@@ -252,7 +252,7 @@ Eigen::Vector3d CollisionAvoidanceBehaviour::latLonToCartesian(
 }
 
 bool CollisionAvoidanceBehaviour::projectionInsideSlice(
-        Eigen::Vector3d triangle[3],
+        const Eigen::Vector3d triangle[3],
         Eigen::Vector3d point){
     // If this is not a slice
     if( std::abs((triangle[1]-triangle[0]).norm()-(triangle[2]-triangle[0]).norm()) <= 0){

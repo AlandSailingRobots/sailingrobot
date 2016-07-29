@@ -5,15 +5,14 @@
 #ifndef SAILINGROBOT_TEST_AVOIDANCE_BEHAVIOUR_H
 #define SAILINGROBOT_TEST_AVOIDANCE_BEHAVIOUR_H
 
-#endif //SAILINGROBOT_TEST_AVOIDANCE_BEHAVIOUR_H
-
 #include <vector>
 #include <math.h>
 #include <stdlib.h>
 #include "libs/Eigen/Dense"
 #include "RoutingBehaviour.h"
 
-// TODO : Receive these values from the database
+// TODO : Receive these values from the database or from RoutingBehaviour
+// Some of these values should be available for all behaviour classes
 #define DISTANCE_NOT_THE_SAME_OBSTACLE 2.0
 #define MAXIMUM_SENSOR_RANGE 100.0
 #define SENSOR_HEADING_RELATIVE_TO_BOAT 0.0 // There might be several sensors
@@ -36,6 +35,65 @@
 */
 
 /**
+ * Structure which contains every obstacle data from the sensors
+ */
+struct ObstacleData {
+    double minDistanceToObstacle;
+    double maxDistanceToObstacle; /**< -1 = infinite */
+    double LeftBoundHeadingRelativeToBoat;
+    double RightBoundHeadingRelativeToBoat;
+};
+/**
+ * Structure which contains every obstacle data
+ */
+struct Obstacle {
+    //Polygon
+    std::vector<Eigen::Vector2d> polygon;
+    std::string color;
+};
+/**
+ * Structure which contains every used data from the sensors
+ */
+struct SensorData {
+    Eigen::Vector2d gpsPos;
+    double gpsSpeed;
+    double compHeading;
+    double gpsHeading;
+    double windDirection;
+    double windSpeed; /**< meter par second */
+    int pitch;
+    int roll;
+
+    //TODO : put the real inputs here (video, sonar or whatever)
+    std::vector<ObstacleData> detectedObstacles;
+};
+struct FollowedLine {
+    Eigen::Vector2d startPoint;
+    Eigen::Vector2d endPoint;
+};
+struct CommandOutput {
+    double deltaRudder;
+    double deltaSail;
+};
+struct MinPotField {
+    double x;
+    double y;
+    double row;
+    double col;
+}; //Trash, not used. Could be useful though
+struct Simulation {
+    const bool waypoints;
+    const bool obstacles;
+};
+struct PotentialMap{
+    const double xMin;
+    const double xMax;
+    const double yMin;
+    const double yMax;
+    Eigen::ArrayXXd field;
+};
+
+/**
  * Collision avoidance class
  * Super class call. Calls the database
  */
@@ -46,8 +104,7 @@ class CollisionAvoidanceBehaviour : public RoutingBehaviour {
 
 public:
     /**
-     * Initialize values :
-     *  sailingZone
+     * Test if everything is ok before starting everything
      * @return
      */
     bool init(); //
@@ -72,59 +129,6 @@ public:
 
 private:
 
-    /**
-     * Structure which contains every used data from the sensors
-     */
-    struct ObstacleData {
-        double minDistanceToObstacle;
-        double maxDistanceToObstacle; /**< -1 = infinite */
-        double LeftBoundHeadingRelativeToBoat;
-        double RightBoundHeadingRelativeToBoat;
-    };
-    struct Obstacle {
-        //Polygon
-        std::vector<Eigen::Vector2d> polygon;
-        std::string color;
-    };
-    struct SensorData {
-        Eigen::Vector2d gpsPos;
-        double gpsSpeed;
-        double compHeading;
-        double gpsHeading;
-        double windDirection;
-        double windSpeed; /**< meter par second */
-        int pitch;
-        int roll;
-
-        //TODO : put the real inputs here (video, sonar or whatever)
-        std::vector<ObstacleData> detectedObstacles;
-    };
-    struct FollowedLine {
-        Eigen::Vector2d startPoint;
-        Eigen::Vector2d endPoint;
-    };
-    struct CommandOutput {
-        double deltaRudder;
-        double deltaSail;
-    };
-    struct MinPotField {
-        double x;
-        double y;
-        double row;
-        double col;
-    }; //Trash, not used. Could be useful though
-    struct Simulation {
-        const bool waypoints;
-        const bool obstacles;
-    };
-    struct PotentialMap{
-        const double xMin;
-        const double xMax;
-        const double yMin;
-        const double yMax;
-        Eigen::ArrayXXd field;
-    };
-
     std::vector<Obstacle> m_seenObstacles;
     // Since followedLine is updated from the waypointNode at each iteration
     // maybe it's not necessary to put it as a class variable.
@@ -137,6 +141,9 @@ private:
     int m_tackingDirection; //Need init
 
     // UTILITY FUNCTIONS
+    /*
+     * Most of them are functions to handle geometry.
+     */
 
     /**
      * Gives the difference between two angles regardless of their definition.
@@ -235,7 +242,7 @@ private:
      * @return
      */
     Eigen::Vector2d getPointWithDistanceAndBearing(double distance,
-                                                   double bearing
+                                                   double bearing,
                                                    Eigen::Vector2d startPoint);
 
     /**
@@ -289,7 +296,8 @@ private:
      * @param point
      * @return
      */
-    bool projectionInsideSlice(Eigen::Vector3d triangle[3],Eigen::Vector3d point);
+    bool projectionInsideSlice(const Eigen::Vector3d triangle[],
+                               Eigen::Vector3d point);
 
     /**
      * Debugging function, specific to Eigen
@@ -411,3 +419,5 @@ private:
      */
     CommandOutput run(SystemStateModel &systemStateModel);
 };
+
+#endif //SAILINGROBOT_TEST_AVOIDANCE_BEHAVIOUR_H
