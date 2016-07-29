@@ -20,7 +20,7 @@
 
 #include "HMC6343Node.h"
 #include "Messages/CompassDataMsg.h"
-#include "logger/Logger.h"
+#include "SystemServices/Logger.h"
 #include "wiringPi.h"
 #include "utility/Utility.h"
 
@@ -74,11 +74,12 @@ bool HMC6343Node::init()
 		m_I2C.writeReg(COM_READ_EEPROM, EEPROM_ADDRESS);
 		delay(10);
 		uint8_t deviceID = m_I2C.read();
+		printf("received %02x request %02x\n",deviceID,I2C_ADDRESS);
 
 		m_I2C.endTransmission();
 
 		// The Device reports the I2C address that is mentioned in the datasheet
-		if(deviceID == I2C_DATASHEET_ADDRESS)
+		if(deviceID == I2C_ADDRESS)
 		{
 			m_Initialised = true;
 		}

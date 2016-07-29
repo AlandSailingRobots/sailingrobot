@@ -17,18 +17,20 @@
 
 class ActuatorPositionMsg : public Message {
 public:
-	ActuatorPositionMsg(NodeID destinationID, NodeID sourceID, int position)
-		:Message(MessageType::ActuatorPosition, sourceID, destinationID), m_Position(position)
+	ActuatorPositionMsg(NodeID destinationID, NodeID sourceID, int rudderPosition, int sailPosition)
+		:Message(MessageType::ActuatorPosition, sourceID, destinationID), m_rudderPosition(rudderPosition), m_sailPosition(sailPosition)
 	{ }
 
-	ActuatorPositionMsg(int position)
-		:Message(MessageType::ActuatorPosition, NodeID::None, NodeID::None), m_Position(position)
+	ActuatorPositionMsg(int rudderPosition, int sailPosition)
+		:Message(MessageType::ActuatorPosition, NodeID::None, NodeID::None), m_rudderPosition(rudderPosition), m_sailPosition(sailPosition)
 	{ }
 
 	virtual ~ActuatorPositionMsg() { }
 
-	int position() { return m_Position; }
+	int sailPosition() { return m_sailPosition; }
+	int rudderPosition() { return m_rudderPosition; }
 
 private:
-	int m_Position;
+	int m_rudderPosition;
+	int m_sailPosition;
 };

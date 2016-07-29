@@ -3,7 +3,7 @@
 
 #include "ActiveNode.h"
 #include "dbhandler/DBHandler.h"
-#include "logger/Logger.h"
+#include "SystemServices/Logger.h"
 #include "models/SystemStateModel.h"
 
 

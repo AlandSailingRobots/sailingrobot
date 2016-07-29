@@ -12,7 +12,7 @@
  ***************************************************************************************/
 
 #include "MessageLoggerNode.h"
-#include "logger/Logger.h"
+#include "SystemServices/Logger.h"
 
 
 //TODO - Jordan: File logging
@@ -41,22 +41,22 @@ void MessageLoggerNode::processMessage(const Message* message)
 	switch(msgType)
 	{
 		case MessageType::DataRequest:
-			Logger::info("DataRequest message received");
+			//Logger::info("DataRequest message received");
 			break;
 		case MessageType::WindData:
-			Logger::info("WindData message received");
+			//Logger::info("WindData message received");
 			break;
 		case MessageType::CompassData:
-			Logger::info("CompassData message received");
+			//Logger::info("CompassData message received");
 			break;
 		case MessageType::GPSData:
-			Logger::info("GPSData message received");
+			//Logger::info("GPSData message received");
 			break;
 		case MessageType::ArduinoData:
-			Logger::info("ArduinoData message received");
+			//Logger::info("ArduinoData message received");
 			break;
 		case MessageType::WaypointData:
-			Logger::info("WaypointData message received");
+			//Logger::info("WaypointData message received");
 			break;
 		default:
 			break;

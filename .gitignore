@@ -13,3 +13,5 @@ sr
 
 # Other
 *.vim
+*.tags
+*.gch
