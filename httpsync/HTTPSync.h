@@ -39,7 +39,7 @@ class HTTPSync {
 
 		CURL *curl;
 		CURLcode res;
-
+		bool reportedConnectError;
 		std::string shipID;
 		std::string shipPWD;
 		std::string serverURL;
@@ -53,16 +53,14 @@ class HTTPSync {
 
 		DBHandler *m_dbHandler;
 
-		std::string serve(std::string data, std::string call);
 
-		std::string pushData(std::string data, std::string call);
 		std::string getData(std::string call);
 		void updateConfigs();
 		void updateWaypoints();
 
 
 
-		std::string performCURLCall(std::string serverCall);
+		bool performCURLCall(std::string data, std::string call, std::string& response);
 		bool checkIfNewConfig();
 		bool checkIfNewWaypoints();
 		bool isRunning();
