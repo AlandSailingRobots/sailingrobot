@@ -14,6 +14,7 @@
 #include "behaviourclass/WaypointBehaviour.h"
 #include "behaviourclass/LineFollowBehaviour.h"
 
+#define DEFAULT_TWD_BUFFERSIZE 200
 
 
 SailingRobot::SailingRobot(ExternalCommand* externalCommand,
@@ -24,17 +25,6 @@ SailingRobot::SailingRobot(ExternalCommand* externalCommand,
 	m_systemState(systemState),
 	m_dbHandler(db),
 	m_httpSync(httpSync),
-	m_waypointModel(PositionModel(1.5,2.7), 100, "", 6),
-	
-	m_waypointRouting(m_waypointModel,
-		atof(m_dbHandler->retrieveCell("waypoint_routing_config", "1", "radius_ratio").c_str()),
-		atof(m_dbHandler->retrieveCell("course_calculation_config", "1", "tack_angle").c_str()),
-		atof(m_dbHandler->retrieveCell("course_calculation_config", "1", "tack_max_angle").c_str()),
-		atof(m_dbHandler->retrieveCell("course_calculation_config", "1", "tack_min_speed").c_str()),
-		atof(m_dbHandler->retrieveCell("course_calculation_config", "1", "sector_angle").c_str()),
-		 atof(m_dbHandler->retrieveCell("waypoint_routing_config", "1", "max_command_angle ").c_str()),
-		 atof(m_dbHandler->retrieveCell("waypoint_routing_config", "1", "rudder_speed_min").c_str())
-		),
 
 	m_systemStateModel(
 		SystemStateModel(
@@ -62,10 +52,10 @@ bool SailingRobot::init(std::string programPath, std::string errorFileName) {
 	m_getHeadingFromCompass = m_dbHandler->retrieveCellAsInt("sailing_robot_config", "1", "flag_heading_compass");
 	
 	if(not setupMaestro()) 			{ return false; }
-	if(not setupRudderServo()) 		{ return false; }
-	if(not setupRudderCommand()) 	{ return false; }
-	if(not setupSailServo()) 		{ return false; }
-	if(not setupSailCommand()) 		{ return false; }
+	setupRudderServo();
+	setupRudderCommand();
+	setupSailServo();
+	setupSailCommand();
 
 	return true;
 }
@@ -81,17 +71,24 @@ void SailingRobot::run() {
 
 	//int windDir = 0; // outComment if use of tureWindDirCalculation
 	std::vector<float> twdBuffer;
-	const unsigned int twdBufferMaxSize =
+	unsigned int twdBufferMaxSize =
 		m_dbHandler->retrieveCellAsInt("buffer_config", "1", "true_wind");
+	if(twdBufferMaxSize == 0)
+		twdBufferMaxSize = DEFAULT_TWD_BUFFERSIZE;
 	double trueWindDirection;
 
 
 	Timer timer;
+	double loop_time = 0;
 	std::string sr_loop_time =
 		m_dbHandler->retrieveCell("sailing_robot_config", "1", "loop_time");
-	double loop_time = std::stod(sr_loop_time);
+	if (sr_loop_time.size() > 0)
+	{
+		loop_time = std::stod(sr_loop_time);
+	}
 
-	bool usingLineFollow = std::stoi(m_dbHandler->retrieveCell("sailing_robot_config", "1", "line_follow"));
+
+	bool usingLineFollow = (bool)(m_dbHandler->retrieveCellAsInt("sailing_robot_config", "1", "line_follow"));
 	//bool previousBehaviour = usingLineFollow; //Used in while-loop to see if waypoint routing has changed
 
   	WaypointBehaviour waypB(m_dbHandler); 
@@ -178,11 +175,9 @@ bool SailingRobot::setupMaestro() {
 		m_maestroController.reset(new MaestroController());
 	}
 
-	std::string port_name;
-	try {
-		port_name = m_dbHandler->retrieveCell("maestro_controller_config", "1", "port");
-	} catch (const char * error) {
-		Logger::error("SailingRobot::%d %s", __LINE__, error);
+	std::string port_name = m_dbHandler->retrieveCell("maestro_controller_config", "1", "port");
+	if (port_name.size() == 0)
+	{
 		return false;
 	}
 
@@ -201,55 +196,36 @@ bool SailingRobot::setupMaestro() {
 	}
 }
 
-bool SailingRobot::setupRudderServo() {
-	try {
-		m_rudderServo.setController(m_maestroController.get());
-		m_rudderServo.setChannel( m_dbHandler->retrieveCellAsInt("rudder_servo_config", "1", "channel") );
-		m_rudderServo.setSpeed( m_dbHandler->retrieveCellAsInt("rudder_servo_config", "1", "speed") );
-		m_rudderServo.setAcceleration( m_dbHandler->retrieveCellAsInt("rudder_servo_config", "1", "acceleration") );
-	} catch (const char * error) {
-		Logger::error("SailingRobot::%d %s", __LINE__, error);
-		return false;
-	}
+void SailingRobot::setupRudderServo() {
+
+	m_rudderServo.setController(m_maestroController.get());
+	m_rudderServo.setChannel( m_dbHandler->retrieveCellAsInt("rudder_servo_config", "1", "channel") );
+	m_rudderServo.setSpeed( m_dbHandler->retrieveCellAsInt("rudder_servo_config", "1", "speed") );
+	m_rudderServo.setAcceleration( m_dbHandler->retrieveCellAsInt("rudder_servo_config", "1", "acceleration") );
+
 	Logger::info("Rudder servo setup");
-	return true;
+
 }
 
-bool SailingRobot::setupSailServo() {
-	try {
-		m_sailServo.setController(m_maestroController.get());
-		m_sailServo.setChannel( m_dbHandler->retrieveCellAsInt("sail_servo_config", "1", "channel") );
-		m_sailServo.setSpeed( m_dbHandler->retrieveCellAsInt("sail_servo_config", "1", "speed") );
-		m_sailServo.setAcceleration( m_dbHandler->retrieveCellAsInt("sail_servo_config", "1", "acceleration") );
-	} catch (const char * error) {
-		Logger::error("SailingRobot::%d %s", __LINE__, error);
-		return false;
-	}
+void SailingRobot::setupSailServo() {
+
+	m_sailServo.setController(m_maestroController.get());
+	m_sailServo.setChannel( m_dbHandler->retrieveCellAsInt("sail_servo_config", "1", "channel") );
+	m_sailServo.setSpeed( m_dbHandler->retrieveCellAsInt("sail_servo_config", "1", "speed") );
+	m_sailServo.setAcceleration( m_dbHandler->retrieveCellAsInt("sail_servo_config", "1", "acceleration") );
 
 	Logger::info("Sail servo setup");
-	return true;
 }
 
-bool SailingRobot::setupRudderCommand() {
-	try {
-		m_rudderCommand.setCommandValues( m_dbHandler->retrieveCellAsInt("rudder_command_config", "1", "extreme_command"),
-		m_dbHandler->retrieveCellAsInt("rudder_command_config", "1", "midship_command"));
+void SailingRobot::setupRudderCommand() {
 
-	} catch (const char * error) {
-		Logger::error("SailingRobot::%d %s", __LINE__, error);
-		return false;
-	}
-	return true;
+	m_rudderCommand.setCommandValues(m_dbHandler->retrieveCellAsInt("rudder_command_config", "1","extreme_command"),
+	m_dbHandler->retrieveCellAsInt("rudder_command_config", "1", "midship_command"));
 }
 
-bool SailingRobot::setupSailCommand() {
-	try {
-		m_sailCommand.setCommandValues( m_dbHandler->retrieveCellAsInt("sail_command_config", "1", "close_reach_command"),
-		m_dbHandler->retrieveCellAsInt("sail_command_config", "1", "run_command"));
+void SailingRobot::setupSailCommand() {
 
-	} catch (const char * error) {
-		Logger::error("SailingRobot::%d %s", __LINE__, error);
-		return false;
-	}
-	return true;
+	m_sailCommand.setCommandValues( m_dbHandler->retrieveCellAsInt("sail_command_config", "1", "close_reach_command"),
+	m_dbHandler->retrieveCellAsInt("sail_command_config", "1", "run_command"));
+
 }
