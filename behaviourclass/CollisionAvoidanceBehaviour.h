@@ -5,15 +5,14 @@
 #ifndef SAILINGROBOT_TEST_AVOIDANCE_BEHAVIOUR_H
 #define SAILINGROBOT_TEST_AVOIDANCE_BEHAVIOUR_H
 
-#endif //SAILINGROBOT_TEST_AVOIDANCE_BEHAVIOUR_H
-
 #include <vector>
 #include <math.h>
 #include <stdlib.h>
 #include "libs/Eigen/Dense"
 #include "RoutingBehaviour.h"
 
-// TODO : Receive these values from the database
+// TODO : Receive these values from the database or from RoutingBehaviour
+// Some of these values should be available for all behaviour classes
 #define DISTANCE_NOT_THE_SAME_OBSTACLE 2.0
 #define MAXIMUM_SENSOR_RANGE 100.0
 #define SENSOR_HEADING_RELATIVE_TO_BOAT 0.0 // There might be several sensors
@@ -46,8 +45,7 @@ class CollisionAvoidanceBehaviour : public RoutingBehaviour {
 
 public:
     /**
-     * Initialize values :
-     *  sailingZone
+     * Test if everything is ok before starting everything
      * @return
      */
     bool init(); //
@@ -137,6 +135,9 @@ private:
     int m_tackingDirection; //Need init
 
     // UTILITY FUNCTIONS
+    /*
+     * Most of them are functions to handle geometry.
+     */
 
     /**
      * Gives the difference between two angles regardless of their definition.
@@ -411,3 +412,5 @@ private:
      */
     CommandOutput run(SystemStateModel &systemStateModel);
 };
+
+#endif //SAILINGROBOT_TEST_AVOIDANCE_BEHAVIOUR_H
