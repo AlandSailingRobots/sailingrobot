@@ -52,7 +52,7 @@ struct Obstacle {
     std::string color;
 };
 /**
- * Structure which contains every used data from the sensors
+ * Structure which contains every used data from the sensors.
  */
 struct SensorData {
     Eigen::Vector2d gpsPos;

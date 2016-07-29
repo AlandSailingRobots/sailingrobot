@@ -319,7 +319,7 @@ SensorData CollisionAvoidanceBehaviour::update_sensors(
         //Extraction of data from sensors
 
         //Position and speed
-        //The latitude and longitude are easier to compute in radians
+        //The latitude and longitude are easier to compute in radians.
         sensorData.gpsPos(0) = // x
                 Utility::degreeToRadian(systemStateModel.gpsModel.positionModel.latitude);
         sensorData.gpsPos(1) = // y
