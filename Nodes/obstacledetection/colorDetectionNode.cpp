@@ -278,7 +278,7 @@ void colorDetectionNode::colorDetectionThreadFunc(void* nodePtr)
         obstacles.erase(obstacles.begin(),obstacles.end());
 
         imshow("Thresholded Image", imgsThresholded[node->m_iColor]);
-        imshow("Detection", node->m_imgOriginal); 
+        imshow("Detection", node->m_imgOriginal);
         setMouseCallback( "Detection", get_on_click_hsv_pixel_values, nodePtr );
 
 		// Controls how often we pump out messages

@@ -20,6 +20,8 @@ struct ObstacleData {
        double maxDistanceToObstacle; // -1 = infinite
        double LeftBoundheadingRelativeToBoat;
        double RightBoundheadingRelativeToBoat;
+       double angularPositionX;
+       double angularPositionY;
    };
 
 

@@ -331,8 +331,6 @@ void computeObstaclesAnglePosition(cv::Mat const& imgOriginal, std::vector<Obsta
     ObstacleData currentObstacle;
     Size imageSize=imgOriginal.size(), rectangleSize;
     Point topLeftCorner, leftPoint, rightPoint, imageCenter(imageSize.width/2.0,imageSize.height/2.0);
-    //int imgHeight=imageSize.height;
-    //int imgWidth=imageSize.width;
     float webcamAngleApertureXPerPixel = webcamAngleApertureX/imageSize.width;
     //float webcamAngleApertureYPerPixel = webcamAngleApertureY/imageSize.height;
     for(int i = 0; i<(int)rotated_bounding_rects_several_captures.size(); i++){
