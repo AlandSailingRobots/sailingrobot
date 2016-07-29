@@ -28,5 +28,6 @@ enum class NodeID {
 	Arduino,
 	VesselState,
 	ColorDetection,
-    CollisionAvoidanceBehaviour
+    CollisionAvoidanceBehaviour,
+	LIDAR
 };

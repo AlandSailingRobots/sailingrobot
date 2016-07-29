@@ -22,7 +22,8 @@ class colorDetectionNode : public ActiveNode {
 public:
     colorDetectionNode(MessageBus& msgBus,std::vector<std::string> colors_input);//Accepted values:red,orange,green,yellow,purple and blue
     //Possibility to live change ths HSV values live after to detect another color
-	colorDetectionNode(MessageBus& msgBus,int port, int delay,std::vector<std::string> colors_input);
+	colorDetectionNode(MessageBus& msgBus,int m_numberOfCapturesPerDetection,
+                        int port, int delay,std::vector<std::string> colors_input);
 
 	~colorDetectionNode();
 
@@ -45,25 +46,26 @@ public:
 	void start();
 private:
 
-    void initWindowsAndTrackbars(void);
 	static void colorDetectionThreadFunc(void* nodePtr);
-    static void changecolorTrackbar(void);
-    static void update_trackbar_hsv_values( int, void* );
-    static void get_trackbar_hsv_values( int, void* );
-    static void get_on_click_hsv_pixel_values( int event, int x, int y, int, void* );
 
-    static cv::Mat     m_imgOriginal;
-    static int     m_hsvDiff;
-    static int     m_iLowH;
-    static int     m_iHighH;
-    static int     m_iLowS;
-    static int     m_iHighS;
-    static int     m_iLowV;
-    static int     m_iHighV;
-    static int     m_iColor;
-    static cv::Mat     m_trackBarHSV;
-    static int     m_numberOfColorsToTrack;
-    static std::vector<std::vector<int> >  m_hsvValues;
+    void changecolorTrackbar(void* nodePtr);
+    static void update_trackbar_hsv_values( int val , void* nodePtr );
+    static void get_trackbar_hsv_values( int val, void* nodePtr );
+    static void get_on_click_hsv_pixel_values( int event, int x, int y, int val , void* nodePtr );
+    void initWindowsAndTrackbars(void* nodePtr);
+
+    cv::Mat     m_imgOriginal;
+    int     m_hsvDiff;
+    int     m_iLowH;
+    int     m_iHighH;
+    int     m_iLowS;
+    int     m_iHighS;
+    int     m_iLowV;
+    int     m_iHighV;
+    int     m_iColor;
+    cv::Mat     m_trackBarHSV;
+    int     m_numberOfColorsToTrack;
+    std::vector<std::vector<int> >  m_hsvValues;
 
 	bool 	m_Initialised;
     bool 	m_inputColorError;

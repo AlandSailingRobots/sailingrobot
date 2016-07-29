@@ -10,6 +10,7 @@ std::vector<int> blue;
 std::vector<int> purple;
 float webcamAngleApertureX;
 float webcamAngleApertureY;
+
 void initHsvColors(){
 
     red.push_back(165);//low H
@@ -53,11 +54,6 @@ void initHsvColors(){
 
 }
 
-void createTrackbarHSV(int numberOfColorsToTrack){
-
-
-
-}
 /* This function return true if x is not +nan or -nan */
 bool is_valid_double(double x)
 {
@@ -83,7 +79,7 @@ bool find_if_close(vector<Point>  cnt1,vector<Point>  cnt2, float dist_is_close)
 /* This function merge two contours and calculate the smallest rectangle
    containing this merged contour. In order to be drawable the function
     convexHull is used to sort the Points in a clockwise order.*/
-vector<Point> merge2Contours(vector<Point>  cnt1,vector<Point>  cnt2,Rect& rotated_bounding_rect){
+vector<Point> merge2Contours(vector<Point>  cnt1,vector<Point>  cnt2){
     vector<Point> mContour = cnt1;
     for(int l=0; l< (int)cnt2.size(); l++){
         mContour.push_back(cnt2[l]);
@@ -91,16 +87,13 @@ vector<Point> merge2Contours(vector<Point>  cnt1,vector<Point>  cnt2,Rect& rotat
     vector<Point> hull;
     convexHull(Mat(mContour),hull);
     Mat hull_points(hull);
-    rotated_bounding_rect = boundingRect(hull_points);
     return hull;
 }
 
 /* This function merge the contours which are close and returns a new vector
     of contours.*/
 vector<vector<Point> > mergeAllContours(vector<vector<Point> > contours,
-                                float const& dist_is_close,
-                                Rect& rotated_bounding_rect,
-                                vector <Rect>& rotated_bounding_rects){
+                                float const& dist_is_close){
 
     vector<vector<Point> > contoursBis;
     vector<vector<Point> > mergedContours;
@@ -112,7 +105,7 @@ vector<vector<Point> > mergeAllContours(vector<vector<Point> > contours,
         while(q < size){
 
             if(q!=0 && find_if_close(contours[0],contours[q], dist_is_close)){
-                contours[0]=merge2Contours(contours[0],contours[q],rotated_bounding_rect);
+                contours[0]=merge2Contours(contours[0],contours[q]);
             }
             else{
                 if(q!=0){
@@ -126,11 +119,9 @@ vector<vector<Point> > mergeAllContours(vector<vector<Point> > contours,
         }
         else{
             mergedContours.push_back(contours[0]);
-            rotated_bounding_rects.push_back(rotated_bounding_rect);
             contours=contoursBis;
             if( contours.size()==1){
                 mergedContours.push_back(contours[0]);
-                rotated_bounding_rects.push_back(rotated_bounding_rect);
                 return mergedContours;
             }
             size =(int)contours.size();
@@ -139,6 +130,7 @@ vector<vector<Point> > mergeAllContours(vector<vector<Point> > contours,
     }
     return mergedContours;
 }
+
 /*This function print a vector of contour */
 void printContour(vector<vector<Point> > ct){
     for(int i = 0; i < (int)ct.size(); i++ ){
@@ -148,7 +140,7 @@ void printContour(vector<vector<Point> > ct){
         }
     }
 }
-
+/*This function return the HSV tresholds for the colors asked by the user*/
 vector<vector<int> > findHsvTreshold(vector<string> colors, vector<Scalar>& colorDrawing){
     vector<vector<int> > hsvValues;
     /*Hsv low nd min values*/
@@ -183,6 +175,8 @@ vector<vector<int> > findHsvTreshold(vector<string> colors, vector<Scalar>& colo
     return hsvValues;
 }
 
+/*Treshold the image imgOriginal,the output image will be a grey image.
+The color defined by color will be in white.*/
 Mat threshold(Mat const& imgOriginal,vector<int> const& color){
     int iLowH = color[0];
     int iHighH = color[3];
@@ -200,6 +194,10 @@ Mat threshold(Mat const& imgOriginal,vector<int> const& color){
     inRange(imgHSV, Scalar(iLowH, iLowS, iLowV), Scalar(iHighH, iHighS, iHighV), imgThresholded); //Threshold the image
 return imgThresholded;
 }
+
+/* Filter the small areas of white and merge the white areas which are close.
+Don't add to much morphologicalOperations it will severly diminish the range of
+detection.*/
 void morphologicalOperations (Mat& imgThresholded){
     //morphological opening (removes small objects from the foreground)
     erode(imgThresholded, imgThresholded, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
@@ -209,6 +207,7 @@ void morphologicalOperations (Mat& imgThresholded){
     dilate( imgThresholded, imgThresholded, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
     erode(imgThresholded, imgThresholded, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
 }
+
 
 void computeContoursCentersRectangles(Mat const& imgThresholded,vector<Point2f>& mc,vector<Rect>& rotated_bounding_rects, int minAreaToDetect  ){
 
@@ -223,21 +222,24 @@ void computeContoursCentersRectangles(Mat const& imgThresholded,vector<Point2f>&
     vector<Vec4i> hierarchy;
 
     findContours(cpImgThresholded, contours, hierarchy,CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE, Point(0, 0) );
-    contoursMerged=mergeAllContours(contours, 150, rotated_bounding_rect,rotated_bounding_rects);
-
+    contoursMerged=mergeAllContours(contours, 150);
+    for(int i = 0; i<(int)contoursMerged.size(); i++){
+        rotated_bounding_rects.push_back(boundingRect(contoursMerged[i]));
+    }
     /// Get the moments
     vector<Moments> mu(contoursMerged.size() );
     vector<Point2f> mc1( contoursMerged.size() );
     mc=mc1;
+    cout << "" << endl;
     double dArea = 0;
     for( int i = 0; i <(int)contoursMerged.size(); i++ ){
         mu[i] = moments( contoursMerged[i], false );
         dArea=mu[i].m00;
-
         if (dArea > minAreaToDetect){// if the area <= 20000, I consider that the there are no object in the image and it's because of the noise, the area is not zero
             mc[i] = Point2f( mu[i].m10/mu[i].m00 , mu[i].m01/mu[i].m00 );///  Get the mass centers:
         }
         else{
+            cout << "in" << endl;
             rotated_bounding_rects.erase(rotated_bounding_rects.begin()+i);
         }
     }
@@ -250,7 +252,7 @@ void drawCentersRectangles(Mat& imgOriginal,vector<Point2f> const& mc,vector<Rec
         rectangle(imgOriginal, rotated_bounding_rects[i], aColorDrawing,4, 8,0);
     }
 }
-
+/*Merge rectangles which are secant or tangent*/
 vector<Rect> compareRects(cv::Mat& imgOriginal,std::vector<cv::Rect> const& rotated_bounding_rects){
     vector<Rect> mergedRects, rectsBis, rotated_bounding_rects_copy ;
     rotated_bounding_rects_copy=rotated_bounding_rects;
@@ -301,6 +303,8 @@ vector<Rect> compareRects(cv::Mat& imgOriginal,std::vector<cv::Rect> const& rota
     }
     return mergedRects;
  }
+
+/*Find the centers of the rectangles in the vector rects*/
 vector<Point> findRectanglesCenters(std::vector<cv::Rect> const& rects){
      vector<Point> centerList;
      Point center;
@@ -313,7 +317,7 @@ vector<Point> findRectanglesCenters(std::vector<cv::Rect> const& rects){
      }
      return centerList;
  }
-
+/*Not used but could be usefull. Supress the rectangles with a area < minAreaRectangle*/
  void supressSmallRectangles(vector<Rect>& rects,int minAreaRectangle){
      vector<Rect> newRectList;
      for (int i=0; i<(int) rects.size(); i++){
@@ -327,8 +331,6 @@ void computeObstaclesAnglePosition(cv::Mat const& imgOriginal, std::vector<Obsta
     ObstacleData currentObstacle;
     Size imageSize=imgOriginal.size(), rectangleSize;
     Point topLeftCorner, leftPoint, rightPoint, imageCenter(imageSize.width/2.0,imageSize.height/2.0);
-    //int imgHeight=imageSize.height;
-    //int imgWidth=imageSize.width;
     float webcamAngleApertureXPerPixel = webcamAngleApertureX/imageSize.width;
     //float webcamAngleApertureYPerPixel = webcamAngleApertureY/imageSize.height;
     for(int i = 0; i<(int)rotated_bounding_rects_several_captures.size(); i++){
@@ -343,17 +345,6 @@ void computeObstaclesAnglePosition(cv::Mat const& imgOriginal, std::vector<Obsta
             currentObstacle.RightBoundheadingRelativeToBoat = (-imageCenter.x+rightPoint.x)*webcamAngleApertureXPerPixel;
             currentObstacle.minDistanceToObstacle=0;
             currentObstacle.maxDistanceToObstacle=-1;
-            /*
-            cout << "" <<endl;
-            cout << "imageCenter" << imageCenter << endl;
-            cout << "leftPoint" << leftPoint << endl;
-            cout << "rightPoint" << rightPoint << endl;
-            cout << "leftPointX" << (-imageCenter.x+leftPoint.x) << endl;
-            cout << "rightPointX" << (-imageCenter.x+rightPoint.x) << endl;
-            cout << "webcamAngleApertureXPerPixel" << webcamAngleApertureX <<endl;
-            cout << "LeftBoundheadingRelativeToBoat" << currentObstacle.LeftBoundheadingRelativeToBoat <<endl;
-            cout << "RightBoundheadingRelativeToBoat" << currentObstacle.RightBoundheadingRelativeToBoat <<endl;
-            */
             Obstacles.push_back(currentObstacle);
             }
     }
