@@ -44,7 +44,7 @@ LineFollowNode::LineFollowNode(MessageBus& msgBus, DBHandler& db)
 
     m_maxCommandAngle = M_PI / 6;
     m_maxSailAngle = M_PI / 4.2f;
-    m_minSailAngle = M_PI / 32;
+    m_minSailAngle = M_PI / 32.0f;
     m_tackAngle = 0.872665; //50°
 }
 
@@ -179,14 +179,27 @@ void LineFollowNode::calculateActuatorPos(VesselStateMsg* msg)
 
     apparentWindDirection = ( (apparentWindDirection+M_PI>M_PI) ? (apparentWindDirection-M_PI):(apparentWindDirection+M_PI) );
 
-    sailCommand = abs( ((m_minSailAngle - m_maxSailAngle) / M_PI) * abs(apparentWindDirection) + m_maxSailAngle);
+    sailCommand = (((m_minSailAngle - m_maxSailAngle) / M_PI) * abs(apparentWindDirection) + m_maxSailAngle);
+
+    if (sailCommand<0)
+    {
+        sailCommand=-sailCommand;
+    }
+
+    if (cos(apparentWindDirection+M_PI) + cos(m_maxSailAngle) <0 )
+    {
+       sailCommand = m_minSailAngle;
+    }
+
     //------------------
     int rudderCommand_norm = m_rudderCommand.getCommand(rudderCommand);
     int sailCommand_norm = m_sailCommand.getCommand(sailCommand);
 
     //Send messages----
     ActuatorPositionMsg *actuatorMsg = new ActuatorPositionMsg(NodeID::RudderActuator, nodeID(), rudderCommand_norm, sailCommand_norm);
+    ActuatorPositionMsg *actuatorMsg2 = new ActuatorPositionMsg(NodeID::SailActuator, nodeID(), rudderCommand_norm, sailCommand_norm);
     m_MsgBus.sendMessage(actuatorMsg);
+    m_MsgBus.sendMessage(actuatorMsg2);
     //------------------
 
     double bearingToNextWaypoint = m_courseMath.calculateBTW(msg->longitude(), msg->latitude(), m_nextWaypointLon, m_nextWaypointLat); //calculated for database

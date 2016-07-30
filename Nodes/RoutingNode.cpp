@@ -90,13 +90,15 @@ void RoutingNode::calculateActuatorPos(VesselStateMsg* msg)
     double rudderCommand, sailCommand;
 
     m_waypointRouting.getCommands(rudderCommand, sailCommand, msg->longitude(), msg->latitude(), m_nextWaypointRadius,
-	trueWindDirection, heading, msg->gpsHeading(), msg->speed(), msg->compassHeading(), msg->windDir());
+	  trueWindDirection, heading, msg->gpsHeading(), msg->speed(), msg->compassHeading(), msg->windDir());
 
     rudderCommand = m_rudderCommand.getCommand(rudderCommand);
-	sailCommand = m_sailCommand.getCommand(sailCommand);
+	  sailCommand = m_sailCommand.getCommand(sailCommand);
 
     ActuatorPositionMsg *actuatorMsg = new ActuatorPositionMsg(NodeID::RudderActuator, nodeID(), rudderCommand, sailCommand);
     m_MsgBus.sendMessage(actuatorMsg);
+    ActuatorPositionMsg *actuatorMsg2 = new ActuatorPositionMsg(NodeID::SailActuator, nodeID(), rudderCommand, sailCommand);
+    m_MsgBus.sendMessage(actuatorMsg2);
 
     //create timestamp----
     std::string timestamp_str=SysClock::timeStampStr();

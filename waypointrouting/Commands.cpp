@@ -6,7 +6,7 @@
 Commands::Commands() :
 	m_starboardExtreme(1),
 	m_portExtreme(-1),
-	m_closeReach(0),
+	m_closeReach(0.1),
 	m_running(1)
 {}
 
