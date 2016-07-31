@@ -82,7 +82,7 @@ void VesselStateNode::processGPSMessage(GPSDataMsg* msg)
 	m_GPSUnixTime = msg->unixTime();
 	m_GPSSpeed = msg->speed();
 	m_GPSHeading = msg->heading();
-	m_GPSSatellite = msg->satellite();
+	m_GPSSatellite = msg->satelliteCount();
 }
 
 void VesselStateNode::processWindMessage(WindDataMsg* msg)

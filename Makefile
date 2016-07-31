@@ -46,7 +46,7 @@ NODES =					Nodes/MessageLoggerNode.cpp Nodes/CV7Node.cpp Nodes/HMC6343Node.cpp 
 
 SYSTEM_SERVICES =		SystemServices/MaestroController.cpp SystemServices/Logger.cpp
 
-XBEE = 					xBee/xBeeSync.cpp xBee/xBee.cpp
+XBEE = 					xBee/xBee.cpp xBee/Xbee.cpp
 
 BEHAVIOURCLASS = 		behaviourclass/RoutingBehaviour.cpp  behaviourclass/WaypointBehaviour.cpp behaviourclass/LineFollowBehaviour.cpp
 

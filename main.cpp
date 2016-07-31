@@ -16,6 +16,7 @@
 #include "Messages/DataRequestMsg.h"
 #include "dbhandler/DBHandler.h"
 #include "SystemServices/MaestroController.h"
+#include "xBee/Xbee.h"
 
 #define DISABLE_LOGGING 0
 
@@ -107,7 +108,6 @@ int main(int argc, char *argv[])
 	WaypointNode waypoint(messageBus, dbHandler);
 	HTTPSyncNode httpsync(messageBus, &dbHandler, 0, false);
 	Node* sailingLogic;
-
 
 	bool usingLineFollow = (bool)(dbHandler.retrieveCellAsInt("sailing_robot_config", "1", "line_follow"));
 	if(usingLineFollow)
