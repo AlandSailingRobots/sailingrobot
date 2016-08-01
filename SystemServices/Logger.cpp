@@ -113,8 +113,14 @@ void Logger::info(std::string message, ...)
     va_end(args);
 
     char buff[256];
+		int millis = SysClock::millis();
 
-    snprintf(buff, 256, "[%s:%d] <info>\t %s\n", SysClock::timeStampStr().c_str(), SysClock::millis(), logBuffer);
+		if (millis<10)
+      snprintf(buff, 256, "[%s:00%d] <info>\t %s\n", SysClock::timeStampStr().c_str(),millis, logBuffer);
+	  else if(millis<100)
+      snprintf(buff, 256, "[%s:0%d] <info>\t %s\n", SysClock::timeStampStr().c_str(),millis, logBuffer);
+		else
+      snprintf(buff, 256, "[%s:%d] <info>\t %s\n", SysClock::timeStampStr().c_str(),millis, logBuffer);
 
     printf("%s", buff);
     log(buff);

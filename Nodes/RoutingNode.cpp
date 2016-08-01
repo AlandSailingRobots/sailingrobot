@@ -25,7 +25,7 @@ RoutingNode::RoutingNode(MessageBus& msgBus, DBHandler& db)
     m_nextWaypointLat(0),
     m_nextWaypointDeclination(0),
     m_nextWaypointRadius(0),
-    m_db(db), m_dbLogger(10, m_db),
+    m_db(db), m_dbLogger(5, m_db),
     m_waypointRouting(m_nextWaypointLon, m_nextWaypointLat, m_nextWaypointRadius,
         atof(m_db.retrieveCell("waypoint_routing_config", "1", "radius_ratio").c_str()),
         atof(m_db.retrieveCell("course_calculation_config", "1", "tack_angle").c_str()),
@@ -95,10 +95,8 @@ void RoutingNode::calculateActuatorPos(VesselStateMsg* msg)
     rudderCommand = m_rudderCommand.getCommand(rudderCommand);
 	  sailCommand = m_sailCommand.getCommand(sailCommand);
 
-    ActuatorPositionMsg *actuatorMsg = new ActuatorPositionMsg(NodeID::RudderActuator, nodeID(), rudderCommand, sailCommand);
+    ActuatorPositionMsg *actuatorMsg = new ActuatorPositionMsg(rudderCommand, sailCommand);
     m_MsgBus.sendMessage(actuatorMsg);
-    ActuatorPositionMsg *actuatorMsg2 = new ActuatorPositionMsg(NodeID::SailActuator, nodeID(), rudderCommand, sailCommand);
-    m_MsgBus.sendMessage(actuatorMsg2);
 
     //create timestamp----
     std::string timestamp_str=SysClock::timeStampStr();

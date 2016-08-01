@@ -21,7 +21,7 @@
 #include "Messages/VesselStateMsg.h"
 
 
-#define VESSEL_STATE_SLEEP_MS 500
+#define VESSEL_STATE_SLEEP_MS 400
 #define VESSEL_STATE_INITIAL_SLEEP 2000
 
 

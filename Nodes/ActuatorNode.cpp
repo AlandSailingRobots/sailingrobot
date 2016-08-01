@@ -20,7 +20,8 @@
 ActuatorNode::ActuatorNode(MessageBus& msgBus, NodeID id, int channel, int speed, int acceleration)
 	:Node(id, msgBus), m_Channel(channel), m_Speed(speed), m_Acceleration(acceleration)
 {
-  msgBus.registerNode(this);
+  msgBus.registerNode(this,MessageType::ActuatorPosition);
+
 }
 
 bool ActuatorNode::init()
@@ -48,7 +49,7 @@ void ActuatorNode::processMessage(const Message* message)
 		int setPosition = 0;
 
 		if (nodeID() == NodeID::RudderActuator)
-		{			
+		{
 			setPosition = msg->rudderPosition();
 		}
 		else if (nodeID() == NodeID::SailActuator)
