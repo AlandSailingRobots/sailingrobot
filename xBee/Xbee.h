@@ -18,6 +18,7 @@
 #include <stdint.h>
 #include <string>
 #include <queue>
+#include <mutex>
 
 
 #define BAUD_RATE 57600
@@ -27,7 +28,7 @@ typedef void (*XbeeIncomingMsgFunc) (uint8_t* data, uint8_t size);
 
 class Xbee {
 public:
-	Xbee();
+	Xbee(bool master);
 	~Xbee();
 
 	///----------------------------------------------------------------------------------
@@ -54,6 +55,11 @@ public:
 	/// @param size				How many bytes to transmit.
 	///----------------------------------------------------------------------------------
 	void transmit(uint8_t* data, uint8_t size);
+
+	///----------------------------------------------------------------------------------
+	/// Receives any messages from the xbee and begins transmitting messages.
+	///----------------------------------------------------------------------------------
+	void processMessages();
 
 protected:
 	// A Xbee packet has an overhead of 3 bytes
@@ -85,9 +91,10 @@ protected:
 	bool dataAvailable();
 
 	///----------------------------------------------------------------------------------
-	/// Attempts to read packets and stores them for processing.
+	/// Attempts to read packets and stores them for processing. Returns true if any
+	/// packets were received.
 	///----------------------------------------------------------------------------------
-	void receivePackets();
+	bool receivePackets();
 
 	///----------------------------------------------------------------------------------
 	/// Processes the packets, joins multi-packet messages and checks for malformed data.
@@ -97,10 +104,13 @@ protected:
 	void processPacket(XbeePacket& packet);
 	void processPacket(std::vector<XbeePacket>& packets);
 
+	bool					m_master;
 	int 					m_handle; // Xbee fd
 	bool					m_initialised;
 	int 					m_currPacketID;
 	std::queue<XbeePacket>	m_receiveQueue;
+	std::queue<XbeePacket>	m_transmitQueue;
+	std::mutex				m_transmitQueueMutex;
 	int						m_packetsReceived;
 	int						m_badPackets;
 	XbeeIncomingMsgFunc		m_incomingCallback;

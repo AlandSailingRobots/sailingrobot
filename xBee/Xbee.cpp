@@ -17,6 +17,7 @@
 #include <wiringSerial.h>
 #include <thread>
 #include <cstring>
+#include "utility/SysClock.h"
 
 
 #define AT_COMMAND_MODE_WAIT	3000
@@ -32,8 +33,8 @@
 #define EXIT_CMD_MODE()		writeData((uint8_t*)"ATCN\r", 5)
 
 
-Xbee::Xbee()
-	:m_handle(-1), m_initialised(false), m_currPacketID(0)
+Xbee::Xbee(bool master)
+	:m_master(master), m_handle(-1), m_initialised(false), m_currPacketID(0)
 {
 
 }
@@ -87,6 +88,9 @@ void Xbee::transmit(uint8_t* data, uint8_t size)
 		uint8_t packetCount = 1 + ((size - 1) / maxDataSize);
 		uint8_t* dataPtr = data;
 
+		// Locks until the function returns and the current scope is left
+		std::lock_guard<std::mutex> lock(m_transmitQueueMutex);
+
 		for(uint8_t i = 0; i < packetCount - 1; i++)
 		{
 			XbeePacket packet;
@@ -97,7 +101,7 @@ void Xbee::transmit(uint8_t* data, uint8_t size)
 			memcpy(packet.m_payload, dataPtr, maxDataSize);
 			dataPtr = dataPtr + maxDataSize;
 
-			writeData(packet);
+			m_transmitQueue.push(packet);
 		}
 
 		XbeePacket packet;
@@ -107,7 +111,7 @@ void Xbee::transmit(uint8_t* data, uint8_t size)
 		packet.m_payload = new uint8_t[packet.m_payloadSize];
 		memcpy(packet.m_payload, dataPtr, packet.m_payloadSize);
 
-		writeData(packet);
+		m_transmitQueue.push(packet);
 
 		m_currPacketID++;
 	}
@@ -119,9 +123,56 @@ void Xbee::transmit(uint8_t* data, uint8_t size)
 		packet.m_payloadSize = size;
 		packet.m_payload = data;
 
-		writeData(packet);
+		m_transmitQueue.push(packet);
 	}
 }
+
+void Xbee::processMessages()
+{
+	static unsigned long int lastReceived = 0;
+	const int TRANSMIT_WAIT = 1; // 1 seconds, should probably be less, like 500ms
+	const int PACKETS_TO_TRANSMIT = 5;
+
+	bool packetsReceived = receivePackets();
+	processPacketQueue();
+
+	if(packetsReceived)
+	{
+		lastReceived = SysClock::unixTime();
+	}
+
+	// Packets to transmit
+	if(m_transmitQueue.size() > 0)
+	{
+		// Master gets priority otherwise we wait until TRANSMIT_WAIT time has past before the last read
+		// before transmitting
+		if(m_master)
+		{
+			// Locks until the function returns and the current scope is left
+			std::lock_guard<std::mutex> lock(m_transmitQueueMutex);
+			uint16_t msgsToTransmit = m_transmitQueue.size();
+
+			for(uint16_t i = 0; i < msgsToTransmit; i++)
+			{
+				writeData(m_transmitQueue.front());
+				m_transmitQueue.pop();
+			}
+		}
+		// When we are not in master mode we should only transmit a few packets then break incase the master
+		// wants to interrupt.
+		else if((SysClock::unixTime() - lastReceived) > TRANSMIT_WAIT)
+		{
+			uint16_t msgsToTransmit = m_transmitQueue.size();
+
+			for(uint16_t i = 0;(i < msgsToTransmit || i == PACKETS_TO_TRANSMIT); i++)
+			{
+				writeData(m_transmitQueue.front());
+				m_transmitQueue.pop();
+			}
+		}
+	}
+}
+
 
 void Xbee::writeData(XbeePacket packet)
 {
@@ -191,13 +242,13 @@ bool Xbee::dataAvailable()
 	return serialDataAvail(m_handle);
 }
 
-void Xbee::receivePackets()
+bool Xbee::receivePackets()
 {
 	// Check for packets to be available and if there isn't anything to do with
 	// the packets, don't bother receiving them
 	if(not dataAvailable() || m_incomingCallback == NULL)
 	{
-		return;
+		return false;
 	}
 
 	bool readPackets = true;
@@ -217,6 +268,8 @@ void Xbee::receivePackets()
 			readPackets = false;
 		}
 	}
+
+	return true;
 }
 
 void Xbee::processPacketQueue()
