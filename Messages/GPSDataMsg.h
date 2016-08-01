@@ -42,6 +42,28 @@ public:
 		 m_SatCount(satCount), m_Mode(mode)
 	{ }
 
+
+	GPSDataMsg(MessageDeserialiser deserialiser)
+		:Message(deserialiser)
+	{
+		uint8_t mode = 0;
+		if(	!deserialiser.readBool(m_HasFix) ||
+			!deserialiser.readBool(m_Online) ||
+			!deserialiser.readDouble(m_Lat) ||
+			!deserialiser.readDouble(m_Lon) ||
+			!deserialiser.readDouble(m_UnixTime) ||
+			!deserialiser.readDouble(m_Speed) ||
+			!deserialiser.readDouble(m_Heading) ||
+			!deserialiser.readInt(m_SatCount) ||
+			!deserialiser.readUint8_t(mode))
+		{
+			m_valid = false;
+		}
+
+		m_Mode = (GPSMode)mode;
+	}
+
+
 	virtual ~GPSDataMsg() { }
 
 	bool hasFix() { return m_HasFix; }
@@ -53,6 +75,24 @@ public:
 	double heading() { return m_Heading; }
 	int satelliteCount() { return m_SatCount; }
 	GPSMode gpsMode() { return m_Mode; }
+
+	///----------------------------------------------------------------------------------
+	/// Serialises the message into a MessageSerialiser
+	///----------------------------------------------------------------------------------
+	virtual void Serialise(MessageSerialiser& serialiser)
+	{
+		Message::Serialise(serialiser);
+
+		serialiser.serialise(m_HasFix);
+		serialiser.serialise(m_Online);
+		serialiser.serialise(m_Lat);
+		serialiser.serialise(m_Lon);
+		serialiser.serialise(m_UnixTime);
+		serialiser.serialise(m_Speed);
+		serialiser.serialise(m_Heading);
+		serialiser.serialise(m_SatCount);
+		serialiser.serialise((uint8_t)m_Mode);
+	}
 
 private:
 	bool	m_HasFix;
