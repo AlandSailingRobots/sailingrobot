@@ -60,8 +60,8 @@ bool SimulationNode::init(){
 		}
 
 
-		Logger::info("Size of float on this platform %d\n",(int)sizeof(float)*8 );
-		Logger::info("Address: %s Port: %d\n", inet_ntoa(m_handler_socket_server.info_me.sin_addr),6400);
+		Logger::info("Size of float on this platform %d",(int)sizeof(float)*8 );
+		Logger::info("Address: %s Port: %d", inet_ntoa(m_handler_socket_server.info_me.sin_addr),6400);
 
 		//================
 		unsigned int clntLen;            /* Length of client address data structure */
@@ -78,6 +78,7 @@ bool SimulationNode::init(){
 				return false;
 	  }
 
+    // Set socket as non-blocking
 		fcntl(m_handler_socket_client.sockfd, F_SETFL, O_NONBLOCK);
     fcntl(m_handler_socket_server.sockfd, F_SETFL, O_NONBLOCK);
     Logger::info("Handling Simulation client from : %s\n", inet_ntoa(m_handler_socket_client.info_me.sin_addr));
@@ -197,7 +198,6 @@ void SimulationNode::createArduinoMessage()
 }
 
 void SimulationNode::processSocketData(){
-
   createCompassMessage();
   createGPSMessage();
   createWindMessage();
@@ -221,6 +221,7 @@ void SimulationNode::SimulationThreadFunc(void* nodePtr)
     bytes_received += read(node->m_handler_socket_client.sockfd,&(node->m_data_receive)+bytes_received,sizeof(struct DATA_SOCKET_RECEIVE)-bytes_received);
     if (bytes_received==sizeof(struct DATA_SOCKET_RECEIVE)){
        bytes_received=0;
+			 //flush socket
        while(read(node->m_handler_socket_client.sockfd,&dump_data_sock_receive,sizeof(struct DATA_SOCKET_RECEIVE))>0){};
     }
     if (bytes_received==-1)
@@ -236,6 +237,7 @@ void SimulationNode::SimulationThreadFunc(void* nodePtr)
     node->processSocketData();
 		node->setupDataSend();
 
+    //send data to simulation
     write(node->m_handler_socket_client.sockfd,&(node->m_data_send), sizeof(struct DATA_SOCKET_SEND));
 
 		std::this_thread::sleep_for(std::chrono::milliseconds(BASE_SLEEP_MS));

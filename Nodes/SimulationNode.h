@@ -105,11 +105,14 @@ private:
   /// Manage data received from simulation
   ///----------------------------------------------------------------------------------
   void processSocketData();
+
+  ///----------------------------------------------------------------------------------
+  /// Manage data to send to simulation
+  ///----------------------------------------------------------------------------------
   void setupDataSend();
 
   void createCompassMessage();
   void createGPSMessage();
-
   void createWindMessage();
   void createArduinoMessage();
 
