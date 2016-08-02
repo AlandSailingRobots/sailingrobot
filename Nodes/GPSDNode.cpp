@@ -23,7 +23,7 @@
 GPSDNode::GPSDNode(MessageBus& msgBus)
 	: ActiveNode(NodeID::GPS, msgBus), m_Initialised(false), m_GpsConnection(0), m_Lat(0), m_Lon(0), m_Speed(0), m_Heading(0)
 {
-	m_currentDay = SysClock::day();
+
 }
 
 GPSDNode::~GPSDNode()
@@ -35,6 +35,7 @@ bool GPSDNode::init()
 {
 	m_Initialised = false;
 	m_GpsConnection = new gpsmm("localhost", DEFAULT_GPSD_PORT);
+	m_currentDay = SysClock::day();
 
 	if (m_GpsConnection->stream(WATCH_ENABLE | WATCH_JSON) != NULL) {
 		m_Initialised = true;
