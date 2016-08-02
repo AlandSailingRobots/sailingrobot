@@ -4,8 +4,8 @@
  * 		SimulationNode.cpp
  *
  * Purpose:
- *		Maintains the "current" state of the vessel. Collects data from sensor messages
- *		and then resends a collected copy of that data back out for further processing.
+ *		Discuss with simulation via TCP, create message for the program from the
+ *    data from simulation and send the command data to the simulation.
  *
  * Developer Notes:
  *
