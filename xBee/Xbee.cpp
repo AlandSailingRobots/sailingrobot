@@ -351,6 +351,7 @@ bool Xbee::receivePackets()
 	}
 
 	bool readPackets = true;
+	int packetsReceived = 0;
 
 	// TODO - Jordan: Add a time check here too just in case
 	while(readPackets)
@@ -361,6 +362,7 @@ bool Xbee::receivePackets()
 		{
 			m_receiveQueue.push(packet);
 			m_packetsReceived++;
+			packetsReceived++;
 		}
 		else
 		{
@@ -368,7 +370,7 @@ bool Xbee::receivePackets()
 		}
 	}
 
-	return true;
+	return (packetsReceived > 0);
 }
 
 void Xbee::processPacketQueue()
