@@ -217,13 +217,13 @@ uint8_t Xbee::readData(XbeePacket& packet)
 		}
 		else
 		{
-			Logger::error("%s Malformed packet - Less bytes available than the packet payload", __PRETTY_FUNCTION__);
+			Logger::error("%s Malformed packet - Less bytes available than the packet payload, expected %d, got %d", __PRETTY_FUNCTION__, packet.m_payloadSize, bytesAvailable);
 		}
 
 	}
 	else
 	{
-		Logger::warning("%s No Data - Failed to receive data from the Xbee", __PRETTY_FUNCTION__);
+		//Logger::warning("%s No Data - Failed to receive data from the Xbee", __PRETTY_FUNCTION__);
 	}
 
 	return bytesRead;

@@ -33,6 +33,7 @@ XbeeSyncNode::XbeeSyncNode(MessageBus& msgBus, DBHandler& db) :
 	m_pushOnlyLatestLogs = m_db.retrieveCellAsInt("xbee_config", "1", "push_only_latest_logs");
 
 	XbeeSyncNode::m_node = this;
+	msgBus.registerNode(this, MessageType::VesselState);
 }
 bool XbeeSyncNode::init()
 {
