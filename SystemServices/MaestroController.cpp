@@ -40,7 +40,7 @@ bool MaestroController::init(std::string portName)
 bool MaestroController::writeCommand(MaestroCommands cmd, int channel, int value)
 {
 	bool success = true;
-	std::cout << "MHANDLE: "<< m_Handle << std::endl;
+
 	if(m_Handle > -1)
 	{
 		// Locks until the function returns and the current scope is left
