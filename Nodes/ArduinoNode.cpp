@@ -14,7 +14,7 @@
 
 #include "ArduinoNode.h"
 #include "Messages/ArduinoDataMsg.h"
-#include "logger/Logger.h"
+#include "SystemServices/Logger.h"
 
 // For std::this_thread
 #include <chrono>

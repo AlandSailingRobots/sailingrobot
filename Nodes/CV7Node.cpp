@@ -12,7 +12,7 @@
  ***************************************************************************************/
 
 #include "CV7Node.h"
-#include "logger/Logger.h"
+#include "SystemServices/Logger.h"
 #include "dbhandler/DBHandler.h"
 #include "Messages/WindDataMsg.h"
 #include "utility/Utility.h"
@@ -77,9 +77,9 @@ void CV7Node::WindSensorThread(void* nodePtr)
 {
 	CV7Node* node = (CV7Node*)(nodePtr);
 
-	const int DATA_BUFFER_SIZE = 30;
+	const int DATA_BUFFER_SIZE = 1;
 	const int NON_BREAKING_SPACE = 255;
-	const int BUFF_SIZE = 256;
+	const int BUFF_SIZE = 60;
 	const short MAX_NO_DATA_ERROR_COUNT = 100; // 10 seconds of no data
 	char buffer[BUFF_SIZE];
 
@@ -88,7 +88,6 @@ void CV7Node::WindSensorThread(void* nodePtr)
 	std::vector<float> windTempData(DATA_BUFFER_SIZE);
 	unsigned int dataIndex = 0;
 	unsigned short noDataCount = 0;
-
 	Logger::info("Wind sensor thread started");
 
 	while(true)
@@ -110,7 +109,6 @@ void CV7Node::WindSensorThread(void* nodePtr)
 			if(data != -1)
 			{
 				buffer[index] = data;
-				fflush(stdout);
 
 				if(NON_BREAKING_SPACE == (int)buffer[index])
 				{
@@ -133,7 +131,7 @@ void CV7Node::WindSensorThread(void* nodePtr)
 			float windSpeed = 0;
 			float windTemp = 0;
 
-			if(CV7Node::parseString(buffer, windDir, windSpeed, windTemp))
+			if(node->parseString(buffer, windDir, windSpeed, windTemp))
 			{
 				noDataCount = 0;
 				if(windDirData.size() < DATA_BUFFER_SIZE)
@@ -160,8 +158,10 @@ void CV7Node::WindSensorThread(void* nodePtr)
 				node->m_MeanWindSpeed = Utility::mean(windSpeedData);
 
 				// Send a wind sensor message out
-				MessagePtr windData = std::make_unique<WindDataMsg>(node->m_MeanWindDir, node->m_MeanWindTemp, node->m_MeanWindSpeed);
+
+				MessagePtr windData = std::make_unique<WindDataMsg>(node->m_MeanWindDir, node->m_MeanWindSpeed, node->m_MeanWindTemp);
 				node->m_MsgBus.sendMessage(std::move(windData));
+
 			}
 		}
 		else
@@ -171,7 +171,7 @@ void CV7Node::WindSensorThread(void* nodePtr)
 	}
 }
 
-bool CV7Node::parseString(const char* buffer, float& windDir, float& windSpeed, float& windTemp)
+bool CV7Node::parseString(const char* buffer, float& windDir, float& windSpeed, float& windTemp) const
 {
 	const int IIMWV = 0;
 	const int WIXDR = 1;

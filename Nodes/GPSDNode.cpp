@@ -12,7 +12,7 @@
  ***************************************************************************************/
 
 #include "GPSDNode.h"
-#include "logger/Logger.h"
+#include "SystemServices/Logger.h"
 #include "Messages/GPSDataMsg.h"
 
 
@@ -21,7 +21,7 @@
 
 
 GPSDNode::GPSDNode(MessageBus& msgBus)
-	: ActiveNode(NodeID::GPS, msgBus), m_Initialised(false), m_GpsConnection(0)
+	: ActiveNode(NodeID::GPS, msgBus), m_Initialised(false), m_GpsConnection(0), m_Lat(0), m_Lon(0), m_Speed(0), m_Heading(0)
 {
 
 }
@@ -91,44 +91,45 @@ void GPSDNode::GPSThreadFunc(void* nodePtr)
 		// Get status flags
 		unsigned long int flags = newData->set;
 
-		bool gps_online = flags & ONLINE_SET;
+		bool gps_online =  (flags & ( 1 << 4 )) >> 4; //flags & ONLINE_SET;
 		bool gps_hasFix = (newData->status > 0);
 		double unixTime = 0;
 
-		if(flags & TIME_SET)
+		//if(flags & TIME_SET)
 		{
 			unixTime = newData->fix.time;
 		}
 
-		if(flags & LATLON_SET)
+		//if(flags & LATLON_SET)
 		{
 			node->m_Lat = newData->fix.latitude;
 			node->m_Lon = newData->fix.longitude;
 		}
 
-		if(flags & SPEED_SET)
+		//if(flags & SPEED_SET)
 		{
 			node->m_Speed = newData->fix.speed;
 		}
 
-		if(flags & TRACK_SET)
+		// if(flags & TRACK_SET)
 		{
 			node->m_Heading = newData->fix.track;
 		}
 
 		int satCount = 0;
-		if(flags & SATELLITE_SET)
-		{
+		// if(flags & SATELLITE_SET)
+		// {
 			satCount = newData->satellites_used;
-		}
+		//}
 
 		GPSMode mode = GPSMode::NoUpdate;
-		if(flags & MODE_SET)
+		//if(flags & MODE_SET)
 		{
 			mode = static_cast<GPSMode>(newData->fix.mode);
 		}
 
-		MessagePtr msg = std::make_unique<GPSDataMsg>(gps_hasFix, gps_online, unixTime, node->m_Lat, node->m_Lon, node->m_Speed, node->m_Heading, satCount, mode);
+		MessagePtr msg = std::make_unique<GPSDataMsg>(gps_hasFix, gps_online, node->m_Lat, node->m_Lon, unixTime, node->m_Speed, node->m_Heading, satCount, mode);
 		node->m_MsgBus.sendMessage(std::move(msg));
+
 	}
 }

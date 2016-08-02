@@ -7,12 +7,14 @@
 #include "models/SystemStateModel.h"
 
 
-WaypointRouting::WaypointRouting(WaypointModel waypoint, double innerRadiusRatio,
-		double tackAngle, double maxTackAngle, double minTackSpeed, double sectorAngle, 
-		 double maxCommandAngle, double  rudderSpeedMin) :
+WaypointRouting::WaypointRouting(double lon, double lat, int radius, double innerRadiusRatio,
+		double tackAngle, double maxTackAngle, double minTackSpeed, double sectorAngle,
+		double maxCommandAngle, double  rudderSpeedMin) :
+	m_lon(lon),
+	m_lat(lat),
+	m_radius(radius),
 	m_tackAngleHandler(tackAngle, maxTackAngle, minTackSpeed),
 	m_commandHandler(),
-	m_waypoint(waypoint),
 	m_innerRadiusRatio(innerRadiusRatio),
 	m_courseToSteer(0),
 	m_maxCommandAngle(maxCommandAngle),
@@ -32,71 +34,37 @@ WaypointRouting::~WaypointRouting()
 {
 }
 
+/* Uses:
+	* GPS heading
+	* compass heading
+	* GPS speed
+*/
 
-void WaypointRouting::getCommands(double & rudder, double & sail, PositionModel boat,
-	double trueWindDirection, double heading, SystemStateModel systemStateModel) {
+void WaypointRouting::getCommands(double & rudder, double & sail, double gpsLon, double gpsLat, int radius,
+	double trueWindDirection, double heading, double gpsHeading, double gpsSpeed, double compassHeading, double windsensorDir) {
 
-	double speed = Utility::directionAdjustedSpeed(systemStateModel.gpsModel.heading,
-												  										systemStateModel.compassModel.heading,
-												  										systemStateModel.gpsModel.speed);
+	double speed = Utility::directionAdjustedSpeed(gpsHeading,compassHeading, gpsSpeed);
 	double commandAngle = m_maxCommandAngle;
-	
-	if (m_waypoint.time > 0 && reachedRadius(m_waypoint.radius * m_innerRadiusRatio, boat)) {
-		
-		if(speed > m_rudderSpeedMin) {
-			commandAngle = speed/m_rudderSpeedMin * m_maxCommandAngle;		
-		}
-		
-		m_courseToSteer = trueWindDirection;
-		rudder = m_commandHandler.rudderCommand(m_courseToSteer, heading,commandAngle);
-		sail = m_commandHandler.runningSailCommand();
-	} 
-	else {
-		m_courseCalc.setTackAngle(m_tackAngleHandler.adjustedTackAngle(systemStateModel));
+	m_courseCalc.setTackAngle(m_tackAngleHandler.adjustedTackAngle(gpsHeading,compassHeading, gpsSpeed));
 
-		if(speed > m_rudderSpeedMin) {
-			commandAngle = speed/m_rudderSpeedMin * m_maxCommandAngle;		
-		}
-		
-		m_courseToSteer = m_courseCalc.calculateCourseToSteer(boat, m_waypoint, trueWindDirection);
-		rudder = m_commandHandler.rudderCommand(m_courseToSteer, heading,commandAngle);
-		sail = m_commandHandler.sailCommand(systemStateModel.windsensorModel.direction);
+	if(speed > m_rudderSpeedMin) {
+		commandAngle = speed/m_rudderSpeedMin * m_maxCommandAngle;
 	}
 
-	if(!adjustSteering(systemStateModel.windsensorModel.direction)) {
-		m_lastRWD = systemStateModel.windsensorModel.direction;
+	m_courseToSteer = m_courseCalc.calculateCourseToSteer(gpsLon, gpsLat, m_lon, m_lat, radius, trueWindDirection);
+	rudder = m_commandHandler.rudderCommand(m_courseToSteer, heading,commandAngle);
+	sail = m_commandHandler.sailCommand(windsensorDir);
+
+	if(!adjustSteering(windsensorDir)) {
+		m_lastRWD = windsensorDir;
 		sail = m_lastSail;
 		return;
 	}
 
-	m_lastRWD = systemStateModel.windsensorModel.direction;
+	m_lastRWD = windsensorDir;
 	m_lastSail = sail;
 }
 
-
-bool WaypointRouting::nextWaypoint(PositionModel boat)
-{
-	bool nextWaypoint = false;
-	if (m_waypoint.time > 0)
-	{
-		if (m_waypointTimer.timeReached(m_waypoint.time))
-			nextWaypoint = true;
-		if (reachedRadius(m_waypoint.radius, boat))
-			m_waypointTimer.start();
-	}
-	else
-	{
-		if (reachedRadius(m_waypoint.radius, boat))
-			nextWaypoint = true;
-	}
-	return nextWaypoint;
-}
-
-void WaypointRouting::setWaypoint(WaypointModel waypoint)
-{
-	m_waypoint = waypoint;
-	m_waypointTimer.stop();
-}
 
 void WaypointRouting::setCourseCalcValues(double tackAngle, double sectorAngle)
 {
@@ -107,6 +75,13 @@ void WaypointRouting::setCourseCalcValues(double tackAngle, double sectorAngle)
 void WaypointRouting::setInnerRadiusRatio(double ratio)
 {
 	m_innerRadiusRatio = ratio;
+}
+
+void WaypointRouting::setWaypointData(double lon, double lat, int radius)
+{
+	m_lon = lon;
+	m_lat = lat;
+	m_radius = radius;
 }
 
 double WaypointRouting::getDTW()
@@ -147,15 +122,6 @@ void WaypointRouting::setMinimumDegreeLimit(double degLimit) {
 	m_degLimit = degLimit;
 }
 
-bool WaypointRouting::reachedRadius(double radius, PositionModel boat) const
-{
-	bool reachedRadius = false;
-	double dtw = m_courseMath.calculateDTW(boat, m_waypoint.positionModel);
-	if (dtw < radius)
-		reachedRadius = true;
-	return reachedRadius;
-}
-
 bool WaypointRouting::adjustSteering(double relativeWindDirection) {
 	m_timePassed += m_sailControlTimer.timePassed();
 
@@ -164,7 +130,7 @@ bool WaypointRouting::adjustSteering(double relativeWindDirection) {
 
 		if(Utility::angleDifference(relativeWindDirection, m_lastRWD) > m_degLimit) {
 			m_sailControlTimer.reset();
-			return true;	
+			return true;
 		}
 	}
 

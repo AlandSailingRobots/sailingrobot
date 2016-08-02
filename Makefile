@@ -30,7 +30,8 @@ export BUILD_DIR = build
 SRC_DIR = ./
 OUTPUT_DIR = ./
 
-TEST_MAKEFILE = ./Makefile.tests
+UNIT_TEST = ./unit-tests.run
+HARDWARE_TEST = ./hardware-tests.run
 
 # External Libraries
 
@@ -40,11 +41,14 @@ JSON = 					libs/json
 
 CORE =					MessageBus.cpp ActiveNode.cpp
 
-NODES =					Nodes/MessageLoggerNode.cpp Nodes/CV7Node.cpp Nodes/HMC6343Node.cpp Nodes/GPSDNode.cpp Nodes/ArduinoNode.cpp Nodes/VesselStateNode.cpp
+NODES =					Nodes/MessageLoggerNode.cpp Nodes/CV7Node.cpp Nodes/HMC6343Node.cpp Nodes/GPSDNode.cpp Nodes/ActuatorNode.cpp  Nodes/ArduinoNode.cpp \
+							Nodes/VesselStateNode.cpp Nodes/WaypointNode.cpp Nodes/HTTPSyncNode.cpp Nodes/xBeeSyncNode.cpp Nodes/RoutingNode.cpp Nodes/LineFollowNode.cpp
+
+SYSTEM_SERVICES =		SystemServices/MaestroController.cpp SystemServices/Logger.cpp
 
 XBEE = 					xBee/xBeeSync.cpp xBee/xBee.cpp
 
-BEHAVIOURCLASS = 	behaviourclass/RoutingBehaviour.cpp  behaviourclass/WaypointBehaviour.cpp behaviourclass/LineFollowBehaviour.cpp
+BEHAVIOURCLASS = 		behaviourclass/RoutingBehaviour.cpp  behaviourclass/WaypointBehaviour.cpp behaviourclass/LineFollowBehaviour.cpp
 
 I2CCONTROLLER = 		i2ccontroller/I2CController.cpp
 
@@ -52,13 +56,9 @@ POSITION = 				utility/Position.cpp utility/MockPosition.cpp utility/RealPositio
 
 COURSE = 				coursecalculation/CourseCalculation.cpp coursecalculation/CourseMath.cpp
 
-DB = 					dbhandler/DBHandler.cpp
+DB = 					dbhandler/DBHandler.cpp dbhandler/DBLogger.cpp
 
 COMMAND = 				ruddercommand/RudderCommand.cpp sailcommand/SailCommand.cpp
-
-MAESTRO = 				servocontroller/MaestroController.cpp servocontroller/MockMaestroController.cpp servocontroller/ServoObject.cpp servocontroller/SensorObject.cpp servocontroller/MockServoObject.cpp
-
-HTTP = 					httpsync/HTTPSync.cpp
 
 XML_LOG = 				xmlparser/pugi/pugixml.cpp xmlparser/src/xml_log.cpp
 
@@ -70,9 +70,10 @@ WINDVANECONTROLLER = 	windvanecontroller/WindVaneController.cpp
 
 SRC_MAIN = main.cpp
 
-SRC = 	logger/Logger.cpp utility/Utility.cpp utility/Timer.cpp $(XBEE) \
-		$(CORE) $(NODES) $(I2CCONTROLLER) $(POSITION) $(COURSE) $(DB) $(COMMAND) $(MAESTRO) $(GPS) $(HTTP) \
-		$(XML_LOG) $(THREAD) $(WAYPOINTROUTING) $(WINDVANECONTROLLER) $(BEHAVIOURCLASS)
+SRC = 	utility/Utility.cpp utility/Timer.cpp utility/SysClock.cpp $(SYSTEM_SERVICES) $(XBEE) \
+		$(CORE) $(NODES) $(I2CCONTROLLER) $(POSITION) $(COURSE) $(DB) $(COMMAND) $(GPS) \
+		$(XML_LOG) $(THREAD) $(WAYPOINTROUTING) $(WINDVANECONTROLLER)
+		
 
 #SOURCES = $(addprefix src/, $(SRC))
 
@@ -110,7 +111,7 @@ C_TOOLCHAIN = 0
 CC = arm-linux-gnueabihf-gcc
 CXX = arm-linux-gnueabihf-g++
 SIZE = arm-linux-gnueabihf-size
-else 
+else
 C_TOOLCHAIN = 1
 CC = gcc
 CXX = g++
@@ -127,18 +128,16 @@ export MKDIR_P = mkdir -p
 # Rules
 #######################################################
 
-.PHONY: clean clean_tests
+.PHONY: clean
 
 all: $(EXECUTABLE) stats
 
 # Builds the intergration test, requires the whole system to be built before
 build_tests: $(OBJECTS) $(EXECUTABLE)
 	@echo Building tests...
-	@$(MAKE) -f $(TEST_MAKEFILE)
-
-clean_tests:
-	@echo Cleaning tests...
-	@$(MAKE) -f $(TEST_MAKEFILE) clean
+	$(MAKE) -C tests
+	$(CXX) $(CPPFLAGS) tests/runner.o @$(OBJECT_FILE) -Wl,-rpath=./ ./libwiringPi.so -o $(UNIT_TEST) $(LIBS)
+	$(CXX) $(CPPFLAGS) tests/runnerHardware.o @$(OBJECT_FILE) -Wl,-rpath=./ ./libwiringPi.so -o $(HARDWARE_TEST) $(LIBS)
 
 #  Create the directories needed
 $(BUILD_DIR):
@@ -161,7 +160,7 @@ $(BUILD_DIR)/%.o:$(SRC_DIR)/%.cpp
 	@mkdir -p $(dir $@)
 	@echo Compiling CPP File: $@
 	@$(CXX) -c $(CPPFLAGS) $(INC) -o ./$@ $< -DTOOLCHAIN=$(TOOLCHAIN) $(LIBS) $(LIBS_BOOST)
- 
+
  # Compile C files into the build folder
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
 	@mkdir -p $(dir $@)
@@ -174,9 +173,9 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
 
 stats:$(EXECUTABLE)
 	@echo Final executable size:
-	$(SIZE) $(EXECUTABLE) 
+	$(SIZE) $(EXECUTABLE)
 
-clean: clean_tests
+clean:
 	@echo Removing existing object files and executable
 	@rm -f -r $(BUILD_DIR)
 	@rm -f $(EXECUTABLE)

@@ -24,6 +24,8 @@ public:
 	Node(NodeID id, MessageBus& msgBus) : m_MsgBus(msgBus), m_NodeID(id)
 	{ }
 
+	virtual ~Node(){};
+
 	///----------------------------------------------------------------------------------
  	/// This function should attempt to initialise or setup any resources it may need to
  	/// function. If this was successful this function should return true.

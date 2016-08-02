@@ -1,14 +1,23 @@
 
 #include <string>
-#include "logger/Logger.h"
+#include "SystemServices/Logger.h"
 #include "MessageBus.h"
 #include "Nodes/MessageLoggerNode.h"
 #include "Nodes/CV7Node.h"
 #include "Nodes/HMC6343Node.h"
 #include "Nodes/GPSDNode.h"
+#include "Nodes/ActuatorNode.h"
 #include "Nodes/ArduinoNode.h"
+#include "Nodes/WaypointNode.h"
+#include "Nodes/VesselStateNode.h"
+#include "Nodes/HTTPSyncNode.h"
+#include "Nodes/RoutingNode.h"
+#include "Nodes/LineFollowNode.h"
 #include "Messages/DataRequestMsg.h"
 #include "dbhandler/DBHandler.h"
+#include "SystemServices/MaestroController.h"
+
+#define DISABLE_LOGGING 0
 
 enum class NodeImportance {
 	CRITICAL,
@@ -48,10 +57,10 @@ void initialiseNode(Node& node, const char* nodeName, NodeImportance importance)
 /// Entry point, can accept one argument containing a relative path to the database.
 ///
 ///----------------------------------------------------------------------------------
-int main(int argc, char *argv[]) 
+int main(int argc, char *argv[])
 {
 	// This is for eclipse development so the output is constantly pumped out.
-	setbuf(stdout, NULL); 
+	setbuf(stdout, NULL);
 
 	// Database Path
 	std::string db_path;
@@ -94,19 +103,74 @@ int main(int argc, char *argv[])
 	HMC6343Node compass(messageBus, dbHandler.retrieveCellAsInt("buffer_config", "1", "compass"));
 	GPSDNode gpsd(messageBus);
 	ArduinoNode arduino(messageBus);
+	VesselStateNode vessel(messageBus);
+	WaypointNode waypoint(messageBus, dbHandler);
+	HTTPSyncNode httpsync(messageBus, &dbHandler, 0, false);
+	Node* sailingLogic;
+
+
+	bool usingLineFollow = (bool)(dbHandler.retrieveCellAsInt("sailing_robot_config", "1", "line_follow"));
+	if(usingLineFollow)
+	{
+		sailingLogic = new LineFollowNode(messageBus, dbHandler);
+	}
+	else
+	{
+		sailingLogic = new RoutingNode(messageBus, dbHandler);
+	}
+
+	int channel = dbHandler.retrieveCellAsInt("sail_servo_config", "1", "channel");
+	int speed = dbHandler.retrieveCellAsInt("sail_servo_config", "1", "speed");
+	int acceleration = dbHandler.retrieveCellAsInt("sail_servo_config", "1", "acceleration");
+
+	ActuatorNode sail(messageBus, NodeID::SailActuator, channel, speed, acceleration);
+
+	channel = dbHandler.retrieveCellAsInt("rudder_servo_config", "1", "channel");
+	speed = dbHandler.retrieveCellAsInt("rudder_servo_config", "1", "speed");
+	acceleration = dbHandler.retrieveCellAsInt("rudder_servo_config", "1", "acceleration");
+
+	ActuatorNode rudder(messageBus, NodeID::RudderActuator, channel, speed, acceleration);
+
+	bool requireNetwork = (bool) (dbHandler.retrieveCellAsInt("sailing_robot_config", "1", "require_network"));
+
+	// System services
+
+	MaestroController::init(dbHandler.retrieveCell("maestro_controller_config", "1", "port"));
 
 	// Initialise nodes
 	initialiseNode(msgLogger, "Message Logger", NodeImportance::NOT_CRITICAL);
 	initialiseNode(windSensor, "Wind Sensor", NodeImportance::CRITICAL);
 	initialiseNode(compass, "Compass", NodeImportance::CRITICAL);
 	initialiseNode(gpsd, "GPSD Node", NodeImportance::CRITICAL);
+	initialiseNode(sail, "Sail Actuator", NodeImportance::CRITICAL);
+	initialiseNode(rudder, "Rudder Actuator", NodeImportance::CRITICAL);
 	initialiseNode(arduino, "Arduino Node", NodeImportance::NOT_CRITICAL);
+	initialiseNode(vessel, "Vessel State Node", NodeImportance::CRITICAL);
+	initialiseNode(waypoint, "Waypoint Node", NodeImportance::CRITICAL);
+	if (requireNetwork)
+	{
+		initialiseNode(httpsync, "Httpsync Node", NodeImportance::CRITICAL);
+	}
+	else
+	{
+		initialiseNode(httpsync, "Httpsync Node", NodeImportance::NOT_CRITICAL);
+	}
+	if(usingLineFollow)
+	{
+		initialiseNode(*sailingLogic, "LineFollow Node", NodeImportance::CRITICAL);
+	}
+	else
+	{
+		initialiseNode(*sailingLogic, "Routing Node", NodeImportance::CRITICAL);
+	}
 
 	// Start active nodes
 	windSensor.start();
 	compass.start();
 	gpsd.start();
 	arduino.start();
+	vessel.start();
+	httpsync.start();
 
 	// NOTE - Jordan: Just to ensure messages are following through the system
 	MessagePtr dataRequest = std::make_unique<DataRequestMsg>(NodeID::MessageLogger);
@@ -114,8 +178,12 @@ int main(int argc, char *argv[])
 
 	Logger::info("Message bus started!");
 	messageBus.run();
+
+	Logger::shutdown();
+	delete sailingLogic;
 	exit(0);
 }
+
 
 
 // Purely for reference, remove once complete
@@ -155,7 +223,7 @@ static void threadWindsensor() {
 
 int main(int argc, char *argv[]) {
 	// This is for eclipse development so the output is constantly pumped out.
-	setbuf(stdout, NULL); 
+	setbuf(stdout, NULL);
 
 	std::string path, db_name, errorLog;
 	if (argc < 2) {
@@ -209,7 +277,7 @@ int main(int argc, char *argv[]) {
 	bool removeLogs = db.retrieveCellAsInt("httpsync_config", "1", "remove_logs");
 
 	httpsync_handle = new HTTPSync( &db, http_delay, removeLogs );
-	
+
     SailingRobot sr_handle(&externalCommand, &systemstate, &db, httpsync_handle);
 
 	GPSupdater gps_updater(&systemstate,mockGPS);
@@ -238,13 +306,13 @@ int main(int argc, char *argv[]) {
 		double xBee_loopTime = stod(db.retrieveCell("xbee_config", "1", "loop_time"));
 
 		xbee_handle = new xBeeSync(&externalCommand, &systemstate, &db, xBee_sendLogs, xBee_sending, xBee_receiving,xBee_loopTime);
-		
+
 		if(xbee_handle->init())
 		{
 			// Start xBeeSync thread
 			std::unique_ptr<ThreadRAII> xbee_sync_thread;
 
-			if (xBee_sending || xBee_receiving) 
+			if (xBee_sending || xBee_receiving)
 			{
 				xbee_sync_thread = std::unique_ptr<ThreadRAII>(new ThreadRAII(std::thread(threadXBeeSyncRun), ThreadRAII::DtorAction::detach));
 			}
@@ -282,7 +350,7 @@ int main(int argc, char *argv[]) {
 		) );
 
 		sr_handle.run();
-	} 
+	}
 	catch (const char * e) {
 		printf("ERROR[%s]\n\n",e);
 		return 1;
