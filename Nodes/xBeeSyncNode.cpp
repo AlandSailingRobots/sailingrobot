@@ -168,8 +168,9 @@ void xBeeSyncNode::receiveControl(){
 		if (rudder_cmd != -1 && sail_cmd != -1){
 			Logger::info("Rudder command in xBeeSync::run = %d", rudder_cmd);
 			Logger::info("Sail command in xBeeSync::run = %d", sail_cmd);
-			ActuatorPositionMsg* actuatorControl = new ActuatorPositionMsg(rudder_cmd, sail_cmd);
-			m_MsgBus.sendMessage(actuatorControl);
+
+			MessagePtr actuatorControl = std::make_unique<ActuatorPositionMsg>(rudder_cmd, sail_cmd);
+			m_MsgBus.sendMessage(std::move(actuatorControl));
 			//PLANNED: Send externalCommandMsg here when implemented?
 		}
 

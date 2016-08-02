@@ -39,8 +39,8 @@ LineFollowNode::LineFollowNode(MessageBus& msgBus, DBHandler& db)
     m_prevWaypointRadius(0),
     m_tackingDirection(1)
 {
-    msgBus.registerNode(this, MessageType::VesselState);
-    msgBus.registerNode(this, MessageType::WaypointData);
+    msgBus.registerNode(*this, MessageType::VesselState);
+    msgBus.registerNode(*this, MessageType::WaypointData);
 
     m_maxCommandAngle = M_PI / 6;
     m_maxSailAngle = M_PI / 4.2f;
@@ -191,8 +191,8 @@ void LineFollowNode::calculateActuatorPos(VesselStateMsg* msg)
     int sailCommand_norm = m_sailCommand.getCommand(sailCommand);
 
     //Send messages----
-    ActuatorPositionMsg *actuatorMsg = new ActuatorPositionMsg(rudderCommand_norm, sailCommand_norm);
-    m_MsgBus.sendMessage(actuatorMsg);
+    MessagePtr actuatorMsg = std::make_unique<ActuatorPositionMsg>(rudderCommand_norm, sailCommand_norm);
+    m_MsgBus.sendMessage(std::move(actuatorMsg));
     //------------------
 
     double bearingToNextWaypoint = m_courseMath.calculateBTW(msg->longitude(), msg->latitude(), m_nextWaypointLon, m_nextWaypointLat); //calculated for database

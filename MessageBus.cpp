@@ -71,7 +71,7 @@ void MessageBus::sendMessage(MessagePtr msg)
 	{
 		m_FrontQueueMutex.lock();
 		m_FrontMessages->push(std::move(msg));
-		logMessageReceived(msg);
+		logMessageReceived(std::move(msg));
 		m_FrontQueueMutex.unlock();
 	}
 }
@@ -130,9 +130,11 @@ void MessageBus::processMessages()
 {
 	while(m_BackMessages->size() > 0)
 	{
-		Message* msg = m_BackMessages->front().get();
 
-		logMessage(msg);
+		MessagePtr msgPtr = std::move(m_BackMessages->front());
+		Message* msg = msgPtr.get();
+
+		logMessage(std::move(msgPtr));
 
 		for(auto node : m_RegisteredNodes)
 		{
@@ -183,14 +185,14 @@ void MessageBus::startMessageLog()
 #endif
 }
 
-void MessageBus::logMessageReceived(Message* msg)
+void MessageBus::logMessageReceived(MessagePtr msg)
 {
 #ifdef LOG_MESSAGES
 	msg->timeReceived = SysClock::timeStamp();
 #endif
 }
 
-void MessageBus::logMessage(Message* msg)
+void MessageBus::logMessage(MessagePtr msg)
 {
 #ifdef LOG_MESSAGES
 	if(m_LogFile != NULL)

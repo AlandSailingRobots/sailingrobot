@@ -138,12 +138,12 @@ private:
 	///----------------------------------------------------------------------------------
 	/// Logs that a message was received.
 	///----------------------------------------------------------------------------------
-	void logMessageReceived(Message* msg);
+	void logMessageReceived(MessagePtr msg);
 
 	///----------------------------------------------------------------------------------
 	/// Logs a message that is being processed.
 	///----------------------------------------------------------------------------------
-	void logMessage(Message* msg);
+	void logMessage(MessagePtr msg);
 
 	///----------------------------------------------------------------------------------
 	/// Logs that a node consumed the current message being processed.
