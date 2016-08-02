@@ -49,7 +49,7 @@ public:
 	void setIncomingCallback(XbeeIncomingMsgFunc func) { m_incomingCallback = func; }
 
 	///----------------------------------------------------------------------------------
-	/// Transmits a block of data
+	/// Transmits a block of data, a copy is made of the data.
 	///
 	/// @param data				The data to transmit
 	/// @param size				How many bytes to transmit.

@@ -23,9 +23,11 @@
 #define AT_COMMAND_MODE_WAIT	3000
 #define XBEE_TRANSMIT_TIME		50
 
-#define PACKET_OVERHEAD			3
+#define PACKET_OVERHEAD			4
 
-
+#define PACKET_START			0xC0
+#define PACKET_ESCAPE			0xDB
+#define PACKET_ESCAPE_START		0xDC
 
 
 // REDO< FIX!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -81,12 +83,43 @@ bool Xbee::init(std::string port, uint16_t baudRate)
 void Xbee::transmit(uint8_t* data, uint8_t size)
 {
 	const uint8_t maxDataSize = MAX_PACKET_SIZE - PACKET_OVERHEAD;
+
+	int finalSize = size;
+	// Find Slip and Escape characters
+	for(unsigned int i = 0; i < size; i++)
+	{
+		uint8_t c = data[i];
+		if(c == PACKET_START || c == PACKET_ESCAPE)
+		{
+			finalSize++;
+		}
+	}
+
+	// Turn the data into slip data
+	uint8_t* slipData = new uint8_t[size];
+	unsigned int slipIndex = 0;
+
+	for(unsigned int i = 0; i < size; i++)
+	{
+		uint8_t c = data[i];
+
+		if(c == PACKET_START)
+		{
+			slipData[slipIndex++] = PACKET_ESCAPE;
+			slipData[slipIndex++] = PACKET_ESCAPE_START;
+		}
+		else
+		{
+			slipData[slipIndex++] = c;
+		}
+	}
+
 	// Split the packet
 	if(size > maxDataSize)
 	{
 		// Round up
 		uint8_t packetCount = 1 + ((size - 1) / maxDataSize);
-		uint8_t* dataPtr = data;
+		uint8_t* dataPtr = slipData;
 
 		// Locks until the function returns and the current scope is left
 		std::lock_guard<std::mutex> lock(m_transmitQueueMutex);
@@ -96,35 +129,26 @@ void Xbee::transmit(uint8_t* data, uint8_t size)
 			XbeePacket packet;
 			packet.m_packetID = m_currPacketID;
 			packet.m_packetCount = packetCount;
-			packet.m_payloadSize = maxDataSize;
-			packet.m_payload = new uint8_t[maxDataSize];
-			memcpy(packet.m_payload, dataPtr, maxDataSize);
+			packet.m_payloadSize = size > maxDataSize ? maxDataSize : size;
+			packet.m_payload = dataPtr;
 			dataPtr = dataPtr + maxDataSize;
+			size = size - maxDataSize;
 
 			m_transmitQueue.push(packet);
 		}
-
-		XbeePacket packet;
-		packet.m_packetID = m_currPacketID;
-		packet.m_packetCount = packetCount;
-		packet.m_payloadSize = size - ((packetCount - 1) * maxDataSize);
-		packet.m_payload = new uint8_t[packet.m_payloadSize];
-		memcpy(packet.m_payload, dataPtr, packet.m_payloadSize);
-
-		m_transmitQueue.push(packet);
-
-		m_currPacketID++;
 	}
 	else
 	{
 		XbeePacket packet;
-		packet.m_packetID = m_currPacketID++; // CPP Note: incremented after assignment
+		packet.m_packetID = m_currPacketID;
 		packet.m_packetCount = 1;
 		packet.m_payloadSize = size;
-		packet.m_payload = data;
+		packet.m_payload = slipData;
 
 		m_transmitQueue.push(packet);
 	}
+
+	m_currPacketID++;
 }
 
 void Xbee::processRadioMessages()
@@ -176,6 +200,7 @@ void Xbee::processRadioMessages()
 
 void Xbee::writeData(XbeePacket packet)
 {
+	serialPutchar(m_handle, (char)PACKET_START);
 	serialPutchar(m_handle, (char)packet.m_packetID);
 	serialPutchar(m_handle, (char)packet.m_packetCount);
 	serialPutchar(m_handle, (char)packet.m_payloadSize);
@@ -196,7 +221,73 @@ void Xbee::writeData(uint8_t* data, uint8_t size)
 
 uint8_t Xbee::readData(XbeePacket& packet)
 {
-	int bytesAvailable = serialDataAvail(m_handle);
+	bool listen = true;
+	bool foundEscape = false;
+	int temp = 0;
+
+	// Look for start character
+	while(listen)
+	{
+		if(serialDataAvail(m_handle) > 0);
+		{
+			int c = serialGetchar(m_handle);
+
+			if((uint8_t)c == PACKET_ESCAPE)
+			{
+				foundEscape = true;
+			}
+			else
+			{
+				foundEscape = false;
+			}
+
+			if((uint8_t)c == PACKET_START && not foundEscape)
+			{
+				listen = false;
+			}
+		}
+
+		if(temp == 50000)
+		{
+			return 0;
+		}
+		temp++;
+	}
+
+	//const uint8_t maxDataSize = MAX_PACKET_SIZE - PACKET_OVERHEAD;
+	//uint8_t tempBuffer[maxDataSize];
+
+	// Get header packets
+	packet.m_packetID = serialGetchar(m_handle);
+	packet.m_packetCount = serialGetchar(m_handle);
+	packet.m_payloadSize = serialGetchar(m_handle);
+	if(packet.m_payloadSize == 0)
+	{
+		return 0;
+	}
+	packet.m_payload = new uint8_t[packet.m_payloadSize];
+
+	uint8_t bytesRead = 0;
+
+	for(unsigned int i = 0; i < packet.m_payloadSize; i++)
+	{
+		int c = serialGetchar(m_handle);
+
+		if(c != -1)
+		{
+			packet.m_payload[i] = c;
+			bytesRead++;
+		}
+	}
+
+	// Replace with check sum
+	if(bytesRead != packet.m_payloadSize)
+	{
+		delete packet.m_payload;
+		bytesRead = 0;
+	}
+
+	/*int bytesAvailable = serialDataAvail(m_handle);
 	uint8_t bytesRead = 0;
 
 	// The packet must have more data than the packet overhead
@@ -207,9 +298,17 @@ uint8_t Xbee::readData(XbeePacket& packet)
 		packet.m_packetCount = serialGetchar(m_handle);
 		packet.m_payloadSize = serialGetchar(m_handle);
 
+		if(packet.m_payloadSize > MAX_PACKET_SIZE || packet.m_payloadSize == 0)
+		{
+			return 0;
+		}
+
+		while(packet.m_payloadSize > serialDataAvail(m_handle)) { }
+
 		// Check all the payload made it
 		if(bytesAvailable >= packet.m_payloadSize)
 		{
+			Logger::info("Got packet %d", packet.m_payloadSize);
 			packet.m_payload = new uint8_t[packet.m_payloadSize];
 
 			Xbee::readData(packet.m_payload, packet.m_payloadSize);
@@ -217,14 +316,14 @@ uint8_t Xbee::readData(XbeePacket& packet)
 		}
 		else
 		{
-			Logger::error("%s Malformed packet - Less bytes available than the packet payload, expected %d, got %d", __PRETTY_FUNCTION__, packet.m_payloadSize, bytesAvailable);
+			//Logger::error("%s Malformed packet - Less bytes available than the packet payload, expected %d, got %d", __PRETTY_FUNCTION__, packet.m_payloadSize, bytesAvailable);
 		}
 
 	}
 	else
 	{
 		//Logger::warning("%s No Data - Failed to receive data from the Xbee", __PRETTY_FUNCTION__);
-	}
+	}*/
 
 	return bytesRead;
 }
@@ -258,7 +357,7 @@ bool Xbee::receivePackets()
 	{
 		XbeePacket packet;
 
-		if(readData(packet))
+		if(readData(packet) && packet.m_payloadSize > 0)
 		{
 			m_receiveQueue.push(packet);
 			m_packetsReceived++;
@@ -329,6 +428,10 @@ void Xbee::processPacket(XbeePacket& packet)
 {
 	if(m_incomingCallback != NULL)
 	{
+		Logger::info("Single inbound packet Size: %d", packet.m_payloadSize);
+
+		// Deslip it
+
 		m_incomingCallback(packet.m_payload, packet.m_payloadSize);
 	}
 	else
@@ -341,12 +444,10 @@ void Xbee::processPacket(XbeePacket& packet)
 void Xbee::processPacket(std::vector<XbeePacket>& packets)
 {
 	// No one to hand packets to, so cleanup
-	if(m_incomingCallback == NULL)
+	if(m_incomingCallback == NULL || packets.size() != packets[0].m_packetCount)
 	{
-		for(auto p : packets)
-		{
-			delete p.m_payload;
-		}
+		// The first packet in the multi-pack actually holds the valid pointer.
+		delete packets[0].m_payload;
 	}
 	else
 	{
@@ -364,9 +465,11 @@ void Xbee::processPacket(std::vector<XbeePacket>& packets)
 		{
 			memcpy(copyPtr, p.m_payload, p.m_payloadSize);
 			copyPtr += p.m_payloadSize;
-			delete p.m_payload;
 		}
 
+		delete packets[0].m_payload;
+
+		Logger::info("Multi-packet Size: %d", payloadSize);
 		m_incomingCallback(finalPayload, payloadSize);
 	}
 }
