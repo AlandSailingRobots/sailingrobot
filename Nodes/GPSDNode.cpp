@@ -23,7 +23,7 @@
 GPSDNode::GPSDNode(MessageBus& msgBus)
 	: ActiveNode(NodeID::GPS, msgBus), m_Initialised(false), m_GpsConnection(0), m_Lat(0), m_Lon(0), m_Speed(0), m_Heading(0)
 {
-
+	m_currentDay = SysClock::day();
 }
 
 GPSDNode::~GPSDNode()
@@ -97,7 +97,14 @@ void GPSDNode::GPSThreadFunc(void* nodePtr)
 
 		unixTime = newData->fix.time;
 
-		SysClock::setTime(unixTime);
+		//Once a day: make sure system clock is updated from gps to ensure accuracy
+		if (gps_online){
+			int today = SysClock::day();
+			if (node->m_currentDay != today){
+				SysClock::setTime(unixTime);
+				node->m_currentDay = SysClock::day();
+			}
+		}
 
 		node->m_Lat = newData->fix.latitude;
 		node->m_Lon = newData->fix.longitude;
