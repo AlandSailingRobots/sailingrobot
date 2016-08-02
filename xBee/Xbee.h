@@ -21,7 +21,7 @@
 #include <mutex>
 
 
-#define BAUD_RATE 57600
+#define XBEE_BAUD_RATE 	57600
 #define MAX_PACKET_SIZE 72
 
 typedef void (*XbeeIncomingMsgFunc) (uint8_t* data, uint8_t size);
@@ -59,7 +59,7 @@ public:
 	///----------------------------------------------------------------------------------
 	/// Receives any messages from the xbee and begins transmitting messages.
 	///----------------------------------------------------------------------------------
-	void processMessages();
+	void processRadioMessages();
 
 protected:
 	// A Xbee packet has an overhead of 3 bytes

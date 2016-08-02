@@ -127,7 +127,7 @@ void Xbee::transmit(uint8_t* data, uint8_t size)
 	}
 }
 
-void Xbee::processMessages()
+void Xbee::processRadioMessages()
 {
 	static unsigned long int lastReceived = 0;
 	const int TRANSMIT_WAIT = 1; // 1 seconds, should probably be less, like 500ms

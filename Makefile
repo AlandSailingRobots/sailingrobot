@@ -42,11 +42,11 @@ JSON = 					libs/json
 CORE =					MessageBus.cpp ActiveNode.cpp Messages/MessageSerialiser.cpp Messages/MessageDeserialiser.cpp
 
 NODES =					Nodes/MessageLoggerNode.cpp Nodes/CV7Node.cpp Nodes/HMC6343Node.cpp Nodes/GPSDNode.cpp Nodes/ActuatorNode.cpp  Nodes/ArduinoNode.cpp \
-							Nodes/VesselStateNode.cpp Nodes/WaypointNode.cpp Nodes/HTTPSyncNode.cpp Nodes/xBeeSyncNode.cpp Nodes/RoutingNode.cpp Nodes/LineFollowNode.cpp
+							Nodes/VesselStateNode.cpp Nodes/WaypointNode.cpp Nodes/HTTPSyncNode.cpp Nodes/XbeeSyncNode.cpp Nodes/RoutingNode.cpp Nodes/LineFollowNode.cpp
 
 SYSTEM_SERVICES =		SystemServices/MaestroController.cpp SystemServices/Logger.cpp
 
-XBEE = 					xBee/xBee.cpp xBee/Xbee.cpp
+XBEE = 					xBee/Xbee.cpp
 
 BEHAVIOURCLASS = 		behaviourclass/RoutingBehaviour.cpp  behaviourclass/WaypointBehaviour.cpp behaviourclass/LineFollowBehaviour.cpp
 

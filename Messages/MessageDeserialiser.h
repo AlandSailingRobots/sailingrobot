@@ -35,6 +35,8 @@ public:
 	bool readMessageType(MessageType& data);
 	bool readNodeID(NodeID& data);
 
+	void resetInternalPtr() { m_index = 0;}
+
 private:
 	uint8_t* 	m_data;
 	uint8_t		m_index;

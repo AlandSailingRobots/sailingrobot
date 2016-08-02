@@ -2,7 +2,7 @@
 /****************************************************************************************
  *
  * File:
- * 		xBeeSyncNode.h
+ * 		XbeeSyncNode.h
  *
  * Purpose:
  *		Handles sending of logs or the current system state (xml-format) over xbee,
@@ -17,17 +17,14 @@
  #pragma once
 
 #include "ActiveNode.h"
-#include "xBee/xBee.h"
-#include "xmlparser/src/xml_log.h"
+#include "xBee/Xbee.h"
 #include "SystemServices/Logger.h"
 #include "dbhandler/DBHandler.h"
-#include "utility/Timer.h"
 #include "Messages/VesselStateMsg.h"
-#include "Messages/ActuatorPositionMsg.h"
 
-class xBeeSyncNode : public ActiveNode {
+class XbeeSyncNode : public ActiveNode {
 public:
-	xBeeSyncNode(MessageBus& msgBus, DBHandler& db);
+	XbeeSyncNode(MessageBus& msgBus, DBHandler& db);
 
 	///----------------------------------------------------------------------------------
 	/// Gets all settings from database and initializes xbee object
@@ -40,46 +37,36 @@ public:
 	///
 	///----------------------------------------------------------------------------------
 	void start();
+
 	void processMessage(const Message*);
 	
 private:
 
 	///----------------------------------------------------------------------------------
-	/// Sends an xml-formated vessel state string over the xbee network
-	///
+	/// Serialises a vessel state message and passes it to the Xbee for sending.
 	///----------------------------------------------------------------------------------
 	void sendVesselState(VesselStateMsg* msg);
 
 	///----------------------------------------------------------------------------------
-	/// Sends a log string over the xbee network
-	///
+	/// Called when a message has been received by the Xbee radio.
 	///----------------------------------------------------------------------------------
-	void sendLogs();
+	static void incomingMessage(uint8_t* data, uint8_t size);
 
 	///----------------------------------------------------------------------------------
-	/// Generates an actuator control message from data received by xbee
-	///
-	///----------------------------------------------------------------------------------
-	void receiveControl();
-
-	///----------------------------------------------------------------------------------
-	/// Polls receiveControl and sendlogs repeatedly
-	///
+	/// Transmits and receives messages from the xbee.
 	///----------------------------------------------------------------------------------
 	static void xBeeSyncThread(void* nodePtr);
 
-	XML_log m_XML_log;
-	xBee m_xBee;
-	int m_xbee_fd;
+	Xbee m_xbee;
+	bool m_initialised;
 	DBHandler &m_db;
-	Timer m_timer;
+	static XbeeSyncNode* m_node;
 
 	bool m_running;
 	bool m_sending;
 	bool m_receiving;
 	bool m_sendLogs;
 	bool m_pushOnlyLatestLogs;
-	bool m_initialised;
 	double m_loopTime;
 	double m_lastMessageCallTime;
 	bool m_firstMessageCall;
