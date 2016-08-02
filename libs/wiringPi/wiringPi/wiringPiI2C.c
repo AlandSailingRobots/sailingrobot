@@ -265,3 +265,49 @@ int wiringPiI2CReadBlock (int fd, char* block, int length)
 		return i + 1;
 	}
 }
+
+int wiringPiI2CReadBlock(int file, __u8 command, 
+                                              __u8 *values)
+{
+  union i2c_smbus_data data;
+  int i;
+  if (i2c_smbus_access(file,I2C_SMBUS_READ,command,
+                       I2C_SMBUS_BLOCK_DATA,&data))
+    return -1;
+
+  else {
+
+    for (i = 1; i <= data.block[0]; i++)
+      values[i-1] = data.block[i];
+
+    return data.block[0];
+  }
+}
+
+int i2c_smbus_write_block_data(int file, __u8 command, 
+                                               __u8 length, __u8 *values)
+{
+  union i2c_smbus_data data;
+  int i;
+  if (length > 32)
+    length = 32;
+  for (i = 1; i <= length; i++)
+    data.block[i] = values[i-1];
+  data.block[0] = length;
+  return i2c_smbus_access(file,I2C_SMBUS_WRITE,command,
+                          I2C_SMBUS_BLOCK_DATA, &data);
+}
+
+int i2c_smbus_write_i2c_block_data(int file, __u8 command,
+                                               __u8 length, __u8 *values)
+{
+  union i2c_smbus_data data;
+  int i;
+  if (length > 32)
+    length = 32;
+  for (i = 1; i <= length; i++)
+    data.block[i] = values[i-1];
+  data.block[0] = length;
+  return i2c_smbus_access(file,I2C_SMBUS_WRITE,command,
+                          I2C_SMBUS_I2C_BLOCK_DATA, &data);
+}

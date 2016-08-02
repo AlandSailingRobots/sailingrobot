@@ -31,7 +31,11 @@ enum class MessageType {
 	ActuatorPosition,
 	ArduinoData,
 	VesselState,
-	WaypointData
+	WaypointData,
+	CANActuatorCommand = 0x10,
+	CANFullFeedback = 0x20,
+	CANActuatorFeedback = 0x21
+
 };
 
 inline std::string msgToString(MessageType msgType)
@@ -62,6 +66,12 @@ inline std::string msgToString(MessageType msgType)
 		return "VesselState";
 	case MessageType::WaypointData:
 		return "WaypointData";
+	case MessageType::CANActuatorCommand:
+		return "CANActuatorCommand";
+	case MessageType::CANFullFeedback:
+		return "CANFullFeedback";
+	case MessageType::CANActuatorFeedback:
+		return "CANActuatorFeedback";
 	}
 	return "";
 }
