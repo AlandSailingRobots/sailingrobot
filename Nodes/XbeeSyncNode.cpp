@@ -85,6 +85,8 @@ void XbeeSyncNode::sendVesselState(VesselStateMsg* msg)
 
 	m_xbee.transmit(data, serialiser.size());
 
+	delete data;
+
 
 	//Do not allow sending of vesselstate and logs at the same time; double output turns into mush
 	/*if (!m_sendLogs && m_sending)
