@@ -1,7 +1,7 @@
 /****************************************************************************************
  *
  * File:
- * 		VesselStateNode.h
+ * 		SimulationNode.h
  *
  * Purpose:
  *		Maintains the "current" state of the vessel. Collects data from sensor messages
