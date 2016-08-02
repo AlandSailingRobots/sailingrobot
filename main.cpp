@@ -11,6 +11,7 @@
 #include "Nodes/WaypointNode.h"
 #include "Nodes/VesselStateNode.h"
 #include "Nodes/HTTPSyncNode.h"
+#include "Nodes/XbeeSyncNode.h"
 #include "Nodes/RoutingNode.h"
 #include "Nodes/LineFollowNode.h"
 #include "Messages/DataRequestMsg.h"
@@ -99,6 +100,7 @@ int main(int argc, char *argv[])
 	}
 
 	// Create nodes
+	XbeeSyncNode xbee(messageBus, dbHandler);
 	MessageLoggerNode msgLogger(messageBus);
 	CV7Node windSensor(messageBus, dbHandler.retrieveCell("windsensor_config", "1", "port"), dbHandler.retrieveCellAsInt("windsensor_config", "1", "baud_rate"));
 	HMC6343Node compass(messageBus, dbHandler.retrieveCellAsInt("buffer_config", "1", "compass"));
@@ -138,6 +140,7 @@ int main(int argc, char *argv[])
 	MaestroController::init(dbHandler.retrieveCell("maestro_controller_config", "1", "port"));
 
 	// Initialise nodes
+	initialiseNode(xbee, "Xbee Sync Node", NodeImportance::CRITICAL);
 	initialiseNode(msgLogger, "Message Logger", NodeImportance::NOT_CRITICAL);
 	initialiseNode(windSensor, "Wind Sensor", NodeImportance::CRITICAL);
 	initialiseNode(compass, "Compass", NodeImportance::CRITICAL);
@@ -165,6 +168,7 @@ int main(int argc, char *argv[])
 	}
 
 	// Start active nodes
+	xbee.start();
 	windSensor.start();
 	compass.start();
 	gpsd.start();

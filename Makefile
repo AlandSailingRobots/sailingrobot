@@ -139,6 +139,9 @@ build_tests: $(OBJECTS) $(EXECUTABLE)
 	$(CXX) $(CPPFLAGS) tests/runner.o @$(OBJECT_FILE) -Wl,-rpath=./ ./libwiringPi.so -o $(UNIT_TEST) $(LIBS)
 	$(CXX) $(CPPFLAGS) tests/runnerHardware.o @$(OBJECT_FILE) -Wl,-rpath=./ ./libwiringPi.so -o $(HARDWARE_TEST) $(LIBS)
 
+xbee_remote: $(OBJECTS) $(EXECUTABLE) $(WIRING_PI)
+	$(MAKE) -C xbeerelay
+
 #  Create the directories needed
 $(BUILD_DIR):
 	@$(MKDIR_P) $(BUILD_DIR)
