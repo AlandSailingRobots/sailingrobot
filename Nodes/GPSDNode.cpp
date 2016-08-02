@@ -95,38 +95,20 @@ void GPSDNode::GPSThreadFunc(void* nodePtr)
 		bool gps_hasFix = (newData->status > 0);
 		double unixTime = 0;
 
-		//if(flags & TIME_SET)
-		{
-			unixTime = newData->fix.time;
-		}
+		unixTime = newData->fix.time;
 
-		//if(flags & LATLON_SET)
-		{
-			node->m_Lat = newData->fix.latitude;
-			node->m_Lon = newData->fix.longitude;
-		}
+		SysClock::setTime(unixTime);
 
-		//if(flags & SPEED_SET)
-		{
-			node->m_Speed = newData->fix.speed;
-		}
-
-		// if(flags & TRACK_SET)
-		{
-			node->m_Heading = newData->fix.track;
-		}
+		node->m_Lat = newData->fix.latitude;
+		node->m_Lon = newData->fix.longitude;
+		node->m_Speed = newData->fix.speed;
+		node->m_Heading = newData->fix.track;
 
 		int satCount = 0;
-		// if(flags & SATELLITE_SET)
-		// {
-			satCount = newData->satellites_used;
-		//}
+		satCount = newData->satellites_used;
 
 		GPSMode mode = GPSMode::NoUpdate;
-		//if(flags & MODE_SET)
-		{
-			mode = static_cast<GPSMode>(newData->fix.mode);
-		}
+		mode = static_cast<GPSMode>(newData->fix.mode);
 
 		MessagePtr msg = std::make_unique<GPSDataMsg>(gps_hasFix, gps_online, node->m_Lat, node->m_Lon, unixTime, node->m_Speed, node->m_Heading, satCount, mode);
 		node->m_MsgBus.sendMessage(std::move(msg));
