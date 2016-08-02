@@ -29,8 +29,11 @@
 #include "utility/SysClock.h"
 
 
-#define VESSEL_STATE_SLEEP_MS 400
-#define VESSEL_STATE_INITIAL_SLEEP 2000
+#define BASE_SLEEP_MS 400
+#define COUNT_COMPASSDATA_MSG 1
+#define COUNT_GPSDATA_MSG 1
+#define COUNT_WINDDATA_MSG 1
+#define COUNT_ARDUINO_MSG 1
 
 
 SimulationNode::SimulationNode(MessageBus& msgBus)
@@ -38,7 +41,7 @@ SimulationNode::SimulationNode(MessageBus& msgBus)
 		m_CompassHeading(0), m_CompassPitch(0), m_CompassRoll(0),
 		m_GPSHasFix(false), m_GPSOnline(false), m_GPSLat(0), m_GPSLon(0), m_GPSUnixTime(0), m_GPSSpeed(0),
 		m_GPSHeading(0), m_WindDir(0), m_WindSpeed(0), m_WindTemp(0), m_ArduinoPressure(0),
-		m_ArduinoRudder(0),m_ArduinoSheet(0),m_ArduinoBattery(0),m_rudder(0),m_sail(0)
+		m_ArduinoRudder(0),m_ArduinoSheet(0),m_ArduinoBattery(0),m_rudder(0),m_sail(0),m_count_sleep(0)
 {
   m_MsgBus.registerNode(this, MessageType::ActuatorPosition);
 }
@@ -139,7 +142,8 @@ void SimulationNode::createCompassMessage()
 	m_CompassHeading = m_data_receive.headingVector[0]/10.f;
 	m_CompassPitch = 0;
 	m_CompassRoll = 0;
-	if (true){
+
+	if (m_count_sleep % COUNT_COMPASSDATA_MSG==0){
 	  CompassDataMsg* msg = new CompassDataMsg( int(m_CompassHeading+0.5) , m_CompassPitch, m_CompassRoll);
 	  m_MsgBus.sendMessage(msg);
   }
@@ -157,7 +161,8 @@ void SimulationNode::createGPSMessage()
 	m_GPSHeading = m_data_receive.course_real;
 	m_GPSSatellite = 0;
 	GPSMode mode = GPSMode::LatLonOk;
-	if (true)
+
+	if (m_count_sleep % COUNT_GPSDATA_MSG==0)
 	{
 		GPSDataMsg* msg = new GPSDataMsg(m_GPSHasFix, m_GPSOnline, m_GPSLat, m_GPSLon, m_GPSUnixTime, m_GPSSpeed, m_GPSHeading, m_GPSSatellite, mode);
 		m_MsgBus.sendMessage(msg);
@@ -169,7 +174,8 @@ void SimulationNode::createWindMessage()
 	m_WindDir = m_data_receive.windDirection;
 	m_WindSpeed = m_data_receive.windSpeed;
 	m_WindTemp = m_data_receive.windTemperature;
-	if (true)
+
+	if (m_count_sleep % COUNT_WINDDATA_MSG==0)
 	{
 		WindDataMsg* windData = new WindDataMsg(m_WindDir, m_WindSpeed, m_WindTemp);
 		m_MsgBus.sendMessage(windData);
@@ -182,7 +188,8 @@ void SimulationNode::createArduinoMessage()
 	m_ArduinoRudder = m_data_receive.rudder;
 	m_ArduinoSheet = m_data_receive.sheet;
 	m_ArduinoBattery = m_data_receive.battery;
-	if (true)
+
+	if (m_count_sleep % COUNT_ARDUINO_MSG==0)
 	{
 		ArduinoDataMsg* msg = new ArduinoDataMsg(m_ArduinoPressure, m_ArduinoRudder, m_ArduinoSheet, m_ArduinoBattery );
 		m_MsgBus.sendMessage(msg);
@@ -209,6 +216,7 @@ void SimulationNode::SimulationThreadFunc(void* nodePtr)
 	int bytes_received = 0;
 	struct DATA_SOCKET_RECEIVE dump_data_sock_receive;
 	while(true){
+
     //receive socket from simulation
     bytes_received += read(node->m_handler_socket_client.sockfd,&(node->m_data_receive)+bytes_received,sizeof(struct DATA_SOCKET_RECEIVE)-bytes_received);
     if (bytes_received==sizeof(struct DATA_SOCKET_RECEIVE)){
@@ -218,11 +226,18 @@ void SimulationNode::SimulationThreadFunc(void* nodePtr)
     if (bytes_received==-1)
       bytes_received=0;
 
+    //clock for sending messages
+    if (node->m_count_sleep==10)
+		{
+			node->m_count_sleep=0;
+		}
+		node->m_count_sleep++;
+
     node->processSocketData();
 		node->setupDataSend();
 
     write(node->m_handler_socket_client.sockfd,&(node->m_data_send), sizeof(struct DATA_SOCKET_SEND));
 
-		std::this_thread::sleep_for(std::chrono::milliseconds(VESSEL_STATE_SLEEP_MS));
+		std::this_thread::sleep_for(std::chrono::milliseconds(BASE_SLEEP_MS));
   }
 }

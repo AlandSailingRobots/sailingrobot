@@ -141,6 +141,10 @@ export MKDIR_P = mkdir -p
 
 all: $(EXECUTABLE) stats
 
+
+simulation:
+	make USE_SIM=1 -j
+
 # Builds the intergration test, requires the whole system to be built before
 build_tests: $(OBJECTS) $(EXECUTABLE)
 	@echo Building tests...

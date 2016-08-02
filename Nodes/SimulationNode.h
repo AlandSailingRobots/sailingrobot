@@ -139,4 +139,6 @@ private:
   struct HANDLERS_SOCKET m_handler_socket_server;
   struct HANDLERS_SOCKET m_handler_socket_client;
 
+  int m_count_sleep;
+
 };
