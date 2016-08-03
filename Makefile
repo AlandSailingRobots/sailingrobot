@@ -42,8 +42,8 @@ CORE =					MessageBus.cpp ActiveNode.cpp
 
 BEHAVIOURCLASS = 	behaviourclass/RoutingBehaviour.cpp  behaviourclass/WaypointBehaviour.cpp behaviourclass/LineFollowBehaviour.cpp behaviourclass/CollisionAvoidanceBehave.cpp
 
-NODES =					Nodes/MessageLoggerNode.cpp Nodes/CV7Node.cpp Nodes/HMC6343Node.cpp Nodes/GPSDNode.cpp Nodes/ActuatorNode.cpp  Nodes/ArduinoNode.cpp Nodes/VesselStateNode.cpp Nodes/obstacledetection/colorDetectionNode.cpp Nodes/obstacledetection/colorDetectionUtility.cpp
-
+NODES =					Nodes/MessageLoggerNode.cpp Nodes/CV7Node.cpp Nodes/HMC6343Node.cpp Nodes/GPSDNode.cpp Nodes/ActuatorNode.cpp  Nodes/ArduinoNode.cpp Nodes/VesselStateNode.cpp Nodes/obstacledetection/colorDetectionNode.cpp Nodes/obstacledetection/colorDetectionUtility.cpp\
+						Nodes/lidarLite/lidarLite.cpp Nodes/lidarLite/lidarTest.cpp
 SYSTEM_SERVICES =		SystemServices/MaestroController.cpp
 
 XBEE = 					xBee/xBeeSync.cpp xBee/xBee.cpp

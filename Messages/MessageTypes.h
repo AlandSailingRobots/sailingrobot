@@ -24,5 +24,6 @@ enum class MessageType {
 	ActuatorPosition,
 	ArduinoData,
 	VesselState,
-	ObstacleVector
+	ObstacleVector,
+	LidarData
 };
