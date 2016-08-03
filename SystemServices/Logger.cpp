@@ -94,7 +94,7 @@ void Logger::log(std::string message)
 		}
 		else
 		{
-			printf(" === NO ROOM IN BUFFER FOR MORE MESSAGES ===\n");
+			//printf(" === NO ROOM IN BUFFER FOR MORE MESSAGES ===\n");
 		}
 	}
 	m_Mutex.unlock();
