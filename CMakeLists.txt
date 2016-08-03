@@ -554,31 +554,12 @@ set(SAILBOT_SOURCE_FILES
     AnalogArduino/myWiringI2C.cpp
     AnalogArduino/myWiringI2C.h
     ${BEHAVIOUR}
-    Compass/Compass.cpp
-    Compass/Compass.h
-    Compass/HMC6343.cpp
-    Compass/HMC6343.h
-    Compass/MockCompass.cpp
-    Compass/MockCompass.h
     coursecalculation/CourseCalculation.cpp
     coursecalculation/CourseCalculation.h
     coursecalculation/CourseMath.cpp
     coursecalculation/CourseMath.h
-    CV7/CV7.cpp
-    CV7/CV7.h
-    CV7/MockWindsensor.cpp
-    CV7/MockWindsensor.h
-    CV7/UtilityLibrary.cpp
-    CV7/UtilityLibrary.h
-    CV7/Windsensor.cpp
-    CV7/Windsensor.h
     dbhandler/DBHandler.cpp
     dbhandler/DBHandler.h
-    gps/GPS.h
-    gps/GPSReader.cpp
-    gps/GPSReader.h
-    gps/MockGPSReader.cpp
-    gps/MockGPSReader.h
     httpsync/HTTPSync.cpp
     httpsync/HTTPSync.h
     i2ccontroller/I2CController.cpp
@@ -600,17 +581,6 @@ set(SAILBOT_SOURCE_FILES
     ruddercommand/RudderCommand.h
     sailcommand/SailCommand.cpp
     sailcommand/SailCommand.h
-    servocontroller/Actuator.h
-    servocontroller/MaestroController.cpp
-    servocontroller/MaestroController.h
-    servocontroller/MockMaestroController.cpp
-    servocontroller/MockMaestroController.h
-    servocontroller/MockServoObject.cpp
-    servocontroller/MockServoObject.h
-    servocontroller/SensorObject.cpp
-    servocontroller/SensorObject.h
-    servocontroller/ServoObject.cpp
-    servocontroller/ServoObject.h
     tests/db/main.cpp
     tests/db/test_dbhandler.cpp
     tests/integration/IntegrationTests/AnalogArduinoIntegrationTest.cpp
@@ -663,14 +633,10 @@ set(SAILBOT_SOURCE_FILES
     xbeerelay/xBeeRelay.cpp
     xbeerelay/xBeeRelay.h
     ${XML_PARSER}
-    GPSupdater.cpp
-    GPSupdater.h
     main.cpp
     main.h
     SailingRobot.cpp
-    SailingRobot.h
-    WindsensorController.cpp
-    WindsensorController.h)
+    SailingRobot.h)
 
 include_directories(.)
 include_directories(libs/json)
@@ -680,6 +646,9 @@ add_executable(sailingrobot
 add_executable(unitTestCollisionAvoidance
         ${LIB_EIGEN}
         ${UTILITY}
-        ${BEHAVIOUR}
-        behaviourclass/unitTestFile.cpp
-        behaviourclass/unitTestFile.h)
+        tests/collisionAvoidance/test_CollisionAvoidanceBehaviour.cpp
+        tests/collisionAvoidance/test_CollisionAvoidanceBehaviour.h
+        tests/collisionAvoidance/UnitTest_CollisionAvoidanceBehaviour.cpp
+        tests/collisionAvoidance/UnitTest_CollisionAvoidanceBehaviour.h
+        tests/collisionAvoidance/vibes.cpp
+        tests/collisionAvoidance/vibes.h)

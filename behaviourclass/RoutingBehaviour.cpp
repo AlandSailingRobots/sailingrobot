@@ -27,8 +27,8 @@ void RoutingBehaviour::setNextWaypoint(WaypointModel &waypointModel)
 	}
 	else
 	{
-		Logger::info("New Waypoint picked! ID: %s, Lon: %f, Lat: %f, Rad: %d",  waypointModel.id.c_str(), 
-                                                                				waypointModel.positionModel.longitude, 
+		Logger::info("New Waypoint picked! ID: %s, Lon: %f, Lat: %f, Rad: %d",  waypointModel.id.c_str(),
+                                                                				waypointModel.positionModel.longitude,
                                                                 				waypointModel.positionModel.latitude,
                                                                					waypointModel.radius);
 	}
