@@ -28,13 +28,12 @@ enum class MessageType {
 	ServerWaypointsReceived,
 	LocalConfigChange,
 	LocalWaypointChange,
-	ActuatorPosition,
+	ActuatorCommand,
+	ActuatorFeedback,
 	ArduinoData,
 	VesselState,
 	WaypointData,
-	CANActuatorCommand = 0x10,
-	CANFullFeedback = 0x20,
-	CANActuatorFeedback = 0x21
+	WindVaneCommand
 
 };
 
