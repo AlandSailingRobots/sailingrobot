@@ -31,10 +31,10 @@ XbeeSyncNode::XbeeSyncNode(MessageBus& msgBus, DBHandler& db) :
 	m_sendLogs = m_db.retrieveCellAsInt("xbee_config", "1", "send_logs");
 	m_loopTime = stod(m_db.retrieveCell("xbee_config", "1", "loop_time"));
 	m_pushOnlyLatestLogs = m_db.retrieveCellAsInt("xbee_config", "1", "push_only_latest_logs");
-
 	XbeeSyncNode::m_node = this;
-	msgBus.registerNode(this, MessageType::VesselState);
+	msgBus.registerNode(*this, MessageType::VesselState);
 }
+
 bool XbeeSyncNode::init()
 {
 	m_initialised = false;
@@ -198,8 +198,8 @@ void XbeeSyncNode::incomingMessage(uint8_t* data, uint8_t size)
 	{
 		case MessageType::ActuatorPosition:
 		{
-			ActuatorPositionMsg* actuatorControl = new ActuatorPositionMsg(deserialiser);
-			m_node->m_MsgBus.sendMessage(actuatorControl);
+			MessagePtr actuatorControl = std::make_unique<ActuatorPositionMsg>(ActuatorPositionMsg(deserialiser));
+			m_node->m_MsgBus.sendMessage(std::move(actuatorControl));
 		}
 			break;
 		default:
