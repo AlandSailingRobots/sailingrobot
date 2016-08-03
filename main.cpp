@@ -7,6 +7,7 @@
 #if SIMULATION == 1
  #include "Nodes/SimulationNode.h"
 #else
+ #include "Nodes/obstacledetection/colorDetectionNode.h"
  #include "Nodes/CV7Node.h"
  #include "Nodes/HMC6343Node.h"
  #include "Nodes/GPSDNode.h"
@@ -110,12 +111,14 @@ int main(int argc, char *argv[])
 	printf("using simulation\n");
 	SimulationNode simulation(messageBus);
 	#else
-  CV7Node windSensor(messageBus, dbHandler.retrieveCell("windsensor_config", "1", "port"), dbHandler.retrieveCellAsInt("windsensor_config", "1", "baud_rate"));
+    CV7Node windSensor(messageBus, dbHandler.retrieveCell("windsensor_config", "1", "port"), dbHandler.retrieveCellAsInt("windsensor_config", "1", "baud_rate"));
 	HMC6343Node compass(messageBus, dbHandler.retrieveCellAsInt("buffer_config", "1", "compass"));
 	GPSDNode gpsd(messageBus);
 	ArduinoNode arduino(messageBus);
 	#endif
-
+    std::vector<std::string> color_inputs;
+    color_inputs.push_back("red");
+    colorDetectionNode colorDetect(messageBus,color_inputs);
 	VesselStateNode vessel(messageBus);
 	WaypointNode waypoint(messageBus, dbHandler);
 	HTTPSyncNode httpsync(messageBus, &dbHandler, 0, false);
@@ -160,7 +163,8 @@ int main(int argc, char *argv[])
 	#if SIMULATION == 1
 	initialiseNode(simulation,"Simulation Node",NodeImportance::CRITICAL);
 	#else
-  initialiseNode(windSensor, "Wind Sensor", NodeImportance::CRITICAL);
+    initialiseNode(colorDetect, "colorDetection Node", NodeImportance::CRITICAL);
+    initialiseNode(windSensor, "Wind Sensor", NodeImportance::CRITICAL);
 	initialiseNode(compass, "Compass", NodeImportance::CRITICAL);
 	initialiseNode(gpsd, "GPSD Node", NodeImportance::CRITICAL);
 	initialiseNode(sail, "Sail Actuator", NodeImportance::CRITICAL);
@@ -191,6 +195,7 @@ int main(int argc, char *argv[])
 	#if SIMULATION == 1
 	simulation.start();
   #else
+  colorDetect.start();
 	windSensor.start();
 	compass.start();
 	gpsd.start();
