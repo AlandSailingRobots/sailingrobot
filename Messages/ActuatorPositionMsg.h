@@ -25,10 +25,31 @@ public:
 		:Message(MessageType::ActuatorPosition, NodeID::None, NodeID::None), m_rudderPosition(rudderPosition), m_sailPosition(sailPosition)
 	{ }
 
+	ActuatorPositionMsg(MessageDeserialiser deserialiser)
+			:Message(deserialiser)
+	{
+		if(	!deserialiser.readInt(m_rudderPosition) ||
+			!deserialiser.readInt(m_sailPosition))
+		{
+			m_valid = false;
+		}
+	}
+
 	virtual ~ActuatorPositionMsg() { }
 
 	int sailPosition() { return m_sailPosition; }
 	int rudderPosition() { return m_rudderPosition; }
+
+	///----------------------------------------------------------------------------------
+	/// Serialises the message into a MessageSerialiser
+	///----------------------------------------------------------------------------------
+	virtual void Serialise(MessageSerialiser& serialiser)
+	{
+		Message::Serialise(serialiser);
+
+		serialiser.serialise(m_rudderPosition);
+		serialiser.serialise(m_sailPosition);
+	}
 
 private:
 	int m_rudderPosition;

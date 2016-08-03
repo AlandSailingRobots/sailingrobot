@@ -39,7 +39,7 @@ JSON = 					libs/json
 
 # Sources
 
-CORE =					MessageBus.cpp ActiveNode.cpp
+CORE =					MessageBus.cpp ActiveNode.cpp Messages/MessageSerialiser.cpp Messages/MessageDeserialiser.cpp
 
 ifeq ($(USE_SIM),1)
 NODES =					Nodes/MessageLoggerNode.cpp  Nodes/WaypointNode.cpp Nodes/HTTPSyncNode.cpp Nodes/xBeeSyncNode.cpp \
@@ -55,7 +55,7 @@ SYSTEM_SERVICES =		SystemServices/MaestroController.cpp SystemServices/Logger.cp
 endif
 
 
-XBEE = 					xBee/xBeeSync.cpp xBee/xBee.cpp
+XBEE = 					xBee/Xbee.cpp
 
 BEHAVIOURCLASS = 		behaviourclass/RoutingBehaviour.cpp  behaviourclass/WaypointBehaviour.cpp behaviourclass/LineFollowBehaviour.cpp
 
@@ -151,6 +151,9 @@ build_tests: $(OBJECTS) $(EXECUTABLE)
 	$(MAKE) -C tests
 	$(CXX) $(CPPFLAGS) tests/runner.o @$(OBJECT_FILE) -Wl,-rpath=./ ./libwiringPi.so -o $(UNIT_TEST) $(LIBS)
 	$(CXX) $(CPPFLAGS) tests/runnerHardware.o @$(OBJECT_FILE) -Wl,-rpath=./ ./libwiringPi.so -o $(HARDWARE_TEST) $(LIBS)
+
+xbee_remote: $(OBJECTS) $(EXECUTABLE) $(WIRING_PI)
+	$(MAKE) -C xbeerelay
 
 #  Create the directories needed
 $(BUILD_DIR):

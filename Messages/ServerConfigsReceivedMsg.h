@@ -21,6 +21,10 @@ public:
 		:Message(MessageType::ServerConfigsReceived, NodeID::None, NodeID::None)
 	{ }
 
+	ServerConfigsReceivedMsg(MessageDeserialiser deserialiser)
+		:Message(deserialiser)
+	{ }
+
 	virtual ~ServerConfigsReceivedMsg() { }
 
 };

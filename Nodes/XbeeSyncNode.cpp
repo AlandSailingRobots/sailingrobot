@@ -1,7 +1,7 @@
 /****************************************************************************************
  *
  * File:
- * 		xBeeSyncNode.cpp
+ * 		XbeeSyncNode.cpp
  *
  * Purpose:
  *		Handles sending of logs or the current system state (xml-format) over xbee,
@@ -13,11 +13,17 @@
  *
  ***************************************************************************************/
 
-#include "xBeeSyncNode.h"
-#include <sstream>
 
-xBeeSyncNode::xBeeSyncNode(MessageBus& msgBus, DBHandler& db) :
-	ActiveNode(NodeID::xBeeSync, msgBus), m_db(db)
+#include "XbeeSyncNode.h"
+#include <cstring>
+#include "Messages/ActuatorPositionMsg.h"
+
+
+XbeeSyncNode* XbeeSyncNode::m_node = NULL;
+
+
+XbeeSyncNode::XbeeSyncNode(MessageBus& msgBus, DBHandler& db) :
+	ActiveNode(NodeID::xBeeSync, msgBus), m_xbee(false), m_initialised(false), m_db(db)
 {
 	m_firstMessageCall = true;
 	m_sending = m_db.retrieveCellAsInt("xbee_config", "1", "send");
@@ -25,30 +31,25 @@ xBeeSyncNode::xBeeSyncNode(MessageBus& msgBus, DBHandler& db) :
 	m_sendLogs = m_db.retrieveCellAsInt("xbee_config", "1", "send_logs");
 	m_loopTime = stod(m_db.retrieveCell("xbee_config", "1", "loop_time"));
 	m_pushOnlyLatestLogs = m_db.retrieveCellAsInt("xbee_config", "1", "push_only_latest_logs");
+
+	XbeeSyncNode::m_node = this;
+	msgBus.registerNode(this, MessageType::VesselState);
 }
-bool xBeeSyncNode::init()
+bool XbeeSyncNode::init()
 {
+	m_initialised = false;
 
-	bool rv = false;
-
-	m_xbee_fd = m_xBee.init();
-
-	if(m_xbee_fd < 0)
+	if(m_xbee.init("/dev/xbee", XBEE_BAUD_RATE))
 	{
-		Logger::error("XbeeSync::%d Failed to initalise", __LINE__);
-	}
-	else
-	{
-		rv = true;
 		Logger::info("Xbee initialised - receiving: %d sending: %d", m_receiving, m_sending);
 		m_initialised = true;
 	}
 
-	return rv;
+	return m_initialised;
 }
 
-void xBeeSyncNode::start(){
-
+void XbeeSyncNode::start()
+{
 	if (m_initialised)
     {
         runThread(xBeeSyncThread);
@@ -57,10 +58,9 @@ void xBeeSyncNode::start(){
     {
         Logger::error("%s Cannot start XBEESYNC thread as the node was not correctly initialised!", __PRETTY_FUNCTION__);
     }
-
 }
 
-void xBeeSyncNode::processMessage(const Message* msgPtr)
+void XbeeSyncNode::processMessage(const Message* msgPtr)
 {
     MessageType msgType = msgPtr->messageType();
 
@@ -75,10 +75,21 @@ void xBeeSyncNode::processMessage(const Message* msgPtr)
 
 }
 
-void xBeeSyncNode::sendVesselState(VesselStateMsg* msg){
+void XbeeSyncNode::sendVesselState(VesselStateMsg* msg)
+{
+	MessageSerialiser serialiser;
+	msg->Serialise(serialiser);
+
+	uint8_t* data = new uint8_t[serialiser.size()];
+	memcpy(data, serialiser.data(), serialiser.size());
+
+	m_xbee.transmit(data, serialiser.size());
+
+	delete data;
+
 
 	//Do not allow sending of vesselstate and logs at the same time; double output turns into mush
-	if (!m_sendLogs && m_sending)
+	/*if (!m_sendLogs && m_sending)
 	{
 		bool enoughTimePassed = false;
 
@@ -136,13 +147,13 @@ void xBeeSyncNode::sendVesselState(VesselStateMsg* msg){
 			m_xBee.transmitData(m_xbee_fd,res_xml);
 
 		}
-	}
-
+	}*/
 }
 
-void xBeeSyncNode::sendLogs(){
+/*
+void XbeeSyncNode::sendLogs(){
 	
-		if(m_sending && m_sendLogs) 
+		if(m_sending && m_sendLogs)
 		{
 			//Transmits latest/all logs over xbee network
 			std::string logs = m_db.getLogs(m_pushOnlyLatestLogs);
@@ -150,8 +161,8 @@ void xBeeSyncNode::sendLogs(){
 		}
 }
 
-void xBeeSyncNode::receiveControl(){
-	if(m_receiving) {
+void XbeeSyncNode::receiveControl(){
+		if(m_receiving) {
 
 		//Receive settings for rudder and sail by parsing xml message
 		std::string res_xml = m_xBee.receiveXMLData(m_xbee_fd);
@@ -173,21 +184,40 @@ void xBeeSyncNode::receiveControl(){
 			m_MsgBus.sendMessage(std::move(actuatorControl));
 			//PLANNED: Send externalCommandMsg here when implemented?
 		}
-
 	}
+}*/
+
+void XbeeSyncNode::incomingMessage(uint8_t* data, uint8_t size)
+{
+	MessageDeserialiser deserialiser(data, size);
+
+	Message msg(deserialiser);
+	deserialiser.resetInternalPtr();
+
+	switch(msg.messageType())
+	{
+		case MessageType::ActuatorPosition:
+		{
+			ActuatorPositionMsg* actuatorControl = new ActuatorPositionMsg(deserialiser);
+			m_node->m_MsgBus.sendMessage(actuatorControl);
+		}
+			break;
+		default:
+			break;
+	}
+
+	delete data;
+	data = NULL;
 }
 
-void xBeeSyncNode::xBeeSyncThread(void* nodePtr) {
+void XbeeSyncNode::xBeeSyncThread(void* nodePtr)
+{
+	XbeeSyncNode* node = (XbeeSyncNode*)(nodePtr);
 
-	xBeeSyncNode* node = (xBeeSyncNode*)(nodePtr);
+	node->m_xbee.setIncomingCallback(node->incomingMessage);
 
-	while(true) {
-
-		node->m_timer.reset();
-
-		node->sendLogs();
-		node->receiveControl();
-
-		node->m_timer.sleepUntil(node->m_loopTime);
+	while(true)
+	{
+		node->m_xbee.processRadioMessages();
 	}
 }

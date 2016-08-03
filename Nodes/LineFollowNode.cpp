@@ -193,6 +193,7 @@ void LineFollowNode::calculateActuatorPos(VesselStateMsg* msg)
     //Send messages----
     MessagePtr actuatorMsg = std::make_unique<ActuatorPositionMsg>(rudderCommand_norm, sailCommand_norm);
     m_MsgBus.sendMessage(std::move(actuatorMsg));
+
     //------------------
 
     double bearingToNextWaypoint = m_courseMath.calculateBTW(msg->longitude(), msg->latitude(), m_nextWaypointLon, m_nextWaypointLat); //calculated for database

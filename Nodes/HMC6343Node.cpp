@@ -79,7 +79,7 @@ bool HMC6343Node::init()
 		m_I2C.endTransmission();
 
 		// The Device reports the I2C address that is mentioned in the datasheet
-		if(deviceID == I2C_ADDRESS)
+		if(deviceID == I2C_DATASHEET_ADDRESS)
 		{
 			m_Initialised = true;
 		}

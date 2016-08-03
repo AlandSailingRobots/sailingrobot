@@ -33,6 +33,24 @@ public:
 
 	{ }
 
+	WaypointDataMsg(MessageDeserialiser deserialiser)
+	:Message(deserialiser)
+	{
+		if(	!deserialiser.readInt(m_nextId) ||
+			!deserialiser.readDouble(m_nextLongitude) ||
+			!deserialiser.readDouble(m_nextLatitude) ||
+			!deserialiser.readInt(m_nextDeclination) ||
+			!deserialiser.readInt(m_nextRadius) ||
+			!deserialiser.readInt(m_prevId) ||
+			!deserialiser.readDouble(m_prevLongitude) ||
+			!deserialiser.readDouble(m_prevLatitude) ||
+			!deserialiser.readInt(m_prevDeclination) ||
+			!deserialiser.readInt(m_prevRadius))
+		{
+			m_valid = false;
+		}
+	}
+
 	virtual ~WaypointDataMsg() { }
 
 
@@ -47,6 +65,25 @@ public:
     double  prevLatitude()      { return m_prevLatitude; }
     int     prevDeclination()   { return m_prevDeclination; }
     int     prevRadius()        { return m_prevRadius; }
+
+    ///----------------------------------------------------------------------------------
+	/// Serialises the message into a MessageSerialiser
+	///----------------------------------------------------------------------------------
+	virtual void Serialise(MessageSerialiser& serialiser)
+	{
+		Message::Serialise(serialiser);
+
+		serialiser.serialise(m_nextId);
+		serialiser.serialise(m_nextLongitude);
+		serialiser.serialise(m_nextLatitude);
+		serialiser.serialise(m_nextDeclination);
+		serialiser.serialise(m_nextRadius);
+		serialiser.serialise(m_prevId);
+		serialiser.serialise(m_prevLongitude);
+		serialiser.serialise(m_prevLongitude);
+		serialiser.serialise(m_prevDeclination);
+		serialiser.serialise(m_prevRadius);
+	}
 
 private:
 

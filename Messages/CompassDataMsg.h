@@ -26,11 +26,34 @@ public:
 		:Message(MessageType::CompassData, NodeID::None, NodeID::None), m_Heading(heading), m_Pitch(pitch), m_Roll(roll)
 	{ }
 
+	CompassDataMsg(MessageDeserialiser& deserialiser)
+		:Message(deserialiser)
+	{
+		if(	!deserialiser.readInt(m_Heading) ||
+			!deserialiser.readInt(m_Pitch) ||
+			!deserialiser.readInt(m_Roll))
+		{
+			m_valid = false;
+		}
+	}
+
 	virtual ~CompassDataMsg() { }
 
 	int heading() { return m_Heading; }
 	int pitch() { return m_Pitch; }
 	int roll() { return m_Roll; }
+
+	///----------------------------------------------------------------------------------
+	/// Serialises the message into a MessageSerialiser
+	///----------------------------------------------------------------------------------
+	virtual void Serialise(MessageSerialiser& serialiser)
+	{
+		Message::Serialise(serialiser);
+
+		serialiser.serialise(m_Heading);
+		serialiser.serialise(m_Pitch);
+		serialiser.serialise(m_Roll);
+	}
 
 private:
 	int m_Heading;

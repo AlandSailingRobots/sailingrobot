@@ -39,6 +39,32 @@ public:
 		m_ArduinoRudder(arduinoRudder), m_ArduinoSheet(arduinoSheet), m_ArduinoBattery(arduinoBattery)
 		{ }
 
+	VesselStateMsg(MessageDeserialiser deserialiser)
+		:Message(deserialiser)
+	{
+		if(	!deserialiser.readInt(m_CompassHeading) ||
+			!deserialiser.readInt(m_CompassPitch) ||
+			!deserialiser.readInt(m_CompassRoll) ||
+			!deserialiser.readBool(m_GPSHasFix) ||
+			!deserialiser.readBool(m_GPSOnline) ||
+			!deserialiser.readDouble(m_GPSLat) ||
+			!deserialiser.readDouble(m_GPSLon) ||
+			!deserialiser.readDouble(m_GPSUnixTime) ||
+			!deserialiser.readDouble(m_GPSSpeed) ||
+			!deserialiser.readDouble(m_GPSHeading) ||
+			!deserialiser.readInt(m_GPSSatellite) ||
+			!deserialiser.readFloat(m_WindDir) ||
+			!deserialiser.readFloat(m_WindSpeed) ||
+			!deserialiser.readFloat(m_WindTemp) ||
+			!deserialiser.readInt(m_ArduinoPressure) ||
+			!deserialiser.readInt(m_ArduinoRudder) ||
+			!deserialiser.readInt(m_ArduinoSheet) ||
+			!deserialiser.readInt(m_ArduinoBattery))
+		{
+			m_valid = false;
+		}
+	}
+
 	virtual ~VesselStateMsg() { }
 
 	int compassHeading() { return m_CompassHeading; }
@@ -62,6 +88,34 @@ public:
 	int arduinoRudder() { return m_ArduinoRudder; }
 	int arduinoSheet() { return m_ArduinoSheet; }
 	int arduinoBattery() { return m_ArduinoBattery; }
+
+	///----------------------------------------------------------------------------------
+	/// Serialises the message into a MessageSerialiser
+	///----------------------------------------------------------------------------------
+	virtual void Serialise(MessageSerialiser& serialiser)
+	{
+		Message::Serialise(serialiser);
+
+		serialiser.serialise(m_CompassHeading);
+		serialiser.serialise(m_CompassPitch);
+		serialiser.serialise(m_CompassRoll);
+		serialiser.serialise(m_GPSHasFix);
+		serialiser.serialise(m_GPSOnline);
+		serialiser.serialise(m_GPSLat);
+		serialiser.serialise(m_GPSLon);
+		serialiser.serialise(m_GPSUnixTime);
+		serialiser.serialise(m_GPSSpeed);
+		serialiser.serialise(m_GPSHeading);
+		serialiser.serialise(m_GPSSatellite);
+		serialiser.serialise(m_WindDir);
+		serialiser.serialise(m_WindSpeed);
+		serialiser.serialise(m_WindTemp);
+		serialiser.serialise(m_ArduinoPressure);
+		serialiser.serialise(m_ArduinoRudder);
+		serialiser.serialise(m_ArduinoSheet);
+		serialiser.serialise(m_ArduinoBattery);
+	}
+
 
 private:
 	int 	m_CompassHeading;

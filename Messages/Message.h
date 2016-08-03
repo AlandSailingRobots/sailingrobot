@@ -15,6 +15,8 @@
 
 #include "MessageTypes.h"
 #include "NodeIDs.h"
+#include "MessageSerialiser.h"
+#include "MessageDeserialiser.h"
 
 
 #define LOG_MESSAGES
@@ -35,7 +37,7 @@ public:
  	///							NodeIDS::NONE for no specific destination.
  	///----------------------------------------------------------------------------------
 	Message(MessageType msgType, NodeID msgSource, NodeID msgDest)
-		:m_MessageType(msgType), m_SourceID(msgSource), m_DestinationID(msgDest)
+		:m_valid(true), m_MessageType(msgType), m_SourceID(msgSource), m_DestinationID(msgDest)
 	{ }
 
 	///----------------------------------------------------------------------------------
@@ -45,7 +47,7 @@ public:
  	/// @param msgSource		Which node posted this message.
  	///----------------------------------------------------------------------------------
 	Message(MessageType msgType, NodeID msgSource)
-		:m_MessageType(msgType), m_SourceID(msgSource), m_DestinationID(NodeID::None)
+		:m_valid(true), m_MessageType(msgType), m_SourceID(msgSource), m_DestinationID(NodeID::None)
 	{ }
 
 	///----------------------------------------------------------------------------------
@@ -56,6 +58,17 @@ public:
 	Message(MessageType msgType)
 		:m_MessageType(msgType), m_SourceID(NodeID::None), m_DestinationID(NodeID::None)
 	{ }
+
+	Message(MessageDeserialiser& deserialiser)
+		:m_valid(true)
+	{
+		if(	!deserialiser.readMessageType(m_MessageType) ||
+			!deserialiser.readNodeID(m_SourceID) ||
+			!deserialiser.readNodeID(m_DestinationID))
+		{
+			m_valid = false;
+		}
+	}
 
 	virtual ~Message() { }
 
@@ -77,9 +90,27 @@ public:
  	///----------------------------------------------------------------------------------
 	NodeID destinationID() const { return m_DestinationID; }
 
+	///----------------------------------------------------------------------------------
+	/// Indicates that the message was constructed correctly
+	///----------------------------------------------------------------------------------
+	bool isValid() const { return m_valid; }
+
+	///----------------------------------------------------------------------------------
+	/// Serialises the message into a MessageSerialiser
+	///----------------------------------------------------------------------------------
+	virtual void Serialise(MessageSerialiser& serialiser)
+	{
+		serialiser.serialise(m_MessageType);
+		serialiser.serialise(m_SourceID);
+		serialiser.serialise(m_DestinationID);
+	}
+
 #ifdef LOG_MESSAGES
 	TimeStamp timeReceived;
 #endif
+
+protected:
+	bool m_valid;					// Indicates that the message was correctl created
 
 private:
 	MessageType m_MessageType;		// The message type

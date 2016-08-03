@@ -28,5 +28,9 @@ public:
 	DataRequestMsg(NodeID destinationID)
 		:Message(MessageType::DataRequest, NodeID::None, destinationID) { }
 
+	DataRequestMsg(MessageDeserialiser deserialiser)
+		:Message(deserialiser)
+	{ }
+
 	virtual ~DataRequestMsg() { }
 };
