@@ -230,7 +230,6 @@ void computeContoursCentersRectangles(Mat const& imgThresholded,vector<Point2f>&
     vector<Moments> mu(contoursMerged.size() );
     vector<Point2f> mc1( contoursMerged.size() );
     mc=mc1;
-    cout << "" << endl;
     double dArea = 0;
     for( int i = 0; i <(int)contoursMerged.size(); i++ ){
         mu[i] = moments( contoursMerged[i], false );
@@ -239,7 +238,6 @@ void computeContoursCentersRectangles(Mat const& imgThresholded,vector<Point2f>&
             mc[i] = Point2f( mu[i].m10/mu[i].m00 , mu[i].m01/mu[i].m00 );///  Get the mass centers:
         }
         else{
-            cout << "in" << endl;
             rotated_bounding_rects.erase(rotated_bounding_rects.begin()+i);
         }
     }

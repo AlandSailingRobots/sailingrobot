@@ -7,7 +7,6 @@
 #if SIMULATION == 1
  #include "Nodes/SimulationNode.h"
 #else
- #include "Nodes/obstacledetection/colorDetectionNode.h"
  #include "Nodes/CV7Node.h"
  #include "Nodes/HMC6343Node.h"
  #include "Nodes/GPSDNode.h"
@@ -15,6 +14,7 @@
  #include "Nodes/ArduinoNode.h"
 #endif
 
+#include "Nodes/obstacledetection/colorDetectionNode.h"
 #include "Nodes/WaypointNode.h"
 #include "Nodes/VesselStateNode.h"
 #include "Nodes/HTTPSyncNode.h"
@@ -163,7 +163,6 @@ int main(int argc, char *argv[])
 	#if SIMULATION == 1
 	initialiseNode(simulation,"Simulation Node",NodeImportance::CRITICAL);
 	#else
-    initialiseNode(colorDetect, "colorDetection Node", NodeImportance::CRITICAL);
     initialiseNode(windSensor, "Wind Sensor", NodeImportance::CRITICAL);
 	initialiseNode(compass, "Compass", NodeImportance::CRITICAL);
 	initialiseNode(gpsd, "GPSD Node", NodeImportance::CRITICAL);
@@ -171,7 +170,7 @@ int main(int argc, char *argv[])
 	initialiseNode(rudder, "Rudder Actuator", NodeImportance::CRITICAL);
 	initialiseNode(arduino, "Arduino Node", NodeImportance::NOT_CRITICAL);
 	#endif
-
+	initialiseNode(colorDetect, "colorDetection Node", NodeImportance::NOT_CRITICAL);
 	initialiseNode(vessel, "Vessel State Node", NodeImportance::CRITICAL);
 	initialiseNode(waypoint, "Waypoint Node", NodeImportance::CRITICAL);
 	if (requireNetwork)
@@ -195,13 +194,13 @@ int main(int argc, char *argv[])
 	#if SIMULATION == 1
 	simulation.start();
   #else
-  colorDetect.start();
+  
 	windSensor.start();
 	compass.start();
 	gpsd.start();
 	arduino.start();
   #endif
-
+	colorDetect.start();
 	vessel.start();
 	httpsync.start();
 

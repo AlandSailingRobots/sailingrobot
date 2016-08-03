@@ -7,14 +7,14 @@ colorDetectionNode::colorDetectionNode(MessageBus& msgBus,std::vector<string> co
 	: ActiveNode(NodeID::ColorDetection, msgBus),m_hsvDiff(10),m_iLowH(0),
 	m_iHighH(179),m_iLowS(0),m_iHighS(255),m_iLowV(0),m_iHighV(255),m_iColor(0),
 	m_numberOfColorsToTrack(0),m_Initialised(false),m_minAreaToDetect(2000),
-	m_maxAreaToDetect(20000),m_numberOfCapturesPerDetection(5),m_delay(5000),m_port(1)
+	m_maxAreaToDetect(20000),m_numberOfCapturesPerDetection(5),m_delay(1),m_port(0)
 {
 	vector<string> colors;
 	m_trackBarHSV = Mat3b(100, 300, Vec3b(0,0,0));
 
-	int numberOfColorInput=(int)colors.size();
+	int numberOfColorInput=(int)colors_input.size();
 	m_inputColorError=false;
-	for(int i = 1; i< numberOfColorInput; i++){
+	for(int i = 0; i< numberOfColorInput; i++){
         if(colors_input[i].compare("red")==0 ||colors_input[i].compare("orange")==0
 		||colors_input[i].compare("yellow")==0 ||colors_input[i].compare("green")==0
 		||colors_input[i].compare("blue")==0 ||colors_input[i].compare("purple")==0){
@@ -50,9 +50,9 @@ colorDetectionNode::colorDetectionNode(MessageBus& msgBus,
 	vector<string> colors;
 	m_trackBarHSV = Mat3b(100, 300, Vec3b(0,0,0));
 
-	int numberOfColorInput=(int)colors.size();
+	int numberOfColorInput=(int)colors_input.size();
 	m_inputColorError=false;
-	for(int i = 1; i< numberOfColorInput; i++){
+	for(int i = 0; i< numberOfColorInput; i++){
         if(colors_input[i].compare("red")==0 ||colors_input[i].compare("orange")==0
 		||colors_input[i].compare("yellow")==0 ||colors_input[i].compare("green")==0
 		||colors_input[i].compare("blue")==0 ||colors_input[i].compare("purple")==0){
@@ -237,6 +237,7 @@ void colorDetectionNode::colorDetectionThreadFunc(void* nodePtr)
 
     while (true)
     {
+		
 		//For each capture
         for(int h = 0; h<(int)(node->m_numberOfCapturesPerDetection);h++){
 			// read a new frame from video
@@ -269,7 +270,6 @@ void colorDetectionNode::colorDetectionThreadFunc(void* nodePtr)
         }
 
         computeObstaclesAnglePosition(node->m_imgOriginal, obstacles, rotated_bounding_rects_merged_list );
-
 		ObstacleVectorMsg* msg = new ObstacleVectorMsg(NodeID::Lidar, NodeID::ColorDetection ,obstacles);
 		node->m_MsgBus.sendMessage(msg);
 
@@ -278,9 +278,10 @@ void colorDetectionNode::colorDetectionThreadFunc(void* nodePtr)
         obstacles.erase(obstacles.begin(),obstacles.end());
 
         imshow("Thresholded Image", imgsThresholded[node->m_iColor]);
+        cvWaitKey(1);
         imshow("Detection", node->m_imgOriginal);
+        cvWaitKey(1);
         setMouseCallback( "Detection", get_on_click_hsv_pixel_values, nodePtr );
-
 		// Controls how often we pump out messages
 		std::this_thread::sleep_for(std::chrono::milliseconds(node->m_delay));
     }

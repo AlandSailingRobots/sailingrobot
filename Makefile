@@ -146,7 +146,7 @@ all: $(EXECUTABLE) stats
 
 
 simulation:
-	make USE_SIM=1 -j
+	make USE_SIM=1 -j4
 
 # Builds the intergration test, requires the whole system to be built before
 build_tests: $(OBJECTS) $(EXECUTABLE)
