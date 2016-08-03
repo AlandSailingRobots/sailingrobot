@@ -34,6 +34,7 @@ XbeeSyncNode::XbeeSyncNode(MessageBus& msgBus, DBHandler& db) :
 
 	XbeeSyncNode::m_node = this;
 	msgBus.registerNode(this, MessageType::VesselState);
+	msgBus.registerNode(this, MessageType::CourseData);
 }
 bool XbeeSyncNode::init()
 {
@@ -67,7 +68,10 @@ void XbeeSyncNode::processMessage(const Message* msgPtr)
     switch(msgType)
     {
 		case MessageType::VesselState:
-			sendVesselState((VesselStateMsg*)msgPtr);
+			sendMessage(msgPtr);
+			break;
+		case MessageType::CourseData:
+			sendMessage(msgPtr);
 			break;
         default:
             break;
@@ -75,7 +79,7 @@ void XbeeSyncNode::processMessage(const Message* msgPtr)
 
 }
 
-void XbeeSyncNode::sendVesselState(VesselStateMsg* msg)
+void XbeeSyncNode::sendMessage(Message* msg)
 {
 	MessageSerialiser serialiser;
 	msg->Serialise(serialiser);

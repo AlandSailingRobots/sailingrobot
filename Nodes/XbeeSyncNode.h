@@ -46,7 +46,7 @@ private:
 	///----------------------------------------------------------------------------------
 	/// Serialises a vessel state message and passes it to the Xbee for sending.
 	///----------------------------------------------------------------------------------
-	void sendVesselState(VesselStateMsg* msg);
+	void sendMessage(Message* msg);
 
 	///----------------------------------------------------------------------------------
 	/// Called when a message has been received by the Xbee radio.

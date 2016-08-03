@@ -191,6 +191,9 @@ void LineFollowNode::calculateActuatorPos(VesselStateMsg* msg)
     double distanceToNextWaypoint = m_courseMath.calculateDTW(msg->longitude(), msg->latitude(), m_nextWaypointLon, m_nextWaypointLat);
 
     manageDatabase(msg, trueWindDirection, rudderCommand_norm, sailCommand_norm, currentHeading, distanceToNextWaypoint, bearingToNextWaypoint);
+
+    CourseDataMsg* courseMsg = new CourseDataMsg(trueWindDirection, distanceToNextWaypoint, bearingToNextWaypoint);
+    m_MsgBus.sendMessage(courseMsg);
 }
 
 void LineFollowNode::setPrevWaypointData(WaypointDataMsg* waypMsg, VesselStateMsg* vesselMsg)
