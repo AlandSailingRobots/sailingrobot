@@ -25,7 +25,6 @@ public:
 	colorDetectionNode(MessageBus& msgBus,int m_numberOfCapturesPerDetection,
                         int port, int delay,std::vector<std::string> colors_input);
 
-	~colorDetectionNode();
 
 	///----------------------------------------------------------------------------------
 	/// Initialises the connection with the camera and HSV default values

@@ -16,14 +16,58 @@
 #pragma once
 
 
+#include <string>
+
+
 enum class MessageType {
 	DataRequest = 0,
 	WindData,
 	CompassData,
 	GPSData,
+	ServerConfigsReceived,
+	ServerWaypointsReceived,
+	LocalConfigChange,
+	LocalWaypointChange,
 	ActuatorPosition,
 	ArduinoData,
 	VesselState,
+	WaypointData,
 	ObstacleVector,
 	LidarData
 };
+
+inline std::string msgToString(MessageType msgType)
+{
+	switch(msgType)
+	{
+	case MessageType::DataRequest:
+		return "DataRequest";
+	case MessageType::WindData:
+		return "WindData";
+	case MessageType::CompassData:
+		return "CompassData";
+	case MessageType::GPSData:
+		return "GPSData";
+	case MessageType::ServerConfigsReceived:
+		return "ServerConfigReceived";
+	case MessageType::ServerWaypointsReceived:
+		return "ServerWaypointsReceived";
+	case MessageType::LocalConfigChange:
+		return "LocalConfigChange";
+	case MessageType::LocalWaypointChange:
+		return "LocalWaypointChange";
+	case MessageType::ActuatorPosition:
+		return "ActuatorPosition";
+	case MessageType::ArduinoData:
+		return "ArduinoData";
+	case MessageType::VesselState:
+		return "VesselState";
+	case MessageType::WaypointData:
+		return "WaypointData";
+	case MessageType::ObstacleVector:
+		return "ObstacleVector";
+	case MessageType::LidarData:
+		return "LidarData";
+	}
+	return "";
+}

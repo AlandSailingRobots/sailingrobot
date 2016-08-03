@@ -19,7 +19,7 @@
 #		raspi_local = For compiling on the PI itself
 export TOOLCHAIN = linux-local
 C_TOOLCHAIN = 0
-
+USE_SIM = 0
 
 #######################################################
 # FILES
@@ -30,7 +30,8 @@ export BUILD_DIR = build
 SRC_DIR = ./
 OUTPUT_DIR = ./
 
-TEST_MAKEFILE = ./Makefile.tests
+UNIT_TEST = ./unit-tests.run
+HARDWARE_TEST = ./hardware-tests.run
 
 # External Libraries
 
@@ -40,11 +41,21 @@ JSON = 					libs/json
 
 CORE =					MessageBus.cpp ActiveNode.cpp
 
-BEHAVIOURCLASS = 	behaviourclass/RoutingBehaviour.cpp  behaviourclass/WaypointBehaviour.cpp behaviourclass/LineFollowBehaviour.cpp behaviourclass/CollisionAvoidanceBehave.cpp
+ifeq ($(USE_SIM),1)
+NODES =					Nodes/MessageLoggerNode.cpp  Nodes/WaypointNode.cpp Nodes/HTTPSyncNode.cpp Nodes/xBeeSyncNode.cpp \
+							Nodes/VesselStateNode.cpp  Nodes/RoutingNode.cpp Nodes/LineFollowNode.cpp \
+							Nodes/SimulationNode.cpp Nodes/obstacledetection/colorDetectionNode.cpp \
+							Nodes/obstacledetection/colorDetectionUtility.cpp Nodes/lidarLite/lidarLite.cpp \
+							Nodes/lidarLite/lidarLiteNode.cpp
+SYSTEM_SERVICES =	SystemServices/Logger.cpp
+else
+NODES =					Nodes/MessageLoggerNode.cpp Nodes/CV7Node.cpp Nodes/HMC6343Node.cpp Nodes/GPSDNode.cpp Nodes/ActuatorNode.cpp  Nodes/ArduinoNode.cpp \
+														Nodes/VesselStateNode.cpp Nodes/WaypointNode.cpp Nodes/HTTPSyncNode.cpp Nodes/xBeeSyncNode.cpp Nodes/RoutingNode.cpp Nodes/LineFollowNode.cpp \
+														Nodes/SimulationNode.cpp Nodes/obstacledetection/colorDetectionNode.cpp Nodes/obstacledetection/colorDetectionUtility.cpp \
+														Nodes/lidarLite/lidarLite.cpp Nodes/lidarLite/lidarLiteNode.cpp
 
-NODES =					Nodes/MessageLoggerNode.cpp Nodes/CV7Node.cpp Nodes/HMC6343Node.cpp Nodes/GPSDNode.cpp Nodes/ActuatorNode.cpp  Nodes/ArduinoNode.cpp Nodes/VesselStateNode.cpp Nodes/obstacledetection/colorDetectionNode.cpp Nodes/obstacledetection/colorDetectionUtility.cpp\
-						Nodes/lidarLite/lidarLite.cpp Nodes/lidarLite/lidarLiteNode.cpp
-SYSTEM_SERVICES =		SystemServices/MaestroController.cpp
+SYSTEM_SERVICES =		SystemServices/MaestroController.cpp SystemServices/Logger.cpp
+endif
 
 XBEE = 					xBee/xBeeSync.cpp xBee/xBee.cpp
 
@@ -56,11 +67,9 @@ POSITION = 				utility/Position.cpp utility/MockPosition.cpp utility/RealPositio
 
 COURSE = 				coursecalculation/CourseCalculation.cpp coursecalculation/CourseMath.cpp
 
-DB = 					dbhandler/DBHandler.cpp
+DB = 					dbhandler/DBHandler.cpp dbhandler/DBLogger.cpp
 
 COMMAND = 				ruddercommand/RudderCommand.cpp sailcommand/SailCommand.cpp
-
-HTTP = 					httpsync/HTTPSync.cpp
 
 XML_LOG = 				xmlparser/pugi/pugixml.cpp xmlparser/src/xml_log.cpp
 
@@ -73,9 +82,10 @@ WINDVANECONTROLLER = 	windvanecontroller/WindVaneController.cpp
 
 SRC_MAIN = main.cpp
 
-SRC = 	logger/Logger.cpp utility/Utility.cpp utility/Timer.cpp $(SYSTEM_SERVICES) $(XBEE) \
-		$(CORE) $(NODES) $(I2CCONTROLLER) $(POSITION) $(COURSE) $(DB) $(COMMAND) $(GPS) $(HTTP) \
-		$(XML_LOG) $(THREAD) $(WAYPOINTROUTING) $(WINDVANECONTROLLER) $(BEHAVIOURCLASS)
+SRC = 	utility/Utility.cpp utility/Timer.cpp utility/SysClock.cpp $(SYSTEM_SERVICES) $(XBEE) \
+		$(CORE) $(NODES) $(I2CCONTROLLER) $(POSITION) $(COURSE) $(DB) $(COMMAND) $(GPS) \
+		$(XML_LOG) $(THREAD) $(WAYPOINTROUTING) $(WINDVANECONTROLLER)
+
 
 #SOURCES = $(addprefix src/, $(SRC))
 
@@ -130,18 +140,20 @@ export MKDIR_P = mkdir -p
 # Rules
 #######################################################
 
-.PHONY: clean clean_tests
+.PHONY: clean
 
 all: $(EXECUTABLE) stats
+
+
+simulation:
+	make USE_SIM=1 -j
 
 # Builds the intergration test, requires the whole system to be built before
 build_tests: $(OBJECTS) $(EXECUTABLE)
 	@echo Building tests...
-	@$(MAKE) -f $(TEST_MAKEFILE)
-
-clean_tests:
-	@echo Cleaning tests...
-	@$(MAKE) -f $(TEST_MAKEFILE) clean
+	$(MAKE) -C tests
+	$(CXX) $(CPPFLAGS) tests/runner.o @$(OBJECT_FILE) -Wl,-rpath=./ ./libwiringPi.so -o $(UNIT_TEST) $(LIBS)
+	$(CXX) $(CPPFLAGS) tests/runnerHardware.o @$(OBJECT_FILE) -Wl,-rpath=./ ./libwiringPi.so -o $(HARDWARE_TEST) $(LIBS)
 
 #  Create the directories needed
 $(BUILD_DIR):
@@ -163,7 +175,8 @@ $(EXECUTABLE) : $(BUILD_DIR) $(OBJECTS) $(WIRING_PI) $(OBJECT_MAIN)
 $(BUILD_DIR)/%.o:$(SRC_DIR)/%.cpp
 	@mkdir -p $(dir $@)
 	@echo Compiling CPP File: $@
-	@$(CXX) -c $(CPPFLAGS) $(INC) -o ./$@ $< -DTOOLCHAIN=$(TOOLCHAIN) $(LIBS) $(LIBS_BOOST)
+
+	@$(CXX) -c $(CPPFLAGS) $(INC) -o ./$@ $< -DTOOLCHAIN=$(TOOLCHAIN) -DSIMULATION=$(USE_SIM) $(LIBS) $(LIBS_BOOST)
 
  # Compile C files into the build folder
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
@@ -179,7 +192,7 @@ stats:$(EXECUTABLE)
 	@echo Final executable size:
 	$(SIZE) $(EXECUTABLE)
 
-clean: clean_tests
+clean:
 	@echo Removing existing object files and executable
 	@rm -f -r $(BUILD_DIR)
 	@rm -f $(EXECUTABLE)

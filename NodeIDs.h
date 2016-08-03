@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <string>
 
 enum class NodeID {
 	None = 0,
@@ -23,11 +24,55 @@ enum class NodeID {
 	WindSensor,
 	Compass,
 	GPS,
+	HTTPSync,
 	SailActuator,
 	RudderActuator,
 	Arduino,
 	VesselState,
-	ColorDetection,
+	Waypoint,
+	xBeeSync,
+	SailingLogic,
+    ColorDetection,
     CollisionAvoidanceBehaviour,
     Lidar
 };
+
+inline std::string nodeToString(NodeID id)
+{
+	switch(id)
+	{
+	case NodeID::None:
+		return "None";
+	case NodeID::MessageLogger:
+		return "MessageLogger";
+	case NodeID::WindSensor:
+		return "WindSensor";
+	case NodeID::Compass:
+		return "Compass";
+	case NodeID::GPS:
+		return "GPS";
+	case NodeID::HTTPSync:
+		return "HTTPSync";
+	case NodeID::SailActuator:
+		return "SailActuator";
+	case NodeID::RudderActuator:
+		return "RudderActuator";
+	case NodeID::Arduino:
+		return "Arduino";
+	case NodeID::VesselState:
+		return "VesselState";
+	case NodeID::Waypoint:
+		return "Waypoint";
+	case NodeID::SailingLogic:
+		return "SailingLogic";
+	case NodeID::xBeeSync:
+		return "xBeeSync";
+    case NodeID::ColorDetection:
+    	return "ColorDetection";
+    case NodeID::CollisionAvoidanceBehaviour:
+        return "CollisionAvoidanceBehaviour";
+    case NodeID::Lidar:
+            return "Lidar";
+	}
+	return "";
+}

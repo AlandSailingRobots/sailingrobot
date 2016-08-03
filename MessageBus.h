@@ -22,6 +22,8 @@
 #include <vector>
 #include <queue>
 #include <mutex>
+#include <iostream>
+#include <fstream>
 
 class Node;
 
@@ -46,7 +48,7 @@ public:
  	///
  	/// @param node 			Pointer to the node that should be registered.
  	///----------------------------------------------------------------------------------
-	void registerNode(Node* node);
+	bool registerNode(Node* node);
 
 	///----------------------------------------------------------------------------------
  	/// Registers a node onto the message bus allowing it receive direct messages and
@@ -55,7 +57,7 @@ public:
  	/// @param node 			Pointer to the node that should be registered.
  	/// @param msgType 			The type of message to register for
  	///----------------------------------------------------------------------------------
-	void registerNode(Node* node, MessageType msgType);
+	bool registerNode(Node* node, MessageType msgType);
 
 	///----------------------------------------------------------------------------------
  	/// Enqueues a message onto the message queue for distribution through the message 
@@ -123,6 +125,37 @@ private:
  	///----------------------------------------------------------------------------------
 	void processMessages();
 
+	///----------------------------------------------------------------------------------
+	/// Creates a log file for the messages.
+	///----------------------------------------------------------------------------------
+	void startMessageLog();
+
+	///----------------------------------------------------------------------------------
+	/// Logs that a message was received.
+	///----------------------------------------------------------------------------------
+	void logMessageReceived(Message* msg);
+
+	///----------------------------------------------------------------------------------
+	/// Logs a message that is being processed.
+	///----------------------------------------------------------------------------------
+	void logMessage(Message* msg);
+
+	///----------------------------------------------------------------------------------
+	/// Logs that a node consumed the current message being processed.
+	///----------------------------------------------------------------------------------
+	void logMessageConsumer(NodeID id);
+
+	///----------------------------------------------------------------------------------
+	/// Logs that the current message being processed has finished being processed.
+	///----------------------------------------------------------------------------------
+	//void logMessageProcessed(Message* msg);
+
+	///----------------------------------------------------------------------------------
+	/// Returns a message time stamp in the format HH:MM:SS:MS, a char buffer of 14
+	/// characters needs to be provided.
+	///----------------------------------------------------------------------------------
+	void messageTimeStamp(unsigned long unixTime, char* buffer);
+
 	bool 							m_Running;
 	std::vector<RegisteredNode*> 	m_RegisteredNodes;
 	std::queue<Message*>* 			m_FrontMessages; 	// The forward facing message queue 
@@ -130,4 +163,8 @@ private:
 	std::queue<Message*>*			m_BackMessages; 	// The backend message queue which 
 														// contains messages to distribute.
 	std::mutex						m_FrontQueueMutex;	// Guards the front message queue.
+	
+#ifdef LOG_MESSAGES
+	std::ofstream* 					m_LogFile;
+#endif
 };
