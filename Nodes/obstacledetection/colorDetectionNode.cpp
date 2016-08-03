@@ -270,7 +270,7 @@ void colorDetectionNode::colorDetectionThreadFunc(void* nodePtr)
 
         computeObstaclesAnglePosition(node->m_imgOriginal, obstacles, rotated_bounding_rects_merged_list );
 
-		ObstacleVectorMsg* msg = new ObstacleVectorMsg(NodeID::LIDAR, NodeID::ColorDetection ,obstacles);
+		ObstacleVectorMsg* msg = new ObstacleVectorMsg(NodeID::Lidar, NodeID::ColorDetection ,obstacles);
 		node->m_MsgBus.sendMessage(msg);
 
         rotated_bounding_rects_several_captures.erase(rotated_bounding_rects_several_captures.begin(),rotated_bounding_rects_several_captures.end());
