@@ -270,7 +270,7 @@ void colorDetectionNode::colorDetectionThreadFunc(void* nodePtr)
 
         computeObstaclesAnglePosition(node->m_imgOriginal, obstacles, rotated_bounding_rects_merged_list );
 
-		ObstacleVectorMsg* msg = new ObstacleVectorMsg(obstacles);
+		ObstacleVectorMsg* msg = new ObstacleVectorMsg(NodeID::LIDAR, NodeID::ColorDetection ,obstacles);
 		node->m_MsgBus.sendMessage(msg);
 
         rotated_bounding_rects_several_captures.erase(rotated_bounding_rects_several_captures.begin(),rotated_bounding_rects_several_captures.end());
@@ -278,7 +278,7 @@ void colorDetectionNode::colorDetectionThreadFunc(void* nodePtr)
         obstacles.erase(obstacles.begin(),obstacles.end());
 
         imshow("Thresholded Image", imgsThresholded[node->m_iColor]);
-        imshow("Detection", node->m_imgOriginal); 
+        imshow("Detection", node->m_imgOriginal);
         setMouseCallback( "Detection", get_on_click_hsv_pixel_values, nodePtr );
 
 		// Controls how often we pump out messages
