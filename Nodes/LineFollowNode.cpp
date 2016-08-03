@@ -183,7 +183,7 @@ void LineFollowNode::calculateActuatorPos(VesselStateMsg* msg)
     int sailCommand_norm = m_sailCommand.getCommand(sailCommand);
 
     //Send messages----
-    ActuatorPositionMsg *actuatorMsg = new ActuatorPositionMsg(NodeID::RudderActuator, nodeID(), rudderCommand_norm, sailCommand_norm);
+    ActuatorPositionMsg *actuatorMsg = new ActuatorPositionMsg(rudderCommand_norm, sailCommand_norm);
     m_MsgBus.sendMessage(actuatorMsg);
     //------------------
 

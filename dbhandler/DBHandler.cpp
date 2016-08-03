@@ -133,7 +133,6 @@ void DBHandler::insertDataLog(
 			<< msg->windSpeed() << ", "
 			<< msg->windTemp();
 
-		printf("GPS GMT + 3: %s GPS UTC: %s\n","ADD GPS TIME","ADD GPS UTC_TIME"); //TODO - Oliver: Get GPS timestamp
 		int arduinoId = insertLog("arduino_datalogs",arduinoValues.str());
 		int windsensorId = insertLog("windsensor_datalogs",windsensorValues.str());
 		int gpsId = insertLog("gps_datalogs",gpsValues.str());
