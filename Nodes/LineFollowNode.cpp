@@ -17,6 +17,7 @@
 
 #include "LineFollowNode.h"
 #include "Messages/ActuatorPositionMsg.h"
+#include "Messages/CourseDataMsg.h"
 #include "utility/Utility.h"
 #include <math.h>
 #include <algorithm>

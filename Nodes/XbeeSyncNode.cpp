@@ -79,7 +79,7 @@ void XbeeSyncNode::processMessage(const Message* msgPtr)
 
 }
 
-void XbeeSyncNode::sendMessage(Message* msg)
+void XbeeSyncNode::sendMessage(const Message* msg)
 {
 	MessageSerialiser serialiser;
 	msg->Serialise(serialiser);

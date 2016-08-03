@@ -98,7 +98,7 @@ public:
 	///----------------------------------------------------------------------------------
 	/// Serialises the message into a MessageSerialiser
 	///----------------------------------------------------------------------------------
-	virtual void Serialise(MessageSerialiser& serialiser)
+	virtual void Serialise(MessageSerialiser& serialiser) const
 	{
 		serialiser.serialise(m_MessageType);
 		serialiser.serialise(m_SourceID);
