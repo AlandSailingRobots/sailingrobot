@@ -84,6 +84,7 @@ bool WaypointNode::waypointReached()
             Logger::error("Failed to harvest waypoint");
         }
         Logger::info("Reached waypoint");
+        m_waypointTimer.stop();
 
         return true;
     }
@@ -116,18 +117,18 @@ bool WaypointNode::harvestWaypoint()
         return false;
     }
 
-    if(m_nextStayTime > 0)
+    if(m_nextStayTime > 0) //if next waypoint has a time to stay inside its radius, start the timer
     {
         m_waypointTimer.start();
 
-        if(m_waypointTimer.timeReached(m_nextStayTime))
+        if(m_waypointTimer.timeReached(m_nextStayTime)) //Check if boat has stayed the designated amount of time
         {
             return true;
         }
-        
+
         return false;   
     }
-    else
+    else //if no timer for waypoint, harvest it
     {
         return true;
     }
