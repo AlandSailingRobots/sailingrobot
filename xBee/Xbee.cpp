@@ -23,7 +23,7 @@
 #define AT_COMMAND_MODE_WAIT	3000
 #define XBEE_TRANSMIT_TIME		50
 
-#define PACKET_OVERHEAD			4
+#define PACKET_OVERHEAD			6 // START character(1), Packet ID(1), packet count(1), payload size(1), checksum(2)
 
 #define PACKET_START			0xC0
 #define PACKET_ESCAPE			0xDB
@@ -106,6 +106,7 @@ void Xbee::transmit(uint8_t* data, uint8_t size)
 			packet.m_packetCount = packetCount;
 			packet.m_payloadSize = slipSize > maxDataSize ? maxDataSize : slipSize;
 			packet.m_payload = dataPtr;
+			packet.m_checksum = fletcherChecksum(packet.m_payload, packet.m_payloadSize);
 
 			dataPtr = dataPtr + packet.m_payloadSize;
 			slipSize = slipSize - packet.m_payloadSize;
@@ -121,6 +122,7 @@ void Xbee::transmit(uint8_t* data, uint8_t size)
 		packet.m_packetCount = 1;
 		packet.m_payloadSize = slipSize;
 		packet.m_payload = slipData;
+		packet.m_checksum = fletcherChecksum(packet.m_payload, packet.m_payloadSize);
 
 		m_transmitQueue.push(packet);
 	}
@@ -176,7 +178,7 @@ void Xbee::processRadioMessages()
 
 bool Xbee::receivePackets()
 {
-	//TODO - Jordan: Tidy up!
+	const uint8_t MAX_PACKETS_TO_RECEIVE = 10;
 
 	// Check for packets to be available and if there isn't anything to do with
 	// the packets, don't bother receiving them
@@ -188,15 +190,9 @@ bool Xbee::receivePackets()
 	bool readPackets = true;
 	int packetsReceived = 0;
 
-	// TODO - Jordan: Add a time check here too just in case
-	while(readPackets)
+	while(readPackets || packetsReceived == MAX_PACKETS_TO_RECEIVE)
 	{
 		XbeePacket packet;
-
-		if(packetsReceived == 10)
-		{
-			break;
-		}
 
 		if(readData(packet) && packet.m_payloadSize > 0)
 		{
@@ -337,6 +333,8 @@ void Xbee::writeData(XbeePacket packet)
 	serialPutchar(m_handle, (char)packet.m_payloadSize);
 
 	writeData(packet.m_payload, packet.m_payloadSize);
+	serialPutchar(m_handle, (char)packet.m_checksum);
+	serialPutchar(m_handle, (char)(packet.m_checksum >> 8));
 
 	// TODO - Jordan: Test this value and reliability.
 	std::this_thread::sleep_for(std::chrono::milliseconds(XBEE_TRANSMIT_TIME));
@@ -414,8 +412,18 @@ uint8_t Xbee::readData(XbeePacket& packet)
 		}
 	}
 
-	// Replace with check sum
+	uint8_t checksum1 = serialGetchar(m_handle);
+	uint8_t checksum2 = serialGetchar(m_handle);
+
+	packet.m_checksum = (checksum2 << 8) | checksum1;
+
 	if(bytesRead != packet.m_payloadSize)
+	{
+		delete packet.m_payload;
+		bytesRead = 0;
+	}
+
+	if(packet.m_checksum != fletcherChecksum(packet.m_payload, packet.m_payloadSize))
 	{
 		delete packet.m_payload;
 		bytesRead = 0;
@@ -517,3 +525,23 @@ uint8_t* Xbee::deslip(uint8_t* slipData, uint16_t slipSize, uint16_t& size)
 	return data;
 }
 
+uint16_t Xbee::fletcherChecksum(uint8_t* data, uint16_t size)
+{
+	// Taken for Wikipedia - https://en.wikipedia.org/wiki/Fletcher's_checksum
+	uint16_t sum1 = 0xff, sum2 = 0xff;
+	size_t tlen;
+
+	while (size) {
+			tlen = size >= 20 ? 20 : size;
+			size -= tlen;
+			do {
+					sum2 += sum1 += *data++;
+			} while (--tlen);
+			sum1 = (sum1 & 0xff) + (sum1 >> 8);
+			sum2 = (sum2 & 0xff) + (sum2 >> 8);
+	}
+	/* Second reduction step to reduce sums to 8 bits */
+	sum1 = (sum1 & 0xff) + (sum1 >> 8);
+	sum2 = (sum2 & 0xff) + (sum2 >> 8);
+	return sum2 << 8 | sum1;
+}

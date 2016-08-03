@@ -68,6 +68,7 @@ protected:
 		uint8_t m_packetCount;
 		uint8_t m_payloadSize;
 		uint8_t* m_payload;
+		uint16_t m_checksum;
 	};
 
 	///----------------------------------------------------------------------------------
@@ -116,6 +117,11 @@ protected:
 	/// Replaces the special slip characters with normal characters.
 	///----------------------------------------------------------------------------------
 	uint8_t* deslip(uint8_t* slipData, uint16_t slipSize, uint16_t& size);
+
+	///----------------------------------------------------------------------------------
+	/// Returns the fletcher's checksum of a block of bytes.
+	///----------------------------------------------------------------------------------
+	uint16_t fletcherChecksum(uint8_t* data, uint16_t size);
 
 	bool					m_master;
 	int 					m_handle; // Xbee fd
