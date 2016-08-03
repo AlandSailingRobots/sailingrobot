@@ -70,6 +70,7 @@ double CollisionAvoidanceBehaviour::calculateGPSDistance(
 }
 
 Eigen::Vector2d CollisionAvoidanceBehaviour::findCenter(
+        // TODO : make it work for spherical spaces (conversion to 3d space then computation ofgps coords)
         const std::vector<Eigen::Vector2d> polygon) {
     double sumOfX = 0;
     double sumOfY = 0;
@@ -180,18 +181,25 @@ Eigen::Vector2d CollisionAvoidanceBehaviour::getPointWithDistanceAndBearing(
         double distance,
         double bearing,
         Eigen::Vector2d startPoint) {
-    // lat in rad, long in rad. Everything from east anticlockwise
-    const double angularDist = distance/EARTH_RADIUS;
-    // Since the bearing is here in radians from east, rightAngleForFormula = pi/2 - bearing
-    // so cos are transformed in sin and inversely the same for sin.
-    const double newLat = asin(cos(bearing)*cos(angularDist)
-                               +cos(startPoint(1))*sin(angularDist)*sin(bearing));
-    const double newLong = startPoint(0) + atan2(cos(bearing)*sin(angularDist)*cos(startPoint(1)),
-                                                 cos(angularDist) - sin(startPoint(1))*sin(newLat));
-    const Eigen::Vector2d endPoint(newLong,newLat);
-
+    Eigen::Vector2d endPoint;
+    if(distance>50) { // To lighten calculus
+        // lat in rad, long in rad. Everything from east anticlockwise
+        const double angularDist = distance / EARTH_RADIUS;
+        // Since the bearing is here in radians from east, rightAngleForFormula = pi/2 - bearing
+        // so cos are transformed in sin and inversely the same for sin.
+        const double newLat = asin(cos(bearing) * cos(angularDist)
+                                   + cos(startPoint(1)) * sin(angularDist) * sin(bearing));
+        const double newLong = startPoint(0) + (atan2(cos(bearing) * sin(angularDist) * cos(startPoint(1)),
+                                                      cos(angularDist) - sin(startPoint(1))
+                                                                         * sin(newLat)));
+        endPoint << newLong, newLat;
+    }
+    else{
+        const double newLat = startPoint(1) + distance*sin(bearing)*CONVERSION_FACTOR_METER_TO_GPS;
+        const double newLong = startPoint(0) + distance*cos(bearing)*CONVERSION_FACTOR_METER_TO_GPS;
+        endPoint << newLong, newLat;
+    }
     return endPoint;
-
 }
 
 std::vector<double> CollisionAvoidanceBehaviour::distanceFromSegment(
@@ -269,41 +277,6 @@ bool CollisionAvoidanceBehaviour::projectionInsideSlice(
     //const double coord2 = 1-coord0-coord1;
 
     return 0 <= coord0 && 0 <= coord1;
-}
-
-void CollisionAvoidanceBehaviour::printStdVectorMat(
-        std::string const &name,
-        std::vector<Eigen::MatrixXd> const &v) {
-
-    std::cout << " " << std::endl;
-    std::cout << name << " : " << std::endl;
-    std::cout << " " << std::endl;
-    for (int i = 0; i < (int) v.size(); ++i) {
-        std::cout << v[i] << std::endl;
-        std::cout << " " << std::endl;
-    }
-}
-void CollisionAvoidanceBehaviour::printStdVectorFloat(
-        std::string const &name,
-        std::vector<float> const &v) {
-
-    std::cout << " " << std::endl;
-    std::cout << name << " : " << std::endl;
-    std::cout << " " << std::endl;
-    for (int i = 0; i < (int) v.size(); ++i) {
-        std::cout << v[i] << std::endl;
-        std::cout << " " << std::endl;
-    }
-}
-void CollisionAvoidanceBehaviour::printMat(
-        std::string const &name,
-        Eigen::MatrixXd const &mat) {
-
-    std::cout << " " << std::endl;
-    std::cout << name << " : " << std::endl;
-    std::cout << " " << std::endl;
-    std::cout << mat << std::endl;
-    std::cout << " " << std::endl;
 }
 
 //PRIVATE MAIN FUNCTIONS
@@ -461,17 +434,14 @@ std::vector<Obstacle> CollisionAvoidanceBehaviour::check_obstacles(SensorData se
         Obstacle newObstacle;
 
         //Obstacle from scratch for now
-        const Eigen::Matrix2d rotation(cos(sensorData.compHeading + SENSOR_HEADING_RELATIVE_TO_BOAT),
-                                       -sin(sensorData.compHeading+ SENSOR_HEADING_RELATIVE_TO_BOAT),
-                                       cos(sensorData.compHeading + SENSOR_HEADING_RELATIVE_TO_BOAT),
-                                       sin(sensorData.compHeading + SENSOR_HEADING_RELATIVE_TO_BOAT));
+        const Eigen::Rotation2Dd rotation(sensorData.compHeading + SENSOR_HEADING_RELATIVE_TO_BOAT);
 
         // Point 1
         const double x1RelativeToBoat = sensDatObstacle.minDistanceToObstacle
                                         * tan(sensDatObstacle.RightBoundHeadingRelativeToBoat);
         const double y1RelativeToBoat = sensDatObstacle.minDistanceToObstacle;
         Eigen::Vector2d pt1(x1RelativeToBoat,y1RelativeToBoat);
-        pt1 = pt1*rotation;
+        pt1 = rotation*pt1;
         newObstacle.polygon.push_back(pt1);
 
         // Point 2
@@ -479,7 +449,7 @@ std::vector<Obstacle> CollisionAvoidanceBehaviour::check_obstacles(SensorData se
                                         * tan(sensDatObstacle.RightBoundHeadingRelativeToBoat);
         const double y2RelativeToBoat = sensDatObstacle.maxDistanceToObstacle;
         Eigen::Vector2d pt2(x1RelativeToBoat,y1RelativeToBoat);
-        pt2 = pt2*rotation;
+        pt2 = rotation*pt2;
         newObstacle.polygon.push_back(pt2);
 
         // Point 3
@@ -487,7 +457,7 @@ std::vector<Obstacle> CollisionAvoidanceBehaviour::check_obstacles(SensorData se
                                         * tan(sensDatObstacle.LeftBoundHeadingRelativeToBoat);
         const double y3RelativeToBoat = sensDatObstacle.maxDistanceToObstacle;
         Eigen::Vector2d pt3(x1RelativeToBoat,y1RelativeToBoat);
-        pt3 = pt3*rotation;
+        pt3 = rotation*pt3;
         newObstacle.polygon.push_back(pt3);
 
         // Point 4
@@ -495,7 +465,7 @@ std::vector<Obstacle> CollisionAvoidanceBehaviour::check_obstacles(SensorData se
                                         * tan(sensDatObstacle.LeftBoundHeadingRelativeToBoat);
         const double y4RelativeToBoat = sensDatObstacle.minDistanceToObstacle;
         Eigen::Vector2d pt4(x4RelativeToBoat,y4RelativeToBoat);
-        pt4 = pt4*rotation;
+        pt4 = rotation*pt4;
         newObstacle.polygon.push_back(pt4);
 
         newObstacle.color = "Null";
@@ -529,7 +499,10 @@ bool CollisionAvoidanceBehaviour::these_obstacles_are_a_problem(
                                                            point);
             bool thisObstacleIsAProblem = false;
             if(std::abs(signedDistance)< CHANNEL_WIDTH
-               && calculateGPSDistance(m_sensorOutput.gpsPos,getClosestPoint(obstacle.polygon)) < SAFE_DISTANCE){
+               && calculateGPSDistance(m_sensorOutput.gpsPos,
+                                       getClosestPoint(obstacle.polygon,
+                                                       m_sensorOutput.gpsPos) ) < SAFE_DISTANCE){
+
                 thisObstacleIsAProblem = true;
             }
             theseObstaclesAreAProblem = theseObstaclesAreAProblem || thisObstacleIsAProblem;
@@ -542,6 +515,22 @@ PotentialMap CollisionAvoidanceBehaviour::compute_potential_field(
         std::vector<Obstacle> m_seenObstacles,
         std::vector<Eigen::Vector2d> m_sailingZone,
         FollowedLine) {
+    // TODO : add this code
+    /*
+    else if(only_direction_mode==1){
+        if( have_to_avoid_obstacle == 1){
+             isObsPEmpty = 0;
+             bearingObstacle=boat_state(0,2)+direction_boat_obstacle[0]-M_PI/2;
+             x1 = point_x.array()-boat_state(0,0);
+             y1 = point_y.array()-boat_state(0,1);
+             xb =  x1*cos(bearingObstacle) + y1*sin(bearingObstacle);
+             yb = -x1*sin(bearingObstacle) + y1*cos(bearingObstacle);
+             ObsP = 15*rectangularPulse(-lengthObstacle,lengthObstacle,xb).array() * heavisideMat(yb).array()-5*rectangularPulse(-lengthObstacle*2,lengthObstacle*2,xb).array() *  heavisideMat(yb).array();
+        }
+    }
+     */
+
+
     // Init
 
     // Set up of the matrix of 100*100 around the boat.
@@ -564,14 +553,12 @@ PotentialMap CollisionAvoidanceBehaviour::compute_potential_field(
             Eigen::ArrayXXd::Zero(matrixHeight, matrixWidth)
     };
 
-    const Eigen::ArrayXXd Px(matrixHeight,matrixWidth)
-            = Eigen::RowVectorXd::LinSpaced(matrixWidth,
-                                            PotField.xMin,
-                                            PotField.xMax).replicate(matrixHeight,1);
-    const Eigen::ArrayXXd Py(matrixHeight,matrixWidth)
-            = Eigen::VectorXd::LinSpaced(   matrixHeight,
-                                            PotField.yMin,
-                                            PotField.yMax).replicate(1, matrixWidth);
+    const Eigen::ArrayXXd Px = Eigen::RowVectorXd::LinSpaced(matrixWidth,
+                                                             PotField.xMin,
+                                                             PotField.xMax).replicate(matrixHeight,1);
+    const Eigen::ArrayXXd Py = Eigen::VectorXd::LinSpaced(   matrixHeight,
+                                                             PotField.yMin,
+                                                             PotField.yMax).replicate(1, matrixWidth);
     // On a distance of 150m there is an error of approximatively 2 meters, so a linear conversion from
     // GPS coordinates to meters is possible at this scale
 
@@ -584,7 +571,7 @@ PotentialMap CollisionAvoidanceBehaviour::compute_potential_field(
      * Values found after extensive testing on matlab
      * The values are scaled for meters.
      */
-    // TODO : conversion to gps coordinates
+    // TODO : conversion to gps coordinate                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      s
     // TODO : modify obstacle according to its width. ?
     const double scaleHole = 50;
     const double scalePike = 550;
@@ -694,7 +681,7 @@ PotentialMap CollisionAvoidanceBehaviour::compute_potential_field(
         // Distance between the origin and the line (AB)
         // I'm not sure using gsp distance here is the best idea
         // const double offsetFromOrigin = signedDistanceFromLine(linePt0,linePt1,origin);
-        const Eigen::Matrix2d mat;
+        Eigen::Matrix2d mat;
         mat << (linePt1-linePt0)/(linePt1-linePt0).norm(),(origin-linePt0);
         const double offsetFromOrigin = mat.determinant();
         const double lineHeading = atan2(linePt1(1)-linePt0(1),
@@ -712,7 +699,7 @@ PotentialMap CollisionAvoidanceBehaviour::compute_potential_field(
                                                     ).exp()
                                               ));
 
-        sailingZoneMatrix = sailingZoneMatrix .* line;
+        sailingZoneMatrix = sailingZoneMatrix*line;
 
         sailingZoneMatrix = 1-sailingZoneMatrix;
     }
@@ -727,7 +714,7 @@ PotentialMap CollisionAvoidanceBehaviour::compute_potential_field(
 
 Eigen::Vector2d CollisionAvoidanceBehaviour::find_minimum_potential_field(
         PotentialMap potField) {
-    const double I_row = 0, I_col = 0;
+    double I_row = 0, I_col = 0;
     const double minZ = potField.field.minCoeff(&I_row, &I_col);
     double I_x = I_col*(potField.xMax-potField.xMin)
                  /potField.field.cols()-(abs(potField.yMin));
@@ -900,16 +887,16 @@ CommandOutput CollisionAvoidanceBehaviour::run(
     m_seenObstacles = check_obstacles(m_sensorOutput);
     //    update_map();
     if (these_obstacles_are_a_problem(m_seenObstacles)) {
-        Eigen::MatrixXd potential_field = compute_potential_field(m_seenObstacles,
-                                                                  m_sailingZone,
-                                                                  m_followedLine);
-        MinPotField min = find_minimum_potential_field(potential_field);
+        PotentialMap potential_field = compute_potential_field(m_seenObstacles,
+                                                               m_sailingZone,
+                                                               m_followedLine);
+        Eigen::Vector2d min = find_minimum_potential_field(potential_field);
         m_followedLine = compute_new_path(min);
     }
     return compute_commands(m_followedLine);
 }
 
-//PUBLIC FUNCTIONS
+//PUBLIC FUNCTIONS (TRASH)
 
 // TODO : replace hardcoded sailing zone by an import from the database
 bool CollisionAvoidanceBehaviour::init() {
@@ -931,6 +918,7 @@ void CollisionAvoidanceBehaviour::computeCommands(
     m_rudderCommand = out.deltaRudder;
     m_sailCommand   = out.deltaSail;
 }
+
 
 
 

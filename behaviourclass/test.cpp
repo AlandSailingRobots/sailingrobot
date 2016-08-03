@@ -157,7 +157,9 @@ void calculatePotentialField(float const& radius_obstacle, Eigen::MatrixXd const
     //std::cout << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$" << std::endl;
     //std::cout << "ENTERING calculatePotentialField" << std::endl;
     //Init
-    Eigen::MatrixXd ObsP = 0*point_x, ObjP = 0*point_x, xObs = 0*point_x, yObs = 0*point_x, xObj = 0*point_x, yObj = 0*point_x, xo = 0*point_x, yo = 0*point_x;
+    Eigen::MatrixXd ObsP = 0*point_x,
+                    ObjP = 0*point_x,
+                    xObs = 0*point_x, yObs = 0*point_x, xObj = 0*point_x, yObj = 0*point_x, xo = 0*point_x, yo = 0*point_x;
     Eigen::MatrixXd tHoleR = 0*point_x, tHoleL = 0*point_x, tPike = 0*point_x, tR = 0*point_x, tL = 0*point_x, tP = 0*point_x, ep1 = 0*point_x,ep2 = 0*point_x, xb = 0*point_x;
     Eigen::MatrixXd yb = 0*point_x, x1 = 0*point_x, y1 = 0*point_x, xw = 0*point_x, yw = 0*point_x, WindP = 0*point_x, BoatP = 0*point_x;
     float boatHeading =  boat_state(0,2), bearingObstacle = 0, T = 0,Ao = 1.6, strengthBoat = 3, strengthHoleBoat = 1.5, strengthPikeBoat = 5, lengthObstacle=radius_obstacle*step_coeff;
@@ -380,9 +382,20 @@ void avoidObstacle(Eigen::MatrixXd target_phat,Eigen::MatrixXd boat_state,Eigen:
     float norma=0;
     float collLineAngle = 0;
 
-    if(detected_obstacle_list_qhat.size()!=0 && collisioned_obstacle.size()!=0 && can_compute_a_new_avoidance_point==1){
+    if(detected_obstacle_list_qhat.size()!=0
+       && collisioned_obstacle.size()!=0
+       && can_compute_a_new_avoidance_point==1){
 
-        calculatePotentialField(radius_obstacle,point_x, point_y,  boat_state, target_phat, detected_obstacle_list_qhat, wind_direction, only_direction_mode, have_to_avoid_obstacle, step_coeff, direction_boat_obstacle, potential_Z);
+        calculatePotentialField(radius_obstacle,
+                                point_x,
+                                point_y,
+                                boat_state,
+                                target_phat,
+                                detected_obstacle_list_qhat,
+                                wind_direction,
+                                only_direction_mode,
+                                have_to_avoid_obstacle,
+                                step_coeff, direction_boat_obstacle, potential_Z);
         calculate_collision_avoidance_point(potential_Z, potential_field_dim, collision_avoidance_point);
         printStdVectorMat("collisioned_obstacle",collisioned_obstacle);
 
@@ -393,7 +406,6 @@ void avoidObstacle(Eigen::MatrixXd target_phat,Eigen::MatrixXd boat_state,Eigen:
         Eigen::MatrixXd startCollLine(2,1);
         startCollLine(0,0)=norma*cos(boat_state(0,2)+M_PI)+boat_state(0,0);
         startCollLine(1,0)=norma*sin(boat_state(0,2)+M_PI)+boat_state(0,1);
-
 
         line_to_follow[0]= startCollLine;
         line_to_follow[1]= collision_avoidance_point;
@@ -439,7 +451,9 @@ Eigen::MatrixXd f(Eigen::MatrixXd boat_state,Eigen::MatrixXd inputs,int wind_spe
     float p1=0.1, p2=1, p3=6000, p4=1000, p5=2000;
     float p6=1, p7=1, p8=2, p9=300, p10=6000;
 
-    float theta=boat_state(0,2), v=boat_state(0,3), w=boat_state(0,4), deltar=inputs(0,0), deltasmax=inputs(1,0);
+    float   theta=boat_state(0,2),
+            v=boat_state(0,3),
+            w=boat_state(0,4), deltar=inputs(0,0), deltasmax=inputs(1,0);
     Eigen::MatrixXd w_ap(2,1);
     w_ap(0,0)=wind_speed*cos(wind_direction-theta)-v;
     w_ap(1,0)=wind_speed*sin(wind_direction-theta);
@@ -609,12 +623,40 @@ int main()
         if (delay == 10){
             delay =0;
         }
-        mockObstacleDetection(mock_obstacle_list, detected_obstacles, direction_boat_obstacle,boat_state, mock_detection_distance, mock_detection_angle);
+        mockObstacleDetection(mock_obstacle_list,
+                              detected_obstacles,
+                              direction_boat_obstacle,
+                              boat_state,
+                              mock_detection_distance,
+                              mock_detection_angle);
         //calculatePotentialField( radius_obstacle,point_x, point_y,  boat_state, target_phat, detected_obstacle_list_qhat, wind_direction, only_direction_mode, have_to_avoid_obstacle, step_coeff, direction_boat_obstacle, potential_Z);
-        update_obstacles( detected_obstacles, boat_state, mock_detection_distance, mock_detection_angle, detected_obstacle_list_qhat);
-        obstacleOnACollisionCourse(boat_state,detected_obstacle_list_qhat, radius_obstacle, radius_corridor, can_compute_a_new_avoidance_point,detected_obstacles, collisioned_obstacle, only_direction_mode, is_obstacle_detected, have_to_avoid_obstacle);
+        update_obstacles( detected_obstacles,
+                          boat_state,
+                          mock_detection_distance,
+                          mock_detection_angle,
+                          detected_obstacle_list_qhat);
+        obstacleOnACollisionCourse(boat_state,
+                                   detected_obstacle_list_qhat,
+                                   radius_obstacle,
+                                   radius_corridor,
+                                   can_compute_a_new_avoidance_point,
+                                   detected_obstacles,
+                                   collisioned_obstacle,
+                                   only_direction_mode,
+                                   is_obstacle_detected,
+                                   have_to_avoid_obstacle);
         //calculate_collision_avoidance_point(potential_Z,potential_field_dim,collision_avoidance_point);
-        avoidObstacle(target_phat, boat_state, point_x, point_y, wind_direction,radius_obstacle, radius_corridor, only_direction_mode,have_to_avoid_obstacle, step_coeff, direction_boat_obstacle, can_compute_a_new_avoidance_point, line_to_follow,collisioned_obstacle,
+        avoidObstacle(target_phat,
+                      boat_state,
+                      point_x,
+                      point_y,
+                      wind_direction,
+                      radius_obstacle,
+                      radius_corridor,
+                      only_direction_mode,
+                      have_to_avoid_obstacle,
+                      step_coeff,
+                      direction_boat_obstacle, can_compute_a_new_avoidance_point, line_to_follow,collisioned_obstacle,
                         detected_obstacle_list_qhat, potential_Z,potential_field_dim,collision_avoidance_point);
 
         if (delay == 0){

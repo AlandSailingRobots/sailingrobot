@@ -92,17 +92,21 @@ struct PotentialMap{
     const double yMax;
     Eigen::ArrayXXd field;
 };
+struct BearingOnlyVars{
+    bool only_direction_mode;
+    bool have_to_avoid_obstacle;
+};
 
 /**
  * Collision avoidance class
  * Super class call. Calls the database
  */
 class CollisionAvoidanceBehaviour : public RoutingBehaviour {
-    CollisionAvoidanceBehaviour(DBHandler *db);
-
-    ~CollisionAvoidanceBehaviour() { };
-
+    //For test only
 public:
+    CollisionAvoidanceBehaviour(DBHandler *db);
+    ~CollisionAvoidanceBehaviour() {};
+
     /**
      * Test if everything is ok before starting everything
      * @return
@@ -125,7 +129,7 @@ public:
                          double trueWindDirection,
                          bool mockPosition,
                          bool getHeadingFromCompass);
-    //make the computation of the commands
+    void manageDatabase(double trueWindDirection, SystemStateModel &systemStateModel);
 
 private:
 
@@ -139,6 +143,7 @@ private:
 
     bool m_tack; //Need init
     int m_tackingDirection; //Need init
+    BearingOnlyVars m_bearingOnlyVars; // TODO use these variables
 
     // UTILITY FUNCTIONS
     /*
@@ -298,30 +303,6 @@ private:
      */
     bool projectionInsideSlice(const Eigen::Vector3d triangle[],
                                Eigen::Vector3d point);
-
-    /**
-     * Debugging function, specific to Eigen
-     * @param name
-     * @param v
-     */
-    void printStdVectorMat(std::string const &name,
-                           std::vector<Eigen::MatrixXd> const &v);
-
-    /**
-     * Debugging functions, specific to Eigen
-     * @param name
-     * @param v
-     */
-    void printStdVectorFloat(std::string const &name,
-                             std::vector<float> const &v);
-
-    /**
-     * Debugging functions, specific to Eigen
-     * @param name
-     * @param mat
-     */
-    void printMat(std::string const &name,
-                  Eigen::MatrixXd const &mat);
 
     //PRIVATE MAIN FUNCTIONS
 
