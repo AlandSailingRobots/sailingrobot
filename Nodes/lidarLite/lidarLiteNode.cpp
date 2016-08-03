@@ -1,5 +1,4 @@
-#include "lidarLite.h"
-using namespace cv;
+#include "lidarLiteNode.h"
 using namespace std;
 
 
@@ -39,14 +38,14 @@ void lidarLiteNode::start()
 	}
 }
 
-void lidarLiteNode::colorDetectionThreadFunc(void* nodePtr)
+void lidarLiteNode::lidarThreadFunc(void* nodePtr)
 {
 	lidarLiteNode* node = (lidarLiteNode*)nodePtr;
 	Logger::info("lidarLiteNode thread started");
 	int res, st;
 	for (;;) {
-		res = lidar_read(m_fd);
-		st = lidar_status(m_fd);
+		res = lidar_read(node->m_fd);
+		st = lidar_status(node->m_fd);
 		Logger::info("%3.0d cm \n", res);
 		lidar_status_print(st);
 		

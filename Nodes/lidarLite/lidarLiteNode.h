@@ -14,15 +14,14 @@
  ***************************************************************************************/
 
 #pragma once
-
-#include "lidarLite.cpp"
 #include "ActiveNode.h"
-
+#include "lidarLite.h"
+#include "Messages/LidarMsg.h"
 
 class lidarLiteNode : public ActiveNode {
 public:
     lidarLiteNode(MessageBus& msgBus,int delay,bool debug);//delay in microseconds at least 2000 or too much timeout
-    lidarLiteNode(MessageBus& msgBus,int delay;
+    lidarLiteNode(MessageBus& msgBus,int delay);//delay in microseconds
 	~lidarLiteNode();
 
 	///----------------------------------------------------------------------------------

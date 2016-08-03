@@ -33,7 +33,7 @@ public:
 
 	virtual ~LidarMsg() { }
 
-	int distance { return m_distance; }
+	int distance() { return m_distance; }
 
 private:
 	int	m_distance;
