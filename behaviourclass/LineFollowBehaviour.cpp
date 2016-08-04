@@ -24,6 +24,10 @@
 #include "LineFollowBehaviour.h"
 
 
+#define NORM_RUDDER_COMMAND 0.5166 // getCommand() take a value between -1 and 1 so we need to normalize the command correspond to 29.6 degree
+#define NORM_SAIL_COMMAND 0.6958
+
+
 LineFollowBehaviour::LineFollowBehaviour(DBHandler *db):
   RoutingBehaviour(db),//super class call
   m_previousWaypointModel(PositionModel(0,0), 0, "", 0),
@@ -220,6 +224,10 @@ void LineFollowBehaviour::computeCommands(SystemStateModel &systemStateModel,std
         printf("Speed: %f      RudderCommand: %f     SailCommand: %f       TrueWindDirection: %f \n", systemStateModel.gpsModel.speed, m_rudderCommand, m_sailCommand, trueWindDirection);
         printf("Tacking: %d     TackingDirection: %d Afterwaypoint: %.4f desiredDir %.4f\n", m_tack, m_tackingDirection,afterNextWaypoint,(2 * (M_PI / 4)/M_PI) * atan(signedDistance/maxTackDistance));
         */
+        m_rudderCommand = m_rudderCommand/NORM_RUDDER_COMMAND;
+        m_sailCommand = m_sailCommand/NORM_SAIL_COMMAND;
+
+
     } else {
         Logger::warning("%s gps NaN. Using values from last iteration", __PRETTY_FUNCTION__);
     }
