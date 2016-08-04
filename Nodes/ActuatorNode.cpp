@@ -41,7 +41,7 @@ bool ActuatorNode::init()
 
 void ActuatorNode::processMessage(const Message* message)
 {
-	if(message->messageType() == MessageType::ActuatorPosition)
+	if(message->messageType() == MessageType::ActuatorCommand)
 	{
 		ActuatorPositionMsg* msg = (ActuatorPositionMsg*)message;
 
