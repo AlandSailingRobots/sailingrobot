@@ -32,8 +32,8 @@ public:
 		:Message(deserialiser)
 	{
 		if(	!deserialiser.readUint16_t(m_windDir) ||
-			!deserialiser.readUint8_t(m_WindSpeed) ||
-			!deserialiser.readUint8_t(m_WindTemp))
+			!deserialiser.readUint8_t(m_windSpeed) ||
+			!deserialiser.readUint8_t(m_windTemp))
 		{
 			m_valid = false;
 		}
@@ -53,8 +53,8 @@ public:
 		Message::Serialise(serialiser);
 
 		serialiser.serialise(m_windDir);
-		serialiser.serialise(m_WindSpeed);
-		serialiser.serialise(m_WindTemp);
+		serialiser.serialise(m_windSpeed);
+		serialiser.serialise(m_windTemp);
 	}
 
 private:
