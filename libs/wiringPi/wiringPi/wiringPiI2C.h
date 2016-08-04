@@ -39,8 +39,8 @@ extern int wiringPiI2CSetup          (const int devId) ;
 
 extern int wiringPiI2CReadBlock		(int fd, char* block, int length);
 extern int wiringPiI2CReadBlockOriginal(int file, char command, char *values);
-extern int wiringPiI2CWriteBlock(int file, char command, char length, char *values);
-extern int wiringPiI2CWriteI2CBlock(int file, char command, char length, char *values);
+extern int wiringPiI2CWriteBlock(int file, char command, char *values, char length)
+extern int wiringPiI2CWriteI2CBlock(int file, char command, char *values, char length)
 
 #ifdef __cplusplus
 }
