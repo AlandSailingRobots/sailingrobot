@@ -67,6 +67,8 @@ inline std::string nodeToString(NodeID id)
 		return "SailingLogic";
 	case NodeID::xBeeSync:
 		return "xBeeSync";
+	case NodeID::CANBus:
+		return "CANBus";
 	}
 	return "";
 }

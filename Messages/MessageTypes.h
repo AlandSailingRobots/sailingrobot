@@ -57,20 +57,18 @@ inline std::string msgToString(MessageType msgType)
 		return "LocalConfigChange";
 	case MessageType::LocalWaypointChange:
 		return "LocalWaypointChange";
-	case MessageType::ActuatorPosition:
-		return "ActuatorPosition";
+	case MessageType::ActuatorCommand:
+		return "ActuatorCommand";
+	case MessageType::ActuatorFeedback:
+		return "ActuatorFeedback";
 	case MessageType::ArduinoData:
 		return "ArduinoData";
 	case MessageType::VesselState:
 		return "VesselState";
 	case MessageType::WaypointData:
 		return "WaypointData";
-	case MessageType::CANActuatorCommand:
-		return "CANActuatorCommand";
-	case MessageType::CANFullFeedback:
-		return "CANFullFeedback";
-	case MessageType::CANActuatorFeedback:
-		return "CANActuatorFeedback";
+	case MessageType::WindVaneCommand:
+		return "WindVaneCommand";
 	}
 	return "";
 }
