@@ -267,7 +267,7 @@ void Xbee::processPacket(XbeePacket& packet)
 {
 	if(m_incomingCallback != NULL)
 	{
-		Logger::info("Single inbound packet Size: %d", packet.m_payloadSize);
+		//Logger::info("Single inbound packet Size: %d", packet.m_payloadSize);
 
 		// Deslip it
 		uint16_t dataSize = 0;

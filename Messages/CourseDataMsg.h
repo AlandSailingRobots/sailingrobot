@@ -30,9 +30,9 @@ public:
 	CourseDataMsg(MessageDeserialiser deserialiser)
 		:Message(deserialiser)
 	{
-		if(	deserialiser.readFloat(m_twd) ||
-			deserialiser.readFloat(m_dtw) ||
-			deserialiser.readFloat(m_ctw))
+		if(	!deserialiser.readFloat(m_twd) ||
+			!deserialiser.readFloat(m_dtw) ||
+			!deserialiser.readFloat(m_ctw))
 		{
 			m_valid = false;
 		}

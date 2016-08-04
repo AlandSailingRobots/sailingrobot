@@ -1,0 +1,136 @@
+#monitor
+port 4321
+
+#
+# First there's a block of variable declarations. There
+# should be one of these for each key which appears in the
+# data stream, except for "time".
+
+# These are separated by commas.
+
+var {
+    # Currently only float values are supported - we can emulate
+    # others with these.
+    
+    # "heading" is a variable with range 0 to 359. We'll store 100 values
+    # for it in a cyclic buffer, so we can graph 100 values back.
+
+    float heading 100 range 0 to 359
+
+    # True Wind direction
+    float twd 100 range 0 to 359
+
+    # Course to the waypoint
+    float ctw 100 range 0 to 359
+
+    # Distance to the waypoint in metres
+    float dtw 100 range 0 to 50000
+
+    float wpnum 100 range 0 to 1000
+
+    float speed 10000 range 0 to 10
+
+    float warn 100 range 0 to 3
+    
+    # "lat" and "lon" should always be considered to be a pair,
+    # so we link them - if a lat ever arrives without a lon, a
+    # lon will be created at the same time with the same value
+    # it had previously.
+    # Lat has range -90 to 90, lon has range -180 to 180
+    # Being linked, they have the same buffer size - 1000 values.
+    
+    linked (
+    float lat range -90 to 90,
+    float lon range -180 to 180) 1000
+}
+    
+# That's the variables, now we can define the widgets.
+
+# the only display (currently)
+window {
+    
+    # top left
+    frame 0,0,20,1 {
+        map 0,0 size 400, 400{
+            centre 60.10,19.92 height 10
+
+            point {
+                # For this point renderer,
+                # we render points at lat,lon, with a new point
+                # every time we get a new lat. Note that lat comes first.
+                
+                location var lat,var lon on var lat
+            
+                # we also render 40 of the previous points when new "lat" data arrived.
+            
+                trail 40000
+
+                # var a's range is mapped onto the entire hue range, in which 0 is red
+                # and 1 is back to red again; so a=-1 will be red as will a=1. If you
+                # wanted to do something cleverer, you could use an expression.
+            
+                hue var speed
+            
+                # we map variable b's range (-1 to 1) onto the size range 2-20 pixels
+                # to determine the size of the circle drawn.
+            
+                #sizerange 3 20 var temp
+            }
+
+            vector {
+                # we also draw a vector at each point - the same points.            
+                location var lat, var lon on var lat
+            
+                trail 1
+            
+                # the width of the vector is set to 3 pixels
+                width 3
+            
+                # the direction of the vector comes from the expression a*180.
+                degrees var heading
+            
+                # and the vector is black (default is white, for technical reasons)
+                colour black
+            }
+        }
+    }
+
+    frame 20,0,20,1 { # top right
+
+        compass 0,0 {
+            title "Course"
+            expr "ctw" range auto
+        } 
+
+        gauge 0,1 { 
+            var speed 
+            title "Speed" 
+            subtitle "Metres Per Second" 
+            fontscale 2 
+        }
+    
+        compass 1,0 {
+            title "Heading"
+            expr "heading" range auto
+        }
+
+        compass 1,1 {
+            title "True Wind"
+            expr "twd" range auto
+        }
+
+        number 0,2 { var wpnum title "Waypoint Number"}
+        number 1,2 { var dtw title "Waypoint Distance"}
+    } 
+    
+
+    # bottom frame, 2 cols wide
+
+    frame 0,1,40,80 {
+        graph 0,0 {
+            time 100
+            var speed { col red width 2}
+            var dtw { col blue width 2}
+        }
+    }
+}

@@ -35,6 +35,7 @@ XbeeSyncNode::XbeeSyncNode(MessageBus& msgBus, DBHandler& db) :
 	XbeeSyncNode::m_node = this;
 	msgBus.registerNode(this, MessageType::VesselState);
 	msgBus.registerNode(this, MessageType::CourseData);
+	msgBus.registerNode(this, MessageType::WaypointData);
 }
 bool XbeeSyncNode::init()
 {
@@ -71,6 +72,9 @@ void XbeeSyncNode::processMessage(const Message* msgPtr)
 			sendMessage(msgPtr);
 			break;
 		case MessageType::CourseData:
+			sendMessage(msgPtr);
+			break;
+		case MessageType::WaypointData:
 			sendMessage(msgPtr);
 			break;
         default:
