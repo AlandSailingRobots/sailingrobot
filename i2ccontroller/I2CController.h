@@ -86,6 +86,19 @@ class I2CController {
 		///							error.
 		///----------------------------------------------------------------------------------
 		int readBlock(uint8_t* block, uint8_t size);
+		
+		///----------------------------------------------------------------------------------
+		/// Writes a block of bytes from the I2C device. The block will not write more than 32
+		/// bytes.
+		///
+		/// @param block			Pointer to the byte block.
+		/// @param size				Number of bytes to write, a maximum of 32 bytes will be
+		///										written.
+		///
+		/// @returns 					Returns a byte from the read, or a -1 if there was a
+		///										error.
+		///----------------------------------------------------------------------------------
+		int writeBlock(uint8_t* block, uint8_t size);
 
 		///----------------------------------------------------------------------------------
 		/// Begins an I2C transmission, this should be called before any I2C operations are

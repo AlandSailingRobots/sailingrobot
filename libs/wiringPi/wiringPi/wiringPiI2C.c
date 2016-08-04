@@ -235,7 +235,7 @@ int wiringPiI2CSetup (const int devId)
 int wiringPiI2CReadBlock (int fd, char* block, int length)
 {
 	union i2c_smbus_data data;
-	#define DATA_START 	2
+	#define DATA_START 	0 //should be 2
 
 	// Can only read 32 bytes at a time
 	if(length > I2C_SMBUS_I2C_BLOCK_MAX)
@@ -266,8 +266,7 @@ int wiringPiI2CReadBlock (int fd, char* block, int length)
 	}
 }
 
-int wiringPiI2CReadBlock(int file, __u8 command, 
-                                              __u8 *values)
+int wiringPiI2CReadBlockOriginal(int file, char command, char *values)
 {
   union i2c_smbus_data data;
   int i;
@@ -284,8 +283,7 @@ int wiringPiI2CReadBlock(int file, __u8 command,
   }
 }
 
-int i2c_smbus_write_block_data(int file, __u8 command, 
-                                               __u8 length, __u8 *values)
+int wiringPiI2CWriteBlock(int file, char command, char length, char *values)
 {
   union i2c_smbus_data data;
   int i;
@@ -298,8 +296,7 @@ int i2c_smbus_write_block_data(int file, __u8 command,
                           I2C_SMBUS_BLOCK_DATA, &data);
 }
 
-int i2c_smbus_write_i2c_block_data(int file, __u8 command,
-                                               __u8 length, __u8 *values)
+int wiringPiI2CWriteI2CBlock(int file, char command, char length, char *values)
 {
   union i2c_smbus_data data;
   int i;
