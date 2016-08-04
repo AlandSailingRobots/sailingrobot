@@ -15,7 +15,7 @@ CREATE TABLE waypoints (id INTEGER PRIMARY KEY AUTOINCREMENT, -- no autoincremen
 	longitude DOUBLE,
 	declination INTEGER,
 	radius INTEGER,
-  stay_time INTEGER,
+ 	stay_time INTEGER,
 	harvested BOOLEAN
 );
 

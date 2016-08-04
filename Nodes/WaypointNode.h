@@ -41,8 +41,9 @@ private:
     void sendMessage();
     bool harvestWaypoint();
 
-    DBHandler m_db;
+    DBHandler &m_db;
     CourseMath m_courseMath;
+    bool writeTime;
 
     int     m_nextId;
     double  m_nextLongitude;

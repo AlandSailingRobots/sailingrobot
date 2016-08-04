@@ -41,7 +41,7 @@ void DBHandler::getDataAsJson(std::string select, std::string table, std::string
 	std::vector<std::string> values;
 	std::vector<std::string> columnNames;
 	std::vector<std::string> results;
-
+	
 	try {
 		if(id == "")
 			results = retrieveFromTable("SELECT " + select + " FROM " + table + ";", rows, columns);
@@ -335,7 +335,7 @@ bool DBHandler::updateWaypoints(std::string waypoints){
 	Json json = Json::parse(waypoints);
 	std::string DBPrinter = "";
 	std::string tempValue = "";
-	int valuesLimit = 5; //"Dirty" fix for limiting the amount of values requested from server waypoint entries (amount of fields n = valuesLimit + 1)
+	int valuesLimit = 6; //"Dirty" fix for limiting the amount of values requested from server waypoint entries (amount of fields n = valuesLimit + 1)
 	int limitCounter;
 
 	if(not queryTable("DELETE FROM waypoints;"))
@@ -350,7 +350,7 @@ bool DBHandler::updateWaypoints(std::string waypoints){
 		for (auto y : Json::iterator_wrapper(i.value())){
 
 			limitCounter = valuesLimit;
-			DBPrinter = "INSERT INTO waypoints (id,latitude,longitude,declination,radius,harvested) VALUES (";
+			DBPrinter = "INSERT INTO waypoints (id,latitude,longitude,declination,radius,stay_time,harvested) VALUES (";
 
 			for (auto z : Json::iterator_wrapper(y.value())){
 				//Each individual value
@@ -516,7 +516,7 @@ std::string DBHandler::getWaypoints() {
 	rows = getRows("waypoints");
 	if (rows > 0) {
 		for (auto i = 1; i <= rows; ++i) {
-			getDataAsJson("id,latitude,longitude,declination,radius", "waypoints", wp + std::to_string(i), std::to_string(i),json, true);
+			getDataAsJson("id,latitude,longitude,declination,radius,stay_time", "waypoints", wp + std::to_string(i), std::to_string(i),json, true);
 		}
 		return json.dump();
 	}

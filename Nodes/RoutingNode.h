@@ -40,8 +40,9 @@ private:
 	double 	m_nextWaypointLat;
 	int 	m_nextWaypointDeclination;
 	int 	m_nextWaypointRadius;
+	int		m_nextWaypointStayTime;
 	
-	DBHandler m_db;
+	DBHandler &m_db;
 	DBLogger m_dbLogger;
 	WaypointRouting m_waypointRouting;
 	RudderCommand m_rudderCommand;

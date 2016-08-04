@@ -74,16 +74,16 @@ void WaypointNode::processGPSMessage(GPSDataMsg* msg)
 
 bool WaypointNode::waypointReached()
 {
-    double distanceAfterWaypoint = Utility::calculateWaypointsOrthogonalLine(m_nextLongitude, m_nextLatitude, m_prevLongitude,
-                m_prevLatitude, m_gpsLongitude, m_gpsLatitude); //Checks if boat has passed the waypoint following the line, without entering waypoints radius
+    // double distanceAfterWaypoint = Utility::calculateWaypointsOrthogonalLine(m_nextLongitude, m_nextLatitude, m_prevLongitude,
+    //             m_prevLatitude, m_gpsLongitude, m_gpsLatitude); //Checks if boat has passed the waypoint following the line, without entering waypoints radius
 
-    if(harvestWaypoint() ||  distanceAfterWaypoint > 0)
+    if(harvestWaypoint())
     {
         if(not m_db.changeOneValue("waypoints", std::to_string(m_nextId),"1","harvested"))
         {
             Logger::error("Failed to harvest waypoint");
         }
-        Logger::info("Reached waypoint");
+        Logger::info("Waypoint harvested");
         m_waypointTimer.stop();
 
         return true;
@@ -120,9 +120,16 @@ bool WaypointNode::harvestWaypoint()
     if(m_nextStayTime > 0) //if next waypoint has a time to stay inside its radius, start the timer
     {
         m_waypointTimer.start();
+        if(not writeTime)
+        {
+            Logger::info("Started waypoint timer. Stay at waypoint for: %d seconds", m_nextStayTime);
+            writeTime = true;
+        }
 
         if(m_waypointTimer.timeReached(m_nextStayTime)) //Check if boat has stayed the designated amount of time
         {
+            Logger::info("Waypoint timer passed");
+            writeTime = false;
             return true;
         }
 

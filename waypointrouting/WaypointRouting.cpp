@@ -40,20 +40,42 @@ WaypointRouting::~WaypointRouting()
 	* GPS speed
 */
 
-void WaypointRouting::getCommands(double & rudder, double & sail, double gpsLon, double gpsLat, int radius,
+void WaypointRouting::getCommands(double & rudder, double & sail, double gpsLon, double gpsLat, int radius, int stayTime,
 	double trueWindDirection, double heading, double gpsHeading, double gpsSpeed, double compassHeading, double windsensorDir) {
 
 	double speed = Utility::directionAdjustedSpeed(gpsHeading,compassHeading, gpsSpeed);
 	double commandAngle = m_maxCommandAngle;
-	m_courseCalc.setTackAngle(m_tackAngleHandler.adjustedTackAngle(gpsHeading,compassHeading, gpsSpeed));
+	// m_courseCalc.setTackAngle(m_tackAngleHandler.adjustedTackAngle(gpsHeading,compassHeading, gpsSpeed));
 
-	if(speed > m_rudderSpeedMin) {
-		commandAngle = speed/m_rudderSpeedMin * m_maxCommandAngle;
+	// if(speed > m_rudderSpeedMin) {
+	// 	commandAngle = speed/m_rudderSpeedMin * m_maxCommandAngle;
+	// }
+
+	// m_courseToSteer = m_courseCalc.calculateCourseToSteer(gpsLon, gpsLat, m_lon, m_lat, radius, trueWindDirection);
+	// rudder = m_commandHandler.rudderCommand(m_courseToSteer, heading,commandAngle);
+	// sail = m_commandHandler.sailCommand(windsensorDir);
+
+	if (stayTime > 0 && reachedRadius(radius * m_innerRadiusRatio, gpsLon, gpsLat)) 
+	{	
+		if(speed > m_rudderSpeedMin) {
+			commandAngle = speed/m_rudderSpeedMin * m_maxCommandAngle;		
+		}
+
+		m_courseToSteer = trueWindDirection;
+		rudder = m_commandHandler.rudderCommand(m_courseToSteer, heading,commandAngle);
+		sail = m_commandHandler.runningSailCommand();
+	} 
+	else {
+		m_courseCalc.setTackAngle(m_tackAngleHandler.adjustedTackAngle(gpsHeading,compassHeading, gpsSpeed));
+
+		if(speed > m_rudderSpeedMin) {
+			commandAngle = speed/m_rudderSpeedMin * m_maxCommandAngle;
+		}
+
+		m_courseToSteer = m_courseCalc.calculateCourseToSteer(gpsLon, gpsLat, m_lon, m_lat, radius, trueWindDirection);
+		rudder = m_commandHandler.rudderCommand(m_courseToSteer, heading,commandAngle);
+		sail = m_commandHandler.sailCommand(windsensorDir);
 	}
-
-	m_courseToSteer = m_courseCalc.calculateCourseToSteer(gpsLon, gpsLat, m_lon, m_lat, radius, trueWindDirection);
-	rudder = m_commandHandler.rudderCommand(m_courseToSteer, heading,commandAngle);
-	sail = m_commandHandler.sailCommand(windsensorDir);
 
 	if(!adjustSteering(windsensorDir)) {
 		m_lastRWD = windsensorDir;
@@ -120,6 +142,15 @@ void WaypointRouting::setUpdateInterval(double updateInterval) {
 
 void WaypointRouting::setMinimumDegreeLimit(double degLimit) {
 	m_degLimit = degLimit;
+}
+
+bool WaypointRouting::reachedRadius(double radius, double gpsLon, double gpsLat) const
+{
+	bool reachedRadius = false;
+	double dtw = m_courseMath.calculateDTW(gpsLon, gpsLat, m_lon, m_lat);
+	if (dtw < radius)
+		reachedRadius = true;
+	return reachedRadius;
 }
 
 bool WaypointRouting::adjustSteering(double relativeWindDirection) {

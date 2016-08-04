@@ -39,7 +39,7 @@ public:
 	float m_gpsHeadingWeight;
 
 private:
-	DBHandler m_db;
+	DBHandler &m_db;
 	DBLogger m_dbLogger;
 
 	int 	m_nextWaypointId;
@@ -76,6 +76,7 @@ private:
 	void setupRudderCommand();
 	void setupSailCommand();
     bool getGoingStarboard();
+	void setPrevWaypointToBoatPos(VesselStateMsg* msg);
 
 	/*void manageDatabase(VesselStateMsg* msg, double trueWindDirection, double rudder, double sail, double heading,
                         double distanceToNextWaypoint, double bearingToNextWaypoint);*/

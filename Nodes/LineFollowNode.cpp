@@ -124,6 +124,8 @@ void LineFollowNode::calculateActuatorPos(VesselStateMsg* msg)
     /* add pi because trueWindDirection is originally origin of wind but algorithm need direction*/
     double trueWindDirection_radian = Utility::degreeToRadian(trueWindDirection)+M_PI;
 
+    setPrevWaypointToBoatPos(msg);
+
     //GET DIRECTION--------
     double currentHeading = getHeading(msg->gpsHeading(), msg->compassHeading(), msg->speed(), false, false);
     double currentHeading_radian = Utility::degreeToRadian(currentHeading);
@@ -187,6 +189,7 @@ void LineFollowNode::calculateActuatorPos(VesselStateMsg* msg)
     }
 
     //------------------
+    rudderCommand = rudderCommand/0.5166;
     int rudderCommand_norm = m_rudderCommand.getCommand(rudderCommand);
     int sailCommand_norm = m_sailCommand.getCommand(sailCommand);
 
@@ -291,6 +294,20 @@ bool LineFollowNode::getGoingStarboard()
 {
     if(m_tackingDirection == 1) return true;
     else return false;
+}
+
+void LineFollowNode::setPrevWaypointToBoatPos(VesselStateMsg* msg)
+{
+    double distanceAfterWaypoint = Utility::calculateWaypointsOrthogonalLine(m_nextWaypointLon, m_nextWaypointLat, m_prevWaypointLon,
+            m_prevWaypointLat, msg->longitude(), msg->latitude());
+
+    double DTW = m_courseMath.calculateDTW(msg->longitude(), msg->latitude(), m_nextWaypointLon, m_nextWaypointLat);
+    
+    if(distanceAfterWaypoint > 0 ||  DTW < m_nextWaypointRadius)
+    {
+        m_prevWaypointLon = msg->longitude();
+        m_prevWaypointLat = msg->latitude();
+    }
 }
 
 /*
