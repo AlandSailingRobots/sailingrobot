@@ -15,6 +15,7 @@
 #endif
 
 #include "Nodes/obstacledetection/colorDetectionNode.h"
+#include "Nodes/lidarLite/lidarLiteNode.h"
 #include "Nodes/WaypointNode.h"
 #include "Nodes/VesselStateNode.h"
 #include "Nodes/HTTPSyncNode.h"
@@ -119,6 +120,7 @@ int main(int argc, char *argv[])
     std::vector<std::string> color_inputs;
     color_inputs.push_back("red");
     colorDetectionNode colorDetect(messageBus,color_inputs);
+    lidarLiteNode lidarDetect(messageBus,2);
 	VesselStateNode vessel(messageBus);
 	WaypointNode waypoint(messageBus, dbHandler);
 	HTTPSyncNode httpsync(messageBus, &dbHandler, 0, false);
@@ -170,7 +172,8 @@ int main(int argc, char *argv[])
 	initialiseNode(rudder, "Rudder Actuator", NodeImportance::CRITICAL);
 	initialiseNode(arduino, "Arduino Node", NodeImportance::NOT_CRITICAL);
 	#endif
-	initialiseNode(colorDetect, "colorDetection Node", NodeImportance::NOT_CRITICAL);
+	initialiseNode(colorDetect, "Color Detection Node", NodeImportance::NOT_CRITICAL);
+	initialiseNode(lidarDetect, "Lidar Node", NodeImportance::NOT_CRITICAL);
 	initialiseNode(vessel, "Vessel State Node", NodeImportance::CRITICAL);
 	initialiseNode(waypoint, "Waypoint Node", NodeImportance::CRITICAL);
 	if (requireNetwork)
@@ -201,6 +204,7 @@ int main(int argc, char *argv[])
 	arduino.start();
   #endif
 	colorDetect.start();
+	lidarDetect.start();
 	vessel.start();
 	httpsync.start();
 

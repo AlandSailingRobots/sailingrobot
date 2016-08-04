@@ -20,8 +20,8 @@
 
 class lidarLiteNode : public ActiveNode {
 public:
-    lidarLiteNode(MessageBus& msgBus,int delay,bool debug);//delay in microseconds at least 2000 or too much timeout
-    lidarLiteNode(MessageBus& msgBus,int delay);//delay in microseconds
+    lidarLiteNode(MessageBus& msgBus,int delay,bool debug);//delay in msat least 2ms or too much timeout
+    lidarLiteNode(MessageBus& msgBus,int delay);
 
 	///----------------------------------------------------------------------------------
 	/// Initialises the connection with the lidar

@@ -2,6 +2,7 @@
 #include "SystemServices/Logger.h"
 using namespace cv;
 using namespace std;
+#define DISPLAY_WINDOWS_AND_TRACKBARS 1
 
 colorDetectionNode::colorDetectionNode(MessageBus& msgBus,std::vector<string> colors_input)
 	: ActiveNode(NodeID::ColorDetection, msgBus),m_hsvDiff(10),m_iLowH(0),
@@ -229,7 +230,9 @@ void colorDetectionNode::colorDetectionThreadFunc(void* nodePtr)
     vector<Point2f> mc;
     vector<Rect> rotated_bounding_rects;
     vector<Mat> imgsThresholded (node->m_numberOfColorsToTrack);
-    node->initWindowsAndTrackbars(nodePtr);
+    if(DISPLAY_WINDOWS_AND_TRACKBARS == 1){
+		node->initWindowsAndTrackbars(nodePtr);
+	}
     vector<vector<Rect> > rotated_bounding_rects_several_captures(node->m_numberOfColorsToTrack);
     vector<vector<Rect> > rotated_bounding_rects_merged_list(node->m_numberOfColorsToTrack);
     vector<vector<Point> > centers(node->m_numberOfColorsToTrack);
@@ -277,11 +280,13 @@ void colorDetectionNode::colorDetectionThreadFunc(void* nodePtr)
         rotated_bounding_rects_several_captures.resize(node->m_numberOfColorsToTrack);
         obstacles.erase(obstacles.begin(),obstacles.end());
 
-        imshow("Thresholded Image", imgsThresholded[node->m_iColor]);
-        cvWaitKey(1);
-        imshow("Detection", node->m_imgOriginal);
-        cvWaitKey(1);
-        setMouseCallback( "Detection", get_on_click_hsv_pixel_values, nodePtr );
+		if(DISPLAY_WINDOWS_AND_TRACKBARS == 1){
+			imshow("Thresholded Image", imgsThresholded[node->m_iColor]);
+			cvWaitKey(1);
+			imshow("Detection", node->m_imgOriginal);
+			cvWaitKey(1);
+			setMouseCallback( "Detection", get_on_click_hsv_pixel_values, nodePtr );
+		}
 		// Controls how often we pump out messages
 		std::this_thread::sleep_for(std::chrono::milliseconds(node->m_delay));
     }
