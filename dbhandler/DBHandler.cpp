@@ -31,6 +31,7 @@ bool DBHandler::initialise()
 	}
 	else
 	{
+		closeDatabase(connection);
 		return false;
 	}
 }
@@ -101,6 +102,7 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs)
 		if(db == NULL)
 		{
 			Logger::error("%s Database is null!", __PRETTY_FUNCTION__);
+			closeDatabase(db);
 			return;
 		}
 
@@ -726,11 +728,13 @@ bool DBHandler::queryTable(std::string sqlINSERT) {
 			Logger::error("%s Error: %s", __PRETTY_FUNCTION__, sqlite3_errmsg(db));
 
 			sqlite3_free(m_error);
+			closeDatabase(db);
 			return false;
 		}
 	}
 	else {
 		Logger::error("%s Error: no database found", __PRETTY_FUNCTION__);
+		closeDatabase(db);
 		return false;
 	}
 	closeDatabase(db);
