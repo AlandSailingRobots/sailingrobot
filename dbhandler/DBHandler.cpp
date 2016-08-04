@@ -784,15 +784,18 @@ std::vector<std::string> DBHandler::retrieveFromTable(std::string sqlSELECT, int
 
 		if(resultcode == SQLITE_EMPTY) {
 			std::vector<std::string> s;
+			closeDatabase(db);
 			return s;
 		}
 
 		if (resultcode != SQLITE_OK) {
 			Logger::error("%s SQL statement: %s Error: %s", __PRETTY_FUNCTION__, sqlSELECT.c_str(), sqlite3_errstr(resultcode));
+			closeDatabase(db);
 			throw "retrieveFromTable";
 		}
 	}
 	else {
+		closeDatabase(db);
 		throw "DBHandler::retrieveFromTable(), no db connection";
 	}
 
