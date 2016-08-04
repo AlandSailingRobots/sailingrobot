@@ -38,8 +38,8 @@ public:
 	ActuatorPositionMsg(MessageDeserialiser deserialiser)
 			:Message(deserialiser)
 	{
-		if(	!deserialiser.readInt(m_rudderPosition) ||
-			!deserialiser.readInt(m_sailPosition))
+		if(	!deserialiser.readUint16_t(m_rudderPosition) ||
+			!deserialiser.readUint16_t((m_sailPosition))
 		{
 			m_valid = false;
 		}
