@@ -137,7 +137,7 @@ public:
 
 	bool getWaypointFromTable(WaypointModel &waypointModel, bool max);
 
-	bool getWaypointValues(int& nextId, double& nextLongitude, double& nextLatitude, int& nextDeclination, int& nextRadius,
+	bool getWaypointValues(int& nextId, double& nextLongitude, double& nextLatitude, int& nextDeclination, int& nextRadius, int& nextStayTime,
                         int& prevId, double& prevLongitude, double& prevLatitude, int& prevDeclination, int& prevRadius);
 
 	bool insert(std::string table, std::string fields, std::string values);

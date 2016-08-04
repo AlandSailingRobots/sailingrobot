@@ -928,7 +928,7 @@ bool DBHandler::getWaypointFromTable(WaypointModel &waypointModel, bool max){
 	return true;
 }
 
-bool DBHandler::getWaypointValues(int& nextId, double& nextLongitude, double& nextLatitude, int& nextDeclination, int& nextRadius,
+bool DBHandler::getWaypointValues(int& nextId, double& nextLongitude, double& nextLatitude, int& nextDeclination, int& nextRadius, int& nextStayTime,
                         int& prevId, double& prevLongitude, double& prevLatitude, int& prevDeclination, int& prevRadius)
 {
 	int rows, columns, rows2, columns2;
@@ -962,6 +962,8 @@ bool DBHandler::getWaypointValues(int& nextId, double& nextLongitude, double& ne
     nextLatitude = atof(retrieveCell("waypoints", results[1], "latitude").c_str());
     nextDeclination = retrieveCellAsInt("waypoints", results[1], "declination");
     nextRadius = retrieveCellAsInt("waypoints", results[1], "radius");
+	nextStayTime = retrieveCellAsInt("waypoints", results[1], "stay_time");
+
 
 	if(foundPrevWaypoints) //Set values to next waypoint if harvested waypoint found
 	{
