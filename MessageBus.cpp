@@ -71,7 +71,8 @@ void MessageBus::sendMessage(MessagePtr msg)
 	{
 		m_FrontQueueMutex.lock();
 		m_FrontMessages->push(std::move(msg));
-		logMessageReceived(std::move(msg));
+		Message* logMsg = msg.get();
+		logMessageReceived(logMsg); 
 		m_FrontQueueMutex.unlock();
 	}
 }
@@ -185,7 +186,7 @@ void MessageBus::startMessageLog()
 #endif
 }
 
-void MessageBus::logMessageReceived(MessagePtr msg)
+void MessageBus::logMessageReceived(Message* msg)
 {
 #ifdef LOG_MESSAGES
 	msg->timeReceived = SysClock::timeStamp();

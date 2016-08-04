@@ -138,7 +138,7 @@ private:
 	///----------------------------------------------------------------------------------
 	/// Logs that a message was received.
 	///----------------------------------------------------------------------------------
-	void logMessageReceived(MessagePtr msg);
+	void logMessageReceived(Message* msg);
 
 	///----------------------------------------------------------------------------------
 	/// Logs a message that is being processed.
