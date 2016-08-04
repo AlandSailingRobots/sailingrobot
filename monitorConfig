@@ -24,13 +24,17 @@ var {
     float ctw 100 range 0 to 359
 
     # Distance to the waypoint in metres
-    float dtw 100 range 0 to 50000
+    float dtw 100 range 0 to 200
 
-    float wpnum 100 range 0 to 1000
+    float wpnum 1000 range 0 to 200
 
-    float speed 10000 range 0 to 10
+    float speed 1000 range 0 to 5
 
     float warn 100 range 0 to 3
+
+    float offline 1 range 0 to 1
+
+    float display 1 range 0 to 1
     
     # "lat" and "lon" should always be considered to be a pair,
     # so we link them - if a lat ever arrives without a lon, a
@@ -42,6 +46,10 @@ var {
     linked (
     float lat range -90 to 90,
     float lon range -180 to 180) 1000
+
+    linked (
+    float wpLat range -90 to 90,
+    float wpLon range -180 to 180) 1000
 }
     
 # That's the variables, now we can define the widgets.
@@ -63,18 +71,22 @@ window {
             
                 # we also render 40 of the previous points when new "lat" data arrived.
             
-                trail 40000
+                trail 40
+            }
 
-                # var a's range is mapped onto the entire hue range, in which 0 is red
-                # and 1 is back to red again; so a=-1 will be red as will a=1. If you
-                # wanted to do something cleverer, you could use an expression.
+            point {
+                # For this point renderer,
+                # we render points at lat,lon, with a new point
+                # every time we get a new lat. Note that lat comes first.
+                
+                location var wpLat,var wpLon on var wpLat
+            
+                # we also render 40 of the previous points when new "lat" data arrived.
+            
+                trail 40
+                colour red
             
                 hue var speed
-            
-                # we map variable b's range (-1 to 1) onto the size range 2-20 pixels
-                # to determine the size of the circle drawn.
-            
-                #sizerange 3 20 var temp
             }
 
             vector {
@@ -92,35 +104,62 @@ window {
                 # and the vector is black (default is white, for technical reasons)
                 colour black
             }
+            
+            # waypoint renderer
+            waypoint {}
         }
     }
 
     frame 20,0,20,1 { # top right
 
-        compass 0,0 {
+        compass 0,1 {
             title "Course"
             expr "ctw" range auto
         } 
 
-        gauge 0,1 { 
+        compass 1,1 {
+            title "Heading"
+            expr "heading" range auto
+        }
+
+        gauge 0,2 { 
             var speed 
             title "Speed" 
             subtitle "Metres Per Second" 
             fontscale 2 
         }
-    
-        compass 1,0 {
-            title "Heading"
-            expr "heading" range auto
-        }
 
-        compass 1,1 {
+        compass 1,2 {
             title "True Wind"
             expr "twd" range auto
         }
 
-        number 0,2 { var wpnum title "Waypoint Number"}
-        number 1,2 { var dtw title "Waypoint Distance"}
+        number 0,3 { var wpnum title "Waypoint Number"}
+        number 1,3 { var dtw title "Waypoint Distance"}
+
+        status 0,0,  2,1 {
+            size 2,1 
+
+            # bool requires a boolean expression source,
+            # which is actually a float in the range -1 to 1 (although
+            # you can specify "range auto".) 
+
+            bool {
+                pos 0,0
+                title "Monitor Tool"
+                expr "display=0" range auto
+                false green
+                true red
+            } 
+        
+            bool {
+                pos 1,0
+                title "Connected"
+                expr "offline=1" range auto
+                false green
+                true red
+            }
+        }
     } 
     
 
