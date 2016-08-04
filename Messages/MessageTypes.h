@@ -33,8 +33,8 @@ enum class MessageType {
 	ArduinoData,
 	VesselState,
 	WaypointData,
-	WindVaneCommand
-
+	WindVaneCommand,
+	CourseData
 };
 
 inline std::string msgToString(MessageType msgType)
@@ -67,8 +67,13 @@ inline std::string msgToString(MessageType msgType)
 		return "VesselState";
 	case MessageType::WaypointData:
 		return "WaypointData";
+<<<<<<< HEAD
 	case MessageType::WindVaneCommand:
 		return "WindVaneCommand";
+=======
+	case MessageType::CourseData:
+		return "CourseData";
+>>>>>>> origin/srcs-217_xbee_tool
 	}
 	return "";
 }

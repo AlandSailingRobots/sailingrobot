@@ -21,6 +21,10 @@ public:
 		:Message(MessageType::LocalWaypointChange, NodeID::None, NodeID::None)
 	{ }
 
+	LocalWaypointChangeMsg(MessageDeserialiser deserialiser)
+		:Message(deserialiser)
+	{ }
+
 	virtual ~LocalWaypointChangeMsg() { }
 
 };

@@ -28,14 +28,37 @@ public:
 		m_windDir(windDir), m_windSpeed(windSpeed), m_windTemp(windTemp)
 	{ }
 
+	WindDataMsg(MessageDeserialiser deserialiser)
+		:Message(deserialiser)
+	{
+		if(	!deserialiser.readFloat(m_WindDir) ||
+			!deserialiser.readFloat(m_WindSpeed) ||
+			!deserialiser.readFloat(m_WindTemp))
+		{
+			m_valid = false;
+		}
+	}
+
 	virtual ~WindDataMsg() { }
 
 	uint8_t windDirection() { return m_windDir; }
 	uint8_t windSpeed() { return m_windSpeed; }
 	uint16_t windTemp() { return m_windTemp; }
 
+	///----------------------------------------------------------------------------------
+	/// Serialises the message into a MessageSerialiser
+	///----------------------------------------------------------------------------------
+	virtual void Serialise(MessageSerialiser& serialiser) const
+	{
+		Message::Serialise(serialiser);
+
+		serialiser.serialise(m_WindDir);
+		serialiser.serialise(m_WindSpeed);
+		serialiser.serialise(m_WindTemp);
+	}
+
 private:
-	uint8_t 	m_windDir;
+	uint16_t 	m_windDir;
 	uint8_t 	m_windSpeed;
-	uint16_t	  m_windTemp;
+	uint8_t	  m_windTemp;
 };

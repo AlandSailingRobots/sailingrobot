@@ -15,6 +15,8 @@
 #include "ArduinoI2CNode.h"
 #include "Messages/ArduinoDataMsg.h"
 #include "SystemServices/Logger.h"
+#include "Messages/WindDataMsg.h"
+#include "Messages/ActuatorPositionMsg.h"
 
 // For std::this_thread
 #include <chrono>
@@ -221,9 +223,9 @@ void ArduinoI2CNode::processIncomingCAN(uint32_t CANID, uint8_t* CANData)
 	{
 		uint16_t = rudderPosition = (CANData[0] << 8) | CANData[1];
 		uint16_t = sailPosition = (CANData[2] << 8) | CANData[3];
-		uint8_t = windDir = //TODO;
-		uint8_t = windSpeed = //TODO;
-		uint16_t = windTemp = //TODO;
+		uint16_t = windDir = 0;//TODO;
+		uint8_t = windSpeed = 0;//TODO;
+		uint8_t = windTemp = 0;//TODO;
 
 		ActuatorPositionMsg *actuatorMsg = new ActuatorPositionMsg(rudderCommand_norm, sailCommand_norm, true);
 		m_MsgBus.sendMessage(actuatorMsg);
