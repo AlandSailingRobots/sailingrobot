@@ -17,6 +17,7 @@
 #include "Messages/VesselStateMsg.h"
 #include "waypointrouting/WaypointRouting.h"
 #include "dbhandler/DBHandler.h"
+#include "dbhandler/DBLogger.h"
 #include "sailcommand/SailCommand.h"
 #include "ruddercommand/RudderCommand.h"
 
@@ -41,6 +42,7 @@ private:
 	int 	m_nextWaypointRadius;
 	
 	DBHandler m_db;
+	DBLogger m_dbLogger;
 	WaypointRouting m_waypointRouting;
 	RudderCommand m_rudderCommand;
 	SailCommand m_sailCommand;
@@ -56,5 +58,5 @@ private:
 	void setupRudderCommand();
 	void setupSailCommand();
 
-	void manageDatabase(VesselStateMsg* msg, double trueWindDirection, double rudder, double sail);
+	//void manageDatabase(VesselStateMsg* msg, double trueWindDirection, double rudder, double sail);
 };

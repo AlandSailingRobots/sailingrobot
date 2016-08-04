@@ -19,14 +19,17 @@
 #include "Messages/ActuatorPositionMsg.h"
 #include "Messages/CourseDataMsg.h"
 #include "utility/Utility.h"
+#include "utility/SysClock.h"
 #include <math.h>
 #include <algorithm>
 #include <cmath>
 
 #define DEFAULT_TWD_BUFFERSIZE 200
+#define NORM_RUDDER_COMMAND 0.5166 // getCommand() take a value between -1 and 1 so we need to normalize the command correspond to 29.6 degree
+#define NORM_SAIL_COMMAND 0.6958
 
 LineFollowNode::LineFollowNode(MessageBus& msgBus, DBHandler& db)
-:  Node(NodeID::SailingLogic, msgBus), m_db(db),
+:  Node(NodeID::SailingLogic, msgBus), m_db(db), m_dbLogger(5, db),
     m_nextWaypointId(0),
     m_nextWaypointLon(0),
     m_nextWaypointLat(0),
@@ -44,7 +47,7 @@ LineFollowNode::LineFollowNode(MessageBus& msgBus, DBHandler& db)
 
     m_maxCommandAngle = M_PI / 6;
     m_maxSailAngle = M_PI / 4.2f;
-    m_minSailAngle = M_PI / 32;
+    m_minSailAngle = M_PI / 32.0f;
     m_tackAngle = 0.872665; //50°
 }
 
@@ -55,6 +58,7 @@ bool LineFollowNode::init()
     twdBufferMaxSize = m_db.retrieveCellAsInt("buffer_config", "1", "true_wind");
 	if(twdBufferMaxSize == 0)
 		twdBufferMaxSize = DEFAULT_TWD_BUFFERSIZE;
+	m_dbLogger.startWorkerThread();
     return true;
 }
 
@@ -178,10 +182,16 @@ void LineFollowNode::calculateActuatorPos(VesselStateMsg* msg)
 
     apparentWindDirection = ( (apparentWindDirection+M_PI>M_PI) ? (apparentWindDirection-M_PI):(apparentWindDirection+M_PI) );
 
-    sailCommand = abs( ((m_minSailAngle - m_maxSailAngle) / M_PI) * abs(apparentWindDirection) + m_maxSailAngle);
+    sailCommand = fabs(((m_minSailAngle - m_maxSailAngle) / M_PI) * fabs(apparentWindDirection) + m_maxSailAngle);/*!!! on some pc abs only ouptut an int (ubuntu 14.04 gcc 4.9.3)*/
+
+    if (cos(apparentWindDirection+M_PI) + cos(m_maxSailAngle) <0 )
+    {
+       sailCommand = m_minSailAngle;
+    }
+
     //------------------
-    int rudderCommand_norm = m_rudderCommand.getCommand(rudderCommand);
-    int sailCommand_norm = m_sailCommand.getCommand(sailCommand);
+    int rudderCommand_norm = m_rudderCommand.getCommand(rudderCommand/NORM_RUDDER_COMMAND);
+    int sailCommand_norm = m_sailCommand.getCommand(sailCommand/NORM_SAIL_COMMAND);
 
     //Send messages----
     ActuatorPositionMsg *actuatorMsg = new ActuatorPositionMsg(rudderCommand_norm, sailCommand_norm);
@@ -191,10 +201,16 @@ void LineFollowNode::calculateActuatorPos(VesselStateMsg* msg)
     double bearingToNextWaypoint = m_courseMath.calculateBTW(msg->longitude(), msg->latitude(), m_nextWaypointLon, m_nextWaypointLat); //calculated for database
     double distanceToNextWaypoint = m_courseMath.calculateDTW(msg->longitude(), msg->latitude(), m_nextWaypointLon, m_nextWaypointLat);
 
-    manageDatabase(msg, trueWindDirection, rudderCommand_norm, sailCommand_norm, currentHeading, distanceToNextWaypoint, bearingToNextWaypoint);
-
     CourseDataMsg* courseMsg = new CourseDataMsg(trueWindDirection, distanceToNextWaypoint, bearingToNextWaypoint);
     m_MsgBus.sendMessage(courseMsg);
+
+    //create timestamp----
+    std::string timestamp_str=SysClock::timeStampStr();
+    timestamp_str+=".";
+    timestamp_str+= std::to_string(SysClock::millis());
+    //--------------------
+
+    m_dbLogger.log(msg, rudderCommand_norm, sailCommand_norm, 0, 0, distanceToNextWaypoint, bearingToNextWaypoint, desiredHeading, m_tack, getGoingStarboard(), m_nextWaypointId, trueWindDirection, false,timestamp_str);
 }
 
 void LineFollowNode::setPrevWaypointData(WaypointDataMsg* waypMsg, VesselStateMsg* vesselMsg)
@@ -282,6 +298,7 @@ bool LineFollowNode::getGoingStarboard()
     else return false;
 }
 
+/*
 void LineFollowNode::manageDatabase(VesselStateMsg* msg, double trueWindDirection, double rudder, double sail, double heading,
                         double distanceToNextWaypoint, double bearingToNextWaypoint){
   //logging
@@ -301,4 +318,4 @@ void LineFollowNode::manageDatabase(VesselStateMsg* msg, double trueWindDirectio
     trueWindDirection,
     routeStarted
   );
-}
+}*/

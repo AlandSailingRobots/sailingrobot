@@ -7,14 +7,45 @@
 #include <vector>
 #include <sqlite3.h>
 #include "SystemServices/Logger.h"
+#include "models/WaypointModel.h"
 #include "Messages/VesselStateMsg.h"
 
 #include "libs/json/src/json.hpp"
 using Json = nlohmann::json;
 
-class SystemStateModel;
-class WaypointModel;
-class PositionModel;
+struct LogItem {
+		int 	m_compassHeading;
+		int 	m_compassPitch;
+		int 	m_compassRoll;
+		bool	m_gpsHasFix;
+		bool	m_gpsOnline;
+		double	m_gpsLat;
+		double	m_gpsLon;
+		double	m_gpsUnixTime;
+		double	m_gpsSpeed;
+		double	m_gpsHeading;
+		int		m_gpsSatellite;
+		float	m_windDir;
+		float	m_windSpeed;
+		float 	m_windTemp;
+		int 	m_arduinoPressure;
+		int 	m_arduinoRudder;
+		int 	m_arduinoSheet;
+		int 	m_arduinoBattery;
+		double 	m_rudder;
+		double 	m_sail;
+		int 	m_sailServoPosition;
+		int 	m_rudderServoPosition;
+		double 	m_distanceToWaypoint;
+		double 	m_bearingToWaypoint;
+		double 	m_courseToSteer;
+		bool 	m_tack;
+		bool 	m_goingStarboard;
+		int 	m_waypointId;
+		double 	m_twd;
+		bool 	m_routeStarted;
+		std::string m_timestamp_str;
+	};
 
 class DBHandler {
 
@@ -27,10 +58,12 @@ private:
 
 	//execute INSERT query and add new row into table
 	bool queryTable(std::string sqlINSERT);
+	bool queryTable(std::string sqlINSERT, sqlite3* db);
 
 	//retrieve data from given table/tables, return value is a C 2D char array
 	//rows and columns also return values (through a reference) about rows and columns in the result set
 	std::vector<std::string> retrieveFromTable(std::string sqlSELECT, int &rows, int &columns);
+	std::vector<std::string> retrieveFromTable(std::string sqlSELECT, int &rows, int &columns,sqlite3* db);
 
 	//adds a table row into the json object as a array if array flag is true,
 	//otherwise it adds the table row as a json object
@@ -48,7 +81,7 @@ private:
 	std::vector<std::string> getColumnInfo(std::string info, std::string table);
 
 	//help function used in insertDataLog
-	int insertLog(std::string table, std::string values);
+	int insertLog(std::string table, std::string values, sqlite3* db);
 
 	// own implementation of deprecated sqlite3_get_table()
 	int getTable(sqlite3* db, const std::string &sql, std::vector<std::string> &results, int &rows, int &columns);
@@ -67,20 +100,7 @@ public:
 
 	int getRows(std::string table);
 
-	void insertDataLog(
-		VesselStateMsg* msg,
-		double rudder,
-		double sail,
-		int sailServoPosition,
-		int rudderServoPosition,
-		double courseCalculationDistanceToWaypoint,
-		double courseCalculationBearingToWaypoint,
-		double courseCalculationCourseToSteer,
-		bool courseCalculationTack,
-		bool courseCalculationGoingStarboard,
-		int waypointId,
-		double trueWindDirectionCalc,
-		bool routeStarted);
+	void insertDataLogs(std::vector<LogItem>& logs);
 
 	void insertMessageLog(std::string gps_time, std::string type, std::string msg);
 
@@ -111,6 +131,7 @@ public:
 	//max = false -> min id
 	//max = true -> max id
 	std::string getIdFromTable(std::string table, bool max);
+	std::string getIdFromTable(std::string table, bool max,sqlite3* db);
 
 	void deleteRow(std::string table, std::string id);
 

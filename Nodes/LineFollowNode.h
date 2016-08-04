@@ -21,6 +21,7 @@
 #include "Messages/VesselStateMsg.h"
 #include "Messages/WaypointDataMsg.h"
 #include "dbhandler/DBHandler.h"
+#include "dbhandler/DBLogger.h"
 #include "sailcommand/SailCommand.h"
 #include "ruddercommand/RudderCommand.h"
 #include "coursecalculation/CourseMath.h"
@@ -39,6 +40,7 @@ public:
 
 private:
 	DBHandler m_db;
+	DBLogger m_dbLogger;
 
 	int 	m_nextWaypointId;
 	double 	m_nextWaypointLon;
@@ -75,6 +77,6 @@ private:
 	void setupSailCommand();
     bool getGoingStarboard();
 
-	void manageDatabase(VesselStateMsg* msg, double trueWindDirection, double rudder, double sail, double heading,
-                        double distanceToNextWaypoint, double bearingToNextWaypoint);
+	/*void manageDatabase(VesselStateMsg* msg, double trueWindDirection, double rudder, double sail, double heading,
+                        double distanceToNextWaypoint, double bearingToNextWaypoint);*/
 };
