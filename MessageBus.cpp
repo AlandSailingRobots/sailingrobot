@@ -70,8 +70,8 @@ void MessageBus::sendMessage(MessagePtr msg)
 	if(msg != NULL)
 	{
 		m_FrontQueueMutex.lock();
-		m_FrontMessages->push(std::move(msg));
 		Message* logMsg = msg.get();
+		m_FrontMessages->push(std::move(msg));
 		logMessageReceived(logMsg); 
 		m_FrontQueueMutex.unlock();
 	}
