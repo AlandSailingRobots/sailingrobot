@@ -31,9 +31,9 @@ public:
 	WindDataMsg(MessageDeserialiser deserialiser)
 		:Message(deserialiser)
 	{
-		if(	!deserialiser.readFloat(m_windDir) ||
-			!deserialiser.readFloat(m_WindSpeed) ||
-			!deserialiser.readFloat(m_WindTemp))
+		if(	!deserialiser.readUint16_t(m_windDir) ||
+			!deserialiser.readUint8_t(m_WindSpeed) ||
+			!deserialiser.readUint8_t(m_WindTemp))
 		{
 			m_valid = false;
 		}
