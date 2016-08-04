@@ -31,7 +31,7 @@ public:
 	WindDataMsg(MessageDeserialiser deserialiser)
 		:Message(deserialiser)
 	{
-		if(	!deserialiser.readFloat(m_WindDir) ||
+		if(	!deserialiser.readFloat(m_windDir) ||
 			!deserialiser.readFloat(m_WindSpeed) ||
 			!deserialiser.readFloat(m_WindTemp))
 		{
@@ -52,7 +52,7 @@ public:
 	{
 		Message::Serialise(serialiser);
 
-		serialiser.serialise(m_WindDir);
+		serialiser.serialise(m_windDir);
 		serialiser.serialise(m_WindSpeed);
 		serialiser.serialise(m_WindTemp);
 	}
