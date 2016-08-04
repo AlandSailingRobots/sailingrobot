@@ -9,7 +9,7 @@
 #include "SystemServices/Logger.h"
 #include "models/WaypointModel.h"
 #include "Messages/VesselStateMsg.h"
-
+#include <mutex>
 #include "libs/json/src/json.hpp"
 using Json = nlohmann::json;
 
@@ -55,6 +55,7 @@ private:
 	int m_latestDataLogId;
 	std::string m_currentWaypointId = "";
 	std::string m_filePath;
+	std::mutex m_databaseLock;
 
 	//execute INSERT query and add new row into table
 	bool queryTable(std::string sqlINSERT);

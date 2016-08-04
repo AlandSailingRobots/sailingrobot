@@ -42,7 +42,7 @@ JSON = 					libs/json
 CORE =					MessageBus.cpp ActiveNode.cpp Messages/MessageSerialiser.cpp Messages/MessageDeserialiser.cpp
 
 ifeq ($(USE_SIM),1)
-NODES =					Nodes/MessageLoggerNode.cpp  Nodes/WaypointNode.cpp Nodes/HTTPSyncNode.cpp Nodes/xBeeSyncNode.cpp \
+NODES =					Nodes/MessageLoggerNode.cpp  Nodes/WaypointNode.cpp Nodes/HTTPSyncNode.cpp Nodes/XbeeSyncNode.cpp \
 							Nodes/VesselStateNode.cpp  Nodes/RoutingNode.cpp Nodes/LineFollowNode.cpp \
 							Nodes/SimulationNode.cpp
 SYSTEM_SERVICES =	SystemServices/Logger.cpp

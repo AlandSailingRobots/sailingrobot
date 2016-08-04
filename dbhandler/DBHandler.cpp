@@ -31,6 +31,7 @@ bool DBHandler::initialise()
 	}
 	else
 	{
+		closeDatabase(connection);
 		return false;
 	}
 }
@@ -101,6 +102,7 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs)
 		if(db == NULL)
 		{
 			Logger::error("%s Database is null!", __PRETTY_FUNCTION__);
+			closeDatabase(db);
 			return;
 		}
 
@@ -585,6 +587,8 @@ std::string DBHandler::getIdFromTable(std::string table, bool max,sqlite3* db) {
 ////////////////////////////////////////////////////////////////////
 
 sqlite3* DBHandler::openDatabase() {
+
+	m_databaseLock.lock();
 	sqlite3* connection;
 	int resultcode = 0;
 
@@ -592,6 +596,9 @@ sqlite3* DBHandler::openDatabase() {
 	FILE* db_file = fopen(m_filePath.c_str(), "r");
 	if (!db_file) {
 		Logger::error("%s %s not found", __PRETTY_FUNCTION__, m_filePath.c_str());
+	  fclose(db_file);
+		m_databaseLock.unlock();
+		return NULL;
 	}
 	fclose(db_file);
 
@@ -601,6 +608,7 @@ sqlite3* DBHandler::openDatabase() {
 
 	if (resultcode) {
 		Logger::error("%s Failed to open the database Error %s", __PRETTY_FUNCTION__, sqlite3_errmsg(connection));
+		m_databaseLock.unlock();
 		return 0;
 	}
 
@@ -614,8 +622,10 @@ void DBHandler::closeDatabase(sqlite3* connection) {
 
 	if(connection != NULL) {
 		sqlite3_close(connection);
+		m_databaseLock.unlock();
 		connection = NULL;
 	} else {
+		m_databaseLock.unlock();
 		throw "DBHandler::closeDatabase() : connection is already null";
 	}
 }
@@ -718,11 +728,13 @@ bool DBHandler::queryTable(std::string sqlINSERT) {
 			Logger::error("%s Error: %s", __PRETTY_FUNCTION__, sqlite3_errmsg(db));
 
 			sqlite3_free(m_error);
+			closeDatabase(db);
 			return false;
 		}
 	}
 	else {
 		Logger::error("%s Error: no database found", __PRETTY_FUNCTION__);
+		closeDatabase(db);
 		return false;
 	}
 	closeDatabase(db);
@@ -776,15 +788,18 @@ std::vector<std::string> DBHandler::retrieveFromTable(std::string sqlSELECT, int
 
 		if(resultcode == SQLITE_EMPTY) {
 			std::vector<std::string> s;
+			closeDatabase(db);
 			return s;
 		}
 
 		if (resultcode != SQLITE_OK) {
 			Logger::error("%s SQL statement: %s Error: %s", __PRETTY_FUNCTION__, sqlSELECT.c_str(), sqlite3_errstr(resultcode));
+			closeDatabase(db);
 			throw "retrieveFromTable";
 		}
 	}
 	else {
+		closeDatabase(db);
 		throw "DBHandler::retrieveFromTable(), no db connection";
 	}
 
