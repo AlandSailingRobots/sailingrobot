@@ -585,6 +585,8 @@ std::string DBHandler::getIdFromTable(std::string table, bool max,sqlite3* db) {
 ////////////////////////////////////////////////////////////////////
 
 sqlite3* DBHandler::openDatabase() {
+
+	m_databaseLock.lock();
 	sqlite3* connection;
 	int resultcode = 0;
 
@@ -592,6 +594,9 @@ sqlite3* DBHandler::openDatabase() {
 	FILE* db_file = fopen(m_filePath.c_str(), "r");
 	if (!db_file) {
 		Logger::error("%s %s not found", __PRETTY_FUNCTION__, m_filePath.c_str());
+	  fclose(db_file);
+		m_databaseLock.unlock();
+		return NULL;
 	}
 	fclose(db_file);
 
@@ -601,6 +606,7 @@ sqlite3* DBHandler::openDatabase() {
 
 	if (resultcode) {
 		Logger::error("%s Failed to open the database Error %s", __PRETTY_FUNCTION__, sqlite3_errmsg(connection));
+		m_databaseLock.unlock();
 		return 0;
 	}
 
@@ -614,8 +620,10 @@ void DBHandler::closeDatabase(sqlite3* connection) {
 
 	if(connection != NULL) {
 		sqlite3_close(connection);
+		m_databaseLock.unlock();
 		connection = NULL;
 	} else {
+		m_databaseLock.unlock();
 		throw "DBHandler::closeDatabase() : connection is already null";
 	}
 }
