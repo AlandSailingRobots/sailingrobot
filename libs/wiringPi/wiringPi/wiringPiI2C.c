@@ -283,7 +283,7 @@ int wiringPiI2CReadBlockOriginal(int file, char command, char *values)
   }
 }
 
-int wiringPiI2CWriteBlock(int file, char command, char length, char *values)
+int wiringPiI2CWriteBlock(int file, char command, char *values, char length)
 {
   union i2c_smbus_data data;
   int i;
@@ -296,7 +296,7 @@ int wiringPiI2CWriteBlock(int file, char command, char length, char *values)
                           I2C_SMBUS_BLOCK_DATA, &data);
 }
 
-int wiringPiI2CWriteI2CBlock(int file, char command, char length, char *values)
+int wiringPiI2CWriteI2CBlock(int file, char command, char *values, char length)
 {
   union i2c_smbus_data data;
   int i;
