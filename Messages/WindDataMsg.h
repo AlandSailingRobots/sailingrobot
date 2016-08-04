@@ -20,19 +20,19 @@ class WindDataMsg : public Message {
 public:
 	WindDataMsg(NodeID destinationID, NodeID sourceID, uint8_t windDir, uint8_t windSpeed, uint16_t windTemp)
 		:Message(MessageType::WindData, sourceID, destinationID),
-		m_WindDir(windDir), m_WindSpeed(windSpeed), m_WindTemp(windTemp)
+		m_windDir(windDir), m_windSpeed(windSpeed), m_windTemp(windTemp)
 	{ }
 
 	WindDataMsg(uint8_t windDir, uint8_t windSpeed, uint16_t windTemp)
 		:Message(MessageType::WindData, NodeID::None, NodeID::None),
-		m_WindDir(windDir), m_WindSpeed(windSpeed), m_WindTemp(windTemp)
+		m_windDir(windDir), m_windSpeed(windSpeed), m_windTemp(windTemp)
 	{ }
 
 	virtual ~WindDataMsg() { }
 
-	uint8_t windDirection() { return m_WindDir; }
-	uint8_t windSpeed() { return m_WindSpeed; }
-	uint16_t windTemp() { return m_WindTemp; }
+	uint8_t windDirection() { return m_windDir; }
+	uint8_t windSpeed() { return m_windSpeed; }
+	uint16_t windTemp() { return m_windTemp; }
 
 private:
 	uint8_t 	m_windDir;
