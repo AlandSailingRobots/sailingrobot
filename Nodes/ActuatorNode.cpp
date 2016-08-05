@@ -20,7 +20,7 @@
 ActuatorNode::ActuatorNode(MessageBus& msgBus, NodeID id, int channel, int speed, int acceleration)
 	:Node(id, msgBus), m_Channel(channel), m_Speed(speed), m_Acceleration(acceleration)
 {
-  msgBus.registerNode(this,MessageType::ActuatorPosition);
+  msgBus.registerNode(*this,MessageType::ActuatorPosition);
 }
 
 bool ActuatorNode::init()

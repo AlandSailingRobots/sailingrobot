@@ -594,13 +594,12 @@ sqlite3* DBHandler::openDatabase() {
 
 	// check if file exists
 	FILE* db_file = fopen(m_filePath.c_str(), "r");
-	if (!db_file) {
+	if (db_file != NULL) {
 		Logger::error("%s %s not found", __PRETTY_FUNCTION__, m_filePath.c_str());
-	  fclose(db_file);
+		fclose(db_file);
 		m_databaseLock.unlock();
 		return NULL;
 	}
-	fclose(db_file);
 
 	do {
 		resultcode = sqlite3_open(m_filePath.c_str(), &connection);
@@ -863,7 +862,7 @@ std::vector<std::string> DBHandler::getTableNames(std::string like) {
     }
 
     std::vector<std::string> tableNames;
-    for (int i = 1; i <= rows; i++) {
+    for (unsigned int i = 1; i <= results.size(); i++) {
     	tableNames.push_back(results[i]);
     }
 

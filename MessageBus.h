@@ -22,8 +22,13 @@
 #include <vector>
 #include <queue>
 #include <mutex>
+#include <memory>
 #include <iostream>
 #include <fstream>
+
+
+typedef std::unique_ptr<Message> MessagePtr;
+
 
 class Node;
 
@@ -48,7 +53,7 @@ public:
  	///
  	/// @param node 			Pointer to the node that should be registered.
  	///----------------------------------------------------------------------------------
-	bool registerNode(Node* node);
+	bool registerNode(Node& node);
 
 	///----------------------------------------------------------------------------------
  	/// Registers a node onto the message bus allowing it receive direct messages and
@@ -57,7 +62,7 @@ public:
  	/// @param node 			Pointer to the node that should be registered.
  	/// @param msgType 			The type of message to register for
  	///----------------------------------------------------------------------------------
-	bool registerNode(Node* node, MessageType msgType);
+	bool registerNode(Node& node, MessageType msgType);
 
 	///----------------------------------------------------------------------------------
  	/// Enqueues a message onto the message queue for distribution through the message 
@@ -66,7 +71,7 @@ public:
  	/// @param msg 				Pointer to the message that should be enqeued, this
  	///							passes ownership to the MessageBus.
  	///----------------------------------------------------------------------------------
-	void sendMessage(Message* msg);
+	void sendMessage(MessagePtr msg);
 
 	///----------------------------------------------------------------------------------
  	/// Begins running the message bus and distributing messages to nodes that have been
@@ -79,9 +84,9 @@ private:
  	/// in.
  	///----------------------------------------------------------------------------------
 	struct RegisteredNode {
-		RegisteredNode(Node* node) : nodePtr(node) { }
+		RegisteredNode(Node& node) : nodeRef(node) { }
 
-		Node* nodePtr;
+		Node& nodeRef;
 
 		///------------------------------------------------------------------------------
  		/// Returns true if a registered node is interested in a message type.
@@ -117,7 +122,7 @@ private:
  	/// to it. If the node has not yet been registered, it is then registered and a 
  	/// pointer to the new RegisteredNode is returned.
  	///----------------------------------------------------------------------------------
-	RegisteredNode* getRegisteredNode(Node* node);
+	RegisteredNode* getRegisteredNode(Node& node);
 
 	///----------------------------------------------------------------------------------
  	/// Goes through the back message queue and distributes messages, calling 
@@ -138,7 +143,7 @@ private:
 	///----------------------------------------------------------------------------------
 	/// Logs a message that is being processed.
 	///----------------------------------------------------------------------------------
-	void logMessage(Message* msg);
+	void logMessage(MessagePtr msg);
 
 	///----------------------------------------------------------------------------------
 	/// Logs that a node consumed the current message being processed.
@@ -158,9 +163,9 @@ private:
 
 	bool 							m_Running;
 	std::vector<RegisteredNode*> 	m_RegisteredNodes;
-	std::queue<Message*>* 			m_FrontMessages; 	// The forward facing message queue 
+	std::queue<MessagePtr>* 		m_FrontMessages; 	// The forward facing message queue 
 													 	// which messages are append to.
-	std::queue<Message*>*			m_BackMessages; 	// The backend message queue which 
+	std::queue<MessagePtr>*			m_BackMessages; 	// The backend message queue which 
 														// contains messages to distribute.
 	std::mutex						m_FrontQueueMutex;	// Guards the front message queue.
 	

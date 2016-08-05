@@ -125,6 +125,7 @@ public:
 	// returns all logs in database as json; supply onlyLatest to get only the ones with the highest id
 	std::string getLogs(bool onlyLatest);
 
+	void forceUnlock() { m_databaseLock.unlock(); }
 
 	void clearLogs();
 

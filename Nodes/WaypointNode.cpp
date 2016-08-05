@@ -33,7 +33,7 @@ WaypointNode::WaypointNode(MessageBus& msgBus, DBHandler& db)
     m_prevDeclination(0),
     m_prevRadius(0)
 {
-    msgBus.registerNode(this, MessageType::GPSData);
+    msgBus.registerNode(*this, MessageType::GPSData);
 }
 
 bool WaypointNode::init()
@@ -97,12 +97,15 @@ void WaypointNode::sendMessage()
     if(m_db.getWaypointValues(m_nextId, m_nextLongitude, m_nextLatitude, m_nextDeclination, m_nextRadius,
                         m_prevId, m_prevLongitude, m_prevLatitude, m_prevDeclination, m_prevRadius))
     {
-        WaypointDataMsg* msg = new WaypointDataMsg(m_nextId, m_nextLongitude, m_nextLatitude, m_nextDeclination, m_nextRadius,
+        MessagePtr msg = std::make_unique<WaypointDataMsg>(m_nextId, m_nextLongitude, m_nextLatitude, m_nextDeclination, m_nextRadius,
                         m_prevId, m_prevLongitude, m_prevLatitude, m_prevDeclination, m_prevRadius);
-        m_MsgBus.sendMessage(msg);
+
+        m_MsgBus.sendMessage(std::move(msg));
     }
     else
     {
         Logger::warning("%s No waypoint found, boat is using old waypoint data. No message sent.", __func__);
     }
+
+    m_db.forceUnlock();
 }

@@ -106,22 +106,22 @@ int main(int argc, char *argv[])
 	}
 
 	// Create nodes
-	XbeeSyncNode xbee(messageBus, dbHandler);
 	MessageLoggerNode msgLogger(messageBus);
 
 	#if SIMULATION == 1
 	printf("using simulation\n");
 	SimulationNode simulation(messageBus);
 	#else
-  CV7Node windSensor(messageBus, dbHandler.retrieveCell("windsensor_config", "1", "port"), dbHandler.retrieveCellAsInt("windsensor_config", "1", "baud_rate"));
+	XbeeSyncNode xbee(messageBus, dbHandler);
+	CV7Node windSensor(messageBus, dbHandler.retrieveCell("windsensor_config", "1", "port"), dbHandler.retrieveCellAsInt("windsensor_config", "1", "baud_rate"));
 	HMC6343Node compass(messageBus, dbHandler.retrieveCellAsInt("buffer_config", "1", "compass"));
 	GPSDNode gpsd(messageBus);
 	ArduinoNode arduino(messageBus);
+	HTTPSyncNode httpsync(messageBus, &dbHandler, 0, false);
 	#endif
 
 	VesselStateNode vessel(messageBus);
 	WaypointNode waypoint(messageBus, dbHandler);
-	HTTPSyncNode httpsync(messageBus, &dbHandler, 0, false);
 
 
 	Node* sailingLogic;
@@ -149,30 +149,26 @@ int main(int argc, char *argv[])
 
 	ActuatorNode rudder(messageBus, NodeID::RudderActuator, channel, speed, acceleration);
 	MaestroController::init(dbHandler.retrieveCell("maestro_controller_config", "1", "port"));
-  #endif
-
 	bool requireNetwork = (bool) (dbHandler.retrieveCellAsInt("sailing_robot_config", "1", "require_network"));
+  #endif
 
 	// System services
 
 
 	// Initialise nodes
-	initialiseNode(xbee, "Xbee Sync Node", NodeImportance::CRITICAL);
 	initialiseNode(msgLogger, "Message Logger", NodeImportance::NOT_CRITICAL);
 
 	#if SIMULATION == 1
 	initialiseNode(simulation,"Simulation Node",NodeImportance::CRITICAL);
 	#else
-  initialiseNode(windSensor, "Wind Sensor", NodeImportance::CRITICAL);
+	initialiseNode(xbee, "Xbee Sync Node", NodeImportance::CRITICAL);
+	initialiseNode(windSensor, "Wind Sensor", NodeImportance::CRITICAL);
 	initialiseNode(compass, "Compass", NodeImportance::CRITICAL);
 	initialiseNode(gpsd, "GPSD Node", NodeImportance::CRITICAL);
 	initialiseNode(sail, "Sail Actuator", NodeImportance::CRITICAL);
 	initialiseNode(rudder, "Rudder Actuator", NodeImportance::CRITICAL);
 	initialiseNode(arduino, "Arduino Node", NodeImportance::NOT_CRITICAL);
-	#endif
 
-	initialiseNode(vessel, "Vessel State Node", NodeImportance::CRITICAL);
-	initialiseNode(waypoint, "Waypoint Node", NodeImportance::CRITICAL);
 	if (requireNetwork)
 	{
 		initialiseNode(httpsync, "Httpsync Node", NodeImportance::CRITICAL);
@@ -181,6 +177,11 @@ int main(int argc, char *argv[])
 	{
 		initialiseNode(httpsync, "Httpsync Node", NodeImportance::NOT_CRITICAL);
 	}
+	#endif
+
+	initialiseNode(vessel, "Vessel State Node", NodeImportance::CRITICAL);
+	initialiseNode(waypoint, "Waypoint Node", NodeImportance::CRITICAL);
+
 	if(usingLineFollow)
 	{
 		initialiseNode(*sailingLogic, "LineFollow Node", NodeImportance::CRITICAL);
@@ -191,22 +192,22 @@ int main(int argc, char *argv[])
 	}
 
 	// Start active nodes
-	xbee.start();
 	#if SIMULATION == 1
 	simulation.start();
   #else
+	xbee.start();
 	windSensor.start();
 	compass.start();
 	gpsd.start();
 	arduino.start();
+	httpsync.start();
   #endif
 
 	vessel.start();
-	httpsync.start();
 
 	// NOTE - Jordan: Just to ensure messages are following through the system
-	DataRequestMsg* dataRequest = new DataRequestMsg(NodeID::MessageLogger);
-	messageBus.sendMessage(dataRequest);
+	MessagePtr dataRequest = std::make_unique<DataRequestMsg>(NodeID::MessageLogger);
+	messageBus.sendMessage(std::move(dataRequest));
 
 	Logger::info("Message bus started!");
 	messageBus.run();

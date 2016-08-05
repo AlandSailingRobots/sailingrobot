@@ -41,6 +41,7 @@ private:
 	static void workerThread(DBLogger* ptr);
 
 	std::thread* 			m_thread;
+	static bool				m_working;
 	std::mutex				m_mutex;
 	std::condition_variable m_cv;
 	DBHandler& 				m_dbHandler;

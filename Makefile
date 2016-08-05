@@ -43,9 +43,9 @@ CORE =					MessageBus.cpp ActiveNode.cpp Messages/MessageSerialiser.cpp Messages
 
 ifeq ($(USE_SIM),1)
 NODES =					Nodes/MessageLoggerNode.cpp  Nodes/WaypointNode.cpp Nodes/HTTPSyncNode.cpp Nodes/XbeeSyncNode.cpp \
-							Nodes/VesselStateNode.cpp  Nodes/RoutingNode.cpp Nodes/LineFollowNode.cpp \
-							Nodes/SimulationNode.cpp
-SYSTEM_SERVICES =	SystemServices/Logger.cpp
+						Nodes/VesselStateNode.cpp  Nodes/RoutingNode.cpp Nodes/LineFollowNode.cpp \
+						Nodes/SimulationNode.cpp
+SYSTEM_SERVICES =		SystemServices/Logger.cpp
 else
 NODES =					Nodes/MessageLoggerNode.cpp Nodes/CV7Node.cpp Nodes/HMC6343Node.cpp Nodes/GPSDNode.cpp Nodes/ActuatorNode.cpp  Nodes/ArduinoNode.cpp \
 						Nodes/VesselStateNode.cpp Nodes/WaypointNode.cpp Nodes/HTTPSyncNode.cpp Nodes/XbeeSyncNode.cpp Nodes/RoutingNode.cpp Nodes/LineFollowNode.cpp \
@@ -111,7 +111,7 @@ export OBJECT_FILE = $(BUILD_DIR)/objects.tmp
 
 
 export CFLAGS = -Wall -g -o2
-export CPPFLAGS = -g -Wall -pedantic -Werror -std=c++11
+export CPPFLAGS = -g -Wall -pedantic -Werror -std=c++14
 
 export LIBS = -lsqlite3 -lgps -lrt -lcurl -lpthread
 
