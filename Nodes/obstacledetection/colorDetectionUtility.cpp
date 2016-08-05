@@ -49,7 +49,7 @@ void initHsvColors(){
     purple.push_back(160);
     purple.push_back(255);
     purple.push_back(255);
-    webcamAngleApertureX =2*atan(20.0/(2.0*24))*180/M_PI;
+    webcamAngleApertureX =2*atan(20.0/(2.0*24));
     webcamAngleApertureY =2*atan(15.0/(2.0*23));
 
 }

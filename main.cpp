@@ -119,7 +119,7 @@ int main(int argc, char *argv[])
 	#endif
     std::vector<std::string> color_inputs;
     color_inputs.push_back("red");
-    colorDetectionNode colorDetect(messageBus,color_inputs);
+    colorDetectionNode colorDetect(messageBus,color_inputs,0);
     lidarLiteNode lidarDetect(messageBus,2);
 	VesselStateNode vessel(messageBus);
 	WaypointNode waypoint(messageBus, dbHandler);

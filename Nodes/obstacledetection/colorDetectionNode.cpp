@@ -4,11 +4,11 @@ using namespace cv;
 using namespace std;
 #define DISPLAY_WINDOWS_AND_TRACKBARS 1
 
-colorDetectionNode::colorDetectionNode(MessageBus& msgBus,std::vector<string> colors_input)
+colorDetectionNode::colorDetectionNode(MessageBus& msgBus,std::vector<string> colors_input,int bottomPixelsToCrop)
 	: ActiveNode(NodeID::ColorDetection, msgBus),m_hsvDiff(10),m_iLowH(0),
 	m_iHighH(179),m_iLowS(0),m_iHighS(255),m_iLowV(0),m_iHighV(255),m_iColor(0),
 	m_numberOfColorsToTrack(0),m_Initialised(false),m_minAreaToDetect(2000),
-	m_maxAreaToDetect(20000),m_numberOfCapturesPerDetection(5),m_delay(1),m_port(0)
+	m_maxAreaToDetect(20000),m_numberOfCapturesPerDetection(5),m_delay(1),m_port(0),m_bottomPixelsToCrop(bottomPixelsToCrop)
 {
 	vector<string> colors;
 	m_trackBarHSV = Mat3b(100, 300, Vec3b(0,0,0));
@@ -40,12 +40,12 @@ colorDetectionNode::colorDetectionNode(MessageBus& msgBus,std::vector<string> co
 }
 
 colorDetectionNode::colorDetectionNode(MessageBus& msgBus,
-	int m_numberOfCapturesPerDetection, int port, int delay,std::vector<string> colors_input)
+	int m_numberOfCapturesPerDetection, int port, int delay,std::vector<string> colors_input,int bottomPixelsToCrop)
 	: ActiveNode(NodeID::ColorDetection, msgBus),m_hsvDiff(10),m_iLowH(0),
 	m_iHighH(179),m_iLowS(0),m_iHighS(255),m_iLowV(0),m_iHighV(255),m_iColor(0),
 	m_numberOfColorsToTrack(0),m_Initialised(false),m_minAreaToDetect(2000),
 	m_maxAreaToDetect(20000),m_numberOfCapturesPerDetection(m_numberOfCapturesPerDetection),
-	m_delay(delay),m_port(port)
+	m_delay(delay),m_port(port),m_bottomPixelsToCrop(bottomPixelsToCrop)
 {
 
 	vector<string> colors;
@@ -249,6 +249,13 @@ void colorDetectionNode::colorDetectionThreadFunc(void* nodePtr)
 				Logger::warning("%sCannot read a frame from video stream!", __PRETTY_FUNCTION__);
 				continue;
             }
+            //Crop the part corresponding to the boat
+            // Setup a rectangle to define your region of interest
+            cv::Rect myROI(0, 0, node->m_imgOriginal.cols,node->m_imgOriginal.rows - node->m_bottomPixelsToCrop);
+            // Crop the full image to that image contained by the rectangle myROI
+            // Note that this doesn't copy the data
+            node->m_imgOriginal = node->m_imgOriginal(myROI);
+
 			//For each color to track find obstacles
             for(int i = 0; i<(int)node->m_hsvValues.size(); i++){
                 imgThresholded=threshold(node->m_imgOriginal,node->m_hsvValues[i]);
