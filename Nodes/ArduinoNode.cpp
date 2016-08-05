@@ -43,7 +43,7 @@ bool ArduinoNode::init()
 		m_I2C.beginTransmission();
 
         uint8_t block[BLOCK_READ_SIZE];
-        m_I2C.readBlock(block, BLOCK_READ_SIZE);
+        m_I2C.readBlock(block);
 		uint8_t deviceID = block[BLOCK_I2C_ADDRESS_LOC];
 
 		m_I2C.endTransmission();
@@ -98,7 +98,7 @@ void ArduinoNode::ArduinoThreadFunc(void* nodePtr)
         //readValues(block)
 
         node->m_I2C.beginTransmission();        
-            node->m_I2C.readBlock(block, BLOCK_READ_SIZE);
+            node->m_I2C.readBlock(block);
         node->m_I2C.endTransmission();
 
         reVal = block[0]<<8;

@@ -85,7 +85,7 @@ class I2CController {
 		/// @returns 				Returns a byte from the read, or a -1 if there was a
 		///							error.
 		///----------------------------------------------------------------------------------
-		int readBlock(uint8_t* block, uint8_t size);
+		int readBlock(uint8_t* block);
 		
 		///----------------------------------------------------------------------------------
 		/// Writes a block of bytes from the I2C device. The block will not write more than 32
