@@ -106,4 +106,6 @@ void WaypointNode::sendMessage()
     {
         Logger::warning("%s No waypoint found, boat is using old waypoint data. No message sent.", __func__);
     }
+
+    m_db.forceUnlock();
 }

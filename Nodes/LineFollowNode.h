@@ -39,7 +39,7 @@ public:
 	float m_gpsHeadingWeight;
 
 private:
-	DBHandler m_db;
+	DBHandler &m_db;
 	DBLogger m_dbLogger;
 
 	int 	m_nextWaypointId;
@@ -58,7 +58,7 @@ private:
     double  m_maxCommandAngle, m_maxSailAngle, m_minSailAngle;
     double  m_tackAngle;
     int     m_tackingDirection;
-	
+
     CourseMath m_courseMath;
 	RudderCommand m_rudderCommand;
 	SailCommand m_sailCommand;

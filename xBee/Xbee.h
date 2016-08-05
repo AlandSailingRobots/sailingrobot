@@ -49,17 +49,17 @@ public:
 	void setIncomingCallback(XbeeIncomingMsgFunc func) { m_incomingCallback = func; }
 
 	///----------------------------------------------------------------------------------
+	/// Receives any messages from the xbee and begins transmitting messages.
+	///----------------------------------------------------------------------------------
+	void processRadioMessages();
+
+	///----------------------------------------------------------------------------------
 	/// Transmits a block of data, a copy is made of the data.
 	///
 	/// @param data				The data to transmit
 	/// @param size				How many bytes to transmit.
 	///----------------------------------------------------------------------------------
 	void transmit(uint8_t* data, uint8_t size);
-
-	///----------------------------------------------------------------------------------
-	/// Receives any messages from the xbee and begins transmitting messages.
-	///----------------------------------------------------------------------------------
-	void processRadioMessages();
 
 protected:
 	// A Xbee packet has an overhead of 3 bytes
@@ -68,7 +68,19 @@ protected:
 		uint8_t m_packetCount;
 		uint8_t m_payloadSize;
 		uint8_t* m_payload;
+		uint16_t m_checksum;
 	};
+
+	///----------------------------------------------------------------------------------
+	/// Attempts to read packets and stores them for processing. Returns true if any
+	/// packets were received.
+	///----------------------------------------------------------------------------------
+	bool receivePackets();
+
+	///----------------------------------------------------------------------------------
+	/// Processes the packets, joins multi-packet messages and checks for malformed data.
+	///----------------------------------------------------------------------------------
+	void processPacketQueue();
 
 	///----------------------------------------------------------------------------------
 	/// Writes a packet to the xbee. This function is virtual so the mock unit test
@@ -90,19 +102,26 @@ protected:
 	///----------------------------------------------------------------------------------
 	bool dataAvailable();
 
-	///----------------------------------------------------------------------------------
-	/// Attempts to read packets and stores them for processing. Returns true if any
-	/// packets were received.
-	///----------------------------------------------------------------------------------
-	bool receivePackets();
-
-	///----------------------------------------------------------------------------------
-	/// Processes the packets, joins multi-packet messages and checks for malformed data.
-	///----------------------------------------------------------------------------------
-	void processPacketQueue();
-
 	void processPacket(XbeePacket& packet);
 	void processPacket(std::vector<XbeePacket>& packets);
+
+	///----------------------------------------------------------------------------------
+	/// Converts a array of bytes into slip compatible data. Replaces the special start
+	/// character with two characters so it is not confused with a start of packet. This
+	/// function will allocate enough memory for the slip data. Pointer ownership is
+	/// left to the caller function.
+	///----------------------------------------------------------------------------------
+	uint8_t* slip(uint8_t* data, uint16_t size, uint16_t& slipSize);
+
+	///----------------------------------------------------------------------------------
+	/// Replaces the special slip characters with normal characters.
+	///----------------------------------------------------------------------------------
+	uint8_t* deslip(uint8_t* slipData, uint16_t slipSize, uint16_t& size);
+
+	///----------------------------------------------------------------------------------
+	/// Returns the fletcher's checksum of a block of bytes.
+	///----------------------------------------------------------------------------------
+	uint16_t fletcherChecksum(uint8_t* data, uint16_t size);
 
 	bool					m_master;
 	int 					m_handle; // Xbee fd

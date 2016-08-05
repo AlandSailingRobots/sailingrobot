@@ -69,7 +69,7 @@ public:
     ///----------------------------------------------------------------------------------
 	/// Serialises the message into a MessageSerialiser
 	///----------------------------------------------------------------------------------
-	virtual void Serialise(MessageSerialiser& serialiser)
+	virtual void Serialise(MessageSerialiser& serialiser) const
 	{
 		Message::Serialise(serialiser);
 
