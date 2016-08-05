@@ -39,7 +39,7 @@ private:
  	///----------------------------------------------------------------------------------
     void sendMessage();
 
-    DBHandler m_db;
+    DBHandler &m_db;
     CourseMath m_courseMath;
 
     int     m_nextId;

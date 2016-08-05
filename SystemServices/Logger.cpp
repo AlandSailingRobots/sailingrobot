@@ -26,7 +26,7 @@
 #include "utility/SysClock.h"
 
 
-#define MAX_LOG_SIZE	256
+#define MAX_LOG_SIZE	256*2
 #define MAX_MSG_BUFFER 100
 
 std::string 				Logger::m_LogFilePath;
@@ -94,7 +94,7 @@ void Logger::log(std::string message)
 		}
 		else
 		{
-			printf(" === NO ROOM IN BUFFER FOR MORE MESSAGES ===\n");
+			//printf(" === NO ROOM IN BUFFER FOR MORE MESSAGES ===\n");
 		}
 	}
 	m_Mutex.unlock();

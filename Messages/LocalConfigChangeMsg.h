@@ -21,6 +21,10 @@ public:
 		:Message(MessageType::LocalConfigChange, NodeID::None, NodeID::None)
 	{ }
 
+	LocalConfigChangeMsg(MessageDeserialiser deserialiser)
+		:Message(deserialiser)
+	{ }
+
 	virtual ~LocalConfigChangeMsg() { }
 
 };

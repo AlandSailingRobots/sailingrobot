@@ -17,11 +17,13 @@
 #include "Nodes/WaypointNode.h"
 #include "Nodes/VesselStateNode.h"
 #include "Nodes/HTTPSyncNode.h"
+#include "Nodes/XbeeSyncNode.h"
 #include "Nodes/RoutingNode.h"
 #include "Nodes/LineFollowNode.h"
 #include "Messages/DataRequestMsg.h"
 #include "dbhandler/DBHandler.h"
 #include "SystemServices/MaestroController.h"
+#include "xBee/Xbee.h"
 
 #define DISABLE_LOGGING 0
 
@@ -104,6 +106,7 @@ int main(int argc, char *argv[])
 	}
 
 	// Create nodes
+	XbeeSyncNode xbee(messageBus, dbHandler);
 	MessageLoggerNode msgLogger(messageBus);
 
 	#if SIMULATION == 1
@@ -122,7 +125,6 @@ int main(int argc, char *argv[])
 
 
 	Node* sailingLogic;
-
 
 	bool usingLineFollow = (bool)(dbHandler.retrieveCellAsInt("sailing_robot_config", "1", "line_follow"));
 	if(usingLineFollow)
@@ -155,6 +157,7 @@ int main(int argc, char *argv[])
 
 
 	// Initialise nodes
+	initialiseNode(xbee, "Xbee Sync Node", NodeImportance::CRITICAL);
 	initialiseNode(msgLogger, "Message Logger", NodeImportance::NOT_CRITICAL);
 
 	#if SIMULATION == 1
@@ -188,6 +191,7 @@ int main(int argc, char *argv[])
 	}
 
 	// Start active nodes
+	xbee.start();
 	#if SIMULATION == 1
 	simulation.start();
   #else

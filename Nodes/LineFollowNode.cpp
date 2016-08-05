@@ -17,6 +17,7 @@
 
 #include "LineFollowNode.h"
 #include "Messages/ActuatorPositionMsg.h"
+#include "Messages/CourseDataMsg.h"
 #include "utility/Utility.h"
 #include "utility/SysClock.h"
 #include <math.h>
@@ -200,6 +201,8 @@ void LineFollowNode::calculateActuatorPos(VesselStateMsg* msg)
     double bearingToNextWaypoint = m_courseMath.calculateBTW(msg->longitude(), msg->latitude(), m_nextWaypointLon, m_nextWaypointLat); //calculated for database
     double distanceToNextWaypoint = m_courseMath.calculateDTW(msg->longitude(), msg->latitude(), m_nextWaypointLon, m_nextWaypointLat);
 
+    CourseDataMsg* courseMsg = new CourseDataMsg(trueWindDirection, distanceToNextWaypoint, bearingToNextWaypoint);
+    m_MsgBus.sendMessage(courseMsg);
 
     //create timestamp----
     std::string timestamp_str=SysClock::timeStampStr();
