@@ -135,7 +135,7 @@ void MessageBus::processMessages()
 		MessagePtr msgPtr = std::move(m_BackMessages->front());
 		Message* msg = msgPtr.get();
 
-		logMessage(std::move(msgPtr));
+		logMessage(msg);
 
 		for(auto node : m_RegisteredNodes)
 		{
@@ -193,7 +193,7 @@ void MessageBus::logMessageReceived(Message* msg)
 #endif
 }
 
-void MessageBus::logMessage(MessagePtr msg)
+void MessageBus::logMessage(Message* msg)
 {
 #ifdef LOG_MESSAGES
 	if(m_LogFile != NULL)

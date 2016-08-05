@@ -143,7 +143,7 @@ private:
 	///----------------------------------------------------------------------------------
 	/// Logs a message that is being processed.
 	///----------------------------------------------------------------------------------
-	void logMessage(MessagePtr msg);
+	void logMessage(Message* msg);
 
 	///----------------------------------------------------------------------------------
 	/// Logs that a node consumed the current message being processed.
