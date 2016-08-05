@@ -39,7 +39,7 @@ public:
 			:Message(deserialiser)
 	{
 		if(	!deserialiser.readUint16_t(m_rudderPosition) ||
-			!deserialiser.readUint16_t((m_sailPosition))
+			!deserialiser.readUint16_t(m_sailPosition))
 		{
 			m_valid = false;
 		}

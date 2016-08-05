@@ -43,7 +43,7 @@ SimulationNode::SimulationNode(MessageBus& msgBus)
 		m_GPSHeading(0), m_WindDir(0), m_WindSpeed(0), m_WindTemp(0), m_ArduinoPressure(0),
 		m_ArduinoRudder(0),m_ArduinoSheet(0),m_ArduinoBattery(0),m_rudder(0),m_sail(0),m_count_sleep(0)
 {
-  m_MsgBus.registerNode(this, MessageType::ActuatorPosition);
+  m_MsgBus.registerNode(this, MessageType::ActuatorCommand);
 }
 
 void SimulationNode::start()
@@ -124,7 +124,7 @@ void SimulationNode::processMessage(const Message* msg)
 
 	switch(type)
 	{
-	case MessageType::ActuatorPosition:
+	case MessageType::ActuatorCommand:
 		processActuatorPositionMessage((ActuatorPositionMsg*)msg);
 		break;
 	default:

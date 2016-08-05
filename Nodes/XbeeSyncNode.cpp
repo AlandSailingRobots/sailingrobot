@@ -203,7 +203,7 @@ void XbeeSyncNode::incomingMessage(uint8_t* data, uint8_t size)
 
 	switch(msg.messageType())
 	{
-		case MessageType::ActuatorPosition:
+		case MessageType::ActuatorCommand:
 		{
 			ActuatorPositionMsg* actuatorControl = new ActuatorPositionMsg(deserialiser);
 			m_node->m_MsgBus.sendMessage(actuatorControl);

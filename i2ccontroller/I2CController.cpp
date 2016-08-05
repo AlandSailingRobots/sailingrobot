@@ -86,6 +86,7 @@ int I2CController::readBlock(uint8_t* block, uint8_t size)
 	return -1;
 }
 
+/*
 int I2CController::writeBlock(uint8_t* block, uint8_t size)
 {
 	if(m_Locked)
@@ -102,6 +103,7 @@ int I2CController::writeBlock(uint8_t* block, uint8_t size)
 	Logger::error("I2C controller transmission has not begun, call I2CController::beginTransmission!");
 	return -1;
 }
+*/
 
 void I2CController::beginTransmission()
 {
