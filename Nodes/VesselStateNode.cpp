@@ -47,7 +47,7 @@ void VesselStateNode::start()
 void VesselStateNode::processMessage(const Message* msg)
 {
 	MessageType type = msg->messageType();
-    printf("find gps\n %d",(int) type);
+
 	switch(type)
 	{
 	case MessageType::CompassData:
