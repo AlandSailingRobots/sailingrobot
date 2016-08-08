@@ -9,19 +9,22 @@
 #include <math.h>
 #include <stdlib.h>
 #include "libs/Eigen/Dense"
-#include "RoutingBehaviour.h"
+#include "utility/Utility.h"
+#include <boost/geometry/geometry.hpp>
 
 // TODO : Receive these values from the database or from RoutingBehaviour
 // Some of these values should be available for all behaviour classes
-#define DISTANCE_NOT_THE_SAME_OBSTACLE 2.0
+#define DISTANCE_NOT_THE_SAME_OBSTACLE 15.0
 #define MAXIMUM_SENSOR_RANGE 100.0
 #define SENSOR_HEADING_RELATIVE_TO_BOAT 0.0 // There might be several sensors
 #define SENSOR_ARC_ANGLE 90.0 // Every angle is in radian
-#define CHANNEL_WIDTH 15.0 // in meters
+#define CHANNEL_RADIUS 15.0 // in meters
 #define SAFE_DISTANCE 30.0 // in meters
 #define EARTH_RADIUS 6371000 // in meters
-#define CONVERSION_FACTOR_METER_TO_GPS 0.00000899280575539/180*M_PI // in rad/meters
+#define CONVERSION_FACTOR_METER_TO_GPS 0.00000015695406942385 // in rad/meters
 
+#define FIND_CENTER_NORMAL 0
+#define FIND_CENTER_DETECTED 1
 // SAVED CODE IN CASE OF ARCHITECTURAL CHANGE
 /*
 
@@ -34,14 +37,17 @@
 
 */
 
+typedef boost::geometry::model::point<double, 2, boost::geometry::cs::cartesian> boostPoint;
+typedef boost::geometry::model::polygon<boostPoint> boostPolygon;
+
 /**
  * Structure which contains every obstacle data from the sensors
  */
 struct ObstacleData {
     double minDistanceToObstacle;
     double maxDistanceToObstacle; /**< -1 = infinite */
-    double LeftBoundHeadingRelativeToBoat;
-    double RightBoundHeadingRelativeToBoat;
+    double leftBoundHeadingRelativeToBoat;
+    double rightBoundHeadingRelativeToBoat;
 };
 /**
  * Structure which contains every obstacle data
@@ -49,6 +55,8 @@ struct ObstacleData {
 struct Obstacle {
     //Polygon
     std::vector<Eigen::Vector2d> polygon;
+    Eigen::Vector2d center;
+    bool upToDate;
     std::string color;
 };
 /**
@@ -82,8 +90,8 @@ struct MinPotField {
     double col;
 }; //Trash, not used. Could be useful though
 struct Simulation {
-    const bool waypoints;
-    const bool obstacles;
+    bool waypoints;
+    bool obstacles;
 };
 struct PotentialMap{
     const double xMin;
@@ -174,20 +182,51 @@ private:
     double calculateGPSDistance(Eigen::Vector2d, Eigen::Vector2d);
 
     /**
-     * Find the center of a polygon defined anticlockwise.
-     * @param polygon
+     * This is the half-way point along a great circle path between the two points.
+     * Got from http://www.movable-type.co.uk/scripts/latlong.html
+     * @param pt1
+     * @param pt2
      * @return
      */
-    Eigen::Vector2d findCenter(const std::vector<Eigen::Vector2d> polygon);
+    Eigen::Vector2d findMidPoint(Eigen::Vector2d pt1, Eigen::Vector2d pt2);
+
+    /**
+     * Find the center of a polygon defined anticlockwise.
+     *
+     * 2 options
+     * FIND_CENTER_DETECTED = 1 : for detected obstacles
+     * FIND_CENTER_NORMAL = 0 : for other polygons, default parameter
+     * @param polygon
+     * @param option
+     * @return
+     */
+    Eigen::Vector2d findCenter(const std::vector<Eigen::Vector2d> polygon,
+                               int option=0);
 
     /**
      * Gives the area in unit of the vector (squared of course).
-     * So be careful of the units of the values inside the vectors
+     * So be careful of the units of the values inside the vectors.
+     * Computes the area as a sum of spherical triangles.
+     *
+     * Uses https://en.wikipedia.org/wiki/Spherical_trigonometry#Lines%5Fon%5Fa%5Fsphere
+     *
      * The polygon must be initialized anticlockwise
      * @param polygon
      * @return
      */
     double getArea(std::vector<Eigen::Vector2d> polygon);
+
+    /**
+     * Get the initial bearing from a start point toward another point
+     * on the surface of the earth.
+     *
+     * Got from http://www.movable-type.co.uk/scripts/latlong.html
+     *
+     * @param pt1 (Longitude in radians, Latitude in radians)
+     * @param pt2 (Longitude in radians, Latitude in radians)
+     * @return
+     */
+    double getInitialBearing(Eigen::Vector2d pt1,Eigen::Vector2d pt2);
 
     /**
      * Compute the signed distance between a line and a point
@@ -304,6 +343,54 @@ private:
     bool projectionInsideSlice(const Eigen::Vector3d triangle[],
                                Eigen::Vector3d point);
 
+    /**
+     * Convert the polygon of an obstacle to a c++ boost polygon
+     * @param obstacle
+     * @return
+     */
+    boostPolygon eigenPolyToBoostPoly(Obstacle obstacle);
+
+    /**
+     * Update the polygon of an obstacle with the data inside a boost polygon
+     *
+     * I make the assumption that there will be only one poly in output
+     * Be aware that some segfault might come from here.
+     * But it shouln't be the case, no poly is concave here.
+     * @param poly
+     * @return
+     */
+    Obstacle updateObstacleWithBoostPoly(Obstacle obstacle,boostPolygon poly);
+
+    /**
+     * Clean the obstacles that should have been seen but are not.
+     * There is a distance of non detection to set up.
+     * @param sensorData
+     * @param seenObstacles
+     * @return
+     */
+    std::vector<Obstacle> cleanObstacles(SensorData sensorData,
+                                         std::vector<Obstacle> seenObstacles);
+
+    /**
+     * register and convert the new obstacles inside the detectedObstacles to a new
+     * std::vector<Obstacle>
+     * @param sensorData
+     * @param seenObstacles
+     * @return
+     */
+    std::vector<Obstacle> registerObstacles(SensorData sensorData,
+                                            std::vector<Obstacle> seenObstacles);
+
+    /**
+     * merge two set of obstacles together.
+     * It outputs the intersection between each obstacles of the set
+     * @param sensorData
+     * @param seenObstacles
+     * @return
+     */
+    std::vector<Obstacle> mergeObstacles(std::vector<Obstacle> upToDateObstacles,
+                                         std::vector<Obstacle> seenObstacles);
+
     //PRIVATE MAIN FUNCTIONS
 
     /**
@@ -324,7 +411,7 @@ private:
      * @param sensorData
      * @return
      */
-    std::vector<Obstacle> check_obstacles(SensorData sensorData);
+    std::vector<Obstacle> check_obstacles(SensorData sensorData, std::vector<Obstacle> seenObstacles);
 
     /**
      * Check if there is intersection between

@@ -53,42 +53,77 @@ CollisionAvoidanceBehaviour::CollisionAvoidanceBehaviour(DBHandler *db) :
 double CollisionAvoidanceBehaviour::angleDiff(
         double radAngle1,
         double radAngle2) {
-    return fmod(radAngle1-radAngle2+M_PI,2*M_PI)+M_PI;
+    return fmod(radAngle1-radAngle2-M_PI,2*M_PI)+M_PI;
 }
 
 double CollisionAvoidanceBehaviour::calculateGPSDistance(
         Eigen::Vector2d point1,
         Eigen::Vector2d point2) {
-    //...(1) : latitude //...(2) : longitude
+    //...(1) : latitude //...(0) : longitude
     const double deltaLat = angleDiff(point2(1),point1(1));
-    const double deltaLon = angleDiff(point2(2),point1(2));
-    const double Rearth = 6371000;
+    const double deltaLon = angleDiff(point2(0),point1(0));
     const double a  = sin(deltaLat/2)*sin(deltaLat/2)
                       + cos(point1(1))*cos(point2(1))*sin(deltaLon/2)*sin(deltaLon/2);
     const double c = 2*atan2(sqrt(a),sqrt(1-a));
-    return Rearth*c;
+    return EARTH_RADIUS*c;
+}
+
+Eigen::Vector2d CollisionAvoidanceBehaviour::findMidPoint(Eigen::Vector2d pt1,
+                                                          Eigen::Vector2d pt2){
+    const Eigen::Vector3d cartPt1 = latLonToCartesian(pt1);
+    const Eigen::Vector3d cartPt2 = latLonToCartesian(pt2);
+    const Eigen::Vector3d cartPt3 = (cartPt1+cartPt2)/2;
+    return cartesianToLatLon(cartPt3);
 }
 
 Eigen::Vector2d CollisionAvoidanceBehaviour::findCenter(
-        // TODO : make it work for spherical spaces (conversion to 3d space then computation ofgps coords)
-        const std::vector<Eigen::Vector2d> polygon) {
-    double sumOfX = 0;
-    double sumOfY = 0;
-    for(auto & vec : polygon){
-        sumOfX += vec(0);
-        sumOfY += vec(1);
+        const std::vector<Eigen::Vector2d> polygon,
+        int option) {
+    if(option==1){
+        const Eigen::Vector2d midPoint = findMidPoint(polygon[0],polygon[3]);
+        const double distance = calculateGPSDistance(polygon[0],polygon[3])/2;
+        const double bearing = angleDiff(atan2(polygon[3](1)-polygon[0](1),
+                                               polygon[3](0)-polygon[0](0)),
+                                         M_PI/2);
+        const Eigen::Vector2d closeCenter = getPointWithDistanceAndBearing(distance,bearing,midPoint);
     }
-    const Eigen::Vector2d meanPolygon(sumOfX/polygon.size(),sumOfY/polygon.size());
-    return meanPolygon;
+    else {
+        // Not totally accurate but ok for the precision we need.
+        double sumOfX = 0;
+        double sumOfY = 0;
+        for (auto &vec : polygon) {
+            sumOfX += vec(0);
+            sumOfY += vec(1);
+        }
+        const Eigen::Vector2d meanPolygon(sumOfX / polygon.size(), sumOfY / polygon.size());
+        return meanPolygon;
+    }
+}
+
+double CollisionAvoidanceBehaviour::getInitialBearing(
+        Eigen::Vector2d pt1,
+        Eigen::Vector2d pt2) {
+    const double bearingFromNorth = atan2(sin(pt2(0)-pt1(0))*cos(pt2(1)),
+                                          cos(pt1(1))*sin(pt2(1))-sin(pt1(1))*cos(pt2(1))
+                                                                  *cos(pt2(0)-pt1(0)));
+    return M_PI/2-bearingFromNorth;
 }
 
 double CollisionAvoidanceBehaviour::getArea(
         std::vector<Eigen::Vector2d> polygon){
-    double sum = 0;
-    for(int i = 0;i<polygon.size()-1;i++){
-        sum += polygon[i](0)*polygon[i+1](1)-polygon[i+1](0)*polygon[i](1);
+    double sumAngle = 0;
+    for(int i = 0;i<polygon.size();i++){
+        const int iPlusOne = static_cast<int>((i + 1) % polygon.size());
+        const int iMinusOne = static_cast<int>((i - 1) % polygon.size());
+        const double angleCurrentVertex = angleDiff(getInitialBearing(polygon[i],
+                                                                      polygon[iMinusOne]),
+                                                    getInitialBearing(polygon[i],
+                                                                      polygon[iPlusOne]));
+        //std::cout << i << " : " << angleCurrentVertex << "\n";
+        sumAngle += angleCurrentVertex;
     }
-    return sum/2;
+    //std::cout << sumAngle << "\n";
+    return (sumAngle-(polygon.size()-2)*M_PI)*EARTH_RADIUS*EARTH_RADIUS;
 }
 
 double CollisionAvoidanceBehaviour::signedDistanceFromLine(
@@ -101,7 +136,7 @@ double CollisionAvoidanceBehaviour::signedDistanceFromLine(
     const Eigen::Vector3d b = latLonToCartesian(linePt2);
     const Eigen::Vector3d m = latLonToCartesian(point);
 
-    const Eigen::Vector3d n = (a.cross(b)) / (a.norm() * b.norm());
+    const Eigen::Vector3d n = (a.cross(b)) / (a.cross(b).norm());
     const double distFromTriangle = m.transpose() * n;
     const double arcLenght = EARTH_RADIUS * asin(distFromTriangle / EARTH_RADIUS);
     return arcLenght;
@@ -111,7 +146,7 @@ Eigen::Vector2d CollisionAvoidanceBehaviour::getClosestVertex(
         std::vector<Eigen::Vector2d> polygon,
         Eigen::Vector2d point){
     int idClosestPoint = -1;
-    double minDistance = 40000;
+    double minDistance = 40000000;
     double distance;
     for(int i = 0;i<polygon.size();i++) {
         distance = calculateGPSDistance(polygon[i], point);
@@ -167,7 +202,10 @@ Eigen::Vector2d CollisionAvoidanceBehaviour::getClosestPoint(
         //normal unit vector to the plane
         const Eigen::Vector3d planeNormal = ((segPt0-worldOrigin).cross(segPt1-worldOrigin))
                                             /((segPt0-worldOrigin).cross(segPt1-worldOrigin).norm());
-        const Eigen::Vector3d projection = (-pointCartesian.dot(planeNormal)) * planeNormal;
+        const Eigen::Vector3d projection = ((-pointCartesian.dot(planeNormal)) * planeNormal)
+                                           + pointCartesian;
+
+        //std::cout << "projection : \n" << projection << "\n";
 
         closestPoint = cartesianToLatLon(projection);
         // Since altitude isn't used in the calculations, this is the right
@@ -178,27 +216,20 @@ Eigen::Vector2d CollisionAvoidanceBehaviour::getClosestPoint(
 }
 
 Eigen::Vector2d CollisionAvoidanceBehaviour::getPointWithDistanceAndBearing(
-        double distance,
-        double bearing,
+        double distance, // in meters
+        double bearing,  // in radians from east
         Eigen::Vector2d startPoint) {
-    Eigen::Vector2d endPoint;
-    if(distance>50) { // To lighten calculus
-        // lat in rad, long in rad. Everything from east anticlockwise
-        const double angularDist = distance / EARTH_RADIUS;
-        // Since the bearing is here in radians from east, rightAngleForFormula = pi/2 - bearing
-        // so cos are transformed in sin and inversely the same for sin.
-        const double newLat = asin(cos(bearing) * cos(angularDist)
-                                   + cos(startPoint(1)) * sin(angularDist) * sin(bearing));
-        const double newLong = startPoint(0) + (atan2(cos(bearing) * sin(angularDist) * cos(startPoint(1)),
-                                                      cos(angularDist) - sin(startPoint(1))
-                                                                         * sin(newLat)));
-        endPoint << newLong, newLat;
-    }
-    else{
-        const double newLat = startPoint(1) + distance*sin(bearing)*CONVERSION_FACTOR_METER_TO_GPS;
-        const double newLong = startPoint(0) + distance*cos(bearing)*CONVERSION_FACTOR_METER_TO_GPS;
-        endPoint << newLong, newLat;
-    }
+    // lat in rad, long in rad. Everything from east anticlockwise
+    const double angularDist = distance/EARTH_RADIUS;
+    // Since the bearing is here in radians from east, rightAngleForFormula = pi/2 - bearing
+    // so cos are transformed in sin, and inversely the same for sin, for the bearing.
+    const double newLat = asin(sin(startPoint(1))*cos(angularDist)
+                               +cos(startPoint(1))*sin(angularDist)*sin(bearing));
+    const double newLong = (startPoint(0) + atan2(cos(bearing)*sin(angularDist)*cos(startPoint(1)),
+                                                 cos(angularDist) - sin(startPoint(1))
+                                                                    *sin(newLat)));
+    const Eigen::Vector2d endPoint(newLong,newLat);
+
     return endPoint;
 }
 
@@ -224,15 +255,17 @@ std::vector<double> CollisionAvoidanceBehaviour::distanceFromSegment(
     const Eigen::Vector3d triangle[3] = {worldOrigin, a, b};
 
     if (projectionInsideSlice(triangle, m)) {
-        const double gpsDistance = std::abs(signedDistanceFromLine(segmentPt1,segmentPt2,point));
+        const double gpsDistance = std::abs(signedDistanceFromLine(segmentPt1,
+                                                                   segmentPt2,
+                                                                   point));
         const std::vector<double> result = {gpsDistance,2};
         return result;
     }
     else { //projection is not inside the slice
         const std::vector<Eigen::Vector2d> line = {segmentPt1,segmentPt2};
-        const Eigen::Vector2d closestPoint = getClosestPoint(line,point);
-        const double gpsDistance = calculateGPSDistance(point, closestPoint);
-        if(closestPoint==segmentPt1){
+        const Eigen::Vector2d closestVertex = getClosestVertex(line,point);
+        const double gpsDistance = calculateGPSDistance(point, closestVertex);
+        if(closestVertex==segmentPt1){
             const std::vector<double> result = {gpsDistance,0};
             return result;
         }
@@ -263,7 +296,14 @@ bool CollisionAvoidanceBehaviour::projectionInsideSlice(
         const Eigen::Vector3d triangle[3],
         Eigen::Vector3d point){
     // If this is not a slice
-    if( std::abs((triangle[1]-triangle[0]).norm()-(triangle[2]-triangle[0]).norm()) <= 0){
+    if(std::abs((triangle[1]-triangle[0]).norm()-(triangle[2]-triangle[0]).norm()) > 10){
+        printf("[ERROR](projectionInsideSlice) Not a triangle\n");
+        printf("[ERROR_DETAIL](projectionInsideSlice) Vertice 1 : ");
+        std::cout << (triangle[1]-triangle[0]).norm() << "\n";
+        printf("[ERROR_DETAIL](projectionInsideSlice) Vertice 2 : ");
+        std::cout << (triangle[2]-triangle[0]).norm() << "\n";
+        printf("[ERROR_DETAIL](projectionInsideSlice) Difference : ");
+        std::cout << std::abs((triangle[1]-triangle[0]).norm()-(triangle[2]-triangle[0]).norm()) << "\n";
         return false;
         //TODO find a way to stop the program here.
     }
@@ -272,12 +312,253 @@ bool CollisionAvoidanceBehaviour::projectionInsideSlice(
     const Eigen::Vector3d v = triangle[2]-triangle[0];
     const Eigen::Vector3d n = u.cross(v);
     const Eigen::Vector3d w = point-triangle[0];
-    const double coord0 = (u.cross(w).dot(n))/(n.norm()*n.norm());
+    const double coord2 = (u.cross(w).dot(n))/(n.norm()*n.norm());
+    //std::cout << "coord2 : " << coord2 << "\n";
     const double coord1 = (w.cross(v).dot(n))/(n.norm()*n.norm());
-    //const double coord2 = 1-coord0-coord1;
+    //std::cout << "coord1 : " << coord1 << "\n";
+    //std::cout << "coord0 : " << 1-coord2-coord1 << "\n";
+    //const double coord0 = 1-coord2-coord1;
+    //std::cout << "cond1 : " << (coord1>=0.0) << "\n";
 
-    return 0 <= coord0 && 0 <= coord1;
+    return (coord2>=0.0)&&(coord1>=0.0);
 }
+
+boostPolygon CollisionAvoidanceBehaviour::eigenPolyToBoostPoly(
+        Obstacle obstacle){
+    boostPolygon poly;
+    for (auto &point : obstacle.polygon) {
+        boost::geometry::append(poly.outer(), boostPoint(point(0), point(1)));
+    }
+    // add at the end the first point to close the polygon.
+    boost::geometry::append(poly.outer(), boostPoint(obstacle.polygon[0](0),
+                                                     obstacle.polygon[0](1)));
+    // boost lib define its polygon clockwise and ours are counterclockwise
+    boost::geometry::reverse(poly);
+    return poly;
+}
+
+Obstacle CollisionAvoidanceBehaviour::updateObstacleWithBoostPoly(
+        Obstacle obstacle,
+        boostPolygon poly){
+    // From clockwise to counterClockwise
+    boost::geometry::reverse(poly);
+
+    // The old obstacle is updated without the last point
+    obstacle.polygon.clear();
+    for (int i = 0 ; i< poly.outer().size()-1; i++){
+        const Eigen::Vector2d pt(poly.outer()[i].get<0>(), poly.outer()[i].get<1>());
+        obstacle.polygon.push_back(pt);
+    }
+
+    // Computes the new center
+    obstacle.center = findCenter(obstacle.polygon);
+
+    return obstacle;
+
+}
+
+std::vector<Obstacle> CollisionAvoidanceBehaviour::cleanObstacles(
+        SensorData sensorData,
+        std::vector<Obstacle> seenObstacles){
+    int i = 0;
+//    std::cout << "Check_obstacle reached\n";
+    std::cout << "Before clean seenObstacles.size() = " << seenObstacles.size() << "\n";
+    if (seenObstacles.size() != 0) {
+        // for each memorized obstacles
+        while (i < seenObstacles.size()) {
+            //the current memorized obstacle does not belong to detectedObstacles
+            /*
+             * The computations made here verify that an obstacle isn't too far from any other detected
+             * obstacle and is not detected : that would mean that it doesn't exist any more and then need
+             * to be cleaned from the memory
+             */
+
+            //The obstacle is not up to date any more
+            seenObstacles[i].upToDate = false;
+
+            //Init of the conditions
+            bool obstaclesAreNotTooCloseWithCurrentMemorizedObstacle = 1;
+            // for each detected obstacles it will check if it's close to the memorized one
+            // if not it should be cleaned from the memory.
+            for (auto &sensDatObstacle : sensorData.detectedObstacles) {
+                const double headingCenterOfDetectedObstacle =
+                        angleDiff(sensDatObstacle.leftBoundHeadingRelativeToBoat,
+                                  sensDatObstacle.rightBoundHeadingRelativeToBoat)
+                        + sensorData.compHeading;
+                const double widthOfCurrentDetectedObstacleAtClosest =
+                        sensDatObstacle.minDistanceToObstacle
+                        * tan(angleDiff(sensDatObstacle.leftBoundHeadingRelativeToBoat,
+                                        sensDatObstacle.rightBoundHeadingRelativeToBoat)
+                              / 2);
+
+                //Computation of the best center for the detected obstacle
+                const double centerDistance = widthOfCurrentDetectedObstacleAtClosest / 2
+                                              + sensDatObstacle.minDistanceToObstacle;
+                const Eigen::Vector2d centerDetectedObstacle =
+                        getPointWithDistanceAndBearing(centerDistance,
+                                                       headingCenterOfDetectedObstacle,
+                                                       sensorData.gpsPos);
+
+                // 1rst Condition : current obstacle is not too close from the boat
+                const bool currentObstaclesIsNotTooClose = calculateGPSDistance(seenObstacles[i].center,
+                                                                                centerDetectedObstacle)
+                                                           - widthOfCurrentDetectedObstacleAtClosest
+                                                           > DISTANCE_NOT_THE_SAME_OBSTACLE;
+                std::cout << "reduced dist = " <<  calculateGPSDistance(seenObstacles[i].center,
+                                                                        centerDetectedObstacle)
+                                                   - widthOfCurrentDetectedObstacleAtClosest << "\n";
+                obstaclesAreNotTooCloseWithCurrentMemorizedObstacle =
+                        obstaclesAreNotTooCloseWithCurrentMemorizedObstacle
+                        && currentObstaclesIsNotTooClose;
+            }
+            // 2nd condition : the obstacle should have been detected
+            const bool obstacleInsideRange =  // Same error given by the IDE
+                    calculateGPSDistance(seenObstacles[i].center, sensorData.gpsPos) < MAXIMUM_SENSOR_RANGE;
+            const bool obstacleInsideArc =
+                    std::abs(angleDiff(
+                            atan2(seenObstacles[i].center(1) - sensorData.gpsPos(1),
+                                  seenObstacles[i].center(0) - sensorData.gpsPos(0)),
+                            sensorData.compHeading + SENSOR_HEADING_RELATIVE_TO_BOAT))
+                    < SENSOR_ARC_ANGLE;
+            const bool obstacleShouldHaveBeenDetected =
+                    (obstacleInsideRange)
+                    && (obstacleInsideArc);
+
+            // Where the conditions are used
+            std::cout << "Condition 1 obstacleShouldHaveBeenDetected = " << obstacleShouldHaveBeenDetected << "\n";
+            std::cout << "Condition 2 obstaclesAreNotTooCloseWithCurrentMemorizedObstacle = " << obstaclesAreNotTooCloseWithCurrentMemorizedObstacle << "\n";
+            if (obstacleShouldHaveBeenDetected && obstaclesAreNotTooCloseWithCurrentMemorizedObstacle) {
+                // Remove the undetected obstacle from the memory
+                seenObstacles.erase(seenObstacles.begin() + i);
+            }
+            i++;
+        }
+    }
+    return seenObstacles;
+}
+
+std::vector<Obstacle> CollisionAvoidanceBehaviour::registerObstacles(
+        SensorData sensorData,
+        std::vector<Obstacle> seenObstacles){
+    std::vector<Obstacle> upToDateObstacles;
+    for (auto &sensDatObstacle : sensorData.detectedObstacles) {
+        // Currently obstacles are added without merge.
+        // polygon is initialized anti-clockwise
+
+        // Init for polygon creation
+        Obstacle newObstacle;
+        const double halfAngleObsWidth = angleDiff(sensDatObstacle.leftBoundHeadingRelativeToBoat,
+                                                   sensDatObstacle.rightBoundHeadingRelativeToBoat) / 2;
+        const double rightAngle = sensDatObstacle.rightBoundHeadingRelativeToBoat
+                                  + sensorData.compHeading
+                                  + SENSOR_HEADING_RELATIVE_TO_BOAT;
+        const double leftAngle = sensDatObstacle.leftBoundHeadingRelativeToBoat
+                                 + sensorData.compHeading
+                                 + SENSOR_HEADING_RELATIVE_TO_BOAT;
+        const double minDistance = sensDatObstacle.minDistanceToObstacle
+                                   / cos(halfAngleObsWidth);
+        const double maxDistance = sensDatObstacle.maxDistanceToObstacle
+                                   / cos(halfAngleObsWidth);
+//        std::cout << "cosAngleFromObsWidth = " << cosAngleFromObsWidth << "\n";
+//        std::cout << "sensDatObstacle.maxDistanceToObstacle * cosAngleFromObsWidth = " << maxDistance << "\n";
+
+        // Polygon creation
+        const Eigen::Vector2d pt1 = getPointWithDistanceAndBearing(minDistance, rightAngle,
+                                                                   sensorData.gpsPos);
+        newObstacle.polygon.push_back(pt1);
+
+        const Eigen::Vector2d pt2 = getPointWithDistanceAndBearing(maxDistance, rightAngle,
+                                                                   sensorData.gpsPos);
+        newObstacle.polygon.push_back(pt2);
+
+        const Eigen::Vector2d pt3 = getPointWithDistanceAndBearing(maxDistance, leftAngle,
+                                                                   sensorData.gpsPos);
+        newObstacle.polygon.push_back(pt3);
+
+        const Eigen::Vector2d pt4 = getPointWithDistanceAndBearing(minDistance, leftAngle,
+                                                                   sensorData.gpsPos);
+        newObstacle.polygon.push_back(pt4);
+
+        //Computation of the best center (longer but more accurate than the other)
+        const double centerDistance = calculateGPSDistance(pt1, pt4) / 2;
+        const double centerAngle = angleDiff(atan2(pt4(1) - pt1(1), pt4(0) - pt1(0)),
+                                             M_PI / 2);
+
+//        std::cout << "centerAngle = " << centerAngle << "\n";
+        const Eigen::Vector2d midPoint = findMidPoint(pt1, pt4);
+//        std::cout << "midPoint = " << midPoint << "\n";
+        const Eigen::Vector2d bestCenterDetectedObstacle = getPointWithDistanceAndBearing(centerDistance,
+                                                                                          centerAngle,
+                                                                                          midPoint);
+//        std::cout << "bestCenterDetectedObstacle = " << bestCenterDetectedObstacle << "\n";
+        newObstacle.center = bestCenterDetectedObstacle;
+
+        //Color
+        newObstacle.color = "Null";
+
+        //upToDate
+        newObstacle.upToDate=true;
+
+        // Add it as well to the up to date obstacles to save time
+        upToDateObstacles.push_back(newObstacle);
+    }
+    return upToDateObstacles;
+}
+
+std::vector<Obstacle> CollisionAvoidanceBehaviour::mergeObstacles(
+        std::vector<Obstacle> upToDateObstacles,
+        std::vector<Obstacle> seenObstacles){
+
+    int i2 = 0;
+    if (upToDateObstacles.size() != 0) {
+        while (i2 < upToDateObstacles.size()) {
+            std::cout << "Got into for each up to date obstacle\n";
+            // Init
+            bool deletion = false;
+
+            // Creation of the boost polygon
+            boostPolygon poly = eigenPolyToBoostPoly(upToDateObstacles[i2]);
+
+            for (auto &otherObstacle : seenObstacles) {
+
+                std::cout << "Verification of up to date " << otherObstacle.upToDate << "\n";
+                std::cout << "Got into for each other obstacle\n";
+                // Modify the old obstacle if there is an intersection with an upToDateObstacle
+
+                // TODO : investigate if we should modify everything to use boost c++ lib ?
+                // TODO : investigate to make the intersection code more efficient.
+
+                // Creation of the boost polygon
+                boostPolygon poly2 = eigenPolyToBoostPoly(otherObstacle);
+
+                // Intersection
+                std::vector<boostPolygon> output;
+                boost::geometry::intersection(poly, poly2, output);
+
+                if (!output.empty()) {
+                    otherObstacle = updateObstacleWithBoostPoly(otherObstacle, output[0]);
+
+                    // The detected obstacle is set to be deleted
+                    deletion = true;
+                }
+            }
+            // Delete the up to date obstacle if it has been used to create an intersection
+            if (deletion) {
+                upToDateObstacles.erase(upToDateObstacles.begin() + i2);
+            }
+            i2++;
+        }
+
+    }
+
+    // put back the up to date obstacles and the old ones into seen_obstacles
+    for(auto & upToDateObs : upToDateObstacles){
+        seenObstacles.push_back(upToDateObs);
+    }
+
+    return seenObstacles;
+}
+
 
 //PRIVATE MAIN FUNCTIONS
 
@@ -294,23 +575,23 @@ SensorData CollisionAvoidanceBehaviour::update_sensors(
         //Position and speed
         //The latitude and longitude are easier to compute in radians.
         sensorData.gpsPos(0) = // x
-                Utility::degreeToRadian(systemStateModel.gpsModel.positionModel.latitude);
-        sensorData.gpsPos(1) = // y
                 Utility::degreeToRadian(systemStateModel.gpsModel.positionModel.longitude);
+        sensorData.gpsPos(1) = // y
+                Utility::degreeToRadian(systemStateModel.gpsModel.positionModel.latitude);
         sensorData.gpsSpeed = systemStateModel.gpsModel.speed;
 
         //Heading
         //compHeading : degree from north -> radian from east
-        sensorData.compHeading = Utility::degreeToRadian(systemStateModel.compassModel.heading)
-                                 - M_PI / 2;
+        sensorData.compHeading = -Utility::degreeToRadian(systemStateModel.compassModel.heading)
+                                 + M_PI / 2;
         //gpsHeading : degree from north -> radian from east
-        sensorData.gpsHeading = Utility::degreeToRadian(systemStateModel.gpsModel.heading)
-                                - M_PI / 2;
+        sensorData.gpsHeading = -Utility::degreeToRadian(systemStateModel.gpsModel.heading)
+                                + M_PI / 2;
 
         //Wind
-        //windDirection : degree from north -> radian from east
-        sensorData.windDirection = Utility::degreeToRadian(systemStateModel.windsensorModel.direction)
-                                   - M_PI / 2;
+        //windDirection : degree from east -> radian from east
+        sensorData.windDirection = -Utility::degreeToRadian(systemStateModel.windsensorModel.direction)
+                                   ;
         sensorData.windSpeed = systemStateModel.windsensorModel.speed;
 
         //Tilt
@@ -328,33 +609,48 @@ SensorData CollisionAvoidanceBehaviour::update_sensors(
         // [UPDATE] Elouan said this script will have to take care of the obstacles without his simulator.
         // TODO : Create a simulation class/node which will compute every sensor output. I might only have to modify Elouan's
 
-        // This don't work right now, this is an example.
-        // TODO : make working mock obstacles
-        ObstacleData obstacle0 = {2,  //double minDistanceToObstacle;
-                                  20, //double maxDistanceToObstacle;
-                                  -10,//double LeftBoundheadingRelativeToBoat;
-                                  10};//double RightBoundheadingRelativeToBoat;
-        sensorData.detectedObstacles.push_back(obstacle0);
-        ObstacleData obstacle1 = {2,  //double minDistanceToObstacle;
-                                  20, //double maxDistanceToObstacle;
-                                  -10,//double LeftBoundheadingRelativeToBoat;
-                                  10};//double RightBoundheadingRelativeToBoat;
-        sensorData.detectedObstacles.push_back(obstacle1);
-        ObstacleData obstacle2 = {2,  //double minDistanceToObstacle;
-                                  20, //double maxDistanceToObstacle;
-                                  -10,//double LeftBoundheadingRelativeToBoat;
-                                  10};//double RightBoundheadingRelativeToBoat;
-        sensorData.detectedObstacles.push_back(obstacle2);
-        ObstacleData obstacle3 = {2,  //double minDistanceToObstacle;
-                                  20, //double maxDistanceToObstacle;
-                                  -10,//double LeftBoundheadingRelativeToBoat;
-                                  10};//double RightBoundheadingRelativeToBoat;
-        sensorData.detectedObstacles.push_back(obstacle3);
+        //Obstacle settings
+        const double obstacleRadius = 5; //meters
+        std::vector<Eigen::Vector2d> obsVec;
+        const Eigen::Vector2d obs0(0+(-5)*CONVERSION_FACTOR_METER_TO_GPS,
+                                   0+(50)*CONVERSION_FACTOR_METER_TO_GPS); obsVec.push_back(obs0);
+        const Eigen::Vector2d obs1(1+(0)*CONVERSION_FACTOR_METER_TO_GPS,
+                                   1+(-20)*CONVERSION_FACTOR_METER_TO_GPS); obsVec.push_back(obs1);
+        const Eigen::Vector2d obs2(1+(-20)*CONVERSION_FACTOR_METER_TO_GPS,
+                                   1+(0)*CONVERSION_FACTOR_METER_TO_GPS); obsVec.push_back(obs2);
+        const Eigen::Vector2d obs3(1+(0)*CONVERSION_FACTOR_METER_TO_GPS,
+                                   1+(0)*CONVERSION_FACTOR_METER_TO_GPS); obsVec.push_back(obs3);
 
+        //Sensor settings
+        const double maxDetectionRange = 1000;
+
+        //Simulation
+        // TODO : implement more precisely obstacle simulation.
+        for(auto & obs : obsVec){
+            const double obstacleHeadingRelativeToBoat = angleDiff(atan2(obs(1)-sensorData.gpsPos(1),
+                                                                         obs(0)-sensorData.gpsPos(0)),
+                                                                   sensorData.compHeading);
+            //std::cout << "obstacleHeadingRelativeToBoat = " << obstacleHeadingRelativeToBoat<< "\n";
+            const double distFromObstacle = calculateGPSDistance(sensorData.gpsPos,
+                                                                 obs);
+            if(std::abs(obstacleHeadingRelativeToBoat)<=M_PI/4 && distFromObstacle<=maxDetectionRange) {
+
+                const double leftHeadingRelativeToBoat =  atan2(obstacleRadius, distFromObstacle)
+                                                          +obstacleHeadingRelativeToBoat;
+                const double rightHeadingRelativeToBoat = -atan2(obstacleRadius, distFromObstacle)
+                                                          +obstacleHeadingRelativeToBoat;
+                ObstacleData obstacle = {
+                        distFromObstacle - obstacleRadius, //double minDistanceToObstacle;
+                        maxDetectionRange,                 //double maxDistanceToObstacle;
+                        leftHeadingRelativeToBoat,         //double LeftBoundheadingRelativeToBoat;
+                        rightHeadingRelativeToBoat};       //double RightBoundheadingRelativeToBoat;
+                //std::cout << "I push back\n";
+                sensorData.detectedObstacles.push_back(obstacle);
+            }
+        }
     }
     else {
         // TODO : when the sensors wil be ready, put the code to get everything here
-
     }
 
     return sensorData;
@@ -366,117 +662,23 @@ SensorData CollisionAvoidanceBehaviour::update_sensors(
  */
 //    void update_waypoints(){}
 
-std::vector<Obstacle> CollisionAvoidanceBehaviour::check_obstacles(SensorData sensorData) {
-    //Clean obstacles
-    int i = 0;
-    while(i<=m_seenObstacles.size()){
-        //the current memorized obstacle does not belong to detectedObstacles
-        /*
-         * The computations made here verify that an obstacle isn't too far from any other detected
-         * obstacle and is not detected : that would mean that it doesn't exist any more and then need
-         * to be cleaned from the memory
-         */
-        const Eigen::Vector2d centerOfMemorizedObstacle = findCenter(m_seenObstacles[i].polygon);
+std::vector<Obstacle> CollisionAvoidanceBehaviour::check_obstacles(SensorData sensorData,
+                                                                   std::vector<Obstacle> seenObstacles) {
+    // clean the obstacles thar should have been detected and are not
+    seenObstacles = cleanObstacles(sensorData,seenObstacles);
 
-        bool obstaclesAreNotTooCloseWithCurrentMemorizedObstacle;
-        for(auto & sensDatObstacle : sensorData.detectedObstacles) {
-            const double headingCenterOfDetectedObstacle =
-                    angleDiff(sensDatObstacle.LeftBoundHeadingRelativeToBoat,
-                              sensDatObstacle.RightBoundHeadingRelativeToBoat)
-                    + sensorData.compHeading;
-            const double widthOfCurrentDetectedObstacleAtClosest =
-                    sensDatObstacle.minDistanceToObstacle
-                    * tan(angleDiff(sensDatObstacle.LeftBoundHeadingRelativeToBoat,
-                                    sensDatObstacle.RightBoundHeadingRelativeToBoat)
-                          / 2);
+    std::cout << "After clean seenObstacles.size() = " << seenObstacles.size() << "\n";
 
-            const Eigen::Vector2d centerOfCurrentlyDetectedObstacle(
-                    sensorData.gpsPos(0)
-                    + sensDatObstacle.minDistanceToObstacle
-                      * cos(headingCenterOfDetectedObstacle),// x
-                    sensorData.gpsPos(1)
-                    + sensDatObstacle.minDistanceToObstacle
-                      * sin(headingCenterOfDetectedObstacle) // y
-            );
+    // register the new obstacles inside upToDateObstacles (convert from sensorData)
+    std::vector<Obstacle> upToDateObstacles = registerObstacles(sensorData, seenObstacles);
 
-            // 1rst Condition : current obstacle is not too close from the boat
-            const bool currentObstaclesIsNotTooClose = calculateGPSDistance(centerOfMemorizedObstacle,
-                                                                            centerOfCurrentlyDetectedObstacle)
-                                                    + widthOfCurrentDetectedObstacleAtClosest * 2
-                                                    > DISTANCE_NOT_THE_SAME_OBSTACLE;
-            obstaclesAreNotTooCloseWithCurrentMemorizedObstacle =
-                    obstaclesAreNotTooCloseWithCurrentMemorizedObstacle && currentObstaclesIsNotTooClose;
-        }
-        // 2nd condition
-        const bool obstacleInsideRange =  // Same error given by the IDE
-                calculateGPSDistance(centerOfMemorizedObstacle,sensorData.gpsPos) < MAXIMUM_SENSOR_RANGE;
-        const bool obstacleInsideArc =
-                std::abs(angleDiff(
-                        atan2(centerOfMemorizedObstacle(1)-sensorData.gpsPos(1),
-                              centerOfMemorizedObstacle(0)-sensorData.gpsPos(0)),
-                        sensorData.compHeading + SENSOR_HEADING_RELATIVE_TO_BOAT))
-                < SENSOR_ARC_ANGLE;
-        const bool obstacleShouldHaveBeenDetected =
-                (obstacleInsideRange)
-                &&(obstacleInsideArc);
+    std::cout << "After registering upToDateObstacles.size() = " << upToDateObstacles.size() << "\n";
+    std::cout << "Just for info : seenObstacles.size() = " << seenObstacles.size() << "\n";
 
-        if(obstacleShouldHaveBeenDetected && obstaclesAreNotTooCloseWithCurrentMemorizedObstacle){
-            // Remove the undetected obstacle from the memory
-            m_seenObstacles.erase(m_seenObstacles.begin()+i);
-        }
-        i++;
-    }
+    // for each up to date obstacle we clean the areas where nothing has been detected
+    seenObstacles = mergeObstacles(upToDateObstacles,seenObstacles);
 
-    //Register new obstacles
-    for(auto & sensDatObstacle : sensorData.detectedObstacles){
-        // Currently obstacles are added without merge.
-        // polygon is initialized anti-clockwise
-        Obstacle newObstacle;
-
-        //Obstacle from scratch for now
-        const Eigen::Rotation2Dd rotation(sensorData.compHeading + SENSOR_HEADING_RELATIVE_TO_BOAT);
-
-        // Point 1
-        const double x1RelativeToBoat = sensDatObstacle.minDistanceToObstacle
-                                        * tan(sensDatObstacle.RightBoundHeadingRelativeToBoat);
-        const double y1RelativeToBoat = sensDatObstacle.minDistanceToObstacle;
-        Eigen::Vector2d pt1(x1RelativeToBoat,y1RelativeToBoat);
-        pt1 = rotation*pt1;
-        newObstacle.polygon.push_back(pt1);
-
-        // Point 2
-        const double x2RelativeToBoat = sensDatObstacle.maxDistanceToObstacle
-                                        * tan(sensDatObstacle.RightBoundHeadingRelativeToBoat);
-        const double y2RelativeToBoat = sensDatObstacle.maxDistanceToObstacle;
-        Eigen::Vector2d pt2(x1RelativeToBoat,y1RelativeToBoat);
-        pt2 = rotation*pt2;
-        newObstacle.polygon.push_back(pt2);
-
-        // Point 3
-        const double x3RelativeToBoat = sensDatObstacle.maxDistanceToObstacle
-                                        * tan(sensDatObstacle.LeftBoundHeadingRelativeToBoat);
-        const double y3RelativeToBoat = sensDatObstacle.maxDistanceToObstacle;
-        Eigen::Vector2d pt3(x1RelativeToBoat,y1RelativeToBoat);
-        pt3 = rotation*pt3;
-        newObstacle.polygon.push_back(pt3);
-
-        // Point 4
-        const double x4RelativeToBoat = sensDatObstacle.minDistanceToObstacle
-                                        * tan(sensDatObstacle.LeftBoundHeadingRelativeToBoat);
-        const double y4RelativeToBoat = sensDatObstacle.minDistanceToObstacle;
-        Eigen::Vector2d pt4(x4RelativeToBoat,y4RelativeToBoat);
-        pt4 = rotation*pt4;
-        newObstacle.polygon.push_back(pt4);
-
-        newObstacle.color = "Null";
-
-        // Add new obstacle to the list
-        m_seenObstacles.push_back(newObstacle);
-    }
-
-    for(auto & sensDatObstacle : sensorData.detectedObstacles){
-        // TODO update of the obtacles with polygon intersection
-    }
+    return seenObstacles;
 }
 
 /*
@@ -498,7 +700,7 @@ bool CollisionAvoidanceBehaviour::these_obstacles_are_a_problem(
                                                            m_followedLine.endPoint,
                                                            point);
             bool thisObstacleIsAProblem = false;
-            if(std::abs(signedDistance)< CHANNEL_WIDTH
+            if(std::abs(signedDistance)< CHANNEL_RADIUS
                && calculateGPSDistance(m_sensorOutput.gpsPos,
                                        getClosestPoint(obstacle.polygon,
                                                        m_sensorOutput.gpsPos) ) < SAFE_DISTANCE){
@@ -790,7 +992,7 @@ CommandOutput CollisionAvoidanceBehaviour::compute_commands(
                                                          m_sensorOutput.gpsPos);
 
     // Step 2 : set up tacking direction -1: ,1:
-    if (std::abs(signedDistance) > CHANNEL_WIDTH){
+    if (std::abs(signedDistance) > CHANNEL_RADIUS){
         m_tackingDirection = Utility::sgn(signedDistance); // matlab : q
         // OR q = sign(theta-(mod(psi,pi)-pi)); (OLD algo)
     }
@@ -799,7 +1001,7 @@ CommandOutput CollisionAvoidanceBehaviour::compute_commands(
     //take care of the incidence angle
     double desiredHeading_star = lineHeading - 2 * incidenceAngle // theta_star
                                                     / M_PI*atan(signedDistance
-                                                                / CHANNEL_WIDTH);
+                                                                / CHANNEL_RADIUS);
     double desiredHeading_bar;
 
     // Step 5-9 : tacking part
@@ -829,7 +1031,7 @@ CommandOutput CollisionAvoidanceBehaviour::compute_commands(
 //                (cos(m_sensorOutput.windDirection + M_PI - desiredHeading_star)
 //                 + cos(ngzAngleBack) < 0)
 //                ||
-//                ( (std::abs(signedDistance)< CHANNEL_WIDTH)
+//                ( (std::abs(signedDistance)< CHANNEL_RADIUS)
 //                  && (cos(m_sensorOutput.windDirection + M_PI-lineHeading)
 //                      + cos(ngzAngleBack) < 0) )
 //        ){
