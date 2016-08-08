@@ -40,12 +40,8 @@ private:
 	double 	m_nextWaypointLat;
 	int 	m_nextWaypointDeclination;
 	int 	m_nextWaypointRadius;
-<<<<<<< HEAD
 	int		m_nextWaypointStayTime;
-	
-=======
 
->>>>>>> srcs-144_message_architecture
 	DBHandler &m_db;
 	DBLogger m_dbLogger;
 	WaypointRouting m_waypointRouting;

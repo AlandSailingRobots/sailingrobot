@@ -34,8 +34,8 @@ WaypointNode::WaypointNode(MessageBus& msgBus, DBHandler& db)
     m_prevDeclination(0),
     m_prevRadius(0)
 {
-    msgBus.registerNode(this, MessageType::GPSData);
-    msgBus.registerNode(this, MessageType::ServerWaypointsReceived);
+    msgBus.registerNode(*this, MessageType::GPSData);
+    msgBus.registerNode(*this, MessageType::ServerWaypointsReceived);
 }
 
 bool WaypointNode::init()
@@ -99,10 +99,8 @@ void WaypointNode::sendMessage()
     if(m_db.getWaypointValues(m_nextId, m_nextLongitude, m_nextLatitude, m_nextDeclination, m_nextRadius, m_nextStayTime,
                         m_prevId, m_prevLongitude, m_prevLatitude, m_prevDeclination, m_prevRadius))
     {
-
-        WaypointDataMsg* msg = new WaypointDataMsg(m_nextId, m_nextLongitude, m_nextLatitude, m_nextDeclination, m_nextRadius, m_nextStayTime,
+        MessagePtr msg = std::make_unique<WaypointDataMsg>(m_nextId, m_nextLongitude, m_nextLatitude, m_nextDeclination, m_nextRadius, m_nextStayTime,
                         m_prevId, m_prevLongitude, m_prevLatitude, m_prevDeclination, m_prevRadius);
-
         m_MsgBus.sendMessage(std::move(msg));
     }
     else
