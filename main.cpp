@@ -161,7 +161,7 @@ int main(int argc, char *argv[])
 	#if SIMULATION == 1
 	initialiseNode(simulation,"Simulation Node",NodeImportance::CRITICAL);
 	#else
-	initialiseNode(xbee, "Xbee Sync Node", NodeImportance::CRITICAL);
+	initialiseNode(xbee, "Xbee Sync Node", NodeImportance::NOT_CRITICAL);
 	initialiseNode(windSensor, "Wind Sensor", NodeImportance::CRITICAL);
 	initialiseNode(compass, "Compass", NodeImportance::CRITICAL);
 	initialiseNode(gpsd, "GPSD Node", NodeImportance::CRITICAL);
