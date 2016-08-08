@@ -76,7 +76,6 @@ void VesselStateNode::processCompassMessage(CompassDataMsg* msg)
 
 void VesselStateNode::processGPSMessage(GPSDataMsg* msg)
 {
-	printf("receive sendin gpsd mess \n");
 	m_GPSHasFix = msg->hasFix();
 	m_GPSOnline = msg->gpsOnline();
 	m_GPSLat = msg->latitude();
