@@ -13,8 +13,6 @@
 
 
 class HTTPSyncNode : public ActiveNode{
-
-
 	public:
 
 		HTTPSyncNode(MessageBus& msgBus,DBHandler *db,int delay, bool removeLogs);
