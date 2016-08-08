@@ -20,8 +20,8 @@ Or :
 	*colorDetectionNode(MessageBus& msgBus,int numberOfCapturesPerDetection,
                         int port, int delay,std::vector<std::string> colors_input,int bottomPixelsToCrop);
 
-Create a std::vector<std::string> colors_input with the colors you settled earlier.
-If you need to crop the bottom part of the image to not detect the boat adjust bottomPixelsToCrop;
+Create a `std::vector<std::string> colors_input` with the colors you settled earlier.
+If you need to crop the bottom part of the image to not detect the boat adjust `int bottomPixelsToCrop`;
 
 	*int numberOfCapturesPerDetection : at each loop iteration the program will take numberOfCapturesPerDetection
 		pictures and compute the position of the detected obstacles with
