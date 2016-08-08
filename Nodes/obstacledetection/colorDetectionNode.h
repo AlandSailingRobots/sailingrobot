@@ -23,7 +23,7 @@ public:
     colorDetectionNode(MessageBus& msgBus,std::vector<std::string> colors_input,int bottomPixelsToCrop);
     //Accepted values:red,orange,green,yellow,purple and blue
     //Possibility to live change ths HSV values live after to detect another color
-	colorDetectionNode(MessageBus& msgBus,int m_numberOfCapturesPerDetection,
+	colorDetectionNode(MessageBus& msgBus,int numberOfCapturesPerDetection,
                         int port, int delay,std::vector<std::string> colors_input,int bottomPixelsToCrop);
 
 

@@ -40,11 +40,11 @@ colorDetectionNode::colorDetectionNode(MessageBus& msgBus,std::vector<string> co
 }
 
 colorDetectionNode::colorDetectionNode(MessageBus& msgBus,
-	int m_numberOfCapturesPerDetection, int port, int delay,std::vector<string> colors_input,int bottomPixelsToCrop)
+	int numberOfCapturesPerDetection, int port, int delay,std::vector<string> colors_input,int bottomPixelsToCrop)
 	: ActiveNode(NodeID::ColorDetection, msgBus),m_hsvDiff(10),m_iLowH(0),
 	m_iHighH(179),m_iLowS(0),m_iHighS(255),m_iLowV(0),m_iHighV(255),m_iColor(0),
 	m_numberOfColorsToTrack(0),m_Initialised(false),m_minAreaToDetect(2000),
-	m_maxAreaToDetect(20000),m_numberOfCapturesPerDetection(m_numberOfCapturesPerDetection),
+	m_maxAreaToDetect(20000),m_numberOfCapturesPerDetection(numberOfCapturesPerDetection),
 	m_delay(delay),m_port(port),m_bottomPixelsToCrop(bottomPixelsToCrop)
 {
 
