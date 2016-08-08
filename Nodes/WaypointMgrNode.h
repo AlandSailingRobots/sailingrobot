@@ -17,14 +17,14 @@
 #include "Node.h"
 #include "Messages/GPSDataMsg.h"
 #include "dbhandler/DBHandler.h"
-#include "coursecalculation/CourseMath.h"
+#include "utility/CourseMath.h"
 #include "utility/Timer.h"
 
 
-class WaypointNode : public Node {
+class WaypointMgrNode : public Node {
 public:
-	WaypointNode(MessageBus& msgBus, DBHandler& db);
-    virtual ~WaypointNode(){};
+	WaypointMgrNode(MessageBus& msgBus, DBHandler& db);
+    virtual ~WaypointMgrNode(){};
 
 	bool init();
 
@@ -41,7 +41,6 @@ private:
     bool harvestWaypoint();
 
     DBHandler &m_db;
-    CourseMath m_courseMath;
     bool writeTime;
 
     int     m_nextId;

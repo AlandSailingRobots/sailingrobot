@@ -24,7 +24,7 @@
 #include "dbhandler/DBLogger.h"
 #include "waypointrouting/SailCommand.h"
 #include "waypointrouting/RudderCommand.h"
-#include "coursecalculation/CourseMath.h"
+#include "utility/CourseMath.h"
 
 
 class LineFollowNode : public Node {
@@ -59,7 +59,6 @@ private:
     double  m_tackAngle;
     int     m_tackingDirection;
 
-    CourseMath m_courseMath;
 	RudderCommand m_rudderCommand;
 	SailCommand m_sailCommand;
 

@@ -1,7 +1,7 @@
 #ifndef __WAYPOINTROUTING_H__
 #define __WAYPOINTROUTING_H__
 
-#include "coursecalculation/CourseCalculation.h"
+#include "utility/CourseCalculation.h"
 #include "utility/Timer.h"
 #include "utility/Utility.h"
 #include "TackAngle.h"
@@ -48,7 +48,6 @@ private:
 	TackAngle m_tackAngleHandler;
 	Commands m_commandHandler;
 	CourseCalculation m_courseCalc;
-	CourseMath m_courseMath;
 	double m_innerRadiusRatio;
 	Timer m_waypointTimer;
 	double m_courseToSteer;

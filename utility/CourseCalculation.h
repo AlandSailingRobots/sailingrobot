@@ -33,8 +33,6 @@ private:
 
 	/* Angle around true wind direction in which the boat will be turning side when tacking */
 	double m_sectorAngle;
-	
-	CourseMath m_courseMath;
 
 	/* Calculates if the boat has to tack, which it needs if bearing to waypoint is close to true wind direction */
 	void calculateTack();

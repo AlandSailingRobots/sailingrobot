@@ -202,8 +202,8 @@ void LineFollowNode::calculateActuatorPos(VesselStateMsg* msg)
 
     //------------------
 
-    double bearingToNextWaypoint = m_courseMath.calculateBTW(msg->longitude(), msg->latitude(), m_nextWaypointLon, m_nextWaypointLat); //calculated for database
-    double distanceToNextWaypoint = m_courseMath.calculateDTW(msg->longitude(), msg->latitude(), m_nextWaypointLon, m_nextWaypointLat);
+    double bearingToNextWaypoint = CourseMath::calculateBTW(msg->longitude(), msg->latitude(), m_nextWaypointLon, m_nextWaypointLat); //calculated for database
+    double distanceToNextWaypoint = CourseMath::calculateDTW(msg->longitude(), msg->latitude(), m_nextWaypointLon, m_nextWaypointLat);
 
     MessagePtr courseMsg = std::make_unique<CourseDataMsg>(trueWindDirection, distanceToNextWaypoint, bearingToNextWaypoint);
     m_MsgBus.sendMessage(std::move(courseMsg));
@@ -307,7 +307,7 @@ void LineFollowNode::setPrevWaypointToBoatPos(VesselStateMsg* msg) //If boat pas
     double distanceAfterWaypoint = Utility::calculateWaypointsOrthogonalLine(m_nextWaypointLon, m_nextWaypointLat, m_prevWaypointLon,
             m_prevWaypointLat, msg->longitude(), msg->latitude());
 
-    double DTW = m_courseMath.calculateDTW(msg->longitude(), msg->latitude(), m_nextWaypointLon, m_nextWaypointLat);
+    double DTW = CourseMath::calculateDTW(msg->longitude(), msg->latitude(), m_nextWaypointLon, m_nextWaypointLat);
     
     if(distanceAfterWaypoint > 0 ||  DTW < m_nextWaypointRadius)
     {

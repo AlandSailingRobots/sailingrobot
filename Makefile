@@ -42,13 +42,13 @@ JSON = 					libs/json
 CORE =					MessageBus.cpp ActiveNode.cpp Messages/MessageSerialiser.cpp Messages/MessageDeserialiser.cpp
 
 ifeq ($(USE_SIM),1)
-NODES =					Nodes/MessageLoggerNode.cpp  Nodes/WaypointNode.cpp Nodes/HTTPSyncNode.cpp Nodes/XbeeSyncNode.cpp \
+NODES =					Nodes/MessageLoggerNode.cpp  Nodes/WaypointMgrNode.cpp Nodes/HTTPSyncNode.cpp Nodes/XbeeSyncNode.cpp \
 						Nodes/VesselStateNode.cpp  Nodes/RoutingNode.cpp Nodes/LineFollowNode.cpp \
 						Nodes/SimulationNode.cpp
 SYSTEM_SERVICES =		SystemServices/Logger.cpp
 else
 NODES =					Nodes/MessageLoggerNode.cpp Nodes/CV7Node.cpp Nodes/HMC6343Node.cpp Nodes/GPSDNode.cpp Nodes/ActuatorNode.cpp  Nodes/ArduinoNode.cpp \
-						Nodes/VesselStateNode.cpp Nodes/WaypointNode.cpp Nodes/HTTPSyncNode.cpp Nodes/XbeeSyncNode.cpp Nodes/RoutingNode.cpp Nodes/LineFollowNode.cpp \
+						Nodes/VesselStateNode.cpp Nodes/WaypointMgrNode.cpp Nodes/HTTPSyncNode.cpp Nodes/XbeeSyncNode.cpp Nodes/RoutingNode.cpp Nodes/LineFollowNode.cpp \
 						Nodes/SimulationNode.cpp
 
 SYSTEM_SERVICES =		SystemServices/MaestroController.cpp SystemServices/Logger.cpp
@@ -59,7 +59,7 @@ XBEE = 					xBee/Xbee.cpp
 
 I2CCONTROLLER = 		i2ccontroller/I2CController.cpp
 
-COURSE = 				coursecalculation/CourseCalculation.cpp coursecalculation/CourseMath.cpp
+COURSE = 				utility/CourseCalculation.cpp utility/CourseMath.cpp
 
 DB = 					dbhandler/DBHandler.cpp dbhandler/DBLogger.cpp
 

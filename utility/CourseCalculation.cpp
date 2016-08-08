@@ -24,8 +24,8 @@ double CourseCalculation::calculateCourseToSteer(double gpsLon, double gpsLat, d
 	double trueWindDirection)
 {
 	m_trueWindDirection = trueWindDirection;
-	m_distanceToWaypoint = m_courseMath.calculateDTW(gpsLon, gpsLat, waypLon, waypLat);
-	m_bearingToWaypoint = m_courseMath.calculateBTW(gpsLon, gpsLat, waypLon, waypLat);
+	m_distanceToWaypoint = CourseMath::calculateDTW(gpsLon, gpsLat, waypLon, waypLat);
+	m_bearingToWaypoint = CourseMath::calculateBTW(gpsLon, gpsLat, waypLon, waypLat);
 
 	calculateTack();
 

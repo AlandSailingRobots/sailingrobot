@@ -3,7 +3,7 @@
 #include "utility/Utility.h"
 
 
-double CourseMath::calculateBTW(double gpsLon, double gpsLat, double waypointLon, double waypointLat) const
+double CourseMath::calculateBTW(double gpsLon, double gpsLat, double waypointLon, double waypointLat)
 {
 	double boatLatitudeInRadian = Utility::degreeToRadian(gpsLat);
 	double waypointLatitudeInRadian = Utility::degreeToRadian(waypointLat);
@@ -26,7 +26,7 @@ double CourseMath::calculateBTW(double gpsLon, double gpsLat, double waypointLon
 	return bearingToWaypoint;
 }
 
-double CourseMath::calculateDTW(double gpsLon, double gpsLat, double waypointLon, double waypointLat) const
+double CourseMath::calculateDTW(double gpsLon, double gpsLat, double waypointLon, double waypointLat)
 {
 	const double radiusOfEarth = 6371.0;
 
