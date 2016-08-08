@@ -168,7 +168,6 @@ void SimulationNode::createGPSMessage()
 
 	if (m_count_sleep % COUNT_GPSDATA_MSG==0)
 	{
-		printf("sending message\n");
 		MessagePtr msg = std::make_unique<GPSDataMsg>(GPSDataMsg(m_GPSHasFix, m_GPSOnline, m_GPSLat, m_GPSLon, m_GPSUnixTime, m_GPSSpeed, m_GPSHeading, m_GPSSatellite, mode));
 		m_MsgBus.sendMessage(std::move(msg));
 	}
