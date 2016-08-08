@@ -18,6 +18,7 @@
 #include "Messages/GPSDataMsg.h"
 #include "dbhandler/DBHandler.h"
 #include "coursecalculation/CourseMath.h"
+#include "utility/Timer.h"
 
 
 
@@ -38,15 +39,18 @@ private:
  	/// Sends message with data about the next waypoint
  	///----------------------------------------------------------------------------------
     void sendMessage();
+    bool harvestWaypoint();
 
     DBHandler &m_db;
     CourseMath m_courseMath;
+    bool writeTime;
 
     int     m_nextId;
     double  m_nextLongitude;
     double  m_nextLatitude;
     int     m_nextDeclination;
     int     m_nextRadius;
+    int     m_nextStayTime;
 
     int     m_prevId;
     double  m_prevLongitude;
@@ -56,4 +60,6 @@ private:
 
     double  m_gpsLongitude;
     double  m_gpsLatitude;
+
+    Timer   m_waypointTimer;
 };

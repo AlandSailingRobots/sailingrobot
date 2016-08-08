@@ -21,7 +21,7 @@ public:
 	WaypointRouting & operator=(const WaypointRouting &) = delete;	
 	~WaypointRouting();
 
-	void getCommands(double & rudder, double & sail, double gpsLon, double gpsLat, int radius,
+	void getCommands(double & rudder, double & sail, double gpsLon, double gpsLat, int radius, int stayTime,
 	double trueWindDirection, double heading, double gpsHeading, double gpsSpeed, double compassHeading, double windsensorDir);
 
 	void setCourseCalcValues(double tackAngle, double sectorAngle);
@@ -42,6 +42,7 @@ public:
 	
 private:
 
+	bool reachedRadius(double radius, double gpsLon, double gpsLat) const;
 	bool adjustSteering(double relativeWindDirection);
 
 	double m_lon;

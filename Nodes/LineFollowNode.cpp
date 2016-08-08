@@ -127,6 +127,8 @@ void LineFollowNode::calculateActuatorPos(VesselStateMsg* msg)
     /* add pi because trueWindDirection is originally origin of wind but algorithm need direction*/
     double trueWindDirection_radian = Utility::degreeToRadian(trueWindDirection)+M_PI;
 
+    setPrevWaypointToBoatPos(msg);
+
     //GET DIRECTION--------
     double currentHeading = getHeading(msg->gpsHeading(), msg->compassHeading(), msg->speed(), false, false);
     double currentHeading_radian = Utility::degreeToRadian(currentHeading);
@@ -192,6 +194,7 @@ void LineFollowNode::calculateActuatorPos(VesselStateMsg* msg)
     //------------------
     int rudderCommand_norm = m_rudderCommand.getCommand(rudderCommand/NORM_RUDDER_COMMAND);
     int sailCommand_norm = m_sailCommand.getCommand(sailCommand/NORM_SAIL_COMMAND);
+
 
     //Send messages----
     MessagePtr actuatorMsg = std::make_unique<ActuatorPositionMsg>(rudderCommand_norm, sailCommand_norm);
@@ -299,24 +302,16 @@ bool LineFollowNode::getGoingStarboard()
     else return false;
 }
 
-/*
-void LineFollowNode::manageDatabase(VesselStateMsg* msg, double trueWindDirection, double rudder, double sail, double heading,
-                        double distanceToNextWaypoint, double bearingToNextWaypoint){
-  //logging
-  bool routeStarted = false;
-  m_db.insertDataLog(
-    msg,
-    rudder,
-    sail,
-    0,
-    0,
-    distanceToNextWaypoint,
-    bearingToNextWaypoint,
-    heading,
-    m_tack,
-    getGoingStarboard(),
-    m_nextWaypointId,
-    trueWindDirection,
-    routeStarted
-  );
-}*/
+void LineFollowNode::setPrevWaypointToBoatPos(VesselStateMsg* msg) //If boat passed waypoint or enters it, set new line from boat to waypoint.
+{                                                                  //Used if boat has to stay within waypoint for a set amount of time.
+    double distanceAfterWaypoint = Utility::calculateWaypointsOrthogonalLine(m_nextWaypointLon, m_nextWaypointLat, m_prevWaypointLon,
+            m_prevWaypointLat, msg->longitude(), msg->latitude());
+
+    double DTW = m_courseMath.calculateDTW(msg->longitude(), msg->latitude(), m_nextWaypointLon, m_nextWaypointLat);
+    
+    if(distanceAfterWaypoint > 0 ||  DTW < m_nextWaypointRadius)
+    {
+        m_prevWaypointLon = msg->longitude();
+        m_prevWaypointLat = msg->latitude();
+    }
+}

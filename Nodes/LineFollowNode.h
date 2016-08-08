@@ -76,6 +76,7 @@ private:
 	void setupRudderCommand();
 	void setupSailCommand();
     bool getGoingStarboard();
+	void setPrevWaypointToBoatPos(VesselStateMsg* msg);
 
 	/*void manageDatabase(VesselStateMsg* msg, double trueWindDirection, double rudder, double sail, double heading,
                         double distanceToNextWaypoint, double bearingToNextWaypoint);*/

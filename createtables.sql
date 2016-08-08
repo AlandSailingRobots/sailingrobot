@@ -15,6 +15,7 @@ CREATE TABLE waypoints (id INTEGER PRIMARY KEY AUTOINCREMENT, -- no autoincremen
 	longitude DOUBLE,
 	declination INTEGER,
 	radius INTEGER,
+ 	stay_time INTEGER,
 	harvested BOOLEAN
 );
 
@@ -23,15 +24,6 @@ CREATE TABLE waypoint_index (
 	id INTEGER PRIMARY KEY,
 	i INTEGER,
 	j INTEGER,
-
-	-- not enforced: foreign_keys off (line 1)
-	FOREIGN KEY(id) REFERENCES waypoints(id)
-);
-
-DROP TABLE IF EXISTS "waypoint_stationary";
-CREATE TABLE waypoint_stationary (
-	id INTEGER PRIMARY KEY,
-	time INTEGER,
 
 	-- not enforced: foreign_keys off (line 1)
 	FOREIGN KEY(id) REFERENCES waypoints(id)

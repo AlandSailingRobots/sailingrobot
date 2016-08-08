@@ -34,10 +34,10 @@ HTTPSyncNode::HTTPSyncNode(MessageBus& msgBus, DBHandler *db, int delay, bool re
 
 bool HTTPSyncNode::init()
 {
+    
 
     m_initialised = false;
-
-    curl = curl_easy_init();
+    
     m_reportedConnectError = false;
 
     m_pushOnlyLatestLogs = m_dbHandler->retrieveCellAsInt("httpsync_config", "1", "push_only_latest_logs");
@@ -57,7 +57,7 @@ void HTTPSyncNode::start(){
 
     if (m_initialised)
     {
-        pushWaypoints();
+        
         runThread(HTTPSyncThread);
     }
     else
@@ -89,8 +89,14 @@ void HTTPSyncNode::processMessage(const Message* msgPtr)
 void HTTPSyncNode::HTTPSyncThread(void* nodePtr){
 
     HTTPSyncNode* node = (HTTPSyncNode*)(nodePtr);
+    
 
     Logger::info("HTTPSync thread has started");
+
+    curl_global_init(CURL_GLOBAL_ALL);
+
+    node->pushWaypoints();
+    node->pushConfigs();
 
     while(true)
     {
@@ -100,6 +106,8 @@ void HTTPSyncNode::HTTPSyncThread(void* nodePtr){
         node->getWaypointsFromServer();
         node->pushDatalogs();
     }
+
+    curl_global_cleanup();
 
     Logger::info("HTTPSync thread has exited");
 }
@@ -112,8 +120,6 @@ bool HTTPSyncNode::pushDatalogs() {
         if(m_removeLogs) {
             m_dbHandler->clearLogs();
         }
-
-        Logger::info("Logs pushed to server");
         return true;
     }
     else if(!m_reportedConnectError)
@@ -132,7 +138,6 @@ bool HTTPSyncNode::pushWaypoints()
 		std::string response;
 		if(performCURLCall(waypointsData,"pushWaypoints", response))
 		{
-			Logger::info("Waypoints pushed to server");
             return true;
 		}
 		else if(!m_reportedConnectError)
@@ -148,7 +153,7 @@ bool HTTPSyncNode::pushConfigs() {
 
 	if(performCURLCall(m_dbHandler->getConfigs(), "pushConfigs", response))
 	{
-		Logger::info("Configs pushed to server");
+		Logger::info("Configs pushed to server: " + response);
         return true;
 	}
 	else if(!m_reportedConnectError)
@@ -250,6 +255,7 @@ bool HTTPSyncNode::performCURLCall(std::string data, std::string call, std::stri
         serverCall = "serv="+call + "&id="+m_shipID+"&pwd="+m_shipPWD;
         //example: serv=getAllConfigs&id=BOATID&pwd=BOATPW
 
+    curl = curl_easy_init();
     if(curl) {
     	//Send data through curl with POST
 		curl_easy_setopt(curl, CURLOPT_URL, m_serverURL.c_str());
@@ -279,6 +285,9 @@ bool HTTPSyncNode::performCURLCall(std::string data, std::string call, std::stri
 		{
 			m_reportedConnectError = false;
 		}
+        curl_easy_cleanup(curl);
+    }else{
+        fprintf(stderr, "CURL IS FALSE");
     }
 
     return true;
