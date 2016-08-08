@@ -11,15 +11,17 @@ Don't forgot to change float webcamAngleApertureX and float webcamAngleApertureY
 
 ## Initialize and start the node in main.cpp
 
-You use either :
+You can use either :
+
  colorDetectionNode(MessageBus& msgBus,std::vector<std::string> colors_input,int bottomPixelsToCrop);
  
 Or :
+
  colorDetectionNode(MessageBus& msgBus,int numberOfCapturesPerDetection,
                         int port, int delay,std::vector<std::string> colors_input,int bottomPixelsToCrop);
 
 Create a std::vector<std::string> colors_input with the colors you settled earlier.
-If you need to crop the bottom part of the image to not detect the boat adjust int bottomPixelsToCrop;
+If you need to crop the bottom part of the image to not detect the boat adjust bottomPixelsToCrop;
 
 	*int numberOfCapturesPerDetection : at each loop iteration the program will take numberOfCapturesPerDetection
 		pictures and compute the position of the detected obstacles with
@@ -29,9 +31,9 @@ If you need to crop the bottom part of the image to not detect the boat adjust i
 	
 	*int delay : Delay between each loop iteration.
 	
-	*m_minAreaToDetect(2000) : is always set to 2000 in colorDetectionNode.cpp. If needed
-			don't forget to adjust and change this.
+	*m_minAreaToDetect(2000) : is always set to 2000 in colorDetectionNode.cpp. If neededdon't forget to adjust 
+			and change this.
 	
-	*m_maxAreaToDetect(20000) : is always set to 20000 in colorDetectionNode.cpp. If needed
-			don't forget to adjust and change this.
+	*m_maxAreaToDetect(20000) : is always set to 20000 in colorDetectionNode.cpp. If needed don't forget to adjust
+			and change this.
  
