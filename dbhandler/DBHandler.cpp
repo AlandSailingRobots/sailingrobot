@@ -42,7 +42,7 @@ void DBHandler::getDataAsJson(std::string select, std::string table, std::string
 	std::vector<std::string> values;
 	std::vector<std::string> columnNames;
 	std::vector<std::string> results;
-	
+
 	try {
 		if(id == "")
 			results = retrieveFromTable("SELECT " + select + " FROM " + table + ";", rows, columns);
@@ -862,7 +862,7 @@ std::vector<std::string> DBHandler::getTableNames(std::string like) {
     }
 
     std::vector<std::string> tableNames;
-    for (unsigned int i = 1; i <= results.size(); i++) {
+    for (unsigned int i = 1; i < results.size(); i++) {
     	tableNames.push_back(results[i]);
     }
 

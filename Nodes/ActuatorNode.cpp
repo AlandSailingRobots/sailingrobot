@@ -32,7 +32,7 @@ bool ActuatorNode::init()
 	}
 	else
 	{
-		Logger::error("%s Failed to write actuator speed and aceleration!", __PRETTY_FUNCTION__);
+		Logger::error("%s Failed to write actuator speed and acceleration!", __PRETTY_FUNCTION__);
 		return false;
 	}
 
