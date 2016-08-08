@@ -16,6 +16,7 @@
 
 #include "ActiveNode.h"
 #include "i2ccontroller/I2CController.h"
+#include <mutex>
 
 
 
@@ -35,25 +36,24 @@ public:
 
 	void processMessage(const Message* msg);
 
+	int sendToArduino(uint8_t* data, uint8_t dataID);
+
+	void passToCANBus();
+
+	void processI2CData(uint8_t* data);
 
 private:
 	static void ArduinoThreadFunc(void* nodePtr);
-	void sendToArduino(uint32_t dataID, uint32_t CANID, uint8_t* CANData)
-	void loadOutgoingMessage(const Message* message)
-	void passToCANBus()
-	void processIncomingCAN(uint32_t CANID, uint8_t* CANData)
 
 	I2CController 	m_I2C;
-	bool 		m_Initialised;
-	int             m_pressure;
-	int             m_rudder;
-	int             m_sheet;
-	int             m_battery;
+	bool 			m_Initialised;
+	bool 			m_locked;
+	std::mutex 		m_mutex;
 
 	//adding instead of replacing for testing purposes
-	uint16_t m_rudderPosition;
-	uint16_t m_sailPosition;
+	uint16_t m_rudderCommand;
+	uint16_t m_sailCommand;
 	uint8_t m_windVaneCommand;
-	bool m_actuatorPositionsReady;
+	bool m_actuatorCommandsReady;
 	bool m_windVaneCommandReady;
 };

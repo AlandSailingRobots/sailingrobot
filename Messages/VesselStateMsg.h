@@ -21,22 +21,22 @@ public:
 	VesselStateMsg(	NodeID destinationID, NodeID sourceID, int compassHeading, int compassPitch, 
 					int compassRoll, bool gpsFix, bool gpsOnline, double lat, double lon, double unixTime, 
 					double gpsSpeed, int gpsSatellite, double heading, float windDir, float windSpeed, float windTemp,
-					int arduinoPressure, int arduinoRudder, int arduinoSheet, int arduinoBattery)
+					int arduinoPressure, int rudderFeedback, int sailFeedback, int arduinoBattery)
 		:Message(MessageType::VesselState, sourceID, destinationID),
 		m_CompassHeading(compassHeading), m_CompassPitch(compassPitch), m_CompassRoll(compassRoll), 
 		m_GPSHasFix(gpsFix), m_GPSOnline(gpsOnline), m_GPSLat(lat), m_GPSLon(lon), m_GPSUnixTime(unixTime), m_GPSSpeed(gpsSpeed), 
 		m_GPSHeading(heading), m_GPSSatellite(gpsSatellite) , m_WindDir(windDir), m_WindSpeed(windSpeed), m_WindTemp(windTemp), m_ArduinoPressure(arduinoPressure),
-		m_ArduinoRudder(arduinoRudder), m_ArduinoSheet(arduinoSheet), m_ArduinoBattery(arduinoBattery)
+		m_RudderFeedback(rudderFeedback), m_SailFeedback(sailFeedback), m_ArduinoBattery(arduinoBattery)
 		{ }
 
 	VesselStateMsg(	int compassHeading, int compassPitch, int compassRoll, bool gpsFix, bool gpsOnline, double lat,
 					double lon, double unixTime, double gpsSpeed, int gpsSatellite, double heading, float windDir, 
-					float windSpeed, float windTemp, int arduinoPressure, int arduinoRudder, int arduinoSheet, int arduinoBattery)
+					float windSpeed, float windTemp, int arduinoPressure, int rudderFeedback, int sailFeedback, int arduinoBattery)
 		:Message(MessageType::VesselState, NodeID::None, NodeID::None),
 		m_CompassHeading(compassHeading), m_CompassPitch(compassPitch), m_CompassRoll(compassRoll), 
 		m_GPSHasFix(gpsFix), m_GPSOnline(gpsOnline), m_GPSLat(lat), m_GPSLon(lon), m_GPSUnixTime(unixTime), m_GPSSpeed(gpsSpeed), 
 		m_GPSHeading(heading), m_GPSSatellite(gpsSatellite), m_WindDir(windDir), m_WindSpeed(windSpeed), m_WindTemp(windTemp), m_ArduinoPressure(arduinoPressure),
-		m_ArduinoRudder(arduinoRudder), m_ArduinoSheet(arduinoSheet), m_ArduinoBattery(arduinoBattery)
+		m_RudderFeedback(rudderFeedback), m_SailFeedback(sailFeedback), m_ArduinoBattery(arduinoBattery)
 		{ }
 
 	VesselStateMsg(MessageDeserialiser deserialiser)
@@ -57,8 +57,8 @@ public:
 			!deserialiser.readFloat(m_WindSpeed) ||
 			!deserialiser.readFloat(m_WindTemp) ||
 			!deserialiser.readInt(m_ArduinoPressure) ||
-			!deserialiser.readInt(m_ArduinoRudder) ||
-			!deserialiser.readInt(m_ArduinoSheet) ||
+			!deserialiser.readInt(m_RudderFeedback) ||
+			!deserialiser.readInt(m_SailFeedback) ||
 			!deserialiser.readInt(m_ArduinoBattery))
 		{
 			m_valid = false;
@@ -85,8 +85,8 @@ public:
 	float windTemp() { return m_WindTemp; }
 
 	int arduinoPressure() { return m_ArduinoPressure; }
-	int arduinoRudder() { return m_ArduinoRudder; }
-	int arduinoSheet() { return m_ArduinoSheet; }
+	int rudderFeedback() { return m_RudderFeedback; }
+	int sailFeedback() { return m_SailFeedback; }
 	int arduinoBattery() { return m_ArduinoBattery; }
 
 	///----------------------------------------------------------------------------------
@@ -111,8 +111,8 @@ public:
 		serialiser.serialise(m_WindSpeed);
 		serialiser.serialise(m_WindTemp);
 		serialiser.serialise(m_ArduinoPressure);
-		serialiser.serialise(m_ArduinoRudder);
-		serialiser.serialise(m_ArduinoSheet);
+		serialiser.serialise(m_RudderFeedback);
+		serialiser.serialise(m_SailFeedback);
 		serialiser.serialise(m_ArduinoBattery);
 	}
 
@@ -133,7 +133,7 @@ private:
 	float	m_WindSpeed;
 	float 	m_WindTemp;
 	int 	m_ArduinoPressure;
-	int 	m_ArduinoRudder;
-	int 	m_ArduinoSheet;
+	int 	m_RudderFeedback;
+	int 	m_SailFeedback;
     int 	m_ArduinoBattery;
 };

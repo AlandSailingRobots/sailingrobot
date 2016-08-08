@@ -192,8 +192,11 @@ void SimulationNode::createArduinoMessage()
 
 	if (m_count_sleep % COUNT_ARDUINO_MSG==0)
 	{
-		ArduinoDataMsg* msg = new ArduinoDataMsg(m_ArduinoPressure, m_ArduinoRudder, m_ArduinoSheet, m_ArduinoBattery );
+		ArduinoDataMsg* msg = new ArduinoDataMsg(m_ArduinoPressure, m_ArduinoBattery );
 		m_MsgBus.sendMessage(msg);
+
+		ActuatorPositionMsg* aMsg = new ActuatorPositionMsg(m_ArduinoRudder, m_ArduinoSheet, true);
+		m_MsgBus.sendMessage(aMsg);
 	}
 }
 

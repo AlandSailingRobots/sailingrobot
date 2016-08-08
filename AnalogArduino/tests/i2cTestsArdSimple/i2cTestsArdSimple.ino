@@ -7,8 +7,10 @@ byte I2Caddress = SLAVE_ADDRESS;                                       // I2C sl
 int number = 0;
 int state = 0;
 byte datapacket[20];
+byte datapacket2[20];
 byte receiveBuf[34];
 int dataLength = 9;
+int dataLength2 = 7;
 int i = 0;
 
  
@@ -48,6 +50,8 @@ void receiveData(int byteCount){
 void sendData(){
   Serial.println("Writing data...");
   Wire.write(datapacket,dataLength+1);
+  Serial.println("Writing data2...");
+  Wire.write(datapacket2,dataLength2+1);
 }
 
 void loadData(){
@@ -61,5 +65,15 @@ void loadData(){
   datapacket[7]=7;
   datapacket[8]=8;
   datapacket[9]=I2Caddress;
+
+  
+  datapacket2[0]=dataLength2;
+  datapacket2[1]=12;
+  datapacket2[2]=22;
+  datapacket2[3]=32;
+  datapacket2[4]=42;
+  datapacket2[5]=52;
+  datapacket2[6]=62;
+  datapacket2[7]=72;
 }
 

@@ -98,7 +98,7 @@ class I2CController {
 		/// @returns 					Returns a byte from the read, or a -1 if there was a
 		///										error.
 		///----------------------------------------------------------------------------------
-		//int writeBlock(uint8_t* block, uint8_t size);
+		int writeBlock(uint8_t* block, uint8_t size, uint8_t dataID);
 
 		///----------------------------------------------------------------------------------
 		/// Begins an I2C transmission, this should be called before any I2C operations are

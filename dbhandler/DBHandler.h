@@ -29,8 +29,8 @@ struct LogItem {
 		float	m_windSpeed;
 		float 	m_windTemp;
 		int 	m_arduinoPressure;
-		int 	m_arduinoRudder;
-		int 	m_arduinoSheet;
+		int 	m_rudderFeedback;
+		int 	m_sailFeedback;
 		int 	m_arduinoBattery;
 		double 	m_rudder;
 		double 	m_sail;

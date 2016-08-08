@@ -86,8 +86,8 @@ int I2CController::readBlock(uint8_t* block)
 	return -1;
 }
 
-/*
-int I2CController::writeBlock(uint8_t* block, uint8_t size)
+
+int I2CController::writeBlock(uint8_t* block, uint8_t size, uint8_t dataID)
 {
 	if(m_Locked)
 	{
@@ -96,14 +96,13 @@ int I2CController::writeBlock(uint8_t* block, uint8_t size)
 			Logger::error("%s char* block is a null pointer!", __PRETTY_FUNCTION__);
 			return -1;
 		}
-		char command = 0;
-		return wiringPiI2CWriteBlock(m_DeviceFD, command, (char*)block, size);
+		return wiringPiI2CWriteI2CBlock(m_DeviceFD, dataID, (char*)block, size);
 	}
 
 	Logger::error("I2C controller transmission has not begun, call I2CController::beginTransmission!");
 	return -1;
 }
-*/
+
 
 void I2CController::beginTransmission()
 {

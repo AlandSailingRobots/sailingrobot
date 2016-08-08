@@ -149,8 +149,8 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs)
 
 			arduinoValues << std::setprecision(10)
 				<< log.m_arduinoPressure << ", "
-				<< log.m_arduinoRudder << ", "
-				<< log.m_arduinoSheet << ", "
+				<< log.m_rudderFeedback << ", "
+				<< log.m_sailFeedback << ", "
 				<< log.m_arduinoBattery;
 
 		  ss << "INSERT INTO " << "arduino_datalogs" << " VALUES(NULL, " << arduinoValues.str() << ");";

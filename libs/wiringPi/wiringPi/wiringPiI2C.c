@@ -235,7 +235,7 @@ int wiringPiI2CSetup (const int devId)
 int wiringPiI2CReadBlock (int fd, char* block)
 {
   union i2c_smbus_data data;
-  #define DATA_START  0 //should be 2
+  #define DATA_START  2 //should be 2
 
   // Arduino always sends 32 to data[0] so we must read length from data[1]
   if (i2c_smbus_access (fd, I2C_SMBUS_READ, 0, I2C_SMBUS_I2C_BLOCK_BROKEN, &data))
@@ -250,7 +250,9 @@ int wiringPiI2CReadBlock (int fd, char* block)
     // Can only read 32 bytes at a time
     if(length > I2C_SMBUS_I2C_BLOCK_MAX)
     {
-      retVal = length - I2C_SMBUS_I2C_BLOCK_MAX;
+      // Return the number of bytes not read as a negative
+      retVal = I2C_SMBUS_I2C_BLOCK_MAX - length;
+      length = I2C_SMBUS_I2C_BLOCK_MAX;
     }
     else
     {
@@ -266,22 +268,6 @@ int wiringPiI2CReadBlock (int fd, char* block)
   }
 }
 
-int wiringPiI2CReadBlockOriginal(int file, char command, char *values)
-{
-  union i2c_smbus_data data;
-  int i;
-  if (i2c_smbus_access(file,I2C_SMBUS_READ,command,
-                       I2C_SMBUS_BLOCK_DATA,&data))
-    return -1;
-
-  else {
-
-    for (i = 1; i <= data.block[0]; i++)
-      values[i-1] = data.block[i];
-
-    return data.block[0];
-  }
-}
 
 int wiringPiI2CWriteBlock(int file, char command, char *values, char length)
 {

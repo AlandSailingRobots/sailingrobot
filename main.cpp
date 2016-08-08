@@ -11,7 +11,7 @@
  #include "Nodes/HMC6343Node.h"
  #include "Nodes/GPSDNode.h"
  #include "Nodes/ActuatorNode.h"
- #include "Nodes/ArduinoNode.h"
+ #include "Nodes/ArduinoI2CNode.h"
 #endif
 
 #include "Nodes/WaypointNode.h"
@@ -116,7 +116,7 @@ int main(int argc, char *argv[])
   CV7Node windSensor(messageBus, dbHandler.retrieveCell("windsensor_config", "1", "port"), dbHandler.retrieveCellAsInt("windsensor_config", "1", "baud_rate"));
 	HMC6343Node compass(messageBus, dbHandler.retrieveCellAsInt("buffer_config", "1", "compass"));
 	GPSDNode gpsd(messageBus);
-	ArduinoNode arduino(messageBus);
+	ArduinoI2CNode arduino(messageBus);
 	#endif
 
 	VesselStateNode vessel(messageBus);

@@ -57,8 +57,8 @@ void DBLogger::log(VesselStateMsg* msg, double rudder, double sail, int sailServ
 	item.m_windSpeed = msg->windSpeed();
 	item.m_windTemp = msg->windTemp();
 	item.m_arduinoPressure = msg->arduinoPressure();
-	item.m_arduinoRudder = msg->arduinoPressure();
-	item.m_arduinoSheet = msg->arduinoSheet();
+	item.m_rudderFeedback = msg->rudderFeedback();
+	item.m_sailFeedback = msg->sailFeedback();
 	item.m_arduinoBattery = msg->arduinoBattery();
 	item.m_rudder = rudder;
 	item.m_sail = sail;

@@ -19,6 +19,7 @@
 #include "Messages/GPSDataMsg.h"
 #include "Messages/WindDataMsg.h"
 #include "Messages/ArduinoDataMsg.h"
+#include "Messages/ActuatorPositionMsg.h"
 
 
 class VesselStateNode : public ActiveNode {
@@ -52,6 +53,7 @@ public:
 	///----------------------------------------------------------------------------------
 	void processWindMessage(WindDataMsg* msg);
 	void processArduinoMessage(ArduinoDataMsg* msg);
+	void processActuatorMessage(ActuatorPositionMsg* msg);
 
 private:
 	///----------------------------------------------------------------------------------
@@ -75,7 +77,7 @@ private:
 	float	m_WindSpeed;
 	float 	m_WindTemp;
 	int 	m_ArduinoPressure;
-	int 	m_ArduinoRudder;
-	int 	m_ArduinoSheet;
+	int 	m_rudderFeedback;
+	int 	m_sailFeedback;
     int 	m_ArduinoBattery;
 };
