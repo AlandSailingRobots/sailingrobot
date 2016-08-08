@@ -303,8 +303,8 @@ bool LineFollowNode::getGoingStarboard()
     else return false;
 }
 
-void LineFollowNode::setPrevWaypointToBoatPos(VesselStateMsg* msg)
-{
+void LineFollowNode::setPrevWaypointToBoatPos(VesselStateMsg* msg) //If boat passed waypoint or enters it, set new line from boat to waypoint.
+{                                                                  //Used if boat has to stay within waypoint for a set amount of time.
     double distanceAfterWaypoint = Utility::calculateWaypointsOrthogonalLine(m_nextWaypointLon, m_nextWaypointLat, m_prevWaypointLon,
             m_prevWaypointLat, msg->longitude(), msg->latitude());
 
@@ -316,25 +316,3 @@ void LineFollowNode::setPrevWaypointToBoatPos(VesselStateMsg* msg)
         m_prevWaypointLat = msg->latitude();
     }
 }
-
-/*
-void LineFollowNode::manageDatabase(VesselStateMsg* msg, double trueWindDirection, double rudder, double sail, double heading,
-                        double distanceToNextWaypoint, double bearingToNextWaypoint){
-  //logging
-  bool routeStarted = false;
-  m_db.insertDataLog(
-    msg,
-    rudder,
-    sail,
-    0,
-    0,
-    distanceToNextWaypoint,
-    bearingToNextWaypoint,
-    heading,
-    m_tack,
-    getGoingStarboard(),
-    m_nextWaypointId,
-    trueWindDirection,
-    routeStarted
-  );
-}*/
