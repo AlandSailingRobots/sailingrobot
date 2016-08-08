@@ -192,9 +192,8 @@ void LineFollowNode::calculateActuatorPos(VesselStateMsg* msg)
     }
 
     //------------------
-    rudderCommand = rudderCommand/0.5166;
-    int rudderCommand_norm = m_rudderCommand.getCommand(rudderCommand);
-    int sailCommand_norm = m_sailCommand.getCommand(sailCommand);
+    int rudderCommand_norm = m_rudderCommand.getCommand(rudderCommand/NORM_RUDDER_COMMAND);
+    int sailCommand_norm = m_sailCommand.getCommand(sailCommand/NORM_SAIL_COMMAND);
 
 
     //Send messages----
