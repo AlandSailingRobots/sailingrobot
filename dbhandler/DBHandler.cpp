@@ -862,7 +862,7 @@ std::vector<std::string> DBHandler::getTableNames(std::string like) {
     }
 
     std::vector<std::string> tableNames;
-    for (unsigned int i = 1; i <= results.size(); i++) {
+    for (unsigned int i = 1; i < results.size(); i++) {
     	tableNames.push_back(results[i]);
     }
 
