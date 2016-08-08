@@ -13,11 +13,11 @@ Don't forgot to change float webcamAngleApertureX and float webcamAngleApertureY
 
 You can use either :
 
- colorDetectionNode(MessageBus& msgBus,std::vector<std::string> colors_input,int bottomPixelsToCrop);
+	*colorDetectionNode(MessageBus& msgBus,std::vector<std::string> colors_input,int bottomPixelsToCrop);
  
 Or :
 
- colorDetectionNode(MessageBus& msgBus,int numberOfCapturesPerDetection,
+	*colorDetectionNode(MessageBus& msgBus,int numberOfCapturesPerDetection,
                         int port, int delay,std::vector<std::string> colors_input,int bottomPixelsToCrop);
 
 Create a std::vector<std::string> colors_input with the colors you settled earlier.
