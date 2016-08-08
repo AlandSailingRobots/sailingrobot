@@ -57,4 +57,6 @@ private:
 	double	m_Lon;
 	double	m_Speed;
 	double	m_Heading;
+
+	int m_currentDay;
 };

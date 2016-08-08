@@ -58,7 +58,7 @@ private:
     double  m_maxCommandAngle, m_maxSailAngle, m_minSailAngle;
     double  m_tackAngle;
     int     m_tackingDirection;
-	
+
     CourseMath m_courseMath;
 	RudderCommand m_rudderCommand;
 	SailCommand m_sailCommand;

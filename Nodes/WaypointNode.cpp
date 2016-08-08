@@ -99,14 +99,18 @@ void WaypointNode::sendMessage()
     if(m_db.getWaypointValues(m_nextId, m_nextLongitude, m_nextLatitude, m_nextDeclination, m_nextRadius, m_nextStayTime,
                         m_prevId, m_prevLongitude, m_prevLatitude, m_prevDeclination, m_prevRadius))
     {
+
         WaypointDataMsg* msg = new WaypointDataMsg(m_nextId, m_nextLongitude, m_nextLatitude, m_nextDeclination, m_nextRadius, m_nextStayTime,
                         m_prevId, m_prevLongitude, m_prevLatitude, m_prevDeclination, m_prevRadius);
-        m_MsgBus.sendMessage(msg);
+
+        m_MsgBus.sendMessage(std::move(msg));
     }
     else
     {
         Logger::warning("%s No waypoint found, boat is using old waypoint data. No message sent.", __func__);
     }
+
+    m_db.forceUnlock();
 }
 
 bool WaypointNode::harvestWaypoint()

@@ -43,7 +43,7 @@ SimulationNode::SimulationNode(MessageBus& msgBus)
 		m_GPSHeading(0), m_WindDir(0), m_WindSpeed(0), m_WindTemp(0), m_ArduinoPressure(0),
 		m_ArduinoRudder(0),m_ArduinoSheet(0),m_ArduinoBattery(0),m_rudder(0),m_sail(0),m_count_sleep(0)
 {
-  m_MsgBus.registerNode(this, MessageType::ActuatorPosition);
+  m_MsgBus.registerNode(*this, MessageType::ActuatorPosition);
 }
 
 void SimulationNode::start()
@@ -145,8 +145,10 @@ void SimulationNode::createCompassMessage()
 	m_CompassRoll = 0;
 
 	if (m_count_sleep % COUNT_COMPASSDATA_MSG==0){
-	  CompassDataMsg* msg = new CompassDataMsg( int(m_CompassHeading+0.5) , m_CompassPitch, m_CompassRoll);
-	  m_MsgBus.sendMessage(msg);
+
+		MessagePtr msg = std::make_unique<CompassDataMsg>(CompassDataMsg( int(m_CompassHeading+0.5) , m_CompassPitch, m_CompassRoll));
+
+	  	m_MsgBus.sendMessage(std::move(msg));
   }
 }
 
@@ -165,8 +167,8 @@ void SimulationNode::createGPSMessage()
 
 	if (m_count_sleep % COUNT_GPSDATA_MSG==0)
 	{
-		GPSDataMsg* msg = new GPSDataMsg(m_GPSHasFix, m_GPSOnline, m_GPSLat, m_GPSLon, m_GPSUnixTime, m_GPSSpeed, m_GPSHeading, m_GPSSatellite, mode);
-		m_MsgBus.sendMessage(msg);
+		MessagePtr msg = std::make_unique<GPSDataMsg>(GPSDataMsg(m_GPSHasFix, m_GPSOnline, m_GPSLat, m_GPSLon, m_GPSUnixTime, m_GPSSpeed, m_GPSHeading, m_GPSSatellite, mode));
+		m_MsgBus.sendMessage(std::move(msg));
 	}
 }
 
@@ -178,8 +180,8 @@ void SimulationNode::createWindMessage()
 
 	if (m_count_sleep % COUNT_WINDDATA_MSG==0)
 	{
-		WindDataMsg* windData = new WindDataMsg(m_WindDir, m_WindSpeed, m_WindTemp);
-		m_MsgBus.sendMessage(windData);
+		MessagePtr windData = std::make_unique<WindDataMsg>(WindDataMsg(m_WindDir, m_WindSpeed, m_WindTemp));
+		m_MsgBus.sendMessage(std::move(windData));
 	}
 }
 
@@ -192,8 +194,8 @@ void SimulationNode::createArduinoMessage()
 
 	if (m_count_sleep % COUNT_ARDUINO_MSG==0)
 	{
-		ArduinoDataMsg* msg = new ArduinoDataMsg(m_ArduinoPressure, m_ArduinoRudder, m_ArduinoSheet, m_ArduinoBattery );
-		m_MsgBus.sendMessage(msg);
+		MessagePtr msg = std::make_unique<ArduinoDataMsg>(ArduinoDataMsg(m_ArduinoPressure, m_ArduinoRudder, m_ArduinoSheet, m_ArduinoBattery ));
+		m_MsgBus.sendMessage(std::move(msg));
 	}
 }
 

@@ -205,8 +205,8 @@ bool HTTPSyncNode::getConfigsFromServer() {
                 return false;
             }
 
-            ServerConfigsReceivedMsg* newServerConfigs = new ServerConfigsReceivedMsg();
-            m_MsgBus.sendMessage(newServerConfigs);
+            MessagePtr newServerConfigs = std::make_unique<ServerConfigsReceivedMsg>();
+            m_MsgBus.sendMessage(std::move(newServerConfigs));
             Logger::info("Configuration retrieved from remote server");
             return true;
         }
@@ -229,9 +229,8 @@ bool HTTPSyncNode::getWaypointsFromServer() {
             if (m_dbHandler->updateWaypoints(waypoints))
             {
                 //EVENT MESSAGE - REPLACES OLD CALLBACK, CLEAN OUT CALLBACK REMNANTS IN OTHER CLASSES
-                ServerWaypointsReceivedMsg* newServerWaypoints = new ServerWaypointsReceivedMsg();
-                m_MsgBus.sendMessage(newServerWaypoints);
-
+                MessagePtr newServerWaypoints = std::make_unique<ServerWaypointsReceivedMsg>();
+                m_MsgBus.sendMessage(std::move(newServerWaypoints));
 
                 Logger::info("Waypoints retrieved from remote server");
                 return true;

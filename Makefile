@@ -39,23 +39,23 @@ JSON = 					libs/json
 
 # Sources
 
-CORE =					MessageBus.cpp ActiveNode.cpp
+CORE =					MessageBus.cpp ActiveNode.cpp Messages/MessageSerialiser.cpp Messages/MessageDeserialiser.cpp
 
 ifeq ($(USE_SIM),1)
-NODES =					Nodes/MessageLoggerNode.cpp  Nodes/WaypointNode.cpp Nodes/HTTPSyncNode.cpp Nodes/xBeeSyncNode.cpp \
-							Nodes/VesselStateNode.cpp  Nodes/RoutingNode.cpp Nodes/LineFollowNode.cpp \
-							Nodes/SimulationNode.cpp
-SYSTEM_SERVICES =	SystemServices/Logger.cpp
+NODES =					Nodes/MessageLoggerNode.cpp  Nodes/WaypointNode.cpp Nodes/HTTPSyncNode.cpp Nodes/XbeeSyncNode.cpp \
+						Nodes/VesselStateNode.cpp  Nodes/RoutingNode.cpp Nodes/LineFollowNode.cpp \
+						Nodes/SimulationNode.cpp
+SYSTEM_SERVICES =		SystemServices/Logger.cpp
 else
 NODES =					Nodes/MessageLoggerNode.cpp Nodes/CV7Node.cpp Nodes/HMC6343Node.cpp Nodes/GPSDNode.cpp Nodes/ActuatorNode.cpp  Nodes/ArduinoNode.cpp \
-														Nodes/VesselStateNode.cpp Nodes/WaypointNode.cpp Nodes/HTTPSyncNode.cpp Nodes/xBeeSyncNode.cpp Nodes/RoutingNode.cpp Nodes/LineFollowNode.cpp \
-														Nodes/SimulationNode.cpp
+						Nodes/VesselStateNode.cpp Nodes/WaypointNode.cpp Nodes/HTTPSyncNode.cpp Nodes/XbeeSyncNode.cpp Nodes/RoutingNode.cpp Nodes/LineFollowNode.cpp \
+						Nodes/SimulationNode.cpp
 
 SYSTEM_SERVICES =		SystemServices/MaestroController.cpp SystemServices/Logger.cpp
 endif
 
 
-XBEE = 					xBee/xBeeSync.cpp xBee/xBee.cpp
+XBEE = 					xBee/Xbee.cpp
 
 BEHAVIOURCLASS = 		behaviourclass/RoutingBehaviour.cpp  behaviourclass/WaypointBehaviour.cpp behaviourclass/LineFollowBehaviour.cpp
 
@@ -111,7 +111,7 @@ export OBJECT_FILE = $(BUILD_DIR)/objects.tmp
 
 
 export CFLAGS = -Wall -g -o2
-export CPPFLAGS = -g -Wall -pedantic -Werror -std=c++11
+export CPPFLAGS = -g -Wall -pedantic -Werror -std=c++14
 
 export LIBS = -lsqlite3 -lgps -lrt -lcurl -lpthread
 
@@ -151,6 +151,9 @@ build_tests: $(OBJECTS) $(EXECUTABLE)
 	$(MAKE) -C tests
 	$(CXX) $(CPPFLAGS) tests/runner.o @$(OBJECT_FILE) -Wl,-rpath=./ ./libwiringPi.so -o $(UNIT_TEST) $(LIBS)
 	$(CXX) $(CPPFLAGS) tests/runnerHardware.o @$(OBJECT_FILE) -Wl,-rpath=./ ./libwiringPi.so -o $(HARDWARE_TEST) $(LIBS)
+
+xbee_remote: $(OBJECTS) $(EXECUTABLE) $(WIRING_PI)
+	$(MAKE) -C xbeerelay
 
 #  Create the directories needed
 $(BUILD_DIR):

@@ -25,8 +25,8 @@
 MessageBus::MessageBus()
 	:m_Running(false)
 {
-	m_FrontMessages = new std::queue<Message*>();
-	m_BackMessages = new std::queue<Message*>();
+	m_FrontMessages = new std::queue<MessagePtr>();
+	m_BackMessages = new std::queue<MessagePtr>();
 }
 
 MessageBus::~MessageBus()
@@ -41,7 +41,8 @@ MessageBus::~MessageBus()
 
 // TODO - Jordan: Log warning if node tries to register after start
 
-bool MessageBus::registerNode(Node* node)
+bool MessageBus::registerNode(Node& node)
+
 {
 	if(not m_Running)
 	{
@@ -52,7 +53,8 @@ bool MessageBus::registerNode(Node* node)
 	return false;
 }
 
-bool MessageBus::registerNode(Node* node, MessageType msgType)
+bool MessageBus::registerNode(Node& node, MessageType msgType)
+
 {
 	if(not m_Running)
 	{
@@ -63,13 +65,14 @@ bool MessageBus::registerNode(Node* node, MessageType msgType)
 	return false;
 }
 
-void MessageBus::sendMessage(Message* msg)
+void MessageBus::sendMessage(MessagePtr msg)
 {
 	if(msg != NULL)
 	{
 		m_FrontQueueMutex.lock();
-		m_FrontMessages->push(msg);
-		logMessageReceived(msg);
+		Message* logMsg = msg.get();
+		m_FrontMessages->push(std::move(msg));
+		logMessageReceived(logMsg); 
 		m_FrontQueueMutex.unlock();
 	}
 }
@@ -90,7 +93,7 @@ void MessageBus::run()
 		// If we have messages, flip the two queues and begin processing messages
 		if(m_FrontMessages->size() > 0)
 		{
-			std::queue<Message*>* tmpPtr;
+			std::queue<MessagePtr>* tmpPtr;
 
 			m_FrontQueueMutex.lock();
 
@@ -107,11 +110,12 @@ void MessageBus::run()
 }
 
 //TODO - Jordan: What would cause this to return a null pointer?
-MessageBus::RegisteredNode* MessageBus::getRegisteredNode(Node* node)
+MessageBus::RegisteredNode* MessageBus::getRegisteredNode(Node& node)
+
 {
 	for(auto regNode : m_RegisteredNodes)
 	{
-		if(regNode->nodePtr == node)
+		if(regNode->nodeRef.nodeID() == node.nodeID())
 		{
 			return regNode;
 		}
@@ -127,7 +131,9 @@ void MessageBus::processMessages()
 {
 	while(m_BackMessages->size() > 0)
 	{
-		Message* msg = m_BackMessages->front();
+
+		MessagePtr msgPtr = std::move(m_BackMessages->front());
+		Message* msg = msgPtr.get();
 
 		logMessage(msg);
 
@@ -138,26 +144,29 @@ void MessageBus::processMessages()
 			{
 				if(node->isInterested( msg->messageType() ))
 				{
-					node->nodePtr->processMessage(msg);
-					logMessageConsumer(node->nodePtr->nodeID());
+					node->nodeRef.processMessage(msg);
+					logMessageConsumer(node->nodeRef.nodeID());
+
 				}
 			}
 			// Distribute to the node the message is directed at then move onto the next message
 			else
 			{
-				if(node->nodePtr->nodeID() == msg->destinationID())
+				if(node->nodeRef.nodeID() == msg->destinationID())
 				{
-					node->nodePtr->processMessage(msg);
-					logMessageConsumer(node->nodePtr->nodeID());
+					node->nodeRef.processMessage(msg);
+					logMessageConsumer(node->nodeRef.nodeID());
+
 					continue;
 				}
 			}
 		}
 
 		m_BackMessages->pop();
-		delete msg;
-		msg = NULL;
+
+		// delete msg; Don't need for unique pointers
 	}
+
 }
 
 void MessageBus::startMessageLog()
@@ -228,4 +237,5 @@ void MessageBus::messageTimeStamp(unsigned long unixTime, char* buffer)
 	int milli = curTime.tv_usec / 1000;
 
 	sprintf(buffer, "%s:%d", buff, milli);
+
 }

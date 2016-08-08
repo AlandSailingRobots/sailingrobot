@@ -17,6 +17,7 @@
 
 #include "LineFollowNode.h"
 #include "Messages/ActuatorPositionMsg.h"
+#include "Messages/CourseDataMsg.h"
 #include "utility/Utility.h"
 #include "utility/SysClock.h"
 #include <math.h>
@@ -24,6 +25,8 @@
 #include <cmath>
 
 #define DEFAULT_TWD_BUFFERSIZE 200
+#define NORM_RUDDER_COMMAND 0.5166 // getCommand() take a value between -1 and 1 so we need to normalize the command correspond to 29.6 degree
+#define NORM_SAIL_COMMAND 0.6958
 
 LineFollowNode::LineFollowNode(MessageBus& msgBus, DBHandler& db)
 :  Node(NodeID::SailingLogic, msgBus), m_db(db), m_dbLogger(5, db),
@@ -39,8 +42,8 @@ LineFollowNode::LineFollowNode(MessageBus& msgBus, DBHandler& db)
     m_prevWaypointRadius(0),
     m_tackingDirection(1)
 {
-    msgBus.registerNode(this, MessageType::VesselState);
-    msgBus.registerNode(this, MessageType::WaypointData);
+    msgBus.registerNode(*this, MessageType::VesselState);
+    msgBus.registerNode(*this, MessageType::WaypointData);
 
     m_maxCommandAngle = M_PI / 6;
     m_maxSailAngle = M_PI / 4.2f;
@@ -193,14 +196,18 @@ void LineFollowNode::calculateActuatorPos(VesselStateMsg* msg)
     int rudderCommand_norm = m_rudderCommand.getCommand(rudderCommand);
     int sailCommand_norm = m_sailCommand.getCommand(sailCommand);
 
+
     //Send messages----
-    ActuatorPositionMsg *actuatorMsg = new ActuatorPositionMsg(rudderCommand_norm, sailCommand_norm);
-    m_MsgBus.sendMessage(actuatorMsg);
+    MessagePtr actuatorMsg = std::make_unique<ActuatorPositionMsg>(rudderCommand_norm, sailCommand_norm);
+    m_MsgBus.sendMessage(std::move(actuatorMsg));
+
     //------------------
 
     double bearingToNextWaypoint = m_courseMath.calculateBTW(msg->longitude(), msg->latitude(), m_nextWaypointLon, m_nextWaypointLat); //calculated for database
     double distanceToNextWaypoint = m_courseMath.calculateDTW(msg->longitude(), msg->latitude(), m_nextWaypointLon, m_nextWaypointLat);
 
+    MessagePtr courseMsg = std::make_unique<CourseDataMsg>(trueWindDirection, distanceToNextWaypoint, bearingToNextWaypoint);
+    m_MsgBus.sendMessage(std::move(courseMsg));
 
     //create timestamp----
     std::string timestamp_str=SysClock::timeStampStr();

@@ -16,6 +16,9 @@
 #include "DBLogger.h"
 
 
+bool DBLogger::m_working;
+
+
 DBLogger::DBLogger(unsigned int logBufferSize, DBHandler& dbHandler)
 	:m_dbHandler(dbHandler), m_bufferSize(logBufferSize)
 {
@@ -24,15 +27,28 @@ DBLogger::DBLogger(unsigned int logBufferSize, DBHandler& dbHandler)
 
 	m_logBufferBack = new std::vector<LogItem>();
 	m_logBufferBack->reserve(logBufferSize);
+	m_working = false;
 }
 
 DBLogger::~DBLogger()
 {
+	m_working = false;
+
+	// Wait for the mutex to be unlocked.
+	{
+		std::lock_guard<std::mutex> lk(m_mutex);
+	}
+	// instruct the worker thread to work
+	m_cv.notify_one();
+
+	m_thread->join();
+
 	delete m_thread;
 }
 
 void DBLogger::startWorkerThread()
 {
+	m_working = true;
 	m_thread = new std::thread(workerThread, this);
 }
 
@@ -94,7 +110,7 @@ void DBLogger::log(VesselStateMsg* msg, double rudder, double sail, int sailServ
 
 void DBLogger::workerThread(DBLogger* ptr)
 {
-	while(true)
+	while(m_working)
 	{
 		std::unique_lock<std::mutex> lk(ptr->m_mutex);
 		ptr->m_cv.wait(lk);

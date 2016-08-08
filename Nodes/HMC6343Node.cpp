@@ -79,7 +79,7 @@ bool HMC6343Node::init()
 		m_I2C.endTransmission();
 
 		// The Device reports the I2C address that is mentioned in the datasheet
-		if(deviceID == I2C_ADDRESS)
+		if(deviceID == I2C_DATASHEET_ADDRESS)
 		{
 			m_Initialised = true;
 		}
@@ -219,8 +219,8 @@ void HMC6343Node::HMC6343ThreadFunc(void* nodePtr)
 			}
 
 			// Post the data to the message bus
-			CompassDataMsg* msg = new CompassDataMsg(int(Utility::meanOfAngles(headingData) + 0.5), pitch, roll);
-			node->m_MsgBus.sendMessage(msg);
+			MessagePtr msg = std::make_unique<CompassDataMsg>(int(Utility::meanOfAngles(headingData) + 0.5), pitch, roll);
+			node->m_MsgBus.sendMessage(std::move(msg));
 		}
 		else
 		{

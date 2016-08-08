@@ -37,8 +37,8 @@ RoutingNode::RoutingNode(MessageBus& msgBus, DBHandler& db)
         atof(m_db.retrieveCell("waypoint_routing_config", "1", "rudder_speed_min").c_str())
         )
 {
-    msgBus.registerNode(this, MessageType::VesselState);
-    msgBus.registerNode(this, MessageType::WaypointData);
+    msgBus.registerNode(*this, MessageType::VesselState);
+    msgBus.registerNode(*this, MessageType::WaypointData);
 }
 
 bool RoutingNode::init()
@@ -97,8 +97,9 @@ void RoutingNode::calculateActuatorPos(VesselStateMsg* msg)
     rudderCommand = m_rudderCommand.getCommand(rudderCommand);
 	  sailCommand = m_sailCommand.getCommand(sailCommand);
 
-    ActuatorPositionMsg *actuatorMsg = new ActuatorPositionMsg(rudderCommand, sailCommand);
-    m_MsgBus.sendMessage(actuatorMsg);
+    MessagePtr actuatorMsg = std::make_unique<ActuatorPositionMsg>(rudderCommand, sailCommand);
+
+    m_MsgBus.sendMessage(std::move(actuatorMsg));
 
     //create timestamp----
     std::string timestamp_str=SysClock::timeStampStr();

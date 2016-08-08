@@ -21,6 +21,10 @@ public:
 		:Message(MessageType::ServerWaypointsReceived, NodeID::None, NodeID::None)
 	{ }
 
+	ServerWaypointsReceivedMsg(MessageDeserialiser deserialiser)
+		:Message(deserialiser)
+	{ }
+
 	virtual ~ServerWaypointsReceivedMsg() { }
 
 };
