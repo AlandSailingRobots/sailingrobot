@@ -594,7 +594,7 @@ sqlite3* DBHandler::openDatabase() {
 
 	// check if file exists
 	FILE* db_file = fopen(m_filePath.c_str(), "r");
-	if (db_file != NULL) {
+	if (db_file == NULL) {
 		Logger::error("%s %s not found", __PRETTY_FUNCTION__, m_filePath.c_str());
 		fclose(db_file);
 		m_databaseLock.unlock();
