@@ -1,8 +1,6 @@
 #ifndef __TACKANGLE_H__
 #define __TACKANGLE_H__
 
-class SystemStateModel;
-
 class TackAngle
 {
 public:

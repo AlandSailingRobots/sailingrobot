@@ -7,8 +7,6 @@
 #include "TackAngle.h"
 #include "Commands.h"
 
-class PositionModel;
-class SystemStateModel;
 
 class WaypointRouting
 {

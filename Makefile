@@ -57,8 +57,6 @@ endif
 
 XBEE = 					xBee/Xbee.cpp
 
-BEHAVIOURCLASS = 		behaviourclass/RoutingBehaviour.cpp  behaviourclass/WaypointBehaviour.cpp behaviourclass/LineFollowBehaviour.cpp
-
 I2CCONTROLLER = 		i2ccontroller/I2CController.cpp
 
 COURSE = 				coursecalculation/CourseCalculation.cpp coursecalculation/CourseMath.cpp
@@ -74,8 +72,7 @@ WINDVANECONTROLLER = 	windvanecontroller/WindVaneController.cpp
 SRC_MAIN = main.cpp
 
 SRC = 	utility/Utility.cpp utility/Timer.cpp utility/SysClock.cpp $(SYSTEM_SERVICES) $(XBEE) \
-		$(CORE) $(NODES) $(I2CCONTROLLER) $(POSITION) $(COURSE) $(DB) $(COMMAND) $(GPS) \
-		$(XML_LOG) $(THREAD) $(WAYPOINTROUTING) $(WINDVANECONTROLLER)
+		$(CORE) $(NODES) $(I2CCONTROLLER) $(COURSE) $(DB) $(COMMAND) $(GPS) $(WAYPOINTROUTING) $(WINDVANECONTROLLER)
 
 
 #SOURCES = $(addprefix src/, $(SRC))
