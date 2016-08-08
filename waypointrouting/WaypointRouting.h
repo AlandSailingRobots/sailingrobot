@@ -6,7 +6,6 @@
 #include "utility/Utility.h"
 #include "TackAngle.h"
 #include "Commands.h"
-#include "models/WaypointModel.h"
 
 class PositionModel;
 class SystemStateModel;

@@ -3,9 +3,6 @@
 
 #include "CourseMath.h"
 
-class PositionModel;
-class WaypointModel;
-
 class CourseCalculation {
 
 private:

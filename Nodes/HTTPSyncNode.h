@@ -4,9 +4,6 @@
 #include "ActiveNode.h"
 #include "dbhandler/DBHandler.h"
 #include "SystemServices/Logger.h"
-#include "models/SystemStateModel.h"
-
-
 #include <chrono>
 #include <thread>
 #include <curl/curl.h>

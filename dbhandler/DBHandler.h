@@ -7,7 +7,6 @@
 #include <vector>
 #include <sqlite3.h>
 #include "SystemServices/Logger.h"
-#include "models/WaypointModel.h"
 #include "Messages/VesselStateMsg.h"
 #include <mutex>
 #include "libs/json/src/json.hpp"
@@ -136,8 +135,6 @@ public:
 	std::string getIdFromTable(std::string table, bool max,sqlite3* db);
 
 	void deleteRow(std::string table, std::string id);
-
-	bool getWaypointFromTable(WaypointModel &waypointModel, bool max);
 
 	bool getWaypointValues(int& nextId, double& nextLongitude, double& nextLatitude, int& nextDeclination, int& nextRadius, int& nextStayTime,
                         int& prevId, double& prevLongitude, double& prevLatitude, int& prevDeclination, int& prevRadius);

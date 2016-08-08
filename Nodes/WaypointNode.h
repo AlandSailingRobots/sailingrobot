@@ -21,7 +21,6 @@
 #include "utility/Timer.h"
 
 
-
 class WaypointNode : public Node {
 public:
 	WaypointNode(MessageBus& msgBus, DBHandler& db);

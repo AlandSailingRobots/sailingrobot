@@ -1,5 +1,4 @@
 #include "TackAngle.h"
-#include "models/SystemStateModel.h"
 #include "utility/Utility.h"
 
 TackAngle::TackAngle(double tackAngle, double maxTackAngle, double minTackSpeed) :

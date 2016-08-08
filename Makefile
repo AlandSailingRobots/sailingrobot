@@ -61,17 +61,11 @@ BEHAVIOURCLASS = 		behaviourclass/RoutingBehaviour.cpp  behaviourclass/WaypointB
 
 I2CCONTROLLER = 		i2ccontroller/I2CController.cpp
 
-POSITION = 				utility/Position.cpp utility/MockPosition.cpp utility/RealPosition.cpp
-
 COURSE = 				coursecalculation/CourseCalculation.cpp coursecalculation/CourseMath.cpp
 
 DB = 					dbhandler/DBHandler.cpp dbhandler/DBLogger.cpp
 
-COMMAND = 				ruddercommand/RudderCommand.cpp sailcommand/SailCommand.cpp
-
-XML_LOG = 				xmlparser/pugi/pugixml.cpp xmlparser/src/xml_log.cpp
-
-THREAD = 				thread/SystemState.cpp thread/ExternalCommand.cpp thread/ThreadRAII.cpp
+COMMAND = 				waypointrouting/RudderCommand.cpp waypointrouting/SailCommand.cpp
 
 WAYPOINTROUTING = 		waypointrouting/WaypointRouting.cpp waypointrouting/Commands.cpp waypointrouting/TackAngle.cpp
 

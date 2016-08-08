@@ -22,8 +22,8 @@
 #include "Messages/WaypointDataMsg.h"
 #include "dbhandler/DBHandler.h"
 #include "dbhandler/DBLogger.h"
-#include "sailcommand/SailCommand.h"
-#include "ruddercommand/RudderCommand.h"
+#include "waypointrouting/SailCommand.h"
+#include "waypointrouting/RudderCommand.h"
 #include "coursecalculation/CourseMath.h"
 
 

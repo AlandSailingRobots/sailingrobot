@@ -3,8 +3,6 @@
 #include "coursecalculation/CourseCalculation.h"
 #include "utility/Timer.h"
 #include "utility/Utility.h"
-#include "models/WaypointModel.h"
-#include "models/SystemStateModel.h"
 
 
 WaypointRouting::WaypointRouting(double lon, double lat, int radius, double innerRadiusRatio,
