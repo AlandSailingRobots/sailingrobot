@@ -35,7 +35,7 @@ public:
  	///----------------------------------------------------------------------------------
 	void start();
 
-	virtual void processMessage(const Message* msg);
+	void processMessage(const Message* msg);
 
 	///----------------------------------------------------------------------------------
 	/// Stores compass data from a CompassDataMsg.
