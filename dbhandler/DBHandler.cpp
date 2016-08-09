@@ -9,6 +9,9 @@
 #include "utility/Timer.h"
 
 
+std::mutex DBHandler::m_databaseLock;
+
+
 DBHandler::DBHandler(std::string filePath) :
 	m_filePath(filePath)
 {
@@ -17,7 +20,7 @@ DBHandler::DBHandler(std::string filePath) :
 
 
 DBHandler::~DBHandler(void) {
-
+	m_databaseLock.unlock();
 }
 
 bool DBHandler::initialise()
@@ -596,10 +599,10 @@ sqlite3* DBHandler::openDatabase() {
 	FILE* db_file = fopen(m_filePath.c_str(), "r");
 	if (db_file == NULL) {
 		Logger::error("%s %s not found", __PRETTY_FUNCTION__, m_filePath.c_str());
-		fclose(db_file);
 		m_databaseLock.unlock();
 		return NULL;
 	}
+	fclose(db_file);
 
 	do {
 		resultcode = sqlite3_open(m_filePath.c_str(), &connection);

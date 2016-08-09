@@ -98,6 +98,7 @@ void HTTPSyncNode::HTTPSyncThread(void* nodePtr){
     node->pushWaypoints();
     node->pushConfigs();
 
+
     while(true)
     {
         std::this_thread::sleep_for(std::chrono::milliseconds(node->m_delay));
@@ -138,6 +139,7 @@ bool HTTPSyncNode::pushWaypoints()
 		std::string response;
 		if(performCURLCall(waypointsData,"pushWaypoints", response))
 		{
+            Logger::info("Waypoints pushed to server");
             return true;
 		}
 		else if(!m_reportedConnectError)
@@ -150,10 +152,10 @@ bool HTTPSyncNode::pushWaypoints()
 
 bool HTTPSyncNode::pushConfigs() {
     std::string response;
-
+    
 	if(performCURLCall(m_dbHandler->getConfigs(), "pushConfigs", response))
 	{
-		Logger::info("Configs pushed to server: " + response);
+		Logger::info("Configs pushed to server");
         return true;
 	}
 	else if(!m_reportedConnectError)
