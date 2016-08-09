@@ -7,6 +7,7 @@
 #include "models/WaypointModel.h"
 #include "models/PositionModel.h"
 #include "utility/Timer.h"
+#include <thread>
 
 
 DBHandler::DBHandler(std::string filePath) :
@@ -596,7 +597,6 @@ sqlite3* DBHandler::openDatabase() {
 	FILE* db_file = fopen(m_filePath.c_str(), "r");
 	if (db_file == NULL) {
 		Logger::error("%s %s not found", __PRETTY_FUNCTION__, m_filePath.c_str());
-		fclose(db_file);
 		m_databaseLock.unlock();
 		return NULL;
 	}
@@ -620,8 +620,10 @@ sqlite3* DBHandler::openDatabase() {
 void DBHandler::closeDatabase(sqlite3* connection) {
 	if(connection != NULL) {
 		sqlite3_close(connection);
-		m_databaseLock.unlock();
 		connection = NULL;
+		// ENsure it closes properly
+		std::this_thread::sleep_for(std::chrono::milliseconds(1));
+		m_databaseLock.unlock();
 	} else {
 		m_databaseLock.unlock();
 		throw "DBHandler::closeDatabase() : connection is already null";
