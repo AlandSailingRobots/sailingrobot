@@ -81,6 +81,9 @@ void setup() {
 void loop() {
   readCAN();
   readAnalogData();
+  
+  loadMockData();
+  loadData();
   delay(100);
 }
  
@@ -154,8 +157,10 @@ void sendData(){
   }
   else
   {
-    loadData();
     Serial.println("Writing data...");
+
+    Serial.println(dataLength);
+    
     Wire.write(datapacket, dataLength+1);
     clearData();
   }
@@ -165,6 +170,19 @@ void readAnalogData()
 {
   int pressure = analogRead(pressurePin);
   int battery = analogRead(batteryPin);
+  analogFeedback[0] = pressure << 8;
+  analogFeedback[1] = pressure & 0x00FF;
+  analogFeedback[2] = battery << 8;
+  analogFeedback[3] = battery & 0x00FF;
+
+  analogReady=true;
+}
+
+void loadMockData()
+{
+  
+  int pressure = 12;
+  int battery = 45;
   analogFeedback[0] = pressure << 8;
   analogFeedback[1] = pressure & 0x00FF;
   analogFeedback[2] = battery << 8;
