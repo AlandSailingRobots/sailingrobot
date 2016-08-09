@@ -6,7 +6,7 @@
 Commands::Commands() :
 	m_starboardExtreme(1),
 	m_portExtreme(-1),
-	m_closeReach(0),
+	m_closeReach(0.1),
 	m_running(1)
 {}
 
@@ -40,15 +40,16 @@ double Commands::rudderCommand(double courseToSteer, double heading,double maxCo
 double Commands::sailCommand(double relativeWindDirection) {
 	relativeWindDirection = Utility::limitAngleRange(relativeWindDirection);
 
-	if (relativeWindDirection > 180) {
+	if (relativeWindDirection > 180)
+	{
 		relativeWindDirection = 360 - relativeWindDirection;
 	}
-	if (relativeWindDirection < 45) {
+	if (relativeWindDirection < 45)
+	{
 		return m_closeReach;
 	}
 
 	return m_closeReach + (relativeWindDirection - 45.0) * (m_running - m_closeReach) / 135.0;
-
 }
 
 

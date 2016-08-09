@@ -228,5 +228,4 @@ void SailingRobot::setupSailCommand() {
 
 	m_sailCommand.setCommandValues( m_dbHandler->retrieveCellAsInt("sail_command_config", "1", "close_reach_command"),
 	m_dbHandler->retrieveCellAsInt("sail_command_config", "1", "run_command"));
-
 }

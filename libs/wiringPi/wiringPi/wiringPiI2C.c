@@ -230,3 +230,38 @@ int wiringPiI2CSetup (const int devId)
 
   return wiringPiI2CSetupInterface (device, devId) ;
 }
+
+
+int wiringPiI2CReadBlock (int fd, char* block, int length)
+{
+	union i2c_smbus_data data;
+	#define DATA_START 	2
+
+	// Can only read 32 bytes at a time
+	if(length > I2C_SMBUS_I2C_BLOCK_MAX)
+	{
+		return - 1;
+	}
+
+	if (i2c_smbus_access (fd, I2C_SMBUS_READ, 0, I2C_SMBUS_I2C_BLOCK_BROKEN, &data))
+	{
+		return -1 ;
+	}
+	else
+	{
+		int i;
+		for(i = 0; i < length; i++)
+		{
+			if(i < data.block[0])
+			{
+				block[i] = data.block[DATA_START + i];
+			}
+			else
+			{
+				break;
+			}
+		}
+
+		return i + 1;
+	}
+}

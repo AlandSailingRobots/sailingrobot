@@ -22,12 +22,12 @@ CourseCalculation::CourseCalculation() :
 CourseCalculation::~CourseCalculation() {
 }
 
-double CourseCalculation::calculateCourseToSteer(PositionModel boat, WaypointModel waypoint,
+double CourseCalculation::calculateCourseToSteer(double gpsLon, double gpsLat, double waypLon, double waypLat, int radius,
 	double trueWindDirection)
 {
 	m_trueWindDirection = trueWindDirection;
-	m_distanceToWaypoint = m_courseMath.calculateDTW(boat, waypoint.positionModel);
-	m_bearingToWaypoint = m_courseMath.calculateBTW(boat, waypoint.positionModel);
+	m_distanceToWaypoint = m_courseMath.calculateDTW(gpsLon, gpsLat, waypLon, waypLat);
+	m_bearingToWaypoint = m_courseMath.calculateBTW(gpsLon, gpsLat, waypLon, waypLat);
 
 	calculateTack();
 
@@ -36,7 +36,7 @@ double CourseCalculation::calculateCourseToSteer(PositionModel boat, WaypointMod
 
 	if(m_tack)
 	{
-		if (!continueDirection(waypoint.radius))
+		if (!continueDirection(radius))
 			m_goingStarboard = !m_goingStarboard;
 
 		m_courseToSteer = calculateTackCTS();

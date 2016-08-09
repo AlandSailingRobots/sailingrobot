@@ -15,6 +15,7 @@ CREATE TABLE waypoints (id INTEGER PRIMARY KEY AUTOINCREMENT, -- no autoincremen
 	longitude DOUBLE,
 	declination INTEGER,
 	radius INTEGER,
+ 	stay_time INTEGER,
 	harvested BOOLEAN
 );
 
@@ -23,15 +24,6 @@ CREATE TABLE waypoint_index (
 	id INTEGER PRIMARY KEY,
 	i INTEGER,
 	j INTEGER,
-
-	-- not enforced: foreign_keys off (line 1)
-	FOREIGN KEY(id) REFERENCES waypoints(id)
-);
-
-DROP TABLE IF EXISTS "waypoint_stationary";
-CREATE TABLE waypoint_stationary (
-	id INTEGER PRIMARY KEY,
-	time INTEGER,
 
 	-- not enforced: foreign_keys off (line 1)
 	FOREIGN KEY(id) REFERENCES waypoints(id)
@@ -280,7 +272,8 @@ CREATE TABLE sailing_robot_config (
   flag_heading_compass INTEGER,
   loop_time DOUBLE,
   scanning BOOLEAN,
-  line_follow BOOLEAN
+  line_follow BOOLEAN,
+  require_network BOOLEAN
 );
 
 
@@ -329,7 +322,7 @@ INSERT INTO "rudder_servo_config" VALUES(1,4,0,0);
 INSERT INTO "sail_servo_config" VALUES(1,3,0,0);
 INSERT INTO "xbee_config" VALUES(1,1,1,0,0.1,1);
 INSERT INTO "httpsync_config" VALUES(1,0,0,1);
-INSERT INTO "sailing_robot_config" VALUES(1,1,0.5,0,0);
+INSERT INTO "sailing_robot_config" VALUES(1,1,0.5,0,1,1);
 INSERT INTO "waypoint_routing_config" VALUES(1,0.5,5,25,90.0,1.0);
 INSERT INTO "wind_vane_config" VALUES(1,1,0,1.5);
 INSERT INTO "i2c_config" VALUES(1, 0.1);
