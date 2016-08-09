@@ -1,7 +1,7 @@
 
 #include <string>
 #include "SystemServices/Logger.h"
-#include "MessageBus.h"
+#include "MessageBus/MessageBus.h"
 #include "Nodes/MessageLoggerNode.h"
 
 #if SIMULATION == 1

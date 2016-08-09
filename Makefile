@@ -39,7 +39,7 @@ JSON = 					libs/json
 
 # Sources
 
-CORE =					MessageBus/MessageBus.cpp ActiveNode.cpp Messages/MessageSerialiser.cpp Messages/MessageDeserialiser.cpp
+CORE =					MessageBus/MessageBus.cpp Nodes/ActiveNode.cpp Messages/MessageSerialiser.cpp Messages/MessageDeserialiser.cpp
 
 ifeq ($(USE_SIM),1)
 NODES =					Nodes/MessageLoggerNode.cpp  Nodes/WaypointMgrNode.cpp Nodes/HTTPSyncNode.cpp Nodes/XbeeSyncNode.cpp \
