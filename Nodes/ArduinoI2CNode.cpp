@@ -26,7 +26,6 @@
 #define BLOCK_READ_SIZE 9
 #define DATA_ID_LOC 0
 #define INIT_ID 0xFF
-#define INIT_COMMAND 1
 #define READ_COMMAND 0
 
 #define ARDUINO_ADDRESS 0x07
@@ -50,7 +49,7 @@ bool ArduinoI2CNode::init()
 		m_I2C.beginTransmission();
 
         uint8_t block[BLOCK_READ_SIZE];
-        m_I2C.readBlock(block, INIT_COMMAND);
+        m_I2C.readBlock(block, INIT_ID);
 		uint8_t initID = block[DATA_ID_LOC];
 
 		m_I2C.endTransmission();

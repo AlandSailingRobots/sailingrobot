@@ -21,7 +21,7 @@ unsigned char buf[8];
 char str[20];
 
 byte I2Caddress = SLAVE_ADDRESS;                                       // I2C slave address
-bool initialized;
+bool initialize;
 
 int dataLength;
 byte dataID;
@@ -92,7 +92,7 @@ void receiveData(int byteCount){
   if (Wire.available())
   {
     readVal = Wire.read();
-    if (readVal==INIT_COMMAND)
+    if (readVal==INIT_ID)
     {
       initialize=true;    
     }
