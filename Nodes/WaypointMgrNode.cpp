@@ -11,7 +11,7 @@
  *
  ***************************************************************************************/
 
-#include "WaypointNode.h"
+#include "WaypointMgrNode.h"
 #include "Messages/WaypointDataMsg.h"
 #include "Messages/ServerWaypointsReceivedMsg.h"
 #include "SystemServices/Logger.h"
@@ -20,7 +20,7 @@
 #include <string>
 #include <vector>
 
-WaypointNode::WaypointNode(MessageBus& msgBus, DBHandler& db)
+WaypointMgrNode::WaypointMgrNode(MessageBus& msgBus, DBHandler& db)
 : Node(NodeID::Waypoint, msgBus), m_db(db),
     m_nextId(0),
     m_nextLongitude(0),
@@ -38,14 +38,14 @@ WaypointNode::WaypointNode(MessageBus& msgBus, DBHandler& db)
     msgBus.registerNode(*this, MessageType::ServerWaypointsReceived);
 }
 
-bool WaypointNode::init()
+bool WaypointMgrNode::init()
 {
     sendMessage();
     return true;
 }
 
 
-void WaypointNode::processMessage(const Message* msg)
+void WaypointMgrNode::processMessage(const Message* msg)
 {
 	MessageType type = msg->messageType();
 
@@ -66,13 +66,13 @@ void WaypointNode::processMessage(const Message* msg)
     }
 }
 
-void WaypointNode::processGPSMessage(GPSDataMsg* msg)
+void WaypointMgrNode::processGPSMessage(GPSDataMsg* msg)
 {
     m_gpsLongitude = msg->longitude();
     m_gpsLatitude = msg->latitude();
 }
 
-bool WaypointNode::waypointReached()
+bool WaypointMgrNode::waypointReached()
 {
     // double distanceAfterWaypoint = Utility::calculateWaypointsOrthogonalLine(m_nextLongitude, m_nextLatitude, m_prevLongitude,
     //             m_prevLatitude, m_gpsLongitude, m_gpsLatitude); //Checks if boat has passed the waypoint following the line, without entering waypoints radius
@@ -94,7 +94,7 @@ bool WaypointNode::waypointReached()
     }
 }
 
-void WaypointNode::sendMessage()
+void WaypointMgrNode::sendMessage()
 {
     if(m_db.getWaypointValues(m_nextId, m_nextLongitude, m_nextLatitude, m_nextDeclination, m_nextRadius, m_nextStayTime,
                         m_prevId, m_prevLongitude, m_prevLatitude, m_prevDeclination, m_prevRadius))
@@ -111,9 +111,9 @@ void WaypointNode::sendMessage()
     m_db.forceUnlock();
 }
 
-bool WaypointNode::harvestWaypoint()
+bool WaypointMgrNode::harvestWaypoint()
 {
-    double DTW = m_courseMath.calculateDTW(m_gpsLongitude, m_gpsLatitude, m_nextLongitude, m_nextLatitude); //Calculate distance to waypoint
+    double DTW = CourseMath::calculateDTW(m_gpsLongitude, m_gpsLatitude, m_nextLongitude, m_nextLatitude); //Calculate distance to waypoint
     if(DTW > m_nextRadius)
     {
         return false;

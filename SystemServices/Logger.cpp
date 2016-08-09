@@ -198,42 +198,44 @@ bool Logger::createLogFiles(const char* filename)
 {
 	if(m_DisableLogging) { return true; }
 
-	std::string filePath;
+	char fileName[256];
 
 	if(filename == 0)
 	{
-		filePath = DEFAULT_LOG_NAME;
+		snprintf(fileName, 256, "%s-%s", SysClock::hh_mm_ss().c_str(), DEFAULT_LOG_NAME);
 	}
 	else
 	{
-		filePath = filename;
+		snprintf(fileName, 256, "%s-%s", SysClock::hh_mm_ss().c_str(), filename);
 	}
 
-	m_LogFile.open(filePath, std::ios::out | std::ios::trunc);
+	m_LogFile.open(fileName, std::ios::out | std::ios::trunc);
 
 	#ifdef ENABLE_WRSC_LOGGING
-		m_LogFileWRSC.open(DEFAULT_LOG_NAME_WRSC, std::ios::out | std::ios::trunc);
+		char wrscFileName[256];
+		snprintf(wrscFileName, 256, "%s-%s", SysClock::hh_mm_ss().c_str(), DEFAULT_LOG_NAME_WRSC);
+		m_LogFileWRSC.open(wrscFileName, std::ios::out | std::ios::trunc);
 
 		if(m_LogFile.is_open() && m_LogFileWRSC.is_open())
 		{
-			Logger::info("Log files %s, %s have been created", filePath.c_str(), DEFAULT_LOG_NAME_WRSC);
+			Logger::info("Log files %s, %s have been created", fileName, wrscFileName);
 			writeBufferedLogs();
 			return true;
 		}
 		else
 		{
-			Logger::info("Failed to create Log files %s, %s", filePath.c_str(), DEFAULT_LOG_NAME_WRSC);
+			Logger::info("Failed to create Log files %s, %s", fileName, wrscFileName);
 		}
 	#else
 		if(m_LogFile.is_open())
 		{
-			Logger::info("Log file %s has been created", filePath.c_str());
+			Logger::info("Log file %s has been created", fileName);
 			writeBufferedLogs();
 			return true;
 		}
 		else
 		{
-			Logger::info("Failed to create Log file %s", filePath.c_str());
+			Logger::info("Failed to create Log file %s", fileName);
 		}
 	#endif
 

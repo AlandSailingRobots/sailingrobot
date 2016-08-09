@@ -18,9 +18,8 @@
 #include "waypointrouting/WaypointRouting.h"
 #include "dbhandler/DBHandler.h"
 #include "dbhandler/DBLogger.h"
-#include "sailcommand/SailCommand.h"
-#include "ruddercommand/RudderCommand.h"
-
+#include "waypointrouting/SailCommand.h"
+#include "waypointrouting/RudderCommand.h"
 
 class RoutingNode : public Node {
 public:

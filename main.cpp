@@ -14,7 +14,7 @@
  #include "Nodes/ArduinoNode.h"
 #endif
 
-#include "Nodes/WaypointNode.h"
+#include "Nodes/WaypointMgrNode.h"
 #include "Nodes/VesselStateNode.h"
 #include "Nodes/HTTPSyncNode.h"
 #include "Nodes/XbeeSyncNode.h"
@@ -121,7 +121,7 @@ int main(int argc, char *argv[])
 
 	HTTPSyncNode httpsync(messageBus, &dbHandler, 0, false);
 	VesselStateNode vessel(messageBus);
-	WaypointNode waypoint(messageBus, dbHandler);
+	WaypointMgrNode waypoint(messageBus, dbHandler);
 
 
 	Node* sailingLogic;

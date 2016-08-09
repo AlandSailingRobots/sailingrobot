@@ -14,7 +14,7 @@
 #pragma once
 
 #include "MessageTypes.h"
-#include "NodeIDs.h"
+#include "Nodes/NodeIDs.h"
 #include "MessageSerialiser.h"
 #include "MessageDeserialiser.h"
 

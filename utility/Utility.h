@@ -4,7 +4,6 @@
 #include <stdint.h> // uint8_t
 #include <vector>
 #include <array>
-#include "models/SystemStateModel.h"
 
 
 class Utility {
