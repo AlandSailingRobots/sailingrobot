@@ -21,14 +21,7 @@
 #include <stdio.h>
 #include <regex>
 
-#include <termios.h>
-#include <sys/ioctl.h>
 #include <unistd.h>
-#include <fcntl.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <limits.h>
-#include <sys/file.h>
 #include <cerrno>
 
 // For std::this_thread
@@ -63,6 +56,10 @@ bool CV7Node::init()
 	if(m_fd!=-1)//open_port())
 	{
 		m_Initialised = true;
+	}
+	else
+	{
+		Logger::error("%s Cannot open %s as windsensor: %s", __PRETTY_FUNCTION__,m_PortName.c_str(),strerror(errno));
 	}
 
 	return m_Initialised;
@@ -112,7 +109,7 @@ void CV7Node::WindSensorThread(void* nodePtr)
 	struct timeval wait_time;
 
 
-	Logger::info("Wind sensor thread started");
+	Logger::info("Wind sensor thread  ");
 	buffer_to_parse.reserve(255);
 
 	float windDir = 0;
@@ -176,7 +173,6 @@ void CV7Node::WindSensorThread(void* nodePtr)
 
 				MessagePtr windData = std::make_unique<WindDataMsg>(node->m_MeanWindDir, node->m_MeanWindSpeed, node->m_MeanWindTemp);
 				node->m_MsgBus.sendMessage(std::move(windData));
-
 			}
 		}
 	}
@@ -203,13 +199,16 @@ bool CV7Node::parseString(std::string& buffer_to_parse, float& windDir, float& w
 		found_second = buffer_to_parse.find_first_of("$",1);
 	}
 
-  if (buffer_to_parse.size()>0)
+  if (buffer_to_parse.size()>0)/* if there is still thing in the parser*/
 	{
 
 		std::smatch sm;
+		bool erase = false;
+
+		/* while there is the asked string in the buffer*/
 		while(std::regex_search (buffer_to_parse,iimwv_regex) || std::regex_search (buffer_to_parse,wixdir_regex))
 		{
-
+      erase = true;
 			if(std::regex_search( buffer_to_parse, sm,iimwv_regex ))
 			{
 				windDir = stof(sm[1].str());
@@ -225,7 +224,10 @@ bool CV7Node::parseString(std::string& buffer_to_parse, float& windDir, float& w
 			buffer_to_parse.erase(sm.position(0),sm[0].str().size());
 
 		}
-		buffer_to_parse.erase(0,sm.position(0));
+		if (erase)
+		{
+		  buffer_to_parse.erase(0,sm.position(0));
+		}
 	}
 	else
 	{
