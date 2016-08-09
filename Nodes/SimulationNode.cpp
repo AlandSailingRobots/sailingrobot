@@ -37,7 +37,7 @@
 
 
 SimulationNode::SimulationNode(MessageBus& msgBus)
-	: ActiveNode(NodeID::VesselState, msgBus),
+	: ActiveNode(NodeID::Simulator, msgBus),
 		m_CompassHeading(0), m_CompassPitch(0), m_CompassRoll(0),
 		m_GPSHasFix(false), m_GPSOnline(false), m_GPSLat(0), m_GPSLon(0), m_GPSUnixTime(0), m_GPSSpeed(0),
 		m_GPSHeading(0), m_WindDir(0), m_WindSpeed(0), m_WindTemp(0), m_ArduinoPressure(0),
@@ -154,6 +154,7 @@ void SimulationNode::createCompassMessage()
 
 void SimulationNode::createGPSMessage()
 {
+
 	double knots = 1.94384;
 	m_GPSHasFix = true;
 	m_GPSOnline = true;
