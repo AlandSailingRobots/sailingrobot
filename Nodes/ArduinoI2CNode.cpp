@@ -4,8 +4,9 @@
  * 		ArduinoI2CNode.cpp
  *
  * Purpose:
- *		The Arduino node communicates with the arduino. Sends data about the pressure, rudder, sheet and battery.
- *
+ *		The Arduino node communicates with the arduino. Sends data received over I2C via 
+ *		CANBus or analog pins on the Arduino. Receives commands to be sent over CANBus, 
+ *		processes them, and passes them to the Arduino over I2C.
  *
  * Developer Notes:
  *

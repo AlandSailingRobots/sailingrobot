@@ -34,12 +34,25 @@ public:
  	///----------------------------------------------------------------------------------
 	void start();
 
+	///----------------------------------------------------------------------------------
+ 	/// Parses subscrubed messages
+ 	///----------------------------------------------------------------------------------
 	void processMessage(const Message* msg);
 
+	///----------------------------------------------------------------------------------
+ 	/// Sends messages to the arduino over I2C
+ 	///----------------------------------------------------------------------------------
 	int sendToArduino(uint8_t* data, uint8_t dataID);
 
+	///----------------------------------------------------------------------------------
+ 	/// Takes a system message and converts it into the format of a CANBus message, ready
+	/// to be sent to the Arduino over I2C, then passes this data to sendToArduino
+ 	///----------------------------------------------------------------------------------
 	void passToCANBus();
 
+	///----------------------------------------------------------------------------------
+ 	/// Parses the incoming I2C data and publishes respective messages
+ 	///----------------------------------------------------------------------------------
 	void processI2CData(uint8_t* data);
 
 private:
@@ -49,8 +62,6 @@ private:
 	bool 			m_Initialised;
 	bool 			m_locked;
 	std::mutex 		m_mutex;
-
-	//adding instead of replacing for testing purposes
 	uint16_t m_rudderCommand;
 	uint16_t m_sailCommand;
 	uint8_t m_windVaneCommand;
