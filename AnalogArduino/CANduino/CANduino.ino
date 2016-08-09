@@ -10,7 +10,7 @@
 
 // the cs pin of the version after v1.1 is default to D9
 // v0.9b and v1.0 is default D10
-const int SPI_CS_PIN = 10;
+const int SPI_CS_PIN = 53; //53 for MEGA, 10 for UNO
 
 MCP_CAN CAN(SPI_CS_PIN);                                    // Set CS pin
 
@@ -74,7 +74,7 @@ void setup() {
   Wire.onRequest(sendData);
 
   //Set init_flag false
-  initialized = false;
+  initialize = false;
 }
  
 void loop() {
@@ -92,8 +92,18 @@ void receiveData(int byteCount){
   if (Wire.available())
   {
     readVal = Wire.read();
-    CANID = readVal;    
-    Serial.print("CANID: "); Serial.print(readVal); Serial.print(" || ");
+    if (readVal==INIT_COMMAND)
+    {
+      initialize=true;    
+    }
+
+    else
+    {
+      CANID = readVal;
+
+      Serial.print("CANID: "); Serial.print(CANID,HEX); Serial.print(" || "); 
+    }
+    
   }
   
   while(Wire.available()) 
@@ -111,7 +121,7 @@ void receiveData(int byteCount){
 // callback for sending data
 void sendData(){
 
-  if (!initialized)
+  if (initialize)
   {
     dataLength = 1;
     datapacket[0]=dataLength;
@@ -120,8 +130,8 @@ void sendData(){
     Wire.write(datapacket, dataLength+1);
 
     dataLength = 0;
+    initialize = false;
   }
-
   else
   {
     loadData();

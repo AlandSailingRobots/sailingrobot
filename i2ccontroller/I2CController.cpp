@@ -69,7 +69,7 @@ int I2CController::readReg(int regAddress)
 	return -1;
 }
 
-int I2CController::readBlock(uint8_t* block)
+int I2CController::readBlock(uint8_t* block, uint8_t command)
 {
 	if(m_Locked)
 	{
@@ -79,7 +79,7 @@ int I2CController::readBlock(uint8_t* block)
 			return -1;
 		}
 
-		return wiringPiI2CReadBlock(m_DeviceFD, (char*)block);
+		return wiringPiI2CReadBlock(m_DeviceFD, (char*)block, command);
 	}
 
 	Logger::error("I2C controller transmission has not begun, call I2CController::beginTransmission!");

@@ -232,13 +232,13 @@ int wiringPiI2CSetup (const int devId)
 }
 
 
-int wiringPiI2CReadBlock (int fd, char* block)
+int wiringPiI2CReadBlock (int fd, char* block, char command)
 {
   union i2c_smbus_data data;
   #define DATA_START  2 //should be 2
 
   // Arduino always sends 32 to data[0] so we must read length from data[1]
-  if (i2c_smbus_access (fd, I2C_SMBUS_READ, 0, I2C_SMBUS_I2C_BLOCK_BROKEN, &data))
+  if (i2c_smbus_access (fd, I2C_SMBUS_READ, command, I2C_SMBUS_I2C_BLOCK_BROKEN, &data))
   {
     return -1 ;
   }

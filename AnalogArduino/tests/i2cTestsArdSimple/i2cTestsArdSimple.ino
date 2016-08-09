@@ -50,8 +50,6 @@ void receiveData(int byteCount){
 void sendData(){
   Serial.println("Writing data...");
   Wire.write(datapacket,dataLength+1);
-  Serial.println("Writing data2...");
-  Wire.write(datapacket2,dataLength2+1);
 }
 
 void loadData(){

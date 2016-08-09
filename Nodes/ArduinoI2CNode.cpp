@@ -26,6 +26,8 @@
 #define BLOCK_READ_SIZE 9
 #define DATA_ID_LOC 0
 #define INIT_ID 0xFF
+#define INIT_COMMAND 1
+#define READ_COMMAND 0
 
 #define ARDUINO_ADDRESS 0x07
 
@@ -48,7 +50,7 @@ bool ArduinoI2CNode::init()
 		m_I2C.beginTransmission();
 
         uint8_t block[BLOCK_READ_SIZE];
-        m_I2C.readBlock(block);
+        m_I2C.readBlock(block, INIT_COMMAND);
 		uint8_t initID = block[DATA_ID_LOC];
 
 		m_I2C.endTransmission();
@@ -151,7 +153,7 @@ void ArduinoI2CNode::ArduinoThreadFunc(void* nodePtr)
         //readValues(block)
 
         node->m_I2C.beginTransmission();        
-        node->m_I2C.readBlock(data);
+        node->m_I2C.readBlock(data, READ_COMMAND);
         node->m_I2C.endTransmission();
 
         node->processI2CData(data);
@@ -166,7 +168,6 @@ void ArduinoI2CNode::ArduinoThreadFunc(void* nodePtr)
         	node->m_locked = false;
 			node->m_mutex.unlock();
         }
-
     }
 }
 
