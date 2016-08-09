@@ -97,7 +97,7 @@ WIRING_PI_PATH = ./libs/wiringPi/wiringPi/
 WIRING_PI_STATIC = ./libs/wiringPi/wiringPi/libwiringPi.so.2.32
 
 # Object files
-OBJECTS = $(addprefix $(BUILD_DIR)/, $(SRC:.cpp=.o)) $(BUILD_DIR)/AnalogArduino/libmyWiringI2C.so
+OBJECTS = $(addprefix $(BUILD_DIR)/, $(SRC:.cpp=.o))
 OBJECT_MAIN = $(addprefix $(BUILD_DIR)/, $(SRC_MAIN:.cpp=.o))
 
 # Target Output
