@@ -155,6 +155,7 @@ void SimulationNode::createCompassMessage()
 
 void SimulationNode::createGPSMessage()
 {
+
 	double knots = 1.94384;
 	m_GPSHasFix = true;
 	m_GPSOnline = true;

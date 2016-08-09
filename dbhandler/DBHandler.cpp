@@ -7,6 +7,10 @@
 #include "models/WaypointModel.h"
 #include "models/PositionModel.h"
 #include "utility/Timer.h"
+#include <thread>
+
+
+std::mutex DBHandler::m_databaseLock;
 
 
 DBHandler::DBHandler(std::string filePath) :
@@ -17,7 +21,7 @@ DBHandler::DBHandler(std::string filePath) :
 
 
 DBHandler::~DBHandler(void) {
-
+	m_databaseLock.unlock();
 }
 
 bool DBHandler::initialise()
@@ -596,10 +600,10 @@ sqlite3* DBHandler::openDatabase() {
 	FILE* db_file = fopen(m_filePath.c_str(), "r");
 	if (db_file == NULL) {
 		Logger::error("%s %s not found", __PRETTY_FUNCTION__, m_filePath.c_str());
-		fclose(db_file);
 		m_databaseLock.unlock();
 		return NULL;
 	}
+	fclose(db_file);
 
 	do {
 		resultcode = sqlite3_open(m_filePath.c_str(), &connection);
@@ -618,11 +622,12 @@ sqlite3* DBHandler::openDatabase() {
 
 
 void DBHandler::closeDatabase(sqlite3* connection) {
-
 	if(connection != NULL) {
 		sqlite3_close(connection);
-		m_databaseLock.unlock();
 		connection = NULL;
+		// ENsure it closes properly
+		std::this_thread::sleep_for(std::chrono::milliseconds(1));
+		m_databaseLock.unlock();
 	} else {
 		m_databaseLock.unlock();
 		throw "DBHandler::closeDatabase() : connection is already null";
@@ -773,6 +778,7 @@ bool DBHandler::queryTable(std::string sqlINSERT, sqlite3* db) {
 }
 
 std::vector<std::string> DBHandler::retrieveFromTable(std::string sqlSELECT, int &rows, int &columns) {
+
 	sqlite3* db = openDatabase();
 	std::vector<std::string> results;
 
@@ -801,7 +807,6 @@ std::vector<std::string> DBHandler::retrieveFromTable(std::string sqlSELECT, int
 		closeDatabase(db);
 		throw "DBHandler::retrieveFromTable(), no db connection";
 	}
-
 	closeDatabase(db);
 	return results;
 }
@@ -943,7 +948,7 @@ bool DBHandler::getWaypointFromTable(WaypointModel &waypointModel, bool max){
 
 bool DBHandler::getWaypointValues(int& nextId, double& nextLongitude, double& nextLatitude, int& nextDeclination, int& nextRadius, int& nextStayTime,
                         int& prevId, double& prevLongitude, double& prevLatitude, int& prevDeclination, int& prevRadius)
-{
+{	
 	int rows, columns, rows2, columns2;
     std::vector<std::string> results;
 	std::vector<std::string> results2;
@@ -968,6 +973,7 @@ bool DBHandler::getWaypointValues(int& nextId, double& nextLongitude, double& ne
 		foundPrevWaypoints = false;
     }
 
+
 	//Set values to next waypoint
     nextId = stoi(results[1]);
 
@@ -987,7 +993,7 @@ bool DBHandler::getWaypointValues(int& nextId, double& nextLongitude, double& ne
 		prevDeclination = retrieveCellAsInt("waypoints", results2[1], "declination");
 		prevRadius = retrieveCellAsInt("waypoints", results2[1], "radius");
 	}
-
+	
     return true;
 }
 

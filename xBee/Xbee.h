@@ -69,6 +69,7 @@ protected:
 		uint8_t m_payloadSize;
 		uint8_t* m_payload;
 		uint16_t m_checksum;
+		bool m_ownsMem; // A flag that indicates if the packet owns memory
 	};
 
 	///----------------------------------------------------------------------------------

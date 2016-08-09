@@ -117,9 +117,9 @@ int main(int argc, char *argv[])
 	HMC6343Node compass(messageBus, dbHandler.retrieveCellAsInt("buffer_config", "1", "compass"));
 	GPSDNode gpsd(messageBus);
 	ArduinoNode arduino(messageBus);
-	HTTPSyncNode httpsync(messageBus, &dbHandler, 0, false);
 	#endif
 
+	HTTPSyncNode httpsync(messageBus, &dbHandler, 0, false);
 	VesselStateNode vessel(messageBus);
 	WaypointNode waypoint(messageBus, dbHandler);
 
@@ -149,8 +149,8 @@ int main(int argc, char *argv[])
 
 	ActuatorNode rudder(messageBus, NodeID::RudderActuator, channel, speed, acceleration);
 	MaestroController::init(dbHandler.retrieveCell("maestro_controller_config", "1", "port"));
-	bool requireNetwork = (bool) (dbHandler.retrieveCellAsInt("sailing_robot_config", "1", "require_network"));
   #endif
+	bool requireNetwork = (bool) (dbHandler.retrieveCellAsInt("sailing_robot_config", "1", "require_network"));
 
 	// System services
 
@@ -169,6 +169,7 @@ int main(int argc, char *argv[])
 	initialiseNode(rudder, "Rudder Actuator", NodeImportance::CRITICAL);
 	initialiseNode(arduino, "Arduino Node", NodeImportance::NOT_CRITICAL);
 
+	#endif
 	if (requireNetwork)
 	{
 		initialiseNode(httpsync, "Httpsync Node", NodeImportance::CRITICAL);
@@ -177,7 +178,6 @@ int main(int argc, char *argv[])
 	{
 		initialiseNode(httpsync, "Httpsync Node", NodeImportance::NOT_CRITICAL);
 	}
-	#endif
 
 	initialiseNode(vessel, "Vessel State Node", NodeImportance::CRITICAL);
 	initialiseNode(waypoint, "Waypoint Node", NodeImportance::CRITICAL);
@@ -200,9 +200,9 @@ int main(int argc, char *argv[])
 	compass.start();
 	gpsd.start();
 	arduino.start();
-	httpsync.start();
   #endif
 
+	httpsync.start();
 	vessel.start();
 
 	// NOTE - Jordan: Just to ensure messages are following through the system

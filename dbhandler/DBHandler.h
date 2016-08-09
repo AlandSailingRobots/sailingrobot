@@ -55,7 +55,7 @@ private:
 	int m_latestDataLogId;
 	std::string m_currentWaypointId = "";
 	std::string m_filePath;
-	std::mutex m_databaseLock;
+	static std::mutex m_databaseLock;
 
 	//execute INSERT query and add new row into table
 	bool queryTable(std::string sqlINSERT);
