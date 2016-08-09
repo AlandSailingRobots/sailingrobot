@@ -111,6 +111,9 @@ void Xbee::transmit(uint8_t* data, uint8_t size)
 			dataPtr = dataPtr + packet.m_payloadSize;
 			slipSize = slipSize - packet.m_payloadSize;
 
+			// The first packet actually owns the memory pointer.
+			packet.m_ownsMem = (i == 0);
+
 			m_transmitQueue.push(packet);
 		}
 	}
@@ -123,6 +126,7 @@ void Xbee::transmit(uint8_t* data, uint8_t size)
 		packet.m_payloadSize = slipSize;
 		packet.m_payload = slipData;
 		packet.m_checksum = fletcherChecksum(packet.m_payload, packet.m_payloadSize);
+		packet.m_ownsMem = true;
 
 		m_transmitQueue.push(packet);
 	}
@@ -154,11 +158,30 @@ void Xbee::processRadioMessages()
 			// Locks until the function returns and the current scope is left
 			std::lock_guard<std::mutex> lock(m_transmitQueueMutex);
 			uint16_t msgsToTransmit = m_transmitQueue.size();
+			uint8_t packetsLeft = 0;
+			uint8_t* ptrToClean = NULL;
 
 			for(uint16_t i = 0; i < msgsToTransmit; i++)
 			{
+				if(m_transmitQueue.front().m_ownsMem)
+				{
+					ptrToClean = m_transmitQueue.front().m_payload;
+					packetsLeft = m_transmitQueue.front().m_packetCount;
+				}
+
+				if(packetsLeft > 0)
+				{
+					packetsLeft--;
+				}
+
 				writeData(m_transmitQueue.front());
 				m_transmitQueue.pop();
+
+				if(ptrToClean != NULL && packetsLeft == 0)
+				{
+					delete ptrToClean;
+					ptrToClean = NULL;
+				}
 			}
 		}
 		// When we are not in master mode we should only transmit a few packets then break incase the master
@@ -166,11 +189,30 @@ void Xbee::processRadioMessages()
 		else if((SysClock::unixTime() - lastReceived) > TRANSMIT_WAIT)
 		{
 			uint16_t msgsToTransmit = m_transmitQueue.size();
+			uint8_t packetsLeft = 0;
+			uint8_t* ptrToClean = NULL;
 
-			for(uint16_t i = 0;(i < msgsToTransmit || i == PACKETS_TO_TRANSMIT); i++)
+			for(uint16_t i = 0;(i < msgsToTransmit && (i == PACKETS_TO_TRANSMIT || packetsLeft > 0)); i++)
 			{
+				if(m_transmitQueue.front().m_ownsMem)
+				{
+					ptrToClean = m_transmitQueue.front().m_payload;
+					packetsLeft = m_transmitQueue.front().m_packetCount;
+				}
+
+				if(packetsLeft > 0)
+				{
+					packetsLeft--;
+				}
+
 				writeData(m_transmitQueue.front());
 				m_transmitQueue.pop();
+
+				if(ptrToClean != NULL && packetsLeft == 0)
+				{
+					delete ptrToClean;
+					ptrToClean = NULL;
+				}
 			}
 		}
 	}

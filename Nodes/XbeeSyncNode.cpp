@@ -87,12 +87,8 @@ void XbeeSyncNode::sendMessage(const Message* msg)
 	MessageSerialiser serialiser;
 	msg->Serialise(serialiser);
 
-	uint8_t* data = new uint8_t[serialiser.size()];
-	memcpy(data, serialiser.data(), serialiser.size());
-
-	m_xbee.transmit(data, serialiser.size());
-
-	delete data;
+	// The data is allocated on the stack, so is automatically cleaned up
+	m_xbee.transmit(serialiser.data(), serialiser.size());
 }
 
 void XbeeSyncNode::incomingMessage(uint8_t* data, uint8_t size)

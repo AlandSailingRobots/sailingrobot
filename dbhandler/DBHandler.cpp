@@ -7,6 +7,7 @@
 #include "models/WaypointModel.h"
 #include "models/PositionModel.h"
 #include "utility/Timer.h"
+#include <thread>
 
 
 std::mutex DBHandler::m_databaseLock;
@@ -623,8 +624,10 @@ sqlite3* DBHandler::openDatabase() {
 void DBHandler::closeDatabase(sqlite3* connection) {
 	if(connection != NULL) {
 		sqlite3_close(connection);
-		m_databaseLock.unlock();
 		connection = NULL;
+		// ENsure it closes properly
+		std::this_thread::sleep_for(std::chrono::milliseconds(1));
+		m_databaseLock.unlock();
 	} else {
 		m_databaseLock.unlock();
 		throw "DBHandler::closeDatabase() : connection is already null";
