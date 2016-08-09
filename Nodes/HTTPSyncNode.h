@@ -4,7 +4,6 @@
 #include "ActiveNode.h"
 #include "dbhandler/DBHandler.h"
 #include "SystemServices/Logger.h"
-#include "models/SystemStateModel.h"
 
 
 #include <chrono>
@@ -14,8 +13,6 @@
 
 
 class HTTPSyncNode : public ActiveNode{
-
-
 	public:
 
 		HTTPSyncNode(MessageBus& msgBus,DBHandler *db,int delay, bool removeLogs);

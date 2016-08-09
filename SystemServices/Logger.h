@@ -31,8 +31,8 @@
 #include <fstream>
 
 
-#define DEFAULT_LOG_NAME			"./sailing-log.log"
-#define DEFAULT_LOG_NAME_WRSC		"./wrsc-log.log"
+#define DEFAULT_LOG_NAME			"sailing-log.log"
+#define DEFAULT_LOG_NAME_WRSC		"wrsc-log.log"
 
 // Uncomment for a WRSC2016 position log file
 //#define ENABLE_WRSC_LOGGING

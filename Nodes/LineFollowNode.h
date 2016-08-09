@@ -22,9 +22,9 @@
 #include "Messages/WaypointDataMsg.h"
 #include "dbhandler/DBHandler.h"
 #include "dbhandler/DBLogger.h"
-#include "sailcommand/SailCommand.h"
-#include "ruddercommand/RudderCommand.h"
-#include "coursecalculation/CourseMath.h"
+#include "waypointrouting/SailCommand.h"
+#include "waypointrouting/RudderCommand.h"
+#include "utility/CourseMath.h"
 
 
 class LineFollowNode : public Node {
@@ -59,7 +59,6 @@ private:
     double  m_tackAngle;
     int     m_tackingDirection;
 
-    CourseMath m_courseMath;
 	RudderCommand m_rudderCommand;
 	SailCommand m_sailCommand;
 

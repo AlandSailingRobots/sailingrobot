@@ -1,10 +1,7 @@
 #include "WaypointRouting.h"
 #include <math.h>
-#include "coursecalculation/CourseCalculation.h"
 #include "utility/Timer.h"
 #include "utility/Utility.h"
-#include "models/WaypointModel.h"
-#include "models/SystemStateModel.h"
 
 
 WaypointRouting::WaypointRouting(double lon, double lat, int radius, double innerRadiusRatio,
@@ -147,7 +144,7 @@ void WaypointRouting::setMinimumDegreeLimit(double degLimit) {
 bool WaypointRouting::reachedRadius(double radius, double gpsLon, double gpsLat) const
 {
 	bool reachedRadius = false;
-	double dtw = m_courseMath.calculateDTW(gpsLon, gpsLat, m_lon, m_lat);
+	double dtw = CourseMath::calculateDTW(gpsLon, gpsLat, m_lon, m_lat);
 	if (dtw < radius)
 		reachedRadius = true;
 	return reachedRadius;

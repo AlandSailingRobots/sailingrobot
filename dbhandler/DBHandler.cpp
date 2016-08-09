@@ -3,9 +3,6 @@
 #include <string>
 #include <cstdlib>
 #include <cstdio>
-#include "models/SystemStateModel.h"
-#include "models/WaypointModel.h"
-#include "models/PositionModel.h"
 #include "utility/Timer.h"
 #include <thread>
 
@@ -899,51 +896,6 @@ std::vector<std::string> DBHandler::getColumnInfo(std::string info, std::string 
 		types.push_back(results[i * columns + infoIndex]);
 	}
     return types;
-}
-
-bool DBHandler::getWaypointFromTable(WaypointModel &waypointModel, bool max){
-
-	int rows, columns;
-    std::vector<std::string> results;
-    try {
-    	if(max)
-    	{
-    		results = retrieveFromTable("SELECT MAX(id) FROM waypoints WHERE harvested = 1;", rows, columns);
-    	}
-    	else
-    	{
-    		results = retrieveFromTable("SELECT MIN(id) FROM waypoints WHERE harvested = 0;", rows, columns);
-    	}
-    }
-    catch(const char* error)
-    {
-    	Logger::error("%s Error: %s", __PRETTY_FUNCTION__, error);
-    	return false;
-    }
-    if (rows * columns < 1 || results[1] == "\0") {
-    	return false;
-    }
-
-
-    waypointModel.id = results[1];
-
-	m_currentWaypointId = waypointModel.id;
-	waypointModel.positionModel.latitude = atof(retrieveCell("waypoints", waypointModel.id, "latitude").c_str());
-	waypointModel.positionModel.longitude = atof(retrieveCell("waypoints", waypointModel.id, "longitude").c_str());
-	waypointModel.radius = retrieveCellAsInt("waypoints", waypointModel.id, "radius");
-	waypointModel.declination = retrieveCellAsInt("waypoints", waypointModel.id, "declination");
-
-	results = retrieveFromTable("SELECT time FROM waypoint_stationary WHERE id = " +
-		waypointModel.id + ";", rows, columns);
-
-	if (rows * columns < 1 || results[1] == "\0") {
-		waypointModel.time = 0;
-	}
-	else {
-		waypointModel.time = retrieveCellAsInt("waypoint_stationary", waypointModel.id, "time");
-	}
-
-	return true;
 }
 
 bool DBHandler::getWaypointValues(int& nextId, double& nextLongitude, double& nextLatitude, int& nextDeclination, int& nextRadius, int& nextStayTime,
