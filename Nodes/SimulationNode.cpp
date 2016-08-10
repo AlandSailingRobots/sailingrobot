@@ -17,6 +17,7 @@
 // For std::this_thread
 #include <chrono>
 #include <thread>
+#include <memory>
 
 #include <sys/types.h>
 #include <netdb.h>
@@ -74,7 +75,7 @@ bool SimulationNode::init(){
 		if ((m_handler_socket_client.sockfd = accept(m_handler_socket_server.sockfd, (struct sockaddr *) &(m_handler_socket_client.info_me),
 					 &clntLen)) < 0)
 	  {
-			  Logger::error("Error in accept() failed: %s",__PRETTY_FUNCTION__,strerror(errno));
+			  Logger::error("%s Error in accept() failed: %s",__PRETTY_FUNCTION__,strerror(errno));
 				return false;
 	  }
 
@@ -92,7 +93,7 @@ int SimulationNode::init_socket(int port)
     m_handler_socket_server.sockfd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if (m_handler_socket_server.sockfd == -1)
     {
-				Logger::error("Error in initialise socket: %s",__PRETTY_FUNCTION__,strerror(errno));
+				Logger::error("%s Error in initialise socket: %s",__PRETTY_FUNCTION__,strerror(errno));
         return -1;
     }
 
@@ -105,13 +106,13 @@ int SimulationNode::init_socket(int port)
     if( bind(m_handler_socket_server.sockfd, (struct sockaddr*) &m_handler_socket_server.info_me,
              sizeof(m_handler_socket_server.info_me)) == -1)
     {
-        Logger::error("Error in initialise socket bind: %s",__PRETTY_FUNCTION__,strerror(errno));
+        Logger::error("%s Error in initialise socket bind: %s",__PRETTY_FUNCTION__,strerror(errno));
         return -1;
     }
 
     if (listen(m_handler_socket_server.sockfd,1) < 0)
     {
-        Logger::error("Error in initialise socket listen: %s",__PRETTY_FUNCTION__,strerror(errno));
+        Logger::error("%s Error in initialise socket listen: %s",__PRETTY_FUNCTION__,strerror(errno));
         return -1;
     }
     return 0;

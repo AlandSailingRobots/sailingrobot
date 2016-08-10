@@ -38,6 +38,9 @@ public:
 	unsigned int bufferSize() { return m_bufferSize; }
 private:
 
+	template<typename FloatOrDouble>
+	FloatOrDouble setValue(FloatOrDouble value);
+	
 	static void workerThread(DBLogger* ptr);
 
 	std::thread* 			m_thread;

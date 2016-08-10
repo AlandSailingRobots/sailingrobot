@@ -21,7 +21,7 @@ class CV7Node : public ActiveNode{
 public:
 	CV7Node(MessageBus& msgBus, std::string m_PortName, unsigned int baudRate);
 
-	virtual ~CV7Node() { }
+	virtual ~CV7Node();
 
 	///----------------------------------------------------------------------------------
  	/// Attempts to connect to the CV7 wind sensor.
@@ -30,7 +30,7 @@ public:
 	bool init();
 
 	///----------------------------------------------------------------------------------
- 	/// Starts the wind sensors thread so that it actively pumps data into the message 
+ 	/// Starts the wind sensors thread so that it actively pumps data into the message
  	/// bus.
  	///
  	///----------------------------------------------------------------------------------
@@ -46,7 +46,7 @@ public:
 	/// The CV7 Node's thread function.
 	///
 	///----------------------------------------------------------------------------------
-	bool parseString(const char* buffer, float& windDir, float& windSpeed, float& windTemp) const;
+	bool parseString(std::string& buffer_to_parse, float& windDir, float& windSpeed, float& windTemp) const;
 
 private:
 	///----------------------------------------------------------------------------------

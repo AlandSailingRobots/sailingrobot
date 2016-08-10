@@ -18,6 +18,12 @@
 #include "utility/Utility.h"
 #include <cstring>
 
+#include <stdio.h>
+#include <regex>
+
+#include <unistd.h>
+#include <cerrno>
+
 // For std::this_thread
 #include <chrono>
 #include <thread>
@@ -36,13 +42,24 @@ CV7Node::CV7Node(MessageBus& msgBus, std::string portName, unsigned int baudRate
 
 }
 
+CV7Node::~CV7Node()
+{
+	if (m_fd!=-1)
+	  close(m_fd);
+}
+
 bool CV7Node::init()
 {
-	m_fd = serialOpen(m_PortName.c_str(), m_BaudRate);
+  m_fd = serialOpen(m_PortName.c_str(),m_BaudRate);
 
-	if(m_fd != 0)
+
+	if(m_fd!=-1)
 	{
 		m_Initialised = true;
+	}
+	else
+	{
+		Logger::error("%s Cannot open %s as windsensor: %s", __PRETTY_FUNCTION__,m_PortName.c_str(),strerror(errno));
 	}
 
 	return m_Initialised;
@@ -78,62 +95,57 @@ void CV7Node::WindSensorThread(void* nodePtr)
 	CV7Node* node = (CV7Node*)(nodePtr);
 
 	const int DATA_BUFFER_SIZE = 1;
-	const int NON_BREAKING_SPACE = 255;
-	const int BUFF_SIZE = 60;
-	const short MAX_NO_DATA_ERROR_COUNT = 100; // 10 seconds of no data
+	const int BUFF_SIZE = 255;
 	char buffer[BUFF_SIZE];
 
+
+	std::string buffer_to_parse;
 	std::vector<float> windDirData(DATA_BUFFER_SIZE);
 	std::vector<float> windSpeedData(DATA_BUFFER_SIZE);
 	std::vector<float> windTempData(DATA_BUFFER_SIZE);
 	unsigned int dataIndex = 0;
-	unsigned short noDataCount = 0;
-	Logger::info("Wind sensor thread started");
+	fd_set fd_read_set;
+	struct timeval wait_time;
+
+
+	Logger::info("Wind sensor thread  ");
+	buffer_to_parse.reserve(255);
+
+	float windDir = 0;
+	float windSpeed = 0;
+	float windTemp = 0;
 
 	while(true)
 	{
-		if(noDataCount >= MAX_NO_DATA_ERROR_COUNT)
+    int bytes = 0;
+		wait_time.tv_sec = 10;
+		wait_time.tv_usec = 0;
+		bzero(buffer, BUFF_SIZE);
+
+    FD_ZERO(&fd_read_set);
+    FD_SET(node->m_fd, &fd_read_set);
+
+    /* Wait for data to come or timeout*/
+    select(node->m_fd+1, &fd_read_set, NULL, NULL, &wait_time);
+
+    if (FD_ISSET(node->m_fd, &fd_read_set))
+    {
+        bytes = read(node->m_fd, buffer, BUFF_SIZE);
+    }
+		else
 		{
 			Logger::error("%s No data on the CV7 serial line!", __PRETTY_FUNCTION__);
-			noDataCount = 0;
 		}
 
-		// Controls how often we pump out messages
-		std::this_thread::sleep_for(std::chrono::milliseconds(WIND_SENSOR_SLEEP_MS));
-
-		// Extract data from the CV7 serial port
-		int index = 0;
-		for(int i = 0; i < BUFF_SIZE; i++) {
-
-			int data = serialGetchar(node->m_fd);
-			if(data != -1)
-			{
-				buffer[index] = data;
-
-				if(NON_BREAKING_SPACE == (int)buffer[index])
-				{
-					Logger::warning("Wind sensor serial timeout!");
-					index = 0;
-					break;
-				}
-				index++;
-			}
-			else
-			{
-				Logger::error("%s No data on the CV7 serial line!", __PRETTY_FUNCTION__);
-			}
-		}
 
 		// Parse the data and send out messages
-		if(index > 0 )
+		if(bytes > 0 )
 		{
-			float windDir = 0;
-			float windSpeed = 0;
-			float windTemp = 0;
+			buffer_to_parse+=buffer;
 
-			if(node->parseString(buffer, windDir, windSpeed, windTemp))
+      //Logger::info("buffer windsensor %s",buffer_to_parse.c_str());
+			if(node->parseString(buffer_to_parse, windDir, windSpeed, windTemp))
 			{
-				noDataCount = 0;
 				if(windDirData.size() < DATA_BUFFER_SIZE)
 				{
 					windDirData.push_back(windDir);
@@ -161,52 +173,60 @@ void CV7Node::WindSensorThread(void* nodePtr)
 
 				MessagePtr windData = std::make_unique<WindDataMsg>(node->m_MeanWindDir, node->m_MeanWindSpeed, node->m_MeanWindTemp);
 				node->m_MsgBus.sendMessage(std::move(windData));
-
 			}
-		}
-		else
-		{
-			noDataCount++;
 		}
 	}
 }
 
-bool CV7Node::parseString(const char* buffer, float& windDir, float& windSpeed, float& windTemp) const
+bool CV7Node::parseString(std::string& buffer_to_parse, float& windDir, float& windSpeed, float& windTemp) const
 {
 	const int IIMWV = 0;
 	const int WIXDR = 1;
 	bool updated[] = { false, false };
-	char * writalbeBuff;
-	writalbeBuff = const_cast<char *>(buffer);
-	char* split = strtok(writalbeBuff, "$,");
+	/*"$IIMWV,%03.1f,R,%03.1f,M,*AB
+	   $WIXDR,C,%03.1f,C,,*AB",*/
+	std::regex iimwv_regex ("\\$IIMWV,([^,]{0,6}),.,([^,]{0,6}),.,[^\\$]{0,4}\\n?");
+	std::regex wixdir_regex ("\\$WIXDR,.,([^,]{0,6}),.,.?,[^\\$]{0,4}");
 
-	while (split != NULL)
+  // erase everything before first $ -
+  std::size_t found_begin = buffer_to_parse.find_first_of("$");
+  buffer_to_parse.erase(0,found_begin);
+	//----------------------------------
+
+  if (buffer_to_parse.size()>0)
 	{
-		if (strcmp(split, "IIMWV") == 0)
-		{
-			split = strtok(NULL, "$,");
-			windDir = atof(split);
-			split = strtok(NULL, "$,");
-			split = strtok(NULL, "$,");
-			windSpeed = atof(split);
-			updated[IIMWV] = true;
-		} else if (strcmp(split, "WIXDR") == 0)
-		{
-			split = strtok(NULL, "$,");
-			split = strtok(NULL, "$,");
-			windTemp = atof(split);
-			updated[WIXDR] = true;
-		}
 
-		if (updated[IIMWV] && updated[WIXDR])
+		std::smatch sm;
+		bool erase = false;
+
+		/* while there still interesting data in the buffer*/
+		while(std::regex_search (buffer_to_parse,iimwv_regex) || std::regex_search (buffer_to_parse,wixdir_regex))
 		{
-			break;
+      erase = true;
+			/*get the specific match string with regex groups (with smatch)*/
+			if(std::regex_search( buffer_to_parse, sm,iimwv_regex ))
+			{
+				windDir = stof(sm[1].str()); //sm[1] is the first substring in parenthesis in the regular expression
+				windSpeed = stof(sm[2].str());
+				updated[IIMWV] = true;
+			}
+			else
+			{
+				std::regex_search ( buffer_to_parse, sm,wixdir_regex );
+        windTemp = stof(sm[1].str());
+				updated[WIXDR] = true;
+			}
+			buffer_to_parse.erase(sm.position(0),sm[0].str().size());//erase the match from buffer
+
 		}
-		split = strtok(NULL, "$,");
+		if (erase)// if find match in buffer erase everything before the match
+		{
+		  buffer_to_parse.erase(0,sm.position(0));
+		}
 	}
-	if (updated[IIMWV] == false || updated[WIXDR] == false ) {
+	else
+	{
 		return false;
 	}
-
-	return true;
+	return (updated[IIMWV]); //|| updated[WIXDR]); we dont care much for temperature for the moment
 }
