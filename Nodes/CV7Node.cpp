@@ -53,7 +53,7 @@ bool CV7Node::init()
   m_fd = serialOpen(m_PortName.c_str(),m_BaudRate);
 
 
-	if(m_fd!=-1)//open_port())
+	if(m_fd!=-1)
 	{
 		m_Initialised = true;
 	}
@@ -95,7 +95,6 @@ void CV7Node::WindSensorThread(void* nodePtr)
 	CV7Node* node = (CV7Node*)(nodePtr);
 
 	const int DATA_BUFFER_SIZE = 1;
-	//const int NON_BREAKING_SPACE = 255;
 	const int BUFF_SIZE = 255;
 	char buffer[BUFF_SIZE];
 
@@ -194,17 +193,17 @@ bool CV7Node::parseString(std::string& buffer_to_parse, float& windDir, float& w
   buffer_to_parse.erase(0,found_begin);
 	//----------------------------------
 
-  if (buffer_to_parse.size()>0)/* if there is still thing in the parser*/
+  if (buffer_to_parse.size()>0)
 	{
 
 		std::smatch sm;
 		bool erase = false;
 
-		/* while there is the asked strings in the buffer*/
+		/* while there still interesting data in the buffer*/
 		while(std::regex_search (buffer_to_parse,iimwv_regex) || std::regex_search (buffer_to_parse,wixdir_regex))
 		{
       erase = true;
-			//get the specific match string with regex groups (with smatch)
+			/*get the specific match string with regex groups (with smatch)*/
 			if(std::regex_search( buffer_to_parse, sm,iimwv_regex ))
 			{
 				windDir = stof(sm[1].str()); //sm[1] is the first substring in parenthesis in the regular expression
