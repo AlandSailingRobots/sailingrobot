@@ -40,8 +40,6 @@ public:
 	///----------------------------------------------------------------------------------
 	bool init(std::string port, uint16_t baudRate);
 
-	//TODO - Jordan: Shared pointer maybe?
-
 	///----------------------------------------------------------------------------------
 	/// Sets the callback, the callback will take ownership of the data pointer passed to
 	/// it.
