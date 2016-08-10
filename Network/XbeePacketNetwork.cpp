@@ -175,6 +175,8 @@ bool XbeePacketNetwork::receivePacket()
 void XbeePacketNetwork::transmitPackets(uint8_t packetsToSend)
 {
 	uint8_t packetCount = (packetsToSend == 0 ? m_transmitQueue.size() : packetsToSend);
+	uint8_t packetsLeft = 0;
+	uint8_t* ptrToClean = NULL;
 
 	for(uint8_t i = 0; i < packetCount; i++)
 	{
@@ -189,10 +191,37 @@ void XbeePacketNetwork::transmitPackets(uint8_t packetsToSend)
 		frame[frameSize - 2] = (uint8_t)(packet.m_checksum & 0xFFu);
 		frame[frameSize - 1] = (uint8_t)( (packet.m_checksum >> 8) & 0xFFu );
 
+		// Pointer ownership is passed onto netFrame
 		NetworkFrame netFrame(frame, frameSize);
 		m_dataLink.transmit(netFrame);
 
 		std::this_thread::sleep_for(std::chrono::milliseconds(XBEE_TRANSMIT_TIME));
+
+		if(packetsLeft != 0)
+		{
+			packetsLeft--;
+		}
+
+		// If this is a one packet message, we can just clean it up
+		if(packet.m_packetCount == 1)
+		{
+			delete packet.m_payload;
+			packet.m_payload = NULL;
+		}
+		// If the message is made up of multiple packets, only one packet will have the actual
+		// valid memory pointer that can be deleted
+		else if(packet.m_packetCount > 1 && packet.m_ownsMem)
+		{
+			packetsLeft = packet.m_packetCount;
+			ptrToClean = packet.m_payload;
+		}
+		else if(packetsLeft == 0)
+		{
+			delete ptrToClean;
+			ptrToClean = NULL;
+		}
+
+		m_transmitQueue.pop();
 	}
 }
 
