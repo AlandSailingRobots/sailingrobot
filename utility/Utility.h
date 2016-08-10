@@ -17,7 +17,7 @@ public:
 	static float mean(std::vector<float> values);
 	static float meanOfAngles(std::vector<float> anglesInDegrees);
 	static int sgn(double value);
-	
+
 	/*
 	 * Converts an angle in degrees to cartesian coordinates (x,y) on the
 	 * unit circle

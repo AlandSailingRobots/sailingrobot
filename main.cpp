@@ -1,7 +1,7 @@
 
 #include <string>
 #include "SystemServices/Logger.h"
-#include "MessageBus.h"
+#include "MessageBus/MessageBus.h"
 #include "Nodes/MessageLoggerNode.h"
 
 #if SIMULATION == 1
@@ -263,7 +263,12 @@ int main(int argc, char *argv[]) {
 		path = "./";
 		db_name = "asr.db";
 		errorLog = "errors.log";
-	} else {
+	} else if (argc == 3 ) {
+		path = std::string(argv[1]);
+		db_name = std::string(argv[2]);
+		errorLog = "errors.log";
+	}
+  else {
 		path = std::string(argv[1]);
 		db_name = "asr.db";
 		errorLog = "errors.log";
