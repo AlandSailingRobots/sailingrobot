@@ -63,7 +63,7 @@ void DBLogger::log(VesselStateMsg* msg, double rudder, double sail, int sailServ
 	item.m_compassRoll = msg->compassRoll();
 	item.m_gpsHasFix = msg->gpsHasFix();
 	item.m_gpsOnline = msg->gpsOnline();
-	item.m_gpsLat = setValue<double>(msg->latitude()); if(item.m_gpsLat == -1) item.m_gpsLat = -1000;
+	item.m_gpsLat = setValue<double>(msg->latitude()); if(item.m_gpsLat == -1) item.m_gpsLat = -1000; //-1 is a valid number for latitude and longitude
 	item.m_gpsLon = setValue<double>(msg->longitude()); if(item.m_gpsLon == -1) item.m_gpsLon = -1000;
 	item.m_gpsUnixTime = setValue<double>(msg->unixTime());
 	item.m_gpsSpeed = setValue<double>(msg->speed());
@@ -71,7 +71,7 @@ void DBLogger::log(VesselStateMsg* msg, double rudder, double sail, int sailServ
 	item.m_gpsSatellite = msg->gpsSatellite();
 	item.m_windDir = setValue<float>(msg->windDir());
 	item.m_windSpeed = setValue<float>(msg->windSpeed());
-	item.m_windTemp = setValue<float>(msg->windTemp());
+	item.m_windTemp = setValue<float>(msg->windTemp()); if(item.m_windTemp == -1) item.m_windTemp = -1000;
 	item.m_arduinoPressure = msg->arduinoPressure();
 	item.m_arduinoRudder = msg->arduinoPressure();
 	item.m_arduinoSheet = msg->arduinoSheet();
