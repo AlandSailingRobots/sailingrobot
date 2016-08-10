@@ -96,7 +96,7 @@ void CV7Node::WindSensorThread(void* nodePtr)
 
 	const int DATA_BUFFER_SIZE = 1;
 	//const int NON_BREAKING_SPACE = 255;
-	const int BUFF_SIZE = 60;
+	const int BUFF_SIZE = 255;
 	char buffer[BUFF_SIZE];
 
 
@@ -105,7 +105,7 @@ void CV7Node::WindSensorThread(void* nodePtr)
 	std::vector<float> windSpeedData(DATA_BUFFER_SIZE);
 	std::vector<float> windTempData(DATA_BUFFER_SIZE);
 	unsigned int dataIndex = 0;
-	fd_set fdset;
+	fd_set fd_read_set;
 	struct timeval wait_time;
 
 
@@ -123,12 +123,13 @@ void CV7Node::WindSensorThread(void* nodePtr)
 		wait_time.tv_usec = 0;
 		bzero(buffer, BUFF_SIZE);
 
-    FD_ZERO(&fdset);
-    FD_SET(node->m_fd, &fdset);
+    FD_ZERO(&fd_read_set);
+    FD_SET(node->m_fd, &fd_read_set);
 
-    select(node->m_fd+1, &fdset, NULL, NULL, &wait_time);
+    /* Wait for data to come or timeout*/
+    select(node->m_fd+1, &fd_read_set, NULL, NULL, &wait_time);
 
-    if (FD_ISSET(node->m_fd, &fdset))
+    if (FD_ISSET(node->m_fd, &fd_read_set))
     {
         bytes = read(node->m_fd, buffer, BUFF_SIZE);
     }
@@ -188,16 +189,10 @@ bool CV7Node::parseString(std::string& buffer_to_parse, float& windDir, float& w
 	std::regex iimwv_regex ("\\$IIMWV,([^,]{0,6}),.,([^,]{0,6}),.,[^\\$]{0,4}\\n?");
 	std::regex wixdir_regex ("\\$WIXDR,.,([^,]{0,6}),.,.?,[^\\$]{0,4}");
 
+  // erase everything before first $ -
   std::size_t found_begin = buffer_to_parse.find_first_of("$");
   buffer_to_parse.erase(0,found_begin);
-	std::size_t found_second = buffer_to_parse.find_first_of("$",1);
-
-	while(found_second==1) /* To get $ as the fisrt character of the sentence not the last*/
-	{
-		buffer_to_parse.erase(0,1);
-		found_begin=0;
-		found_second = buffer_to_parse.find_first_of("$",1);
-	}
+	//----------------------------------
 
   if (buffer_to_parse.size()>0)/* if there is still thing in the parser*/
 	{
@@ -205,13 +200,14 @@ bool CV7Node::parseString(std::string& buffer_to_parse, float& windDir, float& w
 		std::smatch sm;
 		bool erase = false;
 
-		/* while there is the asked string in the buffer*/
+		/* while there is the asked strings in the buffer*/
 		while(std::regex_search (buffer_to_parse,iimwv_regex) || std::regex_search (buffer_to_parse,wixdir_regex))
 		{
       erase = true;
+			//get the specific match string with regex groups (with smatch)
 			if(std::regex_search( buffer_to_parse, sm,iimwv_regex ))
 			{
-				windDir = stof(sm[1].str());
+				windDir = stof(sm[1].str()); //sm[1] is the first substring in parenthesis in the regular expression
 				windSpeed = stof(sm[2].str());
 				updated[IIMWV] = true;
 			}
@@ -221,10 +217,10 @@ bool CV7Node::parseString(std::string& buffer_to_parse, float& windDir, float& w
         windTemp = stof(sm[1].str());
 				updated[WIXDR] = true;
 			}
-			buffer_to_parse.erase(sm.position(0),sm[0].str().size());
+			buffer_to_parse.erase(sm.position(0),sm[0].str().size());//erase the match from buffer
 
 		}
-		if (erase)
+		if (erase)// if find match in buffer erase everything before the match
 		{
 		  buffer_to_parse.erase(0,sm.position(0));
 		}
