@@ -84,7 +84,11 @@ void XbeePacketNetwork::transmit(uint8_t* data, uint8_t size)
 	const uint8_t MAX_DATA_SIZE = XBEE_PACKET_SIZE - XBEE_PACKET_MAX_OVERHEAD;
 	uint8_t packetCount = SLIP::packetCount(data, size, MAX_DATA_SIZE);
 	uint16_t bytesToProcess = 0;
-	uint8_t* currPtr = data;
+
+	uint8_t* dataPtr = new uint8_t[size];
+	memcpy(dataPtr, data, size);
+	uint8_t* currPtr = dataPtr;
+
 
 	// Locks until the function returns and the current scope is left
 	std::lock_guard<std::mutex> lock(m_transmitQueueMutex);
