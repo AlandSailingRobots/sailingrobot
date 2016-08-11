@@ -14,9 +14,10 @@
 
 
 # Options include:
-#		linux_local = For a local linux machine (MOCK objects used)
+#		linux_local = For a local linux machine
 #		raspi_cc = For cross compiling to the PI on a linux machine
 #		raspi_local = For compiling on the PI itself
+# 		win = for windows
 export TOOLCHAIN = linux-local
 C_TOOLCHAIN = 0
 USE_SIM = 0
@@ -73,8 +74,17 @@ WINDVANECONTROLLER = 	windvanecontroller/WindVaneController.cpp
 
 SRC_MAIN = main.cpp
 
+ifeq ($(TOOLCHAIN),win)
+SRC = 					utility/SysClock.cpp SystemServices/Logger.cpp Network/DataLink.cpp Network/XbeePacketNetwork.cpp
+else					
 SRC = 	utility/Utility.cpp utility/Timer.cpp utility/SysClock.cpp $(SYSTEM_SERVICES) $(XBEE) $(XBEE_NETWORK) \
 		$(CORE) $(NODES) $(I2CCONTROLLER) $(COURSE) $(DB) $(COMMAND) $(GPS) $(WAYPOINTROUTING) $(WINDVANECONTROLLER)
+		
+WIRING_PI = libwiringPi.so
+WIRING_PI_PATH = ./libs/wiringPi/wiringPi/
+WIRING_PI_STATIC = ./libs/wiringPi/wiringPi/libwiringPi.so.2.32
+
+endif
 
 
 #SOURCES = $(addprefix src/, $(SRC))
@@ -84,10 +94,6 @@ SRC = 	utility/Utility.cpp utility/Timer.cpp utility/SysClock.cpp $(SYSTEM_SERVI
 export INC = -I./ -I./libs
 
 INC = -I./ -I./libs -I./libs/wiringPi/wiringPi
-
-WIRING_PI = libwiringPi.so
-WIRING_PI_PATH = ./libs/wiringPi/wiringPi/
-WIRING_PI_STATIC = ./libs/wiringPi/wiringPi/libwiringPi.so.2.32
 
 # Object files
 OBJECTS = $(addprefix $(BUILD_DIR)/, $(SRC:.cpp=.o))
@@ -145,7 +151,7 @@ build_tests: $(OBJECTS) $(EXECUTABLE)
 	$(CXX) $(CPPFLAGS) tests/runner.o @$(OBJECT_FILE) -Wl,-rpath=./ ./libwiringPi.so -o $(UNIT_TEST) $(LIBS)
 	$(CXX) $(CPPFLAGS) tests/runnerHardware.o @$(OBJECT_FILE) -Wl,-rpath=./ ./libwiringPi.so -o $(HARDWARE_TEST) $(LIBS)
 
-xbee_remote: $(OBJECTS) $(EXECUTABLE) $(WIRING_PI)
+xbee_remote: $(OBJECTS) $(WIRING_PI)
 	$(MAKE) -C xbeerelay
 
 #  Create the directories needed
