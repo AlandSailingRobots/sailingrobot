@@ -156,15 +156,16 @@ bool XbeePacketNetwork::receivePacket()
 			memcpy(packet.m_payload, frame.m_data + PAYLOAD_START, payloadLength);
 
 			// LSB is sent first, followed by the MSB
-			packet.m_checksum = (frame.m_data[frame.m_size - 1] << 8) | frame.m_data[frame.m_size - 2];
+			packet.m_checksum = (frame.m_data[(3 + payloadLength) - 1] << 8) | frame.m_data[(3 + payloadLength) - 2];
 
 			// Check the checksum and cleanup if the checksum was bad
-			if(packet.m_checksum != fletcherChecksum(packet.m_payload, packet.m_payloadSize))
+			/*if(packet.m_checksum != fletcherChecksum(packet.m_payload, packet.m_payloadSize))
 			{
+				Logger::info("Bad checksum");
 				delete[] packet.m_payload;
 				m_badPackets++;
 			}
-			else
+			else*/
 			{
 				received = true;
 				m_receiveQueue.push(packet);
@@ -274,6 +275,7 @@ void XbeePacketNetwork::processReceivedPackets()
 		// Could be more packets following
 		else
 		{
+			//Logger::info("Repushing! %d of %d", multiPackets.size(), multiPackets[0].m_packetCount);
 			for(auto p : multiPackets)
 			{
 				m_receiveQueue.push(p);

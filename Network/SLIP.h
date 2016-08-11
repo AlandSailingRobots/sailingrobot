@@ -24,51 +24,51 @@
 
 class SLIP {
 public:
-	static bool isStartCharacter(char c)
+	static bool isStartCharacter(uint8_t c)
 	{
 		return (c == SLIP_PACKET_START);
 	}
 
-	static bool isEndCharacter(char c)
+	static bool isEndCharacter(uint8_t c)
 	{
 		return (c == SLIP_PACKET_END);
 	}
 
-	static bool isEscapeCharacter(char c)
+	static bool isEscapeCharacter(uint8_t c)
 	{
 		return (c == SLIP_PACKET_ESCAPE);
 	}
 
-	static bool isSpecialCharacter(char c)
+	static bool isSpecialCharacter(uint8_t c)
 	{
 		return ( isStartCharacter(c) || isEndCharacter(c) || isEscapeCharacter(c) );
 	}
 
-	static char getEscapedCharacter(char c)
+	static uint8_t getEscapedCharacter(uint8_t c)
 	{
 		switch(c)
 		{
-		case (char)SLIP_PACKET_ESCAPE_START:
-			return (char)SLIP_PACKET_START;
-		case (char)SLIP_PACKET_ESCAPE_ESCAPE:
-			return (char)SLIP_PACKET_ESCAPE;
-		case (char)SLIP_PACKET_ESCAPE_END:
-			return (char)SLIP_PACKET_END;
+		case SLIP_PACKET_ESCAPE_START:
+			return SLIP_PACKET_START;
+		case SLIP_PACKET_ESCAPE_ESCAPE:
+			return SLIP_PACKET_ESCAPE;
+		case SLIP_PACKET_ESCAPE_END:
+			return SLIP_PACKET_END;
 		default:
 			return c;
 		}
 	}
 
-	static char getEscapeCharacter(char c)
+	static uint8_t getEscapeCharacter(uint8_t c)
 	{
 		switch(c)
 		{
-		case (char)SLIP_PACKET_START:
-			return (char)SLIP_PACKET_ESCAPE_START;
-		case (char)SLIP_PACKET_ESCAPE:
-			return (char)SLIP_PACKET_ESCAPE_ESCAPE;
-		case (char)SLIP_PACKET_END:
-			return (char)SLIP_PACKET_ESCAPE_END;
+		case SLIP_PACKET_START:
+			return SLIP_PACKET_ESCAPE_START;
+		case SLIP_PACKET_ESCAPE:
+			return SLIP_PACKET_ESCAPE_ESCAPE;
+		case SLIP_PACKET_END:
+			return SLIP_PACKET_ESCAPE_END;
 		default:
 			return c;
 		}

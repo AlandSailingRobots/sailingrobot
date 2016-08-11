@@ -37,6 +37,8 @@ LinuxSerialDataLink::~LinuxSerialDataLink()
 
 bool LinuxSerialDataLink::initialise(uint16_t frameSize)
 {
+	DataLink::initialise(frameSize);
+
 	m_initialised = false;
 
 	m_handle = serialOpen(m_port.c_str(), m_baudRate);
@@ -48,6 +50,7 @@ bool LinuxSerialDataLink::initialise(uint16_t frameSize)
 	}
 
 	std::string response = sendATCommand("AT\r", 2);
+	m_initialised = true;
 
 	if(response[0] == 'O' && response[1] == 'K')
 	{
