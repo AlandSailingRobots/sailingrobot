@@ -54,7 +54,7 @@ bool DataLink::receive(NetworkFrame& frame)
 		}
 
 		uint16_t maxSize = maxFrameSize();
-		uint8_t buffer[maxSize];
+		uint8_t* buffer = new uint8_t[maxSize];
 		bool foundEnd;
 		uint16_t index = 0;
 		bool slipEscape = false;
@@ -105,12 +105,13 @@ bool DataLink::receive(NetworkFrame& frame)
 			uint8_t frameSize = index + 1;
 			uint8_t* frameData = new uint8_t[frameSize];
 			memcpy(frameData, buffer, frameSize);
-
+			delete[] buffer;
 			frame.setData(frameData, frameSize);
 			return true;
 		}
+	delete[] buffer;
 	}
-
+	
 	return false;
 }
 
