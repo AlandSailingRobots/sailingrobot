@@ -15,6 +15,11 @@
 #include "DataLink.h"
 #include "SLIP.h"
 #include <cstring>
+#include "SystemServices/Logger.h"
+
+// For std::this_thread
+#include <chrono>
+#include <thread>
 
 
 void DataLink::transmit(const NetworkFrame& frame)
@@ -60,6 +65,7 @@ bool DataLink::receive(NetworkFrame& frame)
 		bool slipEscape = false;
 		int c = 0;
 
+
 		/* Try and find the frame end, our two exit conditions are:
 		 * 		- Found the end frame character (SUCCESS)
 		 * 		- Gone over the max frame size (FAILURE)
@@ -87,7 +93,7 @@ bool DataLink::receive(NetworkFrame& frame)
 				slipEscape = false;
 			}
 			// Check if the character is an escape character
-			else if(SLIP::isEscapeCharacter(c))
+			else if((uint8_t)c == SLIP_PACKET_ESCAPE)
 			{
 				slipEscape = true;
 			}
@@ -109,7 +115,8 @@ bool DataLink::receive(NetworkFrame& frame)
 			frame.setData(frameData, frameSize);
 			return true;
 		}
-	delete[] buffer;
+
+		delete[] buffer;
 	}
 	
 	return false;
@@ -117,7 +124,7 @@ bool DataLink::receive(NetworkFrame& frame)
 
 bool DataLink::foundFrameStart()
 {
-	const uint16_t MAX_BYTES_TO_INSPECT = maxFrameSize()*2;
+	//const uint16_t MAX_BYTES_TO_INSPECT = maxFrameSize()*10;
 
 	bool slipEscape = false;
 	uint16_t inspected = 0;
@@ -125,22 +132,23 @@ bool DataLink::foundFrameStart()
 
 	// TODO - Jordan: Break out into separate function?
 
-	if(not dataAvailable())
-	{
-		return false;
-	}
-
 	// Look for start character and break out when found
 	while(true)
 	{
 		// Read enough characters for now, go do something else
-		if(inspected <= MAX_BYTES_TO_INSPECT)
+		if(inspected >= 1000)
 		{
 			return false;
 		}
 
-		c = readByte();
 		inspected++;
+		if(not dataAvailable())
+		{
+			continue;
+		}
+
+
+		c = readByte();
 
 		// No characters left to read
 		if(c == -1)
@@ -148,18 +156,21 @@ bool DataLink::foundFrameStart()
 			return false;
 		}
 
-		if(SLIP::isEscapeCharacter(c))
-		{
-			slipEscape = true;
-		}
-		else if(SLIP::isStartCharacter(c) && not slipEscape)
+		if((uint8_t)c == SLIP_PACKET_START && not slipEscape)
 		{
 			break;
+		}
+
+		if((uint8_t)c == SLIP_PACKET_ESCAPE)
+		{
+			slipEscape = true;
 		}
 		else
 		{
 			slipEscape = false;
 		}
+
+		std::this_thread::sleep_for(std::chrono::milliseconds(2));
 	}
 
 	return true;

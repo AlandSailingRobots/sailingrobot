@@ -78,7 +78,7 @@ private:
 			if(m_references == 0)
 			{
 				delete m_references;
-				delete m_data;
+				delete[] m_data;
 				m_data = NULL;
 			}
 		}

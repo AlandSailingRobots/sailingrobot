@@ -84,7 +84,11 @@ void XbeePacketNetwork::transmit(uint8_t* data, uint8_t size)
 	const uint8_t MAX_DATA_SIZE = XBEE_PACKET_SIZE - XBEE_PACKET_MAX_OVERHEAD;
 	uint8_t packetCount = SLIP::packetCount(data, size, MAX_DATA_SIZE);
 	uint16_t bytesToProcess = 0;
-	uint8_t* currPtr = data;
+
+	uint8_t* dataPtr = new uint8_t[size];
+	memcpy(dataPtr, data, size);
+	uint8_t* currPtr = dataPtr;
+
 
 	// Locks until the function returns and the current scope is left
 	std::lock_guard<std::mutex> lock(m_transmitQueueMutex);
@@ -98,12 +102,11 @@ void XbeePacketNetwork::transmit(uint8_t* data, uint8_t size)
 		packet.m_payload = currPtr;
 		packet.m_checksum = fletcherChecksum(packet.m_payload, packet.m_payloadSize);
 
-		currPtr = currPtr + packet.m_payloadSize;
-
 		// The first packet actually owns the memory pointer.
 		packet.m_ownsMem = (i == 0);
 
 		m_transmitQueue.push(packet);
+		currPtr = currPtr + packet.m_payloadSize;
 	}
 
 	m_currPacketID++;
@@ -153,15 +156,16 @@ bool XbeePacketNetwork::receivePacket()
 			memcpy(packet.m_payload, frame.m_data + PAYLOAD_START, payloadLength);
 
 			// LSB is sent first, followed by the MSB
-			packet.m_checksum = (frame.m_data[frame.m_size - 1] << 8) | frame.m_data[frame.m_size - 2];
+			packet.m_checksum = (frame.m_data[(3 + payloadLength) - 1] << 8) | frame.m_data[(3 + payloadLength) - 2];
 
 			// Check the checksum and cleanup if the checksum was bad
-			if(packet.m_checksum != fletcherChecksum(packet.m_payload, packet.m_payloadSize))
+			/*if(packet.m_checksum != fletcherChecksum(packet.m_payload, packet.m_payloadSize))
 			{
-				delete packet.m_payload;
+				Logger::info("Bad checksum");
+				delete[] packet.m_payload;
 				m_badPackets++;
 			}
-			else
+			else*/
 			{
 				received = true;
 				m_receiveQueue.push(packet);
@@ -178,7 +182,7 @@ void XbeePacketNetwork::transmitPackets(uint8_t packetsToSend)
 	uint8_t packetsLeft = 0;
 	uint8_t* ptrToClean = NULL;
 
-	for(uint8_t i = 0; i < packetCount; i++)
+	for(uint8_t i = 0; i < packetCount && m_transmitQueue.size() > 0; i++)
 	{
 		XbeePacket& packet = m_transmitQueue.front();
 		uint8_t frameSize = packet.m_payloadSize + XBEE_PACKET_OVERHEAD;
@@ -205,7 +209,7 @@ void XbeePacketNetwork::transmitPackets(uint8_t packetsToSend)
 		// If this is a one packet message, we can just clean it up
 		if(packet.m_packetCount == 1)
 		{
-			delete packet.m_payload;
+			delete[] packet.m_payload;
 			packet.m_payload = NULL;
 		}
 		// If the message is made up of multiple packets, only one packet will have the actual
@@ -217,7 +221,7 @@ void XbeePacketNetwork::transmitPackets(uint8_t packetsToSend)
 		}
 		else if(packetsLeft == 0)
 		{
-			delete ptrToClean;
+			delete[] ptrToClean;
 			ptrToClean = NULL;
 		}
 
@@ -271,6 +275,7 @@ void XbeePacketNetwork::processReceivedPackets()
 		// Could be more packets following
 		else
 		{
+			//Logger::info("Repushing! %d of %d", multiPackets.size(), multiPackets[0].m_packetCount);
 			for(auto p : multiPackets)
 			{
 				m_receiveQueue.push(p);
@@ -291,7 +296,7 @@ void XbeePacketNetwork::processPacket(XbeePacket& packet)
 	{
 		Logger::info("No callback set!");
 		// Clean up if there is no one to hand the data to.
-		delete packet.m_payload;
+		delete[] packet.m_payload;
 	}
 }
 
@@ -326,7 +331,7 @@ void XbeePacketNetwork::processPacket(std::vector<XbeePacket>& packets)
 	// Clean up the packets
 	for(auto p : packets)
 	{
-		delete p.m_payload;
+		delete[] p.m_payload;
 	}
 
 	packets.clear();
