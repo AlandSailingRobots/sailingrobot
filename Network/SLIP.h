@@ -77,7 +77,7 @@ public:
 	static uint8_t packetCount(uint8_t* dataPtr, uint16_t dataLength, uint16_t maxPacketSize)
 	{
 		uint16_t currentPacketLength = 0;
-		uint16_t packetCount = 0;
+		uint16_t packetCount = 1;
 
 		for(uint16_t i = 0; i < dataLength; i++)
 		{

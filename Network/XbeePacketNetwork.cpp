@@ -182,7 +182,7 @@ void XbeePacketNetwork::transmitPackets(uint8_t packetsToSend)
 	uint8_t packetsLeft = 0;
 	uint8_t* ptrToClean = NULL;
 
-	for(uint8_t i = 0; i < packetCount; i++)
+	for(uint8_t i = 0; i < packetCount && m_transmitQueue.size() > 0; i++)
 	{
 		XbeePacket& packet = m_transmitQueue.front();
 		uint8_t frameSize = packet.m_payloadSize + XBEE_PACKET_OVERHEAD;
