@@ -98,12 +98,11 @@ void XbeePacketNetwork::transmit(uint8_t* data, uint8_t size)
 		packet.m_payload = currPtr;
 		packet.m_checksum = fletcherChecksum(packet.m_payload, packet.m_payloadSize);
 
-		currPtr = currPtr + packet.m_payloadSize;
-
 		// The first packet actually owns the memory pointer.
 		packet.m_ownsMem = (i == 0);
 
 		m_transmitQueue.push(packet);
+		currPtr = currPtr + packet.m_payloadSize;
 	}
 
 	m_currPacketID++;
@@ -158,7 +157,7 @@ bool XbeePacketNetwork::receivePacket()
 			// Check the checksum and cleanup if the checksum was bad
 			if(packet.m_checksum != fletcherChecksum(packet.m_payload, packet.m_payloadSize))
 			{
-				delete packet.m_payload;
+				delete[] packet.m_payload;
 				m_badPackets++;
 			}
 			else
@@ -205,7 +204,7 @@ void XbeePacketNetwork::transmitPackets(uint8_t packetsToSend)
 		// If this is a one packet message, we can just clean it up
 		if(packet.m_packetCount == 1)
 		{
-			delete packet.m_payload;
+			delete[] packet.m_payload;
 			packet.m_payload = NULL;
 		}
 		// If the message is made up of multiple packets, only one packet will have the actual
@@ -217,7 +216,7 @@ void XbeePacketNetwork::transmitPackets(uint8_t packetsToSend)
 		}
 		else if(packetsLeft == 0)
 		{
-			delete ptrToClean;
+			delete[] ptrToClean;
 			ptrToClean = NULL;
 		}
 
@@ -291,7 +290,7 @@ void XbeePacketNetwork::processPacket(XbeePacket& packet)
 	{
 		Logger::info("No callback set!");
 		// Clean up if there is no one to hand the data to.
-		delete packet.m_payload;
+		delete[] packet.m_payload;
 	}
 }
 
@@ -326,7 +325,7 @@ void XbeePacketNetwork::processPacket(std::vector<XbeePacket>& packets)
 	// Clean up the packets
 	for(auto p : packets)
 	{
-		delete p.m_payload;
+		delete[] p.m_payload;
 	}
 
 	packets.clear();
