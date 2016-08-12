@@ -91,9 +91,7 @@ endif
 
 # Includes
 
-export INC = -I./ -I./libs
-
-INC = -I./ -I./libs -I./libs/wiringPi/wiringPi
+export INC = -I./ -I./libs -I./libs/wiringPi/wiringPi -I.\
 
 # Object files
 OBJECTS = $(addprefix $(BUILD_DIR)/, $(SRC:.cpp=.o))
@@ -109,10 +107,21 @@ export OBJECT_FILE = $(BUILD_DIR)/objects.tmp
 #######################################################
 
 
+ifeq ($(TOOLCHAIN),win)
+
+export CFLAGS = -Wall -g -o2
+export CPPFLAGS = -g -Wall -pedantic -Werror -std=gnu++14
+
+export LIBS = 
+
+else
+
 export CFLAGS = -Wall -g -o2
 export CPPFLAGS = -g -Wall -pedantic -Werror -std=c++14
 
 export LIBS = -lsqlite3 -lgps -lrt -lcurl -lpthread
+
+endif
 
 ifeq ($(TOOLCHAIN),raspi_cc)
 C_TOOLCHAIN = 0
