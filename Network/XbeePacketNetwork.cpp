@@ -12,15 +12,16 @@
 
 
 #include "XbeePacketNetwork.h"
-#include "utility/SysClock.h"
+#include "../utility/SysClock.h"
 #include "SLIP.h"
-#include "SystemServices/Logger.h"
+#include "..\SystemServices/Logger.h"
 #include <cstring>
 
+#ifndef _WIN32
 // For std::this_thread
 #include <chrono>
 #include <thread>
-
+#endif
 
 #define XBEE_PACKET_OVERHEAD 		6
 #define XBEE_PACKET_MAX_OVERHEAD 	6*2 // START character(1), Packet ID(1), packet count(1), payload size(1), checksum(2), slip could double the size
@@ -63,9 +64,10 @@ void XbeePacketNetwork::processRadioMessages()
 	// Transmit any stored packets
 	if(m_transmitQueue.size() > 0)
 	{
+		#ifndef _WIN32
 		// Locks until the function returns and the current scope is left
 		std::lock_guard<std::mutex> lock(m_transmitQueueMutex);
-
+		#endif
 		if(m_master)
 		{
 			transmitPackets(0);
@@ -89,10 +91,10 @@ void XbeePacketNetwork::transmit(uint8_t* data, uint8_t size)
 	memcpy(dataPtr, data, size);
 	uint8_t* currPtr = dataPtr;
 
-
+	#ifndef _WIN32
 	// Locks until the function returns and the current scope is left
 	std::lock_guard<std::mutex> lock(m_transmitQueueMutex);
-
+	#endif
 	for(uint8_t i = 0; i < packetCount; i++)
 	{
 		XbeePacket packet;
@@ -136,7 +138,7 @@ uint16_t XbeePacketNetwork::fletcherChecksum(uint8_t* data, uint16_t size)
 bool XbeePacketNetwork::receivePacket()
 {
 	const uint8_t PAYLOAD_START = 3;
-
+			std::cout << "RECEIVE THIS PACKET LMAO" << std::endl;
 	NetworkFrame frame;
 	bool received = false;
 
@@ -199,7 +201,7 @@ void XbeePacketNetwork::transmitPackets(uint8_t packetsToSend)
 		NetworkFrame netFrame(frame, frameSize);
 		m_dataLink.transmit(netFrame);
 
-		std::this_thread::sleep_for(std::chrono::milliseconds(XBEE_TRANSMIT_TIME));
+		//std::this_thread::sleep_for(std::chrono::milliseconds(XBEE_TRANSMIT_TIME));
 
 		if(packetsLeft != 0)
 		{

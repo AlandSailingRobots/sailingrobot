@@ -15,7 +15,7 @@
 #include "DataLink.h"
 #include "SLIP.h"
 #include <cstring>
-#include "SystemServices/Logger.h"
+#include "..\SystemServices/Logger.h"
 
 // For std::this_thread
 #include <chrono>
@@ -65,7 +65,7 @@ bool DataLink::receive(NetworkFrame& frame)
 		bool slipEscape = false;
 		int c = 0;
 
-
+					std::cout << "FRAME FOR DOGS" << std::endl;
 		/* Try and find the frame end, our two exit conditions are:
 		 * 		- Found the end frame character (SUCCESS)
 		 * 		- Gone over the max frame size (FAILURE)
@@ -144,6 +144,7 @@ bool DataLink::foundFrameStart()
 		inspected++;
 		if(not dataAvailable())
 		{
+			std::cout << "NOTHING AVAILABLE ;(" << std::endl;
 			continue;
 		}
 
@@ -170,7 +171,7 @@ bool DataLink::foundFrameStart()
 			slipEscape = false;
 		}
 
-		std::this_thread::sleep_for(std::chrono::milliseconds(2));
+		//std::this_thread::sleep_for(std::chrono::milliseconds(2));
 	}
 
 	return true;

@@ -23,7 +23,7 @@
 
 #include "Logger.h"
 #include <iostream>
-#include "utility/SysClock.h"
+#include "../utility/SysClock.h"
 
 
 #define MAX_LOG_SIZE	256*2
@@ -32,7 +32,9 @@
 std::string 				Logger::m_LogFilePath;
 std::ofstream 				Logger::m_LogFile;
 std::vector<std::string> 	Logger::m_LogBuffer;
+#ifndef _WIN32
 std::mutex 					Logger::m_Mutex;
+#endif
 bool Logger::m_DisableLogging = false;
 
 #ifdef ENABLE_WRSC_LOGGING
@@ -80,7 +82,10 @@ void Logger::log(std::string message)
 {
 	if(m_DisableLogging) { return; }
 
+	#ifndef _WIN32
 	m_Mutex.lock();
+	#endif
+	
 	if(m_LogFile.is_open())
 	{
 		m_LogFile << message.c_str();
@@ -97,8 +102,10 @@ void Logger::log(std::string message)
 			//printf(" === NO ROOM IN BUFFER FOR MORE MESSAGES ===\n");
 		}
 	}
+	#ifndef _WIN32
 	m_Mutex.unlock();
-}
+	#endif
+	}
 
 void Logger::info(std::string message, ...)
 {
@@ -174,8 +181,9 @@ void Logger::logWRSC(double latitude, double longitude)
 	// Flag so that we only issue one error about the log file not existing
 	static bool errorMsgUsge = false;
 
+	#ifndef _WIN32
 	m_Mutex.lock();
-
+	#endif
 	if(m_LogFileWRSC.is_open())
 	{
 		char logBuffer[MAX_LOG_SIZE];
@@ -190,7 +198,9 @@ void Logger::logWRSC(double latitude, double longitude)
 		Logger::error("WRSC log file is not open! Cannot log WRSC messages");
 		errorMsgUsge = true;
 	}
+	#ifndef _WIN32
 	m_Mutex.unlock();
+	#endif
 	#endif
 }
 

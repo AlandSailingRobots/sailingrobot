@@ -26,7 +26,9 @@
 #include <string>
 #include <vector>
 #include <cstdarg>
+#ifndef _WIN32
 #include <mutex>
+#endif
 #include <iostream>
 #include <fstream>
 
@@ -78,7 +80,9 @@ private:
 	static std::string 				m_LogFilePath;
 	static std::ofstream 			m_LogFile;
 	static std::vector<std::string> m_LogBuffer;
+	#ifndef _WIN32
 	static std::mutex 				m_Mutex;
+	#endif
 	static bool						m_DisableLogging;
 
 	#ifdef ENABLE_WRSC_LOGGING

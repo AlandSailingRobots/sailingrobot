@@ -18,8 +18,9 @@
 #include <stdint.h>
 #include <string>
 #include <queue>
+#ifndef _WIN32
 #include <mutex>
-
+#endif
 
 #define XBEE_BAUD_RATE 	57600
 #define XBEE_PACKET_SIZE 70 // Its actually 72, but 2 bytes will be used for framing
@@ -91,7 +92,9 @@ private:
 	int 					m_currPacketID;
 	std::queue<XbeePacket>	m_receiveQueue;
 	std::queue<XbeePacket>	m_transmitQueue;
+	#ifndef _WIN32
 	std::mutex				m_transmitQueueMutex;
+	#endif
 	int						m_packetsReceived;
 	int						m_badPackets;
 	XbeeIncomingMsgFunc		m_incomingCallback;

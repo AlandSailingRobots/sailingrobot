@@ -75,7 +75,7 @@ WINDVANECONTROLLER = 	windvanecontroller/WindVaneController.cpp
 SRC_MAIN = main.cpp
 
 ifeq ($(TOOLCHAIN),win)
-SRC = 					utility/SysClock.cpp SystemServices/Logger.cpp Network/DataLink.cpp Network/XbeePacketNetwork.cpp
+SRC = 					utility\SysClock.cpp SystemServices\Logger.cpp Network\DataLink.cpp Network\XbeePacketNetwork.cpp Messages\MessageSerialiser.cpp Messages\MessageDeserialiser.cpp
 else					
 SRC = 	utility/Utility.cpp utility/Timer.cpp utility/SysClock.cpp $(SYSTEM_SERVICES) $(XBEE) $(XBEE_NETWORK) \
 		$(CORE) $(NODES) $(I2CCONTROLLER) $(COURSE) $(DB) $(COMMAND) $(GPS) $(WAYPOINTROUTING) $(WINDVANECONTROLLER)
@@ -91,7 +91,7 @@ endif
 
 # Includes
 
-export INC = -I./ -I./libs
+export INC = -I./ -I./libs -I../sailingrobot
 
 INC = -I./ -I./libs -I./libs/wiringPi/wiringPi
 
@@ -110,7 +110,7 @@ export OBJECT_FILE = $(BUILD_DIR)/objects.tmp
 
 
 export CFLAGS = -Wall -g -o2
-export CPPFLAGS = -g -Wall -pedantic -Werror -std=c++14
+export CPPFLAGS = -g -Wall -pedantic -Werror -std=gnu++14
 
 export LIBS = -lsqlite3 -lgps -lrt -lcurl -lpthread
 
@@ -152,7 +152,7 @@ build_tests: $(OBJECTS) $(EXECUTABLE)
 	$(CXX) $(CPPFLAGS) tests/runnerHardware.o @$(OBJECT_FILE) -Wl,-rpath=./ ./libwiringPi.so -o $(HARDWARE_TEST) $(LIBS)
 
 xbee_remote: $(OBJECTS) $(WIRING_PI)
-	$(MAKE) -C xbeerelay
+	"$(MAKE)" -C xbeerelay
 
 #  Create the directories needed
 $(BUILD_DIR):

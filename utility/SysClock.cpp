@@ -13,6 +13,7 @@
  ***************************************************************************************/
 
 #include "SysClock.h"
+#include <stdio.h>
 #include <ctime>
 #include <sys/time.h>
 
