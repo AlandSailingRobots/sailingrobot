@@ -57,7 +57,7 @@ bool DataLink::receive(NetworkFrame& frame)
 		{
 			return false;
 		}
-
+		
 		uint16_t maxSize = maxFrameSize();
 		uint8_t* buffer = new uint8_t[maxSize];
 		bool foundEnd;
@@ -65,7 +65,6 @@ bool DataLink::receive(NetworkFrame& frame)
 		bool slipEscape = false;
 		int c = 0;
 
-					std::cout << "FRAME FOR DOGS" << std::endl;
 		/* Try and find the frame end, our two exit conditions are:
 		 * 		- Found the end frame character (SUCCESS)
 		 * 		- Gone over the max frame size (FAILURE)
@@ -79,7 +78,6 @@ bool DataLink::receive(NetworkFrame& frame)
 			{
 				break;
 			}
-
 			// We found the end
 			if(not slipEscape && SLIP::isEndCharacter(c))
 			{
@@ -144,7 +142,7 @@ bool DataLink::foundFrameStart()
 		inspected++;
 		if(not dataAvailable())
 		{
-			std::cout << "NOTHING AVAILABLE ;(" << std::endl;
+			//std::cout << "NOTHING AVAILABLE ;(" << std::endl;
 			continue;
 		}
 
@@ -158,16 +156,16 @@ bool DataLink::foundFrameStart()
 		}
 
 		if((uint8_t)c == SLIP_PACKET_START && not slipEscape)
-		{
+		{				
 			break;
 		}
 
 		if((uint8_t)c == SLIP_PACKET_ESCAPE)
-		{
+		{				
 			slipEscape = true;
 		}
 		else
-		{
+		{				
 			slipEscape = false;
 		}
 

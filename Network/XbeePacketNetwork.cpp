@@ -138,7 +138,7 @@ uint16_t XbeePacketNetwork::fletcherChecksum(uint8_t* data, uint16_t size)
 bool XbeePacketNetwork::receivePacket()
 {
 	const uint8_t PAYLOAD_START = 3;
-			std::cout << "RECEIVE THIS PACKET LMAO" << std::endl;
+			
 	NetworkFrame frame;
 	bool received = false;
 
@@ -247,7 +247,7 @@ void XbeePacketNetwork::processReceivedPackets()
 	for(unsigned int i = 0; i < queueSize; i++)
 	{
 		XbeePacket packet = m_receiveQueue.front();
-
+	
 		// Complete multi-packet, process it
 		if(multiPackets.size() > 0 && packet.m_packetID != lastPacketID)
 		{
@@ -265,6 +265,7 @@ void XbeePacketNetwork::processReceivedPackets()
 		{
 			processPacket(packet);
 		}
+		lastPacketID = packet.m_packetID;
 		m_receiveQueue.pop();
 	}
 
@@ -277,7 +278,6 @@ void XbeePacketNetwork::processReceivedPackets()
 		// Could be more packets following
 		else
 		{
-			//Logger::info("Repushing! %d of %d", multiPackets.size(), multiPackets[0].m_packetCount);
 			for(auto p : multiPackets)
 			{
 				m_receiveQueue.push(p);
@@ -290,13 +290,10 @@ void XbeePacketNetwork::processPacket(XbeePacket& packet)
 {
 	if(m_incomingCallback != NULL)
 	{
-		//Logger::info("Single inbound packet Size: %d", packet.m_payloadSize);
-
 		m_incomingCallback(packet.m_payload, packet.m_payloadSize);
 	}
 	else
 	{
-		Logger::info("No callback set!");
 		// Clean up if there is no one to hand the data to.
 		delete[] packet.m_payload;
 	}
@@ -307,7 +304,7 @@ void XbeePacketNetwork::processPacket(std::vector<XbeePacket>& packets)
 	// No one to hand packets to, so cleanup
 	if(m_incomingCallback == NULL || packets.size() != packets[0].m_packetCount)
 	{
-		Logger::info("Missing packets or no callback set!");
+		Logger::info("Missing packets or no callback set! ID: %d Packets: %d Got: %d", packets[0].m_packetID, packets.size(), packets[0].m_packetCount);
 	}
 	else
 	{
