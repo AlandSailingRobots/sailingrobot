@@ -33,47 +33,64 @@ Distributed as-is; no warranty is given.
 
 //Include necessary libraries for compilation
 #include <SPI.h>
-#include <SoftwareSerial.h>
-#include <Canbus.h>
+#include <mcp_can.h>
+#include <AHM36A.h>
 
-//Declare CAN variables for communication
-char *EngineRPM;
+
+// the cs pin of the version after v1.1 is default to D9
+// v0.9b and v1.0 is default D10
+const int SPI_CS_PIN = 10;
+
+MCP_CAN CAN(SPI_CS_PIN);                                    // Set CS pin
+
+unsigned char flagRecv = 0;
+unsigned char len = 0;
+unsigned long id = 0;
+unsigned char buf[8];
 unsigned char UserInput;
 unsigned char rate_num, new_rate;
+unsigned char rtr;
 unsigned char exitChar='x';
 unsigned char node_id = 5;
-unsigned char action, onOff, new_id, info, r_w, pdo_num,id,ccd,sub;
+unsigned char action, onOff, new_id, info, r_w, pdo_num,ccd,sub;
 unsigned char start = 0x01;
 unsigned char stop_node = 0x02;
 unsigned int input,index;
 unsigned long data;
-
+unsigned char rbuffer[8];
+unsigned long cob;
+int result, last_result;
 char buffer[64];  //Data will be temporarily stored to this buffer before being written to the file
 
 //********************************Setup Loop*********************************//
 void setup() {
   //Initialize Serial communication for debugging
   Serial.begin(9600);
-  Serial.println("my ECU Sender");
+  Serial.println("CAN Bus Encoder Interface");
+  START_INIT:
   
-  //Initialize CAN Controller 
-  if(Canbus.init(CANSPEED_250))  /* Initialize MCP2515 CAN controller at the specified speed */
+  if(CAN_OK == CAN.begin(CAN_250KBPS,1))                   // init can bus : baudrate = 500k
   {
-    Serial.println("CAN Init Ok");
-    delay(1500);
-  } 
+      Serial.println("CAN BUS Shield init ok!");
+  }
   else
   {
-    Serial.println("Can't init CAN");
-    return;
-  } 
+      Serial.println("CAN BUS Shield init fail");
+      Serial.println("Init CAN BUS Shield again");
+      delay(100);
+      goto START_INIT;
+  }
+  
+  attachInterrupt(digitalPinToInterrupt(2), MCP2515_ISR, FALLING); // start interrupt
+  
+  Encoder.init(&CAN); 
   
   Serial.println("Press any key to begin");
   
   wait();
   UserInput = Serial.read();
   Serial.println("Enter message:");
-  Canbus.message_NMT(node_id,start);
+  Encoder.message_NMT(node_id,start);
 
   Serial.println("Choose Function");
   Serial.println("n = NMT, l = LSS, p = PDO, s = SDO, t = TX, e = English Options");
@@ -81,7 +98,7 @@ void setup() {
 
 //********************************Main Loop*********************************//
 void loop(){
-
+  read_message();
   while(Serial.available()){
     UserInput = Serial.read();
     
@@ -97,19 +114,19 @@ void loop(){
         action = Serial.read();
         switch(action) {
           case 's':
-            Canbus.start_node(node_id);
+            Encoder.start_node(node_id);
             break;
           case 'x':
-            Canbus.stop_node(node_id);
+            Encoder.stop_node(node_id);
             break;
           case 'p':
-            Canbus.preop_node(node_id);
+            Encoder.preop_node(node_id);
             break;
           case 'r':
-            Canbus.reset_node(node_id);
+            Encoder.reset_node(node_id);
             break;
           case 'c':
-            Canbus.reset_comm_node(node_id);
+            Encoder.reset_comm_node(node_id);
             break;
         }
         break;
@@ -125,13 +142,13 @@ void loop(){
               Serial.println("1 = ON, 0 = OFF");
               wait();
               onOff = Serial.read()-'0';
-              Canbus.switch_lss_config(onOff);
+              Encoder.switch_lss_config(onOff);
               break;
             case 'i':             
               Serial.println("New ID:");
               wait();
               new_id = Serial.read()-'0';
-              Canbus.change_id(new_id);
+              Encoder.change_id(new_id);
               break;
             case 'b':
               Serial.println("New rate?");
@@ -149,10 +166,10 @@ void loop(){
                   Serial.println("Incorrect Input");
                   break;
               }
-              Canbus.change_baud_rate(new_rate);
+              Encoder.change_baud_rate(new_rate);
               break;
             case 's':
-              Canbus.save_lss_config();
+              Encoder.save_lss_config();
               break;
             case 'g':
               Serial.println("Enter desire info:");
@@ -161,24 +178,24 @@ void loop(){
               info = Serial.read();
               switch(info) {
                 case 'n':
-                  Canbus.get_node_id();
+                  Encoder.get_node_id();
                   break;
                 case 's':
-                  Canbus.get_serial_num();
+                  Encoder.get_serial_num();
                   break;
                 case 'r':
-                  Canbus.get_revision_num();
+                  Encoder.get_revision_num();
                   break;
                 case 'p':
-                  Canbus.get_product_code();
+                  Encoder.get_product_code();
                   break;
                 case 'v':
-                  Canbus.get_vendor_id();
+                  Encoder.get_vendor_id();
                   break;
               }
               break;
             case 'n':
-              Canbus.identify_non_configured();
+              Encoder.identify_non_configured();
               break;
             }
         break;
@@ -200,30 +217,30 @@ void loop(){
           action = Serial.read();
           switch(action) {
             case 'h':
-              Canbus.read_heartbeat(node_id);
+              Encoder.read_heartbeat(node_id);
               break;
             case 'p':
-              Canbus.read_pos(node_id);
+              Encoder.read_pos(node_id);
               break;
             case 'n':
-              Canbus.read_num(node_id,pdo_num);
+              Encoder.read_num(node_id,pdo_num);
               break;
             case 'c':
-              Canbus.read_cob(node_id,pdo_num);
+              Encoder.read_cob(node_id,pdo_num);
               break;
             case 't':
-              Canbus.read_tx_type(node_id,pdo_num);
+              Encoder.read_tx_type(node_id,pdo_num);
               break;
             case 'i':
-              Canbus.read_inhibition_time(node_id,pdo_num);
+              Encoder.read_inhibition_time(node_id,pdo_num);
               break;
             case 'e':
               if (r_w=='w') {
                   Serial.println("Enter new event timer value");
                   data=pars_serial();
-                  Canbus.write_event_timer(node_id,pdo_num,data);             
+                  Encoder.write_event_timer(node_id,pdo_num,data);             
                 }
-              Canbus.read_event_timer(node_id,pdo_num);
+              Encoder.read_event_timer(node_id,pdo_num);
               break;
          }
 
@@ -235,8 +252,19 @@ void loop(){
           index=pars_serial();
           sub=pars_serial();
           data=pars_serial();
-          Canbus.message_SDO(id,ccd,index,sub,data);
+          Encoder.message_SDO(id,ccd,index,sub,data);
           break;
+
+        case 'e':
+          Serial.println("p = pos");
+          wait();
+          action = Serial.read();
+          switch(action) {
+            case 'p':
+              Encoder.read_pos(node_id);
+              break;
+          }
+          
     }
     
     Serial.println("Choose Function");
@@ -267,5 +295,41 @@ unsigned long pars_serial(){
   }
   Serial.println(ret,HEX);
   return ret;
+}
+
+void read_message() {
+    if(flagRecv) 
+    {                                   // check if get data
+
+        flagRecv = 0;                   // clear flag
+
+        // iterate over all pending messages
+        // If either the bus is saturated or the MCU is busy,
+        // both RX buffers may be in use and reading a single
+        // message does not clear the IRQ conditon.
+        while (CAN_MSGAVAIL == CAN.checkReceive()) 
+        {
+            // read data,  len: data length, buf: data buf
+            CAN.readMsgBufID(&id, &len, buf);
+        
+//            Serial.print("#S|S|[");
+            
+            Serial.print(id,HEX);
+            Serial.print(", ");
+            Serial.print(len,HEX);
+            for(int i = 0; i<len; i++)
+            {
+              Serial.print(", ");
+              Serial.print(buf[i],HEX);
+            }
+//            Serial.print("]#");
+              Serial.println("");
+        }
+    }
+}
+
+void MCP2515_ISR()
+{
+    flagRecv = 1;
 }
 
