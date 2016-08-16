@@ -152,16 +152,46 @@ void mockObstacleDetection(std::vector<Eigen::MatrixXd> const& mock_obstacle_lis
 }
 
 //Matlab name: calculate_potField
-void calculatePotentialField(float const& radius_obstacle, Eigen::MatrixXd const& point_x,Eigen::MatrixXd const& point_y, Eigen::MatrixXd const& boat_state,Eigen::MatrixXd const& target_phat,std::vector<Eigen::MatrixXd> const& detected_obstacle_list_qhat,float const& wind_direction,int const& only_direction_mode,int const& have_to_avoid_obstacle,float const& step_coeff,std::vector<float> direction_boat_obstacle, Eigen::MatrixXd& potential_Z){
+void calculatePotentialField(float const& radius_obstacle,
+                             Eigen::MatrixXd const& point_x,
+                             Eigen::MatrixXd const& point_y,
+                             Eigen::MatrixXd const& boat_state,
+                             Eigen::MatrixXd const& target_phat,
+                             std::vector<Eigen::MatrixXd> const& detected_obstacle_list_qhat,
+                             float const& wind_direction,
+                             int const& only_direction_mode,
+                             int const& have_to_avoid_obstacle,
+                             float const& step_coeff,
+                             std::vector<float> direction_boat_obstacle,
+                             Eigen::MatrixXd& potential_Z){
     //std::cout <<""<<std::endl;
     //std::cout << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$" << std::endl;
     //std::cout << "ENTERING calculatePotentialField" << std::endl;
     //Init
     Eigen::MatrixXd ObsP = 0*point_x,
                     ObjP = 0*point_x,
-                    xObs = 0*point_x, yObs = 0*point_x, xObj = 0*point_x, yObj = 0*point_x, xo = 0*point_x, yo = 0*point_x;
-    Eigen::MatrixXd tHoleR = 0*point_x, tHoleL = 0*point_x, tPike = 0*point_x, tR = 0*point_x, tL = 0*point_x, tP = 0*point_x, ep1 = 0*point_x,ep2 = 0*point_x, xb = 0*point_x;
-    Eigen::MatrixXd yb = 0*point_x, x1 = 0*point_x, y1 = 0*point_x, xw = 0*point_x, yw = 0*point_x, WindP = 0*point_x, BoatP = 0*point_x;
+                    xObs = 0*point_x,
+                    yObs = 0*point_x,
+                    xObj = 0*point_x,
+                    yObj = 0*point_x,
+                    xo = 0*point_x,
+                    yo = 0*point_x;
+    Eigen::MatrixXd tHoleR = 0*point_x,
+                    tHoleL = 0*point_x,
+                    tPike = 0*point_x,
+                    tR = 0*point_x,
+                    tL = 0*point_x,
+                    tP = 0*point_x,
+                    ep1 = 0*point_x,
+                    ep2 = 0*point_x,
+                    xb = 0*point_x;
+    Eigen::MatrixXd yb = 0*point_x,
+                    x1 = 0*point_x,
+                    y1 = 0*point_x,
+                    xw = 0*point_x,
+                    yw = 0*point_x,
+                    WindP = 0*point_x,
+                    BoatP = 0*point_x;
     float boatHeading =  boat_state(0,2), bearingObstacle = 0, T = 0,Ao = 1.6, strengthBoat = 3, strengthHoleBoat = 1.5, strengthPikeBoat = 5, lengthObstacle=radius_obstacle*step_coeff;
     int scaleHole = 50, scalePike = 550, strengthHoles = 2, strengthPike = 4, strength = 5, isObsPEmpty = 1;
 
@@ -495,7 +525,9 @@ int main()
     int rows_Z = (int)(abs(potential_field_dim(0,2)-potential_field_dim(0,3))/step)+1;
     int cols_Z = (int)(abs(potential_field_dim(0,2)-potential_field_dim(0,3))/step)+1;
     Eigen::MatrixXd potential_Z = Eigen::MatrixXd::Zero(rows_Z,cols_Z);//Matlab name: Z
-    Eigen::VectorXd v = Eigen::VectorXd::LinSpaced(cols_Z,potential_field_dim(0,0),potential_field_dim(0,1));
+    Eigen::VectorXd v = Eigen::VectorXd::LinSpaced(cols_Z,
+                                                   potential_field_dim(0,0),
+                                                   potential_field_dim(0,1));
 
     Eigen::MatrixXd point_x = Eigen::MatrixXd::Zero(rows_Z,cols_Z);//Matlab name: P1
     Eigen::MatrixXd point_y = Eigen::MatrixXd::Zero(rows_Z,cols_Z);//Matlab name: P2
@@ -587,9 +619,33 @@ int main()
     int have_to_avoid_obstacle = 1;//Matlab name: haveToAvoidObstacle //In direction mode do the boat need to avoid an obstacle?
     int can_compute_a_new_avoidance_point = 1;//Matlab name: avoidMode //Can the boat compute a new collision_avoidance_point
 
-    printCollisionAvoidanceBehave(potential_Z,point_x,point_y,step_coeff,potential_field_dim, mock_obstacle_list,detected_obstacle_list_qhat,detected_obstacles,
-                                  collisioned_obstacle,direction_boat_obstacle,radius_obstacle, collision_avoidance_point,is_obstacle_detected,target_list, target_phat, boat_state,
-                                  mock_detection_distance,mock_detection_angle,line_to_follow,radius_corridor,wind_direction,only_direction_mode,have_to_avoid_obstacle,can_compute_a_new_avoidance_point,rows_Z,cols_Z,v);
+    printCollisionAvoidanceBehave(potential_Z,
+                                  point_x,
+                                  point_y,
+                                  step_coeff,
+                                  potential_field_dim,
+                                  mock_obstacle_list,
+                                  detected_obstacle_list_qhat,
+                                  detected_obstacles,
+                                  collisioned_obstacle,
+                                  direction_boat_obstacle,
+                                  radius_obstacle,
+                                  collision_avoidance_point,
+                                  is_obstacle_detected,
+                                  target_list,
+                                  target_phat,
+                                  boat_state,
+                                  mock_detection_distance,
+                                  mock_detection_angle,
+                                  line_to_follow,
+                                  radius_corridor,
+                                  wind_direction,
+                                  only_direction_mode,
+                                  have_to_avoid_obstacle,
+                                  can_compute_a_new_avoidance_point,
+                                  rows_Z,
+                                  cols_Z,
+                                  v);
 
     //Function tests
     //mockObstacleDetection(mock_obstacle_list, detected_obstacles, direction_boat_obstacle,boat_state, mock_detection_distance, mock_detection_angle);
