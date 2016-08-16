@@ -22,9 +22,9 @@
 #include "Messages/WaypointDataMsg.h"
 #include "dbhandler/DBHandler.h"
 #include "dbhandler/DBLogger.h"
-#include "sailcommand/SailCommand.h"
-#include "ruddercommand/RudderCommand.h"
-#include "coursecalculation/CourseMath.h"
+#include "waypointrouting/SailCommand.h"
+#include "waypointrouting/RudderCommand.h"
+#include "utility/CourseMath.h"
 
 
 class LineFollowNode : public Node {
@@ -39,7 +39,7 @@ public:
 	float m_gpsHeadingWeight;
 
 private:
-	DBHandler m_db;
+	DBHandler &m_db;
 	DBLogger m_dbLogger;
 
 	int 	m_nextWaypointId;
@@ -58,8 +58,7 @@ private:
     double  m_maxCommandAngle, m_maxSailAngle, m_minSailAngle;
     double  m_tackAngle;
     int     m_tackingDirection;
-	
-    CourseMath m_courseMath;
+
 	RudderCommand m_rudderCommand;
 	SailCommand m_sailCommand;
 
@@ -76,6 +75,7 @@ private:
 	void setupRudderCommand();
 	void setupSailCommand();
     bool getGoingStarboard();
+	void setPrevWaypointToBoatPos(VesselStateMsg* msg);
 
 	/*void manageDatabase(VesselStateMsg* msg, double trueWindDirection, double rudder, double sail, double heading,
                         double distanceToNextWaypoint, double bearingToNextWaypoint);*/

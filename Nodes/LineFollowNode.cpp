@@ -17,6 +17,7 @@
 
 #include "LineFollowNode.h"
 #include "Messages/ActuatorPositionMsg.h"
+#include "Messages/CourseDataMsg.h"
 #include "utility/Utility.h"
 #include "utility/SysClock.h"
 #include <math.h>
@@ -24,6 +25,8 @@
 #include <cmath>
 
 #define DEFAULT_TWD_BUFFERSIZE 200
+#define NORM_RUDDER_COMMAND 0.5166 // getCommand() take a value between -1 and 1 so we need to normalize the command correspond to 29.6 degree
+#define NORM_SAIL_COMMAND 0.6958
 
 LineFollowNode::LineFollowNode(MessageBus& msgBus, DBHandler& db)
 :  Node(NodeID::SailingLogic, msgBus), m_db(db), m_dbLogger(5, db),
@@ -39,8 +42,8 @@ LineFollowNode::LineFollowNode(MessageBus& msgBus, DBHandler& db)
     m_prevWaypointRadius(0),
     m_tackingDirection(1)
 {
-    msgBus.registerNode(this, MessageType::VesselState);
-    msgBus.registerNode(this, MessageType::WaypointData);
+    msgBus.registerNode(*this, MessageType::VesselState);
+    msgBus.registerNode(*this, MessageType::WaypointData);
 
     m_maxCommandAngle = M_PI / 6;
     m_maxSailAngle = M_PI / 4.2f;
@@ -124,6 +127,8 @@ void LineFollowNode::calculateActuatorPos(VesselStateMsg* msg)
     /* add pi because trueWindDirection is originally origin of wind but algorithm need direction*/
     double trueWindDirection_radian = Utility::degreeToRadian(trueWindDirection)+M_PI;
 
+    setPrevWaypointToBoatPos(msg);
+
     //GET DIRECTION--------
     double currentHeading = getHeading(msg->gpsHeading(), msg->compassHeading(), msg->speed(), false, false);
     double currentHeading_radian = Utility::degreeToRadian(currentHeading);
@@ -187,17 +192,21 @@ void LineFollowNode::calculateActuatorPos(VesselStateMsg* msg)
     }
 
     //------------------
-    int rudderCommand_norm = m_rudderCommand.getCommand(rudderCommand);
-    int sailCommand_norm = m_sailCommand.getCommand(sailCommand);
+    int rudderCommand_norm = m_rudderCommand.getCommand(rudderCommand/NORM_RUDDER_COMMAND);
+    int sailCommand_norm = m_sailCommand.getCommand(sailCommand/NORM_SAIL_COMMAND);
+
 
     //Send messages----
-    ActuatorPositionMsg *actuatorMsg = new ActuatorPositionMsg(rudderCommand_norm, sailCommand_norm);
-    m_MsgBus.sendMessage(actuatorMsg);
+    MessagePtr actuatorMsg = std::make_unique<ActuatorPositionMsg>(rudderCommand_norm, sailCommand_norm);
+    m_MsgBus.sendMessage(std::move(actuatorMsg));
+
     //------------------
 
-    double bearingToNextWaypoint = m_courseMath.calculateBTW(msg->longitude(), msg->latitude(), m_nextWaypointLon, m_nextWaypointLat); //calculated for database
-    double distanceToNextWaypoint = m_courseMath.calculateDTW(msg->longitude(), msg->latitude(), m_nextWaypointLon, m_nextWaypointLat);
+    double bearingToNextWaypoint = CourseMath::calculateBTW(msg->longitude(), msg->latitude(), m_nextWaypointLon, m_nextWaypointLat); //calculated for database
+    double distanceToNextWaypoint = CourseMath::calculateDTW(msg->longitude(), msg->latitude(), m_nextWaypointLon, m_nextWaypointLat);
 
+    MessagePtr courseMsg = std::make_unique<CourseDataMsg>(trueWindDirection, distanceToNextWaypoint, bearingToNextWaypoint);
+    m_MsgBus.sendMessage(std::move(courseMsg));
 
     //create timestamp----
     std::string timestamp_str=SysClock::timeStampStr();
@@ -293,24 +302,16 @@ bool LineFollowNode::getGoingStarboard()
     else return false;
 }
 
-/*
-void LineFollowNode::manageDatabase(VesselStateMsg* msg, double trueWindDirection, double rudder, double sail, double heading,
-                        double distanceToNextWaypoint, double bearingToNextWaypoint){
-  //logging
-  bool routeStarted = false;
-  m_db.insertDataLog(
-    msg,
-    rudder,
-    sail,
-    0,
-    0,
-    distanceToNextWaypoint,
-    bearingToNextWaypoint,
-    heading,
-    m_tack,
-    getGoingStarboard(),
-    m_nextWaypointId,
-    trueWindDirection,
-    routeStarted
-  );
-}*/
+void LineFollowNode::setPrevWaypointToBoatPos(VesselStateMsg* msg) //If boat passed waypoint or enters it, set new line from boat to waypoint.
+{                                                                  //Used if boat has to stay within waypoint for a set amount of time.
+    double distanceAfterWaypoint = Utility::calculateWaypointsOrthogonalLine(m_nextWaypointLon, m_nextWaypointLat, m_prevWaypointLon,
+            m_prevWaypointLat, msg->longitude(), msg->latitude());
+
+    double DTW = CourseMath::calculateDTW(msg->longitude(), msg->latitude(), m_nextWaypointLon, m_nextWaypointLat);
+    
+    if(distanceAfterWaypoint > 0 ||  DTW < m_nextWaypointRadius)
+    {
+        m_prevWaypointLon = msg->longitude();
+        m_prevWaypointLat = msg->latitude();
+    }
+}

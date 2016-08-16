@@ -20,8 +20,7 @@
 ActuatorNode::ActuatorNode(MessageBus& msgBus, NodeID id, int channel, int speed, int acceleration)
 	:Node(id, msgBus), m_Channel(channel), m_Speed(speed), m_Acceleration(acceleration)
 {
-  msgBus.registerNode(this,MessageType::ActuatorPosition);
-
+  msgBus.registerNode(*this,MessageType::ActuatorPosition);
 }
 
 bool ActuatorNode::init()
@@ -33,7 +32,7 @@ bool ActuatorNode::init()
 	}
 	else
 	{
-		Logger::error("%s Failed to write actuator speed and aceleration!", __PRETTY_FUNCTION__);
+		Logger::error("%s Failed to write actuator speed and acceleration!", __PRETTY_FUNCTION__);
 		return false;
 	}
 
@@ -59,6 +58,7 @@ void ActuatorNode::processMessage(const Message* message)
 		else
 		{
 			Logger::warning("%s Actuator: %d Unknown/Unregistered actuator message NodeID", __PRETTY_FUNCTION__, (int)nodeID());
+			return;
 		}
 
 		if(not MaestroController::writeCommand(MaestroCommands::SetPosition, m_Channel, setPosition))

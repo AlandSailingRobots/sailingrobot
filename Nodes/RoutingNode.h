@@ -18,9 +18,8 @@
 #include "waypointrouting/WaypointRouting.h"
 #include "dbhandler/DBHandler.h"
 #include "dbhandler/DBLogger.h"
-#include "sailcommand/SailCommand.h"
-#include "ruddercommand/RudderCommand.h"
-
+#include "waypointrouting/SailCommand.h"
+#include "waypointrouting/RudderCommand.h"
 
 class RoutingNode : public Node {
 public:
@@ -40,8 +39,9 @@ private:
 	double 	m_nextWaypointLat;
 	int 	m_nextWaypointDeclination;
 	int 	m_nextWaypointRadius;
-	
-	DBHandler m_db;
+	int		m_nextWaypointStayTime;
+
+	DBHandler &m_db;
 	DBLogger m_dbLogger;
 	WaypointRouting m_waypointRouting;
 	RudderCommand m_rudderCommand;

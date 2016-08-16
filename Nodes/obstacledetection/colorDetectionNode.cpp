@@ -240,7 +240,7 @@ void colorDetectionNode::colorDetectionThreadFunc(void* nodePtr)
 
     while (true)
     {
-		
+
 		//For each capture
         for(int h = 0; h<(int)(node->m_numberOfCapturesPerDetection);h++){
 			// read a new frame from video
@@ -280,8 +280,9 @@ void colorDetectionNode::colorDetectionThreadFunc(void* nodePtr)
         }
 
         computeObstaclesAnglePosition(node->m_imgOriginal, obstacles, rotated_bounding_rects_merged_list );
-		ObstacleVectorMsg* msg = new ObstacleVectorMsg(NodeID::Lidar, NodeID::ColorDetection ,obstacles);
-		node->m_MsgBus.sendMessage(msg);
+
+		MessagePtr msg = std::make_unique<ObstacleVectorMsg>(NodeID::Lidar, NodeID::ColorDetection ,obstacles);
+		node->m_MsgBus.sendMessage(std::move(msg));
 
         rotated_bounding_rects_several_captures.erase(rotated_bounding_rects_several_captures.begin(),rotated_bounding_rects_several_captures.end());
         rotated_bounding_rects_several_captures.resize(node->m_numberOfColorsToTrack);

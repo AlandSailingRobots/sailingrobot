@@ -39,52 +39,43 @@ JSON = 					libs/json
 
 # Sources
 
-CORE =					MessageBus.cpp ActiveNode.cpp
+CORE =					MessageBus/MessageBus.cpp Nodes/ActiveNode.cpp Messages/MessageSerialiser.cpp Messages/MessageDeserialiser.cpp
 
 ifeq ($(USE_SIM),1)
-NODES =					Nodes/MessageLoggerNode.cpp  Nodes/WaypointNode.cpp Nodes/HTTPSyncNode.cpp Nodes/xBeeSyncNode.cpp \
-							Nodes/VesselStateNode.cpp  Nodes/RoutingNode.cpp Nodes/LineFollowNode.cpp \
-							Nodes/SimulationNode.cpp Nodes/obstacledetection/colorDetectionNode.cpp \
-							Nodes/obstacledetection/colorDetectionUtility.cpp Nodes/lidarLite/lidarLite.cpp \
-							Nodes/lidarLite/lidarLiteNode.cpp
-SYSTEM_SERVICES =	SystemServices/Logger.cpp
+
+NODES =					Nodes/MessageLoggerNode.cpp  Nodes/WaypointMgrNode.cpp Nodes/HTTPSyncNode.cpp Nodes/XbeeSyncNode.cpp \
+						Nodes/VesselStateNode.cpp  Nodes/RoutingNode.cpp Nodes/LineFollowNode.cpp \
+						Nodes/SimulationNode.cpp Nodes/lidarLite/lidarLite.cpp Nodes/lidarLite/lidarLiteNode.cpp \
+						Nodes/obstacledetection/colorDetectionNode.cpp Nodes/obstacledetection/colorDetectionUtility.cpp
+
+SYSTEM_SERVICES =		SystemServices/Logger.cpp
 else
 NODES =					Nodes/MessageLoggerNode.cpp Nodes/CV7Node.cpp Nodes/HMC6343Node.cpp Nodes/GPSDNode.cpp Nodes/ActuatorNode.cpp  Nodes/ArduinoNode.cpp \
-														Nodes/VesselStateNode.cpp Nodes/WaypointNode.cpp Nodes/HTTPSyncNode.cpp Nodes/xBeeSyncNode.cpp Nodes/RoutingNode.cpp Nodes/LineFollowNode.cpp \
-														Nodes/SimulationNode.cpp Nodes/obstacledetection/colorDetectionNode.cpp Nodes/obstacledetection/colorDetectionUtility.cpp \
-														Nodes/lidarLite/lidarLite.cpp Nodes/lidarLite/lidarLiteNode.cpp
+						Nodes/VesselStateNode.cpp Nodes/WaypointMgrNode.cpp Nodes/HTTPSyncNode.cpp Nodes/XbeeSyncNode.cpp Nodes/RoutingNode.cpp Nodes/LineFollowNode.cpp \
+						Nodes/SimulationNode.cpp Nodes/lidarLite/lidarLite.cpp Nodes/lidarLite/lidarLiteNode.cpp \
+						Nodes/obstacledetection/colorDetectionNode.cpp Nodes/obstacledetection/colorDetectionUtility.cpp
 
 SYSTEM_SERVICES =		SystemServices/MaestroController.cpp SystemServices/Logger.cpp
 endif
 
-XBEE = 					xBee/xBeeSync.cpp xBee/xBee.cpp
-
-BEHAVIOURCLASS = 		behaviourclass/RoutingBehaviour.cpp  behaviourclass/WaypointBehaviour.cpp behaviourclass/LineFollowBehaviour.cpp
+XBEE = 					xBee/Xbee.cpp
 
 I2CCONTROLLER = 		i2ccontroller/I2CController.cpp
 
-POSITION = 				utility/Position.cpp utility/MockPosition.cpp utility/RealPosition.cpp
-
-COURSE = 				coursecalculation/CourseCalculation.cpp coursecalculation/CourseMath.cpp
+COURSE = 				utility/CourseCalculation.cpp utility/CourseMath.cpp
 
 DB = 					dbhandler/DBHandler.cpp dbhandler/DBLogger.cpp
 
-COMMAND = 				ruddercommand/RudderCommand.cpp sailcommand/SailCommand.cpp
-
-XML_LOG = 				xmlparser/pugi/pugixml.cpp xmlparser/src/xml_log.cpp
-
-THREAD = 				thread/SystemState.cpp thread/ExternalCommand.cpp thread/ThreadRAII.cpp
+COMMAND = 				waypointrouting/RudderCommand.cpp waypointrouting/SailCommand.cpp
 
 WAYPOINTROUTING = 		waypointrouting/WaypointRouting.cpp waypointrouting/Commands.cpp waypointrouting/TackAngle.cpp
 
 WINDVANECONTROLLER = 	windvanecontroller/WindVaneController.cpp
 
-
 SRC_MAIN = main.cpp
 
 SRC = 	utility/Utility.cpp utility/Timer.cpp utility/SysClock.cpp $(SYSTEM_SERVICES) $(XBEE) \
-		$(CORE) $(NODES) $(I2CCONTROLLER) $(POSITION) $(COURSE) $(DB) $(COMMAND) $(GPS) \
-		$(XML_LOG) $(THREAD) $(WAYPOINTROUTING) $(WINDVANECONTROLLER)
+		$(CORE) $(NODES) $(I2CCONTROLLER) $(COURSE) $(DB) $(COMMAND) $(GPS) $(WAYPOINTROUTING) $(WINDVANECONTROLLER)
 
 
 #SOURCES = $(addprefix src/, $(SRC))
@@ -113,8 +104,12 @@ export OBJECT_FILE = $(BUILD_DIR)/objects.tmp
 #######################################################
 
 
+#To compile colorDetection files you need opencv cf README.MD in obstacledetection
 export CFLAGS = -Wall -g -o2 `pkg-config --cflags opencv`
-export CPPFLAGS = -g -Wall -pedantic -Werror -std=c++11
+
+#export CFLAGS = -Wall -g -o2
+export CPPFLAGS = -g -Wall -pedantic -Werror -std=c++14
+
 
 export LIBS = -lsqlite3 -lgps -lrt -lcurl -lpthread `pkg-config --libs opencv`
 
@@ -155,6 +150,9 @@ build_tests: $(OBJECTS) $(EXECUTABLE)
 	$(CXX) $(CPPFLAGS) tests/runner.o @$(OBJECT_FILE) -Wl,-rpath=./ ./libwiringPi.so -o $(UNIT_TEST) $(LIBS)
 	$(CXX) $(CPPFLAGS) tests/runnerHardware.o @$(OBJECT_FILE) -Wl,-rpath=./ ./libwiringPi.so -o $(HARDWARE_TEST) $(LIBS)
 
+xbee_remote: $(OBJECTS) $(EXECUTABLE) $(WIRING_PI)
+	$(MAKE) -C xbeerelay
+
 #  Create the directories needed
 $(BUILD_DIR):
 	@$(MKDIR_P) $(BUILD_DIR)
@@ -184,6 +182,12 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
 	@echo Compiling C File: $@
 	@$(C) -c $(CFLAGS) $(INC) -o $@ $ -DTOOLCHAIN=$(C_TOOLCHAIN)
 
+#SPECIAL COMPILATION FOR mywiringI2C.cpp to be overload when doing simulation AnalogArduino/myWiringI2C.cpp
+$(BUILD_DIR)/AnalogArduino/libmyWiringI2C.so: $(SRC_DIR)/AnalogArduino/myWiringI2C.cpp
+	@echo Compiling CPP File to Shared library: $(SRC_DIR)/AnalogArduino/myWiringI2C.cpp
+	$(CXX) -c -fPIC $(CPPFLAGS) $(INC) $(SRC_DIR)/AnalogArduino/myWiringI2C.cpp -o $(BUILD_DIR)/AnalogArduino/myWiringI2C.o -DTOOLCHAIN=$(TOOLCHAIN) $(LIBS)
+	$(CXX) -shared -Wl,-soname,libmyWiringI2C.so -o $(BUILD_DIR)/AnalogArduino/libmyWiringI2C.so $(BUILD_DIR)/AnalogArduino/myWiringI2C.o -ldl
+	cp $(BUILD_DIR)/AnalogArduino/libmyWiringI2C.so  $(SRC_DIR)/
 
 #####################################################################
 # Tool Rules

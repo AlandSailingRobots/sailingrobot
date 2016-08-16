@@ -3,10 +3,11 @@
 #include <string>
 #include <cstdlib>
 #include <cstdio>
-#include "models/SystemStateModel.h"
-#include "models/WaypointModel.h"
-#include "models/PositionModel.h"
 #include "utility/Timer.h"
+#include <thread>
+
+
+std::mutex DBHandler::m_databaseLock;
 
 
 DBHandler::DBHandler(std::string filePath) :
@@ -16,7 +17,7 @@ DBHandler::DBHandler(std::string filePath) :
 }
 
 DBHandler::~DBHandler(void) {
-
+	m_databaseLock.unlock();
 }
 
 bool DBHandler::initialise()
@@ -30,6 +31,7 @@ bool DBHandler::initialise()
 	}
 	else
 	{
+		closeDatabase(connection);
 		return false;
 	}
 }
@@ -99,6 +101,7 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs)
 		if(db == NULL)
 		{
 			Logger::error("%s Database is null!", __PRETTY_FUNCTION__);
+			closeDatabase(db);
 			return;
 		}
 
@@ -106,7 +109,6 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs)
 		{
 		  Logger::info("Writing in the database last value: %s size logs %d",logs[0].m_timestamp_str.c_str(),logs.size());
     }
-
 		tableId = getIdFromTable("arduino_datalogs",true,db);
 		if(tableId.size() > 0)
 		{
@@ -332,7 +334,7 @@ bool DBHandler::updateWaypoints(std::string waypoints){
 	Json json = Json::parse(waypoints);
 	std::string DBPrinter = "";
 	std::string tempValue = "";
-	int valuesLimit = 5; //"Dirty" fix for limiting the amount of values requested from server waypoint entries (amount of fields n = valuesLimit + 1)
+	int valuesLimit = 6; //"Dirty" fix for limiting the amount of values requested from server waypoint entries (amount of fields n = valuesLimit + 1)
 	int limitCounter;
 
 	if(not queryTable("DELETE FROM waypoints;"))
@@ -347,7 +349,7 @@ bool DBHandler::updateWaypoints(std::string waypoints){
 		for (auto y : Json::iterator_wrapper(i.value())){
 
 			limitCounter = valuesLimit;
-			DBPrinter = "INSERT INTO waypoints (id,latitude,longitude,declination,radius,harvested) VALUES (";
+			DBPrinter = "INSERT INTO waypoints (id,latitude,longitude,declination,radius,stay_time,harvested) VALUES (";
 
 			for (auto z : Json::iterator_wrapper(y.value())){
 				//Each individual value
@@ -513,7 +515,7 @@ std::string DBHandler::getWaypoints() {
 	rows = getRows("waypoints");
 	if (rows > 0) {
 		for (auto i = 1; i <= rows; ++i) {
-			getDataAsJson("id,latitude,longitude,declination,radius", "waypoints", wp + std::to_string(i), std::to_string(i),json, true);
+			getDataAsJson("id,latitude,longitude,declination,radius,stay_time", "waypoints", wp + std::to_string(i), std::to_string(i),json, true);
 		}
 		return json.dump();
 	}
@@ -583,13 +585,17 @@ std::string DBHandler::getIdFromTable(std::string table, bool max,sqlite3* db) {
 ////////////////////////////////////////////////////////////////////
 
 sqlite3* DBHandler::openDatabase() {
+
+	m_databaseLock.lock();
 	sqlite3* connection;
 	int resultcode = 0;
 
 	// check if file exists
 	FILE* db_file = fopen(m_filePath.c_str(), "r");
-	if (!db_file) {
+	if (db_file == NULL) {
 		Logger::error("%s %s not found", __PRETTY_FUNCTION__, m_filePath.c_str());
+		m_databaseLock.unlock();
+		return NULL;
 	}
 	fclose(db_file);
 
@@ -599,6 +605,7 @@ sqlite3* DBHandler::openDatabase() {
 
 	if (resultcode) {
 		Logger::error("%s Failed to open the database Error %s", __PRETTY_FUNCTION__, sqlite3_errmsg(connection));
+		m_databaseLock.unlock();
 		return 0;
 	}
 
@@ -609,11 +616,14 @@ sqlite3* DBHandler::openDatabase() {
 
 
 void DBHandler::closeDatabase(sqlite3* connection) {
-
 	if(connection != NULL) {
 		sqlite3_close(connection);
 		connection = NULL;
+		// ENsure it closes properly
+		std::this_thread::sleep_for(std::chrono::milliseconds(1));
+		m_databaseLock.unlock();
 	} else {
+		m_databaseLock.unlock();
 		throw "DBHandler::closeDatabase() : connection is already null";
 	}
 }
@@ -716,11 +726,13 @@ bool DBHandler::queryTable(std::string sqlINSERT) {
 			Logger::error("%s Error: %s", __PRETTY_FUNCTION__, sqlite3_errmsg(db));
 
 			sqlite3_free(m_error);
+			closeDatabase(db);
 			return false;
 		}
 	}
 	else {
 		Logger::error("%s Error: no database found", __PRETTY_FUNCTION__);
+		closeDatabase(db);
 		return false;
 	}
 	closeDatabase(db);
@@ -760,6 +772,7 @@ bool DBHandler::queryTable(std::string sqlINSERT, sqlite3* db) {
 }
 
 std::vector<std::string> DBHandler::retrieveFromTable(std::string sqlSELECT, int &rows, int &columns) {
+
 	sqlite3* db = openDatabase();
 	std::vector<std::string> results;
 
@@ -774,18 +787,20 @@ std::vector<std::string> DBHandler::retrieveFromTable(std::string sqlSELECT, int
 
 		if(resultcode == SQLITE_EMPTY) {
 			std::vector<std::string> s;
+			closeDatabase(db);
 			return s;
 		}
 
 		if (resultcode != SQLITE_OK) {
 			Logger::error("%s SQL statement: %s Error: %s", __PRETTY_FUNCTION__, sqlSELECT.c_str(), sqlite3_errstr(resultcode));
+			closeDatabase(db);
 			throw "retrieveFromTable";
 		}
 	}
 	else {
+		closeDatabase(db);
 		throw "DBHandler::retrieveFromTable(), no db connection";
 	}
-
 	closeDatabase(db);
 	return results;
 }
@@ -846,7 +861,7 @@ std::vector<std::string> DBHandler::getTableNames(std::string like) {
     }
 
     std::vector<std::string> tableNames;
-    for (int i = 1; i <= rows; i++) {
+    for (unsigned int i = 1; i < results.size(); i++) {
     	tableNames.push_back(results[i]);
     }
 
@@ -880,54 +895,9 @@ std::vector<std::string> DBHandler::getColumnInfo(std::string info, std::string 
     return types;
 }
 
-bool DBHandler::getWaypointFromTable(WaypointModel &waypointModel, bool max){
-
-	int rows, columns;
-    std::vector<std::string> results;
-    try {
-    	if(max)
-    	{
-    		results = retrieveFromTable("SELECT MAX(id) FROM waypoints WHERE harvested = 1;", rows, columns);
-    	}
-    	else
-    	{
-    		results = retrieveFromTable("SELECT MIN(id) FROM waypoints WHERE harvested = 0;", rows, columns);
-    	}
-    }
-    catch(const char* error)
-    {
-    	Logger::error("%s Error: %s", __PRETTY_FUNCTION__, error);
-    	return false;
-    }
-    if (rows * columns < 1 || results[1] == "\0") {
-    	return false;
-    }
-
-
-    waypointModel.id = results[1];
-
-	m_currentWaypointId = waypointModel.id;
-	waypointModel.positionModel.latitude = atof(retrieveCell("waypoints", waypointModel.id, "latitude").c_str());
-	waypointModel.positionModel.longitude = atof(retrieveCell("waypoints", waypointModel.id, "longitude").c_str());
-	waypointModel.radius = retrieveCellAsInt("waypoints", waypointModel.id, "radius");
-	waypointModel.declination = retrieveCellAsInt("waypoints", waypointModel.id, "declination");
-
-	results = retrieveFromTable("SELECT time FROM waypoint_stationary WHERE id = " +
-		waypointModel.id + ";", rows, columns);
-
-	if (rows * columns < 1 || results[1] == "\0") {
-		waypointModel.time = 0;
-	}
-	else {
-		waypointModel.time = retrieveCellAsInt("waypoint_stationary", waypointModel.id, "time");
-	}
-
-	return true;
-}
-
-bool DBHandler::getWaypointValues(int& nextId, double& nextLongitude, double& nextLatitude, int& nextDeclination, int& nextRadius,
+bool DBHandler::getWaypointValues(int& nextId, double& nextLongitude, double& nextLatitude, int& nextDeclination, int& nextRadius, int& nextStayTime,
                         int& prevId, double& prevLongitude, double& prevLatitude, int& prevDeclination, int& prevRadius)
-{
+{	
 	int rows, columns, rows2, columns2;
     std::vector<std::string> results;
 	std::vector<std::string> results2;
@@ -952,6 +922,7 @@ bool DBHandler::getWaypointValues(int& nextId, double& nextLongitude, double& ne
 		foundPrevWaypoints = false;
     }
 
+
 	//Set values to next waypoint
     nextId = stoi(results[1]);
 
@@ -959,6 +930,8 @@ bool DBHandler::getWaypointValues(int& nextId, double& nextLongitude, double& ne
     nextLatitude = atof(retrieveCell("waypoints", results[1], "latitude").c_str());
     nextDeclination = retrieveCellAsInt("waypoints", results[1], "declination");
     nextRadius = retrieveCellAsInt("waypoints", results[1], "radius");
+	nextStayTime = retrieveCellAsInt("waypoints", results[1], "stay_time");
+
 
 	if(foundPrevWaypoints) //Set values to next waypoint if harvested waypoint found
 	{
@@ -969,7 +942,7 @@ bool DBHandler::getWaypointValues(int& nextId, double& nextLongitude, double& ne
 		prevDeclination = retrieveCellAsInt("waypoints", results2[1], "declination");
 		prevRadius = retrieveCellAsInt("waypoints", results2[1], "radius");
 	}
-
+	
     return true;
 }
 

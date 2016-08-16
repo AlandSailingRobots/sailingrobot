@@ -16,6 +16,9 @@
 #include "DBLogger.h"
 
 
+bool DBLogger::m_working;
+
+
 DBLogger::DBLogger(unsigned int logBufferSize, DBHandler& dbHandler)
 	:m_dbHandler(dbHandler), m_bufferSize(logBufferSize)
 {
@@ -24,15 +27,28 @@ DBLogger::DBLogger(unsigned int logBufferSize, DBHandler& dbHandler)
 
 	m_logBufferBack = new std::vector<LogItem>();
 	m_logBufferBack->reserve(logBufferSize);
+	m_working = false;
 }
 
 DBLogger::~DBLogger()
 {
+	m_working = false;
+
+	// Wait for the mutex to be unlocked.
+	{
+		std::lock_guard<std::mutex> lk(m_mutex);
+	}
+	// instruct the worker thread to work
+	m_cv.notify_one();
+
+	m_thread->join();
+
 	delete m_thread;
 }
 
 void DBLogger::startWorkerThread()
 {
+	m_working = true;
 	m_thread = new std::thread(workerThread, this);
 }
 
@@ -47,30 +63,30 @@ void DBLogger::log(VesselStateMsg* msg, double rudder, double sail, int sailServ
 	item.m_compassRoll = msg->compassRoll();
 	item.m_gpsHasFix = msg->gpsHasFix();
 	item.m_gpsOnline = msg->gpsOnline();
-	item.m_gpsLat = msg->latitude();
-	item.m_gpsLon = msg->longitude();
-	item.m_gpsUnixTime = msg->unixTime();
-	item.m_gpsSpeed = msg->speed();
-	item.m_gpsHeading = msg->gpsHeading();
+	item.m_gpsLat = setValue<double>(msg->latitude()); if(item.m_gpsLat == -1) item.m_gpsLat = -1000; //-1 is a valid number for latitude and longitude
+	item.m_gpsLon = setValue<double>(msg->longitude()); if(item.m_gpsLon == -1) item.m_gpsLon = -1000;
+	item.m_gpsUnixTime = setValue<double>(msg->unixTime());
+	item.m_gpsSpeed = setValue<double>(msg->speed());
+	item.m_gpsHeading = setValue<double>(msg->gpsHeading());
 	item.m_gpsSatellite = msg->gpsSatellite();
-	item.m_windDir = msg->windDir();
-	item.m_windSpeed = msg->windSpeed();
-	item.m_windTemp = msg->windTemp();
+	item.m_windDir = setValue<float>(msg->windDir());
+	item.m_windSpeed = setValue<float>(msg->windSpeed());
+	item.m_windTemp = setValue<float>(msg->windTemp()); if(item.m_windTemp == -1) item.m_windTemp = -1000;
 	item.m_arduinoPressure = msg->arduinoPressure();
 	item.m_arduinoRudder = msg->arduinoPressure();
 	item.m_arduinoSheet = msg->arduinoSheet();
 	item.m_arduinoBattery = msg->arduinoBattery();
-	item.m_rudder = rudder;
-	item.m_sail = sail;
+	item.m_rudder = setValue<double>(rudder);
+	item.m_sail = setValue<double>(sail);
 	item.m_sailServoPosition = sailServoPosition;
 	item.m_rudderServoPosition = rudderServoPosition;
-	item.m_distanceToWaypoint = distanceToWaypoint;
-	item.m_bearingToWaypoint = bearingToWaypoint;
-	item.m_courseToSteer = courseToSteer;
+	item.m_distanceToWaypoint = setValue<double>(distanceToWaypoint);
+	item.m_bearingToWaypoint = setValue<double>(bearingToWaypoint);
+	item.m_courseToSteer = setValue<double>(courseToSteer);
 	item.m_tack = tack;
 	item.m_goingStarboard = goingStarboard;
 	item.m_waypointId = waypointId;
-	item.m_twd = twd;
+	item.m_twd = setValue<double>(twd);
 	item.m_routeStarted = routeStarted;
 	item.m_timestamp_str = timestamp_str;
 
@@ -92,9 +108,20 @@ void DBLogger::log(VesselStateMsg* msg, double rudder, double sail, int sailServ
 	}
 }
 
+template<typename FloatOrDouble>
+FloatOrDouble DBLogger::setValue(FloatOrDouble value) //Function to check if value is NaN before setting the value
+{
+	if(value != value) //If value is NaN
+	{
+		return -1;
+	}
+
+	return value;
+}
+
 void DBLogger::workerThread(DBLogger* ptr)
 {
-	while(true)
+	while(m_working)
 	{
 		std::unique_lock<std::mutex> lk(ptr->m_mutex);
 		ptr->m_cv.wait(lk);

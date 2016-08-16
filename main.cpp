@@ -1,7 +1,7 @@
 
 #include <string>
 #include "SystemServices/Logger.h"
-#include "MessageBus.h"
+#include "MessageBus/MessageBus.h"
 #include "Nodes/MessageLoggerNode.h"
 
 #if SIMULATION == 1
@@ -14,16 +14,16 @@
  #include "Nodes/ArduinoNode.h"
 #endif
 
-#include "Nodes/obstacledetection/colorDetectionNode.h"
-#include "Nodes/lidarLite/lidarLiteNode.h"
-#include "Nodes/WaypointNode.h"
+#include "Nodes/WaypointMgrNode.h"
 #include "Nodes/VesselStateNode.h"
 #include "Nodes/HTTPSyncNode.h"
+#include "Nodes/XbeeSyncNode.h"
 #include "Nodes/RoutingNode.h"
 #include "Nodes/LineFollowNode.h"
 #include "Messages/DataRequestMsg.h"
 #include "dbhandler/DBHandler.h"
 #include "SystemServices/MaestroController.h"
+#include "xBee/Xbee.h"
 
 #define DISABLE_LOGGING 0
 
@@ -112,22 +112,20 @@ int main(int argc, char *argv[])
 	printf("using simulation\n");
 	SimulationNode simulation(messageBus);
 	#else
-    CV7Node windSensor(messageBus, dbHandler.retrieveCell("windsensor_config", "1", "port"), dbHandler.retrieveCellAsInt("windsensor_config", "1", "baud_rate"));
+
+	XbeeSyncNode xbee(messageBus, dbHandler);
+	CV7Node windSensor(messageBus, dbHandler.retrieveCell("windsensor_config", "1", "port"), dbHandler.retrieveCellAsInt("windsensor_config", "1", "baud_rate"));
 	HMC6343Node compass(messageBus, dbHandler.retrieveCellAsInt("buffer_config", "1", "compass"));
 	GPSDNode gpsd(messageBus);
 	ArduinoNode arduino(messageBus);
 	#endif
-    std::vector<std::string> color_inputs;
-    color_inputs.push_back("red");
-    colorDetectionNode colorDetect(messageBus,color_inputs,0);
-    lidarLiteNode lidarDetect(messageBus,2);
-	VesselStateNode vessel(messageBus);
-	WaypointNode waypoint(messageBus, dbHandler);
+
 	HTTPSyncNode httpsync(messageBus, &dbHandler, 0, false);
+	VesselStateNode vessel(messageBus);
+	WaypointMgrNode waypoint(messageBus, dbHandler);
 
 
 	Node* sailingLogic;
-
 
 	bool usingLineFollow = (bool)(dbHandler.retrieveCellAsInt("sailing_robot_config", "1", "line_follow"));
 	if(usingLineFollow)
@@ -153,7 +151,6 @@ int main(int argc, char *argv[])
 	ActuatorNode rudder(messageBus, NodeID::RudderActuator, channel, speed, acceleration);
 	MaestroController::init(dbHandler.retrieveCell("maestro_controller_config", "1", "port"));
   #endif
-
 	bool requireNetwork = (bool) (dbHandler.retrieveCellAsInt("sailing_robot_config", "1", "require_network"));
 
 	// System services
@@ -165,17 +162,16 @@ int main(int argc, char *argv[])
 	#if SIMULATION == 1
 	initialiseNode(simulation,"Simulation Node",NodeImportance::CRITICAL);
 	#else
-    initialiseNode(windSensor, "Wind Sensor", NodeImportance::CRITICAL);
+    initialiseNode(xbee, "Xbee Sync Node", NodeImportance::NOT_CRITICAL);
+	initialiseNode(windSensor, "Wind Sensor", NodeImportance::CRITICAL);
+
 	initialiseNode(compass, "Compass", NodeImportance::CRITICAL);
 	initialiseNode(gpsd, "GPSD Node", NodeImportance::CRITICAL);
 	initialiseNode(sail, "Sail Actuator", NodeImportance::CRITICAL);
 	initialiseNode(rudder, "Rudder Actuator", NodeImportance::CRITICAL);
 	initialiseNode(arduino, "Arduino Node", NodeImportance::NOT_CRITICAL);
 	#endif
-	initialiseNode(colorDetect, "Color Detection Node", NodeImportance::NOT_CRITICAL);
-	initialiseNode(lidarDetect, "Lidar Node", NodeImportance::NOT_CRITICAL);
-	initialiseNode(vessel, "Vessel State Node", NodeImportance::CRITICAL);
-	initialiseNode(waypoint, "Waypoint Node", NodeImportance::CRITICAL);
+
 	if (requireNetwork)
 	{
 		initialiseNode(httpsync, "Httpsync Node", NodeImportance::CRITICAL);
@@ -184,6 +180,10 @@ int main(int argc, char *argv[])
 	{
 		initialiseNode(httpsync, "Httpsync Node", NodeImportance::NOT_CRITICAL);
 	}
+
+	initialiseNode(vessel, "Vessel State Node", NodeImportance::CRITICAL);
+	initialiseNode(waypoint, "Waypoint Node", NodeImportance::CRITICAL);
+
 	if(usingLineFollow)
 	{
 		initialiseNode(*sailingLogic, "LineFollow Node", NodeImportance::CRITICAL);
@@ -197,20 +197,19 @@ int main(int argc, char *argv[])
 	#if SIMULATION == 1
 	simulation.start();
   #else
-  
+
+	xbee.start();
 	windSensor.start();
 	compass.start();
 	gpsd.start();
 	arduino.start();
   #endif
-	colorDetect.start();
-	lidarDetect.start();
-	vessel.start();
 	httpsync.start();
+	vessel.start();
 
 	// NOTE - Jordan: Just to ensure messages are following through the system
-	DataRequestMsg* dataRequest = new DataRequestMsg(NodeID::MessageLogger);
-	messageBus.sendMessage(dataRequest);
+	MessagePtr dataRequest = std::make_unique<DataRequestMsg>(NodeID::MessageLogger);
+	messageBus.sendMessage(std::move(dataRequest));
 
 	Logger::info("Message bus started!");
 	messageBus.run();
@@ -266,7 +265,12 @@ int main(int argc, char *argv[]) {
 		path = "./";
 		db_name = "asr.db";
 		errorLog = "errors.log";
-	} else {
+	} else if (argc == 3 ) {
+		path = std::string(argv[1]);
+		db_name = std::string(argv[2]);
+		errorLog = "errors.log";
+	}
+  else {
 		path = std::string(argv[1]);
 		db_name = "asr.db";
 		errorLog = "errors.log";

@@ -7,9 +7,8 @@
 #include <vector>
 #include <sqlite3.h>
 #include "SystemServices/Logger.h"
-#include "models/WaypointModel.h"
 #include "Messages/VesselStateMsg.h"
-
+#include <mutex>
 #include "libs/json/src/json.hpp"
 using Json = nlohmann::json;
 
@@ -55,6 +54,7 @@ private:
 	int m_latestDataLogId;
 	std::string m_currentWaypointId = "";
 	std::string m_filePath;
+	static std::mutex m_databaseLock;
 
 	//execute INSERT query and add new row into table
 	bool queryTable(std::string sqlINSERT);
@@ -124,6 +124,7 @@ public:
 	// returns all logs in database as json; supply onlyLatest to get only the ones with the highest id
 	std::string getLogs(bool onlyLatest);
 
+	void forceUnlock() { m_databaseLock.unlock(); }
 
 	void clearLogs();
 
@@ -135,9 +136,7 @@ public:
 
 	void deleteRow(std::string table, std::string id);
 
-	bool getWaypointFromTable(WaypointModel &waypointModel, bool max);
-
-	bool getWaypointValues(int& nextId, double& nextLongitude, double& nextLatitude, int& nextDeclination, int& nextRadius,
+	bool getWaypointValues(int& nextId, double& nextLongitude, double& nextLatitude, int& nextDeclination, int& nextRadius, int& nextStayTime,
                         int& prevId, double& prevLongitude, double& prevLatitude, int& prevDeclination, int& prevRadius);
 
 	bool insert(std::string table, std::string fields, std::string values);

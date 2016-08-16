@@ -17,6 +17,7 @@
 // For std::this_thread
 #include <chrono>
 #include <thread>
+#include <memory>
 
 #include <sys/types.h>
 #include <netdb.h>
@@ -37,13 +38,13 @@
 
 
 SimulationNode::SimulationNode(MessageBus& msgBus)
-	: ActiveNode(NodeID::VesselState, msgBus),
+	: ActiveNode(NodeID::Simulator, msgBus),
 		m_CompassHeading(0), m_CompassPitch(0), m_CompassRoll(0),
 		m_GPSHasFix(false), m_GPSOnline(false), m_GPSLat(0), m_GPSLon(0), m_GPSUnixTime(0), m_GPSSpeed(0),
 		m_GPSHeading(0), m_WindDir(0), m_WindSpeed(0), m_WindTemp(0), m_ArduinoPressure(0),
 		m_ArduinoRudder(0),m_ArduinoSheet(0),m_ArduinoBattery(0),m_rudder(0),m_sail(0),m_count_sleep(0)
 {
-  m_MsgBus.registerNode(this, MessageType::ActuatorPosition);
+  m_MsgBus.registerNode(*this, MessageType::ActuatorPosition);
 }
 
 void SimulationNode::start()
@@ -74,7 +75,7 @@ bool SimulationNode::init(){
 		if ((m_handler_socket_client.sockfd = accept(m_handler_socket_server.sockfd, (struct sockaddr *) &(m_handler_socket_client.info_me),
 					 &clntLen)) < 0)
 	  {
-			  Logger::error("Error in accept() failed: %s",__PRETTY_FUNCTION__,strerror(errno));
+			  Logger::error("%s Error in accept() failed: %s",__PRETTY_FUNCTION__,strerror(errno));
 				return false;
 	  }
 
@@ -92,7 +93,7 @@ int SimulationNode::init_socket(int port)
     m_handler_socket_server.sockfd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if (m_handler_socket_server.sockfd == -1)
     {
-				Logger::error("Error in initialise socket: %s",__PRETTY_FUNCTION__,strerror(errno));
+				Logger::error("%s Error in initialise socket: %s",__PRETTY_FUNCTION__,strerror(errno));
         return -1;
     }
 
@@ -105,13 +106,13 @@ int SimulationNode::init_socket(int port)
     if( bind(m_handler_socket_server.sockfd, (struct sockaddr*) &m_handler_socket_server.info_me,
              sizeof(m_handler_socket_server.info_me)) == -1)
     {
-        Logger::error("Error in initialise socket bind: %s",__PRETTY_FUNCTION__,strerror(errno));
+        Logger::error("%s Error in initialise socket bind: %s",__PRETTY_FUNCTION__,strerror(errno));
         return -1;
     }
 
     if (listen(m_handler_socket_server.sockfd,1) < 0)
     {
-        Logger::error("Error in initialise socket listen: %s",__PRETTY_FUNCTION__,strerror(errno));
+        Logger::error("%s Error in initialise socket listen: %s",__PRETTY_FUNCTION__,strerror(errno));
         return -1;
     }
     return 0;
@@ -145,13 +146,16 @@ void SimulationNode::createCompassMessage()
 	m_CompassRoll = 0;
 
 	if (m_count_sleep % COUNT_COMPASSDATA_MSG==0){
-	  CompassDataMsg* msg = new CompassDataMsg( int(m_CompassHeading+0.5) , m_CompassPitch, m_CompassRoll);
-	  m_MsgBus.sendMessage(msg);
+
+		MessagePtr msg = std::make_unique<CompassDataMsg>(CompassDataMsg( int(m_CompassHeading+0.5) , m_CompassPitch, m_CompassRoll));
+
+	  	m_MsgBus.sendMessage(std::move(msg));
   }
 }
 
 void SimulationNode::createGPSMessage()
 {
+
 	double knots = 1.94384;
 	m_GPSHasFix = true;
 	m_GPSOnline = true;
@@ -165,8 +169,8 @@ void SimulationNode::createGPSMessage()
 
 	if (m_count_sleep % COUNT_GPSDATA_MSG==0)
 	{
-		GPSDataMsg* msg = new GPSDataMsg(m_GPSHasFix, m_GPSOnline, m_GPSLat, m_GPSLon, m_GPSUnixTime, m_GPSSpeed, m_GPSHeading, m_GPSSatellite, mode);
-		m_MsgBus.sendMessage(msg);
+		MessagePtr msg = std::make_unique<GPSDataMsg>(GPSDataMsg(m_GPSHasFix, m_GPSOnline, m_GPSLat, m_GPSLon, m_GPSUnixTime, m_GPSSpeed, m_GPSHeading, m_GPSSatellite, mode));
+		m_MsgBus.sendMessage(std::move(msg));
 	}
 }
 
@@ -178,8 +182,8 @@ void SimulationNode::createWindMessage()
 
 	if (m_count_sleep % COUNT_WINDDATA_MSG==0)
 	{
-		WindDataMsg* windData = new WindDataMsg(m_WindDir, m_WindSpeed, m_WindTemp);
-		m_MsgBus.sendMessage(windData);
+		MessagePtr windData = std::make_unique<WindDataMsg>(WindDataMsg(m_WindDir, m_WindSpeed, m_WindTemp));
+		m_MsgBus.sendMessage(std::move(windData));
 	}
 }
 
@@ -192,8 +196,8 @@ void SimulationNode::createArduinoMessage()
 
 	if (m_count_sleep % COUNT_ARDUINO_MSG==0)
 	{
-		ArduinoDataMsg* msg = new ArduinoDataMsg(m_ArduinoPressure, m_ArduinoRudder, m_ArduinoSheet, m_ArduinoBattery );
-		m_MsgBus.sendMessage(msg);
+		MessagePtr msg = std::make_unique<ArduinoDataMsg>(ArduinoDataMsg(m_ArduinoPressure, m_ArduinoRudder, m_ArduinoSheet, m_ArduinoBattery ));
+		m_MsgBus.sendMessage(std::move(msg));
 	}
 }
 

@@ -35,6 +35,7 @@ bool GPSDNode::init()
 {
 	m_Initialised = false;
 	m_GpsConnection = new gpsmm("localhost", DEFAULT_GPSD_PORT);
+	m_currentDay = SysClock::day();
 
 	if (m_GpsConnection->stream(WATCH_ENABLE | WATCH_JSON) != NULL) {
 		m_Initialised = true;
@@ -95,40 +96,30 @@ void GPSDNode::GPSThreadFunc(void* nodePtr)
 		bool gps_hasFix = (newData->status > 0);
 		double unixTime = 0;
 
-		//if(flags & TIME_SET)
-		{
-			unixTime = newData->fix.time;
+		unixTime = newData->fix.time;
+
+		//Once a day: make sure system clock is updated from gps to ensure accuracy
+		if (gps_online){
+			int today = SysClock::day();
+			if (node->m_currentDay != today){
+				SysClock::setTime(unixTime);
+				node->m_currentDay = SysClock::day();
+			}
 		}
 
-		//if(flags & LATLON_SET)
-		{
-			node->m_Lat = newData->fix.latitude;
-			node->m_Lon = newData->fix.longitude;
-		}
-
-		//if(flags & SPEED_SET)
-		{
-			node->m_Speed = newData->fix.speed;
-		}
-
-		// if(flags & TRACK_SET)
-		{
-			node->m_Heading = newData->fix.track;
-		}
+		node->m_Lat = newData->fix.latitude;
+		node->m_Lon = newData->fix.longitude;
+		node->m_Speed = newData->fix.speed;
+		node->m_Heading = newData->fix.track;
 
 		int satCount = 0;
-		// if(flags & SATELLITE_SET)
-		// {
-			satCount = newData->satellites_used;
-		//}
+		satCount = newData->satellites_used;
 
 		GPSMode mode = GPSMode::NoUpdate;
-		//if(flags & MODE_SET)
-		{
-			mode = static_cast<GPSMode>(newData->fix.mode);
-		}
+		mode = static_cast<GPSMode>(newData->fix.mode);
 
-		GPSDataMsg* msg = new GPSDataMsg(gps_hasFix, gps_online, node->m_Lat, node->m_Lon, unixTime, node->m_Speed, node->m_Heading, satCount, mode);
-		node->m_MsgBus.sendMessage(msg);
+		MessagePtr msg = std::make_unique<GPSDataMsg>(gps_hasFix, gps_online, node->m_Lat, node->m_Lon, unixTime, node->m_Speed, node->m_Heading, satCount, mode);
+		node->m_MsgBus.sendMessage(std::move(msg));
+
 	}
 }

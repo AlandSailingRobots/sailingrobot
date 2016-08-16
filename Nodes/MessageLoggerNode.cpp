@@ -21,12 +21,14 @@
 MessageLoggerNode::MessageLoggerNode(MessageBus& msgBus)
 	:Node(NodeID::MessageLogger, msgBus)
 {
-	msgBus.registerNode(this);
-	msgBus.registerNode(this, MessageType::WindData);
-	msgBus.registerNode(this, MessageType::CompassData);
-	msgBus.registerNode(this, MessageType::GPSData);
-	msgBus.registerNode(this, MessageType::ArduinoData);
-	msgBus.registerNode(this, MessageType::WaypointData);
+
+	msgBus.registerNode(*this);
+	msgBus.registerNode(*this, MessageType::WindData);
+	msgBus.registerNode(*this, MessageType::CompassData);
+	msgBus.registerNode(*this, MessageType::GPSData);
+	msgBus.registerNode(*this, MessageType::ArduinoData);
+	msgBus.registerNode(*this, MessageType::WaypointData);
+
 }
 
 bool MessageLoggerNode::init()

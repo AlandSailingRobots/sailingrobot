@@ -14,7 +14,7 @@
 #pragma once
 
 #include "colorDetectionUtility.h"
-#include "ActiveNode.h"
+#include "../ActiveNode.h"
 
 
 
@@ -77,5 +77,5 @@ private:
     int 	m_bottomPixelsToCrop;//height in pixel of the visible part of the boat on the image
     std::vector<cv::Scalar>      m_colorDrawing;
     cv::VideoCapture m_cap;
-    
+
 };
