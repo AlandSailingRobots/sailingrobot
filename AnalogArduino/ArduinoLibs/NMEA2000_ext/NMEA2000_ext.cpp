@@ -21,7 +21,7 @@ Author: Timo Lappalainen
   1301  USA
 */
 
-#include <NMEA2000.h> 
+#include <NMEA2000_ext.h>
 
 #define N2kAddressClaimTimeout 250
 
@@ -124,6 +124,11 @@ tNMEA2000::tNMEA2000() {
                        4  // Marine
                        );
   DeviceCount=1;
+}
+
+
+void tNMEA2000::init(MCP_CAN* _CAN) {
+	CAN = _CAN;			
 }
 
 //*****************************************************************************
@@ -615,30 +620,33 @@ bool tNMEA2000::HandleReceivedSystemMessage(int MsgIndex) {
 }
 
 //*****************************************************************************
-void tNMEA2000::ParseMessages() {
-    unsigned long canId;
-    unsigned char len = 0;
-    unsigned char buf[8];
+void tNMEA2000::ParseMessages(unsigned long canId, unsigned char len, unsigned char* buf) {
     int MsgIndex;
-//    tN2kMsg N2kMsg;
-  
-    if (!Open()) return;  // Can not do much
     
-    if (CANGetFrame(canId,len,buf) ) {           // check if data coming
 //        ForwardStream->print("Can ID:"); ForwardStream->print(canId); ForwardStream->print(" len:"); ForwardStream->print(len); ForwardStream->print(" data:"); PrintBuf(ForwardStream,len,buf); ForwardStream->println("\r\n");
-        MsgIndex=SetN2kCANBufMsg(canId,len,buf);
-        if (MsgIndex>=0) {
-          if ( !HandleReceivedSystemMessage(MsgIndex) ) {
-            Serial.println(MsgIndex);
-            ForwardMessage(N2kCANMsgBuf[MsgIndex].N2kMsg);
-          }
+		MsgIndex=SetN2kCANBufMsg(canId,len,buf);
+		if (MsgIndex>=0) {
+			if ( !HandleReceivedSystemMessage(MsgIndex) ) {
+				Serial.println(MsgIndex);
+				ForwardMessage(N2kCANMsgBuf[MsgIndex].N2kMsg);
+			}
 //          N2kCANMsgBuf[MsgIndex].N2kMsg.Print(Serial);
-          if ( MsgHandler!=0 ) MsgHandler(N2kCANMsgBuf[MsgIndex].N2kMsg);
-          N2kCANMsgBuf[MsgIndex].FreeMessage();
+			if ( MsgHandler!=0 ) MsgHandler(N2kCANMsgBuf[MsgIndex].N2kMsg);
+			N2kCANMsgBuf[MsgIndex].FreeMessage();
 //          Serial.print(MsgIndex); Serial.print("\r\n");
-        }
-    }
+		}
 }
+
+//*****************************************************************************
+//CAN Send/Check
+bool tNMEA2000::CANSendFrame(unsigned long id, unsigned char len, const unsigned char *buf, bool wait_sent) {
+	return CAN->sendMsgBuf(id, 1, len, buf, wait_sent);
+}
+
+bool tNMEA2000::CANOpen() {
+  return CAN->checkIsOpen();
+}
+
 
 //*****************************************************************************
 void tNMEA2000::SetMsgHandler(void (*_MsgHandler)(const tN2kMsg &N2kMsg)) {
@@ -717,4 +725,5 @@ bool ParseN2kPGN59904(const tN2kMsg &N2kMsg, unsigned long &RequestedPGN) {
   
   return result;
 }
+
 

@@ -140,11 +140,7 @@ INT8U MCP_CAN::mcp2515_setCANCTRL_Mode(const INT8U newmode)
 
   i = mcp2515_readRegister(MCP_CANCTRL);
   i &= MODE_MASK;
-	Serial.print("i = ");
-	Serial.print(i);
-	Serial.print(", newmode = ");
-	Serial.print(newmode);
-	Serial.print("\n");
+
   if ( i == newmode )
   {
     return MCP2515_OK;
@@ -424,7 +420,6 @@ INT8U MCP_CAN::mcp2515_init(const INT8U canSpeed, const INT8U clock)            
 
   mcp2515_reset();
   res = mcp2515_setCANCTRL_Mode(MODE_CONFIG);
-	Serial.print(res);
   if (res > 0)
   {
 #if DEBUG_MODE
@@ -655,6 +650,7 @@ MCP_CAN::MCP_CAN(INT8U _CS)
 void MCP_CAN::init_CS(INT8U _CS)
 {
   if (_CS == 0) return;
+	isOpen = false;
   SPICS = _CS;
   pinMode(SPICS, OUTPUT);
   MCP2515_UNSELECT();
@@ -671,8 +667,21 @@ INT8U MCP_CAN::begin(INT8U speedset, const INT8U clockset)
   //SPI_2.begin();      for maple mini spi2 
   SPI.begin();
   res = mcp2515_init(speedset, clockset);
-  if (res == MCP2515_OK) return CAN_OK;
+  if (res == MCP2515_OK) {
+		isOpen = true;
+		return CAN_OK;
+	}
   else return CAN_FAILINIT;
+}
+
+
+/*********************************************************************************************************
+** Function name:           checkIsOpen
+** Descriptions:            check if CANBus has begun
+*********************************************************************************************************/
+bool MCP_CAN::checkIsOpen()
+{
+  return isOpen;
 }
 
 /*********************************************************************************************************

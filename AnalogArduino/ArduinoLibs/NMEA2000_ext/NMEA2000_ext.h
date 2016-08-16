@@ -41,10 +41,9 @@ save address to the EEPROM and use that on next start, they does not need to cha
 address anymore. See also method ReadResetAddressChanged().
 */
 
-#ifndef _NMEA2000_H_
-#define _NMEA2000_H_
 #include <N2kMsg.h>
 #include <N2kCANMsg.h>
+#include <mcp_can.h>
 
 // Documenta says for leghts 33,40,24,32, but then values
 // has not been translated right on devices.
@@ -168,16 +167,16 @@ protected:
     // Buffer for received messages.
     tN2kCANMsg *N2kCANMsgBuf;
     unsigned char MaxN2kCANMsgs;
+		
+		// CAN Object
+		MCP_CAN* CAN;
 
     // Handler callback
     void (*MsgHandler)(const tN2kMsg &N2kMsg);
     
 protected:
-    // Virtual functions for different interfaces. Currently there are own classes
-    // for Arduino due internal CAN (NMEA2000_due) and external MCP2515 SPI CAN bus controller (NMEA2000_mcp)
-    virtual bool CANSendFrame(unsigned long id, unsigned char len, const unsigned char *buf, bool wait_sent=true)=0;
-    virtual bool CANOpen()=0;
-    virtual bool CANGetFrame(unsigned long &id, unsigned char &len, unsigned char *buf)=0;
+    bool CANSendFrame(unsigned long id, unsigned char len, const unsigned char *buf, bool wait_sent=true);
+    bool CANOpen();
 
 protected:
     int SetN2kCANBufMsg(unsigned long canId, unsigned char len, unsigned char *buf);
@@ -194,8 +193,12 @@ protected:
     bool ForwardSystemMessages() const { return ((ForwardMode&FwdModeBit_SystemMessages)>0); }
     bool ForwardOnlyKnownMessages() const { return ((ForwardMode&FwdModeBit_OnlyKnownMessages)>0); }
     bool ForwardOwnMessages() const { return ((ForwardMode&FwdModeBit_OwnMessages)>0); }
+
 public:
-    tNMEA2000();
+    
+		tNMEA2000();
+		
+		void init(MCP_CAN* _CAN);
     
     // As default there are reservation for 5 messages. If it is not critical to handle all fast packet messages like with N2km_NodeOnly
     // you can set buffer size smaller like 3 or 2 by calling this before open.    
@@ -272,7 +275,7 @@ public:
     // Call this periodically to handle N2k messages. Note that even if you only send e.g.
     // temperature to the bus, you should call this so the code will automatically inform
     // abot itselt to others.
-    void ParseMessages();
+    void ParseMessages(unsigned long canId, unsigned char len, unsigned char* buf);
 
     // Set the message handler for incoming N2kMessages.
     void SetMsgHandler(void (*_MsgHandler)(const tN2kMsg &N2kMsg));
@@ -351,4 +354,3 @@ inline bool ParseN2kPGNISORequest(const tN2kMsg &N2kMsg, unsigned long &Requeste
   return ParseN2kPGN59904(N2kMsg, RequestedPGN);
 }
 
-#endif

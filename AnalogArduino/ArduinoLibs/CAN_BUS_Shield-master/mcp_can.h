@@ -24,7 +24,7 @@
 #define _MCP2515_H_
 
 #include "mcp_can_dfs.h"
-
+	
 #define MAX_CHAR_IN_MESSAGE 8
 
 class MCP_CAN
@@ -96,6 +96,9 @@ private:
     INT8U sendMsg(bool wait_sent=true);                             /* send message                 */
 
 public:
+		bool isOpen;
+		
+		bool checkIsOpen();
     MCP_CAN(INT8U _CS=0);//INT8U _CS);
     void init_CS(INT8U _CS);
     INT8U begin(INT8U speedset, const INT8U clockset = MCP_16MHz);                                    /* init can                     */
