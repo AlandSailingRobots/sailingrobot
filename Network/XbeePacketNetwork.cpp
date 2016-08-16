@@ -14,7 +14,11 @@
 #include "XbeePacketNetwork.h"
 #include "../utility/SysClock.h"
 #include "SLIP.h"
+#ifdef __linux__
+#include "../SystemServices/Logger.h"
+#elif _WIN32
 #include "..\SystemServices/Logger.h"
+#endif
 #include <cstring>
 
 #ifndef _WIN32

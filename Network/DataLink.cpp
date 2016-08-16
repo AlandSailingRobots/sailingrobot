@@ -15,8 +15,12 @@
 #include "DataLink.h"
 #include "SLIP.h"
 #include <cstring>
-#include "..\SystemServices/Logger.h"
 
+#ifdef __linux__
+#include "../SystemServices/Logger.h"
+#elif _WIN32
+#include "..\SystemServices/Logger.h"
+#endif
 // For std::this_thread
 #include <chrono>
 #include <thread>
