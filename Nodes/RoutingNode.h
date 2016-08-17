@@ -41,6 +41,8 @@ private:
 	int 	m_nextWaypointRadius;
 	int		m_nextWaypointStayTime;
 
+	bool	m_externalControlActive;
+
 	DBHandler &m_db;
 	DBLogger m_dbLogger;
 	WaypointRouting m_waypointRouting;

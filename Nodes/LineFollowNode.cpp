@@ -17,6 +17,7 @@
 
 #include "LineFollowNode.h"
 #include "Messages/ActuatorPositionMsg.h"
+#include "Messages/ExternalControlMsg.h"
 #include "Messages/CourseDataMsg.h"
 #include "utility/Utility.h"
 #include "utility/SysClock.h"
@@ -40,10 +41,12 @@ LineFollowNode::LineFollowNode(MessageBus& msgBus, DBHandler& db)
     m_prevWaypointLat(0),
     m_prevWaypointDeclination(0),
     m_prevWaypointRadius(0),
+    m_externalControlActive(false),
     m_tackingDirection(1)
 {
     msgBus.registerNode(*this, MessageType::VesselState);
     msgBus.registerNode(*this, MessageType::WaypointData);
+    msgBus.registerNode(*this, MessageType::ExternalControl);
 
     m_maxCommandAngle = M_PI / 6;
     m_maxSailAngle = M_PI / 4.2f;
@@ -68,8 +71,14 @@ void LineFollowNode::processMessage(const Message* msg)
 
 	switch(type)
 	{
+    case MessageType::ExternalControl:
+         m_externalControlActive = ((ExternalControlMsg*)msg)->externalControlActive();
+        break;
 	case MessageType::VesselState:
-		calculateActuatorPos((VesselStateMsg*)msg);
+        if(m_externalControlActive)
+        {
+             calculateActuatorPos((VesselStateMsg*)msg);
+        }
 		break;
 	case MessageType::WaypointData:
         {

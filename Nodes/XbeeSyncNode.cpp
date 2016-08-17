@@ -16,6 +16,8 @@
 
 #include "XbeeSyncNode.h"
 #include <cstring>
+
+#include "Messages/ExternalControlMsg.h"
 #include "Messages/ActuatorPositionMsg.h"
 
 
@@ -101,10 +103,16 @@ void XbeeSyncNode::incomingMessage(uint8_t* data, uint8_t size)
 	switch(msg.messageType())
 	{
 		case MessageType::ActuatorPosition:
-		{
-			MessagePtr actuatorControl = std::make_unique<ActuatorPositionMsg>(ActuatorPositionMsg(deserialiser));
-			m_node->m_MsgBus.sendMessage(std::move(actuatorControl));
-		}
+			{
+				MessagePtr actuatorControl = std::make_unique<ActuatorPositionMsg>(ActuatorPositionMsg(deserialiser));
+				m_node->m_MsgBus.sendMessage(std::move(actuatorControl));
+			}
+			break;
+		case MessageType::ExternalControl:
+			{
+				MessagePtr externalControl = std::make_unique<ExternalControlMsg>(ExternalControlMsg(deserialiser));
+				m_node->m_MsgBus.sendMessage(std::move(externalControl));
+			}
 			break;
 		default:
 			break;

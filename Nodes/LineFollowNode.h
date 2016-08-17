@@ -54,6 +54,8 @@ private:
 	int 	m_prevWaypointDeclination;
 	int 	m_prevWaypointRadius;
 
+	bool 	m_externalControlActive;
+
     bool    m_tack;
     double  m_maxCommandAngle, m_maxSailAngle, m_minSailAngle;
     double  m_tackAngle;
