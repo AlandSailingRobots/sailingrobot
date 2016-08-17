@@ -9,6 +9,16 @@
 
 
 #######################################################
+# Extra Build Options
+#######################################################
+
+
+# Enables OpenCV color detection if it is set
+USE_OPENCV = 0
+
+
+
+#######################################################
 # TOOLCHAINS
 #######################################################
 
@@ -20,6 +30,8 @@
 export TOOLCHAIN = linux-local
 C_TOOLCHAIN = 0
 USE_SIM = 0
+
+
 
 #######################################################
 # FILES
@@ -60,6 +72,10 @@ NODES =					Nodes/MessageLoggerNode.cpp Nodes/CV7Node.cpp Nodes/HMC6343Node.cpp 
 SYSTEM_SERVICES =		SystemServices/MaestroController.cpp SystemServices/Logger.cpp
 endif
 
+ifeq ($(USE_OPENCV), 1)
+OPENCV_CD =				Nodes/obstacledetection/colorDetectionNode.cpp Nodes/obstacledetection/colorDetectionUtility.cpp 
+endif
+
 XBEE = 					xBee/Xbee.cpp
 
 I2CCONTROLLER = 		i2ccontroller/I2CController.cpp
@@ -76,7 +92,7 @@ WINDVANECONTROLLER = 	windvanecontroller/WindVaneController.cpp
 
 SRC_MAIN = main.cpp
 
-SRC = 	utility/Utility.cpp utility/Timer.cpp utility/SysClock.cpp $(SYSTEM_SERVICES) $(XBEE) \
+SRC = 	utility/Utility.cpp utility/Timer.cpp utility/SysClock.cpp $(SYSTEM_SERVICES) $(XBEE) $(OPENCV_CD) \
 		$(CORE) $(NODES) $(I2CCONTROLLER) $(COURSE) $(DB) $(COMMAND) $(GPS) $(WAYPOINTROUTING) $(WINDVANECONTROLLER)
 
 
@@ -106,14 +122,15 @@ export OBJECT_FILE = $(BUILD_DIR)/objects.tmp
 #######################################################
 
 
-#To compile colorDetection files you need opencv cf README.MD in obstacledetection
-#export CFLAGS = -Wall -g -o2 `pkg-config --cflags opencv`
-
 export CFLAGS = -Wall -g -o2
 export CPPFLAGS = -g -Wall -pedantic -Werror -std=c++14
 
 
-export LIBS = -lsqlite3 -lgps -lrt -lcurl -lpthread `pkg-config --libs opencv`
+export LIBS = -lsqlite3 -lgps -lrt -lcurl -lpthread
+
+ifeq ($(USE_OPENCV), 1)
+LIBS += `pkg-config --libs opencv`
+endif
 
 ifeq ($(TOOLCHAIN),raspi_cc)
 C_TOOLCHAIN = 0
@@ -131,6 +148,8 @@ export CC
 export CXX
 
 export MKDIR_P = mkdir -p
+
+DEFINES = -DTOOLCHAIN=$(TOOLCHAIN) -DSIMULATION=$(USE_SIM) -DSE_OPENCV_COLOR_DETECTION=$(USE_OPENCV)
 
 
 #######################################################
@@ -176,7 +195,7 @@ $(BUILD_DIR)/%.o:$(SRC_DIR)/%.cpp
 	@mkdir -p $(dir $@)
 	@echo Compiling CPP File: $@
 
-	@$(CXX) -c $(CPPFLAGS) $(INC) -o ./$@ $< -DTOOLCHAIN=$(TOOLCHAIN) -DSIMULATION=$(USE_SIM) $(LIBS) $(LIBS_BOOST)
+	@$(CXX) -c $(CPPFLAGS) $(INC) -o ./$@ $< $(DEFINES) $(LIBS) $(LIBS_BOOST)
 
  # Compile C files into the build folder
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c

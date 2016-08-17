@@ -1,5 +1,7 @@
+
 #ifndef DETECTUTILITY
 #define DETECTUTILITY
+
 #include <iostream>
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
@@ -10,6 +12,7 @@
 #include <string>
 #include <cstdio>
 #include "Messages/ObstacleVectorMsg.h"
+
 bool is_valid_double(double x);
 
 bool find_if_close(std::vector<cv::Point>  cnt1,
