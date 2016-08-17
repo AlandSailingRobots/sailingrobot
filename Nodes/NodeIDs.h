@@ -16,7 +16,6 @@
 
 #pragma once
 
-
 #include <string>
 
 enum class NodeID {
@@ -33,6 +32,9 @@ enum class NodeID {
 	Waypoint,
 	xBeeSync,
 	SailingLogic,
+    ColorDetection,
+    CollisionAvoidanceBehaviour,
+    Lidar,
 	Simulator
 };
 
@@ -66,6 +68,12 @@ inline std::string nodeToString(NodeID id)
 		return "SailingLogic";
 	case NodeID::xBeeSync:
 		return "xBeeSync";
+    case NodeID::ColorDetection:
+    	return "ColorDetection";
+    case NodeID::CollisionAvoidanceBehaviour:
+        return "CollisionAvoidanceBehaviour";
+    case NodeID::Lidar:
+            return "Lidar";
 	case NodeID::Simulator:
 		return "Simulator";
 	}

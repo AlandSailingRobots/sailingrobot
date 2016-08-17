@@ -42,18 +42,23 @@ JSON = 					libs/json
 CORE =					MessageBus/MessageBus.cpp Nodes/ActiveNode.cpp Messages/MessageSerialiser.cpp Messages/MessageDeserialiser.cpp
 
 ifeq ($(USE_SIM),1)
+
 NODES =					Nodes/MessageLoggerNode.cpp  Nodes/WaypointMgrNode.cpp Nodes/HTTPSyncNode.cpp Nodes/XbeeSyncNode.cpp \
 						Nodes/VesselStateNode.cpp  Nodes/RoutingNode.cpp Nodes/LineFollowNode.cpp \
-						Nodes/SimulationNode.cpp
+						Nodes/SimulationNode.cpp Nodes/lidarLite/lidarLite.cpp Nodes/lidarLite/lidarLiteNode.cpp \
+						#You need opencv for the files below
+						#Nodes/obstacledetection/colorDetectionNode.cpp Nodes/obstacledetection/colorDetectionUtility.cpp
+
 SYSTEM_SERVICES =		SystemServices/Logger.cpp
 else
 NODES =					Nodes/MessageLoggerNode.cpp Nodes/CV7Node.cpp Nodes/HMC6343Node.cpp Nodes/GPSDNode.cpp Nodes/ActuatorNode.cpp  Nodes/ArduinoNode.cpp \
 						Nodes/VesselStateNode.cpp Nodes/WaypointMgrNode.cpp Nodes/HTTPSyncNode.cpp Nodes/XbeeSyncNode.cpp Nodes/RoutingNode.cpp Nodes/LineFollowNode.cpp \
-						Nodes/SimulationNode.cpp
+						Nodes/SimulationNode.cpp Nodes/lidarLite/lidarLite.cpp Nodes/lidarLite/lidarLiteNode.cpp \
+						#You need opencv for the files below
+						#Nodes/obstacledetection/colorDetectionNode.cpp Nodes/obstacledetection/colorDetectionUtility.cpp
 
 SYSTEM_SERVICES =		SystemServices/MaestroController.cpp SystemServices/Logger.cpp
 endif
-
 
 XBEE = 					xBee/Xbee.cpp
 
@@ -101,10 +106,14 @@ export OBJECT_FILE = $(BUILD_DIR)/objects.tmp
 #######################################################
 
 
+#To compile colorDetection files you need opencv cf README.MD in obstacledetection
+#export CFLAGS = -Wall -g -o2 `pkg-config --cflags opencv`
+
 export CFLAGS = -Wall -g -o2
 export CPPFLAGS = -g -Wall -pedantic -Werror -std=c++14
 
-export LIBS = -lsqlite3 -lgps -lrt -lcurl -lpthread
+
+export LIBS = -lsqlite3 -lgps -lrt -lcurl -lpthread `pkg-config --libs opencv`
 
 ifeq ($(TOOLCHAIN),raspi_cc)
 C_TOOLCHAIN = 0
@@ -134,7 +143,7 @@ all: $(EXECUTABLE) stats
 
 
 simulation:
-	make USE_SIM=1 -j
+	make USE_SIM=1 -j4
 
 # Builds the intergration test, requires the whole system to be built before
 build_tests: $(OBJECTS) $(EXECUTABLE)
@@ -166,6 +175,7 @@ $(EXECUTABLE) : $(BUILD_DIR) $(OBJECTS) $(WIRING_PI) $(OBJECT_MAIN)
 $(BUILD_DIR)/%.o:$(SRC_DIR)/%.cpp
 	@mkdir -p $(dir $@)
 	@echo Compiling CPP File: $@
+
 	@$(CXX) -c $(CPPFLAGS) $(INC) -o ./$@ $< -DTOOLCHAIN=$(TOOLCHAIN) -DSIMULATION=$(USE_SIM) $(LIBS) $(LIBS_BOOST)
 
  # Compile C files into the build folder

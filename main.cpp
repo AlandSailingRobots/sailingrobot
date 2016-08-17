@@ -112,6 +112,7 @@ int main(int argc, char *argv[])
 	printf("using simulation\n");
 	SimulationNode simulation(messageBus);
 	#else
+
 	XbeeSyncNode xbee(messageBus, dbHandler);
 	CV7Node windSensor(messageBus, dbHandler.retrieveCell("windsensor_config", "1", "port"), dbHandler.retrieveCellAsInt("windsensor_config", "1", "baud_rate"));
 	HMC6343Node compass(messageBus, dbHandler.retrieveCellAsInt("buffer_config", "1", "compass"));
@@ -161,15 +162,16 @@ int main(int argc, char *argv[])
 	#if SIMULATION == 1
 	initialiseNode(simulation,"Simulation Node",NodeImportance::CRITICAL);
 	#else
-	initialiseNode(xbee, "Xbee Sync Node", NodeImportance::NOT_CRITICAL);
+    initialiseNode(xbee, "Xbee Sync Node", NodeImportance::NOT_CRITICAL);
 	initialiseNode(windSensor, "Wind Sensor", NodeImportance::CRITICAL);
+
 	initialiseNode(compass, "Compass", NodeImportance::CRITICAL);
 	initialiseNode(gpsd, "GPSD Node", NodeImportance::CRITICAL);
 	initialiseNode(sail, "Sail Actuator", NodeImportance::CRITICAL);
 	initialiseNode(rudder, "Rudder Actuator", NodeImportance::CRITICAL);
 	initialiseNode(arduino, "Arduino Node", NodeImportance::NOT_CRITICAL);
-
 	#endif
+
 	if (requireNetwork)
 	{
 		initialiseNode(httpsync, "Httpsync Node", NodeImportance::CRITICAL);
@@ -195,13 +197,13 @@ int main(int argc, char *argv[])
 	#if SIMULATION == 1
 	simulation.start();
   #else
+
 	xbee.start();
 	windSensor.start();
 	compass.start();
 	gpsd.start();
 	arduino.start();
   #endif
-
 	httpsync.start();
 	vessel.start();
 

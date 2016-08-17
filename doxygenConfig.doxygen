@@ -44,7 +44,11 @@ PROJECT_NUMBER         =
 # for a project that appears at the top of each page and should give viewer a
 # quick idea about the purpose of the project. Keep the description short.
 
+<<<<<<< HEAD
+PROJECT_BRIEF          = "Project about a sailing robot."
+=======
 PROJECT_BRIEF          =
+>>>>>>> origin/srcs-144_message_architecture
 
 # With the PROJECT_LOGO tag one can specify a logo or an icon that is included
 # in the documentation. The maximum height of the logo should not exceed 55
@@ -207,7 +211,11 @@ QT_AUTOBRIEF           = NO
 # not recognized any more.
 # The default value is: NO.
 
+<<<<<<< HEAD
+MULTILINE_CPP_IS_BRIEF = YES
+=======
 MULTILINE_CPP_IS_BRIEF = NO
+>>>>>>> origin/srcs-144_message_architecture
 
 # If the INHERIT_DOCS tag is set to YES then an undocumented member inherits the
 # documentation from any documented member that it re-implements.
@@ -441,7 +449,11 @@ EXTRACT_ALL            = NO
 # be included in the documentation.
 # The default value is: NO.
 
+<<<<<<< HEAD
+EXTRACT_PRIVATE        = YES
+=======
 EXTRACT_PRIVATE        = NO
+>>>>>>> origin/srcs-144_message_architecture
 
 # If the EXTRACT_PACKAGE tag is set to YES, all members with package or internal
 # scope will be included in the documentation.
@@ -453,7 +465,11 @@ EXTRACT_PACKAGE        = NO
 # included in the documentation.
 # The default value is: NO.
 
+<<<<<<< HEAD
+EXTRACT_STATIC         = YES
+=======
 EXTRACT_STATIC         = NO
+>>>>>>> origin/srcs-144_message_architecture
 
 # If the EXTRACT_LOCAL_CLASSES tag is set to YES, classes (and structs) defined
 # locally in source files will be included in the documentation. If set to NO,
@@ -843,7 +859,10 @@ FILE_PATTERNS          = *.c \
                          *.inc \
                          *.m \
                          *.markdown \
+<<<<<<< HEAD
+=======
                          *.md \
+>>>>>>> origin/srcs-144_message_architecture
                          *.mm \
                          *.dox \
                          *.py \
@@ -861,7 +880,11 @@ FILE_PATTERNS          = *.c \
 # be searched for input files as well.
 # The default value is: NO.
 
+<<<<<<< HEAD
+RECURSIVE              = YES
+=======
 RECURSIVE              = NO
+>>>>>>> origin/srcs-144_message_architecture
 
 # The EXCLUDE tag can be used to specify files and/or directories that should be
 # excluded from the INPUT source files. This way you can easily exclude a
@@ -870,7 +893,11 @@ RECURSIVE              = NO
 # Note that relative paths are relative to the directory from which doxygen is
 # run.
 
+<<<<<<< HEAD
+EXCLUDE                = libs
+=======
 EXCLUDE                =
+>>>>>>> origin/srcs-144_message_architecture
 
 # The EXCLUDE_SYMLINKS tag can be used to select whether or not files or
 # directories that are symbolic links (a Unix file system feature) are excluded
