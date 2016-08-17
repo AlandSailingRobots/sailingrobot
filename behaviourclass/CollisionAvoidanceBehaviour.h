@@ -8,18 +8,22 @@
 #include <vector>
 #include <math.h>
 #include <stdlib.h>
+#include <iostream>
 #include "libs/Eigen/Dense"
+#include "models/SystemStateModel.h"
 #include "utility/Utility.h"
 #include <boost/geometry/geometry.hpp>
+#include <boost/geometry/geometries/polygon.hpp>
+#include <boost/geometry/multi/geometries/multi_polygon.hpp>
 
 // TODO : Receive these values from the database or from RoutingBehaviour
 // Some of these values should be available for all behaviour classes
 #define DISTANCE_NOT_THE_SAME_OBSTACLE 15.0
 #define MAXIMUM_SENSOR_RANGE 100.0
 #define SENSOR_HEADING_RELATIVE_TO_BOAT 0.0 // There might be several sensors
-#define SENSOR_ARC_ANGLE 90.0 // Every angle is in radian
+#define SENSOR_ARC_ANGLE M_PI/3 // Every angle is in radian
 #define CHANNEL_RADIUS 15.0 // in meters
-#define SAFE_DISTANCE 30.0 // in meters
+#define SAFE_DISTANCE 50.0 // in meters
 #define EARTH_RADIUS 6371000 // in meters
 #define CONVERSION_FACTOR_METER_TO_GPS 0.00000015695406942385 // in rad/meters
 
@@ -39,6 +43,7 @@
 
 typedef boost::geometry::model::point<double, 2, boost::geometry::cs::cartesian> boostPoint;
 typedef boost::geometry::model::polygon<boostPoint> boostPolygon;
+typedef boost::geometry::model::multi_polygon<boostPolygon> boostMultiPolygon;
 
 /**
  * Structure which contains every obstacle data from the sensors
@@ -79,6 +84,9 @@ struct FollowedLine {
     Eigen::Vector2d startPoint;
     Eigen::Vector2d endPoint;
 };
+/**
+ * Commands output in radians
+ */
 struct CommandOutput {
     double deltaRudder;
     double deltaSail;
@@ -94,10 +102,10 @@ struct Simulation {
     bool obstacles;
 };
 struct PotentialMap{
-    const double xMin;
-    const double xMax;
-    const double yMin;
-    const double yMax;
+    double xMin;
+    double xMax;
+    double yMin;
+    double yMax;
     Eigen::ArrayXXd field;
 };
 struct BearingOnlyVars{
@@ -107,39 +115,40 @@ struct BearingOnlyVars{
 
 /**
  * Collision avoidance class
- * Super class call. Calls the database
  */
-class CollisionAvoidanceBehaviour : public RoutingBehaviour {
+class CollisionAvoidanceBehaviour{
     //For test only
 public:
-    CollisionAvoidanceBehaviour(DBHandler *db);
+    CollisionAvoidanceBehaviour();
     ~CollisionAvoidanceBehaviour() {};
 
-    /**
-     * Test if everything is ok before starting everything
-     * @return
-     */
-    bool init(); //
-
-    /**
-     * Compute the commands
-     * Too much output parameters, should be reduced.
-     *
-     * This is a trick to interface this code and the rest of the c++ code
-     * @param systemStateModel
-     * @param position
-     * @param trueWindDirection
-     * @param mockPosition
-     * @param getHeadingFromCompass
-     */
-    void computeCommands(SystemStateModel &systemStateModel,
-                         std::unique_ptr<Position> const &position,
-                         double trueWindDirection,
-                         bool mockPosition,
-                         bool getHeadingFromCompass);
-    void manageDatabase(double trueWindDirection, SystemStateModel &systemStateModel);
-
-private:
+    bool setSailingZone();
+//
+//    /**
+//     * Test if everything is ok before starting everything
+//     * @return
+//     */
+//    bool init(); //
+//
+//    /**
+//     * Compute the commands
+//     * Too much output parameters, should be reduced.
+//     *
+//     * This is a trick to interface this code and the rest of the c++ code
+//     * @param systemStateModel
+//     * @param position
+//     * @param trueWindDirection
+//     * @param mockPosition
+//     * @param getHeadingFromCompass
+//     */
+//    void computeCommands(SystemStateModel &systemStateModel,
+//                         std::unique_ptr<Position> const &position,
+//                         double trueWindDirection,
+//                         bool mockPosition,
+//                         bool getHeadingFromCompass);
+//    void manageDatabase(double trueWindDirection, SystemStateModel &systemStateModel);
+//
+protected:
 
     std::vector<Obstacle> m_seenObstacles;
     // Since followedLine is updated from the waypointNode at each iteration
@@ -167,8 +176,8 @@ private:
      * @param radAngle2
      * @return
      */
-    double angleDiff(double radAngle1,
-                     double radAngle2);
+    double wrapToPi(double radAngle1,
+                    double radAngle2);
 
     /**
      * \Brief Compute the distance between 2 GPS points
@@ -280,6 +289,8 @@ private:
      *          d being the distance travelled,
      *          R the earth’s radius
      *
+     * Here everything is in meters and radians
+     *
      * @param distance
      * @param bearing
      * @param startPoint
@@ -353,6 +364,8 @@ private:
     /**
      * Update the polygon of an obstacle with the data inside a boost polygon
      *
+     * recreate the polygon but not the obstacle
+     *
      * I make the assumption that there will be only one poly in output
      * Be aware that some segfault might come from here.
      * But it shouln't be the case, no poly is concave here.
@@ -388,8 +401,70 @@ private:
      * @param seenObstacles
      * @return
      */
-    std::vector<Obstacle> mergeObstacles(std::vector<Obstacle> upToDateObstacles,
+    std::vector<Obstacle> mergeObstacles(SensorData sensorData,
+                                         std::vector<Obstacle> upToDateObstacles,
                                          std::vector<Obstacle> seenObstacles);
+
+    /**
+     * Boost union handler
+     * @param mpoly
+     * @return
+     */
+    boostMultiPolygon polyUnion(boostMultiPolygon mpoly);
+
+    /**
+     * Compute obstacle potential
+     *
+     * Since the obstacle is a polygon, only the closest point from
+     * the polygon will be counted as an obstacle
+     *
+     * Maybe we should do a parameter file where we could configure everything
+     * Values found after extensive testing on matlab
+     * The values are scaled for meters.
+     * @param Px
+     * @param Py
+     * @param sensorData
+     * @param seenObstacles
+     * @param followedLine
+     * @return
+     */
+    Eigen::ArrayXXd computeObstaclePot(Eigen::ArrayXXd Px,Eigen::ArrayXXd Py,
+                                       SensorData sensorData,std::vector<Obstacle> seenObstacles,
+                                       FollowedLine followedLine);
+    /**
+     * Compute objective potential
+     * @param Px  a grid matrix used like an axis
+     * @param Py  a grid matrix used like an axis
+     * @param followedLine
+     * @return
+     */
+    Eigen::ArrayXXd computeObjectivePot(Eigen::ArrayXXd Px,Eigen::ArrayXXd Py,FollowedLine followedLine);
+    /**
+     * Compute wind no-go zone potential
+     * @param Px
+     * @param Py
+     * @param sensorData
+     * @return
+     */
+    Eigen::ArrayXXd computeWindPot(Eigen::ArrayXXd Px,Eigen::ArrayXXd Py,SensorData sensorData);
+    /**
+     * Compute boat potential
+     * @param Px
+     * @param Py
+     * @param sensorData
+     * @return
+     */
+    Eigen::ArrayXXd computeBoatPot(Eigen::ArrayXXd Px,Eigen::ArrayXXd Py,SensorData sensorData);
+    /**
+     * Compute sailing zone potential
+     * @param Px
+     * @param Py
+     * @param sailingZone
+     * @return
+     */
+    Eigen::ArrayXXd computeSailingZonePot(Eigen::ArrayXXd Px,Eigen::ArrayXXd Py,
+                                          std::vector<Eigen::Vector2d> sailingZone);
+
 
     //PRIVATE MAIN FUNCTIONS
 
@@ -461,7 +536,8 @@ private:
      * @param min
      * @return
      */
-    FollowedLine compute_new_path(Eigen::Vector2d collision_avoidance_point);
+    FollowedLine compute_new_path(Eigen::Vector2d collision_avoidance_point,
+                                  FollowedLine followedLine);
 
     /**
      * Compute the commands according to the new path.

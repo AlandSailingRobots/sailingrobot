@@ -477,7 +477,10 @@ int sign(float num){
     }
     return signNum;
 }
-Eigen::MatrixXd f(Eigen::MatrixXd boat_state,Eigen::MatrixXd inputs,int wind_speed,float wind_direction){
+Eigen::MatrixXd f(Eigen::MatrixXd boat_state,
+                  Eigen::MatrixXd inputs,
+                  int wind_speed,
+                  float wind_direction){
     float p1=0.1, p2=1, p3=6000, p4=1000, p5=2000;
     float p6=1, p7=1, p8=2, p9=300, p10=6000;
 
