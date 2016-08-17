@@ -19,7 +19,7 @@
 #		raspi_local = For compiling on the PI itself
 export TOOLCHAIN = linux-local
 C_TOOLCHAIN = 0
-
+USE_SIM = 0
 
 #######################################################
 # FILES
@@ -30,7 +30,8 @@ export BUILD_DIR = build
 SRC_DIR = ./
 OUTPUT_DIR = ./
 
-TEST_MAKEFILE = ./Makefile.tests
+UNIT_TEST = ./unit-tests.run
+HARDWARE_TEST = ./hardware-tests.run
 
 # External Libraries
 
@@ -38,35 +39,31 @@ JSON = 					libs/json
 
 # Sources
 
-XBEE = 					xBee/xBeeSync.cpp xBee/xBee.cpp
+CORE =					MessageBus/MessageBus.cpp Nodes/ActiveNode.cpp Messages/MessageSerialiser.cpp Messages/MessageDeserialiser.cpp
 
-BEHAVIOURCLASS = 	behaviourclass/RoutingBehaviour.cpp  behaviourclass/WaypointBehaviour.cpp behaviourclass/LineFollowBehaviour.cpp
+ifeq ($(USE_SIM),1)
+NODES =					Nodes/MessageLoggerNode.cpp  Nodes/WaypointMgrNode.cpp Nodes/HTTPSyncNode.cpp Nodes/XbeeSyncNode.cpp \
+						Nodes/VesselStateNode.cpp  Nodes/RoutingNode.cpp Nodes/LineFollowNode.cpp \
+						Nodes/SimulationNode.cpp
+SYSTEM_SERVICES =		SystemServices/Logger.cpp
+else
+NODES =					Nodes/MessageLoggerNode.cpp Nodes/CV7Node.cpp Nodes/HMC6343Node.cpp Nodes/GPSDNode.cpp Nodes/ActuatorNode.cpp  Nodes/ArduinoNode.cpp \
+						Nodes/VesselStateNode.cpp Nodes/WaypointMgrNode.cpp Nodes/HTTPSyncNode.cpp Nodes/XbeeSyncNode.cpp Nodes/RoutingNode.cpp Nodes/LineFollowNode.cpp \
+						Nodes/SimulationNode.cpp
 
-ANALOGARDUINO = 		AnalogArduino/AnalogArduino.cpp AnalogArduino/MockAnalogArduino.cpp AnalogArduino/AR_UNO.cpp
+SYSTEM_SERVICES =		SystemServices/MaestroController.cpp SystemServices/Logger.cpp
+endif
 
-COMPASS = 				Compass/Compass.cpp Compass/MockCompass.cpp Compass/HMC6343.cpp
+
+XBEE = 					xBee/Xbee.cpp
 
 I2CCONTROLLER = 		i2ccontroller/I2CController.cpp
 
-POSITION = 				utility/Position.cpp utility/MockPosition.cpp utility/RealPosition.cpp
+COURSE = 				utility/CourseCalculation.cpp utility/CourseMath.cpp
 
-COURSE = 				coursecalculation/CourseCalculation.cpp coursecalculation/CourseMath.cpp
+DB = 					dbhandler/DBHandler.cpp dbhandler/DBLogger.cpp
 
-DB = 					dbhandler/DBHandler.cpp
-
-COMMAND = 				ruddercommand/RudderCommand.cpp sailcommand/SailCommand.cpp
-
-MAESTRO = 				servocontroller/MaestroController.cpp servocontroller/MockMaestroController.cpp servocontroller/ServoObject.cpp servocontroller/SensorObject.cpp servocontroller/MockServoObject.cpp
-
-CV7 = 					CV7/Windsensor.cpp CV7/MockWindsensor.cpp CV7/UtilityLibrary.cpp CV7/CV7.cpp
-
-GPS = 					gps/GPSReader.cpp gps/MockGPSReader.cpp
-
-HTTP = 					httpsync/HTTPSync.cpp
-
-XML_LOG = 				xmlparser/pugi/pugixml.cpp xmlparser/src/xml_log.cpp
-
-THREAD = 				thread/SystemState.cpp thread/ExternalCommand.cpp thread/ThreadRAII.cpp
+COMMAND = 				waypointrouting/RudderCommand.cpp waypointrouting/SailCommand.cpp
 
 WAYPOINTROUTING = 		waypointrouting/WaypointRouting.cpp waypointrouting/Commands.cpp waypointrouting/TackAngle.cpp
 
@@ -74,9 +71,9 @@ WINDVANECONTROLLER = 	windvanecontroller/WindVaneController.cpp
 
 SRC_MAIN = main.cpp
 
-SRC = 	GPSupdater.cpp SailingRobot.cpp WindsensorController.cpp logger/Logger.cpp utility/Utility.cpp utility/Timer.cpp $(XBEE) \
-		$(ANALOGARDUINO) $(COMPASS) $(I2CCONTROLLER) $(POSITION) $(COURSE) $(DB) $(COMMAND) $(MAESTRO) $(CV7) $(GPS) $(HTTP) \
-		$(XML_LOG) $(THREAD) $(WAYPOINTROUTING) $(WINDVANECONTROLLER) $(BEHAVIOURCLASS)
+SRC = 	utility/Utility.cpp utility/Timer.cpp utility/SysClock.cpp $(SYSTEM_SERVICES) $(XBEE) \
+		$(CORE) $(NODES) $(I2CCONTROLLER) $(COURSE) $(DB) $(COMMAND) $(GPS) $(WAYPOINTROUTING) $(WINDVANECONTROLLER)
+
 
 #SOURCES = $(addprefix src/, $(SRC))
 
@@ -91,7 +88,7 @@ WIRING_PI_PATH = ./libs/wiringPi/wiringPi/
 WIRING_PI_STATIC = ./libs/wiringPi/wiringPi/libwiringPi.so.2.32
 
 # Object files
-OBJECTS = $(addprefix $(BUILD_DIR)/, $(SRC:.cpp=.o)) $(BUILD_DIR)/AnalogArduino/libmyWiringI2C.so
+OBJECTS = $(addprefix $(BUILD_DIR)/, $(SRC:.cpp=.o))
 OBJECT_MAIN = $(addprefix $(BUILD_DIR)/, $(SRC_MAIN:.cpp=.o))
 
 # Target Output
@@ -105,7 +102,7 @@ export OBJECT_FILE = $(BUILD_DIR)/objects.tmp
 
 
 export CFLAGS = -Wall -g -o2
-export CPPFLAGS = -g -Wall -pedantic -Werror -std=c++11
+export CPPFLAGS = -g -Wall -pedantic -Werror -std=c++14
 
 export LIBS = -lsqlite3 -lgps -lrt -lcurl -lpthread
 
@@ -131,18 +128,23 @@ export MKDIR_P = mkdir -p
 # Rules
 #######################################################
 
-.PHONY: clean clean_tests
+.PHONY: clean
 
 all: $(EXECUTABLE) stats
+
+
+simulation:
+	make USE_SIM=1 -j
 
 # Builds the intergration test, requires the whole system to be built before
 build_tests: $(OBJECTS) $(EXECUTABLE)
 	@echo Building tests...
-	@$(MAKE) -f $(TEST_MAKEFILE)
+	$(MAKE) -C tests
+	$(CXX) $(CPPFLAGS) tests/runner.o @$(OBJECT_FILE) -Wl,-rpath=./ ./libwiringPi.so -o $(UNIT_TEST) $(LIBS)
+	$(CXX) $(CPPFLAGS) tests/runnerHardware.o @$(OBJECT_FILE) -Wl,-rpath=./ ./libwiringPi.so -o $(HARDWARE_TEST) $(LIBS)
 
-clean_tests:
-	@echo Cleaning tests...
-	@$(MAKE) -f $(TEST_MAKEFILE) clean
+xbee_remote: $(OBJECTS) $(EXECUTABLE) $(WIRING_PI)
+	$(MAKE) -C xbeerelay
 
 #  Create the directories needed
 $(BUILD_DIR):
@@ -164,7 +166,7 @@ $(EXECUTABLE) : $(BUILD_DIR) $(OBJECTS) $(WIRING_PI) $(OBJECT_MAIN)
 $(BUILD_DIR)/%.o:$(SRC_DIR)/%.cpp
 	@mkdir -p $(dir $@)
 	@echo Compiling CPP File: $@
-	@$(CXX) -c $(CPPFLAGS) $(INC) -o ./$@ $< -DTOOLCHAIN=$(TOOLCHAIN) $(LIBS) $(LIBS_BOOST)
+	@$(CXX) -c $(CPPFLAGS) $(INC) -o ./$@ $< -DTOOLCHAIN=$(TOOLCHAIN) -DSIMULATION=$(USE_SIM) $(LIBS) $(LIBS_BOOST)
 
  # Compile C files into the build folder
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
@@ -186,7 +188,7 @@ stats:$(EXECUTABLE)
 	@echo Final executable size:
 	$(SIZE) $(EXECUTABLE)
 
-clean: clean_tests
+clean:
 	@echo Removing existing object files and executable
 	@rm -f -r $(BUILD_DIR)
 	@rm -f $(EXECUTABLE)
