@@ -32,7 +32,9 @@ enum class MessageType {
 	ArduinoData,
 	VesselState,
 	WaypointData,
-	CourseData
+	CourseData,
+    ObstacleVector,
+    CollisionAvoidance
 };
 
 inline std::string msgToString(MessageType msgType)
@@ -65,6 +67,10 @@ inline std::string msgToString(MessageType msgType)
 		return "WaypointData";
 	case MessageType::CourseData:
 		return "CourseData";
-	}
+    case MessageType::ObstacleVector:
+        return "ObstacleVector";
+    case MessageType::CollisionAvoidance:
+        return "CollisionAvoidance";
+    }
 	return "";
 }

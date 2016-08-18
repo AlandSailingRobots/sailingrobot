@@ -120,11 +120,11 @@ struct BearingOnlyVars{
 /**
  * Collision avoidance class
  */
-class CollisionAvoidanceBehaviour : public Node{
+class CollisionAvoidanceNode : public Node{
     //For test only
 public:
-    CollisionAvoidanceBehaviour(MessageBus& msgBus);
-    ~CollisionAvoidanceBehaviour() {};
+    CollisionAvoidanceNode(MessageBus& msgBus);
+    ~CollisionAvoidanceNode() {};
 
     /**
      * Nothing to initialize for now
@@ -138,7 +138,7 @@ public:
      * @param message
      * @return
      */
-    bool processMessage(const Message* message);
+    void processMessage(const Message* message);
 
     /**
      * Setter for the sailing zone
