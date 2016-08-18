@@ -20,6 +20,7 @@
 #include "Nodes/XbeeSyncNode.h"
 #include "Nodes/RoutingNode.h"
 #include "Nodes/LineFollowNode.h"
+#include "Nodes/obstacledetection/colorDetectionNode.h"
 #include "Messages/DataRequestMsg.h"
 #include "dbhandler/DBHandler.h"
 #include "SystemServices/MaestroController.h"
@@ -123,6 +124,9 @@ int main(int argc, char *argv[])
 	HTTPSyncNode httpsync(messageBus, &dbHandler, 0, false);
 	VesselStateNode vessel(messageBus);
 	WaypointMgrNode waypoint(messageBus, dbHandler);
+	std::vector<std::string> list;
+	list.push_back("red");
+	colorDetectionNode colorDetection(messageBus, list, 0);
 
 
 	Node* sailingLogic;
@@ -157,19 +161,19 @@ int main(int argc, char *argv[])
 
 
 	// Initialise nodes
-	initialiseNode(msgLogger, "Message Logger", NodeImportance::NOT_CRITICAL);
+	//initialiseNode(msgLogger, "Message Logger", NodeImportance::NOT_CRITICAL);
 
 	#if SIMULATION == 1
 	initialiseNode(simulation,"Simulation Node",NodeImportance::CRITICAL);
 	#else
     initialiseNode(xbee, "Xbee Sync Node", NodeImportance::NOT_CRITICAL);
-	initialiseNode(windSensor, "Wind Sensor", NodeImportance::CRITICAL);
+	/*initialiseNode(windSensor, "Wind Sensor", NodeImportance::CRITICAL);
 
 	initialiseNode(compass, "Compass", NodeImportance::CRITICAL);
 	initialiseNode(gpsd, "GPSD Node", NodeImportance::CRITICAL);
 	initialiseNode(sail, "Sail Actuator", NodeImportance::CRITICAL);
 	initialiseNode(rudder, "Rudder Actuator", NodeImportance::CRITICAL);
-	initialiseNode(arduino, "Arduino Node", NodeImportance::NOT_CRITICAL);
+	initialiseNode(arduino, "Arduino Node", NodeImportance::NOT_CRITICAL);*/
 	#endif
 
 	if (requireNetwork)
@@ -182,7 +186,8 @@ int main(int argc, char *argv[])
 	}
 
 	initialiseNode(vessel, "Vessel State Node", NodeImportance::CRITICAL);
-	initialiseNode(waypoint, "Waypoint Node", NodeImportance::CRITICAL);
+	//initialiseNode(waypoint, "Waypoint Node", NodeImportance::CRITICAL);
+	initialiseNode(colorDetection, "Colour detection node", NodeImportance::NOT_CRITICAL);
 
 	if(usingLineFollow)
 	{
@@ -204,8 +209,9 @@ int main(int argc, char *argv[])
 	gpsd.start();
 	arduino.start();
   #endif
-	httpsync.start();
+	//httpsync.start();
 	vessel.start();
+	colorDetection.start();
 
 	// NOTE - Jordan: Just to ensure messages are following through the system
 	MessagePtr dataRequest = std::make_unique<DataRequestMsg>(NodeID::MessageLogger);

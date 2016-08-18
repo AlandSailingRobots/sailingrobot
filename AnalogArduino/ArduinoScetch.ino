@@ -13,6 +13,7 @@ int pressurePin = A0;
 int rudderPin = A1;
 int sheetPin = A2;
 int batteryPin = A3;
+int RCPin = 7;
 
 byte mask = 1;
 byte LSB[4] = {0,0,0,0};
@@ -25,7 +26,8 @@ byte errorflag;
 bool request_activated = false;
 bool request = true;
 bool end_request=false; 
-byte b;                                                                      // byte from buffer
+byte b;  // byte from buffer
+byte RCFlag;
 
 
 void setup() {
@@ -35,6 +37,7 @@ void setup() {
   pinMode(rudderPin, INPUT);
   pinMode(sheetPin, INPUT);
   pinMode(batteryPin, INPUT);
+  pinMode(RCPin, INPUT);
   byte i=0;EEPROM.read(0);
   if(i==0x55)                                        // B01010101 is written to the first byte of EEPROM memory to indicate that an I2C address has been previously stored
   {
@@ -59,6 +62,7 @@ void loop() {
   splitValue(analogRead(rudderPin),RUDDERBYTE);
   splitValue(analogRead(sheetPin),SHEETBYTE);
   splitValue(analogRead(batteryPin),BATTERYBYTE);
+  RCFlag = digitalRead(RCPin);
   delay(100);
 }
   
@@ -94,5 +98,6 @@ void I2Cstatus(){
   datapacket[7]=MSB[BATTERYBYTE-1];
   datapacket[8]=LSB[BATTERYBYTE-1];
   datapacket[9]=I2Caddress;
+  datapacket[10]=RCPin;
   Wire.write(datapacket,11);
 }
