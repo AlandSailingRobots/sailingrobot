@@ -78,4 +78,5 @@ private:
 	int 	m_ArduinoRudder;
 	int 	m_ArduinoSheet;
     int 	m_ArduinoBattery;
+	int		m_ArduinoRC;
 };
