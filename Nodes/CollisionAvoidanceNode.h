@@ -10,6 +10,7 @@
 #include "Nodes/Node.h"
 #include "Messages/VesselStateMsg.h"
 #include "Messages/ObstacleVectorMsg.h"
+#include "Messages/WaypointDataMsg.h.h"
 #include <vector>
 #include <math.h>
 #include <stdlib.h>
@@ -177,12 +178,20 @@ protected:
     void processObstacleData(ObstacleData* msg);
 
     /**
+     * Process the messages from the waypoint manager in order to know the
+     * line the boat is currently following.
+     * @param msg
+     */
+    void processWaypointData(WaypointDataMsg* msg);
+
+    /**
      * The most important function of the class, it calls al the others.
      * It's called by processObstacleData.
-     * @param systemStateModel
-     * @return
+     *
+     * It uses m_followedLine and m_sensorOutput as main input
+     * Then it sends the commands by itself
      */
-    CommandOutput run(SensorData sensorData);
+    void run();
 
     /**
      * Is there any obstacles ? If yes, which information can i gather on them.

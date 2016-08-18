@@ -44,7 +44,11 @@
 
 //CONSTRUCTOR
 CollisionAvoidanceNode::CollisionAvoidanceNode(MessageBus& msgBus)
-        : Node(NodeID::CollisionAvoidance, msgBus){}
+        : Node(NodeID::CollisionAvoidance, msgBus){
+    msgBus.registerNode(*this, MessageType::ObstacleVector);
+    msgBus.registerNode(*this, MessageType::VesselState);
+    msgBus.registerNode(*this, MessageType::WaypointData);
+}
 
 //PUBLIC FUNCTIONS
 
@@ -68,9 +72,10 @@ void CollisionAvoidanceNode::processMessage(const Message* msg){
     {
         case MessageType::VesselState:
             processVesselState((VesselStateMsg*)msg);
-            break;
         case MessageType::ObstacleVector:
-            processObstacleData((ObstacleVector*)msg);
+            processObstacleData((ObstacleData*)msg);
+        case MessageType::WaypointData:
+            processObstacleData((WaypointDataMsg*)msg);
         default:
             return;
     }
@@ -78,13 +83,14 @@ void CollisionAvoidanceNode::processMessage(const Message* msg){
 
 //PRIVATE MAIN FUNCTIONS
 
-void CollisionAvoidanceNode::processVesselState(VesselStateMsg* msg){}
+void CollisionAvoidanceNode::processVesselState(VesselStateMsg* msg){
+    msgBus.registerNode(*this, MessageType::VesselState);
+    msgBus.registerNode(*this, MessageType::ObstacleVector);
+    msgBus.registerNode(*this, MessageType::WaypointData);
+}
 
-SensorData CollisionAvoidanceNode::update_sensors(
-        SystemStateModel &systemStateModel,
-        const Simulation sim) {
-    SensorData sensorData;
-    if (sim.waypoints) {
+void processVesselState(VesselStateMsg* msg){
+    if (m_simu.waypoints) {
         // TODO : simulation part (called or made here)
     }
     else {
@@ -115,7 +121,9 @@ SensorData CollisionAvoidanceNode::update_sensors(
         sensorData.pitch = systemStateModel.compassModel.pitch;
         sensorData.roll = systemStateModel.compassModel.roll;
     }
+}
 
+void processObstacleData(ObstacleData* msg){
     //ASSUMPTION
     /*
      * The sensors will give a confidence interval of the heading and the distance
@@ -169,8 +177,38 @@ SensorData CollisionAvoidanceNode::update_sensors(
     else {
         // TODO : when the sensors wil be ready, put the code to get everything here
     }
+}
 
-    return sensorData;
+void processWaypointData(WaypointDataMsg* msg){
+
+}
+
+// TODO : When the message architecture will be done, modify all this.
+CommandOutput CollisionAvoidanceNode::run() {
+    //Note on simulation
+    /*
+     * For now i don't know of any place in the code where it specified if the code is
+     * in a simulated environement or not. So this variable is temporary.
+     */
+    Simulation sim = {false, // waypoints
+                      true};// obstacles
+
+    //Gives sensors output or compute an easier way to handle them
+    m_sensorOutput = update_sensors(systemStateModel,
+                                    sim);
+
+    //update_waypoints(); //Update waypoints or compute an easier way to handle them
+
+    m_seenObstacles = check_obstacles(m_sensorOutput,m_seenObstacles);
+    //    update_map();
+    if (these_obstacles_are_a_problem(m_seenObstacles)) {
+        PotentialMap potential_field = compute_potential_field(m_seenObstacles,
+                                                               m_sailingZone,
+                                                               m_followedLine);
+        Eigen::Vector2d min = find_minimum_potential_field(potential_field);
+        m_followedLine = compute_new_path(min,m_followedLine);
+    }
+    return compute_commands(m_followedLine);
 }
 
 /*
@@ -477,35 +515,6 @@ CommandOutput CollisionAvoidanceNode::compute_commands(
                                             - desiredHeading_bar)
                                         + 1);
     return commandOutput;
-}
-
-// TODO : When the message architecture will be done, modify all this.
-CommandOutput CollisionAvoidanceNode::run(
-        SystemStateModel &systemStateModel) {
-    //Note on simulation
-    /*
-     * For now i don't know of any place in the code where it specified if the code is
-     * in a simulated environement or not. So this variable is temporary.
-     */
-    Simulation sim = {false, // waypoints
-                      true};// obstacles
-
-    //Gives sensors output or compute an easier way to handle them
-    m_sensorOutput = update_sensors(systemStateModel,
-                                    sim);
-
-    //update_waypoints(); //Update waypoints or compute an easier way to handle them
-
-    m_seenObstacles = check_obstacles(m_sensorOutput,m_seenObstacles);
-    //    update_map();
-    if (these_obstacles_are_a_problem(m_seenObstacles)) {
-        PotentialMap potential_field = compute_potential_field(m_seenObstacles,
-                                                               m_sailingZone,
-                                                               m_followedLine);
-        Eigen::Vector2d min = find_minimum_potential_field(potential_field);
-        m_followedLine = compute_new_path(min,m_followedLine);
-    }
-    return compute_commands(m_followedLine);
 }
 
 // UTILITY FUNCTIONS
@@ -1198,6 +1207,7 @@ Eigen::ArrayXXd CollisionAvoidanceNode::computeObstaclePot(
 
     return obsPot;
 }
+
 Eigen::ArrayXXd CollisionAvoidanceNode::computeObjectivePot(
         Eigen::ArrayXXd Px,Eigen::ArrayXXd Py,
         FollowedLine followedLine){
@@ -1211,6 +1221,7 @@ Eigen::ArrayXXd CollisionAvoidanceNode::computeObjectivePot(
                                                       *objectiveSpread).exp();
     return objPot;
 }
+
 Eigen::ArrayXXd CollisionAvoidanceNode::computeWindPot(
         Eigen::ArrayXXd Px,Eigen::ArrayXXd Py,
         SensorData sensorData){
@@ -1233,6 +1244,7 @@ Eigen::ArrayXXd CollisionAvoidanceNode::computeWindPot(
                                                  * (1/(1+(-windChangeSlope*yWindAfterRot).exp()));
     return windPot;
 }
+
 Eigen::ArrayXXd CollisionAvoidanceNode::computeBoatPot(
         Eigen::ArrayXXd Px,Eigen::ArrayXXd Py,
         SensorData sensorData){
@@ -1254,6 +1266,7 @@ Eigen::ArrayXXd CollisionAvoidanceNode::computeBoatPot(
 
     return boatPot;
 }
+
 Eigen::ArrayXXd CollisionAvoidanceNode::computeSailingZonePot(
         Eigen::ArrayXXd Px,Eigen::ArrayXXd Py,
         std::vector<Eigen::Vector2d> sailingZone){
