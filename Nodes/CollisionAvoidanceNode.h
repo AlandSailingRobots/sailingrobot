@@ -10,7 +10,7 @@
 #include "Nodes/Node.h"
 #include "Messages/VesselStateMsg.h"
 #include "Messages/ObstacleVectorMsg.h"
-#include "Messages/WaypointDataMsg.h.h"
+#include "Messages/WaypointDataMsg.h"
 #include <vector>
 #include <math.h>
 #include <stdlib.h>
@@ -74,7 +74,7 @@ struct Obstacle {
  */
 struct SensorData {
     Eigen::Vector2d gpsPos;
-    double gpsSpeed;
+    double speed;
     double compHeading;
     double gpsHeading;
     double windDirection;

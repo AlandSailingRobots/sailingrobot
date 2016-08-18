@@ -63,6 +63,7 @@ bool CollisionAvoidanceNode::setSailingZone() {
 }
 
 bool CollisionAvoidanceNode::init(){
+    setSailingZone();
     return true;
 }
 
@@ -75,7 +76,7 @@ void CollisionAvoidanceNode::processMessage(const Message* msg){
         case MessageType::ObstacleVector:
             processObstacleData((ObstacleData*)msg);
         case MessageType::WaypointData:
-            processObstacleData((WaypointDataMsg*)msg);
+            processWaypointData((WaypointDataMsg*)msg);
         default:
             return;
     }
@@ -84,12 +85,6 @@ void CollisionAvoidanceNode::processMessage(const Message* msg){
 //PRIVATE MAIN FUNCTIONS
 
 void CollisionAvoidanceNode::processVesselState(VesselStateMsg* msg){
-    msgBus.registerNode(*this, MessageType::VesselState);
-    msgBus.registerNode(*this, MessageType::ObstacleVector);
-    msgBus.registerNode(*this, MessageType::WaypointData);
-}
-
-void processVesselState(VesselStateMsg* msg){
     if (m_simu.waypoints) {
         // TODO : simulation part (called or made here)
     }
@@ -98,38 +93,39 @@ void processVesselState(VesselStateMsg* msg){
 
         //Position and speed
         //The latitude and longitude are easier to compute in radians.
-        sensorData.gpsPos(0) = // x
-                Utility::degreeToRadian(systemStateModel.gpsModel.positionModel.longitude);
-        sensorData.gpsPos(1) = // y
-                Utility::degreeToRadian(systemStateModel.gpsModel.positionModel.latitude);
-        sensorData.gpsSpeed = systemStateModel.gpsModel.speed;
+        m_sensorOutput.gpsPos(0) = // x
+                Utility::degreeToRadian(msg->longitude());
+        m_sensorOutput.gpsPos(1) = // y
+                Utility::degreeToRadian(msg->latitude());
+        m_sensorOutput.speed = msg->speed();
 
         //Heading
+        // TODO : merge the two heading into one
         //compHeading : degree from north -> radian from east
-        sensorData.compHeading = M_PI / 2
-                                 - Utility::degreeToRadian(systemStateModel.compassModel.heading);
+        m_sensorOutput.compHeading = M_PI / 2
+                                 - Utility::degreeToRadian(msg->compassHeading());
         //gpsHeading : degree from north -> radian from east
-        sensorData.gpsHeading = M_PI / 2
-                                - Utility::degreeToRadian(systemStateModel.gpsModel.heading);
+        m_sensorOutput.gpsHeading = M_PI / 2
+                                - Utility::degreeToRadian(msg->gpsHeading());
 
         //Wind
         //windDirection : degree from east -> radian from east
-        sensorData.windDirection = -Utility::degreeToRadian(systemStateModel.windsensorModel.direction);
-        sensorData.windSpeed = systemStateModel.windsensorModel.speed;
+        m_sensorOutput.windDirection = -Utility::degreeToRadian(msg->windDir());
+        m_sensorOutput.windSpeed = msg->windSpeed();
 
-        //Tilt
-        sensorData.pitch = systemStateModel.compassModel.pitch;
-        sensorData.roll = systemStateModel.compassModel.roll;
+        //Pitch and roll
+        m_sensorOutput.pitch = msg->compassPitch();
+        m_sensorOutput.roll = msg->compassRoll();
     }
 }
 
-void processObstacleData(ObstacleData* msg){
+void CollisionAvoidanceNode::processObstacleData(ObstacleData* msg){
     //ASSUMPTION
     /*
      * The sensors will give a confidence interval of the heading and the distance
      * relatively to the boat
      */
-    if (sim.obstacles) {
+    if (m_simu.obstacles) {
         //Mock obstacles here
         // [UPDATE] Elouan said this script will have to take care of the obstacles without his simulator.
         // TODO : Create a simulation class/node which will compute every sensor output. I might only have to modify Elouan's
@@ -152,13 +148,13 @@ void processObstacleData(ObstacleData* msg){
         //Simulation
         // TODO : implement more precisely obstacle simulation.
         for(auto & obs : obsVec){
-            const double obstacleHeadingRelativeToBoat = wrapToPi(atan2(obs(1)-sensorData.gpsPos(1),
-                                                                        obs(0)-sensorData.gpsPos(0)),
-                                                                  - sensorData.compHeading);
+            const double obstacleHeadingRelativeToBoat = wrapToPi(atan2(obs(1)-m_sensorOutput.gpsPos(1),
+                                                                        obs(0)-m_sensorOutput.gpsPos(0)),
+                                                                  - m_sensorOutput.compHeading);
             //std::cout << "obstacleHeadingRelativeToBoat = " << obstacleHeadingRelativeToBoat<< "\n";
-            const double distFromObstacle = calculateGPSDistance(sensorData.gpsPos,
+            const double distFromObstacle = calculateGPSDistance(m_sensorOutput.gpsPos,
                                                                  obs);
-            if(std::abs(obstacleHeadingRelativeToBoat)<=SENSOR_ARC_ANGLE && distFromObstacle<=maxDetectionRange) {
+            if(std::abs(obstacleHeadingRelativeToBoat) <= SENSOR_ARC_ANGLE && distFromObstacle<=maxDetectionRange) {
 
                 const double leftHeadingRelativeToBoat =  atan2(obstacleRadius, distFromObstacle)
                                                           +obstacleHeadingRelativeToBoat;
@@ -170,21 +166,32 @@ void processObstacleData(ObstacleData* msg){
                         leftHeadingRelativeToBoat,         //double LeftBoundheadingRelativeToBoat;
                         rightHeadingRelativeToBoat};       //double RightBoundheadingRelativeToBoat;
                 //std::cout << "I push back\n";
-                sensorData.detectedObstacles.push_back(obstacle);
+                m_sensorOutput.detectedObstacles.push_back(obstacle);
             }
         }
     }
     else {
         // TODO : when the sensors wil be ready, put the code to get everything here
+        ObstacleData obstacle;
+        obstacle.LeftBoundheadingRelativeToBoat = msg->LeftBoundheadingRelativeToBoat;
+        obstacle.RightBoundheadingRelativeToBoat = msg->RightBoundheadingRelativeToBoat;
+        obstacle.minDistanceToObstacle = msg->minDistanceToObstacle;
+        obstacle.maxDistanceToObstacle = msg->maxDistanceToObstacle;
+        m_sensorOutput.detectedObstacles.push_back(obstacle);
     }
+
+    run();
 }
 
-void processWaypointData(WaypointDataMsg* msg){
-
+void CollisionAvoidanceNode::processWaypointData(WaypointDataMsg* msg){
+    m_followedLine.endPoint(0) = msg->nextLongitude();
+    m_followedLine.endPoint(1) = msg->nextLatitude();
+    m_followedLine.startPoint(0) = msg->prevLongitude();
+    m_followedLine.startPoint(1) = msg->prevLatitude();
 }
 
 // TODO : When the message architecture will be done, modify all this.
-CommandOutput CollisionAvoidanceNode::run() {
+void CollisionAvoidanceNode::run() {
     //Note on simulation
     /*
      * For now i don't know of any place in the code where it specified if the code is
@@ -855,13 +862,13 @@ std::vector<Obstacle> CollisionAvoidanceNode::cleanObstacles(
             // if not it should be cleaned from the memory.
             for (auto &sensDatObstacle : sensorData.detectedObstacles) {
                 const double headingCenterOfDetectedObstacle =
-                        wrapToPi(sensDatObstacle.leftBoundHeadingRelativeToBoat,
-                                 - sensDatObstacle.rightBoundHeadingRelativeToBoat)
+                        wrapToPi(sensDatObstacle.LeftBoundheadingRelativeToBoat,
+                                 - sensDatObstacle.RightBoundheadingRelativeToBoat)
                         + sensorData.compHeading;
                 const double widthOfCurrentDetectedObstacleAtClosest =
                         sensDatObstacle.minDistanceToObstacle
-                        * tan(wrapToPi(sensDatObstacle.leftBoundHeadingRelativeToBoat,
-                                       - sensDatObstacle.rightBoundHeadingRelativeToBoat)
+                        * tan(wrapToPi(sensDatObstacle.LeftBoundheadingRelativeToBoat,
+                                       - sensDatObstacle.RightBoundheadingRelativeToBoat)
                               / 2);
 
                 //Computation of the best center for the detected obstacle
@@ -922,12 +929,12 @@ std::vector<Obstacle> CollisionAvoidanceNode::registerObstacles(
 
         // Init for polygon creation
         Obstacle newObstacle;
-        const double halfAngleObsWidth = wrapToPi(sensDatObstacle.leftBoundHeadingRelativeToBoat,
-                                                  - sensDatObstacle.rightBoundHeadingRelativeToBoat) / 2;
-        const double rightAngle = wrapToPi(sensDatObstacle.rightBoundHeadingRelativeToBoat,
+        const double halfAngleObsWidth = wrapToPi(sensDatObstacle.LeftBoundheadingRelativeToBoat,
+                                                  - sensDatObstacle.RightBoundheadingRelativeToBoat) / 2;
+        const double rightAngle = wrapToPi(sensDatObstacle.RightBoundheadingRelativeToBoat,
                                            wrapToPi(sensorData.compHeading,
                                                     SENSOR_HEADING_RELATIVE_TO_BOAT));
-        const double leftAngle = wrapToPi(sensDatObstacle.leftBoundHeadingRelativeToBoat,
+        const double leftAngle = wrapToPi(sensDatObstacle.LeftBoundheadingRelativeToBoat,
                                           wrapToPi(sensorData.compHeading,
                                                    SENSOR_HEADING_RELATIVE_TO_BOAT));
         const double minDistance = sensDatObstacle.minDistanceToObstacle
