@@ -24,11 +24,11 @@
 class CollisionAvoidanceMsg : public Message {
 public:
     CollisionAvoidanceMsg(NodeID destinationID, NodeID sourceID,
-                          double startWaypointLong,
+                          double startWaypointLon,
                           double startWaypointLat,
-                          double midWaypointLong,
+                          double midWaypointLon,
                           double midWaypointLat,
-                          double endWaypointLong,
+                          double endWaypointLon,
                           double endWaypointLat)
             :Message(MessageType::CollisionAvoidance, sourceID, destinationID),
              m_startWaypointLong(startWaypointLon),
@@ -39,11 +39,11 @@ public:
              m_endWaypointLat(endWaypointLat)
     { }
 
-    CollisionAvoidanceMsg(double startWaypointLong,
+    CollisionAvoidanceMsg(double startWaypointLon,
                           double startWaypointLat,
-                          double midWaypointLong,
+                          double midWaypointLon,
                           double midWaypointLat,
-                          double endWaypointLong,
+                          double endWaypointLon,
                           double endWaypointLat)
             :Message(MessageType::CollisionAvoidance, NodeID::None, NodeID::None),
              m_startWaypointLong(startWaypointLon),
@@ -94,11 +94,11 @@ public:
     }
 
 private:
-    double m_startWaypointLong;
+    double m_startWaypointLon;
     double m_startWaypointLat;
     double m_midWaypointLong;
     double m_midWaypointLat;
-    double m_endWaypointLong;
+    double m_endWaypointLon;
     double m_endWaypointLat;
 };
 
