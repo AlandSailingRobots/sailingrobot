@@ -33,7 +33,8 @@ enum class NodeID {
 	Waypoint,
 	xBeeSync,
 	SailingLogic,
-	Simulator
+	Simulator,
+	CollisionAvoidance
 };
 
 inline std::string nodeToString(NodeID id)

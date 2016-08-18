@@ -52,12 +52,12 @@ typedef boost::geometry::model::multi_polygon<boostPolygon> boostMultiPolygon;
 /**
  * Structure which contains every obstacle data from the sensors
  */
-struct ObstaclesData {
-    double minDistanceToObstacle;
-    double maxDistanceToObstacle; /**< -1 = infinite */
-    double leftBoundHeadingRelativeToBoat;
-    double rightBoundHeadingRelativeToBoat;
-}; //TODO : ObstacleData changed into ObstaclesData
+//struct ObstaclesData {
+//    double minDistanceToObstacle;
+//    double maxDistanceToObstacle; /**< -1 = infinite */
+//    double leftBoundHeadingRelativeToBoat;
+//    double rightBoundHeadingRelativeToBoat;
+//}; //TODO : ObstacleData changed into ObstaclesData
 /**
  * Structure which contains every obstacle data
  */
@@ -120,11 +120,11 @@ struct BearingOnlyVars{
 /**
  * Collision avoidance class
  */
-class CollisionAvoidanceBehaviour : public Node{
+class CollisionAvoidanceNode : public Node{
     //For test only
 public:
-    CollisionAvoidanceBehaviour(MessageBus& msgBus);
-    ~CollisionAvoidanceBehaviour() {};
+    CollisionAvoidanceNode(MessageBus& msgBus);
+    ~CollisionAvoidanceNode() {};
 
     /**
      * Nothing to initialize for now
@@ -138,7 +138,7 @@ public:
      * @param message
      * @return
      */
-    bool processMessage(const Message* message);
+    void processMessage(const Message* message);
 
     /**
      * Setter for the sailing zone
@@ -149,16 +149,109 @@ public:
 protected:
 
     std::vector<Obstacle> m_seenObstacles;
-    // Since followedLine is updated from the waypointNode at each iteration
-    // maybe it's not necessary to put it as a class variable.
-    // TODO : investigate usefulness of followedLine as a class variable
     FollowedLine m_followedLine;
     std::vector<Eigen::Vector2d> m_sailingZone;
     SensorData m_sensorOutput;
+    /**
+     * Used to tell if the local node simulation should run
+     * TODO : investigate if variable is needed of if it would be easy to use simulationNode
+     */
+    Simulation m_simu;
 
     bool m_tack; //Need init
     int m_tackingDirection; //Need init
     BearingOnlyVars m_bearingOnlyVars; //For future implementation if collision avoidance doesn't work
+
+    //PRIVATE MAIN FUNCTIONS
+
+    /**
+     * Process the message that constains the state of the boat
+     * @param msg
+     */
+    void processVesselState(VesselStateMsg* msg);
+
+    /**
+     * Proccess the messages from the color_detection node
+     * @param msg
+     */
+    void processObstacleData(ObstacleData* msg);
+
+    /**
+     * The most important function of the class, it calls al the others.
+     * It's called by processObstacleData.
+     * @param systemStateModel
+     * @return
+     */
+    CommandOutput run(SensorData sensorData);
+
+    /**
+     * Is there any obstacles ? If yes, which information can i gather on them.
+     * OUTPUT a list of obstacles (struct) with all their characteristics.
+     *
+     * For now transform hardcoded obstacles to something more usable.
+     * @param sensorData
+     * @return
+     */
+    std::vector<Obstacle> check_obstacles(SensorData sensorData, std::vector<Obstacle> seenObstacles);
+
+    /**
+     * Check if there is intersection between
+     * the current path+security radius and the obstacle
+     * @param seenObstacles
+     * @return
+     */
+    bool these_obstacles_are_a_problem(std::vector<Obstacle> seenObstacles);
+
+    /**
+     * Compute the potential field for the obstacles, the sailing zone,
+     * the boat, the objective, and the wind.
+     *
+     * For now it creates the matrix at each loop (easier for code review)
+     * The size of the matrix needs to be adapted to the size of the sailing zone
+     * (with the max and mins for example)
+     *
+     * Maybe we could create everything in the init function and put it in a
+     * struct. This struct would be a class variable. // TODO potField class variable
+     *
+     * Maybe we should as well put the computation of the potential field in another class
+     * due to the length of the function. // TODO see if a new class is needed
+     * @param seen_obstacles
+     * @param sailing_zone
+     * @param followedLine
+     * @return
+     */
+    PotentialMap compute_potential_field(std::vector<Obstacle> seen_obstacles,
+                                         std::vector<Eigen::Vector2d> sailing_zone,
+                                         FollowedLine followedLine);
+
+    /**
+     * Find the minimum in the potential field and return its coordinates in the matrix
+     * as well as its real gps coordinates.
+     * @param Potential_field
+     * @return
+     */
+    Eigen::Vector2d find_minimum_potential_field(PotentialMap PotentialField);
+
+    /**
+     * Gives the new line to follow. It would be better if it added a WP in the
+     * DataBase as well.
+     *
+     * It add 3 intermediate wp to follow and follow them. Everything will be updated
+     * on the next loop by update waypoint. Then the boat will continue to follow
+     * these waypoints.
+     * @param min
+     * @return
+     */
+    FollowedLine compute_new_path(Eigen::Vector2d collision_avoidance_point,
+                                  FollowedLine followedLine);
+
+    /**
+     * Compute the commands according to the new path.
+     * Follow the line between the last waypoint and the next
+     * @param line
+     * @return
+     */
+    CommandOutput compute_commands(FollowedLine line);
 
     // UTILITY FUNCTIONS
     /*
@@ -166,10 +259,9 @@ protected:
      */
 
     /**
-     * Gives the difference between two angles regardless of their definition.
-     * It's radAngle1-radAngle2.
+     * Gives the sum between two angles regardless of their definition.
+     * It's radAngle1+radAngle2.
      * The angles needs to be in radians.
-     * I don't trust the one from Utility
      * @param radAngle1
      * @param radAngle2
      * @return
@@ -184,7 +276,7 @@ protected:
      * a = sin²(Δφ/2) + cos φ1 ⋅ cos φ2 ⋅ sin²(Δλ/2) \n
      * c = 2 ⋅ atan2( √a, √(1−a) ) \n
      * distance = Rearth ⋅ c \n
-     * @return double          The distance between the thwo gps points
+     * @return double          The distance between the two gps points
      */
     double calculateGPSDistance(Eigen::Vector2d, Eigen::Vector2d);
 
@@ -466,102 +558,6 @@ protected:
                                           std::vector<Eigen::Vector2d> sailingZone);
 
 
-    //PRIVATE MAIN FUNCTIONS
-
-    /**
-     * Makes the interface between the old code and the new one. This is make the code more modular
-     * since changes in the architecture might come.
-     * @param systemStateModel
-     * @param sim
-     * @return
-     */
-    SensorData update_sensors(SystemStateModel &systemStateModel,
-                              Simulation sim);
-
-    /**
-     * Is there any obstacles ? If yes, which information can i gather on them.
-     * OUTPUT a list of obstacles (struct) with all their characteristics.
-     *
-     * For now transform hardcoded obstacles to something more usable.
-     * @param sensorData
-     * @return
-     */
-    std::vector<Obstacle> check_obstacles(SensorData sensorData, std::vector<Obstacle> seenObstacles);
-
-    /**
-     * Check if there is intersection between
-     * the current path+security radius and the obstacle
-     * @param seenObstacles
-     * @return
-     */
-    bool these_obstacles_are_a_problem(std::vector<Obstacle> seenObstacles);
-
-    /**
-     * Compute the potential field for the obstacles, the sailing zone,
-     * the boat, the objective, and the wind.
-     *
-     * For now it creates the matrix at each loop (easier for code review)
-     * The size of the matrix needs to be adapted to the size of the sailing zone
-     * (with the max and mins for example)
-     *
-     * Maybe we could create everything in the init function and put it in a
-     * struct. This struct would be a class variable. // TODO potField class variable
-     *
-     * Maybe we should as well put the computation of the potential field in another class
-     * due to the length of the function. // TODO see if a new class is needed
-     * @param seen_obstacles
-     * @param sailing_zone
-     * @param followedLine
-     * @return
-     */
-    PotentialMap compute_potential_field(std::vector<Obstacle> seen_obstacles,
-                                         std::vector<Eigen::Vector2d> sailing_zone,
-                                         FollowedLine followedLine);
-
-    /**
-     * Find the minimum in the potential field and return its coordinates in the matrix
-     * as well as its real gps coordinates.
-     * @param Potential_field
-     * @return
-     */
-    Eigen::Vector2d find_minimum_potential_field(PotentialMap PotentialField);
-
-    /**
-     * Gives the new line to follow. It would be better if it added a WP in the
-     * DataBase as well.
-     *
-     * It add 3 intermediate wp to follow and follow them. Everything will be updated
-     * on the next loop by update waypoint. Then the boat will continue to follow
-     * these waypoints.
-     * @param min
-     * @return
-     */
-    FollowedLine compute_new_path(Eigen::Vector2d collision_avoidance_point,
-                                  FollowedLine followedLine);
-
-    /**
-     * Compute the commands according to the new path.
-     * Follow the line between the last waypoint and the next
-     * @param line
-     * @return
-     */
-    CommandOutput compute_commands(FollowedLine line);
-
-    /**
-     * The most important function of the class, it calls al the others.
-     *
-     * Some inputs of the function are class variables. This is to improve
-     * the readability of the code and its modularity in case of architectural
-     * modifications.
-     *
-     * I don't think inputing system state into this function is the best idea.
-     * But update_sensors need it. Either I move update_sensors out of run(), in
-     * that case isn't any more a modular function since it lacks update_sensors,
-     * or systemStateModel stays where it is for the same result.
-     * @param systemStateModel
-     * @return
-     */
-    CommandOutput run(SystemStateModel &systemStateModel);
 };
 
 #endif //SAILINGROBOT_TEST_AVOIDANCE_BEHAVIOUR_H
