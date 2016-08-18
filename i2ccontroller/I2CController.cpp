@@ -2,7 +2,7 @@
 #include "SystemServices/Logger.h"
 #include <unistd.h> // close
 
-#include <wiringPiI2C.h>
+#include "libs/wiringPi/wiringPi/wiringPiI2C.h"
 
 std::mutex I2CController::m_mutex;
 

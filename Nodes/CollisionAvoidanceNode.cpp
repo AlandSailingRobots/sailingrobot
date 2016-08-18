@@ -197,25 +197,24 @@ void CollisionAvoidanceNode::run() {
      * For now i don't know of any place in the code where it specified if the code is
      * in a simulated environement or not. So this variable is temporary.
      */
-    Simulation sim = {false, // waypoints
-                      true};// obstacles
 
-    //Gives sensors output or compute an easier way to handle them
-    m_sensorOutput = update_sensors(systemStateModel,
-                                    sim);
-
-    //update_waypoints(); //Update waypoints or compute an easier way to handle them
-
-    m_seenObstacles = check_obstacles(m_sensorOutput,m_seenObstacles);
+    check_obstacles(m_sensorOutput,m_seenObstacles); // seen_obstacle as a reference
     //    update_map();
     if (these_obstacles_are_a_problem(m_seenObstacles)) {
         PotentialMap potential_field = compute_potential_field(m_seenObstacles,
                                                                m_sailingZone,
                                                                m_followedLine);
         Eigen::Vector2d min = find_minimum_potential_field(potential_field);
-        m_followedLine = compute_new_path(min,m_followedLine);
+        WaypointOutput wpOut = compute_new_path(min,m_followedLine);
+
+        MessagePtr msg = std::make_unique<CollisionAvoidanceMsg>(wpOut.startPoint(0),
+                                                                 wpOut.startPoint(1),
+                                                                 wpOut.midPoint(0),
+                                                                 wpOut.midPoint(1),
+                                                                 wpOut.endPoint(0),
+                                                                 wpOut.endPoint(1));
+        m_MsgBus.sendMessage(std::move(msg));
     }
-    return compute_commands(m_followedLine);
 }
 
 /*
@@ -224,24 +223,18 @@ void CollisionAvoidanceNode::run() {
  */
 //    void update_waypoints(){}
 
-std::vector<Obstacle> CollisionAvoidanceNode::check_obstacles(
+void CollisionAvoidanceNode::check_obstacles(
         SensorData sensorData,
-        std::vector<Obstacle> seenObstacles) {
-    // clean the obstacles thar should have been detected and are not
-    seenObstacles = cleanObstacles(sensorData,seenObstacles);
+        std::vector<Obstacle> & seenObstacles) {
 
-//    std::cout << "After clean seenObstacles.size() = " << seenObstacles.size() << "\n";
+    // clean the obstacles thar should have been detected and are not
+    cleanObstacles(sensorData,seenObstacles); // seen_obstacle as a reference
 
     // register the new obstacles inside upToDateObstacles (convert from sensorData)
-    std::vector<Obstacle> upToDateObstacles = registerObstacles(sensorData, seenObstacles);
-
-//    std::cout << "After registering upToDateObstacles.size() = " << upToDateObstacles.size() << "\n";
-//    std::cout << "Just for info : seenObstacles.size() = " << seenObstacles.size() << "\n";
+    std::vector<Obstacle> upToDateObstacles = registerObstacles(sensorData, seenObstacles); // seen_obstacle not as a reference
 
     // for each up to date obstacle we clean the areas where nothing has been detected
-    seenObstacles = mergeObstacles(sensorData,upToDateObstacles,seenObstacles);
-
-    return seenObstacles;
+    mergeObstacles(sensorData,upToDateObstacles,seenObstacles); // seen_obstacle as a reference
 }
 
 /*
@@ -379,9 +372,10 @@ Eigen::Vector2d CollisionAvoidanceNode::find_minimum_potential_field(
     return collision_avoidance_point;
 }
 
-FollowedLine CollisionAvoidanceNode::compute_new_path(
+WaypointOutput CollisionAvoidanceNode::compute_new_path(
         Eigen::Vector2d collision_avoidance_point,
         FollowedLine followedLine) {
+    WaypointOutput wpOut;
     const double avoidDist = 30;
 
     // Initialize the 3 wps
@@ -398,14 +392,16 @@ FollowedLine CollisionAvoidanceNode::compute_new_path(
     const Eigen::Vector2d endCollPoint   = getPointWithDistanceAndBearing(-avoidDist,
                                                                           m_sensorOutput.compHeading + M_PI,
                                                                           m_sensorOutput.gpsPos);
-    // TODO add 3 wp to the database
+
+    wpOut.startPoint = startCollPoint;
+    wpOut.endPoint = collision_avoidance_point;
+    wpOut.midPoint = endCollPoint;
 
     // Set m_followedLine accordingly
-    followedLine.startPoint = startCollPoint;
-    followedLine.endPoint = collision_avoidance_point;
+//    followedLine.startPoint = startCollPoint;
+//    followedLine.endPoint = collision_avoidance_point;
 
-    //The waypointNode gives which wps to follow.
-    return followedLine; //return is not necessary if m_followedLine is still a class variable. Delete it otherwise
+    return wpOut;
 }
 
 CommandOutput CollisionAvoidanceNode::compute_commands(
@@ -837,9 +833,9 @@ Obstacle CollisionAvoidanceNode::updateObstacleWithBoostPoly(
 
 }
 
-std::vector<Obstacle> CollisionAvoidanceNode::cleanObstacles(
+void CollisionAvoidanceNode::cleanObstacles(
         SensorData sensorData,
-        std::vector<Obstacle> seenObstacles){
+        std::vector<Obstacle> &seenObstacles){
     int i = 0;
 //    std::cout << "Check_obstacle reached\n";
 //    std::cout << "Before clean seenObstacles.size() = " << seenObstacles.size() << "\n";
@@ -916,7 +912,6 @@ std::vector<Obstacle> CollisionAvoidanceNode::cleanObstacles(
             i++;
         }
     }
-    return seenObstacles;
 }
 
 std::vector<Obstacle> CollisionAvoidanceNode::registerObstacles(
@@ -987,10 +982,10 @@ std::vector<Obstacle> CollisionAvoidanceNode::registerObstacles(
     return upToDateObstacles;
 }
 
-std::vector<Obstacle> CollisionAvoidanceNode::mergeObstacles(
+void CollisionAvoidanceNode::mergeObstacles(
         SensorData sensorData,
         std::vector<Obstacle> upToDateObstacles,
-        std::vector<Obstacle> seenObstacles){
+        std::vector<Obstacle> &seenObstacles){
 
     //std::vector<Obstacle> to std::vector<boostPolygon>
     boostMultiPolygon boostUpToDatePoly; // output of the union
@@ -1088,7 +1083,6 @@ std::vector<Obstacle> CollisionAvoidanceNode::mergeObstacles(
             seenObstacles.push_back(upToDateObstacles[i]);
         }
     }
-    return seenObstacles;
 }
 
 boostMultiPolygon CollisionAvoidanceNode::polyUnion(

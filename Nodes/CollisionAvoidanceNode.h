@@ -11,6 +11,7 @@
 #include "Messages/VesselStateMsg.h"
 #include "Messages/ObstacleVectorMsg.h"
 #include "Messages/WaypointDataMsg.h"
+#include "Messages/CollisionAvoidanceMsg.h"
 #include <vector>
 #include <math.h>
 #include <stdlib.h>
@@ -113,10 +114,19 @@ struct PotentialMap{
     double yMax;
     Eigen::ArrayXXd field;
 };
+/**
+ * The datas output by this node
+ */
+struct WaypointOutput{
+    Eigen::Vector2d startPoint;
+    Eigen::Vector2d midPoint;
+    Eigen::Vector2d endPoint;
+};
 struct BearingOnlyVars{
     bool only_direction_mode;
     bool have_to_avoid_obstacle;
 };
+
 
 /**
  * Collision avoidance class
@@ -201,7 +211,8 @@ protected:
      * @param sensorData
      * @return
      */
-    std::vector<Obstacle> check_obstacles(SensorData sensorData, std::vector<Obstacle> seenObstacles);
+    void check_obstacles(SensorData sensorData,
+                         std::vector<Obstacle> &seenObstacles);
 
     /**
      * Check if there is intersection between
@@ -251,8 +262,8 @@ protected:
      * @param min
      * @return
      */
-    FollowedLine compute_new_path(Eigen::Vector2d collision_avoidance_point,
-                                  FollowedLine followedLine);
+    WaypointOutput compute_new_path(Eigen::Vector2d collision_avoidance_point,
+                                    FollowedLine followedLine);
 
     /**
      * Compute the commands according to the new path.
@@ -482,8 +493,8 @@ protected:
      * @param seenObstacles
      * @return
      */
-    std::vector<Obstacle> cleanObstacles(SensorData sensorData,
-                                         std::vector<Obstacle> seenObstacles);
+    void cleanObstacles(SensorData sensorData,
+                        std::vector<Obstacle> &seenObstacles);
 
     /**
      * register and convert the new obstacles inside the detectedObstacles to a new
@@ -502,9 +513,9 @@ protected:
      * @param seenObstacles
      * @return
      */
-    std::vector<Obstacle> mergeObstacles(SensorData sensorData,
-                                         std::vector<Obstacle> upToDateObstacles,
-                                         std::vector<Obstacle> seenObstacles);
+    void mergeObstacles(SensorData sensorData,
+                        std::vector<Obstacle> upToDateObstacles,
+                        std::vector<Obstacle> &seenObstacles);
 
     /**
      * Boost union handler
