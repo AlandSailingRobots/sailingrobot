@@ -4,7 +4,6 @@
 #include <stdint.h> // uint8_t
 #include <vector>
 #include <array>
-#include "models/SystemStateModel.h"
 
 
 class Utility {
@@ -18,7 +17,7 @@ public:
 	static float mean(std::vector<float> values);
 	static float meanOfAngles(std::vector<float> anglesInDegrees);
 	static int sgn(double value);
-	
+
 	/*
 	 * Converts an angle in degrees to cartesian coordinates (x,y) on the
 	 * unit circle
@@ -39,14 +38,20 @@ public:
 
 	static double directionAdjustedSpeed(double gpsHeading,double compassHeading,double gpsSpeed);
 
-	static double calculateTrueWindDirection(const SystemStateModel& systemStateModel , double heading);
-	static double calculateTrueWindSpeed(const SystemStateModel& systemStateModel , double heading);
-	static double getTrueWindDirection(const SystemStateModel systemStateModel, std::vector<float> &twdBuffer, const unsigned int twdBufferMaxSize);
+	static double calculateSignedDistanceToLine(const double nextLon, const double nextLat, const double prevLon, const double prevLat, 
+					const double gpsLon, const double gpsLat);
+	static double calculateWaypointsOrthogonalLine(const double nextLon, const double nextLat, const double prevLon, const double prevLat, 
+					const double gpsLon, const double gpsLat);
 
-	static std::array<double, 2> calculateApparentWind(const SystemStateModel systemStateModel, const double heading, const double trueWindDirection);
-	static double getApparentWindSpeed(const SystemStateModel systemStateModel, const double heading, const double trueWindDirection);
-	static double getApparentWindDirection(const SystemStateModel systemStateModel, const double heading, const double trueWindDirection);
-	
+	static double calculateTrueWindDirection(const int windsensorDir, const int windsensorSpeed, const double gpsSpeed, const double heading);
+	static double calculateTrueWindSpeed(int windsensorDir, int windsensorSpeed, double gpsSpeed, double heading);
+	static double getTrueWindDirection(int windsensorDir, int windsensorSpeed, double gpsSpeed, int compassHeading, 
+			std::vector<float> &twdBuffer, const unsigned int twdBufferMaxSize);
+
+	static void calculateApparentWind(const int windsensorDir, const int windsensorSpeed, const double gpsSpeed, const double heading, const double trueWindDirection,
+		                                         double &apparentWindSpeed, double &apparentWindDirection);
+	static double getApparentWindSpeed(const int windsensorDir, const int windsensorSpeed, const double gpsSpeed, const double heading, const double trueWindDirection);
+	static double getApparentWindDirection(const int windsensorDir, const int windsensorSpeed, const double gpsSpeed, const double heading, const double trueWindDirection);
 };
 
 #endif

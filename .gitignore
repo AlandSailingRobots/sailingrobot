@@ -3,6 +3,7 @@
 build/
 sr
 *.so
+*.run
 
 # Database and log files
 *.db
@@ -12,3 +13,5 @@ sr
 
 # Other
 *.vim
+*.tags
+*.gch
