@@ -69,6 +69,8 @@ inline std::string nodeToString(NodeID id)
 		return "xBeeSync";
 	case NodeID::Simulator:
 		return "Simulator";
+	case NodeID::CollisionAvoidance:
+		return "CollisionAvoidance";
 	}
 	return "";
 }

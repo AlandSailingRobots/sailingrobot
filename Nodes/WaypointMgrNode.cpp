@@ -14,6 +14,7 @@
 #include "WaypointMgrNode.h"
 #include "Messages/WaypointDataMsg.h"
 #include "Messages/ServerWaypointsReceivedMsg.h"
+#include "Messages/CollisionAvoidanceMsg.h"
 #include "SystemServices/Logger.h"
 #include "dbhandler/DBHandler.h"
 #include "utility/Utility.h"
@@ -42,6 +43,7 @@ WaypointMgrNode::WaypointMgrNode(MessageBus& msgBus, DBHandler& db)
 {
     msgBus.registerNode(*this, MessageType::GPSData);
     msgBus.registerNode(*this, MessageType::ServerWaypointsReceived);
+    msgBus.registerNode(*this, MessageType::CollisionAvoidance);
 }
 
 bool WaypointMgrNode::init()
@@ -63,10 +65,11 @@ void WaypointMgrNode::processMessage(const Message* msg)
         case MessageType::ServerWaypointsReceived:
             sendMessage();
             break;
-        // case MessageType::CollisionAvoidance:
-        //     m_collisionAvoidance = true;       PSEUDO CODE
-        //     sendMessage about new waypoint for sailing Logic
-        //     break;
+        case MessageType::CollisionAvoidance:
+            m_collisionAvoidance = true;
+            m_caCounter = 0;
+            sendCAMessage();
+            break;
         default:
             return;
 	}
