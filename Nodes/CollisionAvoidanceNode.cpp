@@ -64,6 +64,8 @@ bool CollisionAvoidanceNode::setSailingZone() {
 
 bool CollisionAvoidanceNode::init(){
     setSailingZone();
+    m_simu.obstacles = true;
+    m_simu.waypoints = false;
     return true;
 }
 
