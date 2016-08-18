@@ -2,15 +2,19 @@
 // Created by tag on 12/07/16.
 //
 
+#pragma once
+
 #ifndef SAILINGROBOT_TEST_AVOIDANCE_BEHAVIOUR_H
 #define SAILINGROBOT_TEST_AVOIDANCE_BEHAVIOUR_H
 
+#include "Nodes/Node.h"
+#include "Messages/VesselStateMsg.h"
+#include "Messages/ObstacleVectorMsg.h"
 #include <vector>
 #include <math.h>
 #include <stdlib.h>
 #include <iostream>
 #include "libs/Eigen/Dense"
-#include "models/SystemStateModel.h"
 #include "utility/Utility.h"
 #include <boost/geometry/geometry.hpp>
 #include <boost/geometry/geometries/polygon.hpp>
@@ -48,12 +52,12 @@ typedef boost::geometry::model::multi_polygon<boostPolygon> boostMultiPolygon;
 /**
  * Structure which contains every obstacle data from the sensors
  */
-struct ObstacleData {
+struct ObstaclesData {
     double minDistanceToObstacle;
     double maxDistanceToObstacle; /**< -1 = infinite */
     double leftBoundHeadingRelativeToBoat;
     double rightBoundHeadingRelativeToBoat;
-};
+}; //TODO : ObstacleData changed into ObstaclesData
 /**
  * Structure which contains every obstacle data
  */
@@ -116,51 +120,45 @@ struct BearingOnlyVars{
 /**
  * Collision avoidance class
  */
-class CollisionAvoidanceBehaviour{
+class CollisionAvoidanceBehaviour : public Node{
     //For test only
 public:
-    CollisionAvoidanceBehaviour();
+    CollisionAvoidanceBehaviour(MessageBus& msgBus);
     ~CollisionAvoidanceBehaviour() {};
 
+    /**
+     * Nothing to initialize for now
+     * @return
+     */
+    bool init();
+
+    /**
+     * Process the messages from the message bus.
+     * Called by message bus.
+     * @param message
+     * @return
+     */
+    bool processMessage(const Message* message);
+
+    /**
+     * Setter for the sailing zone
+     * @return
+     */
     bool setSailingZone();
-//
-//    /**
-//     * Test if everything is ok before starting everything
-//     * @return
-//     */
-//    bool init(); //
-//
-//    /**
-//     * Compute the commands
-//     * Too much output parameters, should be reduced.
-//     *
-//     * This is a trick to interface this code and the rest of the c++ code
-//     * @param systemStateModel
-//     * @param position
-//     * @param trueWindDirection
-//     * @param mockPosition
-//     * @param getHeadingFromCompass
-//     */
-//    void computeCommands(SystemStateModel &systemStateModel,
-//                         std::unique_ptr<Position> const &position,
-//                         double trueWindDirection,
-//                         bool mockPosition,
-//                         bool getHeadingFromCompass);
-//    void manageDatabase(double trueWindDirection, SystemStateModel &systemStateModel);
-//
+
 protected:
 
     std::vector<Obstacle> m_seenObstacles;
     // Since followedLine is updated from the waypointNode at each iteration
     // maybe it's not necessary to put it as a class variable.
-    // TODO : investigate usefulness of followedLine as a class variable, same for sensorOutput
+    // TODO : investigate usefulness of followedLine as a class variable
     FollowedLine m_followedLine;
     std::vector<Eigen::Vector2d> m_sailingZone;
     SensorData m_sensorOutput;
 
     bool m_tack; //Need init
     int m_tackingDirection; //Need init
-    BearingOnlyVars m_bearingOnlyVars; // TODO use these variables
+    BearingOnlyVars m_bearingOnlyVars; //For future implementation if collision avoidance doesn't work
 
     // UTILITY FUNCTIONS
     /*
@@ -186,7 +184,7 @@ protected:
      * a = sin²(Δφ/2) + cos φ1 ⋅ cos φ2 ⋅ sin²(Δλ/2) \n
      * c = 2 ⋅ atan2( √a, √(1−a) ) \n
      * distance = Rearth ⋅ c \n
-     * @return
+     * @return double          The distance between the thwo gps points
      */
     double calculateGPSDistance(Eigen::Vector2d, Eigen::Vector2d);
 
@@ -220,6 +218,8 @@ protected:
      * Uses https://en.wikipedia.org/wiki/Spherical_trigonometry#Lines%5Fon%5Fa%5Fsphere
      *
      * The polygon must be initialized anticlockwise
+     *
+     * It's not used for now but kept in case of future implementation
      * @param polygon
      * @return
      */

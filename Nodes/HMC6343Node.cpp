@@ -8,13 +8,19 @@
  *		to the message bus.
  *
  * Developer Notes:
+ * 		I2C Address
+ *
+ * 		The I2C address is different from what is mentioned in the datasheet. The
+ * 		datasheet mentions it is 0x32, however when accessing the device you need to use
+ * 		0x19 for successful communications. The register on the HMC6343 that contains the
+ * 		I2C address returns 0x32, the address mentioned in the datasheet.
  *
  *
  ***************************************************************************************/
 
 #include "HMC6343Node.h"
 #include "Messages/CompassDataMsg.h"
-#include "logger/Logger.h"
+#include "SystemServices/Logger.h"
 #include "wiringPi.h"
 #include "utility/Utility.h"
 
@@ -68,6 +74,7 @@ bool HMC6343Node::init()
 		m_I2C.writeReg(COM_READ_EEPROM, EEPROM_ADDRESS);
 		delay(10);
 		uint8_t deviceID = m_I2C.read();
+		printf("received %02x request %02x\n",deviceID,I2C_ADDRESS);
 
 		m_I2C.endTransmission();
 
@@ -141,7 +148,7 @@ bool HMC6343Node::readData(float& heading, float& pitch, float& roll)
 		// The data is stretched across two separate bytes in big endian format
 		heading = ((buffer[0] << 8) + buffer[1]) / 10.f;
 		pitch = ((buffer[2] << 8) + buffer[3]) / 10.f;
-		roll = ((buffer[4] << 8) + buffer[5]) / 10.f;
+		roll = (int(buffer[4] << 8) + buffer[5]) / 10.f;
 
 		return true;
 	}
@@ -212,8 +219,8 @@ void HMC6343Node::HMC6343ThreadFunc(void* nodePtr)
 			}
 
 			// Post the data to the message bus
-			CompassDataMsg* msg = new CompassDataMsg(int(Utility::meanOfAngles(headingData) + 0.5), pitch, roll);
-			node->m_MsgBus.sendMessage(msg);
+			MessagePtr msg = std::make_unique<CompassDataMsg>(int(Utility::meanOfAngles(headingData) + 0.5), pitch, roll);
+			node->m_MsgBus.sendMessage(std::move(msg));
 		}
 		else
 		{

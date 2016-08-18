@@ -14,13 +14,13 @@
 #include "ActuatorNode.h"
 #include "Messages/ActuatorPositionMsg.h"
 #include "SystemServices/MaestroController.h"
-#include "logger/Logger.h"
+#include "SystemServices/Logger.h"
 
 
 ActuatorNode::ActuatorNode(MessageBus& msgBus, NodeID id, int channel, int speed, int acceleration)
 	:Node(id, msgBus), m_Channel(channel), m_Speed(speed), m_Acceleration(acceleration)
 {
-
+  msgBus.registerNode(*this,MessageType::ActuatorPosition);
 }
 
 bool ActuatorNode::init()
@@ -32,7 +32,7 @@ bool ActuatorNode::init()
 	}
 	else
 	{
-		Logger::error("%s Failed to write actuator speed and aceleration!", __PRETTY_FUNCTION__);
+		Logger::error("%s Failed to write actuator speed and acceleration!", __PRETTY_FUNCTION__);
 		return false;
 	}
 
@@ -44,7 +44,24 @@ void ActuatorNode::processMessage(const Message* message)
 	{
 		ActuatorPositionMsg* msg = (ActuatorPositionMsg*)message;
 
-		if(not MaestroController::writeCommand(MaestroCommands::SetPosition, m_Channel, msg->position()))
+		//Get relevant command
+		int setPosition = 0;
+
+		if (nodeID() == NodeID::RudderActuator)
+		{
+			setPosition = msg->rudderPosition();
+		}
+		else if (nodeID() == NodeID::SailActuator)
+		{
+			setPosition = msg->sailPosition();
+		}
+		else
+		{
+			Logger::warning("%s Actuator: %d Unknown/Unregistered actuator message NodeID", __PRETTY_FUNCTION__, (int)nodeID());
+			return;
+		}
+
+		if(not MaestroController::writeCommand(MaestroCommands::SetPosition, m_Channel, setPosition))
 		{
 			Logger::error("%s Actuator: %d Failed to write position command", __PRETTY_FUNCTION__, (int)nodeID());
 		}

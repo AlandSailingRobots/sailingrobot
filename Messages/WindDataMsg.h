@@ -19,7 +19,7 @@
 class WindDataMsg : public Message {
 public:
 	WindDataMsg(NodeID destinationID, NodeID sourceID, float windDir, float windSpeed, float windTemp)
-		:Message(MessageType::WindData, sourceID, destinationID), 
+		:Message(MessageType::WindData, sourceID, destinationID),
 		m_WindDir(windDir), m_WindSpeed(windSpeed), m_WindTemp(windTemp)
 	{ }
 
@@ -28,11 +28,34 @@ public:
 		m_WindDir(windDir), m_WindSpeed(windSpeed), m_WindTemp(windTemp)
 	{ }
 
+	WindDataMsg(MessageDeserialiser deserialiser)
+		:Message(deserialiser)
+	{
+		if(	!deserialiser.readFloat(m_WindDir) ||
+			!deserialiser.readFloat(m_WindSpeed) ||
+			!deserialiser.readFloat(m_WindTemp))
+		{
+			m_valid = false;
+		}
+	}
+
 	virtual ~WindDataMsg() { }
 
 	float windDirection() { return m_WindDir; }
 	float windSpeed() { return m_WindSpeed; }
 	float windTemp() { return m_WindTemp; }
+
+	///----------------------------------------------------------------------------------
+	/// Serialises the message into a MessageSerialiser
+	///----------------------------------------------------------------------------------
+	virtual void Serialise(MessageSerialiser& serialiser) const
+	{
+		Message::Serialise(serialiser);
+
+		serialiser.serialise(m_WindDir);
+		serialiser.serialise(m_WindSpeed);
+		serialiser.serialise(m_WindTemp);
+	}
 
 private:
 	float 	m_WindDir;

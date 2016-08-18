@@ -21,8 +21,8 @@
 class GPSDNode : public ActiveNode {
 public:
 	GPSDNode(MessageBus& msgBus);
-
-	~GPSDNode();
+	
+	virtual ~GPSDNode();
 
 	///----------------------------------------------------------------------------------
 	/// Initialises a connection gpsd.
@@ -31,7 +31,7 @@ public:
 	bool init();
 
 	///----------------------------------------------------------------------------------
-	/// Processes DataRequest messages.
+	/// Currently doesn't process any messages.
 	///
 	///----------------------------------------------------------------------------------
 	void processMessage(const Message* msgPtr);
@@ -42,6 +42,12 @@ public:
  	///----------------------------------------------------------------------------------
 	void start();
 private:
+
+	///----------------------------------------------------------------------------------
+	/// Attempts to retrieve data from the GPS and then sends a GPSDataMessage every x
+	/// milliseconds, see GPS_SENSOR_SLEEP_MS in GPSDNode.cpp
+	///
+	///----------------------------------------------------------------------------------
 	static void GPSThreadFunc(void* nodePtr);
 
 	bool 	m_Initialised;
@@ -51,4 +57,6 @@ private:
 	double	m_Lon;
 	double	m_Speed;
 	double	m_Heading;
+
+	int m_currentDay;
 };

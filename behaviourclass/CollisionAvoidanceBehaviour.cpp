@@ -43,7 +43,6 @@
 */
 
 //CONSTRUCTOR
-
 CollisionAvoidanceBehaviour::CollisionAvoidanceBehaviour(){}
 
 // UTILITY FUNCTIONS
@@ -55,6 +54,7 @@ double CollisionAvoidanceBehaviour::wrapToPi(
     return fmod(radAngle1+radAngle2+3*M_PI,2*M_PI)-M_PI;
 }
 
+// TODO use function in utility/courseMath.h ?
 double CollisionAvoidanceBehaviour::calculateGPSDistance(
         Eigen::Vector2d point1,
         Eigen::Vector2d point2) {
@@ -101,6 +101,7 @@ Eigen::Vector2d CollisionAvoidanceBehaviour::findCenter(
     }
 }
 
+// TODO use function in utility/courseMath.h ?
 double CollisionAvoidanceBehaviour::getInitialBearing(
         Eigen::Vector2d pt1,
         Eigen::Vector2d pt2) {

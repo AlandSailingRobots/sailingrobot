@@ -1,33 +1,31 @@
 #ifndef __WAYPOINTROUTING_H__
 #define __WAYPOINTROUTING_H__
 
-#include "coursecalculation/CourseCalculation.h"
+#include "utility/CourseCalculation.h"
 #include "utility/Timer.h"
 #include "utility/Utility.h"
 #include "TackAngle.h"
 #include "Commands.h"
-#include "models/WaypointModel.h"
 
-class PositionModel;
-class SystemStateModel;
 
 class WaypointRouting
 {
 public:
-	WaypointRouting(WaypointModel waypoint, double innerRadiusRatio,
+	WaypointRouting(double lon, double lat, int radius, double innerRadiusRatio,
 		double tackAngle, double maxTackAngle, double minTackSpeed, double sectorAngle, 
 		double maxCommandAngle, double  rudderSpeedMin);
 	WaypointRouting(const WaypointRouting &) = delete;
 	WaypointRouting & operator=(const WaypointRouting &) = delete;	
 	~WaypointRouting();
 
-	void getCommands(double & rudder, double & sail, PositionModel boat,
-		double trueWindDirection, double heading, SystemStateModel systemStateModel);
-	bool nextWaypoint(PositionModel boat);
-	void setWaypoint(WaypointModel waypoint);
+	void getCommands(double & rudder, double & sail, double gpsLon, double gpsLat, int radius, int stayTime,
+	double trueWindDirection, double heading, double gpsHeading, double gpsSpeed, double compassHeading, double windsensorDir);
+
 	void setCourseCalcValues(double tackAngle, double sectorAngle);
 	void setInnerRadiusRatio(double ratio);
-	
+
+	void setWaypointData(double lon, double lat, int radius);
+
 	double getDTW();
 	double getBTW();
 	double getTWD();
@@ -37,17 +35,19 @@ public:
 
 	void setUpdateInterval(double updateInterval);
 	void setMinimumDegreeLimit(double degLimit);
+
 	
 private:
-	bool reachedRadius(double radius, PositionModel boat) const;
 
+	bool reachedRadius(double radius, double gpsLon, double gpsLat) const;
 	bool adjustSteering(double relativeWindDirection);
 
+	double m_lon;
+	double m_lat;
+	int m_radius;
 	TackAngle m_tackAngleHandler;
 	Commands m_commandHandler;
-	WaypointModel m_waypoint;
 	CourseCalculation m_courseCalc;
-	CourseMath m_courseMath;
 	double m_innerRadiusRatio;
 	Timer m_waypointTimer;
 	double m_courseToSteer;
