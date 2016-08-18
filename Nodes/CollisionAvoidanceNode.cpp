@@ -38,8 +38,6 @@
 //        }
 //        return compute_commands();
 //    }
-
-
 */
 
 //CONSTRUCTOR
