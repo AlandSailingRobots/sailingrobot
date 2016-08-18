@@ -16,10 +16,16 @@
 
 #include "Node.h"
 #include "Messages/GPSDataMsg.h"
+#include "Messages/CollisionAvoidanceMsg.h"
 #include "dbhandler/DBHandler.h"
 #include "utility/CourseMath.h"
 #include "utility/Timer.h"
 
+struct caWaypoint
+{
+    double longitude;
+    double latitude;
+};
 
 class WaypointMgrNode : public Node {
 public:
@@ -32,6 +38,8 @@ public:
 
 private:
 	void processGPSMessage(GPSDataMsg* msg);
+
+    void processCollisionAvoidanceMessage(CollisionAvoidanceMsg* msg);
 
     ///----------------------------------------------------------------------------------
  	/// Function called after every received message. Checks to see if waypoint harvested
@@ -76,17 +84,12 @@ private:
     int     m_prevRadius;
 
     bool    m_collisionAvoidance;
-    int     m_caCounter;
-    int     m_caId;
+    int     m_caId; //ca = Collision Avoidance
     int     m_caDeclination;
     int     m_caRadius;
     int     m_caStayTime;
-    double  m_caStartLon; //Collision Avoidance Waypoints
-    double  m_caStartLat;
-    double  m_caMidLon;
-    double  m_caMidLat;
-    double  m_caEndLon;   
-    double  m_caEndLat;
+    int     m_caCounter; //Keeps track of previous waypoint Nr in array
+    std::array<caWaypoint, 3> m_caWPArray; 
 
     double  m_gpsLongitude;
     double  m_gpsLatitude;

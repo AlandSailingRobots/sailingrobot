@@ -14,7 +14,6 @@
 #include "WaypointMgrNode.h"
 #include "Messages/WaypointDataMsg.h"
 #include "Messages/ServerWaypointsReceivedMsg.h"
-#include "Messages/CollisionAvoidanceMsg.h"
 #include "SystemServices/Logger.h"
 #include "dbhandler/DBHandler.h"
 #include "utility/Utility.h"
@@ -67,7 +66,7 @@ void WaypointMgrNode::processMessage(const Message* msg)
             break;
         case MessageType::CollisionAvoidance:
             m_collisionAvoidance = true;
-            m_caCounter = 0;
+            processCollisionAvoidanceMessage((CollisionAvoidanceMsg*)msg);
             sendCAMessage();
             break;
         default:
@@ -96,6 +95,17 @@ void WaypointMgrNode::processGPSMessage(GPSDataMsg* msg)
     m_gpsLatitude = msg->latitude();
 }
 
+void WaypointMgrNode::processCollisionAvoidanceMessage(CollisionAvoidanceMsg* msg)
+{
+    m_caWPArray[0].longitude = msg->startWaypointLon();
+    m_caWPArray[0].latitude = msg->startWaypointLat();
+    m_caWPArray[1].longitude = msg->midWaypointLon();
+    m_caWPArray[1].latitude = msg->midWaypointLat();
+    m_caWPArray[2].longitude = msg->endWaypointLon();
+    m_caWPArray[2].latitude = msg->endWaypointLat();
+    m_caCounter = 0;
+}
+
 bool WaypointMgrNode::waypointReached()
 {
     if(harvestWaypoint())
@@ -117,14 +127,14 @@ bool WaypointMgrNode::waypointReached()
 
 bool WaypointMgrNode::collisionWaypointReached()
 {
-    double DTW = CourseMath::calculateDTW(m_gpsLongitude, m_gpsLatitude, m_caMidLon, m_caMidLat); //Calculate distance to waypoint
+    double DTW = CourseMath::calculateDTW(m_gpsLongitude, m_gpsLatitude, m_caWPArray[m_caCounter].longitude, m_caWPArray[m_caCounter].latitude); //Calculate distance to waypoint
     if(DTW > m_nextRadius)
     {
         return false;
     }
     else
     {
-        m_caCounter++;
+        m_caCounter++;;
         return true;
     }
 }
@@ -148,24 +158,19 @@ void WaypointMgrNode::sendMessage()
 
 void WaypointMgrNode::sendCAMessage()
 {
-    if(m_caCounter == 0)
-    {
-        MessagePtr msg = std::make_unique<WaypointDataMsg>(m_caId, m_caMidLon, m_caMidLat, m_caDeclination, m_caRadius, m_caStayTime,
-                        m_caId, m_caStartLon, m_caStartLat, m_caDeclination, m_caRadius);
-        m_MsgBus.sendMessage(std::move(msg));
-    }
-    else if(m_caCounter == 1)
-    {
-        MessagePtr msg = std::make_unique<WaypointDataMsg>(m_nextId, m_caEndLat, m_caEndLat, m_caDeclination, m_caRadius, m_nextStayTime,
-                         m_caId, m_caMidLon, m_caMidLat, m_caDeclination, m_caRadius);
-        m_MsgBus.sendMessage(std::move(msg));
-    }
-    else if(m_caCounter == 2)
+    if(m_caCounter > 1)
     {
         MessagePtr msg = std::make_unique<WaypointDataMsg>(m_nextId, m_nextLongitude, m_nextLatitude, m_nextDeclination, m_nextRadius, m_nextStayTime,
-                        m_caId, m_caEndLon, m_caEndLat, m_caDeclination, m_caRadius);
+                        m_caId, m_caWPArray[m_caCounter].longitude, m_caWPArray[m_caCounter].latitude, m_caDeclination, m_caRadius);
         m_MsgBus.sendMessage(std::move(msg));
         m_collisionAvoidance = false;
+    }
+    else
+    {
+        MessagePtr msg = std::make_unique<WaypointDataMsg>(m_nextId, m_caWPArray[m_caCounter + 1].longitude, m_caWPArray[m_caCounter + 1].latitude, 
+                            m_caDeclination, m_caRadius, m_nextStayTime, m_caId, m_caWPArray[m_caCounter].longitude, m_caWPArray[m_caCounter].latitude, 
+                            m_caDeclination, m_caRadius);
+        m_MsgBus.sendMessage(std::move(msg));
     }
 }
 

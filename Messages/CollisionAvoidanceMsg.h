@@ -13,11 +13,6 @@
 
 #pragma once
 
-#ifndef SAILINGROBOT_COLLISIONAVOIDANCEMSG_H
-#define SAILINGROBOT_COLLISIONAVOIDANCEMSG_H
-
-#pragma once
-
 #include "Message.h"
 
 
@@ -31,11 +26,11 @@ public:
                           double endWaypointLon,
                           double endWaypointLat)
             :Message(MessageType::CollisionAvoidance, sourceID, destinationID),
-             m_startWaypointLong(startWaypointLon),
+             m_startWaypointLon(startWaypointLon),
              m_startWaypointLat(startWaypointLat),
-             m_midWaypointLong(midWaypointLon),
+             m_midWaypointLon(midWaypointLon),
              m_midWaypointLat(midWaypointLat),
-             m_endWaypointLong(endWaypointLon),
+             m_endWaypointLon(endWaypointLon),
              m_endWaypointLat(endWaypointLat)
     { }
 
@@ -46,11 +41,11 @@ public:
                           double endWaypointLon,
                           double endWaypointLat)
             :Message(MessageType::CollisionAvoidance, NodeID::None, NodeID::None),
-             m_startWaypointLong(startWaypointLon),
+             m_startWaypointLon(startWaypointLon),
              m_startWaypointLat(startWaypointLat),
-             m_midWaypointLong(midWaypointLon),
+             m_midWaypointLon(midWaypointLon),
              m_midWaypointLat(midWaypointLat),
-             m_endWaypointLong(endWaypointLon),
+             m_endWaypointLon(endWaypointLon),
              m_endWaypointLat(endWaypointLat)
     { }
 
@@ -85,23 +80,19 @@ public:
     {
         Message::Serialise(serialiser);
 
-        serialiser.serialise(m_startWaypointLong);
+        serialiser.serialise(m_startWaypointLon);
         serialiser.serialise(m_startWaypointLat );
-        serialiser.serialise(m_midWaypointLong  );
+        serialiser.serialise(m_midWaypointLon  );
         serialiser.serialise(m_midWaypointLat   );
-        serialiser.serialise(m_endWaypointLong  );
+        serialiser.serialise(m_endWaypointLon  );
         serialiser.serialise(m_endWaypointLat   );
     }
 
 private:
     double m_startWaypointLon;
     double m_startWaypointLat;
-    double m_midWaypointLong;
+    double m_midWaypointLon;
     double m_midWaypointLat;
     double m_endWaypointLon;
     double m_endWaypointLat;
 };
-
-
-
-#endif //SAILINGROBOT_COLLISIONAVOIDANCEMSG_H
