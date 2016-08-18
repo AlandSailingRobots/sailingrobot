@@ -32,7 +32,13 @@ WaypointMgrNode::WaypointMgrNode(MessageBus& msgBus, DBHandler& db)
     m_prevLongitude(0),
     m_prevLatitude(0),
     m_prevDeclination(0),
-    m_prevRadius(0)
+    m_prevRadius(0),
+
+    m_collisionAvoidance(false),
+    m_caId(-1),
+    m_caDeclination(6),
+    m_caRadius(20),
+    m_caStayTime(0)
 {
     msgBus.registerNode(*this, MessageType::GPSData);
     msgBus.registerNode(*this, MessageType::ServerWaypointsReceived);
@@ -56,13 +62,28 @@ void WaypointMgrNode::processMessage(const Message* msg)
             break;
         case MessageType::ServerWaypointsReceived:
             sendMessage();
+            break;
+        // case MessageType::CollisionAvoidance:
+        //     m_collisionAvoidance = true;       PSEUDO CODE
+        //     sendMessage about new waypoint for sailing Logic
+        //     break;
         default:
             return;
 	}
 
-    if(waypointReached())
+    if(not m_collisionAvoidance)
     {
-        sendMessage();
+        if(waypointReached())
+        {
+            sendMessage();
+        }
+    }
+    else
+    {
+        if(collisionWaypointReached())
+        {
+            sendCAMessage();
+        }
     }
 }
 
@@ -74,9 +95,6 @@ void WaypointMgrNode::processGPSMessage(GPSDataMsg* msg)
 
 bool WaypointMgrNode::waypointReached()
 {
-    // double distanceAfterWaypoint = Utility::calculateWaypointsOrthogonalLine(m_nextLongitude, m_nextLatitude, m_prevLongitude,
-    //             m_prevLatitude, m_gpsLongitude, m_gpsLatitude); //Checks if boat has passed the waypoint following the line, without entering waypoints radius
-
     if(harvestWaypoint())
     {
         if(not m_db.changeOneValue("waypoints", std::to_string(m_nextId),"1","harvested"))
@@ -91,6 +109,20 @@ bool WaypointMgrNode::waypointReached()
     else
     {
         return false;
+    }
+}
+
+bool WaypointMgrNode::collisionWaypointReached()
+{
+    double DTW = CourseMath::calculateDTW(m_gpsLongitude, m_gpsLatitude, m_caMidLon, m_caMidLat); //Calculate distance to waypoint
+    if(DTW > m_nextRadius)
+    {
+        return false;
+    }
+    else
+    {
+        m_caCounter++;
+        return true;
     }
 }
 
@@ -109,6 +141,29 @@ void WaypointMgrNode::sendMessage()
     }
 
     m_db.forceUnlock();
+}
+
+void WaypointMgrNode::sendCAMessage()
+{
+    if(m_caCounter == 0)
+    {
+        MessagePtr msg = std::make_unique<WaypointDataMsg>(m_caId, m_caMidLon, m_caMidLat, m_caDeclination, m_caRadius, m_caStayTime,
+                        m_caId, m_caStartLon, m_caStartLat, m_caDeclination, m_caRadius);
+        m_MsgBus.sendMessage(std::move(msg));
+    }
+    else if(m_caCounter == 1)
+    {
+        MessagePtr msg = std::make_unique<WaypointDataMsg>(m_nextId, m_caEndLat, m_caEndLat, m_caDeclination, m_caRadius, m_nextStayTime,
+                         m_caId, m_caMidLon, m_caMidLat, m_caDeclination, m_caRadius);
+        m_MsgBus.sendMessage(std::move(msg));
+    }
+    else if(m_caCounter == 2)
+    {
+        MessagePtr msg = std::make_unique<WaypointDataMsg>(m_nextId, m_nextLongitude, m_nextLatitude, m_nextDeclination, m_nextRadius, m_nextStayTime,
+                        m_caId, m_caEndLon, m_caEndLat, m_caDeclination, m_caRadius);
+        m_MsgBus.sendMessage(std::move(msg));
+        m_collisionAvoidance = false;
+    }
 }
 
 bool WaypointMgrNode::harvestWaypoint()
