@@ -821,7 +821,7 @@ Obstacle CollisionAvoidanceNode::updateObstacleWithBoostPoly(
 
     // The old obstacle is updated without the last point
     obstacle.polygon.clear();
-    for (int i = 0 ; i< poly.outer().size()-1; i++){
+    for (int i = 0 ; i< static_cast<signed>(poly.outer().size()-1); i++){
         const Eigen::Vector2d pt(poly.outer()[i].get<0>(), poly.outer()[i].get<1>());
         obstacle.polygon.push_back(pt);
     }
@@ -841,7 +841,7 @@ void CollisionAvoidanceNode::cleanObstacles(
 //    std::cout << "Before clean seenObstacles.size() = " << seenObstacles.size() << "\n";
     if (seenObstacles.size() != 0) {
         // for each memorized obstacles
-        while (i < seenObstacles.size()) {
+        while (i < static_cast<signed>(seenObstacles.size())) {
             //the current memorized obstacle does not belong to detectedObstacles
             /*
              * The computations made here verify that an obstacle isn't too far from any other detected
@@ -1038,7 +1038,7 @@ void CollisionAvoidanceNode::mergeObstacles(
     //Intersection
     int j = 0;
     //For each memorized obstacle, makes the intersection with the zone
-    while (j<seenObstacles.size()) {
+    while (j<static_cast<signed>(seenObstacles.size())) {
         boostPolygon memPoly = eigenPolyToBoostPoly(seenObstacles[j]);
         boostMultiPolygon output;
         boost::geometry::intersection(boostUpToDatePoly, memPoly, output);
@@ -1053,7 +1053,7 @@ void CollisionAvoidanceNode::mergeObstacles(
                 printf("[DETAIL](mergeObstacles) Obstacle split into several ones \n");
                 tmp.color = seenObstacles[j].color;
                 tmp.upToDate = false;
-                for (int i = 0; i < output.size(); i++) {
+                for (int i = 0; i < static_cast<signed>(output.size()); i++) {
                     if (i == 0) {
                         seenObstacles[j] = updateObstacleWithBoostPoly(seenObstacles[j], output[0]);
                     }
@@ -1094,7 +1094,7 @@ boostMultiPolygon CollisionAvoidanceNode::polyUnion(
     while(continueUnion && mpoly.size()!=1) {
         continueUnion = true;
         int i2 = i1+1;
-        while (i2 < mpoly.size()) {
+        while (i2 < static_cast<signed>(mpoly.size())) {
 
 //            vibes::clearFigure("hello");
 //            drawBoostPoly(mpoly,"hello");
