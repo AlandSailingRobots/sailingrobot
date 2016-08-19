@@ -22,6 +22,7 @@ ifeq ($(TOOLCHAIN),win)
 
 TARGET			= ./XbeeRemote.exe
 SRC				+= WindowsSerialDataLink.cpp
+XBEE_LIBS 			= -lwsock32
 
 else
 
@@ -50,7 +51,7 @@ all : $(TARGET)
 	 
 $(TARGET): $(OBJECTS)
 	$(MOVE_LIB)
-	@$(CXX) $(CPPFLAGS) $(OBJECTS) -Wl,-rpath=./,-rpath=../ $(WIRING_PI) -o $(TARGET) $(LIBS)
+	@$(CXX) $(CPPFLAGS) $(OBJECTS) -Wl,-rpath=./,-rpath=../ $(WIRING_PI) -o $(TARGET) $(LIBS) $(XBEE_LIBS)
 	@echo Built $(TARGET)
 	 
 # Compile CPP files into the build folder

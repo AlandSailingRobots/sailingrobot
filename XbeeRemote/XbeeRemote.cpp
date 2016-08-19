@@ -192,7 +192,7 @@ void XbeeRemote::printMessage(Message* msgPtr, MessageDeserialiser& deserialiser
 /***************************************************************************************/
 void XbeeRemote::sendToUI(Message* msgPtr, MessageDeserialiser& deserialiser)
 {
-	const int OFFLINE_TIME = 5;
+	//const int OFFLINE_TIME = 5;
 	m_LastReceived = SysClock::unixTime();
 
 #ifdef __linux__

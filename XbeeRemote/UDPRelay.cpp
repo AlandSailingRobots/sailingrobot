@@ -92,7 +92,7 @@ void UDPRelay::send(const char* msg)
 	{
 		sockaddr_in servaddr;
 
-		bzero(&servaddr,sizeof(servaddr));
+		memset(&servaddr, 0, sizeof(servaddr));
 		servaddr.sin_family = AF_INET;
 		servaddr.sin_addr.s_addr = inet_addr(m_destAddress.c_str());
 		servaddr.sin_port = htons(m_ports[i]);
