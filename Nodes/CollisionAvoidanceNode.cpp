@@ -361,7 +361,7 @@ PotentialMap CollisionAvoidanceNode::compute_potential_field(
 Eigen::Vector2d CollisionAvoidanceNode::find_minimum_potential_field(
         PotentialMap potField) {
     double I_row = 0, I_col = 0;
-    const double minZ = potField.field.minCoeff(&I_row, &I_col);
+    potField.field.minCoeff(&I_row, &I_col);
     double I_x = I_col*(potField.xMax-potField.xMin)
                  /potField.field.cols()-(std::abs(potField.yMin));
     double I_y = I_row*(potField.yMax-potField.yMin)
@@ -418,7 +418,7 @@ CommandOutput CollisionAvoidanceNode::compute_commands(
     const double delta_rMax = M_PI / 4;     // rad   maximum rudder angle
     const double incidenceAngle = M_PI / 4; // rad   incidence angle
     const double ngzAngle = M_PI / 4;       // rad   close hauled angle
-    const double ngzAngleBack = 0;          // rad   back wind angle
+//    const double ngzAngleBack = 0;          // rad   back wind angle
     // ngzAngleOUT = ngzAngle+pi/8;         // rad   out of the no-go zone angle
     // NGZHeading = mod(psi+pi,2*pi);       // rad   no-go zone angle
 
@@ -589,7 +589,7 @@ double CollisionAvoidanceNode::getInitialBearing(
 double CollisionAvoidanceNode::getArea(
         std::vector<Eigen::Vector2d> polygon){
     double sumAngle = 0;
-    for(int i = 0;i<polygon.size();i++){
+    for(int i = 0;i< static_cast<signed>(polygon.size());i++){
         const int iPlusOne = static_cast<int>((i + 1) % polygon.size());
         const int iMinusOne = static_cast<int>((i - 1) % polygon.size());
         const double angleCurrentVertex = wrapToPi(getInitialBearing(polygon[i],
@@ -625,7 +625,7 @@ Eigen::Vector2d CollisionAvoidanceNode::getClosestVertex(
     int idClosestPoint = -1;
     double minDistance = 40000000;
     double distance;
-    for(int i = 0;i<polygon.size();i++) {
+    for(int i = 0;i<static_cast<signed>(polygon.size());i++) {
         distance = calculateGPSDistance(polygon[i], point);
         minDistance = std::min(minDistance, distance);
         if (minDistance == distance) {
@@ -646,7 +646,7 @@ Eigen::Vector2d CollisionAvoidanceNode::getClosestPoint(
     Eigen::Vector2d closestPoint;
     const Eigen::Vector3d worldOrigin(0,0,0);
 
-    for(int i = 0;i<polygon.size();i++){
+    for(int i = 0;i<static_cast<signed>(polygon.size());i++){
         const int iPlusOne = static_cast<const int>((i+1) % polygon.size());
         const std::vector<double> distInfo = distanceFromSegment(polygon[i],
                                                                  polygon[iPlusOne],
@@ -1071,7 +1071,7 @@ void CollisionAvoidanceNode::mergeObstacles(
     }
 
     // Add the obstacles that intersects with nothing
-    for(int i = 0; i<boostUpToDatePolygons.size();i++){
+    for(int i = 0; i<static_cast<signed>(boostUpToDatePolygons.size());i++){
         bool createNewObstacle = true;
         for(auto & memObs : seenObstacles){
             boostPolygon memPoly = eigenPolyToBoostPoly(memObs);
@@ -1273,7 +1273,7 @@ Eigen::ArrayXXd CollisionAvoidanceNode::computeSailingZonePot(
         std::vector<Eigen::Vector2d> sailingZone){
 
     Eigen::ArrayXXd sailingZoneMatrix = Eigen::ArrayXXd::Ones(Px.rows(),Px.cols());//New blank matrix
-    for(int i = 0;i<sailingZone.size();i++){
+    for(int i = 0;i<static_cast<signed>(sailingZone.size());i++){
         // The lines of the polygon are added incrementally
 
         const int iPlusOne = static_cast<int>(fmod(i+1,sailingZone.size())); // index of the next point
