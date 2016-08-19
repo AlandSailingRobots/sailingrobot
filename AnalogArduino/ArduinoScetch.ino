@@ -63,6 +63,7 @@ void loop() {
   splitValue(analogRead(sheetPin),SHEETBYTE);
   splitValue(analogRead(batteryPin),BATTERYBYTE);
   RCFlag = digitalRead(RCPin);
+  Serial.println(RCFlag,DEC);
   delay(100);
 }
   
@@ -98,6 +99,6 @@ void I2Cstatus(){
   datapacket[7]=MSB[BATTERYBYTE-1];
   datapacket[8]=LSB[BATTERYBYTE-1];
   datapacket[9]=I2Caddress;
-  datapacket[10]=RCPin;
+  datapacket[10]=RCFlag;
   Wire.write(datapacket,11);
 }
