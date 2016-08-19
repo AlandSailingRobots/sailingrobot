@@ -82,7 +82,7 @@ I2CCONTROLLER = 		i2ccontroller/I2CController.cpp
 
 COURSE = 				utility/CourseCalculation.cpp utility/CourseMath.cpp
 
-DB = 					dbhandler/DBHandler.cpp dbhandler/DBLogger.cpp
+DB = 					dbhandler/DBHandler.cpp dbhandler/DBLogger.cpp dbhandler/SQLiteDataStore.cpp
 
 COMMAND = 				waypointrouting/RudderCommand.cpp waypointrouting/SailCommand.cpp
 
