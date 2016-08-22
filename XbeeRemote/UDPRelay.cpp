@@ -114,5 +114,3 @@ void UDPRelay::send(const char* msg)
 		}
 	}
 }
-
-std::string receive()

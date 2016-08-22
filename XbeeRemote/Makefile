@@ -61,5 +61,4 @@ $(BUILD_DIR)/%.o:%.cpp
 	$(CXX) -c $(CPPFLAGS) $(INC) $(INCLUDE) -o ./$@ $< -DTOOLCHAIN=$(TOOLCHAIN) $(LIBS)
 
 clean :
-	rm -f ./*.o
-	rm xbeerelay
+	rm -rd build

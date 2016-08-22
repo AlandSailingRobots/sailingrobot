@@ -34,7 +34,7 @@ typedef SOCKET UDPSocket;
 
 class UDPRelay {
 public:
-	UDPRelay(std::vector<int> ports, std::string address, int receivePort);
+	UDPRelay(std::vector<int> ports, std::string address);
 	virtual ~UDPRelay();
 
 	///----------------------------------------------------------------------------------
@@ -55,6 +55,5 @@ private:
 
 	std::string 		m_destAddress;
 	std::vector<int> 	m_ports;
-	UDPSocket			m_socket;
 	UDPSocket			m_socket;
 };

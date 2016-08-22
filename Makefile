@@ -238,4 +238,6 @@ clean:
 	@echo Removing existing object files and executable
 	@rm -f -r $(BUILD_DIR)
 	@rm -f $(EXECUTABLE)
+	"$(MAKE)" -C XbeeRemote clean
+	
 	@echo DONE

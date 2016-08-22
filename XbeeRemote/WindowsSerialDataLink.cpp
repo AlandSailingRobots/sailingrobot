@@ -76,7 +76,7 @@ bool WindowsSerialDataLink::initialise(uint16_t frameSize)
 }
 
 std::string WindowsSerialDataLink::sendATCommand(std::string command, uint16_t responseSize)
-{ return "Nothing here buddy";}
+{ return "OK\n";}
 
 
 void WindowsSerialDataLink::writeData(const uint8_t* data, uint8_t size)
@@ -97,13 +97,13 @@ int WindowsSerialDataLink::readByte()
     int retVal;
     BYTE byte;
 
-		if(not ReadFile(m_hSerial, &byte, 1, &dwRead, 0))
-		{
-			return -1;
-		}
-		
-		retVal = byte;
-		return retVal;
+	if(not ReadFile(m_hSerial, &byte, 1, &dwRead, 0))
+	{
+		return -1;
+	}
+
+	retVal = byte;
+	return retVal;
 }
 
 bool WindowsSerialDataLink::dataAvailable()
