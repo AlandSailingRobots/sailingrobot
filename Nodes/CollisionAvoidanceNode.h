@@ -30,8 +30,6 @@
 #define SENSOR_ARC_ANGLE M_PI/3 // Every angle is in radian
 #define CHANNEL_RADIUS 15.0 // in meters
 #define SAFE_DISTANCE 50.0 // in meters
-#define EARTH_RADIUS 6371000 // in meters
-#define CONVERSION_FACTOR_METER_TO_GPS 0.00000015695406942385 // in rad/meters
 
 #define FIND_CENTER_NORMAL 0
 #define FIND_CENTER_DETECTED 1

@@ -26,8 +26,10 @@
 #include <cerrno>
 #include <cstring>
 #include <unistd.h>
+#include <cmath>
 #include "SystemServices/Logger.h"
 #include "utility/SysClock.h"
+#include "CollisionAvoidanceNode.h"
 
 
 #define BASE_SLEEP_MS 400
@@ -35,6 +37,7 @@
 #define COUNT_GPSDATA_MSG 1
 #define COUNT_WINDDATA_MSG 1
 #define COUNT_ARDUINO_MSG 1
+#define COUNT_OBSTACLE_MSG 1
 
 
 SimulationNode::SimulationNode(MessageBus& msgBus)
@@ -199,6 +202,66 @@ void SimulationNode::createArduinoMessage()
 		MessagePtr msg = std::make_unique<ArduinoDataMsg>(ArduinoDataMsg(m_ArduinoPressure, m_ArduinoRudder, m_ArduinoSheet, m_ArduinoBattery ));
 		m_MsgBus.sendMessage(std::move(msg));
 	}
+}
+
+void SimulationNode::createObstacleMessage(){
+
+    //Obstacle settings
+    const double obstacleRadius = 5; //meters
+    std::vector<Eigen::Vector2d> obsVec;
+    const Eigen::Vector2d obs0(0+(0)*CONVERSION_FACTOR_METER_TO_GPS,
+                               0+(30)*CONVERSION_FACTOR_METER_TO_GPS); obsVec.push_back(obs0);
+    const Eigen::Vector2d obs1(0+(11)*CONVERSION_FACTOR_METER_TO_GPS,
+                               0+(20)*CONVERSION_FACTOR_METER_TO_GPS); obsVec.push_back(obs1);
+    const Eigen::Vector2d obs2(1+(-20)*CONVERSION_FACTOR_METER_TO_GPS,
+                               1+(0)*CONVERSION_FACTOR_METER_TO_GPS); obsVec.push_back(obs2);
+    const Eigen::Vector2d obs3(1+(0)*CONVERSION_FACTOR_METER_TO_GPS,
+                               1+(0)*CONVERSION_FACTOR_METER_TO_GPS); obsVec.push_back(obs3);
+
+    ObstacleData
+    m_obstacles.push_back();
+
+    if (m_count_sleep % COUNT_OBSTACLE_MSG==0)
+    {
+        MessagePtr msg = std::make_unique<ArduinoDataMsg>(ObstacleVectorMsg(m_obstacles);
+        m_MsgBus.sendMessage(std::move(msg));
+    }
+}
+
+ObstacleData SimulationNode::createObstacleDataCircle(double obsGpsLat,
+                                                      double obsGpsLon,
+                                                      double obstacleRadius){
+    // Conversion
+    const double gpsLat = Utility::degreeToRadian(m_GPSLat);
+    const double gpsLon = Utility::degreeToRadian(m_GPSLon);
+    const double compHeading = M_PI/2 - Utility::degreeToRadian(m_CompassHeading);
+
+    // Sensor settings
+    const double maxDetectionRange = 1000;
+
+    // Simulation
+    // TODO : implement more precisely obstacle simulation.
+    const double obstacleHeadingRelativeToBoat = Utility::wrapToPi(atan2(obsGpsLat-gpsLat,
+                                                                         obsGpsLon-gpsLon),
+                                                                   - compHeading);
+    //std::cout << "obstacleHeadingRelativeToBoat = " << obstacleHeadingRelativeToBoat<< "\n";
+    const double distFromObstacle = Utility::calculateGPSDistance(gpsLon   ,gpsLat,
+                                                                  obsGpsLon,obsGpsLat);
+    if(std::abs(obstacleHeadingRelativeToBoat) <= SENSOR_ARC_ANGLE && distFromObstacle<=maxDetectionRange) {
+
+        const double leftHeadingRelativeToBoat =  atan2(obstacleRadius, distFromObstacle)
+                                                  +obstacleHeadingRelativeToBoat;
+        const double rightHeadingRelativeToBoat = -atan2(obstacleRadius, distFromObstacle)
+                                                  +obstacleHeadingRelativeToBoat;
+        ObstacleData obstacle = {
+                distFromObstacle - obstacleRadius, //double minDistanceToObstacle;
+                maxDetectionRange,                 //double maxDistanceToObstacle;
+                leftHeadingRelativeToBoat,         //double LeftBoundheadingRelativeToBoat;
+                rightHeadingRelativeToBoat};       //double RightBoundheadingRelativeToBoat;
+        //std::cout << "I push back\n";
+        m_sensorOutput.detectedObstacles.push_back(obstacle);
+
+    }
 }
 
 void SimulationNode::processSocketData(){

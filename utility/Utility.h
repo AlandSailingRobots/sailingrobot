@@ -5,6 +5,8 @@
 #include <vector>
 #include <array>
 
+#define CONVERSION_FACTOR_METER_TO_GPS 0.00000015695406942385 // in rad/meters
+#define EARTH_RADIUS 6371000 // in meters
 
 class Utility {
 public:
@@ -52,6 +54,33 @@ public:
 		                                         double &apparentWindSpeed, double &apparentWindDirection);
 	static double getApparentWindSpeed(const int windsensorDir, const int windsensorSpeed, const double gpsSpeed, const double heading, const double trueWindDirection);
 	static double getApparentWindDirection(const int windsensorDir, const int windsensorSpeed, const double gpsSpeed, const double heading, const double trueWindDirection);
+    /**
+     * Gives the sum between two angles regardless of their definition.
+     * It's radAngle1+radAngle2.
+     * The angles needs to be in radians.
+     * @param radAngle1
+     * @param radAngle2
+     * @return
+     */
+    static double wrapToPi(double angleRad1, double angleRad2);
+    /**
+     * \Brief Compute the distance between 2 GPS points
+     * Haversine algorithm for distance computation on Earth. \n
+     * Took on http://www.movable-type.co.uk/scripts/latlong.html \n
+     * a = sin²(Δφ/2) + cos φ1 ⋅ cos φ2 ⋅ sin²(Δλ/2) \n
+     * c = 2 ⋅ atan2( √a, √(1−a) ) \n
+     * distance = Rearth ⋅ c \n
+     * @param point1X
+     * @param point1Y
+     * @param point2X
+     * @param point2Y
+     * @return double          The distance between the two gps points
+     */
+    static double calculateGPSDistance(double point1X,
+                                       double point1Y,
+                                       double point2X,
+                                       double point2Y);
+
 };
 
 #endif
