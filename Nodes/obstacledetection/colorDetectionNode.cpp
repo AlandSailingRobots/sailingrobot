@@ -2,13 +2,13 @@
 #include "SystemServices/Logger.h"
 using namespace cv;
 using namespace std;
-#define DISPLAY_WINDOWS_AND_TRACKBARS 1
+#define DISPLAY_WINDOWS_AND_TRACKBARS 0
 
 colorDetectionNode::colorDetectionNode(MessageBus& msgBus,std::vector<string> colors_input,int bottomPixelsToCrop)
 	: ActiveNode(NodeID::ColorDetection, msgBus),m_hsvDiff(10),m_iLowH(0),
 	m_iHighH(179),m_iLowS(0),m_iHighS(255),m_iLowV(0),m_iHighV(255),m_iColor(0),
 	m_numberOfColorsToTrack(0),m_Initialised(false),m_minAreaToDetect(2000),
-	m_maxAreaToDetect(20000),m_numberOfCapturesPerDetection(5),m_delay(1),m_port(0),m_bottomPixelsToCrop(bottomPixelsToCrop)
+	m_maxAreaToDetect(20000),m_numberOfCapturesPerDetection(5),m_delay(1),m_port(1),m_bottomPixelsToCrop(bottomPixelsToCrop)
 {
 	vector<string> colors;
 	m_trackBarHSV = Mat3b(100, 300, Vec3b(0,0,0));

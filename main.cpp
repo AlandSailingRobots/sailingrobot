@@ -20,6 +20,7 @@
 #include "Nodes/XbeeSyncNode.h"
 #include "Nodes/RoutingNode.h"
 #include "Nodes/LineFollowNode.h"
+#include "Nodes/obstacledetection/colorDetectionNode.h"
 #include "Messages/DataRequestMsg.h"
 #include "dbhandler/DBHandler.h"
 #include "SystemServices/MaestroController.h"
@@ -118,6 +119,9 @@ int main(int argc, char *argv[])
 	HMC6343Node compass(messageBus, dbHandler.retrieveCellAsInt("buffer_config", "1", "compass"));
 	GPSDNode gpsd(messageBus);
 	ArduinoNode arduino(messageBus);
+	std::vector<std::string> list;
+	list.push_back("red");
+	colorDetectionNode colorDetection(messageBus, list, 0);
 	#endif
 
 	HTTPSyncNode httpsync(messageBus, &dbHandler, 0, false);
@@ -170,6 +174,7 @@ int main(int argc, char *argv[])
 	initialiseNode(sail, "Sail Actuator", NodeImportance::CRITICAL);
 	initialiseNode(rudder, "Rudder Actuator", NodeImportance::CRITICAL);
 	initialiseNode(arduino, "Arduino Node", NodeImportance::NOT_CRITICAL);
+	initialiseNode(colorDetection, "Colour detection node", NodeImportance::NOT_CRITICAL);
 	#endif
 
 	if (requireNetwork)
@@ -203,9 +208,11 @@ int main(int argc, char *argv[])
 	compass.start();
 	gpsd.start();
 	arduino.start();
+	colorDetection.start();
   #endif
 	httpsync.start();
 	vessel.start();
+
 
 	// NOTE - Jordan: Just to ensure messages are following through the system
 	MessagePtr dataRequest = std::make_unique<DataRequestMsg>(NodeID::MessageLogger);

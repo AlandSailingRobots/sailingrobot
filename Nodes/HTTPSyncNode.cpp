@@ -275,12 +275,14 @@ bool HTTPSyncNode::performCURLCall(std::string data, std::string call, std::stri
 			}
 			if(m_res == CURLE_COULDNT_CONNECT && m_reportedConnectError)
 			{
+                curl_easy_cleanup(curl);
 				return false;
 			}
 			else if(m_res == CURLE_COULDNT_CONNECT)
 			{
 				m_reportedConnectError = true;
 			}
+            curl_easy_cleanup(curl);
 			return false;
 		}
 		else

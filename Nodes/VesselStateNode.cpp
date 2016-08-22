@@ -99,6 +99,7 @@ void VesselStateNode::processArduinoMessage(ArduinoDataMsg* msg)
 	m_ArduinoRudder = msg->rudder();
 	m_ArduinoSheet = msg->sheet();
 	m_ArduinoBattery = msg->battery();
+	m_ArduinoRC = msg->RC();
 }
 
 void VesselStateNode::VesselStateThreadFunc(void* nodePtr)
@@ -119,7 +120,7 @@ void VesselStateNode::VesselStateThreadFunc(void* nodePtr)
 																	node->m_GPSLon, node->m_GPSUnixTime, node->m_GPSSpeed, node->m_GPSSatellite,
 																	node->m_GPSHeading, node->m_WindDir, node->m_WindSpeed,
 																	node->m_WindTemp, node->m_ArduinoPressure, node->m_ArduinoRudder,
-																	node->m_ArduinoSheet, node->m_ArduinoBattery);
+																	node->m_ArduinoSheet, node->m_ArduinoBattery, node->m_ArduinoRC);
 		node->m_MsgBus.sendMessage(std::move(vesselState));
 
 	}

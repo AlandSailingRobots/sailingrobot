@@ -20,7 +20,7 @@
 #include <chrono>
 #include <thread>
 
-#define BLOCK_READ_SIZE 9
+#define BLOCK_READ_SIZE 10
 #define BLOCK_I2C_ADDRESS_LOC 8
 
 #define DEFAULT_I2C_ADDRESS_PRESSURE 0x07
@@ -117,7 +117,11 @@ void ArduinoNode::ArduinoThreadFunc(void* nodePtr)
         reVal+=(uint16_t) block[7];
         node->m_battery = reVal;
 
-        MessagePtr msg = std::make_unique<ArduinoDataMsg>(node->m_pressure, node->m_rudder, node->m_sheet, node->m_battery);
+        reVal = block[9]<<8;
+        reVal+=(uint16_t) block[10];
+        node->m_RC = reVal;
+
+        MessagePtr msg = std::make_unique<ArduinoDataMsg>(node->m_pressure, node->m_rudder, node->m_sheet, node->m_battery, node->m_RC);
         node->m_MsgBus.sendMessage(std::move(msg));
     }
 }
