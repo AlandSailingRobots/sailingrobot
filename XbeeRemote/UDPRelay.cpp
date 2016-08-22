@@ -57,9 +57,9 @@ UDPRelay::UDPRelay(std::vector<int> ports, std::string address)
 
 	// Initialize Winsock
 	iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
-	if (iResult != NO_ERROR) {
+	if (iResult != NO_ERROR)
+	{
 		wprintf(L"WSAStartup failed with error: %d\n", iResult);
-		return 1;
 	}
 #endif
 
