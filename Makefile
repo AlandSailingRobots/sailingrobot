@@ -102,7 +102,7 @@ export OBJECT_FILE = $(BUILD_DIR)/objects.tmp
 
 
 export CFLAGS = -Wall -g -o2
-export CPPFLAGS = -g -Wall -pedantic -Werror -std=c++14 -Wno-deprecated-declarations -Wno-reorder
+export CPPFLAGS = -g -Wall -pedantic -Werror -std=c++14 -Wno-deprecated-declarations
 
 export LIBS = -lsqlite3 -lgps -lrt -lcurl -lpthread
 

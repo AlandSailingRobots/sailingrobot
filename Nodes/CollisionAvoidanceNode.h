@@ -21,7 +21,7 @@
 #include <boost/geometry/geometry.hpp>
 #include <boost/geometry/geometries/polygon.hpp>
 #include <boost/geometry/multi/geometries/multi_polygon.hpp>
-#include "tests/collisionAvoidance/vibes.h"
+#include "utility/vibes.h"
 
 // TODO : Receive these values from the database or from RoutingBehaviour
 // Some of these values should be available for all behaviour classes
