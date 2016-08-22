@@ -246,7 +246,7 @@ void SimulationNode::createObstacleMessage(){
 
     if (m_count_sleep % COUNT_OBSTACLE_MSG==0)
     {
-        MessagePtr msg = std::make_unique<ArduinoDataMsg>(ObstacleVectorMsg(obstacles));
+        MessagePtr msg = std::make_unique<ObstacleVectorMsg>(ObstacleVectorMsg(obstacles));
         m_MsgBus.sendMessage(std::move(msg));
     }
 }
