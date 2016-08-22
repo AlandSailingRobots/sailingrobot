@@ -126,7 +126,8 @@ private:
 	void createObstacleMessage();
 
     /**
-     *
+     * The sensors will give a confidence interval of the heading and the distance
+     * relatively to the boat
      * @param obsGpsLat in rads
      * @param obsGpsLon in rads
      * @return

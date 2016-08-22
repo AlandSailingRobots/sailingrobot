@@ -21,6 +21,7 @@
 #include <boost/geometry/geometry.hpp>
 #include <boost/geometry/geometries/polygon.hpp>
 #include <boost/geometry/multi/geometries/multi_polygon.hpp>
+#include "tests/collisionAvoidance/vibes.h"
 
 // TODO : Receive these values from the database or from RoutingBehaviour
 // Some of these values should be available for all behaviour classes
@@ -161,14 +162,9 @@ protected:
     FollowedLine m_followedLine;
     std::vector<Eigen::Vector2d> m_sailingZone;
     SensorData m_sensorOutput;
-    /**
-     * Used to tell if the local node simulation should run
-     * TODO : investigate if variable is needed of if it would be easy to use simulationNode
-     */
-    Simulation m_simu;
-
     bool m_tack; //Need init
     int m_tackingDirection; //Need init
+    double m_loop_id;
     BearingOnlyVars m_bearingOnlyVars; //For future implementation if collision avoidance doesn't work
 
     //PRIVATE MAIN FUNCTIONS
@@ -275,6 +271,21 @@ protected:
     /*
      * Most of them are functions to handle geometry.
      */
+
+    /**
+     * Draw the state of the boat on vibes.
+     */
+    void drawState();
+    std::vector<double> getVectorLine(std::vector<Eigen::Vector2d> vec,int line);
+    void drawObstacles(std::vector<Obstacle> seen_obstacles,std::string color);
+    void drawObstacle(Obstacle obs,std::string color);
+    void drawEigenPoly(std::vector<Eigen::Vector2d> poly,std::string color);
+    void drawBoat(SensorData sensorData,std::string color);
+    void drawChannel(FollowedLine followedLine);
+    void CollisionAvoidanceNode::drawPotField(PotentialMap potfield,int option);
+    void CollisionAvoidanceNode::drawPotFieldPoint(int i, int j,
+                                                   PotentialMap potfield,
+                                                   std::string color, int option);
 
     /**
      * Gives the sum between two angles regardless of their definition.
