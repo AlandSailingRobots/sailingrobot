@@ -38,7 +38,7 @@
 #define COUNT_WINDDATA_MSG 1
 #define COUNT_ARDUINO_MSG 1
 #define COUNT_OBSTACLE_MSG 1
-
+#define DRAW_STATE_WITH_VIBES 1
 
 SimulationNode::SimulationNode(MessageBus& msgBus)
 	: ActiveNode(NodeID::Simulator, msgBus),
@@ -255,6 +255,11 @@ bool SimulationNode::createObstacleDataCircle(double obsGpsLat, //rads
                                               double obsGpsLon, //rads
                                               double obstacleRadius, //meters
                                               ObstacleData & obstacle){
+    // drawing of last iteration
+    if(DRAW_STATE_WITH_VIBES){
+        CollisionAvoidanceNode::drawState();
+    }
+
     // Conversion
     const double gpsLat = Utility::degreeToRadian(m_GPSLat);
     const double gpsLon = Utility::degreeToRadian(m_GPSLon);
@@ -332,6 +337,6 @@ void SimulationNode::SimulationThreadFunc(void* nodePtr)
     //send data to simulation
     write(node->m_handler_socket_client.sockfd,&(node->m_data_send), sizeof(struct DATA_SOCKET_SEND));
 
-		std::this_thread::sleep_for(std::chrono::milliseconds(BASE_SLEEP_MS));
+	std::this_thread::sleep_for(std::chrono::milliseconds(BASE_SLEEP_MS));
   }
 }

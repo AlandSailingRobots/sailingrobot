@@ -156,6 +156,11 @@ public:
      */
     bool setSailingZone();
 
+    /**
+     * Draw the state of the boat on vibes.
+     */
+    static void drawState();
+
 protected:
 
     std::vector<Obstacle> m_seenObstacles;
@@ -272,10 +277,6 @@ protected:
      * Most of them are functions to handle geometry.
      */
 
-    /**
-     * Draw the state of the boat on vibes.
-     */
-    void drawState();
     std::vector<double> getVectorLine(std::vector<Eigen::Vector2d> vec,int line);
     void drawObstacles(std::vector<Obstacle> seen_obstacles,std::string color);
     void drawObstacle(Obstacle obs,std::string color);

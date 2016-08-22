@@ -4,8 +4,6 @@
 
 #include "CollisionAvoidanceNode.h"
 
-#define DRAW_STATE_WITH_VIBES 1
-
 //INPUT
 /* Current_line (WP1 and WP2)
  * Boat_state
@@ -163,10 +161,6 @@ void CollisionAvoidanceNode::run() {
                                                                  wpOut.endPoint(0),
                                                                  wpOut.endPoint(1));
         m_MsgBus.sendMessage(std::move(msg));
-    }
-
-    if(DRAW_STATE_WITH_VIBES){
-        drawState();
     }
 }
 
