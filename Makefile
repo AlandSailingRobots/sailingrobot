@@ -24,9 +24,10 @@ USE_OPENCV = 0
 
 
 # Options include:
-#		linux_local = For a local linux machine (MOCK objects used)
+#		linux_local = For a local linux machine
 #		raspi_cc = For cross compiling to the PI on a linux machine
 #		raspi_local = For compiling on the PI itself
+# 		win = for windows
 export TOOLCHAIN = linux-local
 C_TOOLCHAIN = 0
 USE_SIM = 0
@@ -65,15 +66,15 @@ SYSTEM_SERVICES =		SystemServices/Logger.cpp
 else
 NODES =					Nodes/MessageLoggerNode.cpp Nodes/CV7Node.cpp Nodes/HMC6343Node.cpp Nodes/GPSDNode.cpp Nodes/ActuatorNode.cpp  Nodes/ArduinoNode.cpp \
 						Nodes/VesselStateNode.cpp Nodes/WaypointMgrNode.cpp Nodes/HTTPSyncNode.cpp Nodes/XbeeSyncNode.cpp Nodes/RoutingNode.cpp Nodes/LineFollowNode.cpp \
-						Nodes/SimulationNode.cpp Nodes/lidarLite/lidarLite.cpp Nodes/lidarLite/lidarLiteNode.cpp \
-						#You need opencv for the files below
-						#Nodes/obstacledetection/colorDetectionNode.cpp Nodes/obstacledetection/colorDetectionUtility.cpp
+						Nodes/lidarLite/lidarLite.cpp Nodes/lidarLite/lidarLiteNode.cpp \
+						
+XBEE_NETWORK = 			Network/DataLink.cpp Network/LinuxSerialDataLink.cpp Network/XbeePacketNetwork.cpp
 
 SYSTEM_SERVICES =		SystemServices/MaestroController.cpp SystemServices/Logger.cpp
 endif
 
 ifeq ($(USE_OPENCV), 1)
-OPENCV_CD =				Nodes/obstacledetection/colorDetectionNode.cpp Nodes/obstacledetection/colorDetectionUtility.cpp 
+OPENCV_CV =				Nodes/obstacledetection/colorDetectionNode.cpp Nodes/obstacledetection/colorDetectionUtility.cpp 
 endif
 
 XBEE = 					xBee/Xbee.cpp
@@ -92,21 +93,27 @@ WINDVANECONTROLLER = 	windvanecontroller/WindVaneController.cpp
 
 SRC_MAIN = main.cpp
 
-SRC = 	utility/Utility.cpp utility/Timer.cpp utility/SysClock.cpp $(SYSTEM_SERVICES) $(XBEE) $(OPENCV_CD) \
-		$(CORE) $(NODES) $(I2CCONTROLLER) $(COURSE) $(DB) $(COMMAND) $(GPS) $(WAYPOINTROUTING) $(WINDVANECONTROLLER)
+
+ifeq ($(TOOLCHAIN),win)
+SRC = 					utility\SysClock.cpp SystemServices\Logger.cpp Network\DataLink.cpp Network\XbeePacketNetwork.cpp Messages\MessageSerialiser.cpp Messages\MessageDeserialiser.cpp
+else					
+SRC = 	utility/Utility.cpp utility/Timer.cpp utility/SysClock.cpp $(SYSTEM_SERVICES) $(XBEE) $(XBEE_NETWORK) \
+		$(CORE) $(NODES) $(I2CCONTROLLER) $(COURSE) $(DB) $(COMMAND) $(GPS) $(WAYPOINTROUTING) $(WINDVANECONTROLLER) $(OPENCV_CV)
+		
+WIRING_PI = libwiringPi.so
+WIRING_PI_PATH = ./libs/wiringPi/wiringPi/
+WIRING_PI_STATIC = ./libs/wiringPi/wiringPi/libwiringPi.so.2.32
+
+endif
 
 
 #SOURCES = $(addprefix src/, $(SRC))
 
 # Includes
 
-export INC = -I./ -I./libs
 
-INC = -I./ -I./libs -I./libs/wiringPi/wiringPi
+export INC = -I./ -I./libs -I./libs/wiringPi/wiringPi -I.\
 
-WIRING_PI = libwiringPi.so
-WIRING_PI_PATH = ./libs/wiringPi/wiringPi/
-WIRING_PI_STATIC = ./libs/wiringPi/wiringPi/libwiringPi.so.2.32
 
 # Object files
 OBJECTS = $(addprefix $(BUILD_DIR)/, $(SRC:.cpp=.o))
@@ -122,11 +129,21 @@ export OBJECT_FILE = $(BUILD_DIR)/objects.tmp
 #######################################################
 
 
+ifeq ($(TOOLCHAIN),win)
+
 export CFLAGS = -Wall -g -o2
-export CPPFLAGS = -g -Wall -pedantic -Werror -std=c++14
+export CPPFLAGS = -g -Wall -pedantic -Werror -std=gnu++14
+
+export LIBS = 
+
+else
+
+export CFLAGS = -Wall -g -o2
+export CPPFLAGS = -g -Wall -pedantic -Werror -std=gnu++14
 
 
 export LIBS = -lsqlite3 -lgps -lrt -lcurl -lpthread
+endif
 
 ifeq ($(USE_OPENCV), 1)
 LIBS += `pkg-config --libs opencv`
@@ -171,8 +188,8 @@ build_tests: $(OBJECTS) $(EXECUTABLE)
 	$(CXX) $(CPPFLAGS) tests/runner.o @$(OBJECT_FILE) -Wl,-rpath=./ ./libwiringPi.so -o $(UNIT_TEST) $(LIBS)
 	$(CXX) $(CPPFLAGS) tests/runnerHardware.o @$(OBJECT_FILE) -Wl,-rpath=./ ./libwiringPi.so -o $(HARDWARE_TEST) $(LIBS)
 
-xbee_remote: $(OBJECTS) $(EXECUTABLE) $(WIRING_PI)
-	$(MAKE) -C xbeerelay
+xbee_remote: $(OBJECTS) $(WIRING_PI)
+	"$(MAKE)" -C XbeeRemote
 
 #  Create the directories needed
 $(BUILD_DIR):

@@ -24,6 +24,7 @@
 								<option id="gnu.cpp.compiler.option.preprocessor.def.705521683" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="__cplusplus=201103L"/>
 								</option>
+								<option id="gnu.cpp.compiler.option.include.paths.266063852" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath"/>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.537625791" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.c.compiler.base.289493583" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.base">

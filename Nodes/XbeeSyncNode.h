@@ -21,6 +21,9 @@
 #include "SystemServices/Logger.h"
 #include "dbhandler/DBHandler.h"
 #include "Messages/VesselStateMsg.h"
+#include "Network/XbeePacketNetwork.h"
+#include "Network/LinuxSerialDataLink.h"
+
 
 class XbeeSyncNode : public ActiveNode {
 public:
@@ -58,10 +61,11 @@ private:
 	///----------------------------------------------------------------------------------
 	static void xBeeSyncThread(void* nodePtr);
 
-	Xbee m_xbee;
-	bool m_initialised;
-	DBHandler &m_db;
-	static XbeeSyncNode* m_node;
+	bool 					m_initialised;
+	DBHandler& 				m_db;
+	LinuxSerialDataLink 	m_dataLink;
+	XbeePacketNetwork 		m_xbeeNetwork;
+	static XbeeSyncNode* 	m_node;
 
 	bool m_running;
 	bool m_sending;
