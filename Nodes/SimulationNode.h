@@ -103,6 +103,12 @@ private:
 	///----------------------------------------------------------------------------------
 	int init_socket(int port);
 
+    /**
+     * Initialize obstacles coordinates in degrees
+     * @return
+     */
+    bool init_obstacles();
+
 	///----------------------------------------------------------------------------------
 	/// Manage data received from simulation
 	///----------------------------------------------------------------------------------
@@ -125,7 +131,8 @@ private:
      * @param obsGpsLon in rads
      * @return
      */
-    ObstacleData createObstacleDataCircle(double obsGpsLat,double obsGpsLon, double obstacleRadius);
+    bool createObstacleDataCircle(double obsGpsLat,double obsGpsLon, double obstacleRadius,
+                                  ObstacleData & obstacle);
 
 	int 	m_CompassHeading;
 	int 	m_CompassPitch;
@@ -147,7 +154,7 @@ private:
 	int 	m_ArduinoBattery;
 	int   m_rudder;
 	int   m_sail;
-    std::vector<ObstacleData> m_obstacles;
+    std::vector<std::vector<double>> m_obstacles_coords;
 
 	struct DATA_SOCKET_RECEIVE m_data_receive;
 	struct DATA_SOCKET_SEND m_data_send;

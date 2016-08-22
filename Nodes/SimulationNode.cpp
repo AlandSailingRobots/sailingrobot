@@ -87,7 +87,12 @@ bool SimulationNode::init(){
     fcntl(m_handler_socket_server.sockfd, F_SETFL, O_NONBLOCK);
     Logger::info("Handling Simulation client from : %s\n", inet_ntoa(m_handler_socket_client.info_me.sin_addr));
 
-		return true;
+    // code can be simplified here
+    if(!init_obstacles()){
+        return false;
+    }
+
+	return true;
 }
 
 int SimulationNode::init_socket(int port)
@@ -121,6 +126,18 @@ int SimulationNode::init_socket(int port)
     return 0;
 }
 
+bool SimulationNode::init_obstacles(){
+    m_obstacles_coords.clear();
+    std::vector<double> longitudVec = {}; // deg
+    std::vector<double> latitudeVec = {}; // deg
+    if(longitudVec.size()!=latitudeVec.size()){
+        printf("[ERROR](createObstacleMessage) obstacle vectors not of the same size\n");
+        return false;
+    }
+    m_obstacles_coords.push_back(longitudVec);
+    m_obstacles_coords.push_back(latitudeVec);
+    return true;
+}
 
 void SimulationNode::processMessage(const Message* msg)
 {
@@ -206,31 +223,38 @@ void SimulationNode::createArduinoMessage()
 
 void SimulationNode::createObstacleMessage(){
 
+    std::vector<ObstacleData> obstacles;
+
     //Obstacle settings
     const double obstacleRadius = 5; //meters
-    std::vector<Eigen::Vector2d> obsVec;
-    const Eigen::Vector2d obs0(0+(0)*CONVERSION_FACTOR_METER_TO_GPS,
-                               0+(30)*CONVERSION_FACTOR_METER_TO_GPS); obsVec.push_back(obs0);
-    const Eigen::Vector2d obs1(0+(11)*CONVERSION_FACTOR_METER_TO_GPS,
-                               0+(20)*CONVERSION_FACTOR_METER_TO_GPS); obsVec.push_back(obs1);
-    const Eigen::Vector2d obs2(1+(-20)*CONVERSION_FACTOR_METER_TO_GPS,
-                               1+(0)*CONVERSION_FACTOR_METER_TO_GPS); obsVec.push_back(obs2);
-    const Eigen::Vector2d obs3(1+(0)*CONVERSION_FACTOR_METER_TO_GPS,
-                               1+(0)*CONVERSION_FACTOR_METER_TO_GPS); obsVec.push_back(obs3);
+    ObstacleData obsData;
 
-    ObstacleData
-    m_obstacles.push_back();
+    // static cast to disable warnings
+    // for each coordinates, create an obstacle
+    for (int i = 0; i < static_cast<unsigned>(m_obstacles_coords[0].size()); ++i) {
+        // transformation in radians
+        const double obsGpsLon = Utility::degreeToRadian(m_obstacles_coords[0][i]);
+        const double obsGpsLat = Utility::degreeToRadian(m_obstacles_coords[1][i]);
+        bool isCreated = createObstacleDataCircle(obsGpsLon,
+                                                  obsGpsLat,
+                                                  obstacleRadius,
+                                                  obsData);
+        if(isCreated){
+            obstacles.push_back(obsData);
+        }
+    }
 
     if (m_count_sleep % COUNT_OBSTACLE_MSG==0)
     {
-        MessagePtr msg = std::make_unique<ArduinoDataMsg>(ObstacleVectorMsg(m_obstacles);
+        MessagePtr msg = std::make_unique<ArduinoDataMsg>(ObstacleVectorMsg(obstacles);
         m_MsgBus.sendMessage(std::move(msg));
     }
 }
 
-ObstacleData SimulationNode::createObstacleDataCircle(double obsGpsLat,
-                                                      double obsGpsLon,
-                                                      double obstacleRadius){
+bool SimulationNode::createObstacleDataCircle(double obsGpsLat, //rads
+                                              double obsGpsLon, //rads
+                                              double obstacleRadius, //meters
+                                              ObstacleData & obstacle){
     // Conversion
     const double gpsLat = Utility::degreeToRadian(m_GPSLat);
     const double gpsLon = Utility::degreeToRadian(m_GPSLon);
@@ -250,18 +274,19 @@ ObstacleData SimulationNode::createObstacleDataCircle(double obsGpsLat,
     if(std::abs(obstacleHeadingRelativeToBoat) <= SENSOR_ARC_ANGLE && distFromObstacle<=maxDetectionRange) {
 
         const double leftHeadingRelativeToBoat =  atan2(obstacleRadius, distFromObstacle)
-                                                  +obstacleHeadingRelativeToBoat;
+                                                  + obstacleHeadingRelativeToBoat;
         const double rightHeadingRelativeToBoat = -atan2(obstacleRadius, distFromObstacle)
-                                                  +obstacleHeadingRelativeToBoat;
-        ObstacleData obstacle = {
+                                                  + obstacleHeadingRelativeToBoat;
+        obstacle = {
                 distFromObstacle - obstacleRadius, //double minDistanceToObstacle;
                 maxDetectionRange,                 //double maxDistanceToObstacle;
                 leftHeadingRelativeToBoat,         //double LeftBoundheadingRelativeToBoat;
                 rightHeadingRelativeToBoat};       //double RightBoundheadingRelativeToBoat;
         //std::cout << "I push back\n";
-        m_sensorOutput.detectedObstacles.push_back(obstacle);
-
+        return true;
     }
+    return false;
+
 }
 
 void SimulationNode::processSocketData(){
