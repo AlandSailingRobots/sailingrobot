@@ -35,10 +35,14 @@
 XbeeRemote*	XbeeRemote::m_Instance = NULL;
 
 
+#define MONITOR_PORT	4321
+#define OTHER_PORT		4322
+
+
 /***************************************************************************************/
 XbeeRemote::XbeeRemote(std::string portName)
 	:m_DataLink(NULL), m_Network(NULL), m_PortName(portName),
-	 m_LastReceived(0), m_Connected(false)
+	 m_LastReceived(0), m_Connected(true), m_Relay({4321, 4322}, "127.0.0.1")
 {
 	m_Instance = this;
 }
@@ -86,9 +90,28 @@ void XbeeRemote::run()
 {
 	if(m_Network != NULL)
 	{
+		m_Relay.write("offline=0");
 		while(true)
 		{
+			const int OFFLINE_TIME = 5;
 			m_Network->processRadioMessages();
+
+			if(SysClock::unixTime() - m_LastReceived > OFFLINE_TIME)
+			{
+				if(m_Connected)
+				{
+					Logger::info("Lost connected");
+					m_Connected = false;
+					m_Relay.write("offline=1");
+				}
+
+			}
+			else if(not m_Connected)
+			{
+				Logger::info("Gained connection");
+				m_Relay.write("offline=0");
+				m_Connected = true;
+			}
 		}
 	}
 }
@@ -96,6 +119,8 @@ void XbeeRemote::run()
 /***************************************************************************************/
 void XbeeRemote::printMessage(Message* msgPtr, MessageDeserialiser& deserialiser)
 {
+	m_LastReceived = SysClock::unixTime();
+
 	switch(msgPtr->messageType())
 	{
 		case MessageType::DataRequest:
@@ -192,10 +217,6 @@ void XbeeRemote::printMessage(Message* msgPtr, MessageDeserialiser& deserialiser
 /***************************************************************************************/
 void XbeeRemote::sendToUI(Message* msgPtr, MessageDeserialiser& deserialiser)
 {
-	//const int OFFLINE_TIME = 5;
-	m_LastReceived = SysClock::unixTime();
-
-#ifdef __linux__
 	switch(msgPtr->messageType())
 	{
 		case MessageType::VesselState:
@@ -203,7 +224,7 @@ void XbeeRemote::sendToUI(Message* msgPtr, MessageDeserialiser& deserialiser)
 			VesselStateMsg msg(deserialiser);
 			if(msg.isValid())
 			{
-				udpwrite("heading=%d speed=%f lat=%.7f lon=%.7f", msg.compassHeading(), msg.speed(), msg.latitude(), msg.longitude());
+				m_Relay.write("heading=%d gpsHeading=%f speed=%f lat=%.7f lon=%.7f windDir=%f windSpeed=%f", msg.compassHeading(), msg.gpsHeading(), msg.speed(), msg.latitude(), msg.longitude(), msg.windDir(), msg.windSpeed());
 			}
 		}
 		break;
@@ -212,7 +233,7 @@ void XbeeRemote::sendToUI(Message* msgPtr, MessageDeserialiser& deserialiser)
 			WaypointDataMsg msg(deserialiser);
 			if(msg.isValid())
 			{
-				udpwrite("wpnum=%d ", msg.nextId());
+				m_Relay.write("wpnum=%d ", msg.nextId());
 			}
 		}
 		break;
@@ -221,29 +242,13 @@ void XbeeRemote::sendToUI(Message* msgPtr, MessageDeserialiser& deserialiser)
 			CourseDataMsg msg(deserialiser);
 			if(msg.isValid())
 			{
-				udpwrite("twd=%f dtw=%f ctw=%f", msg.trueWindDir(), msg.distanceToWP(), msg.courseToWP());
+				m_Relay.write("twd=%f dtw=%f ctw=%f", msg.trueWindDir(), msg.distanceToWP(), msg.courseToWP());
 			}
 		}
 		break;
 		default:
 			break;
 	}
-
-	if(SysClock::unixTime() - m_LastReceived > OFFLINE_TIME)
-	{
-		if(not m_Connected)
-		{
-			m_Connected = true;
-			udpwrite("offline=1");
-		}
-
-	}
-	else if(m_Connected)
-	{
-		udpwrite("offline=0");
-		m_Connected = false;
-	}
-#endif
 }
 
 /***************************************************************************************/

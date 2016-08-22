@@ -17,6 +17,7 @@
 #include "../Network/XbeePacketNetwork.h"
 #include "../Network/DataLink.h"
 #include "../Messages/Message.h"
+#include "UDPRelay.h"
 
 
 class XbeeRemote {
@@ -51,4 +52,5 @@ private:
 	std::string			m_PortName;
 	unsigned long		m_LastReceived;
 	bool				m_Connected;
+	UDPRelay			m_Relay;
 };

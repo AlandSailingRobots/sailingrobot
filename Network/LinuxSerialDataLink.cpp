@@ -108,5 +108,5 @@ void LinuxSerialDataLink::writeByte(uint8_t byte)
 
 bool LinuxSerialDataLink::dataAvailable()
 {
-	return serialDataAvail(m_handle);
+	return (serialDataAvail(m_handle) > 0);
 }

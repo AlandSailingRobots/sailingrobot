@@ -138,7 +138,7 @@ bool DataLink::foundFrameStart()
 	while(true)
 	{
 		// Read enough characters for now, go do something else
-		if(inspected >= 1000)
+		if(inspected >= 100)
 		{
 			return false;
 		}
