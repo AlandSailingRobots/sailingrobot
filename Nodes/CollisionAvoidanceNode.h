@@ -282,8 +282,8 @@ protected:
     void drawEigenPoly(std::vector<Eigen::Vector2d> poly,std::string color);
     void drawBoat(SensorData sensorData,std::string color);
     void drawChannel(FollowedLine followedLine);
-    void CollisionAvoidanceNode::drawPotField(PotentialMap potfield,int option);
-    void CollisionAvoidanceNode::drawPotFieldPoint(int i, int j,
+    void drawPotField(PotentialMap potfield,int option);
+    void drawPotFieldPoint(int i, int j,
                                                    PotentialMap potfield,
                                                    std::string color, int option);
 
