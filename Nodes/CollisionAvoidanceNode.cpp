@@ -4,6 +4,8 @@
 
 #include "CollisionAvoidanceNode.h"
 
+#define DRAW_STATE_WITH_VIBES 1
+
 //INPUT
 /* Current_line (WP1 and WP2)
  * Boat_state
@@ -113,6 +115,8 @@ void CollisionAvoidanceNode::processVesselState(VesselStateMsg* msg){
     //Pitch and roll
     m_sensorOutput.pitch = msg->compassPitch();
     m_sensorOutput.roll = msg->compassRoll();
+
+    drawState();
 }
 
 void CollisionAvoidanceNode::processObstacleData(ObstacleData* msg){
@@ -161,6 +165,10 @@ void CollisionAvoidanceNode::run() {
                                                                  wpOut.endPoint(0),
                                                                  wpOut.endPoint(1));
         m_MsgBus.sendMessage(std::move(msg));
+    }
+
+    if(DRAW_STATE_WITH_VIBES){
+        drawState();
     }
 }
 

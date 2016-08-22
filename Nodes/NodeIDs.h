@@ -35,7 +35,7 @@ enum class NodeID {
 	SailingLogic,
 	Simulator,
 	ColorDetection,
-	CollisionAvoidance
+	CollisionAvoidance,
 };
 
 inline std::string nodeToString(NodeID id)

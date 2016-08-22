@@ -156,10 +156,6 @@ public:
      */
     bool setSailingZone();
 
-    /**
-     * Draw the state of the boat on vibes.
-     */
-    static void drawState();
 
 protected:
 
@@ -277,6 +273,10 @@ protected:
      * Most of them are functions to handle geometry.
      */
 
+    /**
+     * Draw the state of the boat on vibes.
+     */
+    void drawState();
     std::vector<double> getVectorLine(std::vector<Eigen::Vector2d> vec,int line);
     void drawObstacles(std::vector<Obstacle> seen_obstacles,std::string color);
     void drawObstacle(Obstacle obs,std::string color);
@@ -285,8 +285,8 @@ protected:
     void drawChannel(FollowedLine followedLine);
     void drawPotField(PotentialMap potfield,int option);
     void drawPotFieldPoint(int i, int j,
-                                                   PotentialMap potfield,
-                                                   std::string color, int option);
+                           PotentialMap potfield,
+                           std::string color, int option);
 
     /**
      * Gives the sum between two angles regardless of their definition.

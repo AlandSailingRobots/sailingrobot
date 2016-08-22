@@ -223,11 +223,6 @@ void SimulationNode::createArduinoMessage()
 
 void SimulationNode::createObstacleMessage(){
 
-    // drawing of last iteration
-    if(DRAW_STATE_WITH_VIBES){
-        CollisionAvoidanceNode::drawState();
-    }
-
     std::vector<ObstacleData> obstacles;
 
     //Obstacle settings
