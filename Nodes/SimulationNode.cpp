@@ -231,7 +231,7 @@ void SimulationNode::createObstacleMessage(){
 
     // static cast to disable warnings
     // for each coordinates, create an obstacle
-    for (int i = 0; i < static_cast<unsigned>(m_obstacles_coords[0].size()); ++i) {
+    for (int i = 0; i < static_cast<signed>(m_obstacles_coords[0].size()); ++i) {
         // transformation in radians
         const double obsGpsLon = Utility::degreeToRadian(m_obstacles_coords[0][i]);
         const double obsGpsLat = Utility::degreeToRadian(m_obstacles_coords[1][i]);
@@ -246,7 +246,7 @@ void SimulationNode::createObstacleMessage(){
 
     if (m_count_sleep % COUNT_OBSTACLE_MSG==0)
     {
-        MessagePtr msg = std::make_unique<ArduinoDataMsg>(ObstacleVectorMsg(obstacles);
+        MessagePtr msg = std::make_unique<ArduinoDataMsg>(ObstacleVectorMsg(obstacles));
         m_MsgBus.sendMessage(std::move(msg));
     }
 }
