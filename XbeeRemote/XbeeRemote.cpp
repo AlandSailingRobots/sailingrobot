@@ -70,7 +70,7 @@ bool XbeeRemote::initialise()
 
 #endif
 
-	if(m_DataLink->initialise(XBEE_PACKET_SIZE))
+	/*if(m_DataLink->initialise(XBEE_PACKET_SIZE))
 	{
 		m_Network = new XbeePacketNetwork(*m_DataLink, true);
 		m_Network->setIncomingCallback(incomingData);
@@ -81,14 +81,14 @@ bool XbeeRemote::initialise()
 		delete m_DataLink;
 		m_DataLink = NULL;
 		return false;
-	}
-
+	}*/
+	return true;
 }
 
 /***************************************************************************************/
 void XbeeRemote::run()
 {
-	if(m_Network != NULL)
+	//if(m_Network != NULL)
 	{
 		m_Relay.write("offline=0");
 

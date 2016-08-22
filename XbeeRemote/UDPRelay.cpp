@@ -51,16 +51,23 @@ static double gettime(){
 UDPRelay::UDPRelay(std::vector<int> ports, std::string address)
 	:m_destAddress(address), m_ports(ports)
 {
-#ifdef __linux__
+#if _WIN32
+	int iResult;
+	WSADATA wsaData;
+
+	// Initialize Winsock
+	iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
+	if (iResult != NO_ERROR) {
+		wprintf(L"WSAStartup failed with error: %d\n", iResult);
+		return 1;
+	}
+#endif
 
 	m_socket = socket(AF_INET,SOCK_DGRAM,0);
 	if(m_socket < 0)
 	{
 		Logger::error("%s:%d Cannot open UDP socket", __FILE__, __LINE__);
 	}
-
-#elif _WIN32
-#endif
 }
 
 /***************************************************************************************/
@@ -107,3 +114,5 @@ void UDPRelay::send(const char* msg)
 		}
 	}
 }
+
+std::string receive()
