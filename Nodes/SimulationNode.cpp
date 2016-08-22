@@ -223,6 +223,11 @@ void SimulationNode::createArduinoMessage()
 
 void SimulationNode::createObstacleMessage(){
 
+    // drawing of last iteration
+    if(DRAW_STATE_WITH_VIBES){
+        CollisionAvoidanceNode::drawState();
+    }
+
     std::vector<ObstacleData> obstacles;
 
     //Obstacle settings
@@ -255,10 +260,6 @@ bool SimulationNode::createObstacleDataCircle(double obsGpsLat, //rads
                                               double obsGpsLon, //rads
                                               double obstacleRadius, //meters
                                               ObstacleData & obstacle){
-    // drawing of last iteration
-    if(DRAW_STATE_WITH_VIBES){
-        CollisionAvoidanceNode::drawState();
-    }
 
     // Conversion
     const double gpsLat = Utility::degreeToRadian(m_GPSLat);
@@ -299,6 +300,7 @@ void SimulationNode::processSocketData(){
   createGPSMessage();
   createWindMessage();
   createArduinoMessage();
+  createObstacleMessage();
 }
 
 void SimulationNode::setupDataSend(){
