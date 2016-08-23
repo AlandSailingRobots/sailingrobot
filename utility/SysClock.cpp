@@ -17,6 +17,9 @@
 #include <ctime>
 #include <sys/time.h>
 
+#include <thread>
+#include <chrono>
+
 
 #define GET_UNIX_TIME() static_cast<long int>(std::time(0))
 
@@ -129,6 +132,11 @@ int SysClock::year()
  unsigned int SysClock::lastUpdated()
  {
 	 return unixTime() - m_LastUpdated;
+ }
+
+ void SysClock::sleepMS(unsigned int milliseconds)
+ {
+ 	std::this_thread::sleep_for(std::chrono::milliseconds(milliseconds));
  }
 
 

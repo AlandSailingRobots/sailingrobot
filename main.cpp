@@ -14,24 +14,39 @@
  #include "Nodes/ArduinoNode.h"
 #endif
 
-#include "Nodes/WaypointMgrNode.h"
-#include "Nodes/VesselStateNode.h"
-#include "Nodes/HTTPSyncNode.h"
-#include "Nodes/XbeeSyncNode.h"
-#include "Nodes/RoutingNode.h"
-#include "Nodes/LineFollowNode.h"
-#include "Nodes/obstacledetection/colorDetectionNode.h"
-#include "Messages/DataRequestMsg.h"
-#include "dbhandler/DBHandler.h"
-#include "SystemServices/MaestroController.h"
-#include "xBee/Xbee.h"
-
 #define DISABLE_LOGGING 0
 
 enum class NodeImportance {
 	CRITICAL,
 	NOT_CRITICAL
 };
+
+#if TARGET == 0
+#define TARGET_STR "Default"
+
+#include "Nodes/WaypointMgrNode.h"
+#include "Nodes/VesselStateNode.h"
+#include "Nodes/HTTPSyncNode.h"
+#include "Nodes/XbeeSyncNode.h"
+#include "Nodes/RoutingNode.h"
+#include "Nodes/LineFollowNode.h"
+#include "dbhandler/DBHandler.h"
+#include "SystemServices/MaestroController.h"
+
+#elif TARGET == 1
+#define TARGET_STR "WRSC2016"
+
+#include "Nodes/WaypointMgrNode.h"
+#include "Nodes/VesselStateNode.h"
+#include "Nodes/RoutingNode.h"
+#include "Nodes/LineFollowNode.h"
+#include "dbhandler/DBHandler.h"
+#include "SystemServices/MaestroController.h"
+
+#else
+#define TARGET_STR "None"
+#endif
+
 
 ///----------------------------------------------------------------------------------
 /// Initialises a node and shutsdown the program if a critical node fails.
@@ -62,6 +77,20 @@ void initialiseNode(Node& node, const char* nodeName, NodeImportance importance)
 	}
 }
 
+void setupDB(DBHandler& dbHandler)
+{
+	if(dbHandler.initialise())
+	{
+		Logger::info("Database init\t\t[OK]");
+	}
+	else
+	{
+		Logger::error("Database init\t\t[FAILED]");
+		Logger::shutdown();
+		exit(1);
+	}
+}
+
 ///----------------------------------------------------------------------------------
 /// Entry point, can accept one argument containing a relative path to the database.
 ///
@@ -86,7 +115,8 @@ int main(int argc, char *argv[])
 
 	if (Logger::init()) {
 		Logger::info("Built on %s at %s", __DATE__, __TIME__);
-		Logger::info("Logger init\t\t[OK]");
+		Logger::info("Target: %s", TARGET_STR);
+		Logger::info("\nLogger init\t\t[OK]");
 	}
 	else {
 		Logger::error("Logger init\t\t[FAILED]");
@@ -95,42 +125,61 @@ int main(int argc, char *argv[])
 	MessageBus messageBus;
 	DBHandler dbHandler(db_path);
 
-	if(dbHandler.initialise())
-	{
-		Logger::info("Database init\t\t[OK]");
-	}
-	else
-	{
-		Logger::error("Database init\t\t[FAILED]");
-		Logger::shutdown();
-		exit(1);
-	}
-
-	// Create nodes
 	MessageLoggerNode msgLogger(messageBus);
+	setupDB(dbHandler);
 
-	#if SIMULATION == 1
-	printf("using simulation\n");
+	// All active nodes will have a reference here so we can start them after ever node has been initialised
+	std::vector<ActiveNode*> activeNodes;
+
+	//---------------------------------------------------------------------------------------------
+	// Use Simulator
+
+#if SIMULATOR == 1
+	Logger::info("Using the simulator!");
 	SimulationNode simulation(messageBus);
-	#else
+	initialiseNode(simulation, "Simulation Node", NodeImportance::CRITICAL);
+	activeNodes.push_back(simulation);
+#endif
 
-	XbeeSyncNode xbee(messageBus, dbHandler);
+	//---------------------------------------------------------------------------------------------
+
+	//---------------------------------------------------------------------------------------------
+	// Target: Default
+#if TARGET == 0
+
+	// No sensor nodes if we are using the simulator
+#if SIMULATOR != 1
+	// Common Sensor Nodes
 	CV7Node windSensor(messageBus, dbHandler.retrieveCell("windsensor_config", "1", "port"), dbHandler.retrieveCellAsInt("windsensor_config", "1", "baud_rate"));
 	HMC6343Node compass(messageBus, dbHandler.retrieveCellAsInt("buffer_config", "1", "compass"));
 	GPSDNode gpsd(messageBus);
 	ArduinoNode arduino(messageBus);
-	std::vector<std::string> list;
-	list.push_back("red");
-	colorDetectionNode colorDetection(messageBus, list, 0);
-	#endif
 
+	activeNodes.push_back(&windSensor);
+	activeNodes.push_back(&compass);
+	activeNodes.push_back(&gpsd);
+	activeNodes.push_back(&arduino);
+
+	initialiseNode(windSensor, "Wind Sensor", NodeImportance::CRITICAL);
+	initialiseNode(compass, "Compass", NodeImportance::CRITICAL);
+	initialiseNode(gpsd, "GPSD Node", NodeImportance::CRITICAL);
+	initialiseNode(arduino, "Arduino Node", NodeImportance::NOT_CRITICAL);
+#endif
+
+	// Network Nodes
+	XbeeSyncNode xbee(messageBus, dbHandler);
 	HTTPSyncNode httpsync(messageBus, &dbHandler, 0, false);
+
+	activeNodes.push_back(&xbee);
+	activeNodes.push_back(&httpsync);
+
+	// Sailing Logic nodes
 	VesselStateNode vessel(messageBus);
 	WaypointMgrNode waypoint(messageBus, dbHandler);
 
+	activeNodes.push_back(&vessel);
 
 	Node* sailingLogic;
-
 	bool usingLineFollow = (bool)(dbHandler.retrieveCellAsInt("sailing_robot_config", "1", "line_follow"));
 	if(usingLineFollow)
 	{
@@ -141,7 +190,8 @@ int main(int argc, char *argv[])
 		sailingLogic = new RoutingNode(messageBus, dbHandler);
 	}
 
-	#if SIMULATION == 0
+	// Actuator Node
+
 	int channel = dbHandler.retrieveCellAsInt("sail_servo_config", "1", "channel");
 	int speed = dbHandler.retrieveCellAsInt("sail_servo_config", "1", "speed");
 	int acceleration = dbHandler.retrieveCellAsInt("sail_servo_config", "1", "acceleration");
@@ -154,37 +204,9 @@ int main(int argc, char *argv[])
 
 	ActuatorNode rudder(messageBus, NodeID::RudderActuator, channel, speed, acceleration);
 	MaestroController::init(dbHandler.retrieveCell("maestro_controller_config", "1", "port"));
-  #endif
-	bool requireNetwork = (bool) (dbHandler.retrieveCellAsInt("sailing_robot_config", "1", "require_network"));
 
-	// System services
-
-
-	// Initialise nodes
-	initialiseNode(msgLogger, "Message Logger", NodeImportance::NOT_CRITICAL);
-
-	#if SIMULATION == 1
-	initialiseNode(simulation,"Simulation Node",NodeImportance::CRITICAL);
-	#else
-    initialiseNode(xbee, "Xbee Sync Node", NodeImportance::NOT_CRITICAL);
-	initialiseNode(windSensor, "Wind Sensor", NodeImportance::CRITICAL);
-
-	initialiseNode(compass, "Compass", NodeImportance::CRITICAL);
-	initialiseNode(gpsd, "GPSD Node", NodeImportance::CRITICAL);
-	initialiseNode(sail, "Sail Actuator", NodeImportance::CRITICAL);
-	initialiseNode(rudder, "Rudder Actuator", NodeImportance::CRITICAL);
-	initialiseNode(arduino, "Arduino Node", NodeImportance::NOT_CRITICAL);
-	initialiseNode(colorDetection, "Colour detection node", NodeImportance::NOT_CRITICAL);
-	#endif
-
-	if (requireNetwork)
-	{
-		initialiseNode(httpsync, "Httpsync Node", NodeImportance::CRITICAL);
-	}
-	else
-	{
-		initialiseNode(httpsync, "Httpsync Node", NodeImportance::NOT_CRITICAL);
-	}
+	initialiseNode(xbee, "Xbee Sync Node", NodeImportance::NOT_CRITICAL);
+	initialiseNode(httpsync, "Httpsync Node", NodeImportance::CRITICAL);
 
 	initialiseNode(vessel, "Vessel State Node", NodeImportance::CRITICAL);
 	initialiseNode(waypoint, "Waypoint Node", NodeImportance::CRITICAL);
@@ -198,25 +220,67 @@ int main(int argc, char *argv[])
 		initialiseNode(*sailingLogic, "Routing Node", NodeImportance::CRITICAL);
 	}
 
-	// Start active nodes
-	#if SIMULATION == 1
-	simulation.start();
-  #else
+	initialiseNode(sail, "Sail Actuator", NodeImportance::CRITICAL);
+	initialiseNode(rudder, "Rudder Actuator", NodeImportance::CRITICAL);
+#endif
+	//---------------------------------------------------------------------------------------------
 
-	xbee.start();
-	windSensor.start();
-	compass.start();
-	gpsd.start();
-	arduino.start();
-	colorDetection.start();
-  #endif
-	httpsync.start();
-	vessel.start();
+	//---------------------------------------------------------------------------------------------
+	// Target: WRSC2016
+#if TARGET == 1
 
+	// No sensor nodes if we are using the simulator
+#if SIMULATOR != 1
 
-	// NOTE - Jordan: Just to ensure messages are following through the system
-	MessagePtr dataRequest = std::make_unique<DataRequestMsg>(NodeID::MessageLogger);
-	messageBus.sendMessage(std::move(dataRequest));
+#endif
+
+	// Sailing Logic nodes
+	VesselStateNode vessel(messageBus);
+	WaypointMgrNode waypoint(messageBus, dbHandler);
+
+	activeNodes.push_back(&vessel);
+
+	Node* sailingLogic;
+	bool usingLineFollow = (bool)(dbHandler.retrieveCellAsInt("sailing_robot_config", "1", "line_follow"));
+	if(usingLineFollow)
+	{
+		sailingLogic = new LineFollowNode(messageBus, dbHandler);
+	}
+	else
+	{
+		sailingLogic = new RoutingNode(messageBus, dbHandler);
+	}
+
+	// Actuator Node
+
+	int channel = dbHandler.retrieveCellAsInt("sail_servo_config", "1", "channel");
+	int speed = dbHandler.retrieveCellAsInt("sail_servo_config", "1", "speed");
+	int acceleration = dbHandler.retrieveCellAsInt("sail_servo_config", "1", "acceleration");
+
+	ActuatorNode sail(messageBus, NodeID::SailActuator, channel, speed, acceleration);
+
+	channel = dbHandler.retrieveCellAsInt("rudder_servo_config", "1", "channel");
+	speed = dbHandler.retrieveCellAsInt("rudder_servo_config", "1", "speed");
+	acceleration = dbHandler.retrieveCellAsInt("rudder_servo_config", "1", "acceleration");
+
+	ActuatorNode rudder(messageBus, NodeID::RudderActuator, channel, speed, acceleration);
+	MaestroController::init(dbHandler.retrieveCell("maestro_controller_config", "1", "port"));
+
+	initialiseNode(vessel, "Vessel State Node", NodeImportance::CRITICAL);
+	initialiseNode(waypoint, "Waypoint Node", NodeImportance::CRITICAL);
+	initialiseNode(sail, "Sail Actuator", NodeImportance::CRITICAL);
+	initialiseNode(rudder, "Rudder Actuator", NodeImportance::CRITICAL);
+
+#endif
+	//---------------------------------------------------------------------------------------------
+
+	// Initialise nodes
+	initialiseNode(msgLogger, "Message Logger", NodeImportance::NOT_CRITICAL);
+
+	for(unsigned int i = 0; i < activeNodes.size(); i++)
+	{
+		activeNodes[i]->start();
+	}
 
 	Logger::info("Message bus started!");
 	messageBus.run();

@@ -18,10 +18,10 @@ USE_OPENCV = 0
 
 # Allows the building of preset lists of nodes
 # DEFAULT: THis is the default janet set of nodes
-# SIM: THis is the default janet but with the sensor nodes being replaced with the simulator node
 # WRSC: This is the set of nodes used for WRSC2016
 # XBEE_REMOTE: The xbee remote tool
 TARGET = DEFAULT
+TARGET_INT = 0
 
 
 #######################################################
@@ -89,39 +89,49 @@ SRC_OPENCV_CV 			= Nodes/obstacledetection/colorDetectionNode.cpp Nodes/obstacle
 
 SRC_SIMULATOR			= Nodes/SimulationNode.cpp
 
-# Default Janet build
-ifeq($(TARGET),DEFAULT)
+SRC_WRSC_C				= libs/minmea/minmea.c
+SRC_WRSC_NODES			= Nodes/SerialGPSNode.cpp
 
-SRC 					= $(SRC_CORE) $(SRC_CORE_SAILING) $(SRC_CORE_NODES) $(SRC_COMMON) $(SRC_SENSOR_NODES) $(SRC_ACTUATOR_NODE) $(SRC_NETWORK_XBEE_LINUX) $(SRC_NETWORK_HTTP_SYNC) $(SRC_I2CCONTROLLER) $(SRC_MAIN)
+
+#----------------------------------------------------------------------------------------
+#Default Janet
+ifeq ($(TARGET),DEFAULT)
+TARGET_INT = 0
+
+ifeq ($(USE_SIM), 1)
+SRC 					= $(SRC_CORE) $(SRC_CORE_SAILING) $(SRC_CORE_NODES) $(SRC_COMMON) $(SRC_SIMULATOR) \
+						  $(SRC_NETWORK_XBEE_LINUX) $(SRC_NETWORK_HTTP_SYNC)
+else
+SRC 					= $(SRC_CORE) $(SRC_CORE_SAILING) $(SRC_CORE_NODES) $(SRC_COMMON) $(SRC_SENSOR_NODES) \
+						  $(SRC_ACTUATOR_NODE) $(SRC_NETWORK_XBEE_LINUX) $(SRC_NETWORK_HTTP_SYNC) $(SRC_I2CCONTROLLER)
 endif
-
-# SIM build
-ifeq($(TARGET),SIM)
-
-SRC 					= $(SRC_CORE) $(SRC_CORE_SAILING) $(SRC_CORE_NODES) $(SRC_COMMON) $(SRC_SIMULATOR) $(SRC_NETWORK_XBEE_LINUX) $(SRC_NETWORK_HTTP_SYNC) $(SRC_MAIN)
-
 endif
+#----------------------------------------------------------------------------------------
 
+#----------------------------------------------------------------------------------------
 # WRSC2016 build
-ifeq($(TARGET),WRSC)
+ifeq ($(TARGET),WRSC)
+TARGET_INT = 1
 
-SRC 					= $(SRC_CORE) $(SRC_CORE_SAILING) $(SRC_CORE_NODES) $(SRC_COMMON) $(SRC_WRSC_NODES) $(SRC_ACTUATOR_NODE) $(SRC_MAIN) $(SRC_NETWORK_WIFI_UDP)
+SRC 					= $(SRC_CORE) $(SRC_CORE_SAILING) $(SRC_CORE_NODES) $(SRC_COMMON) $(SRC_WRSC_NODES) \
+						  $(SRC_ACTUATOR_NODE) $(SRC_NETWORK_WIFI_UDP)
 # $(SRC_OPENCV_CV) Get working properly
 
-endif
+C_SRC					= $(SRC_WRSC_C)
 
+endif
+#----------------------------------------------------------------------------------------
+
+#----------------------------------------------------------------------------------------
 # Xbee Remote tool
-ifeq( $(TARGET), XBEE_REMOTE)
+ifeq ($(TARGET), XBEE_REMOTE)
 ifeq ($(TOOLCHAIN),win)
-
 SRC						= $(SRC_COMMON) $(SRC_NETWORK_XBEE) $(SRC_MESSAGES)
-
 else
-
 SRC						= $(SRC_NETWORK_XBEE_LINUX) $(SRC_COMMON) $(SRC_MESSAGES)
-
 endif
 endif
+#----------------------------------------------------------------------------------------
 
 WIRING_PI = libwiringPi.so
 WIRING_PI_PATH = ./libs/wiringPi/wiringPi/
@@ -135,6 +145,7 @@ export INC = -I./ -I./libs -I./libs/wiringPi/wiringPi -I.\
 
 # Object files
 OBJECTS = $(addprefix $(BUILD_DIR)/, $(SRC:.cpp=.o))
+C_OBJECTS = $(addprefix $(BUILD_DIR)/, $(C_SRC:.c=.o))
 OBJECT_MAIN = $(addprefix $(BUILD_DIR)/, $(SRC_MAIN:.cpp=.o))
 
 # Target Output
@@ -148,15 +159,15 @@ export OBJECT_FILE = $(BUILD_DIR)/objects.tmp
 
 ifeq ($(TOOLCHAIN),win)
 
-export CFLAGS = -Wall -g -o2
-export CPPFLAGS = -g -Wall -pedantic -Werror -std=gnu++14
+export CFLAGS= -g -Wall -Wextra -std=c99
+export CPPFLAGS = -g -Wall -pedantic -std=gnu++14
 
 export LIBS = 
 
 else
 
-export CFLAGS = -Wall -g -o2
-export CPPFLAGS = -g -Wall -pedantic -Werror -std=gnu++14
+export CFLAGS= -g -Wall -Wextra -std=c99
+export CPPFLAGS = -g -Wall -pedantic -std=gnu++14
 
 
 export LIBS = -lsqlite3 -lgps -lrt -lcurl -lpthread
@@ -183,7 +194,7 @@ export CXX
 
 export MKDIR_P = mkdir -p
 
-DEFINES = -DTOOLCHAIN=$(TOOLCHAIN) -DSIMULATION=$(USE_SIM) -DSE_OPENCV_COLOR_DETECTION=$(USE_OPENCV)
+DEFINES = -DTOOLCHAIN=$(TOOLCHAIN) -DSIMULATION=$(USE_SIM) -DSE_OPENCV_COLOR_DETECTION=$(USE_OPENCV) -DTARGET=$(TARGET_INT)
 
 
 #######################################################
@@ -199,7 +210,7 @@ simulation:
 	make USE_SIM=1 -j4
 
 # Builds the intergration test, requires the whole system to be built before
-build_tests: $(OBJECTS) $(EXECUTABLE)
+build_tests: $(OBJECTS) $(EXECUTABLE) $(C_OBJECTS)
 	@echo Building tests...
 	$(MAKE) -C tests
 	$(CXX) $(CPPFLAGS) tests/runner.o @$(OBJECT_FILE) -Wl,-rpath=./ ./libwiringPi.so -o $(UNIT_TEST) $(LIBS)
@@ -217,10 +228,10 @@ $(WIRING_PI):
 	@mv $(WIRING_PI_STATIC) ./libwiringPi.so
 
 # Link and build
-$(EXECUTABLE) : $(BUILD_DIR) $(OBJECTS) $(WIRING_PI) $(OBJECT_MAIN)
+$(EXECUTABLE) : $(BUILD_DIR) $(OBJECTS) $(C_OBJECTS) $(WIRING_PI) $(OBJECT_MAIN)
 	rm -f $(OBJECT_FILE)
 	@echo Linking object files
-	@echo -n " " $(OBJECTS) >> $(OBJECT_FILE)
+	@echo -n " " $(OBJECTS) >> $(OBJECT_FILE) $(C_OBJECTS)
 	$(CXX) $(LDFLAGS) @$(OBJECT_FILE) ./libwiringPi.so $(OBJECT_MAIN) -Wl,-rpath=./ -o $@ $(LIBS) $(LIBS_BOOST)
 	@echo Built using toolchain: $(TOOLCHAIN)
 
@@ -235,7 +246,7 @@ $(BUILD_DIR)/%.o:$(SRC_DIR)/%.cpp
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
 	@mkdir -p $(dir $@)
 	@echo Compiling C File: $@
-	@$(C) -c $(CFLAGS) $(INC) -o $@ $ -DTOOLCHAIN=$(C_TOOLCHAIN)
+	@$(CXX) -c $(CPPFLAGS) $(INC) -o ./$@ $< $(DEFINES) $(LIBS) $(LIBS_BOOST)
 
 #SPECIAL COMPILATION FOR mywiringI2C.cpp to be overload when doing simulation AnalogArduino/myWiringI2C.cpp
 $(BUILD_DIR)/AnalogArduino/libmyWiringI2C.so: $(SRC_DIR)/AnalogArduino/myWiringI2C.cpp
