@@ -36,6 +36,9 @@ enum class NodeImportance {
 #elif TARGET == 1
 #define TARGET_STR "WRSC2016"
 
+#include "Nodes/SerialGPSNode.h"
+#include "Nodes/MA3WindSensorNode.h"
+
 #include "Nodes/WaypointMgrNode.h"
 #include "Nodes/VesselStateNode.h"
 #include "Nodes/RoutingNode.h"
@@ -234,6 +237,12 @@ int main(int argc, char *argv[])
 
 #endif
 
+	MA3WindSensorNode windSensor(messageBus, 2);
+	SerialGPSNode gps(messageBus);
+
+	activeNodes.push_back(&windSensor);
+	activeNodes.push_back(&gps);
+
 	// Sailing Logic nodes
 	VesselStateNode vessel(messageBus);
 	WaypointMgrNode waypoint(messageBus, dbHandler);
@@ -252,19 +261,12 @@ int main(int argc, char *argv[])
 	}
 
 	// Actuator Node
-
-	int channel = dbHandler.retrieveCellAsInt("sail_servo_config", "1", "channel");
-	int speed = dbHandler.retrieveCellAsInt("sail_servo_config", "1", "speed");
-	int acceleration = dbHandler.retrieveCellAsInt("sail_servo_config", "1", "acceleration");
-
-	ActuatorNode sail(messageBus, NodeID::SailActuator, channel, speed, acceleration);
-
-	channel = dbHandler.retrieveCellAsInt("rudder_servo_config", "1", "channel");
-	speed = dbHandler.retrieveCellAsInt("rudder_servo_config", "1", "speed");
-	acceleration = dbHandler.retrieveCellAsInt("rudder_servo_config", "1", "acceleration");
-
-	ActuatorNode rudder(messageBus, NodeID::RudderActuator, channel, speed, acceleration);
+	ActuatorNode sail(messageBus, NodeID::SailActuator, 1, 0, 0);
+	ActuatorNode rudder(messageBus, NodeID::RudderActuator, 0, 0, 0);
 	MaestroController::init(dbHandler.retrieveCell("maestro_controller_config", "1", "port"));
+
+	initialiseNode(windSensor, "Wind Sensor Node", NodeImportance::CRITICAL);
+	initialiseNode(gps, "GPS Node", NodeImportance::CRITICAL);
 
 	initialiseNode(vessel, "Vessel State Node", NodeImportance::CRITICAL);
 	initialiseNode(waypoint, "Waypoint Node", NodeImportance::CRITICAL);
