@@ -4,7 +4,7 @@
 
 #include "CollisionAvoidanceNode.h"
 
-#define DRAW_STATE_WITH_VIBES 1
+#define DRAW_STATE_WITH_VIBES 0
 
 //INPUT
 /* Current_line (WP1 and WP2)
