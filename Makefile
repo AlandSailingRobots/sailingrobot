@@ -16,6 +16,12 @@
 # Enables OpenCV color detection if it is set
 USE_OPENCV = 0
 
+# Allows the building of preset lists of nodes
+# DEFAULT: THis is the default janet set of nodes
+# SIM: THis is the default janet but with the sensor nodes being replaced with the simulator node
+# WRSC: This is the set of nodes used for WRSC2016
+# XBEE_REMOTE: The xbee remote tool
+TARGET = DEFAULT
 
 
 #######################################################
@@ -32,6 +38,84 @@ export TOOLCHAIN = linux-local
 C_TOOLCHAIN = 0
 USE_SIM = 0
 
+#######################################################
+# Directories
+#######################################################
+
+export BUILD_DIR 		= build
+SRC_DIR 				= ./
+OUTPUT_DIR 				= ./
+
+#######################################################
+# Build targets
+#######################################################
+
+UNIT_TEST 				= ./unit-tests.run
+HARDWARE_TEST 			= ./hardware-tests.run
+EXECUTABLE 				= sr
+
+#######################################################
+# FILES TO BUILD
+#######################################################
+
+# List of Sources
+
+SRC_MAIN 				= main.cpp
+
+SRC_MESSAGES			= Messages/MessageSerialiser.cpp Messages/MessageDeserialiser.cpp
+
+SRC_CORE				= MessageBus/MessageBus.cpp Nodes/ActiveNode.cpp $(SRC_MESSAGES) utility/CourseCalculation.cpp utility/CourseMath.cpp \
+						  dbhandler/DBHandler.cpp dbhandler/DBLogger.cpp utility/Utility.cpp utility/Timer.cpp
+						  
+SRC_CORE_SAILING		= waypointrouting/RudderCommand.cpp waypointrouting/SailCommand.cpp waypointrouting/WaypointRouting.cpp \ 
+						  waypointrouting/Commands.cpp waypointrouting/TackAngle.cpp
+
+SRC_CORE_NODES			= Nodes/MessageLoggerNode.cpp Nodes/WaypointMgrNode.cpp Nodes/VesselStateNode.cpp Nodes/RoutingNode.cpp Nodes/LineFollowNode.cpp 
+
+SRC_COMMON				= utility/SysClock.cpp SystemServices/Logger.cpp
+
+SRC_SENSOR_NODES		= Nodes/CV7Node.cpp Nodes/HMC6343Node.cpp Nodes/GPSDNode.cpp Nodes/ArduinoNode.cpp SystemServices/MaestroController.cpp
+
+SRC_ACTUATOR_NODE		= Nodes/ActuatorNode.cpp
+
+SRC_NETWORK_XBEE		= Network/DataLink.cpp Network/XbeePacketNetwork.cpp
+
+SRC_NETWORK_XBEE_LINUX 	= $(SRC_NETWORK_XBEE) Network/LinuxSerialDataLink.cpp Nodes/XbeeSyncNode.cpp
+
+SRC_NETWORK_HTTP_SYNC	= Nodes/HTTPSyncNode.cpp
+
+SRC_I2CCONTROLLER 		= i2ccontroller/I2CController.cpp
+
+SRC_LIDAR_LITE			= Nodes/lidarLite/lidarLite.cpp Nodes/lidarLite/lidarLiteNode.cpp
+SRC_OPENCV_CV 			= Nodes/obstacledetection/colorDetectionNode.cpp Nodes/obstacledetection/colorDetectionUtility.cpp 
+
+SRC_SIMULATOR			= Nodes/SimulationNode.cpp
+
+
+# List of Sources to build
+
+# Default Janet build
+ifeq( $(TARGET), DEFAULT)
+
+SRC 					= $(SRC_CORE) $(SRC_CORE_SAILING $(SRC_CORE_NODES) $(SRC_COMMON) $(SRC_SENSOR_NODES) $(SRC_ACTUATOR_NODE) \
+						  $(SRC_NETWORK_XBEE_LINUX) $(SRC_NETWORK_HTTP_SYNC) $(SRC_I2CCONTROLLER) $(SRC_MAIN)
+endif
+
+# SIM build
+ifeq( $(TARGET), SIM)
+
+SRC 					= $(SRC_CORE) $(SRC_CORE_SAILING $(SRC_CORE_NODES) $(SRC_COMMON) $(SRC_SIMULATOR) \
+						  $(SRC_NETWORK_XBEE_LINUX) $(SRC_NETWORK_HTTP_SYNC) $(SRC_MAIN)
+
+endif
+
+# WRSC2016 build
+ifeq( $(TARGET), WRSC)
+endif
+
+# Xbee Remote tool
+ifeq( $(TARGET), XBEE_REMOTE)
+endif
 
 
 #######################################################
@@ -49,45 +133,6 @@ HARDWARE_TEST = ./hardware-tests.run
 # External Libraries
 
 JSON = 					libs/json
-
-# Sources
-
-CORE =					MessageBus/MessageBus.cpp Nodes/ActiveNode.cpp Messages/MessageSerialiser.cpp Messages/MessageDeserialiser.cpp
-
-ifeq ($(USE_SIM),1)
-
-NODES =					Nodes/MessageLoggerNode.cpp  Nodes/WaypointMgrNode.cpp Nodes/HTTPSyncNode.cpp Nodes/XbeeSyncNode.cpp \
-						Nodes/VesselStateNode.cpp  Nodes/RoutingNode.cpp Nodes/LineFollowNode.cpp \
-						Nodes/SimulationNode.cpp Nodes/lidarLite/lidarLite.cpp Nodes/lidarLite/lidarLiteNode.cpp \
-						#You need opencv for the files below
-						#Nodes/obstacledetection/colorDetectionNode.cpp Nodes/obstacledetection/colorDetectionUtility.cpp
-
-SYSTEM_SERVICES =		SystemServices/Logger.cpp
-else
-NODES =					Nodes/MessageLoggerNode.cpp Nodes/CV7Node.cpp Nodes/HMC6343Node.cpp Nodes/GPSDNode.cpp Nodes/ActuatorNode.cpp  Nodes/ArduinoNode.cpp \
-						Nodes/VesselStateNode.cpp Nodes/WaypointMgrNode.cpp Nodes/HTTPSyncNode.cpp Nodes/XbeeSyncNode.cpp Nodes/RoutingNode.cpp Nodes/LineFollowNode.cpp \
-						Nodes/lidarLite/lidarLite.cpp Nodes/lidarLite/lidarLiteNode.cpp \
-						
-XBEE_NETWORK = 			Network/DataLink.cpp Network/LinuxSerialDataLink.cpp Network/XbeePacketNetwork.cpp
-
-SYSTEM_SERVICES =		SystemServices/MaestroController.cpp SystemServices/Logger.cpp
-endif
-
-ifeq ($(USE_OPENCV), 1)
-OPENCV_CV =				Nodes/obstacledetection/colorDetectionNode.cpp Nodes/obstacledetection/colorDetectionUtility.cpp 
-endif
-
-XBEE = 					xBee/Xbee.cpp
-
-I2CCONTROLLER = 		i2ccontroller/I2CController.cpp
-
-COURSE = 				utility/CourseCalculation.cpp utility/CourseMath.cpp
-
-DB = 					dbhandler/DBHandler.cpp dbhandler/DBLogger.cpp
-
-COMMAND = 				waypointrouting/RudderCommand.cpp waypointrouting/SailCommand.cpp
-
-WAYPOINTROUTING = 		waypointrouting/WaypointRouting.cpp waypointrouting/Commands.cpp waypointrouting/TackAngle.cpp
 
 WINDVANECONTROLLER = 	windvanecontroller/WindVaneController.cpp
 
@@ -120,7 +165,6 @@ OBJECTS = $(addprefix $(BUILD_DIR)/, $(SRC:.cpp=.o))
 OBJECT_MAIN = $(addprefix $(BUILD_DIR)/, $(SRC_MAIN:.cpp=.o))
 
 # Target Output
-EXECUTABLE = sr
 export OBJECT_FILE = $(BUILD_DIR)/objects.tmp
 
 
