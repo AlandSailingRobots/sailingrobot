@@ -45,6 +45,7 @@
 //CONSTRUCTOR
 CollisionAvoidanceNode::CollisionAvoidanceNode(MessageBus& msgBus)
         : Node(NodeID::CollisionAvoidance, msgBus){
+          printf("registering\n");
     msgBus.registerNode(*this, MessageType::ObstacleVector);
     msgBus.registerNode(*this, MessageType::VesselState);
     msgBus.registerNode(*this, MessageType::WaypointData);
@@ -68,6 +69,10 @@ bool CollisionAvoidanceNode::init(){
     m_tack = false;
     m_tackingDirection = 0;
     m_loop_id = 0;
+    if(DRAW_STATE_WITH_VIBES){
+      vibes::beginDrawing();
+      vibes::newFigure("Simu");
+    }
     return true;
 }
 
@@ -90,6 +95,8 @@ void CollisionAvoidanceNode::processMessage(const Message* msg){
 
 void CollisionAvoidanceNode::processVesselState(VesselStateMsg* msg){
     //Extraction of data from sensors
+
+    printf("Received VesselStateMsg\n" );
 
     //Position and speed
     //The latitude and longitude are easier to compute in radians.
@@ -129,6 +136,8 @@ void CollisionAvoidanceNode::processVesselState(VesselStateMsg* msg){
     }
 
     if(DRAW_STATE_WITH_VIBES){
+        vibes::selectFigure("Simu");
+        vibes::clearFigure();
         drawState();
     }
 }
@@ -1478,9 +1487,3 @@ Eigen::ArrayXXd CollisionAvoidanceNode::computeSailingZonePot(
 
     return sailZonePot;
 }
-
-
-
-
-
-
