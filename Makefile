@@ -64,19 +64,17 @@ SRC_MAIN 				= main.cpp
 
 SRC_MESSAGES			= Messages/MessageSerialiser.cpp Messages/MessageDeserialiser.cpp
 
-SRC_CORE				= MessageBus/MessageBus.cpp Nodes/ActiveNode.cpp $(SRC_MESSAGES) utility/CourseCalculation.cpp utility/CourseMath.cpp \
-						  dbhandler/DBHandler.cpp dbhandler/DBLogger.cpp utility/Utility.cpp utility/Timer.cpp
-						  
-SRC_CORE_SAILING		= waypointrouting/RudderCommand.cpp waypointrouting/SailCommand.cpp waypointrouting/WaypointRouting.cpp \ 
-						  waypointrouting/Commands.cpp waypointrouting/TackAngle.cpp
+SRC_CORE				= MessageBus/MessageBus.cpp Nodes/ActiveNode.cpp $(SRC_MESSAGES) utility/CourseCalculation.cpp utility/CourseMath.cpp dbhandler/DBHandler.cpp dbhandler/DBLogger.cpp utility/Utility.cpp utility/Timer.cpp
+
+SRC_CORE_SAILING		= waypointrouting/RudderCommand.cpp waypointrouting/SailCommand.cpp waypointrouting/WaypointRouting.cpp waypointrouting/Commands.cpp waypointrouting/TackAngle.cpp
 
 SRC_CORE_NODES			= Nodes/MessageLoggerNode.cpp Nodes/WaypointMgrNode.cpp Nodes/VesselStateNode.cpp Nodes/RoutingNode.cpp Nodes/LineFollowNode.cpp 
 
 SRC_COMMON				= utility/SysClock.cpp SystemServices/Logger.cpp
 
-SRC_SENSOR_NODES		= Nodes/CV7Node.cpp Nodes/HMC6343Node.cpp Nodes/GPSDNode.cpp Nodes/ArduinoNode.cpp SystemServices/MaestroController.cpp
+SRC_SENSOR_NODES		= Nodes/CV7Node.cpp Nodes/HMC6343Node.cpp Nodes/GPSDNode.cpp Nodes/ArduinoNode.cpp
 
-SRC_ACTUATOR_NODE		= Nodes/ActuatorNode.cpp
+SRC_ACTUATOR_NODE		= SystemServices/MaestroController.cpp Nodes/ActuatorNode.cpp
 
 SRC_NETWORK_XBEE		= Network/DataLink.cpp Network/XbeePacketNetwork.cpp
 
@@ -91,68 +89,43 @@ SRC_OPENCV_CV 			= Nodes/obstacledetection/colorDetectionNode.cpp Nodes/obstacle
 
 SRC_SIMULATOR			= Nodes/SimulationNode.cpp
 
-
-# List of Sources to build
-
 # Default Janet build
-ifeq( $(TARGET), DEFAULT)
+ifeq($(TARGET),DEFAULT)
 
-SRC 					= $(SRC_CORE) $(SRC_CORE_SAILING $(SRC_CORE_NODES) $(SRC_COMMON) $(SRC_SENSOR_NODES) $(SRC_ACTUATOR_NODE) \
-						  $(SRC_NETWORK_XBEE_LINUX) $(SRC_NETWORK_HTTP_SYNC) $(SRC_I2CCONTROLLER) $(SRC_MAIN)
+SRC 					= $(SRC_CORE) $(SRC_CORE_SAILING) $(SRC_CORE_NODES) $(SRC_COMMON) $(SRC_SENSOR_NODES) $(SRC_ACTUATOR_NODE) $(SRC_NETWORK_XBEE_LINUX) $(SRC_NETWORK_HTTP_SYNC) $(SRC_I2CCONTROLLER) $(SRC_MAIN)
 endif
 
 # SIM build
-ifeq( $(TARGET), SIM)
+ifeq($(TARGET),SIM)
 
-SRC 					= $(SRC_CORE) $(SRC_CORE_SAILING $(SRC_CORE_NODES) $(SRC_COMMON) $(SRC_SIMULATOR) \
-						  $(SRC_NETWORK_XBEE_LINUX) $(SRC_NETWORK_HTTP_SYNC) $(SRC_MAIN)
+SRC 					= $(SRC_CORE) $(SRC_CORE_SAILING) $(SRC_CORE_NODES) $(SRC_COMMON) $(SRC_SIMULATOR) $(SRC_NETWORK_XBEE_LINUX) $(SRC_NETWORK_HTTP_SYNC) $(SRC_MAIN)
 
 endif
 
 # WRSC2016 build
-ifeq( $(TARGET), WRSC)
+ifeq($(TARGET),WRSC)
+
+SRC 					= $(SRC_CORE) $(SRC_CORE_SAILING) $(SRC_CORE_NODES) $(SRC_COMMON) $(SRC_WRSC_NODES) $(SRC_ACTUATOR_NODE) $(SRC_MAIN) $(SRC_NETWORK_WIFI_UDP)
+# $(SRC_OPENCV_CV) Get working properly
+
 endif
 
 # Xbee Remote tool
 ifeq( $(TARGET), XBEE_REMOTE)
+ifeq ($(TOOLCHAIN),win)
+
+SRC						= $(SRC_COMMON) $(SRC_NETWORK_XBEE) $(SRC_MESSAGES)
+
+else
+
+SRC						= $(SRC_NETWORK_XBEE_LINUX) $(SRC_COMMON) $(SRC_MESSAGES)
+
+endif
 endif
 
-
-#######################################################
-# FILES
-#######################################################
-
-# Directories
-export BUILD_DIR = build
-SRC_DIR = ./
-OUTPUT_DIR = ./
-
-UNIT_TEST = ./unit-tests.run
-HARDWARE_TEST = ./hardware-tests.run
-
-# External Libraries
-
-JSON = 					libs/json
-
-WINDVANECONTROLLER = 	windvanecontroller/WindVaneController.cpp
-
-SRC_MAIN = main.cpp
-
-
-ifeq ($(TOOLCHAIN),win)
-SRC = 					utility\SysClock.cpp SystemServices\Logger.cpp Network\DataLink.cpp Network\XbeePacketNetwork.cpp Messages\MessageSerialiser.cpp Messages\MessageDeserialiser.cpp
-else					
-SRC = 	utility/Utility.cpp utility/Timer.cpp utility/SysClock.cpp $(SYSTEM_SERVICES) $(XBEE) $(XBEE_NETWORK) \
-		$(CORE) $(NODES) $(I2CCONTROLLER) $(COURSE) $(DB) $(COMMAND) $(GPS) $(WAYPOINTROUTING) $(WINDVANECONTROLLER) $(OPENCV_CV)
-		
 WIRING_PI = libwiringPi.so
 WIRING_PI_PATH = ./libs/wiringPi/wiringPi/
 WIRING_PI_STATIC = ./libs/wiringPi/wiringPi/libwiringPi.so.2.32
-
-endif
-
-
-#SOURCES = $(addprefix src/, $(SRC))
 
 # Includes
 
