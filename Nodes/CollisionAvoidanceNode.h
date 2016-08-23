@@ -272,6 +272,11 @@ protected:
     /*
      * Most of them are functions to handle geometry.
      */
+    std::vector<ObstacleData> simulateObstacle(std::vector<std::vector<double>> obstacle_coords);
+    bool createObstacleDataCircle(double obsGpsLat, //rads
+                                  double obsGpsLon, //rads
+                                  double obstacleRadius, //meters
+                                  ObstacleData & obstacle);
 
     /**
      * Draw the state of the boat on vibes.

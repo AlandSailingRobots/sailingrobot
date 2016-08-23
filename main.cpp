@@ -20,6 +20,7 @@
 #include "Nodes/XbeeSyncNode.h"
 #include "Nodes/RoutingNode.h"
 #include "Nodes/LineFollowNode.h"
+#include "Nodes/CollisionAvoidanceNode.h"
 #include "Messages/DataRequestMsg.h"
 #include "dbhandler/DBHandler.h"
 #include "SystemServices/MaestroController.h"
@@ -106,6 +107,7 @@ int main(int argc, char *argv[])
 	}
 
 	// Create nodes
+	// TODO create collision avoidance node
 	MessageLoggerNode msgLogger(messageBus);
 
 	#if SIMULATION == 1
@@ -122,7 +124,7 @@ int main(int argc, char *argv[])
 	HTTPSyncNode httpsync(messageBus, &dbHandler, 0, false);
 	VesselStateNode vessel(messageBus);
 	WaypointMgrNode waypoint(messageBus, dbHandler);
-
+    CollisionAvoidanceNode collisionAvoidanceNode(messageBus);
 
 	Node* sailingLogic;
 
@@ -190,6 +192,8 @@ int main(int argc, char *argv[])
 	{
 		initialiseNode(*sailingLogic, "Routing Node", NodeImportance::CRITICAL);
 	}
+
+    initialiseNode(collisionAvoidanceNode, "Collision Avoidance Node", NodeImportance::NOT_CRITICAL);
 
 	// Start active nodes
 	#if SIMULATION == 1
