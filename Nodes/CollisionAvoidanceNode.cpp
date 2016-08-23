@@ -126,6 +126,7 @@ void CollisionAvoidanceNode::processVesselState(VesselStateMsg* msg){
         for (auto &&data : obsData) {
             m_sensorOutput.detectedObstacles.push_back(data);
         }
+        run();
     }
 
     if(DRAW_STATE_WITH_VIBES){
@@ -144,11 +145,12 @@ void CollisionAvoidanceNode::processObstacleData(ObstacleData* msg){
         obstacle.minDistanceToObstacle = msg->minDistanceToObstacle;
         obstacle.maxDistanceToObstacle = msg->maxDistanceToObstacle;
         m_sensorOutput.detectedObstacles.push_back(obstacle);
+        run();
     }
 
     // Here it begins !
     // Launch collision avoidance process
-    run();
+
 }
 
 void CollisionAvoidanceNode::processWaypointData(WaypointDataMsg* msg){
