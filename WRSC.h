@@ -37,8 +37,8 @@
 
 #elif BOAT_TYPE == BOAT_ENSTA_PETIT
 
-#define SAIL_MAX_US		1725
-#define SAIL_MIN_US		1000 //1301
+#define SAIL_MAX_US		1750
+#define SAIL_MIN_US		1100
 
 #define RUDDER_MAX_US	2000
 #define RUDDER_MID_US	1500

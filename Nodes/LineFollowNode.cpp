@@ -157,6 +157,12 @@ void LineFollowNode::calculateActuatorPos(VesselStateMsg* msg)
         return;
     }
 
+	if(std::isnan(msg->longitude()) || std::isnan(msg->latitude()))
+	{
+		Logger::warning("Invalid GPS coords");
+		return;
+	}
+
     double trueWindDirection = Utility::getTrueWindDirection(msg->windDir(), msg->windSpeed(),
                                                              msg->speed(), msg->compassHeading(), twdBuffer, twdBufferMaxSize);
     /* add pi because trueWindDirection is originally origin of wind but algorithm need direction*/
@@ -237,7 +243,7 @@ void LineFollowNode::calculateActuatorPos(VesselStateMsg* msg)
     int rudderCommand_norm = m_rudderCommand.getCommand(rudderCommand/NORM_RUDDER_COMMAND);
     int sailCommand_norm = m_sailCommand.getCommand(sailCommand/NORM_SAIL_COMMAND);
 
-    //Logger::info("[Sail] cmd: %d, Rudder: %d sc: %f", sailCommand_norm, rudderCommand_norm, sailCommand);
+    Logger::info("[Sail] cmd: %d, Rudder: %d sc: %f", sailCommand_norm, rudderCommand_norm, sailCommand);
 
 
     //Send messages----
