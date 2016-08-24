@@ -69,7 +69,7 @@ bool XbeeRemote::initialise()
 
 	m_DataLink = new LinuxSerialDataLink(m_PortName.c_str(), XBEE_BAUD_RATE);
 
-	if(not m_msgReceiver.initialise(MSG_IN_PORT))
+	if(not m_msgReceiver.initialise(MSG_IN_PORT) && not m_actReceiver.initialise(ACTUATOR_IN_PORT))
 	{
 		Logger::error("Failed to start the message receiver");
 		return false;
@@ -127,7 +127,7 @@ void XbeeRemote::run()
 				m_Connected = true;
 			}
 
-			// Receive
+			// Receive messages
 			uint8_t* ptr = NULL;
 			uint16_t size = 0;
 			ptr = m_msgReceiver.receive(size);
@@ -135,6 +135,27 @@ void XbeeRemote::run()
 			if(size > 0)
 			{
 				incomingData(ptr, size);
+
+				delete ptr;
+			}
+
+			// Receive actuator positions
+			uint8_t* ptr = NULL;
+			uint16_t size = 0;
+			ptr = m_actReceiver.receive(size);
+
+			if(size > 0)
+			{
+				int rudder = 0;
+				int sail = 0;
+
+				if(parseActuatorMessage(ptr, rudder, sail))
+				{
+					ActuatorPositionMsg msg(rudder, sail);
+					MessageSerialiser serialiser;
+					msg.Serialise(serialiser);
+					m_Network->transmit(serialiser.data(), serialiser.size());
+				}
 
 				delete ptr;
 			}
@@ -294,5 +315,18 @@ void XbeeRemote::sendToUI(Message* msgPtr, MessageDeserialiser& deserialiser)
 		// Send it to the Monitor UI
 		deserialiser.resetInternalPtr();
 		m_Instance->sendToUI(&msg, deserialiser);
+	}
+}
+
+/***************************************************************************************/
+bool XbeeRemote::parseActuatorMessage(uint8_t* data, int& rudder, int& sail)
+{
+	if(sscanf((char*)data, "rudderAV=%d sailAV=%d", rudder, sail) == 2)
+	{
+		return true;
+	}
+	else
+	{
+		return false;
 	}
 }

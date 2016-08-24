@@ -41,6 +41,8 @@ public:
 
 	void sendToUI(Message* msgPtr, MessageDeserialiser& deserialiser);
 
+	bool parseActuatorMessage(uint8_t* data, int& rudder, int& sail);
+
 	///----------------------------------------------------------------------------------
 	/// Called when a message is received over the Xbee network
 	///----------------------------------------------------------------------------------
@@ -55,4 +57,5 @@ private:
 	bool				m_Connected;
 	UDPRelay			m_Relay;
 	UDPReceiver 		m_msgReceiver;
+	UDPReceiver 		m_actReceiver;
 };
