@@ -1,7 +1,14 @@
-//
-// Created by tag on 12/07/16.
-//
-
+/****************************************************************************************
+ *
+ * File:
+ * 		CollisionAvoidanceNode.h
+ *
+ * Purpose:
+ *		Compute the new path in case of collision avoidance.
+ *
+ * Developer Notes:
+ *
+ ***************************************************************************************/
 #pragma once
 
 #ifndef SAILINGROBOT_TEST_AVOIDANCE_BEHAVIOUR_H
@@ -23,8 +30,7 @@
 #include <boost/geometry/multi/geometries/multi_polygon.hpp>
 #include "utility/vibes.h"
 
-// TODO : Receive these values from the database or from RoutingBehaviour
-// Some of these values should be available for all behaviour classes
+// TODO : Receive these values from the database
 #define DISTANCE_NOT_THE_SAME_OBSTACLE 15.0
 #define MAXIMUM_SENSOR_RANGE 100.0
 #define SENSOR_HEADING_RELATIVE_TO_BOAT 0.0 // There might be several sensors
@@ -34,31 +40,15 @@
 
 #define FIND_CENTER_NORMAL 0
 #define FIND_CENTER_DETECTED 1
-// SAVED CODE IN CASE OF ARCHITECTURAL CHANGE
-/*
-
-//struct sensorData{
-//    double gpsLon; //x
-//    double gpsLat; //y
-//    double compass;
-//    double windDirection;
-//};
-
-*/
+#define UNIT_DEGREE 1
+#define UNIT_RADIANS 0
+#define STANDALONE_DRAW_NEW_FIGURE 0
+#define STANDALONE_DRAW_USE_EXISTING 1
 
 typedef boost::geometry::model::point<double, 2, boost::geometry::cs::cartesian> boostPoint;
 typedef boost::geometry::model::polygon<boostPoint> boostPolygon;
 typedef boost::geometry::model::multi_polygon<boostPolygon> boostMultiPolygon;
 
-/**
- * Structure which contains every obstacle data from the sensors
- */
-//struct ObstaclesData {
-//    double minDistanceToObstacle;
-//    double maxDistanceToObstacle; /**< -1 = infinite */
-//    double leftBoundHeadingRelativeToBoat;
-//    double rightBoundHeadingRelativeToBoat;
-//}; //TODO : ObstacleData changed into ObstaclesData
 /**
  * Structure which contains every obstacle data
  */
@@ -121,24 +111,28 @@ struct WaypointOutput{
     Eigen::Vector2d midPoint;
     Eigen::Vector2d endPoint;
 };
+/**
+ * Struct from Eloise algorithm
+ */
 struct BearingOnlyVars{
     bool only_direction_mode;
     bool have_to_avoid_obstacle;
+    std::vector<double> obstacleBearings;
 };
-
 
 /**
  * Collision avoidance class
  */
 class CollisionAvoidanceNode : public Node{
-    //For test only
+
 public:
     CollisionAvoidanceNode(MessageBus& msgBus);
     ~CollisionAvoidanceNode() {};
 
     /**
-     * Nothing to initialize for now
-     * @return
+     * Initialize the values for simulation or drawing (not really used apart from DEBUG)
+     * Setup sailing zone
+     * @return success
      */
     bool init();
 
@@ -152,6 +146,7 @@ public:
 
     /**
      * Setter for the sailing zone
+     * Currently it's not a setter, the sailingZone is hardcoded.
      * @return
      */
     bool setSailingZone();
@@ -166,6 +161,7 @@ protected:
     bool m_tack; //Need init
     int m_tackingDirection; //Need init
     double m_loop_id;
+    double m_simu_without_simulator;
     BearingOnlyVars m_bearingOnlyVars; //For future implementation if collision avoidance doesn't work
 
     //PRIVATE MAIN FUNCTIONS
@@ -272,26 +268,34 @@ protected:
     /*
      * Most of them are functions to handle geometry.
      */
-    std::vector<ObstacleData> simulateObstacle(std::vector<std::vector<double>> obstacle_coords);
+    std::vector<ObstacleData> simulateObstacle(std::vector<std::vector<double>> obstacle_coords, // in rads
+                                               int unit);
     bool createObstacleDataCircle(double obsGpsLat, //rads
                                   double obsGpsLon, //rads
                                   double obstacleRadius, //meters
                                   ObstacleData & obstacle);
 
     /**
-     * Draw the state of the boat on vibes.
+     * Draw the state of the boat on vibes-viewer.
+     * VIBes : http://enstabretagnerobotics.github.io/VIBES/
      */
     void drawState();
-    std::vector<double> getVectorLine(std::vector<Eigen::Vector2d> vec,int line);
+    std::vector<double> getEigenVectorLine(std::vector<Eigen::Vector2d> vec,int line);
+    std::vector<double>  getBoostVectorLine(boostPolygon vec,int line);
     void drawObstacles(std::vector<Obstacle> seen_obstacles,std::string color);
     void drawObstacle(Obstacle obs,std::string color);
     void drawEigenPoly(std::vector<Eigen::Vector2d> poly,std::string color);
+    void drawBoostPoly(boostPolygon, std::string color);
     void drawBoat(SensorData sensorData,std::string color);
     void drawChannel(FollowedLine followedLine);
     void drawPotField(PotentialMap potfield,int option);
     void drawPotFieldPoint(int i, int j,
                            PotentialMap potfield,
                            std::string color, int option);
+    void standAloneDrawObstacles(std::vector<Obstacle> seen_obstacles,std::string color, std::string name, int option);
+    void standAloneDrawBoostMultiPoly(boostMultiPolygon multiPoly, std::string color, std::string name, int option);
+    void standAloneDrawBoostPoly(boostPolygon poly, std::string color, std::string name, int option);
+    void vibesFigureHandler(std::string name, int option);
 
     /**
      * Gives the sum between two angles regardless of their definition.
@@ -418,7 +422,7 @@ protected:
      *
      * Here everything is in meters and radians
      *
-     * @param distance
+     * @param distance    in meters
      * @param bearing
      * @param startPoint
      * @return
@@ -489,6 +493,14 @@ protected:
     boostPolygon eigenPolyToBoostPoly(Obstacle obstacle);
 
     /**
+     * Convert back a c++ boost polygon into the polygon of an obstacle.
+     * @param boostPoly
+     * @return
+     */
+    std::vector<Eigen::Vector2d> boostPolyToEigenPoly(
+            boostPolygon boostPoly);
+
+    /**
      * Update the polygon of an obstacle with the data inside a boost polygon
      *
      * recreate the polygon but not the obstacle
@@ -499,7 +511,7 @@ protected:
      * @param poly
      * @return
      */
-    Obstacle updateObstacleWithBoostPoly(Obstacle obstacle,boostPolygon poly);
+    void updateObstacleWithBoostPoly(Obstacle & obstacle,boostPolygon poly);
 
     /**
      * Clean the obstacles that should have been seen but are not.
