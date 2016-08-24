@@ -18,6 +18,7 @@
 #include "../Network/DataLink.h"
 #include "../Messages/Message.h"
 #include "UDPRelay.h"
+#include "UDPReceiver.h"
 
 
 class XbeeRemote {
@@ -53,4 +54,5 @@ private:
 	unsigned long		m_LastReceived;
 	bool				m_Connected;
 	UDPRelay			m_Relay;
+	UDPReceiver 		m_msgReceiver;
 };

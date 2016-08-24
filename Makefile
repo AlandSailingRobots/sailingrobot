@@ -90,7 +90,7 @@ SRC_OPENCV_CV 			= Nodes/obstacledetection/colorDetectionNode.cpp Nodes/obstacle
 SRC_SIMULATOR			= Nodes/SimulationNode.cpp
 
 SRC_WRSC_C				= libs/minmea/minmea.c
-SRC_WRSC_NODES			= Nodes/SerialGPSNode.cpp Nodes/MA3WindSensorNode.cpp
+SRC_WRSC_NODES			= Nodes/SerialGPSNode.cpp Nodes/MA3WindSensorNode.cpp Nodes/RazorCompassNode.cpp Nodes/UDPNode.cpp XbeeRemote/UDPRelay.cpp
 
 
 #----------------------------------------------------------------------------------------

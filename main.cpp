@@ -36,8 +36,10 @@ enum class NodeImportance {
 #elif TARGET == 1
 #define TARGET_STR "WRSC2016"
 
+#include "Nodes/UDPNode.h"
 #include "Nodes/SerialGPSNode.h"
 #include "Nodes/MA3WindSensorNode.h"
+#include "Nodes/RazorCompassNode.h"
 
 #include "Nodes/WaypointMgrNode.h"
 #include "Nodes/VesselStateNode.h"
@@ -237,8 +239,18 @@ int main(int argc, char *argv[])
 
 #endif
 
+	UDPNode udp(messageBus, "127.0.0.1", 4320);
+
 	MA3WindSensorNode windSensor(messageBus, 2);
 	SerialGPSNode gps(messageBus);
+	RazorCompassNode compass(messageBus);
+
+	// QUICK TEST
+	/*float heading, pitch,roll;
+	if(compass.parseData("#YPR=-155.73,-76.48,-129.51", heading, pitch, roll))
+	{
+		Logger::info("Data: %f %f %f", heading, pitch, roll);
+	}*/
 
 	activeNodes.push_back(&windSensor);
 	activeNodes.push_back(&gps);
@@ -263,8 +275,10 @@ int main(int argc, char *argv[])
 	// Actuator Node
 	ActuatorNode sail(messageBus, NodeID::SailActuator, 1, 0, 0);
 	ActuatorNode rudder(messageBus, NodeID::RudderActuator, 0, 0, 0);
-	MaestroController::init(dbHandler.retrieveCell("maestro_controller_config", "1", "port"));
+	MaestroController::init("/dev/ttyACM0");
 
+	initialiseNode(udp, "UDP Node", NodeImportance::CRITICAL);
+	initialiseNode(compass, "Compass Node", NodeImportance::CRITICAL);
 	initialiseNode(windSensor, "Wind Sensor Node", NodeImportance::CRITICAL);
 	initialiseNode(gps, "GPS Node", NodeImportance::CRITICAL);
 
