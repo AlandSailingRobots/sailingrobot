@@ -222,9 +222,11 @@ void LineFollowNode::calculateActuatorPos(VesselStateMsg* msg)
     //SET SAIL---------
 
     // QUICKFIX for WRSC
+	double boatHeading_rad = msg->compassHeading() * M_PI /180.0; //Simon : i don't trust currentHeading
     double windDirection_raw = Utility::degreeToRadian(msg->windDir()); // degree from north
     double windSpeed_raw = msg->windSpeed(); // degree from north
-    sailCommand = m_maxSailAngle/2.0 * (cos(windDirection_raw * M_PI /180.0 + M_PI - desiredHeading) + 1);
+    double windDirection = Utility::fmod_2PI_pos(windDirection_raw * M_PI /180.0 + boatHeading_rad);
+	sailCommand = m_maxSailAngle/2.0 * (cos(windDirection * M_PI /180.0 + M_PI - desiredHeading) + 1);
 
     //sailCommand = m_minSailAngle;
 //    double apparentWindDirection = Utility::getApparentWindDirection(msg->windDir(),
