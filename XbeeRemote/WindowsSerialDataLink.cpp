@@ -58,11 +58,11 @@ bool WindowsSerialDataLink::initialise(uint16_t frameSize)
 			}
 
 			// Set COM port timeout settings
-			m_timeouts.ReadIntervalTimeout = 1;
-			m_timeouts.ReadTotalTimeoutConstant = 1;
-			m_timeouts.ReadTotalTimeoutMultiplier = 1;
-			m_timeouts.WriteTotalTimeoutConstant = 1;
-			m_timeouts.WriteTotalTimeoutMultiplier = 1;
+			m_timeouts.ReadIntervalTimeout = 0;
+			m_timeouts.ReadTotalTimeoutConstant = 0;
+			m_timeouts.ReadTotalTimeoutMultiplier = 0;
+			m_timeouts.WriteTotalTimeoutConstant = 0;
+			m_timeouts.WriteTotalTimeoutMultiplier = 0;
 			if(SetCommTimeouts(m_hSerial, &m_timeouts) == 0)
 			{
 					printf("Error setting timeouts\n");
@@ -108,7 +108,22 @@ int WindowsSerialDataLink::readByte()
 
 bool WindowsSerialDataLink::dataAvailable()
 {
+	//static int MAX = 5000;
+	//static int count = 0;
+	
+	return true;
+	/*if(count == MAX)
+	{
+		count = 0;
+		return false;
+	}
+	else
+	{
+		count++;
+		return true;
+	}
+	
 	static bool wait = false;
 
-	return (wait = not wait);
+	return (wait = not wait);*/
 }

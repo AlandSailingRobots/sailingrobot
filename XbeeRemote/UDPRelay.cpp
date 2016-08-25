@@ -144,7 +144,7 @@ void UDPRelay::send(uint8_t* data, uint16_t size)
 		char opt=1;
 		setsockopt(m_socket, SOL_SOCKET, SO_BROADCAST, &opt, sizeof(int));
 
-		if (sendto(m_socket, data, size, 0,
+		if (sendto(m_socket, (char*)data, size, 0,
 				   (sockaddr*)&servaddr, sizeof(servaddr)) < 0){
 			Logger::warning("%s:%d Cannot send message", __FILE__, __LINE__);
 		}

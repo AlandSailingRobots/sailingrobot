@@ -13,6 +13,7 @@
 
 #include "UDPReceiver.h"
 
+#ifdef __linux__
 #include <stdarg.h>
 #include <time.h>
 #include <sys/socket.h>
@@ -20,7 +21,10 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <fcntl.h>
-
+#elif _WIN32
+#include <winsock2.h>
+typedef int socklen_t;
+#endif
 #include <cstring>
 
 

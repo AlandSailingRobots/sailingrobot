@@ -112,7 +112,7 @@ void XbeeRemote::run()
 			 	*/
 
 			test++;
-			if(test == 40000)
+			/*if(test == 25)
 			{
 				ActuatorPositionMsg msg(100, 100);
 				MessageSerialiser serialiser;
@@ -120,7 +120,7 @@ void XbeeRemote::run()
 				m_Network->transmit(serialiser.data(), serialiser.size());
 				Logger::info("Transmitting");
 				test = 0;
-			}
+			}*/
 
 
 			if(SysClock::unixTime() - m_LastReceived > OFFLINE_TIME)
