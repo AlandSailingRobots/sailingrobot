@@ -30,6 +30,7 @@
 #include "SystemServices/Logger.h"
 #include "utility/SysClock.h"
 #include "CollisionAvoidanceNode.h"
+#include "SystemServices/Logger.h"
 
 
 #define BASE_SLEEP_MS 400
@@ -37,7 +38,7 @@
 #define COUNT_GPSDATA_MSG 1
 #define COUNT_WINDDATA_MSG 1
 #define COUNT_ARDUINO_MSG 1
-#define COUNT_OBSTACLE_MSG 1
+#define COUNT_OBSTACLE_MSG 3
 #define DRAW_STATE_WITH_VIBES 1
 
 SimulationNode::SimulationNode(MessageBus& msgBus)
@@ -128,8 +129,8 @@ int SimulationNode::init_socket(int port)
 
 bool SimulationNode::init_obstacles(){
     m_obstacles_coords.clear();
-    std::vector<double> longitudVec = {}; // deg
-    std::vector<double> latitudeVec = {}; // deg
+    std::vector<double> longitudVec = {19.92207992094336,19.92193812140613,19.921326,19.921705,19.92185527391433,19.92238372564315}; // deg
+    std::vector<double> latitudeVec = {60.10531054974476,60.10533773205465,60.105284,60.105256,60.10524774529737,60.10521566220767}; // deg
     if(longitudVec.size()!=latitudeVec.size()){
         printf("[ERROR](createObstacleMessage) obstacle vectors not of the same size\n");
         return false;
@@ -191,6 +192,7 @@ void SimulationNode::createGPSMessage()
 	{
 		MessagePtr msg = std::make_unique<GPSDataMsg>(GPSDataMsg(m_GPSHasFix, m_GPSOnline, m_GPSLat, m_GPSLon, m_GPSUnixTime, m_GPSSpeed, m_GPSHeading, m_GPSSatellite, mode));
 		m_MsgBus.sendMessage(std::move(msg));
+        Logger::info("(SimulationNode) Sent GPSDataMsg : (%f,%f)",m_GPSLon,m_GPSLat);
 	}
 }
 
@@ -235,9 +237,9 @@ void SimulationNode::createObstacleMessage(){
         // transformation in radians
         const double obsGpsLon = Utility::degreeToRadian(m_obstacles_coords[0][i]);
         const double obsGpsLat = Utility::degreeToRadian(m_obstacles_coords[1][i]);
-        bool isCreated = createObstacleDataCircle(obsGpsLon,
-                                                  obsGpsLat,
-                                                  obstacleRadius,
+        bool isCreated = createObstacleDataCircle(obsGpsLon, //rads
+                                                  obsGpsLat, //rads
+                                                  obstacleRadius, //m
                                                   obsData);
         if(isCreated){
             obstacles.push_back(obsData);

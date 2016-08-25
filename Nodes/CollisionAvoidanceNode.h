@@ -162,6 +162,13 @@ protected:
     int m_tackingDirection; //Need init
     double m_loop_id;
     double m_simu_without_simulator;
+    /**
+     * Number of waypoints recieved\n
+     * This is necessary to prevent problems in the disscussion between
+     * WaypoinMgrNode and CollisionAvoidanceNode.\n
+     * Else the boat will avoid obstacles seen just after initialisation around Africa.
+     */
+    double m_number_of_wp_recieved;
     BearingOnlyVars m_bearingOnlyVars; //For future implementation if collision avoidance doesn't work
 
     //PRIVATE MAIN FUNCTIONS

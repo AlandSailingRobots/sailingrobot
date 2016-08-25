@@ -47,7 +47,7 @@ bool HTTPSyncNode::init()
     m_shipPWD = m_dbHandler->retrieveCell("server", "1", "boat_pwd");
 
     m_initialised = true;
-    //Logger::info("HTTPSyncNode init() successful");
+    Logger::info("HTTPSyncNode init() successful");
 
     return m_initialised;
 
@@ -62,7 +62,7 @@ void HTTPSyncNode::start(){
     }
     else
     {
-//        Logger::error("%s Cannot start HTTPSYNC thread as the node was not correctly initialised!", __PRETTY_FUNCTION__);
+        Logger::error("%s Cannot start HTTPSYNC thread as the node was not correctly initialised!", __PRETTY_FUNCTION__);
     }
 
 }
@@ -155,12 +155,12 @@ bool HTTPSyncNode::pushConfigs() {
     
 	if(performCURLCall(m_dbHandler->getConfigs(), "pushConfigs", response))
 	{
-		//Logger::info("Configs pushed to server");
+		Logger::info("Configs pushed to server");
         return true;
 	}
 	else if(!m_reportedConnectError)
 	{
-//		Logger::warning("%s Error: ", __PRETTY_FUNCTION__);
+		Logger::warning("%s Error: ", __PRETTY_FUNCTION__);
 	}
 
     return false;
@@ -203,18 +203,18 @@ bool HTTPSyncNode::getConfigsFromServer() {
             m_dbHandler->updateConfigs(configs);
             if (not m_dbHandler->updateTable("state", "configs_updated", "1", "1"))
             {
-//                Logger::error("%s Error updating state table",__PRETTY_FUNCTION__);
+                Logger::error("%s Error updating state table",__PRETTY_FUNCTION__);
                 return false;
             }
 
             MessagePtr newServerConfigs = std::make_unique<ServerConfigsReceivedMsg>();
             m_MsgBus.sendMessage(std::move(newServerConfigs));
-//            Logger::info("Configuration retrieved from remote server");
+            Logger::info("Configuration retrieved from remote server");
             return true;
         }
         else if(!m_reportedConnectError)
         {
-            //Logger::error("%s Error: %s", __PRETTY_FUNCTION__);
+            Logger::error("%s Error: %s", __PRETTY_FUNCTION__);
         }
 
     }

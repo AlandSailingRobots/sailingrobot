@@ -17,6 +17,7 @@
 
 
 #include <string>
+#include <MessageBus/MessageBus.h>
 
 
 enum class MessageType {
@@ -36,6 +37,7 @@ enum class MessageType {
     ObstacleVector,
     CollisionAvoidance,
     ObstaclePosition,
+	CollisionAvoidanceRequestWp,
 };
 
 inline std::string msgToString(MessageType msgType)
@@ -72,8 +74,10 @@ inline std::string msgToString(MessageType msgType)
         return "ObstacleVector";
     case MessageType::CollisionAvoidance:
         return "CollisionAvoidance";
-    case MessageType ::ObstaclePosition:
+    case MessageType::ObstaclePosition:
         return  "ObstaclePosition";
+	case MessageType::CollisionAvoidanceRequestWp:
+		return "CollisionAvoidanceRequestWp";
 	}
 	return "";
 }
