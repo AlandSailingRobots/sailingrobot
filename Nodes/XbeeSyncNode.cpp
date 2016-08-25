@@ -104,14 +104,14 @@ void XbeeSyncNode::incomingMessage(uint8_t* data, uint8_t size)
 	{
 		case MessageType::ActuatorPosition:
 			{
-				MessagePtr actuatorControl = std::make_unique<ActuatorPositionMsg>(ActuatorPositionMsg(deserialiser));
+				MessagePtr actuatorControl = std::make_unique<ActuatorPositionMsg>(deserialiser);
 				m_node->m_MsgBus.sendMessage(std::move(actuatorControl));
 				Logger::info("Actuator received");
 			}
 			break;
 		case MessageType::ExternalControl:
 			{
-				MessagePtr externalControl = std::make_unique<ExternalControlMsg>(ExternalControlMsg(deserialiser));
+				MessagePtr externalControl = std::make_unique<ExternalControlMsg>(deserialiser);
 				m_node->m_MsgBus.sendMessage(std::move(externalControl));
 			}
 			break;

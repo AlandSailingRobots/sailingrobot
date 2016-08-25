@@ -112,6 +112,17 @@ void XbeeRemote::run()
 			 	*/
 
 			test++;
+			if(test == 40000)
+			{
+				ActuatorPositionMsg msg(100, 100);
+				MessageSerialiser serialiser;
+				msg.Serialise(serialiser);
+				m_Network->transmit(serialiser.data(), serialiser.size());
+				Logger::info("Transmitting");
+				test = 0;
+			}
+
+
 			if(SysClock::unixTime() - m_LastReceived > OFFLINE_TIME)
 			{
 				if(m_Connected)
@@ -132,7 +143,7 @@ void XbeeRemote::run()
 			// Receive messages
 			uint8_t* ptr = NULL;
 			uint16_t size = 0;
-			ptr = m_msgReceiver.receive(size);
+			//ptr = m_msgReceiver.receive(size);
 
 			if(size > 0)
 			{
@@ -144,7 +155,7 @@ void XbeeRemote::run()
 			// Receive actuator positions
 			ptr = NULL;
 			size = 0;
-			ptr = m_actReceiver.receive(size);
+			//ptr = m_actReceiver.receive(size);
 
 			if(size > 0)
 			{
@@ -160,15 +171,6 @@ void XbeeRemote::run()
 				}
 
 				delete ptr;
-			}
-
-			if(test == 100)
-			{
-				ActuatorPositionMsg msg(100, 100);
-				MessageSerialiser serialiser;
-				msg.Serialise(serialiser);
-				m_Network->transmit(serialiser.data(), serialiser.size());
-				test = 0;
 			}
 		}
 	}
