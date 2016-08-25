@@ -23,6 +23,7 @@
 #include "../Messages/ActuatorPositionMsg.h"
 #include "../Messages/WaypointDataMsg.h"
 #include "../Messages/CourseDataMsg.h"
+#include "../Messages/ExternalControlMsg.h"
 
 #ifdef __linux__
 #include "Network/LinuxSerialDataLink.h"
@@ -98,6 +99,8 @@ bool XbeeRemote::initialise()
 void XbeeRemote::run()
 {
 	int test = 0;
+	bool externalControl = false;
+	int lastUpdate = SysClock::unixTime();
 	if(m_Network != NULL)
 	{
 		m_Relay.write("offline=0");
@@ -105,6 +108,7 @@ void XbeeRemote::run()
 		while(true)
 		{
 			const int OFFLINE_TIME = 5;
+			const int MAX_EXTERNAL_CONTROL_TIME = 120;
 			m_Network->processRadioMessages();
 
 			/* Test
@@ -121,6 +125,17 @@ void XbeeRemote::run()
 				Logger::info("Transmitting");
 				test = 0;
 			}*/
+
+			if(externalControl && (SysClock::unixTime() - lastUpdate > MAX_EXTERNAL_CONTROL_TIME))
+			{
+				Logger::info("External control is disabled");
+				ExternalControlMsg externalControl(false);
+				externalControl = false;
+
+				MessageSerialiser serialiser;
+				externalControl.Serialise(serialiser);
+				m_Network->transmit(serialiser.data(), serialiser.size());
+			}
 
 
 			if(SysClock::unixTime() - m_LastReceived > OFFLINE_TIME)
@@ -143,7 +158,7 @@ void XbeeRemote::run()
 			// Receive messages
 			uint8_t* ptr = NULL;
 			uint16_t size = 0;
-			//ptr = m_msgReceiver.receive(size);
+			ptr = m_msgReceiver.receive(size);
 
 			if(size > 0)
 			{
@@ -155,7 +170,7 @@ void XbeeRemote::run()
 			// Receive actuator positions
 			ptr = NULL;
 			size = 0;
-			//ptr = m_actReceiver.receive(size);
+			ptr = m_actReceiver.receive(size);
 
 			if(size > 0)
 			{
@@ -164,6 +179,18 @@ void XbeeRemote::run()
 
 				if(parseActuatorMessage(ptr, rudder, sail))
 				{
+					lastUpdate = SysClock::unixTime();
+					if(externalControl == false)
+					{
+						Logger::info("External control is enabled");
+						ExternalControlMsg externalControl(true);
+						externalControl = true;
+
+						MessageSerialiser serialiser;
+						externalControl.Serialise(serialiser);
+						m_Network->transmit(serialiser.data(), serialiser.size());
+					}
+
 					ActuatorPositionMsg msg(rudder, sail);
 					MessageSerialiser serialiser;
 					msg.Serialise(serialiser);
