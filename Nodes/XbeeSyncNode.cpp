@@ -120,6 +120,8 @@ void XbeeSyncNode::incomingMessage(uint8_t* data, uint8_t size)
 
 	delete data;
 	data = NULL;
+
+	Logger::info("Message received!");
 }
 
 void XbeeSyncNode::xBeeSyncThread(void* nodePtr)
