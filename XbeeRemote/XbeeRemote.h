@@ -18,6 +18,7 @@
 #include "../Network/DataLink.h"
 #include "../Messages/Message.h"
 #include "UDPRelay.h"
+#include "UDPReceiver.h"
 
 
 class XbeeRemote {
@@ -40,6 +41,8 @@ public:
 
 	void sendToUI(Message* msgPtr, MessageDeserialiser& deserialiser);
 
+	bool parseActuatorMessage(uint8_t* data, int& rudder, int& sail);
+
 	///----------------------------------------------------------------------------------
 	/// Called when a message is received over the Xbee network
 	///----------------------------------------------------------------------------------
@@ -53,4 +56,6 @@ private:
 	unsigned long		m_LastReceived;
 	bool				m_Connected;
 	UDPRelay			m_Relay;
+	UDPReceiver 		m_msgReceiver;
+	UDPReceiver 		m_actReceiver;
 };

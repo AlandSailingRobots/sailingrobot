@@ -16,7 +16,7 @@
 
 BUILD_DR 		= ../build/XbeeRemote
 
-SRC 			= main.cpp XbeeRemote.cpp UDPRelay.cpp
+SRC 			= main.cpp XbeeRemote.cpp UDPRelay.cpp UDPReceiver.cpp
 
 ifeq ($(TOOLCHAIN),win)
 

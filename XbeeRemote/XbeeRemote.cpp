@@ -35,8 +35,11 @@
 XbeeRemote*	XbeeRemote::m_Instance = NULL;
 
 
-#define MONITOR_PORT	4321
-#define OTHER_PORT		4322
+#define MONITOR_PORT		4321
+#define OTHER_PORT			4322
+
+#define MSG_IN_PORT			4320
+#define ACTUATOR_IN_PORT	4319
 
 
 /***************************************************************************************/
@@ -65,6 +68,12 @@ bool XbeeRemote::initialise()
 #ifdef __linux__
 
 	m_DataLink = new LinuxSerialDataLink(m_PortName.c_str(), XBEE_BAUD_RATE);
+
+	if(not m_msgReceiver.initialise(MSG_IN_PORT) && not m_actReceiver.initialise(ACTUATOR_IN_PORT))
+	{
+		Logger::error("Failed to start the message receiver");
+		return false;
+	}
 
 #elif _WIN32
 	m_DataLink = new WindowsSerialDataLink(m_PortName.c_str(), XBEE_BAUD_RATE);
@@ -116,6 +125,39 @@ void XbeeRemote::run()
 				Logger::info("Gained connection");
 				m_Relay.write("offline=0");
 				m_Connected = true;
+			}
+
+			// Receive messages
+			uint8_t* ptr = NULL;
+			uint16_t size = 0;
+			ptr = m_msgReceiver.receive(size);
+
+			if(size > 0)
+			{
+				incomingData(ptr, size);
+
+				delete ptr;
+			}
+
+			// Receive actuator positions
+			uint8_t* ptr = NULL;
+			uint16_t size = 0;
+			ptr = m_actReceiver.receive(size);
+
+			if(size > 0)
+			{
+				int rudder = 0;
+				int sail = 0;
+
+				if(parseActuatorMessage(ptr, rudder, sail))
+				{
+					ActuatorPositionMsg msg(rudder, sail);
+					MessageSerialiser serialiser;
+					msg.Serialise(serialiser);
+					m_Network->transmit(serialiser.data(), serialiser.size());
+				}
+
+				delete ptr;
 			}
 		}
 	}
@@ -273,5 +315,18 @@ void XbeeRemote::sendToUI(Message* msgPtr, MessageDeserialiser& deserialiser)
 		// Send it to the Monitor UI
 		deserialiser.resetInternalPtr();
 		m_Instance->sendToUI(&msg, deserialiser);
+	}
+}
+
+/***************************************************************************************/
+bool XbeeRemote::parseActuatorMessage(uint8_t* data, int& rudder, int& sail)
+{
+	if(sscanf((char*)data, "rudderAV=%d sailAV=%d", rudder, sail) == 2)
+	{
+		return true;
+	}
+	else
+	{
+		return false;
 	}
 }

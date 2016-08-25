@@ -49,7 +49,7 @@ static double gettime(){
 
 /***************************************************************************************/
 UDPRelay::UDPRelay(std::vector<int> ports, std::string address)
-	:m_destAddress(address), m_ports(ports)
+	:m_destAddress(address), m_ports(ports), m_setup(false)
 {
 #if _WIN32
 	int iResult;
@@ -61,12 +61,20 @@ UDPRelay::UDPRelay(std::vector<int> ports, std::string address)
 	{
 		wprintf(L"WSAStartup failed with error: %d\n", iResult);
 	}
+	else
+	{
+		m_setup = true;
+	}
 #endif
 
 	m_socket = socket(AF_INET,SOCK_DGRAM,0);
 	if(m_socket < 0)
 	{
 		Logger::error("%s:%d Cannot open UDP socket", __FILE__, __LINE__);
+	}
+	else
+	{
+		m_setup = true;
 	}
 }
 
@@ -94,6 +102,12 @@ void UDPRelay::write(const char *s,...)
 }
 
 /***************************************************************************************/
+void UDPRelay::write(uint8_t* data, uint16_t size)
+{
+	send(data, size);
+}
+
+/***************************************************************************************/
 void UDPRelay::send(const char* msg)
 {
 	for(unsigned int i = 0; i < m_ports.size(); i++)
@@ -111,6 +125,28 @@ void UDPRelay::send(const char* msg)
 		if (sendto(m_socket, msg, strlen(msg)+1, 0, // +1 to include terminator
 				   (sockaddr*)&servaddr, sizeof(servaddr)) < 0){
 			Logger::warning("%s:%d Cannot send message %s", __FILE__, __LINE__, msg);
+		}
+	}
+}
+
+/***************************************************************************************/
+void UDPRelay::send(uint8_t* data, uint16_t size)
+{
+	for(unsigned int i = 0; i < m_ports.size(); i++)
+	{
+		sockaddr_in servaddr;
+
+		memset(&servaddr, 0, sizeof(servaddr));
+		servaddr.sin_family = AF_INET;
+		servaddr.sin_addr.s_addr = inet_addr(m_destAddress.c_str());
+		servaddr.sin_port = htons(m_ports[i]);
+
+		char opt=1;
+		setsockopt(m_socket, SOL_SOCKET, SO_BROADCAST, &opt, sizeof(int));
+
+		if (sendto(m_socket, data, size, 0,
+				   (sockaddr*)&servaddr, sizeof(servaddr)) < 0){
+			Logger::warning("%s:%d Cannot send message", __FILE__, __LINE__);
 		}
 	}
 }

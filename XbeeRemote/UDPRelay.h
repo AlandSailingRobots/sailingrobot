@@ -17,6 +17,7 @@
 #include <vector>
 #include <strings.h>
 #include <string>
+#include <stdint.h>
 
 
 #ifdef __linux__
@@ -43,17 +44,26 @@ public:
 	void write(const char *s,...);
 
 	///----------------------------------------------------------------------------------
+	/// Writes a UDP packet to the address and list of ports.
+	///----------------------------------------------------------------------------------
+	void write(uint8_t* data, uint16_t size);
+
+	///----------------------------------------------------------------------------------
 	/// Receive a UDP packet
 	///----------------------------------------------------------------------------------
 	//std::string receive();
 
+	bool isSetup() { return m_setup; }
 private:
 	///----------------------------------------------------------------------------------
 	/// Sends a UDP packet
 	///----------------------------------------------------------------------------------
 	void send(const char* msg);
 
+	void send(uint8_t* data, uint16_t size);
+
 	std::string 		m_destAddress;
 	std::vector<int> 	m_ports;
 	UDPSocket			m_socket;
+	bool				m_setup;
 };
