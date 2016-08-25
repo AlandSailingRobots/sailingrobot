@@ -97,6 +97,7 @@ bool XbeeRemote::initialise()
 /***************************************************************************************/
 void XbeeRemote::run()
 {
+	int test = 0;
 	if(m_Network != NULL)
 	{
 		m_Relay.write("offline=0");
@@ -110,6 +111,7 @@ void XbeeRemote::run()
 			m_Relay.write("heading=%d gpsHeading=%f speed=%f lat=%.7f lon=%.7f windDir=%f windSpeed=%f rudderAV=%d sailAV=%d pressure=%d currTot=%d", 120, 120., 4., 52.4, 32.6, 120., 4., 4500, 5000, 10, 12);
 			 	*/
 
+			test++;
 			if(SysClock::unixTime() - m_LastReceived > OFFLINE_TIME)
 			{
 				if(m_Connected)
@@ -140,8 +142,8 @@ void XbeeRemote::run()
 			}
 
 			// Receive actuator positions
-			uint8_t* ptr = NULL;
-			uint16_t size = 0;
+			ptr = NULL;
+			size = 0;
 			ptr = m_actReceiver.receive(size);
 
 			if(size > 0)
@@ -158,6 +160,15 @@ void XbeeRemote::run()
 				}
 
 				delete ptr;
+			}
+
+			if(test == 100)
+			{
+				ActuatorPositionMsg msg(100, 100);
+				MessageSerialiser serialiser;
+				msg.Serialise(serialiser);
+				m_Network->transmit(serialiser.data(), serialiser.size());
+				test = 0;
 			}
 		}
 	}
@@ -321,7 +332,7 @@ void XbeeRemote::sendToUI(Message* msgPtr, MessageDeserialiser& deserialiser)
 /***************************************************************************************/
 bool XbeeRemote::parseActuatorMessage(uint8_t* data, int& rudder, int& sail)
 {
-	if(sscanf((char*)data, "rudderAV=%d sailAV=%d", rudder, sail) == 2)
+	if(sscanf((char*)data, "rudderAV=%d sailAV=%d", &rudder, &sail) == 2)
 	{
 		return true;
 	}

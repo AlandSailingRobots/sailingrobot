@@ -106,6 +106,7 @@ void XbeeSyncNode::incomingMessage(uint8_t* data, uint8_t size)
 			{
 				MessagePtr actuatorControl = std::make_unique<ActuatorPositionMsg>(ActuatorPositionMsg(deserialiser));
 				m_node->m_MsgBus.sendMessage(std::move(actuatorControl));
+				Logger::info("Actuator received");
 			}
 			break;
 		case MessageType::ExternalControl:
@@ -120,8 +121,6 @@ void XbeeSyncNode::incomingMessage(uint8_t* data, uint8_t size)
 
 	delete data;
 	data = NULL;
-
-	Logger::info("Message received!");
 }
 
 void XbeeSyncNode::xBeeSyncThread(void* nodePtr)
