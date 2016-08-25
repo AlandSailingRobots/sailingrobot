@@ -36,6 +36,7 @@ XbeeSyncNode::XbeeSyncNode(MessageBus& msgBus, DBHandler& db) :
 	msgBus.registerNode(*this, MessageType::VesselState);
 	msgBus.registerNode(*this, MessageType::CourseData);
 	msgBus.registerNode(*this, MessageType::WaypointData);
+	m_node = this;
 }
 
 bool XbeeSyncNode::init()
