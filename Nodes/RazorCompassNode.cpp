@@ -17,9 +17,10 @@
 #include "Messages/CompassDataMsg.h"
 #include <wiringSerial.h>
 #include <cstring>
+ #include <termios.h>
 
 
-#define COMPASS_THREAD_SLEEP		200
+#define COMPASS_THREAD_SLEEP		400
 #define COMPASS_BAUD_RATE			57600
 #define COMPASS_DEFAULT_PORT		"/dev/ttyUSB0"
 
@@ -168,7 +169,9 @@ void RazorCompassNode::RazorThreadFunc(void* nodePtr)
 
 	while(node->m_keepRunning)
 	{
-		SysClock::sleepMS(COMPASS_THREAD_SLEEP);
+		SysClock::sleepMS(500);
+		tcflush(node->m_FD,TCIOFLUSH);
+		SysClock::sleepMS(10);
 
 		charsRead = node->readLine(buffer, 35);
 
@@ -183,6 +186,7 @@ void RazorCompassNode::RazorThreadFunc(void* nodePtr)
 				node->m_MsgBus.sendMessage(std::move(msg));
 			}
 		}
+
 	}
 }
 
