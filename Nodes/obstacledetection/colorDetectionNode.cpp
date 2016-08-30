@@ -99,11 +99,13 @@ void colorDetectionNode::start()
 	{
 		runThread(colorDetectionThreadFunc);
 	}
-	else if(!m_Initialised)
+
+	if(!m_Initialised)
 	{
 		Logger::error("%s Cannot start colorDetectionNode thread as the node was not correctly initialised!", __PRETTY_FUNCTION__);
 	}
-	else if(m_inputColorError)
+
+	if(m_inputColorError)
 	{
 		Logger::error("%sCannot start colorDetectionNode thread because of a wrong color input!", __PRETTY_FUNCTION__);
 	}
@@ -242,7 +244,8 @@ void colorDetectionNode::colorDetectionThreadFunc(void* nodePtr)
     {
 
 		//For each capture
-        for(int h = 0; h<(int)(node->m_numberOfCapturesPerDetection);h++){
+        for(int h = 0; h < (int)(node->m_numberOfCapturesPerDetection);h++)
+        {
 			// read a new frame from video
             bool bSuccess = node->m_cap.read(node->m_imgOriginal);
             if (!bSuccess) {
@@ -257,34 +260,37 @@ void colorDetectionNode::colorDetectionThreadFunc(void* nodePtr)
             node->m_imgOriginal = node->m_imgOriginal(myROI);
 
 			//For each color to track find obstacles
-            for(int i = 0; i<(int)node->m_hsvValues.size(); i++){
-                imgThresholded=threshold(node->m_imgOriginal,node->m_hsvValues[i]);
+            for(int i = 0; i < (int)node->m_hsvValues.size(); i++)
+            {
+                imgThresholded = threshold(node->m_imgOriginal,node->m_hsvValues[i]);
                 morphologicalOperations (imgThresholded);
-                computeContoursCentersRectangles(imgThresholded,mc,rotated_bounding_rects,node->m_minAreaToDetect );
-                rotated_bounding_rects_several_captures[i].insert(rotated_bounding_rects_several_captures[i].begin(),rotated_bounding_rects.begin(),rotated_bounding_rects.end());
-                rotated_bounding_rects.erase(rotated_bounding_rects.begin(),rotated_bounding_rects.end());
+                computeContoursCentersRectangles(imgThresholded,mc,rotated_bounding_rects, node->m_minAreaToDetect );
+                rotated_bounding_rects_several_captures[i].insert(rotated_bounding_rects_several_captures[i].begin(), rotated_bounding_rects.begin(),rotated_bounding_rects.end());
+                rotated_bounding_rects.erase(rotated_bounding_rects.begin(), rotated_bounding_rects.end());
                 imgsThresholded[i]=imgThresholded;
             }
         }
 		//For each obstacles found merge the obstacles close to each others
-        for( int i = 0; i<(int)rotated_bounding_rects_several_captures.size(); i++ ){
+        for( int i = 0; i < (int)rotated_bounding_rects_several_captures.size(); i++ )
+        {
             //supressSmallRectangles(rotated_bounding_rects_several_captures[i], m_minAreaToDetect);
-            rotated_bounding_rects_merged_list[i] = compareRects(node->m_imgOriginal,rotated_bounding_rects_several_captures[i]);
+            rotated_bounding_rects_merged_list[i] = compareRects(node->m_imgOriginal, rotated_bounding_rects_several_captures[i]);
             centers[i]=findRectanglesCenters(rotated_bounding_rects_merged_list[i]);
 
 			//Display merged rectangles and centers found
-            for(int j = 0; j <(int)rotated_bounding_rects_merged_list[i].size(); j++){
-                rectangle(node->m_imgOriginal, rotated_bounding_rects_merged_list[i][j],node->m_colorDrawing[i] ,4, 8,0);
-                circle( node->m_imgOriginal, centers[i][j], 10,node->m_colorDrawing[i] , 4, 8, 0 );
+            for(int j = 0; j < (int)rotated_bounding_rects_merged_list[i].size(); j++)
+            {
+                rectangle(node->m_imgOriginal, rotated_bounding_rects_merged_list[i][j], node->m_colorDrawing[i], 4, 8, 0);
+                circle(node->m_imgOriginal, centers[i][j], 10, node->m_colorDrawing[i], 4, 8, 0);
             }
         }
 
         computeObstaclesAnglePosition(node->m_imgOriginal, obstacles, rotated_bounding_rects_merged_list );
 
-		MessagePtr msg = std::make_unique<ObstacleVectorMsg>(NodeID::Lidar, NodeID::ColorDetection ,obstacles);
+		MessagePtr msg = std::make_unique<ObstacleVectorMsg>(obstacles);
 		node->m_MsgBus.sendMessage(std::move(msg));
 
-        rotated_bounding_rects_several_captures.erase(rotated_bounding_rects_several_captures.begin(),rotated_bounding_rects_several_captures.end());
+        rotated_bounding_rects_several_captures.erase(rotated_bounding_rects_several_captures.begin(), rotated_bounding_rects_several_captures.end());
         rotated_bounding_rects_several_captures.resize(node->m_numberOfColorsToTrack);
         obstacles.erase(obstacles.begin(),obstacles.end());
 
@@ -293,7 +299,7 @@ void colorDetectionNode::colorDetectionThreadFunc(void* nodePtr)
 			cvWaitKey(1);
 			imshow("Detection", node->m_imgOriginal);
 			cvWaitKey(1);
-			setMouseCallback( "Detection", get_on_click_hsv_pixel_values, nodePtr );
+			setMouseCallback("Detection", get_on_click_hsv_pixel_values, nodePtr );
 		}
 		// Controls how often we pump out messages
 		std::this_thread::sleep_for(std::chrono::milliseconds(node->m_delay));

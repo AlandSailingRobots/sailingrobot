@@ -41,6 +41,8 @@ XbeeRemote*	XbeeRemote::m_Instance = NULL;
 #define MSG_IN_PORT			4320
 #define ACTUATOR_IN_PORT	4319
 
+bool xbeeStarted;
+
 
 /***************************************************************************************/
 XbeeRemote::XbeeRemote(std::string portName)
@@ -48,6 +50,7 @@ XbeeRemote::XbeeRemote(std::string portName)
 	 m_LastReceived(0), m_Connected(true), m_Relay({4321, 4322}, "127.0.0.1")
 {
 	m_Instance = this;
+	xbeeStarted = false;
 }
 
 /***************************************************************************************/
@@ -61,50 +64,50 @@ bool XbeeRemote::initialise()
 {
 	if(m_PortName.length() == 0)
 	{
-		Logger::error("%s:%d No port name set!", __FILE__, __LINE__);
-		return false;
+		Logger::warning("%s:%d No port name set!", __FILE__, __LINE__);
 	}
 
 #ifdef __linux__
 
-	m_DataLink = new LinuxSerialDataLink(m_PortName.c_str(), XBEE_BAUD_RATE);
+	//m_DataLink = new LinuxSerialDataLink(m_PortName.c_str(), XBEE_BAUD_RATE);
 
 	if(not m_msgReceiver.initialise(MSG_IN_PORT) && not m_actReceiver.initialise(ACTUATOR_IN_PORT))
 	{
-		Logger::error("Failed to start the message receiver");
-		return false;
+		Logger::warning("Failed to start the message receiver");
 	}
 
 #elif _WIN32
 	m_DataLink = new WindowsSerialDataLink(m_PortName.c_str(), XBEE_BAUD_RATE);
 #endif
-
+/* TEMP: Not using XBEE for WRSC, do not merge into develop this commented out code! We want to keep this
+ * code alive and active on develop
 	if(m_DataLink->initialise(XBEE_PACKET_SIZE))
 	{
 		m_Network = new XbeePacketNetwork(*m_DataLink, true);
 		m_Network->setIncomingCallback(incomingData);
-		return true;
+		xbeeStarted = true;
 	}
 	else
 	{
 		delete m_DataLink;
 		m_DataLink = NULL;
-		return false;
-	}
+		Logger::warning("Failed to start the message receiver");
+	}*/
 	return true;
 }
 
 /***************************************************************************************/
 void XbeeRemote::run()
 {
-	if(m_Network != NULL)
+	//if(m_Network != NULL)
 	{
 		m_Relay.write("offline=0");
 
 		while(true)
 		{
 			const int OFFLINE_TIME = 5;
-			m_Network->processRadioMessages();
+			// More Code that is WRSC specific
+			//m_Network->processRadioMessages();
 
 			/* Test
 			m_Relay.write("heading=%d gpsHeading=%f speed=%f lat=%.7f lon=%.7f windDir=%f windSpeed=%f rudderAV=%d sailAV=%d pressure=%d currTot=%d", 120, 120., 4., 52.4, 32.6, 120., 4., 4500, 5000, 10, 12);
@@ -140,8 +143,8 @@ void XbeeRemote::run()
 			}
 
 			// Receive actuator positions
-			uint8_t* ptr = NULL;
-			uint16_t size = 0;
+			ptr = NULL;
+			size = 0;
 			ptr = m_actReceiver.receive(size);
 
 			if(size > 0)
@@ -316,12 +319,16 @@ void XbeeRemote::sendToUI(Message* msgPtr, MessageDeserialiser& deserialiser)
 		deserialiser.resetInternalPtr();
 		m_Instance->sendToUI(&msg, deserialiser);
 	}
+	else
+	{
+		Logger::info("Message failed to deserialise");
+	}
 }
 
 /***************************************************************************************/
 bool XbeeRemote::parseActuatorMessage(uint8_t* data, int& rudder, int& sail)
 {
-	if(sscanf((char*)data, "rudderAV=%d sailAV=%d", rudder, sail) == 2)
+	if(sscanf((char*)data, "rudderAV=%d sailAV=%d", &rudder, &sail) == 2)
 	{
 		return true;
 	}

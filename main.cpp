@@ -37,7 +37,7 @@ enum class NodeImportance {
 #define TARGET_STR "WRSC2016"
 
 #include "Nodes/UDPNode.h"
-#include "Nodes/SerialGPSNode.h"
+#include "Nodes/GPSDNode.h"
 #include "Nodes/MA3WindSensorNode.h"
 #include "Nodes/RazorCompassNode.h"
 
@@ -208,7 +208,7 @@ int main(int argc, char *argv[])
 	acceleration = dbHandler.retrieveCellAsInt("rudder_servo_config", "1", "acceleration");
 
 	ActuatorNode rudder(messageBus, NodeID::RudderActuator, channel, speed, acceleration);
-	MaestroController::init(dbHandler.retrieveCell("maestro_controller_config", "1", "port"));
+	MaestroController::init("dev/tty/ACM0");
 
 	initialiseNode(xbee, "Xbee Sync Node", NodeImportance::NOT_CRITICAL);
 	initialiseNode(httpsync, "Httpsync Node", NodeImportance::CRITICAL);
@@ -241,8 +241,8 @@ int main(int argc, char *argv[])
 
 	UDPNode udp(messageBus, "127.0.0.1", 4320);
 
-	MA3WindSensorNode windSensor(messageBus, 2);
-	SerialGPSNode gps(messageBus);
+	//MA3WindSensorNode windSensor(messageBus, 2);
+	GPSDNode gps(messageBus);
 	RazorCompassNode compass(messageBus);
 
 	// QUICK TEST
@@ -252,8 +252,9 @@ int main(int argc, char *argv[])
 		Logger::info("Data: %f %f %f", heading, pitch, roll);
 	}*/
 
-	activeNodes.push_back(&windSensor);
-	activeNodes.push_back(&gps);
+	//activeNodes.push_back(&windSensor);
+	//activeNodes.push_back(&gps);
+	activeNodes.push_back(&compass);
 
 	// Sailing Logic nodes
 	VesselStateNode vessel(messageBus);
@@ -279,8 +280,8 @@ int main(int argc, char *argv[])
 
 	initialiseNode(udp, "UDP Node", NodeImportance::CRITICAL);
 	initialiseNode(compass, "Compass Node", NodeImportance::CRITICAL);
-	initialiseNode(windSensor, "Wind Sensor Node", NodeImportance::CRITICAL);
-	initialiseNode(gps, "GPS Node", NodeImportance::CRITICAL);
+	//initialiseNode(windSensor, "Wind Sensor Node", NodeImportance::CRITICAL);
+	//initialiseNode(gps, "GPS Node", NodeImportance::CRITICAL);
 
 	initialiseNode(vessel, "Vessel State Node", NodeImportance::CRITICAL);
 	initialiseNode(waypoint, "Waypoint Node", NodeImportance::CRITICAL);

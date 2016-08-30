@@ -39,8 +39,6 @@ void UDPNode::processMessage(const Message* message)
 	MessageSerialiser serialiser;
 	message->Serialise(serialiser);
 
-	Logger::error("Data sent over UDP, size: %d", serialiser.size());
-
 	m_udpRelay.write(serialiser.data(), serialiser.size());
 }
 

@@ -19,9 +19,9 @@
 #include <cstring>
 
 
-#define COMPASS_THREAD_SLEEP		400
+#define COMPASS_THREAD_SLEEP		200
 #define COMPASS_BAUD_RATE			57600
-#define COMPASS_DEFAULT_PORT		"/dev/ttyACM1"
+#define COMPASS_DEFAULT_PORT		"/dev/ttyUSB0"
 
 
 RazorCompassNode::RazorCompassNode(MessageBus& msgBus)
@@ -177,6 +177,8 @@ void RazorCompassNode::RazorThreadFunc(void* nodePtr)
 		{
 			if(node->parseData(buffer, heading, pitch, roll))
 			{
+				Logger::info("Compass Data %f %d %s", heading, (int)(heading + 0.5), buffer);
+
 				MessagePtr msg = std::make_unique<CompassDataMsg>((int)(heading + 0.5), (int)pitch, (int)roll);
 				node->m_MsgBus.sendMessage(std::move(msg));
 			}

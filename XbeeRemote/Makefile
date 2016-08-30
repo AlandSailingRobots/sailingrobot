@@ -31,7 +31,7 @@ SRC				+= udpclient.cpp
 OBJECTS			= ../build/Network/LinuxSerialDataLink.o
 
 WIRING_PI 		= libwiringPi.so
-MOVE_LIB		= @mv ../$(WIRING_PI) $(WIRING_PI)
+MOVE_LIB		= @cp ../$(WIRING_PI) $(WIRING_PI)
 
 endif
 

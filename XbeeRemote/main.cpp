@@ -30,8 +30,7 @@ int main() {
 
 	if(not xbeeRemote.initialise())
 	{
-		Logger::error("Shutting down, failed to initialise");
-		return 1;
+		Logger::error("No Xbee");
 	}
 
 	while(true)

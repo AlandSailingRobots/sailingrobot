@@ -13,6 +13,7 @@
 
 #include "UDPReceiver.h"
 
+#ifdef __linux__
 #include <stdarg.h>
 #include <time.h>
 #include <sys/socket.h>
@@ -20,8 +21,12 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <fcntl.h>
-
+#elif _WIN32
+#include <winsock2.h>
+typedef int socklen_t;
+#endif
 #include <cstring>
+#include "../SystemServices/Logger.h"
 
 
 UDPReceiver::UDPReceiver() {
@@ -43,15 +48,29 @@ bool UDPReceiver::initialise(int receivePort)
 		return false;
 	}
 
+	// Set to nonblocking
+	#ifdef __linux__
+		fcntl(m_socket, F_SETFL, O_NONBLOCK);
+	#elif _WIN32
+		u_long iMode = 1;
+		iResult = ioctlsocket(m_socket, FIONBIO, &iMode);
+		if (iResult != NO_ERROR)
+		{
+			printf("ioctlsocket failed with error: %ld\n", iResult);
+		}
+	#endif
+
+
 	memset((char *)&myaddr, 0, sizeof(myaddr));
 	myaddr.sin_family = AF_INET;
 	myaddr.sin_addr.s_addr = htonl(INADDR_ANY);
 	myaddr.sin_port = htons(receivePort);
 
 	if (bind(m_socket, (struct sockaddr *)&myaddr, sizeof(myaddr)) < 0) {
-		perror("bind failed");
+		Logger::error("bind failed");
 		return false;
 	}
+	Logger::info("UDP receiver listening on localhost port:%d", receivePort);
 
 	return true;
 }
@@ -61,12 +80,13 @@ uint8_t* UDPReceiver::receive(uint16_t& size)
 	char buffer[200];
 	struct sockaddr_in remaddr;
 	socklen_t addrlen = sizeof(remaddr);
+	int size_tmp = - 1;
 
-	size = recvfrom(m_socket, buffer, 200, 0, (struct sockaddr *)&remaddr, &addrlen);
-	printf("received %d bytes\n", size);
-	if (size > 0)
+	size_tmp = recvfrom(m_socket, buffer, 200, 0, (struct sockaddr *)&remaddr, &addrlen);
+
+	if(size_tmp > 0)
 	{
-		printf("received message: \"%s\"\n", buffer);
+		size = size_tmp;
 		uint8_t* data = new uint8_t[size];
 
 		memcpy(data, buffer, size);
