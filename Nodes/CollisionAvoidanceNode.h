@@ -11,9 +11,6 @@
  ***************************************************************************************/
 #pragma once
 
-#ifndef SAILINGROBOT_TEST_AVOIDANCE_BEHAVIOUR_H
-#define SAILINGROBOT_TEST_AVOIDANCE_BEHAVIOUR_H
-
 #include "Nodes/Node.h"
 #include "Messages/VesselStateMsg.h"
 #include "Messages/ObstacleVectorMsg.h"
@@ -31,11 +28,11 @@
 #include "utility/vibes.h"
 
 // TODO : Receive these values from the database
-#define DISTANCE_NOT_THE_SAME_OBSTACLE 15.0
-#define MAXIMUM_SENSOR_RANGE 100.0
-#define SENSOR_HEADING_RELATIVE_TO_BOAT 0.0 // There might be several sensors
+#define DISTANCE_NOT_THE_SAME_OBSTACLE 10.0 // in meters
+#define MAXIMUM_SENSOR_RANGE 100.0 // in meters
+#define SENSOR_HEADING_RELATIVE_TO_BOAT 0.0 // There might be several sensors (not tested, best to stay = 0)
 #define SENSOR_ARC_ANGLE M_PI/3 // Every angle is in radian
-#define CHANNEL_RADIUS 15.0 // in meters
+#define CHANNEL_RADIUS 40.0 // in meters
 #define SAFE_DISTANCE 50.0 // in meters
 
 #define FIND_CENTER_NORMAL 0
@@ -43,7 +40,14 @@
 #define UNIT_DEGREE 1
 #define UNIT_RADIANS 0
 #define STANDALONE_DRAW_NEW_FIGURE 0
+#define STANDALONE_DRAW_NEW_FIGURE_12 0
+#define STANDALONE_DRAW_NEW_FIGURE_10 10
+#define STANDALONE_DRAW_NEW_FIGURE_11 11
+#define STANDALONE_DRAW_NEW_FIGURE_UNIT_TEST 20
 #define STANDALONE_DRAW_USE_EXISTING 1
+
+#define DRAWING_ORIGIN_LON_RAD 0.34771144 // in rads
+#define DRAWING_ORIGIN_LAT_RAD 1.04906922 // in rads
 
 typedef boost::geometry::model::point<double, 2, boost::geometry::cs::cartesian> boostPoint;
 typedef boost::geometry::model::polygon<boostPoint> boostPolygon;
@@ -119,6 +123,10 @@ struct BearingOnlyVars{
     bool have_to_avoid_obstacle;
     std::vector<double> obstacleBearings;
 };
+struct ObstacleRealPosition{
+    std::vector<double> lon;
+    std::vector<double> lat;
+};
 
 /**
  * Collision avoidance class
@@ -151,7 +159,6 @@ public:
      */
     bool setSailingZone();
 
-
 protected:
 
     std::vector<Obstacle> m_seenObstacles;
@@ -162,6 +169,8 @@ protected:
     int m_tackingDirection; //Need init
     double m_loop_id;
     double m_simu_without_simulator;
+    ObstacleRealPosition m_obs_coords;
+
     /**
      * Number of waypoints recieved\n
      * This is necessary to prevent problems in the disscussion between
@@ -183,7 +192,7 @@ protected:
      * Proccess the messages from the color_detection node
      * @param msg
      */
-    void processObstacleData(ObstacleData* msg);
+    void processObstacleData(ObstacleVectorMsg* msg);
 
     /**
      * Process the messages from the waypoint manager in order to know the
@@ -209,8 +218,8 @@ protected:
      * @param sensorData
      * @return
      */
-    void check_obstacles(SensorData sensorData,
-                         std::vector<Obstacle> &seenObstacles);
+    void check_obstacles(SensorData & sensorData,
+                         std::vector<Obstacle> & seenObstacles);
 
     /**
      * Check if there is intersection between
@@ -218,7 +227,7 @@ protected:
      * @param seenObstacles
      * @return
      */
-    bool these_obstacles_are_a_problem(std::vector<Obstacle> seenObstacles);
+    bool these_obstacles_are_a_problem(std::vector<Obstacle> & seenObstacles);
 
     /**
      * Compute the potential field for the obstacles, the sailing zone,
@@ -238,9 +247,9 @@ protected:
      * @param followedLine
      * @return
      */
-    PotentialMap compute_potential_field(std::vector<Obstacle> seen_obstacles,
-                                         std::vector<Eigen::Vector2d> sailing_zone,
-                                         FollowedLine followedLine);
+    PotentialMap compute_potential_field(std::vector<Obstacle> & seen_obstacles,
+                                         std::vector<Eigen::Vector2d> & sailing_zone,
+                                         FollowedLine & followedLine);
 
     /**
      * Find the minimum in the potential field and return its coordinates in the matrix
@@ -248,7 +257,7 @@ protected:
      * @param Potential_field
      * @return
      */
-    Eigen::Vector2d find_minimum_potential_field(PotentialMap PotentialField);
+    Eigen::Vector2d find_minimum_potential_field(PotentialMap & PotentialField);
 
     /**
      * Gives the new line to follow. It would be better if it added a WP in the
@@ -275,7 +284,7 @@ protected:
     /*
      * Most of them are functions to handle geometry.
      */
-    std::vector<ObstacleData> simulateObstacle(std::vector<std::vector<double>> obstacle_coords, // in rads
+    std::vector<ObstacleData> simulateObstacle(ObstacleRealPosition obstacle_coords, // in rads
                                                int unit);
     bool createObstacleDataCircle(double obsGpsLat, //rads
                                   double obsGpsLon, //rads
@@ -285,19 +294,22 @@ protected:
     /**
      * Draw the state of the boat on vibes-viewer.
      * VIBes : http://enstabretagnerobotics.github.io/VIBES/
+     *
+     * The offset to be closer to 0 is because vibes has some precision problem when the coordinates are not close to 0.
+     * VIBes could be improved and it's open-source : go on if you want.
      */
     void drawState();
     std::vector<double> getEigenVectorLine(std::vector<Eigen::Vector2d> vec,int line);
     std::vector<double>  getBoostVectorLine(boostPolygon vec,int line);
-    void drawObstacles(std::vector<Obstacle> seen_obstacles,std::string color);
+    void drawObstacles(std::vector<Obstacle> & seen_obstacles,std::string color);
     void drawObstacle(Obstacle obs,std::string color);
     void drawEigenPoly(std::vector<Eigen::Vector2d> poly,std::string color);
     void drawBoostPoly(boostPolygon, std::string color);
-    void drawBoat(SensorData sensorData,std::string color);
-    void drawChannel(FollowedLine followedLine);
-    void drawPotField(PotentialMap potfield,int option);
+    void drawBoat(SensorData & sensorData,std::string color);
+    void drawChannel(FollowedLine & followedLine);
+    void drawPotField(PotentialMap & potfield,int option);
     void drawPotFieldPoint(int i, int j,
-                           PotentialMap potfield,
+                           PotentialMap & potfield,
                            std::string color, int option);
     void standAloneDrawObstacles(std::vector<Obstacle> seen_obstacles,std::string color, std::string name, int option);
     void standAloneDrawBoostMultiPoly(boostMultiPolygon multiPoly, std::string color, std::string name, int option);
@@ -613,5 +625,3 @@ protected:
 
 
 };
-
-#endif //SAILINGROBOT_TEST_AVOIDANCE_BEHAVIOUR_H

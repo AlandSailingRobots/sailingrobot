@@ -57,9 +57,9 @@ private:
  	///----------------------------------------------------------------------------------
     void sendMessage();
     ///----------------------------------------------------------------------------------
-    /// Sends message with data about the next waypoint to a specified Node
+    /// Sends message with the first waypoint being the boat.
     ///----------------------------------------------------------------------------------
-    void sendMessage(NodeID id);
+    void sendMessageInit();
     ///----------------------------------------------------------------------------------
  	/// Sends message with data about the next collision avoidance waypoint
  	///----------------------------------------------------------------------------------
@@ -99,4 +99,6 @@ private:
     double  m_gpsLatitude;
 
     Timer   m_waypointTimer;
+
+    int m_init_after_gps;
 };

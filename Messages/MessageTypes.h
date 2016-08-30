@@ -17,8 +17,6 @@
 
 
 #include <string>
-#include <MessageBus/MessageBus.h>
-
 
 enum class MessageType {
 	DataRequest = 0,
@@ -36,8 +34,7 @@ enum class MessageType {
 	CourseData,
     ObstacleVector,
     CollisionAvoidance,
-    ObstaclePosition,
-	CollisionAvoidanceRequestWp,
+    ObstaclePosition
 };
 
 inline std::string msgToString(MessageType msgType)
@@ -76,8 +73,6 @@ inline std::string msgToString(MessageType msgType)
         return "CollisionAvoidance";
     case MessageType::ObstaclePosition:
         return  "ObstaclePosition";
-	case MessageType::CollisionAvoidanceRequestWp:
-		return "CollisionAvoidanceRequestWp";
 	}
 	return "";
 }

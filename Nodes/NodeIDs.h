@@ -70,7 +70,7 @@ inline std::string nodeToString(NodeID id)
 		return "xBeeSync";
 	case NodeID::Simulator:
 		return "Simulator";
-	case NodeID ::ColorDetection:
+	case NodeID::ColorDetection:
 		return "ColorDetection";
 	case NodeID::CollisionAvoidance:
 		return "CollisionAvoidance";

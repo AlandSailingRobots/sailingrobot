@@ -44,15 +44,15 @@ WaypointMgrNode::WaypointMgrNode(MessageBus& msgBus, DBHandler& db)
     msgBus.registerNode(*this, MessageType::GPSData);
     msgBus.registerNode(*this, MessageType::ServerWaypointsReceived);
     msgBus.registerNode(*this, MessageType::CollisionAvoidance);
-    msgBus.registerNode(*this, MessageType::CollisionAvoidanceRequestWp);
+//    msgBus.registerNode(*this, MessageType::CollisionAvoidanceRequestWp);
 }
 
 bool WaypointMgrNode::init()
 {
+    m_init_after_gps = 0;
     sendMessage();
     return true;
 }
-
 
 void WaypointMgrNode::processMessage(const Message* msg)
 {
@@ -62,13 +62,16 @@ void WaypointMgrNode::processMessage(const Message* msg)
 	{
         case MessageType::GPSData:
             processGPSMessage((GPSDataMsg*)msg);
+            if(m_init_after_gps>10) { //It's to wait for good values for the gps
+//                sendMessageInit();
+                m_init_after_gps = -1;
+            } else if(m_init_after_gps!=-1) {
+                m_init_after_gps++;
+            }
             break;
         case MessageType::ServerWaypointsReceived:
             sendMessage();
             break;
-//        case MessageType::CollisionAvoidanceRequestWp:
-//            sendMessage(NodeID::CollisionAvoidance);
-//            break;
         case MessageType::CollisionAvoidance:
             m_collisionAvoidance = true;
             processCollisionAvoidanceMessage((CollisionAvoidanceMsg*)msg);
@@ -111,7 +114,7 @@ void WaypointMgrNode::processCollisionAvoidanceMessage(CollisionAvoidanceMsg* ms
     m_caWPArray[1].latitude = msg->midWaypointLat();
     m_caWPArray[2].longitude = msg->endWaypointLon();
     m_caWPArray[2].latitude = msg->endWaypointLat();
-    m_caCounter = 0;
+    m_caCounter = 1;
 }
 
 bool WaypointMgrNode::waypointReached()
@@ -146,6 +149,7 @@ bool WaypointMgrNode::collisionWaypointReached()
     else
     {
         m_caCounter++;;
+        Logger::info("(WaypointMgrNode) Collision waypoint harvested");
         return true;
     }
 }
@@ -165,48 +169,7 @@ void WaypointMgrNode::sendMessage()
                               m_prevDeclination,
                               m_prevRadius))
     {
-        MessagePtr msg = std::make_unique<WaypointDataMsg>(NodeID::Waypoint,
-                                                           m_nextId,
-                                                           m_nextLongitude,
-                                                           m_nextLatitude,
-                                                           m_nextDeclination,
-                                                           m_nextRadius,
-                                                           m_nextStayTime,
-
-                                                           m_prevId,
-                                                           m_prevLongitude,
-                                                           m_prevLatitude,
-                                                           m_prevDeclination,
-                                                           m_prevRadius);
-        m_MsgBus.sendMessage(std::move(msg));
-        Logger::info("(WaypointMgrNode) ==================================== Sent wpData : next (%f,%f) / previous (%f,%f)",m_nextLongitude,m_nextLatitude,m_prevLongitude,m_prevLatitude);
-    }
-    else
-    {
-        Logger::warning("%s No waypoint found, boat is using old waypoint data. No message sent.", __func__);
-    }
-
-    m_db.forceUnlock();
-}
-
-void WaypointMgrNode::sendMessage(NodeID id)
-{
-    if(m_db.getWaypointValues(m_nextId,
-                              m_nextLongitude,
-                              m_nextLatitude,
-                              m_nextDeclination,
-                              m_nextRadius,
-                              m_nextStayTime,
-
-                              m_prevId,
-                              m_prevLongitude,
-                              m_prevLatitude,
-                              m_prevDeclination,
-                              m_prevRadius))
-    {
-        MessagePtr msg = std::make_unique<WaypointDataMsg>(id,
-                                                           NodeID::Waypoint,
-                                                           m_nextId,
+        MessagePtr msg = std::make_unique<WaypointDataMsg>(m_nextId,
                                                            m_nextLongitude,
                                                            m_nextLatitude,
                                                            m_nextDeclination,
@@ -229,12 +192,50 @@ void WaypointMgrNode::sendMessage(NodeID id)
     m_db.forceUnlock();
 }
 
+void WaypointMgrNode::sendMessageInit()
+{
+    if(m_db.getWaypointValues(m_nextId,
+                              m_nextLongitude,
+                              m_nextLatitude,
+                              m_nextDeclination,
+                              m_nextRadius,
+                              m_nextStayTime,
+
+                              m_prevId,
+                              m_prevLongitude,
+                              m_prevLatitude,
+                              m_prevDeclination,
+                              m_prevRadius))
+    {
+        Logger::info("(WaypointMgrNode) Got values from DB : next (%f,%f) / previous (%f,%f)",m_nextLongitude,m_nextLatitude,m_prevLongitude,m_prevLatitude);
+        MessagePtr msg = std::make_unique<WaypointDataMsg>(m_prevId,
+                                                           m_gpsLongitude,
+                                                           m_gpsLatitude,
+                                                           m_nextDeclination,
+                                                           m_nextRadius,
+                                                           0,
+
+                                                           -1,
+                                                           m_gpsLongitude,
+                                                           m_gpsLatitude,
+                                                           m_nextDeclination,
+                                                           m_nextRadius);
+        m_MsgBus.sendMessage(std::move(msg));
+        Logger::info("(WaypointMgrNode) Sent wpDataInit : next (%f,%f) / previous (%f,%f)",m_gpsLongitude,m_gpsLongitude,m_prevLongitude,m_prevLatitude);
+    }
+    else
+    {
+        Logger::warning("%s No waypoint found, boat is using old waypoint data. No message sent.", __func__);
+    }
+
+    m_db.forceUnlock();
+}
+
 void WaypointMgrNode::sendCAMessage()
 {
-    if(m_caCounter > 1)
+    if(m_caCounter > 1) //2
     {
-        MessagePtr msg = std::make_unique<WaypointDataMsg>(NodeID::Waypoint,
-                                                           m_nextId,
+        MessagePtr msg = std::make_unique<WaypointDataMsg>(m_nextId,
                                                            m_nextLongitude,
                                                            m_nextLatitude,
                                                            m_nextDeclination,
@@ -252,25 +253,24 @@ void WaypointMgrNode::sendCAMessage()
                      m_nextLongitude,m_nextLatitude,
                      m_caWPArray[m_caCounter].longitude,m_caWPArray[m_caCounter].latitude);
     }
-    else
+    else //1
     {
-        MessagePtr msg = std::make_unique<WaypointDataMsg>(NodeID::Waypoint,
-                                                           m_nextId,
-                                                           m_caWPArray[m_caCounter + 1].longitude,
-                                                           m_caWPArray[m_caCounter + 1].latitude,
+        MessagePtr msg = std::make_unique<WaypointDataMsg>(m_nextId,
+                                                           m_caWPArray[m_caCounter].longitude,
+                                                           m_caWPArray[m_caCounter].latitude,
                                                            m_caDeclination,
                                                            m_caRadius,
                                                            m_nextStayTime,
 
                                                            m_caId,
-                                                           m_caWPArray[m_caCounter].longitude,
-                                                           m_caWPArray[m_caCounter].latitude,
+                                                           m_caWPArray[m_caCounter - 1].longitude,
+                                                           m_caWPArray[m_caCounter - 1].latitude,
                                                            m_caDeclination,
                                                            m_caRadius);
         m_MsgBus.sendMessage(std::move(msg));
         Logger::info("(WaypointMgrNode) Sent CAwpData : next (%f,%f) / previous (%f,%f)",
-                     m_caWPArray[m_caCounter + 1].longitude,m_caWPArray[m_caCounter + 1].latitude,
-                     m_caWPArray[m_caCounter].longitude,m_caWPArray[m_caCounter].latitude);
+                     m_caWPArray[m_caCounter].longitude,m_caWPArray[m_caCounter].latitude,
+                     m_caWPArray[m_caCounter - 1].longitude,m_caWPArray[m_caCounter - 1].latitude);
     }
 }
 

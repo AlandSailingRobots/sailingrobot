@@ -1,4 +1,3 @@
-
 #include <string>
 #include "SystemServices/Logger.h"
 #include "MessageBus/MessageBus.h"
@@ -20,7 +19,12 @@
 #include "Nodes/XbeeSyncNode.h"
 #include "Nodes/RoutingNode.h"
 #include "Nodes/LineFollowNode.h"
-#include "Nodes/CollisionAvoidanceNode.h"
+#define BAK_STRAT 0
+#ifdef BAK_STRAT
+ #include "Nodes/CollAvoidanceBakStrat.h"
+#else
+ #include "Nodes/CollisionAvoidanceNode.h"
+#endif
 #include "Messages/DataRequestMsg.h"
 #include "dbhandler/DBHandler.h"
 #include "SystemServices/MaestroController.h"

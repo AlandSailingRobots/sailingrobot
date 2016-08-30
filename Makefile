@@ -44,12 +44,12 @@ CORE =					MessageBus/MessageBus.cpp Nodes/ActiveNode.cpp Messages/MessageSerial
 ifeq ($(USE_SIM),1)
 NODES =					Nodes/MessageLoggerNode.cpp  Nodes/WaypointMgrNode.cpp Nodes/HTTPSyncNode.cpp Nodes/XbeeSyncNode.cpp \
 						Nodes/VesselStateNode.cpp  Nodes/RoutingNode.cpp Nodes/LineFollowNode.cpp \
-						Nodes/SimulationNode.cpp  Nodes/CollisionAvoidanceNode.cpp
+						Nodes/SimulationNode.cpp  Nodes/CollAvoidanceBakStrat.cpp
 SYSTEM_SERVICES =		SystemServices/Logger.cpp
 else
 NODES =					Nodes/MessageLoggerNode.cpp Nodes/CV7Node.cpp Nodes/HMC6343Node.cpp Nodes/GPSDNode.cpp Nodes/ActuatorNode.cpp  Nodes/ArduinoNode.cpp \
 						Nodes/VesselStateNode.cpp Nodes/WaypointMgrNode.cpp Nodes/HTTPSyncNode.cpp Nodes/XbeeSyncNode.cpp Nodes/RoutingNode.cpp Nodes/LineFollowNode.cpp \
-						Nodes/SimulationNode.cpp  Nodes/CollisionAvoidanceNode.cpp
+						Nodes/SimulationNode.cpp  Nodes/CollAvoidanceBakStrat.cpp
 
 SYSTEM_SERVICES =		SystemServices/MaestroController.cpp SystemServices/Logger.cpp
 endif

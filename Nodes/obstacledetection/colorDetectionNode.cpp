@@ -235,7 +235,7 @@ void colorDetectionNode::colorDetectionThreadFunc(void* nodePtr)
     vector<vector<Point> > centers(node->m_numberOfColorsToTrack);
     std::vector<ObstacleData> obstacles;
 
-    while (true)
+    while ()
     {
 		//For each capture
         for(int h = 0; h<(int)(node->m_numberOfCapturesPerDetection);h++){
@@ -249,22 +249,34 @@ void colorDetectionNode::colorDetectionThreadFunc(void* nodePtr)
             for(int i = 0; i<(int)node->m_hsvValues.size(); i++){
                 imgThresholded=threshold(node->m_imgOriginal,node->m_hsvValues[i]);
                 morphologicalOperations (imgThresholded);
-                computeContoursCentersRectangles(imgThresholded,mc,rotated_bounding_rects,node->m_minAreaToDetect );
-                rotated_bounding_rects_several_captures[i].insert(rotated_bounding_rects_several_captures[i].begin(),rotated_bounding_rects.begin(),rotated_bounding_rects.end());
-                rotated_bounding_rects.erase(rotated_bounding_rects.begin(),rotated_bounding_rects.end());
+                computeContoursCentersRectangles(imgThresholded,
+                                                 mc,
+                                                 rotated_bounding_rects,
+                                                 node->m_minAreaToDetect );
+                rotated_bounding_rects_several_captures[i].insert(rotated_bounding_rects_several_captures[i].begin(),
+                                                                  rotated_bounding_rects.begin(),
+                                                                  rotated_bounding_rects.end());
+                rotated_bounding_rects.erase(rotated_bounding_rects.begin(),
+                                             rotated_bounding_rects.end());
                 imgsThresholded[i]=imgThresholded;
             }
         }
 		//For each obstacles found merge the obstacles close to each others
         for( int i = 0; i<(int)rotated_bounding_rects_several_captures.size(); i++ ){
             //supressSmallRectangles(rotated_bounding_rects_several_captures[i], m_minAreaToDetect);
-            rotated_bounding_rects_merged_list[i] = compareRects(node->m_imgOriginal,rotated_bounding_rects_several_captures[i]);
+            rotated_bounding_rects_merged_list[i] = compareRects(node->m_imgOriginal,
+                                                                 rotated_bounding_rects_several_captures[i]);
             centers[i]=findRectanglesCenters(rotated_bounding_rects_merged_list[i]);
 
 			//Display merged rectangles and centers found
             for(int j = 0; j <(int)rotated_bounding_rects_merged_list[i].size(); j++){
-                rectangle(node->m_imgOriginal, rotated_bounding_rects_merged_list[i][j],node->m_colorDrawing[i] ,4, 8,0);
-                circle( node->m_imgOriginal, centers[i][j], 10,node->m_colorDrawing[i] , 4, 8, 0 );
+                rectangle( node->m_imgOriginal,
+                           rotated_bounding_rects_merged_list[i][j],
+                           node->m_colorDrawing[i] ,4, 8,0);
+                circle( node->m_imgOriginal,
+                        centers[i][j],
+                        10,
+                        node->m_colorDrawing[i] , 4, 8, 0 );
             }
         }
 

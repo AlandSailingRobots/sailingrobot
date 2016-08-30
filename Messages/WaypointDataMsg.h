@@ -32,13 +32,6 @@ public:
                          m_prevLatitude(prevLatitude), m_prevDeclination(prevDeclination), m_prevRadius(prevRadius)
 	{ }
 
-	WaypointDataMsg(NodeID sourceID, int nextId, double nextLongitude, double nextLatitude, int nextDeclination, int nextRadius, int nextStayTime,
-					int prevId, double prevLongitude, double prevLatitude, int prevDeclination, int prevRadius)
-			:Message(MessageType::WaypointData, sourceID, NodeID::None), m_nextId(nextId), m_nextLongitude(nextLongitude), m_nextLatitude(nextLatitude),
-			 m_nextDeclination(nextDeclination), m_nextRadius(nextRadius), m_nextStayTime(nextStayTime), m_prevId(prevId), m_prevLongitude(prevLongitude),
-			 m_prevLatitude(prevLatitude), m_prevDeclination(prevDeclination), m_prevRadius(prevRadius)
-	{ }
-
 	WaypointDataMsg(MessageDeserialiser deserialiser)
 	:Message(deserialiser)
 	{

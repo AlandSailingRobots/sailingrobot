@@ -27,10 +27,10 @@
  ***************************************************************************************/
 
 #include "CollisionAvoidanceNode.h"
-
 #include "SystemServices/Logger.h"
 
 #define DRAW_STATE_WITH_VIBES 1
+#define WAIT_FOR_X_WAYPOINTS 1
 
 //CONSTRUCTOR
 CollisionAvoidanceNode::CollisionAvoidanceNode(MessageBus& msgBus)
@@ -62,6 +62,8 @@ bool CollisionAvoidanceNode::init(){
     m_loop_id = 0;
     m_simu_without_simulator= false;
     m_number_of_wp_recieved = 0;
+    m_obs_coords.lon = {19.922080,19.920391}; // deg
+    m_obs_coords.lat = {60.105311,60.107564}; // deg
     if(DRAW_STATE_WITH_VIBES){
         vibes::beginDrawing();
         vibesFigureHandler("Simu",STANDALONE_DRAW_NEW_FIGURE);
@@ -75,10 +77,13 @@ void CollisionAvoidanceNode::processMessage(const Message* msg){
     {
         case MessageType::VesselState:
             processVesselState((VesselStateMsg*)msg);
+            break;
         case MessageType::ObstacleVector:
-            processObstacleData((ObstacleData*)msg);
+            processObstacleData((ObstacleVectorMsg*)msg);
+            break;
         case MessageType::WaypointData:
             processWaypointData((WaypointDataMsg*)msg);
+            break;
         default:
             return;
     }
@@ -118,18 +123,14 @@ void CollisionAvoidanceNode::processVesselState(VesselStateMsg* msg){
     m_sensorOutput.roll = msg->compassRoll();
 
     if(m_simu_without_simulator){
-        std::vector<std::vector<double>> coords
-                = {{19.92207992094336,19.92193812140613,19.921326,19.921705,19.92185527391433,19.92238372564315},
-                   {60.10531054974476,60.10533773205465,60.105284,60.105256,60.10524774529737,60.10521566220767}};
-//        std::vector<std::vector<double>> coords
-//                = {{10*CONVERSION_FACTOR_METER_TO_GPS,15*CONVERSION_FACTOR_METER_TO_GPS,-15*CONVERSION_FACTOR_METER_TO_GPS},
-//                   {30*CONVERSION_FACTOR_METER_TO_GPS,30*CONVERSION_FACTOR_METER_TO_GPS, 30*CONVERSION_FACTOR_METER_TO_GPS}};
-        std::vector<ObstacleData> obsData = simulateObstacle(coords,UNIT_DEGREE);
+        std::vector<ObstacleData> obsData = simulateObstacle(m_obs_coords,UNIT_DEGREE);
         for (auto &&data : obsData) {
             m_sensorOutput.detectedObstacles.push_back(data);
         }
         run();
     }
+
+//    Logger::info("(Collision Avoidance) Received GPS from VesselState : (%f,%f) deg",m_sensorOutput.gpsPos(0)/M_PI*180,m_sensorOutput.gpsPos(1)/M_PI*180);
 
     if(DRAW_STATE_WITH_VIBES){
         vibes::selectFigure("Simu");
@@ -138,19 +139,19 @@ void CollisionAvoidanceNode::processVesselState(VesselStateMsg* msg){
     }
 }
 
-void CollisionAvoidanceNode::processObstacleData(ObstacleData* msg){
+void CollisionAvoidanceNode::processObstacleData(ObstacleVectorMsg* msg){
 
     if(!m_simu_without_simulator){
         Logger::info("(Collision Avoidance) Received ObstacleData >>> processObstacleData()");
-        // Get the data
-        ObstacleData obstacle;
-        obstacle.LeftBoundheadingRelativeToBoat = msg->LeftBoundheadingRelativeToBoat;
-        obstacle.RightBoundheadingRelativeToBoat = msg->RightBoundheadingRelativeToBoat;
-        obstacle.minDistanceToObstacle = msg->minDistanceToObstacle;
-        obstacle.maxDistanceToObstacle = msg->maxDistanceToObstacle;
-        m_sensorOutput.detectedObstacles.push_back(obstacle);
-        Logger::info("(Collision Avoidance) Detected obstacle size : %f",m_sensorOutput.detectedObstacles.size());
-        if(m_number_of_wp_recieved>=10){
+        m_sensorOutput.detectedObstacles = msg->obstacles();
+        //std::copy(msg->obstacles().begin(),msg->obstacles().end(),std::back_inserter(m_sensorOutput.detectedObstacles));
+//        Logger::info("(Collision Avoidance) Detected obstacle size : %d",m_sensorOutput.detectedObstacles.size());
+        for (auto &&obstacle : m_sensorOutput.detectedObstacles) {
+            obstacle.boatLonAtDetection = Utility::degreeToRadian(obstacle.boatLonAtDetection);
+            obstacle.boatLatAtDetection = Utility::degreeToRadian(obstacle.boatLatAtDetection);
+            obstacle.boatHeadingAtDetection = M_PI/2-Utility::degreeToRadian(obstacle.boatHeadingAtDetection);
+        }
+        if(m_number_of_wp_recieved>=WAIT_FOR_X_WAYPOINTS){
             run();
         }
     }
@@ -161,16 +162,16 @@ void CollisionAvoidanceNode::processObstacleData(ObstacleData* msg){
 }
 
 void CollisionAvoidanceNode::processWaypointData(WaypointDataMsg* msg){
-    Logger::info("(Collision Avoidance) Received WaypointData >>> processWaypointData() =================================== ");
-//    std::cout << "Wp source node : " << nodeToString(msg->sourceID()) << "\n";
+//    Logger::info("(Collision Avoidance) Received WaypointData >>> processWaypointData() ");
 
     m_followedLine.endPoint(0) = msg->nextLongitude()/180*M_PI;
     m_followedLine.endPoint(1) = msg->nextLatitude()/180*M_PI;
     m_followedLine.startPoint(0) = msg->prevLongitude()/180*M_PI;
     m_followedLine.startPoint(1) = msg->prevLatitude()/180*M_PI;
-    if(m_number_of_wp_recieved<10){
+    if(m_number_of_wp_recieved<WAIT_FOR_X_WAYPOINTS){
         m_number_of_wp_recieved++;
     }
+//    Logger::info("(Collision Avoidance) Current gps position : (%f deg,%f deg)", m_sensorOutput.gpsPos(0)/M_PI*180,m_sensorOutput.gpsPos(1)/M_PI*180);
 //    Logger::info("(Collision Avoidance) Received followedLine start point : (%f deg,%f deg)", m_followedLine.startPoint(0)/M_PI*180,m_followedLine.startPoint(1)/M_PI*180);
 //    Logger::info("(Collision Avoidance) Received followedLine end point : (%f deg,%f deg)", m_followedLine.endPoint(0)/M_PI*180,m_followedLine.endPoint(1)/M_PI*180);
 }
@@ -184,52 +185,50 @@ void CollisionAvoidanceNode::run() {
     Logger::info("(Collision Avoidance) >>> run()");
     check_obstacles(m_sensorOutput,m_seenObstacles); // seen_obstacle as a reference
 
-    // There is a problem there, whenever I check if the list is empty, a blank obstacle is created.
     double minDebug = 10000000000.0;
-    Logger::info("(Collision Avoidance) m_seenObstacles[0].center : (%f,%f) deg", m_seenObstacles[0].center(0)/M_PI*180,m_seenObstacles[0].center(1)/M_PI*180);
-    Logger::info("(Collision Avoidance) !m_seenObstacles.empty() && (m_seenObstacles[0].center(0)!=0.0 && m_seenObstacles[0].center(0)!=0.0) = %d",
-                 !m_seenObstacles.empty() && (m_seenObstacles[0].center(0)!=0.0 && m_seenObstacles[0].center(0)!=0.0));
-    if(!m_seenObstacles.empty() && (m_seenObstacles[0].center(0)!=0.0 && m_seenObstacles[0].center(0)!=0.0)){
+//    Logger::info("(Collision Avoidance) !m_seenObstacles.empty() = %d",!m_seenObstacles.empty());
+    //To prevent strange behaviour from m_seenObstacles
+    if(!m_seenObstacles.empty()){
 
         for (auto &&seenObstacle : m_seenObstacles) {
             double dist = calculateGPSDistance(seenObstacle.center,m_sensorOutput.gpsPos);
             minDebug = std::min(minDebug,dist);
         }
-        Logger::info("(Collision Avoidance) Min distance to obstacle : %f m", minDebug);
-        Logger::info("(Collision Avoidance) Size of Obstacle Vector: %f", m_seenObstacles.size());
+//        Logger::info("(Collision Avoidance) Min distance to obstacle : %f m", minDebug);
+//        Logger::info("(Collision Avoidance) Size of Obstacle Vector: %d", m_seenObstacles.size());
 
-    Logger::info("(Collision Avoidance) Current latitude : %f deg",m_sensorOutput.gpsPos(1)/M_PI*180);
-    Logger::info("(Collision Avoidance) Current longitude : %f deg",m_sensorOutput.gpsPos(0)/M_PI*180);
-    Logger::info("(Collision Avoidance) First obstacle latitude : %f deg",m_seenObstacles[0].center/M_PI*180);
-    Logger::info("(Collision Avoidance) First obstacle longitude : %f deg",m_seenObstacles[0].center/M_PI*180);
-    Logger::info("(Collision Avoidance) distance to first obstacle : %f m", calculateGPSDistance(m_seenObstacles[0].center,
-                                                                                                 m_sensorOutput.gpsPos));
+//    Logger::info("(Collision Avoidance) Current latitude : %f deg",m_sensorOutput.gpsPos(1)/M_PI*180);
+//    Logger::info("(Collision Avoidance) Current longitude : %f deg",m_sensorOutput.gpsPos(0)/M_PI*180);
+//    Logger::info("(Collision Avoidance) First obstacle latitude : %f deg",m_seenObstacles[0].center/M_PI*180);
+//    Logger::info("(Collision Avoidance) First obstacle longitude : %f deg",m_seenObstacles[0].center/M_PI*180);
+//    Logger::info("(Collision Avoidance) distance to first obstacle : %f m", calculateGPSDistance(m_seenObstacles[0].center,
+//                                                                                                 m_sensorOutput.gpsPos));
 
         //    update_map();
         if (these_obstacles_are_a_problem(m_seenObstacles)) {
-            Logger::info("(Collision Avoidance) >>> Obstacle is a problem");
+//            Logger::info("(Collision Avoidance) >>> Obstacle is a problem");
             PotentialMap potential_field = compute_potential_field(m_seenObstacles,
                                                                    m_sailingZone,
                                                                    m_followedLine);
             Eigen::Vector2d min = find_minimum_potential_field(potential_field);
             WaypointOutput wpOut = compute_new_path(min,m_followedLine);
-            Logger::info("(Collision Avoidance) New path computed >>> send new path");
+//            Logger::info("(Collision Avoidance) New path computed >>> send new path");
 
-            MessagePtr msg = std::make_unique<CollisionAvoidanceMsg>(wpOut.startPoint(0),
-                                                                     wpOut.startPoint(1),
-                                                                     wpOut.midPoint(0),
-                                                                     wpOut.midPoint(1),
-                                                                     wpOut.endPoint(0),
-                                                                     wpOut.endPoint(1));
+            MessagePtr msg = std::make_unique<CollisionAvoidanceMsg>(Utility::radianToDegree(wpOut.startPoint(0)),
+                                                                     Utility::radianToDegree(wpOut.startPoint(1)),
+                                                                     Utility::radianToDegree(wpOut.midPoint(0)),
+                                                                     Utility::radianToDegree(wpOut.midPoint(1)),
+                                                                     Utility::radianToDegree(wpOut.endPoint(0)),
+                                                                     Utility::radianToDegree(wpOut.endPoint(1)));
             m_MsgBus.sendMessage(std::move(msg));
-            Logger::info("(Collision Avoidance) Sent collision avoidance message");
+//            Logger::info("(Collision Avoidance) Sent collision avoidance message");
         }
     } else{
         m_seenObstacles.clear();
-        Logger::info("(Collision Avoidance) No obstacles seen");
+//        Logger::info("(Collision Avoidance) No obstacles seen");
     }
-    Logger::info("(Collision Avoidance) Current followedLine start point : (%f deg,%f deg)", m_followedLine.startPoint(0)/M_PI*180,m_followedLine.startPoint(1)/M_PI*180);
-    Logger::info("(Collision Avoidance) Current followedLine end point : (%f deg,%f deg)", m_followedLine.endPoint(0)/M_PI*180,m_followedLine.endPoint(1)/M_PI*180);
+//    Logger::info("(Collision Avoidance) Current followedLine start point : (%f deg,%f deg)", m_followedLine.startPoint(0)/M_PI*180,m_followedLine.startPoint(1)/M_PI*180);
+//    Logger::info("(Collision Avoidance) Current followedLine end point : (%f deg,%f deg)", m_followedLine.endPoint(0)/M_PI*180,m_followedLine.endPoint(1)/M_PI*180);
 }
 
 /*
@@ -239,7 +238,7 @@ void CollisionAvoidanceNode::run() {
 //    void update_waypoints(){}
 
 void CollisionAvoidanceNode::check_obstacles(
-        SensorData sensorData,
+        SensorData & sensorData,
         std::vector<Obstacle> & seenObstacles) {
 
     // clean the obstacles thar should have been detected and are not
@@ -248,8 +247,13 @@ void CollisionAvoidanceNode::check_obstacles(
     // register the new obstacles inside upToDateObstacles (convert from sensorData)
     std::vector<Obstacle> upToDateObstacles = registerObstacles(sensorData, seenObstacles); // seen_obstacle not as a reference
 
+//    standAloneDrawObstacles(upToDateObstacles,"[r]","upToDateObstacles",STANDALONE_DRAW_NEW_FIGURE_11);
+
     // for each up to date obstacle we clean the areas where nothing has been detected
     mergeObstacles(sensorData,upToDateObstacles,seenObstacles); // seen_obstacle as a reference
+
+    //TODO :   what():  Boost.Geometry Overlay invalid input exception when running simulation. Obstacles are all destroyed then recreated at some point of the simulation.
+    //TODO : Obstacles are not updated properly on running the simulation
 }
 
 //void CollisionAvoidanceNode::check_obstaclesBearingOnly(
@@ -272,11 +276,13 @@ void CollisionAvoidanceNode::check_obstacles(
 //map update_map(){}
 
 bool CollisionAvoidanceNode::these_obstacles_are_a_problem(
-        std::vector<Obstacle> seenObstacles) { // OUTPUT if these obstacles are a problem
+        std::vector<Obstacle> & seenObstacles) { // OUTPUT if these obstacles are a problem
+    Logger::info("(Collision Avoidance) >>> These_obstacles_are_a_problem ");
+
     bool theseObstaclesAreAProblem = false;
     // We have polygons. We need to see if there is an intersection between
     // the channel and the polygons. That is to say : one of the points of the
-    // polygon is inside the channel
+    // polygon is inside the channel or it's center
 
     for(auto & obstacle : seenObstacles){
         for(auto & point : obstacle.polygon){
@@ -285,16 +291,18 @@ bool CollisionAvoidanceNode::these_obstacles_are_a_problem(
                                                                          m_followedLine.endPoint,
                                                                          point);
             const double distance = distanceInfo[0];
-//            std::cout << "distance to line segment = " << distance << "\n";
+//            std::cout << "_distance to line segment = " << distance << "\n";
 
             // compute the distance between the boat and the closest point of the obstacle
             // TODO : use boost poly for get closest point ?
             const double distObstacleFromBoat = calculateGPSDistance(m_sensorOutput.gpsPos,
                                                                      getClosestPoint(obstacle.polygon,
                                                                                      m_sensorOutput.gpsPos));
-//            std::cout << "distance boat from obstacle = " << distance << "\n";
+//            std::cout << "_distance boat from obstacle = " << distObstacleFromBoat << "\n";
 
             bool thisObstacleIsAProblem = false;
+//            std::cout << "__(distance < CHANNEL_RADIUS) = " << (distance < CHANNEL_RADIUS) << "\n";
+//            std::cout << "__(distObstacleFromBoat < SAFE_DISTANCE) = " << (distObstacleFromBoat < SAFE_DISTANCE) << "\n";
             if(   (distance < CHANNEL_RADIUS)
                   && (distObstacleFromBoat < SAFE_DISTANCE)){
 
@@ -304,21 +312,23 @@ bool CollisionAvoidanceNode::these_obstacles_are_a_problem(
         }
 
         // Do it another time for the center
-        // TODO : put code inside thease_obstacles_are_a_problem into a function
+        // TODO : put code inside these_obstacles_are_a_problem into a function
         const std::vector<double> distanceInfo = distanceFromSegment(m_followedLine.startPoint,
                                                                      m_followedLine.endPoint,
                                                                      obstacle.center);
         const double distance = distanceInfo[0];
-//        std::cout << "distance to line segment = " << distance << "\n";
+//        std::cout << "_distance center to line segment = " << distance << "\n";
 
         // compute the distance between the boat and the closest point of the obstacle
         // TODO : use boost poly for get closest point ?
         const double distObstacleFromBoat = calculateGPSDistance(m_sensorOutput.gpsPos,
                                                                  getClosestPoint(obstacle.polygon,
                                                                                  m_sensorOutput.gpsPos));
-//        std::cout << "distance boat from obstacle = " << distance << "\n";
+//        std::cout << "_distance boat from center of obstacle = " << distObstacleFromBoat << "\n";
 
         bool thisObstacleIsAProblem = false;
+//        std::cout << "__(distanceCenter < CHANNEL_RADIUS) = " << (distance < CHANNEL_RADIUS) << "\n";
+//        std::cout << "__(distObstacleCenterFromBoat < SAFE_DISTANCE) = " << (distObstacleFromBoat < SAFE_DISTANCE) << "\n";
         if(   (distance < CHANNEL_RADIUS)
               && (distObstacleFromBoat < SAFE_DISTANCE)){
 
@@ -331,14 +341,12 @@ bool CollisionAvoidanceNode::these_obstacles_are_a_problem(
 }
 
 PotentialMap CollisionAvoidanceNode::compute_potential_field(
-        std::vector<Obstacle> seenObstacles,
-        std::vector<Eigen::Vector2d> sailingZone,
-        FollowedLine followedLine) {
+        std::vector<Obstacle> & seenObstacles,
+        std::vector<Eigen::Vector2d> & sailingZone,
+        FollowedLine & followedLine) {
     // Init
     // Set up of the matrix of 100*100 around the boat.
     //TODO : get these values from the database/elsewhere ?
-    //TODO :   what():  Boost.Geometry Overlay invalid input exception when running simulation. Obstacles are all destroyed then recreated at some point of the simulation.
-    //TODO : Obstacles are not updated properly on running the simulation
     const int matrixHeight   =  100; const int matrixWidth    =  100;
     const int yUpperMapBound =  100; const int xUpperMapBound =  100; // in meters
     const int yLowerMapBound = -100; const int xLowerMapBound = -100; // in meters
@@ -388,7 +396,7 @@ PotentialMap CollisionAvoidanceNode::compute_potential_field(
 }
 
 Eigen::Vector2d CollisionAvoidanceNode::find_minimum_potential_field(
-        PotentialMap potField) {
+        PotentialMap & potField) {
     double I_row = 0, I_col = 0;
     potField.field.minCoeff(&I_row, &I_col);
     double I_x = I_col*(potField.xMax-potField.xMin)
@@ -554,7 +562,7 @@ CommandOutput CollisionAvoidanceNode::compute_commands(
 
 //Simulate
 std::vector<ObstacleData> CollisionAvoidanceNode::simulateObstacle(
-        std::vector<std::vector<double>> obstacle_coords, int unit){
+        ObstacleRealPosition obstacle_coords, int unit){
 
     std::vector<ObstacleData> obstacles;
 
@@ -566,18 +574,18 @@ std::vector<ObstacleData> CollisionAvoidanceNode::simulateObstacle(
     // for each coordinates, create an obstacle
     double obsGpsLon;
     double obsGpsLat;
-    for (int i = 0; i < static_cast<signed>(obstacle_coords[0].size()); ++i) {
+    for (int i = 0; i < static_cast<signed>(obstacle_coords.lon.size()); ++i) {
         if(unit==1) {
             // transformation in radians
-            obsGpsLon = Utility::degreeToRadian(obstacle_coords[0][i]);
-            obsGpsLat = Utility::degreeToRadian(obstacle_coords[1][i]);
+            obsGpsLon = Utility::degreeToRadian(obstacle_coords.lon[i]);
+            obsGpsLat = Utility::degreeToRadian(obstacle_coords.lat[i]);
         }
         else{
-            obsGpsLon = obstacle_coords[0][i];
-            obsGpsLat = obstacle_coords[1][i];
+            obsGpsLon = obstacle_coords.lon[i];
+            obsGpsLat = obstacle_coords.lat[i];
         }
-        bool isCreated = createObstacleDataCircle(obsGpsLat,
-                                                  obsGpsLon,
+        bool isCreated = createObstacleDataCircle(obsGpsLon,
+                                                  obsGpsLat,
                                                   obstacleRadius,
                                                   obsData);
         if(isCreated){
@@ -587,26 +595,28 @@ std::vector<ObstacleData> CollisionAvoidanceNode::simulateObstacle(
 
     return obstacles;
 }
-bool CollisionAvoidanceNode::createObstacleDataCircle(double obsGpsLat, //rads
-                                                      double obsGpsLon, //rads
+bool CollisionAvoidanceNode::createObstacleDataCircle(double obsGpsLon, //rads
+                                                      double obsGpsLat, //rads
                                                       double obstacleRadius, //meters
                                                       ObstacleData & obstacle){
 //    Logger::info("(Collision Avoidance) Obstacle data creation");
     // Conversion
     const double gpsLat = m_sensorOutput.gpsPos(1); //rad
     const double gpsLon = m_sensorOutput.gpsPos(0); //rad
-    const double compHeading = m_sensorOutput.compHeading;
+    const double compassHeading = m_sensorOutput.compHeading;
 //    Logger::info("(Collision Avoidance) inputs ox : %f, oy : %f, bx : %f, by : %f", obsGpsLon, obsGpsLat, gpsLon, gpsLat);
 
     // Sensor settings
-    const double maxDetectionRange = 1000;
+    const double maxDetectionRange = MAXIMUM_SENSOR_RANGE;
 
     // Simulation
     // TODO : implement more precisely obstacle simulation.
     const double obstacleHeadingRelativeToBoat = Utility::wrapToPi(atan2(obsGpsLat-gpsLat,
                                                                          obsGpsLon-gpsLon),
-                                                                   - compHeading);
-    //std::cout << "obstacleHeadingRelativeToBoat = " << obstacleHeadingRelativeToBoat<< "\n";
+                                                                   - compassHeading);
+//    std::cout << "compassHeading = " << compassHeading << " rads\n";
+//    std::cout << "angle boat to obstacle = " << atan2(obsGpsLat-gpsLat, obsGpsLon-gpsLon) << "\n";
+//    std::cout << "obstacleHeadingRelativeToBoat = " << obstacleHeadingRelativeToBoat <<","<<SENSOR_ARC_ANGLE<< "\n";
     const double distFromObstacle = Utility::calculateGPSDistance(gpsLon   ,gpsLat,
                                                                   obsGpsLon,obsGpsLat);
 //      const double distFromObstacle = calculateGPSDistance(Eigen::Vector2d(obsGpsLon,obsGpsLat),m_sensorOutput.gpsPos);
@@ -615,10 +625,10 @@ bool CollisionAvoidanceNode::createObstacleDataCircle(double obsGpsLat, //rads
 //    Logger::info("(Collision Avoidance) obstacle heading relative to boat  : %f", obstacleHeadingRelativeToBoat);
     if(std::abs(obstacleHeadingRelativeToBoat) <= SENSOR_ARC_ANGLE && distFromObstacle<=maxDetectionRange) {
 //        Logger::info("(Collision Avoidance) Obstacle detected");
-        const double leftHeadingRelativeToBoat =  atan2(obstacleRadius, distFromObstacle)
-                                                  + obstacleHeadingRelativeToBoat;
-        const double rightHeadingRelativeToBoat = -atan2(obstacleRadius, distFromObstacle)
-                                                  + obstacleHeadingRelativeToBoat;
+        const double leftHeadingRelativeToBoat =  Utility::wrapToPi(atan2(obstacleRadius, distFromObstacle),
+                                                                    obstacleHeadingRelativeToBoat);
+        const double rightHeadingRelativeToBoat = Utility::wrapToPi(-atan2(obstacleRadius, distFromObstacle),
+                                                                    obstacleHeadingRelativeToBoat);
         double minDistanceToObstacle = distFromObstacle - obstacleRadius;
         if(minDistanceToObstacle<=0){
             minDistanceToObstacle = 0.1;
@@ -628,7 +638,10 @@ bool CollisionAvoidanceNode::createObstacleDataCircle(double obsGpsLat, //rads
                 maxDetectionRange,                 //double maxDistanceToObstacle;
                 leftHeadingRelativeToBoat,         //double LeftBoundheadingRelativeToBoat;
                 rightHeadingRelativeToBoat,        //double RightBoundheadingRelativeToBoat;
-                0,0};
+                0,0,
+                Utility::radianToDegree(m_sensorOutput.gpsPos(0)),
+                Utility::radianToDegree(m_sensorOutput.gpsPos(1)),
+                Utility::radianToDegree(M_PI/2-m_sensorOutput.compHeading)};
         //std::cout << "I push back\n";
         return true;
     }
@@ -639,16 +652,21 @@ bool CollisionAvoidanceNode::createObstacleDataCircle(double obsGpsLat, //rads
 //Draw
 void CollisionAvoidanceNode::drawState(){
     if(std::fmod(m_loop_id,10.0) == 0) {
-        vibes::axisLimits(-100 * CONVERSION_FACTOR_METER_TO_GPS + m_sensorOutput.gpsPos(0),
-                          100 * CONVERSION_FACTOR_METER_TO_GPS + m_sensorOutput.gpsPos(0),
-                          -100 * CONVERSION_FACTOR_METER_TO_GPS + m_sensorOutput.gpsPos(1),
-                          100 * CONVERSION_FACTOR_METER_TO_GPS + m_sensorOutput.gpsPos(1));
+        vibes::axisLimits(-400 * CONVERSION_FACTOR_METER_TO_GPS + m_sensorOutput.gpsPos(0) - DRAWING_ORIGIN_LON_RAD,
+                          400 * CONVERSION_FACTOR_METER_TO_GPS + m_sensorOutput.gpsPos(0) - DRAWING_ORIGIN_LON_RAD,
+                          -400 * CONVERSION_FACTOR_METER_TO_GPS + m_sensorOutput.gpsPos(1) - DRAWING_ORIGIN_LAT_RAD,
+                          400 * CONVERSION_FACTOR_METER_TO_GPS + m_sensorOutput.gpsPos(1) - DRAWING_ORIGIN_LAT_RAD);
         drawEigenPoly(m_sailingZone, "b[]");
         drawChannel(m_followedLine);
         drawObstacles(m_seenObstacles, "[r]");
         drawBoat(m_sensorOutput, "[m]");
         vibes::drawPoint(m_followedLine.startPoint(0),m_followedLine.startPoint(1),"[r]");
         vibes::drawPoint(m_followedLine.endPoint(0),m_followedLine.endPoint(1),"[b]");
+        for (int j = 0; j < static_cast<signed>(m_obs_coords.lon.size()); j++) {
+            vibes::drawCircle(m_obs_coords.lon[j]/180*M_PI - DRAWING_ORIGIN_LON_RAD,
+                              m_obs_coords.lat[j]/180*M_PI - DRAWING_ORIGIN_LAT_RAD,
+                              5*CONVERSION_FACTOR_METER_TO_GPS);
+        }
     }
 }
 std::vector<double> CollisionAvoidanceNode::getEigenVectorLine(std::vector<Eigen::Vector2d> vec,int line){
@@ -670,64 +688,84 @@ std::vector<double>  CollisionAvoidanceNode::getBoostVectorLine(boostPolygon vec
     }
     return output;
 }
-void CollisionAvoidanceNode::drawObstacles(std::vector<Obstacle> seen_obstacles,std::string color){
+void CollisionAvoidanceNode::drawObstacles(std::vector<Obstacle> & seen_obstacles,std::string color){
     for(auto & obs : seen_obstacles) {
         drawObstacle(obs,color);
     }
 }
 void CollisionAvoidanceNode::drawObstacle(Obstacle obs,std::string color){
     drawEigenPoly(obs.polygon,color);
-    vibes::drawPoint(obs.center(0),obs.center(1),
+    vibes::drawPoint(obs.center(0)-DRAWING_ORIGIN_LON_RAD,
+                     obs.center(1)-DRAWING_ORIGIN_LAT_RAD,
                      2);
 }
 void CollisionAvoidanceNode::drawEigenPoly(std::vector<Eigen::Vector2d> poly,std::string color){
-    vibes::drawPolygon(getEigenVectorLine(poly, 0),
-                       getEigenVectorLine(poly, 1),color);
+    std::vector<double> xVec = getEigenVectorLine(poly, 0);
+    for (auto &&item : xVec) {
+        item = item - DRAWING_ORIGIN_LON_RAD;
+    }
+    std::vector<double> yVec = getEigenVectorLine(poly, 1);
+    for (auto &&item : yVec) {
+        item = item - DRAWING_ORIGIN_LAT_RAD;
+    }
+    vibes::drawPolygon(xVec,yVec,color);
 }
 void CollisionAvoidanceNode::drawBoostPoly(boostPolygon poly, std::string color){
-    vibes::drawPolygon(getBoostVectorLine(poly, 0),
-                       getBoostVectorLine(poly, 1),color);
+    std::vector<double> xVec = getBoostVectorLine(poly, 0);
+    for (auto &&item : xVec) {
+        item = item - DRAWING_ORIGIN_LON_RAD;
+    }
+    std::vector<double> yVec = getBoostVectorLine(poly, 1);
+    for (auto &&item : yVec) {
+        item = item - DRAWING_ORIGIN_LAT_RAD;
+    }
+    vibes::drawPolygon(xVec,yVec,color);
 }
-void CollisionAvoidanceNode::drawBoat(SensorData sensorData,std::string color){
-    vibes::drawVehicle(sensorData.gpsPos(0),
-                       sensorData.gpsPos(1),
+void CollisionAvoidanceNode::drawBoat(SensorData & sensorData,std::string color){
+    vibes::drawVehicle(sensorData.gpsPos(0)-DRAWING_ORIGIN_LON_RAD,
+                       sensorData.gpsPos(1)-DRAWING_ORIGIN_LAT_RAD,
                        sensorData.compHeading/M_PI*180,
                        4*1000*CONVERSION_FACTOR_METER_TO_GPS,
                        "[b]"); // in mm
 }
-void CollisionAvoidanceNode::drawChannel(FollowedLine followedLine) {
-    vibes::drawPoint(followedLine.startPoint(0),followedLine.startPoint(1),2);
-    vibes::drawPoint(followedLine.endPoint(0),followedLine.endPoint(1),2);
-    vibes::drawLine({followedLine.startPoint(0),followedLine.endPoint(0)},
-                    {followedLine.startPoint(1),followedLine.endPoint(1)},"g");
+void CollisionAvoidanceNode::drawChannel(FollowedLine & followedLine) {
+    vibes::drawPoint(followedLine.startPoint(0)-DRAWING_ORIGIN_LON_RAD,
+                     followedLine.startPoint(1)-DRAWING_ORIGIN_LAT_RAD,
+                     2);
+    vibes::drawPoint(followedLine.endPoint(0)-DRAWING_ORIGIN_LON_RAD,
+                     followedLine.endPoint(1)-DRAWING_ORIGIN_LAT_RAD,
+                     2);
+    vibes::drawLine({followedLine.startPoint(0)-DRAWING_ORIGIN_LON_RAD,followedLine.endPoint(0)-DRAWING_ORIGIN_LON_RAD},
+                    {followedLine.startPoint(1)-DRAWING_ORIGIN_LAT_RAD,followedLine.endPoint(1)-DRAWING_ORIGIN_LAT_RAD},
+                    "g");
     double lineAngle = atan2(followedLine.endPoint(1)-followedLine.startPoint(1),
                              followedLine.endPoint(0)-followedLine.startPoint(0));
-    vibes::drawLine( {followedLine.startPoint(0)-CHANNEL_RADIUS
+    vibes::drawLine( {followedLine.startPoint(0)-CHANNEL_RADIUS - DRAWING_ORIGIN_LON_RAD
                                                  * CONVERSION_FACTOR_METER_TO_GPS
                                                  * sin(lineAngle),
-                      followedLine.endPoint(0)  -CHANNEL_RADIUS
+                      followedLine.endPoint(0)  -CHANNEL_RADIUS - DRAWING_ORIGIN_LON_RAD
                                                  * CONVERSION_FACTOR_METER_TO_GPS
                                                  * sin(lineAngle)},
-                     {followedLine.startPoint(1)+CHANNEL_RADIUS
+                     {followedLine.startPoint(1)+CHANNEL_RADIUS - DRAWING_ORIGIN_LAT_RAD
                                                  * CONVERSION_FACTOR_METER_TO_GPS
                                                  * cos(lineAngle),
-                      followedLine.endPoint(1)  +CHANNEL_RADIUS
+                      followedLine.endPoint(1)  +CHANNEL_RADIUS - DRAWING_ORIGIN_LAT_RAD
                                                  * CONVERSION_FACTOR_METER_TO_GPS
                                                  * cos(lineAngle)} );
-    vibes::drawLine( {followedLine.startPoint(0)+CHANNEL_RADIUS
+    vibes::drawLine( {followedLine.startPoint(0)+CHANNEL_RADIUS - DRAWING_ORIGIN_LON_RAD
                                                  * CONVERSION_FACTOR_METER_TO_GPS
                                                  * sin(lineAngle),
-                      followedLine.endPoint(0)  +CHANNEL_RADIUS
+                      followedLine.endPoint(0)  +CHANNEL_RADIUS - DRAWING_ORIGIN_LON_RAD
                                                  * CONVERSION_FACTOR_METER_TO_GPS
                                                  * sin(lineAngle)},
-                     {followedLine.startPoint(1)-CHANNEL_RADIUS
+                     {followedLine.startPoint(1)-CHANNEL_RADIUS - DRAWING_ORIGIN_LAT_RAD
                                                  * CONVERSION_FACTOR_METER_TO_GPS
                                                  * cos(lineAngle),
-                      followedLine.endPoint(1)  -CHANNEL_RADIUS
+                      followedLine.endPoint(1)  -CHANNEL_RADIUS - DRAWING_ORIGIN_LAT_RAD
                                                  * CONVERSION_FACTOR_METER_TO_GPS
                                                  * cos(lineAngle)} );
 }
-void CollisionAvoidanceNode::drawPotField(PotentialMap potfield,int option){
+void CollisionAvoidanceNode::drawPotField(PotentialMap & potfield,int option){
     const double min = potfield.field.minCoeff();
     const double max = potfield.field.maxCoeff();
     const double range = max-min; // red, orange ,yellow, green, cyan, blue
@@ -758,30 +796,30 @@ void CollisionAvoidanceNode::drawPotField(PotentialMap potfield,int option){
     }
 
 }
-void CollisionAvoidanceNode::drawPotFieldPoint(int i, int j, PotentialMap potfield, std::string color, int option){
+void CollisionAvoidanceNode::drawPotFieldPoint(int i, int j, PotentialMap & potfield, std::string color, int option){
     // Option : {0:point,1:square}
     if(option==1) {
         const double stepX = (potfield.xMax - potfield.xMin)/potfield.field.cols();
         const double stepY = (potfield.yMax - potfield.yMin)/potfield.field.rows();
         vibes::drawBox(static_cast<double>(i) / potfield.field.cols()
                        * (potfield.xMax - potfield.xMin)
-                       + potfield.xMin - stepX/2,
+                       + potfield.xMin - stepX/2 - DRAWING_ORIGIN_LON_RAD,
                        static_cast<double>(i) / potfield.field.cols()
                        * (potfield.xMax - potfield.xMin)
-                       + potfield.xMin + stepX/2,
+                       + potfield.xMin + stepX/2 - DRAWING_ORIGIN_LON_RAD,
                        static_cast<double>(j) / potfield.field.rows()
                        * (potfield.yMax - potfield.yMin)
-                       + potfield.yMin - stepY/2,
+                       + potfield.yMin - stepY/2 - DRAWING_ORIGIN_LAT_RAD,
                        static_cast<double>(j) / potfield.field.rows()
                        * (potfield.yMax - potfield.yMin)
-                       + potfield.yMin + stepY/2,
+                       + potfield.yMin + stepY/2 - DRAWING_ORIGIN_LAT_RAD,
                        color);
     }
     else{
         vibes::drawPoint(static_cast<double>(i) / potfield.field.cols() * (potfield.xMax - potfield.xMin)
-                         + potfield.xMin,
+                         + potfield.xMin - DRAWING_ORIGIN_LON_RAD,
                          static_cast<double>(j) / potfield.field.rows() * (potfield.yMax - potfield.yMin)
-                         + potfield.yMin,
+                         + potfield.yMin - DRAWING_ORIGIN_LAT_RAD,
                          2, color);
     }
 }
@@ -806,16 +844,44 @@ void CollisionAvoidanceNode::vibesFigureHandler(std::string name, int option){
     if(option == STANDALONE_DRAW_NEW_FIGURE){
         vibes::newFigure(name);
         vibes::selectFigure(name);
-        vibes::axisLimits(-100 * CONVERSION_FACTOR_METER_TO_GPS + m_sensorOutput.gpsPos(0),
-                          100 * CONVERSION_FACTOR_METER_TO_GPS + m_sensorOutput.gpsPos(0),
-                          -100 * CONVERSION_FACTOR_METER_TO_GPS + m_sensorOutput.gpsPos(1),
-                          100 * CONVERSION_FACTOR_METER_TO_GPS + m_sensorOutput.gpsPos(1),
+        vibes::axisLimits(-400 * CONVERSION_FACTOR_METER_TO_GPS + m_sensorOutput.gpsPos(0) - DRAWING_ORIGIN_LON_RAD,
+                          400 * CONVERSION_FACTOR_METER_TO_GPS + m_sensorOutput.gpsPos(0) - DRAWING_ORIGIN_LON_RAD,
+                          -400 * CONVERSION_FACTOR_METER_TO_GPS + m_sensorOutput.gpsPos(1) - DRAWING_ORIGIN_LAT_RAD,
+                          400 * CONVERSION_FACTOR_METER_TO_GPS + m_sensorOutput.gpsPos(1) - DRAWING_ORIGIN_LAT_RAD,
                           name);
 //        vibes::axisAuto(name);
         vibes::setFigureProperty("x", 1380);
         vibes::setFigureProperty("y", 715);
         vibes::setFigureProperty("width", 400);
         vibes::setFigureProperty("height", 340);
+    }
+    else if(option == STANDALONE_DRAW_NEW_FIGURE_11) {
+        vibes::newFigure(name);
+        vibes::selectFigure(name);
+        vibes::axisLimits(-400 * CONVERSION_FACTOR_METER_TO_GPS + m_sensorOutput.gpsPos(0) - DRAWING_ORIGIN_LON_RAD,
+                          400 * CONVERSION_FACTOR_METER_TO_GPS + m_sensorOutput.gpsPos(0) - DRAWING_ORIGIN_LON_RAD,
+                          -400 * CONVERSION_FACTOR_METER_TO_GPS + m_sensorOutput.gpsPos(1) - DRAWING_ORIGIN_LAT_RAD,
+                          400 * CONVERSION_FACTOR_METER_TO_GPS + m_sensorOutput.gpsPos(1) - DRAWING_ORIGIN_LAT_RAD,
+                          name);
+//        vibes::axisAuto(name);
+        vibes::setFigureProperty("x", 1380);
+        vibes::setFigureProperty("y", 375);
+        vibes::setFigureProperty("width", 400);
+        vibes::setFigureProperty("height", 340);
+    }
+    else if(option == STANDALONE_DRAW_NEW_FIGURE_UNIT_TEST) {
+        vibes::newFigure(name);
+        vibes::selectFigure(name);
+        vibes::axisLimits(-200 * CONVERSION_FACTOR_METER_TO_GPS,
+                          200 * CONVERSION_FACTOR_METER_TO_GPS,
+                          -200 * CONVERSION_FACTOR_METER_TO_GPS,
+                          200 * CONVERSION_FACTOR_METER_TO_GPS,
+                          name);
+//        vibes::axisAuto(name);
+        vibes::setFigureProperty("x", 1080);
+        vibes::setFigureProperty("y", 370);
+        vibes::setFigureProperty("width", 800);
+        vibes::setFigureProperty("height", 640);
     }
     else{
         vibes::selectFigure(name);
@@ -1166,23 +1232,25 @@ void CollisionAvoidanceNode::cleanObstacles(
             // for each detected obstacles it will check if it's close to the memorized one
             // if not it should be cleaned from the memory.
             for (auto &sensDatObstacle : sensorData.detectedObstacles) {
+
+                //Computation of several useful variables
                 const double headingCenterOfDetectedObstacle =
-                        wrapToPi(sensDatObstacle.LeftBoundheadingRelativeToBoat,
-                                 - sensDatObstacle.RightBoundheadingRelativeToBoat)
-                        + sensorData.compHeading;
+                        wrapToPi(wrapToPi(sensDatObstacle.LeftBoundheadingRelativeToBoat,
+                                          sensDatObstacle.RightBoundheadingRelativeToBoat)/2.0,
+                                 sensDatObstacle.boatHeadingAtDetection);
                 const double widthOfCurrentDetectedObstacleAtClosest =
                         sensDatObstacle.minDistanceToObstacle
-                        * tan(wrapToPi(sensDatObstacle.LeftBoundheadingRelativeToBoat,
-                                       - sensDatObstacle.RightBoundheadingRelativeToBoat)
-                              / 2);
+                        * atan(wrapToPi(sensDatObstacle.LeftBoundheadingRelativeToBoat,
+                                        - sensDatObstacle.RightBoundheadingRelativeToBoat) / 2.0);
 
                 //Computation of the best center for the detected obstacle
-                const double centerDistance = widthOfCurrentDetectedObstacleAtClosest / 2
+                const double centerDistance = widthOfCurrentDetectedObstacleAtClosest / 2.0
                                               + sensDatObstacle.minDistanceToObstacle;
                 const Eigen::Vector2d centerDetectedObstacle =
                         getPointWithDistanceAndBearing(centerDistance,
                                                        headingCenterOfDetectedObstacle,
-                                                       sensorData.gpsPos);
+                                                       Eigen::Vector2d(sensDatObstacle.boatLonAtDetection,
+                                                                       sensDatObstacle.boatLatAtDetection));
 
                 // 1rst Condition : current obstacle is not too close from the boat
                 const bool currentObstaclesIsNotTooClose = calculateGPSDistance(seenObstacles[i].center,
@@ -1232,37 +1300,42 @@ std::vector<Obstacle> CollisionAvoidanceNode::registerObstacles(
         // polygon is initialized anti-clockwise
 
         // Init for polygon creation
+        const Eigen::Vector2d boatGpsPosAtDetection(sensDatObstacle.boatLonAtDetection,
+                                                    sensDatObstacle.boatLatAtDetection);
+
         Obstacle newObstacle;
         const double halfAngleObsWidth = wrapToPi(sensDatObstacle.LeftBoundheadingRelativeToBoat,
-                                                  - sensDatObstacle.RightBoundheadingRelativeToBoat) / 2;
+                                                  - sensDatObstacle.RightBoundheadingRelativeToBoat) / 2.0;
         const double rightAngle = wrapToPi(sensDatObstacle.RightBoundheadingRelativeToBoat,
-                                           wrapToPi(sensorData.compHeading,
+                                           wrapToPi(sensDatObstacle.boatHeadingAtDetection,
                                                     SENSOR_HEADING_RELATIVE_TO_BOAT));
         const double leftAngle = wrapToPi(sensDatObstacle.LeftBoundheadingRelativeToBoat,
-                                          wrapToPi(sensorData.compHeading,
+                                          wrapToPi(sensDatObstacle.boatHeadingAtDetection,
                                                    SENSOR_HEADING_RELATIVE_TO_BOAT));
         const double minDistance = sensDatObstacle.minDistanceToObstacle
                                    / cos(halfAngleObsWidth);
         const double maxDistance = sensDatObstacle.maxDistanceToObstacle
                                    / cos(halfAngleObsWidth);
-//        std::cout << "cosAngleFromObsWidth = " << cosAngleFromObsWidth << "\n";
+
+        std::cout << "rightAngle = " << rightAngle << "\n";
+        std::cout << "leftAngle = " << leftAngle << "\n";
 //        std::cout << "sensDatObstacle.maxDistanceToObstacle * cosAngleFromObsWidth = " << maxDistance << "\n";
 
         // Polygon creation
         const Eigen::Vector2d pt1 = getPointWithDistanceAndBearing(minDistance, rightAngle,
-                                                                   sensorData.gpsPos);
+                                                                   boatGpsPosAtDetection);
         newObstacle.polygon.push_back(pt1);
 
         const Eigen::Vector2d pt2 = getPointWithDistanceAndBearing(maxDistance, rightAngle,
-                                                                   sensorData.gpsPos);
+                                                                   boatGpsPosAtDetection);
         newObstacle.polygon.push_back(pt2);
 
         const Eigen::Vector2d pt3 = getPointWithDistanceAndBearing(maxDistance, leftAngle,
-                                                                   sensorData.gpsPos);
+                                                                   boatGpsPosAtDetection);
         newObstacle.polygon.push_back(pt3);
 
         const Eigen::Vector2d pt4 = getPointWithDistanceAndBearing(minDistance, leftAngle,
-                                                                   sensorData.gpsPos);
+                                                                   boatGpsPosAtDetection);
         newObstacle.polygon.push_back(pt4);
 
         //Computation of the best center (longer but more accurate than the other)
@@ -1288,6 +1361,11 @@ std::vector<Obstacle> CollisionAvoidanceNode::registerObstacles(
         // Add it as well to the up to date obstacles to save time
         upToDateObstacles.push_back(newObstacle);
     }
+//    int testid = 0;
+//    for (auto &&seenObstacle : seenObstacles) {
+//        testid++;
+//        std::cout << "coord obstacle " <<testid<<",0,"<<seenObstacle.polygon[0](1)/M_PI*180<<","<<seenObstacle.polygon[0](0)/M_PI*180 <<"\n";
+//    }
     return upToDateObstacles;
 }
 

@@ -181,7 +181,7 @@ double Utility::limitRadianAngleRange(double angle)
 
 double Utility::degreeToRadian(double degrees)
 {
-	return degrees * M_PI / 180;
+	return degrees * M_PI / 180.0;
 }
 
 

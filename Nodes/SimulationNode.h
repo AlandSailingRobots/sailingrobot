@@ -14,7 +14,6 @@
 
 #pragma once
 
-
 #include <sys/socket.h>
 #include <arpa/inet.h>
 
@@ -26,6 +25,13 @@
 #include "Messages/ArduinoDataMsg.h"
 #include "Messages/ActuatorPositionMsg.h"
 #include "Messages/ObstacleVectorMsg.h"
+
+#define BAK_STRAT 0
+#ifdef BAK_STRAT
+#include "CollAvoidanceBakStrat.h"
+#else
+#include "CollisionAvoidanceNode.h"
+#endif
 
 //-----------------------------------------------------------------------------
 struct DATA_SOCKET_RECEIVE{
@@ -155,7 +161,7 @@ private:
 	int 	m_ArduinoBattery;
 	int   m_rudder;
 	int   m_sail;
-    std::vector<std::vector<double>> m_obstacles_coords;
+    ObstacleRealPosition m_obstacles_coords;
 
 	struct DATA_SOCKET_RECEIVE m_data_receive;
 	struct DATA_SOCKET_SEND m_data_send;
