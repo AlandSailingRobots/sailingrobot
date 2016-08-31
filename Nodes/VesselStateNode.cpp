@@ -19,6 +19,7 @@
 #include <thread>
 
 #include "Messages/VesselStateMsg.h"
+#include "SystemServices/Logger.h"
 
 
 #define VESSEL_STATE_SLEEP_MS 400
@@ -123,6 +124,6 @@ void VesselStateNode::VesselStateThreadFunc(void* nodePtr)
 																	node->m_ArduinoSheet, node->m_ArduinoBattery, node->m_ArduinoRC);
 		node->m_MsgBus.sendMessage(std::move(vesselState));
 
-		Logger::logWRSC(m_GPSLat, m_GPSLon);
+		Logger::logWRSC(node->m_GPSLat, node->m_GPSLon);
 	}
 }

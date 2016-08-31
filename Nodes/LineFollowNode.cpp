@@ -26,6 +26,9 @@
 #include <cmath>
 
 #define DEFAULT_TWD_BUFFERSIZE 200
+
+// These values correspond to the angle of the sail/Rudder at its maximum position in radians
+
 #define NORM_RUDDER_COMMAND 0.5166 // getCommand() take a value between -1 and 1 so we need to normalize the command correspond to 29.6 degree
 #define NORM_SAIL_COMMAND 0.6958
 
@@ -295,12 +298,14 @@ int LineFollowNode::getMergedHeading(int gpsHeading, int compassHeading, bool in
 
 void LineFollowNode::setupRudderCommand()
 {
+	// MAX and Middle
 	m_rudderCommand.setCommandValues(m_db.retrieveCellAsInt("rudder_command_config", "1","extreme_command"),
 	        m_db.retrieveCellAsInt("rudder_command_config", "1", "midship_command"));
 }
 
 void LineFollowNode::setupSailCommand()
 {
+	// Close and
 	m_sailCommand.setCommandValues( m_db.retrieveCellAsInt("sail_command_config", "1", "close_reach_command"),
 	        m_db.retrieveCellAsInt("sail_command_config", "1", "run_command"));
 }
