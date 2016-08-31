@@ -48,9 +48,25 @@ enum class NodeImportance {
 #include "dbhandler/DBHandler.h"
 #include "SystemServices/MaestroController.h"
 
+RazorCompassNode* razorFix;
+
 #else
 #define TARGET_STR "None"
 #endif
+
+
+#include <signal.h>
+#include <atomic>
+#include <cstring>
+
+
+void got_signal(int)
+{
+#if TARGET == 1
+	//razorFix->shutdown();
+#endif
+	exit(0);
+}
 
 
 ///----------------------------------------------------------------------------------
@@ -104,6 +120,12 @@ int main(int argc, char *argv[])
 {
 	// This is for eclipse development so the output is constantly pumped out.
 	setbuf(stdout, NULL);
+
+	struct sigaction sa;
+	    memset( &sa, 0, sizeof(sa) );
+	    sa.sa_handler = got_signal;
+	    sigfillset(&sa.sa_mask);
+	    sigaction(SIGINT,&sa,NULL);
 
 	// Database Path
 	std::string db_path;
@@ -242,8 +264,9 @@ int main(int argc, char *argv[])
 	UDPNode udp(messageBus, "127.0.0.1", 4320);
 
 	//MA3WindSensorNode windSensor(messageBus, 2);
-	GPSDNode gps(messageBus);
+	//GPSDNode gps(messageBus);
 	RazorCompassNode compass(messageBus);
+	//razorFix = &compass;
 
 	// QUICK TEST
 	/*float heading, pitch,roll;
@@ -306,6 +329,7 @@ int main(int argc, char *argv[])
 	delete sailingLogic;
 	exit(0);
 }
+
 
 
 

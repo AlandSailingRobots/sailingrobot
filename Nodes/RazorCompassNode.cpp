@@ -17,7 +17,8 @@
 #include "Messages/CompassDataMsg.h"
 #include <wiringSerial.h>
 #include <cstring>
- #include <termios.h>
+#include <unistd.h>
+#include <termios.h>
 
 
 #define COMPASS_THREAD_SLEEP		400
@@ -35,6 +36,7 @@ RazorCompassNode::~RazorCompassNode()
 {
 	// TODO Auto-generated destructor stub
 	m_keepRunning = false;
+	serialClose(m_FD);
 }
 
 bool RazorCompassNode::init()
@@ -63,6 +65,17 @@ void RazorCompassNode::start()
 	{
 		Logger::error("%s:%d Cannot start thread, invalid file descriptor", __FILE__, __LINE__);
 	}
+}
+
+void RazorCompassNode::shutdown()
+{
+	m_keepRunning = false;
+	SysClock::sleepMS(520);
+	Logger::info("Closing port: %d",close(m_FD));
+	SysClock::sleepMS(20);
+	//serialClose(m_FD);
+	m_FD = -1;
+	Logger::info("Shut down compass");
 }
 
 void RazorCompassNode::processMessage(const Message* msg) { }
@@ -169,7 +182,7 @@ void RazorCompassNode::RazorThreadFunc(void* nodePtr)
 
 	while(node->m_keepRunning)
 	{
-		SysClock::sleepMS(500);
+		SysClock::sleepMS(400);
 		tcflush(node->m_FD,TCIOFLUSH);
 		SysClock::sleepMS(10);
 
@@ -182,11 +195,11 @@ void RazorCompassNode::RazorThreadFunc(void* nodePtr)
 			{
 				Logger::info("Compass Data %f %d %s", heading, (int)(heading + 0.5), buffer);
 
+				Logger::info("Compass Data %d", (int)heading);
 				MessagePtr msg = std::make_unique<CompassDataMsg>((int)(heading + 0.5), (int)pitch, (int)roll);
 				node->m_MsgBus.sendMessage(std::move(msg));
 			}
 		}
-
 	}
 }
 
