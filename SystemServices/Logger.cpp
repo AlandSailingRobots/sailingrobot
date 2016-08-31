@@ -37,6 +37,7 @@ std::mutex 					Logger::m_Mutex;
 #endif
 bool Logger::m_DisableLogging = false;
 
+#define ENABLE_WRSC_LOGGING
 #ifdef ENABLE_WRSC_LOGGING
 static std::ofstream 			m_LogFileWRSC;
 #endif

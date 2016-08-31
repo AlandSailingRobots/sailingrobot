@@ -123,5 +123,6 @@ void VesselStateNode::VesselStateThreadFunc(void* nodePtr)
 																	node->m_ArduinoSheet, node->m_ArduinoBattery, node->m_ArduinoRC);
 		node->m_MsgBus.sendMessage(std::move(vesselState));
 
+		Logger::logWRSC(m_GPSLat, m_GPSLon);
 	}
 }
