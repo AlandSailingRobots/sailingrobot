@@ -51,8 +51,8 @@ LineFollowNode::LineFollowNode(MessageBus& msgBus, DBHandler& db)
     msgBus.registerNode(*this, MessageType::WaypointData);
     msgBus.registerNode(*this, MessageType::ExternalControl);
 
-    m_maxCommandAngle = M_PI / 6;
-    m_maxSailAngle = M_PI / 4.2f;
+    m_maxCommandAngle = M_PI / 6; // 29.98460029 Degrees
+    m_maxSailAngle = M_PI / 4.2f; // 42 Degrees
     m_minSailAngle = M_PI / 32.0f;
     m_tackAngle = 0.872665; //50°
 }
@@ -298,16 +298,24 @@ int LineFollowNode::getMergedHeading(int gpsHeading, int compassHeading, bool in
 
 void LineFollowNode::setupRudderCommand()
 {
+	// KEEP THIS USE IT NORMALLY, GET RID OF WRSC
 	// MAX and Middle
-	m_rudderCommand.setCommandValues(m_db.retrieveCellAsInt("rudder_command_config", "1","extreme_command"),
-	        m_db.retrieveCellAsInt("rudder_command_config", "1", "midship_command"));
+	/*m_rudderCommand.setCommandValues(m_db.retrieveCellAsInt("rudder_command_config", "1","extreme_command"),
+	        m_db.retrieveCellAsInt("rudder_command_config", "1", "midship_command"));*/
+
+	// FOR WRSC, QUICK HACK
+	m_rudderCommand.setCommandValues( 0, 0);
 }
 
 void LineFollowNode::setupSailCommand()
 {
+	// KEEP THIS USE IT NORMALLY, GET RID OF WRSC
 	// Close and
-	m_sailCommand.setCommandValues( m_db.retrieveCellAsInt("sail_command_config", "1", "close_reach_command"),
-	        m_db.retrieveCellAsInt("sail_command_config", "1", "run_command"));
+	/*m_sailCommand.setCommandValues( m_db.retrieveCellAsInt("sail_command_config", "1", "close_reach_command"),
+	        m_db.retrieveCellAsInt("sail_command_config", "1", "run_command"));*/
+
+	// FOR WRSC, QUICK HACK
+	m_sailCommand.setCommandValues( 0, 0);
 }
 
 bool LineFollowNode::getGoingStarboard()
