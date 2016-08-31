@@ -62,7 +62,7 @@ void WaypointMgrNode::processMessage(const Message* msg)
         case MessageType::GPSData:
             processGPSMessage((GPSDataMsg*)msg);
             if(m_init_after_gps>10) { //It's to wait for good values for the gps
-                sendMessageInit();
+//                sendMessageInit();
                 m_init_after_gps = -1;
             } else if(m_init_after_gps!=-1) {
                 m_init_after_gps++;
@@ -100,8 +100,8 @@ void WaypointMgrNode::processGPSMessage(GPSDataMsg* msg)
 {
     m_gpsLongitude = msg->longitude();
     m_gpsLatitude = msg->latitude();
-    Logger::info("(WaypointMgrNode) Received GPSDataMsg");
-    Logger::info("(WaypointMgrNode) local GPS vars : (%f,%f) deg", m_gpsLongitude,m_gpsLatitude);
+//    Logger::info("(WaypointMgrNode) Received GPSDataMsg");
+//    Logger::info("(WaypointMgrNode) local GPS vars : (%f,%f) deg", m_gpsLongitude,m_gpsLatitude);
 }
 
 void WaypointMgrNode::processCollisionAvoidanceMessage(CollisionAvoidanceMsg* msg)

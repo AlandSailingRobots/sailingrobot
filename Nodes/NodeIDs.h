@@ -35,8 +35,8 @@ enum class NodeID {
     ColorDetection,
     Lidar,
 	Simulator,
-	Network
-	CollisionAvoidance,
+	Network,
+	CollisionAvoidance
 };
 
 inline std::string nodeToString(NodeID id)

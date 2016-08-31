@@ -178,9 +178,9 @@ void CollisionAvoidanceNode::processWaypointData(WaypointDataMsg* msg){
     if(m_number_of_wp_recieved<WAIT_FOR_X_WAYPOINTS){
         m_number_of_wp_recieved++;
     }
-//    Logger::info("(Collision Avoidance) Current gps position : (%f deg,%f deg)", m_sensorOutput.gpsPos(0)/M_PI*180,m_sensorOutput.gpsPos(1)/M_PI*180);
-//    Logger::info("(Collision Avoidance) Received followedLine start point : (%f deg,%f deg)", m_followedLine.startPoint(0)/M_PI*180,m_followedLine.startPoint(1)/M_PI*180);
-//    Logger::info("(Collision Avoidance) Received followedLine end point : (%f deg,%f deg)", m_followedLine.endPoint(0)/M_PI*180,m_followedLine.endPoint(1)/M_PI*180);
+    Logger::info("(Collision Avoidance) Current gps position : (%f deg,%f deg)", m_sensorOutput.gpsPos(0)/M_PI*180,m_sensorOutput.gpsPos(1)/M_PI*180);
+    Logger::info("(Collision Avoidance) Received followedLine start point : (%f deg,%f deg)", m_followedLine.startPoint(0)/M_PI*180,m_followedLine.startPoint(1)/M_PI*180);
+    Logger::info("(Collision Avoidance) Received followedLine end point : (%f deg,%f deg)", m_followedLine.endPoint(0)/M_PI*180,m_followedLine.endPoint(1)/M_PI*180);
 }
 
 void CollisionAvoidanceNode::run() {

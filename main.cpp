@@ -30,12 +30,6 @@ enum class NodeImportance {
 #include "Nodes/XbeeSyncNode.h"
 #include "Nodes/RoutingNode.h"
 #include "Nodes/LineFollowNode.h"
-#define BAK_STRAT 0
-#if BAK_STRAT == 1
- #include "Nodes/CollAvoidanceBakStrat.h"
-#else
- #include "Nodes/CollisionAvoidanceNode.h"
-#endif
 #include "Messages/DataRequestMsg.h"
 #include "dbhandler/DBHandler.h"
 #include "SystemServices/MaestroController.h"
@@ -54,6 +48,13 @@ enum class NodeImportance {
 #include "Nodes/LineFollowNode.h"
 #include "dbhandler/DBHandler.h"
 #include "SystemServices/MaestroController.h"
+
+#define BAK_STRAT 0
+#if BAK_STRAT == 1
+ #include "Nodes/CollAvoidanceBakStrat.h"
+#else
+ #include "Nodes/CollisionAvoidanceNode.h"
+#endif
 
 RazorCompassNode* razorFix;
 
@@ -168,11 +169,11 @@ int main(int argc, char *argv[])
 	//---------------------------------------------------------------------------------------------
 	// Use Simulator
 
-#if SIMULATOR == 1
+#if SIMULATION == 1
 	Logger::info("Using the simulator!");
 	SimulationNode simulation(messageBus);
 	initialiseNode(simulation, "Simulation Node", NodeImportance::CRITICAL);
-	activeNodes.push_back(simulation);
+	activeNodes.push_back(&simulation);
 #endif
 
 	//---------------------------------------------------------------------------------------------
@@ -182,7 +183,7 @@ int main(int argc, char *argv[])
 #if TARGET == 0
 
 	// No sensor nodes if we are using the simulator
-#if SIMULATOR != 1
+#if SIMULATION != 1
 	// Common Sensor Nodes
 	CV7Node windSensor(messageBus, dbHandler.retrieveCell("windsensor_config", "1", "port"), dbHandler.retrieveCellAsInt("windsensor_config", "1", "baud_rate"));
 	HMC6343Node compass(messageBus, dbHandler.retrieveCellAsInt("buffer_config", "1", "compass"));
@@ -262,64 +263,65 @@ int main(int argc, char *argv[])
 
 	//---------------------------------------------------------------------------------------------
 	// Target: WRSC2016
-#if TARGET == 1
+    // No sensor nodes if we are using the simulator
+#if SIMULATION != 1
+    RazorCompassNode compass(messageBus);
+    //MA3WindSensorNode windSensor(messageBus, 2);
+    //GPSDNode gps(messageBus);
 
-	// No sensor nodes if we are using the simulator
-#if SIMULATOR != 1
+    //razorFix = &compass;
+
+    // Actuator Node
+    ActuatorNode sail(messageBus, NodeID::SailActuator, 1, 0, 0);
+    ActuatorNode rudder(messageBus, NodeID::RudderActuator, 0, 0, 0);
+    MaestroController::init("/dev/ttyACM0");
+
+    // QUICK TEST
+    /*float heading, pitch,roll;
+    if(compass.parseData("#YPR=-155.73,-76.48,-129.51", heading, pitch, roll))
+    {
+        Logger::info("Data: %f %f %f", heading, pitch, roll);
+    }*/
+
+    //activeNodes.push_back(&windSensor);
+    //activeNodes.push_back(&gps);
+    activeNodes.push_back(&compass);
+
+    initialiseNode(compass, "Compass Node", NodeImportance::CRITICAL);
+    //initialiseNode(windSensor, "Wind Sensor Node", NodeImportance::CRITICAL);
+    //initialiseNode(gps, "GPS Node", NodeImportance::CRITICAL);
+
+    initialiseNode(sail, "Sail Actuator", NodeImportance::CRITICAL);
+    initialiseNode(rudder, "Rudder Actuator", NodeImportance::CRITICAL);
 
 #endif
 
-	UDPNode udp(messageBus, "127.0.0.1", 4320);
+    UDPNode udp(messageBus, "127.0.0.1", 4320);
 
-	//MA3WindSensorNode windSensor(messageBus, 2);
-	//GPSDNode gps(messageBus);
-	RazorCompassNode compass(messageBus);
-	//razorFix = &compass;
+    // Sailing Logic nodes
+    VesselStateNode vessel(messageBus);
+    WaypointMgrNode waypoint(messageBus, dbHandler);
+    CollisionAvoidanceNode collisionAvoidanceNode(messageBus);
 
-	// QUICK TEST
-	/*float heading, pitch,roll;
-	if(compass.parseData("#YPR=-155.73,-76.48,-129.51", heading, pitch, roll))
-	{
-		Logger::info("Data: %f %f %f", heading, pitch, roll);
-	}*/
+    activeNodes.push_back(&vessel);
 
-	//activeNodes.push_back(&windSensor);
-	//activeNodes.push_back(&gps);
-	activeNodes.push_back(&compass);
+    Node* sailingLogic;
+    bool usingLineFollow = (bool)(dbHandler.retrieveCellAsInt("sailing_robot_config", "1", "line_follow"));
+    if(usingLineFollow)
+    {
+        sailingLogic = new LineFollowNode(messageBus, dbHandler);
+    }
+    else
+    {
+        sailingLogic = new RoutingNode(messageBus, dbHandler);
+    }
 
-	// Sailing Logic nodes
-	VesselStateNode vessel(messageBus);
-	WaypointMgrNode waypoint(messageBus, dbHandler);
-	CollisionAvoidanceNode collisionAvoidanceNode(messageBus);
-
-	activeNodes.push_back(&vessel);
-
-	Node* sailingLogic;
-	bool usingLineFollow = (bool)(dbHandler.retrieveCellAsInt("sailing_robot_config", "1", "line_follow"));
-	if(usingLineFollow)
-	{
-		sailingLogic = new LineFollowNode(messageBus, dbHandler);
-	}
-	else
-	{
-		sailingLogic = new RoutingNode(messageBus, dbHandler);
-	}
-
-	// Actuator Node
-	ActuatorNode sail(messageBus, NodeID::SailActuator, 1, 0, 0);
-	ActuatorNode rudder(messageBus, NodeID::RudderActuator, 0, 0, 0);
-	MaestroController::init("/dev/ttyACM0");
-
-	initialiseNode(udp, "UDP Node", NodeImportance::CRITICAL);
-	initialiseNode(compass, "Compass Node", NodeImportance::CRITICAL);
-	//initialiseNode(windSensor, "Wind Sensor Node", NodeImportance::CRITICAL);
-	//initialiseNode(gps, "GPS Node", NodeImportance::CRITICAL);
-
-	initialiseNode(vessel, "Vessel State Node", NodeImportance::CRITICAL);
-	initialiseNode(waypoint, "Waypoint Node", NodeImportance::CRITICAL);
-	initialiseNode(sail, "Sail Actuator", NodeImportance::CRITICAL);
-	initialiseNode(rudder, "Rudder Actuator", NodeImportance::CRITICAL);
+    initialiseNode(udp, "UDP Node", NodeImportance::CRITICAL);
+    initialiseNode(vessel, "Vessel State Node", NodeImportance::CRITICAL);
+    initialiseNode(waypoint, "Waypoint Node", NodeImportance::CRITICAL);
     initialiseNode(collisionAvoidanceNode, "Collision Avoidance Node", NodeImportance::NOT_CRITICAL);
+#if TARGET == 1
+
 
 #endif
 	//---------------------------------------------------------------------------------------------
