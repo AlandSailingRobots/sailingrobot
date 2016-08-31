@@ -62,8 +62,8 @@ bool CollisionAvoidanceNode::init(){
     m_loop_id = 0;
     m_simu_without_simulator= false;
     m_number_of_wp_recieved = 0;
-    m_obs_coords.lon = {19.922080,19.920391}; // deg
-    m_obs_coords.lat = {60.105311,60.107564}; // deg
+    m_obs_coords.lon = {19.9229765, 19.9228048, 19.9225795, 19.9223757, 19.9221718, 19.9220002, 19.9218071, 19.9216354, 19.9214852, 19.9213350, 19.9211848, 19.9210238, 19.9208844, 19.9229014, 19.9226868, 19.9224937, 19.9222791, 19.9220860, 19.9218714, 19.9217534};
+    m_obs_coords.lat = {60.1070290, 60.1070397, 60.1070290, 60.1070290, 60.1070450, 60.1070397, 60.1070610, 60.1070557, 60.1070664, 60.1070664, 60.1070717, 60.1070664, 60.1070664, 60.1070183, 60.1070290, 60.1070290, 60.1070397, 60.1070343, 60.1070503, 60.1070610};
     if(DRAW_STATE_WITH_VIBES){
         vibes::beginDrawing();
         vibesFigureHandler("Simu",STANDALONE_DRAW_NEW_FIGURE);
@@ -145,11 +145,18 @@ void CollisionAvoidanceNode::processObstacleData(ObstacleVectorMsg* msg){
         Logger::info("(Collision Avoidance) Received ObstacleData >>> processObstacleData()");
         m_sensorOutput.detectedObstacles = msg->obstacles();
         //std::copy(msg->obstacles().begin(),msg->obstacles().end(),std::back_inserter(m_sensorOutput.detectedObstacles));
-//        Logger::info("(Collision Avoidance) Detected obstacle size : %d",m_sensorOutput.detectedObstacles.size());
+        Logger::info("(Collision Avoidance) Detected obstacle size : %d",m_sensorOutput.detectedObstacles.size());
         for (auto &&obstacle : m_sensorOutput.detectedObstacles) {
             obstacle.boatLonAtDetection = Utility::degreeToRadian(obstacle.boatLonAtDetection);
             obstacle.boatLatAtDetection = Utility::degreeToRadian(obstacle.boatLatAtDetection);
             obstacle.boatHeadingAtDetection = M_PI/2-Utility::degreeToRadian(obstacle.boatHeadingAtDetection);
+        }
+        for (auto &&item : m_sensorOutput.detectedObstacles) {
+            Logger::info("(Collision Avoidance) ==Detected Obstacle==");
+            Logger::info("(Collision Avoidance) item.LeftBoundheadingRelativeToBoat = %f",item.LeftBoundheadingRelativeToBoat);
+            Logger::info("(Collision Avoidance) item.RightBoundheadingRelativeToBoat = %f",item.RightBoundheadingRelativeToBoat);
+            Logger::info("(Collision Avoidance) item.minDistanceToObstacle = %f",item.minDistanceToObstacle);
+            Logger::info("(Collision Avoidance) item.maxDistanceToObstacle = %f",item.maxDistanceToObstacle);
         }
         if(m_number_of_wp_recieved>=WAIT_FOR_X_WAYPOINTS){
             run();
@@ -667,6 +674,9 @@ void CollisionAvoidanceNode::drawState(){
                               m_obs_coords.lat[j]/180*M_PI - DRAWING_ORIGIN_LAT_RAD,
                               5*CONVERSION_FACTOR_METER_TO_GPS);
         }
+        vibes::drawCircle(m_sensorOutput.gpsPos(0) - DRAWING_ORIGIN_LON_RAD,
+                          m_sensorOutput.gpsPos(1) - DRAWING_ORIGIN_LAT_RAD,
+                          MAXIMUM_SENSOR_RANGE * CONVERSION_FACTOR_METER_TO_GPS);
     }
 }
 std::vector<double> CollisionAvoidanceNode::getEigenVectorLine(std::vector<Eigen::Vector2d> vec,int line){
@@ -740,30 +750,54 @@ void CollisionAvoidanceNode::drawChannel(FollowedLine & followedLine) {
                     "g");
     double lineAngle = atan2(followedLine.endPoint(1)-followedLine.startPoint(1),
                              followedLine.endPoint(0)-followedLine.startPoint(0));
-    vibes::drawLine( {followedLine.startPoint(0)-CHANNEL_RADIUS - DRAWING_ORIGIN_LON_RAD
+//    vibes::drawLine( {followedLine.startPoint(0)-CHANNEL_RADIUS - DRAWING_ORIGIN_LON_RAD
+//                                                 * CONVERSION_FACTOR_METER_TO_GPS
+//                                                 * sin(lineAngle),
+//                      followedLine.endPoint(0)  -CHANNEL_RADIUS - DRAWING_ORIGIN_LON_RAD
+//                                                 * CONVERSION_FACTOR_METER_TO_GPS
+//                                                 * sin(lineAngle)},
+//                     {followedLine.startPoint(1)+CHANNEL_RADIUS - DRAWING_ORIGIN_LAT_RAD
+//                                                 * CONVERSION_FACTOR_METER_TO_GPS
+//                                                 * cos(lineAngle),
+//                      followedLine.endPoint(1)  +CHANNEL_RADIUS - DRAWING_ORIGIN_LAT_RAD
+//                                                 * CONVERSION_FACTOR_METER_TO_GPS
+//                                                 * cos(lineAngle)} );
+//    vibes::drawLine( {followedLine.startPoint(0)+CHANNEL_RADIUS - DRAWING_ORIGIN_LON_RAD
+//                                                 * CONVERSION_FACTOR_METER_TO_GPS
+//                                                 * sin(lineAngle),
+//                      followedLine.endPoint(0)  +CHANNEL_RADIUS - DRAWING_ORIGIN_LON_RAD
+//                                                 * CONVERSION_FACTOR_METER_TO_GPS
+//                                                 * sin(lineAngle)},
+//                     {followedLine.startPoint(1)-CHANNEL_RADIUS - DRAWING_ORIGIN_LAT_RAD
+//                                                 * CONVERSION_FACTOR_METER_TO_GPS
+//                                                 * cos(lineAngle),
+//                      followedLine.endPoint(1)  -CHANNEL_RADIUS - DRAWING_ORIGIN_LAT_RAD
+//                                                 * CONVERSION_FACTOR_METER_TO_GPS
+//                                                 * cos(lineAngle)} );
+    vibes::drawLine( {followedLine.startPoint(0)-CHANNEL_RADIUS
                                                  * CONVERSION_FACTOR_METER_TO_GPS
-                                                 * sin(lineAngle),
-                      followedLine.endPoint(0)  -CHANNEL_RADIUS - DRAWING_ORIGIN_LON_RAD
+                                                 * sin(lineAngle) - DRAWING_ORIGIN_LON_RAD,
+                      followedLine.endPoint(0)  -CHANNEL_RADIUS
                                                  * CONVERSION_FACTOR_METER_TO_GPS
-                                                 * sin(lineAngle)},
-                     {followedLine.startPoint(1)+CHANNEL_RADIUS - DRAWING_ORIGIN_LAT_RAD
+                                                 * sin(lineAngle) - DRAWING_ORIGIN_LON_RAD},
+                     {followedLine.startPoint(1)+CHANNEL_RADIUS
                                                  * CONVERSION_FACTOR_METER_TO_GPS
-                                                 * cos(lineAngle),
-                      followedLine.endPoint(1)  +CHANNEL_RADIUS - DRAWING_ORIGIN_LAT_RAD
+                                                 * cos(lineAngle) - DRAWING_ORIGIN_LAT_RAD,
+                      followedLine.endPoint(1)  +CHANNEL_RADIUS
                                                  * CONVERSION_FACTOR_METER_TO_GPS
-                                                 * cos(lineAngle)} );
-    vibes::drawLine( {followedLine.startPoint(0)+CHANNEL_RADIUS - DRAWING_ORIGIN_LON_RAD
+                                                 * cos(lineAngle) - DRAWING_ORIGIN_LAT_RAD} );
+    vibes::drawLine( {followedLine.startPoint(0)+CHANNEL_RADIUS
                                                  * CONVERSION_FACTOR_METER_TO_GPS
-                                                 * sin(lineAngle),
-                      followedLine.endPoint(0)  +CHANNEL_RADIUS - DRAWING_ORIGIN_LON_RAD
+                                                 * sin(lineAngle) - DRAWING_ORIGIN_LON_RAD,
+                      followedLine.endPoint(0)  +CHANNEL_RADIUS
                                                  * CONVERSION_FACTOR_METER_TO_GPS
-                                                 * sin(lineAngle)},
-                     {followedLine.startPoint(1)-CHANNEL_RADIUS - DRAWING_ORIGIN_LAT_RAD
+                                                 * sin(lineAngle) - DRAWING_ORIGIN_LON_RAD},
+                     {followedLine.startPoint(1)-CHANNEL_RADIUS
                                                  * CONVERSION_FACTOR_METER_TO_GPS
-                                                 * cos(lineAngle),
-                      followedLine.endPoint(1)  -CHANNEL_RADIUS - DRAWING_ORIGIN_LAT_RAD
+                                                 * cos(lineAngle) - DRAWING_ORIGIN_LAT_RAD,
+                      followedLine.endPoint(1)  -CHANNEL_RADIUS
                                                  * CONVERSION_FACTOR_METER_TO_GPS
-                                                 * cos(lineAngle)} );
+                                                 * cos(lineAngle) - DRAWING_ORIGIN_LAT_RAD} );
 }
 void CollisionAvoidanceNode::drawPotField(PotentialMap & potfield,int option){
     const double min = potfield.field.minCoeff();
@@ -1303,11 +1337,11 @@ std::vector<Obstacle> CollisionAvoidanceNode::registerObstacles(
         const Eigen::Vector2d boatGpsPosAtDetection(sensDatObstacle.boatLonAtDetection,
                                                     sensDatObstacle.boatLatAtDetection);
 
-        const double obstacleHeading = wrapToPi(wrapToPi(sensDatObstacle.LeftBoundheadingRelativeToBoat,
-                                                         sensDatObstacle.RightBoundheadingRelativeToBoat) / 2.0,
-                                                sensDatObstacle.boatHeadingAtDetection);
-        std::cout << "sensDatObstacle.boatHeadingAtDetection = " << sensDatObstacle.boatHeadingAtDetection << " rad\n";
-        std::cout << "obstacle heading = " << obstacleHeading << " rad\n";
+//        const double obstacleHeading = wrapToPi(wrapToPi(sensDatObstacle.LeftBoundheadingRelativeToBoat,
+//                                                         sensDatObstacle.RightBoundheadingRelativeToBoat) / 2.0,
+//                                                sensDatObstacle.boatHeadingAtDetection);
+//        std::cout << "sensDatObstacle.boatHeadingAtDetection = " << sensDatObstacle.boatHeadingAtDetection << " rad\n";
+//        std::cout << "obstacle heading = " << obstacleHeading << " rad\n";
 
         Obstacle newObstacle;
         const double halfAngleObsWidth = wrapToPi(sensDatObstacle.LeftBoundheadingRelativeToBoat,
@@ -1323,8 +1357,8 @@ std::vector<Obstacle> CollisionAvoidanceNode::registerObstacles(
         const double maxDistance = sensDatObstacle.maxDistanceToObstacle
                                    / cos(halfAngleObsWidth);
 
-        std::cout << "rightAngle = " << rightAngle << "\n";
-        std::cout << "leftAngle = " << leftAngle << "\n";
+//        std::cout << "rightAngle = " << rightAngle << "\n";
+//        std::cout << "leftAngle = " << leftAngle << "\n";
 //        std::cout << "sensDatObstacle.maxDistanceToObstacle * cosAngleFromObsWidth = " << maxDistance << "\n";
 
         // Polygon creation

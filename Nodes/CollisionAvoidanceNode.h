@@ -29,7 +29,7 @@
 
 // TODO : Receive these values from the database
 #define DISTANCE_NOT_THE_SAME_OBSTACLE 10.0 // in meters
-#define MAXIMUM_SENSOR_RANGE 100.0 // in meters
+#define MAXIMUM_SENSOR_RANGE 300.0 // in meters
 #define SENSOR_HEADING_RELATIVE_TO_BOAT 0.0 // There might be several sensors (not tested, best to stay = 0)
 #define SENSOR_ARC_ANGLE M_PI/3 // Every angle is in radian
 #define CHANNEL_RADIUS 40.0 // in meters

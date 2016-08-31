@@ -48,7 +48,7 @@ WaypointMgrNode::WaypointMgrNode(MessageBus& msgBus, DBHandler& db)
 
 bool WaypointMgrNode::init()
 {
-//    m_init_after_gps = 0;
+    m_init_after_gps = 0;
     sendMessage();
     return true;
 }
@@ -61,12 +61,12 @@ void WaypointMgrNode::processMessage(const Message* msg)
 	{
         case MessageType::GPSData:
             processGPSMessage((GPSDataMsg*)msg);
-//            if(m_init_after_gps>10) { //It's to wait for good values for the gps
-//                sendMessageInit();
-//                m_init_after_gps = -1;
-//            } else if(m_init_after_gps!=-1) {
-//                m_init_after_gps++;
-//            }
+            if(m_init_after_gps>10) { //It's to wait for good values for the gps
+                sendMessageInit();
+                m_init_after_gps = -1;
+            } else if(m_init_after_gps!=-1) {
+                m_init_after_gps++;
+            }
             break;
         case MessageType::ServerWaypointsReceived:
             sendMessage();
