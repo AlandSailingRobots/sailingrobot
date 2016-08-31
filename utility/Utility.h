@@ -4,6 +4,7 @@
 #include <stdint.h> // uint8_t
 #include <vector>
 #include <array>
+#include <cmath>
 
 
 class Utility {
