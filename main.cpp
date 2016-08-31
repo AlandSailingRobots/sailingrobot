@@ -63,7 +63,7 @@ RazorCompassNode* razorFix;
 void got_signal(int)
 {
 #if TARGET == 1
-	//razorFix->shutdown();
+	razorFix->shutdown();
 #endif
 	exit(0);
 }
@@ -263,10 +263,10 @@ int main(int argc, char *argv[])
 
 	UDPNode udp(messageBus, "127.0.0.1", 4320);
 
-	//MA3WindSensorNode windSensor(messageBus, 2);
-	//GPSDNode gps(messageBus);
+	MA3WindSensorNode windSensor(messageBus, 11);
+	GPSDNode gps(messageBus);
 	RazorCompassNode compass(messageBus);
-	//razorFix = &compass;
+	razorFix = &compass;
 
 	// QUICK TEST
 	/*float heading, pitch,roll;
@@ -275,8 +275,8 @@ int main(int argc, char *argv[])
 		Logger::info("Data: %f %f %f", heading, pitch, roll);
 	}*/
 
-	//activeNodes.push_back(&windSensor);
-	//activeNodes.push_back(&gps);
+	activeNodes.push_back(&windSensor);
+	activeNodes.push_back(&gps);
 	activeNodes.push_back(&compass);
 
 	// Sailing Logic nodes
@@ -297,14 +297,14 @@ int main(int argc, char *argv[])
 	}
 
 	// Actuator Node
+	MaestroController::init("/dev/ttyACM0");
 	ActuatorNode sail(messageBus, NodeID::SailActuator, 1, 0, 0);
 	ActuatorNode rudder(messageBus, NodeID::RudderActuator, 0, 0, 0);
-	MaestroController::init("/dev/ttyACM0");
 
 	initialiseNode(udp, "UDP Node", NodeImportance::CRITICAL);
 	initialiseNode(compass, "Compass Node", NodeImportance::CRITICAL);
-	//initialiseNode(windSensor, "Wind Sensor Node", NodeImportance::CRITICAL);
-	//initialiseNode(gps, "GPS Node", NodeImportance::CRITICAL);
+	initialiseNode(windSensor, "Wind Sensor Node", NodeImportance::CRITICAL);
+	initialiseNode(gps, "GPS Node", NodeImportance::CRITICAL);
 
 	initialiseNode(vessel, "Vessel State Node", NodeImportance::CRITICAL);
 	initialiseNode(waypoint, "Waypoint Node", NodeImportance::CRITICAL);

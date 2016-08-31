@@ -121,7 +121,7 @@ int MaestroController::readCommand(MaestroCommands cmd, int channel)
 		{
 			if (read(m_Handle, &buff, sizeof (buff)) == sizeof (buff))
 			{
-				response = (buff[0] <<8) | buff[1];
+				response = (buff[0] | (buff[1] << 8) );
 			}
 			else
 			{

@@ -19,11 +19,17 @@
 #include <cstring>
 #include <unistd.h>
 #include <termios.h>
+#include <cmath>
+#include "utility/Utility.h"
 
 
 #define COMPASS_THREAD_SLEEP		400
 #define COMPASS_BAUD_RATE			57600
 #define COMPASS_DEFAULT_PORT		"/dev/ttyUSB0"
+
+#define COMPASS_YAW_ORIENTATION		0.0151
+#define COMPASS_YAW_P1				-0.7774
+#define COMPASS_YAW_P2				1.5629
 
 
 RazorCompassNode::RazorCompassNode(MessageBus& msgBus)
@@ -193,10 +199,15 @@ void RazorCompassNode::RazorThreadFunc(void* nodePtr)
 		{
 			if(node->parseData(buffer, heading, pitch, roll))
 			{
-				Logger::info("Compass Data %f %d %s", heading, (int)(heading + 0.5), buffer);
+				double yaw = Utility::degreeToRadian(heading);
 
-				Logger::info("Compass Data %d", (int)heading);
-				MessagePtr msg = std::make_unique<CompassDataMsg>((int)(heading + 0.5), (int)pitch, (int)roll);
+				yaw = Utility::fmod_2PI_pos((yaw + COMPASS_YAW_ORIENTATION + COMPASS_YAW_P1 * cos(yaw + COMPASS_YAW_P2)));
+
+				yaw = Utility::radianToDegree(yaw);
+
+				//Logger::info("Compass Data %f %d %f", heading, (int)(yaw + 0.5), (float)yaw);
+
+				MessagePtr msg = std::make_unique<CompassDataMsg>((int)(yaw + 0.5), (int)pitch, (int)roll);
 				node->m_MsgBus.sendMessage(std::move(msg));
 			}
 		}

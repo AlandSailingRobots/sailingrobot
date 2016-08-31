@@ -52,6 +52,26 @@ public:
 		                                         double &apparentWindSpeed, double &apparentWindDirection);
 	static double getApparentWindSpeed(const int windsensorDir, const int windsensorSpeed, const double gpsSpeed, const double heading, const double trueWindDirection);
 	static double getApparentWindDirection(const int windsensorDir, const int windsensorSpeed, const double gpsSpeed, const double heading, const double trueWindDirection);
+
+	/*
+	Return an angle between 0 and 2*M_PI.
+	double theta : (IN) Value.
+	Return : The converted angle.
+	*/
+	static inline double fmod_2PI_pos(double theta)
+	{
+		return fmod(fmod(theta, 2*M_PI)+2*M_PI, 2*M_PI);
+	}
+
+	/*
+	Return an angle between -M_PI and M_PI.
+	double theta : (IN) Value.
+	Return : The converted angle.
+	*/
+	static inline double fmod_2PI(double theta)
+	{
+		return fmod(fmod(theta, 2*M_PI)+3*M_PI, 2*M_PI)-M_PI;
+	}
 };
 
 #endif
