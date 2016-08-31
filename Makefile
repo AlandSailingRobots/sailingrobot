@@ -9,90 +9,146 @@
 
 
 #######################################################
+# Extra Build Options
+#######################################################
+
+
+# Enables OpenCV color detection if it is set
+USE_OPENCV = 0
+
+# Allows the building of preset lists of nodes
+# DEFAULT: THis is the default janet set of nodes
+# WRSC: This is the set of nodes used for WRSC2016
+# XBEE_REMOTE: The xbee remote tool
+TARGET = DEFAULT
+TARGET_INT = 0
+
+
+#######################################################
 # TOOLCHAINS
 #######################################################
 
 
 # Options include:
-#		linux_local = For a local linux machine (MOCK objects used)
+#		linux_local = For a local linux machine
 #		raspi_cc = For cross compiling to the PI on a linux machine
 #		raspi_local = For compiling on the PI itself
+# 		win = for windows
 export TOOLCHAIN = linux-local
 C_TOOLCHAIN = 0
 USE_SIM = 0
 
 #######################################################
-# FILES
+# Directories
 #######################################################
 
-# Directories
-export BUILD_DIR = build
-SRC_DIR = ./
-OUTPUT_DIR = ./
+export BUILD_DIR 		= build
+SRC_DIR 				= ./
+OUTPUT_DIR 				= ./
 
-UNIT_TEST = ./unit-tests.run
-HARDWARE_TEST = ./hardware-tests.run
+#######################################################
+# Build targets
+#######################################################
 
-# External Libraries
+UNIT_TEST 				= ./unit-tests.run
+HARDWARE_TEST 			= ./hardware-tests.run
+EXECUTABLE 				= sr
 
-JSON = 					libs/json
+#######################################################
+# FILES TO BUILD
+#######################################################
 
-# Sources
+# List of Sources
 
-CORE =					MessageBus/MessageBus.cpp Nodes/ActiveNode.cpp Messages/MessageSerialiser.cpp Messages/MessageDeserialiser.cpp
+SRC_MAIN 				= main.cpp
 
-ifeq ($(USE_SIM),1)
-NODES =					Nodes/MessageLoggerNode.cpp  Nodes/WaypointMgrNode.cpp Nodes/HTTPSyncNode.cpp Nodes/XbeeSyncNode.cpp \
-						Nodes/VesselStateNode.cpp  Nodes/RoutingNode.cpp Nodes/LineFollowNode.cpp \
-						Nodes/SimulationNode.cpp  Nodes/CollisionAvoidanceNode.cpp
-SYSTEM_SERVICES =		SystemServices/Logger.cpp
+SRC_MESSAGES			= Messages/MessageSerialiser.cpp Messages/MessageDeserialiser.cpp
+
+SRC_CORE				= MessageBus/MessageBus.cpp Nodes/ActiveNode.cpp $(SRC_MESSAGES) utility/CourseCalculation.cpp utility/CourseMath.cpp dbhandler/DBHandler.cpp dbhandler/DBLogger.cpp utility/Utility.cpp utility/Timer.cpp
+
+SRC_CORE_SAILING		= waypointrouting/RudderCommand.cpp waypointrouting/SailCommand.cpp waypointrouting/WaypointRouting.cpp waypointrouting/Commands.cpp waypointrouting/TackAngle.cpp
+
+SRC_CORE_NODES			= Nodes/MessageLoggerNode.cpp Nodes/WaypointMgrNode.cpp Nodes/VesselStateNode.cpp Nodes/RoutingNode.cpp Nodes/LineFollowNode.cpp
+
+SRC_COMMON				= utility/SysClock.cpp SystemServices/Logger.cpp
+
+SRC_SENSOR_NODES		= Nodes/CV7Node.cpp Nodes/HMC6343Node.cpp Nodes/GPSDNode.cpp Nodes/ArduinoNode.cpp
+
+SRC_ACTUATOR_NODE		= SystemServices/MaestroController.cpp Nodes/ActuatorNode.cpp
+
+SRC_NETWORK_XBEE		= Network/DataLink.cpp Network/XbeePacketNetwork.cpp
+
+SRC_NETWORK_XBEE_LINUX 	= $(SRC_NETWORK_XBEE) Network/LinuxSerialDataLink.cpp Nodes/XbeeSyncNode.cpp
+
+SRC_NETWORK_HTTP_SYNC	= Nodes/HTTPSyncNode.cpp
+
+SRC_I2CCONTROLLER 		= i2ccontroller/I2CController.cpp
+
+SRC_LIDAR_LITE			= Nodes/lidarLite/lidarLite.cpp Nodes/lidarLite/lidarLiteNode.cpp
+SRC_OPENCV_CV 			= Nodes/obstacledetection/colorDetectionNode.cpp Nodes/obstacledetection/colorDetectionUtility.cpp
+
+SRC_SIMULATOR			= Nodes/SimulationNode.cpp
+
+SRC_WRSC_C				= libs/minmea/minmea.c
+SRC_WRSC_NODES			= Nodes/MA3WindSensorNode.cpp Nodes/RazorCompassNode.cpp Nodes/UDPNode.cpp XbeeRemote/UDPRelay.cpp Nodes/GPSDNode.cpp
+							# Nodes/SerialGPSNode.cpp Swithed to USB
+
+SRC_COLLISION_AVOIDANCE = Nodes/CollisionAvoidanceNode.cpp
+
+#----------------------------------------------------------------------------------------
+#Default Janet
+ifeq ($(TARGET),DEFAULT)
+TARGET_INT = 0
+
+ifeq ($(USE_SIM), 1)
+SRC 					= $(SRC_CORE) $(SRC_CORE_SAILING) $(SRC_CORE_NODES) $(SRC_COMMON) $(SRC_SIMULATOR) \
+						  $(SRC_NETWORK_XBEE_LINUX) $(SRC_NETWORK_HTTP_SYNC) $(SRC_COLLISION_AVOIDANCE)
 else
-NODES =					Nodes/MessageLoggerNode.cpp Nodes/CV7Node.cpp Nodes/HMC6343Node.cpp Nodes/GPSDNode.cpp Nodes/ActuatorNode.cpp  Nodes/ArduinoNode.cpp \
-						Nodes/VesselStateNode.cpp Nodes/WaypointMgrNode.cpp Nodes/HTTPSyncNode.cpp Nodes/XbeeSyncNode.cpp Nodes/RoutingNode.cpp Nodes/LineFollowNode.cpp \
-						Nodes/SimulationNode.cpp  Nodes/CollisionAvoidanceNode.cpp
-
-SYSTEM_SERVICES =		SystemServices/MaestroController.cpp SystemServices/Logger.cpp
+SRC 					= $(SRC_CORE) $(SRC_CORE_SAILING) $(SRC_CORE_NODES) $(SRC_COMMON) $(SRC_SENSOR_NODES) \
+						  $(SRC_ACTUATOR_NODE) $(SRC_NETWORK_XBEE_LINUX) $(SRC_NETWORK_HTTP_SYNC) $(SRC_I2CCONTROLLER) $(SRC_COLLISION_AVOIDANCE)
 endif
+endif
+#----------------------------------------------------------------------------------------
 
+#----------------------------------------------------------------------------------------
+# WRSC2016 build
+ifeq ($(TARGET),WRSC)
+TARGET_INT = 1
 
 XBEE = 					xBee/Xbee.cpp
 
-I2CCONTROLLER = 		i2ccontroller/I2CController.cpp
+C_SRC					= $(SRC_WRSC_C)
 
-COURSE = 				utility/CourseCalculation.cpp utility/CourseMath.cpp
+endif
+#----------------------------------------------------------------------------------------
 
-DB = 					dbhandler/DBHandler.cpp dbhandler/DBLogger.cpp
-
-COMMAND = 				waypointrouting/RudderCommand.cpp waypointrouting/SailCommand.cpp
-
-WAYPOINTROUTING = 		waypointrouting/WaypointRouting.cpp waypointrouting/Commands.cpp waypointrouting/TackAngle.cpp
-
-WINDVANECONTROLLER = 	windvanecontroller/WindVaneController.cpp
-
-SRC_MAIN = main.cpp
-
-SRC = 	utility/Utility.cpp utility/Timer.cpp utility/SysClock.cpp utility/vibes.cpp $(SYSTEM_SERVICES) $(XBEE) \
-		$(CORE) $(NODES) $(I2CCONTROLLER) $(COURSE) $(DB) $(COMMAND) $(GPS) $(WAYPOINTROUTING) $(WINDVANECONTROLLER)
-
-
-#SOURCES = $(addprefix src/, $(SRC))
-
-# Includes
-
-export INC = -I./ -I./libs
-
-INC = -I./ -I./libs -I./libs/wiringPi/wiringPi
+#----------------------------------------------------------------------------------------
+# Xbee Remote tool
+ifeq ($(TARGET), XBEE_REMOTE)
+ifeq ($(TOOLCHAIN),win)
+SRC						= $(SRC_COMMON) $(SRC_NETWORK_XBEE) $(SRC_MESSAGES)
+else
+SRC						= $(SRC_NETWORK_XBEE_LINUX) $(SRC_COMMON) $(SRC_MESSAGES)
+endif
+endif
+#----------------------------------------------------------------------------------------
 
 WIRING_PI = libwiringPi.so
 WIRING_PI_PATH = ./libs/wiringPi/wiringPi/
 WIRING_PI_STATIC = ./libs/wiringPi/wiringPi/libwiringPi.so.2.32
 
+# Includes
+
+
+export INC = -I./ -I./libs -I./libs/wiringPi/wiringPi -I.\
+
+
 # Object files
 OBJECTS = $(addprefix $(BUILD_DIR)/, $(SRC:.cpp=.o))
+C_OBJECTS = $(addprefix $(BUILD_DIR)/, $(C_SRC:.c=.o))
 OBJECT_MAIN = $(addprefix $(BUILD_DIR)/, $(SRC_MAIN:.cpp=.o))
 
 # Target Output
-EXECUTABLE = sr
 export OBJECT_FILE = $(BUILD_DIR)/objects.tmp
 
 
@@ -101,10 +157,25 @@ export OBJECT_FILE = $(BUILD_DIR)/objects.tmp
 #######################################################
 
 
-export CFLAGS = -Wall -g -o2
-export CPPFLAGS = -g -Wall -pedantic -Werror -std=c++14 -Wno-deprecated-declarations -Wno-reorder
+ifeq ($(TOOLCHAIN),win)
+
+export CFLAGS= -g -Wall -Wextra -std=c99
+export CPPFLAGS = -g -Wall -pedantic -std=gnu++14 -Wno-deprecated-declarations -Wno-reorder
+
+export LIBS =
+
+else
+
+export CFLAGS= -g -Wall -Wextra -std=c99
+export CPPFLAGS = -g -Wall -pedantic -std=gnu++14 -Wno-deprecated-declarations -Wno-reorder
+
 
 export LIBS = -lsqlite3 -lgps -lrt -lcurl -lpthread
+endif
+
+ifeq ($(USE_OPENCV), 1)
+LIBS += `pkg-config --libs opencv`
+endif
 
 ifeq ($(TOOLCHAIN),raspi_cc)
 C_TOOLCHAIN = 0
@@ -123,6 +194,8 @@ export CXX
 
 export MKDIR_P = mkdir -p
 
+DEFINES = -DTOOLCHAIN=$(TOOLCHAIN) -DSIMULATION=$(USE_SIM) -DSE_OPENCV_COLOR_DETECTION=$(USE_OPENCV) -DTARGET=$(TARGET_INT)
+
 
 #######################################################
 # Rules
@@ -134,17 +207,17 @@ all: $(EXECUTABLE) stats
 
 
 simulation:
-	make USE_SIM=1 -j
+	make USE_SIM=1 -j4
 
 # Builds the intergration test, requires the whole system to be built before
-build_tests: $(OBJECTS) $(EXECUTABLE)
+build_tests: $(OBJECTS) $(EXECUTABLE) $(C_OBJECTS)
 	@echo Building tests...
 	$(MAKE) -C tests
 	$(CXX) $(CPPFLAGS) tests/runner.o @$(OBJECT_FILE) -Wl,-rpath=./ ./libwiringPi.so -o $(UNIT_TEST) $(LIBS)
 	$(CXX) $(CPPFLAGS) tests/runnerHardware.o @$(OBJECT_FILE) -Wl,-rpath=./ ./libwiringPi.so -o $(HARDWARE_TEST) $(LIBS)
 
-xbee_remote: $(OBJECTS) $(EXECUTABLE) $(WIRING_PI)
-	$(MAKE) -C xbeerelay
+xbee_remote: $(OBJECTS) $(WIRING_PI)
+	"$(MAKE)" -C XbeeRemote
 
 #  Create the directories needed
 $(BUILD_DIR):
@@ -155,10 +228,10 @@ $(WIRING_PI):
 	@mv $(WIRING_PI_STATIC) ./libwiringPi.so
 
 # Link and build
-$(EXECUTABLE) : $(BUILD_DIR) $(OBJECTS) $(WIRING_PI) $(OBJECT_MAIN)
+$(EXECUTABLE) : $(BUILD_DIR) $(OBJECTS) $(C_OBJECTS) $(WIRING_PI) $(OBJECT_MAIN)
 	rm -f $(OBJECT_FILE)
 	@echo Linking object files
-	@echo -n " " $(OBJECTS) >> $(OBJECT_FILE)
+	@echo -n " " $(OBJECTS) >> $(OBJECT_FILE) $(C_OBJECTS)
 	$(CXX) $(LDFLAGS) @$(OBJECT_FILE) ./libwiringPi.so $(OBJECT_MAIN) -Wl,-rpath=./ -o $@ $(LIBS) $(LIBS_BOOST)
 	@echo Built using toolchain: $(TOOLCHAIN)
 
@@ -166,13 +239,14 @@ $(EXECUTABLE) : $(BUILD_DIR) $(OBJECTS) $(WIRING_PI) $(OBJECT_MAIN)
 $(BUILD_DIR)/%.o:$(SRC_DIR)/%.cpp
 	@mkdir -p $(dir $@)
 	@echo Compiling CPP File: $@
-	@$(CXX) -c $(CPPFLAGS) $(INC) -o ./$@ $< -DTOOLCHAIN=$(TOOLCHAIN) -DSIMULATION=$(USE_SIM) $(LIBS) $(LIBS_BOOST)
+
+	@$(CXX) -c $(CPPFLAGS) $(INC) -o ./$@ $< $(DEFINES) $(LIBS) $(LIBS_BOOST)
 
  # Compile C files into the build folder
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
 	@mkdir -p $(dir $@)
 	@echo Compiling C File: $@
-	@$(C) -c $(CFLAGS) $(INC) -o $@ $ -DTOOLCHAIN=$(C_TOOLCHAIN)
+	@$(CXX) -c $(CPPFLAGS) $(INC) -o ./$@ $< $(DEFINES) $(LIBS) $(LIBS_BOOST)
 
 #SPECIAL COMPILATION FOR mywiringI2C.cpp to be overload when doing simulation AnalogArduino/myWiringI2C.cpp
 $(BUILD_DIR)/AnalogArduino/libmyWiringI2C.so: $(SRC_DIR)/AnalogArduino/myWiringI2C.cpp
@@ -192,4 +266,6 @@ clean:
 	@echo Removing existing object files and executable
 	@rm -f -r $(BUILD_DIR)
 	@rm -f $(EXECUTABLE)
+	"$(MAKE)" -C XbeeRemote clean
+
 	@echo DONE

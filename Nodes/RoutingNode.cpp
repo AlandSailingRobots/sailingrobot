@@ -14,6 +14,7 @@
 #include "RoutingNode.h"
 #include "Messages/WaypointDataMsg.h"
 #include "Messages/ActuatorPositionMsg.h"
+#include "Messages/ExternalControlMsg.h"
 #include "utility/Utility.h"
 #include "utility/SysClock.h"
 
@@ -26,6 +27,7 @@ RoutingNode::RoutingNode(MessageBus& msgBus, DBHandler& db)
     m_nextWaypointDeclination(0),
     m_nextWaypointRadius(0),
     m_nextWaypointStayTime(0),
+    m_externalControlActive(false),
     m_db(db), m_dbLogger(5, m_db),
     m_waypointRouting(m_nextWaypointLon, m_nextWaypointLat, m_nextWaypointRadius,
         atof(m_db.retrieveCell("waypoint_routing_config", "1", "radius_ratio").c_str()),
@@ -58,8 +60,14 @@ void RoutingNode::processMessage(const Message* msg)
 
 	switch(type)
 	{
+    case MessageType::ExternalControl:
+        m_externalControlActive = ((ExternalControlMsg*)msg)->externalControlActive();
+        break;
 	case MessageType::VesselState:
-		calculateActuatorPos((VesselStateMsg*)msg);
+        if(m_externalControlActive)
+        {
+             calculateActuatorPos((VesselStateMsg*)msg);
+        }
 		break;
 	case MessageType::WaypointData:
         {

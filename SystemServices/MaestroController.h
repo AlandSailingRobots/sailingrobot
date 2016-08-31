@@ -53,6 +53,8 @@ public:
 	///----------------------------------------------------------------------------------
 	static int readResponse();
 
+	static int readCommand(MaestroCommands command, int channel = -1);
+
 	///----------------------------------------------------------------------------------
 	/// Returns the last reported error from the Maestro hardware.
 	///----------------------------------------------------------------------------------

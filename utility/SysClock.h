@@ -16,6 +16,8 @@
 #pragma once
 
 #include <string>
+//#include <sys/types.h>
+//#include <sys/stat.h>
 
 
 #define NEVER_UPDATED	(unsigned int)(-1)
@@ -97,6 +99,8 @@ public:
 	/// NEVER_UPDATED to check for this.
 	///----------------------------------------------------------------------------------
 	static unsigned int lastUpdated();
+
+	static void sleepMS(unsigned int milliseconds);
 private:
 	static unsigned long	m_LastUpdated;
 	static unsigned long 	m_LastTimeStamp;

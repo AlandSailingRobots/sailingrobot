@@ -49,7 +49,7 @@ void initHsvColors(){
     purple.push_back(160);
     purple.push_back(255);
     purple.push_back(255);
-    webcamAngleApertureX =2*atan(20.0/(2.0*24))*180/M_PI;
+    webcamAngleApertureX =2*atan(20.0/(2.0*24));
     webcamAngleApertureY =2*atan(15.0/(2.0*23));
 
 }
@@ -230,7 +230,6 @@ void computeContoursCentersRectangles(Mat const& imgThresholded,vector<Point2f>&
     vector<Moments> mu(contoursMerged.size() );
     vector<Point2f> mc1( contoursMerged.size() );
     mc=mc1;
-    cout << "" << endl;
     double dArea = 0;
     for( int i = 0; i <(int)contoursMerged.size(); i++ ){
         mu[i] = moments( contoursMerged[i], false );
@@ -239,7 +238,6 @@ void computeContoursCentersRectangles(Mat const& imgThresholded,vector<Point2f>&
             mc[i] = Point2f( mu[i].m10/mu[i].m00 , mu[i].m01/mu[i].m00 );///  Get the mass centers:
         }
         else{
-            cout << "in" << endl;
             rotated_bounding_rects.erase(rotated_bounding_rects.begin()+i);
         }
     }
@@ -318,7 +316,7 @@ vector<Point> findRectanglesCenters(std::vector<cv::Rect> const& rects){
      return centerList;
  }
 /*Not used but could be usefull. Supress the rectangles with a area < minAreaRectangle*/
-void supressSmallRectangles(vector<Rect>& rects,int minAreaRectangle){
+ void supressSmallRectangles(vector<Rect>& rects,int minAreaRectangle){
      vector<Rect> newRectList;
      for (int i=0; i<(int) rects.size(); i++){
          if(rects[i].area()>minAreaRectangle){
@@ -333,10 +331,9 @@ void computeObstaclesAnglePosition(cv::Mat const& imgOriginal,
 
     ObstacleData currentObstacle;
     Size imageSize=imgOriginal.size(), rectangleSize;
-    Point topLeftCorner, leftPoint, rightPoint, imageCenter(imageSize.width/2.0,imageSize.height/2.0);
+    Point topLeftCorner, leftPoint, rightPoint, centerPoint, imageCenter(imageSize.width/2.0,imageSize.height/2.0);
     float webcamAngleApertureXPerPixel = webcamAngleApertureX/imageSize.width;
-    //float webcamAngleApertureYPerPixel = webcamAngleApertureY/imageSize.height;
-
+    float webcamAngleApertureYPerPixel = webcamAngleApertureY/imageSize.height;
     for(int i = 0; i<(int)rotated_bounding_rects_several_captures.size(); i++){
         for(int j = 0; j<(int)rotated_bounding_rects_several_captures[i].size(); j++){
 
@@ -347,9 +344,12 @@ void computeObstaclesAnglePosition(cv::Mat const& imgOriginal,
 
             rightPoint.x = topLeftCorner.x+rectangleSize.width;
             rightPoint.y = topLeftCorner.y +rectangleSize.height/2.0;
-
+            centerPoint.x = (leftPoint.x + rightPoint.x)/2.0;
+            centerPoint.y = (leftPoint.y + rightPoint.y)/2.0;
             currentObstacle.LeftBoundheadingRelativeToBoat = (-imageCenter.x+leftPoint.x)*webcamAngleApertureXPerPixel;
             currentObstacle.RightBoundheadingRelativeToBoat = (-imageCenter.x+rightPoint.x)*webcamAngleApertureXPerPixel;
+            currentObstacle.angularCenterPositionX = centerPoint.x * webcamAngleApertureXPerPixel;
+            currentObstacle.angularCenterPositionY = centerPoint.y * webcamAngleApertureYPerPixel;
             currentObstacle.minDistanceToObstacle=0;
             currentObstacle.maxDistanceToObstacle=-1;
 

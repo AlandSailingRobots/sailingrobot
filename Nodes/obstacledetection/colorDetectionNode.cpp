@@ -2,19 +2,20 @@
 #include "SystemServices/Logger.h"
 using namespace cv;
 using namespace std;
+#define DISPLAY_WINDOWS_AND_TRACKBARS 0
 
-colorDetectionNode::colorDetectionNode(MessageBus& msgBus,std::vector<string> colors_input)
+colorDetectionNode::colorDetectionNode(MessageBus& msgBus,std::vector<string> colors_input,int bottomPixelsToCrop)
 	: ActiveNode(NodeID::ColorDetection, msgBus),m_hsvDiff(10),m_iLowH(0),
 	m_iHighH(179),m_iLowS(0),m_iHighS(255),m_iLowV(0),m_iHighV(255),m_iColor(0),
 	m_numberOfColorsToTrack(0),m_Initialised(false),m_minAreaToDetect(2000),
-	m_maxAreaToDetect(20000),m_numberOfCapturesPerDetection(5),m_delay(5000),m_port(1)
+	m_maxAreaToDetect(20000),m_numberOfCapturesPerDetection(5),m_delay(1),m_port(1),m_bottomPixelsToCrop(bottomPixelsToCrop)
 {
 	vector<string> colors;
 	m_trackBarHSV = Mat3b(100, 300, Vec3b(0,0,0));
 
-	int numberOfColorInput=(int)colors.size();
+	int numberOfColorInput=(int)colors_input.size();
 	m_inputColorError=false;
-	for(int i = 1; i< numberOfColorInput; i++){
+	for(int i = 0; i< numberOfColorInput; i++){
         if(colors_input[i].compare("red")==0 ||colors_input[i].compare("orange")==0
 		||colors_input[i].compare("yellow")==0 ||colors_input[i].compare("green")==0
 		||colors_input[i].compare("blue")==0 ||colors_input[i].compare("purple")==0){
@@ -39,20 +40,20 @@ colorDetectionNode::colorDetectionNode(MessageBus& msgBus,std::vector<string> co
 }
 
 colorDetectionNode::colorDetectionNode(MessageBus& msgBus,
-	int m_numberOfCapturesPerDetection, int port, int delay,std::vector<string> colors_input)
+	int numberOfCapturesPerDetection, int port, int delay,std::vector<string> colors_input,int bottomPixelsToCrop)
 	: ActiveNode(NodeID::ColorDetection, msgBus),m_hsvDiff(10),m_iLowH(0),
 	m_iHighH(179),m_iLowS(0),m_iHighS(255),m_iLowV(0),m_iHighV(255),m_iColor(0),
 	m_numberOfColorsToTrack(0),m_Initialised(false),m_minAreaToDetect(2000),
-	m_maxAreaToDetect(20000),m_numberOfCapturesPerDetection(m_numberOfCapturesPerDetection),
-	m_delay(delay),m_port(port)
+	m_maxAreaToDetect(20000),m_numberOfCapturesPerDetection(numberOfCapturesPerDetection),
+	m_delay(delay),m_port(port),m_bottomPixelsToCrop(bottomPixelsToCrop)
 {
 
 	vector<string> colors;
 	m_trackBarHSV = Mat3b(100, 300, Vec3b(0,0,0));
 
-	int numberOfColorInput=(int)colors.size();
+	int numberOfColorInput=(int)colors_input.size();
 	m_inputColorError=false;
-	for(int i = 1; i< numberOfColorInput; i++){
+	for(int i = 0; i< numberOfColorInput; i++){
         if(colors_input[i].compare("red")==0 ||colors_input[i].compare("orange")==0
 		||colors_input[i].compare("yellow")==0 ||colors_input[i].compare("green")==0
 		||colors_input[i].compare("blue")==0 ||colors_input[i].compare("purple")==0){
@@ -98,11 +99,13 @@ void colorDetectionNode::start()
 	{
 		runThread(colorDetectionThreadFunc);
 	}
-	else if(!m_Initialised)
+
+	if(!m_Initialised)
 	{
 		Logger::error("%s Cannot start colorDetectionNode thread as the node was not correctly initialised!", __PRETTY_FUNCTION__);
 	}
-	else if(m_inputColorError)
+
+	if(m_inputColorError)
 	{
 		Logger::error("%sCannot start colorDetectionNode thread because of a wrong color input!", __PRETTY_FUNCTION__);
 	}
@@ -229,70 +232,75 @@ void colorDetectionNode::colorDetectionThreadFunc(void* nodePtr)
     vector<Point2f> mc;
     vector<Rect> rotated_bounding_rects;
     vector<Mat> imgsThresholded (node->m_numberOfColorsToTrack);
-    node->initWindowsAndTrackbars(nodePtr);
+    if(DISPLAY_WINDOWS_AND_TRACKBARS == 1){
+		node->initWindowsAndTrackbars(nodePtr);
+	}
     vector<vector<Rect> > rotated_bounding_rects_several_captures(node->m_numberOfColorsToTrack);
     vector<vector<Rect> > rotated_bounding_rects_merged_list(node->m_numberOfColorsToTrack);
     vector<vector<Point> > centers(node->m_numberOfColorsToTrack);
     std::vector<ObstacleData> obstacles;
 
-    while ()
+    while (true)
     {
+
 		//For each capture
-        for(int h = 0; h<(int)(node->m_numberOfCapturesPerDetection);h++){
+        for(int h = 0; h < (int)(node->m_numberOfCapturesPerDetection);h++)
+        {
 			// read a new frame from video
             bool bSuccess = node->m_cap.read(node->m_imgOriginal);
             if (!bSuccess) {
 				Logger::warning("%sCannot read a frame from video stream!", __PRETTY_FUNCTION__);
 				continue;
             }
+            //Crop the part corresponding to the boat
+            // Setup a rectangle to define your region of interest
+            cv::Rect myROI(0, 0, node->m_imgOriginal.cols,node->m_imgOriginal.rows - node->m_bottomPixelsToCrop);
+            // Crop the full image to that image contained by the rectangle myROI
+            // Note that this doesn't copy the data
+            node->m_imgOriginal = node->m_imgOriginal(myROI);
+
 			//For each color to track find obstacles
-            for(int i = 0; i<(int)node->m_hsvValues.size(); i++){
-                imgThresholded=threshold(node->m_imgOriginal,node->m_hsvValues[i]);
+            for(int i = 0; i < (int)node->m_hsvValues.size(); i++)
+            {
+                imgThresholded = threshold(node->m_imgOriginal,node->m_hsvValues[i]);
                 morphologicalOperations (imgThresholded);
-                computeContoursCentersRectangles(imgThresholded,
-                                                 mc,
-                                                 rotated_bounding_rects,
-                                                 node->m_minAreaToDetect );
-                rotated_bounding_rects_several_captures[i].insert(rotated_bounding_rects_several_captures[i].begin(),
-                                                                  rotated_bounding_rects.begin(),
-                                                                  rotated_bounding_rects.end());
-                rotated_bounding_rects.erase(rotated_bounding_rects.begin(),
-                                             rotated_bounding_rects.end());
+                computeContoursCentersRectangles(imgThresholded,mc,rotated_bounding_rects, node->m_minAreaToDetect );
+                rotated_bounding_rects_several_captures[i].insert(rotated_bounding_rects_several_captures[i].begin(), rotated_bounding_rects.begin(),rotated_bounding_rects.end());
+                rotated_bounding_rects.erase(rotated_bounding_rects.begin(), rotated_bounding_rects.end());
                 imgsThresholded[i]=imgThresholded;
             }
         }
 		//For each obstacles found merge the obstacles close to each others
-        for( int i = 0; i<(int)rotated_bounding_rects_several_captures.size(); i++ ){
+        for( int i = 0; i < (int)rotated_bounding_rects_several_captures.size(); i++ )
+        {
             //supressSmallRectangles(rotated_bounding_rects_several_captures[i], m_minAreaToDetect);
-            rotated_bounding_rects_merged_list[i] = compareRects(node->m_imgOriginal,
-                                                                 rotated_bounding_rects_several_captures[i]);
+            rotated_bounding_rects_merged_list[i] = compareRects(node->m_imgOriginal, rotated_bounding_rects_several_captures[i]);
             centers[i]=findRectanglesCenters(rotated_bounding_rects_merged_list[i]);
 
 			//Display merged rectangles and centers found
-            for(int j = 0; j <(int)rotated_bounding_rects_merged_list[i].size(); j++){
-                rectangle( node->m_imgOriginal,
-                           rotated_bounding_rects_merged_list[i][j],
-                           node->m_colorDrawing[i] ,4, 8,0);
-                circle( node->m_imgOriginal,
-                        centers[i][j],
-                        10,
-                        node->m_colorDrawing[i] , 4, 8, 0 );
+            for(int j = 0; j < (int)rotated_bounding_rects_merged_list[i].size(); j++)
+            {
+                rectangle(node->m_imgOriginal, rotated_bounding_rects_merged_list[i][j], node->m_colorDrawing[i], 4, 8, 0);
+                circle(node->m_imgOriginal, centers[i][j], 10, node->m_colorDrawing[i], 4, 8, 0);
             }
         }
 
         computeObstaclesAnglePosition(node->m_imgOriginal, obstacles, rotated_bounding_rects_merged_list );
 
-		ObstacleVectorMsg* msg = new ObstacleVectorMsg(obstacles);
-		node->m_MsgBus.sendMessage(msg);
+		MessagePtr msg = std::make_unique<ObstacleVectorMsg>(obstacles);
+		node->m_MsgBus.sendMessage(std::move(msg));
 
-        rotated_bounding_rects_several_captures.erase(rotated_bounding_rects_several_captures.begin(),rotated_bounding_rects_several_captures.end());
+        rotated_bounding_rects_several_captures.erase(rotated_bounding_rects_several_captures.begin(), rotated_bounding_rects_several_captures.end());
         rotated_bounding_rects_several_captures.resize(node->m_numberOfColorsToTrack);
         obstacles.erase(obstacles.begin(),obstacles.end());
 
-        imshow("Thresholded Image", imgsThresholded[node->m_iColor]);
-        imshow("Detection", node->m_imgOriginal);
-        setMouseCallback( "Detection", get_on_click_hsv_pixel_values, nodePtr );
-
+		if(DISPLAY_WINDOWS_AND_TRACKBARS == 1){
+			imshow("Thresholded Image", imgsThresholded[node->m_iColor]);
+			cvWaitKey(1);
+			imshow("Detection", node->m_imgOriginal);
+			cvWaitKey(1);
+			setMouseCallback("Detection", get_on_click_hsv_pixel_values, nodePtr );
+		}
 		// Controls how often we pump out messages
 		std::this_thread::sleep_for(std::chrono::milliseconds(node->m_delay));
     }

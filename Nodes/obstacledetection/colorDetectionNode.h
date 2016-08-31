@@ -20,12 +20,12 @@
 
 class colorDetectionNode : public ActiveNode {
 public:
-    colorDetectionNode(MessageBus& msgBus,std::vector<std::string> colors_input);//Accepted values:red,orange,green,yellow,purple and blue
+    colorDetectionNode(MessageBus& msgBus,std::vector<std::string> colors_input,int bottomPixelsToCrop);
+    //Accepted values:red,orange,green,yellow,purple and blue
     //Possibility to live change ths HSV values live after to detect another color
-	colorDetectionNode(MessageBus& msgBus,int m_numberOfCapturesPerDetection,
-                        int port, int delay,std::vector<std::string> colors_input);
+	colorDetectionNode(MessageBus& msgBus,int numberOfCapturesPerDetection,
+                        int port, int delay,std::vector<std::string> colors_input,int bottomPixelsToCrop);
 
-	~colorDetectionNode();
 
 	///----------------------------------------------------------------------------------
 	/// Initialises the connection with the camera and HSV default values
@@ -74,6 +74,8 @@ private:
     int     m_numberOfCapturesPerDetection;
     int     m_delay; //In ms
     int     m_port;
+    int 	m_bottomPixelsToCrop;//height in pixel of the visible part of the boat on the image
     std::vector<cv::Scalar>      m_colorDrawing;
     cv::VideoCapture m_cap;
+
 };

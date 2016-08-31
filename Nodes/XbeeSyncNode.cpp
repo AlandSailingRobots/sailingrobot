@@ -16,6 +16,8 @@
 
 #include "XbeeSyncNode.h"
 #include <cstring>
+
+#include "Messages/ExternalControlMsg.h"
 #include "Messages/ActuatorPositionMsg.h"
 
 
@@ -23,7 +25,7 @@ XbeeSyncNode* XbeeSyncNode::m_node = NULL;
 
 
 XbeeSyncNode::XbeeSyncNode(MessageBus& msgBus, DBHandler& db) :
-	ActiveNode(NodeID::xBeeSync, msgBus), m_xbee(false), m_initialised(false), m_db(db)
+	ActiveNode(NodeID::xBeeSync, msgBus), m_initialised(false), m_db(db), m_dataLink("/dev/xbee", XBEE_BAUD_RATE), m_xbeeNetwork(m_dataLink, false)
 {
 	m_firstMessageCall = true;
 	m_sending = m_db.retrieveCellAsInt("xbee_config", "1", "send");
@@ -40,7 +42,7 @@ bool XbeeSyncNode::init()
 {
 	m_initialised = false;
 
-	if(m_xbee.init("/dev/xbee", XBEE_BAUD_RATE))
+	if(m_dataLink.initialise(XBEE_PACKET_SIZE))
 	{
 		Logger::info("Xbee initialised - receiving: %d sending: %d", m_receiving, m_sending);
 		m_initialised = true;
@@ -88,7 +90,7 @@ void XbeeSyncNode::sendMessage(const Message* msg)
 	msg->Serialise(serialiser);
 
 	// The data is allocated on the stack, so is automatically cleaned up
-	m_xbee.transmit(serialiser.data(), serialiser.size());
+	m_xbeeNetwork.transmit(serialiser.data(), serialiser.size());
 }
 
 void XbeeSyncNode::incomingMessage(uint8_t* data, uint8_t size)
@@ -101,10 +103,16 @@ void XbeeSyncNode::incomingMessage(uint8_t* data, uint8_t size)
 	switch(msg.messageType())
 	{
 		case MessageType::ActuatorPosition:
-		{
-			MessagePtr actuatorControl = std::make_unique<ActuatorPositionMsg>(ActuatorPositionMsg(deserialiser));
-			m_node->m_MsgBus.sendMessage(std::move(actuatorControl));
-		}
+			{
+				MessagePtr actuatorControl = std::make_unique<ActuatorPositionMsg>(ActuatorPositionMsg(deserialiser));
+				m_node->m_MsgBus.sendMessage(std::move(actuatorControl));
+			}
+			break;
+		case MessageType::ExternalControl:
+			{
+				MessagePtr externalControl = std::make_unique<ExternalControlMsg>(ExternalControlMsg(deserialiser));
+				m_node->m_MsgBus.sendMessage(std::move(externalControl));
+			}
 			break;
 		default:
 			break;
@@ -118,10 +126,10 @@ void XbeeSyncNode::xBeeSyncThread(void* nodePtr)
 {
 	XbeeSyncNode* node = (XbeeSyncNode*)(nodePtr);
 
-	node->m_xbee.setIncomingCallback(node->incomingMessage);
+	node->m_xbeeNetwork.setIncomingCallback(node->incomingMessage);
 
 	while(true)
 	{
-		node->m_xbee.processRadioMessages();
+		node->m_xbeeNetwork.processRadioMessages();
 	}
 }

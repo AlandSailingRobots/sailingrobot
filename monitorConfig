@@ -35,6 +35,10 @@ var {
     float offline 1 range 0 to 1
 
     float display 1 range 0 to 1
+
+    float rudderAV 1 range 3500 to 8000
+
+    float sailAV 1 range 3500 to 8000
     
     # "lat" and "lon" should always be considered to be a pair,
     # so we link them - if a lat ever arrives without a lon, a
@@ -49,7 +53,11 @@ var {
 
     linked (
     float wpLat range -90 to 90,
-    float wpLon range -180 to 180) 1000
+    float wpLon range -180 to 180) 100
+
+    linked (
+    float obLat range -90 to 90,
+    float obLon range -180 to 180) 100
 }
     
 # That's the variables, now we can define the widgets.
@@ -80,6 +88,21 @@ window {
                 # every time we get a new lat. Note that lat comes first.
                 
                 location var wpLat,var wpLon on var wpLat
+            
+                # we also render 40 of the previous points when new "lat" data arrived.
+            
+                trail 40
+                colour green
+            
+                hue var speed
+            }
+
+            point {
+                # For this point renderer,
+                # we render points at lat,lon, with a new point
+                # every time we get a new lat. Note that lat comes first.
+                
+                location var obLat,var obLon on var obLat
             
                 # we also render 40 of the previous points when new "lat" data arrived.
             
@@ -136,6 +159,20 @@ window {
 
         number 0,3 { var wpnum title "Waypoint Number"}
         number 1,3 { var dtw title "Waypoint Distance"}
+
+        gauge 0,4 { 
+            var rudderAV 
+            title "Rudder" 
+            subtitle "PWM" 
+            fontscale 2 
+        }
+
+        gauge 1,4 { 
+            var sailAV 
+            title "Sail" 
+            subtitle "PWM" 
+            fontscale 2 
+        }
 
         status 0,0,  2,1 {
             size 2,1 

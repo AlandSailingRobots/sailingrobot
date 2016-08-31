@@ -98,6 +98,45 @@ int MaestroController::readResponse()
 	return response;
 }
 
+int MaestroController::readCommand(MaestroCommands cmd, int channel)
+{
+	uint8_t buff[2];
+	int response = -1;
+
+	if(m_Handle > -1)
+	{
+		// Locks until the function returns and the current scope is left
+		std::lock_guard<std::mutex> lock(m_Mutex);
+
+		uint8_t channelLSB = channel & 0xFF;
+
+		// Package up the command packet
+		uint8_t command[] = {(uint8_t)cmd, channelLSB};
+
+		if (write(m_Handle, command, sizeof (command)) == -1)
+		{
+			Logger::error("%s Failed to write command to MaestroController", __PRETTY_FUNCTION__);
+		}
+		else
+		{
+			if (read(m_Handle, &buff, sizeof (buff)) == sizeof (buff))
+			{
+				response = (buff[0] <<8) | buff[1];
+			}
+			else
+			{
+				Logger::error("%s Failed to read data from the Maestro Controller", __PRETTY_FUNCTION__);
+			}
+		}
+	}
+	else
+	{
+		Logger::error("%s Handle is not valid, was Maestro Controller::init called, or did it fail?", __PRETTY_FUNCTION__);
+	}
+
+	return response;
+}
+
 int MaestroController::getError()
 {
 	writeCommand(MaestroCommands::GetError, -1, -1);

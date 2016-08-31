@@ -45,4 +45,5 @@ private:
     int             m_rudder;
     int             m_sheet;
     int             m_battery;
+	int				m_RC;
 };

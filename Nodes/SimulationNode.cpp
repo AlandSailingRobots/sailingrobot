@@ -44,7 +44,7 @@ SimulationNode::SimulationNode(MessageBus& msgBus)
 		m_CompassHeading(0), m_CompassPitch(0), m_CompassRoll(0),
 		m_GPSHasFix(false), m_GPSOnline(false), m_GPSLat(0), m_GPSLon(0), m_GPSUnixTime(0), m_GPSSpeed(0),
 		m_GPSHeading(0), m_WindDir(0), m_WindSpeed(0), m_WindTemp(0), m_ArduinoPressure(0),
-		m_ArduinoRudder(0),m_ArduinoSheet(0),m_ArduinoBattery(0),m_rudder(0),m_sail(0),m_count_sleep(0)
+		m_ArduinoRudder(0),m_ArduinoSheet(0),m_ArduinoBattery(0),m_ArduinoRC(0),m_rudder(0),m_sail(0),m_count_sleep(0)
 {
   m_MsgBus.registerNode(*this, MessageType::ActuatorPosition);
 }
@@ -220,7 +220,7 @@ void SimulationNode::createArduinoMessage()
 
 	if (m_count_sleep % COUNT_ARDUINO_MSG==0)
 	{
-		MessagePtr msg = std::make_unique<ArduinoDataMsg>(ArduinoDataMsg(m_ArduinoPressure, m_ArduinoRudder, m_ArduinoSheet, m_ArduinoBattery ));
+		MessagePtr msg = std::make_unique<ArduinoDataMsg>(ArduinoDataMsg(m_ArduinoPressure, m_ArduinoRudder, m_ArduinoSheet, m_ArduinoBattery, m_ArduinoRC ));
 		m_MsgBus.sendMessage(std::move(msg));
 	}
 }
