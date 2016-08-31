@@ -19,11 +19,11 @@
 
 // HARD LIMITS
 
-#define SAIL_MAX_US		0
-#define SAIL_MIN_US		0
+#define SAIL_MAX_US		1725
+#define SAIL_MIN_US		1301
 
-#define RUDDER_MAX_US	0
-#define RUDDER_MIN_US	0
+#define RUDDER_MAX_US	1857
+#define RUDDER_MIN_US	962
 
 
 
@@ -57,18 +57,34 @@ void ActuatorNode::processMessage(const Message* message)
 		if (nodeID() == NodeID::RudderActuator)
 		{
 			int value = msg->rudderPosition();
-			if(value > RUDDER_MIN_US && value < RUDDER_MAX_US)
+
+			if(value <= RUDDER_MIN_US)
 			{
-				sendCommand(value);
+				value = RUDDER_MIN_US + 1;
 			}
+
+			if(value >= RUDDER_MAX_US)
+			{
+				value = RUDDER_MAX_US - 1;
+			}
+
+			sendCommand(value);
 		}
 		else if (nodeID() == NodeID::SailActuator)
 		{
 			int value = msg->sailPosition();
-			if(value > RUDDER_MIN_US && value < RUDDER_MAX_US)
+
+			if(value <= SAIL_MIN_US)
 			{
-				sendCommand(value);
+				value = SAIL_MIN_US + 1;
 			}
+
+			if(value >= SAIL_MAX_US)
+			{
+				value = SAIL_MAX_US - 1;
+			}
+
+			sendCommand(value);
 		}
 		else
 		{
