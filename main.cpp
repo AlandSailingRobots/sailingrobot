@@ -286,7 +286,7 @@ int main(int argc, char *argv[])
 	activeNodes.push_back(&vessel);
 
 	Node* sailingLogic;
-	bool usingLineFollow = (bool)(dbHandler.retrieveCellAsInt("sailing_robot_config", "1", "line_follow"));
+	bool usingLineFollow = true; //(bool)(dbHandler.retrieveCellAsInt("sailing_robot_config", "1", "line_follow"));
 	if(usingLineFollow)
 	{
 		sailingLogic = new LineFollowNode(messageBus, dbHandler);
@@ -311,6 +311,7 @@ int main(int argc, char *argv[])
 	initialiseNode(sail, "Sail Actuator", NodeImportance::CRITICAL);
 	initialiseNode(rudder, "Rudder Actuator", NodeImportance::CRITICAL);
 
+	initialiseNode(*sailingLogic, "Sailing Logic", NodeImportance::CRITICAL);
 #endif
 	//---------------------------------------------------------------------------------------------
 

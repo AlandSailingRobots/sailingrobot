@@ -78,9 +78,9 @@ void LineFollowNode::processMessage(const Message* msg)
          m_externalControlActive = ((ExternalControlMsg*)msg)->externalControlActive();
         break;
 	case MessageType::VesselState:
-        if(m_externalControlActive)
+        if(not m_externalControlActive)
         {
-             calculateActuatorPos((VesselStateMsg*)msg);
+            calculateActuatorPos((VesselStateMsg*)msg);
         }
 		break;
 	case MessageType::WaypointData:
@@ -304,7 +304,7 @@ void LineFollowNode::setupRudderCommand()
 	        m_db.retrieveCellAsInt("rudder_command_config", "1", "midship_command"));*/
 
 	// FOR WRSC, QUICK HACK
-	m_rudderCommand.setCommandValues( 0, 0);
+	m_rudderCommand.setCommandValues( 1000, 2000);
 }
 
 void LineFollowNode::setupSailCommand()
@@ -315,7 +315,7 @@ void LineFollowNode::setupSailCommand()
 	        m_db.retrieveCellAsInt("sail_command_config", "1", "run_command"));*/
 
 	// FOR WRSC, QUICK HACK
-	m_sailCommand.setCommandValues( 0, 0);
+	m_sailCommand.setCommandValues( 1730, 1296);
 }
 
 bool LineFollowNode::getGoingStarboard()

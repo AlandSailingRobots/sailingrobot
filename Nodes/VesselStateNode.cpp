@@ -116,6 +116,8 @@ void VesselStateNode::VesselStateThreadFunc(void* nodePtr)
 		// Controls how often we pump out messages
 		std::this_thread::sleep_for(std::chrono::milliseconds(VESSEL_STATE_SLEEP_MS));
 
+		Logger::info("Compass: %d GPS Lat: %.7f GPS Lon: %.7f", node->m_CompassHeading, node->m_GPSLat, node->m_GPSLon);
+
 		MessagePtr vesselState = std::make_unique<VesselStateMsg>(	node->m_CompassHeading, node->m_CompassPitch,
 																	node->m_CompassRoll, node->m_GPSHasFix, node->m_GPSOnline, node->m_GPSLat,
 																	node->m_GPSLon, node->m_GPSUnixTime, node->m_GPSSpeed, node->m_GPSSatellite,
