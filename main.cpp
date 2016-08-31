@@ -48,6 +48,8 @@ enum class NodeImportance {
 #include "dbhandler/DBHandler.h"
 #include "SystemServices/MaestroController.h"
 
+#include "Messages/ActuatorPositionMsg.h"
+
 RazorCompassNode* razorFix;
 
 #else
@@ -299,7 +301,7 @@ int main(int argc, char *argv[])
 	// Actuator Node
 	MaestroController::init("/dev/ttyACM0");
 	ActuatorNode sail(messageBus, NodeID::SailActuator, 1, 0, 0);
-	ActuatorNode rudder(messageBus, NodeID::RudderActuator, 0, 0, 0);
+	ActuatorNode rudder(messageBus, NodeID::RudderActuator, 2, 0, 0);
 
 	initialiseNode(udp, "UDP Node", NodeImportance::CRITICAL);
 	initialiseNode(compass, "Compass Node", NodeImportance::CRITICAL);
@@ -324,6 +326,21 @@ int main(int argc, char *argv[])
 	}
 
 	Logger::info("Message bus started!");
+
+	// Test actuator Positions
+	// Rudder and Sail Max
+	MessagePtr actuatorMsg = std::make_unique<ActuatorPositionMsg>(1750, 1500);
+	messageBus.sendMessage(std::move(actuatorMsg));
+
+	// Middle
+	MessagePtr actuatorMsg = std::make_unique<ActuatorPositionMsg>(1750, 1500);
+	messageBus.sendMessage(std::move(actuatorMsg));
+
+	// Min
+	MessagePtr actuatorMsg = std::make_unique<ActuatorPositionMsg>(1750, 1500);
+	messageBus.sendMessage(std::move(actuatorMsg));
+
+
 	messageBus.run();
 
 	Logger::shutdown();

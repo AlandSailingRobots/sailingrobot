@@ -17,6 +17,16 @@
 #include "SystemServices/Logger.h"
 
 
+// HARD LIMITS
+
+#define SAIL_MAX_US		0
+#define SAIL_MIN_US		0
+
+#define RUDDER_MAX_US	0
+#define RUDDER_MIN_US	0
+
+
+
 ActuatorNode::ActuatorNode(MessageBus& msgBus, NodeID id, int channel, int speed, int acceleration)
 	:Node(id, msgBus), m_Channel(channel), m_Speed(speed), m_Acceleration(acceleration)
 {
@@ -44,27 +54,34 @@ void ActuatorNode::processMessage(const Message* message)
 	{
 		ActuatorPositionMsg* msg = (ActuatorPositionMsg*)message;
 
-		//Get relevant command
-		int setPosition = 0;
-
 		if (nodeID() == NodeID::RudderActuator)
 		{
-			setPosition = msg->rudderPosition();
+			int value = msg->rudderPosition();
+			if(value > RUDDER_MIN_US && value < RUDDER_MAX_US)
+			{
+				sendCommand(value);
+			}
 		}
 		else if (nodeID() == NodeID::SailActuator)
 		{
-			setPosition = msg->sailPosition();
+			int value = msg->sailPosition();
+			if(value > RUDDER_MIN_US && value < RUDDER_MAX_US)
+			{
+				sendCommand(value);
+			}
 		}
 		else
 		{
 			Logger::warning("%s Actuator: %d Unknown/Unregistered actuator message NodeID", __PRETTY_FUNCTION__, (int)nodeID());
 			return;
 		}
-
-		if(not MaestroController::writeCommand(MaestroCommands::SetPosition, m_Channel, setPosition))
-		{
-			Logger::error("%s Actuator: %d Failed to write position command", __PRETTY_FUNCTION__, (int)nodeID());
-		}
 	}
+}
 
+void ActuatorNode::sendCommand(int value)
+{
+	if(not MaestroController::writeCommand(MaestroCommands::SetPosition, m_Channel, setPosition))
+	{
+		Logger::error("%s Actuator: %d Failed to write position command", __PRETTY_FUNCTION__, (int)nodeID());
+	}
 }
