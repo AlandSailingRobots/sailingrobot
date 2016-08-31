@@ -13,7 +13,6 @@
 
 #pragma once
 
-
 #include "Node.h"
 #include "Messages/GPSDataMsg.h"
 #include "Messages/CollisionAvoidanceMsg.h"
@@ -100,5 +99,5 @@ private:
 
     Timer   m_waypointTimer;
 
-    int m_init_after_gps;
+//    int m_init_after_gps;
 };

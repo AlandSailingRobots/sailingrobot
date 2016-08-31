@@ -20,7 +20,7 @@
 #include "Nodes/RoutingNode.h"
 #include "Nodes/LineFollowNode.h"
 #define BAK_STRAT 0
-#ifdef BAK_STRAT
+#if BAK_STRAT == 1
  #include "Nodes/CollAvoidanceBakStrat.h"
 #else
  #include "Nodes/CollisionAvoidanceNode.h"

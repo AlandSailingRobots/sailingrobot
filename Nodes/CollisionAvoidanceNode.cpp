@@ -1303,6 +1303,12 @@ std::vector<Obstacle> CollisionAvoidanceNode::registerObstacles(
         const Eigen::Vector2d boatGpsPosAtDetection(sensDatObstacle.boatLonAtDetection,
                                                     sensDatObstacle.boatLatAtDetection);
 
+        const double obstacleHeading = wrapToPi(wrapToPi(sensDatObstacle.LeftBoundheadingRelativeToBoat,
+                                                         sensDatObstacle.RightBoundheadingRelativeToBoat) / 2.0,
+                                                sensDatObstacle.boatHeadingAtDetection);
+        std::cout << "sensDatObstacle.boatHeadingAtDetection = " << sensDatObstacle.boatHeadingAtDetection << " rad\n";
+        std::cout << "obstacle heading = " << obstacleHeading << " rad\n";
+
         Obstacle newObstacle;
         const double halfAngleObsWidth = wrapToPi(sensDatObstacle.LeftBoundheadingRelativeToBoat,
                                                   - sensDatObstacle.RightBoundheadingRelativeToBoat) / 2.0;

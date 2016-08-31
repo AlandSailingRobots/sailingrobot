@@ -27,7 +27,7 @@
 #include "Messages/ObstacleVectorMsg.h"
 
 #define BAK_STRAT 0
-#ifdef BAK_STRAT
+#if BAK_STRAT == 1
 #include "CollAvoidanceBakStrat.h"
 #else
 #include "CollisionAvoidanceNode.h"
