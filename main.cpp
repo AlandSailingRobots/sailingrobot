@@ -261,7 +261,7 @@ int main(int argc, char *argv[])
 
 #endif
 
-	UDPNode udp(messageBus, "127.0.0.1", 4320);
+	UDPNode udp(messageBus, "172.20.26.191", 4320);
 
 	MA3WindSensorNode windSensor(messageBus, 11);
 	GPSDNode gps(messageBus);

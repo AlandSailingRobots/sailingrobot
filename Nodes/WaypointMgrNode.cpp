@@ -19,6 +19,7 @@
 #include "utility/Utility.h"
 #include <string>
 #include <vector>
+#include <cmath>
 
 WaypointMgrNode::WaypointMgrNode(MessageBus& msgBus, DBHandler& db)
 : Node(NodeID::Waypoint, msgBus), m_db(db),
@@ -77,7 +78,7 @@ bool WaypointMgrNode::waypointReached()
     // double distanceAfterWaypoint = Utility::calculateWaypointsOrthogonalLine(m_nextLongitude, m_nextLatitude, m_prevLongitude,
     //             m_prevLatitude, m_gpsLongitude, m_gpsLatitude); //Checks if boat has passed the waypoint following the line, without entering waypoints radius
 
-	if(isnan(m_gpsLongitude) || isnan(m_gpsLatitude))
+	if(std::isnan(m_gpsLongitude) || std::isnan(m_gpsLatitude))
 	{
 		return false;
 	}
