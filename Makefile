@@ -19,6 +19,7 @@ USE_OPENCV = 0
 # Allows the building of preset lists of nodes
 # DEFAULT: THis is the default janet set of nodes
 # WRSC: This is the set of nodes used for WRSC2016
+# MANUALCONTROL : For manual testing of actuators
 # XBEE_REMOTE: The xbee remote tool
 TARGET = DEFAULT
 TARGET_INT = 0
@@ -116,6 +117,20 @@ TARGET_INT = 1
 
 SRC 					= $(SRC_CORE) $(SRC_CORE_SAILING) $(SRC_CORE_NODES) $(SRC_COMMON) $(SRC_WRSC_NODES) \
 						  $(SRC_ACTUATOR_NODE) $(SRC_NETWORK_WIFI_UDP)
+# $(SRC_OPENCV_CV) Get working properly
+
+C_SRC					= $(SRC_WRSC_C)
+
+endif
+#----------------------------------------------------------------------------------------
+
+#----------------------------------------------------------------------------------------
+# Manual control build
+ifeq ($(TARGET),MANUALCONTROL)
+TARGET_INT = 2
+
+SRC 					= $(SRC_CORE) $(SRC_CORE_SAILING) $(SRC_CORE_NODES) $(SRC_COMMON) $(SRC_WRSC_NODES) \
+						  $(SRC_ACTUATOR_NODE) $(SRC_NETWORK_WIFI_UDP) Nodes/ManualControlNode.cpp
 # $(SRC_OPENCV_CV) Get working properly
 
 C_SRC					= $(SRC_WRSC_C)
