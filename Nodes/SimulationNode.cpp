@@ -209,8 +209,8 @@ void SimulationNode::processSocketData(){
 }
 
 void SimulationNode::setupDataSend(){
-  m_data_send.rudder_command = m_rudder;
-  m_data_send.sheet_command = m_sail;
+  m_data_send.rudder_command = m_rudder * 4;
+  m_data_send.sheet_command = m_sail * 4;
 }
 
 void SimulationNode::SimulationThreadFunc(void* nodePtr)
@@ -241,6 +241,7 @@ void SimulationNode::SimulationThreadFunc(void* nodePtr)
     node->processSocketData();
 		node->setupDataSend();
 
+	Logger::info("Simulator sent Rudder: %d Sail: %d", node->m_data_send.rudder_command, node->m_data_send.sheet_command);
     //send data to simulation
     write(node->m_handler_socket_client.sockfd,&(node->m_data_send), sizeof(struct DATA_SOCKET_SEND));
 

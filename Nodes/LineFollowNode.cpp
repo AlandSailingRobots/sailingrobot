@@ -280,16 +280,16 @@ int LineFollowNode::getHeading(int gpsHeading, int compassHeading, double gpsSpe
 	bool gpsForbidden = Utility::directionAdjustedSpeed(gpsHeading, compassHeading, gpsSpeed) < useGpsForHeadingMeterSecSpeed;
 
 	getMergedHeading(gpsHeading, compassHeading, true); //decrease compass weight on each iteration
-
+	return Utility::addDeclinationToHeading(getMergedHeading(gpsHeading, compassHeading, gpsForbidden), m_nextWaypointDeclination);
     // if(mockPosition) { //TODO - MOCK
     //     return position->getHeading(); //OUTCOMMENTED FOR NOW UNTIL WE FIGURE OUT MOCK
     // }
 
-	if (getHeadingFromCompass) {
+	/*if (getHeadingFromCompass) {
 		//Should return compass heading if below one knot and not currently merging and vice versa
     	return Utility::addDeclinationToHeading(getMergedHeading(gpsHeading, compassHeading, gpsForbidden), m_nextWaypointDeclination);
 	}
-    return gpsHeading;
+    return gpsHeading;*/
 }
 
 int LineFollowNode::getMergedHeading(int gpsHeading, int compassHeading, bool increaseCompassWeight)
