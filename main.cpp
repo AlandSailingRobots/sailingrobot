@@ -187,7 +187,7 @@ int main(int argc, char *argv[])
 	Logger::info("Using the simulator!");
 	SimulationNode simulation(messageBus);
 	initialiseNode(simulation, "Simulation Node", NodeImportance::CRITICAL);
-	activeNodes.push_back(simulation);
+	activeNodes.push_back(&simulation);
 #endif
 
 	//---------------------------------------------------------------------------------------------
@@ -307,6 +307,9 @@ int main(int argc, char *argv[])
 	initialiseNode(windSensor, "Wind Sensor Node", NodeImportance::CRITICAL);
 	initialiseNode(gps, "GPS Node", NodeImportance::CRITICAL);
 
+	initialiseNode(sail, "Sail Actuator", NodeImportance::CRITICAL);
+	initialiseNode(rudder, "Rudder Actuator", NodeImportance::CRITICAL);
+
 #endif
 
 	// Sailing Logic nodes
@@ -330,8 +333,6 @@ int main(int argc, char *argv[])
 
 	initialiseNode(vessel, "Vessel State Node", NodeImportance::CRITICAL);
 	initialiseNode(waypoint, "Waypoint Node", NodeImportance::CRITICAL);
-	initialiseNode(sail, "Sail Actuator", NodeImportance::CRITICAL);
-	initialiseNode(rudder, "Rudder Actuator", NodeImportance::CRITICAL);
 
 	initialiseNode(*sailingLogic, "Sailing Logic", NodeImportance::CRITICAL);
 #endif
