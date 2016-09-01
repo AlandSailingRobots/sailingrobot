@@ -17,7 +17,7 @@
 #include "SystemServices/Logger.h"
 
 
-// HARD LIMITS
+// HARD LIMITS (FOR WRSC ON ENSTA BOAT)
 
 #define SAIL_MAX_US		1725
 #define SAIL_MIN_US		1301
@@ -96,7 +96,7 @@ void ActuatorNode::processMessage(const Message* message)
 
 void ActuatorNode::sendCommand(int value)
 {
-	if(not MaestroController::writeCommand(MaestroCommands::SetPosition, m_Channel, setPosition))
+	if(not MaestroController::writeCommand(MaestroCommands::SetPosition, m_Channel, value))
 	{
 		Logger::error("%s Actuator: %d Failed to write position command", __PRETTY_FUNCTION__, (int)nodeID());
 	}

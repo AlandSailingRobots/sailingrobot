@@ -24,6 +24,8 @@
 #include <math.h>
 #include <algorithm>
 #include <cmath>
+#include "WRSC.h"
+
 
 #define DEFAULT_TWD_BUFFERSIZE 200
 
@@ -51,10 +53,31 @@ LineFollowNode::LineFollowNode(MessageBus& msgBus, DBHandler& db)
     msgBus.registerNode(*this, MessageType::WaypointData);
     msgBus.registerNode(*this, MessageType::ExternalControl);
 
+#if BOAT_TYPE == BOAT_JANET
+
     m_maxCommandAngle = M_PI / 6; // 29.98460029 Degrees
     m_maxSailAngle = M_PI / 4.2f; // 42 Degrees
     m_minSailAngle = M_PI / 32.0f;
     m_tackAngle = 0.872665; //50°
+#endif
+
+#if BOAT_TYPE == BOAT_ENSTA_GRAND
+
+    m_maxCommandAngle = M_PI / 6; // 29.98460029 Degrees
+	m_maxSailAngle = M_PI / 4.2f; // 42 Degrees
+	m_minSailAngle = M_PI / 32.0f;
+	m_tackAngle = 0.872665; //50°
+
+#endif
+
+#if BOAT_TYPE == BOAT_ENSTA_PETIT
+
+    m_maxCommandAngle = M_PI / 6; // 29.98460029 Degrees
+	m_maxSailAngle = 1.309; // 75 Degrees
+	m_minSailAngle = M_PI / 32.0f; // 5.5 degress or so
+	m_tackAngle = 0.872665; //50°
+
+#endif
 }
 
 bool LineFollowNode::init()

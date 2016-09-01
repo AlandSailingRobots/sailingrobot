@@ -327,18 +327,25 @@ int main(int argc, char *argv[])
 
 	Logger::info("Message bus started!");
 
+
+#define SAIL_MAX_US		1725
+#define SAIL_MIN_US		1301
+
+#define RUDDER_MAX_US	1857
+#define RUDDER_MIN_US	962
+
 	// Test actuator Positions
 	// Rudder and Sail Max
-	MessagePtr actuatorMsg = std::make_unique<ActuatorPositionMsg>(1750, 1500);
+	MessagePtr actuatorMsg = std::make_unique<ActuatorPositionMsg>(RUDDER_MAX_US, SAIL_MAX_US);
 	messageBus.sendMessage(std::move(actuatorMsg));
 
 	// Middle
-	MessagePtr actuatorMsg = std::make_unique<ActuatorPositionMsg>(1750, 1500);
-	messageBus.sendMessage(std::move(actuatorMsg));
+	//MessagePtr actuatorMsg = std::make_unique<ActuatorPositionMsg>(1369, 1500);
+	//messageBus.sendMessage(std::move(actuatorMsg));
 
 	// Min
-	MessagePtr actuatorMsg = std::make_unique<ActuatorPositionMsg>(1750, 1500);
-	messageBus.sendMessage(std::move(actuatorMsg));
+	//MessagePtr actuatorMsg = std::make_unique<ActuatorPositionMsg>(RUDDER_MIN_US, SAIL_MIN_US);
+	//messageBus.sendMessage(std::move(actuatorMsg));
 
 
 	messageBus.run();
