@@ -37,6 +37,7 @@ std::mutex 					Logger::m_Mutex;
 #endif
 bool Logger::m_DisableLogging = false;
 
+#define ENABLE_WRSC_LOGGING
 #ifdef ENABLE_WRSC_LOGGING
 static std::ofstream 			m_LogFileWRSC;
 #endif
@@ -188,8 +189,8 @@ void Logger::logWRSC(double latitude, double longitude)
 	{
 		char logBuffer[MAX_LOG_SIZE];
 		snprintf(logBuffer, MAX_LOG_SIZE, "%s%d, %d, %d\n", SysClock::hh_mm_ss().c_str(), SysClock::day(),
-															(int)(gps->positionModel.latitude*10000000),
-															(int)(gps->positionModel.longitude*10000000));
+															(int)(latitude*10000000),
+															(int)(longitude*10000000));
 		m_LogFileWRSC << logBuffer;
 		m_LogFileWRSC.flush();
 	}

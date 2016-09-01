@@ -148,6 +148,7 @@ void SimulationNode::processMessage(const Message* msg)
 	switch(type)
 	{
 	case MessageType::ActuatorPosition:
+//    Logger::info("(SimulationNode) ActuatorPosition");
 		processActuatorPositionMessage((ActuatorPositionMsg*)msg);
 		break;
 	default:
@@ -172,7 +173,7 @@ void SimulationNode::createCompassMessage()
 		MessagePtr msg = std::make_unique<CompassDataMsg>(CompassDataMsg( m_CompassHeading , m_CompassPitch, m_CompassRoll));
 
 	  	m_MsgBus.sendMessage(std::move(msg));
-//        Logger::info("(SimulationNode) Sent compass data : %d deg", int(m_CompassHeading+0.5));
+        Logger::info("(SimulationNode) Sent compass data : %d deg", m_CompassHeading);
   }
 }
 
@@ -325,8 +326,8 @@ void SimulationNode::processSocketData(){
 }
 
 void SimulationNode::setupDataSend(){
-  m_data_send.rudder_command = m_rudder;
-  m_data_send.sheet_command = m_sail;
+  m_data_send.rudder_command = m_rudder*4;
+  m_data_send.sheet_command = m_sail*4;
 }
 
 void SimulationNode::SimulationThreadFunc(void* nodePtr)

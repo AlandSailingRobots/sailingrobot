@@ -142,21 +142,21 @@ void CollisionAvoidanceNode::processVesselState(VesselStateMsg* msg){
 void CollisionAvoidanceNode::processObstacleData(ObstacleVectorMsg* msg){
 
     if(!m_simu_without_simulator){
-        Logger::info("(Collision Avoidance) Received ObstacleData >>> processObstacleData()");
+//        Logger::info("(Collision Avoidance) Received ObstacleData >>> processObstacleData()");
         m_sensorOutput.detectedObstacles = msg->obstacles();
         //std::copy(msg->obstacles().begin(),msg->obstacles().end(),std::back_inserter(m_sensorOutput.detectedObstacles));
-        Logger::info("(Collision Avoidance) Detected obstacle size : %d",m_sensorOutput.detectedObstacles.size());
+//        Logger::info("(Collision Avoidance) Detected obstacle size : %d",m_sensorOutput.detectedObstacles.size());
         for (auto &&obstacle : m_sensorOutput.detectedObstacles) {
             obstacle.boatLonAtDetection = Utility::degreeToRadian(obstacle.boatLonAtDetection);
             obstacle.boatLatAtDetection = Utility::degreeToRadian(obstacle.boatLatAtDetection);
             obstacle.boatHeadingAtDetection = M_PI/2-Utility::degreeToRadian(obstacle.boatHeadingAtDetection);
         }
         for (auto &&item : m_sensorOutput.detectedObstacles) {
-            Logger::info("(Collision Avoidance) ==Detected Obstacle==");
-            Logger::info("(Collision Avoidance) item.LeftBoundheadingRelativeToBoat = %f",item.LeftBoundheadingRelativeToBoat);
-            Logger::info("(Collision Avoidance) item.RightBoundheadingRelativeToBoat = %f",item.RightBoundheadingRelativeToBoat);
-            Logger::info("(Collision Avoidance) item.minDistanceToObstacle = %f",item.minDistanceToObstacle);
-            Logger::info("(Collision Avoidance) item.maxDistanceToObstacle = %f",item.maxDistanceToObstacle);
+//            Logger::info("(Collision Avoidance) ==Detected Obstacle==");
+//            Logger::info("(Collision Avoidance) item.LeftBoundheadingRelativeToBoat = %f",item.LeftBoundheadingRelativeToBoat);
+//            Logger::info("(Collision Avoidance) item.RightBoundheadingRelativeToBoat = %f",item.RightBoundheadingRelativeToBoat);
+//            Logger::info("(Collision Avoidance) item.minDistanceToObstacle = %f",item.minDistanceToObstacle);
+//            Logger::info("(Collision Avoidance) item.maxDistanceToObstacle = %f",item.maxDistanceToObstacle);
         }
         if(m_number_of_wp_recieved>=WAIT_FOR_X_WAYPOINTS){
             run();
@@ -178,9 +178,9 @@ void CollisionAvoidanceNode::processWaypointData(WaypointDataMsg* msg){
     if(m_number_of_wp_recieved<WAIT_FOR_X_WAYPOINTS){
         m_number_of_wp_recieved++;
     }
-    Logger::info("(Collision Avoidance) Current gps position : (%f deg,%f deg)", m_sensorOutput.gpsPos(0)/M_PI*180,m_sensorOutput.gpsPos(1)/M_PI*180);
-    Logger::info("(Collision Avoidance) Received followedLine start point : (%f deg,%f deg)", m_followedLine.startPoint(0)/M_PI*180,m_followedLine.startPoint(1)/M_PI*180);
-    Logger::info("(Collision Avoidance) Received followedLine end point : (%f deg,%f deg)", m_followedLine.endPoint(0)/M_PI*180,m_followedLine.endPoint(1)/M_PI*180);
+//    Logger::info("(Collision Avoidance) Current gps position : (%f deg,%f deg)", m_sensorOutput.gpsPos(0)/M_PI*180,m_sensorOutput.gpsPos(1)/M_PI*180);
+//    Logger::info("(Collision Avoidance) Received followedLine start point : (%f deg,%f deg)", m_followedLine.startPoint(0)/M_PI*180,m_followedLine.startPoint(1)/M_PI*180);
+//    Logger::info("(Collision Avoidance) Received followedLine end point : (%f deg,%f deg)", m_followedLine.endPoint(0)/M_PI*180,m_followedLine.endPoint(1)/M_PI*180);
 }
 
 void CollisionAvoidanceNode::run() {

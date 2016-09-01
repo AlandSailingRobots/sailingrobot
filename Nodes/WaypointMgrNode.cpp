@@ -20,6 +20,7 @@
 #include <string>
 #include <vector>
 #include "SystemServices/Logger.h"
+#include <cmath>
 
 WaypointMgrNode::WaypointMgrNode(MessageBus& msgBus, DBHandler& db)
 : Node(NodeID::Waypoint, msgBus), m_db(db),
@@ -118,6 +119,11 @@ void WaypointMgrNode::processCollisionAvoidanceMessage(CollisionAvoidanceMsg* ms
 
 bool WaypointMgrNode::waypointReached()
 {
+	if(std::isnan(m_gpsLongitude) || std::isnan(m_gpsLatitude))
+	{
+		return false;
+	}
+
     if(harvestWaypoint())
     {
         if(not m_db.changeOneValue("waypoints", std::to_string(m_nextId),"1","harvested"))

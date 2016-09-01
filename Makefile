@@ -19,6 +19,7 @@ USE_OPENCV = 0
 # Allows the building of preset lists of nodes
 # DEFAULT: THis is the default janet set of nodes
 # WRSC: This is the set of nodes used for WRSC2016
+# MANUALCONTROL : For manual testing of actuators
 # XBEE_REMOTE: The xbee remote tool
 TARGET = DEFAULT
 TARGET_INT = 0
@@ -90,8 +91,7 @@ SRC_OPENCV_CV 			= Nodes/obstacledetection/colorDetectionNode.cpp Nodes/obstacle
 SRC_SIMULATOR			= Nodes/SimulationNode.cpp
 
 SRC_WRSC_C				= libs/minmea/minmea.c
-SRC_WRSC_NODES			= Nodes/MA3WindSensorNode.cpp Nodes/RazorCompassNode.cpp Nodes/UDPNode.cpp XbeeRemote/UDPRelay.cpp Nodes/GPSDNode.cpp
-							# Nodes/SerialGPSNode.cpp Swithed to USB
+SRC_WRSC_NODES			= Nodes/MA3WindSensorNode.cpp Nodes/RazorCompassNode.cpp Nodes/UDPNode.cpp XbeeRemote/UDPRelay.cpp Nodes/GPSDNode.cpp Nodes/SerialGPSNode.cpp
 
 SRC_COLLISION_AVOIDANCE = Nodes/CollisionAvoidanceNode.cpp
 
@@ -153,6 +153,20 @@ SRC 					= $(SRC_CORE) $(SRC_CORE_SAILING) $(SRC_CORE_NODES) $(SRC_COMMON) $(SRC
 
 C_SRC					= $(SRC_WRSC_C)
 endif
+endif
+#----------------------------------------------------------------------------------------
+
+#----------------------------------------------------------------------------------------
+# Manual control build
+ifeq ($(TARGET),MANUALCONTROL)
+TARGET_INT = 2
+
+SRC 					= $(SRC_CORE) $(SRC_CORE_SAILING) $(SRC_CORE_NODES) $(SRC_COMMON) $(SRC_WRSC_NODES) \
+						  $(SRC_ACTUATOR_NODE) $(SRC_NETWORK_WIFI_UDP) Nodes/ManualControlNode.cpp
+# $(SRC_OPENCV_CV) Get working properly
+
+C_SRC					= $(SRC_WRSC_C)
+
 endif
 #----------------------------------------------------------------------------------------
 

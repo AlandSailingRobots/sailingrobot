@@ -24,10 +24,15 @@
 #include <math.h>
 #include <algorithm>
 #include <cmath>
+#include "WRSC.h"
+
 
 #define DEFAULT_TWD_BUFFERSIZE 200
+
+// These values correspond to the angle of the sail/Rudder at its maximum position in radians
+
 #define NORM_RUDDER_COMMAND 0.5166 // getCommand() take a value between -1 and 1 so we need to normalize the command correspond to 29.6 degree
-#define NORM_SAIL_COMMAND 0.6958
+#define NORM_SAIL_COMMAND 0.6958 // 1.5707963
 
 LineFollowNode::LineFollowNode(MessageBus& msgBus, DBHandler& db)
 :  Node(NodeID::SailingLogic, msgBus), m_db(db), m_dbLogger(5, db),
@@ -48,10 +53,31 @@ LineFollowNode::LineFollowNode(MessageBus& msgBus, DBHandler& db)
     msgBus.registerNode(*this, MessageType::WaypointData);
     msgBus.registerNode(*this, MessageType::ExternalControl);
 
-    m_maxCommandAngle = M_PI / 6;
-    m_maxSailAngle = M_PI / 4.2f;
+#if BOAT_TYPE == BOAT_JANET
+
+    m_maxCommandAngle = M_PI / 6; // 29.98460029 Degrees
+    m_maxSailAngle = M_PI / 4.2f; // 42 Degrees
     m_minSailAngle = M_PI / 32.0f;
     m_tackAngle = 0.872665; //50°
+#endif
+
+#if BOAT_TYPE == BOAT_ENSTA_GRAND
+
+    m_maxCommandAngle = M_PI / 6; // 29.98460029 Degrees
+	m_maxSailAngle = M_PI / 4.2f; // 42 Degrees
+	m_minSailAngle = M_PI / 32.0f;
+	m_tackAngle = 0.872665; //50°
+
+#endif
+
+#if BOAT_TYPE == BOAT_ENSTA_PETIT
+
+    m_maxCommandAngle = M_PI / 6; // 29.98460029 Degrees
+	m_maxSailAngle = 1.309; // 75 Degrees
+	m_minSailAngle = M_PI / 32.0f; // 5.5 degress or so
+	m_tackAngle = 0.872665; //50°
+
+#endif
 }
 
 bool LineFollowNode::init()
@@ -75,13 +101,15 @@ void LineFollowNode::processMessage(const Message* msg)
          m_externalControlActive = ((ExternalControlMsg*)msg)->externalControlActive();
         break;
 	case MessageType::VesselState:
-        if(m_externalControlActive)
+        if(not m_externalControlActive)
         {
-             calculateActuatorPos((VesselStateMsg*)msg);
+//            Logger::info("calculateActuatorPos");
+            calculateActuatorPos((VesselStateMsg*)msg);
         }
 		break;
 	case MessageType::WaypointData:
         {
+//            Logger::info("(LineFollowNode) Received waypoint data next:(%f,%f)/prev(%f,%f)",m_nextWaypointLon,m_nextWaypointLat,);
             WaypointDataMsg* waypMsg = (WaypointDataMsg*)msg;
             m_nextWaypointId = waypMsg->nextId();
             m_nextWaypointLon = waypMsg->nextLongitude();
@@ -139,7 +167,7 @@ void LineFollowNode::calculateActuatorPos(VesselStateMsg* msg)
     setPrevWaypointToBoatPos(msg);
 
     //GET DIRECTION--------
-    double currentHeading = getHeading(msg->gpsHeading(), msg->compassHeading(), msg->speed(), false, false);
+    double currentHeading = getHeading(msg->gpsHeading(), msg->compassHeading(), msg->speed(), false, true);
     double currentHeading_radian = Utility::degreeToRadian(currentHeading);
     double signedDistance = Utility::calculateSignedDistanceToLine(m_nextWaypointLon, m_nextWaypointLat, m_prevWaypointLon,
                                                                    m_prevWaypointLat, msg->longitude(), msg->latitude());
@@ -203,6 +231,7 @@ void LineFollowNode::calculateActuatorPos(VesselStateMsg* msg)
     //------------------
     int rudderCommand_norm = m_rudderCommand.getCommand(rudderCommand/NORM_RUDDER_COMMAND);
     int sailCommand_norm = m_sailCommand.getCommand(sailCommand/NORM_SAIL_COMMAND);
+    Logger::info("(r : %f, s : %f)",rudderCommand_norm,sailCommand_norm);
 
 
     //Send messages----
@@ -295,14 +324,32 @@ int LineFollowNode::getMergedHeading(int gpsHeading, int compassHeading, bool in
 
 void LineFollowNode::setupRudderCommand()
 {
-	m_rudderCommand.setCommandValues(m_db.retrieveCellAsInt("rudder_command_config", "1","extreme_command"),
-	        m_db.retrieveCellAsInt("rudder_command_config", "1", "midship_command"));
+	// KEEP THIS USE IT NORMALLY, GET RID OF WRSC
+	// MAX and Middle
+	/*m_rudderCommand.setCommandValues(m_db.retrieveCellAsInt("rudder_command_config", "1","extreme_command"),
+	        m_db.retrieveCellAsInt("rudder_command_config", "1", "midship_command"));*/
+
+	// FOR WRSC, QUICK HACK
+#if BOAT_TYPE == BOAT_ENSTA_GRAND
+	m_rudderCommand.setCommandValues( RUDDER_MIN_US, RUDDER_MID_US);
+#else
+	m_rudderCommand.setCommandValues( RUDDER_MAX_US, RUDDER_MID_US);
+#endif
 }
 
 void LineFollowNode::setupSailCommand()
 {
-	m_sailCommand.setCommandValues( m_db.retrieveCellAsInt("sail_command_config", "1", "close_reach_command"),
-	        m_db.retrieveCellAsInt("sail_command_config", "1", "run_command"));
+	// KEEP THIS USE IT NORMALLY, GET RID OF WRSC
+	// Close and
+	/*m_sailCommand.setCommandValues( m_db.retrieveCellAsInt("sail_command_config", "1", "close_reach_command"),
+	        m_db.retrieveCellAsInt("sail_command_config", "1", "run_command"));*/
+
+	// FOR WRSC, QUICK HACK
+#if BOAT_TYPE == BOAT_ENSTA_GRAND
+	m_sailCommand.setCommandValues( SAIL_MAX_US, SAIL_MIN_US);
+#else
+	m_sailCommand.setCommandValues( SAIL_MAX_US, SAIL_MIN_US);
+#endif
 }
 
 bool LineFollowNode::getGoingStarboard()

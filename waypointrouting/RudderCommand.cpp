@@ -16,7 +16,7 @@ int RudderCommand::getCommand(double command) {
 		command = 1;
 
 	int delta = m_extremeCommand - m_midshipsCommand;
-	return m_midshipsCommand + delta * command;
+	return m_midshipsCommand + (delta * command);
 }
 
 void RudderCommand::setCommandValues(int starboardExtreme, int midships) {

@@ -33,7 +33,8 @@ MA3WindSensorNode::~MA3WindSensorNode()
 
 bool MA3WindSensorNode::init()
 {
-	return (readWindDirection() > -1);
+	//return (readWindDirection() > -1);
+	return true;
 }
 
 void MA3WindSensorNode::start()
@@ -60,14 +61,19 @@ void MA3WindSensorNode::ma3ThreadFunc(void* nodePtr)
 
 	while(node->m_running)
 	{
-		SysClock::sleepMS(260);
+		SysClock::sleepMS(500);
 		int windDir = node->readWindDirection();
 
 		if(windDir != -1)
 		{
-			windDir = (windDir / MAX_VALUE) * 360;
+			windDir = (((windDir*1000) / MAX_VALUE) * 360) / 1000;
+			//Logger::info("Wind Data: %d", windDir);
 			MessagePtr windData = std::make_unique<WindDataMsg>(windDir, 0, 0);
 			node->m_MsgBus.sendMessage(std::move(windData));
+		}
+		else
+		{
+			Logger::info("Failed to read wind");
 		}
 	}
 }

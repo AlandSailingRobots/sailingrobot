@@ -51,10 +51,46 @@ bool MaestroController::writeCommand(MaestroCommands cmd, int channel, int value
 		uint8_t valuePart1 = value & mask;
 		uint8_t valuePart2 = (value >> 7) & mask;
 
-		uint8_t channelLSB = channel & 0xFF;
+		//uint8_t channelLSB = channel & 0xFF;
 
 		// Package up the command packet
-		uint8_t command[] = {(uint8_t)cmd, channelLSB, valuePart1, valuePart2};
+		uint8_t command[] = {(uint8_t)cmd, (uint8_t)channel, valuePart1, valuePart2};
+
+		if (write(m_Handle, command, sizeof (command)) == -1)
+		{
+			Logger::error("%s Failed to write command to MaestroController", __PRETTY_FUNCTION__);
+			success = false;
+		}
+	}
+	else
+	{
+		Logger::error("%s Handle is not valid, was Maestro Controller::init called, or did it fail?", __PRETTY_FUNCTION__);
+		success = false;
+	}
+
+	return success;
+}
+
+bool MaestroController::writeCommandPolulu(MaestroCommands cmd, int channel, int value)
+{
+	bool success = true;
+
+	if(m_Handle > -1)
+	{
+		// Locks until the function returns and the current scope is left
+		std::lock_guard<std::mutex> lock(m_Mutex);
+
+		// Each DATA byte can only transmit seven bits of information.
+		uint8_t mask = 0x7F;
+		uint8_t valuePart1 = value & mask;
+		uint8_t valuePart2 = (value >> 7) & mask;
+
+		uint8_t cmduint = (uint8_t)cmd;
+
+		//uint8_t channelLSB = channel & 0xFF;
+
+		// Package up the command packet
+		uint8_t command[] = { 0xAA, 12, cmduint & 0x7F, (uint8_t)channel, valuePart1, valuePart2};
 
 		if (write(m_Handle, command, sizeof (command)) == -1)
 		{
@@ -121,7 +157,7 @@ int MaestroController::readCommand(MaestroCommands cmd, int channel)
 		{
 			if (read(m_Handle, &buff, sizeof (buff)) == sizeof (buff))
 			{
-				response = (buff[0] <<8) | buff[1];
+				response = (buff[0] | (buff[1] << 8) );
 			}
 			else
 			{
@@ -133,6 +169,7 @@ int MaestroController::readCommand(MaestroCommands cmd, int channel)
 	{
 		Logger::error("%s Handle is not valid, was Maestro Controller::init called, or did it fail?", __PRETTY_FUNCTION__);
 	}
+
 
 	return response;
 }
