@@ -183,7 +183,7 @@ int main(int argc, char *argv[])
 	//---------------------------------------------------------------------------------------------
 	// Use Simulator
 
-#if SIMULATOR == 1
+#if SIMULATION == 1
 	Logger::info("Using the simulator!");
 	SimulationNode simulation(messageBus);
 	initialiseNode(simulation, "Simulation Node", NodeImportance::CRITICAL);
@@ -278,21 +278,13 @@ int main(int argc, char *argv[])
 	// Target: WRSC
 #if TARGET == 1
 
-	// No sensor nodes if we are using the simulator
-#if SIMULATOR != 1
-
-#endif
-
 	UDPNode udp(messageBus, "172.20.26.191", 4320);
+
+	// No sensor nodes if we are using the simulator
+#if SIMULATION != 1
+	MaestroController::init("/dev/ttyACM0");
+
 	MA3WindSensorNode windSensor(messageBus, 11);
-
-	// QUICK TEST
-	/*float heading, pitch,roll;
-	if(compass.parseData("#YPR=-155.73,-76.48,-129.51", heading, pitch, roll))
-	{
-		Logger::info("Data: %f %f %f", heading, pitch, roll);
-	}*/
-
 #if BOAT_TYPE == BOAT_ENSTA_GRAND
 	GPSDNode gps(messageBus);
 	RazorCompassNode compass(messageBus, "/dev/ttyUSB1");
@@ -311,6 +303,12 @@ int main(int argc, char *argv[])
 	activeNodes.push_back(&gps);
 	activeNodes.push_back(&compass);
 
+	initialiseNode(compass, "Compass Node", NodeImportance::CRITICAL);
+	initialiseNode(windSensor, "Wind Sensor Node", NodeImportance::CRITICAL);
+	initialiseNode(gps, "GPS Node", NodeImportance::CRITICAL);
+
+#endif
+
 	// Sailing Logic nodes
 	VesselStateNode vessel(messageBus);
 	WaypointMgrNode waypoint(messageBus, dbHandler);
@@ -328,15 +326,7 @@ int main(int argc, char *argv[])
 		sailingLogic = new RoutingNode(messageBus, dbHandler);
 	}
 
-	// Actuator Node
-	MaestroController::init("/dev/ttyACM0");
-	//ActuatorNode sail(messageBus, NodeID::SailActuator, 1, 0, 0);
-	//ActuatorNode rudder(messageBus, NodeID::RudderActuator, 2, 0, 0);
-
 	initialiseNode(udp, "UDP Node", NodeImportance::CRITICAL);
-	initialiseNode(compass, "Compass Node", NodeImportance::CRITICAL);
-	initialiseNode(windSensor, "Wind Sensor Node", NodeImportance::CRITICAL);
-	initialiseNode(gps, "GPS Node", NodeImportance::CRITICAL);
 
 	initialiseNode(vessel, "Vessel State Node", NodeImportance::CRITICAL);
 	initialiseNode(waypoint, "Waypoint Node", NodeImportance::CRITICAL);
@@ -352,7 +342,7 @@ int main(int argc, char *argv[])
 #if TARGET == 2
 
     // No sensor nodes if we are using the simulator
-#if SIMULATOR != 1
+#if SIMULATION != 1
 
 #endif
 
