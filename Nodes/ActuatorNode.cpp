@@ -15,16 +15,7 @@
 #include "Messages/ActuatorPositionMsg.h"
 #include "SystemServices/MaestroController.h"
 #include "SystemServices/Logger.h"
-
-
-// HARD LIMITS (FOR WRSC ON ENSTA BOAT)
-
-#define SAIL_MAX_US		1725
-#define SAIL_MIN_US		1301
-
-#define RUDDER_MAX_US	1857
-#define RUDDER_MIN_US	962
-
+#include "WRSC.h"
 
 
 ActuatorNode::ActuatorNode(MessageBus& msgBus, NodeID id, int channel, int speed, int acceleration)
@@ -68,7 +59,7 @@ void ActuatorNode::processMessage(const Message* message)
 				value = RUDDER_MAX_US - 1;
 			}
 
-			sendCommand(value);
+			sendCommand(value * 4);
 		}
 		else if (nodeID() == NodeID::SailActuator)
 		{
@@ -84,7 +75,7 @@ void ActuatorNode::processMessage(const Message* message)
 				value = SAIL_MAX_US - 1;
 			}
 
-			sendCommand(value);
+			sendCommand(value * 4);
 		}
 		else
 		{
@@ -100,4 +91,6 @@ void ActuatorNode::sendCommand(int value)
 	{
 		Logger::error("%s Actuator: %d Failed to write position command", __PRETTY_FUNCTION__, (int)nodeID());
 	}
+
+	Logger::info("Maestro Error: %d Value Written: %d", MaestroController::getError(), value);
 }

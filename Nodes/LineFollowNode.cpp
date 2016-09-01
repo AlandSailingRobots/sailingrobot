@@ -327,7 +327,11 @@ void LineFollowNode::setupRudderCommand()
 	        m_db.retrieveCellAsInt("rudder_command_config", "1", "midship_command"));*/
 
 	// FOR WRSC, QUICK HACK
-	m_rudderCommand.setCommandValues( 1000, 2000);
+#if BOAT_TYPE == BOAT_ENSTA_GRAND
+	m_rudderCommand.setCommandValues( RUDDER_MIN_US, RUDDER_MID_US);
+#else
+	m_rudderCommand.setCommandValues( RUDDER_MAX_US, RUDDER_MID_US);
+#endif
 }
 
 void LineFollowNode::setupSailCommand()
@@ -338,7 +342,11 @@ void LineFollowNode::setupSailCommand()
 	        m_db.retrieveCellAsInt("sail_command_config", "1", "run_command"));*/
 
 	// FOR WRSC, QUICK HACK
-	m_sailCommand.setCommandValues( 1730, 1296);
+#if BOAT_TYPE == BOAT_ENSTA_GRAND
+	m_sailCommand.setCommandValues( SAIL_MAX_US, SAIL_MIN_US);
+#else
+	m_sailCommand.setCommandValues( SAIL_MAX_US, SAIL_MIN_US);
+#endif
 }
 
 bool LineFollowNode::getGoingStarboard()

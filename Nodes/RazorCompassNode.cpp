@@ -32,8 +32,8 @@
 #define COMPASS_YAW_P2				1.5629
 
 
-RazorCompassNode::RazorCompassNode(MessageBus& msgBus)
-	:ActiveNode(NodeID::Compass, msgBus), m_FD(-1), m_keepRunning(false)
+RazorCompassNode::RazorCompassNode(MessageBus& msgBus, std::string port)
+	:ActiveNode(NodeID::Compass, msgBus), m_FD(-1), m_keepRunning(false), m_port(port)
 {
 
 }
@@ -49,7 +49,7 @@ bool RazorCompassNode::init()
 {
 	if(m_FD == -1)
 	{
-		m_FD = serialOpen(COMPASS_DEFAULT_PORT, COMPASS_BAUD_RATE);
+		m_FD = serialOpen(m_port.c_str(), COMPASS_BAUD_RATE);
 
 		if(m_FD == -1)
 		{

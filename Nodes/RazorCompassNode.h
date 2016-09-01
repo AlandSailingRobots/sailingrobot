@@ -19,7 +19,7 @@
 
 class RazorCompassNode : public ActiveNode {
 public:
-	RazorCompassNode(MessageBus& msgBus);
+	RazorCompassNode(MessageBus& msgBus, std::string port);
 
 	virtual ~RazorCompassNode();
 
@@ -69,4 +69,5 @@ protected:
 
 	int 			m_FD;
 	bool			m_keepRunning;
+	std::string		m_port;
 };

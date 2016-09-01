@@ -48,6 +48,8 @@ public:
 	///----------------------------------------------------------------------------------
 	static bool writeCommand(MaestroCommands command, int channel = -1, int value = -1);
 
+	static bool writeCommandPolulu(MaestroCommands cmd, int channel, int value);
+
 	///----------------------------------------------------------------------------------
 	/// Reads a response from a command.
 	///----------------------------------------------------------------------------------

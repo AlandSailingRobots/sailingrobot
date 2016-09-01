@@ -38,6 +38,7 @@ enum class NodeImportance {
 
 #include "Nodes/UDPNode.h"
 #include "Nodes/GPSDNode.h"
+#include "Nodes/SerialGPSNode.h"
 #include "Nodes/MA3WindSensorNode.h"
 #include "Nodes/RazorCompassNode.h"
 
@@ -264,11 +265,7 @@ int main(int argc, char *argv[])
 #endif
 
 	UDPNode udp(messageBus, "172.20.26.191", 4320);
-
 	MA3WindSensorNode windSensor(messageBus, 11);
-	GPSDNode gps(messageBus);
-	RazorCompassNode compass(messageBus);
-	razorFix = &compass;
 
 	// QUICK TEST
 	/*float heading, pitch,roll;
@@ -276,6 +273,20 @@ int main(int argc, char *argv[])
 	{
 		Logger::info("Data: %f %f %f", heading, pitch, roll);
 	}*/
+
+#if BOAT_TYPE == BOAT_ENSTA_GRAND
+	GPSDNode gps(messageBus);
+	RazorCompassNode compass(messageBus, "/dev/ttyUSB1");
+	ActuatorNode sail(messageBus, NodeID::SailActuator, 1, 0, 0);
+	ActuatorNode rudder(messageBus, NodeID::RudderActuator, 2, 0, 0);
+#elif BOAT_TYPE == BOAT_ENSTA_PETIT
+	SerialGPSNode gps(messageBus);
+	RazorCompassNode compass(messageBus,"/dev/ttyACM1");
+	ActuatorNode sail(messageBus, NodeID::SailActuator, 1, 0, 0);
+	ActuatorNode rudder(messageBus, NodeID::RudderActuator, 0, 0, 0);
+#endif
+
+	razorFix = &compass;
 
 	activeNodes.push_back(&windSensor);
 	activeNodes.push_back(&gps);
@@ -300,8 +311,8 @@ int main(int argc, char *argv[])
 
 	// Actuator Node
 	MaestroController::init("/dev/ttyACM0");
-	ActuatorNode sail(messageBus, NodeID::SailActuator, 1, 0, 0);
-	ActuatorNode rudder(messageBus, NodeID::RudderActuator, 2, 0, 0);
+	//ActuatorNode sail(messageBus, NodeID::SailActuator, 1, 0, 0);
+	//ActuatorNode rudder(messageBus, NodeID::RudderActuator, 2, 0, 0);
 
 	initialiseNode(udp, "UDP Node", NodeImportance::CRITICAL);
 	initialiseNode(compass, "Compass Node", NodeImportance::CRITICAL);
@@ -336,16 +347,16 @@ int main(int argc, char *argv[])
 
 	// Test actuator Positions
 	// Rudder and Sail Max
-	MessagePtr actuatorMsg = std::make_unique<ActuatorPositionMsg>(RUDDER_MAX_US, SAIL_MAX_US);
-	messageBus.sendMessage(std::move(actuatorMsg));
+	//MessagePtr actuatorMsg = std::make_unique<ActuatorPositionMsg>(RUDDER_MAX_US, SAIL_MAX_US);
+	//messageBus.sendMessage(std::move(actuatorMsg));
 
 	// Middle
-	//MessagePtr actuatorMsg = std::make_unique<ActuatorPositionMsg>(1369, 1500);
+	//MessagePtr actuatorMsg = std::make_unique<ActuatorPositionMsg>(1369*4, 1500);
 	//messageBus.sendMessage(std::move(actuatorMsg));
 
 	// Min
-	//MessagePtr actuatorMsg = std::make_unique<ActuatorPositionMsg>(RUDDER_MIN_US, SAIL_MIN_US);
-	//messageBus.sendMessage(std::move(actuatorMsg));
+	MessagePtr actuatorMsg = std::make_unique<ActuatorPositionMsg>(RUDDER_MIN_US, SAIL_MIN_US);
+	messageBus.sendMessage(std::move(actuatorMsg));
 
 
 	messageBus.run();
