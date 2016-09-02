@@ -381,7 +381,7 @@ void Utility::calculateApparentWind(const int windsensorDir, const int windsenso
 
   double trueWindDirection_ = trueWindDirection+M_PI;
 	std::array<double, 2> wcaw = { calculateTrueWindSpeed(windsensorDir, windsensorSpeed, gpsSpeed, heading) * cos(trueWindDirection_ - heading) - gpsSpeed, //wcaw[0]
-									calculateTrueWindSpeed(windsensorDir, windsensorSpeed, gpsSpeed, heading) * sin(trueWindDirection_ - heading)}; //wcaw[1] Cartesian Apparent Wind
+                                   calculateTrueWindSpeed(windsensorDir, windsensorSpeed, gpsSpeed, heading) * sin(trueWindDirection_ - heading)}; //wcaw[1] Cartesian Apparent Wind
 
 	apparentWindSpeed = sqrt(pow(wcaw[0], 2) + pow(wcaw[1], 2));
 	apparentWindDirection = -atan2(wcaw[0], wcaw[1])*180/M_PI;
@@ -399,4 +399,10 @@ double Utility::getApparentWindDirection(const int windsensorDir, const int wind
 	double apparentWindSpeed,apparentWindDirection;
 	calculateApparentWind(windsensorDir, windsensorSpeed, gpsSpeed, heading, trueWindDirection,apparentWindSpeed,apparentWindDirection);
 	return apparentWindDirection;
+}
+
+double Utility::wrapToPi(
+        double radAngle1,
+        double radAngle2) {
+    return fmod(radAngle1+radAngle2+3*M_PI,2*M_PI)-M_PI;
 }

@@ -214,17 +214,24 @@ void LineFollowNode::calculateActuatorPos(VesselStateMsg* msg)
     //-----------------
 
     //SET SAIL---------
-    double apparentWindDirection = Utility::getApparentWindDirection(msg->windDir(),
-                    msg->windSpeed(), msg->speed(), currentHeading_radian, trueWindDirection_radian)*M_PI/180;
 
-    apparentWindDirection = ( (apparentWindDirection+M_PI>M_PI) ? (apparentWindDirection-M_PI):(apparentWindDirection+M_PI) );
+    // QUICKFIX for WRSC
+    double windDirection_raw = msg->windDir(); // degree from north
+    double windSpeed_raw = msg->windSpeed(); // degree from north
+    sailCommand = m_maxSailAngle/2.0 * (cos(windDirection_raw * M_PI /180.0
+                                            - desiredHeading) + 1);
 
-    sailCommand = fabs(((m_minSailAngle - m_maxSailAngle) / M_PI) * fabs(apparentWindDirection) + m_maxSailAngle);/*!!! on some pc abs only ouptut an int (ubuntu 14.04 gcc 4.9.3)*/
-
-    if (cos(apparentWindDirection+M_PI) + cos(m_maxSailAngle) <0 )
-    {
-       sailCommand = m_minSailAngle;
-    }
+//    double apparentWindDirection = Utility::getApparentWindDirection(msg->windDir(),
+//                    msg->windSpeed(), msg->speed(), currentHeading_radian, trueWindDirection_radian)*M_PI/180;
+//
+//    apparentWindDirection = ( (apparentWindDirection+M_PI>M_PI) ? (apparentWindDirection-M_PI):(apparentWindDirection+M_PI) );
+//
+//    sailCommand = fabs(((m_minSailAngle - m_maxSailAngle) / M_PI) * fabs(apparentWindDirection) + m_maxSailAngle);/*!!! on some pc abs only ouptut an int (ubuntu 14.04 gcc 4.9.3)*/
+//
+//    if (cos(apparentWindDirection+M_PI) + cos(m_maxSailAngle) <0 )
+//    {
+//       sailCommand = m_minSailAngle;
+//    }
 
     //------------------
     int rudderCommand_norm = m_rudderCommand.getCommand(rudderCommand/NORM_RUDDER_COMMAND);
