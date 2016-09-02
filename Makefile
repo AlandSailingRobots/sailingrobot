@@ -188,7 +188,7 @@ export LIBS =
 else
 
 export CFLAGS= -g -Wall -Wextra -std=c99
-export CPPFLAGS = -g -Wall -pedantic -std=gnu++14
+export CPPFLAGS = -g -Wall -pedantic -std=c++14
 
 
 export LIBS = -lsqlite3 -lgps -lrt -lcurl -lpthread

@@ -22,6 +22,7 @@ UDPNode::UDPNode(MessageBus& msgBus, std::string address, int port)
 	msgBus.registerNode(*this, MessageType::VesselState);
 	msgBus.registerNode(*this, MessageType::CourseData);
 	msgBus.registerNode(*this, MessageType::WaypointData);
+	msgBus.registerNode(*this, MessageType::ActuatorPosition);
 }
 
 UDPNode::~UDPNode()
