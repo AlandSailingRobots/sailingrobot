@@ -205,11 +205,11 @@ void LineFollowNode::calculateActuatorPos(VesselStateMsg* msg)
     //SET RUDDER-------
     if(cos(currentHeading_radian - desiredHeading) < 0) //if boat heading is too far away from desired heading
     {
-        rudderCommand = -Utility::sgn(msg->speed()) * m_maxCommandAngle * Utility::sgn(sin(currentHeading_radian - desiredHeading));
+        rudderCommand = m_maxCommandAngle * Utility::sgn(sin(currentHeading_radian - desiredHeading));
     }
     else
     {
-        rudderCommand = -Utility::sgn(msg->speed()) * m_maxCommandAngle * sin(currentHeading_radian - desiredHeading);
+        rudderCommand = m_maxCommandAngle * sin(currentHeading_radian - desiredHeading);
     }
     //-----------------
 

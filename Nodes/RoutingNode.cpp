@@ -17,6 +17,7 @@
 #include "Messages/ExternalControlMsg.h"
 #include "utility/Utility.h"
 #include "utility/SysClock.h"
+#include "WRSC.h"
 
 #define DEFAULT_TWD_BUFFERSIZE 200
 
@@ -30,6 +31,8 @@ RoutingNode::RoutingNode(MessageBus& msgBus, DBHandler& db)
     m_externalControlActive(false),
     m_db(db), m_dbLogger(5, m_db),
     m_waypointRouting(m_nextWaypointLon, m_nextWaypointLat, m_nextWaypointRadius,
+    		20, 45, 50, 1, 5, RUDDER_MAX_US, 1 )
+    /*m_waypointRouting(m_nextWaypointLon, m_nextWaypointLat, m_nextWaypointRadius,
         atof(m_db.retrieveCell("waypoint_routing_config", "1", "radius_ratio").c_str()),
         atof(m_db.retrieveCell("course_calculation_config", "1", "tack_angle").c_str()),
         atof(m_db.retrieveCell("course_calculation_config", "1", "tack_max_angle").c_str()),
@@ -37,7 +40,7 @@ RoutingNode::RoutingNode(MessageBus& msgBus, DBHandler& db)
         atof(m_db.retrieveCell("course_calculation_config", "1", "sector_angle").c_str()),
         atof(m_db.retrieveCell("waypoint_routing_config", "1", "max_command_angle ").c_str()),
         atof(m_db.retrieveCell("waypoint_routing_config", "1", "rudder_speed_min").c_str())
-        )
+        )*/
 {
     msgBus.registerNode(*this, MessageType::VesselState);
     msgBus.registerNode(*this, MessageType::WaypointData);
@@ -64,7 +67,7 @@ void RoutingNode::processMessage(const Message* msg)
         m_externalControlActive = ((ExternalControlMsg*)msg)->externalControlActive();
         break;
 	case MessageType::VesselState:
-        if(m_externalControlActive)
+        if(not m_externalControlActive)
         {
              calculateActuatorPos((VesselStateMsg*)msg);
         }
@@ -165,14 +168,28 @@ int RoutingNode::getMergedHeading(int gpsHeading, int compassHeading, bool incre
 
 void RoutingNode::setupRudderCommand()
 {
-	m_rudderCommand.setCommandValues(m_db.retrieveCellAsInt("rudder_command_config", "1","extreme_command"),
-	        m_db.retrieveCellAsInt("rudder_command_config", "1", "midship_command"));
+	/*m_rudderCommand.setCommandValues(m_db.retrieveCellAsInt("rudder_command_config", "1","extreme_command"),
+	        m_db.retrieveCellAsInt("rudder_command_config", "1", "midship_command"));*/
+
+	// FOR WRSC, QUICK HACK
+#if BOAT_TYPE == BOAT_ENSTA_GRAND
+	m_rudderCommand.setCommandValues( RUDDER_MIN_US, RUDDER_MID_US);
+#else
+	m_rudderCommand.setCommandValues( RUDDER_MAX_US, RUDDER_MID_US);
+#endif
 }
 
 void RoutingNode::setupSailCommand()
 {
-	m_sailCommand.setCommandValues( m_db.retrieveCellAsInt("sail_command_config", "1", "close_reach_command"),
-	        m_db.retrieveCellAsInt("sail_command_config", "1", "run_command"));
+	/*m_sailCommand.setCommandValues( m_db.retrieveCellAsInt("sail_command_config", "1", "close_reach_command"),
+	        m_db.retrieveCellAsInt("sail_command_config", "1", "run_command"));*/
+
+	// FOR WRSC, QUICK HACK
+#if BOAT_TYPE == BOAT_ENSTA_GRAND
+	m_sailCommand.setCommandValues( SAIL_MAX_US, SAIL_MIN_US);
+#else
+	m_sailCommand.setCommandValues( SAIL_MAX_US, SAIL_MIN_US);
+#endif
 }
 
 /*void RoutingNode::manageDatabase(VesselStateMsg* msg, double trueWindDirection, double rudder, double sail){

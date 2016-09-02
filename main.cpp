@@ -3,6 +3,7 @@
 #include "SystemServices/Logger.h"
 #include "MessageBus/MessageBus.h"
 #include "Nodes/MessageLoggerNode.h"
+#include "Nodes/ActuatorNode.h"
 
 #if SIMULATION == 1
  #include "Nodes/SimulationNode.h"
@@ -280,9 +281,13 @@ int main(int argc, char *argv[])
 
 	UDPNode udp(messageBus, "172.20.26.191", 4320);
 
+	MaestroController::init("/dev/ttyACM0");
+	ActuatorNode sail(messageBus, NodeID::SailActuator, 2, 0, 0);
+	ActuatorNode rudder(messageBus, NodeID::RudderActuator, 1, 0, 0);
+
 	// No sensor nodes if we are using the simulator
 #if SIMULATION != 1
-	MaestroController::init("/dev/ttyACM0");
+	//MaestroController::init("/dev/ttyACM0");
 
 	MA3WindSensorNode windSensor(messageBus, 11);
 #if BOAT_TYPE == BOAT_ENSTA_GRAND
@@ -293,8 +298,6 @@ int main(int argc, char *argv[])
 #elif BOAT_TYPE == BOAT_ENSTA_PETIT
 	SerialGPSNode gps(messageBus);
 	RazorCompassNode compass(messageBus,"/dev/ttyACM1");
-	ActuatorNode sail(messageBus, NodeID::SailActuator, 1, 0, 0);
-	ActuatorNode rudder(messageBus, NodeID::RudderActuator, 0, 0, 0);
 #endif
 
 	razorFix = &compass;
