@@ -255,14 +255,14 @@ void SimulationNode::createObstacleMessage(){
 
     if (m_count_sleep % COUNT_OBSTACLE_MSG==0)
     {
-        Logger::info("(SimulationNode) Sent obstacle size : %d", obstacles.size());
-        for (auto &&obstacle : obstacles) {
-            Logger::info("(SimulationNode) ==Detected Obstacle==");
-            Logger::info("(SimulationNode) obstacle.LeftBoundheadingRelativeToBoat = %f",obstacle.LeftBoundheadingRelativeToBoat);
-            Logger::info("(SimulationNode) obstacle.RightBoundheadingRelativeToBoat = %f",obstacle.RightBoundheadingRelativeToBoat);
-            Logger::info("(SimulationNode) obstacle.minDistanceToObstacle = %f",obstacle.minDistanceToObstacle);
-            Logger::info("(SimulationNode) obstacle.maxDistanceToObstacle = %f",obstacle.maxDistanceToObstacle);
-        }
+//        Logger::info("(SimulationNode) Sent obstacle size : %d", obstacles.size());
+//        for (auto &&obstacle : obstacles) {
+//            Logger::info("(SimulationNode) ==Detected Obstacle==");
+//            Logger::info("(SimulationNode) obstacle.LeftBoundheadingRelativeToBoat = %f",obstacle.LeftBoundheadingRelativeToBoat);
+//            Logger::info("(SimulationNode) obstacle.RightBoundheadingRelativeToBoat = %f",obstacle.RightBoundheadingRelativeToBoat);
+//            Logger::info("(SimulationNode) obstacle.minDistanceToObstacle = %f",obstacle.minDistanceToObstacle);
+//            Logger::info("(SimulationNode) obstacle.maxDistanceToObstacle = %f",obstacle.maxDistanceToObstacle);
+//        }
         MessagePtr msg = std::make_unique<ObstacleVectorMsg>(obstacles);
         m_MsgBus.sendMessage(std::move(msg));
     }

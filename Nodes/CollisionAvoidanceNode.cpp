@@ -284,7 +284,7 @@ void CollisionAvoidanceNode::check_obstacles(
 
 bool CollisionAvoidanceNode::these_obstacles_are_a_problem(
         std::vector<Obstacle> & seenObstacles) { // OUTPUT if these obstacles are a problem
-    Logger::info("(Collision Avoidance) >>> These_obstacles_are_a_problem ");
+//    Logger::info("(Collision Avoidance) >>> These_obstacles_are_a_problem ");
 
     bool theseObstaclesAreAProblem = false;
     // We have polygons. We need to see if there is an intersection between

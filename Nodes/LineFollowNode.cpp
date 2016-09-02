@@ -218,10 +218,11 @@ void LineFollowNode::calculateActuatorPos(VesselStateMsg* msg)
     //SET SAIL---------
 
     // QUICKFIX for WRSC
+    double boatHeading_rad  = msg->compassHeading() * M_PI /180.0;//don't trust current heading
     double windDirection_raw = msg->windDir(); // degree from north
-    double windSpeed_raw = msg->windSpeed(); // degree from north
-    sailCommand = m_maxSailAngle/2.0 * (cos(windDirection_raw * M_PI /180.0
-                                            - desiredHeading) + 1);
+    double windDirection = Utility::fmod_2PI_pos(windDirection_raw * M_PI /180.0 + boatHeading_rad);
+    double windSpeed_raw = msg->windSpeed(); // m/s
+    sailCommand = m_maxSailAngle/2.0 * ((cos(windDirection - desiredHeading) + 1));
 
 //    double apparentWindDirection = Utility::getApparentWindDirection(msg->windDir(),
 //                    msg->windSpeed(), msg->speed(), currentHeading_radian, trueWindDirection_radian)*M_PI/180;
@@ -239,7 +240,7 @@ void LineFollowNode::calculateActuatorPos(VesselStateMsg* msg)
     int rudderCommand_norm = m_rudderCommand.getCommand(rudderCommand/NORM_RUDDER_COMMAND);
     int sailCommand_norm = m_sailCommand.getCommand(sailCommand/NORM_SAIL_COMMAND);
 
-    Logger::info("[Sail] cmd: %d, sc: %f, appWind: %f", rudderCommand_norm, sailCommand, (float)apparentWindDirection);
+    Logger::info("[Sail] cmd: %d, sc: %f, windDir: %f", rudderCommand_norm, sailCommand, (float)windDirection / M_PI *180);
 
 
     //Send messages----
@@ -251,7 +252,7 @@ void LineFollowNode::calculateActuatorPos(VesselStateMsg* msg)
     double bearingToNextWaypoint = CourseMath::calculateBTW(msg->longitude(), msg->latitude(), m_nextWaypointLon, m_nextWaypointLat); //calculated for database
     double distanceToNextWaypoint = CourseMath::calculateDTW(msg->longitude(), msg->latitude(), m_nextWaypointLon, m_nextWaypointLat);
 
-    double appWind_degree = Utility::radianToDegree(apparentWindDirection);
+    double appWind_degree = windDirection_raw;
 
     MessagePtr courseMsg = std::make_unique<CourseDataMsg>(appWind_degree, distanceToNextWaypoint, bearingToNextWaypoint);
     m_MsgBus.sendMessage(std::move(courseMsg));
@@ -262,7 +263,8 @@ void LineFollowNode::calculateActuatorPos(VesselStateMsg* msg)
     timestamp_str+= std::to_string(SysClock::millis());
     //--------------------
 
-    m_dbLogger.log(msg, rudderCommand_norm, sailCommand_norm, 0, 0, distanceToNextWaypoint, bearingToNextWaypoint, desiredHeading, m_tack, getGoingStarboard(), m_nextWaypointId, trueWindDirection, false,timestamp_str);
+    m_dbLogger.log(msg, rudderCommand_norm, sailCommand_norm, 0, 0, distanceToNextWaypoint, bearingToNextWaypoint,
+                   desiredHeading, m_tack, getGoingStarboard(), m_nextWaypointId, trueWindDirection, false,timestamp_str);
 }
 
 void LineFollowNode::setPrevWaypointData(WaypointDataMsg* waypMsg, VesselStateMsg* vesselMsg)
