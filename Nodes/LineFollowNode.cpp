@@ -216,11 +216,11 @@ void LineFollowNode::calculateActuatorPos(VesselStateMsg* msg)
     //SET SAIL---------
 
     // QUICKFIX for WRSC
-    double windDirection_raw = msg->windDir(); // degree from north
+    double windDirection_raw = Utility::degreeToRadian(msg->windDir()); // degree from north
     double windSpeed_raw = msg->windSpeed(); // degree from north
-    sailCommand = m_maxSailAngle/2.0 * (cos(windDirection_raw * M_PI /180.0
-                                            - desiredHeading) + 1);
+    sailCommand = m_maxSailAngle/2.0 * (cos(windDirection_raw * M_PI /180.0 + M_PI - desiredHeading) + 1);
 
+    //sailCommand = m_minSailAngle;
 //    double apparentWindDirection = Utility::getApparentWindDirection(msg->windDir(),
 //                    msg->windSpeed(), msg->speed(), currentHeading_radian, trueWindDirection_radian)*M_PI/180;
 //
@@ -237,7 +237,7 @@ void LineFollowNode::calculateActuatorPos(VesselStateMsg* msg)
     int rudderCommand_norm = m_rudderCommand.getCommand(rudderCommand/NORM_RUDDER_COMMAND);
     int sailCommand_norm = m_sailCommand.getCommand(sailCommand/NORM_SAIL_COMMAND);
 
-    Logger::info("[Sail] cmd: %d, sc: %f, appWind: %f", rudderCommand_norm, sailCommand, (float)apparentWindDirection);
+    Logger::info("[Sail] cmd: %d, Rudder: %d sc: %f", sailCommand_norm, rudderCommand_norm, sailCommand);
 
 
     //Send messages----
@@ -249,9 +249,9 @@ void LineFollowNode::calculateActuatorPos(VesselStateMsg* msg)
     double bearingToNextWaypoint = CourseMath::calculateBTW(msg->longitude(), msg->latitude(), m_nextWaypointLon, m_nextWaypointLat); //calculated for database
     double distanceToNextWaypoint = CourseMath::calculateDTW(msg->longitude(), msg->latitude(), m_nextWaypointLon, m_nextWaypointLat);
 
-    double appWind_degree = Utility::radianToDegree(apparentWindDirection);
+    //double appWind_degree = Utility::radianToDegree(apparentWindDirection);
 
-    MessagePtr courseMsg = std::make_unique<CourseDataMsg>(appWind_degree, distanceToNextWaypoint, bearingToNextWaypoint);
+    MessagePtr courseMsg = std::make_unique<CourseDataMsg>(msg->windDir(), distanceToNextWaypoint, bearingToNextWaypoint);
     m_MsgBus.sendMessage(std::move(courseMsg));
 
     //create timestamp----
@@ -358,7 +358,7 @@ void LineFollowNode::setupSailCommand()
 	m_sailCommand.setCommandValues( SAIL_MAX_US, SAIL_MIN_US);
 #else
 	// For little boat swap
-	m_sailCommand.setCommandValues( SAIL_MIN_US, SAIL_MAX_US);
+	m_sailCommand.setCommandValues( SAIL_MAX_US, SAIL_MIN_US);
 #endif
 }
 
