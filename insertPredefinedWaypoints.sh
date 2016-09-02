@@ -147,10 +147,10 @@ then
     sqlite3 asr.db "DROP TABLE waypoints;"
     sqlite3 asr.db "create table waypoints ( id PRIMARY KEY, latitude INTEGER, longitude INTEGER, declination INTEGER, radius INTEGER, stay_time INTEGER, harvested BOOLEAN );"
     
-    sqlite3 asr.db "INSERT INTO waypoints (id,latitude,longitude,declination,radius,stay_time,harvested) VALUES (1,  48.492290,  -4.503987, 6, 20, 60, 0);"
-    sqlite3 asr.db "INSERT INTO waypoints (id,latitude,longitude,declination,radius,stay_time,harvested) VALUES (2,  48.491865,  -4.503909, 6, 15, 40, 0);"
-    sqlite3 asr.db "INSERT INTO waypoints (id,latitude,longitude,declination,radius,stay_time,harvested) VALUES (3,  48.492076,  -4.504488, 6, 10, 10, 0);"
-    sqlite3 asr.db "INSERT INTO waypoints (id,latitude,longitude,declination,radius,stay_time,harvested) VALUES (4,  48.492290,  -4.503987, 6, 10, 20, 0);"
+    sqlite3 asr.db "INSERT INTO waypoints (id,latitude,longitude,declination,radius,stay_time,harvested) VALUES (1,  48.492290,  -4.503987, 6, 15, 0, 0);"
+    sqlite3 asr.db "INSERT INTO waypoints (id,latitude,longitude,declination,radius,stay_time,harvested) VALUES (2,  48.491865,  -4.503909, 6, 15, 0, 0);"
+    sqlite3 asr.db "INSERT INTO waypoints (id,latitude,longitude,declination,radius,stay_time,harvested) VALUES (3,  48.492076,  -4.504488, 6, 10, 0, 0);"
+    sqlite3 asr.db "INSERT INTO waypoints (id,latitude,longitude,declination,radius,stay_time,harvested) VALUES (4,  48.492290,  -4.503987, 6, 10, 0, 0);"
 fi
 
 

@@ -120,6 +120,7 @@ void WaypointMgrNode::sendMessage()
 bool WaypointMgrNode::harvestWaypoint()
 {
     double DTW = CourseMath::calculateDTW(m_gpsLongitude, m_gpsLatitude, m_nextLongitude, m_nextLatitude); //Calculate distance to waypoint
+    //Logger::info("Distance to WP: %f Radius: %f", DTW, m_nextRadius);
     if(DTW > m_nextRadius)
     {
         return false;
