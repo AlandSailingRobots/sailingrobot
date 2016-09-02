@@ -22,7 +22,7 @@
 #include "SystemServices/Logger.h"
 
 
-#define VESSEL_STATE_SLEEP_MS 400
+#define VESSEL_STATE_SLEEP_MS 100
 #define VESSEL_STATE_INITIAL_SLEEP 2000
 
 
@@ -116,7 +116,7 @@ void VesselStateNode::VesselStateThreadFunc(void* nodePtr)
 		// Controls how often we pump out messages
 		std::this_thread::sleep_for(std::chrono::milliseconds(VESSEL_STATE_SLEEP_MS));
 
-		Logger::info("Compass: %d GPS Lat: %.7f GPS Lon: %.7f", node->m_CompassHeading, node->m_GPSLat, node->m_GPSLon);
+		//Logger::info("Compass: %d GPS Lat: %.7f GPS Lon: %.7f", node->m_CompassHeading, node->m_GPSLat, node->m_GPSLon);
 
 		MessagePtr vesselState = std::make_unique<VesselStateMsg>(	node->m_CompassHeading, node->m_CompassPitch,
 																	node->m_CompassRoll, node->m_GPSHasFix, node->m_GPSOnline, node->m_GPSLat,

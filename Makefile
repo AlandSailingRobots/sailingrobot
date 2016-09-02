@@ -119,40 +119,36 @@ endif
 ifeq ($(TARGET),WRSC)
 TARGET_INT = 1
 
+SRC 					= $(SRC_CORE) $(SRC_CORE_SAILING) $(SRC_CORE_NODES) $(SRC_COMMON) $(SRC_WRSC_NODES) \
+						  $(SRC_ACTUATOR_NODE) $(SRC_NETWORK_WIFI_UDP) $(SRC_COLLISION_AVOIDANCE)
+
 ifeq ($(USE_SIM), 1)
-SRC 					= $(SRC_CORE) $(SRC_CORE_SAILING) $(SRC_CORE_NODES) $(SRC_COMMON) $(SRC_WRSC_NODES) \
-						  $(SRC_ACTUATOR_NODE) $(SRC_NETWORK_WIFI_UDP) $(SRC_COLLISION_AVOIDANCE) $(SRC_DRAWING) $(SRC_SIMULATOR)
-# $(SRC_OPENCV_CV) Get working properly
-
-C_SRC					= $(SRC_WRSC_C)
-else
-SRC 					= $(SRC_CORE) $(SRC_CORE_SAILING) $(SRC_CORE_NODES) $(SRC_COMMON) $(SRC_WRSC_NODES) \
-						  $(SRC_ACTUATOR_NODE) $(SRC_NETWORK_WIFI_UDP) $(SRC_COLLISION_AVOIDANCE) $(SRC_DRAWING)
-# $(SRC_OPENCV_CV) Get working properly
-
-C_SRC					= $(SRC_WRSC_C)
+SRC						+= $(SRC_SIMULATOR) $(SRC_DRAWING)
 endif
+
+# $(SRC_OPENCV_CV) Get working properly
+
+C_SRC					= $(SRC_WRSC_C)
+
 endif
 #----------------------------------------------------------------------------------------
 
 #----------------------------------------------------------------------------------------
-# WRSC2016 build
+# WRSC2016 build backup
 ifeq ($(TARGET),WRSC_BAK)
 TARGET_INT = 1
 
+
+SRC 					= $(SRC_CORE) $(SRC_CORE_SAILING) $(SRC_CORE_NODES) $(SRC_COMMON) $(SRC_WRSC_NODES) \
+						  $(SRC_ACTUATOR_NODE) $(SRC_NETWORK_WIFI_UDP) $(SRC_COLLISION_AVOIDANCE_BAK)
+# $(SRC_OPENCV_CV) Get working properly
+
 ifeq ($(USE_SIM), 1)
-SRC 					= $(SRC_CORE) $(SRC_CORE_SAILING) $(SRC_CORE_NODES) $(SRC_COMMON) $(SRC_WRSC_NODES) \
-						  $(SRC_ACTUATOR_NODE) $(SRC_NETWORK_WIFI_UDP) $(SRC_COLLISION_AVOIDANCE_BAK) $(SRC_DRAWING) $(SRC_SIMULATOR)
-# $(SRC_OPENCV_CV) Get working properly
-
-C_SRC					= $(SRC_WRSC_C)
-else
-SRC 					= $(SRC_CORE) $(SRC_CORE_SAILING) $(SRC_CORE_NODES) $(SRC_COMMON) $(SRC_WRSC_NODES) \
-						  $(SRC_ACTUATOR_NODE) $(SRC_NETWORK_WIFI_UDP) $(SRC_COLLISION_AVOIDANCE_BAK) $(SRC_DRAWING)
-# $(SRC_OPENCV_CV) Get working properly
-
-C_SRC					= $(SRC_WRSC_C)
+SRC						+= $(SRC_SIMULATOR) $(SRC_DRAWING)
 endif
+
+C_SRC					= $(SRC_WRSC_C)
+
 endif
 #----------------------------------------------------------------------------------------
 

@@ -3,6 +3,7 @@
 #include "SystemServices/Logger.h"
 #include "MessageBus/MessageBus.h"
 #include "Nodes/MessageLoggerNode.h"
+#include "Nodes/ActuatorNode.h"
 
 #if SIMULATION == 1
  #include "Nodes/SimulationNode.h"
@@ -282,16 +283,18 @@ int main(int argc, char *argv[])
 	initialiseNode(rudder, "Rudder Actuator", NodeImportance::CRITICAL);
 #endif
 	//---------------------------------------------------------------------------------------------
-    // Target: WRSC2016
-    //---------------------------------------------------------------------------------------------
+
+	//---------------------------------------------------------------------------------------------
+	// Target: WRSC
 #if TARGET == 1
 
-	UDPNode udp(messageBus, "172.20.26.191", 4320);
+    //ActuatorNode sail(messageBus, NodeID::SailActuator, 2, 0, 0);
+	//ActuatorNode rudder(messageBus, NodeID::RudderActuator, 1, 0, 0);
+    UDPNode udp(messageBus, "172.20.26.191", 4320);
+    // No sensor nodes if we are using the simulator
 #if SIMULATION != 1
-
     MaestroController::init("/dev/ttyACM0");
     MA3WindSensorNode windSensor(messageBus, 11);
-
 #if BOAT_TYPE == BOAT_ENSTA_GRAND
 	GPSDNode gps(messageBus);
 	RazorCompassNode compass(messageBus, "/dev/ttyUSB1");
@@ -318,6 +321,7 @@ int main(int argc, char *argv[])
     initialiseNode(rudder, "Rudder Actuator", NodeImportance::CRITICAL);
 
 #endif
+
 	// Sailing Logic nodes
 	VesselStateNode vessel(messageBus);
 	WaypointMgrNode waypoint(messageBus, dbHandler);
@@ -336,8 +340,6 @@ int main(int argc, char *argv[])
 	{
         sailingLogic = new RoutingNode(messageBus, dbHandler);
     }
-
-    // Actuator Node
 
     initialiseNode(collisionAvoidanceNode, "Collision Avoidance", NodeImportance::NOT_CRITICAL);
     initialiseNode(udp, "UDP Node", NodeImportance::CRITICAL);
@@ -389,6 +391,6 @@ int main(int argc, char *argv[])
 	messageBus.run();
 
 	Logger::shutdown();
-//	delete sailingLogic;
+    delete sailingLogic;
 	exit(0);
 }

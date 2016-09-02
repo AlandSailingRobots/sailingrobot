@@ -36,9 +36,9 @@ var {
 
     float display 1 range 0 to 1
 
-    float rudderAV 1 range 3500 to 8000
+    float rudderAV 1 range 800 to 2000
 
-    float sailAV 1 range 3500 to 8000
+    float sailAV 1 range 800 to 2000
     
     # "lat" and "lon" should always be considered to be a pair,
     # so we link them - if a lat ever arrives without a lon, a

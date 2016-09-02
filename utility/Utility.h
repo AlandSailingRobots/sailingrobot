@@ -102,6 +102,10 @@ public:
 	{
 		return fmod(fmod(theta, 2*M_PI)+3*M_PI, 2*M_PI)-M_PI;
 	}
+
+    double wrapToPi(
+            double radAngle1,
+            double radAngle2);
 };
 
 #endif

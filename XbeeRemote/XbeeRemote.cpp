@@ -269,12 +269,21 @@ void XbeeRemote::sendToUI(Message* msgPtr, MessageDeserialiser& deserialiser)
 {
 	switch(msgPtr->messageType())
 	{
+		case MessageType::ActuatorPosition:
+		{
+			ActuatorPositionMsg msg(deserialiser);
+			if(msg.isValid())
+			{
+				m_Relay.write("rudderAV=%d sailAV=%d", msg.rudderPosition(), msg.sailPosition());
+			}
+		}
+		break;
 		case MessageType::VesselState:
 		{
 			VesselStateMsg msg(deserialiser);
 			if(msg.isValid())
 			{
-				m_Relay.write("heading=%d gpsHeading=%f speed=%f lat=%.7f lon=%.7f windDir=%f windSpeed=%f rudderAV=%d sailAV=%d pressure=%d currTot=%d", msg.compassHeading(), msg.gpsHeading(), msg.speed(), msg.latitude(), msg.longitude(), msg.windDir(), msg.windSpeed(), msg.arduinoRudder(), msg.arduinoSheet(), msg.arduinoPressure(), msg.arduinoBattery());
+				m_Relay.write("heading=%d gpsHeading=%f speed=%f lat=%.7f lon=%.7f windDir=%f windSpeed=%f pressure=%d currTot=%d", msg.compassHeading(), msg.gpsHeading(), msg.speed(), msg.latitude(), msg.longitude(), msg.windDir(), msg.windSpeed(), msg.arduinoRudder(), msg.arduinoSheet(), msg.arduinoPressure(), msg.arduinoBattery());
 			}
 		}
 		break;

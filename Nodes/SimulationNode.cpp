@@ -31,7 +31,7 @@
 #include "utility/SysClock.h"
 #include "SystemServices/Logger.h"
 
-#define BASE_SLEEP_MS 400
+#define BASE_SLEEP_MS 100
 #define COUNT_COMPASSDATA_MSG 1
 #define COUNT_GPSDATA_MSG 1
 #define COUNT_WINDDATA_MSG 1
