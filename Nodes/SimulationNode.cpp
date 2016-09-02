@@ -30,7 +30,7 @@
 #include "utility/SysClock.h"
 
 
-#define BASE_SLEEP_MS 400
+#define BASE_SLEEP_MS 100
 #define COUNT_COMPASSDATA_MSG 1
 #define COUNT_GPSDATA_MSG 1
 #define COUNT_WINDDATA_MSG 1
@@ -241,7 +241,6 @@ void SimulationNode::SimulationThreadFunc(void* nodePtr)
     node->processSocketData();
 		node->setupDataSend();
 
-	Logger::info("Simulator sent Rudder: %d Sail: %d", node->m_data_send.rudder_command, node->m_data_send.sheet_command);
     //send data to simulation
     write(node->m_handler_socket_client.sockfd,&(node->m_data_send), sizeof(struct DATA_SOCKET_SEND));
 

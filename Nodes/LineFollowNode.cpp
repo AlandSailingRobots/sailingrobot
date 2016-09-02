@@ -73,7 +73,7 @@ LineFollowNode::LineFollowNode(MessageBus& msgBus, DBHandler& db)
 #if BOAT_TYPE == BOAT_ENSTA_PETIT
 
     m_maxCommandAngle = M_PI / 6; // 29.98460029 Degrees
-	m_maxSailAngle = 1.309; // 75 Degrees
+	m_maxSailAngle = M_PI / 4.2f; //1.309; // 75 Degrees
 	m_minSailAngle = M_PI / 32.0f; // 5.5 degress or so
 	m_tackAngle = 0.872665; //50°
 
@@ -237,6 +237,7 @@ void LineFollowNode::calculateActuatorPos(VesselStateMsg* msg)
     int rudderCommand_norm = m_rudderCommand.getCommand(rudderCommand/NORM_RUDDER_COMMAND);
     int sailCommand_norm = m_sailCommand.getCommand(sailCommand/NORM_SAIL_COMMAND);
 
+    Logger::info("[Sail] cmd: %d, sc: %f, appWind: %f", rudderCommand_norm, sailCommand, (float)apparentWindDirection);
 
 
     //Send messages----
@@ -248,7 +249,9 @@ void LineFollowNode::calculateActuatorPos(VesselStateMsg* msg)
     double bearingToNextWaypoint = CourseMath::calculateBTW(msg->longitude(), msg->latitude(), m_nextWaypointLon, m_nextWaypointLat); //calculated for database
     double distanceToNextWaypoint = CourseMath::calculateDTW(msg->longitude(), msg->latitude(), m_nextWaypointLon, m_nextWaypointLat);
 
-    MessagePtr courseMsg = std::make_unique<CourseDataMsg>(trueWindDirection, distanceToNextWaypoint, bearingToNextWaypoint);
+    double appWind_degree = Utility::radianToDegree(apparentWindDirection);
+
+    MessagePtr courseMsg = std::make_unique<CourseDataMsg>(appWind_degree, distanceToNextWaypoint, bearingToNextWaypoint);
     m_MsgBus.sendMessage(std::move(courseMsg));
 
     //create timestamp----
@@ -338,7 +341,8 @@ void LineFollowNode::setupRudderCommand()
 #if BOAT_TYPE == BOAT_ENSTA_GRAND
 	m_rudderCommand.setCommandValues( RUDDER_MIN_US, RUDDER_MID_US);
 #else
-	m_rudderCommand.setCommandValues( RUDDER_MAX_US, RUDDER_MID_US);
+	// Normally max
+	m_rudderCommand.setCommandValues( RUDDER_MIN_US, RUDDER_MID_US);
 #endif
 }
 
@@ -353,7 +357,8 @@ void LineFollowNode::setupSailCommand()
 #if BOAT_TYPE == BOAT_ENSTA_GRAND
 	m_sailCommand.setCommandValues( SAIL_MAX_US, SAIL_MIN_US);
 #else
-	m_sailCommand.setCommandValues( SAIL_MAX_US, SAIL_MIN_US);
+	// For little boat swap
+	m_sailCommand.setCommandValues( SAIL_MIN_US, SAIL_MAX_US);
 #endif
 }
 
