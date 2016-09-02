@@ -58,7 +58,7 @@ void ActuatorNode::processMessage(const Message* message)
 			{
 				value = RUDDER_MAX_US - 1;
 			}
-			Logger::info("Rudder: %d", value);
+			//Logger::info("Rudder: %d", value);
 			sendCommand(value * 4);
 		}
 		else if (nodeID() == NodeID::SailActuator)
@@ -74,7 +74,7 @@ void ActuatorNode::processMessage(const Message* message)
 			{
 				value = SAIL_MAX_US - 1;
 			}
-			Logger::info("Sail: %d", value);
+			//Logger::info("Sail: %d", value);
 			sendCommand(value * 4);
 		}
 		else

@@ -282,8 +282,6 @@ int main(int argc, char *argv[])
 	UDPNode udp(messageBus, "172.20.26.191", 4320);
 
 	MaestroController::init("/dev/ttyACM0");
-	ActuatorNode sail(messageBus, NodeID::SailActuator, 1, 0, 0);
-	ActuatorNode rudder(messageBus, NodeID::RudderActuator, 0, 0, 0);
 
 	// No sensor nodes if we are using the simulator
 #if SIMULATION != 1
@@ -298,6 +296,8 @@ int main(int argc, char *argv[])
 #elif BOAT_TYPE == BOAT_ENSTA_PETIT
 	SerialGPSNode gps(messageBus);
 	RazorCompassNode compass(messageBus,"/dev/ttyACM1");
+	ActuatorNode sail(messageBus, NodeID::SailActuator, 1, 0, 0);
+	ActuatorNode rudder(messageBus, NodeID::RudderActuator, 0, 0, 0);
 #endif
 
 	razorFix = &compass;
