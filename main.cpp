@@ -279,7 +279,7 @@ int main(int argc, char *argv[])
 	// Target: WRSC
 #if TARGET == 1
 
-	UDPNode udp(messageBus, "172.20.26.191", 4320);
+	UDPNode udp(messageBus, "127.0.0.1", 4320);
 
 	MaestroController::init("/dev/ttyACM0");
 
@@ -287,15 +287,16 @@ int main(int argc, char *argv[])
 #if SIMULATION != 1
 	//MaestroController::init("/dev/ttyACM0");
 
-	MA3WindSensorNode windSensor(messageBus, 11);
 #if BOAT_TYPE == BOAT_ENSTA_GRAND
 	GPSDNode gps(messageBus);
 	RazorCompassNode compass(messageBus, "/dev/ttyUSB1");
 	ActuatorNode sail(messageBus, NodeID::SailActuator, 1, 0, 0);
 	ActuatorNode rudder(messageBus, NodeID::RudderActuator, 2, 0, 0);
+	MA3WindSensorNode windSensor(messageBus, 11);
 #elif BOAT_TYPE == BOAT_ENSTA_PETIT
 	SerialGPSNode gps(messageBus);
 	RazorCompassNode compass(messageBus,"/dev/ttyACM1");
+	MA3WindSensorNode windSensor(messageBus, 5);
 	ActuatorNode sail(messageBus, NodeID::SailActuator, 1, 0, 0);
 	ActuatorNode rudder(messageBus, NodeID::RudderActuator, 0, 0, 0);
 #endif

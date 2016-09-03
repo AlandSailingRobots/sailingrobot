@@ -15,6 +15,7 @@
 #include "SystemServices/Logger.h"
 #include "SystemServices/MaestroController.h"
 #include "utility/SysClock.h"
+#include "utility/Utility.h"
 
 
 #define MAX_VALUE		1023
@@ -66,7 +67,7 @@ void MA3WindSensorNode::ma3ThreadFunc(void* nodePtr)
 
 		if(windDir != -1)
 		{
-			windDir = (((windDir*1000) / MAX_VALUE) * 360) / 1000;
+			windDir = Utility::limitAngleRange(((((windDir*1000) / MAX_VALUE) * 360) / 1000) + 20);
 			//Logger::info("Wind Data: %d", windDir);
 			MessagePtr windData = std::make_unique<WindDataMsg>(windDir, 0, 0);
 			node->m_MsgBus.sendMessage(std::move(windData));

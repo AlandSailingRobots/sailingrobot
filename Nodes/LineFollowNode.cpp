@@ -175,24 +175,41 @@ void LineFollowNode::calculateActuatorPos(VesselStateMsg* msg)
     double currentHeading_radian = Utility::degreeToRadian(currentHeading);
     double signedDistance = Utility::calculateSignedDistanceToLine(m_nextWaypointLon, m_nextWaypointLat, m_prevWaypointLon,
                                                                    m_prevWaypointLat, msg->longitude(), msg->latitude());
-    int maxTackDistance = 20; //'r'
+    int maxTackDistance = 10; //'r'
     double phi = calculateAngleOfDesiredTrajectory(msg);
     double desiredHeading = phi + (2 * (M_PI / 4)/M_PI) * atan(signedDistance/maxTackDistance); //heading to smoothly join the line
     desiredHeading = Utility::limitRadianAngleRange(desiredHeading);
     //---------------------
 
+    static bool changingTack = false;
     //Change tacking direction when reaching max distance
     if(abs(signedDistance) > maxTackDistance)
     {
-        m_tackingDirection = -Utility::sgn(signedDistance);
+    	if(m_tack)
+    	{
+			if(not changingTack)
+			{
+				m_tackingDirection = -Utility::sgn(signedDistance);
+				changingTack = true;
+				Logger::info("Tack swap");
+			}
+        }
+    }
+    else
+    {
+    	changingTack = false;
     }
     //--------------------------------------------------
 
+    //Logger::info("Distance from line: %d WindSpeed: %f", abs(signedDistance), msg->windSpeed());
     //Check if tacking is needed-----
     if( (cos(trueWindDirection_radian - desiredHeading) + cos(m_tackAngle) < 0) || (cos(trueWindDirection_radian - phi) + cos(m_tackAngle) < 0))
     {
+    	float windAngle = Utility::radianToDegree(cos(trueWindDirection_radian - desiredHeading) + cos(m_tackAngle));
+    	//Logger::info("Tacking: %f WindAngle %f TWD: %f Heading: %d", cos(trueWindDirection_radian - desiredHeading), windAngle, trueWindDirection, msg->compassHeading());
         if(!m_tack) /* initialize tacking direction */
         {
+        	Logger::info("Begin tack");
             m_tackingDirection = -Utility::sgn(currentHeading_radian-(fmod(trueWindDirection_radian+M_PI, 2*M_PI) - M_PI));
             m_tack = true;
         }
@@ -200,10 +217,11 @@ void LineFollowNode::calculateActuatorPos(VesselStateMsg* msg)
         desiredHeading = M_PI + trueWindDirection_radian - m_tackingDirection * m_tackAngle;/* sail around the wind direction */
         desiredHeading = Utility::limitRadianAngleRange(desiredHeading);
     }
-    else
-    {
-        m_tack = false;
-    }
+    else if(m_tack)
+	{
+		m_tack = false;
+		Logger::info("End tack");
+	}
     //-------------------------------
 
     double rudderCommand, sailCommand;
@@ -225,7 +243,7 @@ void LineFollowNode::calculateActuatorPos(VesselStateMsg* msg)
 	double boatHeading_rad = msg->compassHeading() * M_PI /180.0; //Simon : i don't trust currentHeading
     double windDirection_raw = Utility::degreeToRadian(msg->windDir()); // degree from north
     double windSpeed_raw = msg->windSpeed(); // degree from north
-    double windDirection = Utility::fmod_2PI_pos(windDirection_raw * M_PI /180.0 + boatHeading_rad);
+    double windDirection = Utility::fmod_2PI_pos(windDirection_raw * M_PI /180.0 + boatHeading_rad + M_PI);
 	sailCommand = m_maxSailAngle/2.0 * (cos(windDirection * M_PI /180.0 + M_PI - desiredHeading) + 1);
 
     //sailCommand = m_minSailAngle;
@@ -245,7 +263,7 @@ void LineFollowNode::calculateActuatorPos(VesselStateMsg* msg)
     int rudderCommand_norm = m_rudderCommand.getCommand(rudderCommand/NORM_RUDDER_COMMAND);
     int sailCommand_norm = m_sailCommand.getCommand(sailCommand/NORM_SAIL_COMMAND);
 
-    Logger::info("[Sail] cmd: %d, Rudder: %d sc: %f", sailCommand_norm, rudderCommand_norm, sailCommand);
+    //Logger::info("[Sail] cmd: %d, Rudder: %d sc: %f", sailCommand_norm, rudderCommand_norm, sailCommand);
 
 
     //Send messages----
