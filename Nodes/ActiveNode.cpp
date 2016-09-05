@@ -16,5 +16,5 @@
 
 void ActiveNode::runThread(ActiveNodeFunc func)
 {
-	m_Thread = new std::thread(func, this);
+	m_ThreadPtr = new std::thread(func, this);
 }
