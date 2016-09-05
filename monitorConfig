@@ -16,7 +16,7 @@ var {
     # for it in a cyclic buffer, so we can graph 100 values back.
 
     float heading 100 range 0 to 359
-
+	float windDir 10 range 0 to 359
     # True Wind direction
     float twd 100 range 0 to 359
 
@@ -154,7 +154,7 @@ window {
 
         compass 1,2 {
             title "True Wind"
-            expr "twd" range auto
+            expr "windDir" range auto
         }
 
         number 0,3 { var wpnum title "Waypoint Number"}
