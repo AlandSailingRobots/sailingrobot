@@ -93,7 +93,7 @@ SRC_SIMULATOR			= Nodes/SimulationNode.cpp
 SRC_WRSC_C				= libs/minmea/minmea.c
 SRC_WRSC_NODES			= Nodes/MA3WindSensorNode.cpp Nodes/RazorCompassNode.cpp Nodes/UDPNode.cpp XbeeRemote/UDPRelay.cpp Nodes/GPSDNode.cpp Nodes/SerialGPSNode.cpp
 
-SRC_COLLISION_AVOIDANCE = Nodes/CollisionAvoidanceNode.cpp
+#SRC_COLLISION_AVOIDANCE = Nodes/CollisionAvoidanceNode.cpp
 
 SRC_COLLISION_AVOIDANCE_BAK = Nodes/CollAvoidanceBakStrat.cpp
 
@@ -120,8 +120,9 @@ ifeq ($(TARGET),WRSC)
 TARGET_INT = 1
 
 SRC 					= $(SRC_CORE) $(SRC_CORE_SAILING) $(SRC_CORE_NODES) $(SRC_COMMON) $(SRC_WRSC_NODES) \
-						  $(SRC_ACTUATOR_NODE) $(SRC_NETWORK_WIFI_UDP) $(SRC_COLLISION_AVOIDANCE)
-
+						  $(SRC_ACTUATOR_NODE) $(SRC_NETWORK_WIFI_UDP) $(SRC_COLLISION_AVOIDANCE) \
+						Nodes/ManualControlNode.cpp
+					
 ifeq ($(USE_SIM), 1)
 SRC						+= $(SRC_SIMULATOR) $(SRC_DRAWING)
 endif
@@ -140,7 +141,8 @@ TARGET_INT = 1
 
 
 SRC 					= $(SRC_CORE) $(SRC_CORE_SAILING) $(SRC_CORE_NODES) $(SRC_COMMON) $(SRC_WRSC_NODES) \
-						  $(SRC_ACTUATOR_NODE) $(SRC_NETWORK_WIFI_UDP) $(SRC_COLLISION_AVOIDANCE_BAK)
+						  $(SRC_ACTUATOR_NODE) $(SRC_NETWORK_WIFI_UDP) $(SRC_COLLISION_AVOIDANCE_BAK) \
+						Nodes/ManualControlNode.cpp
 # $(SRC_OPENCV_CV) Get working properly
 
 ifeq ($(USE_SIM), 1)

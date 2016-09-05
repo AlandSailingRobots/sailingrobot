@@ -151,6 +151,10 @@ then
     sqlite3 asr.db "INSERT INTO waypoints (id,latitude,longitude,declination,radius,stay_time,harvested) VALUES (2,  48.491865,  -4.503909, 6, 15, 0, 0);"
     sqlite3 asr.db "INSERT INTO waypoints (id,latitude,longitude,declination,radius,stay_time,harvested) VALUES (3,  48.492076,  -4.504488, 6, 10, 0, 0);"
     sqlite3 asr.db "INSERT INTO waypoints (id,latitude,longitude,declination,radius,stay_time,harvested) VALUES (4,  48.492290,  -4.503987, 6, 10, 0, 0);"
+elif [$C -eq 10]
+then
+	
+
 fi
 
 

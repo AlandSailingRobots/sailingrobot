@@ -137,6 +137,7 @@ double LineFollowNode::calculateAngleOfDesiredTrajectory(VesselStateMsg* msg)
 
 void LineFollowNode::calculateActuatorPos(VesselStateMsg* msg)
 {
+	return;
     if(not msg->gpsOnline())
     {
         Logger::error("GPS not online, using values from last iteration");
@@ -355,7 +356,7 @@ void LineFollowNode::setupRudderCommand()
 	m_rudderCommand.setCommandValues( RUDDER_MID_US, RUDDER_MID_US);
 #else
 	// Normally max
-	m_rudderCommand.setCommandValues( RUDDER_MID_US, RUDDER_MAX_US);
+	m_rudderCommand.setCommandValues( RUDDER_MID_US, RUDDER_MIN_US);
 #endif
 }
 

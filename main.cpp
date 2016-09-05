@@ -49,7 +49,7 @@ enum class NodeImportance {
 #include "Nodes/RoutingNode.h"
 #include "Nodes/LineFollowNode.h"
 #include "SystemServices/MaestroController.h"
-
+#include "Nodes/ManualControlNode.h"
 RazorCompassNode* razorFix;
 
 #elif TARGET == 2
@@ -267,7 +267,7 @@ int main(int argc, char *argv[])
 	// Target: WRSC
 #if TARGET == 1
 
-	UDPNode udp(messageBus, "127.0.0.1", 4320);
+	UDPNode udp(messageBus, "192.168.8.126", 4320);
 
 	MaestroController::init("/dev/ttyACM0");
 
@@ -328,6 +328,10 @@ int main(int argc, char *argv[])
 	initialiseNode(waypoint, "Waypoint Node", NodeImportance::CRITICAL);
 
 	initialiseNode(*sailingLogic, "Sailing Logic", NodeImportance::CRITICAL);
+
+	ManualControlNode manual(messageBus);
+	initialiseNode(manual, "Manual", NodeImportance::CRITICAL);
+	activeNodes.push_back(&manual);
 #endif
 	//---------------------------------------------------------------------------------------------
 
@@ -348,7 +352,7 @@ int main(int argc, char *argv[])
 #endif
 
     ManualControlNode manualControl(messageBus);
-
+	activeNodes.push_back(&manualControl);
 	initialiseNode(sail, "Sail Actuator", NodeImportance::CRITICAL);
 	initialiseNode(rudder, "Rudder Actuator", NodeImportance::CRITICAL);
     initialiseNode(manualControl, "Manual control", NodeImportance::CRITICAL);
@@ -367,16 +371,16 @@ int main(int argc, char *argv[])
 
 	// Test actuator Positions
 	// Rudder and Sail Max
-	//MessagePtr actuatorMsg = std::make_unique<ActuatorPositionMsg>(RUDDER_MAX_US, SAIL_MAX_US);
-	//messageBus.sendMessage(std::move(actuatorMsg));
+	MessagePtr actuatorMsg = std::make_unique<ActuatorPositionMsg>(RUDDER_MAX_US, SAIL_MAX_US);
+	messageBus.sendMessage(std::move(actuatorMsg));
 
 	// Middle
 	//MessagePtr actuatorMsg = std::make_unique<ActuatorPositionMsg>(RUDDER_MID_US, 1500);
 	//messageBus.sendMessage(std::move(actuatorMsg));
 
 	// Min
-	MessagePtr actuatorMsg = std::make_unique<ActuatorPositionMsg>(RUDDER_MIN_US, SAIL_MIN_US);
-	messageBus.sendMessage(std::move(actuatorMsg));
+	//MessagePtr actuatorMsg = std::make_unique<ActuatorPositionMsg>(RUDDER_MIN_US, SAIL_MIN_US);
+	//messageBus.sendMessage(std::move(actuatorMsg));
 
 	messageBus.run();
 

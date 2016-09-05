@@ -20,17 +20,19 @@ class ManualControlNode : public ActiveNode {
 public:
     ManualControlNode(MessageBus& msgBus);
 
+	virtual ~ManualControlNode() {}
+
     ///----------------------------------------------------------------------------------
     /// Attempts to connect to the Arduino.
     ///----------------------------------------------------------------------------------
-    bool init();
+    virtual bool init();
 
     ///----------------------------------------------------------------------------------
     /// This function should be used to start the active nodes thread.
     ///----------------------------------------------------------------------------------
-    void start();
+    virtual void start();
 
-    void processMessage(const Message* message);
+    virtual void processMessage(const Message* message);
 
 private:
 
