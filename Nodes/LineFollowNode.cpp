@@ -352,10 +352,10 @@ void LineFollowNode::setupRudderCommand()
 
 	// FOR WRSC, QUICK HACK
 #if BOAT_TYPE == BOAT_ENSTA_GRAND
-	m_rudderCommand.setCommandValues( RUDDER_MIN_US, RUDDER_MID_US);
+	m_rudderCommand.setCommandValues( RUDDER_MID_US, RUDDER_MID_US);
 #else
 	// Normally max
-	m_rudderCommand.setCommandValues( RUDDER_MIN_US, RUDDER_MID_US);
+	m_rudderCommand.setCommandValues( RUDDER_MID_US, RUDDER_MAX_US);
 #endif
 }
 

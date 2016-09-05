@@ -294,6 +294,7 @@ int main(int argc, char *argv[])
 	ActuatorNode rudder(messageBus, NodeID::RudderActuator, 2, 0, 0);
 	MA3WindSensorNode windSensor(messageBus, 11);
 #elif BOAT_TYPE == BOAT_ENSTA_PETIT
+	MA3WindSensorNode windSensor(messageBus, 3);
 	SerialGPSNode gps(messageBus);
 	RazorCompassNode compass(messageBus,"/dev/ttyACM1");
 	MA3WindSensorNode windSensor(messageBus, 5);
