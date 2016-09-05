@@ -30,7 +30,6 @@ public:
 		:Message(MessageType::WaypointData, NodeID::None, NodeID::None), m_nextId(nextId), m_nextLongitude(nextLongitude), m_nextLatitude(nextLatitude),
                          m_nextDeclination(nextDeclination), m_nextRadius(nextRadius), m_nextStayTime(nextStayTime), m_prevId(prevId), m_prevLongitude(prevLongitude), 
                          m_prevLatitude(prevLatitude), m_prevDeclination(prevDeclination), m_prevRadius(prevRadius)
-
 	{ }
 
 	WaypointDataMsg(MessageDeserialiser deserialiser)

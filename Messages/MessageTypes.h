@@ -18,7 +18,6 @@
 
 #include <string>
 
-
 enum class MessageType {
 	DataRequest = 0,
 	WindData,
@@ -32,10 +31,12 @@ enum class MessageType {
 	ArduinoData,
 	VesselState,
 	WaypointData,
-	ObstacleVector,
-	LidarData,
 	CourseData,
-	ExternalControl
+    ObstacleVector,
+    CollisionAvoidance,
+    ObstaclePosition,
+    LidarData,
+    ExternalControl
 };
 
 inline std::string msgToString(MessageType msgType)
@@ -72,8 +73,12 @@ inline std::string msgToString(MessageType msgType)
 		return "LidarData";
 	case MessageType::CourseData:
 		return "CourseData";
+    case MessageType::CollisionAvoidance:
+        return "CollisionAvoidance";
 	case MessageType::ExternalControl:
 		return "ExternalControl";
+    case MessageType::ObstaclePosition:
+        return  "ObstaclePosition";
 	}
 	return "";
 }

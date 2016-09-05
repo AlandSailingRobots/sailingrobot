@@ -26,16 +26,18 @@
 #include <cerrno>
 #include <cstring>
 #include <unistd.h>
+#include <cmath>
 #include "SystemServices/Logger.h"
 #include "utility/SysClock.h"
-
+#include "SystemServices/Logger.h"
 
 #define BASE_SLEEP_MS 100
 #define COUNT_COMPASSDATA_MSG 1
 #define COUNT_GPSDATA_MSG 1
 #define COUNT_WINDDATA_MSG 1
 #define COUNT_ARDUINO_MSG 1
-
+#define COUNT_OBSTACLE_MSG 1
+#define DRAW_STATE_WITH_VIBES 1
 
 SimulationNode::SimulationNode(MessageBus& msgBus)
 	: ActiveNode(NodeID::Simulator, msgBus),
@@ -84,7 +86,12 @@ bool SimulationNode::init(){
     fcntl(m_handler_socket_server.sockfd, F_SETFL, O_NONBLOCK);
     Logger::info("Handling Simulation client from : %s\n", inet_ntoa(m_handler_socket_client.info_me.sin_addr));
 
-		return true;
+    // code can be simplified here
+    if(!init_obstacles()){
+        return false;
+    }
+
+	return true;
 }
 
 int SimulationNode::init_socket(int port)
@@ -118,6 +125,21 @@ int SimulationNode::init_socket(int port)
     return 0;
 }
 
+bool SimulationNode::init_obstacles(){
+    m_obstacles_coords.lon.clear();
+    m_obstacles_coords.lat.clear();
+//    m_obstacles_coords.lon = {19.92207992094336,19.92193812140613,19.921326,19.921705,19.92185527391433,19.92238372564315,19.920391}; // deg
+//    m_obstacles_coords.lat = {60.10531054974476,60.10533773205465,60.105284,60.105256,60.10524774529737,60.10521566220767,60.107564}; // deg
+
+    m_obstacles_coords.lon = {19.9229765, 19.9228048, 19.9225795, 19.9223757, 19.9221718, 19.9220002, 19.9218071, 19.9216354, 19.9214852, 19.9213350, 19.9211848, 19.9210238, 19.9208844, 19.9229014, 19.9226868, 19.9224937, 19.9222791, 19.9220860, 19.9218714, 19.9217534};
+    m_obstacles_coords.lat = {60.1070290, 60.1070397, 60.1070290, 60.1070290, 60.1070450, 60.1070397, 60.1070610, 60.1070557, 60.1070664, 60.1070664, 60.1070717, 60.1070664, 60.1070664, 60.1070183, 60.1070290, 60.1070290, 60.1070397, 60.1070343, 60.1070503, 60.1070610};
+
+    if(m_obstacles_coords.lon.size()!=m_obstacles_coords.lat.size()){
+        printf("[ERROR](createObstacleMessage) obstacle vectors not of the same size\n");
+        return false;
+    }
+    return true;
+}
 
 void SimulationNode::processMessage(const Message* msg)
 {
@@ -126,6 +148,7 @@ void SimulationNode::processMessage(const Message* msg)
 	switch(type)
 	{
 	case MessageType::ActuatorPosition:
+//    Logger::info("(SimulationNode) ActuatorPosition");
 		processActuatorPositionMessage((ActuatorPositionMsg*)msg);
 		break;
 	default:
@@ -141,15 +164,16 @@ void SimulationNode::processActuatorPositionMessage(ActuatorPositionMsg* msg)
 
 void SimulationNode::createCompassMessage()
 {
-	m_CompassHeading = m_data_receive.headingVector[0]/10.f;
+	m_CompassHeading = static_cast<int>(m_data_receive.headingVector[0]/10.f+0.5);
 	m_CompassPitch = 0;
 	m_CompassRoll = 0;
 
 	if (m_count_sleep % COUNT_COMPASSDATA_MSG==0){
 
-		MessagePtr msg = std::make_unique<CompassDataMsg>(CompassDataMsg( int(m_CompassHeading+0.5) , m_CompassPitch, m_CompassRoll));
+		MessagePtr msg = std::make_unique<CompassDataMsg>(CompassDataMsg( m_CompassHeading , m_CompassPitch, m_CompassRoll));
 
 	  	m_MsgBus.sendMessage(std::move(msg));
+        Logger::info("(SimulationNode) Sent compass data : %d deg", m_CompassHeading);
   }
 }
 
@@ -171,6 +195,7 @@ void SimulationNode::createGPSMessage()
 	{
 		MessagePtr msg = std::make_unique<GPSDataMsg>(GPSDataMsg(m_GPSHasFix, m_GPSOnline, m_GPSLat, m_GPSLon, m_GPSUnixTime, m_GPSSpeed, m_GPSHeading, m_GPSSatellite, mode));
 		m_MsgBus.sendMessage(std::move(msg));
+//        Logger::info("(SimulationNode) Sent GPSDataMsg : (%f,%f)",m_GPSLon,m_GPSLat);
 	}
 }
 
@@ -201,16 +226,108 @@ void SimulationNode::createArduinoMessage()
 	}
 }
 
+void SimulationNode::createObstacleMessage(){
+
+    std::vector<ObstacleData> obstacles;
+
+    //Obstacle settings
+    const double obstacleRadius = 5; //meters
+    ObstacleData obsData;
+
+    // static cast to disable warnings
+    // for each coordinates, create an obstacle
+    for (int i = 0; i < static_cast<signed>(m_obstacles_coords.lon.size()); ++i) {
+        // transformation in radians
+        const double obsGpsLon = Utility::degreeToRadian(m_obstacles_coords.lon[i]);
+        const double obsGpsLat = Utility::degreeToRadian(m_obstacles_coords.lat[i]);
+        bool isCreated = createObstacleDataCircle(obsGpsLon, //rads
+                                                  obsGpsLat, //rads
+                                                  obstacleRadius, //m
+                                                  obsData);
+        if(isCreated){
+//            Logger::info("(SimulationNode) Obstacle created and appened");
+            obstacles.push_back(obsData);
+        }
+        else{
+//            Logger::info("(SimulationNode) Obstacle not seen");
+        }
+    }
+
+    if (m_count_sleep % COUNT_OBSTACLE_MSG==0)
+    {
+//        Logger::info("(SimulationNode) Sent obstacle size : %d", obstacles.size());
+//        for (auto &&obstacle : obstacles) {
+//            Logger::info("(SimulationNode) ==Detected Obstacle==");
+//            Logger::info("(SimulationNode) obstacle.LeftBoundheadingRelativeToBoat = %f",obstacle.LeftBoundheadingRelativeToBoat);
+//            Logger::info("(SimulationNode) obstacle.RightBoundheadingRelativeToBoat = %f",obstacle.RightBoundheadingRelativeToBoat);
+//            Logger::info("(SimulationNode) obstacle.minDistanceToObstacle = %f",obstacle.minDistanceToObstacle);
+//            Logger::info("(SimulationNode) obstacle.maxDistanceToObstacle = %f",obstacle.maxDistanceToObstacle);
+//        }
+        MessagePtr msg = std::make_unique<ObstacleVectorMsg>(obstacles);
+        m_MsgBus.sendMessage(std::move(msg));
+    }
+}
+
+bool SimulationNode::createObstacleDataCircle(double obsGpsLon, //rads
+                                              double obsGpsLat, //rads
+                                              double obstacleRadius, //meters
+                                              ObstacleData & obstacle){
+
+    // Conversion
+    const double gpsLat = Utility::degreeToRadian(m_GPSLat);
+    const double gpsLon = Utility::degreeToRadian(m_GPSLon);
+    const double compassHeading = M_PI/2 - Utility::degreeToRadian(m_CompassHeading);
+
+    // Sensor settings
+    const double maxDetectionRange = MAXIMUM_SENSOR_RANGE;
+
+    // Simulation
+    const double obstacleHeadingRelativeToBoat = Utility::wrapToPi(atan2(obsGpsLat-gpsLat,
+                                                                         obsGpsLon-gpsLon),
+                                                                   - compassHeading);
+    //std::cout << "obstacleHeadingRelativeToBoat = " << obstacleHeadingRelativeToBoat<< "\n";
+    const double distFromObstacle = Utility::calculateGPSDistance(gpsLon   ,gpsLat,
+                                                                  obsGpsLon,obsGpsLat); // meters
+//    Logger::info("(SimulationNode) Obstacle inside sensor arc : %d", std::abs(obstacleHeadingRelativeToBoat) <= SENSOR_ARC_ANGLE);
+//    Logger::info("(SimulationNode) Obstacle inside detection range : %d", distFromObstacle<=maxDetectionRange);
+    if(std::abs(obstacleHeadingRelativeToBoat) <= SENSOR_ARC_ANGLE/2.0 && distFromObstacle<=maxDetectionRange) {
+
+        const double leftHeadingRelativeToBoat =  Utility::wrapToPi(atan2(obstacleRadius, distFromObstacle),
+                                                                    obstacleHeadingRelativeToBoat);
+        const double rightHeadingRelativeToBoat = Utility::wrapToPi(-atan2(obstacleRadius, distFromObstacle),
+                                                                    obstacleHeadingRelativeToBoat);
+        double minDistanceToObstacle = distFromObstacle - obstacleRadius;
+        if(minDistanceToObstacle<=0){
+            minDistanceToObstacle = 0.1;
+        }
+        obstacle = {
+                distFromObstacle - obstacleRadius, //double minDistanceToObstacle;
+                maxDetectionRange,                 //double maxDistanceToObstacle;
+                leftHeadingRelativeToBoat,         //double LeftBoundheadingRelativeToBoat;
+                rightHeadingRelativeToBoat,        //double RightBoundheadingRelativeToBoat;
+                0,
+                0,
+                m_GPSLon,
+                m_GPSLat,
+                static_cast<double>(m_CompassHeading)};
+        //std::cout << "I push back\n";
+        return true;
+    }
+    return false;
+
+}
+
 void SimulationNode::processSocketData(){
   createCompassMessage();
   createGPSMessage();
   createWindMessage();
   createArduinoMessage();
+  createObstacleMessage();
 }
 
 void SimulationNode::setupDataSend(){
-  m_data_send.rudder_command = m_rudder * 4;
-  m_data_send.sheet_command = m_sail * 4;
+  m_data_send.rudder_command = m_rudder*4;
+  m_data_send.sheet_command = m_sail*4;
 }
 
 void SimulationNode::SimulationThreadFunc(void* nodePtr)
@@ -244,6 +361,6 @@ void SimulationNode::SimulationThreadFunc(void* nodePtr)
     //send data to simulation
     write(node->m_handler_socket_client.sockfd,&(node->m_data_send), sizeof(struct DATA_SOCKET_SEND));
 
-		std::this_thread::sleep_for(std::chrono::milliseconds(BASE_SLEEP_MS));
+	std::this_thread::sleep_for(std::chrono::milliseconds(BASE_SLEEP_MS));
   }
 }

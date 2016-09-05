@@ -68,7 +68,7 @@ void MA3WindSensorNode::ma3ThreadFunc(void* nodePtr)
 		if(windDir != -1)
 		{
 			windDir = Utility::limitAngleRange(((((windDir*1000) / MAX_VALUE) * 360) / 1000) + 20);
-			//Logger::info("Wind Data: %d", windDir);
+			Logger::info("Wind Data: %d", windDir);
 			MessagePtr windData = std::make_unique<WindDataMsg>(windDir, 0, 0);
 			node->m_MsgBus.sendMessage(std::move(windData));
 		}

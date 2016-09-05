@@ -14,59 +14,67 @@
 
 #pragma once
 
-
 #include <sys/socket.h>
 #include <arpa/inet.h>
 
 #include "ActiveNode.h"
+#include "utility/Utility.h"
 #include "Messages/CompassDataMsg.h"
 #include "Messages/GPSDataMsg.h"
 #include "Messages/WindDataMsg.h"
 #include "Messages/ArduinoDataMsg.h"
 #include "Messages/ActuatorPositionMsg.h"
+#include "Messages/ObstacleVectorMsg.h"
+
+#define BAK_STRAT 0
+#if BAK_STRAT == 1
+#include "CollAvoidanceBakStrat.h"
+#else
+#include "CollisionAvoidanceNode.h"
+#endif
 
 //-----------------------------------------------------------------------------
 struct DATA_SOCKET_RECEIVE{
 
-  //=========================
-  float latitude=0;
-  float longitude=0;
-  float course_real = 0;
-  float course_magn = 0;
-  float speed_knot = 0;
+	//=========================
+	float latitude=0;
+	float longitude=0;
+	float course_real = 0;
+	float course_magn = 0;
+	float speed_knot = 0;
 
-  //=========================
-  float windDirection = 120;
-  float windSpeed = 2.1;
-  float windTemperature = 24;
+	//=========================
+	float windDirection = 120;
+	float windSpeed = 2.1;
+	float windTemperature = 24;
 
-  //=========================
-  uint16_t pressure;
-  uint16_t rudder;
-  uint16_t sheet;
-  uint16_t battery;
+	//=========================
+	uint16_t pressure;
+	uint16_t rudder;
+	uint16_t sheet;
+	uint16_t battery;
 
 
-  //=========================
+	//=========================
 
-  uint16_t headingVector[3];
-  uint16_t magVector[3];
-  uint16_t tiltVector[3];
-  uint16_t accelVector[3];
-  uint8_t address_compass;
-  uint8_t address_arduino;
+	uint16_t headingVector[3];
+	uint16_t magVector[3];
+	uint16_t tiltVector[3];
+	uint16_t accelVector[3];
+	uint8_t address_compass;
+	uint8_t address_arduino;
 }__attribute__((packed));
 
 struct DATA_SOCKET_SEND{
-  uint16_t rudder_command;
-  uint16_t sheet_command;
+	uint16_t rudder_command;
+	uint16_t sheet_command;
 }__attribute__((packed));
 //-----------------------------------------------------------------------------
 
 struct HANDLERS_SOCKET
 {
-    int sockfd;
-    struct sockaddr_in info_me;
+	int sockfd;
+	struct sockaddr_in info_me;
 };
 
 class SimulationNode : public ActiveNode {
@@ -79,8 +87,8 @@ public:
 	bool init();
 
 	///----------------------------------------------------------------------------------
- 	/// Starts the SimulationNode's thread that create all sensors messages
- 	///----------------------------------------------------------------------------------
+	/// Starts the SimulationNode's thread that create all sensors messages
+	///----------------------------------------------------------------------------------
 	void start();
 
 	void processMessage(const Message* msg);
@@ -96,25 +104,42 @@ private:
 	///----------------------------------------------------------------------------------
 	static void SimulationThreadFunc(void* nodePtr);
 
-  ///----------------------------------------------------------------------------------
-  /// Initalize socket server
-  ///----------------------------------------------------------------------------------
-  int init_socket(int port);
+	///----------------------------------------------------------------------------------
+	/// Initalize socket server
+	///----------------------------------------------------------------------------------
+	int init_socket(int port);
 
-  ///----------------------------------------------------------------------------------
-  /// Manage data received from simulation
-  ///----------------------------------------------------------------------------------
-  void processSocketData();
+    /**
+     * Initialize obstacles coordinates in degrees
+     * @return
+     */
+    bool init_obstacles();
 
-  ///----------------------------------------------------------------------------------
-  /// Manage data to send to simulation
-  ///----------------------------------------------------------------------------------
-  void setupDataSend();
+	///----------------------------------------------------------------------------------
+	/// Manage data received from simulation
+	///----------------------------------------------------------------------------------
+	void processSocketData();
 
-  void createCompassMessage();
-  void createGPSMessage();
-  void createWindMessage();
-  void createArduinoMessage();
+	///----------------------------------------------------------------------------------
+	/// Manage data to send to simulation
+	///----------------------------------------------------------------------------------
+	void setupDataSend();
+
+	void createCompassMessage();
+	void createGPSMessage();
+	void createWindMessage();
+	void createArduinoMessage();
+	void createObstacleMessage();
+
+    /**
+     * The sensors will give a confidence interval of the heading and the distance
+     * relatively to the boat
+     * @param obsGpsLat in rads
+     * @param obsGpsLon in rads
+     * @return
+     */
+    bool createObstacleDataCircle(double obsGpsLat,double obsGpsLon, double obstacleRadius,
+                                  ObstacleData & obstacle);
 
 	int 	m_CompassHeading;
 	int 	m_CompassPitch;
@@ -133,16 +158,17 @@ private:
 	int 	m_ArduinoPressure;
 	int 	m_ArduinoRudder;
 	int 	m_ArduinoSheet;
-  int 	m_ArduinoBattery;
-  int   m_ArduinoRC;
-  int   m_rudder;
-  int   m_sail;
+	int 	m_ArduinoBattery;
+    int   m_ArduinoRC;
+	int   m_rudder;
+	int   m_sail;
+    ObstacleRealPosition m_obstacles_coords;
 
-  struct DATA_SOCKET_RECEIVE m_data_receive;
-  struct DATA_SOCKET_SEND m_data_send;
-  struct HANDLERS_SOCKET m_handler_socket_server;
-  struct HANDLERS_SOCKET m_handler_socket_client;
+	struct DATA_SOCKET_RECEIVE m_data_receive;
+	struct DATA_SOCKET_SEND m_data_send;
+	struct HANDLERS_SOCKET m_handler_socket_server;
+	struct HANDLERS_SOCKET m_handler_socket_client;
 
-  int m_count_sleep;
+	int m_count_sleep;
 
 };

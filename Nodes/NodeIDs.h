@@ -33,10 +33,10 @@ enum class NodeID {
 	xBeeSync,
 	SailingLogic,
     ColorDetection,
-    CollisionAvoidanceBehaviour,
     Lidar,
 	Simulator,
 	Network,
+	CollisionAvoidance,
 	ManualControl
 };
 
@@ -72,12 +72,12 @@ inline std::string nodeToString(NodeID id)
 		return "xBeeSync";
     case NodeID::ColorDetection:
     	return "ColorDetection";
-    case NodeID::CollisionAvoidanceBehaviour:
-        return "CollisionAvoidanceBehaviour";
     case NodeID::Lidar:
-           return "Lidar";
+        return "Lidar";
 	case NodeID::Simulator:
 		return "Simulator";
+	case NodeID::CollisionAvoidance:
+		return "CollisionAvoidance";
 	case NodeID::Network:
 		return "Network";
     case NodeID::ManualControl:

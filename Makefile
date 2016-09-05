@@ -69,7 +69,7 @@ SRC_CORE				= MessageBus/MessageBus.cpp Nodes/ActiveNode.cpp $(SRC_MESSAGES) uti
 
 SRC_CORE_SAILING		= waypointrouting/RudderCommand.cpp waypointrouting/SailCommand.cpp waypointrouting/WaypointRouting.cpp waypointrouting/Commands.cpp waypointrouting/TackAngle.cpp
 
-SRC_CORE_NODES			= Nodes/MessageLoggerNode.cpp Nodes/WaypointMgrNode.cpp Nodes/VesselStateNode.cpp Nodes/RoutingNode.cpp Nodes/LineFollowNode.cpp 
+SRC_CORE_NODES			= Nodes/MessageLoggerNode.cpp Nodes/WaypointMgrNode.cpp Nodes/VesselStateNode.cpp Nodes/RoutingNode.cpp Nodes/LineFollowNode.cpp
 
 SRC_COMMON				= utility/SysClock.cpp SystemServices/Logger.cpp
 
@@ -86,13 +86,18 @@ SRC_NETWORK_HTTP_SYNC	= Nodes/HTTPSyncNode.cpp
 SRC_I2CCONTROLLER 		= i2ccontroller/I2CController.cpp
 
 SRC_LIDAR_LITE			= Nodes/lidarLite/lidarLite.cpp Nodes/lidarLite/lidarLiteNode.cpp
-SRC_OPENCV_CV 			= Nodes/obstacledetection/colorDetectionNode.cpp Nodes/obstacledetection/colorDetectionUtility.cpp 
+SRC_OPENCV_CV 			= Nodes/obstacledetection/colorDetectionNode.cpp Nodes/obstacledetection/colorDetectionUtility.cpp
 
 SRC_SIMULATOR			= Nodes/SimulationNode.cpp
 
 SRC_WRSC_C				= libs/minmea/minmea.c
 SRC_WRSC_NODES			= Nodes/MA3WindSensorNode.cpp Nodes/RazorCompassNode.cpp Nodes/UDPNode.cpp XbeeRemote/UDPRelay.cpp Nodes/GPSDNode.cpp Nodes/SerialGPSNode.cpp
 
+#SRC_COLLISION_AVOIDANCE = Nodes/CollisionAvoidanceNode.cpp
+
+SRC_COLLISION_AVOIDANCE_BAK = Nodes/CollAvoidanceBakStrat.cpp
+
+SRC_DRAWING             = utility/vibes.cpp
 
 #----------------------------------------------------------------------------------------
 #Default Janet
@@ -101,10 +106,10 @@ TARGET_INT = 0
 
 ifeq ($(USE_SIM), 1)
 SRC 					= $(SRC_CORE) $(SRC_CORE_SAILING) $(SRC_CORE_NODES) $(SRC_COMMON) $(SRC_SIMULATOR) \
-						  $(SRC_NETWORK_XBEE_LINUX) $(SRC_NETWORK_HTTP_SYNC)
+						  $(SRC_NETWORK_XBEE_LINUX) $(SRC_NETWORK_HTTP_SYNC) $(SRC_COLLISION_AVOIDANCE)
 else
 SRC 					= $(SRC_CORE) $(SRC_CORE_SAILING) $(SRC_CORE_NODES) $(SRC_COMMON) $(SRC_SENSOR_NODES) \
-						  $(SRC_ACTUATOR_NODE) $(SRC_NETWORK_XBEE_LINUX) $(SRC_NETWORK_HTTP_SYNC) $(SRC_I2CCONTROLLER)
+						  $(SRC_ACTUATOR_NODE) $(SRC_NETWORK_XBEE_LINUX) $(SRC_NETWORK_HTTP_SYNC) $(SRC_I2CCONTROLLER) $(SRC_COLLISION_AVOIDANCE)
 endif
 endif
 #----------------------------------------------------------------------------------------
@@ -115,14 +120,34 @@ ifeq ($(TARGET),WRSC)
 TARGET_INT = 1
 
 SRC 					= $(SRC_CORE) $(SRC_CORE_SAILING) $(SRC_CORE_NODES) $(SRC_COMMON) $(SRC_WRSC_NODES) \
-						  $(SRC_ACTUATOR_NODE) $(SRC_NETWORK_WIFI_UDP)
-
+						  $(SRC_ACTUATOR_NODE) $(SRC_NETWORK_WIFI_UDP) $(SRC_COLLISION_AVOIDANCE) \
+						Nodes/ManualControlNode.cpp
+					
 ifeq ($(USE_SIM), 1)
-SRC						+= $(SRC_SIMULATOR)
-endif						  
-						  
+SRC						+= $(SRC_SIMULATOR) $(SRC_DRAWING)
+endif
 
 # $(SRC_OPENCV_CV) Get working properly
+
+C_SRC					= $(SRC_WRSC_C)
+
+endif
+#----------------------------------------------------------------------------------------
+
+#----------------------------------------------------------------------------------------
+# WRSC2016 build backup
+ifeq ($(TARGET),WRSC_BAK)
+TARGET_INT = 1
+
+
+SRC 					= $(SRC_CORE) $(SRC_CORE_SAILING) $(SRC_CORE_NODES) $(SRC_COMMON) $(SRC_WRSC_NODES) \
+						  $(SRC_ACTUATOR_NODE) $(SRC_NETWORK_WIFI_UDP) $(SRC_COLLISION_AVOIDANCE_BAK) \
+						Nodes/ManualControlNode.cpp
+# $(SRC_OPENCV_CV) Get working properly
+
+ifeq ($(USE_SIM), 1)
+SRC						+= $(SRC_SIMULATOR) $(SRC_DRAWING)
+endif
 
 C_SRC					= $(SRC_WRSC_C)
 
@@ -181,14 +206,14 @@ export OBJECT_FILE = $(BUILD_DIR)/objects.tmp
 ifeq ($(TOOLCHAIN),win)
 
 export CFLAGS= -g -Wall -Wextra -std=c99
-export CPPFLAGS = -g -Wall -pedantic -std=gnu++14
+export CPPFLAGS = -g -Wall -pedantic -std=gnu++14 -Wno-deprecated-declarations -Wno-reorder
 
-export LIBS = 
+export LIBS =
 
 else
 
 export CFLAGS= -g -Wall -Wextra -std=c99
-export CPPFLAGS = -g -Wall -pedantic -std=c++14
+export CPPFLAGS = -g -Wall -pedantic -std=gnu++14 -Wno-deprecated-declarations -Wno-reorder
 
 
 export LIBS = -lsqlite3 -lgps -lrt -lcurl -lpthread
@@ -288,7 +313,7 @@ clean:
 	@rm -f -r $(BUILD_DIR)
 	@rm -f $(EXECUTABLE)
 	"$(MAKE)" -C XbeeRemote clean
-	
+
 	@echo DONE
 clean_wiring:
 	$(MAKE) -C $(WIRING_PI_PATH) clean

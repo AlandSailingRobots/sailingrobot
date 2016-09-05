@@ -216,7 +216,7 @@ void SerialGPSNode::GPSThreadFunc(void* nodePtr)
 		else
 		{
 			SysClock::sleepMS(GPS_THREAD_SLEEP);
-			Logger::info("Has GPS Fix");
+//			Logger::info("Has GPS Fix");
 		}
 
 		charsRead = node->readNMEALine(nmeaBuffer, MINMEA_MAX_LENGTH);

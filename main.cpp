@@ -4,6 +4,7 @@
 #include "MessageBus/MessageBus.h"
 #include "Nodes/MessageLoggerNode.h"
 #include "Nodes/ActuatorNode.h"
+#include "dbhandler/DBHandler.h"
 
 #if SIMULATION == 1
  #include "Nodes/SimulationNode.h"
@@ -47,41 +48,28 @@ enum class NodeImportance {
 #include "Nodes/VesselStateNode.h"
 #include "Nodes/RoutingNode.h"
 #include "Nodes/LineFollowNode.h"
-#include "dbhandler/DBHandler.h"
 #include "SystemServices/MaestroController.h"
-
-#include "Messages/ActuatorPositionMsg.h"
-
+#include "Nodes/ManualControlNode.h"
 RazorCompassNode* razorFix;
 
 #elif TARGET == 2
 #define TARGET_STR "MANCONTROL"
 
 #include "Nodes/UDPNode.h"
-#include "Nodes/GPSDNode.h"
-#include "Nodes/MA3WindSensorNode.h"
-#include "Nodes/RazorCompassNode.h"
 #include "Nodes/ManualControlNode.h"
-
-#include "Nodes/WaypointMgrNode.h"
-#include "Nodes/VesselStateNode.h"
-#include "Nodes/RoutingNode.h"
-#include "Nodes/LineFollowNode.h"
-#include "dbhandler/DBHandler.h"
 #include "SystemServices/MaestroController.h"
-
-RazorCompassNode* razorFix;
 
 #else
 #define TARGET_STR "None"
 #endif
-
 
 #include <signal.h>
 #include <atomic>
 #include <cstring>
 
 #include "WRSC.h"
+#include "Messages/ActuatorPositionMsg.h"
+
 
 void got_signal(int)
 {
@@ -279,7 +267,7 @@ int main(int argc, char *argv[])
 	// Target: WRSC
 #if TARGET == 1
 
-	UDPNode udp(messageBus, "127.0.0.1", 4320);
+	UDPNode udp(messageBus, "192.168.8.126", 4320);
 
 	MaestroController::init("/dev/ttyACM0");
 
@@ -340,6 +328,10 @@ int main(int argc, char *argv[])
 	initialiseNode(waypoint, "Waypoint Node", NodeImportance::CRITICAL);
 
 	initialiseNode(*sailingLogic, "Sailing Logic", NodeImportance::CRITICAL);
+
+	ManualControlNode manual(messageBus);
+	initialiseNode(manual, "Manual", NodeImportance::CRITICAL);
+	activeNodes.push_back(&manual);
 #endif
 	//---------------------------------------------------------------------------------------------
 
@@ -347,65 +339,23 @@ int main(int argc, char *argv[])
     // Target: MANCONTROL
 #if TARGET == 2
 
-    // No sensor nodes if we are using the simulator
-#if SIMULATION != 1
+    UDPNode udp(messageBus, "127.0.0.1", 4320);
 
-#endif
-
-	UDPNode udp(messageBus, "127.0.0.1", 4320);
-
-	//MA3WindSensorNode windSensor(messageBus, 2);
-	//GPSDNode gps(messageBus);
-	RazorCompassNode compass(messageBus);
-	//razorFix = &compass;
-
-	// QUICK TEST
-	/*float heading, pitch,roll;
-	if(compass.parseData("#YPR=-155.73,-76.48,-129.51", heading, pitch, roll))
-	{
-		Logger::info("Data: %f %f %f", heading, pitch, roll);
-	}*/
-
-	//activeNodes.push_back(&windSensor);
-	//activeNodes.push_back(&gps);
-	activeNodes.push_back(&compass);
-
-	// Sailing Logic nodes
-	VesselStateNode vessel(messageBus);
-	WaypointMgrNode waypoint(messageBus, dbHandler);
-
-	activeNodes.push_back(&vessel);
-
-	Node* sailingLogic;
-	bool usingLineFollow = (bool)(dbHandler.retrieveCellAsInt("sailing_robot_config", "1", "line_follow"));
-	if(usingLineFollow)
-	{
-		sailingLogic = new LineFollowNode(messageBus, dbHandler);
-	}
-	else
-	{
-		sailingLogic = new RoutingNode(messageBus, dbHandler);
-	}
-
-	// Actuator Node
-	ActuatorNode sail(messageBus, NodeID::SailActuator, 1, 0, 0);
-	ActuatorNode rudder(messageBus, NodeID::RudderActuator, 0, 0, 0);
 	MaestroController::init("/dev/ttyACM0");
 
-	ManualControlNode manualControl(messageBus);
+#if BOAT_TYPE == BOAT_ENSTA_GRAND
+	ActuatorNode sail(messageBus, NodeID::SailActuator, 1, 0, 0);
+	ActuatorNode rudder(messageBus, NodeID::RudderActuator, 2, 0, 0);
+#elif BOAT_TYPE == BOAT_ENSTA_PETIT
+	ActuatorNode sail(messageBus, NodeID::SailActuator, 1, 0, 0);
+	ActuatorNode rudder(messageBus, NodeID::RudderActuator, 0, 0, 0);
+#endif
+
+    ManualControlNode manualControl(messageBus);
 	activeNodes.push_back(&manualControl);
-
-	initialiseNode(udp, "UDP Node", NodeImportance::CRITICAL);
-	initialiseNode(compass, "Compass Node", NodeImportance::CRITICAL);
-	//initialiseNode(windSensor, "Wind Sensor Node", NodeImportance::CRITICAL);
-	//initialiseNode(gps, "GPS Node", NodeImportance::CRITICAL);
-
-	initialiseNode(vessel, "Vessel State Node", NodeImportance::CRITICAL);
-	initialiseNode(waypoint, "Waypoint Node", NodeImportance::CRITICAL);
 	initialiseNode(sail, "Sail Actuator", NodeImportance::CRITICAL);
 	initialiseNode(rudder, "Rudder Actuator", NodeImportance::CRITICAL);
-    initialiseNode(manualControl, "Manual Control", NodeImportance::CRITICAL);
-
+    initialiseNode(manualControl, "Manual control", NodeImportance::CRITICAL);
 #endif
     //---------------------------------------------------------------------------------------------
 
@@ -421,21 +371,21 @@ int main(int argc, char *argv[])
 
 	// Test actuator Positions
 	// Rudder and Sail Max
-	//MessagePtr actuatorMsg = std::make_unique<ActuatorPositionMsg>(RUDDER_MAX_US, SAIL_MAX_US);
-	//messageBus.sendMessage(std::move(actuatorMsg));
+	MessagePtr actuatorMsg = std::make_unique<ActuatorPositionMsg>(RUDDER_MAX_US, SAIL_MAX_US);
+	messageBus.sendMessage(std::move(actuatorMsg));
 
 	// Middle
 	//MessagePtr actuatorMsg = std::make_unique<ActuatorPositionMsg>(RUDDER_MID_US, 1500);
 	//messageBus.sendMessage(std::move(actuatorMsg));
 
 	// Min
-	MessagePtr actuatorMsg = std::make_unique<ActuatorPositionMsg>(RUDDER_MIN_US, SAIL_MIN_US);
-	messageBus.sendMessage(std::move(actuatorMsg));
+	//MessagePtr actuatorMsg = std::make_unique<ActuatorPositionMsg>(RUDDER_MIN_US, SAIL_MIN_US);
+	//messageBus.sendMessage(std::move(actuatorMsg));
 
 	messageBus.run();
 
 	Logger::shutdown();
-	delete sailingLogic;
+//	delete sailingLogic;
 	exit(0);
 }
 

@@ -180,7 +180,7 @@ double Utility::limitRadianAngleRange(double angle)
 
 double Utility::degreeToRadian(double degrees)
 {
-	return degrees * M_PI / 180;
+	return degrees * M_PI / 180.0;
 }
 
 
@@ -204,8 +204,12 @@ double Utility::directionAdjustedSpeed(double gpsHeading,double compassHeading,d
 		return speed;
 }
 
-double Utility::calculateSignedDistanceToLine(const double nextLon, const double nextLat, const double prevLon, const double prevLat, 
-					const double gpsLon, const double gpsLat)
+double Utility::calculateSignedDistanceToLine(const double nextLon,
+											  const double nextLat,
+                                              const double prevLon,
+                                              const double prevLat,
+					                          const double gpsLon,
+                                              const double gpsLat)
 {
     int earthRadius = 6371000;
     
@@ -238,8 +242,12 @@ double Utility::calculateSignedDistanceToLine(const double nextLon, const double
     return signedDistance;
 }
 
-double Utility::calculateWaypointsOrthogonalLine(const double nextLon, const double nextLat, const double prevLon, const double prevLat, 
-					const double gpsLon, const double gpsLat)
+double Utility::calculateWaypointsOrthogonalLine(const double nextLon,
+                                                 const double nextLat,
+                                                 const double prevLon,
+                                                 const double prevLat,
+                                                 const double gpsLon,
+                                                 const double gpsLat)
 {    /* Check to see if boat has passed the orthogonal to the line
      * otherwise the boat will continue to follow old line if it passed the waypoint without entering the radius
      */
@@ -405,4 +413,17 @@ double Utility::wrapToPi(
         double radAngle1,
         double radAngle2) {
     return fmod(radAngle1+radAngle2+3*M_PI,2*M_PI)-M_PI;
+}
+
+double Utility::calculateGPSDistance(
+        double point1X,
+        double point1Y,
+        double point2X,
+        double point2Y) {
+    const double deltaLat = wrapToPi(point2Y,- point1Y);
+    const double deltaLon = wrapToPi(point2X,- point1X);
+    const double a  = sin(deltaLat/2)*sin(deltaLat/2)
+                      + cos(point1Y)*cos(point2Y)*sin(deltaLon/2)*sin(deltaLon/2);
+    const double c = 2*atan2(sqrt(a),sqrt(1-a));
+    return EARTH_RADIUS*c;
 }

@@ -325,7 +325,10 @@ vector<Point> findRectanglesCenters(std::vector<cv::Rect> const& rects){
      }
      rects=newRectList;
  }
-void computeObstaclesAnglePosition(cv::Mat const& imgOriginal, std::vector<ObstacleData>& Obstacles,std::vector<std::vector<cv::Rect> > rotated_bounding_rects_several_captures ){
+void computeObstaclesAnglePosition(cv::Mat const& imgOriginal,
+                                   std::vector<ObstacleData>& Obstacles,
+                                   std::vector<std::vector<cv::Rect> > rotated_bounding_rects_several_captures ){
+
     ObstacleData currentObstacle;
     Size imageSize=imgOriginal.size(), rectangleSize;
     Point topLeftCorner, leftPoint, rightPoint, centerPoint, imageCenter(imageSize.width/2.0,imageSize.height/2.0);
@@ -333,10 +336,12 @@ void computeObstaclesAnglePosition(cv::Mat const& imgOriginal, std::vector<Obsta
     float webcamAngleApertureYPerPixel = webcamAngleApertureY/imageSize.height;
     for(int i = 0; i<(int)rotated_bounding_rects_several_captures.size(); i++){
         for(int j = 0; j<(int)rotated_bounding_rects_several_captures[i].size(); j++){
+
             rectangleSize=rotated_bounding_rects_several_captures[i][j].size();
             topLeftCorner=rotated_bounding_rects_several_captures[i][j].tl();
             leftPoint.x = topLeftCorner.x;
             leftPoint.y = topLeftCorner.y +rectangleSize.height/2.0;
+
             rightPoint.x = topLeftCorner.x+rectangleSize.width;
             rightPoint.y = topLeftCorner.y +rectangleSize.height/2.0;
             centerPoint.x = (leftPoint.x + rightPoint.x)/2.0;
@@ -347,6 +352,7 @@ void computeObstaclesAnglePosition(cv::Mat const& imgOriginal, std::vector<Obsta
             currentObstacle.angularCenterPositionY = centerPoint.y * webcamAngleApertureYPerPixel;
             currentObstacle.minDistanceToObstacle=0;
             currentObstacle.maxDistanceToObstacle=-1;
+
             Obstacles.push_back(currentObstacle);
             }
     }
