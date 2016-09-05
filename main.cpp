@@ -297,7 +297,7 @@ int main(int argc, char *argv[])
 	MA3WindSensorNode windSensor(messageBus, 3);
 	SerialGPSNode gps(messageBus);
 	RazorCompassNode compass(messageBus,"/dev/ttyACM1");
-	MA3WindSensorNode windSensor(messageBus, 5);
+	//MA3WindSensorNode windSensor(messageBus, 5);
 	ActuatorNode sail(messageBus, NodeID::SailActuator, 1, 0, 0);
 	ActuatorNode rudder(messageBus, NodeID::RudderActuator, 0, 0, 0);
 #endif
