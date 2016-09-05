@@ -58,7 +58,7 @@ void ActuatorNode::processMessage(const Message* message)
 			{
 				value = RUDDER_MAX_US - 1;
 			}
-
+			//Logger::info("Rudder: %d", value);
 			sendCommand(value * 4);
 		}
 		else if (nodeID() == NodeID::SailActuator)
@@ -74,7 +74,7 @@ void ActuatorNode::processMessage(const Message* message)
 			{
 				value = SAIL_MAX_US - 1;
 			}
-
+			//Logger::info("Sail: %d", value);
 			sendCommand(value * 4);
 		}
 		else
@@ -92,5 +92,5 @@ void ActuatorNode::sendCommand(int value)
 		Logger::error("%s Actuator: %d Failed to write position command", __PRETTY_FUNCTION__, (int)nodeID());
 	}
 
-	Logger::info("Maestro Error: %d Value Written: %d", MaestroController::getError(), value);
+	//Logger::info("Node: %s Value Written: %d", nodeToString(nodeID()).c_str(), MaestroController::getError(), value / 4);
 }

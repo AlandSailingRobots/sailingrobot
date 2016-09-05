@@ -107,7 +107,7 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs)
 
     if (logs.size()>0)
 		{
-		  Logger::info("Writing in the database last value: %s size logs %d",logs[0].m_timestamp_str.c_str(),logs.size());
+		 // Logger::info("Writing in the database last value: %s size logs %d",logs[0].m_timestamp_str.c_str(),logs.size());
     }
 		tableId = getIdFromTable("arduino_datalogs",true,db);
 		if(tableId.size() > 0)

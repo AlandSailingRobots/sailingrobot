@@ -36,7 +36,15 @@ DYNAMIC=libwiringPi.so.$(VERSION)
 
 #DEBUG	= -g -O0
 DEBUG	= -O2
+
+ifeq ($(TOOLCHAIN),raspi_cc)
+CC = /opt/tools-master/arm-bcm2708/arm-rpi-4.9.3-linux-gnueabihf/bin/arm-linux-gnueabihf-gcc -I/mnt/rootfs/usr/include/arm-linux-gnueabihf -I/mnt/rootfs/usr/include -I/mnt/rootfs/usr/local/include -L/mnt/rootfs/opt/vc/lib -L/mnt/rootfs/lib/arm-linux-gnueabihf -L/mnt/rootfs/usr/lib/arm-linux-gnueabihf -L/mnt/rootfs/usr/local/lib/arm-linux-gnueabihf -L/mnt/rootfs/lib -L/mnt/rootfs/usr/lib -L/mnt/rootfs/usr/local/lib -Wl,-rpath-link,/mnt/rootfs/opt/vc/lib -Wl,-rpath-link,/mnt/rootfs/lib/arm-linux-gnueabihf -Wl,-rpath-link,/mnt/rootfs/usr/lib/arm-linux-gnueabihf -Wl,-rpath-link,/mnt/rootfs/usr/local/lib/arm-linux-gnueabihf -Wl,-rpath-link,/mnt/rootfs/lib -Wl,-rpath-link,/mnt/rootfs/usr/lib -Wl,-rpath-link,/mnt/rootfs/usr/local/lib
+else
 CC	= gcc
+endif
+
+
+
 INCLUDE	= -I.
 DEFS	= -D_GNU_SOURCE
 CFLAGS	= $(DEBUG) $(DEFS) -Wformat=2 -Wall -Winline $(INCLUDE) -pipe -fPIC

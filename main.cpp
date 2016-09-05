@@ -4,7 +4,6 @@
 #include "MessageBus/MessageBus.h"
 #include "Nodes/MessageLoggerNode.h"
 #include "Nodes/ActuatorNode.h"
-#include "Messages/ActuatorPositionMsg.h"
 
 #if SIMULATION == 1
  #include "Nodes/SimulationNode.h"
@@ -32,7 +31,6 @@ enum class NodeImportance {
 #include "Nodes/XbeeSyncNode.h"
 #include "Nodes/RoutingNode.h"
 #include "Nodes/LineFollowNode.h"
-#include "Messages/DataRequestMsg.h"
 #include "dbhandler/DBHandler.h"
 #include "SystemServices/MaestroController.h"
 
@@ -51,13 +49,6 @@ enum class NodeImportance {
 #include "Nodes/LineFollowNode.h"
 #include "dbhandler/DBHandler.h"
 #include "SystemServices/MaestroController.h"
-
-#define BAK_STRAT 0
-#if BAK_STRAT == 1
- #include "Nodes/CollAvoidanceBakStrat.h"
-#else
- #include "Nodes/CollisionAvoidanceNode.h"
-#endif
 
 #include "Messages/ActuatorPositionMsg.h"
 
@@ -207,7 +198,7 @@ int main(int argc, char *argv[])
 #if TARGET == 0
 
 	// No sensor nodes if we are using the simulator
-#if SIMULATION != 1
+#if SIMULATOR != 1
 	// Common Sensor Nodes
 	CV7Node windSensor(messageBus, dbHandler.retrieveCell("windsensor_config", "1", "port"), dbHandler.retrieveCellAsInt("windsensor_config", "1", "baud_rate"));
 	HMC6343Node compass(messageBus, dbHandler.retrieveCellAsInt("buffer_config", "1", "compass"));
@@ -279,8 +270,7 @@ int main(int argc, char *argv[])
 		initialiseNode(*sailingLogic, "Routing Node", NodeImportance::CRITICAL);
 	}
 
-
-    initialiseNode(sail, "Sail Actuator", NodeImportance::CRITICAL);
+	initialiseNode(sail, "Sail Actuator", NodeImportance::CRITICAL);
 	initialiseNode(rudder, "Rudder Actuator", NodeImportance::CRITICAL);
 #endif
 	//---------------------------------------------------------------------------------------------
@@ -289,21 +279,24 @@ int main(int argc, char *argv[])
 	// Target: WRSC
 #if TARGET == 1
 
-    //ActuatorNode sail(messageBus, NodeID::SailActuator, 2, 0, 0);
-	//ActuatorNode rudder(messageBus, NodeID::RudderActuator, 1, 0, 0);
-    UDPNode udp(messageBus, "172.20.26.191", 4320);
-    // No sensor nodes if we are using the simulator
+	UDPNode udp(messageBus, "127.0.0.1", 4320);
+
+	MaestroController::init("/dev/ttyACM0");
+
+	// No sensor nodes if we are using the simulator
 #if SIMULATION != 1
-    MaestroController::init("/dev/ttyACM0");
-    MA3WindSensorNode windSensor(messageBus, 11);
+	//MaestroController::init("/dev/ttyACM0");
+
 #if BOAT_TYPE == BOAT_ENSTA_GRAND
 	GPSDNode gps(messageBus);
 	RazorCompassNode compass(messageBus, "/dev/ttyUSB1");
 	ActuatorNode sail(messageBus, NodeID::SailActuator, 1, 0, 0);
 	ActuatorNode rudder(messageBus, NodeID::RudderActuator, 2, 0, 0);
+	MA3WindSensorNode windSensor(messageBus, 11);
 #elif BOAT_TYPE == BOAT_ENSTA_PETIT
 	SerialGPSNode gps(messageBus);
 	RazorCompassNode compass(messageBus,"/dev/ttyACM1");
+	MA3WindSensorNode windSensor(messageBus, 5);
 	ActuatorNode sail(messageBus, NodeID::SailActuator, 1, 0, 0);
 	ActuatorNode rudder(messageBus, NodeID::RudderActuator, 0, 0, 0);
 #endif
@@ -314,36 +307,33 @@ int main(int argc, char *argv[])
 	activeNodes.push_back(&gps);
 	activeNodes.push_back(&compass);
 
-    initialiseNode(compass, "Compass Node", NodeImportance::CRITICAL);
-    initialiseNode(windSensor, "Wind Sensor Node", NodeImportance::CRITICAL);
-    initialiseNode(gps, "GPS Node", NodeImportance::CRITICAL);
+	initialiseNode(compass, "Compass Node", NodeImportance::CRITICAL);
+	initialiseNode(windSensor, "Wind Sensor Node", NodeImportance::CRITICAL);
+	initialiseNode(gps, "GPS Node", NodeImportance::CRITICAL);
 
-    initialiseNode(sail, "Sail Actuator", NodeImportance::CRITICAL);
-    initialiseNode(rudder, "Rudder Actuator", NodeImportance::CRITICAL);
+	initialiseNode(sail, "Sail Actuator", NodeImportance::CRITICAL);
+	initialiseNode(rudder, "Rudder Actuator", NodeImportance::CRITICAL);
 
 #endif
 
 	// Sailing Logic nodes
 	VesselStateNode vessel(messageBus);
 	WaypointMgrNode waypoint(messageBus, dbHandler);
-    CollisionAvoidanceNode collisionAvoidanceNode(messageBus);
 
+	activeNodes.push_back(&vessel);
 
-    activeNodes.push_back(&vessel);
-
-    Node* sailingLogic;
-    bool usingLineFollow = true; //(bool)(dbHandler.retrieveCellAsInt("sailing_robot_config", "1", "line_follow"));
-    if(usingLineFollow)
+	Node* sailingLogic;
+	bool usingLineFollow = true; //(bool)(dbHandler.retrieveCellAsInt("sailing_robot_config", "1", "line_follow"));
+	if(usingLineFollow)
 	{
-        sailingLogic = new LineFollowNode(messageBus, dbHandler);
-    }
+		sailingLogic = new LineFollowNode(messageBus, dbHandler);
+	}
 	else
 	{
-        sailingLogic = new RoutingNode(messageBus, dbHandler);
-    }
+		sailingLogic = new RoutingNode(messageBus, dbHandler);
+	}
 
-    initialiseNode(collisionAvoidanceNode, "Collision Avoidance", NodeImportance::NOT_CRITICAL);
-    initialiseNode(udp, "UDP Node", NodeImportance::CRITICAL);
+	initialiseNode(udp, "UDP Node", NodeImportance::CRITICAL);
 
 	initialiseNode(vessel, "Vessel State Node", NodeImportance::CRITICAL);
 	initialiseNode(waypoint, "Waypoint Node", NodeImportance::CRITICAL);
@@ -356,11 +346,63 @@ int main(int argc, char *argv[])
     // Target: MANCONTROL
 #if TARGET == 2
 
-    MaestroController::init("/dev/ttyACM0");
+    // No sensor nodes if we are using the simulator
+#if SIMULATION != 1
 
-    ManualControlNode manualControl(messageBus);
-    activeNodes.push_back(&manualControl);
+#endif
 
+	UDPNode udp(messageBus, "127.0.0.1", 4320);
+
+	//MA3WindSensorNode windSensor(messageBus, 2);
+	//GPSDNode gps(messageBus);
+	RazorCompassNode compass(messageBus);
+	//razorFix = &compass;
+
+	// QUICK TEST
+	/*float heading, pitch,roll;
+	if(compass.parseData("#YPR=-155.73,-76.48,-129.51", heading, pitch, roll))
+	{
+		Logger::info("Data: %f %f %f", heading, pitch, roll);
+	}*/
+
+	//activeNodes.push_back(&windSensor);
+	//activeNodes.push_back(&gps);
+	activeNodes.push_back(&compass);
+
+	// Sailing Logic nodes
+	VesselStateNode vessel(messageBus);
+	WaypointMgrNode waypoint(messageBus, dbHandler);
+
+	activeNodes.push_back(&vessel);
+
+	Node* sailingLogic;
+	bool usingLineFollow = (bool)(dbHandler.retrieveCellAsInt("sailing_robot_config", "1", "line_follow"));
+	if(usingLineFollow)
+	{
+		sailingLogic = new LineFollowNode(messageBus, dbHandler);
+	}
+	else
+	{
+		sailingLogic = new RoutingNode(messageBus, dbHandler);
+	}
+
+	// Actuator Node
+	ActuatorNode sail(messageBus, NodeID::SailActuator, 1, 0, 0);
+	ActuatorNode rudder(messageBus, NodeID::RudderActuator, 0, 0, 0);
+	MaestroController::init("/dev/ttyACM0");
+
+	ManualControlNode manualControl(messageBus);
+	activeNodes.push_back(&manualControl);
+
+	initialiseNode(udp, "UDP Node", NodeImportance::CRITICAL);
+	initialiseNode(compass, "Compass Node", NodeImportance::CRITICAL);
+	//initialiseNode(windSensor, "Wind Sensor Node", NodeImportance::CRITICAL);
+	//initialiseNode(gps, "GPS Node", NodeImportance::CRITICAL);
+
+	initialiseNode(vessel, "Vessel State Node", NodeImportance::CRITICAL);
+	initialiseNode(waypoint, "Waypoint Node", NodeImportance::CRITICAL);
+	initialiseNode(sail, "Sail Actuator", NodeImportance::CRITICAL);
+	initialiseNode(rudder, "Rudder Actuator", NodeImportance::CRITICAL);
     initialiseNode(manualControl, "Manual Control", NodeImportance::CRITICAL);
 
 #endif
@@ -392,6 +434,191 @@ int main(int argc, char *argv[])
 	messageBus.run();
 
 	Logger::shutdown();
-//    delete sailingLogic;
+	delete sailingLogic;
 	exit(0);
 }
+
+
+
+
+// Purely for reference, remove once complete
+
+/*xBeeSync* xbee_handle;
+
+
+static void threadXBeeSyncRun() {
+	xbee_handle->run();
+
+	Logger::warning("Xbee Sync thread has exited");
+}
+
+static void threadGPSupdate() {
+	try {
+		gps_handle->run();
+	}
+	catch (const char * e) {
+		std::cout << "ERROR while running static void threadGPSupdate()" << e << std::endl;
+	}
+}
+
+static void threadHTTPSyncRun() {
+	try {
+		httpsync_handle->run();
+	}
+	catch (const char * error) {
+		Logger::warning("Xbee Sync thread has exited");
+	}
+}
+
+static void threadWindsensor() {
+	windsensor_handle->run();
+	std::cout << " * Windsensor thread exited." << std::endl;
+}
+
+
+int main(int argc, char *argv[]) {
+	// This is for eclipse development so the output is constantly pumped out.
+	setbuf(stdout, NULL);
+
+	std::string path, db_name, errorLog;
+	if (argc < 2) {
+		path = "./";
+		db_name = "asr.db";
+		errorLog = "errors.log";
+	} else if (argc == 3 ) {
+		path = std::string(argv[1]);
+		db_name = std::string(argv[2]);
+		errorLog = "errors.log";
+	}
+  else {
+		path = std::string(argv[1]);
+		db_name = "asr.db";
+		errorLog = "errors.log";
+	}
+
+	printf("================================================================================\n");
+	printf("\t\t\t\tSailing Robot\n");
+	printf("\n");
+	printf("================================================================================\n");
+
+	if (Logger::init()) {
+		Logger::info("Built on %s at %s", __DATE__, __TIME__);
+		Logger::info("Logger init 		[OK]");
+	}
+	else {
+		Logger::info("Logger init 		[FAILED]");
+	}
+
+	// Default time
+	ExternalCommand externalCommand("1970-04-10T10:53:15.1234Z",true,0,0);
+	SystemState systemstate(
+		SystemStateModel(
+			GPSModel("",PositionModel(0,0),0,0,0,0),
+			WindsensorModel(0,0,0),
+			CompassModel(0,0,0,AccelerationModel(0,0,0) ),
+			AnalogArduinoModel(0, 0, 0, 0),
+			0,
+			0
+		)
+	);
+
+	DBHandler db(path+db_name);
+
+	if(db.initialise())
+	{
+		Logger::info("Successful database connection established");
+	}
+
+	bool mockGPS = db.retrieveCellAsInt("mock","1","gps");
+    bool mockWindsensor = db.retrieveCellAsInt("mock","1","windsensor");
+
+	// Create main sailing robot controller
+	int http_delay =  db.retrieveCellAsInt("httpsync_config", "1", "delay");
+	bool removeLogs = db.retrieveCellAsInt("httpsync_config", "1", "remove_logs");
+
+	httpsync_handle = new HTTPSync( &db, http_delay, removeLogs );
+
+    SailingRobot sr_handle(&externalCommand, &systemstate, &db, httpsync_handle);
+
+	GPSupdater gps_updater(&systemstate,mockGPS);
+	gps_handle = &gps_updater;
+
+	try {
+		if( not sr_handle.init(path, errorLog) )
+		{
+			Logger::error("Failed to initialise SailingRobot, exiting...");
+			return 1;
+		}
+
+		windsensor_handle.reset(
+			new WindsensorController(
+				&systemstate,
+				mockWindsensor,
+				db.retrieveCell("windsensor_config", "1", "port"),
+				db.retrieveCellAsInt("windsensor_config", "1", "baud_rate"),
+				db.retrieveCellAsInt("buffer_config", "1", "windsensor")
+			)
+		);
+
+		bool xBee_sending = db.retrieveCellAsInt("xbee_config", "1", "send");
+		bool xBee_receiving = db.retrieveCellAsInt("xbee_config", "1", "recieve");
+		bool xBee_sendLogs = db.retrieveCellAsInt("xbee_config", "1", "send_logs");
+		double xBee_loopTime = stod(db.retrieveCell("xbee_config", "1", "loop_time"));
+
+		xbee_handle = new xBeeSync(&externalCommand, &systemstate, &db, xBee_sendLogs, xBee_sending, xBee_receiving,xBee_loopTime);
+
+		if(xbee_handle->init())
+		{
+			// Start xBeeSync thread
+			std::unique_ptr<ThreadRAII> xbee_sync_thread;
+
+			if (xBee_sending || xBee_receiving)
+			{
+				xbee_sync_thread = std::unique_ptr<ThreadRAII>(new ThreadRAII(std::thread(threadXBeeSyncRun), ThreadRAII::DtorAction::detach));
+			}
+		}
+
+		// I2CController thread
+//		bool mockArduino = db.retrieveCellAsInt("mock","1","analog_arduino");
+//    	bool mockCompass = db.retrieveCellAsInt("mock","1","compass");
+//		int  headningBufferSize = db.retrieveCellAsInt("buffer_config", "1", "compass");
+//		double i2cLoopTime = stod(db.retrieveCell("i2c_config", "1", "loop_time"));
+//
+//		if(mockArduino) { Logger::warning("Using mock Arduino"); }
+//		if(mockArduino) { Logger::warning("Using mock compass"); }
+//
+//
+//		// Start i2cController thread
+
+
+		// Start GPSupdater thread
+		ThreadRAII gps_reader_thread(
+			std::thread(threadGPSupdate),
+			ThreadRAII::DtorAction::detach
+		);
+
+		// Start httpsync thread
+		httpsync_thread = std::unique_ptr<ThreadRAII>(new ThreadRAII(
+			std::thread(threadHTTPSyncRun),
+			ThreadRAII::DtorAction::detach
+		) );
+
+		// Start windsensor thread
+		windsensor_thread = std::unique_ptr<ThreadRAII>(new ThreadRAII(
+			std::thread(threadWindsensor),
+			ThreadRAII::DtorAction::detach
+		) );
+
+		sr_handle.run();
+	}
+	catch (const char * e) {
+		printf("ERROR[%s]\n\n",e);
+		return 1;
+	}
+
+
+	delete xbee_handle;
+
+	printf("-Finished.\n");
+	return 0;
+}*/

@@ -25,7 +25,7 @@
 //---------------------------------------------------------------------------------------
 
 
-#define GPS_THREAD_SLEEP		500
+#define GPS_THREAD_SLEEP		100
 #define GPS_BAUD_RATE			9600
 #define GPS_DEFAULT_PORT		"/dev/ttyAMA0"
 
@@ -216,6 +216,7 @@ void SerialGPSNode::GPSThreadFunc(void* nodePtr)
 		else
 		{
 			SysClock::sleepMS(GPS_THREAD_SLEEP);
+			Logger::info("Has GPS Fix");
 		}
 
 		charsRead = node->readNMEALine(nmeaBuffer, MINMEA_MAX_LENGTH);
