@@ -172,16 +172,16 @@ void MessageBus::processMessages()
 void MessageBus::startMessageLog()
 {
 #ifdef LOG_MESSAGES
-	m_LogFile = new std::ofstream("./Messages.log", std::ios::out | std::ios::trunc);
-	if(m_LogFile->is_open())
+	m_LogFilePtr = new std::ofstream("./Messages.log", std::ios::out | std::ios::trunc);
+	if(m_LogFilePtr->is_open())
 	{
 		Logger::info("Message log file created!");
 	}
 	else
 	{
 		Logger::error("Message log file not created!");
-		delete m_LogFile;
-		m_LogFile = NULL;
+		delete m_LogFilePtr;
+		m_LogFilePtr = NULL;
 	}
 #endif
 }
@@ -196,7 +196,7 @@ void MessageBus::logMessageReceived(Message* msg)
 void MessageBus::logMessage(Message* msg)
 {
 #ifdef LOG_MESSAGES
-	if(m_LogFile != NULL)
+	if(m_LogFilePtr != NULL)
 	{
 		char buff[256];
 
@@ -205,8 +205,8 @@ void MessageBus::logMessage(Message* msg)
 																						(int) msg->messageType(), (int) msg->sourceID(),
 																						(int) msg->destinationID(),
 																						SysClock::hh_mm_ss_ms(msg->timeReceived).c_str());
-		*m_LogFile << buff << "\n";
-		m_LogFile->flush();
+		*m_LogFilePtr << buff << "\n";
+		m_LogFilePtr->flush();
 	}
 #endif
 }
@@ -214,13 +214,13 @@ void MessageBus::logMessage(Message* msg)
 void MessageBus::logMessageConsumer(NodeID id)
 {
 #ifdef LOG_MESSAGES
-	if(m_LogFile != NULL)
+	if(m_LogFilePtr != NULL)
 	{
 		char buff[256];
 
 		snprintf(buff, 256, "\t%s Consumed by Node: %s(%d)", SysClock::hh_mm_ss_ms().c_str(), nodeToString(id).c_str(), (int) id);
-		*m_LogFile << buff << "\n";
-		m_LogFile->flush();
+		*m_LogFilePtr << buff << "\n";
+		m_LogFilePtr->flush();
 	}
 #endif
 }

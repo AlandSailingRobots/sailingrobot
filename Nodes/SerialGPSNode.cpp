@@ -42,14 +42,14 @@ SerialGPSNode::SerialGPSNode(MessageBus& msgBus)
 //---------------------------------------------------------------------------------------
 SerialGPSNode::~SerialGPSNode()
 {
-	if(m_Thread != NULL)
+	if(m_ThreadPtr != NULL)
 	{
 		m_keepRunning = false;
-		m_Thread->join();
+		m_ThreadPtr->join();
 	}
 
-	delete m_Thread;
-	m_Thread = NULL;
+	delete m_ThreadPtr;
+	m_ThreadPtr = NULL;
 }
 
 //---------------------------------------------------------------------------------------

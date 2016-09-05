@@ -32,5 +32,5 @@ public:
 	virtual void start() = 0;
 protected:
 	void runThread(ActiveNodeFunc func);
-	std::thread* m_Thread;
+	std::thread* m_ThreadPtr;
 };

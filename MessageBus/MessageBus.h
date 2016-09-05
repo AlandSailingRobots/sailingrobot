@@ -170,6 +170,6 @@ private:
 	std::mutex						m_FrontQueueMutex;	// Guards the front message queue.
 	
 #ifdef LOG_MESSAGES
-	std::ofstream* 					m_LogFile;
+	std::ofstream* 					m_LogFilePtr;
 #endif
 };

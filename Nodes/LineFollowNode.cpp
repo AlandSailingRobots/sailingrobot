@@ -5,12 +5,17 @@
  *
  * Purpose:
  *		This class computes the actuator positions of the boat in order to follow
- *    lines given by the waypoints.
+ *    	lines given by the waypoints.
  *
  * Developer Notes: algorithm inspired and modified from Luc Jaulin and
- *    Fabrice Le Bars  "An Experimental Validation of a Robust Controller with the VAIMOS
- *    Autonomous Sailboat" and "Modeling and Control for an Autonomous Sailboat: A
- *    Case Study" from Jon Melin, Kjell Dahl and Matia Waller
+ *    	Fabrice Le Bars  "An Experimental Validation of a Robust Controller with the VAIMOS
+ *    	Autonomous Sailboat" and "Modeling and Control for an Autonomous Sailboat: A
+ *    	Case Study" from Jon Melin, Kjell Dahl and Matia Waller
+ *
+ * Configurable Values
+ * 		These are values which are configurable and should be changed for different boats
+ * 			* NORM_RUDDER_COMMAND		The maximum angle the rudder can turn to in radians
+ * 			* NORM_SAIL_COMMAND			The maximum angle of the sail in radians
  *
  *
  ***************************************************************************************/
@@ -31,8 +36,10 @@
 
 // These values correspond to the angle of the sail/Rudder at its maximum position in radians
 
-#define NORM_RUDDER_COMMAND 0.5166 // getCommand() take a value between -1 and 1 so we need to normalize the command correspond to 29.6 degree
-#define NORM_SAIL_COMMAND 0.6958 // 1.5707963
+/*#define MAX_RUDDER_COMMAND 		M_PI / 6 // 29.9846
+#define MIN_SAIL_COMMAND 		0.6958 // 42 Degrees
+#define MIN_SAIL_COMMAND 		M_PI / 32.0f;
+#define TACK_ANGLE				0.872665; //50°*/
 
 LineFollowNode::LineFollowNode(MessageBus& msgBus, DBHandler& db)
 :  Node(NodeID::SailingLogic, msgBus), m_db(db), m_dbLogger(5, db),
@@ -53,31 +60,10 @@ LineFollowNode::LineFollowNode(MessageBus& msgBus, DBHandler& db)
     msgBus.registerNode(*this, MessageType::WaypointData);
     msgBus.registerNode(*this, MessageType::ExternalControl);
 
-#if BOAT_TYPE == BOAT_JANET
-
-    m_maxCommandAngle = M_PI / 6; // 29.98460029 Degrees
-    m_maxSailAngle = M_PI / 4.2f; // 42 Degrees
-    m_minSailAngle = M_PI / 32.0f;
-    m_tackAngle = 0.872665; //50°
-#endif
-
-#if BOAT_TYPE == BOAT_ENSTA_GRAND
-
-    m_maxCommandAngle = M_PI / 6; // 29.98460029 Degrees
-	m_maxSailAngle = M_PI / 4.2f; // 42 Degrees
-	m_minSailAngle = M_PI / 32.0f;
-	m_tackAngle = 0.872665; //50°
-
-#endif
-
-#if BOAT_TYPE == BOAT_ENSTA_PETIT
-
-    m_maxCommandAngle = M_PI / 6; // 29.98460029 Degrees
-	m_maxSailAngle = M_PI / 4.2f; //1.309; // 75 Degrees
-	m_minSailAngle = M_PI / 32.0f; // 5.5 degress or so
-	m_tackAngle = 0.872665; //50°
-
-#endif
+    m_maxCommandAngle = MAX_RUDDER_COMMAND;
+    m_maxSailAngle = MAX_SAIL_COMMAND;
+    m_minSailAngle = MIN_SAIL_COMMAND;
+    m_tackAngle = TACK_ANGLE;
 }
 
 bool LineFollowNode::init()
@@ -260,8 +246,9 @@ void LineFollowNode::calculateActuatorPos(VesselStateMsg* msg)
 //    }
 
     //------------------
-    int rudderCommand_norm = m_rudderCommand.getCommand(rudderCommand/NORM_RUDDER_COMMAND);
-    int sailCommand_norm = m_sailCommand.getCommand(sailCommand/NORM_SAIL_COMMAND);
+	// Normalise and get the PWM value we need
+    int rudderCommand_norm = m_rudderCommand.getCommand(rudderCommand / m_maxCommandAngle);
+    int sailCommand_norm = m_sailCommand.getCommand(sailCommand / m_maxSailAngle);
 
     //Logger::info("[Sail] cmd: %d, Rudder: %d sc: %f", sailCommand_norm, rudderCommand_norm, sailCommand);
 
