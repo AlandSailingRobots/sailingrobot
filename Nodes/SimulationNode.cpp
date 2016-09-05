@@ -290,7 +290,7 @@ bool SimulationNode::createObstacleDataCircle(double obsGpsLon, //rads
                                                                   obsGpsLon,obsGpsLat); // meters
 //    Logger::info("(SimulationNode) Obstacle inside sensor arc : %d", std::abs(obstacleHeadingRelativeToBoat) <= SENSOR_ARC_ANGLE);
 //    Logger::info("(SimulationNode) Obstacle inside detection range : %d", distFromObstacle<=maxDetectionRange);
-    if(std::abs(obstacleHeadingRelativeToBoat) <= SENSOR_ARC_ANGLE && distFromObstacle<=maxDetectionRange) {
+    if(std::abs(obstacleHeadingRelativeToBoat) <= SENSOR_ARC_ANGLE/2.0 && distFromObstacle<=maxDetectionRange) {
 
         const double leftHeadingRelativeToBoat =  Utility::wrapToPi(atan2(obstacleRadius, distFromObstacle),
                                                                     obstacleHeadingRelativeToBoat);

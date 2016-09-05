@@ -154,12 +154,12 @@ void CollisionAvoidanceNode::run() {
      * in a simulated environement or not. So this variable is temporary.
      */
 
-    Logger::info("Number of detected obstacles : %d", m_sensorOutput.detectedObstacles.size());
-    double minDebug = 10000000000.0;
-    for (auto &&obstacle : m_sensorOutput.detectedObstacles) {
-        minDebug = std::min(minDebug,obstacle.minDistanceToObstacle);
-    }
-    Logger::info("Distance to closest obstacle : %f", minDebug);
+//    Logger::info("Number of detected obstacles : %d", m_sensorOutput.detectedObstacles.size());
+//    double minDebug = 10000000000.0;
+//    for (auto &&obstacle : m_sensorOutput.detectedObstacles) {
+//        minDebug = std::min(minDebug,obstacle.minDistanceToObstacle);
+//    }
+//    Logger::info("Distance to closest obstacle : %f", minDebug);
 
     if (check_obstacles()) {
         WaypointOutput wpOut = compute_new_path(); // in rads
@@ -197,17 +197,18 @@ WaypointOutput CollisionAvoidanceNode::compute_new_path() {
     WaypointOutput wpOut;
     const double pathHeading = atan2(m_followedLine.endPoint(1)-m_followedLine.startPoint(1),
                                      m_followedLine.endPoint(0)-m_followedLine.startPoint(0));
+    const double shiftLength  = 1.0* CONVERSION_FACTOR_METER_TO_GPS;
+//    const double shiftLength = Utility::calculateGPSDistance(m_followedLine.startPoint(0),
+//                                                             m_followedLine.startPoint(1),
+//                                                             m_followedLine.endPoint(0),
+//                                                             m_followedLine.endPoint(1))/30.0
+//                               * atan(10.0/180*M_PI) * CONVERSION_FACTOR_METER_TO_GPS;
     const double normalPathHeading = Utility::wrapToPi(pathHeading,M_PI/2);
-    const double shiftLength = Utility::calculateGPSDistance(m_followedLine.startPoint(0),
-                                                             m_followedLine.startPoint(1),
-                                                             m_followedLine.endPoint(0),
-                                                             m_followedLine.endPoint(1))/10.0
-                               * atan(10.0/180*M_PI) * CONVERSION_FACTOR_METER_TO_GPS;
 
     const double offsetLength = CHANNEL_RADIUS/2.0*CONVERSION_FACTOR_METER_TO_GPS;
     Eigen::Vector2d shiftStartVector(offsetLength*cos(normalPathHeading),
                                      offsetLength*sin(normalPathHeading)); //shift of 10 degrees
-    Eigen::Vector2d shiftCollVector((shiftLength+offsetLength)*cos(normalPathHeading),
+    Eigen::Vector2d shiftCollVector((shiftLength)*cos(normalPathHeading),
                                     (shiftLength+offsetLength)*sin(normalPathHeading)); //shift of 10 degrees
     Eigen::Vector2d collision_avoidance_point = m_followedLine.endPoint+shiftCollVector;
 

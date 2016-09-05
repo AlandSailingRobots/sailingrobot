@@ -4,6 +4,7 @@
 #include "MessageBus/MessageBus.h"
 #include "Nodes/MessageLoggerNode.h"
 #include "Nodes/ActuatorNode.h"
+#include "Messages/ActuatorPositionMsg.h"
 
 #if SIMULATION == 1
  #include "Nodes/SimulationNode.h"
@@ -391,6 +392,6 @@ int main(int argc, char *argv[])
 	messageBus.run();
 
 	Logger::shutdown();
-    delete sailingLogic;
+//    delete sailingLogic;
 	exit(0);
 }

@@ -26,13 +26,12 @@
 #include <cmath>
 #include "WRSC.h"
 
-
 #define DEFAULT_TWD_BUFFERSIZE 200
 
 // These values correspond to the angle of the sail/Rudder at its maximum position in radians
 
 #define NORM_RUDDER_COMMAND 0.5166 // getCommand() take a value between -1 and 1 so we need to normalize the command correspond to 29.6 degree
-#define NORM_SAIL_COMMAND 0.6958 // 1.5707963
+#define NORM_SAIL_COMMAND 1.2217//0.6958 // 39.86
 
 LineFollowNode::LineFollowNode(MessageBus& msgBus, DBHandler& db)
 :  Node(NodeID::SailingLogic, msgBus), m_db(db), m_dbLogger(5, db),
@@ -159,6 +158,8 @@ void LineFollowNode::calculateActuatorPos(VesselStateMsg* msg)
         return;
     }
 
+    double incidenceAngle = M_PI / 4;
+
     double trueWindDirection = Utility::getTrueWindDirection(msg->windDir(), msg->windSpeed(),
                                                              msg->speed(), msg->compassHeading(), twdBuffer, twdBufferMaxSize);
     /* add pi because trueWindDirection is originally origin of wind but algorithm need direction*/
@@ -172,8 +173,8 @@ void LineFollowNode::calculateActuatorPos(VesselStateMsg* msg)
     double signedDistance = Utility::calculateSignedDistanceToLine(m_nextWaypointLon, m_nextWaypointLat, m_prevWaypointLon,
                                                                    m_prevWaypointLat, msg->longitude(), msg->latitude());
     int maxTackDistance = 20; //'r'
-    double phi = calculateAngleOfDesiredTrajectory(msg);
-    double desiredHeading = phi + (2 * (M_PI / 4)/M_PI) * atan(signedDistance/maxTackDistance); //heading to smoothly join the line
+    double lineHeading = calculateAngleOfDesiredTrajectory(msg);
+    double desiredHeading = lineHeading + (2 * (incidenceAngle)/M_PI) * atan(signedDistance/maxTackDistance); //heading to smoothly join the line
     desiredHeading = Utility::limitRadianAngleRange(desiredHeading);
     //---------------------
 
@@ -185,7 +186,8 @@ void LineFollowNode::calculateActuatorPos(VesselStateMsg* msg)
     //--------------------------------------------------
 
     //Check if tacking is needed-----
-    if( (cos(trueWindDirection_radian - desiredHeading) + cos(m_tackAngle) < 0) || (cos(trueWindDirection_radian - phi) + cos(m_tackAngle) < 0))
+    if( (cos(trueWindDirection_radian - desiredHeading) + cos(m_tackAngle) < 0)
+        || (cos(trueWindDirection_radian - lineHeading) + cos(m_tackAngle) < 0))
     {
         if(!m_tack) /* initialize tacking direction */
         {
@@ -220,7 +222,7 @@ void LineFollowNode::calculateActuatorPos(VesselStateMsg* msg)
     // QUICKFIX for WRSC
     double boatHeading_rad  = msg->compassHeading() * M_PI /180.0;//don't trust current heading
     double windDirection_raw = msg->windDir(); // degree from north
-    double windDirection = Utility::fmod_2PI_pos(windDirection_raw * M_PI /180.0 + boatHeading_rad);
+    double windDirection = Utility::fmod_2PI_pos(windDirection_raw * M_PI /180.0 + boatHeading_rad + M_PI);
     double windSpeed_raw = msg->windSpeed(); // m/s
     sailCommand = m_maxSailAngle/2.0 * ((cos(windDirection - desiredHeading) + 1));
 
