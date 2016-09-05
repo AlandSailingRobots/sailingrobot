@@ -292,7 +292,7 @@ void XbeeRemote::sendToUI(Message* msgPtr, MessageDeserialiser& deserialiser)
 			WaypointDataMsg msg(deserialiser);
 			if(msg.isValid())
 			{
-				m_Relay.write("wpnum=%d ", msg.nextId());
+				m_Relay.write("wpnum=%d wpLat=%f wpLon=%f", msg.nextId(), (float)msg.nextLatitude(), (float)msg.nextLongitude());
 			}
 		}
 		break;

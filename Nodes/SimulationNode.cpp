@@ -173,7 +173,7 @@ void SimulationNode::createCompassMessage()
 		MessagePtr msg = std::make_unique<CompassDataMsg>(CompassDataMsg( m_CompassHeading , m_CompassPitch, m_CompassRoll));
 
 	  	m_MsgBus.sendMessage(std::move(msg));
-        Logger::info("(SimulationNode) Sent compass data : %d deg", m_CompassHeading);
+        //Logger::info("(SimulationNode) Sent compass data : %d deg", m_CompassHeading);
   }
 }
 

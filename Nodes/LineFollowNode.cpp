@@ -36,10 +36,10 @@
 
 // These values correspond to the angle of the sail/Rudder at its maximum position in radians
 
-/*#define MAX_RUDDER_COMMAND 		M_PI / 6 // 29.9846
-#define MIN_SAIL_COMMAND 		0.6958 // 42 Degrees
-#define MIN_SAIL_COMMAND 		M_PI / 32.0f;
-#define TACK_ANGLE				0.872665; //50°*/
+#define MAX_RUDDER_COMMAND_A 		M_PI / 6 // 29.9846
+#define MAX_SAIL_COMMAND_A 		0.6958 // 42 Degrees
+#define MIN_SAIL_COMMAND_A 		M_PI / 32.0f;
+#define TACK_ANGLE_A				0.872665; //50°
 
 LineFollowNode::LineFollowNode(MessageBus& msgBus, DBHandler& db)
 :  Node(NodeID::SailingLogic, msgBus), m_db(db), m_dbLogger(5, db),
@@ -60,10 +60,16 @@ LineFollowNode::LineFollowNode(MessageBus& msgBus, DBHandler& db)
     msgBus.registerNode(*this, MessageType::WaypointData);
     msgBus.registerNode(*this, MessageType::ExternalControl);
 
+    /*
     m_maxCommandAngle = MAX_RUDDER_COMMAND;
     m_maxSailAngle = MAX_SAIL_COMMAND;
     m_minSailAngle = MIN_SAIL_COMMAND;
     m_tackAngle = TACK_ANGLE;
+    */
+    m_maxCommandAngle = MAX_RUDDER_COMMAND_A;
+    m_maxSailAngle = MAX_SAIL_COMMAND_A;
+    m_minSailAngle = MIN_SAIL_COMMAND_A;
+    m_tackAngle = TACK_ANGLE_A;
 }
 
 bool LineFollowNode::init()
@@ -213,13 +219,14 @@ void LineFollowNode::calculateActuatorPos(VesselStateMsg* msg)
     double rudderCommand, sailCommand;
 
     //SET RUDDER-------
+    Logger::info("Current Heading %f DesiredHeading %f COS % f", currentHeading_radian, desiredHeading, cos(currentHeading_radian - desiredHeading));
     if(cos(currentHeading_radian - desiredHeading) < 0) //if boat heading is too far away from desired heading
     {
-        rudderCommand = m_maxCommandAngle * Utility::sgn(sin(currentHeading_radian - desiredHeading));
+        rudderCommand = m_maxCommandAngle * -Utility::sgn(sin(currentHeading_radian - desiredHeading));
     }
     else
     {
-        rudderCommand = m_maxCommandAngle * sin(currentHeading_radian - desiredHeading);
+        rudderCommand = m_maxCommandAngle * -sin(currentHeading_radian - desiredHeading);
     }
     //-----------------
 
@@ -320,7 +327,9 @@ int LineFollowNode::getMergedHeading(int gpsHeading, int compassHeading, bool in
 	//Shouldn't be hardcoded
 	float tickRate = 0.01;
 
-	int headingCompass = Utility::addDeclinationToHeading(compassHeading, m_nextWaypointDeclination);
+	return compassHeading;
+
+	/*int headingCompass = Utility::addDeclinationToHeading(compassHeading, m_nextWaypointDeclination);
 	int headingGps = gpsHeading;
 
 	if (increaseCompassWeight){
@@ -340,7 +349,7 @@ int LineFollowNode::getMergedHeading(int gpsHeading, int compassHeading, bool in
 	int returnValue = 360 + headingCompass + (diff * m_gpsHeadingWeight);
 	while (returnValue > 360) returnValue -= 360;
 
-	return returnValue;
+	return returnValue;*/
 }
 
 void LineFollowNode::setupRudderCommand()
@@ -355,7 +364,7 @@ void LineFollowNode::setupRudderCommand()
 	m_rudderCommand.setCommandValues( RUDDER_MID_US, RUDDER_MID_US);
 #else
 	// Normally max
-	m_rudderCommand.setCommandValues( RUDDER_MID_US, RUDDER_MIN_US);
+	m_rudderCommand.setCommandValues( RUDDER_MAX_US, RUDDER_MID_US);
 #endif
 }
 
