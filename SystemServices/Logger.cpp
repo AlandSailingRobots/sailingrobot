@@ -42,6 +42,8 @@ bool Logger::m_DisableLogging = false;
 static std::ofstream 			m_LogFileWRSC;
 #endif
 
+#define LOG_FOLDER				"logFolder/"
+
 
 bool Logger::init(const char* filename)
 {
@@ -213,18 +215,18 @@ bool Logger::createLogFiles(const char* filename)
 
 	if(filename == 0)
 	{
-		snprintf(fileName, 256, "%s-%s", SysClock::hh_mm_ss().c_str(), DEFAULT_LOG_NAME);
+		snprintf(fileName, 256, "%s%s-%s", LOG_FOLDER, SysClock::hh_mm_ss().c_str(), DEFAULT_LOG_NAME);
 	}
 	else
 	{
-		snprintf(fileName, 256, "%s-%s", SysClock::hh_mm_ss().c_str(), filename);
+		snprintf(fileName, 256, "%s%s-%s", LOG_FOLDER, SysClock::hh_mm_ss().c_str(), filename);
 	}
 
 	m_LogFile.open(fileName, std::ios::out | std::ios::trunc);
 
 	#ifdef ENABLE_WRSC_LOGGING
 		char wrscFileName[256];
-		snprintf(wrscFileName, 256, "%s-%s", SysClock::hh_mm_ss().c_str(), DEFAULT_LOG_NAME_WRSC);
+		snprintf(wrscFileName, 256, "%s%s-%s", LOG_FOLDER, SysClock::hh_mm_ss().c_str(), DEFAULT_LOG_NAME_WRSC);
 		m_LogFileWRSC.open(wrscFileName, std::ios::out | std::ios::trunc);
 
 		if(m_LogFile.is_open() && m_LogFileWRSC.is_open())
