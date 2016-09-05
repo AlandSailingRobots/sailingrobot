@@ -137,7 +137,6 @@ double LineFollowNode::calculateAngleOfDesiredTrajectory(VesselStateMsg* msg)
 
 void LineFollowNode::calculateActuatorPos(VesselStateMsg* msg)
 {
-	return;
     if(not msg->gpsOnline())
     {
         Logger::error("GPS not online, using values from last iteration");

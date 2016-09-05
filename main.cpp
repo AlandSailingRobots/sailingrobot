@@ -329,9 +329,9 @@ int main(int argc, char *argv[])
 
 	initialiseNode(*sailingLogic, "Sailing Logic", NodeImportance::CRITICAL);
 
-	ManualControlNode manual(messageBus);
+	/*ManualControlNode manual(messageBus);
 	initialiseNode(manual, "Manual", NodeImportance::CRITICAL);
-	activeNodes.push_back(&manual);
+	activeNodes.push_back(&manual);*/
 #endif
 	//---------------------------------------------------------------------------------------------
 
