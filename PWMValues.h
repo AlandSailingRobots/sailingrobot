@@ -18,6 +18,7 @@
 
 
 #define RUDDER_MAX_US	1750
+#define RUDDER_MID_US	1380
 #define RUDDER_MIN_US	1010
 
 #define SAIL_MAX_US		2000

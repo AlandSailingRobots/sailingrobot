@@ -35,6 +35,7 @@ public:
 
 	void processMessage(const Message* message);
 
+	double calculateTrueWind(int windDir, int boatHeading);
 
 	float m_gpsHeadingWeight;
 

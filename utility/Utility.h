@@ -4,7 +4,10 @@
 #include <stdint.h> // uint8_t
 #include <vector>
 #include <array>
+#include <cmath>
 
+#define EARTH_RADIUS 6371000
+#define CONVERSION_FACTOR_METER_TO_GPS 0.00000015695406942385
 
 class Utility {
 public:
@@ -52,6 +55,28 @@ public:
 		                                         double &apparentWindSpeed, double &apparentWindDirection);
 	static double getApparentWindSpeed(const int windsensorDir, const int windsensorSpeed, const double gpsSpeed, const double heading, const double trueWindDirection);
 	static double getApparentWindDirection(const int windsensorDir, const int windsensorSpeed, const double gpsSpeed, const double heading, const double trueWindDirection);
+
+	/*
+	Return an angle between 0 and 2*M_PI.
+	double theta : (IN) Value.
+	Return : The converted angle.
+	*/
+	static inline double fmod_2PI_pos(double theta)
+	{
+		return fmod(fmod(theta, 2*M_PI)+2*M_PI, 2*M_PI);
+	}
+
+	/*
+	Return an angle between -M_PI and M_PI.
+	double theta : (IN) Value.
+	Return : The converted angle.
+	*/
+	static inline double fmod_2PI(double theta)
+	{
+		return fmod(fmod(theta, 2*M_PI)+3*M_PI, 2*M_PI)-M_PI;
+	}
+
+	static double wrapToPi(double radAngle1, double radAngle2);
 };
 
 #endif
