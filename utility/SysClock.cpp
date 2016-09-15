@@ -17,6 +17,8 @@
 #include <ctime>
 #include <sys/time.h>
 
+#include <thread>
+#include <chrono>
 
 #define GET_UNIX_TIME() static_cast<long int>(std::time(0))
 
@@ -38,6 +40,7 @@ unsigned long SysClock::unixTime()
 	if(m_LastUpdated != NEVER_UPDATED)
 	{
 		m_LastTimeStamp = m_LastTimeStamp + (GET_UNIX_TIME() - m_LastClockTime);
+		m_LastClockTime = GET_UNIX_TIME();
 		return m_LastTimeStamp;
 	}
 	else
@@ -126,11 +129,14 @@ int SysClock::year()
 	return 1990 + time->tm_year;
 }
 
- unsigned int SysClock::lastUpdated()
- {
-	 return unixTime() - m_LastUpdated;
- }
+unsigned int SysClock::lastUpdated()
+{
+	return unixTime() - m_LastUpdated;
+}
 
-
+void SysClock::sleepMS(unsigned int milliseconds)
+{
+	std::this_thread::sleep_for(std::chrono::milliseconds(milliseconds));
+}
 
 
