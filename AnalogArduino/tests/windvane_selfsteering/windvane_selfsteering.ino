@@ -94,11 +94,11 @@ void selfSteeringTurnedOff() {
 }
 
 void selfSteeringOff() {
-  float clutchCommand = calculateClutchCommand();
-  moveSaildrive(clutchCommand);
+  float sailDriveCommand = calculateSailDriveCommand();
+  moveSaildrive(sailDriveCommand);
   
   // windwane is locked here, but rotate it up with the wind to give minimum wind resistance
-  rotateWindvane(windDirection); 
+  rotateWindvane(courseToSteer - windDirection); 
 }
 
 /* 
@@ -132,13 +132,13 @@ void setClutchState(bool state) {
 }
 
 /* Help function that calculates the command
- * to give the saildrive clutch
+ * to give the saildrive 
  * returns: the command to give, between 0 and 1.
  *          0 assumed to be full port
  *          0.5 assumed to be straight ahead
  *          1 assumed to be full starboard
  */
-float calculateClutchCommand() {
+float calculateSailDriveCommand() {
   int degreesOffCourse = abs(((heading - courseToSteer) + 180) % 360 - 180); // limit angle to 0-360
   float command = -1;
   
