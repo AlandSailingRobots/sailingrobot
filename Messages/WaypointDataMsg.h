@@ -41,6 +41,7 @@ public:
 			!deserialiser.readDouble(m_nextLatitude) ||
 			!deserialiser.readInt(m_nextDeclination) ||
 			!deserialiser.readInt(m_nextRadius) ||
+			!deserialiser.readInt(m_nextStayTime) ||
 			!deserialiser.readInt(m_prevId) ||
 			!deserialiser.readDouble(m_prevLongitude) ||
 			!deserialiser.readDouble(m_prevLatitude) ||
@@ -79,9 +80,10 @@ public:
 		serialiser.serialise(m_nextLatitude);
 		serialiser.serialise(m_nextDeclination);
 		serialiser.serialise(m_nextRadius);
+		serialiser.serialise(m_nextStayTime);
 		serialiser.serialise(m_prevId);
 		serialiser.serialise(m_prevLongitude);
-		serialiser.serialise(m_prevLongitude);
+		serialiser.serialise(m_prevLatitude);
 		serialiser.serialise(m_prevDeclination);
 		serialiser.serialise(m_prevRadius);
 	}
