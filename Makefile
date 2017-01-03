@@ -62,19 +62,21 @@ NODES =					Nodes/MessageLoggerNode.cpp  Nodes/WaypointMgrNode.cpp Nodes/HTTPSyn
 						#You need opencv for the files below
 						#Nodes/obstacledetection/colorDetectionNode.cpp Nodes/obstacledetection/colorDetectionUtility.cpp
 
+XBEE_NETWORK = 			Network/DataLink.cpp Network/LinuxSerialDataLink.cpp Network/XbeePacketNetwork.cpp
+
 SYSTEM_SERVICES =		SystemServices/Logger.cpp
 else
 NODES =					Nodes/MessageLoggerNode.cpp Nodes/CV7Node.cpp Nodes/HMC6343Node.cpp Nodes/GPSDNode.cpp Nodes/ActuatorNode.cpp  Nodes/ArduinoNode.cpp \
 						Nodes/VesselStateNode.cpp Nodes/WaypointMgrNode.cpp Nodes/HTTPSyncNode.cpp Nodes/XbeeSyncNode.cpp Nodes/RoutingNode.cpp Nodes/LineFollowNode.cpp \
 						Nodes/lidarLite/lidarLite.cpp Nodes/lidarLite/lidarLiteNode.cpp \
-						
+
 XBEE_NETWORK = 			Network/DataLink.cpp Network/LinuxSerialDataLink.cpp Network/XbeePacketNetwork.cpp
 
 SYSTEM_SERVICES =		SystemServices/MaestroController.cpp SystemServices/Logger.cpp
 endif
 
 ifeq ($(USE_OPENCV), 1)
-OPENCV_CV =				Nodes/obstacledetection/colorDetectionNode.cpp Nodes/obstacledetection/colorDetectionUtility.cpp 
+OPENCV_CV =				Nodes/obstacledetection/colorDetectionNode.cpp Nodes/obstacledetection/colorDetectionUtility.cpp
 endif
 
 XBEE = 					xBee/Xbee.cpp
@@ -96,10 +98,10 @@ SRC_MAIN = main.cpp
 
 ifeq ($(TOOLCHAIN),win)
 SRC = 					utility\SysClock.cpp SystemServices\Logger.cpp Network\DataLink.cpp Network\XbeePacketNetwork.cpp Messages\MessageSerialiser.cpp Messages\MessageDeserialiser.cpp
-else					
+else
 SRC = 	utility/Utility.cpp utility/Timer.cpp utility/SysClock.cpp $(SYSTEM_SERVICES) $(XBEE) $(XBEE_NETWORK) \
 		$(CORE) $(NODES) $(I2CCONTROLLER) $(COURSE) $(DB) $(COMMAND) $(GPS) $(WAYPOINTROUTING) $(WINDVANECONTROLLER) $(OPENCV_CV)
-		
+
 WIRING_PI = libwiringPi.so
 WIRING_PI_PATH = ./libs/wiringPi/wiringPi/
 WIRING_PI_STATIC = ./libs/wiringPi/wiringPi/libwiringPi.so.2.32
@@ -134,7 +136,7 @@ ifeq ($(TOOLCHAIN),win)
 export CFLAGS = -Wall -g -o2
 export CPPFLAGS = -g -Wall -pedantic -Werror -std=gnu++14
 
-export LIBS = 
+export LIBS =
 
 else
 
@@ -239,5 +241,5 @@ clean:
 	@rm -f -r $(BUILD_DIR)
 	@rm -f $(EXECUTABLE)
 	"$(MAKE)" -C XbeeRemote clean
-	
+
 	@echo DONE
