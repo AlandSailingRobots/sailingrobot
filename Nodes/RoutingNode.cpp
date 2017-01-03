@@ -64,7 +64,7 @@ void RoutingNode::processMessage(const Message* msg)
         m_externalControlActive = ((ExternalControlMsg*)msg)->externalControlActive();
         break;
 	case MessageType::VesselState:
-        if(m_externalControlActive)
+        if(!m_externalControlActive)
         {
              calculateActuatorPos((VesselStateMsg*)msg);
         }

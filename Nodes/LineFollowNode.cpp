@@ -75,7 +75,7 @@ void LineFollowNode::processMessage(const Message* msg)
          m_externalControlActive = ((ExternalControlMsg*)msg)->externalControlActive();
         break;
 	case MessageType::VesselState:
-        if(m_externalControlActive)
+        if(!m_externalControlActive)
         {
              calculateActuatorPos((VesselStateMsg*)msg);
         }
@@ -317,7 +317,7 @@ void LineFollowNode::setPrevWaypointToBoatPos(VesselStateMsg* msg) //If boat pas
             m_prevWaypointLat, msg->longitude(), msg->latitude());
 
     double DTW = CourseMath::calculateDTW(msg->longitude(), msg->latitude(), m_nextWaypointLon, m_nextWaypointLat);
-    
+
     if(distanceAfterWaypoint > 0 ||  DTW < m_nextWaypointRadius)
     {
         m_prevWaypointLon = msg->longitude();
