@@ -76,13 +76,13 @@ void development_LocalNavigationModule( MessageBus& messageBus, DBHandler& dbHan
 {
 	Logger::info( "Using Local Navigation Module" );
 
-	SimulationNode simulation	( messageBus );
+	SimulationNode 	simulation	( messageBus );
 	VesselStateNode vesselState	( messageBus );
 	WaypointMgrNode waypoint	( messageBus, dbHandler );
 
-	initialiseNode( simulation, "Simulation Node", NodeImportance::CRITICAL );
-	initialiseNode( vesselState, "Vessel State Node", NodeImportance::CRITICAL );
-	initialiseNode( waypoint, "Waypoint Node", NodeImportance::CRITICAL );
+	initialiseNode( simulation, 	"Simulation Node", 		NodeImportance::CRITICAL );
+	initialiseNode( vesselState, 	"Vessel State Node", 	NodeImportance::CRITICAL );
+	initialiseNode( waypoint, 		"Waypoint Node", 		NodeImportance::CRITICAL );
 
 	simulation.start();
 	vesselState.start();
