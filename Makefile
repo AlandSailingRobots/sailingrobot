@@ -238,8 +238,8 @@ stats:$(EXECUTABLE)
 
 clean:
 	@echo Removing existing object files and executable
-	@rm -f -r $(BUILD_DIR)
-	@rm -f $(EXECUTABLE)
-	"$(MAKE)" -C XbeeRemote clean
+	-@rm -rd $(BUILD_DIR)
+	-@rm $(EXECUTABLE)
+	$(MAKE) -C tests clean
 
 	@echo DONE
