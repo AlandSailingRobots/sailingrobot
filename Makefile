@@ -31,6 +31,7 @@ USE_OPENCV = 0
 export TOOLCHAIN = linux-local
 C_TOOLCHAIN = 0
 USE_SIM = 0
+USE_DEV_LNM = 0
 
 
 
@@ -56,7 +57,9 @@ CORE =					MessageBus/MessageBus.cpp Nodes/ActiveNode.cpp Messages/MessageSerial
 
 ifeq ($(USE_DEV_LNM), 1)
 
-NODES = 				Nodes/WaypointMgrNode.cpp Nodes/SimulationNode.cpp Nodes/MessageLoggerNode.cpp Nodes/VesselStateNode.cpp
+LNM_SRC =				Nodes/LocalNavigationModule/CourseBallot.cpp
+
+NODES = 				$(LNM_SRC) Nodes/WaypointMgrNode.cpp Nodes/SimulationNode.cpp Nodes/MessageLoggerNode.cpp Nodes/VesselStateNode.cpp
 
 SYSTEM_SERVICES =		SystemServices/Logger.cpp
 
@@ -197,9 +200,14 @@ simulation:
 # Builds the intergration test, requires the whole system to be built before
 build_tests: $(OBJECTS) $(EXECUTABLE)
 	@echo Building tests...
-	$(MAKE) -C tests
+	$(MAKE) -C tests USE_DEV_LNM=USE_DEV_LNM
 	$(CXX) $(CPPFLAGS) tests/runner.o @$(OBJECT_FILE) -Wl,-rpath=./ ./libwiringPi.so -o $(UNIT_TEST) $(LIBS)
 	$(CXX) $(CPPFLAGS) tests/runnerHardware.o @$(OBJECT_FILE) -Wl,-rpath=./ ./libwiringPi.so -o $(HARDWARE_TEST) $(LIBS)
+
+build_lnm_tests: dev-lnm
+	@echo Building tests...
+	$(MAKE) -C tests test-gen-lnm USE_DEV_LNM=1
+	$(CXX) $(CPPFLAGS) tests/runner.o @$(OBJECT_FILE) -Wl,-rpath=./ ./libwiringPi.so -o $(UNIT_TEST) $(LIBS)
 
 xbee_remote: $(OBJECTS) $(WIRING_PI)
 	"$(MAKE)" -C XbeeRemote

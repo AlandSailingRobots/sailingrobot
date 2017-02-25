@@ -148,6 +148,7 @@ int main(int argc, char *argv[])
 		#if SIMULATION == 1
 		printf("using simulation\n");
 		SimulationNode simulation(messageBus);
+		
 		#else
 
 		XbeeSyncNode xbee(messageBus, dbHandler);
