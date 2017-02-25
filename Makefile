@@ -54,7 +54,13 @@ JSON = 					libs/json
 
 CORE =					MessageBus/MessageBus.cpp Nodes/ActiveNode.cpp Messages/MessageSerialiser.cpp Messages/MessageDeserialiser.cpp
 
-ifeq ($(USE_SIM),1)
+ifeq ($(USE_DEV_LNM), 1)
+
+NODES = 				Nodes/WaypointMgrNode.cpp Nodes/SimulationNode.cpp Nodes/MessageLoggerNode.cpp Nodes/VesselStateNode.cpp
+
+SYSTEM_SERVICES =		SystemServices/Logger.cpp
+
+else ifeq ($(USE_SIM),1)
 
 NODES =					Nodes/MessageLoggerNode.cpp  Nodes/WaypointMgrNode.cpp Nodes/HTTPSyncNode.cpp Nodes/XbeeSyncNode.cpp \
 						Nodes/VesselStateNode.cpp  Nodes/RoutingNode.cpp Nodes/LineFollowNode.cpp \
@@ -168,7 +174,7 @@ export CXX
 
 export MKDIR_P = mkdir -p
 
-DEFINES = -DTOOLCHAIN=$(TOOLCHAIN) -DSIMULATION=$(USE_SIM) -DUSE_OPENCV_COLOR_DETECTION=$(USE_OPENCV)
+DEFINES = -DTOOLCHAIN=$(TOOLCHAIN) -DSIMULATION=$(USE_SIM) -DDEV_LNM=$(USE_DEV_LNM) -DUSE_OPENCV_COLOR_DETECTION=$(USE_OPENCV)
 
 
 #######################################################
@@ -180,7 +186,12 @@ DEFINES = -DTOOLCHAIN=$(TOOLCHAIN) -DSIMULATION=$(USE_SIM) -DUSE_OPENCV_COLOR_DE
 all: $(EXECUTABLE) stats
 
 
+dev-lnm:
+	@echo Building development LNM
+	make USE_DEV_LNM=1 USE_SIM=1 -j4 
+
 simulation:
+	@echo Building simulator
 	make USE_SIM=1 -j4
 
 # Builds the intergration test, requires the whole system to be built before
