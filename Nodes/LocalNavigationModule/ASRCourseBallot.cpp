@@ -13,18 +13,18 @@
  ***************************************************************************************/
 
 
-#include "CourseBallot.h"
+#include "ASRCourseBallot.h"
 
 
 ///----------------------------------------------------------------------------------
-CourseBallot::CourseBallot( int16_t maxVotes )
+ASRCourseBallot::ASRCourseBallot( int16_t maxVotes )
     :MAX_VOTES( maxVotes )
 {
     clear();
 }
 
 ///----------------------------------------------------------------------------------
-void CourseBallot::set( uint16_t course, int16_t value )
+void ASRCourseBallot::set( uint16_t course, int16_t value )
 {
     // Angle wrapping
     course = wrapAngle( course );
@@ -36,20 +36,20 @@ void CourseBallot::set( uint16_t course, int16_t value )
     }
 
     // ensure the index exists based on the course resolution selected
-    if( course % CourseBallot::COURSE_RESOLUTION == 0 )
+    if( course % ASRCourseBallot::COURSE_RESOLUTION == 0 )
     {
         courses[course] = value;
     }
 }
 
 ///----------------------------------------------------------------------------------
-void CourseBallot::add( uint16_t course, int16_t value )
+void ASRCourseBallot::add( uint16_t course, int16_t value )
 {
     // Angle wrapping
     course = wrapAngle( course );
 
     // ensure the index exists based on the course resolution selected
-    if( course % CourseBallot::COURSE_RESOLUTION == 0 )
+    if( course % ASRCourseBallot::COURSE_RESOLUTION == 0 )
     {
         value += courses[course];
 
@@ -64,19 +64,19 @@ void CourseBallot::add( uint16_t course, int16_t value )
 }
 
 ///----------------------------------------------------------------------------------
-void CourseBallot::clear()
+void ASRCourseBallot::clear()
 {
-    memset( courses, 0, sizeof(int16_t) * CourseBallot::ELEMENT_COUNT );
+    memset( courses, 0, sizeof(int16_t) * ASRCourseBallot::ELEMENT_COUNT );
 }
 
 ///----------------------------------------------------------------------------------
-const int16_t* CourseBallot::ptr()
+const int16_t* ASRCourseBallot::ptr() const
 {
     return courses;
 }
 
 ///----------------------------------------------------------------------------------
-int16_t CourseBallot::wrapAngle( int16_t angle )
+int16_t ASRCourseBallot::wrapAngle( int16_t angle ) const
 {
     while ( angle < 0 || angle > 360 )
     {

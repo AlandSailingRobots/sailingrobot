@@ -1,7 +1,7 @@
 /****************************************************************************************
  *
  * File:
- * 		CourseBallot.h
+ * 		ASRCourseBallot.h
  *
  * Purpose:
  *		The Course Ballot is used by the voters and the Arbiter to store the possible 
@@ -21,13 +21,13 @@
 #include <cstring>
 
 
-class CourseBallot {
+class ASRCourseBallot {
 public:
     ///----------------------------------------------------------------------------------
  	/// Constructs a CourseBallot. Requires a single argument which controls the maximum
     /// vote a single course can have.
  	///----------------------------------------------------------------------------------
-    CourseBallot( int16_t maxVotes );
+    ASRCourseBallot( int16_t maxVotes );
 
     ///----------------------------------------------------------------------------------
  	/// Assigns a vote to a particular heading.
@@ -48,7 +48,7 @@ public:
  	/// Returns a pointer to the underlying course data, this is an array that has
     /// 360 / CourseBallot::COURSE_RESOLUTION elements.
  	///----------------------------------------------------------------------------------
-    const int16_t* ptr();
+    const int16_t* ptr() const;
 
     ///----------------------------------------------------------------------------------
  	/// The course resolution controls the number of courses that the boat will examine.
@@ -66,7 +66,7 @@ private:
     ///----------------------------------------------------------------------------------
  	/// Wraps an angle.
  	///----------------------------------------------------------------------------------
-    int16_t wrapAngle( int16_t angle );
+    int16_t wrapAngle( int16_t angle ) const;
 
     const int16_t MAX_VOTES;
     int16_t courses[ELEMENT_COUNT];

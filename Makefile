@@ -57,7 +57,7 @@ CORE =					MessageBus/MessageBus.cpp Nodes/ActiveNode.cpp Messages/MessageSerial
 
 ifeq ($(USE_DEV_LNM), 1)
 
-LNM_SRC =				Nodes/LocalNavigationModule/CourseBallot.cpp
+LNM_SRC =				Nodes/LocalNavigationModule/ASRCourseBallot.cpp
 
 NODES = 				$(LNM_SRC) Nodes/WaypointMgrNode.cpp Nodes/SimulationNode.cpp Nodes/MessageLoggerNode.cpp Nodes/VesselStateNode.cpp
 
