@@ -1,7 +1,7 @@
 /****************************************************************************************
  *
  * File:
- * 		ASRBoatState.h
+ * 		BoatState.h
  *
  * Purpose:
  *		A cache the Local Navigation Module uses to store boat data.
@@ -19,7 +19,7 @@
 #include <stdint.h>
 
 
-struct ASRBoatState_t {
+struct BoatState_t {
     double currWaypointLat;
     double currWaypointLon;
     double lastWaypointLat;

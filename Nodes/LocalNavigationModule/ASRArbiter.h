@@ -1,11 +1,10 @@
 /****************************************************************************************
  *
  * File:
- * 		ASRVoter.h
+ * 		ASRArbiter.h
  *
  * Purpose:
- *		The abstract base voter class. A voter contains a course ballot and a vote 
- *      function which needs to be overriden. 
+ *		
  *
  * License:
  *      This file is subject to the terms and conditions defined in the file 
@@ -20,10 +19,12 @@
 #include "ASRCourseBallot.h"
 
 
-class ASRVoter {
+class ASRArbiter {
 public:
-    virtual ASRCourseBallot_t* vote( BoatState_t& boatState ) = 0;
+    ASRArbiter();
+    void castVote( ASRCourseBallot& ballot );
+    const ASRCourseBallot* getResult() const;
 
-protected:
-    ASRCourseBallot_t courseBallot;
+private:
+    ASRCourseBallot courseBallot;
 };
