@@ -24,8 +24,9 @@ struct BoatState_t {
     double currWaypointLon;
     double lastWaypointLat;
     double lastWaypointLon;
+    uint16_t radius;
 
-    uin16_t heading;
+    uint16_t heading;
     double lat;
     double lon;
     uint16_t wind;

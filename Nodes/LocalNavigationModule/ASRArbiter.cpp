@@ -24,7 +24,7 @@ ASRArbiter::ASRArbiter()
 }
 
 ///----------------------------------------------------------------------------------
-void ASRArbiter::castVote( ASRCourseBallot& ballot )
+void ASRArbiter::castVote( const ASRCourseBallot& ballot )
 {
     for( uint16_t i = 0; i < 360; i+= ASRCourseBallot::COURSE_RESOLUTION )
     {

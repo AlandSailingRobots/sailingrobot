@@ -35,7 +35,9 @@ enum class MessageType {
 	ObstacleVector,
 	LidarData,
 	CourseData,
-	ExternalControl
+	ExternalControl,
+	RequestCourse,
+	DesiredCourse
 };
 
 inline std::string msgToString(MessageType msgType)
@@ -74,6 +76,10 @@ inline std::string msgToString(MessageType msgType)
 		return "CourseData";
 	case MessageType::ExternalControl:
 		return "ExternalControl";
+	case MessageType::RequestCourse:
+		return "RequestCourse";
+	case MessageType::DesiredCourse:
+		return "DesiredCourse";
 	}
 	return "";
 }

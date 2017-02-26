@@ -35,7 +35,8 @@ enum class NodeID {
     ColorDetection,
     CollisionAvoidanceBehaviour,
     Lidar,
-	Simulator
+	Simulator,
+	LocalNavigationModule
 };
 
 inline std::string nodeToString(NodeID id)
@@ -76,6 +77,8 @@ inline std::string nodeToString(NodeID id)
             return "Lidar";
 	case NodeID::Simulator:
 		return "Simulator";
+	case NodeID::LocalNavigationModule:
+		return "Local Navigation Module";
 	}
 	return "";
 }
