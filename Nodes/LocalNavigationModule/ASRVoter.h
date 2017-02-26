@@ -22,8 +22,12 @@
 
 class ASRVoter {
 public:
-    virtual ASRCourseBallot_t* vote( BoatState_t& boatState ) = 0;
+    ///----------------------------------------------------------------------------------
+ 	/// Triggers a ASR voter to place votes on the course headings. This function returns
+    /// a reference to the internal course ballot data.
+ 	///----------------------------------------------------------------------------------
+    virtual const ASRCourseBallot_t& vote( BoatState_t& boatState ) = 0;
 
 protected:
-    ASRCourseBallot_t courseBallot;
+    ASRCourseBallot courseBallot;
 };

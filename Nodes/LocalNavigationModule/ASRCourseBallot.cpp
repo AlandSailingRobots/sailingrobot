@@ -16,6 +16,9 @@
 #include "ASRCourseBallot.h"
 
 
+#define CALCULATE_INDEX( index ) index / ASRCourseBallot::COURSE_RESOLUTION;
+
+
 ///----------------------------------------------------------------------------------
 ASRCourseBallot::ASRCourseBallot( int16_t maxVotes )
     :MAX_VOTES( maxVotes )
@@ -35,11 +38,8 @@ void ASRCourseBallot::set( uint16_t course, int16_t value )
         value = MAX_VOTES;
     }
 
-    // ensure the index exists based on the course resolution selected
-    if( course % ASRCourseBallot::COURSE_RESOLUTION == 0 )
-    {
-        courses[course] = value;
-    }
+    course = CALCULATE_INDEX( course );
+    courses[course] = value;
 }
 
 ///----------------------------------------------------------------------------------
@@ -48,25 +48,33 @@ void ASRCourseBallot::add( uint16_t course, int16_t value )
     // Angle wrapping
     course = wrapAngle( course );
 
-    // ensure the index exists based on the course resolution selected
-    if( course % ASRCourseBallot::COURSE_RESOLUTION == 0 )
+    course = CALCULATE_INDEX( course );
+    value += courses[course];
+
+    // cap the vote
+    if( value > MAX_VOTES )
     {
-        value += courses[course];
-
-        // cap the vote
-        if( value > MAX_VOTES )
-        {
-            value = MAX_VOTES;
-        }
-
-        courses[course] = value;
+        value = MAX_VOTES;
     }
+
+    courses[course] = value;
 }
 
 ///----------------------------------------------------------------------------------
 void ASRCourseBallot::clear()
 {
     memset( courses, 0, sizeof(int16_t) * ASRCourseBallot::ELEMENT_COUNT );
+}
+
+///----------------------------------------------------------------------------------
+int16_t ASRCourseBallot::get( uint16_t heading ) const
+{
+     // Angle wrapping
+    heading = wrapAngle( heading );
+
+    heading = CALCULATE_INDEX( heading );
+
+    return courses[heading];
 }
 
 ///----------------------------------------------------------------------------------
@@ -78,7 +86,7 @@ const int16_t* ASRCourseBallot::ptr() const
 ///----------------------------------------------------------------------------------
 int16_t ASRCourseBallot::wrapAngle( int16_t angle ) const
 {
-    while ( angle < 0 || angle > 360 )
+    while ( angle < 0 || angle >= 360 )
     {
         if ( angle < 0 )
         {

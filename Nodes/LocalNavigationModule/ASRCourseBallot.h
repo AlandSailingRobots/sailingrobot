@@ -22,6 +22,7 @@
 
 
 class ASRCourseBallot {
+    friend class ASRArbiter; 
 public:
     ///----------------------------------------------------------------------------------
  	/// Constructs a CourseBallot. Requires a single argument which controls the maximum
@@ -45,6 +46,12 @@ public:
     void clear();
 
     ///----------------------------------------------------------------------------------
+ 	/// Gets the votes placed on a heading. The heading is rounded down to the nearest 
+    /// valid heading;
+ 	///----------------------------------------------------------------------------------
+    int16_t get( uint16_t heading ) const;
+
+    ///----------------------------------------------------------------------------------
  	/// Returns a pointer to the underlying course data, this is an array that has
     /// 360 / CourseBallot::COURSE_RESOLUTION elements.
  	///----------------------------------------------------------------------------------
@@ -61,7 +68,6 @@ public:
  	/// The number of courses the ballot tracks.
  	///----------------------------------------------------------------------------------
     static const int ELEMENT_COUNT = 360 / COURSE_RESOLUTION;
-
 private:
     ///----------------------------------------------------------------------------------
  	/// Wraps an angle.
