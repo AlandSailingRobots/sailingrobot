@@ -190,6 +190,35 @@ double Utility::radianToDegree(double radians)
 	return radians / M_PI * 180;
 }
 
+uint16_t Utility::headingDifference(uint16_t h1, uint16_t h2)
+{
+	if (h1 > 180) 
+	{
+		return (360 - h1) + h2;
+	}
+	else
+	{
+		return h2 - h1;
+	}
+}
+
+uint16_t Utility::wrapAngle( int16_t angle)
+{
+	while ( angle < 0 || angle >= 360 )
+    {
+        if ( angle < 0 )
+        {
+            angle += 360;
+        }
+        else
+        {
+            angle -= 360;
+        }
+    }
+
+    return angle;
+}
+
 int Utility::addDeclinationToHeading(int heading, int declination) {
 	return static_cast<int> (Utility::limitAngleRange(heading + declination) + 0.5);
 }

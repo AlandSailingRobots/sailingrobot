@@ -14,6 +14,7 @@
 
 
 #include "ASRCourseBallot.h"
+#include "utility/Utility.h"
 
 
 #define CALCULATE_INDEX( index ) index / ASRCourseBallot::COURSE_RESOLUTION;
@@ -30,7 +31,7 @@ ASRCourseBallot::ASRCourseBallot( int16_t maxVotes )
 void ASRCourseBallot::set( uint16_t course, int16_t value )
 {
     // Angle wrapping
-    course = wrapAngle( course );
+    course = Utility::wrapAngle( course );
 
     // cap the vote
     if( value > MAX_VOTES )
@@ -46,7 +47,7 @@ void ASRCourseBallot::set( uint16_t course, int16_t value )
 void ASRCourseBallot::add( uint16_t course, int16_t value )
 {
     // Angle wrapping
-    course = wrapAngle( course );
+    course = Utility::wrapAngle( course );
 
     course = CALCULATE_INDEX( course );
     value += courses[course];
@@ -70,7 +71,7 @@ void ASRCourseBallot::clear()
 int16_t ASRCourseBallot::get( uint16_t heading ) const
 {
      // Angle wrapping
-    heading = wrapAngle( heading );
+    heading = Utility::wrapAngle( heading );
 
     heading = CALCULATE_INDEX( heading );
 
@@ -81,22 +82,4 @@ int16_t ASRCourseBallot::get( uint16_t heading ) const
 const int16_t* ASRCourseBallot::ptr() const
 {
     return courses;
-}
-
-///----------------------------------------------------------------------------------
-int16_t ASRCourseBallot::wrapAngle( int16_t angle ) const
-{
-    while ( angle < 0 || angle >= 360 )
-    {
-        if ( angle < 0 )
-        {
-            angle += 360;
-        }
-        else
-        {
-            angle -= 360;
-        }
-    }
-
-    return angle;
 }

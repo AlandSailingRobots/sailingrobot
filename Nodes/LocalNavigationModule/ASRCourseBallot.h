@@ -69,10 +69,6 @@ public:
  	///----------------------------------------------------------------------------------
     static const int ELEMENT_COUNT = 360 / COURSE_RESOLUTION;
 private:
-    ///----------------------------------------------------------------------------------
- 	/// Wraps an angle.
- 	///----------------------------------------------------------------------------------
-    int16_t wrapAngle( int16_t angle ) const;
 
     const int16_t MAX_VOTES;
     int16_t courses[ELEMENT_COUNT];
