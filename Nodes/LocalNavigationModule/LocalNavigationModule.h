@@ -16,14 +16,14 @@
 #pragma once
 
 
-#include "../Node.h"
+#include "../ActiveNode.h"
 #include "BoatState.h"
 #include "ASRVoter.h"
 #include "ASRArbiter.h"
 #include <vector>
 
 
-class LocalNavigationModule : Node {
+class LocalNavigationModule : public ActiveNode {
 public:
     ///----------------------------------------------------------------------------------
  	/// Constructs the LocalNavigationModule
@@ -36,12 +36,17 @@ public:
     bool init();
 
     ///----------------------------------------------------------------------------------
+ 	/// Starts the quick hack wakeup thread
+ 	///----------------------------------------------------------------------------------
+    void start();
+
+    ///----------------------------------------------------------------------------------
  	/// Processes the following messages:
     ///     * Vessel State Messages
     ///     * New Waypoint Messages
     ///     * Course Request Message
  	///----------------------------------------------------------------------------------
-    void processMessages( const Message* msg );
+    void processMessage( const Message* msg );
 
     ///----------------------------------------------------------------------------------
  	/// Registers a voter, this voter will then be asked to vote when a ballot is held.
@@ -54,6 +59,11 @@ private:
     /// the final result is generated and a desired course message is created.
  	///----------------------------------------------------------------------------------
     void startBallot();
+
+    ///----------------------------------------------------------------------------------
+ 	/// Just a little hack for waking up the navigation module for now
+ 	///----------------------------------------------------------------------------------
+    static void WakeupThreadFunc( void* nodePtr );
 
     std::vector<ASRVoter*> voters;
     BoatState_t boatState;

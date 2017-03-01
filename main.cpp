@@ -30,6 +30,8 @@
 #include "SystemServices/MaestroController.h"
 #include "xBee/Xbee.h"
 
+#include "Nodes/LocalNavigationModule/LocalNavigationModule.h"
+
 #define DISABLE_LOGGING 0
 
 enum class NodeImportance {
@@ -74,18 +76,27 @@ void initialiseNode(Node& node, const char* nodeName, NodeImportance importance)
 ///----------------------------------------------------------------------------------
 void development_LocalNavigationModule( MessageBus& messageBus, DBHandler& dbHandler)
 {
+	const double PGAIN = 0.25
+	const double IGAIN = 0.15
+
 	Logger::info( "Using Local Navigation Module" );
 
 	SimulationNode 	simulation	( messageBus );
 	VesselStateNode vesselState	( messageBus );
 	WaypointMgrNode waypoint	( messageBus, dbHandler );
+	LocalNavigationModule lnm	( messageBus );
+	LowLevelController llc		( messageBus, PGAIN, IGAIN );
 
-	initialiseNode( simulation, 	"Simulation Node", 		NodeImportance::CRITICAL );
-	initialiseNode( vesselState, 	"Vessel State Node", 	NodeImportance::CRITICAL );
-	initialiseNode( waypoint, 		"Waypoint Node", 		NodeImportance::CRITICAL );
+	initialiseNode( simulation, 	"Simulation Node", 			NodeImportance::CRITICAL );
+	initialiseNode( vesselState, 	"Vessel State Node", 		NodeImportance::CRITICAL );
+	initialiseNode( waypoint, 		"Waypoint Node", 			NodeImportance::CRITICAL );
+	initialiseNode( lnm,			"Local Navigation Module",	NodeImportance::CRITICAL );
+	initialiseNode( llc,			"Low Level Controller",		NodeImportance::CRITICAL );
+
 
 	simulation.start();
 	vesselState.start();
+	lnm.start();
 
 	Logger::info("Message bus started!");
 

@@ -17,6 +17,7 @@
 
 
 #include "Node.h"
+#include "dbhandler/DBHandler.h"
 
 
 class LowLevelController : public Node {
@@ -36,10 +37,23 @@ public:
  	///----------------------------------------------------------------------------------
     void processMessage( const Message* msg );
 private:
-    uint16_t pi();
+    void sendActuatorMsg();
+    void calculateRudder();
+    void calculateSail( int windDir );
+    int16_t restrictRudder( int16_t val );
+    int16_t pi();
 
     uint16_t heading;
     uint16_t desiredHeading;
     double pGain;
     double iGain;
+
+    // These are in maestro servo range
+    uint16_t closeRange_ms;
+    uint16_t sailRange_ms;
+    uint16_t rudderMidpoint_ms;
+    uint16_t rudderRange_ms;
+
+    int16_t rudder_ms;
+    int16_t sail_ms;
 };

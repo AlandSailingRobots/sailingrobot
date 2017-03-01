@@ -30,7 +30,7 @@ public:
     ///----------------------------------------------------------------------------------
  	/// Adds all the votes from a course ballot into its internal ballot.
  	///----------------------------------------------------------------------------------
-    void castVote( const ASRCourseBallot& ballot );
+    void castVote( const int16_t weight, const ASRCourseBallot& ballot );
 
     ///----------------------------------------------------------------------------------
  	/// Returns the winning course.

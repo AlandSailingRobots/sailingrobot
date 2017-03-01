@@ -22,12 +22,19 @@
 
 class ASRVoter {
 public:
+    ASRVoter( int16_t maxVotes, int16_t weight )
+        :courseBallot( maxVotes ), voterWeight( weight )
+    { }
+
     ///----------------------------------------------------------------------------------
  	/// Triggers a ASR voter to place votes on the course headings. This function returns
     /// a reference to the internal course ballot data.
  	///----------------------------------------------------------------------------------
     virtual const ASRCourseBallot& vote( BoatState_t& boatState ) = 0;
 
+    int16_t weight() { return voterWeight; }
+
 protected:
     ASRCourseBallot courseBallot;
+    int16_t         voterWeight;
 };

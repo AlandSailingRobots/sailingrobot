@@ -190,15 +190,24 @@ double Utility::radianToDegree(double radians)
 	return radians / M_PI * 180;
 }
 
-uint16_t Utility::headingDifference(uint16_t h1, uint16_t h2)
+int16_t Utility::headingDifference(uint16_t h1, uint16_t h2)
 {
-	if (h1 > 180) 
+	int16_t diff = h2 - h1;
+	int16_t absDiff = abs( diff );
+
+	if (absDiff <= 180)
 	{
-		return (360 - h1) + h2;
+		return absDiff == 180 ? absDiff : diff;
 	}
+
+	else if (h2 > h1)
+	{
+		return absDiff - 360;
+	}
+
 	else
 	{
-		return h2 - h1;
+		return 360 - absDiff;
 	}
 }
 

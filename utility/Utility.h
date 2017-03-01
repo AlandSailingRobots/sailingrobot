@@ -34,7 +34,7 @@ public:
 	static double degreeToRadian(double degrees);
 	static double radianToDegree(double radians);
 
-	static uint16_t headingDifference(uint16_t h1, uint16_t h2);
+	static int16_t headingDifference(uint16_t h1, uint16_t h2);
 	static uint16_t wrapAngle( int16_t angle);
 
 	static int addDeclinationToHeading(int heading, int declination);
