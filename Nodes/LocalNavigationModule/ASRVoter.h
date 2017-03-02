@@ -18,6 +18,7 @@
 
 
 #include "ASRCourseBallot.h"
+#include "BoatState.h"
 
 
 class ASRVoter {

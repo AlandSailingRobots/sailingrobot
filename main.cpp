@@ -31,6 +31,9 @@
 #include "xBee/Xbee.h"
 
 #include "Nodes/LocalNavigationModule/LocalNavigationModule.h"
+#include "Nodes/LocalNavigationModule/Voters/WaypointVoter.h"
+#include "Nodes/LocalNavigationModule/Voters/WindVoter.h"
+#include "Nodes/LowLevelController.h"
 
 #define DISABLE_LOGGING 0
 
@@ -76,8 +79,9 @@ void initialiseNode(Node& node, const char* nodeName, NodeImportance importance)
 ///----------------------------------------------------------------------------------
 void development_LocalNavigationModule( MessageBus& messageBus, DBHandler& dbHandler)
 {
-	const double PGAIN = 0.25
-	const double IGAIN = 0.15
+	const double PGAIN = 0.20;
+	const double IGAIN = 0.30;
+	const int16_t MAX_VOTES = 25;
 
 	Logger::info( "Using Local Navigation Module" );
 
@@ -85,13 +89,19 @@ void development_LocalNavigationModule( MessageBus& messageBus, DBHandler& dbHan
 	VesselStateNode vesselState	( messageBus );
 	WaypointMgrNode waypoint	( messageBus, dbHandler );
 	LocalNavigationModule lnm	( messageBus );
-	LowLevelController llc		( messageBus, PGAIN, IGAIN );
+	LowLevelController llc		( messageBus, dbHandler, PGAIN, IGAIN );
 
 	initialiseNode( simulation, 	"Simulation Node", 			NodeImportance::CRITICAL );
 	initialiseNode( vesselState, 	"Vessel State Node", 		NodeImportance::CRITICAL );
 	initialiseNode( waypoint, 		"Waypoint Node", 			NodeImportance::CRITICAL );
 	initialiseNode( lnm,			"Local Navigation Module",	NodeImportance::CRITICAL );
 	initialiseNode( llc,			"Low Level Controller",		NodeImportance::CRITICAL );
+
+	WaypointVoter waypointVoter( MAX_VOTES, 1 );
+	WindVoter windVoter( MAX_VOTES, 1 );
+
+	lnm.registerVoter( &waypointVoter );
+	lnm.registerVoter( &windVoter );
 
 
 	simulation.start();

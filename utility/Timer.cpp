@@ -27,18 +27,26 @@ void Timer::reset()
 
 void Timer::stop()
 {
+	timePassed = timePassed();
 	m_running = false;
 }
 
 double Timer::timePassed()
 {
-	STEADY_CLOCK::time_point end;
-	DURATION<double> time_span;
+	if(m_running)
+	{
+		STEADY_CLOCK::time_point end;
+		DURATION<double> time_span;
 
-	// the time to count the difference is not included
-	end = STEADY_CLOCK::now();
-	time_span = DURATION_CAST<DURATION<double>>(end - m_start);
-	return time_span.count();
+		// the time to count the difference is not included
+		end = STEADY_CLOCK::now();
+		time_span = DURATION_CAST<DURATION<double>>(end - m_start);
+		return time_span.count();
+	}
+	else
+	{
+		return timePassed;
+	}
 }
 
 double Timer::timeUntil(double seconds)

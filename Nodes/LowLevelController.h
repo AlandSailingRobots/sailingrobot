@@ -25,7 +25,7 @@ public:
     ///----------------------------------------------------------------------------------
  	/// Contructs a LowLevelController
  	///----------------------------------------------------------------------------------
-    LowLevelController( MessageBus& msgBus, double configPGain, double configIGain );
+    LowLevelController( MessageBus& msgBus, DBHandler& dbHandler, double configPGain, double configIGain );
 
     ///----------------------------------------------------------------------------------
  	/// Does nothing

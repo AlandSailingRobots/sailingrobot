@@ -60,4 +60,5 @@ private:
     double  m_gpsLatitude;
 
     Timer   m_waypointTimer;
+    Timer   m_routeTime;
 };

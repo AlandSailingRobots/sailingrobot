@@ -102,10 +102,24 @@ void WaypointMgrNode::sendMessage()
         MessagePtr msg = std::make_unique<WaypointDataMsg>(m_nextId, m_nextLongitude, m_nextLatitude, m_nextDeclination, m_nextRadius, m_nextStayTime,
                         m_prevId, m_prevLongitude, m_prevLatitude, m_prevDeclination, m_prevRadius);
         m_MsgBus.sendMessage(std::move(msg));
+
+        if( !m_routeTime.started() )
+        {
+            m_routeTime.start();
+        }
     }
     else
     {
         Logger::warning("%s No waypoint found, boat is using old waypoint data. No message sent.", __func__);
+        m_routeTime.stop();
+
+        int seconds = m_routeTime.timePassed();
+        int minutes = seconds / 60;
+        int hours = minutes / 60;
+        minutes = minutes % 60;
+        seconds = seconds % 60;
+
+        Logger::info("Completed route in %d:%d:%d", hours, minutes, seconds);
     }
 
     m_db.forceUnlock();

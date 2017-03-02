@@ -20,6 +20,10 @@
 #include "Messages/WindDataMsg.h"
 #include "Messages/WaypointDataMsg.h"
 #include "Messages/RequestCourseMsg.h"
+#include "SystemServices/Logger.h"
+#include "utility/CourseMath.h"
+
+#include <cstdio>
 
 
 // For std::this_thread
@@ -31,6 +35,9 @@
 #define WAKEUP_INTIAL_SLEEP     2000
 
 
+FILE* file = fopen("./gps.txt", "w");
+
+
 ///----------------------------------------------------------------------------------
 LocalNavigationModule::LocalNavigationModule( MessageBus& msgBus )
     :ActiveNode(NodeID::LocalNavigationModule, msgBus)
@@ -40,6 +47,9 @@ LocalNavigationModule::LocalNavigationModule( MessageBus& msgBus )
     msgBus.registerNode( *this, MessageType::WindData );
     msgBus.registerNode( *this, MessageType::WaypointData );
     msgBus.registerNode( *this, MessageType::RequestCourse );
+
+    fprintf( file, "%s,%ss,%s\n", "id", "latitude", "longitude" );
+    fflush( file );
 }
 
 ///----------------------------------------------------------------------------------
@@ -54,6 +64,7 @@ void LocalNavigationModule::start()
 ///----------------------------------------------------------------------------------
 void LocalNavigationModule::processMessage( const Message* msg )
 {
+    static int i = 0;
     switch( msg->messageType() )
     {
         case MessageType::CompassData:
@@ -69,13 +80,17 @@ void LocalNavigationModule::processMessage( const Message* msg )
             boatState.lat = gps->latitude();
             boatState.lon = gps->longitude();
             boatState.speed = gps->speed();
+
+            fprintf( file, "%d,%f,%f\n", i, boatState.lat, boatState.lon );
+            fflush( file );
         }
             break;
 
         case MessageType::WindData:
         {
             WindDataMsg* wind = (WindDataMsg*)msg;
-            boatState.wind = wind->windDirection();
+            boatState.windDir = wind->windDirection();
+            boatState.windSpeed = wind->windSpeed();
         }
             break;
 
@@ -89,6 +104,9 @@ void LocalNavigationModule::processMessage( const Message* msg )
             boatState.lastWaypointLon = waypoint->prevLongitude();
 
             boatState.radius = waypoint->nextRadius();
+            double distance = CourseMath::calculateDTW( boatState.lon, boatState.lat, boatState.currWaypointLon, boatState.currWaypointLat );
+            Logger::info( "New Waypoint! Lat: %f Lon: %f Distance: %f", boatState.currWaypointLat, boatState.currWaypointLon, distance );
+
             // Delibrate dropdown after a new waypoint,0 we want to start a new ballot 
             // and get a new heading
         }

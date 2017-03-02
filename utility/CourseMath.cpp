@@ -3,7 +3,7 @@
 #include "utility/Utility.h"
 
 
-double CourseMath::calculateBTW(double gpsLon, double gpsLat, double waypointLon, double waypointLat)
+int16_t CourseMath::calculateBTW(double gpsLon, double gpsLat, double waypointLon, double waypointLat)
 {
 	double boatLatitudeInRadian = Utility::degreeToRadian(gpsLat);
 	double waypointLatitudeInRadian = Utility::degreeToRadian(waypointLat);
@@ -21,9 +21,12 @@ double CourseMath::calculateBTW(double gpsLon, double gpsLat, double waypointLon
 	double bearingToWaypointInRadian = atan2(y_coordinate, x_coordinate);
 	double bearingToWaypoint = Utility::radianToDegree(bearingToWaypointInRadian);
 
-	bearingToWaypoint = Utility::limitAngleRange(bearingToWaypoint);
+	return Utility::limitAngleRange(bearingToWaypoint);
 
-	return bearingToWaypoint;
+
+	//int16_t bearing = atan2(  );
+
+	//return ((int)bearingToWaypoint + 180) % 360;
 }
 
 double CourseMath::calculateDTW(double gpsLon, double gpsLat, double waypointLon, double waypointLat)

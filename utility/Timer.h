@@ -44,9 +44,12 @@ public:
 	 */
 	bool timeReached(double seconds);
 
+	bool started() { return m_running; }
+
 private:
 	std::chrono::steady_clock::time_point m_start;
 	bool m_running;
+	double timePassed;
 };
 
 #endif

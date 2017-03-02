@@ -55,6 +55,8 @@ public:
 		                                         double &apparentWindSpeed, double &apparentWindDirection);
 	static double getApparentWindSpeed(const int windsensorDir, const int windsensorSpeed, const double gpsSpeed, const double heading, const double trueWindDirection);
 	static double getApparentWindDirection(const int windsensorDir, const int windsensorSpeed, const double gpsSpeed, const double heading, const double trueWindDirection);
+
+	
 };
 
 #endif

@@ -29,6 +29,7 @@ struct BoatState_t {
     uint16_t heading;
     double lat;
     double lon;
-    uint16_t wind;
+    uint16_t windDir;
+    float windSpeed;
     double speed;
 };

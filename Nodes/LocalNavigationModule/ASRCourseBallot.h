@@ -57,6 +57,8 @@ public:
  	///----------------------------------------------------------------------------------
     const int16_t* ptr() const;
 
+    const int16_t maxVotes() { return MAX_VOTES; }
+
     ///----------------------------------------------------------------------------------
  	/// The course resolution controls the number of courses that the boat will examine.
     /// The number of courses examined is 360 / CourseBallot::COURSE_RESOLUTION. This 
