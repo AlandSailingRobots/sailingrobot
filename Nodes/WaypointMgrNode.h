@@ -61,4 +61,5 @@ private:
 
     Timer   m_waypointTimer;
     Timer   m_routeTime;
+    double  m_totalTime;
 };

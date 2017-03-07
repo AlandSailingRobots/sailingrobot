@@ -29,9 +29,8 @@ WaypointVoter::WaypointVoter( int16_t maxVotes, int16_t weight )
 }
 
 ///----------------------------------------------------------------------------------
-const ASRCourseBallot& WaypointVoter::vote( BoatState_t& boatState )
+const ASRCourseBallot& WaypointVoter::vote( const BoatState_t& boatState )
 {
-    int16_t waypointBearing = CourseMath::calculateBTW( boatState.lon, boatState.lat, boatState.currWaypointLon, boatState.currWaypointLat );
     //double distance = CourseMath::calculateDTW( boatState.lon, boatState.lat, boatState.currWaypointLon, boatState.currWaypointLat );
     courseBallot.clear();
 
@@ -40,13 +39,13 @@ const ASRCourseBallot& WaypointVoter::vote( BoatState_t& boatState )
     //std::cout << "Waypoint Votes: ";
     for( int i = 0; i < 90; i+= ASRCourseBallot::COURSE_RESOLUTION )
     {
-        int16_t votes = courseBallot.maxVotes() - ( ( i / 90.f ) * (float)courseBallot.maxVotes() );
+        int16_t votes = courseBallot.maxVotes() - ( ( i / 90.f ) * (float)( courseBallot.maxVotes() ));
 
-        //std::cout << votes << ",";
-        courseBallot.set( waypointBearing + i, votes );
-        courseBallot.set( waypointBearing - i, votes );
+        //std::cout << "[" << waypointBearing + i << "]" << votes << ",";
+        courseBallot.set( boatState.waypointBearing + i, votes );
+        courseBallot.set( boatState.waypointBearing - i, votes );
     }
-   // std::cout << "\n";
+    //std::cout << "\n";
 
     return courseBallot;
 }

@@ -7,7 +7,8 @@
 
 Timer::Timer() :
 	m_start(STEADY_CLOCK::now()),
-	m_running(false)
+	m_running(false),
+	m_timePassed( 0 )
 {}
 
 void Timer::start()
@@ -27,7 +28,7 @@ void Timer::reset()
 
 void Timer::stop()
 {
-	timePassed = timePassed();
+	m_timePassed = timePassed();
 	m_running = false;
 }
 
@@ -45,7 +46,7 @@ double Timer::timePassed()
 	}
 	else
 	{
-		return timePassed;
+		return m_timePassed;
 	}
 }
 

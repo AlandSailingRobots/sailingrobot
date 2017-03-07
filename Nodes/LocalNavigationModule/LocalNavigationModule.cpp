@@ -131,6 +131,7 @@ void LocalNavigationModule::registerVoter( ASRVoter* voter )
 void LocalNavigationModule::startBallot()
 {
     arbiter.clearBallot();
+    boatState.waypointBearing = CourseMath::calculateBTW( boatState.lon, boatState.lat, boatState.currWaypointLon, boatState.currWaypointLat );
 
     std::vector<ASRVoter*>::iterator it;  // declare an iterator to a vector of strings
 

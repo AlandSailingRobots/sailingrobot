@@ -49,7 +49,7 @@ public:
 private:
 	std::chrono::steady_clock::time_point m_start;
 	bool m_running;
-	double timePassed;
+	double m_timePassed;
 };
 
 #endif

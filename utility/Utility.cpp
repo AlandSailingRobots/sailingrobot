@@ -370,8 +370,8 @@ double Utility::calculateTrueWindSpeed(int windsensorDir, int windsensorSpeed, d
 {
 	//double knots = 1.94384;
 	double apparentWindSpeed = windsensorSpeed; //* knots; // Converting m/s to knots
-	double apparentWindAngle = windsensorDir;
-	double boatSpeed = gpsSpeed;
+	double apparentWindAngle = degreeToRadian( windsensorDir );
+	//double boatSpeed = gpsSpeed;
 
 	if (apparentWindAngle < 0.001 ){
 		apparentWindAngle = 0.001;
@@ -383,10 +383,16 @@ double Utility::calculateTrueWindSpeed(int windsensorDir, int windsensorSpeed, d
 		return heading;
 	}
 
-	double trueWindSpeed = sqrt((apparentWindSpeed * apparentWindSpeed) + (boatSpeed * boatSpeed)
-						 - (2 * boatSpeed * apparentWindSpeed * cos(apparentWindAngle/180*M_PI)));
+	double u = gpsSpeed * sin( heading ) - windsensorSpeed * sin (apparentWindAngle);
+	double v = gpsSpeed * cos( heading ) - windsensorSpeed * cos (apparentWindAngle);
 
-	return trueWindSpeed;
+	return atan( u / v );
+
+
+	//double trueWindSpeed = sqrt((apparentWindSpeed * apparentWindSpeed) + (boatSpeed * boatSpeed)
+					//	 - (2 * boatSpeed * apparentWindSpeed * cos(apparentWindAngle/180*M_PI)));
+
+	//return trueWindSpeed;
 }
 
 double Utility::getTrueWindDirection(int windsensorDir, int windsensorSpeed, double gpsSpeed, int compassHeading, 

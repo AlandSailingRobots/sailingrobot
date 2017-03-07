@@ -1,7 +1,7 @@
 /****************************************************************************************
  *
  * File:
- * 		WaypointVoter.h
+ * 		ChannelVoter.h
  *
  * Purpose:
  *		
@@ -17,20 +17,18 @@
 
 
 #include "../ASRVoter.h"
-#include "utility/CourseMath.h"
 
 
-class WaypointVoter : public ASRVoter {
+class ChannelVoter : public ASRVoter {
 public:
     ///----------------------------------------------------------------------------------
- 	/// Constructs the waypoint voter.
+ 	/// Constructs the channel voter.
  	///----------------------------------------------------------------------------------
-    WaypointVoter( int16_t maxVotes, int16_t weight );
+    ChannelVoter( int16_t maxVotes, int16_t weight );
 
     ///----------------------------------------------------------------------------------
- 	/// Triggers a ASR voter to place votes on the course headings. The waypoint voter
-    /// places voters on courses that bring the boat towards the waypoint.
+ 	/// Triggers a ASR voter to place votes on the course headings. The wind voter
+    /// places voters on courses that allow the boat to go faster
  	///----------------------------------------------------------------------------------
     const ASRCourseBallot& vote( const BoatState_t& boatState );
-private:
 };

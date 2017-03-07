@@ -116,11 +116,11 @@ void LowLevelController::calculateSail( int windDir )
     }
     else
     {
-        if( windDir < 225 ) { command = running; Logger::info("Sail is running"); }
-        else if( windDir < 250 ) { command = broadReach; Logger::info("Sail is broad reach"); }
-        else if( windDir < 265 ) { command = beamReach; Logger::info("Sail is beam reach"); }
-        else if( windDir < 290 ) { command = closeReach; Logger::info("Sail is close reached"); }
-        else { command = closeHauled; Logger::info("Sail is close hauled"); }
+        if( windDir < 225 ) { command = running; } // Logger::info("Sail is running"); }
+        else if( windDir < 250 ) { command = broadReach; } // Logger::info("Sail is broad reach"); }
+        else if( windDir < 265 ) { command = beamReach;}// Logger::info("Sail is beam reach"); }
+        else if( windDir < 290 ) { command = closeReach;}// Logger::info("Sail is close reached"); }
+        else { command = closeHauled;}// Logger::info("Sail is close hauled"); }
         //if( windDir < 335 )
     }
 
@@ -171,7 +171,7 @@ int16_t LowLevelController::pi()
 
     int16_t i = integral * iGain;
 
-    Logger::info("Desired Course: %d Heading: %d Rudder Angle: %d PI Integral: %d", desiredHeading, heading, restrictRudder(p + i), integral);
+    //Logger::info("Desired Course: %d Heading: %d Rudder Angle: %d PI Integral: %d", desiredHeading, heading, restrictRudder(p + i), integral);
 
     // Restrict to the angles the rudder can actually move to
     return restrictRudder(p + i);

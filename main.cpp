@@ -33,6 +33,7 @@
 #include "Nodes/LocalNavigationModule/LocalNavigationModule.h"
 #include "Nodes/LocalNavigationModule/Voters/WaypointVoter.h"
 #include "Nodes/LocalNavigationModule/Voters/WindVoter.h"
+#include "Nodes/LocalNavigationModule/Voters/ChannelVoter.h"
 #include "Nodes/LowLevelController.h"
 
 #define DISABLE_LOGGING 0
@@ -99,9 +100,11 @@ void development_LocalNavigationModule( MessageBus& messageBus, DBHandler& dbHan
 
 	WaypointVoter waypointVoter( MAX_VOTES, 1 );
 	WindVoter windVoter( MAX_VOTES, 1 );
+	ChannelVoter channelVoter( MAX_VOTES, 1 );
 
 	lnm.registerVoter( &waypointVoter );
 	lnm.registerVoter( &windVoter );
+	lnm.registerVoter( &channelVoter );
 
 
 	simulation.start();
@@ -182,7 +185,7 @@ int main(int argc, char *argv[])
 		//colorDetectionNode colorDetection(messageBus, list, 0);
 		#endif
 
-		HTTPSyncNode httpsync(messageBus, &dbHandler, 0, false);
+		//HTTPSyncNode httpsync(messageBus, &dbHandler, 0, false);
 		VesselStateNode vessel(messageBus);
 		WaypointMgrNode waypoint(messageBus, dbHandler);
 
@@ -213,7 +216,7 @@ int main(int argc, char *argv[])
 		ActuatorNode rudder(messageBus, NodeID::RudderActuator, channel, speed, acceleration);
 		MaestroController::init(dbHandler.retrieveCell("maestro_controller_config", "1", "port"));
 		#endif
-		bool requireNetwork = (bool) (dbHandler.retrieveCellAsInt("sailing_robot_config", "1", "require_network"));
+		//bool requireNetwork = (bool) (dbHandler.retrieveCellAsInt("sailing_robot_config", "1", "require_network"));
 
 		// System services
 
@@ -235,14 +238,14 @@ int main(int argc, char *argv[])
 		//initialiseNode(colorDetection, "Colour detection node", NodeImportance::NOT_CRITICAL);
 		#endif
 
-		if (requireNetwork)
+		/*if (requireNetwork)
 		{
-			initialiseNode(httpsync, "Httpsync Node", NodeImportance::CRITICAL);
+			//initialiseNode(httpsync, "Httpsync Node", NodeImportance::CRITICAL);
 		}
 		else
 		{
-			initialiseNode(httpsync, "Httpsync Node", NodeImportance::NOT_CRITICAL);
-		}
+			//initialiseNode(httpsync, "Httpsync Node", NodeImportance::NOT_CRITICAL);
+		}*/
 
 		initialiseNode(vessel, "Vessel State Node", NodeImportance::CRITICAL);
 		initialiseNode(waypoint, "Waypoint Node", NodeImportance::CRITICAL);
@@ -268,10 +271,10 @@ int main(int argc, char *argv[])
 		arduino.start();
 		//colorDetection.start();
 		#endif
-		httpsync.start();
+		//httpsync.start();
 		vessel.start();
 
-		delete sailingLogic;
+		//delete sailingLogic;
 
 
 		// NOTE - Jordan: Just to ensure messages are following through the system

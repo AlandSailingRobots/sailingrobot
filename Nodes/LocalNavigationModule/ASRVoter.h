@@ -31,7 +31,7 @@ public:
  	/// Triggers a ASR voter to place votes on the course headings. This function returns
     /// a reference to the internal course ballot data.
  	///----------------------------------------------------------------------------------
-    virtual const ASRCourseBallot& vote( BoatState_t& boatState ) = 0;
+    virtual const ASRCourseBallot& vote( const BoatState_t& boatState ) = 0;
 
     int16_t weight() { return voterWeight; }
 

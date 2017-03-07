@@ -29,6 +29,10 @@
 #define NORM_RUDDER_COMMAND 0.5166 // getCommand() take a value between -1 and 1 so we need to normalize the command correspond to 29.6 degree
 #define NORM_SAIL_COMMAND 0.6958
 
+
+FILE* file = fopen("./gps.txt", "w");
+
+
 LineFollowNode::LineFollowNode(MessageBus& msgBus, DBHandler& db)
 :  Node(NodeID::SailingLogic, msgBus), m_db(db), m_dbLogger(5, db),
     m_nextWaypointId(0),
@@ -52,6 +56,9 @@ LineFollowNode::LineFollowNode(MessageBus& msgBus, DBHandler& db)
     m_maxSailAngle = M_PI / 4.2f;
     m_minSailAngle = M_PI / 32.0f;
     m_tackAngle = 0.872665; //50°
+
+    fprintf( file, "%s,%ss,%s\n", "id", "latitude", "longitude" );
+    fflush( file );
 }
 
 bool LineFollowNode::init()
@@ -67,6 +74,7 @@ bool LineFollowNode::init()
 
 void LineFollowNode::processMessage(const Message* msg)
 {
+    static int i = 0;
     MessageType type = msg->messageType();
 
 	switch(type)
@@ -78,6 +86,10 @@ void LineFollowNode::processMessage(const Message* msg)
         if(!m_externalControlActive)
         {
              calculateActuatorPos((VesselStateMsg*)msg);
+        }
+        {
+        VesselStateMsg* state = (VesselStateMsg*)msg;
+        fprintf( file, "%d,%f,%f\n", i, state->latitude(), state->longitude() );
         }
 		break;
 	case MessageType::WaypointData:
@@ -143,7 +155,7 @@ void LineFollowNode::calculateActuatorPos(VesselStateMsg* msg)
     double currentHeading_radian = Utility::degreeToRadian(currentHeading);
     double signedDistance = Utility::calculateSignedDistanceToLine(m_nextWaypointLon, m_nextWaypointLat, m_prevWaypointLon,
                                                                    m_prevWaypointLat, msg->longitude(), msg->latitude());
-    int maxTackDistance = 20; //'r'
+    int maxTackDistance = 40; //'r'
     double phi = calculateAngleOfDesiredTrajectory(msg);
     double desiredHeading = phi + (2 * (M_PI / 4)/M_PI) * atan(signedDistance/maxTackDistance); //heading to smoothly join the line
     desiredHeading = Utility::limitRadianAngleRange(desiredHeading);
