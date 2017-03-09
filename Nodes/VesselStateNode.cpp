@@ -39,6 +39,18 @@ VesselStateNode::VesselStateNode(MessageBus& msgBus)
 	msgBus.registerNode(*this, MessageType::ArduinoData);
 }
 
+//---------------------------------------------------------------------------------------
+VesselStateNode::~VesselStateNode()
+{
+	server.shutdown();
+}
+
+//---------------------------------------------------------------------------------------
+bool VesselStateNode::init()
+{
+	return server.start( 9600 );
+}
+
 void VesselStateNode::start()
 {
 	runThread(VesselStateThreadFunc);
@@ -110,8 +122,13 @@ void VesselStateNode::VesselStateThreadFunc(void* nodePtr)
 	// at the start before we send out the vessel state message.
 	std::this_thread::sleep_for(std::chrono::milliseconds(VESSEL_STATE_INITIAL_SLEEP));
 
+	char buffer[1024];
+
 	while(true)
-	{
+	{	
+		// Listen to new connections
+		node->server.acceptConnections();
+
 		// Controls how often we pump out messages
 		std::this_thread::sleep_for(std::chrono::milliseconds(VESSEL_STATE_SLEEP_MS));
 
@@ -123,5 +140,12 @@ void VesselStateNode::VesselStateThreadFunc(void* nodePtr)
 																	node->m_ArduinoSheet, node->m_ArduinoBattery, node->m_ArduinoRC);
 		node->m_MsgBus.sendMessage(std::move(vesselState));
 
+		// Compass heading, Compass Pitch, Compass Roll, Wind Dir, Wind Speed, GPS Heading, GPS Lat, GPS Lon
+		int size = snprintf( buffer, 1024, "%d,%d,%d,%d,%d,%d,%f,%f\n", (int)node->m_CompassHeading, (int)node->m_CompassPitch, (int)node->m_CompassRoll, (int)node->m_WindDir, (int)node->m_WindSpeed, (int)node->m_GPSHeading, node->m_GPSLat, node->m_GPSLon );
+		if( size > 0 )
+		{
+			printf("%s", buffer);
+			node->server.broadcast( (uint8_t*)buffer, size );
+		}
 	}
 }

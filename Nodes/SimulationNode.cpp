@@ -91,6 +91,7 @@ int SimulationNode::init_socket(int port)
 {
     // init socket
     m_handler_socket_server.sockfd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+
     if (m_handler_socket_server.sockfd == -1)
     {
 				Logger::error("%s Error in initialise socket: %s",__PRETTY_FUNCTION__,strerror(errno));

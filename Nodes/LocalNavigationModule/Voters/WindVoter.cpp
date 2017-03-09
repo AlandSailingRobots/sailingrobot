@@ -48,15 +48,7 @@ const ASRCourseBallot& WindVoter::vote( const BoatState_t& boatState )
     
     if( twdBearingDiff <= TACK_ANGLE )
     {
-        /*if( distanceFromMiddle < -boatState.radius )
-        {
-            courseBallot.add( twd - TACK_ANGLE, courseBallot.maxVotes() );
-        }
-        else if( distanceFromMiddle > boatState.radius )
-        {
-            courseBallot.add( twd + TACK_ANGLE, courseBallot.maxVotes() );
-        }
-        else*/ if ( abs( Utility::headingDifference( boatState.heading, twd + TACK_ANGLE ) ) < 
+        if ( abs( Utility::headingDifference( boatState.heading, twd + TACK_ANGLE ) ) < 
              abs( Utility::headingDifference( boatState.heading, twd - TACK_ANGLE ) ) )
         {
             courseBallot.add( twd + TACK_ANGLE, courseBallot.maxVotes() );

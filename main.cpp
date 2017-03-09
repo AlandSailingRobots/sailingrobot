@@ -86,17 +86,17 @@ void development_LocalNavigationModule( MessageBus& messageBus, DBHandler& dbHan
 
 	Logger::info( "Using Local Navigation Module" );
 
-	SimulationNode 	simulation	( messageBus );
 	VesselStateNode vesselState	( messageBus );
 	WaypointMgrNode waypoint	( messageBus, dbHandler );
 	LocalNavigationModule lnm	( messageBus );
 	LowLevelController llc		( messageBus, dbHandler, PGAIN, IGAIN );
+	SimulationNode 	simulation	( messageBus );
 
-	initialiseNode( simulation, 	"Simulation Node", 			NodeImportance::CRITICAL );
 	initialiseNode( vesselState, 	"Vessel State Node", 		NodeImportance::CRITICAL );
 	initialiseNode( waypoint, 		"Waypoint Node", 			NodeImportance::CRITICAL );
 	initialiseNode( lnm,			"Local Navigation Module",	NodeImportance::CRITICAL );
 	initialiseNode( llc,			"Low Level Controller",		NodeImportance::CRITICAL );
+	initialiseNode( simulation, 	"Simulation Node", 			NodeImportance::CRITICAL );
 
 	WaypointVoter waypointVoter( MAX_VOTES, 1 );
 	WindVoter windVoter( MAX_VOTES, 1 );
@@ -107,9 +107,9 @@ void development_LocalNavigationModule( MessageBus& messageBus, DBHandler& dbHan
 	lnm.registerVoter( &channelVoter );
 
 
-	simulation.start();
 	vesselState.start();
 	lnm.start();
+	simulation.start();
 
 	Logger::info("Message bus started!");
 

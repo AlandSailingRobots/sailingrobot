@@ -64,7 +64,7 @@ LNM_SRC =				$(LNM_DIR)/ASRCourseBallot.cpp $(LNM_DIR)/ASRArbiter.cpp $(LNM_DIR)
 
 NODES = 				$(LNM_SRC) Nodes/WaypointMgrNode.cpp Nodes/SimulationNode.cpp Nodes/MessageLoggerNode.cpp Nodes/VesselStateNode.cpp
 
-SYSTEM_SERVICES =		SystemServices/Logger.cpp
+SYSTEM_SERVICES =		SystemServices/Logger.cpp Network/TCPServer.cpp
 
 else ifeq ($(USE_SIM),1)
 
