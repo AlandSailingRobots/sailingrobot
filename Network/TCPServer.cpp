@@ -136,7 +136,7 @@ void TCPServer::broadcast( const uint8_t* data, const uint16_t size )
         tcpClient_t client = clients[i];
         while( bytesLeft > 0 )
         {
-            rc = send( client.socketFD, &data[bytesSent], bytesLeft, 0 );
+            rc = send( client.socketFD, &data[bytesSent], bytesLeft, MSG_NOSIGNAL );
 
             if( rc == -1 )
             {

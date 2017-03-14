@@ -31,7 +31,7 @@
 #include <thread>
 
 
-#define WAKEUP_SLEEP_MS         1000
+#define WAKEUP_SLEEP_MS         400
 #define WAKEUP_INTIAL_SLEEP     2000
 
 

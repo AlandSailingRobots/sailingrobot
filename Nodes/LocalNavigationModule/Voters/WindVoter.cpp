@@ -29,9 +29,9 @@ WindVoter::WindVoter( int16_t maxVotes, int16_t weight )
 const ASRCourseBallot& WindVoter::vote( const BoatState_t& boatState )
 {
     const int TACK_ANGLE = 45;
-    /*uint16_t twd = Utility::getTrueWindDirection(boatState.windDir, boatState.windSpeed, 
-                boatState.speed, boatState.heading, trueWindBuffer, TW_BUFFER_SIZE);*/
-    uint16_t twd = 180;
+    uint16_t twd = Utility::getTrueWindDirection(boatState.windDir, boatState.windSpeed, 
+                boatState.speed, boatState.heading, trueWindBuffer, TW_BUFFER_SIZE);
+    //uint16_t twd = 180;
 
     double distanceFromMiddle = Utility::calculateSignedDistanceToLine( boatState.currWaypointLon, 
                                 boatState.currWaypointLat, boatState.lastWaypointLon, 
