@@ -12,7 +12,7 @@
 
 
 #include "XbeePacketNetwork.h"
-#include "../utility/SysClock.h"
+#include "../SystemServices/SysClock.h"
 #include "SLIP.h"
 #ifdef __linux__
 #include "../SystemServices/Logger.h"

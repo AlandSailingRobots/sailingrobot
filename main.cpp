@@ -30,12 +30,6 @@
 #include "SystemServices/MaestroController.h"
 #include "xBee/Xbee.h"
 
-#include "Nodes/LocalNavigationModule/LocalNavigationModule.h"
-#include "Nodes/LocalNavigationModule/Voters/WaypointVoter.h"
-#include "Nodes/LocalNavigationModule/Voters/WindVoter.h"
-#include "Nodes/LocalNavigationModule/Voters/ChannelVoter.h"
-#include "Nodes/LowLevelController.h"
-
 #define DISABLE_LOGGING 0
 
 enum class NodeImportance {
@@ -71,52 +65,6 @@ void initialiseNode(Node& node, const char* nodeName, NodeImportance importance)
 		}
 	}
 }
-
-
-#if DEV_LNM == 1 
-///----------------------------------------------------------------------------------
-/// Used for development of the Local Navigation Module
-///
-///----------------------------------------------------------------------------------
-void development_LocalNavigationModule( MessageBus& messageBus, DBHandler& dbHandler)
-{
-	const double PGAIN = 0.20;
-	const double IGAIN = 0.30;
-	const int16_t MAX_VOTES = 25;
-
-	Logger::info( "Using Local Navigation Module" );
-
-	VesselStateNode vesselState	( messageBus );
-	WaypointMgrNode waypoint	( messageBus, dbHandler );
-	LocalNavigationModule lnm	( messageBus );
-	LowLevelController llc		( messageBus, dbHandler, PGAIN, IGAIN );
-	SimulationNode 	simulation	( messageBus );
-
-	initialiseNode( vesselState, 	"Vessel State Node", 		NodeImportance::CRITICAL );
-	initialiseNode( waypoint, 		"Waypoint Node", 			NodeImportance::CRITICAL );
-	initialiseNode( lnm,			"Local Navigation Module",	NodeImportance::CRITICAL );
-	initialiseNode( llc,			"Low Level Controller",		NodeImportance::CRITICAL );
-	initialiseNode( simulation, 	"Simulation Node", 			NodeImportance::CRITICAL );
-
-	WaypointVoter waypointVoter( MAX_VOTES, 1 );
-	WindVoter windVoter( MAX_VOTES, 1 );
-	ChannelVoter channelVoter( MAX_VOTES, 1 );
-
-	lnm.registerVoter( &waypointVoter );
-	lnm.registerVoter( &windVoter );
-	lnm.registerVoter( &channelVoter );
-
-
-	vesselState.start();
-	lnm.start();
-	simulation.start();
-
-	Logger::info("Message bus started!");
-
-	// Returns when the program has been closed (Does the program ever close gracefully?)
-	messageBus.run();
-}
-#endif
 
 ///----------------------------------------------------------------------------------
 /// Entry point, can accept one argument containing a relative path to the database.
@@ -162,10 +110,6 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 
-
-	#if DEV_LNM == 1
-		development_LocalNavigationModule( messageBus, dbHandler );
-	#else
 		// Create nodes
 		MessageLoggerNode msgLogger(messageBus);
 
@@ -183,7 +127,6 @@ int main(int argc, char *argv[])
 		std::vector<std::string> list;
 		list.push_back("red");
 		//colorDetectionNode colorDetection(messageBus, list, 0);
-		#endif
 
 		//HTTPSyncNode httpsync(messageBus, &dbHandler, 0, false);
 		VesselStateNode vessel(messageBus);
@@ -192,15 +135,7 @@ int main(int argc, char *argv[])
 
 		Node* sailingLogic;
 
-		bool usingLineFollow = (bool)(dbHandler.retrieveCellAsInt("sailing_robot_config", "1", "line_follow"));
-		if(usingLineFollow)
-		{
 			sailingLogic = new LineFollowNode(messageBus, dbHandler);
-		}
-		else
-		{
-			sailingLogic = new RoutingNode(messageBus, dbHandler);
-		}
 
 		#if SIMULATION == 0
 		int channel = dbHandler.retrieveCellAsInt("sail_servo_config", "1", "channel");
@@ -249,15 +184,7 @@ int main(int argc, char *argv[])
 
 		initialiseNode(vessel, "Vessel State Node", NodeImportance::CRITICAL);
 		initialiseNode(waypoint, "Waypoint Node", NodeImportance::CRITICAL);
-
-		if(usingLineFollow)
-		{
 			initialiseNode(*sailingLogic, "LineFollow Node", NodeImportance::CRITICAL);
-		}
-		else
-		{
-			initialiseNode(*sailingLogic, "Routing Node", NodeImportance::CRITICAL);
-		}
 
 		// Start active nodes
 		#if SIMULATION == 1
