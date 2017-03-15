@@ -26,10 +26,10 @@
 #include "SystemServices/MaestroController.h"
 #include "xBee/Xbee.h"
 
-#include "Nodes/LocalNavigationModule/LocalNavigationModule.h"
-#include "Nodes/LocalNavigationModule/Voters/WaypointVoter.h"
-#include "Nodes/LocalNavigationModule/Voters/WindVoter.h"
-#include "Nodes/LocalNavigationModule/Voters/ChannelVoter.h"
+#include "LocalNavigationModule/LocalNavigationModule.h"
+#include "LocalNavigationModule/Voters/WaypointVoter.h"
+#include "LocalNavigationModule/Voters/WindVoter.h"
+#include "LocalNavigationModule/Voters/ChannelVoter.h"
 #include "Nodes/LowLevelController.h"
 
 #define DISABLE_LOGGING 0

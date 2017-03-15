@@ -55,7 +55,7 @@ export BUILD_DIR        = build
 export EXEC_DIR         = ./
 export INC_DIR          = -I./ -I./libs -I./libs/wiringPi/wiringPi
 
-LNM_DIR                 = Nodes/LocalNavigationModule
+LNM_DIR                 = LocalNavigationModule
 
 
 ###############################################################################
@@ -131,6 +131,6 @@ clean:
 	@echo Removing existing object files and executable
 	-@rm -rd $(BUILD_DIR)
 	-@rm $(EXECUTABLE)
-	$(MAKE) -C tests clean
+	-$(MAKE) -C tests clean
 
 	@echo DONE
