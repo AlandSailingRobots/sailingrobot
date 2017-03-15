@@ -22,7 +22,7 @@
 #define LOG_MESSAGES
 
 #ifdef LOG_MESSAGES
-#include "utility/SysClock.h"
+#include "SystemServices/SysClock.h"
 #endif
 
 

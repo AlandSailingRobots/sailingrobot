@@ -19,8 +19,8 @@
 #include "Messages/ActuatorPositionMsg.h"
 #include "Messages/ExternalControlMsg.h"
 #include "Messages/CourseDataMsg.h"
-#include "utility/Utility.h"
-#include "utility/SysClock.h"
+#include "Math/Utility.h"
+#include "SystemServices/SysClock.h"
 #include <math.h>
 #include <algorithm>
 #include <cmath>

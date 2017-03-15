@@ -1,9 +1,9 @@
 #ifndef __WAYPOINTROUTING_H__
 #define __WAYPOINTROUTING_H__
 
-#include "utility/CourseCalculation.h"
-#include "utility/Timer.h"
-#include "utility/Utility.h"
+#include "Math/CourseCalculation.h"
+#include "SystemServices/Timer.h"
+#include "Math/Utility.h"
 #include "TackAngle.h"
 #include "Commands.h"
 

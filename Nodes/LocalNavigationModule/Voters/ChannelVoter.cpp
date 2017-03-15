@@ -16,8 +16,8 @@
 #include "ChannelVoter.h"
 
 
-#include "utility/CourseMath.h"
-#include "utility/Utility.h"
+#include "Math/CourseMath.h"
+#include "Math/Utility.h"
 #include "SystemServices/Logger.h"
 
 #include <iostream>

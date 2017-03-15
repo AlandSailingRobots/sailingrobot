@@ -22,7 +22,7 @@
 #include "Messages/CompassDataMsg.h"
 #include "SystemServices/Logger.h"
 #include "wiringPi.h"
-#include "utility/Utility.h"
+#include "Math/Utility.h"
 
 // For std::this_thread
 #include <chrono>

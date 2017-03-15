@@ -1,5 +1,5 @@
 #include "WindVaneController.h"
-#include "utility/Utility.h"
+#include "Math/Utility.h"
 
 #include <iostream>
 

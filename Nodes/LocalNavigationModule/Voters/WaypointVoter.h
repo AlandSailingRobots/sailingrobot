@@ -17,7 +17,7 @@
 
 
 #include "../ASRVoter.h"
-#include "utility/CourseMath.h"
+#include "Math/CourseMath.h"
 
 
 class WaypointVoter : public ASRVoter {

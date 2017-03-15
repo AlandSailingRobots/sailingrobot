@@ -19,7 +19,7 @@
 #include <thread>
 
 #include "Messages/VesselStateMsg.h"
-#include "utility/CourseMath.h"
+#include "Math/CourseMath.h"
 #include "SystemServices/Logger.h"
 
 

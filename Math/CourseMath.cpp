@@ -1,6 +1,6 @@
 #include "CourseMath.h"
 #include <cmath>
-#include "utility/Utility.h"
+#include "Math/Utility.h"
 
 
 int16_t CourseMath::calculateBTW(double gpsLon, double gpsLat, double waypointLon, double waypointLat)

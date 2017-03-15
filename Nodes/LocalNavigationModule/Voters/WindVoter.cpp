@@ -15,7 +15,7 @@
 
 #include "WindVoter.h"
 #include "SystemServices/Logger.h"
-#include "utility/Utility.h"
+#include "Math/Utility.h"
 
 
 ///----------------------------------------------------------------------------------

@@ -1,7 +1,7 @@
 #include "WaypointRouting.h"
 #include <math.h>
-#include "utility/Timer.h"
-#include "utility/Utility.h"
+#include "SystemServices/Timer.h"
+#include "Math/Utility.h"
 
 
 WaypointRouting::WaypointRouting(double lon, double lat, int radius, double innerRadiusRatio,

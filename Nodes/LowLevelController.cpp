@@ -16,7 +16,7 @@
 #include "LowLevelController.h"
 
 #include <stdlib.h>
-#include "utility/Utility.h"
+#include "Math/Utility.h"
 #include "Messages/CompassDataMsg.h"
 #include "Messages/WindDataMsg.h"
 #include "Messages/DesiredCourseMsg.h"

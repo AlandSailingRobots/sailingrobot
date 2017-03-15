@@ -15,8 +15,8 @@
 #include "Messages/WaypointDataMsg.h"
 #include "Messages/ActuatorPositionMsg.h"
 #include "Messages/ExternalControlMsg.h"
-#include "utility/Utility.h"
-#include "utility/SysClock.h"
+#include "Math/Utility.h"
+#include "SystemServices/SysClock.h"
 
 #define DEFAULT_TWD_BUFFERSIZE 200
 

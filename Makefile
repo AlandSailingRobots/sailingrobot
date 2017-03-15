@@ -95,7 +95,7 @@ XBEE = 					xBee/Xbee.cpp
 
 I2CCONTROLLER = 		i2ccontroller/I2CController.cpp
 
-COURSE = 				utility/CourseCalculation.cpp utility/CourseMath.cpp
+COURSE = 				Math/CourseCalculation.cpp Math/CourseMath.cpp
 
 DB = 					dbhandler/DBHandler.cpp dbhandler/DBLogger.cpp
 
@@ -109,9 +109,9 @@ SRC_MAIN = main.cpp
 
 
 ifeq ($(TOOLCHAIN),win)
-SRC = 					utility\SysClock.cpp SystemServices\Logger.cpp Network\DataLink.cpp Network\XbeePacketNetwork.cpp Messages\MessageSerialiser.cpp Messages\MessageDeserialiser.cpp
+SRC = 					SystemServices\SysClock.cpp SystemServices\Logger.cpp Network\DataLink.cpp Network\XbeePacketNetwork.cpp Messages\MessageSerialiser.cpp Messages\MessageDeserialiser.cpp
 else
-SRC = 	utility/Utility.cpp utility/Timer.cpp utility/SysClock.cpp $(SYSTEM_SERVICES) $(XBEE) $(XBEE_NETWORK) \
+SRC = 	Math/Utility.cpp SystemServices/Timer.cpp SystemServices/SysClock.cpp $(SYSTEM_SERVICES) $(XBEE) $(XBEE_NETWORK) \
 		$(CORE) $(NODES) $(I2CCONTROLLER) $(COURSE) $(DB) $(COMMAND) $(GPS) $(WAYPOINTROUTING) $(WINDVANECONTROLLER) $(OPENCV_CV)
 
 WIRING_PI = libwiringPi.so

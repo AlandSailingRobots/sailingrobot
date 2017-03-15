@@ -15,7 +15,7 @@
 #include "SystemServices/Logger.h"
 #include "dbhandler/DBHandler.h"
 #include "Messages/WindDataMsg.h"
-#include "utility/Utility.h"
+#include "Math/Utility.h"
 #include <cstring>
 
 #include <stdio.h>

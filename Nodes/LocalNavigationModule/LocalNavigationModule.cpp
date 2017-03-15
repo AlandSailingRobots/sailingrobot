@@ -21,7 +21,7 @@
 #include "Messages/WaypointDataMsg.h"
 #include "Messages/RequestCourseMsg.h"
 #include "SystemServices/Logger.h"
-#include "utility/CourseMath.h"
+#include "Math/CourseMath.h"
 
 #include <cstdio>
 

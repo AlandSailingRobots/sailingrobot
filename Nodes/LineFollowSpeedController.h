@@ -24,9 +24,9 @@
 #include "dbhandler/DBLogger.h"
 #include "waypointrouting/SailCommand.h"
 #include "waypointrouting/RudderCommand.h"
-#include "utility/CourseMath.h"
+#include "Math/CourseMath.h"
 
-#include "utility/Timer.h"
+#include "SystemServices/Timer.h"
 
 class LineFollowNode : public Node {
 public:

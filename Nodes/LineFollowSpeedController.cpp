@@ -18,12 +18,12 @@
 #include "LineFollowNode.h"
 #include "Messages/ActuatorPositionMsg.h"
 #include "Messages/CourseDataMsg.h"
-#include "utility/Utility.h"
-#include "utility/SysClock.h"
+#include "Math/Utility.h"
+#include "SystemServices/SysClock.h"
 #include <math.h>
 #include <algorithm>
 #include <cmath>
-#include "utility/Timer.h"
+#include "SystemServices/Timer.h"
 
 #define DEFAULT_TWD_BUFFERSIZE 200
 #define NORM_RUDDER_COMMAND 0.5166 // getCommand() take a value between -1 and 1 so we need to normalize the command correspond to 29.6 degree
