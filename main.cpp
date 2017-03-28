@@ -18,7 +18,6 @@
 #include "Nodes/VesselStateNode.h"
 #include "Nodes/HTTPSyncNode.h"
 #include "Nodes/XbeeSyncNode.h"
-#include "Nodes/RoutingNode.h"
 #include "Nodes/LineFollowNode.h"
 
 #if USE_OPENCV_COLOR_DETECTION == 1
