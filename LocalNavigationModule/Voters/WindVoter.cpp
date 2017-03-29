@@ -33,9 +33,9 @@ const ASRCourseBallot& WindVoter::vote( const BoatState_t& boatState )
                 boatState.speed, boatState.heading, trueWindBuffer, TW_BUFFER_SIZE);
     //uint16_t twd = 180;
 
-    double distanceFromMiddle = Utility::calculateSignedDistanceToLine( boatState.currWaypointLon, 
-                                boatState.currWaypointLat, boatState.lastWaypointLon, 
-                                boatState.lastWaypointLat, boatState.lon, boatState.lat );
+    //double distanceFromMiddle = Utility::calculateSignedDistanceToLine( boatState.currWaypointLon, 
+     //                           boatState.currWaypointLat, boatState.lastWaypointLon, 
+    //                            boatState.lastWaypointLat, boatState.lon, boatState.lat );
 
     // Set everything to max votes
     for( int i = 0; i < 360; i+= ASRCourseBallot::COURSE_RESOLUTION )
@@ -44,7 +44,7 @@ const ASRCourseBallot& WindVoter::vote( const BoatState_t& boatState )
     }
 
     int16_t twdBearingDiff = abs(Utility::headingDifference( boatState.waypointBearing, twd ));
-    Logger::info("True Wind: %d Wind dir: %d, Tacking: %d, Waypoint Bearing: %d Heading: %d Distance from line: %f", twd, boatState.windDir, (twdBearingDiff <= TACK_ANGLE), boatState.waypointBearing, boatState.heading, distanceFromMiddle );
+    //Logger::info("True Wind: %d Wind dir: %d, Tacking: %d, Waypoint Bearing: %d Heading: %d Distance from line: %f", twd, boatState.windDir, (twdBearingDiff <= TACK_ANGLE), boatState.waypointBearing, boatState.heading, distanceFromMiddle );
     
     if( twdBearingDiff <= TACK_ANGLE )
     {

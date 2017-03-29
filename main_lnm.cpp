@@ -18,7 +18,6 @@
 #include "Nodes/VesselStateNode.h"
 #include "Nodes/HTTPSyncNode.h"
 #include "Nodes/XbeeSyncNode.h"
-#include "Nodes/RoutingNode.h"
 #include "Nodes/LineFollowNode.h"
 
 #include "Messages/DataRequestMsg.h"
@@ -26,10 +25,10 @@
 #include "SystemServices/MaestroController.h"
 #include "xBee/Xbee.h"
 
-#include "Nodes/LocalNavigationModule/LocalNavigationModule.h"
-#include "Nodes/LocalNavigationModule/Voters/WaypointVoter.h"
-#include "Nodes/LocalNavigationModule/Voters/WindVoter.h"
-#include "Nodes/LocalNavigationModule/Voters/ChannelVoter.h"
+#include "LocalNavigationModule/LocalNavigationModule.h"
+#include "LocalNavigationModule/Voters/WaypointVoter.h"
+#include "LocalNavigationModule/Voters/WindVoter.h"
+#include "LocalNavigationModule/Voters/ChannelVoter.h"
 #include "Nodes/LowLevelController.h"
 
 #define DISABLE_LOGGING 0
@@ -84,13 +83,19 @@ void development_LocalNavigationModule( MessageBus& messageBus, DBHandler& dbHan
 	WaypointMgrNode waypoint	( messageBus, dbHandler );
 	LocalNavigationModule lnm	( messageBus );
 	LowLevelController llc		( messageBus, dbHandler, PGAIN, IGAIN );
-	//SimulationNode 	simulation	( messageBus );
+
+	#if SIMULATION == 1
+	SimulationNode 	simulation	( messageBus );
+	#endif
 
 	initialiseNode( vesselState, 	"Vessel State Node", 		NodeImportance::CRITICAL );
 	initialiseNode( waypoint, 		"Waypoint Node", 			NodeImportance::CRITICAL );
 	initialiseNode( lnm,			"Local Navigation Module",	NodeImportance::CRITICAL );
 	initialiseNode( llc,			"Low Level Controller",		NodeImportance::CRITICAL );
-	//initialiseNode( simulation, 	"Simulation Node", 			NodeImportance::CRITICAL );
+
+	#if SIMULATION == 1
+	initialiseNode( simulation, 	"Simulation Node", 			NodeImportance::CRITICAL );
+	#endif
 
 	WaypointVoter waypointVoter( MAX_VOTES, 1 );
 	WindVoter windVoter( MAX_VOTES, 1 );
@@ -103,7 +108,10 @@ void development_LocalNavigationModule( MessageBus& messageBus, DBHandler& dbHan
 
 	vesselState.start();
 	lnm.start();
-	//simulation.start();
+
+	#if SIMULATION == 1
+	simulation.start();
+	#endif
 
 	Logger::info("Message bus started!");
 
