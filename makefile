@@ -41,21 +41,25 @@ export CXX                     = g++
 export SIZE                    = size
 endif
 
-export MKDIR_P          = mkdir -p
+export MKDIR_P          	= mkdir -p
 
-export DEFINES          = -DTOOLCHAIN=$(TOOLCHAIN) -DSIMULATION=$(USE_SIM)
+export DEFINES          	= -DTOOLCHAIN=$(TOOLCHAIN) -DSIMULATION=$(USE_SIM)
 
 
 ###############################################################################
 # Folder Paths
 ###############################################################################
 
-export SRC_DIR			= ./
-export BUILD_DIR        = build
-export EXEC_DIR         = ./
-export INC_DIR          = -I./ -I./libs -I./libs/wiringPi/wiringPi
+export SRC_DIR				= ./
+export BUILD_DIR        	= build
+export EXEC_DIR         	= ./
+export INC_DIR         	 	= -I./ -I./libs -I./libs/wiringPi/wiringPi
 
-LNM_DIR                 = Nodes/LocalNavigationModule
+export WIRING_PI            = libwiringPi.so
+export WIRING_PI_PATH		= ./libs/wiringPi/wiringPi
+export WIRING_PI_STATIC		= ./libs/wiringPi/wiringPi/libwiringPi.so.2.32
+
+LNM_DIR                 	= Nodes/LocalNavigationModule
 
 
 ###############################################################################
