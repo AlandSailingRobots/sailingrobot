@@ -26,37 +26,6 @@
 #include "Messages/ActuatorPositionMsg.h"
 #include "Network/TCPServer.h"
 
-//-----------------------------------------------------------------------------
-struct DATA_SOCKET_RECEIVE{
-
-  //=========================
-  float latitude=0;
-  float longitude=0;
-  float course_real = 0;
-  float course_magn = 0;
-  float speed_knot = 0;
-
-  //=========================
-  float windDirection = 120;
-  float windSpeed = 2.1;
-  float windTemperature = 24;
-
-  //=========================
-  uint16_t pressure;
-  uint16_t rudder;
-  uint16_t sheet;
-  uint16_t battery;
-
-
-  //=========================
-
-  uint16_t headingVector[3];
-  uint16_t magVector[3];
-  uint16_t tiltVector[3];
-  uint16_t accelVector[3];
-  uint8_t address_compass;
-  uint8_t address_arduino;
-}__attribute__((packed));
 
 struct BoatDataPacket_t {
   float latitude;
@@ -77,18 +46,6 @@ struct ActuatorDataPacket_t {
   uint16_t sailCommand;
 }__attribute__((packed));
 
-
-struct DATA_SOCKET_SEND{
-  uint16_t rudder_command;
-  uint16_t sheet_command;
-}__attribute__((packed));
-//-----------------------------------------------------------------------------
-
-struct HANDLERS_SOCKET
-{
-    int sockfd;
-    struct sockaddr_in info_me;
-};
 
 class SimulationNode : public ActiveNode {
 public:
@@ -113,21 +70,6 @@ public:
 
 private:
   ///----------------------------------------------------------------------------------
-  /// Initalize socket server
-  ///----------------------------------------------------------------------------------
-  int init_socket(int port);
-
-  ///----------------------------------------------------------------------------------
-  /// Manage data received from simulation
-  ///----------------------------------------------------------------------------------
-  void processSocketData();
-
-  ///----------------------------------------------------------------------------------
-  /// Manage data to send to simulation
-  ///----------------------------------------------------------------------------------
-  void setupDataSend();
-
-  ///----------------------------------------------------------------------------------
   /// Process a boat data message
   ///----------------------------------------------------------------------------------
   void processBoatData( TCPPacket_t& packet );
@@ -150,7 +92,6 @@ private:
 	int 	  m_CompassHeading;
 	double	m_GPSLat;
 	double	m_GPSLon;
-	double	m_GPSUnixTime;
 	double	m_GPSSpeed;
 	double	m_GPSHeading;
 	int	    m_WindDir;
@@ -158,17 +99,7 @@ private:
 	int 	  m_ArduinoRudder;
 	int 	  m_ArduinoSheet;
 
-  int     m_rudder;
-  int     m_sail;
   ActuatorDataPacket_t actuatorData;
-
-  struct DATA_SOCKET_RECEIVE m_data_receive;
-  struct DATA_SOCKET_SEND m_data_send;
-  struct HANDLERS_SOCKET m_handler_socket_server;
-  struct HANDLERS_SOCKET m_handler_socket_client;
-
-  int m_count_sleep;
-
   TCPServer server;
 
 };
