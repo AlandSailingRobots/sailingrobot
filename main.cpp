@@ -17,7 +17,6 @@
 #include "Nodes/VesselStateNode.h"
 #include "Nodes/HTTPSyncNode.h"
 #include "Nodes/XbeeSyncNode.h"
-#include "Nodes/RoutingNode.h"
 #include "Nodes/LineFollowNode.h"
 
 #if USE_OPENCV_COLOR_DETECTION == 1
@@ -115,6 +114,7 @@ int main(int argc, char *argv[])
 	#if SIMULATION == 1
 	printf("using simulation\n");
 	SimulationNode simulation(messageBus);
+	
 	#else
 
 	XbeeSyncNode xbee(messageBus, dbHandler);
@@ -127,14 +127,15 @@ int main(int argc, char *argv[])
 	//colorDetectionNode colorDetection(messageBus, list, 0);
 	#endif
 
-	HTTPSyncNode httpsync(messageBus, &dbHandler, 0, false);
+
+	//HTTPSyncNode httpsync(messageBus, &dbHandler, 0, false);
 	VesselStateNode vessel(messageBus);
 	WaypointMgrNode waypoint(messageBus, dbHandler);
 
 
 	Node* sailingLogic;
 
-	sailingLogic = new LineFollowNode(messageBus, dbHandler);
+		sailingLogic = new LineFollowNode(messageBus, dbHandler);
 
 	#if SIMULATION == 0
 	int channel = dbHandler.retrieveCellAsInt("sail_servo_config", "1", "channel");
@@ -149,10 +150,9 @@ int main(int argc, char *argv[])
 
 	ActuatorNode rudder(messageBus, NodeID::RudderActuator, channel, speed, acceleration);
 	MaestroController::init(dbHandler.retrieveCell("maestro_controller_config", "1", "port"));
-  #endif
-	//bool requireNetwork = (bool) (dbHandler.retrieveCellAsInt("sailing_robot_config", "1", "require_network"));
+	#endif
 
-	// System services
+	HTTPSyncNode httpsync(messageBus, &dbHandler, 0, false);
 
 
 	// Initialise nodes
@@ -169,18 +169,8 @@ int main(int argc, char *argv[])
 	initialiseNode(sail, "Sail Actuator", NodeImportance::CRITICAL);
 	initialiseNode(rudder, "Rudder Actuator", NodeImportance::CRITICAL);
 	initialiseNode(arduino, "Arduino Node", NodeImportance::NOT_CRITICAL);
-	//initialiseNode(colorDetection, "Colour detection node", NodeImportance::NOT_CRITICAL);
 	#endif
 
-	/*if (requireNetwork)
-	{
-		initialiseNode(httpsync, "Httpsync Node", NodeImportance::CRITICAL);
-	}
-	else
-	{
-		initialiseNode(httpsync, "Httpsync Node", NodeImportance::NOT_CRITICAL);
-	}
-*/
 	initialiseNode(vessel, "Vessel State Node", NodeImportance::CRITICAL);
 	initialiseNode(waypoint, "Waypoint Node", NodeImportance::CRITICAL);
 
@@ -188,16 +178,14 @@ int main(int argc, char *argv[])
 	// Start active nodes
 	#if SIMULATION == 1
 	simulation.start();
-  #else
+  	#else
 
 	xbee.start();
 	windSensor.start();
 	compass.start();
 	gpsd.start();
 	arduino.start();
-	//colorDetection.start();
-  #endif
-	//httpsync.start();
+ 	#endif
 	vessel.start();
 
 
