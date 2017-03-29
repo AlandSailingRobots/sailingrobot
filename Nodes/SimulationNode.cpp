@@ -149,8 +149,6 @@ void SimulationNode::processBoatData( TCPPacket_t& packet )
 	 	m_ArduinoRudder = boatData->rudder;
 	 	m_ArduinoSheet = boatData->sail;
 
-		 Logger::info("Heading: %d Lat: %f Lon: %f", m_CompassHeading, m_GPSLat, m_GPSLon);
-
 		// Send messages
 		createCompassMessage();
 		createGPSMessage();
@@ -175,11 +173,13 @@ void SimulationNode::SimulationThreadFunc(void* nodePtr)
 
 	while(true)
 	{
-		// We only care about the latest packet, so clear out the old ones
-		node->server.clearSocketBuffer( packet.socketFD );
-
+		Logger::info("Waiting for message");
 		// Don't timeout on a packet read
 		node->server.readPacket( packet, 0 );
+
+		Logger::info("Clearing buffer");
+		// We only care about the latest packet, so clear out the old ones
+		node->server.clearSocketBuffer( packet.socketFD );
 
 		// We can safely assume that the first packet we receive will actually be from
 		// the simulator as we only should ever accept one connection, the first one/
