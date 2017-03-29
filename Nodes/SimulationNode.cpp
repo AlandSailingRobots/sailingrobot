@@ -28,6 +28,7 @@
 #include <unistd.h>
 #include "SystemServices/Logger.h"
 #include "SystemServices/SysClock.h"
+#include "Network/TCPServer.h"
 
 
 #define BASE_SLEEP_MS 400
@@ -36,13 +37,21 @@
 #define COUNT_WINDDATA_MSG 1
 #define COUNT_ARDUINO_MSG 1
 
+#define SERVER_PORT	6900
+
+
+enum SimulatorPacket {
+	BoatData = 0,
+	AISData = 1,
+	CameraData = 2
+};
+
 
 SimulationNode::SimulationNode(MessageBus& msgBus)
 	: ActiveNode(NodeID::Simulator, msgBus),
-		m_CompassHeading(0), m_CompassPitch(0), m_CompassRoll(0),
-		m_GPSHasFix(false), m_GPSOnline(false), m_GPSLat(0), m_GPSLon(0), m_GPSUnixTime(0), m_GPSSpeed(0),
-		m_GPSHeading(0), m_WindDir(0), m_WindSpeed(0), m_WindTemp(0), m_ArduinoPressure(0),
-		m_ArduinoRudder(0),m_ArduinoSheet(0),m_ArduinoBattery(0),m_ArduinoRC(0),m_rudder(0),m_sail(0),m_count_sleep(0)
+		m_CompassHeading(0), m_GPSLat(0), m_GPSLon(0), m_GPSSpeed(0),
+		m_GPSHeading(0), m_WindDir(0), m_WindSpeed(0),
+		m_ArduinoRudder(0), m_ArduinoSheet(0), m_rudder(0), m_sail(0), m_count_sleep(0)
 {
   m_MsgBus.registerNode(*this, MessageType::ActuatorPosition);
 }
@@ -52,39 +61,59 @@ void SimulationNode::start()
 	runThread(SimulationThreadFunc);
 }
 
-bool SimulationNode::init(){
+bool SimulationNode::init()
+{
+	bool success = false;
 
+	int rc = server.start( SERVER_PORT );
 
-		if (init_socket(6400)<0)
-		{
-			return false;
-		}
-
-
-		Logger::info("Size of float on this platform %d",(int)sizeof(float)*8 );
-		Logger::info("Address: %s Port: %d", inet_ntoa(m_handler_socket_server.info_me.sin_addr),6400);
-
-		//================
-		unsigned int clntLen;            /* Length of client address data structure */
-		/* Set the size of the in-out parameter */
-		clntLen = sizeof(m_handler_socket_client.info_me);
-		/* Wait for a client to connect */
-
+	if( rc > 0 )
+	{
 		Logger::info("Waiting for simulation client...\n");
 
-		if ((m_handler_socket_client.sockfd = accept(m_handler_socket_server.sockfd, (struct sockaddr *) &(m_handler_socket_client.info_me),
-					 &clntLen)) < 0)
-	  {
-			  Logger::error("%s Error in accept() failed: %s",__PRETTY_FUNCTION__,strerror(errno));
-				return false;
-	  }
+		// Block until connection, don't timeout
+		server.acceptConnection( 0 );
 
-    // Set socket as non-blocking
-		fcntl(m_handler_socket_client.sockfd, F_SETFL, O_NONBLOCK);
-    fcntl(m_handler_socket_server.sockfd, F_SETFL, O_NONBLOCK);
-    Logger::info("Handling Simulation client from : %s\n", inet_ntoa(m_handler_socket_client.info_me.sin_addr));
+		success = true;
+	}
+	else
+	{
+		Logger::error( "Failed to start the simulator server" );
+		success = false;
+	}
 
-		return true;
+	return success;
+
+	//return true;
+
+	
+	/*if (init_socket(6400)<0)
+	{
+		return false;
+	}
+
+	Logger::info("Address: %s Port: %d", inet_ntoa(m_handler_socket_server.info_me.sin_addr),6400);
+
+	//================
+	unsigned int clntLen;            // Length of client address data structure 
+	// Set the size of the in-out parameter 
+	clntLen = sizeof(m_handler_socket_client.info_me);
+	// Wait for a client to connect 
+
+	Logger::info("Waiting for simulation client...\n");
+
+	if ((m_handler_socket_client.sockfd = accept(m_handler_socket_server.sockfd, (struct sockaddr *) & (m_handler_socket_client.info_me),
+				&clntLen)) < 0)
+	{
+		Logger::error("%s Error in accept() failed: %s",__PRETTY_FUNCTION__,strerror(errno));
+			return false;
+	}
+
+	// Set socket as non-blocking
+	fcntl(m_handler_socket_client.sockfd, F_SETFL, O_NONBLOCK);
+	fcntl(m_handler_socket_server.sockfd, F_SETFL, O_NONBLOCK);
+	Logger::info("Handling Simulation client from : %s\n", inet_ntoa(m_handler_socket_client.info_me.sin_addr));
+	return true;*/
 }
 
 int SimulationNode::init_socket(int port)
@@ -126,125 +155,240 @@ void SimulationNode::processMessage(const Message* msg)
 
 	switch(type)
 	{
-	case MessageType::ActuatorPosition:
-		processActuatorPositionMessage((ActuatorPositionMsg*)msg);
+		case MessageType::ActuatorPosition:
+			processActuatorPositionMessage((ActuatorPositionMsg*)msg);
 		break;
-	default:
+
+		default:
 		return;
 	}
 }
 
 void SimulationNode::processActuatorPositionMessage(ActuatorPositionMsg* msg)
 {
+	actuatorData.rudderCommand = msg->rudderPosition();
+	actuatorData.sailCommand = msg->sailPosition();
+
 	m_rudder = msg->rudderPosition();
 	m_sail = msg->sailPosition();
 }
 
 void SimulationNode::createCompassMessage()
 {
-	m_CompassHeading = m_data_receive.headingVector[0]/10.f;
-	m_CompassPitch = 0;
-	m_CompassRoll = 0;
+	MessagePtr msg = std::make_unique<CompassDataMsg>(CompassDataMsg( m_CompassHeading, 0, 0));
+	m_MsgBus.sendMessage(std::move(msg));
+	
+	/*
+	m_CompassHeading = m_data_receive.headingVector[0];
+	int m_CompassPitch = 0;
+	int m_CompassRoll = 0;
 
-	if (m_count_sleep % COUNT_COMPASSDATA_MSG==0){
-
+	if (m_count_sleep % COUNT_COMPASSDATA_MSG==0)
+	{
 		MessagePtr msg = std::make_unique<CompassDataMsg>(CompassDataMsg( int(m_CompassHeading+0.5) , m_CompassPitch, m_CompassRoll));
-
 	  	m_MsgBus.sendMessage(std::move(msg));
-  }
+  	}*/
 }
 
 void SimulationNode::createGPSMessage()
 {
+	MessagePtr msg = std::make_unique<GPSDataMsg>(GPSDataMsg(true, true, m_GPSLat, m_GPSLon, SysClock::unixTime(), m_GPSSpeed, m_GPSHeading, 0, GPSMode::LatLonOk));
+	m_MsgBus.sendMessage(std::move(msg));
 
-	double knots = 1.94384;
-	m_GPSHasFix = true;
-	m_GPSOnline = true;
+	/*double knots = 1.94384;
+	bool m_GPSHasFix = true;
+	bool m_GPSOnline = true;
 	m_GPSLat = m_data_receive.latitude;
 	m_GPSLon = m_data_receive.longitude;
-	m_GPSUnixTime = SysClock::unixTime();
+	int m_GPSUnixTime = SysClock::unixTime();
 	m_GPSSpeed = m_data_receive.speed_knot/knots;
 	m_GPSHeading = m_data_receive.course_real;
-	m_GPSSatellite = 0;
+	int m_GPSSatellite = 0;
 	GPSMode mode = GPSMode::LatLonOk;
 
 	if (m_count_sleep % COUNT_GPSDATA_MSG==0)
 	{
 		MessagePtr msg = std::make_unique<GPSDataMsg>(GPSDataMsg(m_GPSHasFix, m_GPSOnline, m_GPSLat, m_GPSLon, m_GPSUnixTime, m_GPSSpeed, m_GPSHeading, m_GPSSatellite, mode));
 		m_MsgBus.sendMessage(std::move(msg));
-	}
+	}*/
 }
 
 void SimulationNode::createWindMessage()
 {
-	m_WindDir = m_data_receive.windDirection;
+	MessagePtr windData = std::make_unique<WindDataMsg>( WindDataMsg(m_WindDir, m_WindSpeed, 21) );
+	m_MsgBus.sendMessage( std::move(windData) );
+
+
+	/*m_WindDir = m_data_receive.windDirection;
 	m_WindSpeed = m_data_receive.windSpeed;
-	m_WindTemp = m_data_receive.windTemperature;
+	int m_WindTemp = m_data_receive.windTemperature;
 
 	if (m_count_sleep % COUNT_WINDDATA_MSG==0)
 	{
 		MessagePtr windData = std::make_unique<WindDataMsg>(WindDataMsg(m_WindDir, m_WindSpeed, m_WindTemp));
 		m_MsgBus.sendMessage(std::move(windData));
-	}
+	}*/
 }
 
 void SimulationNode::createArduinoMessage()
 {
-	m_ArduinoPressure = m_data_receive.pressure;
+	MessagePtr msg = std::make_unique<ArduinoDataMsg>(ArduinoDataMsg(0, m_ArduinoRudder, m_ArduinoSheet, 0, 0 ));
+	m_MsgBus.sendMessage(std::move(msg));
+
+	/*
 	m_ArduinoRudder = m_data_receive.rudder;
 	m_ArduinoSheet = m_data_receive.sheet;
-	m_ArduinoBattery = m_data_receive.battery;
 
 	if (m_count_sleep % COUNT_ARDUINO_MSG==0)
 	{
-		MessagePtr msg = std::make_unique<ArduinoDataMsg>(ArduinoDataMsg(m_ArduinoPressure, m_ArduinoRudder, m_ArduinoSheet, m_ArduinoBattery, m_ArduinoRC ));
+		MessagePtr msg = std::make_unique<ArduinoDataMsg>(ArduinoDataMsg(0, m_ArduinoRudder, m_ArduinoSheet, 0, 0 ));
 		m_MsgBus.sendMessage(std::move(msg));
+	}*/
+}
+
+void SimulationNode::processSocketData()
+{
+	if ( m_count_sleep % COUNT_COMPASSDATA_MSG == 0 )
+	{
+		createCompassMessage();
+	}
+
+	if( m_count_sleep % COUNT_GPSDATA_MSG == 0 )
+	{
+		createGPSMessage();
+	}
+
+	if( m_count_sleep % COUNT_WINDDATA_MSG == 0 )
+	{
+		createWindMessage();
+	}
+
+	if( m_count_sleep % COUNT_ARDUINO_MSG == 0 )
+	{
+		createArduinoMessage();
 	}
 }
 
-void SimulationNode::processSocketData(){
-  createCompassMessage();
-  createGPSMessage();
-  createWindMessage();
-  createArduinoMessage();
+void SimulationNode::setupDataSend()
+{
+	m_data_send.rudder_command = m_rudder;
+	m_data_send.sheet_command = m_sail;
 }
 
-void SimulationNode::setupDataSend(){
-  m_data_send.rudder_command = m_rudder;
-  m_data_send.sheet_command = m_sail;
+///--------------------------------------------------------------------------------------
+void SimulationNode::processBoatData( TCPPacket_t& packet )
+{	
+	if( packet.length - 1 == sizeof(BoatDataPacket_t) )
+	{
+		// The first byte is the packet type, lets skip that
+		uint8_t* ptr = packet.data + 1;
+		BoatDataPacket_t* boatData = (BoatDataPacket_t*)ptr;
+
+		m_CompassHeading = boatData->heading;
+		m_GPSLat = boatData->latitude;
+		m_GPSLon = boatData->longitude;
+		m_GPSSpeed = boatData->speed;
+		m_GPSHeading = boatData->course;
+		m_WindDir = boatData->windDir;
+		m_WindSpeed = boatData->windSpeed;
+	 	m_ArduinoRudder = boatData->rudder;
+	 	m_ArduinoSheet = boatData->sail;
+
+		 Logger::info("Heading: %d Lat: %f Lon: %f", m_CompassHeading, m_GPSLat, m_GPSLon);
+
+		// Send messages
+		processSocketData();
+	}
 }
 
+///--------------------------------------------------------------------------------------
+void SimulationNode::sendActuatorData( int socketFD )
+{
+	server.sendData( socketFD, &actuatorData, sizeof(ActuatorDataPacket_t) );
+}
+
+///--------------------------------------------------------------------------------------
 void SimulationNode::SimulationThreadFunc(void* nodePtr)
 {
 	SimulationNode* node = (SimulationNode*)nodePtr;
 
+	TCPPacket_t packet;
+	int simulatorFD = 0;
+
+	while(true)
+	{
+		// Don't timeout
+		node->server.readPacket( packet, 0 );
+		node->server.clearSocketBuffer( packet.socketFD );
+
+		// We can safely assume that the first packet we receive will actually be from
+		// the simulator as we only should ever accept one connection, the first one/
+		if( simulatorFD == 0 )
+		{
+			simulatorFD = packet.socketFD;
+		}
+
+		// First byte is the message type
+		switch( packet.data[0] )
+		{
+			case SimulatorPacket::BoatData:
+				node->processBoatData( packet );
+			break;
+
+			case SimulatorPacket::AISData:
+				// TODO
+			break;
+
+			case SimulatorPacket::CameraData:
+				// TODO
+			break;
+
+			// unknown or deformed packet
+			default:
+				continue;
+		}
+		
+		node->sendActuatorData( simulatorFD );
+
+		// Reset our packet, better safe than sorry
+		packet.socketFD = 0;
+		packet.length = 0;
+
+		std::this_thread::sleep_for(std::chrono::milliseconds(BASE_SLEEP_MS));
+	}
+	/*
 	int bytes_received = 0;
-	struct DATA_SOCKET_RECEIVE dump_data_sock_receive;
-	while(true){
+	DATA_SOCKET_RECEIVE dump_data_sock_receive;
+	while(true)
+	{
+		//receive socket from simulation
+		bytes_received += read( node->m_handler_socket_client.sockfd, &(node->m_data_receive) + bytes_received, sizeof(struct DATA_SOCKET_RECEIVE) - bytes_received);
 
-    //receive socket from simulation
-    bytes_received += read(node->m_handler_socket_client.sockfd,&(node->m_data_receive)+bytes_received,sizeof(struct DATA_SOCKET_RECEIVE)-bytes_received);
-    if (bytes_received==sizeof(struct DATA_SOCKET_RECEIVE)){
-       bytes_received=0;
-			 //flush socket
-       while(read(node->m_handler_socket_client.sockfd,&dump_data_sock_receive,sizeof(struct DATA_SOCKET_RECEIVE))>0){};
-    }
-    if (bytes_received==-1)
-      bytes_received=0;
+		if (bytes_received == sizeof(DATA_SOCKET_RECEIVE))
+		{
+			bytes_received=0;
+				//flush socket
+			while(read(node->m_handler_socket_client.sockfd,&dump_data_sock_receive,sizeof(struct DATA_SOCKET_RECEIVE))>0){};
+		}
 
-    //clock for sending messages
-    if (node->m_count_sleep==10)
+		if (bytes_received==-1)
+		{
+			bytes_received=0;
+		}
+
+		//clock for sending messages
+		if (node->m_count_sleep==10)
 		{
 			node->m_count_sleep=0;
 		}
 		node->m_count_sleep++;
 
-    node->processSocketData();
+		node->processSocketData();
 		node->setupDataSend();
 
-    //send data to simulation
-    write(node->m_handler_socket_client.sockfd,&(node->m_data_send), sizeof(struct DATA_SOCKET_SEND));
+		//send data to simulation
+		write(node->m_handler_socket_client.sockfd,&(node->m_data_send), sizeof(struct DATA_SOCKET_SEND));
 
 		std::this_thread::sleep_for(std::chrono::milliseconds(BASE_SLEEP_MS));
-  }
+  	}*/
 }
