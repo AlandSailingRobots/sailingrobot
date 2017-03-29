@@ -18,7 +18,6 @@
 #include "Nodes/VesselStateNode.h"
 #include "Nodes/HTTPSyncNode.h"
 #include "Nodes/XbeeSyncNode.h"
-#include "Nodes/RoutingNode.h"
 #include "Nodes/LineFollowNode.h"
 
 #if USE_OPENCV_COLOR_DETECTION == 1
@@ -127,6 +126,8 @@ int main(int argc, char *argv[])
 		std::vector<std::string> list;
 		list.push_back("red");
 		//colorDetectionNode colorDetection(messageBus, list, 0);
+		#endif
+
 
 		//HTTPSyncNode httpsync(messageBus, &dbHandler, 0, false);
 		VesselStateNode vessel(messageBus);
@@ -211,7 +212,6 @@ int main(int argc, char *argv[])
 		Logger::info("Message bus started!");
 		messageBus.run();
 
-	#endif
 
 	Logger::shutdown();
 	exit(0);
