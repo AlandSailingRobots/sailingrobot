@@ -48,6 +48,10 @@ public:
 					uint8_t &TemperatureSource, float &ActualTemperature,
 					float &SetTemperature);
 
+    void ParsePGN130314(N2kMsg &Msg, uint8_t &SID, uint8_t &PressureInstance,		//ActualPressure
+					uint8_t &PressureSource, double &Pressure);
+
+
 	///----------------------------------------------------------------------------------
  	/// Setups the actuator.
  	///
