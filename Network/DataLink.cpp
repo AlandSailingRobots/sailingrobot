@@ -61,7 +61,7 @@ bool DataLink::receive(NetworkFrame& frame)
 		{
 			return false;
 		}
-		
+
 		uint16_t maxSize = maxFrameSize();
 		uint8_t* buffer = new uint8_t[maxSize];
 		bool foundEnd;
@@ -120,7 +120,7 @@ bool DataLink::receive(NetworkFrame& frame)
 
 		delete[] buffer;
 	}
-	
+
 	return false;
 }
 
@@ -160,16 +160,16 @@ bool DataLink::foundFrameStart()
 		}
 
 		if((uint8_t)c == SLIP_PACKET_START && not slipEscape)
-		{				
+		{
 			break;
 		}
 
 		if((uint8_t)c == SLIP_PACKET_ESCAPE)
-		{				
+		{
 			slipEscape = true;
 		}
 		else
-		{				
+		{
 			slipEscape = false;
 		}
 
@@ -179,4 +179,3 @@ bool DataLink::foundFrameStart()
 	return true;
 
 }
-

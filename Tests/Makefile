@@ -10,11 +10,11 @@ TEST_SRC := $(wildcard ../../tests/unit-tests/*.h)
 
 ifeq ($(USE_DEV_LNM), 1)
 
-UNIT_TEST_SRCS 			= MessageCoreSuite.h MessageSuite.h UtilitySuite.h WaypointNodeSuite.h ASRCourseBallotSuite.h ASRArbiterSuite.h
+UNIT_TEST_SRCS 			= MessageCoreSuite.h MessageSuite.h UtilitySuite.h WaypointNodeSuite.h ASRCourseBallotSuite.h ASRArbiterSuite.h CANServiceSuite.h
 
 else
 
-UNIT_TEST_SRCS 			= MessageCoreSuite.h MessageSuite.h UtilitySuite.h HTTPSyncSuite.h WaypointNodeSuite.h LineFollowSuite.h ASRCourseBallotSuite.h
+UNIT_TEST_SRCS 			= MessageCoreSuite.h MessageSuite.h UtilitySuite.h HTTPSyncSuite.h WaypointNodeSuite.h LineFollowSuite.h ASRCourseBallotSuite.h CANServiceSuite.h
 
 HARDWARE_TEST_SRCS 		= HardwareXbeeSuite.h HardwareCompassSuite.h HardwareCV7Suite.h HardwareGPSDSuite.h MaestroControllerSuite.h ActuatorSailNodeSuite.h \
 						ActuatorRudderNodeSuite.h

@@ -35,7 +35,7 @@ public:
 
 	///----------------------------------------------------------------------------------
  	/// Called by the MessageBus when it has a message the node might be interested in.
- 	/// A node should register for messages it wants to receive using 
+ 	/// A node should register for messages it wants to receive using
  	/// MessageBus::registerNode(Node*, MessageType)
  	///
  	///----------------------------------------------------------------------------------

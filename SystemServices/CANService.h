@@ -4,17 +4,65 @@
  * 		CANService.h
  *
  * Purpose:
- *		The message bus manages message distribution to nodes allowing nodes to
- *		communicate with one another.
+ *		Handles communcation between CAN-Nodes on the system
+ *
  *
  * Developer Notes:
- *		Nodes can only be added before the run function is called currently. This is to
- *		reduce the number of thread locks in place and because once the system has
- *		started its very rare that a node should be registered afterwards on the fly.
+ *
+ *
+ *
  *
  *
  ***************************************************************************************/
 
-class CANService {
+ #pragma once
 
+ #include "CANPGNReceiver.h"
+ #include <vector>
+ #include <map>
+ #include <mutex>
+ #include <queue>
+ #include <memory>
+ #include <future>
+
+// Temporarily included in this file while coding the service
+ struct N2kMsg
+ {
+ 	uint32_t PGN;
+ 	uint8_t Priority;
+ 	uint8_t Source;
+ 	uint8_t Destination;
+ 	int DataLen;
+ 	std::vector<uint8_t> Data;
+ };
+
+
+class CANService {
+public:
+  CANService();
+
+  ~CANService();
+
+/*  Registers a CAN receiver with an associated PGN-number     *
+ *  which will receive any message with that number sent into  *
+ *  the CAN-Service                                            */
+  bool registerForReading(CanPGNReceiver& node, uint32_t PGN);
+
+/* Sends a NMEA2000 message onto the service, which will  *
+ * then either be sent to another receiver, or if no such *
+ * receiver is registered, will be discarded.             */
+  void sendN2kMessage(N2kMsg& msg);
+
+/* Starts the service using async, and will begin *
+ * receiving and sending messages                 */
+  void start();
+
+private:
+
+  void run();
+
+  std::map<uint32_t, CanPGNReceiver*> m_RegisteredNodes;
+  std::queue<N2kMsg> m_MsgQueue;
+  std::mutex m_QueueMutex;
+  bool m_Running;
 };
