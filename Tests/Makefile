@@ -1,6 +1,6 @@
 
 
-
+USE_DEV_LNM = 0
 #####################################################################
 # Files
 
@@ -14,7 +14,7 @@ UNIT_TEST_SRCS 			= MessageCoreSuite.h MessageSuite.h UtilitySuite.h WaypointNod
 
 else
 
-UNIT_TEST_SRCS 			= MessageCoreSuite.h MessageSuite.h UtilitySuite.h HTTPSyncSuite.h WaypointNodeSuite.h LineFollowSuite.h ASRCourseBallotSuite.h
+UNIT_TEST_SRCS 			= MessageCoreSuite.h MessageSuite.h UtilitySuite.h HTTPSyncSuite.h WaypointNodeSuite.h LineFollowSuite.h
 
 HARDWARE_TEST_SRCS 		= HardwareXbeeSuite.h HardwareCompassSuite.h HardwareCV7Suite.h HardwareGPSDSuite.h MaestroControllerSuite.h ActuatorSailNodeSuite.h \
 						ActuatorRudderNodeSuite.h
@@ -55,6 +55,10 @@ test-gen: clean
 test-gen-lnm: clean
 	$(TEST_GEN) $(TESTGEN_FLAGS) -o runner.cpp $(UNIT_TESTS) $(TEST_MOCKS)
 	$(CXX) runner.cpp -o runner.o
+
+	$(CXX) $(CPPFLAGS) Tests/runner.o @$(OBJECT_FILE) -Wl,-rpath=./ ./libwiringPi.so -o $(UNIT_TEST_EXEC) $(LIBS)
+	$(CXX) $(CPPFLAGS) Tests/runnerHardware.o @$(OBJECT_FILE) -Wl,-rpath=./ ./libwiringPi.so -o $(HARDWARE_TEST_EXEC) $(LIBS)
+
 
 clean:
 	-rm -f runner.cpp
