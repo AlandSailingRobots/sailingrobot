@@ -49,18 +49,19 @@ void CANWindsensorNode::start()
 	}
 }
 
-void CANWindsensorNode::processPGN(std::vector<uint8_t> Data, uint32_t PGN)
+void CANWindsensorNode::processPGN(N2kMsg &NMsg, uint32_t PGN)
 {
 	//TODO:: parse message and send to message bus
 	if(PGN == PGN130306){
 		uint8_t SID, Ref;
 		float WS, WA;
-		parsePGN130306(Data, SID, WS, WA, Ref);
+		parsePGN130306(N2kMsg &Msg, SID, WS, WA, Ref);
 		std::cout << "SID: " << (int)SID << " ";
 		std::cout << "Windspeed: "<< WS << " ";
 		std::cout << "Windangle: "<< WA << " ";
 		std::cout << "Reference: "<< (int)Ref << std::endl;
 	}
+	else if()
 }
 
 void CANWindsensorNode::parsePGN130306(std::vector<uint8_t> Data, uuint8_t &SID, float &WindSpeed,				//WindData
