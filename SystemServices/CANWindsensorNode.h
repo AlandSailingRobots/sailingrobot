@@ -40,9 +40,13 @@ public:
     void parsePGN130306(N2kMsg &NMsg, uuint8_t &SID, float &WindSpeed,				//WindData
 					float &WindAngle, uint8_t &Reference);
 
-    void ParsePGN130311(N2kMsg &Msg, uint8_t &SID, uint8_t &TemperatureInstance,	//Environmental Parameters
+    void parsePGN130311(N2kMsg &Msg, uint8_t &SID, uint8_t &TemperatureInstance,	//Environmental Parameters
 					uint8_t &HumidityInstance, float &Temperature,
 					float &Humidity, float &AtmosphericPressure);
+
+    void ParsePGN130312(N2kMsg &NMsg, uint8_t &SID, uint8_t &TemperatureInstance,	//Temperature
+					uint8_t &TemperatureSource, float &ActualTemperature,
+					float &SetTemperature);
 
 	///----------------------------------------------------------------------------------
  	/// Setups the actuator.
@@ -69,11 +73,5 @@ private:
 	float m_WindDir;
 	float m_WindSpeed;
 	float m_WindTemperature;
-
-	//Windsensor
-	const uint32_t PGN130306 = 130306; 
-	const uint32_t PGN130311 = 130311;
-	const uint32_t PGN130312 = 130312;
-	const uint32_t PGN130314 = 130314;
 
 };
