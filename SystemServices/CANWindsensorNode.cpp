@@ -22,31 +22,7 @@
 
  bool CANWindsensorNode::init()
 {
-  m_fd = serialOpen(m_PortName.c_str(),m_BaudRate);
 
-
-	if(m_fd!=-1)
-	{
-		m_Initialised = true;
-	}
-	else
-	{
-		Logger::error("%s Cannot open %s as windsensor: %s", __PRETTY_FUNCTION__,m_PortName.c_str(),strerror(errno));
-	}
-
-	return m_Initialised;
-}
-
-void CANWindsensorNode::start()
-{
-	if(m_Initialised)
-	{
-		runThread(WindSensorThread);
-	}
-	else
-	{
-		Logger::error("%s Cannot start wind sensor thread as the node was not correctly initialised!", __PRETTY_FUNCTION__);
-	}
 }
 
 void CANWindsensorNode::processPGN(N2kMsg &NMsg, uint32_t PGN)
@@ -61,7 +37,8 @@ void CANWindsensorNode::processPGN(N2kMsg &NMsg, uint32_t PGN)
 		std::cout << "Windangle: "<< WA << " ";
 		std::cout << "Reference: "<< (int)Ref << std::endl;
 	}
-	else if(NMsg.PGN == 130311){
+	else if(NMsg.PGN == 130311)
+	{
 		uint8_t SID, TI, HI;
 		float Temp, Hum, AP;
 		ParsePGN130311(NMsg, SID, TI, HI, Temp, Hum, AP);
@@ -72,7 +49,8 @@ void CANWindsensorNode::processPGN(N2kMsg &NMsg, uint32_t PGN)
 		std::cout << "Humidity: " << Hum << " ";
 		std::cout << "AtmosphericPressure: " << AP << std::endl;
 	}
-	else if(NMsg.PGN == 130312){
+	else if(NMsg.PGN == 130312)
+	{
 		uint8_t SID, TI, TS;
 		float ATemp, STemp;
 		ParsePGN130312(NMsg, SID, TI, TS, ATemp, STemp);
@@ -81,6 +59,16 @@ void CANWindsensorNode::processPGN(N2kMsg &NMsg, uint32_t PGN)
 		std::cout << "TemperatureSource: " << (int)TS << " ";
 		std::cout << "Actual Temperature: " << ATemp << " ";
 		std::cout << "Set Temperature: " << STemp << std::endl;
+	}
+	else if (NMsg.PGN == 130314)
+	{
+		uint8_t SID, PI, PS;
+		double P;
+		ParsePGN130314(NMsg, SID, PI, PS, P);
+		std::cout << "SID: " << (int)SID << " ";
+		std::cout << "Pressure Instance: " << (int)PI << " ";
+		std::cout << "Pressure Source: " << (int)PS << " ";
+		std::cout << "Pressure: " << P << std::endl;
 	}
 }
 
@@ -122,4 +110,15 @@ void CANWindsensorNode::ParsePGN130312(N2kMsg &NMsg, uint8_t &SID, uint8_t &Temp
 	ActualTemperature = tmp*0.01;
 	tmp = NMsg.Data[5] | (NMsg.Data[6]<<8);
 	SetTemperature = tmp*0.01;
+}
+
+void CANWindsensorNode::ParsePGN130314(N2kMsg &NMsg, uint8_t &SID, uint8_t &PressureInstance,		//ActualPressure
+					uint8_t &PressureSource, double &Pressure)
+{
+	SID = NMsg.Data[0];
+	PressureInstance = NMsg.Data[1];
+	PressureSource = NMsg.Data[2];
+
+	uint32_t tmp = NMsg.Data[3] | (NMsg.Data[4]<<8) | (NMsg.Data[5]<<16) | (NMsg.Data[6]<<24);
+	Pressure = tmp / 1000.0f; 			//hPa
 }
