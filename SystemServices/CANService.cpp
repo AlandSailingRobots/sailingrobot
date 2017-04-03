@@ -41,6 +41,7 @@ void CANService::run() {
 
       if(nodeIt != m_RegisteredNodes.end()) {
 
+        // Iterator is a pair, of which the second element is the actual node.
         CanPGNReceiver* node = nodeIt->second;
         node->processPGN(msg.Data, msg.PGN);
       }
