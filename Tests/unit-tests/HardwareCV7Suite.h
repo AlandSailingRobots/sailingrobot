@@ -83,7 +83,7 @@ public:
 
 	void test_CV7ParseSuccesfully()
 	{
-		std::string sensorData = "$IIMWV,125.8,R,015.8,N,A*3F$WIXDR,C,036.5,C,,*52"; 
+		std::string sensorData = "$IIMWV,125.8,R,015.8,N,A*3F$WIXDR,C,036.5,C,,*52";
 		float windDir = 0;
 		float windSpeed = 0;
 		float windTemp = 0;

@@ -43,10 +43,18 @@ public:
 
   ~CANService();
 
+/*  Registers a CAN receiver with an associated PGN-number     *
+ *  which will receive any message with that number sent into  *
+ *  the CAN-Service                                            */
   bool registerForReading(CanPGNReceiver& node, uint32_t PGN);
 
+/* Sends a NMEA2000 message onto the service, which will  *
+ * then either be sent to another receiver, or if no such *
+ * receiver is registered, will be discarded.             */
   void sendN2kMessage(N2kMsg& msg);
 
+/* Starts the service using async, and will begin *
+ * receiving and sending messages                 */
   void start();
 
 private:
