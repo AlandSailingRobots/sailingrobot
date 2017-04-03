@@ -15,8 +15,8 @@
 #include "Messages/WindDataMsg.h"
 
 
- CANWindsensorNode::CANWindsensorNode(MessageBus& msgBus,float windDir, float windSpeed, float windTemperature)
- 	:Node(id, msgBus), m_WindDir(windDir), m_WindSpeed(m_WindSpeed), m_WindTemperature(windTemperature)
+ CANWindsensorNode::CANWindsensorNode(MessageBus& msgBus, float windDir, float windSpeed, float windTemperature)
+ 	:Node(NodeID::WindSensor, msgBus), m_WindDir(windDir), m_WindSpeed(m_WindSpeed), m_WindTemperature(windTemperature)
  {
 
  }
@@ -67,7 +67,7 @@ void CANWindsensorNode::processPGN(N2kMsg &NMsg, uint32_t PGN)
 	}
 }
 
-void CANWindsensorNode::parsePGN130306(N2kMsg &NMsg, uuint8_t &SID, float &WindSpeed,				//WindData
+void CANWindsensorNode::parsePGN130306(N2kMsg &NMsg, uint8_t &SID, float &WindSpeed,				//WindData
 	float &WindAngle, uint8_t &Reference)
 {
 	SID = NMsg.Data[0];

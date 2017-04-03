@@ -37,7 +37,7 @@ public:
 	virtual void processPGN(N2kMsg &NMsg, uint32_t PGN) = 0;
 
     
-    void parsePGN130306(N2kMsg &NMsg, uuint8_t &SID, float &WindSpeed,				//WindData
+    void parsePGN130306(N2kMsg &NMsg, uint8_t &SID, float &WindSpeed,				//WindData
 					float &WindAngle, uint8_t &Reference);
 
     void parsePGN130311(N2kMsg &Msg, uint8_t &SID, uint8_t &TemperatureInstance,	//Environmental Parameters

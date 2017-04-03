@@ -122,7 +122,12 @@ int main(int argc, char *argv[])
 
 		XbeeSyncNode xbee(messageBus, dbHandler);
 		CV7Node windSensor(messageBus, dbHandler.retrieveCell("windsensor_config", "1", "port"), dbHandler.retrieveCellAsInt("windsensor_config", "1", "baud_rate"));
+		
+		//NOTE: the float arguements are just for test that an object of CANWindsensorNode
+		//can be created
 		CANWindsensorNode windSensorNode(messageBus, 100, 100, 100);
+		
+
 		HMC6343Node compass(messageBus, dbHandler.retrieveCellAsInt("buffer_config", "1", "compass"));
 		GPSDNode gpsd(messageBus);
 		ArduinoNode arduino(messageBus);
