@@ -52,9 +52,9 @@ private:
 	float m_WindTemperature;
 
 	//Windsensor
-	const PGN130306 = 130306; 
-	const PGN130311 = 130311;
-	const PGN130312 = 130312;
-	const PGN130314 = 130314;
+	const uint32_t PGN130306 = 130306; 
+	const uint32_t PGN130311 = 130311;
+	const uint32_t PGN130312 = 130312;
+	const uint32_t PGN130314 = 130314;
 
 };
