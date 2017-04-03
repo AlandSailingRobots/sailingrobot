@@ -51,7 +51,7 @@ void CANWindsensorNode::start()
 
 void CANWindsensorNode::processPGN(N2kMsg &NMsg, uint32_t PGN)
 {
-	//TODO:: parse message and send to message bus
+	//TODO:: parse message 
 	if(PGN == PGN130306){
 		uint8_t SID, Ref;
 		float WS, WA;
@@ -64,13 +64,13 @@ void CANWindsensorNode::processPGN(N2kMsg &NMsg, uint32_t PGN)
 	else if()
 }
 
-void CANWindsensorNode::parsePGN130306(std::vector<uint8_t> Data, uuint8_t &SID, float &WindSpeed,				//WindData
+void CANWindsensorNode::parsePGN130306(N2kMsg &NMsg, uuint8_t &SID, float &WindSpeed,				//WindData
 	float &WindAngle, uint8_t &Reference)
 {
-	SID = Data[0];
-	uint16_t tmp = Data[1] | (Data[2]<<8);
+	SID = NMsg.Data[0];
+	uint16_t tmp = NMsg.Data[1] | (NMsg.Data[2]<<8);
 	WindSpeed = tmp*0.01;
-	tmp = Data[3] | (Data[4]<<8);
+	tmp = NMsg.Data[3] | (NMsg.Data[4]<<8);
 	WindAngle = tmp*0.0001;
-	Reference = Data[5] & 0x07;
+	Reference = NMsg.Data[5] & 0x07;
 }
