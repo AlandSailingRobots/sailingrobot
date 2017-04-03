@@ -5,7 +5,7 @@
 #include <stdint.h>
 #include <vector>
 
-class CanPGNReceiver
+class CANPGNReceiver
 {
 
 public:
