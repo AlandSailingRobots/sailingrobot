@@ -14,7 +14,7 @@ bool CANService::registerForReading(CanPGNReceiver& node, uint32_t PGN) {
     return false;
   }
 
-  m_RegisteredNodes.insert(PGN, node);
+  m_RegisteredNodes[PGN] = &node;
   return true;
 
 }
@@ -26,7 +26,7 @@ void CANService::sendN2kMessage(N2kMsg& msg){
 
 void CANService::start() {
   m_Running = true;
-  std::async(CANService::run);
+  std::async(&CANService::run, this);
 }
 
 void CANService::run() {
@@ -35,13 +35,15 @@ void CANService::run() {
 
     if(m_MsgQueue.size() > 0) {
 
-      N2kMsg msg = m_MsgQueue.pop();
+      N2kMsg msg = m_MsgQueue.front();
+      m_MsgQueue.pop();
       auto nodeIt = m_RegisteredNodes.find(msg.PGN);
 
       if(nodeIt != m_RegisteredNodes.end()) {
-        
-        CANPGNReceiver node = *nodeIt;
-        node.processPGN(msg.Data, msg.PGN);
+
+        CanPGNReceiver* node = nodeIt->second;
+        node->processPGN(msg.Data, msg.PGN);
+      }
     }
   }
 }

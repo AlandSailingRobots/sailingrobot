@@ -22,7 +22,8 @@
  #include <map>
  #include <mutex>
  #include <queue>
-
+ #include <memory>
+ #include <future>
 
 // Temporarily included in this file while coding the service
  struct N2kMsg
@@ -52,7 +53,7 @@ private:
 
   void run();
 
-  std::map<uint32_t, CanPGNReceiver> m_RegisteredNodes;
+  std::map<uint32_t, CanPGNReceiver*> m_RegisteredNodes;
   std::queue<N2kMsg> m_MsgQueue;
   std::mutex m_QueueMutex;
   bool m_Running;
