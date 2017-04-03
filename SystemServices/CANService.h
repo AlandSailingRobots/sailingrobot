@@ -44,7 +44,7 @@ public:
 
   bool registerForReading(CanPGNReceiver& node, uint32_t PGN);
 
-  void sendMessage(N2kMsg& msg);
+  void sendN2kMessage(N2kMsg& msg);
 
   void start();
 
