@@ -52,28 +52,15 @@ public:
 					uint8_t &PressureSource, double &Pressure);
 
 
+
 	///----------------------------------------------------------------------------------
- 	/// Setups the actuator.
+ 	/// Attempts to connect to the wind sensor.
  	///
  	///----------------------------------------------------------------------------------
 	virtual bool init();
 
 
-	///----------------------------------------------------------------------------------
- 	/// Attempts to connect to the CV7 wind sensor.
- 	///
- 	///----------------------------------------------------------------------------------
-	bool init();
-
-	///----------------------------------------------------------------------------------
- 	/// Starts the wind sensors thread so that it actively pumps data into the message
- 	/// bus.
- 	///
- 	///----------------------------------------------------------------------------------
-	void start();
-
 private:
-	bool m_Initialised;		// Indicates that the node was correctly initialised
 	float m_WindDir;
 	float m_WindSpeed;
 	float m_WindTemperature;
