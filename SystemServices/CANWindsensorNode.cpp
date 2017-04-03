@@ -15,7 +15,7 @@
 #include "Messages/WindDataMsg.h"
 
 
- CANWindsensorNode::CANWindsensorNode(MessageBus& msgBus, NodeID id, float windDir, float windSpeed, float windTemperature)
+ CANWindsensorNode::CANWindsensorNode(MessageBus& msgBus,float windDir, float windSpeed, float windTemperature)
  	:Node(id, msgBus), m_WindDir(windDir), m_WindSpeed(m_WindSpeed), m_WindTemperature(windTemperature)
  {
 

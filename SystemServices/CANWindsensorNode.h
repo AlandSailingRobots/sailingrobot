@@ -29,7 +29,7 @@
 class CANWindsensorNode : public Node, public CANPNGReceiver
 {
 public:
-	CANWindsensorNode(MessageBus& msgBus, NodeID id, float windDir, float windSpeed, float windTemperature);
+	CANWindsensorNode(MessageBus& msgBus,float windDir, float windSpeed, float windTemperature);
 
 	~CANWindsensorNode();
 
