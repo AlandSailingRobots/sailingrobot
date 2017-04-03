@@ -129,7 +129,8 @@ line-follow: $(BUILD_DIR) $(WIRING_PI)
 
 # Builds the intergration test, requires the whole system to be built before
 tests: $(BUILD_DIR) $(WIRING_PI)
-	$(MAKE) -C Tests
+	$(MAKE) -C tests
+	$(MAKE) -f testM.mk
 
 #  Create the directories needed
 $(BUILD_DIR):
