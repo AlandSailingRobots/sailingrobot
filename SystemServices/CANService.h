@@ -4,17 +4,56 @@
  * 		CANService.h
  *
  * Purpose:
- *		The message bus manages message distribution to nodes allowing nodes to
- *		communicate with one another.
+ *		Handles communcation between CAN-Nodes on the system
+ *
  *
  * Developer Notes:
- *		Nodes can only be added before the run function is called currently. This is to
- *		reduce the number of thread locks in place and because once the system has
- *		started its very rare that a node should be registered afterwards on the fly.
+ *
+ *
+ *
  *
  *
  ***************************************************************************************/
 
-class CANService {
+ #pragma once
 
+ #include "CANPGNReceiverInterface.h"
+ #include <vector>
+ #include <map>
+ #include <mutex>
+ #include <queue>
+
+
+// Temporarily included in this file while coding the service
+ struct N2kMsg
+ {
+ 	uint32_t PGN;
+ 	uint8_t Priority;
+ 	uint8_t Source;
+ 	uint8_t Destination;
+ 	int DataLen;
+ 	std::vector<uint8_t> Data;
+ };
+
+
+class CANService {
+public:
+  CANService();
+
+  ~CANService();
+
+  bool registerForReading(CANPGNReceiverInterface& node, uint32_t PGN);
+
+  void sendMessage(N2kMsg& msg);
+
+  void start();
+
+private:
+
+  void run();
+
+  std::map<uint32_t, CANPGNReceiverInterface> m_RegisteredNodes;
+  std::queue<N2kMsg> m_MsgQueue;
+  std::mutex m_QueueMutex;
+  bool m_Running;
 };
