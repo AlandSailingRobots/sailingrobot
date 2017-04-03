@@ -17,7 +17,7 @@
 
  #pragma once
 
- #include "CANPGNReceiverInterface.h"
+ #include "CANPGNReceiver.h"
  #include <vector>
  #include <map>
  #include <mutex>
@@ -42,7 +42,7 @@ public:
 
   ~CANService();
 
-  bool registerForReading(CANPGNReceiverInterface& node, uint32_t PGN);
+  bool registerForReading(CanPGNReceiver& node, uint32_t PGN);
 
   void sendMessage(N2kMsg& msg);
 
@@ -52,7 +52,7 @@ private:
 
   void run();
 
-  std::map<uint32_t, CANPGNReceiverInterface> m_RegisteredNodes;
+  std::map<uint32_t, CanPGNReceiver> m_RegisteredNodes;
   std::queue<N2kMsg> m_MsgQueue;
   std::mutex m_QueueMutex;
   bool m_Running;

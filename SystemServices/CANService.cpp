@@ -1,5 +1,5 @@
 #include "CANService.h"
 
-bool registerForReading(CANPGNReceiverInterface& node, uint32_t PGN) {
-
+bool registerForReading(CanPGNReceiver& node, uint32_t PGN) {
+  m_RegisteredNodes.insert(PGN, node);
 }
