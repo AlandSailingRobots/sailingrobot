@@ -46,6 +46,9 @@ void CANWindsensorNode::processPGN(N2kMsg &NMsg, uint32_t PGN)
 		m_WindDir = WA;
 		m_WindSpeed = WS;
 
+		MessagePtr windData = std::make_unique<WindDataMsg>(message->sourceID(), this->nodeID(), m_MeanWindDir, m_MeanWindTemp, m_MeanWindSpeed);
+		m_MsgBus.sendMessage(std::move(windData));
+
 	}
 	else if(NMsg.PGN == 130311)
 	{
