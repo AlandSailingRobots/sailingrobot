@@ -24,7 +24,7 @@ public:
 	/* data */
 	virtual void processPGN(std::vector<uint8_t> Data, uint32_t PGN) = 0;
 
-    void processPGN130306(std::vector<uint8_t> Data, uuint8_t &SID, float &WindSpeed,				//WindData
+    void parsePGN130306(std::vector<uint8_t> Data, uuint8_t &SID, float &WindSpeed,				//WindData
 					float &WindAngle, uint8_t &Reference);
 
 	///----------------------------------------------------------------------------------
