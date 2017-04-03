@@ -15,10 +15,6 @@
 #include "Messages/WindDataMsg.h"
 
 
-
-#define WIND_SENSOR_SLEEP_MS	100
-#define DATA_OUT_OF_RANGE		-2000.
-
  CANWindsensorNode::CANWindsensorNode(MessageBus& msgBus, NodeID id, float windDir, float windSpeed, float windTemperature)
  	:Node(id, msgBus), m_WindDir(windDir), m_WindSpeed(m_WindSpeed), m_WindTemperature(windTemperature)
  {
@@ -32,21 +28,15 @@
 
 void CANWindsensorNode::processPGN(N2kMsg &NMsg, uint32_t PGN)
 {
-	//TODO:: parse message 
 	if(NMsg.PGN == 130306){
 		uint8_t SID, Ref;
 		float WS, WA;
-		parsePGN130306(N2kMsg &Msg, SID, WS, WA, Ref);
-
-		std::cout << "SID: " << (int)SID << " ";
-		std::cout << "Windspeed: "<< WS << " ";
-		std::cout << "Windangle: "<< WA << " ";
-		std::cout << "Reference: "<< (int)Ref << std::endl;
+		parsePGN130306(NMsg, SID, WS, WA, Ref);
 
 		m_WindDir = WA;
 		m_WindSpeed = WS;
 
-		MessagePtr windData = std::make_unique<WindDataMsg>(message->sourceID(), this->nodeID(), m_MeanWindDir, m_MeanWindTemp, m_MeanWindSpeed);
+		MessagePtr windData = std::make_unique<WindDataMsg>(NMsg.Source, this->nodeID(), m_WindDir, m_WindTemperature, m_WindSpeed);
 		m_MsgBus.sendMessage(std::move(windData));
 
 	}
@@ -55,33 +45,25 @@ void CANWindsensorNode::processPGN(N2kMsg &NMsg, uint32_t PGN)
 		uint8_t SID, TI, HI;
 		float Temp, Hum, AP;
 		ParsePGN130311(NMsg, SID, TI, HI, Temp, Hum, AP);
-		std::cout << "SID: " << (int)SID << " ";
-		std::cout << "TemperatureInstance: " << (int)TI << " ";
-		std::cout << "HumidityInstance: " << (int)HI << " ";
-		std::cout << "Temperature: " << Temp << " ";
-		std::cout << "Humidity: " << Hum << " ";
-		std::cout << "AtmosphericPressure: " << AP << std::endl;
+
+		m_WindTemperature = Temp;
+
+		MessagePtr windData = std::make_unique<WindDataMsg>(NMsg.Source, this->nodeID(), m_WindDir, m_WindTemperature, m_WindSpeed);
+		m_MsgBus.sendMessage(std::move(windData));
 	}
 	else if(NMsg.PGN == 130312)
 	{
 		uint8_t SID, TI, TS;
 		float ATemp, STemp;
 		ParsePGN130312(NMsg, SID, TI, TS, ATemp, STemp);
-		std::cout << "SID: " << (int)SID << " ";
-		std::cout << "TemperatureInstance: " << (int)TI << " ";
-		std::cout << "TemperatureSource: " << (int)TS << " ";
-		std::cout << "Actual Temperature: " << ATemp << " ";
-		std::cout << "Set Temperature: " << STemp << std::endl;
+		
 	}
 	else if (NMsg.PGN == 130314)
 	{
 		uint8_t SID, PI, PS;
 		double P;
 		ParsePGN130314(NMsg, SID, PI, PS, P);
-		std::cout << "SID: " << (int)SID << " ";
-		std::cout << "Pressure Instance: " << (int)PI << " ";
-		std::cout << "Pressure Source: " << (int)PS << " ";
-		std::cout << "Pressure: " << P << std::endl;
+		
 	}
 }
 
