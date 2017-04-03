@@ -1,6 +1,7 @@
 
 #include <string>
 #include "SystemServices/Logger.h"
+#include "SystemServices/CANWindsensorNode.h"
 #include "MessageBus/MessageBus.h"
 #include "Nodes/MessageLoggerNode.h"
 
@@ -121,6 +122,7 @@ int main(int argc, char *argv[])
 
 		XbeeSyncNode xbee(messageBus, dbHandler);
 		CV7Node windSensor(messageBus, dbHandler.retrieveCell("windsensor_config", "1", "port"), dbHandler.retrieveCellAsInt("windsensor_config", "1", "baud_rate"));
+		CANWindsensorNode windSensorNode(messageBus, 100, 100, 100);
 		HMC6343Node compass(messageBus, dbHandler.retrieveCellAsInt("buffer_config", "1", "compass"));
 		GPSDNode gpsd(messageBus);
 		ArduinoNode arduino(messageBus);

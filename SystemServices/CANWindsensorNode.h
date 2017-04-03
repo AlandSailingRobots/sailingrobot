@@ -10,8 +10,8 @@
  *
  *
  ***************************************************************************************/
-#include "SystemService/CANPNGReceiver.h"
-
+#include "SystemServices/CANPGNReceiver.h"
+#include "Nodes/Node.h"
 
 #pragma once
 
