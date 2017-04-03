@@ -14,15 +14,20 @@
 #include "CANWindsensorNode.h"
 #include "Messages/WindDataMsg.h"
 
+
+
+#define WIND_SENSOR_SLEEP_MS	100
+#define DATA_OUT_OF_RANGE		-2000.
+
  CANWindsensorNode::CANWindsensorNode(MessageBus& msgBus, NodeID id, float windDir, float windSpeed, float windTemperature)
  	:Node(id, msgBus), m_WindDir(windDir), m_WindSpeed(m_WindSpeed), m_WindTemperature(windTemperature)
  {
- 		msgBus.registerNode(*this, MessageType::WindDataMsg);
+
  }
 
  bool CANWindsensorNode::init()
 {
-
+ return true;
 }
 
 void CANWindsensorNode::processPGN(N2kMsg &NMsg, uint32_t PGN)
@@ -32,10 +37,15 @@ void CANWindsensorNode::processPGN(N2kMsg &NMsg, uint32_t PGN)
 		uint8_t SID, Ref;
 		float WS, WA;
 		parsePGN130306(N2kMsg &Msg, SID, WS, WA, Ref);
+
 		std::cout << "SID: " << (int)SID << " ";
 		std::cout << "Windspeed: "<< WS << " ";
 		std::cout << "Windangle: "<< WA << " ";
 		std::cout << "Reference: "<< (int)Ref << std::endl;
+
+		m_WindDir = WA;
+		m_WindSpeed = WS;
+
 	}
 	else if(NMsg.PGN == 130311)
 	{
