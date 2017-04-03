@@ -13,8 +13,8 @@
 #   For the local navigation module with the simulator
 #   make dev-lnm USE_SIM=1
 #
-# For the default code 
-#   make 
+# For the default code
+#   make
 #
 ###############################################################################
 
@@ -87,7 +87,7 @@ export HARDWARE_NODES_SRC   = Nodes/CV7Node.cpp Nodes/HMC6343Node.cpp Nodes/GPSD
                             Nodes/ActuatorNode.cpp Nodes/ArduinoNode.cpp
 
 export SYSTEM_SERVICES_SRC  = SystemServices/Logger.cpp SystemServices/SysClock.cpp SystemServices/Timer.cpp \
-                            dbhandler/DBHandler.cpp dbhandler/DBLogger.cpp
+                            dbhandler/DBHandler.cpp dbhandler/DBLogger.cpp SystemServices/CANService.cpp
 
 export HARDWARE_SERVICES_SRC = SystemServices/MaestroController.cpp i2ccontroller/I2CController.cpp
 
