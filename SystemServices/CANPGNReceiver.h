@@ -1,6 +1,6 @@
 
-#ifndef canpgnreciever_h
-#define canpgnreciever_h
+#ifndef canpgnreceiver_h
+#define canpgnreceiver_h
 
 #include <stdint.h>
 #include <vector>
