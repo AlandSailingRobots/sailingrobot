@@ -58,8 +58,9 @@ public:
  	/// Attempts to connect to the wind sensor.
  	///
  	///----------------------------------------------------------------------------------
-	virtual bool init() = 0;
-	virtual void processMessage(const Message* message){};
+	virtual bool init() {return true;};
+
+	virtual void processMessage(const Message* message);
 
 	std::vector<uint32_t> PGNs {130306, 130311};
 
