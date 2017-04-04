@@ -34,7 +34,7 @@ public:
 	~CANWindsensorNode();
 
 	/* data */
-	virtual void processPGN(N2kMsg &NMsg, uint32_t PGN) = 0;
+	virtual void processPGN(N2kMsg &NMsg) = 0;
 
     
     void parsePGN130306(N2kMsg &NMsg, uint8_t &SID, float &WindSpeed,				//WindData
