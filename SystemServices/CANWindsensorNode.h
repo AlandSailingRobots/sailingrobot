@@ -58,8 +58,8 @@ public:
  	/// Attempts to connect to the wind sensor.
  	///
  	///----------------------------------------------------------------------------------
-	bool init();
-	void processMessage(const Message* message){};
+	virtual bool init() = 0;
+	virtual void processMessage(const Message* message){};
 
 	std::vector<uint32_t> PGNs {130306, 130311};
 
@@ -69,5 +69,3 @@ private:
 	float m_WindSpeed;
 	float m_WindTemperature;
 };
-
-
