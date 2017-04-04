@@ -25,6 +25,7 @@
  #include <queue>
  #include <memory>
  #include <future>
+ #include <atomic>
 
 
 class CANService {
@@ -45,7 +46,10 @@ public:
 
 /* Starts the service using async, and will begin *
  * receiving and sending messages                 */
-  void start();
+  std::future<void> start();
+
+  /* Stops the service */
+  void stop();
 
 private:
 
@@ -54,5 +58,5 @@ private:
   std::map<uint32_t, CANPGNReceiver*> m_RegisteredNodes;
   std::queue<N2kMsg> m_MsgQueue;
   std::mutex m_QueueMutex;
-  bool m_Running;
+  std::atomic<bool> m_Running;
 };
