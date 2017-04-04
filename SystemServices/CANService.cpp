@@ -5,7 +5,7 @@
 
 #define SLEEP_TIME_MS 50
 
-bool CANService::registerForReading(CanPGNReceiver& node, uint32_t PGN) {
+bool CANService::registerForReading(CANPGNReceiver& node, uint32_t PGN) {
 
   // If the PGN is already registered, do not re-register.
   // Perhaps this should be changed in the future.
@@ -42,7 +42,7 @@ void CANService::run() {
       if(nodeIt != m_RegisteredNodes.end()) {
 
         // Iterator is a pair, of which the second element is the actual node.
-        CanPGNReceiver* node = nodeIt->second;
+        CANPGNReceiver* node = nodeIt->second;
         node->processPGN(msg.Data, msg.PGN);
       }
     }

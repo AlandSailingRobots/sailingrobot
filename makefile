@@ -88,7 +88,7 @@ export HARDWARE_NODES_SRC   = Nodes/CV7Node.cpp Nodes/HMC6343Node.cpp Nodes/GPSD
 
 export SYSTEM_SERVICES_SRC  = SystemServices/Logger.cpp SystemServices/SysClock.cpp SystemServices/Timer.cpp \
                             dbhandler/DBHandler.cpp dbhandler/DBLogger.cpp SystemServices/CANService.cpp \
-														SystemServices/CANPGNReceiver.cpp
+														SystemServices/CANPGNReceiver.cpp SystemServices/CANWindsensorNode.cpp
 
 export HARDWARE_SERVICES_SRC = SystemServices/MaestroController.cpp i2ccontroller/I2CController.cpp
 

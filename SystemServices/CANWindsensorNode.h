@@ -36,7 +36,7 @@ public:
 	/* data */
 	virtual void processPGN(N2kMsg &NMsg) = 0;
 
-    
+
     void parsePGN130306(N2kMsg &NMsg, uint8_t &SID, float &WindSpeed,				//WindData
 					float &WindAngle, uint8_t &Reference);
 
