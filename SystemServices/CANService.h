@@ -46,7 +46,7 @@ public:
 /*  Registers a CAN receiver with an associated PGN-number     *
  *  which will receive any message with that number sent into  *
  *  the CAN-Service                                            */
-  bool registerForReading(CanPGNReceiver& node, uint32_t PGN);
+  bool registerForReading(CANPGNReceiver& node, uint32_t PGN);
 
 /* Sends a NMEA2000 message onto the service, which will  *
  * then either be sent to another receiver, or if no such *
@@ -61,7 +61,7 @@ private:
 
   void run();
 
-  std::map<uint32_t, CanPGNReceiver*> m_RegisteredNodes;
+  std::map<uint32_t, CANPGNReceiver*> m_RegisteredNodes;
   std::queue<N2kMsg> m_MsgQueue;
   std::mutex m_QueueMutex;
   bool m_Running;
