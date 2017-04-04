@@ -46,24 +46,32 @@ void CANWindsensorNode::processPGN(N2kMsg &NMsg)
 		float Temp, Hum, AP;
 		parsePGN130311(NMsg, SID, TI, HI, Temp, Hum, AP);
 
+		m_lock.lock();
 		m_WindTemperature = Temp;
 
 		MessagePtr windData = std::make_unique<WindDataMsg>(m_WindDir, m_WindTemperature, m_WindSpeed);
 		m_MsgBus.sendMessage(std::move(windData));
+		m_lock.unlock();
+
 	}
 	else if(NMsg.PGN == 130312)
 	{
+		m_lock.unlock();
 		uint8_t SID, TI, TS;
 		float ATemp, STemp;
 		parsePGN130312(NMsg, SID, TI, TS, ATemp, STemp);
 		parsePGN130312(NMsg, SID, TI, TS, ATemp, STemp);
+		m_lock.unlock();
 	}
 	else if (NMsg.PGN == 130314)
 	{
+		m_lock.unlock();
 		uint8_t SID, PI, PS;
 		double P;
 		parsePGN130314(NMsg, SID, PI, PS, P);
 		parsePGN130314(NMsg, SID, PI, PS, P);
+		m_lock.unlock();
+
 	}
 }
 
