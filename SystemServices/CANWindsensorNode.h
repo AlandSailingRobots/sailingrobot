@@ -13,18 +13,10 @@
 #include "CANPGNReceiver.h"
 #include "Nodes/Node.h"
 #include "CANService.h"
-#include <vector>
-#pragma once
 
-  struct N2kMsg
-{
-	uint32_t PGN;
-	uint8_t Priority;
-	uint8_t Source;
-	uint8_t Destination;
-	int DataLen;
-	std::vector<uint8_t> Data;
-};
+#include <vector>
+
+#pragma once
 
 
 class CANWindsensorNode : public CANPGNReceiver, public Node
@@ -58,6 +50,7 @@ public:
  	///
  	///----------------------------------------------------------------------------------
 	virtual bool init();
+	std::vector<uint32_t> PGNs(pgns, pgns + sizeof(pgns) / sizeof(pgns));
 
 
 private:
@@ -65,6 +58,4 @@ private:
 	float m_WindSpeed;
 	float m_WindTemperature;
 	uint32_t pgns[] = {130306, 130311};
-	std::vector<uint32_t> PGNs(pgns, pgns + sizeof(pgns) / sizeof(pgns));
-
 };
