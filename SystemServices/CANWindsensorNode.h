@@ -13,7 +13,7 @@
 #include "CANPGNReceiver.h"
 #include "Nodes/Node.h"
 #include "CANService.h"
-
+#include <vector>
 #pragma once
 
   struct N2kMsg
@@ -64,5 +64,7 @@ private:
 	float m_WindDir;
 	float m_WindSpeed;
 	float m_WindTemperature;
+	uint32_t pgns[] = {130306, 130311};
+	std::vector<uint32_t> PGNs(pgns, pgns + sizeof(pgns) / sizeof(pgns));
 
 };
