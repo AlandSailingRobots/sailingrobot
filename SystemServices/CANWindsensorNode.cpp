@@ -23,11 +23,6 @@
     m_WindTemperature = 0;
  } */
 
- bool CANWindsensorNode::init()
-{
- 	return true;
-}
-
 void CANWindsensorNode::processPGN(N2kMsg &NMsg)
 {
 	if(NMsg.PGN == 130306){
@@ -118,4 +113,9 @@ void CANWindsensorNode::parsePGN130314(N2kMsg &NMsg, uint8_t &SID, uint8_t &Pres
 
 	uint32_t tmp = NMsg.Data[3] | (NMsg.Data[4]<<8) | (NMsg.Data[5]<<16) | (NMsg.Data[6]<<24);
 	Pressure = tmp / 1000.0f; 			//hPa
+}
+
+void CANWindsensorNode::void processMessage(const Message* message) {
+	MessagePtr windData = std::make_unique<WindDataMsg>(message->sourceID(), this->nodeID(), m_MeanWindDir, m_MeanWindTemp, m_MeanWindSpeed);
+	m_MsgBus.sendMessage(std::move(windData));
 }
