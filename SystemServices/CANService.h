@@ -18,23 +18,13 @@
  #pragma once
 
  #include "CANPGNReceiver.h"
+ #include "N2kMsg.h"
  #include <vector>
  #include <map>
  #include <mutex>
  #include <queue>
  #include <memory>
  #include <future>
-
-// Temporarily included in this file while coding the service
- struct N2kMsg
- {
- 	uint32_t PGN;
- 	uint8_t Priority;
- 	uint8_t Source;
- 	uint8_t Destination;
- 	int DataLen;
- 	std::vector<uint8_t> Data;
- };
 
 
 class CANService {
