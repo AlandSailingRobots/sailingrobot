@@ -58,6 +58,7 @@ public:
 				WindDataMsg* windMsg = (WindDataMsg*)message;
 				m_WindDir = windMsg->windDirection();
 				m_WindSpeed = windMsg->windSpeed();
+				m_WindTemp = windMsg->windTemp();
 			}
 				break;
 			default:
@@ -74,5 +75,6 @@ public:
 
 	float 	m_WindDir;
 	float 	m_WindSpeed;
+	float 	m_WindTemp;
 };
 

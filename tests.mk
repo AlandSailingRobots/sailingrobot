@@ -27,17 +27,17 @@ OBJECTS = $(addprefix $(BUILD_DIR)/, $(SRC:.cpp=.o))
 all: $(UNIT_TEST_EXEC) $(HARDWARE_TEST_EXEC) stats
 
 # Link and build
-$(UNIT_TEST_EXEC): $(OBJECTS) tests/runner.o
+$(UNIT_TEST_EXEC): $(OBJECTS) Tests/runner.o
 	rm -f $(OBJECT_FILE)
 	@echo -n " " $(OBJECTS) >> $(OBJECT_FILE)
 	@echo Linking object files
-	$(CXX) $(LDFLAGS) tests/runner.o @$(OBJECT_FILE) ./libwiringPi.so -Wl,-rpath=./ -o $@ $(LIBS)
+	$(CXX) $(LDFLAGS) Tests/runner.o @$(OBJECT_FILE) ./libwiringPi.so -Wl,-rpath=./ -o $@ $(LIBS)
 
-$(HARDWARE_TEST_EXEC): $(OBJECTS) tests/runner.o
+$(HARDWARE_TEST_EXEC): $(OBJECTS) Tests/runner.o
 	rm -f $(OBJECT_FILE)
 	@echo -n " " $(OBJECTS) >> $(OBJECT_FILE)
 	@echo Linking object files
-	$(CXX) $(LDFLAGS) tests/runnerHardware.o @$(OBJECT_FILE) ./libwiringPi.so -Wl,-rpath=./ -o $@ $(LIBS)
+	$(CXX) $(LDFLAGS) Tests/runnerHardware.o @$(OBJECT_FILE) ./libwiringPi.so -Wl,-rpath=./ -o $@ $(LIBS)
 
 # Compile CPP files into the build folder
 $(BUILD_DIR)/%.o:$(SRC_DIR)/%.cpp

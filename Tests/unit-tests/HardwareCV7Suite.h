@@ -88,7 +88,6 @@ public:
 		float windSpeed = 0;
 		float windTemp = 0;
 
-		//cv7->parseString(sensorData, windDir, windSpeed, windTemp);
 		TS_ASSERT(cv7->parseString(sensorData, windDir, windSpeed, windTemp));
 
 		TS_ASSERT_EQUALS(windDir, 125.8f);

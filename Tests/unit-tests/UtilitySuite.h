@@ -77,7 +77,7 @@ public:
 
 	void test_MeanOfAngles()
 	{
-		float f[] = {0,180};
+		float f[] = {0,180, 90};
 		std::vector<float> values (f, f + sizeof(f) / sizeof(float) );
 		TS_ASSERT_EQUALS(Utility::meanOfAngles(values), 90);
 	}
@@ -112,9 +112,9 @@ public:
 	void test_PolarToCartesianCoordinates()
 	{
 		float x, y;
-		Utility::polarToCartesian(0, x, y);
-		TS_ASSERT_EQUALS(x, 1);
-		TS_ASSERT_EQUALS(y, 0);
+		Utility::polarToCartesian(90, x, y);
+		TS_ASSERT_DELTA(x, 0, 1e-7);
+		TS_ASSERT_DELTA(y, 1, 1e-7);
 	}
 
 	void test_AngleInSector()
@@ -124,7 +124,8 @@ public:
 		TS_ASSERT(Utility::isAngleInSector(10, 340, 40));
 		TS_ASSERT(Utility::isAngleInSector(350, 340, 40));
 		TS_ASSERT(Utility::isAngleInSector(10, -40, 40));
-		TS_ASSERT(Utility::isAngleInSector(10, 0, 185));
+		TS_ASSERT(Utility::isAngleInSector(10, 0, 375));
+		TS_ASSERT(Utility::isAngleInSector(10, 0, 10));
 		TS_ASSERT(not Utility::isAngleInSector(10, 40, 340));
 		TS_ASSERT(not Utility::isAngleInSector(-10, 0, 30));
 	}

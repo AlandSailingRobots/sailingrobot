@@ -68,8 +68,8 @@ LNM_DIR                 	= Nodes/LocalNavigationModule
 
 # Target Output
 export EXECUTABLE           = sr
-export UNIT_TEST_EXEC 		= ./unit-tests.run
-export HARDWARE_TEST_EXEC 	= ./hardware-tests.run
+export UNIT_TEST_EXEC 		= unit-tests.run
+export HARDWARE_TEST_EXEC 	= hardware-tests.run
 
 export OBJECT_FILE          = $(BUILD_DIR)/objects.tmp
 
@@ -129,7 +129,7 @@ line-follow: $(BUILD_DIR) $(WIRING_PI)
 
 # Builds the intergration test, requires the whole system to be built before
 tests: $(BUILD_DIR) $(WIRING_PI)
-	$(MAKE) -C tests
+	$(MAKE) -C Tests
 	$(MAKE) -f tests.mk
 
 #  Create the directories needed
@@ -144,6 +144,8 @@ clean:
 	@echo Removing existing object files and executable
 	-@rm -rd $(BUILD_DIR)
 	-@rm $(EXECUTABLE)
-	$(MAKE) -C tests clean
+	$(MAKE) -C Tests clean
+	-@rm $(UNIT_TEST_EXEC)
+	-@rm $(HARDWARE_TEST_EXEC)
 
 	@echo DONE

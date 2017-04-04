@@ -56,12 +56,8 @@ test-gen-lnm: clean
 	$(TEST_GEN) $(TESTGEN_FLAGS) -o runner.cpp $(UNIT_TESTS) $(TEST_MOCKS)
 	$(CXX) runner.cpp -o runner.o
 
-	$(CXX) $(CPPFLAGS) Tests/runner.o @$(OBJECT_FILE) -Wl,-rpath=./ ./libwiringPi.so -o $(UNIT_TEST_EXEC) $(LIBS)
-	$(CXX) $(CPPFLAGS) Tests/runnerHardware.o @$(OBJECT_FILE) -Wl,-rpath=./ ./libwiringPi.so -o $(HARDWARE_TEST_EXEC) $(LIBS)
-
-
 clean:
-	-rm -f runner.cpp
-	-rm -f runner.o
-	-rm -f runnerHardware.cpp
-	-rm -f runnerHardware.o
+	-@rm -f runner.cpp
+	-@rm -f runner.o
+	-@rm -f runnerHardware.cpp
+	-@rm -f runnerHardware.o
