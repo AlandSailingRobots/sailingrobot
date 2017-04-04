@@ -15,6 +15,7 @@
 #include "Nodes/Node.h"
 #include "CANService.h"
 
+#include <mutex>
 #include <vector>
 
 #pragma once
@@ -69,4 +70,6 @@ private:
 	float m_WindDir;
 	float m_WindSpeed;
 	float m_WindTemperature;
+
+	std::mutex m_lock;
 };

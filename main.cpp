@@ -121,7 +121,6 @@ int main(int argc, char *argv[])
 
 		XbeeSyncNode xbee(messageBus, dbHandler);
 		CV7Node windSensor(messageBus, dbHandler.retrieveCell("windsensor_config", "1", "port"), dbHandler.retrieveCellAsInt("windsensor_config", "1", "baud_rate"));
-				
 
 		HMC6343Node compass(messageBus, dbHandler.retrieveCellAsInt("buffer_config", "1", "compass"));
 		GPSDNode gpsd(messageBus);

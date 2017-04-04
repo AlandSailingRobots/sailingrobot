@@ -90,7 +90,7 @@ public:
 
 		TS_ASSERT(cv7->parseString(sensorData, windDir, windSpeed, windTemp));
 
-		TS_ASSERT_EQUALS(windDir, 125.8f);
+		TS_ASSERT_EQUALS(windDir, 125.f);
 		TS_ASSERT_EQUALS(windSpeed, 15.8f);
 		TS_ASSERT_EQUALS(windTemp, 36.5f);
 
