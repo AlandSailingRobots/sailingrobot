@@ -115,7 +115,7 @@ void CANWindsensorNode::parsePGN130314(N2kMsg &NMsg, uint8_t &SID, uint8_t &Pres
 	Pressure = tmp / 1000.0f; 			//hPa
 }
 
-void CANWindsensorNode::void processMessage(const Message* message) {
-	MessagePtr windData = std::make_unique<WindDataMsg>(message->sourceID(), this->nodeID(), m_MeanWindDir, m_MeanWindTemp, m_MeanWindSpeed);
+void CANWindsensorNode::processMessage(const Message* message) {
+	MessagePtr windData = std::make_unique<WindDataMsg>(message->sourceID(), this->nodeID(), m_WindDir, m_WindSpeed, m_WindTemperature);
 	m_MsgBus.sendMessage(std::move(windData));
 }
