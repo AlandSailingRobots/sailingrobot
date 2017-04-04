@@ -15,7 +15,7 @@
 
 #pragma once
 
- struct N2kMsg
+  struct N2kMsg
 {
 	uint32_t PGN;
 	uint8_t Priority;
@@ -44,13 +44,12 @@ public:
 					uint8_t &HumidityInstance, float &Temperature,
 					float &Humidity, float &AtmosphericPressure);
 
-    void ParsePGN130312(N2kMsg &NMsg, uint8_t &SID, uint8_t &TemperatureInstance,	//Temperature
+    void parsePGN130312(N2kMsg &NMsg, uint8_t &SID, uint8_t &TemperatureInstance,	//Temperature
 					uint8_t &TemperatureSource, float &ActualTemperature,
 					float &SetTemperature);
 
-    void ParsePGN130314(N2kMsg &Msg, uint8_t &SID, uint8_t &PressureInstance,		//ActualPressure
+    void parsePGN130314(N2kMsg &Msg, uint8_t &SID, uint8_t &PressureInstance,		//ActualPressure
 					uint8_t &PressureSource, double &Pressure);
-
 
 
 	///----------------------------------------------------------------------------------
