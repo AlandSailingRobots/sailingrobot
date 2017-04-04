@@ -16,7 +16,7 @@
 
 
  CANWindsensorNode::CANWindsensorNode(MessageBus& msgBus, CANService& can_service, float windDir, float windSpeed, float windTemperature)
- 	:Node(NodeID::WindSensor, msgBus), m_WindDir(windDir), m_WindSpeed(windSpeed), m_WindTemperature(windTemperature)
+ 	:Node(NodeID::WindSensor, msgBus), :CANPGNReceiver(can_service, PGNs) m_WindDir(windDir), m_WindSpeed(windSpeed), m_WindTemperature(windTemperature)
  {
 
  }
