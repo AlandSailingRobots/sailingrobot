@@ -26,7 +26,7 @@
  	return true;
 }
 
-void CANWindsensorNode::processPGN(N2kMsg &NMsg, uint32_t PGN)
+void CANWindsensorNode::processPGN(N2kMsg &NMsg)
 {
 	if(NMsg.PGN == 130306){
 		uint8_t SID, Ref;
