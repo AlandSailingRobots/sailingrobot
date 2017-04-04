@@ -29,9 +29,9 @@
 
 class CANService {
 public:
-  CANService();
+  CANService() {}
 
-  ~CANService();
+  ~CANService() {}
 
 /*  Registers a CAN receiver with an associated PGN-number     *
  *  which will receive any message with that number sent into  *
