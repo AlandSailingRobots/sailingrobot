@@ -18,7 +18,6 @@
 #include "Math/Utility.h"
 #include "SystemServices/Timer.h"
 #include <stdint.h> // uint8_t
-#include "../testsuite/catch.hpp"
 
 
 class UtilitySuite : public CxxTest::TestSuite {
@@ -153,26 +152,33 @@ public:
 		TS_ASSERT_EQUALS(Utility::limitAngleRange(-2050), 110);
 	}
 
+
+// Following tests have to be refactored with TS_ASSERT_DELTA
+// Maël - 4/4/2017
+
 	void test_DegreeRadianConversion()
 	{
-		TS_ASSERT_EQUALS(Utility::degreeToRadian(0.0), 0.0);
-		TS_ASSERT_EQUALS(Utility::degreeToRadian(180.0), Approx(M_PI));
-		TS_ASSERT_EQUALS(Utility::degreeToRadian(90.0), Approx(M_PI/2));
-		TS_ASSERT_EQUALS(Utility::degreeToRadian(360.0), Approx(M_PI*2));
+	//	TS_ASSERT_EQUALS(Utility::degreeToRadian(0.0), 0.0);
+	//	TS_ASSERT_EQUALS(Utility::degreeToRadian(180.0), Approx(M_PI));
+	//	TS_ASSERT_EQUALS(Utility::degreeToRadian(90.0), Approx(M_PI/2));
+	//	TS_ASSERT_EQUALS(Utility::degreeToRadian(360.0), Approx(M_PI*2));
+		TS_FAIL("Not implemented!");
 	}
 
 	void test_RadianToDegreeConversion()
 	{
-		TS_ASSERT_EQUALS(Utility::radianToDegree(0.0), 0.0);
-		TS_ASSERT_EQUALS(Utility::radianToDegree(1), Approx(57.2957795));
-		TS_ASSERT_EQUALS(Utility::radianToDegree(M_PI) , Approx(180.0));
+	//	TS_ASSERT_EQUALS(Utility::radianToDegree(0.0), 0.0);
+	//	TS_ASSERT_EQUALS(Utility::radianToDegree(1), Approx(57.2957795));
+	//	TS_ASSERT_EQUALS(Utility::radianToDegree(M_PI) , Approx(180.0));
+		TS_FAIL("Not implemented!");
 	}
 
 	void test_AddingDeclinationToHeading()
 	{
-		TS_ASSERT_EQUALS(Utility::addDeclinationToHeading(45, 6), 51);
-		TS_ASSERT_EQUALS(Utility::addDeclinationToHeading(0, -6), 354);
-		TS_ASSERT_EQUALS(Utility::addDeclinationToHeading(355, 6), 1);
+	//	TS_ASSERT_EQUALS(Utility::addDeclinationToHeading(45, 6), 51);
+	//	TS_ASSERT_EQUALS(Utility::addDeclinationToHeading(0, -6), 354);
+	//	TS_ASSERT_EQUALS(Utility::addDeclinationToHeading(355, 6), 1);
+		TS_FAIL("Not implemented!");
 	}
 
 	void test_TrueWindDirection()
