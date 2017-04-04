@@ -1,8 +1,8 @@
 #pragma once
 
-#include "../../../SystemServices/CANPGNReceiver.h"
-#include "../../../SystemServices/CANService.h"
-#include "../../../SystemServices/N2kMsg.h"
+#include "SystemServices/CANPGNReceiver.h"
+#include "SystemServices/CANService.h"
+#include "SystemServices/N2kMsg.h"
 
 #include <iostream>
 
@@ -11,6 +11,11 @@ public:
 
   MockCANReceiver(CANService& service, std::vector<uint32_t> PGNs) : CANPGNReceiver(service, PGNs), m_PGNs(PGNs)
   {
+    if(PGNs[0] == 1304){
+      N2kMsg msg;
+      msg.PGN = 1337;
+      service.sendN2kMessage(msg);
+    }
   }
 
   void processPGN(N2kMsg& msg) {
