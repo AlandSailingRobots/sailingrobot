@@ -2,6 +2,7 @@
 
 #include <chrono>
 #include <thread>
+#include <future>
 
 #define SLEEP_TIME_MS 50
 
@@ -10,10 +11,9 @@ bool CANService::registerForReading(CANPGNReceiver& node, uint32_t PGN) {
   // If the PGN is already registered, do not re-register.
   // Perhaps this should be changed in the future.
 
-  if(m_RegisteredNodes.find(PGN) == m_RegisteredNodes.end()){
+  if(m_RegisteredNodes.find(PGN) != m_RegisteredNodes.end()){
     return false;
   }
-
   m_RegisteredNodes[PGN] = &node;
   return true;
 
@@ -24,27 +24,29 @@ void CANService::sendN2kMessage(N2kMsg& msg){
   m_MsgQueue.push(msg);
 }
 
-void CANService::start() {
-  m_Running = true;
-  std::async(&CANService::run, this);
+std::future<void> CANService::start() {
+  m_Running.store(true);
+  return std::async(std::launch::async, &CANService::run, this);
 }
 
 void CANService::run() {
-  while(m_Running) {
+  while(m_Running.load() == true) {
     std::this_thread::sleep_for(std::chrono::milliseconds(SLEEP_TIME_MS));
 
     if(m_MsgQueue.size() > 0) {
-
       N2kMsg msg = m_MsgQueue.front();
       m_MsgQueue.pop();
       auto nodeIt = m_RegisteredNodes.find(msg.PGN);
 
       if(nodeIt != m_RegisteredNodes.end()) {
-
         // Iterator is a pair, of which the second element is the actual node.
         CANPGNReceiver* node = nodeIt->second;
         node->processPGN(msg);
       }
     }
   }
+}
+
+void CANService::stop() {
+  m_Running.store(false);
 }

@@ -9,12 +9,13 @@
 class MockCANReceiver : public CANPGNReceiver {
 public:
 
-  MockCANReceiver(CANService& service) : CANPGNReceiver(service, PGNs)
-  {  }
+  MockCANReceiver(CANService& service, std::vector<uint32_t> PGNs) : CANPGNReceiver(service, PGNs), m_PGNs(PGNs)
+  {
+  }
 
   void processPGN(N2kMsg& msg) {
     uint32_t PGN = msg.PGN;
-    if(PGN == PGNs[0]){
+    if(PGN == m_PGNs[0]){
       got_message = true;
     }
   }
@@ -24,6 +25,6 @@ public:
   }
 
 private:
-  std::vector<uint32_t> PGNs = {1304, 1307};
+  const std::vector<uint32_t> m_PGNs;
   bool got_message = false;
 };
