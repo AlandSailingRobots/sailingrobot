@@ -12,6 +12,9 @@
  ***************************************************************************************/
 #include "CANPGNReceiver.h"
 #include "Nodes/Node.h"
+#include "CANService.h"
+
+#include <vector>
 
 #pragma once
 
@@ -19,12 +22,12 @@
 class CANWindsensorNode : public CANPGNReceiver, public Node
 {
 public:
-	CANWindsensorNode(MessageBus& msgBus,float windDir, float windSpeed, float windTemperature);
+	CANWindsensorNode(MessageBus& msgBus, CANService& can_service);
 
 	~CANWindsensorNode();
 
 	/* data */
-	virtual void processPGN(N2kMsg &NMsg, uint32_t PGN) = 0;
+	virtual void processPGN(N2kMsg &NMsg) = 0;
 
 
     void parsePGN130306(N2kMsg &NMsg, uint8_t &SID, float &WindSpeed,				//WindData
@@ -34,13 +37,12 @@ public:
 					uint8_t &HumidityInstance, float &Temperature,
 					float &Humidity, float &AtmosphericPressure);
 
-    void ParsePGN130312(N2kMsg &NMsg, uint8_t &SID, uint8_t &TemperatureInstance,	//Temperature
+    void parsePGN130312(N2kMsg &NMsg, uint8_t &SID, uint8_t &TemperatureInstance,	//Temperature
 					uint8_t &TemperatureSource, float &ActualTemperature,
 					float &SetTemperature);
 
-    void ParsePGN130314(N2kMsg &Msg, uint8_t &SID, uint8_t &PressureInstance,		//ActualPressure
+    void parsePGN130314(N2kMsg &Msg, uint8_t &SID, uint8_t &PressureInstance,		//ActualPressure
 					uint8_t &PressureSource, double &Pressure);
-
 
 
 	///----------------------------------------------------------------------------------
@@ -48,11 +50,13 @@ public:
  	///
  	///----------------------------------------------------------------------------------
 	virtual bool init();
+	std::vector<uint32_t> PGNs {130306, 130311};
 
 
 private:
 	float m_WindDir;
 	float m_WindSpeed;
 	float m_WindTemperature;
-
 };
+
+
