@@ -10,6 +10,9 @@
  *
  *
  ***************************************************************************************/
+#ifndef canwindsensornode_h
+#define canwindsensornode_h
+
 #include "CANPGNReceiver.h"
 #include "Nodes/Node.h"
 #include "CANService.h"
@@ -49,7 +52,9 @@ public:
  	/// Attempts to connect to the wind sensor.
  	///
  	///----------------------------------------------------------------------------------
-	virtual bool init();
+	virtual bool init() = 0;
+	virtual void processMessage(const Message* message) = 0;
+
 	std::vector<uint32_t> PGNs {130306, 130311};
 
 
@@ -59,4 +64,5 @@ private:
 	float m_WindTemperature;
 };
 
+#endif
 

@@ -94,15 +94,9 @@ export HARDWARE_NODES_SRC   = Nodes/CV7Node.cpp Nodes/HMC6343Node.cpp Nodes/GPSD
                             Nodes/ActuatorNode.cpp Nodes/ArduinoNode.cpp
 
 export SYSTEM_SERVICES_SRC  = SystemServices/Logger.cpp SystemServices/SysClock.cpp SystemServices/Timer.cpp \
-<<<<<<< HEAD
-                            dbhandler/DBHandler.cpp dbhandler/DBLogger.cpp SystemServices/CANService.cpp \
-														SystemServices/CANPGNReceiver.cpp \
-														SystemServices/CANWindsensorNode.cpp 
-=======
-                            dbhandler/DBHandler.cpp dbhandler/DBLogger.cpp
+                            dbhandler/DBHandler.cpp dbhandler/DBLogger.cpp SystemServices/CANWindsensorNode.cpp
 
-export CAN_SERVICES_SRC			= SystemServices/CANPGNReceiver.cpp SystemServices/CANService.cpp
->>>>>>> 5b8e35568bd652ed141a2f6f7fc1b7c76008cd63
+export CAN_SERVICES_SRC		= SystemServices/CANPGNReceiver.cpp SystemServices/CANService.cpp
 
 export HARDWARE_SERVICES_SRC = SystemServices/MaestroController.cpp i2ccontroller/I2CController.cpp
 
