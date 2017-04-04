@@ -89,7 +89,7 @@ public:
     void test_HTTPSyncValidURL(){
 
         std::string url1 = "http://sailingrobots.com/testdata/sync/";
-        std::string url2 = "http://localhost/Remote-sailing-robot/sync/";
+        std::string url2 = "http://localhost/Remote-sailing-robots/sync/";
         std::string urlOrigin = dbhandler->retrieveCell("server", "1", "srv_addr");
 
         bool validCheck = (urlOrigin == url1 || urlOrigin == url2);

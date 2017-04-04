@@ -1,6 +1,6 @@
 
 
-
+USE_DEV_LNM = 0
 #####################################################################
 # Files
 
@@ -10,14 +10,18 @@ TEST_SRC := $(wildcard ../../tests/unit-tests/*.h)
 
 ifeq ($(USE_DEV_LNM), 1)
 
-UNIT_TEST_SRCS 			= MessageCoreSuite.h MessageSuite.h UtilitySuite.h WaypointNodeSuite.h ASRCourseBallotSuite.h ASRArbiterSuite.h CANServiceSuite.h
+
+UNIT_TEST_SRCS 			= MessageCoreSuite.h MessageSuite.h UtilitySuite.h HTTPSyncSuite.h WaypointNodeSuite.h ASRCourseBallotSuite.h ASRArbiterSuite.h
 
 else
 
-UNIT_TEST_SRCS 			= MessageCoreSuite.h MessageSuite.h UtilitySuite.h HTTPSyncSuite.h WaypointNodeSuite.h LineFollowSuite.h ASRCourseBallotSuite.h CANServiceSuite.h
+UNIT_TEST_SRCS 			= MessageCoreSuite.h MessageSuite.h UtilitySuite.h HTTPSyncSuite.h WaypointNodeSuite.h LineFollowSuite.h
 
-HARDWARE_TEST_SRCS 		= HardwareXbeeSuite.h HardwareCompassSuite.h HardwareCV7Suite.h HardwareGPSDSuite.h MaestroControllerSuite.h ActuatorSailNodeSuite.h \
+
+HARDWARE_TEST_SRCS    	= HardwareXbeeSuite.h HardwareCompassSuite.h HardwareCV7Suite.h HardwareGPSDSuite.h MaestroControllerSuite.h ActuatorSailNodeSuite.h \
 						ActuatorRudderNodeSuite.h
+						# source file of the tests of the I2C branch :
+						# ArduinoI2CSuite.h I2CControllerSuite.h HardwareWiringPiSuite.h
 
 TEST_MOCK_SRCS 			= MockNode.h
 
@@ -57,7 +61,7 @@ test-gen-lnm: clean
 	$(CXX) runner.cpp -o runner.o
 
 clean:
-	-rm -f runner.cpp
-	-rm -f runner.o
-	-rm -f runnerHardware.cpp
-	-rm -f runnerHardware.o
+	-@rm -f runner.cpp
+	-@rm -f runner.o
+	-@rm -f runnerHardware.cpp
+	-@rm -f runnerHardware.o

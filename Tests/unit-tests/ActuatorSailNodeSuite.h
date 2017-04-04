@@ -15,6 +15,7 @@
  #pragma once
 
  #include "../cxxtest/cxxtest/TestSuite.h"
+ #include "../../MessageBus/MessageBus.h"
  #include "TestMocks/MessageLogger.h"
  #include "Nodes/ActuatorNode.h"
  #include "SystemServices/MaestroController.h"

@@ -41,21 +41,25 @@ export CXX                     = g++
 export SIZE                    = size
 endif
 
-export MKDIR_P          = mkdir -p
+export MKDIR_P          	= mkdir -p
 
-export DEFINES          = -DTOOLCHAIN=$(TOOLCHAIN) -DSIMULATION=$(USE_SIM)
+export DEFINES          	= -DTOOLCHAIN=$(TOOLCHAIN) -DSIMULATION=$(USE_SIM)
 
 
 ###############################################################################
 # Folder Paths
 ###############################################################################
 
-export SRC_DIR			= ./
-export BUILD_DIR        = build
-export EXEC_DIR         = ./
-export INC_DIR          = -I./ -I./libs -I./libs/wiringPi/wiringPi
+export SRC_DIR				= ./
+export BUILD_DIR        	= build
+export EXEC_DIR         	= ./
+export INC_DIR         	 	= -I./ -I./libs -I./libs/wiringPi/wiringPi
 
-LNM_DIR                 = Nodes/LocalNavigationModule
+export WIRING_PI            = libwiringPi.so
+export WIRING_PI_PATH		= ./libs/wiringPi/wiringPi
+export WIRING_PI_STATIC		= ./libs/wiringPi/wiringPi/libwiringPi.so.2.32
+
+LNM_DIR                 	= Nodes/LocalNavigationModule
 
 
 ###############################################################################
@@ -64,6 +68,9 @@ LNM_DIR                 = Nodes/LocalNavigationModule
 
 # Target Output
 export EXECUTABLE           = sr
+export UNIT_TEST_EXEC 		= unit-tests.run
+export HARDWARE_TEST_EXEC 	= hardware-tests.run
+
 export OBJECT_FILE          = $(BUILD_DIR)/objects.tmp
 
 
@@ -87,9 +94,15 @@ export HARDWARE_NODES_SRC   = Nodes/CV7Node.cpp Nodes/HMC6343Node.cpp Nodes/GPSD
                             Nodes/ActuatorNode.cpp Nodes/ArduinoNode.cpp
 
 export SYSTEM_SERVICES_SRC  = SystemServices/Logger.cpp SystemServices/SysClock.cpp SystemServices/Timer.cpp \
+<<<<<<< HEAD
                             dbhandler/DBHandler.cpp dbhandler/DBLogger.cpp SystemServices/CANService.cpp \
 														SystemServices/CANPGNReceiver.cpp \
 														SystemServices/CANWindsensorNode.cpp 
+=======
+                            dbhandler/DBHandler.cpp dbhandler/DBLogger.cpp
+
+export CAN_SERVICES_SRC			= SystemServices/CANPGNReceiver.cpp SystemServices/CANService.cpp
+>>>>>>> 5b8e35568bd652ed141a2f6f7fc1b7c76008cd63
 
 export HARDWARE_SERVICES_SRC = SystemServices/MaestroController.cpp i2ccontroller/I2CController.cpp
 
@@ -98,13 +111,14 @@ export MATH_SRC             = Math/CourseCalculation.cpp Math/CourseMath.cpp Mat
 export SIMULATOR_SRC        = Nodes/SimulationNode.cpp
 
 export CORE_SRC             = Nodes/WaypointMgrNode.cpp $(MESSAGE_BUS_SRC) $(NETWORK_SRC) \
-                            $(SYSTEM_SERVICES_SRC) $(MATH_SRC)
+                            $(SYSTEM_SERVICES_SRC) $(MATH_SRC) $(CAN_SERVICES_SRC)
 
 export HTTP_SYNC_SRC        = Nodes/HTTPSyncNode.cpp
 
 # TODO: Break down for Xbee Remote
 export XBEE_NETWORK_SRC     = Network/DataLink.cpp Network/LinuxSerialDataLink.cpp Network/XbeePacketNetwork.cpp \
                             xBee/Xbee.cpp Nodes/XbeeSyncNode.cpp
+
 
 
 ###############################################################################
@@ -121,6 +135,11 @@ dev-lnm: $(BUILD_DIR) $(WIRING_PI)
 line-follow: $(BUILD_DIR) $(WIRING_PI)
 	$(MAKE) -f line-follow.mk -j4
 
+# Builds the intergration test, requires the whole system to be built before
+tests: $(BUILD_DIR) $(WIRING_PI)
+	$(MAKE) -C Tests
+	$(MAKE) -f tests.mk
+
 #  Create the directories needed
 $(BUILD_DIR):
 	@$(MKDIR_P) $(BUILD_DIR)
@@ -133,6 +152,8 @@ clean:
 	@echo Removing existing object files and executable
 	-@rm -rd $(BUILD_DIR)
 	-@rm $(EXECUTABLE)
-	$(MAKE) -C tests clean
+	$(MAKE) -C Tests clean
+	-@rm $(UNIT_TEST_EXEC)
+	-@rm $(HARDWARE_TEST_EXEC)
 
 	@echo DONE

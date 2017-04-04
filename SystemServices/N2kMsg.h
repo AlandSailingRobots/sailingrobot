@@ -1,5 +1,8 @@
 #pragma once
 
+#include <stdint.h>
+#include <vector>
+
 struct N2kMsg
 {
  	uint32_t PGN;

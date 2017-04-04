@@ -18,7 +18,6 @@
 #include "Math/Utility.h"
 #include "SystemServices/Timer.h"
 #include <stdint.h> // uint8_t
-#include "../testsuite/catch.hpp"
 
 
 class UtilitySuite : public CxxTest::TestSuite {
@@ -77,7 +76,7 @@ public:
 
 	void test_MeanOfAngles()
 	{
-		float f[] = {0,180};
+		float f[] = {0,180, 90};
 		std::vector<float> values (f, f + sizeof(f) / sizeof(float) );
 		TS_ASSERT_EQUALS(Utility::meanOfAngles(values), 90);
 	}
@@ -112,9 +111,9 @@ public:
 	void test_PolarToCartesianCoordinates()
 	{
 		float x, y;
-		Utility::polarToCartesian(0, x, y);
-		TS_ASSERT_EQUALS(x, 1);
-		TS_ASSERT_EQUALS(y, 0);
+		Utility::polarToCartesian(90, x, y);
+		TS_ASSERT_DELTA(x, 0, 1e-7);
+		TS_ASSERT_DELTA(y, 1, 1e-7);
 	}
 
 	void test_AngleInSector()
@@ -124,7 +123,8 @@ public:
 		TS_ASSERT(Utility::isAngleInSector(10, 340, 40));
 		TS_ASSERT(Utility::isAngleInSector(350, 340, 40));
 		TS_ASSERT(Utility::isAngleInSector(10, -40, 40));
-		TS_ASSERT(Utility::isAngleInSector(10, 0, 185));
+		TS_ASSERT(Utility::isAngleInSector(10, 0, 375));
+		TS_ASSERT(Utility::isAngleInSector(10, 0, 10));
 		TS_ASSERT(not Utility::isAngleInSector(10, 40, 340));
 		TS_ASSERT(not Utility::isAngleInSector(-10, 0, 30));
 	}
@@ -152,26 +152,33 @@ public:
 		TS_ASSERT_EQUALS(Utility::limitAngleRange(-2050), 110);
 	}
 
+
+// Following tests have to be refactored with TS_ASSERT_DELTA
+// Maël - 4/4/2017
+
 	void test_DegreeRadianConversion()
 	{
-		TS_ASSERT_EQUALS(Utility::degreeToRadian(0.0), 0.0);
-		TS_ASSERT_EQUALS(Utility::degreeToRadian(180.0), Approx(M_PI));
-		TS_ASSERT_EQUALS(Utility::degreeToRadian(90.0), Approx(M_PI/2));
-		TS_ASSERT_EQUALS(Utility::degreeToRadian(360.0), Approx(M_PI*2));
+	//	TS_ASSERT_EQUALS(Utility::degreeToRadian(0.0), 0.0);
+	//	TS_ASSERT_EQUALS(Utility::degreeToRadian(180.0), Approx(M_PI));
+	//	TS_ASSERT_EQUALS(Utility::degreeToRadian(90.0), Approx(M_PI/2));
+	//	TS_ASSERT_EQUALS(Utility::degreeToRadian(360.0), Approx(M_PI*2));
+		TS_FAIL("Not implemented!");
 	}
 
 	void test_RadianToDegreeConversion()
 	{
-		TS_ASSERT_EQUALS(Utility::radianToDegree(0.0), 0.0);
-		TS_ASSERT_EQUALS(Utility::radianToDegree(1), Approx(57.2957795));
-		TS_ASSERT_EQUALS(Utility::radianToDegree(M_PI) , Approx(180.0));
+	//	TS_ASSERT_EQUALS(Utility::radianToDegree(0.0), 0.0);
+	//	TS_ASSERT_EQUALS(Utility::radianToDegree(1), Approx(57.2957795));
+	//	TS_ASSERT_EQUALS(Utility::radianToDegree(M_PI) , Approx(180.0));
+		TS_FAIL("Not implemented!");
 	}
 
 	void test_AddingDeclinationToHeading()
 	{
-		TS_ASSERT_EQUALS(Utility::addDeclinationToHeading(45, 6), 51);
-		TS_ASSERT_EQUALS(Utility::addDeclinationToHeading(0, -6), 354);
-		TS_ASSERT_EQUALS(Utility::addDeclinationToHeading(355, 6), 1);
+	//	TS_ASSERT_EQUALS(Utility::addDeclinationToHeading(45, 6), 51);
+	//	TS_ASSERT_EQUALS(Utility::addDeclinationToHeading(0, -6), 354);
+	//	TS_ASSERT_EQUALS(Utility::addDeclinationToHeading(355, 6), 1);
+		TS_FAIL("Not implemented!");
 	}
 
 	void test_TrueWindDirection()
