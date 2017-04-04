@@ -35,7 +35,7 @@ public:
 	 */
 	double timeUntil(double seconds);
 	/*
-	 * sleeps until timer reaches provided time 
+	 * sleeps until timer reaches provided time
 	 */
 	void sleepUntil(double seconds);
 

@@ -23,12 +23,20 @@
 class CANWindsensorNode : public CANPGNReceiver, public Node
 {
 public:
-	CANWindsensorNode(MessageBus& msgBus, CANService& can_service);
+	// This gave error when put in the .cpp-file, should be fixed?
+	CANWindsensorNode(MessageBus& msgBus, CANService& can_service)
+	 : CANPGNReceiver(can_service, PGNs), Node(NodeID::WindSensor, msgBus)
+	 {
+		 m_WindDir  = 0;
+	     m_WindSpeed = 0;
+	     m_WindTemperature = 0;
+	 }
+
 
 	~CANWindsensorNode();
 
 	/* data */
-	virtual void processPGN(N2kMsg &NMsg) = 0;
+	 void processPGN(N2kMsg &NMsg);
 
 
     void parsePGN130306(N2kMsg &NMsg, uint8_t &SID, float &WindSpeed,				//WindData
@@ -50,8 +58,13 @@ public:
  	/// Attempts to connect to the wind sensor.
  	///
  	///----------------------------------------------------------------------------------
+<<<<<<< HEAD
 	virtual bool init() = 0;
 	virtual void processMessage(const Message* message){};
+=======
+	bool init();
+	void processMessage(const Message* message){};
+>>>>>>> 038cac4d51f8cc66f9224669e70bcf009ab2ec93
 
 	std::vector<uint32_t> PGNs {130306, 130311};
 
@@ -62,3 +75,7 @@ private:
 	float m_WindTemperature;
 };
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 038cac4d51f8cc66f9224669e70bcf009ab2ec93
