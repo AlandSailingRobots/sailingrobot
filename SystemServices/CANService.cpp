@@ -43,7 +43,7 @@ void CANService::run() {
 
         // Iterator is a pair, of which the second element is the actual node.
         CANPGNReceiver* node = nodeIt->second;
-        node->processPGN(msg.Data, msg.PGN);
+        node->processPGN(msg);
       }
     }
   }
