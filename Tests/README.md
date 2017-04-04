@@ -1,2 +1,2 @@
-# testsuit
+# Tests
 module for testing

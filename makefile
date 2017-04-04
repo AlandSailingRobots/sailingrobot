@@ -41,21 +41,25 @@ export CXX                     = g++
 export SIZE                    = size
 endif
 
-export MKDIR_P          = mkdir -p
+export MKDIR_P          	= mkdir -p
 
-export DEFINES          = -DTOOLCHAIN=$(TOOLCHAIN) -DSIMULATION=$(USE_SIM)
+export DEFINES          	= -DTOOLCHAIN=$(TOOLCHAIN) -DSIMULATION=$(USE_SIM)
 
 
 ###############################################################################
 # Folder Paths
 ###############################################################################
 
-export SRC_DIR			= ./
-export BUILD_DIR        = build
-export EXEC_DIR         = ./
-export INC_DIR          = -I./ -I./libs -I./libs/wiringPi/wiringPi
+export SRC_DIR				= ./
+export BUILD_DIR        	= build
+export EXEC_DIR         	= ./
+export INC_DIR         	 	= -I./ -I./libs -I./libs/wiringPi/wiringPi
 
-LNM_DIR                 = Nodes/LocalNavigationModule
+export WIRING_PI            = libwiringPi.so
+export WIRING_PI_PATH		= ./libs/wiringPi/wiringPi
+export WIRING_PI_STATIC		= ./libs/wiringPi/wiringPi/libwiringPi.so.2.32
+
+LNM_DIR                 	= Nodes/LocalNavigationModule
 
 
 ###############################################################################
@@ -64,6 +68,9 @@ LNM_DIR                 = Nodes/LocalNavigationModule
 
 # Target Output
 export EXECUTABLE           = sr
+export UNIT_TEST_EXEC 		= unit-tests.run
+export HARDWARE_TEST_EXEC 	= hardware-tests.run
+
 export OBJECT_FILE          = $(BUILD_DIR)/objects.tmp
 
 
@@ -106,6 +113,7 @@ export XBEE_NETWORK_SRC     = Network/DataLink.cpp Network/LinuxSerialDataLink.c
                             xBee/Xbee.cpp Nodes/XbeeSyncNode.cpp
 
 
+
 ###############################################################################
 # Rules
 ###############################################################################
@@ -120,6 +128,11 @@ dev-lnm: $(BUILD_DIR) $(WIRING_PI)
 line-follow: $(BUILD_DIR) $(WIRING_PI)
 	$(MAKE) -f line-follow.mk -j4
 
+# Builds the intergration test, requires the whole system to be built before
+tests: $(BUILD_DIR) $(WIRING_PI)
+	$(MAKE) -C Tests
+	$(MAKE) -f tests.mk
+
 #  Create the directories needed
 $(BUILD_DIR):
 	@$(MKDIR_P) $(BUILD_DIR)
@@ -132,6 +145,8 @@ clean:
 	@echo Removing existing object files and executable
 	-@rm -rd $(BUILD_DIR)
 	-@rm $(EXECUTABLE)
-	$(MAKE) -C tests clean
+	$(MAKE) -C Tests clean
+	-@rm $(UNIT_TEST_EXEC)
+	-@rm $(HARDWARE_TEST_EXEC)
 
 	@echo DONE
