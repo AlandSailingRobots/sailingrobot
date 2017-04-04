@@ -12,6 +12,7 @@
  ***************************************************************************************/
 #include "CANPGNReceiver.h"
 #include "Nodes/Node.h"
+#include "CANService.h"
 
 #pragma once
 
@@ -29,7 +30,7 @@
 class CANWindsensorNode : public CANPGNReceiver, public Node
 {
 public:
-	CANWindsensorNode(MessageBus& msgBus,float windDir, float windSpeed, float windTemperature);
+	CANWindsensorNode(MessageBus& msgBus, CANService& can_service, float windDir, float windSpeed, float windTemperature);
 
 	~CANWindsensorNode();
 
