@@ -56,14 +56,14 @@ void CANWindsensorNode::processPGN(N2kMsg &NMsg, uint32_t PGN)
 		uint8_t SID, TI, TS;
 		float ATemp, STemp;
 		ParsePGN130312(NMsg, SID, TI, TS, ATemp, STemp);
-		
+
 	}
 	else if (NMsg.PGN == 130314)
 	{
 		uint8_t SID, PI, PS;
 		double P;
 		ParsePGN130314(NMsg, SID, PI, PS, P);
-		
+
 	}
 }
 
