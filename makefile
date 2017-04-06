@@ -114,6 +114,7 @@ export HTTP_SYNC_SRC        = Nodes/HTTPSyncNode.cpp
 export XBEE_NETWORK_SRC     = Network/DataLink.cpp Network/LinuxSerialDataLink.cpp Network/XbeePacketNetwork.cpp \
                             xBee/Xbee.cpp Nodes/XbeeSyncNode.cpp
 
+export INTEGRATION_TEST		= Tests/integration/IntegrationTests/CANServiceIntegrationTest.cpp
 
 
 ###############################################################################
@@ -134,6 +135,9 @@ line-follow: $(BUILD_DIR) $(WIRING_PI)
 tests: $(BUILD_DIR) $(WIRING_PI)
 	$(MAKE) -C Tests
 	$(MAKE) -f tests.mk
+
+integration_tests: $(BUILD_DIR) $(WIRING_PI)
+	$(MAKE) -f integration_tests.mk
 
 #  Create the directories needed
 $(BUILD_DIR):

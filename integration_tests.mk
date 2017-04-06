@@ -5,16 +5,13 @@
 ###############################################################################
 
 
+INTEGRATION_TEST_EXEC	= integration-tests.run
 
 ###############################################################################
 # Files
 ###############################################################################
 
-#UNIT_TEST_SRC		= unit-tests/runner.cpp
-#HARDWARE_TESTS_SRC  = unit-tests/runnerHardware.cpp
-
-SRC         = $(CORE_SRC) $(LINE_FOLLOW_SRC) $(HTTP_SYNC_SRC) $(SIMULATOR_SRC) \
-			$(HARDWARE_NODES_SRC) $(HARDWARE_SERVICES_SRC) $(XBEE_NETWORK_SRC)
+SRC = $(CORE_SRC) $(HARDWARE_NODES_SRC) $(HARDWARE_SERVICES_SRC) $(INTEGRATION_TEST)
 
 # Object files
 OBJECTS = $(addprefix $(BUILD_DIR)/, $(SRC:.cpp=.o))
@@ -25,20 +22,14 @@ OBJECTS = $(addprefix $(BUILD_DIR)/, $(SRC:.cpp=.o))
 ###############################################################################
 
 
-all: $(UNIT_TEST_EXEC) $(HARDWARE_TEST_EXEC) stats
+all: $(INTEGRATION_TEST_EXEC) stats
 
 # Link and build
-$(UNIT_TEST_EXEC): $(OBJECTS) Tests/runner.o
+$(INTEGRATION_TEST_EXEC): $(OBJECTS) 
 	rm -f $(OBJECT_FILE)
 	@echo -n " " $(OBJECTS) >> $(OBJECT_FILE)
 	@echo Linking object files
-	$(CXX) $(LDFLAGS) Tests/runner.o @$(OBJECT_FILE) ./libwiringPi.so -Wl,-rpath=./ -o $@ $(LIBS)
-
-$(HARDWARE_TEST_EXEC): $(OBJECTS) Tests/runner.o
-	rm -f $(OBJECT_FILE)
-	@echo -n " " $(OBJECTS) >> $(OBJECT_FILE)
-	@echo Linking object files
-	$(CXX) $(LDFLAGS) Tests/runnerHardware.o @$(OBJECT_FILE) ./libwiringPi.so -Wl,-rpath=./ -o $@ $(LIBS)
+	$(CXX) $(LDFLAGS) @$(OBJECT_FILE) ./libwiringPi.so -Wl,-rpath=./ -o $@ $(LIBS)
 
 # Compile CPP files into the build folder
 $(BUILD_DIR)/%.o:$(SRC_DIR)/%.cpp
@@ -47,7 +38,6 @@ $(BUILD_DIR)/%.o:$(SRC_DIR)/%.cpp
 
 	@$(CXX) -c $(CPPFLAGS) $(INC_DIR) -o ./$@ $< $(DEFINES) $(LIBS)
 
-stats:$(UNIT_TEST_EXEC) $(HARDWARE_TEST_EXEC)
+stats:$(INTEGRATION_TEST_EXEC)
 	@echo Final executable size:
-	$(SIZE) $(UNIT_TEST_EXEC)
-	$(SIZE) $(HARDWARE_TEST_EXEC)
+	$(SIZE) $(INTEGRATION_TEST_EXEC)

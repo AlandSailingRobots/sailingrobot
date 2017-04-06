@@ -11,7 +11,7 @@ int main(int argc, char const *argv[]) {
 
   CANService service;
   auto future = service.start();
-  std::this_thread.sleep_for(std::chrono::seconds(WAIT_TIME));
+  std::this_thread::sleep_for(std::chrono::seconds(WAIT_TIME));
   service.stop();
   future.get();
 
