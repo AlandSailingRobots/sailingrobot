@@ -1,5 +1,6 @@
 #include "CANService.h"
 
+#include <iostream>
 #include <chrono>
 #include <thread>
 #include <future>
@@ -26,6 +27,10 @@ void CANService::sendN2kMessage(N2kMsg& msg){
 
 std::future<void> CANService::start() {
   m_Running.store(true);
+  bool mcp_initialized = MCP2515_Init();
+  if(!mcp_initialized) {
+    std::cout << "Could not initialize hardware" << std::endl;
+  }
   return std::async(std::launch::async, &CANService::run, this);
 }
 
@@ -33,15 +38,23 @@ void CANService::run() {
   while(m_Running.load() == true) {
     std::this_thread::sleep_for(std::chrono::milliseconds(SLEEP_TIME_MS));
 
-    if(m_MsgQueue.size() > 0) {
-      N2kMsg msg = m_MsgQueue.front();
-      m_MsgQueue.pop();
-      auto receiverIt = m_RegisteredReceivers.find(msg.PGN);
+    static CanMsg Cmsg;
+
+    if(MCP2515_GetMessage(&Cmsg,0)) {//m_MsgQueue.size() > 0) {
+
+      //N2kMsg msg = m_MsgQueue.front();
+      //m_MsgQueue.pop();
+
+      N2kMsg Nmsg;
+
+      IdToN2kMsg(Nmsg,Cmsg.id);
+
+      auto receiverIt = m_RegisteredReceivers.find(Nmsg.PGN);
 
       if(receiverIt != m_RegisteredReceivers.end()) {
         // Iterator is a pair, of which the second element is the actual receiver.
         CANPGNReceiver* receiver = receiverIt->second;
-        receiver->processPGN(msg);
+        receiver->processPGN(Nmsg);
       }
     }
   }
@@ -49,4 +62,28 @@ void CANService::run() {
 
 void CANService::stop() {
   m_Running.store(false);
+}
+
+void IdToN2kMsg(N2kMsg &NMsg, uint32_t &id)
+{
+	uint8_t Prio = (id>> 26)& 0x07;
+	uint8_t DP = (id >> 24) & 1;
+	uint8_t PF = (id >> 16);
+	uint8_t PS = (id >> 8);
+	uint8_t SA = (id);
+
+
+	NMsg.Priority = Prio;
+	NMsg.Source = SA;
+
+	if(PF < 240)		//PDU1, adressable
+	{
+		NMsg.Destination = PS;
+		NMsg.PGN = ((uint32_t)DP<<16) | (uint32_t)(PF<<8); // last byte is 00 for adressable PGNs
+	}
+	else				//PDU2, broadcast
+	{
+		NMsg.Destination = 0xff;
+		NMsg.PGN = (uint32_t)(DP<<16) | (uint32_t)(PF<<8) | (PS);
+	}
 }

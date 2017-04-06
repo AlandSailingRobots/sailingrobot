@@ -18,6 +18,7 @@
  #pragma once
 
  #include "CANPGNReceiver.h"
+ #include "mcp2515.h"
  #include "N2kMsg.h"
  #include <vector>
  #include <map>
