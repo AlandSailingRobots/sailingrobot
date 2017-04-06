@@ -11,9 +11,9 @@
  *
  ***************************************************************************************/
 
-#include "CANPGNReceiver.h"
+#include "HardwareServices/CAN_Services/CANPGNReceiver.h"
 #include "Nodes/Node.h"
-#include "CANService.h"
+#include "HardwareServices/CAN_Services/CANService.h"
 
 #include <mutex>
 #include <vector>

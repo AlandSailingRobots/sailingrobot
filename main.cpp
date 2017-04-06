@@ -27,7 +27,7 @@
 
 #include "Messages/DataRequestMsg.h"
 #include "dbhandler/DBHandler.h"
-#include "SystemServices/MaestroController.h"
+#include "HardwareServices/MaestroController/MaestroController.h"
 #include "xBee/Xbee.h"
 
 #define DISABLE_LOGGING 0
@@ -116,7 +116,7 @@ int main(int argc, char *argv[])
 		#if SIMULATION == 1
 		printf("using simulation\n");
 		SimulationNode simulation(messageBus);
-		
+
 		#else
 
 		XbeeSyncNode xbee(messageBus, dbHandler);
