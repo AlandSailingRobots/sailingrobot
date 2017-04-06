@@ -22,7 +22,7 @@
 
 
 #include "ActiveNode.h"
-#include "i2ccontroller/I2CController.h"
+#include "HardwareServices/i2ccontroller/I2CController.h"
 
 // Magic numbers correspond to the compass commands, see the datasheet for more info.
 enum class CompassOrientation {

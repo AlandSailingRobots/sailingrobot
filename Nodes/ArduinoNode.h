@@ -15,7 +15,7 @@
 
 
 #include "ActiveNode.h"
-#include "i2ccontroller/I2CController.h"
+#include "HardwareServices/i2ccontroller/I2CController.h"
 
 
 
