@@ -48,9 +48,9 @@ void CANService::run() {
   while(m_Running.load() == true) {
     std::this_thread::sleep_for(std::chrono::milliseconds(SLEEP_TIME_MS));
 
-    static CanMsg Cmsg;
+    static CanMsg* Cmsg;
 
-    if(MCP2515_GetMessage(&Cmsg,0)) {
+    if(MCP2515_GetMessage(Cmsg,0)) {
 
       //N2kMsg msg = m_MsgQueue.front();
       //m_MsgQueue.pop();
@@ -58,6 +58,13 @@ void CANService::run() {
       N2kMsg Nmsg;
 
       IdToN2kMsg(Nmsg,Cmsg.id);
+
+      Nmsg.DataLen = Cmsg.header.length;		//Single frame message
+			Nmsg.Data.resize(Cmsg.header.length);
+			for(int i = 0; i < 8; ++i)
+			{
+				Nmsg.Data[i] = Cmsg.data[i];
+			}
 
       PrintNMEAMsg(Nmsg);
 
@@ -68,7 +75,7 @@ void CANService::run() {
         CANPGNReceiver* receiver = receiverIt->second;
         receiver->processPGN(Nmsg);
       }
-    } 
+    }
   }
 }
 
