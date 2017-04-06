@@ -17,8 +17,7 @@
 #include "../cxxtest/cxxtest/TestSuite.h"
 #include "../../MessageBus/MessageBus.h"
 #include "TestMocks/MessageLogger.h"
-#include "TestMocks/MockCANReceiver.h"
-#include "SystemServices/CANService.h"
+#include "HardwareServices/CAN_Services/CANService.h"
 #include "Messages/VesselStateMsg.h"
 
 // For std::this_thread

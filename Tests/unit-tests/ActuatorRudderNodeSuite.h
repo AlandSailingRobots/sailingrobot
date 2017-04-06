@@ -17,7 +17,7 @@
  #include "../cxxtest/cxxtest/TestSuite.h"
  #include "TestMocks/MessageLogger.h"
  #include "Nodes/ActuatorNode.h"
- #include "SystemServices/MaestroController.h"
+ #include "HardwareServices/MaestroController/MaestroController.h"
 
 // For std::this_thread
 #include <chrono>

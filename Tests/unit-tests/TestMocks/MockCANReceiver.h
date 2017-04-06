@@ -1,8 +1,8 @@
 #pragma once
 
-#include "SystemServices/CANPGNReceiver.h"
-#include "SystemServices/CANService.h"
-#include "SystemServices/N2kMsg.h"
+#include "HardwareServices/CAN_Services/CANService.h"
+#include "HardwareServices/CAN_Services/CANPGNReceiver.h"
+#include "HardwareServices/CAN_Services/N2kMsg.h"
 
 #include <iostream>
 
