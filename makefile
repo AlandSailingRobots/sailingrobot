@@ -96,9 +96,10 @@ export HARDWARE_NODES_SRC   = Nodes/CV7Node.cpp Nodes/HMC6343Node.cpp Nodes/GPSD
 export SYSTEM_SERVICES_SRC  = SystemServices/Logger.cpp SystemServices/SysClock.cpp SystemServices/Timer.cpp \
                             dbhandler/DBHandler.cpp dbhandler/DBLogger.cpp SystemServices/CANWindsensorNode.cpp
 
-export CAN_SERVICES_SRC		= SystemServices/CANPGNReceiver.cpp SystemServices/CANService.cpp
+export CAN_SERVICES_SRC		= HardwareServices/CAN_Services/CANPGNReceiver.cpp HardwareServices/CAN_Services/CANService.cpp \
+														HardwareServices/CAN_Services/mcp2515.cpp HardwareServices/CAN_Services/MsgFunctions.cpp
 
-export HARDWARE_SERVICES_SRC = SystemServices/MaestroController.cpp i2ccontroller/I2CController.cpp
+export HARDWARE_SERVICES_SRC = HardwareServices/MaestroController/MaestroController.cpp HardwareServices/i2ccontroller/I2CController.cpp
 
 export MATH_SRC             = Math/CourseCalculation.cpp Math/CourseMath.cpp Math/Utility.cpp
 
@@ -113,6 +114,7 @@ export HTTP_SYNC_SRC        = Nodes/HTTPSyncNode.cpp
 export XBEE_NETWORK_SRC     = Network/DataLink.cpp Network/LinuxSerialDataLink.cpp Network/XbeePacketNetwork.cpp \
                             xBee/Xbee.cpp Nodes/XbeeSyncNode.cpp
 
+export INTEGRATION_TEST		= Tests/integration/IntegrationTests/CANServiceIntegrationTest.cpp
 
 
 ###############################################################################
@@ -133,6 +135,9 @@ line-follow: $(BUILD_DIR) $(WIRING_PI)
 tests: $(BUILD_DIR) $(WIRING_PI)
 	$(MAKE) -C Tests
 	$(MAKE) -f tests.mk
+
+integration_tests: $(BUILD_DIR) $(WIRING_PI)
+	$(MAKE) -f integration_tests.mk
 
 #  Create the directories needed
 $(BUILD_DIR):

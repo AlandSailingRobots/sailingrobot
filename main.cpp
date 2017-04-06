@@ -27,7 +27,7 @@
 
 #include "Messages/DataRequestMsg.h"
 #include "dbhandler/DBHandler.h"
-#include "SystemServices/MaestroController.h"
+#include "HardwareServices/MaestroController/MaestroController.h"
 #include "xBee/Xbee.h"
 
 #define DISABLE_LOGGING 0
