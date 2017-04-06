@@ -68,9 +68,7 @@ void CANService::run() {
         CANPGNReceiver* receiver = receiverIt->second;
         receiver->processPGN(Nmsg);
       }
-    } else {
-      std::cout << "== No Message Was Received ==" << std::endl;
-    }
+    } 
   }
 }
 
