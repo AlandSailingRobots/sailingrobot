@@ -36,8 +36,6 @@ void CANWindsensorNode::processPGN(N2kMsg &NMsg)
 		MessagePtr windData = std::make_unique<WindDataMsg>(m_WindDir, m_WindTemperature, m_WindSpeed);
 		m_MsgBus.sendMessage(std::move(windData));
 		m_lock.unlock();
-
-
 	}
 	else if(NMsg.PGN == 130311)
 	{
@@ -59,7 +57,6 @@ void CANWindsensorNode::processPGN(N2kMsg &NMsg)
 		uint8_t SID, TI, TS;
 		float ATemp, STemp;
 		parsePGN130312(NMsg, SID, TI, TS, ATemp, STemp);
-		parsePGN130312(NMsg, SID, TI, TS, ATemp, STemp);
 		m_lock.unlock();
 	}
 	else if (NMsg.PGN == 130314)
@@ -67,7 +64,6 @@ void CANWindsensorNode::processPGN(N2kMsg &NMsg)
 		m_lock.unlock();
 		uint8_t SID, PI, PS;
 		double P;
-		parsePGN130314(NMsg, SID, PI, PS, P);
 		parsePGN130314(NMsg, SID, PI, PS, P);
 		m_lock.unlock();
 
