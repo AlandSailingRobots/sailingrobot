@@ -40,7 +40,7 @@ void CANService::run() {
 
     static CanMsg Cmsg;
 
-    if(MCP2515_GetMessage(&Cmsg,0)) {//m_MsgQueue.size() > 0) {
+    if(MCP2515_GetMessage(&Cmsg,0)) {
 
       //N2kMsg msg = m_MsgQueue.front();
       //m_MsgQueue.pop();
@@ -49,6 +49,8 @@ void CANService::run() {
 
       IdToN2kMsg(Nmsg,Cmsg.id);
 
+      PrintNMEAMsg(Nmsg);
+
       auto receiverIt = m_RegisteredReceivers.find(Nmsg.PGN);
 
       if(receiverIt != m_RegisteredReceivers.end()) {
@@ -56,6 +58,8 @@ void CANService::run() {
         CANPGNReceiver* receiver = receiverIt->second;
         receiver->processPGN(Nmsg);
       }
+    } else {
+      std::cout << "== No Message Was Received ==" << std::endl;
     }
   }
 }
@@ -64,26 +68,3 @@ void CANService::stop() {
   m_Running.store(false);
 }
 
-void IdToN2kMsg(N2kMsg &NMsg, uint32_t &id)
-{
-	uint8_t Prio = (id>> 26)& 0x07;
-	uint8_t DP = (id >> 24) & 1;
-	uint8_t PF = (id >> 16);
-	uint8_t PS = (id >> 8);
-	uint8_t SA = (id);
-
-
-	NMsg.Priority = Prio;
-	NMsg.Source = SA;
-
-	if(PF < 240)		//PDU1, adressable
-	{
-		NMsg.Destination = PS;
-		NMsg.PGN = ((uint32_t)DP<<16) | (uint32_t)(PF<<8); // last byte is 00 for adressable PGNs
-	}
-	else				//PDU2, broadcast
-	{
-		NMsg.Destination = 0xff;
-		NMsg.PGN = (uint32_t)(DP<<16) | (uint32_t)(PF<<8) | (PS);
-	}
-}
