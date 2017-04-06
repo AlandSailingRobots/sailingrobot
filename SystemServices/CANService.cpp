@@ -48,7 +48,7 @@ void CANService::run() {
   while(m_Running.load() == true) {
     std::this_thread::sleep_for(std::chrono::milliseconds(SLEEP_TIME_MS));
 
-    static CanMsg  Cmsg;
+    static CanMsg Cmsg;
 
     if(MCP2515_GetMessage(&Cmsg,0)) {
 
