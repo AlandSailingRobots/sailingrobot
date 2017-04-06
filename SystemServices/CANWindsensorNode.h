@@ -24,8 +24,7 @@
 class CANWindsensorNode : public CANPGNReceiver, public Node
 {
 public:
-	CANWindsensorNode(MessageBus& msgBus, CANService& can_service)
-	 : CANPGNReceiver(can_service, PGNs), Node(NodeID::WindSensor, msgBus);
+	CANWindsensorNode(MessageBus& msgBus, CANService& can_service);
 
 
 	~CANWindsensorNode(){};
