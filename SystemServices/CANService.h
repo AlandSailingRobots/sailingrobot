@@ -4,7 +4,7 @@
  * 		CANService.h
  *
  * Purpose:
- *		Handles communcation between CAN-Nodes on the system
+ *		Handles communcation between CAN-Receivers on the system
  *
  *
  * Developer Notes:
@@ -37,7 +37,7 @@ public:
 /*  Registers a CAN receiver with an associated PGN-number     *
  *  which will receive any message with that number sent into  *
  *  the CAN-Service                                            */
-  bool registerForReading(CANPGNReceiver& node, uint32_t PGN);
+  bool registerForReading(CANPGNReceiver& receiver, uint32_t PGN);
 
 /* Sends a NMEA2000 message onto the service, which will  *
  * then either be sent to another receiver, or if no such *
@@ -55,7 +55,7 @@ private:
 
   void run();
 
-  std::map<uint32_t, CANPGNReceiver*> m_RegisteredNodes;
+  std::map<uint32_t, CANPGNReceiver*> m_RegisteredReceivers;
   std::queue<N2kMsg> m_MsgQueue;
   std::mutex m_QueueMutex;
   std::atomic<bool> m_Running;

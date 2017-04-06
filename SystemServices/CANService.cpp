@@ -6,15 +6,15 @@
 
 #define SLEEP_TIME_MS 50
 
-bool CANService::registerForReading(CANPGNReceiver& node, uint32_t PGN) {
+bool CANService::registerForReading(CANPGNReceiver& receiver, uint32_t PGN) {
 
   // If the PGN is already registered, do not re-register.
   // Perhaps this should be changed in the future.
 
-  if(m_RegisteredNodes.find(PGN) != m_RegisteredNodes.end()){
+  if(m_RegisteredReceivers.find(PGN) != m_RegisteredReceivers.end()){
     return false;
   }
-  m_RegisteredNodes[PGN] = &node;
+  m_RegisteredReceivers[PGN] = &receiver;
   return true;
 
 }
@@ -36,12 +36,12 @@ void CANService::run() {
     if(m_MsgQueue.size() > 0) {
       N2kMsg msg = m_MsgQueue.front();
       m_MsgQueue.pop();
-      auto nodeIt = m_RegisteredNodes.find(msg.PGN);
+      auto receiverIt = m_RegisteredReceivers.find(msg.PGN);
 
-      if(nodeIt != m_RegisteredNodes.end()) {
-        // Iterator is a pair, of which the second element is the actual node.
-        CANPGNReceiver* node = nodeIt->second;
-        node->processPGN(msg);
+      if(receiverIt != m_RegisteredReceivers.end()) {
+        // Iterator is a pair, of which the second element is the actual receiver.
+        CANPGNReceiver* receiver = receiverIt->second;
+        receiver->processPGN(msg);
       }
     }
   }
