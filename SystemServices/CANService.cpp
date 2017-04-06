@@ -1,4 +1,5 @@
 #include "CANService.h"
+#include "global.h"
 
 #include <iostream>
 #include <chrono>
@@ -27,6 +28,15 @@ void CANService::sendN2kMessage(N2kMsg& msg){
 
 std::future<void> CANService::start() {
   m_Running.store(true);
+  wiringPiSetup();
+  int SPISpeed = 1000000;
+
+	//pinMode(MCP2515_INT, INPUT);					//set the interrupt pin to input
+	if(wiringPiSPISetup(CHANNEL, SPISpeed) == -1)	//channel, SPI speed
+	{
+		std::cout << "Could not setup wiring pi" << std::endl;
+	}
+
   bool mcp_initialized = MCP2515_Init();
   if(!mcp_initialized) {
     std::cout << "Could not initialize hardware" << std::endl;
