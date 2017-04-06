@@ -148,7 +148,7 @@ public:
 
               can_windSensorNode->parsePGN130311(msg,SID, TI, HI, Temp, Hum, AP);
 
-              TS_ASSERT(Temp != 0);
+              TS_ASSERT(Temp > 0);
               msg.Data = getUint8_tTestData();
             }
           }
