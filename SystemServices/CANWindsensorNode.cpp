@@ -14,14 +14,13 @@
 #include "CANWindsensorNode.h"
 #include "Messages/WindDataMsg.h"
 
-
-/* CANWindsensorNode::CANWindsensorNode(MessageBus& msgBus, CANService& can_service)
+CANWindsensorNode::CANWindsensorNode(MessageBus& msgBus, CANService& can_service)
  : CANPGNReceiver(can_service, PGNs), Node(NodeID::WindSensor, msgBus)
  {
- 	m_WindDir  = 0;
+ 		m_WindDir  = 0;
     m_WindSpeed = 0;
     m_WindTemperature = 0;
- } */
+ }
 
 void CANWindsensorNode::processPGN(N2kMsg &NMsg)
 {

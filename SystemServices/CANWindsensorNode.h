@@ -24,17 +24,11 @@
 class CANWindsensorNode : public CANPGNReceiver, public Node
 {
 public:
-	// This gave error when put in the .cpp-file, should be fixed?
 	CANWindsensorNode(MessageBus& msgBus, CANService& can_service)
-	 : CANPGNReceiver(can_service, PGNs), Node(NodeID::WindSensor, msgBus)
-	 {
-		 m_WindDir  = 0;
-	     m_WindSpeed = 0;
-	     m_WindTemperature = 0;
-	 }
+	 : CANPGNReceiver(can_service, PGNs), Node(NodeID::WindSensor, msgBus);
 
 
-	~CANWindsensorNode();
+	~CANWindsensorNode(){};
 
 	/* data */
 	 void processPGN(N2kMsg &NMsg);
