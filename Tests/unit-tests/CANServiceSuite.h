@@ -6,9 +6,9 @@
 
 
 #include "TestMocks/MockCANReceiver.h"
-#include "SystemServices/CANService.h"
-#include "SystemServices/CANPGNReceiver.h"
-#include "SystemServices/N2kMsg.h"
+#include "HardwareServices/CAN_Services/CANService.h"
+#include "HardwareServices/CAN_Services/CANPGNReceiver.h"
+#include "HardwareServices/CAN_Services/N2kMsg.h"
 #include "../cxxtest/cxxtest/TestSuite.h"
 
 #include <thread>

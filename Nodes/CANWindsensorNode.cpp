@@ -14,12 +14,14 @@
 #include "CANWindsensorNode.h"
 #include "Messages/WindDataMsg.h"
 
+#define DATA_OUT_OF_RANGE		-2000
+
 CANWindsensorNode::CANWindsensorNode(MessageBus& msgBus, CANService& can_service)
  : CANPGNReceiver(can_service, PGNs), Node(NodeID::WindSensor, msgBus)
  {
- 		m_WindDir  = 0;
-    m_WindSpeed = 0;
-    m_WindTemperature = 0;
+ 		m_WindDir  = DATA_OUT_OF_RANGE;
+    m_WindSpeed = DATA_OUT_OF_RANGE;
+    m_WindTemperature = DATA_OUT_OF_RANGE;
  }
 
 void CANWindsensorNode::processPGN(N2kMsg &NMsg)
@@ -36,8 +38,6 @@ void CANWindsensorNode::processPGN(N2kMsg &NMsg)
 		MessagePtr windData = std::make_unique<WindDataMsg>(m_WindDir, m_WindTemperature, m_WindSpeed);
 		m_MsgBus.sendMessage(std::move(windData));
 		m_lock.unlock();
-
-
 	}
 	else if(NMsg.PGN == 130311)
 	{
@@ -59,7 +59,6 @@ void CANWindsensorNode::processPGN(N2kMsg &NMsg)
 		uint8_t SID, TI, TS;
 		float ATemp, STemp;
 		parsePGN130312(NMsg, SID, TI, TS, ATemp, STemp);
-		parsePGN130312(NMsg, SID, TI, TS, ATemp, STemp);
 		m_lock.unlock();
 	}
 	else if (NMsg.PGN == 130314)
@@ -67,7 +66,6 @@ void CANWindsensorNode::processPGN(N2kMsg &NMsg)
 		m_lock.unlock();
 		uint8_t SID, PI, PS;
 		double P;
-		parsePGN130314(NMsg, SID, PI, PS, P);
 		parsePGN130314(NMsg, SID, PI, PS, P);
 		m_lock.unlock();
 
@@ -126,6 +124,14 @@ void CANWindsensorNode::parsePGN130314(N2kMsg &NMsg, uint8_t &SID, uint8_t &Pres
 }
 
 void CANWindsensorNode::processMessage(const Message* message) {
-	MessagePtr windData = std::make_unique<WindDataMsg>(message->sourceID(), this->nodeID(), m_WindDir, m_WindSpeed, m_WindTemperature);
-	m_MsgBus.sendMessage(std::move(windData));
+  if(message->messageType() == MessageType::DataRequest)
+  {
+    // On system startup we won't have any valid data, so don't send any
+    if( m_WindDir!= DATA_OUT_OF_RANGE ||  m_WindTemperature != DATA_OUT_OF_RANGE || m_WindSpeed != DATA_OUT_OF_RANGE)
+    {
+
+      MessagePtr windData = std::make_unique<WindDataMsg>(message->sourceID(), this->nodeID(), m_WindDir, m_WindSpeed, m_WindTemperature);
+      m_MsgBus.sendMessage(std::move(windData));
+    }
+  }
 }
