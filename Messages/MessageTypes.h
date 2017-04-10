@@ -1,17 +1,17 @@
 /****************************************************************************************
- *
- * File:
- * 		MessageTypes.h
- *
- * Purpose:
- *		Provides a enum containing all the message types. Used in the base message class
- *		so that when a message pointer is passed around you know what type of message to
- *		cast it to.
- *
- * Developer Notes:
- *
- *
- ***************************************************************************************/
+*
+* File:
+* 		MessageTypes.h
+*
+* Purpose:
+*		Provides a enum containing all the message types. Used in the base message class
+*		so that when a message pointer is passed around you know what type of message to
+*		cast it to.
+*
+* Developer Notes:
+*
+*
+***************************************************************************************/
 
 #pragma once
 
@@ -37,6 +37,7 @@ enum class MessageType {
 	CourseData,
 	ExternalControl,
 	RequestCourse,
+	StateMessage,
 	DesiredCourse
 };
 
@@ -44,41 +45,43 @@ inline std::string msgToString(MessageType msgType)
 {
 	switch(msgType)
 	{
-	case MessageType::DataRequest:
+		case MessageType::DataRequest:
 		return "DataRequest";
-	case MessageType::WindData:
+		case MessageType::WindData:
 		return "WindData";
-	case MessageType::CompassData:
+		case MessageType::CompassData:
 		return "CompassData";
-	case MessageType::GPSData:
+		case MessageType::GPSData:
 		return "GPSData";
-	case MessageType::ServerConfigsReceived:
+		case MessageType::ServerConfigsReceived:
 		return "ServerConfigReceived";
-	case MessageType::ServerWaypointsReceived:
+		case MessageType::ServerWaypointsReceived:
 		return "ServerWaypointsReceived";
-	case MessageType::LocalConfigChange:
+		case MessageType::LocalConfigChange:
 		return "LocalConfigChange";
-	case MessageType::LocalWaypointChange:
+		case MessageType::LocalWaypointChange:
 		return "LocalWaypointChange";
-	case MessageType::ActuatorPosition:
+		case MessageType::ActuatorPosition:
 		return "ActuatorPosition";
-	case MessageType::ArduinoData:
+		case MessageType::ArduinoData:
 		return "ArduinoData";
-	case MessageType::VesselState:
+		case MessageType::VesselState:
 		return "VesselState";
-	case MessageType::WaypointData:
+		case MessageType::WaypointData:
 		return "WaypointData";
-	case MessageType::ObstacleVector:
+		case MessageType::ObstacleVector:
 		return "ObstacleVector";
-	case MessageType::LidarData:
+		case MessageType::LidarData:
 		return "LidarData";
-	case MessageType::CourseData:
+		case MessageType::CourseData:
 		return "CourseData";
-	case MessageType::ExternalControl:
+		case MessageType::ExternalControl:
 		return "ExternalControl";
-	case MessageType::RequestCourse:
+		case MessageType::RequestCourse:
 		return "RequestCourse";
-	case MessageType::DesiredCourse:
+		case MessageType::StateMessage:
+		return "StateMessage";
+		case MessageType::DesiredCourse:
 		return "DesiredCourse";
 	}
 	return "";
