@@ -14,12 +14,14 @@
 #include "CANWindsensorNode.h"
 #include "Messages/WindDataMsg.h"
 
+#define DATA_OUT_OF_RANGE		-2000
+
 CANWindsensorNode::CANWindsensorNode(MessageBus& msgBus, CANService& can_service)
  : CANPGNReceiver(can_service, PGNs), Node(NodeID::WindSensor, msgBus)
  {
- 		m_WindDir  = 0;
-    m_WindSpeed = 0;
-    m_WindTemperature = 0;
+ 		m_WindDir  = DATA_OUT_OF_RANGE;
+    m_WindSpeed = DATA_OUT_OF_RANGE;
+    m_WindTemperature = DATA_OUT_OF_RANGE;
  }
 
 void CANWindsensorNode::processPGN(N2kMsg &NMsg)
@@ -122,6 +124,14 @@ void CANWindsensorNode::parsePGN130314(N2kMsg &NMsg, uint8_t &SID, uint8_t &Pres
 }
 
 void CANWindsensorNode::processMessage(const Message* message) {
-	MessagePtr windData = std::make_unique<WindDataMsg>(message->sourceID(), this->nodeID(), m_WindDir, m_WindSpeed, m_WindTemperature);
-	m_MsgBus.sendMessage(std::move(windData));
+  if(message->messageType() == MessageType::DataRequest)
+  {
+    // On system startup we won't have any valid data, so don't send any
+    if( m_WindDir!= DATA_OUT_OF_RANGE ||  m_WindTemperature != DATA_OUT_OF_RANGE || m_WindSpeed != DATA_OUT_OF_RANGE)
+    {
+
+      MessagePtr windData = std::make_unique<WindDataMsg>(message->sourceID(), this->nodeID(), m_WindDir, m_WindSpeed, m_WindTemperature);
+      m_MsgBus.sendMessage(std::move(windData));
+    }
+  }
 }

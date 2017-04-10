@@ -56,13 +56,11 @@ public:
 
 	virtual void processMessage(const Message* message);
 
-	std::vector<uint32_t> PGNs {130306, 130311};
-
-
 private:
 	float m_WindDir;
 	float m_WindSpeed;
 	float m_WindTemperature;
 
 	std::mutex m_lock;
+	std::vector<uint32_t> PGNs {130306, 130311};
 };
