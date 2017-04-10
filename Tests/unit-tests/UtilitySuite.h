@@ -158,36 +158,32 @@ public:
 
 	void test_DegreeRadianConversion()
 	{
-	//	TS_ASSERT_EQUALS(Utility::degreeToRadian(0.0), 0.0);
-	//	TS_ASSERT_EQUALS(Utility::degreeToRadian(180.0), Approx(M_PI));
-	//	TS_ASSERT_EQUALS(Utility::degreeToRadian(90.0), Approx(M_PI/2));
-	//	TS_ASSERT_EQUALS(Utility::degreeToRadian(360.0), Approx(M_PI*2));
-		TS_FAIL("Not implemented!");
+		TS_ASSERT_DELTA(Utility::degreeToRadian(0.0), 0.0, 1e-7);
+		TS_ASSERT_DELTA(Utility::degreeToRadian(180.0), M_PI, 1e-7);
+		TS_ASSERT_DELTA(Utility::degreeToRadian(90.0), M_PI/2, 1e-7);
+		TS_ASSERT_DELTA(Utility::degreeToRadian(360.0), M_PI*2, 1e-7);
 	}
 
 	void test_RadianToDegreeConversion()
 	{
-	//	TS_ASSERT_EQUALS(Utility::radianToDegree(0.0), 0.0);
-	//	TS_ASSERT_EQUALS(Utility::radianToDegree(1), Approx(57.2957795));
-	//	TS_ASSERT_EQUALS(Utility::radianToDegree(M_PI) , Approx(180.0));
-		TS_FAIL("Not implemented!");
+		TS_ASSERT_DELTA(Utility::radianToDegree(0.0), 0.0, 1e-7);
+		TS_ASSERT_DELTA(Utility::radianToDegree(1), 57.2957795, 1e-7);
+		TS_ASSERT_DELTA(Utility::radianToDegree(M_PI) , 180.0, 1e-7);
 	}
 
 	void test_AddingDeclinationToHeading()
 	{
-	//	TS_ASSERT_EQUALS(Utility::addDeclinationToHeading(45, 6), 51);
-	//	TS_ASSERT_EQUALS(Utility::addDeclinationToHeading(0, -6), 354);
-	//	TS_ASSERT_EQUALS(Utility::addDeclinationToHeading(355, 6), 1);
-		TS_FAIL("Not implemented!");
+		TS_ASSERT_DELTA(Utility::addDeclinationToHeading(45, 6), 51, 1e-7);
+		TS_ASSERT_DELTA(Utility::addDeclinationToHeading(0, -6), 354, 1e-7);
+		TS_ASSERT_DELTA(Utility::addDeclinationToHeading(355, 6), 1, 1e-7);
 	}
 
 	void test_TrueWindDirection()
 	{
-		// std::vector<float> twdBuffer; 				//ELOUAN PLS HELP
-		// unsigned int twdBufferMaxSize = 100;
-		// TS_ASSERT_EQUALS(Utility::getTrueWindDirection(170, 5, 2, 100, twdBuffer, twdBufferMaxSize), 272.8526f);
-		// TS_ASSERT_EQUALS(Utility::getTrueWindDirection(171, 5, 2.1, 100.1, twdBuffer, twdBufferMaxSize), 273.2557f)
-		// TS_ASSERT_EQUALS(Utility::getTrueWindDirection(165, 5, 2, 100, twdBuffer, twdBufferMaxSize), 271.9276f);
-		TS_FAIL("Not implemented!");
+		std::vector<float> twdBuffer; 				//ELOUAN PLS HELP
+		unsigned int twdBufferMaxSize = 100;
+		TS_ASSERT_DELTA(Utility::getTrueWindDirection(170, 5, 2, 100, twdBuffer, twdBufferMaxSize), 272.8526f, 1e-4);
+		TS_ASSERT_DELTA(Utility::getTrueWindDirection(171, 5, 2.1, 100.1, twdBuffer, twdBufferMaxSize), 273.2557f, 1e-4)
+		TS_ASSERT_DELTA(Utility::getTrueWindDirection(165, 5, 2, 100, twdBuffer, twdBufferMaxSize), 271.9276f, 1e-4);
 	}
 };
