@@ -160,16 +160,16 @@ bool DataLink::foundFrameStart()
 		}
 
 		if((uint8_t)c == SLIP_PACKET_START && not slipEscape)
-		{
+		{				
 			break;
 		}
 
 		if((uint8_t)c == SLIP_PACKET_ESCAPE)
-		{
+		{				
 			slipEscape = true;
 		}
 		else
-		{
+		{				
 			slipEscape = false;
 		}
 
