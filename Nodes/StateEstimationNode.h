@@ -4,7 +4,7 @@
 * 		StateEstimationNode.h
 *
 *  Purpose:
-*		Maintains the "current" listening to GPS and compass messages, sending out a
+*		Maintains the "current" state listening to GPS and compass messages, sending out a
 * StateMessage
 *
 * Developer Notes:
@@ -69,11 +69,6 @@ private:
   double	m_GPSHeading;
   int		m_GPSSatellite;
 
-  int waypointID;
-  double waypointLat;
-  double waypointLon;
-  int16_t waypointBearing;
-  double waypointDistance;
   int16_t radius;
 
 
