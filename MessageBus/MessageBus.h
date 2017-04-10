@@ -168,7 +168,7 @@ private:
 	std::queue<MessagePtr>*			m_BackMessages; 	// The backend message queue which 
 														// contains messages to distribute.
 	std::mutex						m_FrontQueueMutex;	// Guards the front message queue.
-
+	
 #ifdef LOG_MESSAGES
 	std::ofstream* 					m_LogFile;
 #endif
