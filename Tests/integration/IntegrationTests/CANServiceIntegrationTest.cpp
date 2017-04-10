@@ -19,6 +19,7 @@ int main(int argc, char const *argv[]) {
   MessageLogger logger(msgBus);
 
   auto future = service.start();
+  msgBus.run();
   std::this_thread::sleep_for(std::chrono::seconds(WAIT_TIME));
   service.stop();
   future.get();
