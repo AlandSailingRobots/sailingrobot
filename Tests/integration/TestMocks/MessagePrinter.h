@@ -23,7 +23,9 @@
  public:
    MessagePrinter(MessageBus& msgBus)
    : Node(NodeID::MessagePrinter, msgBus)
-   {  };
+   {
+     msgBus.registerNode(*this, MessageType::WindData);  
+   }
 
    bool init() {
      return true;
