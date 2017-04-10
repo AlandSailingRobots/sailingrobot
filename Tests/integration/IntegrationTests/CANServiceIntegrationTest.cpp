@@ -10,19 +10,25 @@
 
 #define WAIT_TIME 5
 
+MessageBus msgBus;
+
+void startMsgBus(){
+  msgBus.run();
+}
+
 int main(int argc, char const *argv[]) {
 
   CANService service;
-  MessageBus msgBus;
 
   CANWindsensorNode windNode(msgBus, service);
   MessageLogger logger(msgBus);
 
   auto future = service.start();
-  msgBus.run();
+  std::thread msgThread (startMsgBus);
   std::this_thread::sleep_for(std::chrono::seconds(WAIT_TIME));
   service.stop();
   future.get();
+  msgThread.join();
 
   if(logger.windDataReceived()) {
     std::cout << "Test passed with flying colors." << std::endl;
