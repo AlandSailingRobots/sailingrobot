@@ -17,7 +17,7 @@
 #define DATA_OUT_OF_RANGE		-2000
 
 CANWindsensorNode::CANWindsensorNode(MessageBus& msgBus, CANService& can_service)
- : CANPGNReceiver(can_service, PGNs), Node(NodeID::WindSensor, msgBus)
+ : CANPGNReceiver(can_service, {130306, 130311}), Node(NodeID::WindSensor, msgBus)
  {
  		m_WindDir  = DATA_OUT_OF_RANGE;
     m_WindSpeed = DATA_OUT_OF_RANGE;
