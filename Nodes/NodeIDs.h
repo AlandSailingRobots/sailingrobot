@@ -38,7 +38,7 @@ enum class NodeID {
 	Simulator,
 	LocalNavigationModule,
 	LowLevelController,
-	StateEstimationNode
+	StateEstimation
 };
 
 inline std::string nodeToString(NodeID id)
