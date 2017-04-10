@@ -35,6 +35,8 @@
 
    void processMessage(const Message* message){
       MessageType type = message->messageType();
+
+      // Clears the screen
       std::cout << "\033[2J\033[1;1H";
 
       if(type == MessageType::WindData){
@@ -48,7 +50,7 @@
       std::cout << "/// Wind Direction : " << msg->windDirection() << " ||| ";
       std::cout << "/// Wind speed : " << msg->windSpeed() << " ||| ";
       std::cout << "/// Wind temperature : " << msg->windTemp() << " ||.";
-      std::cout << "////////////////////////////////////////" << std::endl;
+      std::cout << std::endl <<"////////////////////////////////////////" << std::endl;
    }
 
 
