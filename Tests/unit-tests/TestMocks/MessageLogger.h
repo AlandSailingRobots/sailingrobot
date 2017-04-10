@@ -63,35 +63,6 @@ public:
 	}
 
 
-	void sendMessage(const Message* message)
-	{
-
-		MessageType msgType = message->messageType();
-		switch(msgType)
-		{
-			case MessageType::DataRequest:
-				m_DataRequest = true;
-				break;
-			case MessageType::WindData:
-				m_WindData = true;
-				break;
-			case MessageType::CompassData:
-				m_CompassData = true;
-				break;
-			case MessageType::GPSData:
-				m_GPSData = true;
-				break;
-			case MessageType::WaypointData:
-				m_waypointData = true;
-				break;
-			case MessageType::ActuatorPosition:
-				m_actuatorPosition = true;
-				break;
-			default:
-				return;
-		}
-	}
-
 	bool dataRequestReceived() { return m_DataRequest; }
 	bool windDataReceived() { return m_WindData; }
 	bool compassDataReceived() { return m_CompassData; }
