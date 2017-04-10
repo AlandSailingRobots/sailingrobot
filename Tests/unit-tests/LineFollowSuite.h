@@ -79,14 +79,13 @@ class LineFollowSuite : public CxxTest::TestSuite {
 
     void test_LineFollowCalculateActuatorPosition()
     {
-    	TS_FAIL("Test is not implemented !");
 
-        /*MessagePtr msg = std::make_unique<VesselStateMsg>(170, 30, 0, true, true, 19.2, 60.02, 120.04, 2.1, 11, 170, 23.5f, 5.4f, 24.5f, 10, 5500, 4700, 2, 3);
+        MessagePtr msg = std::make_unique<VesselStateMsg>(170, 30, 0, true, true, 19.2, 60.02, 120.04, 2.1, 11, 170, 23.5f, 5.4f, 24.5f, 10, 5500, 4700, 2, 3);
         msgBus().sendMessage(std::move(msg));
 
         std::this_thread::sleep_for(std::chrono::milliseconds(2000));
-		TS_TRACE("END OF LINEFOLLOW");*/
-        //TS_ASSERT(logger->actuatorPositionReceived());
+		TS_TRACE("END OF LINEFOLLOW");
+        TS_ASSERT(logger->actuatorPositionReceived());
     }
 
 };
