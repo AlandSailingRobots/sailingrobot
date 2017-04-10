@@ -68,14 +68,6 @@ private:
   double	m_GPSSpeed;
   double	m_GPSHeading;
   int		m_GPSSatellite;
-  float	m_WindDir;
-  float	m_WindSpeed;
-  float 	m_WindTemp;
-  int 	m_ArduinoPressure;
-  int 	m_ArduinoRudder;
-  int 	m_ArduinoSheet;
-  int 	m_ArduinoBattery;
-  int		m_ArduinoRC;
 
   int waypointID;
   double waypointLat;

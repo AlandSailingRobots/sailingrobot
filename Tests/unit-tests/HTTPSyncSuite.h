@@ -8,6 +8,9 @@
  *
  * Developer Notes:
  *  - Still copypasting
+ *  - Database "asr.db" needs to be created and initialized before testing. Run:
+ *      - ./installdb.sh  -  Server address needs to be "http://www.sailingrobots.com/testdata/sync/" or "http://localhost/Remote-sailing-robots/sync/"
+ *      - ./insertPredefinedWaypoints.sh  -  Choose a waypoint that works
  *
  ***************************************************************************************/
 
@@ -88,7 +91,7 @@ public:
 
     void test_HTTPSyncValidURL(){
 
-        std::string url1 = "http://sailingrobots.com/testdata/sync/";
+        std::string url1 = "http://www.sailingrobots.com/testdata/sync/";
         std::string url2 = "http://localhost/Remote-sailing-robots/sync/";
         std::string urlOrigin = dbhandler->retrieveCell("server", "1", "srv_addr");
 

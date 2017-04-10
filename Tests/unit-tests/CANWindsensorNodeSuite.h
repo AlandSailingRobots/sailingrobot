@@ -13,7 +13,7 @@
 
 #pragma once
 
-#include "SystemServices/CANWindsensorNode.h"
+#include "Nodes/CANWindsensorNode.h"
 #include "../cxxtest/cxxtest/TestSuite.h"
 #include "../../MessageBus/MessageBus.h"
 #include "TestMocks/MessageLogger.h"
