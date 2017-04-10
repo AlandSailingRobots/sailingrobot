@@ -35,7 +35,7 @@ void CANWindsensorNode::processPGN(N2kMsg &NMsg)
 		m_WindDir = WA;
 		m_WindSpeed = WS;
 
-		MessagePtr windData = std::make_unique<WindDataMsg>(m_WindDir, m_WindTemperature, m_WindSpeed);
+		MessagePtr windData = std::make_unique<WindDataMsg>(m_WindDir, m_WindSpeed, m_WindTemperature);
 		m_MsgBus.sendMessage(std::move(windData));
 		m_lock.unlock();
 	}
@@ -48,7 +48,7 @@ void CANWindsensorNode::processPGN(N2kMsg &NMsg)
 		m_lock.lock();
 		m_WindTemperature = Temp;
 
-		MessagePtr windData = std::make_unique<WindDataMsg>(m_WindDir, m_WindTemperature, m_WindSpeed);
+		MessagePtr windData = std::make_unique<WindDataMsg>(m_WindDir, m_WindSpeed, m_WindTemperature);
 		m_MsgBus.sendMessage(std::move(windData));
 		m_lock.unlock();
 
