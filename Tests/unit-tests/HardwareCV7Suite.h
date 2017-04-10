@@ -83,14 +83,14 @@ public:
 
 	void test_CV7ParseSuccesfully()
 	{
-		std::string sensorData = "$IIMWV,125.8,R,015.8,N,A*3F$WIXDR,C,036.5,C,,*52";
+		std::string sensorData = "$IIMWV,125.8,R,015.8,N,A*3F$WIXDR,C,036.5,C,,*52"; 
 		float windDir = 0;
 		float windSpeed = 0;
 		float windTemp = 0;
 
 		TS_ASSERT(cv7->parseString(sensorData, windDir, windSpeed, windTemp));
 
-		TS_ASSERT_EQUALS(windDir, 125.f);
+		TS_ASSERT_EQUALS(windDir, 125.8f);
 		TS_ASSERT_EQUALS(windSpeed, 15.8f);
 		TS_ASSERT_EQUALS(windTemp, 36.5f);
 

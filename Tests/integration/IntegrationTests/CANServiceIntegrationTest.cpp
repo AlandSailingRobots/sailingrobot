@@ -1,5 +1,5 @@
-#include "SystemServices/CANService.h"
-#include "SystemServices/N2kMsg.h"
+#include "HardwareServices/CAN_Services/CANService.h"
+#include "HardwareServices/CAN_Services/N2kMsg.h"
 
 #include <thread>
 #include <chrono>

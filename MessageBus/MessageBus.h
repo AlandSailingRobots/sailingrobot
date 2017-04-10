@@ -9,7 +9,7 @@
  *
  * Developer Notes:
  *		Nodes can only be added before the run function is called currently. This is to
- *		reduce the number of thread locks in place and because once the system has
+ *		reduce the number of thread locks in place and because once the system has 
  *		started its very rare that a node should be registered afterwards on the fly.
  *
  *
@@ -48,7 +48,7 @@ public:
 	~MessageBus();
 
 	///----------------------------------------------------------------------------------
- 	/// Registers a node onto the message bus allowing it receive direct messages. The
+ 	/// Registers a node onto the message bus allowing it receive direct messages. The 
  	/// message bus does not own the node.
  	///
  	/// @param node 			Pointer to the node that should be registered.
@@ -65,7 +65,7 @@ public:
 	bool registerNode(Node& node, MessageType msgType);
 
 	///----------------------------------------------------------------------------------
- 	/// Enqueues a message onto the message queue for distribution through the message
+ 	/// Enqueues a message onto the message queue for distribution through the message 
  	/// bus.
  	///
  	/// @param msg 				Pointer to the message that should be enqeued, this
@@ -95,8 +95,8 @@ private:
  		///------------------------------------------------------------------------------
 		bool isInterested(MessageType type)
 		{
-			for(auto msgType : interestedList) {
-				if(type == msgType) { return true; }
+			for(auto msgType : interestedList) { 
+				if(type == msgType) { return true; } 
 			}
 			return false;
 		}
@@ -106,7 +106,7 @@ private:
  		///
  		/// @param type 		The message type to subscribe this registered node to.
  		///------------------------------------------------------------------------------
-		void subscribe(MessageType type)
+		void subscribe(MessageType type) 
 		{
 			// Maintain only one copy of each interested type.
 			if(not isInterested(type)) { interestedList.push_back(type); }
@@ -119,13 +119,13 @@ private:
 
 	///----------------------------------------------------------------------------------
  	/// Looks for existing registered node for a given node pointer and returns a pointer
- 	/// to it. If the node has not yet been registered, it is then registered and a
+ 	/// to it. If the node has not yet been registered, it is then registered and a 
  	/// pointer to the new RegisteredNode is returned.
  	///----------------------------------------------------------------------------------
 	RegisteredNode* getRegisteredNode(Node& node);
 
 	///----------------------------------------------------------------------------------
- 	/// Goes through the back message queue and distributes messages, calling
+ 	/// Goes through the back message queue and distributes messages, calling 
  	/// Node::processMessage(Message*) on nodes that are interested in any given message.
  	///----------------------------------------------------------------------------------
 	void processMessages();
@@ -163,9 +163,9 @@ private:
 
 	bool 							m_Running;
 	std::vector<RegisteredNode*> 	m_RegisteredNodes;
-	std::queue<MessagePtr>* 		m_FrontMessages; 	// The forward facing message queue
+	std::queue<MessagePtr>* 		m_FrontMessages; 	// The forward facing message queue 
 													 	// which messages are append to.
-	std::queue<MessagePtr>*			m_BackMessages; 	// The backend message queue which
+	std::queue<MessagePtr>*			m_BackMessages; 	// The backend message queue which 
 														// contains messages to distribute.
 	std::mutex						m_FrontQueueMutex;	// Guards the front message queue.
 
