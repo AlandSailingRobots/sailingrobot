@@ -66,8 +66,6 @@ void CANService::run() {
 				Nmsg.Data[i] = Cmsg.data[i];
 			}
 
-      PrintNMEAMsg(Nmsg);
-
       auto receiverIt = m_RegisteredReceivers.find(Nmsg.PGN);
 
       if(receiverIt != m_RegisteredReceivers.end()) {

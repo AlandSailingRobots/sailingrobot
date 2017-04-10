@@ -8,7 +8,7 @@
  *      correctly
  *
  * Developer Notes:
- *
+ *  - ./insertPredefinedWaypoints.sh  needs to be run first.
  *
  ***************************************************************************************/
 

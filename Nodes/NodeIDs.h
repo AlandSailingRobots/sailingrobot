@@ -38,7 +38,8 @@ enum class NodeID {
 	Simulator,
 	LocalNavigationModule,
 	LowLevelController,
-	StateEstimationNode
+	StateEstimationNode,
+	MessagePrinter
 };
 
 inline std::string nodeToString(NodeID id)
@@ -84,8 +85,9 @@ inline std::string nodeToString(NodeID id)
 		case NodeID::LowLevelController:
 		return "Low Level Controller";
 		case NodeID::StateEstimationNode:
-		return "StateEstimation"
-
+		return "StateEstimation";
+		case NodeID::MessagePrinter:
+		return "MessagePrinter";
 	}
 	return "";
 }

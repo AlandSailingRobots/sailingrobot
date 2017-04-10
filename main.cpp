@@ -1,7 +1,7 @@
 
 #include <string>
 #include "SystemServices/Logger.h"
-#include "SystemServices/CANWindsensorNode.h"
+#include "Nodes/CANWindsensorNode.h"
 #include "MessageBus/MessageBus.h"
 #include "Nodes/MessageLoggerNode.h"
 

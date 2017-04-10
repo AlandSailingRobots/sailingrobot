@@ -1,3 +1,10 @@
+////////////////////////////////////////////////////////
+//
+//    CAN-tests will only run when connected to hardware
+//
+////////////////////////////////////////////////////////
+
+
 #include "TestMocks/MockCANReceiver.h"
 #include "HardwareServices/CAN_Services/CANService.h"
 #include "HardwareServices/CAN_Services/CANPGNReceiver.h"
