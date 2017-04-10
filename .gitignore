@@ -15,3 +15,12 @@ sr
 *.vim
 *.tags
 *.gch
+gps.txt
+org.kde.konsole.desktop
+
+# for unit tests
+Tests/cxxtest/python/python3/cxxtest/__pycache__/
+Tests/runner.cpp
+Tests/runner.o
+Tests/runnerHardware.cpp
+Tests/runnerHardware.o
