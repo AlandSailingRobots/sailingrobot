@@ -20,17 +20,20 @@
 
 #include "Messages/StateMessage.h"
 #include "Math/CourseMath.h"
-//#include "SystemServices/Logger.h"
+#include "SystemServices/Logger.h"
+#include "Math/Utility.h"
+
 
 #define STATE_SLEEP_MS 400
 #define STATE_INITIAL_SLEEP 2000
 
 
 StateEstimationNode::StateEstimationNode(MessageBus& msgBus): ActiveNode(NodeID::StateEstimation, msgBus),
-vesselHeading(0), vesselLat(0), vesselLan(0),vesselSpeed(0)
+vesselHeading(0), vesselLat(0), vesselLon(0),vesselSpeed(0), declination(0)
 {
   msgBus.registerNode(*this, MessageType::CompassData);
   msgBus.registerNode(*this, MessageType::GPSData);
+  msgBus.registerNode(*this, MessageType::WaypointData);
 }
 
 StateEstimationNode::~StateEstimationNode()
@@ -66,15 +69,20 @@ void StateEstimationNode::processMessage(const Message* msg)
 
 void StateEstimationNode::processCompassMessage(CompassDataMsg* msg)
 {
-	vesselHeading = msg->heading();
+	int currentVesselHeading = msg->heading();
+  vesselHeading = Utility::addDeclinationToHeading(currentVesselHeading, declination);
 }
 
 void StateEstimationNode::processGPSMessage(GPSDataMsg* msg)
 {
 	vesselLat = msg->latitude();
-	vesselLan = msg->longitude();
+	vesselLon = msg->longitude();
 	vesselSpeed = msg->speed();
-	vesselHeading = msg->heading();
+}
+
+void StateEstimationNode::processWaypointMessage( WaypointDataMsg* msg )
+{
+	declination = msg->nextDeclination();
 }
 
 void StateEstimationNode::StateEstimationNodeThreadFunc(void* nodePtr)
@@ -96,16 +104,15 @@ void StateEstimationNode::StateEstimationNodeThreadFunc(void* nodePtr)
 		std::this_thread::sleep_for(std::chrono::milliseconds(STATE_SLEEP_MS));
 
 		MessagePtr stateMessage = std::make_unique<StateMessage>(	node->vesselHeading, node->vesselLat,
-																	node->vesselLan, node->vesselSpeed);
+																	node->vesselLon, node->vesselSpeed);
 		node->m_MsgBus.sendMessage(std::move(stateMessage));
 
-		// Compass heading, Compass Pitch, Compass Roll, Wind Dir, Wind Speed, GPS Heading, GPS Lat, GPS Lon
-		int size = snprintf( buffer, 1024, "%d,%f,%f,%f,%d\n",
+		// Compass heading, Speed, GPS Lat, GPS Lon
+		int size = snprintf( buffer, 1024, "%d,%f,%f,%f\n",
     (int)node->vesselHeading,
     (float)node->vesselSpeed,
     node->vesselLat,
-    node->vesselLan,
-    (int)node->radius);
+    node->vesselLon);
 		if( size > 0 )
 		{
 			node->server.broadcast( (uint8_t*)buffer, size );
