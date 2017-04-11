@@ -51,6 +51,8 @@ public:
   void processGPSMessage(GPSDataMsg* msg);
   void processWaypointMessage( WaypointDataMsg* msg );
 
+  int getHeading();
+
 
 private:
   ///----------------------------------------------------------------------------------
@@ -68,6 +70,9 @@ private:
 
   double loopTime;
   int declination;
+
+  /* Used when determining heading */
+  const int SPEEDLIMIT = 0.5;
 
   TCPServer server;
 };
