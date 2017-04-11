@@ -18,15 +18,15 @@
 class StateMessage : public Message {
 public:
   StateMessage (NodeID destinationID, NodeID sourceID, float compassHeading,
-    double lat, double lon, double gpsSpeed)
+    double lat, double lon, double gpsSpeed, double gpsCourse)
     :Message(MessageType::StateMessage, sourceID, destinationID),
-    vesselHeading(compassHeading), vesselLat(lat), vesselLan(lon), vesselSpeed(gpsSpeed)
+    vesselHeading(compassHeading), vesselLat(lat), vesselLan(lon), vesselSpeed(gpsSpeed), vesselCourse(gpsCourse)
     { }
 
 
-    StateMessage(float compassHeading, double lat, double lon, double gpsSpeed)
+    StateMessage(float compassHeading, double lat, double lon, double gpsSpeed, double gpsCourse)
       :Message(MessageType::StateMessage, NodeID::None, NodeID::None),
-      vesselHeading(compassHeading), vesselLat(lat), vesselLan(lon), vesselSpeed(gpsSpeed)
+      vesselHeading(compassHeading), vesselLat(lat), vesselLan(lon), vesselSpeed(gpsSpeed), vesselCourse(gpsCourse)
       { }
 
       float heading() { return vesselHeading; }
@@ -42,6 +42,7 @@ public:
         if(	!deserialiser.readFloat(vesselHeading) ||
         !deserialiser.readDouble(vesselLat) ||
         !deserialiser.readDouble(vesselLan) ||
+        !deserialiser.readDouble(vesselCourse) ||
         !deserialiser.readDouble(vesselSpeed))
         {
           m_valid = false;
@@ -59,6 +60,7 @@ public:
         serialiser.serialise(vesselLat);
         serialiser.serialise(vesselLan);
         serialiser.serialise(vesselSpeed);
+        serialiser.serialise(vesselCourse);
       }
 
     private:
@@ -66,4 +68,5 @@ public:
       double	vesselLat;
       double	vesselLan;
       double	vesselSpeed;
+      double  vesselCourse;
     };
