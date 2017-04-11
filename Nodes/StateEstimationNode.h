@@ -25,7 +25,7 @@
 
 class StateEstimationNode : public ActiveNode {
 public:
-  StateEstimationNode(MessageBus& msgBus);
+  StateEstimationNode(MessageBus& msgBus, double loopTime);
   ~StateEstimationNode();
 
   ///----------------------------------------------------------------------------------
@@ -49,6 +49,8 @@ public:
   /// Stores the GPS data from a GPSDataMsg.
   ///----------------------------------------------------------------------------------
   void processGPSMessage(GPSDataMsg* msg);
+  void processWaypointMessage( WaypointDataMsg* msg );
+
 
 private:
   ///----------------------------------------------------------------------------------
@@ -57,20 +59,13 @@ private:
   ///----------------------------------------------------------------------------------
   static void StateEstimationNodeThreadFunc(void* nodePtr);
 
-  int 	m_CompassHeading;
-  int 	m_CompassPitch;
-  int 	m_CompassRoll;
-  bool	m_GPSHasFix;
-  bool	m_GPSOnline;
-  double	m_GPSLat;
-  double	m_GPSLon;
-  double	m_GPSUnixTime;
-  double	m_GPSSpeed;
-  double	m_GPSHeading;
-  int		m_GPSSatellite;
+  float 	vesselHeading;
+  double	vesselLat;
+  double	vesselLon;
+  double	vesselSpeed;
 
-  int16_t radius;
-
+  double loopTime;
+  int declination;
 
   TCPServer server;
 };

@@ -88,7 +88,7 @@ export LNM_SRC              = $(LNM_DIR)/ASRCourseBallot.cpp $(LNM_DIR)/ASRArbit
 export LINE_FOLLOW_SRC      = Nodes/LineFollowNode.cpp waypointrouting/RudderCommand.cpp \
                             waypointrouting/SailCommand.cpp Nodes/MessageLoggerNode.cpp
 
-export NETWORK_SRC          = Network/TCPServer.cpp Nodes/VesselStateNode.cpp
+export NETWORK_SRC          = Network/TCPServer.cpp Nodes/VesselStateNode.cpp Nodes/StateEstimationNode.cpp
 
 export HARDWARE_NODES_SRC   = Nodes/CV7Node.cpp Nodes/HMC6343Node.cpp Nodes/GPSDNode.cpp \
                             Nodes/ActuatorNode.cpp Nodes/ArduinoNode.cpp

@@ -23,17 +23,20 @@
 #include "SystemServices/Logger.h"
 #include "Math/Utility.h"
 
-
 #define STATE_SLEEP_MS 400
 #define STATE_INITIAL_SLEEP 2000
 
+#define STEADY_CLOCK std::chrono::steady_clock
+#define DURATION_CAST std::chrono::duration_cast
+#define DURATION std::chrono::duration
 
-StateEstimationNode::StateEstimationNode(MessageBus& msgBus): ActiveNode(NodeID::StateEstimation, msgBus),
-vesselHeading(0), vesselLat(0), vesselLon(0),vesselSpeed(0), declination(0)
+StateEstimationNode::StateEstimationNode(MessageBus& msgBus, double mloopTime): ActiveNode(NodeID::StateEstimation, msgBus),
+vesselHeading(0), vesselLat(0), vesselLon(0),vesselSpeed(0), loopTime(mloopTime), declination(0)
 {
   msgBus.registerNode(*this, MessageType::CompassData);
   msgBus.registerNode(*this, MessageType::GPSData);
   msgBus.registerNode(*this, MessageType::WaypointData);
+
 }
 
 StateEstimationNode::~StateEstimationNode()
@@ -69,53 +72,63 @@ void StateEstimationNode::processMessage(const Message* msg)
 
 void StateEstimationNode::processCompassMessage(CompassDataMsg* msg)
 {
-	int currentVesselHeading = msg->heading();
+  int currentVesselHeading = msg->heading();
   vesselHeading = Utility::addDeclinationToHeading(currentVesselHeading, declination);
 }
 
 void StateEstimationNode::processGPSMessage(GPSDataMsg* msg)
 {
-	vesselLat = msg->latitude();
-	vesselLon = msg->longitude();
-	vesselSpeed = msg->speed();
+  vesselLat = msg->latitude();
+  vesselLon = msg->longitude();
+  vesselSpeed = msg->speed();
 }
 
 void StateEstimationNode::processWaypointMessage( WaypointDataMsg* msg )
 {
-	declination = msg->nextDeclination();
+  declination = msg->nextDeclination();
 }
 
 void StateEstimationNode::StateEstimationNodeThreadFunc(void* nodePtr)
 {
-	StateEstimationNode* node = (StateEstimationNode*)nodePtr;
+  StateEstimationNode* node = (StateEstimationNode*)nodePtr;
 
-	// An initial sleep, its purpose is to ensure that most if not all the sensor data arrives
-	// at the start before we send out the vessel state message.
-	std::this_thread::sleep_for(std::chrono::milliseconds(STATE_INITIAL_SLEEP));
+  // An initial sleep, its purpose is to ensure that most if not all the sensor data arrives
+  // at the start before we send out the vessel state message.
+  std::this_thread::sleep_for(std::chrono::milliseconds(STATE_INITIAL_SLEEP));
 
-	char buffer[1024];
+  char buffer[1024];
 
-	while(true)
-	{
-		// Listen to new connections
-		node->server.acceptConnections();
+  auto startTime = STEADY_CLOCK::now().time_since_epoch();
+  auto timeSinceStartTimePlusDelayEpoch = DURATION_CAST<DURATION<double>>(startTime).count();
 
-		// Controls how often we pump out messages
-		std::this_thread::sleep_for(std::chrono::milliseconds(STATE_SLEEP_MS));
+  while(true)
+  {
+    // Listen to new connections
+    node->server.acceptConnections();
 
-		MessagePtr stateMessage = std::make_unique<StateMessage>(	node->vesselHeading, node->vesselLat,
-																	node->vesselLon, node->vesselSpeed);
-		node->m_MsgBus.sendMessage(std::move(stateMessage));
+    auto currentTime = STEADY_CLOCK::now().time_since_epoch();
+    auto timeSinceCurrentTimeEpoch = DURATION_CAST<DURATION<double>>(currentTime).count();
+    timeSinceStartTimePlusDelayEpoch += node->loopTime;
+    int sleepTime = timeSinceStartTimePlusDelayEpoch - timeSinceCurrentTimeEpoch;
 
-		// Compass heading, Speed, GPS Lat, GPS Lon
-		int size = snprintf( buffer, 1024, "%d,%f,%f,%f\n",
-    (int)node->vesselHeading,
-    (float)node->vesselSpeed,
-    node->vesselLat,
-    node->vesselLon);
-		if( size > 0 )
-		{
-			node->server.broadcast( (uint8_t*)buffer, size );
-		}
-	}
-}
+    // Controls how often we pump out messages
+    if(sleepTime > 0){
+      std::this_thread::sleep_for(std::chrono::milliseconds(sleepTime));
+    }
+
+    MessagePtr stateMessage = std::make_unique<StateMessage>(	node->vesselHeading, node->vesselLat,
+      node->vesselLon, node->vesselSpeed);
+      node->m_MsgBus.sendMessage(std::move(stateMessage));
+
+      // Compass heading, Speed, GPS Lat, GPS Lon
+      int size = snprintf( buffer, 1024, "%d,%f,%f,%f\n",
+      (int)node->vesselHeading,
+      (float)node->vesselSpeed,
+      node->vesselLat,
+      node->vesselLon);
+      if( size > 0 )
+      {
+        node->server.broadcast( (uint8_t*)buffer, size );
+      }
+    }
+  }
