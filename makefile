@@ -86,7 +86,8 @@ export LNM_SRC              = $(LNM_DIR)/ASRCourseBallot.cpp $(LNM_DIR)/ASRArbit
                             $(LNM_DIR)/Voters/ChannelVoter.cpp
 
 export LINE_FOLLOW_SRC      = Nodes/LineFollowNode.cpp waypointrouting/RudderCommand.cpp \
-                            waypointrouting/SailCommand.cpp Nodes/MessageLoggerNode.cpp
+                            waypointrouting/SailCommand.cpp Nodes/MessageLoggerNode.cpp \
+														Nodes/WindStateNode.cpp
 
 export NETWORK_SRC          = Network/TCPServer.cpp Nodes/VesselStateNode.cpp
 
