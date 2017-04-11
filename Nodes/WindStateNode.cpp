@@ -10,6 +10,11 @@ WindStateNode::WindStateNode(MessageBus& msgBus, const int twd)
   msgBus.registerNode(*this, MessageType::WindData);
 }
 
+WindStateNode::~WindStateNode()
+{
+
+}
+
 bool WindStateNode::init(){
   return true;
 }
@@ -26,7 +31,11 @@ void WindStateNode::processMessage(const Message* message){
     parseStateMessage((StateMessage*) message);
     
 
-    if(!m_windDataReceived){
+    // For the node to update apparent wind, need to have updated
+    // the true wind first.
+
+    //  Can the calculated values be -1?
+    if(m_trueWindDirection == -1 || m_trueWindSpeed == -1){
       return;
     }
     updateApparentWind();
@@ -37,7 +46,7 @@ void WindStateNode::processMessage(const Message* message){
     m_windDataReceived = true;
     parseWindMessage((WindDataMsg*) message);
 
-    if(!m_stateMsgReceived){
+    if(!m_windDataReceived || !m_stateMsgReceived){
       return;
     }
     updateTrueWind();

@@ -18,6 +18,7 @@
 class WindStateNode : public Node {
 public:
   WindStateNode(MessageBus& msgBus, const int twd);
+  ~WindStateNode();
   bool init();
   void processMessage(const Message* message);
 
@@ -39,8 +40,8 @@ private:
   double	m_vesselLon;
   double	m_vesselSpeed;
 
-  double m_trueWindDirection;
-  double m_trueWindSpeed;
+  double m_trueWindDirection = -1;
+  double m_trueWindSpeed = -1;
 
   double m_apparentWindDirection;
   double m_apparentWindSpeed;

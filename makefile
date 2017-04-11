@@ -107,7 +107,7 @@ export MATH_SRC             = Math/CourseCalculation.cpp Math/CourseMath.cpp Mat
 export SIMULATOR_SRC        = Nodes/SimulationNode.cpp
 
 export CORE_SRC             = Nodes/WaypointMgrNode.cpp $(MESSAGE_BUS_SRC) $(NETWORK_SRC) \
-                            $(SYSTEM_SERVICES_SRC) $(MATH_SRC)
+                            $(SYSTEM_SERVICES_SRC) $(MATH_SRC) Nodes/WindStateNode.cpp
 
 export HTTP_SYNC_SRC        = Nodes/HTTPSyncNode.cpp
 
@@ -115,7 +115,7 @@ export HTTP_SYNC_SRC        = Nodes/HTTPSyncNode.cpp
 export XBEE_NETWORK_SRC     = Network/DataLink.cpp Network/LinuxSerialDataLink.cpp Network/XbeePacketNetwork.cpp \
                             xBee/Xbee.cpp Nodes/XbeeSyncNode.cpp
 
-export INTEGRATION_TEST		= Tests/integration/IntegrationTests/CANServiceIntegrationTest.cpp
+export INTEGRATION_TEST		= Tests/integration/IntegrationTests/WindStateNodeIntegrationTest.cpp
 
 
 ###############################################################################
