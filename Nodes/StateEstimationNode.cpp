@@ -83,6 +83,18 @@ void StateEstimationNode::processGPSMessage(GPSDataMsg* msg)
   vesselSpeed = msg->speed();
 }
 
+int StateEstimationNode::getHeading(){
+
+/* Depending on the current speed (Speed over ground) use vesselHeading
+ * (Compass heading compasated for declination)
+ * or the GPS Course */
+  if(vesselSpeed >= 0 && vesselSpeed <= SPEEDLIMIT){
+    return (SPEEDLIMIT - vesselSpeed)/SPEEDLIMIT * vesselHeading + vesselSpeed/SPEEDLIMIT*vesselCourse;
+  }else{
+    return vesselCourse;
+  }
+}
+
 void StateEstimationNode::processWaypointMessage( WaypointDataMsg* msg )
 {
   declination = msg->nextDeclination();
