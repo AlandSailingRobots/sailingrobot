@@ -1,14 +1,23 @@
+// Listens to State and Wind Data messages, stores the information
+// and calculates true and apparent wind speed / direction,
+// and sends out new Wind State Messages containing this data
+// onto the message bus.
+
+
+#pragma once
 
 #include "MessageBus/MessageBus.h"
 #include "Messages/MessageTypes.h"
 #include "Messages/StateMessage.h"
 #include "Messages/WindDataMsg.h"
+#include "Messages/WindStateMsg.h"
 
-#pragma once
+#include <mutex>
+
 
 class WindStateNode : public Node {
 public:
-  WindStateNode(MessageBus& msgBus);
+  WindStateNode(MessageBus& msgBus, const int twd);
   bool init();
   void processMessage(const Message* message);
 
@@ -18,6 +27,9 @@ private:
   void parseStateMessage(StateMessage* msg);
   void sendMessage();
 
+  void updateApparentWind();
+  void updateTrueWind();
+
   float 	m_WindDir;
 	float 	m_WindSpeed;
 	float	  m_WindTemp;
@@ -26,5 +38,18 @@ private:
   double	m_vesselLat;
   double	m_vesselLon;
   double	m_vesselSpeed;
+
+  double m_trueWindDirection;
+  double m_trueWindSpeed;
+
+  double m_apparentWindDirection;
+  double m_apparentWindSpeed;
+
+  bool m_windDataReceived = false;
+  bool m_stateMsgReceived = false;
+
+  const int m_twdSize;
+
+  std::mutex m_Lock;
 
 };
