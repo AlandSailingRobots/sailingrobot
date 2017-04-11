@@ -31,7 +31,7 @@
 #define DURATION std::chrono::duration
 
 StateEstimationNode::StateEstimationNode(MessageBus& msgBus, double mloopTime): ActiveNode(NodeID::StateEstimation, msgBus),
-vesselHeading(0), vesselLat(0), vesselLon(0),vesselSpeed(0), loopTime(mloopTime), declination(0)
+vesselHeading(0), vesselLat(0), vesselLon(0),vesselSpeed(0), vesselCourse(0), loopTime(mloopTime), declination(0)
 {
   msgBus.registerNode(*this, MessageType::CompassData);
   msgBus.registerNode(*this, MessageType::GPSData);
@@ -72,7 +72,7 @@ void StateEstimationNode::processMessage(const Message* msg)
 
 void StateEstimationNode::processCompassMessage(CompassDataMsg* msg)
 {
-  int currentVesselHeading = msg->heading();
+  float currentVesselHeading = msg->heading();
   vesselHeading = Utility::addDeclinationToHeading(currentVesselHeading, declination);
 }
 
@@ -117,7 +117,7 @@ void StateEstimationNode::StateEstimationNodeThreadFunc(void* nodePtr)
     }
 
     MessagePtr stateMessage = std::make_unique<StateMessage>(	node->vesselHeading, node->vesselLat,
-      node->vesselLon, node->vesselSpeed);
+      node->vesselLon, node->vesselSpeed, node->vesselCourse);
       node->m_MsgBus.sendMessage(std::move(stateMessage));
 
       // Compass heading, Speed, GPS Lat, GPS Lon
