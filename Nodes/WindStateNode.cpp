@@ -3,8 +3,8 @@
 
 #include <vector>
 
-WindStateNode::WindStateNode(MessageBus& msgBus, const int twd)
-: Node(NodeID::WindStateNode, msgBus), m_twdSize(twd)
+WindStateNode::WindStateNode(MessageBus& msgBus, int twd)
+: Node(NodeID::WindStateNode, msgBus), m_twd(twd)
 {
   msgBus.registerNode(*this, MessageType::StateMessage);
   msgBus.registerNode(*this, MessageType::WindData);
@@ -82,8 +82,8 @@ void WindStateNode::updateApparentWind() {
 }
 
 void WindStateNode::updateTrueWind() {
-  std::vector<float> twdBuffer(m_twdSize);
+  std::vector<int> twdVector(m_twd);
 
-  m_trueWindDirection = Utility::getTrueWindDirection(m_WindDir, m_WindSpeed, m_vesselSpeed, m_vesselHeading, twdBuffer, m_twdSize);
+  m_trueWindDirection = Utility::getTrueWindDirection(m_WindDir, m_WindSpeed, m_vesselSpeed, m_vesselHeading, twdVector, m_twd);
   m_trueWindSpeed     = Utility::calculateTrueWindSpeed(m_WindDir, m_WindSpeed, m_vesselSpeed, m_vesselHeading);
 }

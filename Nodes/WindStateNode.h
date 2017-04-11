@@ -17,7 +17,7 @@
 
 class WindStateNode : public Node {
 public:
-  WindStateNode(MessageBus& msgBus, const int twd);
+  WindStateNode(MessageBus& msgBus, int twd);
   ~WindStateNode();
   bool init();
   void processMessage(const Message* message);
@@ -56,7 +56,7 @@ private:
   bool m_windDataReceived = false;
   bool m_stateMsgReceived = false;
 
-  const int m_twdSize;
+  int m_twd;
 
   std::mutex m_Lock;
 
