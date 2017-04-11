@@ -40,8 +40,15 @@ private:
   double	m_vesselLon;
   double	m_vesselSpeed;
 
-  double m_trueWindDirection = -1;
-  double m_trueWindSpeed = -1;
+  // True Wind Speed / Direction are calculated and
+  // updated whenever a Wind Data Message is received.
+
+  double m_trueWindDirection;
+  double m_trueWindSpeed;
+
+  // Apparent Wind Speed / Direction are calculated and
+  // updated whenever a State Message is received, and will
+  // send out a new Wind State Message at the same time.
 
   double m_apparentWindDirection;
   double m_apparentWindSpeed;

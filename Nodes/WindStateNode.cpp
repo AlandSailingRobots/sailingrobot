@@ -20,7 +20,9 @@ bool WindStateNode::init(){
 }
 
 // If we have not yet received the necessary messages
-// we do not have the information to calculate what we need to.
+// we do not have the information to calculate 
+// true and apparent wind speeds, one of each message
+// needs to be received before any new messages are sent.
 // Should maybe be done in a nicer way.
 
 void WindStateNode::processMessage(const Message* message){
@@ -31,13 +33,10 @@ void WindStateNode::processMessage(const Message* message){
     parseStateMessage((StateMessage*) message);
     
 
-    // For the node to update apparent wind, need to have updated
-    // the true wind first.
-
-    //  Can the calculated values be -1?
-    if(m_trueWindDirection == -1 || m_trueWindSpeed == -1){
+    if(!m_windDataReceived || !m_stateMsgReceived ){
       return;
     }
+
     updateApparentWind();
     sendMessage();
   }
@@ -46,7 +45,7 @@ void WindStateNode::processMessage(const Message* message){
     m_windDataReceived = true;
     parseWindMessage((WindDataMsg*) message);
 
-    if(!m_windDataReceived || !m_stateMsgReceived){
+    if(!m_stateMsgReceived){
       return;
     }
     updateTrueWind();

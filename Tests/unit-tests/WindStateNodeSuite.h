@@ -6,8 +6,7 @@
 #include <chrono>
 #include <thread>
 
-#define WAIT_TIME 300
-
+#define WAIT_TIME 500
 
 class WindStateNodeSuite : public CxxTest::TestSuite {
 public:
