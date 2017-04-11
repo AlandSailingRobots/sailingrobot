@@ -99,7 +99,7 @@ void StateEstimationNode::StateEstimationNodeThreadFunc(void* nodePtr)
   char buffer[1024];
 
   auto startTime = STEADY_CLOCK::now().time_since_epoch();
-  auto timeSinceStartTimeEpoch = DURATION_CAST<DURATION<double>>(startTime).count();
+  auto timeSinceStartTimePlusDelayEpoch = DURATION_CAST<DURATION<double>>(startTime).count();
 
   while(true)
   {
@@ -108,13 +108,13 @@ void StateEstimationNode::StateEstimationNodeThreadFunc(void* nodePtr)
 
     auto currentTime = STEADY_CLOCK::now().time_since_epoch();
     auto timeSinceCurrentTimeEpoch = DURATION_CAST<DURATION<double>>(currentTime).count();
-    timeSinceStartTimeEpoch += node->loopTime;
-    int sleepTime = timeSinceStartTimeEpoch - timeSinceCurrentTimeEpoch;
+    timeSinceStartTimePlusDelayEpoch += node->loopTime;
+    int sleepTime = timeSinceStartTimePlusDelayEpoch - timeSinceCurrentTimeEpoch;
 
     // Controls how often we pump out messages
     if(sleepTime > 0){
-        std::this_thread::sleep_for(std::chrono::milliseconds(sleepTime));
-      }
+      std::this_thread::sleep_for(std::chrono::milliseconds(sleepTime));
+    }
 
     MessagePtr stateMessage = std::make_unique<StateMessage>(	node->vesselHeading, node->vesselLat,
       node->vesselLon, node->vesselSpeed);
