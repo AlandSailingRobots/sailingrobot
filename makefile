@@ -86,8 +86,7 @@ export LNM_SRC              = $(LNM_DIR)/ASRCourseBallot.cpp $(LNM_DIR)/ASRArbit
                             $(LNM_DIR)/Voters/ChannelVoter.cpp
 
 export LINE_FOLLOW_SRC      = Nodes/LineFollowNode.cpp waypointrouting/RudderCommand.cpp \
-                            waypointrouting/SailCommand.cpp Nodes/MessageLoggerNode.cpp \
-														Nodes/WindStateNode.cpp
+                            waypointrouting/SailCommand.cpp Nodes/MessageLoggerNode.cpp
 
 export NETWORK_SRC          = Network/TCPServer.cpp Nodes/VesselStateNode.cpp
 
@@ -100,14 +99,14 @@ export SYSTEM_SERVICES_SRC  = SystemServices/Logger.cpp SystemServices/SysClock.
 export HARDWARE_SERVICES_SRC = HardwareServices/MaestroController/MaestroController.cpp HardwareServices/i2ccontroller/I2CController.cpp \
 							HardwareServices/CAN_Services/CANPGNReceiver.cpp HardwareServices/CAN_Services/CANService.cpp \
 							HardwareServices/CAN_Services/mcp2515.cpp HardwareServices/CAN_Services/MsgFunctions.cpp \
-							Nodes/CANWindsensorNode.cpp
+							Nodes/CANWindsensorNode.cpp Nodes/WindStateNode.cpp
 
 export MATH_SRC             = Math/CourseCalculation.cpp Math/CourseMath.cpp Math/Utility.cpp
 
 export SIMULATOR_SRC        = Nodes/SimulationNode.cpp
 
 export CORE_SRC             = Nodes/WaypointMgrNode.cpp $(MESSAGE_BUS_SRC) $(NETWORK_SRC) \
-                            $(SYSTEM_SERVICES_SRC) $(MATH_SRC) Nodes/WindStateNode.cpp
+                            $(SYSTEM_SERVICES_SRC) $(MATH_SRC)
 
 export HTTP_SYNC_SRC        = Nodes/HTTPSyncNode.cpp
 
