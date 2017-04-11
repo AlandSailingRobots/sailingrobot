@@ -31,7 +31,7 @@
 #include "Network/TCPServer.h"
 
 
-#define BASE_SLEEP_MS 400
+#define BASE_SLEEP_MS 200
 #define COUNT_COMPASSDATA_MSG 1
 #define COUNT_GPSDATA_MSG 1
 #define COUNT_WINDDATA_MSG 1
@@ -158,6 +158,21 @@ void SimulationNode::processBoatData( TCPPacket_t& packet )
 }
 
 ///--------------------------------------------------------------------------------------
+void SimulationNode::processAISContact( TCPPacket_t& packet )
+{
+	// The first byte is the packet type, lets skip that
+		uint8_t* ptr = packet.data + 1;
+		AISContactPacket_t* aisData = (AISContactPacket_t*)ptr;
+
+		float lat = aisData->latitude;
+		float lon = aisData->longitude;
+		float speed = aisData->speed;
+		int16_t course = aisData->course;
+
+	Logger::info("AIS contact! Lat: %f Lon: %f Speed: %f Course: %d", lat, lon, speed, course);
+}
+
+///--------------------------------------------------------------------------------------
 void SimulationNode::sendActuatorData( int socketFD )
 {
 	server.sendData( socketFD, &actuatorData, sizeof(ActuatorDataPacket_t) );
@@ -173,13 +188,11 @@ void SimulationNode::SimulationThreadFunc(void* nodePtr)
 
 	while(true)
 	{
-		Logger::info("Waiting for message");
 		// Don't timeout on a packet read
 		node->server.readPacket( packet, 0 );
 
-		Logger::info("Clearing buffer");
 		// We only care about the latest packet, so clear out the old ones
-		node->server.clearSocketBuffer( packet.socketFD );
+		//node->server.clearSocketBuffer( packet.socketFD );
 
 		// We can safely assume that the first packet we receive will actually be from
 		// the simulator as we only should ever accept one connection, the first one/
@@ -196,7 +209,7 @@ void SimulationNode::SimulationThreadFunc(void* nodePtr)
 			break;
 
 			case SimulatorPacket::AISData:
-				// TODO
+				node->processAISContact( packet );
 			break;
 
 			case SimulatorPacket::CameraData:
@@ -214,6 +227,6 @@ void SimulationNode::SimulationThreadFunc(void* nodePtr)
 		packet.socketFD = 0;
 		packet.length = 0;
 
-		std::this_thread::sleep_for(std::chrono::milliseconds(BASE_SLEEP_MS));
+		//std::this_thread::sleep_for(std::chrono::milliseconds(BASE_SLEEP_MS));
 	}
 }
