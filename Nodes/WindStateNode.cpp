@@ -24,6 +24,7 @@ void WindStateNode::processMessage(const Message* message){
   if(type == MessageType::StateMessage){
     m_stateMsgReceived = true;
     parseStateMessage((StateMessage*) message);
+    
 
     if(!m_windDataReceived){
       return;

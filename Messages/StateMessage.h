@@ -25,7 +25,7 @@ public:
 
 
     StateMessage(float compassHeading, double lat, double lon, double gpsSpeed)
-      :Message(MessageType::VesselState, NodeID::None, NodeID::None),
+      :Message(MessageType::StateMessage, NodeID::None, NodeID::None),
       vesselHeading(compassHeading), vesselLat(lat), vesselLan(lon), vesselSpeed(gpsSpeed)
       { }
 
