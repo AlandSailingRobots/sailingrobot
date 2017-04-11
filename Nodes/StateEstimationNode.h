@@ -63,6 +63,8 @@ private:
   double	vesselLat;
   double	vesselLon;
   double	vesselSpeed;
+  double  vesselCourse;
+
 
   double loopTime;
   int declination;
