@@ -82,7 +82,7 @@ void WindStateNode::updateApparentWind() {
 }
 
 void WindStateNode::updateTrueWind() {
-  std::vector<int> twdVector(m_twd);
+  std::vector<float> twdVector(m_twd);
 
   m_trueWindDirection = Utility::getTrueWindDirection(m_WindDir, m_WindSpeed, m_vesselSpeed, m_vesselHeading, twdVector, m_twd);
   m_trueWindSpeed     = Utility::calculateTrueWindSpeed(m_WindDir, m_WindSpeed, m_vesselSpeed, m_vesselHeading);

@@ -37,7 +37,7 @@ public:
 		WindStateNode windStateNode(msgBus(), 100);
 
 		MessagePtr windData = std::make_unique<WindDataMsg>(1,2,3);
-		MessagePtr stateMsg = std::make_unique<StateMessage>(4,5,6,7);
+		MessagePtr stateMsg = std::make_unique<StateMessage>(4,5,6,7,8);
 
 		msgBus().sendMessage(std::move(windData));
 		msgBus().sendMessage(std::move(stateMsg));
