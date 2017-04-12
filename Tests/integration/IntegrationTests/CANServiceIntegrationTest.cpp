@@ -25,10 +25,10 @@ int main(int argc, char const *argv[]) {
 
   CANWindsensorNode windNode(msgBus(), service, 500);
   MessagePrinter printer(msgBus());
-  windNode.start();
 
   auto future = service.start();
   
+  windNode.start();
   std::async (std::launch::async, startMsgBus);
 
   std::this_thread::sleep_for(std::chrono::seconds(WAIT_TIME));
