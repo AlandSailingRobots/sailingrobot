@@ -8,7 +8,7 @@
 #include <chrono>
 #include <future>
 
-#define WAIT_TIME 5
+#define WAIT_TIME 750
 
 static MessageBus& msgBus(){
   static MessageBus* mbus = new MessageBus();
@@ -23,16 +23,21 @@ int main(int argc, char const *argv[]) {
 
   CANService service;
 
-  CANWindsensorNode windNode(msgBus(), service);
+  CANWindsensorNode windNode(msgBus(), service, 500);
   MessagePrinter printer(msgBus());
 
   auto future = service.start();
   std::thread msgThread (startMsgBus);
   msgThread.detach();
+
   std::this_thread::sleep_for(std::chrono::seconds(WAIT_TIME));
+
   service.stop();
   future.get();
 
+  // Expected output:
+  // Only first and last messages should be 
+  // printed out
 
   return 0;
 }
