@@ -83,7 +83,7 @@ void StateEstimationNode::processGPSMessage(GPSDataMsg* msg)
   vesselSpeed = msg->speed();
 }
 
-int StateEstimationNode::getHeading(){
+int StateEstimationNode::getCourse(){
 
 /* Depending on the current speed (Speed over ground) use vesselHeading
  * (Compass heading compasated for declination)
@@ -129,7 +129,7 @@ void StateEstimationNode::StateEstimationNodeThreadFunc(void* nodePtr)
     }
 
     MessagePtr stateMessage = std::make_unique<StateMessage>(	node->vesselHeading, node->vesselLat,
-      node->vesselLon, node->vesselSpeed, node->vesselCourse);
+      node->vesselLon, node->vesselSpeed, node->getCourse());
       node->m_MsgBus.sendMessage(std::move(stateMessage));
 
       // Compass heading, Speed, GPS Lat, GPS Lon
