@@ -23,7 +23,7 @@ int main(int argc, char const *argv[]) {
 
   CANWindsensorNode windNode(mBus, service, 500);
   MessagePrinter printer(mBus);
-
+  windNode.start();
   auto future = service.start();
   std::thread msgThread (startMsgBus);
   msgThread.detach();
@@ -32,10 +32,6 @@ int main(int argc, char const *argv[]) {
 
   service.stop();
   future.get();
-
-  // Expected output:
-  // Only first and last messages should be 
-  // printed out
 
   return 0;
 }

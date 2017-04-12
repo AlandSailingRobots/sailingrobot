@@ -129,6 +129,9 @@ void CANWindsensorNode::parsePGN130314(N2kMsg &NMsg, uint8_t &SID, uint8_t &Pres
 }
 
 void CANWindsensorNode::processMessage(const Message* message) {
+
+   std::lock_guard<std::mutex> lock(m_lock);
+
   if(message->messageType() == MessageType::DataRequest)
   {
     // On system startup we won't have any valid data, so don't send any
@@ -147,26 +150,30 @@ void CANWindsensorNode::start() {
 
 void CANWindsensorNode::CANWindSensorNodeThreadFunc(void* nodePtr) {
 
-	CANWindsensorNode* node = (CANWindsensorNode*) nodePtr;
-
 	float lastRecordedDir=0;
 	float lastRecordedSpeed=0;
 	float lastRecordedTemp=0;
+	CANWindsensorNode* node = (CANWindsensorNode*) nodePtr;
 
-	// If there has been a change in wind data since the last cycle,
-	// update stored values and send out a new message, otherwise
-	// wait for the next cycle.
+	while(true) {
+		node->m_lock.lock();
+		// If there has been a change in wind data since the last cycle,
+		// update stored values and send out a new message, otherwise
+		// wait for the next cycle.
 
-	if(lastRecordedDir != node->m_WindDir || lastRecordedSpeed != node->m_WindSpeed 
-		|| lastRecordedTemp != node->m_WindTemperature){
-		
-		lastRecordedDir = node->m_WindDir;
-		lastRecordedSpeed = node->m_WindSpeed;
-		lastRecordedTemp = node->m_WindTemperature;
+		if(lastRecordedDir != node->m_WindDir || lastRecordedSpeed != node->m_WindSpeed 
+			|| lastRecordedTemp != node->m_WindTemperature){
+			
+			lastRecordedDir = node->m_WindDir;
+			lastRecordedSpeed = node->m_WindSpeed;
+			lastRecordedTemp = node->m_WindTemperature;
 
-		MessagePtr windData = std::make_unique<WindDataMsg>(node->m_WindDir, node->m_WindSpeed, node->m_WindTemperature);
-		node->m_MsgBus.sendMessage(std::move(windData));
+			MessagePtr windData = std::make_unique<WindDataMsg>(node->m_WindDir, node->m_WindSpeed, node->m_WindTemperature);
+			node->m_MsgBus.sendMessage(std::move(windData));
+		}
+
+		node->m_lock.unlock();
+		std::this_thread::sleep_for(std::chrono::milliseconds(node->m_TimeBetweenMsgs));
+
 	}
-
-	std::this_thread::sleep_for(std::chrono::milliseconds(node->m_TimeBetweenMsgs));
 }
