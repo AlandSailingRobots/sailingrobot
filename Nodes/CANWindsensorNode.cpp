@@ -175,7 +175,7 @@ void CANWindsensorNode::CANWindSensorNodeThreadFunc(void* nodePtr) {
 			lastRecordedDir = node->m_WindDir;
 			lastRecordedSpeed = node->m_WindSpeed;
 			lastRecordedTemp = node->m_WindTemperature;
-
+			std::cout << "Sending Message to Bus" << std::endl;
 			MessagePtr windData = std::make_unique<WindDataMsg>(node->m_WindDir, node->m_WindSpeed, node->m_WindTemperature);
 			node->m_MsgBus.sendMessage(std::move(windData));
 		}

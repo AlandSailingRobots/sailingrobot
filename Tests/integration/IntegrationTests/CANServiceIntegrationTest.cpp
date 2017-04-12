@@ -27,8 +27,7 @@ int main(int argc, char const *argv[]) {
 
   auto future = service.start();
   
-  std::thread msgThread (startMsgBus, std::ref(mBus));
-  msgThread.detach();
+  std::async (std::launch::async, startMsgBus, std::ref(mBus));
 
   std::this_thread::sleep_for(std::chrono::seconds(WAIT_TIME));
 
