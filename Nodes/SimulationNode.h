@@ -25,6 +25,7 @@
 #include "Messages/ArduinoDataMsg.h"
 #include "Messages/ActuatorPositionMsg.h"
 #include "Network/TCPServer.h"
+#include "CollidableMgr/CollidableMgr.h"
 
 
 struct BoatDataPacket_t {
@@ -42,6 +43,7 @@ struct BoatDataPacket_t {
 } __attribute__((packed));
 
 struct AISContactPacket_t {
+  uint32_t mmsi;
   float latitude;
   float longitude;
   float speed;
@@ -57,6 +59,7 @@ struct ActuatorDataPacket_t {
 class SimulationNode : public ActiveNode {
 public:
 	SimulationNode(MessageBus& msgBus);
+  SimulationNode(MessageBus& msgBus, CollidableMgr* collidableMgr);
 
 	///----------------------------------------------------------------------------------
 	/// Initialize the TCP communication
@@ -113,5 +116,6 @@ private:
 
   ActuatorDataPacket_t actuatorData;
   TCPServer server;
+  CollidableMgr* collidableMgr;
 
 };

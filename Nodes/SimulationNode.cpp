@@ -51,7 +51,16 @@ SimulationNode::SimulationNode(MessageBus& msgBus)
 	: ActiveNode(NodeID::Simulator, msgBus),
 		m_CompassHeading(0), m_GPSLat(0), m_GPSLon(0), m_GPSSpeed(0),
 		m_GPSHeading(0), m_WindDir(0), m_WindSpeed(0),
-		m_ArduinoRudder(0), m_ArduinoSheet(0)
+		m_ArduinoRudder(0), m_ArduinoSheet(0), collidableMgr(NULL)
+{
+  m_MsgBus.registerNode(*this, MessageType::ActuatorPosition);
+}
+
+SimulationNode::SimulationNode(MessageBus& msgBus, CollidableMgr* collidableMgr)
+	: ActiveNode(NodeID::Simulator, msgBus),
+		m_CompassHeading(0), m_GPSLat(0), m_GPSLon(0), m_GPSSpeed(0),
+		m_GPSHeading(0), m_WindDir(0), m_WindSpeed(0),
+		m_ArduinoRudder(0), m_ArduinoSheet(0), collidableMgr(collidableMgr)
 {
   m_MsgBus.registerNode(*this, MessageType::ActuatorPosition);
 }
@@ -160,16 +169,14 @@ void SimulationNode::processBoatData( TCPPacket_t& packet )
 ///--------------------------------------------------------------------------------------
 void SimulationNode::processAISContact( TCPPacket_t& packet )
 {
-	// The first byte is the packet type, lets skip that
+	if( this->collidableMgr != NULL )
+	{
+		// The first byte is the packet type, lets skip that
 		uint8_t* ptr = packet.data + 1;
 		AISContactPacket_t* aisData = (AISContactPacket_t*)ptr;
 
-		float lat = aisData->latitude;
-		float lon = aisData->longitude;
-		float speed = aisData->speed;
-		int16_t course = aisData->course;
-
-	Logger::info("AIS contact! Lat: %f Lon: %f Speed: %f Course: %d", lat, lon, speed, course);
+		this->collidableMgr->addAISContact(aisData->mmsi, aisData->latitude, aisData->longitude, aisData->speed, aisData->course);
+	}
 }
 
 ///--------------------------------------------------------------------------------------
@@ -200,12 +207,12 @@ void SimulationNode::SimulationThreadFunc(void* nodePtr)
 		{
 			simulatorFD = packet.socketFD;
 		}
-
 		// First byte is the message type
 		switch( packet.data[0] )
 		{
 			case SimulatorPacket::BoatData:
 				node->processBoatData( packet );
+				node->sendActuatorData( simulatorFD );
 			break;
 
 			case SimulatorPacket::AISData:
@@ -220,8 +227,6 @@ void SimulationNode::SimulationThreadFunc(void* nodePtr)
 			default:
 				continue;
 		}
-		
-		node->sendActuatorData( simulatorFD );
 
 		// Reset our packet, better safe than sorry
 		packet.socketFD = 0;

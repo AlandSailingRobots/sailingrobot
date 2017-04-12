@@ -73,10 +73,12 @@ export MAIN_LNM_SRC         = main_lnm.cpp
 export MESSAGE_BUS_SRC      = MessageBus/MessageBus.cpp Nodes/ActiveNode.cpp Messages/MessageSerialiser.cpp \
                             Messages/MessageDeserialiser.cpp
 
+export COLLIDABLE_MGR_SRC	= CollidableMgr/CollidableMgr.cpp
+
 export LNM_SRC              = $(LNM_DIR)/ASRCourseBallot.cpp $(LNM_DIR)/ASRArbiter.cpp \
                             $(LNM_DIR)/LocalNavigationModule.cpp Nodes/LowLevelController.cpp \
                             $(LNM_DIR)/Voters/WaypointVoter.cpp $(LNM_DIR)/Voters/WindVoter.cpp  \
-                            $(LNM_DIR)/Voters/ChannelVoter.cpp
+                            $(LNM_DIR)/Voters/ChannelVoter.cpp $(COLLIDABLE_MGR_SRC)
 
 export LINE_FOLLOW_SRC      = Nodes/LineFollowNode.cpp waypointrouting/RudderCommand.cpp \
                             waypointrouting/SailCommand.cpp Nodes/MessageLoggerNode.cpp

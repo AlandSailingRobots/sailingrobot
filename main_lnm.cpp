@@ -4,6 +4,8 @@
 #include "MessageBus/MessageBus.h"
 #include "Nodes/MessageLoggerNode.h"
 
+#include "CollidableMgr/CollidableMgr.h"
+
 #if SIMULATION == 1
  #include "Nodes/SimulationNode.h"
 #else
@@ -83,9 +85,10 @@ void development_LocalNavigationModule( MessageBus& messageBus, DBHandler& dbHan
 	WaypointMgrNode waypoint	( messageBus, dbHandler );
 	LocalNavigationModule lnm	( messageBus );
 	LowLevelController llc		( messageBus, dbHandler, PGAIN, IGAIN );
+	CollidableMgr collidableMgr;
 
 	#if SIMULATION == 1
-	SimulationNode 	simulation	( messageBus );
+	SimulationNode 	simulation	( messageBus, &collidableMgr );
 	#endif
 
 	initialiseNode( vesselState, 	"Vessel State Node", 		NodeImportance::CRITICAL );
