@@ -10,24 +10,26 @@
 
 #define WAIT_TIME 750
 
+static MessageBus& msgBus(){
+  static MessageBus* mbus = new MessageBus();
+  return *mbus;
+}
 
-
-void startMsgBus(MessageBus& mBus){
-  mBus.run();
+void startMsgBus(){
+  msgBus().run();
 }
 
 int main(int argc, char const *argv[]) {
 
   CANService service;
-  MessageBus mBus;
 
-  CANWindsensorNode windNode(mBus, service, 500);
-  MessagePrinter printer(mBus);
+  CANWindsensorNode windNode(msgBus(), service, 500);
+  MessagePrinter printer(msgBus());
   windNode.start();
 
   auto future = service.start();
   
-  std::async (std::launch::async, startMsgBus, std::ref(mBus));
+  std::async (std::launch::async, startMsgBus);
 
   std::this_thread::sleep_for(std::chrono::seconds(WAIT_TIME));
 
