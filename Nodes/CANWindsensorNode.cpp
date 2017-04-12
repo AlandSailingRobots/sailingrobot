@@ -161,6 +161,11 @@ void CANWindsensorNode::CANWindSensorNodeThreadFunc(void* nodePtr) {
 		// update stored values and send out a new message, otherwise
 		// wait for the next cycle.
 
+		if( node->m_WindDir == DATA_OUT_OF_RANGE ||  node->m_WindTemperature == DATA_OUT_OF_RANGE || node->m_WindSpeed == DATA_OUT_OF_RANGE){
+			std::this_thread::sleep_for(std::chrono::milliseconds(500));
+			continue;
+		}
+
 		if(lastRecordedDir != node->m_WindDir || lastRecordedSpeed != node->m_WindSpeed 
 			|| lastRecordedTemp != node->m_WindTemperature){
 			
