@@ -31,6 +31,8 @@ CANWindsensorNode::CANWindsensorNode(MessageBus& msgBus, CANService& can_service
 void CANWindsensorNode::processPGN(N2kMsg &NMsg)
 {
 
+	std::cout << "Got message wind node" << std::endl; 
+
 	if(NMsg.PGN == 130306){
 		uint8_t SID, Ref;
 		float WS, WA;
@@ -163,6 +165,7 @@ void CANWindsensorNode::CANWindSensorNodeThreadFunc(void* nodePtr) {
 
 		if( node->m_WindDir == DATA_OUT_OF_RANGE ||  node->m_WindTemperature == DATA_OUT_OF_RANGE || node->m_WindSpeed == DATA_OUT_OF_RANGE){
 			std::this_thread::sleep_for(std::chrono::milliseconds(500));
+			node->m_lock.unlock();
 			continue;
 		}
 
