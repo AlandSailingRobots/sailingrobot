@@ -7,25 +7,30 @@
  *		 Process messages from the CAN-Service.
  *
  * Developer Notes:
- *
+ *		PGN numbers for this node are:
+ *			130306, 130311, (more to be added later?)
  *
  ***************************************************************************************/
 
 #include "CANWindsensorNode.h"
 #include "Messages/WindDataMsg.h"
 
+#include <chrono>
+#include <thread>
+
 #define DATA_OUT_OF_RANGE		-2000
 
-CANWindsensorNode::CANWindsensorNode(MessageBus& msgBus, CANService& can_service)
- : CANPGNReceiver(can_service, {130306, 130311}), Node(NodeID::WindSensor, msgBus)
+CANWindsensorNode::CANWindsensorNode(MessageBus& msgBus, CANService& can_service, int time_filter_ms)
+ : CANPGNReceiver(can_service, {130306, 130311}), ActiveNode(NodeID::WindSensor, msgBus), m_TimeBetweenMsgs(time_filter_ms)
  {
- 		m_WindDir  = DATA_OUT_OF_RANGE;
+ 	m_WindDir  = DATA_OUT_OF_RANGE;
     m_WindSpeed = DATA_OUT_OF_RANGE;
     m_WindTemperature = DATA_OUT_OF_RANGE;
  }
 
 void CANWindsensorNode::processPGN(N2kMsg &NMsg)
 {
+
 	if(NMsg.PGN == 130306){
 		uint8_t SID, Ref;
 		float WS, WA;
@@ -35,8 +40,8 @@ void CANWindsensorNode::processPGN(N2kMsg &NMsg)
 		m_WindDir = WA;
 		m_WindSpeed = WS;
 
-		MessagePtr windData = std::make_unique<WindDataMsg>(m_WindDir, m_WindSpeed, m_WindTemperature);
-		m_MsgBus.sendMessage(std::move(windData));
+//		MessagePtr windData = std::make_unique<WindDataMsg>(m_WindDir, m_WindSpeed, m_WindTemperature);
+//		m_MsgBus.sendMessage(std::move(windData));
 		m_lock.unlock();
 	}
 	else if(NMsg.PGN == 130311)
@@ -48,8 +53,8 @@ void CANWindsensorNode::processPGN(N2kMsg &NMsg)
 		m_lock.lock();
 		m_WindTemperature = Temp;
 
-		MessagePtr windData = std::make_unique<WindDataMsg>(m_WindDir, m_WindSpeed, m_WindTemperature);
-		m_MsgBus.sendMessage(std::move(windData));
+//		MessagePtr windData = std::make_unique<WindDataMsg>(m_WindDir, m_WindSpeed, m_WindTemperature);
+//		m_MsgBus.sendMessage(std::move(windData));
 		m_lock.unlock();
 
 	}
@@ -134,4 +139,34 @@ void CANWindsensorNode::processMessage(const Message* message) {
       m_MsgBus.sendMessage(std::move(windData));
     }
   }
+}
+
+void CANWindsensorNode::start() {
+	runThread(CANWindSensorNodeThreadFunc);
+}
+
+void CANWindsensorNode::CANWindSensorNodeThreadFunc(void* nodePtr) {
+
+	CANWindsensorNode* node = (CANWindsensorNode*) nodePtr;
+
+	float lastRecordedDir=0;
+	float lastRecordedSpeed=0;
+	float lastRecordedTemp=0;
+
+	// If there has been a change in wind data since the last cycle,
+	// update stored values and send out a new message, otherwise
+	// wait for the next cycle.
+
+	if(lastRecordedDir != node->m_WindDir || lastRecordedSpeed != node->m_WindSpeed 
+		|| lastRecordedTemp != node->m_WindTemperature){
+		
+		lastRecordedDir = node->m_WindDir;
+		lastRecordedSpeed = node->m_WindSpeed;
+		lastRecordedTemp = node->m_WindTemperature;
+
+		MessagePtr windData = std::make_unique<WindDataMsg>(node->m_WindDir, node->m_WindSpeed, node->m_WindTemperature);
+		node->m_MsgBus.sendMessage(std::move(windData));
+	}
+
+	std::this_thread::sleep_for(std::chrono::milliseconds(node->m_TimeBetweenMsgs));
 }
