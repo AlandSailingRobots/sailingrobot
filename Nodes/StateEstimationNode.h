@@ -51,7 +51,7 @@ public:
   void processGPSMessage(GPSDataMsg* msg);
   void processWaypointMessage( WaypointDataMsg* msg );
 
-  int getHeading();
+  int getCourse();
 
 
 private:
