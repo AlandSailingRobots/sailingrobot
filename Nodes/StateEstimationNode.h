@@ -70,8 +70,7 @@ private:
   double loopTime;
   int declination;
 
-  /* Used when determining heading */
-  const int SPEEDLIMIT = 0.5;
+  double speedLimit;
 
   TCPServer server;
 };
