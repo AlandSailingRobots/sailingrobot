@@ -27,10 +27,6 @@
 #define STATE_SLEEP_MS 400
 #define STATE_INITIAL_SLEEP 2000
 
-#define STEADY_CLOCK std::chrono::steady_clock
-#define DURATION_CAST std::chrono::duration_cast
-#define DURATION std::chrono::duration
-
 StateEstimationNode::StateEstimationNode(MessageBus& msgBus, double mloopTime): ActiveNode(NodeID::StateEstimation, msgBus),
 vesselHeading(0), vesselLat(0), vesselLon(0),vesselSpeed(0), vesselCourse(0), loopTime(mloopTime), declination(0)
 {
@@ -66,6 +62,9 @@ void StateEstimationNode::processMessage(const Message* msg)
     case MessageType::GPSData:
     processGPSMessage((GPSDataMsg*)msg);
     break;
+    case MessageType::WaypointData:
+    processWaypointMessage((WaypointDataMsg*)msg);
+    break;
     default:
     return;
   }
@@ -87,10 +86,12 @@ void StateEstimationNode::processGPSMessage(GPSDataMsg* msg)
 int StateEstimationNode::getCourse(){
 
 /* Depending on the current speed (Speed over ground) use vesselHeading
- * (Compass heading compasated for declination)
+ * (Compass heading compensated with declination)
  * or the GPS Course */
   if(vesselSpeed >= 0 && vesselSpeed <= SPEEDLIMIT){
-    return (SPEEDLIMIT - vesselSpeed)/SPEEDLIMIT * vesselHeading + vesselSpeed/SPEEDLIMIT*vesselCourse;
+    int leftOperand = ( (SPEEDLIMIT-vesselSpeed)/SPEEDLIMIT )* vesselHeading;
+    int rightOperand = (vesselSpeed/SPEEDLIMIT)*vesselCourse;
+    return leftOperand + rightOperand;
   }else{
     return vesselCourse;
   }
