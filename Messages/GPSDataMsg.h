@@ -66,15 +66,15 @@ public:
 
 	virtual ~GPSDataMsg() { }
 
-	bool hasFix() { return m_HasFix; }
-	bool gpsOnline() { return m_Online; }
-	double latitude() { return m_Lat; }
-	double longitude() { return m_Lon; }
-	double unixTime() { return m_UnixTime; }
-	double speed() { return m_Speed; }
-	double heading() { return m_Heading; }
-	int satelliteCount() { return m_SatCount; }
-	GPSMode gpsMode() { return m_Mode; }
+	bool hasFix() const { return m_HasFix; }
+	bool gpsOnline() const { return m_Online; }
+	double latitude() const { return m_Lat; }
+	double longitude() const { return m_Lon; }
+	double unixTime() const { return m_UnixTime; }
+	double speed() const { return m_Speed; }
+	double heading() const { return m_Heading; }
+	int satelliteCount() const { return m_SatCount; }
+	GPSMode gpsMode() const { return m_Mode; }
 
 	///----------------------------------------------------------------------------------
 	/// Serialises the message into a MessageSerialiser
