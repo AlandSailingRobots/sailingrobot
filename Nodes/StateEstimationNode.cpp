@@ -22,6 +22,7 @@
 #include "Math/CourseMath.h"
 #include "SystemServices/Logger.h"
 #include "Math/Utility.h"
+#include "SystemServices/Timer.h"
 
 #define STATE_SLEEP_MS 400
 #define STATE_INITIAL_SLEEP 2000
@@ -110,28 +111,27 @@ void StateEstimationNode::StateEstimationNodeThreadFunc(void* nodePtr)
 
   char buffer[1024];
 
-  auto startTime = STEADY_CLOCK::now().time_since_epoch();
-  auto timeSinceStartTimePlusDelayEpoch = DURATION_CAST<DURATION<double>>(startTime).count();
+  Timer timer;
+  double startTime = timer.timePassed();
+  int sleepTime;
 
   while(true)
   {
     // Listen to new connections
     node->server.acceptConnections();
 
-    auto currentTime = STEADY_CLOCK::now().time_since_epoch();
-    auto timeSinceCurrentTimeEpoch = DURATION_CAST<DURATION<double>>(currentTime).count();
-    timeSinceStartTimePlusDelayEpoch += node->loopTime;
-    int sleepTime = timeSinceStartTimePlusDelayEpoch - timeSinceCurrentTimeEpoch;
+    sleepTime = startTime - node->loopTime;
 
     // Controls how often we pump out messages
     if(sleepTime > 0){
       std::this_thread::sleep_for(std::chrono::milliseconds(sleepTime));
+      timer.reset();
+      startTime = timer.timePassed();
     }
 
     MessagePtr stateMessage = std::make_unique<StateMessage>(	node->vesselHeading, node->vesselLat,
       node->vesselLon, node->vesselSpeed, node->getCourse());
       node->m_MsgBus.sendMessage(std::move(stateMessage));
-
       // Compass heading, Speed, GPS Lat, GPS Lon
       int size = snprintf( buffer, 1024, "%d,%f,%f,%f\n",
       (int)node->vesselHeading,
