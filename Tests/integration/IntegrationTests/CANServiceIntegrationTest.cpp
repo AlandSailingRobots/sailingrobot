@@ -21,7 +21,7 @@ void startMsgBus(MessageBus& msgBus){
 }
 
 int main(int argc, char const *argv[]) {
-
+  
   CANService service;
   MessageBus msgBus;
   std::cout << &msgBus << std::endl;

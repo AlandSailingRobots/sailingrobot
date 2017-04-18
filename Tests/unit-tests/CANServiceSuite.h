@@ -19,6 +19,10 @@
 
 class CANServiceSuite : public CxxTest::TestSuite {
 public:
+
+  CANServiceSuite() {
+    wiringPiSetup();
+  }
   void setUp() {
     service = new CANService();
   }

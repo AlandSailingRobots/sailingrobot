@@ -28,7 +28,7 @@ void CANService::sendN2kMessage(N2kMsg& msg){
 
 std::future<void> CANService::start() {
   m_Running.store(true);
-  wiringPiSetup();
+  // wiringPiSetup();
   int SPISpeed = 1000000;
 
 	//pinMode(MCP2515_INT, INPUT);					//set the interrupt pin to input

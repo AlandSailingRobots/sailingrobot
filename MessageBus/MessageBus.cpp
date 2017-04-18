@@ -17,7 +17,7 @@
 // For std::this_thread
 #include <chrono>
 #include <thread>
-
+#include <iostream>
 
 #define SLEEP_TIME_MS	50
 
@@ -37,6 +37,8 @@ MessageBus::~MessageBus()
 
 	delete m_FrontMessages;
 	delete m_BackMessages;
+
+	std::cout << "Message Bus Destructor" << std::endl;
 }
 
 // TODO - Jordan: Log warning if node tries to register after start

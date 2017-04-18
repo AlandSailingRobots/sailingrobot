@@ -18,6 +18,7 @@
 
 #include <mutex>
 #include <vector>
+#include <iostream>
 
 #pragma once
 
@@ -28,7 +29,7 @@ public:
 	CANWindsensorNode(MessageBus& msgBus, CANService& can_service, int time_filter_ms);
 
 
-	~CANWindsensorNode(){};
+	~CANWindsensorNode(){ std::cout << "Wind Sensor Node Desctructor" << std::endl; };
 
 	/* data */
 	 void processPGN(N2kMsg &NMsg);
