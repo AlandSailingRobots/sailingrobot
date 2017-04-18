@@ -40,11 +40,12 @@ public:
 
   void processMessage(const Message* msg);
 
+private:
+
   ///----------------------------------------------------------------------------------
   /// Stores compass data from a CompassDataMsg.
   ///----------------------------------------------------------------------------------
   void processCompassMessage(CompassDataMsg* msg);
-
   ///----------------------------------------------------------------------------------
   /// Stores the GPS data from a GPSDataMsg.
   ///----------------------------------------------------------------------------------
@@ -53,8 +54,6 @@ public:
 
   int getCourse();
 
-
-private:
   ///----------------------------------------------------------------------------------
   /// Starts the StateEstimationNode's thread that pumps out StateMessages which contains
   /// data collected from the sensors
