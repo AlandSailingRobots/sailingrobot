@@ -145,10 +145,11 @@ void CANWindsensorNode::processMessage(const Message* message) {
 }
 
 void CANWindsensorNode::start() {
-	runThread(CANWindSensorNodeThreadFunc);
+	std::thread* thr = new std::thread(CANWindSensorNodeThreadFunc, this, std::ref(m_MsgBus));
+	thr->detach();
 }
 
-void CANWindsensorNode::CANWindSensorNodeThreadFunc(void* nodePtr) {
+void CANWindsensorNode::CANWindSensorNodeThreadFunc(void* nodePtr, MessageBus& bus) {
 
 	float lastRecordedDir=0;
 	float lastRecordedSpeed=0;
@@ -175,7 +176,7 @@ void CANWindsensorNode::CANWindSensorNodeThreadFunc(void* nodePtr) {
 			lastRecordedTemp = node->m_WindTemperature;
 
 			MessagePtr windData = std::make_unique<WindDataMsg>(node->m_WindDir, node->m_WindSpeed, node->m_WindTemperature);
-			node->m_MsgBus.sendMessage(std::move(windData));
+			bus.sendMessage(std::move(windData));
 		}
 
 		node->m_lock.unlock();
