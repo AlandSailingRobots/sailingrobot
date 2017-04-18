@@ -4,6 +4,7 @@
 #include "Nodes/CANWindsensorNode.h"
 #include "Tests/integration/TestMocks/MessagePrinter.h"
 #include "Messages/WindDataMsg.h"
+#include "Tests/integration/IntegrationTests/thread-master/ThreadRAII.h"
 
 #include <thread>
 #include <chrono>
@@ -32,7 +33,8 @@ int main(int argc, char const *argv[]) {
   
   windNode.start();
   std::thread t1(startMsgBus, std::ref(msgBus));
-  t1.detach();
+  ThreadRAII tRaii(std::move(t1), ThreadRAII::DtorAction::detach);
+
   msgBus.sendMessage(std::make_unique<WindDataMsg>(1,2,3));
 
   std::this_thread::sleep_for(std::chrono::seconds(WAIT_TIME));

@@ -110,11 +110,11 @@ export CORE_SRC             = Nodes/WaypointMgrNode.cpp $(MESSAGE_BUS_SRC) $(NET
 
 export HTTP_SYNC_SRC        = Nodes/HTTPSyncNode.cpp
 
-# TODO: Break down for Xbee Remote
+# TODO: Break down for Xbee Remote0
 export XBEE_NETWORK_SRC     = Network/DataLink.cpp Network/LinuxSerialDataLink.cpp Network/XbeePacketNetwork.cpp \
                             xBee/Xbee.cpp Nodes/XbeeSyncNode.cpp
 
-export INTEGRATION_TEST		= Tests/integration/IntegrationTests/CANServiceIntegrationTest.cpp
+export INTEGRATION_TEST		= Tests/integration/IntegrationTests/CANServiceIntegrationTest.cpp Tests/integration/IntegrationTests/thread-master/ThreadRAII.cpp
 
 
 ###############################################################################
