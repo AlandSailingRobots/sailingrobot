@@ -21,11 +21,12 @@
 #include "Messages/ArduinoDataMsg.h"
 #include "Messages/WaypointDataMsg.h"
 #include "Network/TCPServer.h"
+#include <mutex>
 #include <stdint.h>
 
 class StateEstimationNode : public ActiveNode {
 public:
-  StateEstimationNode(MessageBus& msgBus, double loopTime);
+  StateEstimationNode(MessageBus& msgBus, double loopTime, double speedLimit);
   ~StateEstimationNode();
 
   ///----------------------------------------------------------------------------------
@@ -45,12 +46,12 @@ private:
   ///----------------------------------------------------------------------------------
   /// Stores compass data from a CompassDataMsg.
   ///----------------------------------------------------------------------------------
-  void processCompassMessage(CompassDataMsg* msg);
+  void processCompassMessage(const CompassDataMsg* msg);
   ///----------------------------------------------------------------------------------
   /// Stores the GPS data from a GPSDataMsg.
   ///----------------------------------------------------------------------------------
-  void processGPSMessage(GPSDataMsg* msg);
-  void processWaypointMessage( WaypointDataMsg* msg );
+  void processGPSMessage(const GPSDataMsg* msg);
+  void processWaypointMessage(const WaypointDataMsg* msg );
 
   int getCourse();
 
@@ -60,17 +61,19 @@ private:
   ///----------------------------------------------------------------------------------
   static void StateEstimationNodeThreadFunc(void* nodePtr);
 
-  float 	vesselHeading;
-  double	vesselLat;
-  double	vesselLon;
-  double	vesselSpeed;
-  double  vesselCourse;
+  float 	mVesselHeading;
+  double	mVesselLat;
+  double	mVesselLon;
+  double	mVesselSpeed;
+  double  mVesselCourse;
 
 
-  double loopTime;
-  int declination;
+  double mLoopTime;
+  int mDeclination;
 
-  double speedLimit;
+  double mSpeedLimit;
 
-  TCPServer server;
+  std::mutex m_lock;
+
+
 };
