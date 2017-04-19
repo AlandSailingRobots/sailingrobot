@@ -60,7 +60,7 @@ void CANWindsensorNode::processPGN(N2kMsg &NMsg)
 	}
 	else if(NMsg.PGN == 130312)
 	{
-		m_lock.unlock();
+		m_lock.lock();
 		uint8_t SID, TI, TS;
 		float ATemp, STemp;
 		parsePGN130312(NMsg, SID, TI, TS, ATemp, STemp);
@@ -68,7 +68,7 @@ void CANWindsensorNode::processPGN(N2kMsg &NMsg)
 	}
 	else if (NMsg.PGN == 130314)
 	{
-		m_lock.unlock();
+		m_lock.lock();
 		uint8_t SID, PI, PS;
 		double P;
 		parsePGN130314(NMsg, SID, PI, PS, P);
@@ -154,6 +154,10 @@ void CANWindsensorNode::CANWindSensorNodeThreadFunc(void* nodePtr) {
 	float lastRecordedSpeed=0;
 	float lastRecordedTemp=0;
 	CANWindsensorNode* node = (CANWindsensorNode*) nodePtr;
+
+	std::cout << "Node pointer in thread function" << nodePtr << std::endl;
+
+	// TODO : Use Timer instead of sleep
 
 	while(true) {
 		node->m_lock.lock();

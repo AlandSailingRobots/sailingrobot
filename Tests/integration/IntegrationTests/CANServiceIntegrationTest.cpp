@@ -25,8 +25,10 @@ int main(int argc, char const *argv[]) {
    
   CANService service;
   MessageBus msgBus;
-  std::cout << &msgBus << std::endl;
+  
   CANWindsensorNode windNode(msgBus, service, 500);
+  std::cout << "Wind Node Address : " << &windNode << std::endl;
+  
   MessagePrinter printer(msgBus);
 
   auto future = service.start();
