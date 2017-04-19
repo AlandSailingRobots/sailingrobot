@@ -18,7 +18,7 @@
 #include <thread>
 
 typedef void (*ActiveNodeFunc) (void*); 
-
+//typedef void (*ActiveNodeFunc2) (ActiveNode*);
 
 class ActiveNode : public Node {
 public:
@@ -32,6 +32,7 @@ public:
 	virtual void start() = 0;
 protected:
 	void runThread(ActiveNodeFunc func);
+	void runThreadTwo(void(*func)(ActiveNode*));
 private:
 	std::thread* m_Thread;
 };

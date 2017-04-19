@@ -62,7 +62,7 @@ public:
 
 private:
 
-	static void CANWindSensorNodeThreadFunc(void* nodePtr);
+	static void CANWindSensorNodeThreadFunc(ActiveNode* nodePtr);
 
 	float m_WindDir;
 	float m_WindSpeed;

@@ -30,7 +30,7 @@ CANWindsensorNode::CANWindsensorNode(MessageBus& msgBus, CANService& can_service
 
 void CANWindsensorNode::processPGN(N2kMsg &NMsg)
 {
-
+	
 	if(NMsg.PGN == 130306){
 		uint8_t SID, Ref;
 		float WS, WA;
@@ -145,17 +145,16 @@ void CANWindsensorNode::processMessage(const Message* message) {
 }
 
 void CANWindsensorNode::start() {
-	runThread(CANWindSensorNodeThreadFunc);
+	runThreadTwo(CANWindSensorNodeThreadFunc);
 }
 
-void CANWindsensorNode::CANWindSensorNodeThreadFunc(void* nodePtr) {
+void CANWindsensorNode::CANWindSensorNodeThreadFunc(ActiveNode* nodePtr) {
 
 	float lastRecordedDir=0;
 	float lastRecordedSpeed=0;
 	float lastRecordedTemp=0;
-	CANWindsensorNode* node = (CANWindsensorNode*) nodePtr;
+	CANWindsensorNode* node = dynamic_cast<CANWindsensorNode*> (nodePtr);
 
-	std::cout << "Node pointer in thread function" << nodePtr << std::endl;
 
 	// TODO : Use Timer instead of sleep
 
