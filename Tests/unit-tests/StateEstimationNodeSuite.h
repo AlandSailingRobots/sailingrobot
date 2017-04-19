@@ -26,8 +26,7 @@
 #include <chrono>
 #include <thread>
 
-#define STATE_ESTIMATIONODE_TEST_COUNT   3
-#define SLEEP_TIME 2005
+#define STATE_ESTIMATIONODE_TEST_COUNT   2
 
 
 class StateEstimationNodeSuite : public CxxTest::TestSuite
@@ -57,12 +56,11 @@ public:
     {
       Logger::DisableLogging();
       logger = new MessageLogger(msgBus());
-      sEstimationNode = new StateEstimationNode(msgBus(), 1, 1);
+      sEstimationNode = new StateEstimationNode(msgBus(), .5, 1);
       srand (time(NULL));
       thr = new std::thread(runMessageLoop);
     }
     testCount++;
-    std::this_thread::sleep_for(std::chrono::milliseconds(SLEEP_TIME));
   }
 
   void tearDown()
@@ -81,7 +79,10 @@ public:
 
   void test_StateEstimationNodeStateMsgReceived(){
     sEstimationNode->start();
-    std::this_thread::sleep_for(std::chrono::milliseconds(SLEEP_TIME));
+    std::this_thread::sleep_for(std::chrono::milliseconds(2600));
+    TS_ASSERT(logger->StateDataReceived());
+    logger->clearState();
+    std::this_thread::sleep_for(std::chrono::milliseconds(3200));
     TS_ASSERT(logger->StateDataReceived());
   }
 
