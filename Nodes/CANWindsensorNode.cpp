@@ -151,9 +151,6 @@ void CANWindsensorNode::start() {
 
 void CANWindsensorNode::CANWindSensorNodeThreadFunc(ActiveNode* nodePtr) {
 
-	float lastRecordedDir=0;
-	float lastRecordedSpeed=0;
-	float lastRecordedTemp=0;
 	CANWindsensorNode* node = dynamic_cast<CANWindsensorNode*> (nodePtr);
 	Timer timer;
 	timer.start();
@@ -165,7 +162,7 @@ void CANWindsensorNode::CANWindSensorNodeThreadFunc(ActiveNode* nodePtr) {
 		// Timer returns seconds, but the stored time is in
 		// milliseconds
 		
-		if(timer.timePassed() * 1000 < node->m_timeBetweenMsgs) {
+		if(timer.timePassed() * 1000 < node->m_TimeBetweenMsgs) {
 			std::this_thread::sleep_for(std::chrono::milliseconds(5));
 			continue;
 		}
@@ -179,11 +176,6 @@ void CANWindsensorNode::CANWindSensorNodeThreadFunc(ActiveNode* nodePtr) {
 			node->m_lock.unlock();
 			continue;
 		}
-
-			
-		lastRecordedDir = node->m_WindDir;
-		lastRecordedSpeed = node->m_WindSpeed;
-		lastRecordedTemp = node->m_WindTemperature;
 
 		MessagePtr windData = std::make_unique<WindDataMsg>(node->m_WindDir, node->m_WindSpeed, node->m_WindTemperature);
 		node->m_MsgBus.sendMessage(std::move(windData));

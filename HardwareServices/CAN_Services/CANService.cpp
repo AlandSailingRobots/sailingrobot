@@ -40,7 +40,7 @@ std::future<void> CANService::start() {
   bool mcp_initialized = MCP2515_Init();
   if(!mcp_initialized) {
     std::cout << "Could not initialize hardware" << std::endl;
-  } */
+  } 
   return std::async(std::launch::async, &CANService::run, this);
 }
 
