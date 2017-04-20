@@ -83,9 +83,9 @@ void ArduinoNode::processMessage(const Message* msg)
 
 }
 
-void ArduinoNode::ArduinoThreadFunc(void* nodePtr)
+void ArduinoNode::ArduinoThreadFunc(ActiveNode* nodePtr)
 {
-    ArduinoNode* node = (ArduinoNode*)nodePtr;
+    ArduinoNode* node = dynamic_cast<ArduinoNode*> (nodePtr);
 
     Logger::info("Arduino thread started");
 

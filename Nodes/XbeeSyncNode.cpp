@@ -124,9 +124,9 @@ void XbeeSyncNode::incomingMessage(uint8_t* data, uint8_t size)
 	data = NULL;
 }
 
-void XbeeSyncNode::xBeeSyncThread(void* nodePtr)
+void XbeeSyncNode::xBeeSyncThread(ActiveNode* nodePtr)
 {
-	XbeeSyncNode* node = (XbeeSyncNode*)(nodePtr);
+	XbeeSyncNode* node = dynamic_cast<XbeeSyncNode*> (nodePtr);
 
 	node->m_xbeeNetwork.setIncomingCallback(node->incomingMessage);
 

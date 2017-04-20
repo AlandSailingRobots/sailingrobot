@@ -64,7 +64,7 @@ private:
 	/// Starts the VesselStateNode's thread that pumps out VesselStateMsg which contains
 	/// data collected from the vessel's sensors
 	///----------------------------------------------------------------------------------
-	static void VesselStateThreadFunc(void* nodePtr);
+	static void VesselStateThreadFunc(ActiveNode* nodePtr);
 
 	int 	m_CompassHeading;
 	int 	m_CompassPitch;

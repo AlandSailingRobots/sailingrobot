@@ -175,11 +175,11 @@ bool HMC6343Node::setOrientation(CompassOrientation orientation)
 	}
 }
 
-void HMC6343Node::HMC6343ThreadFunc(void* nodePtr)
+void HMC6343Node::HMC6343ThreadFunc(ActiveNode* nodePtr)
 {
 	const int MAX_ERROR_COUNT = 100;
 
-	HMC6343Node* node = (HMC6343Node*)nodePtr;
+	HMC6343Node* node = dynamic_cast<HMC6343Node*> (nodePtr);
 
 	Logger::info("HMC6343 compass thread started!");
 	unsigned int errorCount = 0;

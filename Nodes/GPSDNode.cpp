@@ -65,9 +65,9 @@ void GPSDNode::start()
 	}
 }
 
-void GPSDNode::GPSThreadFunc(void* nodePtr)
+void GPSDNode::GPSThreadFunc(ActiveNode* nodePtr)
 {
-	GPSDNode* node = (GPSDNode*)nodePtr;
+	GPSDNode* node = dynamic_cast<GPSDNode*> (nodePtr);
 
 	Logger::info("GPSD thread started");
 

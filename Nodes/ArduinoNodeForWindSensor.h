@@ -37,7 +37,7 @@ public:
 
 
 private:
-	static void ArduinoThreadFunc(void* nodePtr);
+	static void ArduinoThreadFunc(ActiveNode* nodePtr);
 
 	I2CController 	m_I2C;
 	bool 			m_Initialised;
