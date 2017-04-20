@@ -17,8 +17,6 @@
 #include "Node.h"
 #include <thread>
 
-typedef void (*ActiveNodeFunc) (void*);
-
 class ActiveNode : public Node {
 public:
 	ActiveNode(NodeID id, MessageBus& msgBus) : Node(id, msgBus)
