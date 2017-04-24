@@ -20,7 +20,7 @@
 
 ///----------------------------------------------------------------------------------
 WindVoter::WindVoter( int16_t maxVotes, int16_t weight )
-    :ASRVoter( maxVotes, weight )
+    :ASRVoter( maxVotes, weight, "Wind" )
 {
 
 }

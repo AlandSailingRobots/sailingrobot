@@ -50,6 +50,12 @@ struct AISContactPacket_t {
   uint16_t course;
 } __attribute__((packed));
 
+struct VisualContactPacket_t {
+  uint32_t id;
+  float latitude;
+  float longitude;
+} __attribute__((packed));
+
 struct ActuatorDataPacket_t {
   uint16_t rudderCommand;
   uint16_t sailCommand;
@@ -88,6 +94,11 @@ private:
   /// Process a AIS contact data message
   ///----------------------------------------------------------------------------------
   void processAISContact( TCPPacket_t& packet );
+
+  ///----------------------------------------------------------------------------------
+  /// Process a visual contact data message
+  ///----------------------------------------------------------------------------------
+  void processVisualContact( TCPPacket_t& packet );
 
   ///----------------------------------------------------------------------------------
   /// Send our actuator data

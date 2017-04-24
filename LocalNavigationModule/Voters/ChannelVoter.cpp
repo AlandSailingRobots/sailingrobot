@@ -19,13 +19,14 @@
 #include "Math/CourseMath.h"
 #include "Math/Utility.h"
 #include "SystemServices/Logger.h"
+#include <cmath>
 
 #include <iostream>
 
 
 ///----------------------------------------------------------------------------------
 ChannelVoter::ChannelVoter( int16_t maxVotes, int16_t weight )
-    :ASRVoter( maxVotes, weight )
+    :ASRVoter( maxVotes, weight, "Channel" )
 {
 
 }
@@ -36,10 +37,21 @@ const ASRCourseBallot& ChannelVoter::vote( const BoatState_t& boatState )
     //double distance = CourseMath::calculateDTW( boatState.lon, boatState.lat, boatState.currWaypointLon, boatState.currWaypointLat );
     courseBallot.clear();
     //const double CUTOFF = 0.8;
+    static double maxDistanceFromLine = 0;
 
     double distanceFromMiddle = Utility::calculateSignedDistanceToLine( boatState.currWaypointLon, 
                                 boatState.currWaypointLat, boatState.lastWaypointLon, 
                                 boatState.lastWaypointLat, boatState.lon, boatState.lat );
+
+    if(distanceFromMiddle > -3000)
+    {
+    if(maxDistanceFromLine < abs(distanceFromMiddle))
+    {
+        maxDistanceFromLine = abs(distanceFromMiddle);
+    }
+    }
+
+    Logger::info("Max Distance From Line: %f Current distance from line: %f", maxDistanceFromLine, distanceFromMiddle);
 
     //double distanceRatio = distanceFromMiddle / boatState.radius;
     double waypointLineBearing = CourseMath::calculateBTW( boatState.lastWaypointLon, boatState.lastWaypointLat, boatState.currWaypointLon, boatState.currWaypointLat );

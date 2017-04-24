@@ -19,12 +19,13 @@
 
 #include "ASRCourseBallot.h"
 #include "BoatState.h"
+#include <string>
 
 
 class ASRVoter {
 public:
-    ASRVoter( int16_t maxVotes, int16_t weight )
-        :courseBallot( maxVotes ), voterWeight( weight )
+    ASRVoter( int16_t maxVotes, float weight, std::string name )
+        :courseBallot( maxVotes ), voterWeight( weight ), name(name)
     { }
 
     ///----------------------------------------------------------------------------------
@@ -35,7 +36,26 @@ public:
 
     int16_t weight() { return voterWeight; }
 
+    uint16_t getBestCourse(int16_t& value)
+    {
+        uint16_t bestCourse = 0;
+        value = 0;
+        for( uint16_t i = 0; i < 360; i++)
+        {
+            if(courseBallot.get(i) > value)
+            {
+                value = courseBallot.get(i);
+                bestCourse = i;
+            }
+        }
+
+        return bestCourse;
+    }
+
+    std::string getName() { return name; }
+
 protected:
     ASRCourseBallot courseBallot;
-    int16_t         voterWeight;
+    float         voterWeight;
+    std::string     name;
 };

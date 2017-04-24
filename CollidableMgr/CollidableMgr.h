@@ -26,7 +26,7 @@ class CollidableMgr {
 public:
     CollidableMgr();
     void addAISContact(uint32_t mmsi, float lat, float lon, float speed, uint16_t course);
-    void addVisualContact(uint16_t id, uint16_t bearing);
+    void addVisualContact(uint32_t id, uint16_t bearing);
 
     CollidableList<AISCollidable_t> getAISContacts();
     CollidableList<VisualCollidable_t> getVisualContacts();

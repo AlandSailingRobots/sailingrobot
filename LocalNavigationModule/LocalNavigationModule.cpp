@@ -138,9 +138,20 @@ void LocalNavigationModule::startBallot()
     for( it = voters.begin(); it != voters.end(); it++ ) 
     {
         ASRVoter* voter = (*it);
-
         arbiter.castVote( voter->weight(), voter->vote( boatState ) );
     }
+
+    printf("[Voters] ");
+    for( it = voters.begin(); it != voters.end(); it++ ) 
+    {
+        ASRVoter* voter = (*it);
+        int16_t votes = 0;
+        uint16_t bestCourse = voter->getBestCourse(votes);
+
+        std::string name = voter->getName();
+        printf("%s : %d %d ", name.c_str(), bestCourse, votes);
+    }
+    printf("\n");
 
     MessagePtr msg = std::make_unique<DesiredCourseMsg>( arbiter.getWinner() );
     m_MsgBus.sendMessage( std::move( msg ) );

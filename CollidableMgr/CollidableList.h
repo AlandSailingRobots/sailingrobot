@@ -63,17 +63,17 @@ public:
     {
         if( !this->ownsLock )
         {
-            this->listMutex.lock();
+            this->listMutex->lock();
             this->ownsLock = true;
         }
 
         uint16_t length = this->length();
 
-        T nextItem = dataPtr[index];
+        T nextItem = dataPtr->at(index);
 
-        if(this->index < this->length() - 1)
+        if(this->index < length - 1)
         {
-            this.index++;
+            this->index++;
         }
 
         return nextItem;

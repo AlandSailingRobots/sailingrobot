@@ -23,7 +23,7 @@
 
 ///----------------------------------------------------------------------------------
 WaypointVoter::WaypointVoter( int16_t maxVotes, int16_t weight )
-    :ASRVoter( maxVotes, weight )
+    :ASRVoter( maxVotes, weight, "Waypoint" )
 {
 
 }
@@ -45,7 +45,6 @@ const ASRCourseBallot& WaypointVoter::vote( const BoatState_t& boatState )
         courseBallot.set( boatState.waypointBearing + i, votes );
         courseBallot.set( boatState.waypointBearing - i, votes );
     }
-    //std::cout << "\n";
 
     return courseBallot;
 }

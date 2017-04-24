@@ -46,7 +46,6 @@ void CollidableMgr::addAISContact( uint32_t mmsi, float lat, float lon, float sp
             this->aisContacts[i].course = course;
             this->aisContacts[i].lastUpdated = SysClock::unixTime();
             contactExists = true;
-            Logger::info("Updated AIS contact! MMSI: %u Lat: %f Lon: %f Speed: %f Course: %d", mmsi, lat, lon, speed, course);
         }
     }
 
@@ -61,7 +60,6 @@ void CollidableMgr::addAISContact( uint32_t mmsi, float lat, float lon, float sp
         aisContact.lastUpdated = SysClock::unixTime();
 
         this->aisContacts.push_back(aisContact);
-        Logger::info("New AIS contact! MMSI: %u Lat: %f Lon: %f Speed: %f Course: %d", mmsi, lat, lon, speed, course);
     }
 
     this->aisListMutex.unlock();
@@ -69,7 +67,7 @@ void CollidableMgr::addAISContact( uint32_t mmsi, float lat, float lon, float sp
 }
 
 ///----------------------------------------------------------------------------------
-void CollidableMgr::addVisualContact( uint16_t id, uint16_t bearing )
+void CollidableMgr::addVisualContact( uint32_t id, uint16_t bearing )
 {
     if( !this->ownVisualLock )
     {
@@ -77,7 +75,27 @@ void CollidableMgr::addVisualContact( uint16_t id, uint16_t bearing )
         this->ownVisualLock = true;
     }
 
-    // TODO
+   // Check if the contact already exists, and if so update it
+    bool contactExists = false;
+    for( uint16_t i = 0; i < this->visualContacts.size() && !contactExists; i++ )
+    {
+        if( this->visualContacts[i].id == id)
+        {
+            this->visualContacts[i].bearing = bearing;
+            this->visualContacts[i].lastUpdated = SysClock::unixTime();
+            contactExists = true;
+        }
+    }
+
+    if(!contactExists)
+    {
+        VisualCollidable_t visualContact;
+        visualContact.id = id;
+        visualContact.bearing = bearing;
+        visualContact.lastUpdated = SysClock::unixTime();
+
+        this->visualContacts.push_back(visualContact);
+    }
 
     this->visualListMutex.unlock();
     this->ownVisualLock = false;

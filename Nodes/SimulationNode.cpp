@@ -29,6 +29,7 @@
 #include "SystemServices/Logger.h"
 #include "SystemServices/SysClock.h"
 #include "Network/TCPServer.h"
+#include "Math/CourseMath.h"
 
 
 #define BASE_SLEEP_MS 200
@@ -180,6 +181,21 @@ void SimulationNode::processAISContact( TCPPacket_t& packet )
 }
 
 ///--------------------------------------------------------------------------------------
+void SimulationNode::processVisualContact( TCPPacket_t& packet )
+{
+	if( this->collidableMgr != NULL )
+	{
+		// The first byte is the packet type, lets skip that
+		uint8_t* ptr = packet.data + 1;
+		VisualContactPacket_t* data = (VisualContactPacket_t*)ptr;
+
+		uint16_t bearing = CourseMath::calculateBTW(m_GPSLon, m_GPSLat, data->longitude, data->latitude);
+
+		this->collidableMgr->addVisualContact(data->id, bearing);
+	}
+}
+
+///--------------------------------------------------------------------------------------
 void SimulationNode::sendActuatorData( int socketFD )
 {
 	server.sendData( socketFD, &actuatorData, sizeof(ActuatorDataPacket_t) );
@@ -220,7 +236,7 @@ void SimulationNode::SimulationThreadFunc(void* nodePtr)
 			break;
 
 			case SimulatorPacket::CameraData:
-				// TODO
+				node->processVisualContact( packet );
 			break;
 
 			// unknown or deformed packet

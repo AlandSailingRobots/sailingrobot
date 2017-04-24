@@ -31,6 +31,8 @@
 #include "LocalNavigationModule/Voters/WaypointVoter.h"
 #include "LocalNavigationModule/Voters/WindVoter.h"
 #include "LocalNavigationModule/Voters/ChannelVoter.h"
+#include "LocalNavigationModule/Voters/ProximityVoter.h"
+#include "LocalNavigationModule/Voters/MidRangeVoter.h"
 #include "Nodes/LowLevelController.h"
 
 #define DISABLE_LOGGING 0
@@ -103,10 +105,14 @@ void development_LocalNavigationModule( MessageBus& messageBus, DBHandler& dbHan
 	WaypointVoter waypointVoter( MAX_VOTES, 1 );
 	WindVoter windVoter( MAX_VOTES, 1 );
 	ChannelVoter channelVoter( MAX_VOTES, 1 );
+	MidRangeVoter midRangeVoter( MAX_VOTES, 1, collidableMgr );
+	ProximityVoter proximityVoter( MAX_VOTES, 2, collidableMgr);
 
 	lnm.registerVoter( &waypointVoter );
 	lnm.registerVoter( &windVoter );
 	lnm.registerVoter( &channelVoter );
+	lnm.registerVoter( &proximityVoter );
+	lnm.registerVoter( &midRangeVoter );
 
 
 	vesselState.start();
