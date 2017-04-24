@@ -21,6 +21,7 @@ class MessageVerifier : public Node {
 public:
     MessageVerifier(MessageBus& msgBus) : Node(NodeID::MessageVerifier, msgBus)
     { 
+        msgBus.registerNode(*this);
         msgBus.registerNode(*this, MessageType::WindState);
     }
 
@@ -44,12 +45,21 @@ public:
             return false;
         }
 
-        // Overload operator in WindStateMsg ??
+        if(m_WindStateMsg->trueWindSpeed() == otherMsg->trueWindSpeed() &&
+           m_WindStateMsg->trueWindDirection() == otherMsg->trueWindDirection() &&
+           m_WindStateMsg->apparentWindSpeed() == otherMsg->apparentWindSpeed() &&
+           m_WindStateMsg->apparentWindDirection() == otherMsg->apparentWindDirection()) 
+        {   
+            return true;
+        }
 
-        return(m_WindStateMsg->trueWindSpeed() == otherMsg->trueWindSpeed() &&
-               m_WindStateMsg->trueWindDirection() == otherMsg->trueWindDirection() &&
-               m_WindStateMsg->apparentWindSpeed() == otherMsg->apparentWindSpeed() &&
-               m_WindStateMsg->apparentWindDirection() == otherMsg->apparentWindDirection());
+        else {
+            m_MsgBus.sendMessage(std::make_unique<WindStateMsg>(otherMsg->trueWindSpeed(), otherMsg->trueWindDirection(),
+                                                                otherMsg->apparentWindSpeed(), otherMsg->apparentWindDirection()));
+        }
+               
+
+        return false;
 
     }
 
