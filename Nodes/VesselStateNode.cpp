@@ -132,9 +132,9 @@ void VesselStateNode::processWaypointMessage( WaypointDataMsg* msg )
 	waypointDistance = CourseMath::calculateDTW( m_GPSLon, m_GPSLat, waypointLon, waypointLat );
 }
 
-void VesselStateNode::VesselStateThreadFunc(void* nodePtr)
+void VesselStateNode::VesselStateThreadFunc(ActiveNode* nodePtr)
 {
-	VesselStateNode* node = (VesselStateNode*)nodePtr;
+	VesselStateNode* node = dynamic_cast<VesselStateNode*> (nodePtr);
 
 	// An initial sleep, its purpose is to ensure that most if not all the sensor data arrives
 	// at the start before we send out the vessel state message.

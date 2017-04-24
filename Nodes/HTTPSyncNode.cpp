@@ -86,9 +86,9 @@ void HTTPSyncNode::processMessage(const Message* msgPtr)
 
 }
 
-void HTTPSyncNode::HTTPSyncThread(void* nodePtr){
+void HTTPSyncNode::HTTPSyncThread(ActiveNode* nodePtr){
 
-    HTTPSyncNode* node = (HTTPSyncNode*)(nodePtr);
+    HTTPSyncNode* node = dynamic_cast<HTTPSyncNode*> (nodePtr);
     
 
     Logger::info("HTTPSync thread has started");

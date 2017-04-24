@@ -65,7 +65,7 @@ class HTTPSyncNode : public ActiveNode{
 		///----------------------------------------------------------------------------------
 		/// Node thread: Calls all syncing functions while running
 		///----------------------------------------------------------------------------------
-        static void HTTPSyncThread(void* nodePtr);
+        static void HTTPSyncThread(ActiveNode* nodePtr);
 
 
 		///----------------------------------------------------------------------------------

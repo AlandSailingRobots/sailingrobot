@@ -83,9 +83,9 @@ void ArduinoNodeForWindSensor::processMessage(const Message* msg)
 
 }
 
-void ArduinoNodeForWindSensor::ArduinoThreadFunc(void* nodePtr)
+void ArduinoNodeForWindSensor::ArduinoThreadFunc(ActiveNode* nodePtr)
 {
-    ArduinoNodeForWindSensor* node = (ArduinoNodeForWindSensor*)nodePtr;
+    ArduinoNodeForWindSensor* node = dynamic_cast<ArduinoNodeForWindSensor*> (nodePtr);
 
     Logger::info("Arduino thread started");
 

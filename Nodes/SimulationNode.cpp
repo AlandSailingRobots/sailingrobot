@@ -214,9 +214,9 @@ void SimulationNode::setupDataSend(){
   m_data_send.sheet_command = m_sail;
 }
 
-void SimulationNode::SimulationThreadFunc(void* nodePtr)
+void SimulationNode::SimulationThreadFunc(ActiveNode* nodePtr)
 {
-	SimulationNode* node = (SimulationNode*)nodePtr;
+	SimulationNode* node = dynamic_cast<SimulationNode*> (nodePtr);
 
 	int bytes_received = 0;
 	struct DATA_SOCKET_RECEIVE dump_data_sock_receive;

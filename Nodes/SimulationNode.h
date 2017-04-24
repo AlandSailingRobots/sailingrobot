@@ -94,7 +94,7 @@ private:
 	///----------------------------------------------------------------------------------
 	/// Communicate with the simulation receive sensor data and send actuator data
 	///----------------------------------------------------------------------------------
-	static void SimulationThreadFunc(void* nodePtr);
+	static void SimulationThreadFunc(ActiveNode* nodePtr);
 
   ///----------------------------------------------------------------------------------
   /// Initalize socket server

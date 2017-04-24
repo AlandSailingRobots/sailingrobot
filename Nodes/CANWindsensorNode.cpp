@@ -146,7 +146,7 @@ void CANWindsensorNode::processMessage(const Message* message) {
 }
 
 void CANWindsensorNode::start() {
-	runThreadTwo(CANWindSensorNodeThreadFunc);
+	runThread(CANWindSensorNodeThreadFunc);
 }
 
 void CANWindsensorNode::CANWindSensorNodeThreadFunc(ActiveNode* nodePtr) {
