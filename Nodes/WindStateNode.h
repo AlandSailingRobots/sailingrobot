@@ -17,7 +17,7 @@
 
 class WindStateNode : public Node {
 public:
-  WindStateNode(MessageBus& msgBus);
+  WindStateNode(MessageBus& msgBus, int maxTwdBufferSize);
   ~WindStateNode();
   bool init();
   void processMessage(const Message* message);
@@ -57,6 +57,7 @@ private:
   bool m_stateMsgReceived = false;
 
   std::vector<float> m_Twd;
+  int m_MaxTwdBufferSize;
 
   std::mutex m_Lock;
 

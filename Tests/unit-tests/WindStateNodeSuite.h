@@ -1,6 +1,7 @@
 #include "Nodes/WindStateNode.h"
 #include "MessageBus/MessageBus.h"
 #include "Tests/unit-tests/TestMocks/MessageLogger.h"
+#include "Tests/unit-tests/TestMocks/MessageVerifier.h"
 #include "../cxxtest/cxxtest/TestSuite.h"
 
 #include <chrono>
@@ -34,7 +35,7 @@ public:
 
 	void test_NodeSendsMessage() {
 		MessageLogger logger(msgBus());
-		WindStateNode windStateNode(msgBus());
+		WindStateNode windStateNode(msgBus(), 100);
 
 		MessagePtr windData = std::make_unique<WindDataMsg>(1,2,3);
 		MessagePtr stateMsg = std::make_unique<StateMessage>(4,5,6,7,8);
@@ -46,6 +47,11 @@ public:
 		std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_TIME));
 		TS_ASSERT(logger.windStateReceived());
 
+	}
+
+	void test_verifyCorrectMsgData() {
+		MessageVerifier verifier(msgBus());
+		WindStateNode windStateNode(msgBus(), 100);
 	}
 
 };
