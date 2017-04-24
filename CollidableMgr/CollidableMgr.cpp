@@ -15,6 +15,10 @@
  #include "CollidableMgr.h"
  #include "SystemServices/SysClock.h"
  #include "SystemServices/Logger.h"
+ #include <chrono>
+
+
+ #define CONTACT_TIME_OUT       3600        // 1 Minute
 
 
 ///----------------------------------------------------------------------------------
@@ -22,6 +26,12 @@ CollidableMgr::CollidableMgr()
     :ownAISLock(false), ownVisualLock(false)
 {
 
+}
+
+///----------------------------------------------------------------------------------
+void CollidableMgr::startGC()
+{
+    m_Thread = new std::thread(ContactGC, this);
 }
 
 ///----------------------------------------------------------------------------------
@@ -111,4 +121,65 @@ CollidableList<AISCollidable_t> CollidableMgr::getAISContacts()
 CollidableList<VisualCollidable_t> CollidableMgr::getVisualContacts()
 {
     return CollidableList<VisualCollidable_t>(&this->visualListMutex, &visualContacts);
+}
+
+///----------------------------------------------------------------------------------
+void CollidableMgr::removeOldContacts()
+{
+    if( !this->ownVisualLock )
+    {
+        this->visualListMutex.lock();
+        this->ownVisualLock = true;
+    }
+
+    int timeNow = SysClock::unixTime();
+
+
+    for (auto it = this->visualContacts.cbegin(); it != this->visualContacts.cend();)
+    {
+        if ( (*it).lastUpdated + CONTACT_TIME_OUT < timeNow )
+        {
+            it = visualContacts.erase(it);
+        }
+        else
+        {
+            ++it;
+        }
+    }
+
+    this->visualListMutex.unlock();
+    this->ownVisualLock = false;
+
+    if( !this->ownAISLock )
+    {
+        this->aisListMutex.lock();
+        this->ownAISLock = true;
+    }
+
+    timeNow = SysClock::unixTime();
+
+    for (auto it = this->aisContacts.cbegin(); it != this->aisContacts.cend();)
+    {
+        if ( (*it).lastUpdated + CONTACT_TIME_OUT < timeNow )
+        {
+            it = aisContacts.erase(it);
+        }
+        else
+        {
+            ++it;
+        }
+    }
+
+    this->aisListMutex.unlock();
+    this->ownAISLock = false;
+}
+
+///----------------------------------------------------------------------------------
+void CollidableMgr::ContactGC(CollidableMgr* ptr)
+{
+    while(true)
+    {
+        std::this_thread::sleep_for(std::chrono::milliseconds(CONTACT_TIME_OUT));
+        ptr->removeOldContacts();
+    }
 }

@@ -117,6 +117,8 @@ void development_LocalNavigationModule( MessageBus& messageBus, DBHandler& dbHan
 
 	vesselState.start();
 	lnm.start();
+	
+	collidableMgr.startGC();
 
 	#if SIMULATION == 1
 	simulation.start();
