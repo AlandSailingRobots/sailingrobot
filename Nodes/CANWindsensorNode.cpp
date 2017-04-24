@@ -166,7 +166,7 @@ void CANWindsensorNode::CANWindSensorNodeThreadFunc(ActiveNode* nodePtr) {
 			std::this_thread::sleep_for(std::chrono::milliseconds(5));
 			continue;
 		}
-
+		timer.restart();
 	    node->m_lock.lock();
 		// If there has been a change in wind data since the last cycle,
 		// update stored values and send out a new message, otherwise
