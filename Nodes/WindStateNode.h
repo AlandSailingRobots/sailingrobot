@@ -17,15 +17,15 @@
 
 class WindStateNode : public Node {
 public:
-  WindStateNode(MessageBus& msgBus, int twd);
+  WindStateNode(MessageBus& msgBus);
   ~WindStateNode();
   bool init();
   void processMessage(const Message* message);
 
 private:
 
-  void parseWindMessage(WindDataMsg* msg);
-  void parseStateMessage(StateMessage* msg);
+  void parseWindMessage(const WindDataMsg* msg);
+  void parseStateMessage(const StateMessage* msg);
   void sendMessage();
 
   void updateApparentWind();
@@ -56,7 +56,7 @@ private:
   bool m_windDataReceived = false;
   bool m_stateMsgReceived = false;
 
-  int m_twd;
+  std::vector<float> m_Twd;
 
   std::mutex m_Lock;
 

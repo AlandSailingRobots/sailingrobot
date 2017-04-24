@@ -3,8 +3,8 @@
 
 #include <vector>
 
-WindStateNode::WindStateNode(MessageBus& msgBus, int twd)
-: Node(NodeID::WindStateNode, msgBus), m_twd(twd)
+WindStateNode::WindStateNode(MessageBus& msgBus)
+: Node(NodeID::WindStateNode, msgBus)
 {
   msgBus.registerNode(*this, MessageType::StateMessage);
   msgBus.registerNode(*this, MessageType::WindData);
@@ -30,7 +30,7 @@ void WindStateNode::processMessage(const Message* message){
 
   if(type == MessageType::StateMessage){
     m_stateMsgReceived = true;
-    parseStateMessage((StateMessage*) message);
+    parseStateMessage(dynamic_cast< const StateMessage*> (message));
     
 
     if(!m_windDataReceived || !m_stateMsgReceived ){
@@ -43,7 +43,7 @@ void WindStateNode::processMessage(const Message* message){
 
   else if(type == MessageType::WindData){
     m_windDataReceived = true;
-    parseWindMessage((WindDataMsg*) message);
+    parseWindMessage(dynamic_cast< const WindDataMsg*> (message));
 
     if(!m_stateMsgReceived){
       return;
@@ -53,14 +53,14 @@ void WindStateNode::processMessage(const Message* message){
 
 }
 
-void WindStateNode::parseStateMessage(StateMessage* msg) {
+void WindStateNode::parseStateMessage(const StateMessage* msg) {
   m_vesselHeading = msg->heading();
   m_vesselLat     = msg->latitude();
   m_vesselLon     = msg->longitude();
   m_vesselSpeed   = msg->speed();
 }
 
-void WindStateNode::parseWindMessage(WindDataMsg* msg) {
+void WindStateNode::parseWindMessage(const WindDataMsg* msg) {
   m_WindDir       = msg->windDirection();
   m_WindSpeed     = msg->windSpeed();
   m_WindTemp      = msg->windTemp();
@@ -82,8 +82,7 @@ void WindStateNode::updateApparentWind() {
 }
 
 void WindStateNode::updateTrueWind() {
-  std::vector<float> twdVector(m_twd);
-
-  m_trueWindDirection = Utility::getTrueWindDirection(m_WindDir, m_WindSpeed, m_vesselSpeed, m_vesselHeading, twdVector, m_twd);
+  
+  m_trueWindDirection = Utility::getTrueWindDirection(m_WindDir, m_WindSpeed, m_vesselSpeed, m_vesselHeading, m_Twd, m_Twd.size());
   m_trueWindSpeed     = Utility::calculateTrueWindSpeed(m_WindDir, m_WindSpeed, m_vesselSpeed, m_vesselHeading);
 }

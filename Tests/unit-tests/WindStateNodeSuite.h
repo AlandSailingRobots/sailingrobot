@@ -34,7 +34,7 @@ public:
 
 	void test_NodeSendsMessage() {
 		MessageLogger logger(msgBus());
-		WindStateNode windStateNode(msgBus(), 100);
+		WindStateNode windStateNode(msgBus());
 
 		MessagePtr windData = std::make_unique<WindDataMsg>(1,2,3);
 		MessagePtr stateMsg = std::make_unique<StateMessage>(4,5,6,7,8);
