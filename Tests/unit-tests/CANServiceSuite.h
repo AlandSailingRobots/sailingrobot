@@ -8,6 +8,7 @@
 #include "TestMocks/MockCANReceiver.h"
 #include "HardwareServices/CAN_Services/CANService.h"
 #include "HardwareServices/CAN_Services/CANPGNReceiver.h"
+#include "HardwareServices/CAN_Services/CANFrameReceiver.h"
 #include "HardwareServices/CAN_Services/N2kMsg.h"
 #include "../cxxtest/cxxtest/TestSuite.h"
 
@@ -42,6 +43,11 @@ public:
     fut.get();
 
     TS_ASSERT(receiver.message_received());
+  }
+
+  void test_CANServiceSendFrameMessage() {
+
+    
   }
 
   void test_CANServiceNodeCommunication () {

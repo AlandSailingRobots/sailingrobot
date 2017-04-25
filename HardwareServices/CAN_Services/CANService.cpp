@@ -34,6 +34,11 @@ bool CANService::registerForReading(CANFrameReceiver& receiver, uint32_t ID) {
 
 }
 
+void CANService::sendN2kMessage(N2kMsg& msg){
+  std::lock_guard<std::mutex> lock (m_QueueMutex2);
+  m_MsgQueue2.push(msg);
+}
+
 void CANService::sendCANMessage(CanMsg& msg){
   std::lock_guard<std::mutex> lock (m_QueueMutex);
   m_MsgQueue.push(msg);
@@ -95,7 +100,7 @@ void CANService::run() {
 
         N2kMsg Nmsg;
 
-        IdToN2KMsg(Nmsg,Cmsg.id);
+        IdToN2kMsg(Nmsg,Cmsg.id);
 
         auto receiverIt = m_RegisteredFrameReceivers.find(Nmsg.PGN);
 
@@ -115,14 +120,14 @@ void CANService::run() {
       
     }
 
-    if(!m_MsgQueue.emtpy()) {
+    if(!m_MsgQueue.empty()) {
 
-      Canmsg cmsg = m_MsgQueue.front();
+      CanMsg Cmsg = m_MsgQueue.front();
       m_MsgQueue.pop();
 
       N2kMsg Nmsg;
 
-      IdToN2KMsg(Nmsg,Cmsg.id);
+      IdToN2kMsg(Nmsg,Cmsg.id);
 
       auto receiverIt = m_RegisteredFrameReceivers.find(Nmsg.PGN);
 
@@ -130,6 +135,20 @@ void CANService::run() {
         // Iterator is a pair, of which the second element is the actual receiver.
         CANFrameReceiver* receiver = receiverIt->second;
         receiver->processPGN(Cmsg);
+      }
+    }
+
+    if(!m_MsgQueue2.empty()) {
+
+      N2kMsg Nmsg = m_MsgQueue2.front();
+      m_MsgQueue2.pop();
+
+      auto receiverIt = m_RegisteredPGNReceivers.find(Nmsg.PGN);
+
+      if(receiverIt != m_RegisteredPGNReceivers.end()) {
+        // Iterator is a pair, of which the second element is the actual receiver.
+        CANPGNReceiver* receiver = receiverIt->second;
+        receiver->processPGN(Nmsg);
       }
     }
   }

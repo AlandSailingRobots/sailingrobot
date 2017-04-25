@@ -18,6 +18,7 @@
  #pragma once
 
  #include "CANPGNReceiver.h"
+ #include "CANFrameReceiver.h"
  #include "mcp2515.h"
  #include "N2kMsg.h"
  #include <vector>
@@ -47,6 +48,8 @@ public:
  * receiver is registered, will be discarded.             */
   void sendCANMessage(CanMsg& msg);
 
+  void sendN2kMessage(N2kMsg& msg);
+
 /* Starts the service using async, and will begin *
  * receiving and sending messages                 */
   std::future<void> start();
@@ -62,5 +65,9 @@ private:
   std::map<uint32_t, CANFrameReceiver*> m_RegisteredFrameReceivers;
   std::queue<CanMsg> m_MsgQueue;
   std::mutex m_QueueMutex;
+
+  std::queue<N2kMsg> m_MsgQueue2;
+  std::mutex m_QueueMutex2;
+
   std::atomic<bool> m_Running;
 };
