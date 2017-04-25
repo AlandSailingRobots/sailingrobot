@@ -29,6 +29,8 @@ void CanMsgToN2kMsg(CanMsg &Cmsg, N2kMsg &Nmsg);
 void N2kMsgToCanMsg(N2kMsg &Nmsg, CanMsg &Cmsg);
 
 void IdToN2kMsg(N2kMsg &NMsg, uint32_t &id);
+void N2kMsgToId(N2kMsg &NMsg, uint32_t &id);
+
 void PrintMsg(CanMsg &Msg);
 void PrintNMEAMsg(N2kMsg &NMsg);
 

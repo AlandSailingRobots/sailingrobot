@@ -21,10 +21,10 @@ public:
         m_WindvaneSelfSteeringOn(windvaneSelfSteeringOn), m_NavigationState(state)
     { }
 
-    NavigationState navigationState() { return m_NavigationState; }
-    int courseToSteer() { return m_CourseToSteer; }
-    float targetSpeed() { return m_TargetSpeed; }
-    bool windvaneSelfSteeringOn() { return m_WindvaneSelfSteeringOn; }
+    NavigationState navigationState() const { return m_NavigationState; }
+    int courseToSteer() const { return m_CourseToSteer; }
+    float targetSpeed() const { return m_TargetSpeed; }
+    bool windvaneSelfSteeringOn() const { return m_WindvaneSelfSteeringOn; }
 
 private:
 

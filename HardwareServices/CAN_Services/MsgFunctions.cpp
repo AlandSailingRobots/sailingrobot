@@ -17,14 +17,14 @@ void CanMsgToN2kMsg(CanMsg &Cmsg, N2kMsg &Nmsg)
 
 void N2kMsgToCanMsg(N2kMsg &Nmsg, CanMsg &Cmsg)
 {
-	N2kMsgToID(Nmsg, Cmsg.id);
+	N2kMsgToId(Nmsg, Cmsg.id);
 
 	Cmsg.header.length = Nmsg.DataLen;
 	Cmsg.header.ide = 0;
 
 	for(int i = 0; i < 8; ++i)
 	{
-		Cmsg.Data[i] = Nmsg.data[i];
+		Cmsg.data[i] = Nmsg.Data[i];
 	}
 }
 

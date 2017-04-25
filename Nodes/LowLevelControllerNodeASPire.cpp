@@ -1,5 +1,5 @@
 #include "LowLevelControllerNodeASPire.h"
-#include "N2kMsg.h"
+#include "HardwareServices/CAN_Services/N2kMsg.h"
 
 LowLevelControllerNodeASPire::LowLevelControllerNodeASPire(MessageBus& msgBus, CANService& canService, float maxRudderAngle = 30, 
                                                      float maxCourseAngleDiff = 60, float maxServoSailAngle = 10, float servoSailMinAngleDiff = 5) :
@@ -30,7 +30,13 @@ void LowLevelControllerNodeASPire::processMessage(const Message* message){
 }
 
 void LowLevelControllerNodeASPire::constructAndSendCANFrame() {
-    
+    CanMsg frame = {
+        0,
+        0,
+        8,
+        {1,2,3,4,5,6,7,8},
+    };
+    m_CanService->sendCANMessage(frame);
 }
 
 void LowLevelControllerNodeASPire::processStateMessage(const StateMessage* msg){
