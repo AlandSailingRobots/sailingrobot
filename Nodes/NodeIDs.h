@@ -41,7 +41,8 @@ enum class NodeID {
 	StateEstimation,
 	MessagePrinter,
 	WindStateNode,
-	LowLevelControllerNodeASPire
+	LowLevelControllerNodeASPire,
+	MessageVerifier
 };
 
 inline std::string nodeToString(NodeID id)
@@ -94,6 +95,8 @@ inline std::string nodeToString(NodeID id)
 		return "WindStateNode";
 		case NodeID::LowLevelControllerNodeASPire:
 		return "LowLevelControllerNodeASPire";
+		case NodeID::MessageVerifier:
+		return "MessageVerifier";
 	}
 	return "";
 }
