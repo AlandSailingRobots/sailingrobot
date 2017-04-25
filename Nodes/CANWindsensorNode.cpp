@@ -160,7 +160,7 @@ void CANWindsensorNode::CANWindSensorNodeThreadFunc(ActiveNode* nodePtr) {
 	while(true) {
 
 	// Need to convert milliseconds into seconds for the argument		
-		timer.sleepUntil(m_TimeBetweenMsgs / 1000);
+		timer.sleepUntil(m_TimeBetweenMsgs*1.0f / 1000);
 		timer.reset();
 	    node->m_lock.lock();
 
