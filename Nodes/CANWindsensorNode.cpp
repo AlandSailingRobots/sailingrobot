@@ -159,18 +159,10 @@ void CANWindsensorNode::CANWindSensorNodeThreadFunc(ActiveNode* nodePtr) {
 
 	while(true) {
 
-		// Timer returns seconds, but the stored time is in
-		// milliseconds
-		
-		if(timer.timePassed() * 1000 < node->m_TimeBetweenMsgs) {
-			std::this_thread::sleep_for(std::chrono::milliseconds(5));
-			continue;
-		}
-		timer.restart();
+	// Need to convert milliseconds into seconds for the argument		
+		timer.sleepUntil(m_TimeBetweenMsgs / 1000);
+		timer.reset();
 	    node->m_lock.lock();
-		// If there has been a change in wind data since the last cycle,
-		// update stored values and send out a new message, otherwise
-		// wait for the next cycle.
 
 		if( node->m_WindDir == DATA_OUT_OF_RANGE &&  node->m_WindTemperature == DATA_OUT_OF_RANGE && node->m_WindSpeed == DATA_OUT_OF_RANGE){
 			node->m_lock.unlock();
