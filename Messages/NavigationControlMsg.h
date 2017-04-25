@@ -28,10 +28,9 @@ public:
 
 private:
 
-    NavigationState m_NavigationState;
-
     int     m_CourseToSteer;
     float   m_TargetSpeed;
     bool    m_WindvaneSelfSteeringOn;
+    NavigationState m_NavigationState;
 
 };

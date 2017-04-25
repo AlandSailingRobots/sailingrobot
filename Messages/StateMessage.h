@@ -33,6 +33,7 @@ public:
       double latitude() const { return vesselLat; }
       double longitude() const { return vesselLan; }
       double speed() const { return vesselSpeed; }
+      double course() const { return vesselCourse; }
 
       virtual ~StateMessage() { }
 

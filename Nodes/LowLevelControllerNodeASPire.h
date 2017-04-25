@@ -8,7 +8,7 @@
 #include "MessageBus/MessageBus.h"
 #include "HardwareServices/CAN_Services/CANService.h"
 
-#define DATA_OUT_OF_RANGE = -2000
+#define DATA_OUT_OF_RANGE -2000
 
 class LowLevelControllerNodeASPire : public Node {
 public:
@@ -25,7 +25,7 @@ private:
     void processWindStateMessage(const WindStateMsg* msg);
     void processNavigationControlMessage(const NavigationControlMsg* msg);
 
-    CANService m_CanService;
+    CANService* m_CanService;
 
     float m_MaxRudderAngle;
     float m_MaxCourseAngleDiff;
