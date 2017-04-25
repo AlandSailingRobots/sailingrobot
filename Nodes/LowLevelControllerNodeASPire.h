@@ -24,6 +24,7 @@ private:
     void processStateMessage(const StateMessage* msg);
     void processWindStateMessage(const WindStateMsg* msg);
     void processNavigationControlMessage(const NavigationControlMsg* msg);
+    void constructAndSendCANFrame();
 
     CANService* m_CanService;
 
@@ -42,4 +43,9 @@ private:
 	double m_TrueWindDir = DATA_OUT_OF_RANGE;
 	double m_ApparentWindSpeed = DATA_OUT_OF_RANGE;
 	double m_ApparentWindDir = DATA_OUT_OF_RANGE;
+
+    NavigationControlMsg::NavigationState m_NavigationState;
+    int m_CourseToSteer = DATA_OUT_OF_RANGE;
+    float m_TargetSpeed = DATA_OUT_OF_RANGE;
+    bool m_WindvaneSelfSteeringOn = false;
 };
