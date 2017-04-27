@@ -1,5 +1,6 @@
 #include "LowLevelControllerNodeASPire.h"
 #include "HardwareServices/CAN_Services/N2kMsg.h"
+#include "Math/Utility.h"
 
 LowLevelControllerNodeASPire::LowLevelControllerNodeASPire(MessageBus& msgBus, CANService& canService, float maxRudderAngle = 30, 
                                                      float maxCourseAngleDiff = 60, float maxServoSailAngle = 10, float servoSailMinAngleDiff = 5) :
@@ -29,14 +30,29 @@ void LowLevelControllerNodeASPire::processMessage(const Message* message){
 
 }
 
-void LowLevelControllerNodeASPire::constructAndSendCANFrame() {
-    CanMsg frame = {
-        0,
-        0,
-        8,
-        {1,2,3,4,5,6,7,8},
-    };
-    m_CanService->sendCANMessage(frame);
+void LowLevelControllerNodeASPire::CalculateServoAngle() {
+    float headingWindDiff = Utility::limitAngleRange(m_VesselHeading - m_TrueWindDirection);
+
+    if(m_CurrentServoAngle == 0){
+        // >= or >      ?? 
+        if(headingWindDiff > 180 && headingWindDiff < 360){
+            m_CurrentServoAngle = m_MaxServoAngle;
+        } else {
+            m_CurrentServoAngle = -m_MaxServoAngle;
+        }
+    } 
+    
+    else if(m_CurrentServoAngle < 0) {
+        if(headingWindDiff > (180+m_ServoSailMinAngleDiff) && headingWindDiff < (360 - m_ServoSailMinAngleDiff)) {
+            m_CurrentServoAngle = m_MaxServoSailAngle;
+        }
+    }
+
+    else if(m_CurrentServoAngle > 0) {
+        if(headingWindDiff > m_ServoSailAngleWindDiff && headingWindDiff < (180 - m_ServoSailMinAngleDiff)) {
+            m_CurrentServoAngle = -m_MaxServoSailAngle;
+        }
+    }
 }
 
 void LowLevelControllerNodeASPire::processStateMessage(const StateMessage* msg){
@@ -59,4 +75,15 @@ void LowLevelControllerNodeASPire::processNavigationControlMessage(const Navigat
     m_CourseToSteer     = msg->courseToSteer();
     m_TargetSpeed       = msg->targetSpeed();
     m_WindvaneSelfSteeringOn = msg->windvaneSelfSteeringOn();
+}
+
+
+static float LowLevelControllerNodeASPire::CourseRegulator::getRudderAngle(float maxRudderAngle, double vesselCourse, float courseToSteer) {
+     // Todo : Calculate rudder Angle in the range from -maxRudderAngle : maxRudderAngle
+     // Based on the difference between vesselCourse and courseToSteer
+     return 0.0;
+}
+
+void LowLevelControllerNodeASPire::WingsailControl::calculateAndSendFrame() {
+    
 }

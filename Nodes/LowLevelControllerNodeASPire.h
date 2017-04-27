@@ -19,12 +19,25 @@ public:
     bool init();
     void processMessage(const Message* message);
 
+
+    // If there is only one method in this class, shouldn't we just remove it
+    // and put the method in the Node instead?
+    class CourseRegulator {
+    public:
+        static float getRudderAngle(float maxRudderAngle, double vesselCourse, float courseToSteer);
+    };
+
+    class WingsailControl {
+    public:
+        void calculateAndSendFrame();    
+    };
+
 private:
 
     void processStateMessage(const StateMessage* msg);
     void processWindStateMessage(const WindStateMsg* msg);
     void processNavigationControlMessage(const NavigationControlMsg* msg);
-    void constructAndSendCANFrame();
+    void calculateServoAngle();
 
     CANService* m_CanService;
 
@@ -32,6 +45,7 @@ private:
     float m_MaxCourseAngleDiff;
     float m_MaxServoSailAngle;
     float m_ServoSailMinAngleDiff;
+    float m_CurrentServoAngle = 0;
 
     float  m_VesselHeading = DATA_OUT_OF_RANGE;
     double m_VesselLatitude = DATA_OUT_OF_RANGE;
