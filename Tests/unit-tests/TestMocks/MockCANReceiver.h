@@ -11,10 +11,13 @@ public:
 
   MockCANReceiver(CANService& service, std::vector<uint32_t> IDs) : CANFrameReceiver(service, IDs), m_IDs(IDs)
   {
+    std::cout << "before id-check ";
     if(IDs[0] == 700){
       CanMsg msg;
       msg.id = 701;
+      std::cout << "after id-check ";
       service.sendCANMessage(msg);
+      std::cout << "after service.sendCANMessage ";
     }
   }
 
