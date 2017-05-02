@@ -28,6 +28,8 @@
 #include "Messages/ServerWaypointsReceivedMsg.h"
 #include "Messages/LocalConfigChangeMsg.h"
 #include "Messages/LocalWaypointChangeMsg.h"
+#include "Messages/StateMessage.h"
+
 
 class MessageSuite : public CxxTest::TestSuite {
 public:
@@ -128,13 +130,13 @@ public:
 
 		TS_ASSERT_EQUALS(msg.messageType(), MessageType::WaypointData);
 		TS_ASSERT_EQUALS(msg.nextId(), 2);
-		TS_ASSERT_DELTA(msg.nextLongitude(), 19.81, 1e-7);				
+		TS_ASSERT_DELTA(msg.nextLongitude(), 19.81, 1e-7);
 		TS_ASSERT_DELTA(msg.nextLatitude(), 60.2, 1e-7);
 		TS_ASSERT_EQUALS(msg.nextDeclination(), 0);
 		TS_ASSERT_EQUALS(msg.nextRadius(), 6);
 		TS_ASSERT_EQUALS(msg.stayTime(), 15);
 		TS_ASSERT_EQUALS(msg.prevId(), 1);
-		TS_ASSERT_DELTA(msg.prevLongitude(), 19.82, 1e-7);				
+		TS_ASSERT_DELTA(msg.prevLongitude(), 19.82, 1e-7);
 		TS_ASSERT_DELTA(msg.prevLatitude(), 60.1, 1e-7);
 		TS_ASSERT_EQUALS(msg.prevDeclination(), 6);
 		TS_ASSERT_EQUALS(msg.prevRadius(), 15);
@@ -148,13 +150,13 @@ public:
 		TS_ASSERT(msgTwo.isValid());
 		TS_ASSERT_EQUALS(msgTwo.messageType(), MessageType::WaypointData);
 		TS_ASSERT_EQUALS(msgTwo.nextId(), 2);
-		TS_ASSERT_DELTA(msgTwo.nextLongitude(), 19.81, 1e-7);				
+		TS_ASSERT_DELTA(msgTwo.nextLongitude(), 19.81, 1e-7);
 		TS_ASSERT_DELTA(msgTwo.nextLatitude(), 60.2, 1e-7);
 		TS_ASSERT_EQUALS(msgTwo.nextDeclination(), 0);
 		TS_ASSERT_EQUALS(msgTwo.nextRadius(), 6);
 		TS_ASSERT_EQUALS(msgTwo.stayTime(), 15);
 		TS_ASSERT_EQUALS(msgTwo.prevId(), 1);
-		TS_ASSERT_DELTA(msgTwo.prevLongitude(), 19.82, 1e-7);				
+		TS_ASSERT_DELTA(msgTwo.prevLongitude(), 19.82, 1e-7);
 		TS_ASSERT_DELTA(msgTwo.prevLatitude(), 60.1, 1e-7);
 		TS_ASSERT_EQUALS(msgTwo.prevDeclination(), 6);
 		TS_ASSERT_EQUALS(msgTwo.prevRadius(), 15);
@@ -218,7 +220,7 @@ public:
 		TS_ASSERT_EQUALS(msg.gpsOnline(), true);
 		TS_ASSERT_DELTA(msg.latitude(), 19.2, 1e-7);
 		TS_ASSERT_DELTA(msg.longitude(), 60.02, 1e-7);
-		TS_ASSERT_DELTA(msg.unixTime(), 120.04, 1e-7);			
+		TS_ASSERT_DELTA(msg.unixTime(), 120.04, 1e-7);
 		TS_ASSERT_DELTA(msg.speed(), 2.1, 1e-7);
 		TS_ASSERT_EQUALS(msg.gpsSatellite(), 11);
 		TS_ASSERT_DELTA(msg.gpsHeading(), 170.5, 1e-7);
@@ -229,7 +231,7 @@ public:
 		TS_ASSERT_EQUALS(msg.arduinoRudder(), 5500);
 		TS_ASSERT_EQUALS(msg.arduinoSheet(), 4700);
 		TS_ASSERT_EQUALS(msg.arduinoBattery(), 2);
-		TS_ASSERT_EQUALS(msg.arduinoRC(), 3);		
+		TS_ASSERT_EQUALS(msg.arduinoRC(), 3);
 
 		MessageSerialiser serialiser;
 		msg.Serialise(serialiser);
@@ -246,7 +248,7 @@ public:
 		TS_ASSERT_EQUALS(msgTwo.gpsOnline(), true);
 		TS_ASSERT_DELTA(msgTwo.latitude(), 19.2, 1e-7);
 		TS_ASSERT_DELTA(msgTwo.longitude(), 60.02, 1e-7);
-		TS_ASSERT_DELTA(msgTwo.unixTime(), 120.04, 1e-7);			
+		TS_ASSERT_DELTA(msgTwo.unixTime(), 120.04, 1e-7);
 		TS_ASSERT_DELTA(msgTwo.speed(), 2.1, 1e-7);
 		TS_ASSERT_EQUALS(msgTwo.gpsSatellite(), 11);
 		TS_ASSERT_DELTA(msgTwo.gpsHeading(), 170.5, 1e-7);
@@ -257,7 +259,7 @@ public:
 		TS_ASSERT_EQUALS(msgTwo.arduinoRudder(), 5500);
 		TS_ASSERT_EQUALS(msgTwo.arduinoSheet(), 4700);
 		TS_ASSERT_EQUALS(msgTwo.arduinoBattery(), 2);
-		TS_ASSERT_EQUALS(msg.arduinoRC(), 3);		
+		TS_ASSERT_EQUALS(msg.arduinoRC(), 3);
 	}
 
 		void test_CourseDataMsg()
@@ -316,6 +318,32 @@ public:
 		TS_ASSERT_EQUALS(msg.messageType(), MessageType::LocalWaypointChange);
 		TS_ASSERT_EQUALS(msg.sourceID(), NodeID::HTTPSync);
 		TS_ASSERT_EQUALS(msg.destinationID(), NodeID::None);
+	}
+
+	void test_StateDataMsg()
+	{
+		StateMessage msg(100, 80, 60, 5, 30);
+
+		TS_ASSERT_EQUALS(msg.messageType(), MessageType::StateMessage);
+		TS_ASSERT_EQUALS(msg.heading(), 100);
+		TS_ASSERT_EQUALS(msg.latitude(), 80);
+		TS_ASSERT_EQUALS(msg.longitude(), 60);
+		TS_ASSERT_EQUALS(msg.speed(), 5);
+		TS_ASSERT_EQUALS(msg.course(), 30);
+
+		MessageSerialiser serialiser;
+		msg.Serialise(serialiser);
+
+		MessageDeserialiser deserialiser(serialiser.data(), serialiser.size());
+		StateMessage msgTwo(deserialiser);
+
+		TS_ASSERT(msgTwo.isValid());
+		TS_ASSERT_EQUALS(msgTwo.messageType(), MessageType::StateMessage);
+		TS_ASSERT_EQUALS(msgTwo.heading(), 100);
+		TS_ASSERT_EQUALS(msgTwo.latitude(), 80);
+		TS_ASSERT_EQUALS(msgTwo.longitude(), 60);
+		TS_ASSERT_EQUALS(msgTwo.speed(), 5);
+		TS_ASSERT_EQUALS(msgTwo.course(), 30);
 	}
 
 };
