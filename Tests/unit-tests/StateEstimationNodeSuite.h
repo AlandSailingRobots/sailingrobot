@@ -4,7 +4,7 @@
 * 		StateEstimationNodeSuite.h
 *
 * Purpose:
-*		A set of unit tests seeing if the StateEstimationNode works as intended
+*		A set of unit tests for checking if the StateEstimationNode works as intended
 *
 * Developer Notes:
 *
@@ -18,6 +18,7 @@
 #include "Messages/StateMessage.h"
 #include "../../MessageBus/MessageBus.h"
 #include "TestMocks/MessageLogger.h"
+#include "TestMocks/StateMessageListener.h"
 #include "Messages/CompassDataMsg.h"
 #include "Messages/GPSDataMsg.h"
 
@@ -26,7 +27,7 @@
 #include <chrono>
 #include <thread>
 
-#define STATE_ESTIMATIONODE_TEST_COUNT   2
+#define STATE_ESTIMATIONODE_TEST_COUNT   3
 
 
 class StateEstimationNodeSuite : public CxxTest::TestSuite
@@ -34,6 +35,8 @@ class StateEstimationNodeSuite : public CxxTest::TestSuite
 public:
 
   StateEstimationNode* sEstimationNode;
+  StateMessageListener* stateMessageListener;
+
   std::thread* thr;
   MessageLogger* logger;
   int testCount = 0;
@@ -50,12 +53,15 @@ public:
 
   void setUp()
   {
-    // Only want to setup them up once in this test, only going to delete them when the program closes and the OS destroys
-    // the process's memory
+    // setup them up once in this test, delete them when the program closes
     if(sEstimationNode == 0)
     {
       Logger::DisableLogging();
+      /*gpsMsgData = std::make_unique<GPSDataMsg>(logger->nodeID(),
+          sEstimationNode->nodeID(), false, false,60.09726,19.93481,1,1,10,2,
+          GPSMode::LatLonOk);*/
       logger = new MessageLogger(msgBus());
+      stateMessageListener = new StateMessageListener(msgBus());
       sEstimationNode = new StateEstimationNode(msgBus(), .5, 1);
       srand (time(NULL));
       thr = new std::thread(runMessageLoop);
@@ -69,6 +75,7 @@ public:
     {
       delete sEstimationNode;
       delete logger;
+      delete stateMessageListener;
     }
   }
 
@@ -80,10 +87,17 @@ public:
   void test_StateEstimationNodeStateMsgReceived(){
     sEstimationNode->start();
     std::this_thread::sleep_for(std::chrono::milliseconds(2600));
-    TS_ASSERT(logger->StateDataReceived());
+    TS_ASSERT(logger->stateDataReceived());
     logger->clearState();
-    std::this_thread::sleep_for(std::chrono::milliseconds(3200));
-    TS_ASSERT(logger->StateDataReceived());
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+    TS_ASSERT(logger->stateDataReceived());
+    TS_ASSERT(logger->gpsDataReceived());
+  }
+
+  void test_stateMessageListener(){
+    TS_ASSERT(stateMessageListener->init());
+    TS_ASSERT(stateMessageListener->stateDataReceived());
+    TS_ASSERT(stateMessageListener->getVesselSpeed() == 0);
   }
 
 };
