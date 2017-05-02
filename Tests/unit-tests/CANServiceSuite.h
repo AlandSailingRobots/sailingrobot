@@ -3,11 +3,10 @@
 //    CAN-tests will only run when connected to hardware
 //
 ////////////////////////////////////////////////////////
-
+#pragma once
 
 #include "TestMocks/MockCANReceiver.h"
 #include "HardwareServices/CAN_Services/CANService.h"
-#include "HardwareServices/CAN_Services/CANPGNReceiver.h"
 #include "HardwareServices/CAN_Services/CANFrameReceiver.h"
 #include "HardwareServices/CAN_Services/N2kMsg.h"
 #include "../cxxtest/cxxtest/TestSuite.h"
@@ -27,46 +26,25 @@ public:
     delete service;
   }
 
-  void test_CANServiceSendMessage() {
-
-    MockCANReceiver receiver(*service, std::vector<uint32_t>{1304} );
-    auto fut = service->start();
-
-    N2kMsg msg;
-    msg.PGN = 1304;
-    std::vector<uint8_t> data = {12,24,36};
-    msg.Data = data;
-    service->sendN2kMessage(msg);
-
-    std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_FOR_MSG));
-    service->stop();
-    fut.get();
-
-    TS_ASSERT(receiver.message_received());
-  }
-
-  void test_CANServiceSendFrameMessage() {
-
-    
-  }
-
   void test_CANServiceNodeCommunication () {
-      MockCANReceiver rec (*service, std::vector<uint32_t>{1337, 1339} );
-      MockCANReceiver rec2(*service, std::vector<uint32_t>{1304} );
+      MockCANReceiver receiver (*service, std::vector<uint32_t>{ 700      } );
+      MockCANReceiver receiver2(*service, std::vector<uint32_t>{ 700, 701 } );
       auto fut = service->start();
 
-      N2kMsg msg;
-      msg.PGN = 1304;
-      std::vector<uint8_t> data = {12,24,36};
-      msg.Data = data;
-      service->sendN2kMessage(msg);
+      CanMsg msg;
+      msg.id = 700;
+      for(int i=0; i<8; i++)
+      {
+        msg.data[i] = i;
+      }
+      service->sendCANMessage(msg);
 
       std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_FOR_MSG));
       service->stop();
       fut.get();
 
-      TS_ASSERT (rec.message_received());
-      TS_ASSERT(rec2.message_received());
+      TS_ASSERT( receiver.message_received());
+      TS_ASSERT(receiver2.message_received());
 
   }
 
