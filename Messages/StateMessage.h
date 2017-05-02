@@ -29,10 +29,10 @@ public:
       vesselHeading(compassHeading), vesselLat(lat), vesselLan(lon), vesselSpeed(gpsSpeed), vesselCourse(gpsCourse)
       { }
 
-      float heading() { return vesselHeading; }
-      double latitude() { return vesselLat; }
-      double longitude() { return vesselLan; }
-      double speed() { return vesselSpeed; }
+      float heading() { const return vesselHeading; }
+      double latitude() { const return vesselLat; }
+      double longitude() { const return vesselLan; }
+      double speed() { const return vesselSpeed; }
 
       virtual ~StateMessage() { }
 
