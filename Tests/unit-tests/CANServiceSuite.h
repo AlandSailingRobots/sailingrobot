@@ -27,9 +27,13 @@ public:
   }
 
   void test_CANServiceNodeCommunication () {
+      std::cout << "checking where the segfault is:" << std::endl;
       MockCANReceiver receiver (*service, std::vector<uint32_t>{ 700      } );
+      std::cout << "1";
       MockCANReceiver receiver2(*service, std::vector<uint32_t>{ 700, 701 } );
+      std::cout << "2";
       auto fut = service->start();
+      std::cout << "3";
 
       CanMsg msg;
       msg.id = 700;
@@ -37,14 +41,21 @@ public:
       {
         msg.data[i] = i;
       }
+      std::cout << "4";
       service->sendCANMessage(msg);
+      std::cout << "5";
 
       std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_FOR_MSG));
+      std::cout << "6";
       service->stop();
+      std::cout << "7";
       fut.get();
+      std::cout << "8";
 
       TS_ASSERT( receiver.message_received());
+      std::cout << "9";
       TS_ASSERT(receiver2.message_received());
+      std::cout << "10" << std::endl;
 
   }
 
