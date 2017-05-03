@@ -189,6 +189,13 @@ then
     
     sqlite3 asr.db "INSERT INTO waypoints (id,latitude,longitude,declination,radius,stay_time,harvested) VALUES (1,  60.100863,  19.921260, 6, 40, 0, 0);"
     sqlite3 asr.db "INSERT INTO waypoints (id,latitude,longitude,declination,radius,stay_time,harvested) VALUES (2,  60.097023,  19.921217, 6, 40, 0, 0);"
+elif [ $C -eq 14 ]
+then
+    sqlite3 asr.db "DROP TABLE waypoints;"
+    sqlite3 asr.db "create table waypoints ( id PRIMARY KEY, latitude INTEGER, longitude INTEGER, declination INTEGER, radius INTEGER, stay_time INTEGER, harvested BOOLEAN );"
+    
+    sqlite3 asr.db "INSERT INTO waypoints (id,latitude,longitude,declination,radius,stay_time,harvested) VALUES (1,  60.056853, 19.786497, 6, 40, 0, 0);"
+    sqlite3 asr.db "INSERT INTO waypoints (id,latitude,longitude,declination,radius,stay_time,harvested) VALUES (2,  60.053522, 19.786443, 6, 40, 0, 0);"
 fi
 
 

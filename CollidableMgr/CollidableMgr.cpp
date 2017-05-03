@@ -43,7 +43,6 @@ void CollidableMgr::addAISContact( uint32_t mmsi, float lat, float lon, float sp
         this->ownAISLock = true;
     }
 
-
     // Check if the contact already exists, and if so update it
     bool contactExists = false;
     for( uint16_t i = 0; i < this->aisContacts.size() && !contactExists; i++ )

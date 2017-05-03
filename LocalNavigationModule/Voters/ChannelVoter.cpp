@@ -74,27 +74,5 @@ const ASRCourseBallot& ChannelVoter::vote( const BoatState_t& boatState )
         }
     }
 
-    /*for( int i = 0; i < 45; i++ )
-    {
-        int insideVote = (courseBallot.maxVotes() / 4);
-        int outsideVote = 1 - ( ( ( i / 45 ) * ( i * i ) + (CUTOFF - distanceRatio ) ) * courseBallot.maxVotes() );
-
-        // Left hand side of the line
-        if(distanceRatio > 0 )
-        {
-            courseBallot.set( waypointLineBearing - 45 - i, outsideVote );
-            courseBallot.set( waypointLineBearing - 45 + i, outsideVote );
-            courseBallot.set( waypointLineBearing + 45 - i, insideVote );
-            courseBallot.set( waypointLineBearing + 45 + i, insideVote );
-        }
-        else
-        {
-            courseBallot.set( waypointLineBearing + 45 - i, outsideVote );
-            courseBallot.set( waypointLineBearing + 45 + i, outsideVote );
-            courseBallot.set( waypointLineBearing - 45 - i, insideVote );
-            courseBallot.set( waypointLineBearing - 45 + i, insideVote );
-        }
-    }*/
-
     return courseBallot;
 }

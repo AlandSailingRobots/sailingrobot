@@ -58,11 +58,6 @@ void ASRCourseBallot::add( uint16_t course, int16_t value )
         value = MAX_VOTES;
     }
 
-    if( value < 0)
-    {
-        value = 0;
-    }
-
     courses[course] = value;
 }
 
