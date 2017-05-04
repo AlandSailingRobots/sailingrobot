@@ -60,8 +60,8 @@ public:
         serialiser.serialise(m_VesselHeading);
         serialiser.serialise(m_VesselLat);
         serialiser.serialise(m_VesselLon);
-        serialiser.serialise(m_VesselSpeed);
         serialiser.serialise(m_VesselCourse);
+        serialiser.serialise(m_VesselSpeed);
       }
 
     private:
