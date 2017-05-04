@@ -16,6 +16,8 @@
 #include "Messages/MessageTypes.h"
 #include "Messages/WindDataMsg.h"
 #include "Messages/WindStateMsg.h"
+#include "Messages/StateMessage.h"
+#include "Messages/NavigationControlMsg.h"
 #include "Nodes/NodeIDs.h"
 #include "MessageBus/MessageBus.h"
 
@@ -29,6 +31,8 @@
    {
      msgBus.registerNode(*this, MessageType::WindData);
      msgBus.registerNode(*this, MessageType::WindState);
+     msgBus.registerNode(*this, MessageType::StateMessage);
+     msgBus.registerNode(*this, MessageType::NavigationControl);
    }
 
    bool init() {
@@ -43,6 +47,12 @@
       } 
       else if(type == MessageType::WindState){
         printWindState((WindStateMsg*) message);
+      }
+      else if(type == MessageType::StateMessage) {
+        printState((StateMessage*) message);
+      }
+      else if(type == MessageType::NavigationControl) {
+        printNavigationControl((NavigationControlMsg*) message);
       }
 
    }
@@ -65,6 +75,39 @@
     std::cout << "/// Apparent Wind Speed : " << msg->apparentWindSpeed() << " ||| ";
     std::cout << " Apparent Wind Direction : " << msg->apparentWindDirection() << " |||";
     std::cout << std::endl <<"////////////////////////////////////////" << std::endl;
+   }
+
+   void printState(StateMessage* msg) {
+      
+      std::cout << "/////////////////////////////////" << std::endl;
+      std::cout << "/// State Message: " << std::endl;
+      std::cout << "/// Heading : " << msg->heading() << " Speed : " << msg->speed() << std::endl;
+      std::cout << "/// Latitude : " << msg->latitude() << " Longitude : " << msg->longitude() << std::endl;
+      std::cout << "/// Course : " << msg->course() << std::endl;
+      std::cout <<"////////////////////////////////////////" << std::endl;
+
+   }
+
+   void printNavigationControl(NavigationControlMsg* msg) {
+      std::cout << "/////////////////////////////////" << std::endl;
+      std::cout << "/// Navigation Control Message: " << std::endl;
+      std::cout << "/// Course to Steer : " << msg->courseToSteer() << " Target Speed : " << msg->targetSpeed() << std::endl;
+      std::cout << "/// Windvane Self Steering On : " << msg->windvaneSelfSteeringOn() << std::endl;
+      std::cout << "/// Navigation State : " << std::endl;
+      switch(msg->navigationState()) {
+        case NavigationControlMsg::NavigationState::speedTarget:
+          std::cout << "speedTarget";
+          break;
+        case NavigationControlMsg::NavigationState::sailToWaypoint:
+          std::cout << "sailToWayPoint";
+          break;
+        case NavigationControlMsg::NavigationState::stationKeeping:
+          std::cout << "stationKeeping";
+          break;
+      }
+
+      std::cout << std::endl;
+      std::cout <<"////////////////////////////////////////" << std::endl;
    }
 
  };

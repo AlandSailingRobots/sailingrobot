@@ -13,6 +13,8 @@ public:
 
     }
 
+    // Test assumes that Commands calculation is correct.
+
     void test_RudderCalculation() {
 
         double maxRudderAngle = 30;

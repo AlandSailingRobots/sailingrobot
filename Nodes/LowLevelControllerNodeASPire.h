@@ -14,8 +14,8 @@
 
 class LowLevelControllerNodeASPire : public Node {
 public:
-    LowLevelControllerNodeASPire(MessageBus& msgBus, CANService &canService, float maxRudderAngle, 
-                                    float maxCourseAngleDiff, float maxServoSailAngle, float servoSailMinAngleDiff);
+    LowLevelControllerNodeASPire(MessageBus& msgBus, CANService &canService, float maxRudderAngle = 30, 
+                                    float maxCourseAngleDiff = 60, float maxServoSailAngle = 10, float servoSailMinAngleDiff = 5);
 
     virtual ~LowLevelControllerNodeASPire();
     bool init();
@@ -26,6 +26,7 @@ private:
     void processStateMessage(const StateMessage* msg);
     void processWindStateMessage(const WindStateMsg* msg);
     void processNavigationControlMessage(const NavigationControlMsg* msg);
+    void constructAndSendFrame();
 
     float  m_VesselHeading = DATA_OUT_OF_RANGE;
     double m_VesselLatitude = DATA_OUT_OF_RANGE;

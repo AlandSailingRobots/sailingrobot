@@ -2,8 +2,8 @@
 #include "HardwareServices/CAN_Services/N2kMsg.h"
 
 
-LowLevelControllerNodeASPire::LowLevelControllerNodeASPire(MessageBus& msgBus, CANService& canService, float maxRudderAngle = 30, 
-                                                     float maxCourseAngleDiff = 60, float maxServoSailAngle = 10, float servoSailMinAngleDiff = 5) :
+LowLevelControllerNodeASPire::LowLevelControllerNodeASPire(MessageBus& msgBus, CANService& canService, float maxRudderAngle, 
+                                                     float maxCourseAngleDiff, float maxServoSailAngle, float servoSailMinAngleDiff) :
                                                      Node(NodeID::LowLevelControllerNodeASPire, msgBus), m_CanService(&canService),
                                                      m_WingsailControl(servoSailMinAngleDiff, maxServoSailAngle), m_CourseRegulator(maxRudderAngle, maxCourseAngleDiff)
 {
@@ -25,6 +25,11 @@ void LowLevelControllerNodeASPire::processMessage(const Message* message){
         processWindStateMessage(static_cast<const WindStateMsg*> (message));
     } else if(type == MessageType::NavigationControl){
         processNavigationControlMessage(static_cast<const NavigationControlMsg*> (message));
+    }
+
+    // Basically have we received atleast one of every message so far
+    if(m_VesselHeading != DATA_OUT_OF_RANGE && m_TrueWindSpeed != DATA_OUT_OF_RANGE && m_CourseToSteer != DATA_OUT_OF_RANGE) {
+        constructAndSendFrame();
     }
 
 }
@@ -57,4 +62,8 @@ void LowLevelControllerNodeASPire::processNavigationControlMessage(const Navigat
     m_WindvaneSelfSteeringOn = msg->windvaneSelfSteeringOn();
 
     m_CourseRegulator.setCourseToSteer(msg->courseToSteer());
+}
+
+void LowLevelControllerNodeASPire::constructAndSendFrame() {
+    // TODO - Construct and send the CAN-Frame
 }

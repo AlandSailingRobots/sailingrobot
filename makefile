@@ -115,7 +115,7 @@ export HTTP_SYNC_SRC        = Nodes/HTTPSyncNode.cpp
 export XBEE_NETWORK_SRC     = Network/DataLink.cpp Network/LinuxSerialDataLink.cpp Network/XbeePacketNetwork.cpp \
                             xBee/Xbee.cpp Nodes/XbeeSyncNode.cpp
 
-export INTEGRATION_TEST		= Tests/integration/IntegrationTests/WindStateNodeIntegrationTest.cpp
+export INTEGRATION_TEST		= Tests/integration/IntegrationTests/LowLevelControllerASPireIntegrationTest.cpp
 
 
 ###############################################################################
