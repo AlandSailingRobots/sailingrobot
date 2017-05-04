@@ -24,12 +24,12 @@ public:
     std::cout << &service << std::endl;
   }
   void tearDown() {
+    std::cout << "this should not run" << std::endl;
     delete service;
   }
 
   void test_CANServiceNodeCommunication () {
       std::cout << "checking where the segfault is:" << std::endl;
-      std::cout << &service << std::endl;
       MockCANReceiver receiver (*service, std::vector<uint32_t>{ 700      } );
       std::cout << "1";
       MockCANReceiver receiver2(*service, std::vector<uint32_t>{ 700, 701 } );
