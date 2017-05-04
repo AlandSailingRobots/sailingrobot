@@ -33,7 +33,8 @@ public:
       std::vector<uint32_t> a = {700};
       MockCANReceiver receiver (*service, a );
       std::cout << "1";
-      MockCANReceiver receiver2(*service, std::vector<uint32_t>{ 700, 701 } );
+      std::vector<uint32_t> b = {700,701};
+      MockCANReceiver receiver2(*service, b);
       std::cout << "2";
       auto fut = service->start();
       std::cout << "3";
