@@ -7,6 +7,8 @@
 #include "Messages/MessageTypes.h"
 #include "MessageBus/MessageBus.h"
 #include "HardwareServices/CAN_Services/CANService.h"
+#include "SystemServices/WingsailControl.h"
+#include "SystemServices/CourseRegulator.h"
 
 #define DATA_OUT_OF_RANGE -2000
 
@@ -15,31 +17,16 @@ public:
     LowLevelControllerNodeASPire(MessageBus& msgBus, CANService &canService, float maxRudderAngle, 
                                     float maxCourseAngleDiff, float maxServoSailAngle, float servoSailMinAngleDiff);
 
-    virtual ~LowLevelControllerNodeASPire(){ };
+    virtual ~LowLevelControllerNodeASPire();
     bool init();
     void processMessage(const Message* message);
-
-
-    // If there is only one method in this class, shouldn't we just remove it
-    // and put the method in the Node instead?
-    class CourseRegulator {
-    public:
-        static float getRudderAngle(float maxRudderAngle, double vesselCourse, float courseToSteer);
-    };
-
-    class WingsailControl {
-    public:
-        void calculateAndSendFrame();    
-    };
 
 private:
 
     void processStateMessage(const StateMessage* msg);
     void processWindStateMessage(const WindStateMsg* msg);
     void processNavigationControlMessage(const NavigationControlMsg* msg);
-    void calculateServoAngle();
 
-    CANService* m_CanService;
 
     float m_MaxRudderAngle;
     float m_MaxCourseAngleDiff;
@@ -62,4 +49,8 @@ private:
     int m_CourseToSteer = DATA_OUT_OF_RANGE;
     float m_TargetSpeed = DATA_OUT_OF_RANGE;
     bool m_WindvaneSelfSteeringOn = false;
+
+    CANService* m_CanService;
+    WingsailControl m_WingsailControl;
+    CourseRegulator m_CourseRegulator;
 };
