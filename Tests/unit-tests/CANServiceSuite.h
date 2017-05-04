@@ -30,7 +30,8 @@ public:
 
   void test_CANServiceNodeCommunication () {
       std::cout << "checking where the segfault is:" << std::endl;
-      MockCANReceiver receiver (*service, std::vector<uint32_t>{ 700      } );
+      std::vector<uint32_t> a = {700};
+      MockCANReceiver receiver (*service, a );
       std::cout << "1";
       MockCANReceiver receiver2(*service, std::vector<uint32_t>{ 700, 701 } );
       std::cout << "2";
