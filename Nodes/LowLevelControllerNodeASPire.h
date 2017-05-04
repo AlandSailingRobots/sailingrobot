@@ -27,13 +27,6 @@ private:
     void processWindStateMessage(const WindStateMsg* msg);
     void processNavigationControlMessage(const NavigationControlMsg* msg);
 
-
-    float m_MaxRudderAngle;
-    float m_MaxCourseAngleDiff;
-    float m_MaxServoSailAngle;
-    float m_ServoSailMinAngleDiff;
-    float m_CurrentServoAngle = 0;
-
     float  m_VesselHeading = DATA_OUT_OF_RANGE;
     double m_VesselLatitude = DATA_OUT_OF_RANGE;
     double m_VesselLongitude = DATA_OUT_OF_RANGE;

@@ -4,9 +4,7 @@
 
 LowLevelControllerNodeASPire::LowLevelControllerNodeASPire(MessageBus& msgBus, CANService& canService, float maxRudderAngle = 30, 
                                                      float maxCourseAngleDiff = 60, float maxServoSailAngle = 10, float servoSailMinAngleDiff = 5) :
-                                                     Node(NodeID::LowLevelControllerNodeASPire, msgBus), m_MaxRudderAngle(maxRudderAngle),
-                                                     m_MaxCourseAngleDiff(maxCourseAngleDiff), m_MaxServoSailAngle(maxServoSailAngle), 
-                                                     m_ServoSailMinAngleDiff(servoSailMinAngleDiff), m_CanService(&canService),
+                                                     Node(NodeID::LowLevelControllerNodeASPire, msgBus), m_CanService(&canService),
                                                      m_WingsailControl(servoSailMinAngleDiff, maxServoSailAngle), m_CourseRegulator(maxRudderAngle, maxCourseAngleDiff)
 {
     msgBus.registerNode(*this, MessageType::NavigationControl);

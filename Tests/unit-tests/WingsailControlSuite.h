@@ -12,7 +12,7 @@ public:
 
     }
 
-    void testServoAngleCalculation() {
+    void test_ServoAngleCalculation() {
         int minServoAngleDiff = 5;
         int maxServoSailAngle = 10;
         double twd = 1.2;
@@ -21,6 +21,14 @@ public:
         WingsailControl wscontrol(minServoAngleDiff,maxServoSailAngle);
         wscontrol.setTrueWindDirection(twd);
         wscontrol.setVesselHeading(heading);
+
+        float hwd = Utility::limitAngleRange(heading - twd);
+
+        if(hwd > 180){
+            TS_ASSERT(wscontrol.calculateServoAngle() == maxServoSailAngle)
+        } else {
+            TS_ASSERT(wscontrol.calculateServoAngle() == -maxServoSailAngle);
+        }
         
     }
 
