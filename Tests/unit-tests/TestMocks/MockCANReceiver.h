@@ -9,7 +9,7 @@
 class MockCANReceiver : public CANFrameReceiver {
 public:
 
-  MockCANReceiver(CANService& service, std::vector<uint32_t> IDs) : CANFrameReceiver(service, IDs), m_IDs(IDs)
+  MockCANReceiver(CANService& service, std::vector<uint32_t>& IDs) : CANFrameReceiver(service, IDs), m_IDs(IDs)
   {
     std::cout << "before id-check ";
     if(IDs[0] == 700){
