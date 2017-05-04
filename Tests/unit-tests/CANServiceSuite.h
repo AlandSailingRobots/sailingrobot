@@ -3,11 +3,10 @@
 //    CAN-tests will only run when connected to hardware
 //
 ////////////////////////////////////////////////////////
-
+#pragma once
 
 #include "TestMocks/MockCANReceiver.h"
 #include "HardwareServices/CAN_Services/CANService.h"
-#include "HardwareServices/CAN_Services/CANPGNReceiver.h"
 #include "HardwareServices/CAN_Services/CANFrameReceiver.h"
 #include "HardwareServices/CAN_Services/N2kMsg.h"
 #include "../cxxtest/cxxtest/TestSuite.h"
@@ -22,51 +21,45 @@ class CANServiceSuite : public CxxTest::TestSuite {
 public:
   void setUp() {
     service = new CANService();
+    std::cout << &service << std::endl;
   }
   void tearDown() {
+    std::cout << "this should not run" << std::endl;
     delete service;
   }
 
-  void test_CANServiceSendMessage() {
-
-    MockCANReceiver receiver(*service, std::vector<uint32_t>{1304} );
-    auto fut = service->start();
-
-    N2kMsg msg;
-    msg.PGN = 1304;
-    std::vector<uint8_t> data = {12,24,36};
-    msg.Data = data;
-    service->sendN2kMessage(msg);
-
-    std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_FOR_MSG));
-    service->stop();
-    fut.get();
-
-    TS_ASSERT(receiver.message_received());
-  }
-
-  void test_CANServiceSendFrameMessage() {
-
-    
-  }
-
   void test_CANServiceNodeCommunication () {
-      MockCANReceiver rec (*service, std::vector<uint32_t>{1337, 1339} );
-      MockCANReceiver rec2(*service, std::vector<uint32_t>{1304} );
+      std::cout << "checking where the segfault is:" << std::endl;
+      std::vector<uint32_t> a = {700};
+      MockCANReceiver receiver (*service, a );
+      std::cout << "1";
+      std::vector<uint32_t> b = {700,701};
+      MockCANReceiver receiver2(*service, b);
+      std::cout << "2";
       auto fut = service->start();
+      std::cout << "3";
 
-      N2kMsg msg;
-      msg.PGN = 1304;
-      std::vector<uint8_t> data = {12,24,36};
-      msg.Data = data;
-      service->sendN2kMessage(msg);
+      CanMsg msg;
+      msg.id = 700;
+      for(int i=0; i<8; i++)
+      {
+        msg.data[i] = i;
+      }
+      std::cout << "4";
+      service->sendCANMessage(msg);
+      std::cout << "5";
 
       std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_FOR_MSG));
+      std::cout << "6";
       service->stop();
+      std::cout << "7";
       fut.get();
+      std::cout << "8";
 
-      TS_ASSERT (rec.message_received());
-      TS_ASSERT(rec2.message_received());
+      TS_ASSERT( receiver.message_received());
+      std::cout << "9";
+      TS_ASSERT(receiver2.message_received());
+      std::cout << "10" << std::endl;
 
   }
 
