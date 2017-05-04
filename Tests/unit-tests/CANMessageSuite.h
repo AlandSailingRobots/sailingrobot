@@ -14,11 +14,6 @@ class CANMessageSuite : public CxxTest::TestSuite {
     void tearDown() {}
 
     void test_CANMessageConversion() {
-<<<<<<< HEAD
-        
-    }
-}
-=======
         N2kMsg Nmsg;
         CanMsg Cmsg;
 
@@ -39,4 +34,3 @@ class CANMessageSuite : public CxxTest::TestSuite {
         
     }
 };
->>>>>>> extend_CAN_Service
