@@ -98,7 +98,7 @@ public:
     TS_ASSERT(stateMessageListener->stateDataReceived());
   }
 
-  void test_StateEstimationHeading(){
+  void test_StateEstimationStateMsgHeading(){
     sEstimationNode->start();
     std::this_thread::sleep_for(std::chrono::milliseconds(2600));
     int nextDeclination = 10;
