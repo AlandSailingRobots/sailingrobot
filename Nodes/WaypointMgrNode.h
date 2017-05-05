@@ -17,8 +17,8 @@
 #include "Node.h"
 #include "Messages/GPSDataMsg.h"
 #include "dbhandler/DBHandler.h"
-#include "utility/CourseMath.h"
-#include "utility/Timer.h"
+#include "Math/CourseMath.h"
+#include "SystemServices/Timer.h"
 
 
 class WaypointMgrNode : public Node {
@@ -60,4 +60,6 @@ private:
     double  m_gpsLatitude;
 
     Timer   m_waypointTimer;
+    Timer   m_routeTime;
+    double  m_totalTime;
 };

@@ -19,6 +19,8 @@
 #include <thread>
 
 #include "Messages/VesselStateMsg.h"
+#include "Math/CourseMath.h"
+#include "SystemServices/Logger.h"
 
 
 #define VESSEL_STATE_SLEEP_MS 400
@@ -37,6 +39,19 @@ VesselStateNode::VesselStateNode(MessageBus& msgBus)
 	msgBus.registerNode(*this, MessageType::GPSData);
 	msgBus.registerNode(*this, MessageType::WindData);
 	msgBus.registerNode(*this, MessageType::ArduinoData);
+	msgBus.registerNode(*this, MessageType::WaypointData);
+}
+
+//---------------------------------------------------------------------------------------
+VesselStateNode::~VesselStateNode()
+{
+	server.shutdown();
+}
+
+//---------------------------------------------------------------------------------------
+bool VesselStateNode::init()
+{
+	return server.start( 9600 );
 }
 
 void VesselStateNode::start()
@@ -62,6 +77,8 @@ void VesselStateNode::processMessage(const Message* msg)
 	case MessageType::ArduinoData:
 		processArduinoMessage((ArduinoDataMsg*)msg);
 		break;
+	case MessageType::WaypointData:
+		processWaypointMessage((WaypointDataMsg*)msg);
 	default:
 		return;
 	}
@@ -84,6 +101,8 @@ void VesselStateNode::processGPSMessage(GPSDataMsg* msg)
 	m_GPSSpeed = msg->speed();
 	m_GPSHeading = msg->heading();
 	m_GPSSatellite = msg->satelliteCount();
+	waypointBearing = CourseMath::calculateBTW( m_GPSLon, m_GPSLat, waypointLon, waypointLat );
+	waypointDistance = CourseMath::calculateDTW( m_GPSLon, m_GPSLat, waypointLon, waypointLat );
 }
 
 void VesselStateNode::processWindMessage(WindDataMsg* msg)
@@ -102,6 +121,17 @@ void VesselStateNode::processArduinoMessage(ArduinoDataMsg* msg)
 	m_ArduinoRC = msg->RC();
 }
 
+void VesselStateNode::processWaypointMessage( WaypointDataMsg* msg )
+{
+	waypointID = msg->nextId();
+	waypointLat = msg->nextLatitude();
+	waypointLon = msg->nextLongitude();
+
+	radius = msg->nextRadius();
+	waypointBearing = CourseMath::calculateBTW( m_GPSLon, m_GPSLat, waypointLon, waypointLat );
+	waypointDistance = CourseMath::calculateDTW( m_GPSLon, m_GPSLat, waypointLon, waypointLat );
+}
+
 void VesselStateNode::VesselStateThreadFunc(void* nodePtr)
 {
 	VesselStateNode* node = (VesselStateNode*)nodePtr;
@@ -110,8 +140,13 @@ void VesselStateNode::VesselStateThreadFunc(void* nodePtr)
 	// at the start before we send out the vessel state message.
 	std::this_thread::sleep_for(std::chrono::milliseconds(VESSEL_STATE_INITIAL_SLEEP));
 
+	char buffer[1024];
+
 	while(true)
-	{
+	{	
+		// Listen to new connections
+		node->server.acceptConnections();
+
 		// Controls how often we pump out messages
 		std::this_thread::sleep_for(std::chrono::milliseconds(VESSEL_STATE_SLEEP_MS));
 
@@ -123,5 +158,11 @@ void VesselStateNode::VesselStateThreadFunc(void* nodePtr)
 																	node->m_ArduinoSheet, node->m_ArduinoBattery, node->m_ArduinoRC);
 		node->m_MsgBus.sendMessage(std::move(vesselState));
 
+		// Compass heading, Compass Pitch, Compass Roll, Wind Dir, Wind Speed, GPS Heading, GPS Lat, GPS Lon
+		int size = snprintf( buffer, 1024, "%d,%d,%d,%d,%d,%d,%f,%f,%f,%d,%f,%f,%d,%f,%d\n", (int)node->m_CompassHeading, (int)node->m_CompassPitch, (int)node->m_CompassRoll, (int)node->m_WindDir, (int)node->m_WindSpeed, (int)node->m_GPSHeading, (float)node->m_GPSSpeed, node->m_GPSLat, node->m_GPSLon, node->waypointID, node->waypointLat, node->waypointLon, (int)node->radius, node->waypointDistance, (int)node->waypointBearing );
+		if( size > 0 )
+		{
+			node->server.broadcast( (uint8_t*)buffer, size );
+		}
 	}
 }

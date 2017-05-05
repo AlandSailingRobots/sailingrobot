@@ -16,7 +16,7 @@
 #include "Messages/ServerWaypointsReceivedMsg.h"
 #include "SystemServices/Logger.h"
 #include "dbhandler/DBHandler.h"
-#include "utility/Utility.h"
+#include "Math/Utility.h"
 #include <string>
 #include <vector>
 
@@ -32,7 +32,8 @@ WaypointMgrNode::WaypointMgrNode(MessageBus& msgBus, DBHandler& db)
     m_prevLongitude(0),
     m_prevLatitude(0),
     m_prevDeclination(0),
-    m_prevRadius(0)
+    m_prevRadius(0),
+    m_totalTime( 0 )
 {
     msgBus.registerNode(*this, MessageType::GPSData);
     msgBus.registerNode(*this, MessageType::ServerWaypointsReceived);
@@ -86,6 +87,16 @@ bool WaypointMgrNode::waypointReached()
         Logger::info("Waypoint harvested");
         m_waypointTimer.stop();
 
+        m_routeTime.stop();
+        int seconds = m_routeTime.timePassed();
+        m_totalTime += m_routeTime.timePassed();
+        int minutes = seconds / 60;
+        int hours = minutes / 60;
+        minutes = minutes % 60;
+        seconds = seconds % 60;
+        Logger::info("\tTook %d:%d:%d to complete", hours, minutes, seconds);
+        m_routeTime.reset();
+
         return true;
     }
     else
@@ -96,16 +107,39 @@ bool WaypointMgrNode::waypointReached()
 
 void WaypointMgrNode::sendMessage()
 {
+    bool foundPrev = false;
     if(m_db.getWaypointValues(m_nextId, m_nextLongitude, m_nextLatitude, m_nextDeclination, m_nextRadius, m_nextStayTime,
-                        m_prevId, m_prevLongitude, m_prevLatitude, m_prevDeclination, m_prevRadius))
+                        m_prevId, m_prevLongitude, m_prevLatitude, m_prevDeclination, m_prevRadius, foundPrev))
     {
+        if( !foundPrev )
+        {
+            m_prevLatitude = m_gpsLatitude;
+            m_prevLongitude = m_gpsLongitude;
+        }
+
         MessagePtr msg = std::make_unique<WaypointDataMsg>(m_nextId, m_nextLongitude, m_nextLatitude, m_nextDeclination, m_nextRadius, m_nextStayTime,
                         m_prevId, m_prevLongitude, m_prevLatitude, m_prevDeclination, m_prevRadius);
         m_MsgBus.sendMessage(std::move(msg));
+
+        if( !m_routeTime.started() )
+        {
+            m_routeTime.start();
+        }
     }
     else
     {
         Logger::warning("%s No waypoint found, boat is using old waypoint data. No message sent.", __func__);
+        m_routeTime.stop();
+
+        m_totalTime += m_routeTime.timePassed();
+
+        int seconds = m_totalTime;
+        int minutes = seconds / 60;
+        int hours = minutes / 60;
+        minutes = minutes % 60;
+        seconds = seconds % 60;
+
+        Logger::info("Completed route in %d:%d:%d", hours, minutes, seconds);
     }
 
     m_db.forceUnlock();

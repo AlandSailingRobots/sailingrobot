@@ -3,7 +3,7 @@
 #include <string>
 #include <cstdlib>
 #include <cstdio>
-#include "utility/Timer.h"
+#include "SystemServices/Timer.h"
 #include <thread>
 
 
@@ -896,7 +896,7 @@ std::vector<std::string> DBHandler::getColumnInfo(std::string info, std::string 
 }
 
 bool DBHandler::getWaypointValues(int& nextId, double& nextLongitude, double& nextLatitude, int& nextDeclination, int& nextRadius, int& nextStayTime,
-                        int& prevId, double& prevLongitude, double& prevLatitude, int& prevDeclination, int& prevRadius)
+                        int& prevId, double& prevLongitude, double& prevLatitude, int& prevDeclination, int& prevRadius, bool& foundPrev)
 {	
 	int rows, columns, rows2, columns2;
     std::vector<std::string> results;
@@ -916,10 +916,10 @@ bool DBHandler::getWaypointValues(int& nextId, double& nextLongitude, double& ne
         return false;
     }
 	//Do not give values to previous waypoint if no value found in database
-	bool foundPrevWaypoints = true;
+	foundPrev = true;
     if (rows2 * columns2 < 1 || results2[1] == "\0") {
 		Logger::info("No previously harvested waypoint found, values set as 0");
-		foundPrevWaypoints = false;
+		foundPrev = false;
     }
 
 
@@ -933,7 +933,7 @@ bool DBHandler::getWaypointValues(int& nextId, double& nextLongitude, double& ne
 	nextStayTime = retrieveCellAsInt("waypoints", results[1], "stay_time");
 
 
-	if(foundPrevWaypoints) //Set values to next waypoint if harvested waypoint found
+	if(foundPrev) //Set values to next waypoint if harvested waypoint found
 	{
 		prevId = stoi(results[1]);
 

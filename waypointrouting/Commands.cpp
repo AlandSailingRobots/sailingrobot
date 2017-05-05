@@ -1,6 +1,6 @@
 #include "Commands.h"
 #include <math.h>
-#include "utility/Utility.h"
+#include "Math/Utility.h"
 #include <iostream>
 
 Commands::Commands() :

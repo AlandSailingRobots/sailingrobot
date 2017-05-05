@@ -1,5 +1,5 @@
 #include "TackAngle.h"
-#include "utility/Utility.h"
+#include "Math/Utility.h"
 
 TackAngle::TackAngle(double tackAngle, double maxTackAngle, double minTackSpeed) :
 	m_tackAngle(tackAngle),

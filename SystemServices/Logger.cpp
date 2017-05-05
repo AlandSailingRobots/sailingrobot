@@ -23,7 +23,7 @@
 
 #include "Logger.h"
 #include <iostream>
-#include "../utility/SysClock.h"
+#include "SysClock.h"
 
 
 #define MAX_LOG_SIZE	256*2

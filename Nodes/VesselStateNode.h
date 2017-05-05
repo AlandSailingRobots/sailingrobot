@@ -19,16 +19,20 @@
 #include "Messages/GPSDataMsg.h"
 #include "Messages/WindDataMsg.h"
 #include "Messages/ArduinoDataMsg.h"
+#include "Messages/WaypointDataMsg.h"
+#include "Network/TCPServer.h"
+#include <stdint.h>
 
 
 class VesselStateNode : public ActiveNode {
 public:
 	VesselStateNode(MessageBus& msgBus);
+	~VesselStateNode();
 
 	///----------------------------------------------------------------------------------
-	/// Just returns true, there is nothing to initialise or setup
+	/// Initialises the server.
 	///----------------------------------------------------------------------------------
-	bool init() { return true; }
+	bool init();
 
 	///----------------------------------------------------------------------------------
  	/// Starts the VesselStateNode's thread that pumps out VesselStateMsg's
@@ -52,6 +56,8 @@ public:
 	///----------------------------------------------------------------------------------
 	void processWindMessage(WindDataMsg* msg);
 	void processArduinoMessage(ArduinoDataMsg* msg);
+
+	void processWaypointMessage( WaypointDataMsg* msg );
 
 private:
 	///----------------------------------------------------------------------------------
@@ -79,4 +85,14 @@ private:
 	int 	m_ArduinoSheet;
     int 	m_ArduinoBattery;
 	int		m_ArduinoRC;
+
+	int waypointID;
+	double waypointLat;
+	double waypointLon;
+	int16_t waypointBearing;
+	double waypointDistance;
+	int16_t radius;
+
+
+	TCPServer server;
 };

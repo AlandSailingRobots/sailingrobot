@@ -39,9 +39,9 @@ public:
 
 	virtual ~CompassDataMsg() { }
 
-	int heading() { return m_Heading; }
-	int pitch() { return m_Pitch; }
-	int roll() { return m_Roll; }
+	int heading() const { return m_Heading; }
+	int pitch() const { return m_Pitch; }
+	int roll() const { return m_Roll; }
 
 	///----------------------------------------------------------------------------------
 	/// Serialises the message into a MessageSerialiser

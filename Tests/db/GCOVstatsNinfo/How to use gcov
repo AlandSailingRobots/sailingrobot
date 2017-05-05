@@ -1,0 +1,27 @@
+1. Add '--coverage' to FLAGS in  makefile for the file that will call the target file 
+e.g. in test_dbhandler.cpp - Makefile:
+
+FLAGS = -std=c++14 -Wall -pedantic -Werror --coverage 
+
+2. Add '-c -g -O0 --coverage' after g++ in the target file's Makefile
+e.g. in DBHandler.cpp - Makefile:
+
+CC = g++ -c -g -O0 --coverage
+
+3. Compile the target file
+e.g. /sailingrobot/dbhandler 
+
+4. Compile and run the main file
+e.g. /sailingrobot/tests/db 
+
+5. Open the target file with gcov
+e.g. gcov DBHandler.cpp
+
+This will show some basic statistics and create a file called
+DBHandler.cpp.gcov. This file is a copy of the target file,
+and all the unused lines will be marked.
+
+For a more in-depth view of this topic visit the following link
+http://bobah.net/d4d/tools/code-coverage-with-gcov
+
+
