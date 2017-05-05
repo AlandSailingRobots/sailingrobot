@@ -99,6 +99,7 @@ void CANService::run() {
 
     if(!m_MsgQueue.empty())
     {
+      std::lock_guard<std::mutex> lock (m_QueueMutex);
       CanMsg CmsgSend = m_MsgQueue.front();
       m_MsgQueue.pop();
 
