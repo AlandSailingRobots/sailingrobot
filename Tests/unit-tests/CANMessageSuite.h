@@ -1,11 +1,8 @@
 #pragma once
 
 #include "HardwareServices/CAN_Services/N2kMsg.h"
-<<<<<<< HEAD
-=======
 #include "../cxxtest/cxxtest/TestSuite.h"
 #include <iostream>
->>>>>>> extend_CAN_Service
 
 class CANMessageSuite : public CxxTest::TestSuite {
     public:
