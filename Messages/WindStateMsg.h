@@ -36,10 +36,10 @@ public:
 
 	virtual ~WindStateMsg() { }
 
-	double trueWindSpeed()     		{ return m_trueWindSpeed; }
-	double trueWindDirection() 		{ return m_trueWindDir;   }
-	double apparentWindSpeed() 		{ return m_apparentWindSpeed; }
-	double apparentWindDirection()  { return m_apparentWindDir;   }
+	double trueWindSpeed() const  		 { return m_trueWindSpeed; }
+	double trueWindDirection() const	 { return m_trueWindDir;   }
+	double apparentWindSpeed() const	 { return m_apparentWindSpeed; }
+	double apparentWindDirection() const { return m_apparentWindDir;   }
 
 private:
 	double m_trueWindSpeed;

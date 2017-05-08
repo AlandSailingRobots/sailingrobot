@@ -32,7 +32,6 @@
         msgBus.registerNode(*this, MessageType::CompassData);
         msgBus.registerNode(*this, MessageType::GPSData);
         msgBus.registerNode(*this, MessageType::WaypointData);
-
       }
 
       StateEstimationNode::~StateEstimationNode()
@@ -121,7 +120,6 @@
 
       while(true)
       {
-
         timer.sleepUntil(node->m_LoopTime);
         MessagePtr stateMessage = std::make_unique<StateMessage>( node->m_VesselHeading, node->m_VesselLat,
           node->m_VesselLon, node->m_VesselSpeed, node->getCourse());
