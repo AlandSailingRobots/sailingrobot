@@ -25,9 +25,9 @@ public:
         float hwd = Utility::limitAngleRange(heading - twd);
 
         if(hwd > 180){
-            TS_ASSERT(wscontrol.calculateServoAngle() == maxServoSailAngle)
+            TS_ASSERT_DELTA(wscontrol.calculateServoAngle(),  maxServoSailAngle, 1e-3);
         } else {
-            TS_ASSERT(wscontrol.calculateServoAngle() == -maxServoSailAngle);
+            TS_ASSERT_DELTA(wscontrol.calculateServoAngle(), -maxServoSailAngle, 1e-3);
         }
         
     }
