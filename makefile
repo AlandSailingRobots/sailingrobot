@@ -100,7 +100,8 @@ export SYSTEM_SERVICES_SRC  = SystemServices/Logger.cpp SystemServices/SysClock.
 export HARDWARE_SERVICES_SRC = HardwareServices/MaestroController/MaestroController.cpp HardwareServices/i2ccontroller/I2CController.cpp \
 							HardwareServices/CAN_Services/CANPGNReceiver.cpp HardwareServices/CAN_Services/CANService.cpp \
 							HardwareServices/CAN_Services/mcp2515.cpp HardwareServices/CAN_Services/MsgFunctions.cpp \
-							Nodes/CANWindsensorNode.cpp Nodes/WindStateNode.cpp Nodes/LowLevelControllerNodeASPire.cpp
+							Nodes/CANWindsensorNode.cpp Nodes/WindStateNode.cpp Nodes/LowLevelControllerNodeASPire.cpp \
+							HardwareServices/CAN_Services/CANFrameReceiver.cpp
 
 export MATH_SRC             = Math/CourseCalculation.cpp Math/CourseMath.cpp Math/Utility.cpp
 

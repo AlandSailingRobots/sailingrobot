@@ -44,6 +44,9 @@ private:
     float m_TargetSpeed = DATA_OUT_OF_RANGE;
     bool m_WindvaneSelfSteeringOn = false;
 
+    const float m_MaxRudderAngle;
+    const float m_MaxServoSailAngle;
+
     CANService* m_CanService;
     WingsailControl m_WingsailControl;
     CourseRegulator m_CourseRegulator;

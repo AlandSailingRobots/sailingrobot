@@ -43,37 +43,6 @@ void N2kMsgToCanMsg(N2kMsg &Nmsg, CanMsg &Cmsg)
 	}
 }
 
-
-
-
-void CanMsgToN2kMsg(CanMsg &Cmsg, N2kMsg &Nmsg)
-{
-	IdToN2kMsg(Nmsg, Cmsg.id);
-
-	Nmsg.DataLen = Cmsg.header.length;		//Single frame message
-	Nmsg.Data.resize(Cmsg.header.length);
-	for(int i = 0; i < 8; ++i)
-	{
-		Nmsg.Data[i] = Cmsg.data[i];
-	}
-}
-
-
-void N2kMsgToCanMsg(N2kMsg &Nmsg, CanMsg &Cmsg)
-{
-	N2kMsgToId(Nmsg, Cmsg.id);
-
-	Cmsg.header.length = Nmsg.DataLen;
-	Cmsg.header.ide = 0;
-
-	for(int i = 0; i < 8; ++i)
-	{
-		Cmsg.data[i] = Nmsg.Data[i];
-	}
-}
-
-
-
 void IdToN2kMsg(N2kMsg &NMsg, uint32_t &id)
 {
 	uint8_t Prio = (id>> 26)& 0x07;

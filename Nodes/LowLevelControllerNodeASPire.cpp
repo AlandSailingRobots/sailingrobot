@@ -4,8 +4,11 @@
 
 LowLevelControllerNodeASPire::LowLevelControllerNodeASPire(MessageBus& msgBus, CANService& canService, float maxRudderAngle, 
                                                      float maxCourseAngleDiff, float maxServoSailAngle, float servoSailMinAngleDiff) :
-                                                     Node(NodeID::LowLevelControllerNodeASPire, msgBus), m_CanService(&canService),
+                                                     Node(NodeID::LowLevelControllerNodeASPire, msgBus), 
+                                                     m_MaxRudderAngle(maxRudderAngle), m_MaxServoSailAngle(maxServoSailAngle),
+                                                     m_CanService(&canService),
                                                      m_WingsailControl(servoSailMinAngleDiff, maxServoSailAngle), m_CourseRegulator(maxRudderAngle, maxCourseAngleDiff)
+                                                     
 {
     msgBus.registerNode(*this, MessageType::NavigationControl);
     msgBus.registerNode(*this, MessageType::WindState);
@@ -65,5 +68,31 @@ void LowLevelControllerNodeASPire::processNavigationControlMessage(const Navigat
 }
 
 void LowLevelControllerNodeASPire::constructAndSendFrame() {
-    // TODO - Construct and send the CAN-Frame
+    CanMsg Cmsg;
+    Cmsg.id = 700;
+    Cmsg.header.ide = 0;
+    Cmsg.header.length = 8;
+    
+    double rudderAngle = m_CourseRegulator.calculateRudderAngle();
+    rudderAngle += m_MaxRudderAngle;
+    double ratio = 65535 / m_MaxRudderAngle * 2;
+    uint16_t angle_16 = rudderAngle * ratio;
+
+    (Cmsg.data[0] = angle_16 & 0xff);
+    (Cmsg.data[1] = angle_16 >> 8);
+
+    double servoAngle = m_WingsailControl.calculateServoAngle();
+    servoAngle += m_MaxServoSailAngle;
+    ratio = 65535 / m_MaxServoSailAngle * 2;
+    angle_16 = servoAngle * ratio;
+
+    (Cmsg.data[2] = angle_16 & 0xff);
+    (Cmsg.data[3] = angle_16 >> 8);
+    (Cmsg.data[4] = 0);
+    (Cmsg.data[5] = 0);
+    (Cmsg.data[6] = m_WindvaneSelfSteeringOn);
+    (Cmsg.data[7] = 0);
+
+    m_CanService->sendCANMessage(Cmsg);    
+
 }
