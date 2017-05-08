@@ -3,8 +3,13 @@
 #include "HardwareServices/CAN_Services/CANService.h"
 #include "Tests/unit-tests/TestMocks/MockCANReceiver.h"
 
+MessageBus msgBus;
+
+void msgBusLoop() {
+    msgBus.run();
+}
+
 int main() {
-    MessageBus msgBus;
     CANService canService;
     LowLevelControllerNodeASPire node(msgBus, canService);
     std::vector<uint32_t> IDs = { 700 };
@@ -12,8 +17,8 @@ int main() {
 
     canService.start();
     canService.SetLoopBackMode();
-    msgBus.run();
-
+    std::async(std::launch::async, &msgBusLoop);
+    
     NavigationControlMsg::NavigationState state =
                     NavigationControlMsg::NavigationState::sailToWaypoint;
     msgBus.sendMessage(std::make_unique<NavigationControlMsg>(1.2, 2.3, false, state));
