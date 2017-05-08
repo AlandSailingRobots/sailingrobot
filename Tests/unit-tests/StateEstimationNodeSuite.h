@@ -175,7 +175,7 @@ public:
         Message* msgGPS = msgPtrGpS.get();
         sEstimationNode->processMessage(msgGPS);
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
-        TS_ASSERT(stateMessageListener->getVesselCourse() == 0);
+        TS_ASSERT_DELTA(stateMessageListener->getVesselCourse(), 0, 1e-7);
       }
 
       void test_SEstStateMsgSpdAndDeclOverZero(){
