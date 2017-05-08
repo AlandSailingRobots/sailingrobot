@@ -146,25 +146,3 @@ const double MidRangeVoter::getCPA( const AISCollidable_t& collidable, const Boa
 
     return cpa;
 }
-
-///----------------------------------------------------------------------------------
-const uint16_t MidRangeVoter::perpendicularCourse( const AISCollidable_t& collidable, const BoatState_t& boatState)
-{
-    uint16_t perpCourse = 0;
-
-    uint16_t bearing = CourseMath::calculateBTW(boatState.lon, boatState.lat, collidable.longitude, collidable.latitude);
-
-    int16_t bearingDiffStarboard = abs(Utility::headingDifference(bearing, Utility::wrapAngle(collidable.course - 90)));
-    int16_t bearingDiffPort = abs(Utility::headingDifference(bearing, Utility::wrapAngle(collidable.course + 90)));
-
-    if( bearingDiffStarboard < bearingDiffPort )
-    {
-        perpCourse = Utility::wrapAngle(collidable.course + 90);
-    }
-    else
-    {
-        perpCourse = Utility::wrapAngle(collidable.course - 90);
-    }
-
-    return perpCourse;
-}

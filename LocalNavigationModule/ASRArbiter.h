@@ -46,11 +46,6 @@ public:
  	/// Clears the current ballot
  	///----------------------------------------------------------------------------------
     void clearBallot();
-
-    ///----------------------------------------------------------------------------------
- 	/// The highest possible votes a course can have
- 	///----------------------------------------------------------------------------------
-    const int16_t MAX_VOTES = 100;
 private:
     ASRCourseBallot courseBallot;
 };

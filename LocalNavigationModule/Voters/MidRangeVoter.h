@@ -33,18 +33,13 @@ public:
  	///----------------------------------------------------------------------------------
     const ASRCourseBallot& vote( const BoatState_t& boatState );
 
-    const void assignVotes( uint16_t perpCourse, float collisionRisk );
+    const void assignVotes( uint16_t course, float collisionRisk );
 
     ///----------------------------------------------------------------------------------
  	/// Finds the closest point of approach, the final parameter is the time until 
     /// approach.
  	///----------------------------------------------------------------------------------
     const double getCPA( const AISCollidable_t& collidable, const BoatState_t& boatState, uint16_t course, double& time );
-
-    ///----------------------------------------------------------------------------------
- 	/// Finds the perpendicular course of a given course on the ASV's side.
- 	///----------------------------------------------------------------------------------
-    const uint16_t perpendicularCourse( const AISCollidable_t& collidable, const BoatState_t& boatState );
 
 private:
     CollidableMgr& collidableMgr;
