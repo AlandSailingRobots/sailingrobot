@@ -5,6 +5,7 @@
 ////////////////////////////////////////////////////////
 #pragma once
 
+#include "SystemServices/Logger.h"
 #include "TestMocks/MockCANReceiver.h"
 #include "HardwareServices/CAN_Services/CANService.h"
 #include "HardwareServices/CAN_Services/CANFrameReceiver.h"
@@ -79,6 +80,26 @@ public:
       TS_ASSERT(!missed);
       TS_ASSERT(missed2);
 
+      if (Logger::init())
+      {
+		    Logger::info("Built on %s at %s", __DATE__, __TIME__);
+		    Logger::info("Logger init\t\t[OK]");
+	    }
+	    else
+      {
+		    Logger::error("Logger init\t\t[FAILED]");
+	    }
+
+      if(missed2)
+      {
+        Logger::error("Missed messages from the CAN-Bus");
+      }
+      else
+      {
+        Logger::info("No missed messages from the CAN-Bus")
+      }
+
+      Logger::shutdown();
   }
 
 private:
