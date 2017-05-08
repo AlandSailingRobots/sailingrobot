@@ -41,7 +41,7 @@ enum class NodeID {
 	StateEstimation,
 	MessagePrinter,
 	WindStateNode,
-	StateMessageListener
+	StateMessageListener,
 	MessageVerifier
 };
 
