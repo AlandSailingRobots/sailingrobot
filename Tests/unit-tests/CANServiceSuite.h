@@ -17,49 +17,67 @@
 
 #define WAIT_FOR_MSG 1000
 
-class CANServiceSuite : public CxxTest::TestSuite {
+class CANServiceSuite : public CxxTest::TestSuite
+{
 public:
-  void setUp() {
+  void setUp()
+  {
     service = new CANService();
-    std::cout << &service << std::endl;
   }
-  void tearDown() {
-    std::cout << "this should not run" << std::endl;
+  void tearDown()
+  {
     delete service;
   }
 
-  void test_CANServiceNodeCommunication () {
-      std::cout << "checking where the segfault is:" << std::endl;
+  void test_SendAndMissedMessages()
+  {
       std::vector<uint32_t> a = {700};
       MockCANReceiver receiver (*service, a );
-      std::cout << "1";
-      std::vector<uint32_t> b = {700,701};
-      MockCANReceiver receiver2(*service, b);
-      std::cout << "2";
       auto fut = service->start();
-      std::cout << "3";
+      service->SetLoopBackMode();
 
-      CanMsg msg;
-      msg.id = 700;
+      CanMsg Cmsg;
+      Cmsg.id = 700;
+      Cmsg.header.ide = 0;
       for(int i=0; i<8; i++)
       {
-        msg.data[i] = i;
+        Cmsg.data[i] = i;
       }
-      std::cout << "4";
-      service->sendCANMessage(msg);
-      std::cout << "5";
+      Cmsg.header.length = sizeof(Cmsg.data) / sizeof(Cmsg.data[0]);
+
+      service->sendCANMessage(Cmsg);
+      bool missed = service->checkMissedMessages();
 
       std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_FOR_MSG));
-      std::cout << "6";
-      service->stop();
-      std::cout << "7";
-      fut.get();
-      std::cout << "8";
+      service->SetNormalMode();
 
-      TS_ASSERT( receiver.message_received());
-      std::cout << "9";
-      TS_ASSERT(receiver2.message_received());
-      std::cout << "10" << std::endl;
+      CanMsg Cmsg2;
+      N2kMsg Nmsg;
+
+      Nmsg.PGN = 59904;
+      Nmsg.Priority = 6;
+      Nmsg.Source = 1;
+      Nmsg.Destination = 255;
+      Nmsg.DataLen = 3;
+      Nmsg.Data.resize(Nmsg.DataLen);
+      Nmsg.Data[0] = 20;
+      Nmsg.Data[1] = 240;
+      Nmsg.Data[2] = 1;
+
+      N2kMsgToCanMsg(Nmsg, Cmsg2);
+
+      service->sendCANMessage(Cmsg2);
+
+      std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_FOR_MSG));
+
+      bool missed2 = service->checkMissedMessages();
+
+      service->stop();
+      fut.get();
+
+      TS_ASSERT(receiver.message_received());
+      TS_ASSERT(!missed);
+      TS_ASSERT(missed2);
 
   }
 

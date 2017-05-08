@@ -8,12 +8,14 @@
 
 #define SLEEP_TIME_MS 50
 
-bool CANService::registerForReading(CANPGNReceiver& receiver, uint32_t PGN) {
+bool CANService::registerForReading(CANPGNReceiver& receiver, uint32_t PGN)
+{
 
   // If the PGN is already registered, do not re-register.
   // Perhaps this should be changed in the future.
 
-  if(m_RegisteredPGNReceivers.find(PGN) != m_RegisteredPGNReceivers.end()){
+  if(m_RegisteredPGNReceivers.find(PGN) != m_RegisteredPGNReceivers.end())
+  {
     return false;
   }
   m_RegisteredPGNReceivers[PGN] = &receiver;
@@ -21,12 +23,14 @@ bool CANService::registerForReading(CANPGNReceiver& receiver, uint32_t PGN) {
 
 }
 
-bool CANService::registerForReading(CANFrameReceiver& receiver, uint32_t ID) {
+bool CANService::registerForReading(CANFrameReceiver& receiver, uint32_t ID)
+{
 
   // If the ID is already registered, do not re-register.
   // Perhaps this should be changed in the future.
 
-  if(m_RegisteredFrameReceivers.find(ID) != m_RegisteredFrameReceivers.end()){
+  if(m_RegisteredFrameReceivers.find(ID) != m_RegisteredFrameReceivers.end())
+  {
     return false;
   }
   m_RegisteredFrameReceivers[ID] = &receiver;
@@ -34,12 +38,22 @@ bool CANService::registerForReading(CANFrameReceiver& receiver, uint32_t ID) {
 
 }
 
-void CANService::sendCANMessage(CanMsg& msg){
+void CANService::sendCANMessage(CanMsg& msg)
+{
   std::lock_guard<std::mutex> lock (m_QueueMutex);
   m_MsgQueue.push(msg);
 }
 
-std::future<void> CANService::start() {
+CanMsg CANService::getCANMessage()
+{
+  std::lock_guard<std::mutex> lock (m_QueueMutex);
+  CanMsg Cmsg = m_MsgQueue.front();
+  m_MsgQueue.pop();
+  return Cmsg;
+}
+
+std::future<void> CANService::start() 
+{
   m_Running.store(true);
   wiringPiSetup();
   int SPISpeed = 1000000;
@@ -51,14 +65,17 @@ std::future<void> CANService::start() {
 	}
 
   bool mcp_initialized = MCP2515_Init();
-  if(!mcp_initialized) {
+  if(!mcp_initialized) 
+  {
     std::cout << "Could not initialize hardware" << std::endl;
   }
   return std::async(std::launch::async, &CANService::run, this);
 }
 
-void CANService::run() {
-  while(m_Running.load() == true) {
+void CANService::run() 
+{
+  while(m_Running.load() == true) 
+  {
     std::this_thread::sleep_for(std::chrono::milliseconds(SLEEP_TIME_MS));
 
     static CanMsg Cmsg;
@@ -99,16 +116,45 @@ void CANService::run() {
 
     if(!m_MsgQueue.empty())
     {
-      std::lock_guard<std::mutex> lock (m_QueueMutex);
-      CanMsg CmsgSend = m_MsgQueue.front();
-      m_MsgQueue.pop();
-
+      CanMsg CmsgSend = getCANMessage();
       MCP2515_SendMessage(&CmsgSend, 0);
     }
   }
 }
 
-void CANService::stop() {
+void CANService::SetLoopBackMode()
+{
+	uint8_t Mode = 0x40;
+	uint8_t Mask = (1<<REQOP2)|(1<<REQOP1)|(1<<REQOP0);
+	MCP2515_BitModify(CANCTRL, Mask, Mode);
+	uint8_t Status = MCP2515_Read(CANSTAT);	//wait untill it changes
+	while((Status & Mask) != Mode)
+	{
+		Status = MCP2515_Read(CANSTAT);
+	}
+}
+
+void CANService::SetNormalMode()
+{
+	uint8_t Mode = 0x00;
+	uint8_t Mask = (1<<REQOP2)|(1<<REQOP1)|(1<<REQOP0);
+	MCP2515_BitModify(CANCTRL, Mask, Mode);
+	uint8_t Status = MCP2515_Read(CANSTAT);	//wait untill it changes
+	while((Status & Mask) != Mode)
+	{
+		Status = MCP2515_Read(CANSTAT);
+	}
+}
+
+bool CANService::checkMissedMessages()
+{
+  uint8_t EF = MCP2515_Read(EFLG);
+  if(((EF>>7)&1) || ((EF>>6)&1)) return true;
+  else return false;
+}
+
+void CANService::stop()
+{
   m_Running.store(false);
 }
 

@@ -30,7 +30,8 @@
  #include <atomic>
 
 
-class CANService {
+class CANService
+{
 public:
   CANService() {}
 
@@ -48,9 +49,17 @@ public:
  * receiver is registered, will be discarded.             */
   void sendCANMessage(CanMsg& msg);
 
+  CanMsg getCANMessage();
+
 /* Starts the service using async, and will begin *
  * receiving and sending messages                 */
   std::future<void> start();
+
+  void SetLoopBackMode();
+
+  void SetNormalMode();
+
+  bool checkMissedMessages();
 
   /* Stops the service */
   void stop();
