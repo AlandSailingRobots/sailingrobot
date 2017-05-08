@@ -27,12 +27,11 @@
       #define STATE_INITIAL_SLEEP 2000
 
       StateEstimationNode::StateEstimationNode(MessageBus& msgBus, double loopTime, double speedLimit): ActiveNode(NodeID::StateEstimation, msgBus),
-      mVesselHeading(0), mVesselLat(0), mVesselLon(0), mVesselSpeed(0), mVesselCourse(0), mLoopTime(loopTime), mDeclination(0), mSpeedLimit(speedLimit)
+      m_VesselHeading(0), m_VesselLat(0), m_VesselLon(0), m_VesselSpeed(0), m_VesselCourse(0), m_LoopTime(loopTime), m_Declination(0), m_SpeedLimit(speedLimit)
       {
         msgBus.registerNode(*this, MessageType::CompassData);
         msgBus.registerNode(*this, MessageType::GPSData);
         msgBus.registerNode(*this, MessageType::WaypointData);
-
       }
 
       StateEstimationNode::~StateEstimationNode()
@@ -71,51 +70,45 @@
 
       void StateEstimationNode::processCompassMessage(const CompassDataMsg* msg)
       {
-        m_lock.lock();
+        std::lock_guard<std::mutex> lock_guard(m_lock);
         float currentVesselHeading = msg->heading();
-        mVesselHeading = Utility::addDeclinationToHeading(currentVesselHeading, mDeclination);
-        m_lock.unlock();
-
+        m_VesselHeading = Utility::addDeclinationToHeading(currentVesselHeading, m_Declination);
       }
 
       void StateEstimationNode::processGPSMessage(const GPSDataMsg* msg)
       {
-        m_lock.lock();
-        mVesselLat = msg->latitude();
-        mVesselLon = msg->longitude();
-        mVesselSpeed = msg->speed();
-        mVesselCourse = msg->heading();
-        m_lock.unlock();
+        std::lock_guard<std::mutex> lock_guard(m_lock);
+        m_VesselLat = msg->latitude();
+        m_VesselLon = msg->longitude();
+        m_VesselSpeed = msg->speed();
+        m_VesselCourse = msg->heading();
       }
 
       int StateEstimationNode::getCourse(){
 
       /* Depending on the current speed (Speed over ground) use vesselHeading
        * (Compass heading compensated with declination)
-       * or the GPS Course 
+       * or the GPS Course
        */
-        
+
         std::lock_guard<std::mutex> lock_guard(m_lock);
-        if(mVesselSpeed >= 0 && mVesselSpeed <= mSpeedLimit){
-          int leftOperand = ( (mSpeedLimit-mVesselSpeed)/mSpeedLimit )* mVesselHeading;
-          int rightOperand = (mVesselSpeed/mSpeedLimit)*mVesselCourse;
+        if(m_VesselSpeed >= 0 && m_VesselSpeed <= m_SpeedLimit){
+          int leftOperand = ( (m_SpeedLimit-m_VesselSpeed)/m_SpeedLimit )* m_VesselHeading;
+          int rightOperand = (m_VesselSpeed/m_SpeedLimit)*m_VesselCourse;
           return leftOperand + rightOperand;
         }
-          return mVesselCourse;
+          return m_VesselCourse;
       }
 
       void StateEstimationNode::processWaypointMessage( const WaypointDataMsg* msg )
-      {                  
-        m_lock.lock();
-        mDeclination = msg->nextDeclination();
-        m_lock.unlock();
-
+      {
+        std::lock_guard<std::mutex> lock_guard(m_lock);
+        m_Declination = msg->nextDeclination();
       }
 
       void StateEstimationNode::StateEstimationNodeThreadFunc(void* nodePtr)
       {
         StateEstimationNode* node = (StateEstimationNode*)nodePtr;
-
 
       // An initial sleep, its purpose is to ensure that most if not all the sensor data arrives
       // at the start before we send out the vessel state message.
@@ -127,13 +120,11 @@
 
       while(true)
       {
-
-        timer.sleepUntil(node->mLoopTime);
-        MessagePtr stateMessage = std::make_unique<StateMessage>( node->mVesselHeading, node->mVesselLat,
-          node->mVesselLon, node->mVesselSpeed, node->getCourse());
+        timer.sleepUntil(node->m_LoopTime);
+        MessagePtr stateMessage = std::make_unique<StateMessage>( node->m_VesselHeading, node->m_VesselLat,
+          node->m_VesselLon, node->m_VesselSpeed, node->getCourse());
           node->m_MsgBus.sendMessage(std::move(stateMessage));
           timer.reset();
       }
 
       }
-

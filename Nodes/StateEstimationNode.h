@@ -61,17 +61,17 @@ private:
   ///----------------------------------------------------------------------------------
   static void StateEstimationNodeThreadFunc(void* nodePtr);
 
-  float 	mVesselHeading;
-  double	mVesselLat;
-  double	mVesselLon;
-  double	mVesselSpeed;
-  double  mVesselCourse;
+  float 	m_VesselHeading;
+  double	m_VesselLat;
+  double	m_VesselLon;
+  double	m_VesselSpeed;
+  double  m_VesselCourse;
 
 
-  double mLoopTime;
-  int mDeclination;
+  double m_LoopTime;
+  int m_Declination;
 
-  double mSpeedLimit;
+  double m_SpeedLimit;
 
   std::mutex m_lock;
 

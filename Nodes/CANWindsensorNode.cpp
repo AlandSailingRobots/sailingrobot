@@ -17,9 +17,9 @@
 CANWindsensorNode::CANWindsensorNode(MessageBus& msgBus, CANService& can_service)
  : CANPGNReceiver(can_service, {130306, 130311}), Node(NodeID::WindSensor, msgBus)
  {
- 		m_WindDir  = 0;
-    m_WindSpeed = 0;
-    m_WindTemperature = 0;
+ 	m_WindDir  = 0;
+  m_WindSpeed = 0;
+  m_WindTemperature = 0;
  }
 
 void CANWindsensorNode::processPGN(N2kMsg &NMsg)
