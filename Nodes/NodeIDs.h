@@ -94,13 +94,10 @@ inline std::string nodeToString(NodeID id)
 		return "MessagePrinter";
 		case NodeID::WindStateNode:
 		return "WindStateNode";
-<<<<<<< HEAD
 		case NodeID::LowLevelControllerNodeASPire:
 		return "LowLevelControllerNodeASPire";
-=======
 		case NodeID::StateMessageListener:
 		return "StateMessageListener";
->>>>>>> develop
 		case NodeID::MessageVerifier:
 		return "MessageVerifier";
 	}
