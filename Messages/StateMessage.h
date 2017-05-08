@@ -20,13 +20,13 @@ public:
   StateMessage (NodeID destinationID, NodeID sourceID, float compassHeading,
     double lat, double lon, double gpsSpeed, double gpsCourse)
     :Message(MessageType::StateMessage, sourceID, destinationID),
-    vesselHeading(compassHeading), vesselLat(lat), vesselLan(lon), vesselSpeed(gpsSpeed), vesselCourse(gpsCourse)
+    m_VesselHeading(compassHeading), m_VesselLat(lat), m_VesselLon(lon), m_VesselSpeed(gpsSpeed), m_VesselCourse(gpsCourse)
     { }
 
 
     StateMessage(float compassHeading, double lat, double lon, double gpsSpeed, double gpsCourse)
       :Message(MessageType::StateMessage, NodeID::None, NodeID::None),
-      vesselHeading(compassHeading), vesselLat(lat), vesselLan(lon), vesselSpeed(gpsSpeed), vesselCourse(gpsCourse)
+      m_VesselHeading(compassHeading), m_VesselLat(lat), m_VesselLon(lon), m_VesselSpeed(gpsSpeed), m_VesselCourse(gpsCourse)
       { }
 
       float heading() const { return vesselHeading; }
@@ -40,11 +40,11 @@ public:
       StateMessage(MessageDeserialiser deserialiser)
       :Message(deserialiser)
       {
-        if(	!deserialiser.readFloat(vesselHeading) ||
-        !deserialiser.readDouble(vesselLat) ||
-        !deserialiser.readDouble(vesselLan) ||
-        !deserialiser.readDouble(vesselCourse) ||
-        !deserialiser.readDouble(vesselSpeed))
+        if(	!deserialiser.readFloat(m_VesselHeading) ||
+        !deserialiser.readDouble(m_VesselLat) ||
+        !deserialiser.readDouble(m_VesselLon) ||
+        !deserialiser.readDouble(m_VesselCourse) ||
+        !deserialiser.readDouble(m_VesselSpeed))
         {
           m_valid = false;
         }
@@ -57,17 +57,17 @@ public:
       {
         Message::Serialise(serialiser);
 
-        serialiser.serialise(vesselHeading);
-        serialiser.serialise(vesselLat);
-        serialiser.serialise(vesselLan);
-        serialiser.serialise(vesselSpeed);
-        serialiser.serialise(vesselCourse);
+        serialiser.serialise(m_VesselHeading);
+        serialiser.serialise(m_VesselLat);
+        serialiser.serialise(m_VesselLon);
+        serialiser.serialise(m_VesselCourse);
+        serialiser.serialise(m_VesselSpeed);
       }
 
     private:
-      float 	vesselHeading;
-      double	vesselLat;
-      double	vesselLan;
-      double	vesselSpeed;
-      double  vesselCourse;
+      float 	m_VesselHeading;
+      double	m_VesselLat;
+      double	m_VesselLon;
+      double	m_VesselSpeed;
+      double  m_VesselCourse;
     };
