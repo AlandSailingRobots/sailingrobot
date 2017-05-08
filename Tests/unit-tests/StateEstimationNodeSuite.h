@@ -175,7 +175,7 @@ public:
         Message* msgGPS = msgPtrGpS.get();
         sEstimationNode->processMessage(msgGPS);
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
-        TS_ASSERT(stateMessageListener->getVesselCourse() == 0);
+        TS_ASSERT_DELTA(stateMessageListener->getVesselCourse(), 0, 1e-7);
       }
 
       void test_SEstStateMsgSpdAndDeclOverZero(){
@@ -239,7 +239,7 @@ public:
           double longitude = 19.93481;
           double unixTime = 1;
           double speed = -1;
-          double headingGPS = 10;
+          double headingGPS = 10.00;
           int satCount = 2;
           GPSMode mode = GPSMode::LatLonOk;
           MessagePtr gpsMsgData = std::make_unique<GPSDataMsg>(false,false,latitude,longitude,unixTime,speed,headingGPS,satCount,
@@ -248,8 +248,7 @@ public:
             Message* msgGPS = msgPtrGpS.get();
             sEstimationNode->processMessage(msgGPS);
             std::this_thread::sleep_for(std::chrono::milliseconds(500));
-
-            TS_ASSERT(stateMessageListener->getVesselCourse() == headingGPS);
+            TS_ASSERT_DELTA(stateMessageListener->getVesselCourse(), headingGPS, 1e-7);
           }
 
         };
