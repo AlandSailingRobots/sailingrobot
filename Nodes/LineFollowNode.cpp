@@ -186,7 +186,7 @@ double LineFollowNode::calculateAngleOfDesiredTrajectory()
         double signedDistance = Utility::calculateSignedDistanceToLine(m_nextWaypointLon, m_nextWaypointLat, m_prevWaypointLon,
           m_prevWaypointLat, msg->longitude(), msg->latitude());
           int maxTackDistance = 40; //'r'
-          double phi = calculateAngleOfDesiredTrajectory(msg);
+          double phi = calculateAngleOfDesiredTrajectory();
           double desiredHeading = phi + (2 * (M_PI / 4)/M_PI) * atan(signedDistance/maxTackDistance); //heading to smoothly join the line
           desiredHeading = Utility::limitRadianAngleRange(desiredHeading);
           //---------------------
