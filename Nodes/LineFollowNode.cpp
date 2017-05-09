@@ -124,7 +124,7 @@ void LineFollowNode::processMessage(const Message* msg)
       m_nextWaypointLat = waypMsg->nextLatitude();
       m_nextWaypointDeclination = waypMsg->nextDeclination();
       m_nextWaypointRadius = waypMsg->nextRadius();
-      setPrevWaypointData(waypMsg, (VesselStateMsg*)msg);
+      setPrevWaypointData(waypMsg);
     }
     break;
     default:
@@ -270,15 +270,15 @@ double LineFollowNode::calculateAngleOfDesiredTrajectory(VesselStateMsg* msg)
         }
 
         //Martins: Pass only WaypointDataMsg here
-        void LineFollowNode::setPrevWaypointData(WaypointDataMsg* waypMsg, VesselStateMsg* vesselMsg)
+        void LineFollowNode::setPrevWaypointData(WaypointDataMsg* waypMsg)
         {
 
           //Martins: Use the saved state of the StateMessage
           if(waypMsg->prevId() == 0) //Set previous waypoint to boat position
           {
             m_prevWaypointId = 0;
-            m_prevWaypointLon = vesselMsg->longitude();
-            m_prevWaypointLat = vesselMsg->latitude();
+            m_prevWaypointLon = m_VesselLon;
+            m_prevWaypointLat = m_VesselLat;
             m_prevWaypointDeclination = 0;
             m_prevWaypointRadius = 15;
           }
