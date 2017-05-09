@@ -100,11 +100,11 @@ void LineFollowNode::processMessage(const Message* msg)
     case MessageType::StateMessage:
     {
       const StateMessage* stateMsg = static_cast<const StateMessage*>(msg);
-      m_VesselHeading = stateMsg->heading();
-      m_VesselLat = stateMsg->latitude();
-      m_VesselLon = stateMsg->longitude();
-      m_VesselSpeed = stateMsg->speed();
-      m_VesselCourse = stateMsg->course();
+      m_Heading = stateMsg->heading();
+      m_Latitude = stateMsg->latitude();
+      m_Longitude = stateMsg->longitude();
+      m_Speed = stateMsg->speed();
+      m_Course = stateMsg->course();
     }
     break;
     case MessageType::WindState:
@@ -132,7 +132,7 @@ void LineFollowNode::processMessage(const Message* msg)
   }
 }
 
-double LineFollowNode::calculateAngleOfDesiredTrajectory(VesselStateMsg* msg)
+double LineFollowNode::calculateAngleOfDesiredTrajectory()
 {
   int earthRadius = 6371000;
 
@@ -146,10 +146,10 @@ double LineFollowNode::calculateAngleOfDesiredTrajectory(VesselStateMsg* msg)
       earthRadius * sin(Utility::degreeToRadian(m_nextWaypointLat))};
 
       double M[2][3] =
-      {   {-sin(Utility::degreeToRadian(msg->longitude() )), cos(Utility::degreeToRadian(msg->longitude() )), 0},
-      {-cos(Utility::degreeToRadian(msg->longitude() ))*sin(Utility::degreeToRadian(msg->latitude() )),
-        -sin(Utility::degreeToRadian(msg->longitude() ))*sin(Utility::degreeToRadian(msg->latitude() )),
-        cos(Utility::degreeToRadian(msg->latitude() ))}};
+      {   {-sin(Utility::degreeToRadian(m_Latitude)), cos(Utility::degreeToRadian(m_Latitude )), 0},
+      {-cos(Utility::degreeToRadian(m_Latitude ))*sin(Utility::degreeToRadian(m_Latitude )),
+        -sin(Utility::degreeToRadian(m_Latitude ))*sin(Utility::degreeToRadian(m_Latitude )),
+        cos(Utility::degreeToRadian(m_Latitude ))}};
 
         std::array<double, 3> bMinusA = { nextWPCoord[0]-prevWPCoord[0], nextWPCoord[1]-prevWPCoord[1], nextWPCoord[2]-prevWPCoord[2]};
 
@@ -277,8 +277,8 @@ double LineFollowNode::calculateAngleOfDesiredTrajectory(VesselStateMsg* msg)
           if(waypMsg->prevId() == 0) //Set previous waypoint to boat position
           {
             m_prevWaypointId = 0;
-            m_prevWaypointLon = m_VesselLon;
-            m_prevWaypointLat = m_VesselLat;
+            m_prevWaypointLon = m_Longitude;
+            m_prevWaypointLat = m_Latitude;
             m_prevWaypointDeclination = 0;
             m_prevWaypointRadius = 15;
           }
