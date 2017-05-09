@@ -83,7 +83,7 @@ private:
 
 	double calculateAngleOfDesiredTrajectory(VesselStateMsg* msg);
 	void calculateActuatorPos(VesselStateMsg* msg);
-	void setPrevWaypointData(WaypointDataMsg* waypMsg, VesselStateMsg* vesselMsg);
+	void setPrevWaypointData(WaypointDataMsg* waypMsg);
 
 	virtual int getHeading(int gpsHeading, int compassHeading, double gpsSpeed, bool mockPosition, bool getHeadingFromCompass);
 	//Calculates a smooth transition between the compass and the gps. Do not call directly, use getHeading()
