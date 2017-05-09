@@ -61,14 +61,14 @@ private:
 	int     m_tackingDirection;
 
 	//same as compass heading
-	float 	m_VesselHeading;
+	float 	m_Heading;
 
-	double	m_VesselLat;
-	double	m_VesselLon;
-	double	m_VesselSpeed;
+	double	m_Latitude;
+	double	m_Longitude;
+	double	m_Speed;
 
 	//same as the gpsheading
-	double  m_VesselCourse;
+	double  m_Course;
 
 	double m_trueWindSpeed;
 	double m_trueWindDir;
@@ -81,7 +81,7 @@ private:
 	std::vector<float> twdBuffer;
 	unsigned int twdBufferMaxSize;
 
-	double calculateAngleOfDesiredTrajectory(VesselStateMsg* msg);
+	double calculateAngleOfDesiredTrajectory();
 	void calculateActuatorPos(VesselStateMsg* msg);
 	void setPrevWaypointData(WaypointDataMsg* waypMsg);
 
