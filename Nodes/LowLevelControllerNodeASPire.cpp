@@ -1,5 +1,6 @@
 #include "LowLevelControllerNodeASPire.h"
 #include "HardwareServices/CAN_Services/N2kMsg.h"
+#include "Messages/ActuatorControlASPireMessage.h"
 
 
 LowLevelControllerNodeASPire::LowLevelControllerNodeASPire(MessageBus& msgBus, CANService& canService, float maxRudderAngle, 
@@ -32,7 +33,10 @@ void LowLevelControllerNodeASPire::processMessage(const Message* message){
 
     // Basically have we received atleast one of every message so far
     if(m_VesselHeading != DATA_OUT_OF_RANGE && m_TrueWindSpeed != DATA_OUT_OF_RANGE && m_CourseToSteer != DATA_OUT_OF_RANGE) {
-        constructAndSendFrame();
+        MessagePtr msg = std::make_unique<ActuatorControlASPireMessage>
+                (m_WingsailControl.calculateServoAngle(), m_CourseRegulator.calculateRudderAngle(), m_WindvaneSelfSteeringOn);
+        m_MsgBus.sendMessage(std::move(msg));
+//        constructAndSendFrame();
     }
 
 }
