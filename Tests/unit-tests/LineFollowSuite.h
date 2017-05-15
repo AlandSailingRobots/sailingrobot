@@ -90,7 +90,7 @@ class LineFollowSuite : public CxxTest::TestSuite {
 
         std::this_thread::sleep_for(std::chrono::milliseconds(2000));
 		TS_TRACE("END OF LINEFOLLOW");
-        TS_ASSERT(logger->actuatorPositionReceived());
+        TS_ASSERT(logger->navigationDataReceived());
     }
 
 };
