@@ -40,7 +40,9 @@ public:
         std::vector<uint32_t> PGNs = { 700 };
         MockCANReceiver mockReceiver(CANService, PGNs);
         std::thread t1(runMessageLoop);
+        t1.detach();
         auto fu = CANService.start();
+        CANService.SetLoopBackMode();
 
         msgBus().sendMessage(std::move(msg));
 
