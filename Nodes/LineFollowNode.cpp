@@ -19,8 +19,6 @@
 #include "Messages/ActuatorPositionMsg.h"
 #include "Messages/ExternalControlMsg.h"
 #include "Messages/CourseDataMsg.h"
-#include "Messages/StateMessage.h"
-#include "Messages/WindStateMsg.h"
 #include "Math/Utility.h"
 #include "SystemServices/SysClock.h"
 #include <math.h>
@@ -88,15 +86,7 @@ void LineFollowNode::processMessage(const Message* msg)
     case MessageType::ExternalControl:
     m_externalControlActive = ((ExternalControlMsg*)msg)->externalControlActive();
     break;
-    case MessageType::VesselState:
-    if(!m_externalControlActive)
-    {
-      calculateActuatorPos((VesselStateMsg*)msg);
-    }else{
-      VesselStateMsg* state = (VesselStateMsg*)msg;
-      fprintf( file, "%d,%f,%f\n", i, state->latitude(), state->longitude() );
-    }
-    break;
+
     case MessageType::StateMessage:
     {
       const StateMessage* stateMsg = static_cast<const StateMessage*>(msg);
@@ -114,6 +104,13 @@ void LineFollowNode::processMessage(const Message* msg)
       m_trueWindDir = windStateMsg->trueWindDirection();
       m_apparentWindSpeed = windStateMsg->apparentWindSpeed();
       m_apparentWindDir = windStateMsg->apparentWindDirection();
+
+      if(!m_externalControlActive)
+      {
+        calculateActuatorPos(windStateMsg);
+      }else{
+        fprintf( file, "%d,%f,%f\n", i, m_Latitude, m_Longitude);
+      }
     }
     break;
     case MessageType::WaypointData:
@@ -160,31 +157,24 @@ double LineFollowNode::calculateAngleOfDesiredTrajectory()
       }
 
       //Martins: Send WindStateMsg here And trie to break to smaller components
-      void LineFollowNode::calculateActuatorPos(VesselStateMsg* msg)
+      void LineFollowNode::calculateActuatorPos(const WindStateMsg* msg)
       {
-        //Remove
-        if(not msg->gpsOnline())
-        {
-          Logger::error("GPS not online, using values from last iteration");
-          return;
-        }
 
         //Martins: WindStateMsg already has a trueWindDirection -- i think that should be used instead.
         //Martins: Save the state of the StateMessage
-        double trueWindDirection = Utility::getTrueWindDirection(msg->windDir(), msg->windSpeed(),
-        msg->speed(), msg->compassHeading(), twdBuffer, twdBufferMaxSize);
+
         /* add pi because trueWindDirection is originally origin of wind but algorithm need direction*/
-        double trueWindDirection_radian = Utility::degreeToRadian(trueWindDirection)+M_PI;
+        double trueWindDirection_radian = Utility::degreeToRadian(msg->trueWindDirection())+M_PI;
 
         //Martins: Send WindStateMsg
-        setPrevWaypointToBoatPos(msg);
+        setPrevWaypointToBoatPos();
 
         //Martins: Use the saved state of StateMessage and WaypointDataMsg
         //GET DIRECTION--------
-        double currentHeading = getHeading(msg->gpsHeading(), msg->compassHeading(), msg->speed(), false, false);
+        double currentHeading = getHeading(m_Course, m_Heading, m_Speed, false, false);
         double currentHeading_radian = Utility::degreeToRadian(currentHeading);
         double signedDistance = Utility::calculateSignedDistanceToLine(m_nextWaypointLon, m_nextWaypointLat, m_prevWaypointLon,
-          m_prevWaypointLat, msg->longitude(), msg->latitude());
+          m_prevWaypointLat, m_Longitude, m_Latitude);
           int maxTackDistance = 40; //'r'
           double phi = calculateAngleOfDesiredTrajectory();
           double desiredHeading = phi + (2 * (M_PI / 4)/M_PI) * atan(signedDistance/maxTackDistance); //heading to smoothly join the line
@@ -221,24 +211,19 @@ double LineFollowNode::calculateAngleOfDesiredTrajectory()
           //SET RUDDER-------
           if(cos(currentHeading_radian - desiredHeading) < 0) //if boat heading is too far away from desired heading
           {
-            rudderCommand = -Utility::sgn(msg->speed()) * m_maxCommandAngle * Utility::sgn(sin(currentHeading_radian - desiredHeading));
+            rudderCommand = -Utility::sgn(m_Speed) * m_maxCommandAngle * Utility::sgn(sin(currentHeading_radian - desiredHeading));
           }
           else
           {
-            rudderCommand = -Utility::sgn(msg->speed()) * m_maxCommandAngle * sin(currentHeading_radian - desiredHeading);
+            rudderCommand = -Utility::sgn(m_Speed) * m_maxCommandAngle * sin(currentHeading_radian - desiredHeading);
           }
           //-----------------
 
           //USE WindStateMsg apparentWindDirection
           //SET SAIL---------
-          double apparentWindDirection = Utility::getApparentWindDirection(msg->windDir(),
-          msg->windSpeed(), msg->speed(), currentHeading_radian, trueWindDirection_radian)*M_PI/180;
+          sailCommand = fabs(((m_minSailAngle - m_maxSailAngle) / M_PI) * fabs(msg->apparentWindDirection()) + m_maxSailAngle);/*!!! on some pc abs only ouptut an int (ubuntu 14.04 gcc 4.9.3)*/
 
-          apparentWindDirection = ( (apparentWindDirection+M_PI>M_PI) ? (apparentWindDirection-M_PI):(apparentWindDirection+M_PI) );
-
-          sailCommand = fabs(((m_minSailAngle - m_maxSailAngle) / M_PI) * fabs(apparentWindDirection) + m_maxSailAngle);/*!!! on some pc abs only ouptut an int (ubuntu 14.04 gcc 4.9.3)*/
-
-          if (cos(apparentWindDirection+M_PI) + cos(m_maxSailAngle) <0 )
+          if (cos(msg->apparentWindDirection()+M_PI) + cos(m_maxSailAngle) <0 )
           {
             sailCommand = m_minSailAngle;
           }
@@ -254,10 +239,10 @@ double LineFollowNode::calculateAngleOfDesiredTrajectory()
 
           //------------------
 
-          double bearingToNextWaypoint = CourseMath::calculateBTW(msg->longitude(), msg->latitude(), m_nextWaypointLon, m_nextWaypointLat); //calculated for database
-          double distanceToNextWaypoint = CourseMath::calculateDTW(msg->longitude(), msg->latitude(), m_nextWaypointLon, m_nextWaypointLat);
+          double bearingToNextWaypoint = CourseMath::calculateBTW(m_Longitude, m_Latitude, m_nextWaypointLon, m_nextWaypointLat); //calculated for database
+          double distanceToNextWaypoint = CourseMath::calculateDTW(m_Longitude, m_Latitude, m_nextWaypointLon, m_nextWaypointLat);
 
-          MessagePtr courseMsg = std::make_unique<CourseDataMsg>(trueWindDirection, distanceToNextWaypoint, bearingToNextWaypoint);
+          MessagePtr courseMsg = std::make_unique<CourseDataMsg>(msg->trueWindDirection(), distanceToNextWaypoint, bearingToNextWaypoint);
           m_MsgBus.sendMessage(std::move(courseMsg));
 
           //create timestamp----
@@ -266,7 +251,7 @@ double LineFollowNode::calculateAngleOfDesiredTrajectory()
           timestamp_str+= std::to_string(SysClock::millis());
           //--------------------
 
-          m_dbLogger.log(msg, rudderCommand_norm, sailCommand_norm, 0, 0, distanceToNextWaypoint, bearingToNextWaypoint, desiredHeading, m_tack, getGoingStarboard(), m_nextWaypointId, trueWindDirection, false,timestamp_str);
+          m_dbLogger.log(msg, rudderCommand_norm, sailCommand_norm, 0, 0, distanceToNextWaypoint, bearingToNextWaypoint, desiredHeading, m_tack, getGoingStarboard(), m_nextWaypointId, msg->trueWindDirection(), false,timestamp_str);
         }
 
         //Martins: Pass only WaypointDataMsg here
@@ -358,16 +343,16 @@ double LineFollowNode::calculateAngleOfDesiredTrajectory()
         }
 
         //Martins: Use the StateMessage and WaypointDataMsg Saved so do not send any message type here
-        void LineFollowNode::setPrevWaypointToBoatPos(VesselStateMsg* msg) //If boat passed waypoint or enters it, set new line from boat to waypoint.
+        void LineFollowNode::setPrevWaypointToBoatPos() //If boat passed waypoint or enters it, set new line from boat to waypoint.
         {                                                                  //Used if boat has to stay within waypoint for a set amount of time.
           double distanceAfterWaypoint = Utility::calculateWaypointsOrthogonalLine(m_nextWaypointLon, m_nextWaypointLat, m_prevWaypointLon,
-            m_prevWaypointLat, msg->longitude(), msg->latitude());
+            m_prevWaypointLat, m_Longitude, m_Latitude);
 
-            double DTW = CourseMath::calculateDTW(msg->longitude(), msg->latitude(), m_nextWaypointLon, m_nextWaypointLat);
+            double DTW = CourseMath::calculateDTW(m_Longitude, m_Latitude, m_nextWaypointLon, m_nextWaypointLat);
 
             if(distanceAfterWaypoint > 0 ||  DTW < m_nextWaypointRadius)
             {
-              m_prevWaypointLon = msg->longitude();
-              m_prevWaypointLat = msg->latitude();
+              m_prevWaypointLon = m_Longitude;
+              m_prevWaypointLat = m_Latitude;
             }
           }
