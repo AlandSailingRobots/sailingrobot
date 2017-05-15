@@ -19,6 +19,8 @@
 
 #include "Node.h"
 #include "Messages/VesselStateMsg.h"
+#include "Messages/StateMessage.h"
+#include "Messages/WindStateMsg.h"
 #include "Messages/WaypointDataMsg.h"
 #include "dbhandler/DBHandler.h"
 #include "dbhandler/DBLogger.h"
@@ -82,7 +84,7 @@ private:
 	unsigned int twdBufferMaxSize;
 
 	double calculateAngleOfDesiredTrajectory();
-	void calculateActuatorPos(VesselStateMsg* msg);
+	void calculateActuatorPos(const WindStateMsg* msg);
 	void setPrevWaypointData(WaypointDataMsg* waypMsg);
 
 	virtual int getHeading(int gpsHeading, int compassHeading, double gpsSpeed, bool mockPosition, bool getHeadingFromCompass);
@@ -91,7 +93,7 @@ private:
 	void setupRudderCommand();
 	void setupSailCommand();
 	bool getGoingStarboard();
-	void setPrevWaypointToBoatPos(VesselStateMsg* msg);
+	void setPrevWaypointToBoatPos();
 
 	/*void manageDatabase(VesselStateMsg* msg, double trueWindDirection, double rudder, double sail, double heading,
 	double distanceToNextWaypoint, double bearingToNextWaypoint);*/
