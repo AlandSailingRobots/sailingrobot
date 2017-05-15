@@ -23,6 +23,7 @@
 #include "Messages/WaypointDataMsg.h"
 #include "dbhandler/DBHandler.h"
 #include "dbhandler/DBLogger.h"
+#include "Messages/NavigationControlMsg.h"
 #include "waypointrouting/SailCommand.h"
 #include "waypointrouting/RudderCommand.h"
 #include "Math/CourseMath.h"
