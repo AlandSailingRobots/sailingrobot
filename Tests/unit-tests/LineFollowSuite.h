@@ -18,6 +18,8 @@
 #include "TestMocks/MessageLogger.h"
 #include "Nodes/LineFollowNode.h"
 #include "Messages/VesselStateMsg.h"
+#include "Messages/WindStateMsg.h"
+#include "Messages/StateMessage.h"
 
 // For std::this_thread
 #include <chrono>
@@ -80,8 +82,11 @@ class LineFollowSuite : public CxxTest::TestSuite {
     void test_LineFollowCalculateActuatorPosition()
     {
 
-        MessagePtr msg = std::make_unique<VesselStateMsg>(170, 30, 0, true, true, 19.2, 60.02, 120.04, 2.1, 11, 170, 23.5f, 5.4f, 24.5f, 10, 5500, 4700, 2, 3);
+        MessagePtr msg = std::make_unique<WindStateMsg>(170, 30, 0, 200);
+        MessagePtr sMsg = std::make_unique<StateMessage>(170, 30, 10, 200, 50);
+
         msgBus().sendMessage(std::move(msg));
+        msgBus().sendMessage(std::move(sMsg));
 
         std::this_thread::sleep_for(std::chrono::milliseconds(2000));
 		TS_TRACE("END OF LINEFOLLOW");

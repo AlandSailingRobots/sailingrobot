@@ -55,18 +55,18 @@ public:
 	virtual ~WaypointDataMsg() { }
 
 
-    int     nextId()            { return m_nextId; }
-    double  nextLongitude()     { return m_nextLongitude; }
-    double  nextLatitude()      { return m_nextLatitude; }
-    int     nextDeclination()   { return m_nextDeclination; }
-    int     nextRadius()        { return m_nextRadius; }
-    int     stayTime()          { return m_nextStayTime; }
+    int     nextId()            const { return m_nextId; }
+    double  nextLongitude()     const { return m_nextLongitude; }
+    double  nextLatitude()      const { return m_nextLatitude; }
+    int     nextDeclination()   const { return m_nextDeclination; }
+    int     nextRadius()        const { return m_nextRadius; }
+    int     stayTime()          const { return m_nextStayTime; }
 
-    int     prevId()            { return m_prevId; }
-    double  prevLongitude()     { return m_prevLongitude; }
-    double  prevLatitude()      { return m_prevLatitude; }
-    int     prevDeclination()   { return m_prevDeclination; }
-    int     prevRadius()        { return m_prevRadius; }
+    int     prevId()            const { return m_prevId; }
+    double  prevLongitude()     const { return m_prevLongitude; }
+    double  prevLatitude()      const { return m_prevLatitude; }
+    int     prevDeclination()   const { return m_prevDeclination; }
+    int     prevRadius()        const { return m_prevRadius; }
 
     ///----------------------------------------------------------------------------------
 	/// Serialises the message into a MessageSerialiser

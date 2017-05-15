@@ -52,13 +52,17 @@ void DBLogger::startWorkerThread()
 	m_thread = new std::thread(workerThread, this);
 }
 
-void DBLogger::log(VesselStateMsg* msg, double rudder, double sail, int sailServoPosition, int rudderServoPosition,
+void DBLogger::log(const WindStateMsg* msg, double rudder, double sail, int sailServoPosition, int rudderServoPosition,
 		double distanceToWaypoint, double bearingToWaypoint, double courseToSteer, bool tack, bool goingStarboard,
 		int waypointId, double twd, bool routeStarted,std::string timestamp_str)
 {
 	LogItem item;
 
-	item.m_compassHeading = msg->compassHeading();
+ /*
+	*	NOTE: Some code block are been commented out because the properties used
+  *	in them are not available in msg any longer.
+	*/
+	/*item.m_compassHeading = msg->compassHeading();
 	item.m_compassPitch = msg->compassPitch();
 	item.m_compassRoll = msg->compassRoll();
 	item.m_gpsHasFix = msg->gpsHasFix();
@@ -75,7 +79,7 @@ void DBLogger::log(VesselStateMsg* msg, double rudder, double sail, int sailServ
 	item.m_arduinoPressure = msg->arduinoPressure();
 	item.m_arduinoRudder = msg->arduinoPressure();
 	item.m_arduinoSheet = msg->arduinoSheet();
-	item.m_arduinoBattery = msg->arduinoBattery();
+	item.m_arduinoBattery = msg->arduinoBattery();*/
 	item.m_rudder = setValue<double>(rudder);
 	item.m_sail = setValue<double>(sail);
 	item.m_sailServoPosition = sailServoPosition;

@@ -41,9 +41,9 @@ public:
 
 	virtual ~WindDataMsg() { }
 
-	float windDirection() { return m_WindDir; }
-	float windSpeed() { return m_WindSpeed; }
-	float windTemp() { return m_WindTemp; }
+	float windDirection() const { return m_WindDir; }
+	float windSpeed() const { return m_WindSpeed; }
+	float windTemp() const { return m_WindTemp; }
 
 	///----------------------------------------------------------------------------------
 	/// Serialises the message into a MessageSerialiser

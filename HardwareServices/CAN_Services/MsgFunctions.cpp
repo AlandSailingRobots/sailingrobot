@@ -1,6 +1,47 @@
 #include "N2kMsg.h"
 #include <iostream>
 
+void CanMsgToN2kMsg(CanMsg &Cmsg, N2kMsg &Nmsg)
+{
+	IdToN2kMsg(Nmsg, Cmsg.id);
+
+	if(Cmsg.header.length) 
+	{
+		Nmsg.DataLen = Cmsg.header.length;		//Single frame message
+	}
+	else 
+	{
+		Nmsg.DataLen = sizeof(Cmsg.data) / sizeof(Cmsg.data[0]);
+	}
+
+	Nmsg.Data.resize(Nmsg.DataLen);
+
+	for(int i = 0; i < Nmsg.DataLen; ++i)
+	{
+		Nmsg.Data[i] = Cmsg.data[i];
+	}
+}
+
+
+void N2kMsgToCanMsg(N2kMsg &Nmsg, CanMsg &Cmsg)
+{
+	N2kMsgToId(Nmsg, Cmsg.id);
+
+	if(Nmsg.DataLen)
+	{
+		Cmsg.header.length = Nmsg.DataLen;
+	} 
+	else 
+	{
+		Cmsg.header.length = Nmsg.Data.size();
+	}
+	Cmsg.header.ide = 0;
+
+	for(int i = 0; i < Cmsg.header.length; ++i)
+	{
+		Cmsg.data[i] = Nmsg.Data[i];
+	}
+}
 
 void IdToN2kMsg(N2kMsg &NMsg, uint32_t &id)
 {

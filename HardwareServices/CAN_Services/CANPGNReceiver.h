@@ -1,6 +1,4 @@
-
-#ifndef canpgnreceiver_h
-#define canpgnreceiver_h
+#pragma once
 
 class CANService;
 
@@ -18,5 +16,3 @@ public:
 
 	virtual void processPGN(N2kMsg& msg) = 0;
 };
-
-#endif

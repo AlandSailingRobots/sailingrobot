@@ -1,15 +1,15 @@
 /****************************************************************************************
- *
- * File:
- * 		MessageLogger.h
- *
- * Purpose:
- *		Catches all known message types.
- *
- * Developer Notes:
- *
- *
- ***************************************************************************************/
+*
+* File:
+* 		MessageLogger.h
+*
+* Purpose:
+*		Catches all known message types.
+*
+* Developer Notes:
+*
+*
+***************************************************************************************/
 
 #pragma once
 
@@ -19,7 +19,8 @@
 class MessageLogger: public Node {
 public:
 	MessageLogger(MessageBus& msgBus)
-		:Node(NodeID::MessageLogger, msgBus), m_DataRequest(false), m_WindData(false), m_CompassData(false), m_GPSData(false)
+	:Node(NodeID::MessageLogger, msgBus), m_DataRequest(false), m_WindData(false),
+	m_CompassData(false), m_GPSData(false), m_WindState(false), m_stateData(false)
 	{
 		msgBus.registerNode(*this);
 		msgBus.registerNode(*this, MessageType::WindData);
@@ -27,6 +28,9 @@ public:
 		msgBus.registerNode(*this, MessageType::GPSData);
 		msgBus.registerNode(*this, MessageType::WaypointData);
 		msgBus.registerNode(*this, MessageType::ActuatorPosition);
+		msgBus.registerNode(*this, MessageType::WindState);
+		msgBus.registerNode(*this, MessageType::StateMessage);
+
 	}
 
 	virtual ~MessageLogger() { }
@@ -40,25 +44,31 @@ public:
 		switch(msgType)
 		{
 			case MessageType::DataRequest:
-				m_DataRequest = true;
-				break;
+			m_DataRequest = true;
+			break;
 			case MessageType::WindData:
-				m_WindData = true;
-				break;
+			m_WindData = true;
+			break;
 			case MessageType::CompassData:
-				m_CompassData = true;
-				break;
+			m_CompassData = true;
+			break;
 			case MessageType::GPSData:
-				m_GPSData = true;
-				break;
+			m_GPSData = true;
+			break;
 			case MessageType::WaypointData:
-				m_waypointData = true;
-				break;
+			m_waypointData = true;
+			break;
 			case MessageType::ActuatorPosition:
-				m_actuatorPosition = true;
-				break;
+			m_actuatorPosition = true;
+			break;
+			case MessageType::WindState:
+			m_WindState = true;
+			break;
+			case MessageType::StateMessage:
+			m_stateData = true;
+			break;
 			default:
-				return;
+			return;
 		}
 	}
 
@@ -69,6 +79,20 @@ public:
 	bool gpsDataReceived() { return m_GPSData; }
 	bool waypointDataReceived() { return m_waypointData; }
 	bool actuatorPositionReceived() { return m_actuatorPosition; }
+	bool windStateReceived() { return m_WindState; }
+	bool stateDataReceived() { return m_stateData; }
+
+	void clearState(){
+		m_DataRequest = false;
+		m_WindData = false;
+		m_CompassData = false;
+		m_GPSData = false;
+		m_waypointData = false;
+		m_actuatorPosition = false;
+		m_WindState = false;
+		m_stateData = false;
+	}
+
 
 private:
 	bool m_DataRequest;
@@ -77,4 +101,6 @@ private:
 	bool m_GPSData;
 	bool m_waypointData;
 	bool m_actuatorPosition;
+	bool m_WindState;
+	bool m_stateData;
 };

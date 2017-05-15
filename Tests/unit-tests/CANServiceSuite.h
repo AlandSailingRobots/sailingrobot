@@ -3,11 +3,12 @@
 //    CAN-tests will only run when connected to hardware
 //
 ////////////////////////////////////////////////////////
+#pragma once
 
-
+#include "SystemServices/Logger.h"
 #include "TestMocks/MockCANReceiver.h"
 #include "HardwareServices/CAN_Services/CANService.h"
-#include "HardwareServices/CAN_Services/CANPGNReceiver.h"
+#include "HardwareServices/CAN_Services/CANFrameReceiver.h"
 #include "HardwareServices/CAN_Services/N2kMsg.h"
 #include "../cxxtest/cxxtest/TestSuite.h"
 
@@ -17,55 +18,90 @@
 
 #define WAIT_FOR_MSG 1000
 
-class CANServiceSuite : public CxxTest::TestSuite {
+class CANServiceSuite : public CxxTest::TestSuite
+{
 public:
-
   CANServiceSuite() {
     wiringPiSetup();
   }
   void setUp() {
     service = new CANService();
   }
-  void tearDown() {
+  void tearDown()
+  {
     delete service;
   }
 
-  void test_CANServiceSendMessage() {
-
-    MockCANReceiver receiver(*service, std::vector<uint32_t>{1304} );
-    auto fut = service->start();
-
-    N2kMsg msg;
-    msg.PGN = 1304;
-    std::vector<uint8_t> data = {12,24,36};
-    msg.Data = data;
-    service->sendN2kMessage(msg);
-
-    std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_FOR_MSG));
-    service->stop();
-    fut.get();
-
-    TS_ASSERT(receiver.message_received());
-  }
-
-  void test_CANServiceNodeCommunication () {
-      MockCANReceiver rec (*service, std::vector<uint32_t>{1337, 1339} );
-      MockCANReceiver rec2(*service, std::vector<uint32_t>{1304} );
+  void test_SendAndMissedMessages()
+  {
+      std::vector<uint32_t> a = {700};
+      MockCANReceiver receiver (*service, a );
       auto fut = service->start();
+      service->SetLoopBackMode();
 
-      N2kMsg msg;
-      msg.PGN = 1304;
-      std::vector<uint8_t> data = {12,24,36};
-      msg.Data = data;
-      service->sendN2kMessage(msg);
+      CanMsg Cmsg;
+      Cmsg.id = 700;
+      Cmsg.header.ide = 0;
+      for(int i=0; i<8; i++)
+      {
+        Cmsg.data[i] = i;
+      }
+      Cmsg.header.length = sizeof(Cmsg.data) / sizeof(Cmsg.data[0]);
+
+      service->sendCANMessage(Cmsg);
+      bool missed = service->checkMissedMessages();
 
       std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_FOR_MSG));
+      service->SetNormalMode();
+
+      CanMsg Cmsg2;
+      N2kMsg Nmsg;
+
+      Nmsg.PGN = 59904;
+      Nmsg.Priority = 6;
+      Nmsg.Source = 1;
+      Nmsg.Destination = 255;
+      Nmsg.DataLen = 3;
+      Nmsg.Data.resize(Nmsg.DataLen);
+      Nmsg.Data[0] = 20;
+      Nmsg.Data[1] = 240;
+      Nmsg.Data[2] = 1;
+
+      N2kMsgToCanMsg(Nmsg, Cmsg2);
+
+      service->sendCANMessage(Cmsg2);
+
+      std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_FOR_MSG));
+
+      bool missed2 = service->checkMissedMessages();
+
       service->stop();
       fut.get();
 
-      TS_ASSERT (rec.message_received());
-      TS_ASSERT(rec2.message_received());
+      TS_ASSERT(receiver.message_received());
+      TS_ASSERT(!missed);
+      TS_ASSERT(missed2);
 
+      if (Logger::init())
+      {
+		    Logger::info("Built on %s at %s", __DATE__, __TIME__);
+		    Logger::info("Logger init\t\t[OK]");
+	    }
+	    else
+      {
+		    Logger::error("Logger init\t\t[FAILED]");
+	    }
+
+      if(missed2)
+      {
+        Logger::error("Missed messages from the CAN-Bus");
+      }
+      else
+      {
+        Logger::info("No missed messages from the CAN-Bus");
+      }
+
+      Logger::shutdown();
   }
 
 private:

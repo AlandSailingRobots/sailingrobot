@@ -7,7 +7,7 @@
 #include <vector>
 #include <sqlite3.h>
 #include "SystemServices/Logger.h"
-#include "Messages/VesselStateMsg.h"
+#include "Messages/WindStateMsg.h"
 #include <mutex>
 #include "libs/json/src/json.hpp"
 using Json = nlohmann::json;

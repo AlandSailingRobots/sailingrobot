@@ -1,18 +1,18 @@
 /****************************************************************************************
- *
- * File:
- * 		NodeIDs.h
- *
- * Purpose:
- *		Contains all the Node IDs. A NodeID is a logically name ot describe what a node
- *		does. ITs primary purpose is to allow nodes to send messages to one another
- *		directly instead of via the subscription system. It is also used for message
- *		tracking purposes.
- *
- * Developer Notes:
- *
- *
- ***************************************************************************************/
+*
+* File:
+* 		NodeIDs.h
+*
+* Purpose:
+*		Contains all the Node IDs. A NodeID is a logically name ot describe what a node
+*		does. ITs primary purpose is to allow nodes to send messages to one another
+*		directly instead of via the subscription system. It is also used for message
+*		tracking purposes.
+*
+* Developer Notes:
+*
+*
+***************************************************************************************/
 
 #pragma once
 
@@ -32,59 +32,77 @@ enum class NodeID {
 	Waypoint,
 	xBeeSync,
 	SailingLogic,
-    ColorDetection,
-    CollisionAvoidanceBehaviour,
-    Lidar,
+	ColorDetection,
+	CollisionAvoidanceBehaviour,
+	Lidar,
 	Simulator,
 	LocalNavigationModule,
 	LowLevelController,
-	MessagePrinter
+	StateEstimation,
+	MessagePrinter,
+	WindStateNode,
+	LowLevelControllerNodeASPire,
+	StateMessageListener,
+	MessageVerifier,
+	ActuatorNodeASPire
 };
 
 inline std::string nodeToString(NodeID id)
 {
 	switch(id)
 	{
-	case NodeID::None:
+		case NodeID::None:
 		return "None";
-	case NodeID::MessageLogger:
+		case NodeID::MessageLogger:
 		return "MessageLogger";
-	case NodeID::WindSensor:
+		case NodeID::WindSensor:
 		return "WindSensor";
-	case NodeID::Compass:
+		case NodeID::Compass:
 		return "Compass";
-	case NodeID::GPS:
+		case NodeID::GPS:
 		return "GPS";
-	case NodeID::HTTPSync:
+		case NodeID::HTTPSync:
 		return "HTTPSync";
-	case NodeID::SailActuator:
+		case NodeID::SailActuator:
 		return "SailActuator";
-	case NodeID::RudderActuator:
+		case NodeID::RudderActuator:
 		return "RudderActuator";
-	case NodeID::Arduino:
+		case NodeID::Arduino:
 		return "Arduino";
-	case NodeID::VesselState:
+		case NodeID::VesselState:
 		return "VesselState";
-	case NodeID::Waypoint:
+		case NodeID::Waypoint:
 		return "Waypoint";
-	case NodeID::SailingLogic:
+		case NodeID::SailingLogic:
 		return "SailingLogic";
-	case NodeID::xBeeSync:
+		case NodeID::xBeeSync:
 		return "xBeeSync";
-    case NodeID::ColorDetection:
-    	return "ColorDetection";
-    case NodeID::CollisionAvoidanceBehaviour:
-        return "CollisionAvoidanceBehaviour";
-    case NodeID::Lidar:
-            return "Lidar";
-	case NodeID::Simulator:
+		case NodeID::ColorDetection:
+		return "ColorDetection";
+		case NodeID::CollisionAvoidanceBehaviour:
+		return "CollisionAvoidanceBehaviour";
+		case NodeID::Lidar:
+		return "Lidar";
+		case NodeID::Simulator:
 		return "Simulator";
-	case NodeID::LocalNavigationModule:
+		case NodeID::LocalNavigationModule:
 		return "Local Navigation Module";
-	case NodeID::LowLevelController:
+		case NodeID::LowLevelController:
 		return "Low Level Controller";
-	case NodeID::MessagePrinter:
+		case NodeID::StateEstimation:
+		return "StateEstimation";
+		case NodeID::MessagePrinter:
 		return "MessagePrinter";
+		case NodeID::WindStateNode:
+		return "WindStateNode";
+		case NodeID::LowLevelControllerNodeASPire:
+		return "LowLevelControllerNodeASPire";
+		case NodeID::StateMessageListener:
+		return "StateMessageListener";
+		case NodeID::MessageVerifier:
+		return "MessageVerifier";
+		case NodeID::ActuatorNodeASPire:
+		return "ActuatorNodeASPire";
 	}
 	return "";
 }
