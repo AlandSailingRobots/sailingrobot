@@ -141,6 +141,8 @@ void CANWindsensorNode::processMessage(const Message* message) {
     {
       MessagePtr windData = std::make_unique<WindDataMsg>(message->sourceID(), this->nodeID(), m_WindDir, m_WindSpeed, m_WindTemperature);
       m_MsgBus.sendMessage(std::move(windData));
+	}
+  }
 }
 
 void CANWindsensorNode::start() {
@@ -158,7 +160,7 @@ void CANWindsensorNode::CANWindSensorNodeThreadFunc(ActiveNode* nodePtr) {
 	while(true) {
 
 	// Need to convert milliseconds into seconds for the argument		
-		timer.sleepUntil(m_TimeBetweenMsgs*1.0f / 1000);
+		timer.sleepUntil(node->m_TimeBetweenMsgs*1.0f / 1000);
 		timer.reset();
 	    node->m_lock.lock();
 

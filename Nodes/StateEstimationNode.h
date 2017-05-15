@@ -59,7 +59,7 @@ private:
   /// Starts the StateEstimationNode's thread that pumps out StateMessages which contains
   /// data collected from the sensors
   ///----------------------------------------------------------------------------------
-  static void StateEstimationNodeThreadFunc(void* nodePtr);
+  static void StateEstimationNodeThreadFunc(ActiveNode* nodePtr);
 
   float 	m_VesselHeading;
   double	m_VesselLat;
