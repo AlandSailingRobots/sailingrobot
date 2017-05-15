@@ -84,23 +84,19 @@ public:
       {
 		    Logger::info("Built on %s at %s", __DATE__, __TIME__);
 		    Logger::info("Logger init\t\t[OK]");
-        std::cout << "Logger init success" << std::endl;
 	    }
 	    else
       {
 		    Logger::error("Logger init\t\t[FAILED]");
-        std::cout << "Logger init fail" << std::endl;
 	    }
 
       if(missed2)
       {
         Logger::error("Missed messages from the CAN-Bus");
-        std::cout << "Missed messages" << std::endl;
       }
       else
       {
         Logger::info("No missed messages from the CAN-Bus");
-        std::cout << "No missed messages" << std::endl;
       }
 
       Logger::shutdown();

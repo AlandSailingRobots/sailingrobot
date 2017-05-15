@@ -131,8 +131,6 @@ void Logger::info(std::string message, ...)
 
     printf("%s", buff);
     log(buff);
-
-	std::cout << "Logger::info" << std::endl;
 }
 
 void Logger::error(std::string message, ...)
@@ -153,8 +151,6 @@ void Logger::error(std::string message, ...)
 
     printf("%s", buff);
     log(buff);
-
-	std::cout << "Logger::error" << std::endl;
 }
 
 void Logger::warning(std::string message, ...)
