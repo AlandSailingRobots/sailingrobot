@@ -80,7 +80,7 @@ public:
       TS_ASSERT(!missed);
       TS_ASSERT(missed2);
 
-      if (Logger::init())
+      if (Logger::init("CANServiceLog.log"))
       {
 		    Logger::info("Built on %s at %s", __DATE__, __TIME__);
 		    Logger::info("Logger init\t\t[OK]");
