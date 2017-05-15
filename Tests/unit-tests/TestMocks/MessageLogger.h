@@ -20,7 +20,8 @@ class MessageLogger: public Node {
 public:
 	MessageLogger(MessageBus& msgBus)
 	:Node(NodeID::MessageLogger, msgBus), m_DataRequest(false), m_WindData(false),
-	m_CompassData(false), m_GPSData(false), m_WindState(false), m_stateData(false)
+	m_CompassData(false), m_GPSData(false), m_WindState(false), m_StateData(false),
+	m_NavigationData(false)
 	{
 		msgBus.registerNode(*this);
 		msgBus.registerNode(*this, MessageType::WindData);
@@ -30,7 +31,7 @@ public:
 		msgBus.registerNode(*this, MessageType::ActuatorPosition);
 		msgBus.registerNode(*this, MessageType::WindState);
 		msgBus.registerNode(*this, MessageType::StateMessage);
-
+		msgBus.registerNode(*this, MessageType::NavigationControl);
 	}
 
 	virtual ~MessageLogger() { }
@@ -65,7 +66,10 @@ public:
 			m_WindState = true;
 			break;
 			case MessageType::StateMessage:
-			m_stateData = true;
+			m_StateData = true;
+			break;
+			case MessageType::NavigationControl:
+			m_NavigationData = true;
 			break;
 			default:
 			return;
@@ -80,7 +84,8 @@ public:
 	bool waypointDataReceived() { return m_waypointData; }
 	bool actuatorPositionReceived() { return m_actuatorPosition; }
 	bool windStateReceived() { return m_WindState; }
-	bool stateDataReceived() { return m_stateData; }
+	bool stateDataReceived() { return m_StateData; }
+	bool navigationDataReceived(){return m_NavigationData;}
 
 	void clearState(){
 		m_DataRequest = false;
@@ -90,7 +95,7 @@ public:
 		m_waypointData = false;
 		m_actuatorPosition = false;
 		m_WindState = false;
-		m_stateData = false;
+		m_StateData = false;
 	}
 
 
@@ -102,5 +107,6 @@ private:
 	bool m_waypointData;
 	bool m_actuatorPosition;
 	bool m_WindState;
-	bool m_stateData;
+	bool m_StateData;
+	bool m_NavigationData;
 };
