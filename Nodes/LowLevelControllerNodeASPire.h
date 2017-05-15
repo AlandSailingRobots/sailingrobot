@@ -26,7 +26,6 @@ private:
     void processStateMessage(const StateMessage* msg);
     void processWindStateMessage(const WindStateMsg* msg);
     void processNavigationControlMessage(const NavigationControlMsg* msg);
-    void constructAndSendFrame();
 
     float  m_VesselHeading = DATA_OUT_OF_RANGE;
     double m_VesselLatitude = DATA_OUT_OF_RANGE;
