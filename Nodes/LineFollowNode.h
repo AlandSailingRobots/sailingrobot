@@ -18,7 +18,6 @@
 #pragma once
 
 #include "Node.h"
-#include "Messages/VesselStateMsg.h"
 #include "Messages/StateMessage.h"
 #include "Messages/WindStateMsg.h"
 #include "Messages/WaypointDataMsg.h"
@@ -62,14 +61,10 @@ private:
 	double  m_tackAngle;
 	int     m_tackingDirection;
 
-	//same as compass heading
 	float 	m_Heading;
-
 	double	m_Latitude;
 	double	m_Longitude;
 	double	m_Speed;
-
-	//same as the gpsheading
 	double  m_Course;
 
 	double m_trueWindSpeed;
