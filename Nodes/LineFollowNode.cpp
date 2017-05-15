@@ -156,20 +156,13 @@ double LineFollowNode::calculateAngleOfDesiredTrajectory()
         return phi;
       }
 
-      //Martins: Send WindStateMsg here And trie to break to smaller components
       void LineFollowNode::calculateActuatorPos(const WindStateMsg* msg)
       {
-
-        //Martins: WindStateMsg already has a trueWindDirection -- i think that should be used instead.
-        //Martins: Save the state of the StateMessage
-
         /* add pi because trueWindDirection is originally origin of wind but algorithm need direction*/
         double trueWindDirection_radian = Utility::degreeToRadian(msg->trueWindDirection())+M_PI;
 
-        //Martins: Send WindStateMsg
         setPrevWaypointToBoatPos();
 
-        //Martins: Use the saved state of StateMessage and WaypointDataMsg
         //GET DIRECTION--------
         double currentHeading = getHeading(m_Course, m_Heading, m_Speed, false, false);
         double currentHeading_radian = Utility::degreeToRadian(currentHeading);
@@ -254,11 +247,9 @@ double LineFollowNode::calculateAngleOfDesiredTrajectory()
           m_dbLogger.log(msg, rudderCommand_norm, sailCommand_norm, 0, 0, distanceToNextWaypoint, bearingToNextWaypoint, desiredHeading, m_tack, getGoingStarboard(), m_nextWaypointId, msg->trueWindDirection(), false,timestamp_str);
         }
 
-        //Martins: Pass only WaypointDataMsg here
         void LineFollowNode::setPrevWaypointData(WaypointDataMsg* waypMsg)
         {
 
-          //Martins: Use the saved state of the StateMessage
           if(waypMsg->prevId() == 0) //Set previous waypoint to boat position
           {
             m_prevWaypointId = 0;
@@ -342,7 +333,6 @@ double LineFollowNode::calculateAngleOfDesiredTrajectory()
           else return false;
         }
 
-        //Martins: Use the StateMessage and WaypointDataMsg Saved so do not send any message type here
         void LineFollowNode::setPrevWaypointToBoatPos() //If boat passed waypoint or enters it, set new line from boat to waypoint.
         {                                                                  //Used if boat has to stay within waypoint for a set amount of time.
           double distanceAfterWaypoint = Utility::calculateWaypointsOrthogonalLine(m_nextWaypointLon, m_nextWaypointLat, m_prevWaypointLon,
