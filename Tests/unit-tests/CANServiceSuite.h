@@ -96,7 +96,7 @@ public:
       }
       else
       {
-        Logger::info("No missed messages from the CAN-Bus")
+        Logger::info("No missed messages from the CAN-Bus");
       }
 
       Logger::shutdown();
