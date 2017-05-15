@@ -209,6 +209,53 @@ double LineFollowNode::calculateAngleOfDesiredTrajectory()
           }
         }
 
+        int LineFollowNode::getHeading(int gpsHeading, int compassHeading, double gpsSpeed, bool mockPosition,bool getHeadingFromCompass)
+        {
+          //Use GPS for heading only if speed is higher than 1 m/s
+          int useGpsForHeadingMeterSecSpeed = 1;
+          bool gpsForbidden = Utility::directionAdjustedSpeed(gpsHeading, compassHeading, gpsSpeed) < useGpsForHeadingMeterSecSpeed;
+
+          getMergedHeading(gpsHeading, compassHeading, true); //decrease compass weight on each iteration
+
+          // if(mockPosition) { //TODO - MOCK
+          //     return position->getHeading(); //OUTCOMMENTED FOR NOW UNTIL WE FIGURE OUT MOCK
+          // }
+
+          if (getHeadingFromCompass) {
+            //Should return compass heading if below one knot and not currently merging and vice versa
+            return Utility::addDeclinationToHeading(getMergedHeading(gpsHeading, compassHeading, gpsForbidden), m_nextWaypointDeclination);
+          }
+          return gpsHeading;
+        }
+
+        int LineFollowNode::getMergedHeading(int gpsHeading, int compassHeading, bool increaseCompassWeight)
+        {
+          //Shouldn't be hardcoded
+          float tickRate = 0.01;
+
+          int headingCompass = Utility::addDeclinationToHeading(compassHeading, m_nextWaypointDeclination);
+          int headingGps = gpsHeading;
+
+          if (increaseCompassWeight){
+            m_gpsHeadingWeight = m_gpsHeadingWeight - tickRate; //Decrease gps weight
+            if (m_gpsHeadingWeight < 0.0) m_gpsHeadingWeight = 0;
+          }else{
+            m_gpsHeadingWeight = m_gpsHeadingWeight + tickRate;
+            if (m_gpsHeadingWeight > 1.0) m_gpsHeadingWeight = 1.0;
+          }
+
+          //Difference calculation
+          float diff = ((headingGps - headingCompass) + 180 + 360);
+          while (diff > 360) diff -= 360;
+          diff -= 180;
+
+          //Merge angle calculation
+          int returnValue = 360 + headingCompass + (diff * m_gpsHeadingWeight);
+          while (returnValue > 360) returnValue -= 360;
+
+          return returnValue;
+        }
+
         void LineFollowNode::setupRudderCommand()
         {
           m_rudderCommand.setCommandValues(m_db.retrieveCellAsInt("rudder_command_config", "1","extreme_command"),
