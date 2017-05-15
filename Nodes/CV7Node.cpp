@@ -90,9 +90,9 @@ void CV7Node::processMessage(const Message* message)
 	}
 }
 
-void CV7Node::WindSensorThread(void* nodePtr)
+void CV7Node::WindSensorThread(ActiveNode* nodePtr)
 {
-	CV7Node* node = (CV7Node*)(nodePtr);
+	CV7Node* node = dynamic_cast<CV7Node*> (nodePtr);
 
 	const int DATA_BUFFER_SIZE = 1;
 	const int BUFF_SIZE = 255;

@@ -13,8 +13,8 @@
 
 #include "ActiveNode.h"
 
-
-void ActiveNode::runThread(ActiveNodeFunc func)
+#include <iostream>
+void ActiveNode::runThread(void(*func)(ActiveNode*))
 {
 	m_Thread = new std::thread(func, this);
 }

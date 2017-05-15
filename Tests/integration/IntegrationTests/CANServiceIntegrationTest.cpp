@@ -3,36 +3,45 @@
 #include "MessageBus/MessageBus.h"
 #include "Nodes/CANWindsensorNode.h"
 #include "Tests/integration/TestMocks/MessagePrinter.h"
+#include "Messages/WindDataMsg.h"
+#include "Tests/integration/IntegrationTests/thread-master/ThreadRAII.h"
 
 #include <thread>
 #include <chrono>
 #include <future>
 
 #define WAIT_TIME 5
-
+/*
 static MessageBus& msgBus(){
   static MessageBus* mbus = new MessageBus();
   return *mbus;
 }
-
-void startMsgBus(){
-  msgBus().run();
+*/
+void startMsgBus(MessageBus& msgBus){
+  msgBus.run();
 }
 
 int main(int argc, char const *argv[]) {
-
+   
   CANService service;
-
-  CANWindsensorNode windNode(msgBus(), service);
-  MessagePrinter printer(msgBus());
+  MessageBus msgBus;
+  
+  CANWindsensorNode windNode(msgBus, service, 500);
+    
+  MessagePrinter printer(msgBus);
 
   auto future = service.start();
-  std::thread msgThread (startMsgBus);
-  msgThread.detach();
+  
+  windNode.start();
+  std::thread t1(startMsgBus, std::ref(msgBus));
+  ThreadRAII tRaii(std::move(t1), ThreadRAII::DtorAction::detach);
+
+  msgBus.sendMessage(std::make_unique<WindDataMsg>(1,2,3));
+
   std::this_thread::sleep_for(std::chrono::seconds(WAIT_TIME));
+
   service.stop();
   future.get();
-
 
   return 0;
 }

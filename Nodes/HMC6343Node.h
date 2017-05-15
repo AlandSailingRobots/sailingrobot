@@ -73,7 +73,7 @@ protected:
 	/// for information on the timing in HMC6343Node.cpp. The state is then published to
 	/// the message bus
 	///----------------------------------------------------------------------------------
-	static void HMC6343ThreadFunc(void* nodePtr);
+	static void HMC6343ThreadFunc(ActiveNode* nodePtr);
 
 	I2CController 	m_I2C;
 	bool 			m_Initialised;

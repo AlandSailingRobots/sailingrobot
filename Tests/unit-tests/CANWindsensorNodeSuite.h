@@ -71,7 +71,7 @@ public:
     {
       Logger::DisableLogging();
       logger = new MessageLogger(msgBus());
-      can_windSensorNode = new CANWindsensorNode(msgBus(), canService());
+      can_windSensorNode = new CANWindsensorNode(msgBus(), canService(), 50);
       srand (time(NULL));
       someTestdata = getUint8_tTestData();
 

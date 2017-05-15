@@ -106,9 +106,9 @@
         m_Declination = msg->nextDeclination();
       }
 
-      void StateEstimationNode::StateEstimationNodeThreadFunc(void* nodePtr)
+      void StateEstimationNode::StateEstimationNodeThreadFunc(ActiveNode* nodePtr)
       {
-        StateEstimationNode* node = (StateEstimationNode*)nodePtr;
+        StateEstimationNode* node = dynamic_cast<StateEstimationNode*> (nodePtr);
 
       // An initial sleep, its purpose is to ensure that most if not all the sensor data arrives
       // at the start before we send out the vessel state message.

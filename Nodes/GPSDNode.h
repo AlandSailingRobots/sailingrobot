@@ -49,7 +49,7 @@ private:
 	/// milliseconds, see GPS_SENSOR_SLEEP_MS in GPSDNode.cpp
 	///
 	///----------------------------------------------------------------------------------
-	static void GPSThreadFunc(void* nodePtr);
+	static void GPSThreadFunc(ActiveNode* nodePtr);
 
 	bool 	m_Initialised;
 	gpsmm* 	m_GpsConnection;

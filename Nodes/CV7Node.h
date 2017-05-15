@@ -61,7 +61,7 @@ private:
 	/// @returns			Returns true if the buffer was successfully parsed.
  	///
  	///----------------------------------------------------------------------------------
-	static void WindSensorThread(void* nodePtr);
+	static void WindSensorThread(ActiveNode* nodePtr);
 
 	bool m_Initialised;		// Indicates that the node was correctly initialised
 	int m_fd;

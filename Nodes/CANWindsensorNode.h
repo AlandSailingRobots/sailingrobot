@@ -12,19 +12,21 @@
  ***************************************************************************************/
 
 #include "HardwareServices/CAN_Services/CANPGNReceiver.h"
-#include "Nodes/Node.h"
+#include "Nodes/ActiveNode.h"
 #include "HardwareServices/CAN_Services/CANService.h"
+#include "SystemServices/Timer.h"
 
 #include <mutex>
 #include <vector>
+#include <iostream>
 
 #pragma once
 
 
-class CANWindsensorNode : public CANPGNReceiver, public Node
+class CANWindsensorNode : public CANPGNReceiver, public ActiveNode
 {
 public:
-	CANWindsensorNode(MessageBus& msgBus, CANService& can_service);
+	CANWindsensorNode(MessageBus& msgBus, CANService& can_service, int time_filter_ms);
 
 
 	~CANWindsensorNode(){};
@@ -56,10 +58,16 @@ public:
 
 	virtual void processMessage(const Message* message);
 
+	void start();
+
 private:
+
+	static void CANWindSensorNodeThreadFunc(ActiveNode* nodePtr);
+
 	float m_WindDir;
 	float m_WindSpeed;
 	float m_WindTemperature;
+	int m_TimeBetweenMsgs;
 
 	std::mutex m_lock;
 	std::vector<uint32_t> PGNs {130306, 130311};

@@ -101,7 +101,7 @@ export HARDWARE_SERVICES_SRC = HardwareServices/MaestroController/MaestroControl
 							HardwareServices/CAN_Services/CANPGNReceiver.cpp HardwareServices/CAN_Services/CANService.cpp \
 							HardwareServices/CAN_Services/mcp2515.cpp HardwareServices/CAN_Services/MsgFunctions.cpp \
 							Nodes/CANWindsensorNode.cpp Nodes/WindStateNode.cpp Nodes/LowLevelControllerNodeASPire.cpp \
-							HardwareServices/CAN_Services/CANFrameReceiver.cpp
+							HardwareServices/CAN_Services/CANFrameReceiver.cpp Nodes/ActuatorNodeASPire.cpp
 
 export MATH_SRC             = Math/CourseCalculation.cpp Math/CourseMath.cpp Math/Utility.cpp
 
@@ -112,11 +112,11 @@ export CORE_SRC             = Nodes/WaypointMgrNode.cpp $(MESSAGE_BUS_SRC) $(NET
 
 export HTTP_SYNC_SRC        = Nodes/HTTPSyncNode.cpp
 
-# TODO: Break down for Xbee Remote
+# TODO: Break down for Xbee Remote0
 export XBEE_NETWORK_SRC     = Network/DataLink.cpp Network/LinuxSerialDataLink.cpp Network/XbeePacketNetwork.cpp \
                             xBee/Xbee.cpp Nodes/XbeeSyncNode.cpp
 
-export INTEGRATION_TEST		= Tests/integration/IntegrationTests/LowLevelControllerASPireIntegrationTest.cpp
+export INTEGRATION_TEST		= Tests/integration/IntegrationTests/CANServiceIntegrationTest.cpp Tests/integration/IntegrationTests/thread-master/ThreadRAII.cpp
 
 
 ###############################################################################

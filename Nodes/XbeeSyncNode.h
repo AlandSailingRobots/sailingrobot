@@ -59,7 +59,7 @@ private:
 	///----------------------------------------------------------------------------------
 	/// Transmits and receives messages from the xbee.
 	///----------------------------------------------------------------------------------
-	static void xBeeSyncThread(void* nodePtr);
+	static void xBeeSyncThread(ActiveNode* nodePtr);
 
 	bool 					m_initialised;
 	DBHandler& 				m_db;

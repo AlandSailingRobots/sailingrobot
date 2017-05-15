@@ -10,7 +10,7 @@ void msgBusLoop() {
 }
 
 int main() {
-    CANService canService;
+   /* CANService canService;
     LowLevelControllerNodeASPire node(msgBus, canService);
     std::vector<uint32_t> IDs = { 700 };
     MockCANReceiver mock (canService, IDs);
@@ -28,6 +28,17 @@ int main() {
     canService.stop();
     f.get();
 
-    std::cout << mock.message_received() << std::endl;
+    std::cout << mock.message_received() << std::endl; */
+
+    double rudderAngle = 54;
+    double ratio = 65535 / 60;
+    uint16_t ang16 = rudderAngle * ratio;
+
+    uint8_t data1 = ang16 & 0xff;
+    uint8_t data2 = ang16 >> 8;
+
+    int newAngle = (data2 << 8 | data1);
+
+    std::cout << newAngle / ratio << std::endl; 
 
 }
