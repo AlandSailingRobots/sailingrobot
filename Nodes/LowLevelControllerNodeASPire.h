@@ -14,7 +14,7 @@
 
 class LowLevelControllerNodeASPire : public Node {
 public:
-    LowLevelControllerNodeASPire(MessageBus& msgBus, CANService &canService, float maxRudderAngle = 30, 
+    LowLevelControllerNodeASPire(MessageBus& msgBus, CANService &canService, float maxRudderAngle = 30,
                                     float maxCourseAngleDiff = 60, float maxServoSailAngle = 10, float servoSailMinAngleDiff = 5);
 
     virtual ~LowLevelControllerNodeASPire();
@@ -39,7 +39,7 @@ private:
 	double m_ApparentWindSpeed = DATA_OUT_OF_RANGE;
 	double m_ApparentWindDir = DATA_OUT_OF_RANGE;
 
-    NavigationControlMsg::NavigationState m_NavigationState;
+    NavigationState m_NavigationState;
     int m_CourseToSteer = DATA_OUT_OF_RANGE;
     float m_TargetSpeed = DATA_OUT_OF_RANGE;
     bool m_WindvaneSelfSteeringOn = false;
