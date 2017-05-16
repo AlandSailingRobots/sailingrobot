@@ -32,9 +32,11 @@ public:
     double  m_maxCommandAngle, m_maxSailAngle, m_minSailAngle;
 
     double m_ApparentWindDir = DATA_OUT_OF_RANGE;
+    double m_VesselCourse = DATA_OUT_OF_RANGE;
+    int m_CourseToSteer = DATA_OUT_OF_RANGE;
+
 
     NavigationControlMsg::NavigationState m_NavigationState;
-
 
     const float m_MaxRudderAngle;
 
