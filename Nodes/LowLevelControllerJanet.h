@@ -3,6 +3,7 @@
 #include "Nodes/Node.h"
 #include "Messages/WindStateMsg.h"
 #include "Messages/StateMessage.h"
+#include "waypointrouting/SailCommand.h"
 #include "Messages/NavigationControlMsg.h"
 #include "Messages/MessageTypes.h"
 #include "MessageBus/MessageBus.h"
@@ -14,8 +15,8 @@
 
 class LowLevelControllerJanet: public Node {
 public:
-  LowLevelControllerJanet(MessageBus& msgBus, CANService &canService, float maxRudderAngle = 30,
-    float maxCourseAngleDiff = 60, float maxServoSailAngle = 10, float servoSailMinAngleDiff = 5);
+  LowLevelControllerJanet(MessageBus& msgBus, float maxRudderAngle = 30,
+   float maxCourseAngleDiff = 60);
 
     virtual ~LowLevelControllerJanet();
     bool init();
@@ -26,32 +27,17 @@ public:
     void processStateMessage(const StateMessage* msg);
     void processNavigationControlMessage(const NavigationControlMsg* msg);
     void processWindStateMessage(const WindStateMsg* msg);
-    void constructAndSendFrame();
-    void sendOldActuatorPositionMessage();
+    void sendActuatorPosition();
 
     double  m_maxCommandAngle, m_maxSailAngle, m_minSailAngle;
-  	double  m_tackAngle;
 
-    float  m_VesselHeading = DATA_OUT_OF_RANGE;
-    double m_VesselLatitude = DATA_OUT_OF_RANGE;
-    double m_VesselLongitude = DATA_OUT_OF_RANGE;
-    double m_VesselSpeed = DATA_OUT_OF_RANGE;
-    double m_VesselCourse = DATA_OUT_OF_RANGE;
-
-    double m_TrueWindSpeed = DATA_OUT_OF_RANGE;
-    double m_TrueWindDir = DATA_OUT_OF_RANGE;
-    double m_ApparentWindSpeed = DATA_OUT_OF_RANGE;
     double m_ApparentWindDir = DATA_OUT_OF_RANGE;
 
     NavigationControlMsg::NavigationState m_NavigationState;
-    int m_CourseToSteer = DATA_OUT_OF_RANGE;
-    float m_TargetSpeed = DATA_OUT_OF_RANGE;
-    bool m_WindvaneSelfSteeringOn = false;
+
 
     const float m_MaxRudderAngle;
-    const float m_MaxServoSailAngle;
 
-    CANService* m_CanService;
-    WingsailControl m_WingsailControl;
     CourseRegulator m_CourseRegulator;
+    SailCommand m_SailCommand;
   };
