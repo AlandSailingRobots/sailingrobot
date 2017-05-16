@@ -1,6 +1,5 @@
 #include "LowLevelControllerNodeJanet.h"
 #include "Math/Utility.h"
-#include "Messages/ActuatorPositionMsg.h"
 
 #include <math.h>
 #include <algorithm>
