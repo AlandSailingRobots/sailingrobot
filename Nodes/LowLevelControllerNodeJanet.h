@@ -35,7 +35,7 @@ public:
     int m_CourseToSteer = DATA_OUT_OF_RANGE;
 
 
-    NavigationControlMsg::NavigationState m_NavigationState;
+    NavigationState m_NavigationState;
 
     const float m_MaxRudderAngle;
 
