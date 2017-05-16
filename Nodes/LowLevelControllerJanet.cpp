@@ -7,6 +7,9 @@
 #include <algorithm>
 #include <cmath>
 
+#define DATA_OUT_OF_RANGE -2000
+
+
 LowLevelControllerJanet::LowLevelControllerJanet(MessageBus& msgBus,
   float maxRudderAngle,  float maxCourseAngleDiff) :
   Node(NodeID::LowLevelControllerNodeASPire, msgBus),m_MaxRudderAngle(maxRudderAngle),
@@ -34,11 +37,13 @@ LowLevelControllerJanet::LowLevelControllerJanet(MessageBus& msgBus,
   }
 
   void LowLevelControllerJanet::processStateMessage(const StateMessage* msg){
-    m_CourseRegulator.setVesselCourse(msg->course());
+    m_VesselCourse = msg->course();
+    m_CourseRegulator.setVesselCourse(m_VesselCourse);
   }
 
   void LowLevelControllerJanet::processNavigationControlMessage(const NavigationControlMsg* msg){
-    m_CourseRegulator.setCourseToSteer(msg->courseToSteer());
+    m_CourseToSteer = msg->courseToSteer();
+    m_CourseRegulator.setCourseToSteer(m_CourseToSteer);
   }
 
   void LowLevelControllerJanet::processWindStateMessage(const WindStateMsg* msg){
