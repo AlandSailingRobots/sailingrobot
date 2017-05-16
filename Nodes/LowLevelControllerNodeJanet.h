@@ -7,7 +7,6 @@
 #include "Messages/NavigationControlMsg.h"
 #include "Messages/MessageTypes.h"
 #include "MessageBus/MessageBus.h"
-#include "HardwareServices/CAN_Services/CANService.h"
 #include "SystemServices/CourseRegulator.h"
 
 #define DATA_OUT_OF_RANGE -2000
