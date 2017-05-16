@@ -1,3 +1,28 @@
+/****************************************************************************************
+ *
+ * File:
+ * 		I2CControllerSuite.h
+ *
+ * Purpose:
+ *		
+ *
+ * Developer Notes:
+ *
+ *							12.4.17 JM
+ *
+ *	Functions that have tests:		Functions that does not have tests:
+ *
+ *	init 							write
+ *	readBlock						writereg
+ *	beginTransmission				read
+ *	endTransmission					readReg
+ *
+ *	Functions that does not exist but still have tests:
+ *
+ *	writeBlock
+ *
+ ***************************************************************************************/
+
 #pragma once
 
 #include <unistd.h>
@@ -45,6 +70,16 @@ public:
 		I2C.endTransmission();
 
 		TS_ASSERT_EQUALS(initID, INIT_ID);
+	}
+
+	void test_read()
+	{
+		I2C.beginTransmission();
+
+		std::cout << I2C.read();
+
+		I2C.endTransmission();
+
 	}
 
 	void test_readBlock()

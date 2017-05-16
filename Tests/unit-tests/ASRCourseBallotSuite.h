@@ -9,6 +9,16 @@
  *      This file is subject to the terms and conditions defined in the file 
  *      'LICENSE.txt', which is part of this source code package.
  *
+ * Developer Notes:
+ *
+ *							11.4.17 JM
+ *
+ *	Functions that have tests:		Functions that does not have tests:
+ *
+ *	set 							clear
+ *	ptr								get
+ *	add 							maxVotes
+ *
  ***************************************************************************************/
 
  #pragma once

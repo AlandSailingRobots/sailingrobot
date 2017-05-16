@@ -9,6 +9,18 @@
  *
  * Developer Notes:
  *
+ *							12.4.17 JM
+ *
+ *	Functions that have tests:		Functions that does not have tests:
+ *
+ *	init 							writeData
+ *	setIncomingCallback 			readData
+ *	processRadioMessages 			dataAvailable
+ *	transmit 						slip
+ *	receivePackets 					deslip
+ *	processPacketQueue
+ *	processPacket
+ *	fletcherChecksum
  *
  ***************************************************************************************/
 

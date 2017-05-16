@@ -8,6 +8,25 @@
  *
  * Developer Notes:
  *
+ *							11.4.17 JM
+ *
+ *	Functions that have tests:		Functions that does not have tests:
+ *
+ *	combineBytes 					combineBytesSigned
+ *	getMedianValue 					IsOutOfRange
+ *	mean							fixAngles
+ *	meanOfAngles					directionAdjustedSpeed
+ *	sgn 							calculateSignedDistanceToLine
+ *	polarToCartesian 				calculateWaypointsOrthogonalLine
+ *	isAngleInSector 				calculateTrueWindSpeed
+ *	angleDifference 				calculateApparentWind
+ *	limitAngleRange 				getApparentWindSpeed
+ *	limitRadianAngleRange			getApparentWindDirection
+ *	degreeToRadian
+ *	radianToDegree
+ *	headingDifference
+ *	wrapAngle
+ *	addDeclinationToHeading
  *
  ***************************************************************************************/
 
@@ -108,6 +127,19 @@ public:
 		TS_ASSERT_EQUALS(Utility::meanOfAngles(values), 300);
 	}
 
+	void test_Sgn()
+	{
+		double a1 = -34.6, a2 = 0, a3 = 234.567;
+		int b1 = Utility::sgn(a1);
+		int b2 = Utility::sgn(a2);
+		int b3 = Utility::sgn(a3);
+
+		TS_ASSERT_EQUALS(b1, -1);
+		TS_ASSERT_EQUALS(b2, 0);
+		TS_ASSERT_EQUALS(b3, 1);
+	}
+
+
 	void test_PolarToCartesianCoordinates()
 	{
 		float x, y;
@@ -140,7 +172,7 @@ public:
 		TS_ASSERT_EQUALS(Utility::angleDifference(-1070, -500), 150);
 	}
 
-	void test_LimiteAngleRange()
+	void test_LimitAngleRange()
 	{
 		TS_ASSERT_EQUALS(Utility::limitAngleRange(1), 1);
 		TS_ASSERT_EQUALS(Utility::limitAngleRange(359), 359);
@@ -150,6 +182,16 @@ public:
 		TS_ASSERT_EQUALS(Utility::limitAngleRange(620), 260);
 		TS_ASSERT_EQUALS(Utility::limitAngleRange(2050), 250);
 		TS_ASSERT_EQUALS(Utility::limitAngleRange(-2050), 110);
+	}
+
+	void test_LimitRadianAngleRange()
+	{
+
+		TS_ASSERT_DELTA(Utility::limitRadianAngleRange(0),0, 1e-7);
+		TS_ASSERT_DELTA(Utility::limitRadianAngleRange(M_PI),M_PI, 1e-7);
+		TS_ASSERT_DELTA(Utility::limitRadianAngleRange(M_PI*2),0, 1e-7);
+		TS_ASSERT_DELTA(Utility::limitRadianAngleRange(M_PI*3),M_PI, 1e-7);
+		TS_ASSERT_DELTA(Utility::limitRadianAngleRange(M_PI*-3),M_PI, 1e-7);
 	}
 
 
@@ -171,6 +213,25 @@ public:
 		TS_ASSERT_DELTA(Utility::radianToDegree(M_PI) , 180.0, 1e-7);
 	}
 
+	void test_HeadingDifference()
+	{
+		TS_ASSERT_EQUALS(Utility::headingDifference(1,180), 179);
+		TS_ASSERT_EQUALS(Utility::headingDifference(180,1), -179);
+		TS_ASSERT_EQUALS(Utility::headingDifference(1,181), 180);
+		TS_ASSERT_EQUALS(Utility::headingDifference(181,1), 180);
+		TS_ASSERT_EQUALS(Utility::headingDifference(1,182), -179);
+		TS_ASSERT_EQUALS(Utility::headingDifference(182,1), 179);
+		TS_ASSERT_EQUALS(Utility::headingDifference(360,0), 0);
+		TS_ASSERT_EQUALS(Utility::headingDifference(0,360), 0);
+	}
+
+	void test_WrapAngle()
+	{
+		TS_ASSERT_EQUALS(Utility::wrapAngle(183), 183);
+		TS_ASSERT_EQUALS(Utility::wrapAngle(389), 29);
+		TS_ASSERT_EQUALS(Utility::wrapAngle(-8913), 87);
+	}
+
 	void test_AddingDeclinationToHeading()
 	{
 		TS_ASSERT_DELTA(Utility::addDeclinationToHeading(45, 6), 51, 1e-7);
@@ -180,7 +241,7 @@ public:
 
 	void test_TrueWindDirection()
 	{
-		std::vector<float> twdBuffer; 				//ELOUAN PLS HELP
+		std::vector<float> twdBuffer;
 		unsigned int twdBufferMaxSize = 100;
 		TS_ASSERT_DELTA(Utility::getTrueWindDirection(170, 5, 2, 100, twdBuffer, twdBufferMaxSize), 272.8526f, 1e-4);
 		TS_ASSERT_DELTA(Utility::getTrueWindDirection(171, 5, 2.1, 100.1, twdBuffer, twdBufferMaxSize), 273.2557f, 1e-4)

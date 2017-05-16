@@ -9,6 +9,18 @@
  *
  * Developer Notes:
  *
+ *							12.4.17 JM
+ *
+ *	Functions that have tests:		Functions that does not have tests:
+ *
+ *	sendMessage						registerNode
+ *	run 							getRegisteredNode
+ *									processMessages
+ *									startMessageLog
+ *									logMessageReceived
+ *									logMessage
+ *									logMessageConsumer
+ *									messageTimeStamp
  *
  ***************************************************************************************/
 
