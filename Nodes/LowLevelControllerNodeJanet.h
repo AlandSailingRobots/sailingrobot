@@ -3,11 +3,12 @@
 #include "Nodes/Node.h"
 #include "Messages/WindStateMsg.h"
 #include "Messages/StateMessage.h"
-#include "waypointrouting/SailCommand.h"
+#include "Messages/ActuatorPositionMsg.h"
 #include "Messages/NavigationControlMsg.h"
 #include "Messages/MessageTypes.h"
 #include "MessageBus/MessageBus.h"
 #include "SystemServices/CourseRegulator.h"
+#include "waypointrouting/SailCommand.h"
 
 #define DATA_OUT_OF_RANGE -2000
 
