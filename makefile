@@ -101,7 +101,7 @@ export HARDWARE_SERVICES_SRC = HardwareServices/MaestroController/MaestroControl
 							HardwareServices/CAN_Services/CANPGNReceiver.cpp HardwareServices/CAN_Services/CANService.cpp \
 							HardwareServices/CAN_Services/mcp2515.cpp HardwareServices/CAN_Services/MsgFunctions.cpp \
 							Nodes/CANWindsensorNode.cpp Nodes/WindStateNode.cpp Nodes/LowLevelControllerNodeASPire.cpp \
-							HardwareServices/CAN_Services/CANFrameReceiver.cpp Nodes/Janet.cpp
+							HardwareServices/CAN_Services/CANFrameReceiver.cpp Nodes/LowLevelControllerJanet.cpp
 
 export MATH_SRC             = Math/CourseCalculation.cpp Math/CourseMath.cpp Math/Utility.cpp
 
