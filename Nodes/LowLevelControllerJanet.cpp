@@ -34,6 +34,11 @@ LowLevelControllerJanet::LowLevelControllerJanet(MessageBus& msgBus,
     }else if(type == MessageType::WindState){
       processNavigationControlMessage(static_cast<const NavigationControlMsg*> (message));
     }
+
+    // make sure that the three messages are received atleast once before sending out a actuator position
+    if(m_VesselCourse != DATA_OUT_OF_RANGE && m_CourseToSteer != DATA_OUT_OF_RANGE && m_ApparentWindDir != DATA_OUT_OF_RANGE) {
+        sendActuatorPosition();
+    }
   }
 
   void LowLevelControllerJanet::processStateMessage(const StateMessage* msg){
