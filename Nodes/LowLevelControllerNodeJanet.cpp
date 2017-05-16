@@ -1,5 +1,4 @@
 #include "LowLevelControllerNodeJanet.h"
-#include "HardwareServices/CAN_Services/N2kMsg.h"
 #include "Math/Utility.h"
 #include "Messages/ActuatorPositionMsg.h"
 
