@@ -12,7 +12,7 @@
 
 LowLevelControllerJanet::LowLevelControllerJanet(MessageBus& msgBus,
   float maxRudderAngle,  float maxCourseAngleDiff) :
-  Node(NodeID::LowLevelControllerNodeASPire, msgBus),m_MaxRudderAngle(maxRudderAngle),
+  Node(NodeID::LowLevelControllerJanet, msgBus),m_MaxRudderAngle(maxRudderAngle),
   m_CourseRegulator(maxRudderAngle, maxCourseAngleDiff)
   {
     msgBus.registerNode(*this, MessageType::NavigationControl);
