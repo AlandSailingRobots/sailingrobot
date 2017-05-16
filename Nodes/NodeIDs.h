@@ -44,7 +44,7 @@ enum class NodeID {
 	LowLevelControllerNodeASPire,
 	StateMessageListener,
 	MessageVerifier,
-	LowLevelControllerJanet
+	LowLevelControllerNodeJanet
 };
 
 inline std::string nodeToString(NodeID id)
@@ -101,7 +101,7 @@ inline std::string nodeToString(NodeID id)
 		return "StateMessageListener";
 		case NodeID::MessageVerifier:
 		return "MessageVerifier";
-		case NodeID::LowLevelControllerJanet:
+		case NodeID::LowLevelControllerNodeJanet:
 		return "LowLevelControllerJanet";
 	}
 	return "";
