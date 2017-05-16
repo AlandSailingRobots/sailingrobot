@@ -24,9 +24,10 @@ public:
   private:
 
     void processStateMessage(const StateMessage* msg);
-    void processWindStateMessage(const WindStateMsg* msg);
     void processNavigationControlMessage(const NavigationControlMsg* msg);
     void constructAndSendFrame();
+    void sendOldActuatorPositionMessage();
+
 
     float  m_VesselHeading = DATA_OUT_OF_RANGE;
     double m_VesselLatitude = DATA_OUT_OF_RANGE;
@@ -35,9 +36,6 @@ public:
     double m_VesselCourse = DATA_OUT_OF_RANGE;
 
     double m_TrueWindSpeed = DATA_OUT_OF_RANGE;
-    double m_TrueWindDir = DATA_OUT_OF_RANGE;
-    double m_ApparentWindSpeed = DATA_OUT_OF_RANGE;
-    double m_ApparentWindDir = DATA_OUT_OF_RANGE;
 
     NavigationControlMsg::NavigationState m_NavigationState;
     int m_CourseToSteer = DATA_OUT_OF_RANGE;
