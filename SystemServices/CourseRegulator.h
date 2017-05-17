@@ -1,3 +1,5 @@
+#pragma once
+
 class CourseRegulator {
 public:
     CourseRegulator(double maxRudderAngle, double maxCourseAngleDiff);

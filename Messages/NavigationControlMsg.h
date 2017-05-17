@@ -8,7 +8,6 @@ enum class NavigationState {
     sailToWaypoint, stationKeeping, speedTarget
 };
 
-
 class NavigationControlMsg : public Message {
 public:
     NavigationControlMsg(NodeID sourceID, NodeID destinationID, int courseToSteer, float targetSpeed, bool windvaneSelfSteeringOn, NavigationState state) :

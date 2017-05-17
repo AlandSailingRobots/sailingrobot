@@ -83,7 +83,7 @@ export MESSAGE_BUS_SRC      = MessageBus/MessageBus.cpp Nodes/ActiveNode.cpp Mes
 export LNM_SRC              = $(LNM_DIR)/ASRCourseBallot.cpp $(LNM_DIR)/ASRArbiter.cpp \
                             $(LNM_DIR)/LocalNavigationModule.cpp Nodes/LowLevelController.cpp \
                             $(LNM_DIR)/Voters/WaypointVoter.cpp $(LNM_DIR)/Voters/WindVoter.cpp  \
-                            $(LNM_DIR)/Voters/ChannelVoter.cpp 
+                            $(LNM_DIR)/Voters/ChannelVoter.cpp
 
 export LINE_FOLLOW_SRC      = Nodes/LineFollowNode.cpp waypointrouting/RudderCommand.cpp \
                             waypointrouting/SailCommand.cpp Nodes/MessageLoggerNode.cpp waypointrouting/Commands.cpp
@@ -101,7 +101,8 @@ export HARDWARE_SERVICES_SRC = HardwareServices/MaestroController/MaestroControl
 							HardwareServices/CAN_Services/CANPGNReceiver.cpp HardwareServices/CAN_Services/CANService.cpp \
 							HardwareServices/CAN_Services/mcp2515.cpp HardwareServices/CAN_Services/MsgFunctions.cpp \
 							Nodes/CANWindsensorNode.cpp Nodes/WindStateNode.cpp Nodes/LowLevelControllerNodeASPire.cpp \
-							HardwareServices/CAN_Services/CANFrameReceiver.cpp Nodes/ActuatorNodeASPire.cpp
+							HardwareServices/CAN_Services/CANFrameReceiver.cpp Nodes/ActuatorNodeASPire.cpp \
+							Nodes/LowLevelControllerNodeJanet.cpp
 
 export MATH_SRC             = Math/CourseCalculation.cpp Math/CourseMath.cpp Math/Utility.cpp
 
