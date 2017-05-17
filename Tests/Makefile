@@ -16,7 +16,7 @@ UNIT_TEST_SRCS 			= MessageCoreSuite.h MessageSuite.h UtilitySuite.h HTTPSyncSui
 else
 
 UNIT_TEST_SRCS 			= MessageCoreSuite.h MessageSuite.h UtilitySuite.h HTTPSyncSuite.h WaypointNodeSuite.h LineFollowSuite.h CANWindsensorNodeSuite.h \
-						  WindStateNodeSuite.h StateEstimationNodeSuite.h WingsailControlSuite.h CourseRegulatorSuite.h CANMessageSuite.h
+						  WindStateNodeSuite.h StateEstimationNodeSuite.h WingsailControlSuite.h CourseRegulatorSuite.h CANMessageSuite.h LowLevelControllerNodeJanetSuite.h
 
 HARDWARE_TEST_SRCS    	= HardwareXbeeSuite.h HardwareCompassSuite.h HardwareCV7Suite.h HardwareGPSDSuite.h MaestroControllerSuite.h ActuatorSailNodeSuite.h \
 						ActuatorRudderNodeSuite.h CANServiceSuite.h
