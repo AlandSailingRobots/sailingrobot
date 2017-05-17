@@ -78,8 +78,8 @@ public:
     msgBus().sendMessage(std::make_unique<NavigationControlMsg>(1.2, 2.3, false, NavigationState::sailToWaypoint));
     msgBus().sendMessage(std::make_unique<StateMessage>(1,2,3,4,5));
     msgBus().sendMessage(std::make_unique<WindStateMsg>(6,7,8,9));
-
-    TS_ASSERT(janet->init());
+    std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+    TS_ASSERT(logger->actuatorPositionReceived());
 
   }
 
