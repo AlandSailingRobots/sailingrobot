@@ -48,7 +48,6 @@ m_prevWaypointRadius(0),
 m_externalControlActive(false),
 m_tackingDirection(1)
 {
-  //To remove
   msgBus.registerNode(*this, MessageType::VesselState);
 
   msgBus.registerNode(*this, MessageType::StateMessage);
@@ -212,7 +211,6 @@ double LineFollowNode::calculateAngleOfDesiredTrajectory()
           }
           //-----------------
 
-          //USE WindStateMsg apparentWindDirection
           //SET SAIL---------
           sailCommand = fabs(((m_minSailAngle - m_maxSailAngle) / M_PI) * fabs(msg->apparentWindDirection()) + m_maxSailAngle);/*!!! on some pc abs only ouptut an int (ubuntu 14.04 gcc 4.9.3)*/
 
