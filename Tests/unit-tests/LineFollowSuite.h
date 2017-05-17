@@ -8,6 +8,19 @@
  *
  * Developer Notes:
  *
+ *							12.4.17 JM
+ *
+ *	Functions that have tests:		Functions that does not have tests:
+ *
+ *	init 							calculateAngleOfDesiredTrajectory
+ *									calculateActuatorPos
+ *									setPrevWaypointData
+ *									getHeading
+ *									getMergedHeading
+ *									setupRudderCommand
+ *									setupSailCommand
+ *									getGoingStarboard
+ *									setPrevWaypointToBoatPos
  *
  ***************************************************************************************/
 
