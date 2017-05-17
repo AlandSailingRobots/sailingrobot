@@ -4,20 +4,21 @@
 #include "Messages/MessageTypes.h"
 #include "Nodes/NodeIDs.h"
 
+enum class NavigationState {
+    sailToWaypoint, stationKeeping, speedTarget
+};
+
+
 class NavigationControlMsg : public Message {
 public:
 
-    enum class NavigationState {
-        sailToWaypoint, stationKeeping, speedTarget
-    };
-
     NavigationControlMsg(NodeID sourceID, NodeID destinationID, int courseToSteer, float targetSpeed, bool windvaneSelfSteeringOn, NavigationState state) :
-    Message(MessageType::NavigationControl, sourceID, destinationID), m_CourseToSteer(courseToSteer), m_TargetSpeed(targetSpeed), 
+    Message(MessageType::NavigationControl, sourceID, destinationID), m_CourseToSteer(courseToSteer), m_TargetSpeed(targetSpeed),
         m_WindvaneSelfSteeringOn(windvaneSelfSteeringOn), m_NavigationState(state)
     { }
 
     NavigationControlMsg(int courseToSteer, float targetSpeed, bool windvaneSelfSteeringOn, NavigationState state) :
-    Message(MessageType::NavigationControl, NodeID::None, NodeID::None), m_CourseToSteer(courseToSteer), m_TargetSpeed(targetSpeed), 
+    Message(MessageType::NavigationControl, NodeID::None, NodeID::None), m_CourseToSteer(courseToSteer), m_TargetSpeed(targetSpeed),
         m_WindvaneSelfSteeringOn(windvaneSelfSteeringOn), m_NavigationState(state)
     { }
 
