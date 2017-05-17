@@ -74,7 +74,7 @@ public:
     TS_ASSERT(janet->init());
   }
 
-  void test_LowLevelControllerNodeJanetActuatorPosMsgSent(){
+  void test_LowLevelCntNodeJanetActuatorPosMsgSent(){
     msgBus().sendMessage(std::make_unique<NavigationControlMsg>(1.2, 2.3, false, NavigationState::sailToWaypoint));
     msgBus().sendMessage(std::make_unique<StateMessage>(1,2,3,4,5));
     msgBus().sendMessage(std::make_unique<WindStateMsg>(6,7,8,9));
