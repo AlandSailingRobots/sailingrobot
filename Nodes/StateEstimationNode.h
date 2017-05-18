@@ -67,11 +67,11 @@ private:
   double	m_VesselSpeed;
   double  m_VesselCourse;
 
-
   double m_LoopTime;
   int m_Declination;
 
   double m_SpeedLimit;
+  bool m_GpsOnline;
 
   std::mutex m_lock;
 
