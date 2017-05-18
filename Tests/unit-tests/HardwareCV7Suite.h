@@ -9,6 +9,14 @@
  *
  * Developer Notes:
  *
+ *							11.4.17 JM
+ *
+ *	Functions that have tests:		Functions that does not have tests:
+ *
+ *	init 							
+ *	start
+ *	parseString
+ *	WindSensorThread
  *
  ***************************************************************************************/
 
@@ -113,6 +121,6 @@ public:
 
 		std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_FOR_MESSAGE));
 
-		TS_ASSERT(logger->windDataReceived())
+		TS_ASSERT(logger->windDataReceived());
 	}
 };

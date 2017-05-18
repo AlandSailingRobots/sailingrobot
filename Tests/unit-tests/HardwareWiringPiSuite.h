@@ -1,3 +1,33 @@
+
+/****************************************************************************************
+ *
+ * File:
+ * 		HardwareWiringPiSuite.h
+ *
+ * Purpose:
+ *		
+ *
+ * Developer Notes:
+ *
+ *							12.4.17 JM
+ *
+ *	Functions that have tests:		Functions that does not have tests:
+ *
+ *	wiringPiI2CSetup 				wiringPiI2CRead
+ *	wiringPiI2CReadBlock			wiringPiI2CReadReg8
+ *									wiringPiI2CReadReg16
+ *									wiringPiI2CSetupInterface
+ *									wiringPiI2CWrite
+ *									wiringPiI2CWriteReg8
+ *									wiringPiI2CWriteReg16
+ *
+ *	Functions that does not exist but still have tests:
+ *
+ *	wiringPiI2CWriteBlock
+ *	wiringPiI2CWriteI2CBlock
+ *
+ ***************************************************************************************/
+
 #pragma once
 
 #include <unistd.h>
