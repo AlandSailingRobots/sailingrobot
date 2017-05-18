@@ -44,7 +44,7 @@
 
       if(type == MessageType::WindData){
         printWindMsg((WindDataMsg*) message);
-      } 
+      }
       else if(type == MessageType::WindState){
         printWindState((WindStateMsg*) message);
       }
@@ -78,7 +78,7 @@
    }
 
    void printState(StateMessage* msg) {
-      
+
       std::cout << "/////////////////////////////////" << std::endl;
       std::cout << "/// State Message: " << std::endl;
       std::cout << "/// Heading : " << msg->heading() << " Speed : " << msg->speed() << std::endl;
@@ -95,13 +95,13 @@
       std::cout << "/// Windvane Self Steering On : " << msg->windvaneSelfSteeringOn() << std::endl;
       std::cout << "/// Navigation State : " << std::endl;
       switch(msg->navigationState()) {
-        case NavigationControlMsg::NavigationState::speedTarget:
+        case NavigationState::speedTarget:
           std::cout << "speedTarget";
           break;
-        case NavigationControlMsg::NavigationState::sailToWaypoint:
+        case NavigationState::sailToWaypoint:
           std::cout << "sailToWayPoint";
           break;
-        case NavigationControlMsg::NavigationState::stationKeeping:
+        case NavigationState::stationKeeping:
           std::cout << "stationKeeping";
           break;
       }
