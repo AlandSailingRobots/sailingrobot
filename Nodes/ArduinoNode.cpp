@@ -21,17 +21,13 @@
 #include <thread>
 
 #define BLOCK_READ_SIZE 10
-#define BLOCK_I2C_ADDRESS_LOC 8
 
 #define DEFAULT_I2C_ADDRESS_PRESSURE 0x07
-
-#define ARDUINO_SENSOR_SLEEP_MS	100
-
 
 ArduinoNode::ArduinoNode(MessageBus& msgBus)
 : ActiveNode(NodeID::Arduino, msgBus), m_Initialised(false)
 {
-    
+
 }
 
 bool ArduinoNode::init()
@@ -91,13 +87,13 @@ void ArduinoNode::ArduinoThreadFunc(ActiveNode* nodePtr)
 
     while(true)
     {
-        std::this_thread::sleep_for(std::chrono::milliseconds(ARDUINO_SENSOR_SLEEP_MS));
+        std::this_thread::sleep_for(std::chrono::milliseconds(node->ARDUINO_SENSOR_SLEEP_MS));
 
         uint8_t block[BLOCK_READ_SIZE];
-        uint16_t reVal;       
+        uint16_t reVal;
         //readValues(block)
 
-        node->m_I2C.beginTransmission();        
+        node->m_I2C.beginTransmission();
             node->m_I2C.readBlock(block, BLOCK_READ_SIZE);
         node->m_I2C.endTransmission();
 
