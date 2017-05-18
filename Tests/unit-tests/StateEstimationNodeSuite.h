@@ -55,7 +55,7 @@ public:
   void setUp()
   {
     // setup them up once in this test, delete them when the program closes
-    if(sEstimationNode == 0)
+    if(testCount == 0)
     {
       Logger::DisableLogging();
       logger = new MessageLogger(msgBus());
@@ -79,16 +79,16 @@ public:
     }
   }
 
-  void test_StateEstimationNodeInit(){
-    TS_ASSERT(sEstimationNode->init());
-  }
-
   void test_StateEstimationNodeStateMsgReceived(){
     sEstimationNode->start();
     std::this_thread::sleep_for(std::chrono::milliseconds(2600));
     TS_ASSERT(!logger->stateDataReceived());
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
     TS_ASSERT(!logger->stateDataReceived());
+  }
+
+  void test_StateEstimationNodeInit(){
+    TS_ASSERT(sEstimationNode->init());
   }
 
   void test_StateMessageListener(){
