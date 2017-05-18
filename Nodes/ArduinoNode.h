@@ -41,13 +41,9 @@ private:
 
 	I2CController 	m_I2C;
 	bool m_Initialised;
-	int m_pressure;
-	int m_rudder;
-	int m_sheet;
-	int m_battery;
-	int	m_RC;
-
-	const int ARDUINO_SENSOR_SLEEP_MS	= 100;
-	const int BLOCK_I2C_ADDRESS_LOC = 8;
-
+	int  m_pressure;
+	int  m_rudder;
+	int  m_sheet;
+	int  m_battery;
+	int	 m_RC;
 };
