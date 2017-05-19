@@ -81,6 +81,7 @@ void DBHandler::getDataAsJson(std::string select, std::string table, std::string
 
 void DBHandler::insertDataLogs(std::vector<LogItem>& logs)
 {
+		std::cout << "kör plz" << std::endl;
 		std::stringstream arduinoValues;
 		std::stringstream gpsValues;
 		std::stringstream courseCalculationValues;
@@ -138,6 +139,7 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs)
 
 		for(auto log: logs)
 		{
+			std::cout << "pless" << std::endl;
       logNumber++;
 			arduinoValues.str("");
 			gpsValues.str("");

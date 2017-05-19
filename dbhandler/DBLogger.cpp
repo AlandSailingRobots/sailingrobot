@@ -96,6 +96,8 @@ void DBLogger::log(const WindStateMsg* msg, double rudder, double sail, int sail
 
 	m_logBufferFront->push_back(item);
 
+	std::cout << "hejdu" << std::endl;
+
 	// Kick off the worker thread
 	if(m_logBufferFront->size() == m_bufferSize)
 	{

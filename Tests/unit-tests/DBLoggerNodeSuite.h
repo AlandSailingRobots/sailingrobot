@@ -41,5 +41,6 @@ class DBLoggerNodeSuite : public CxxTest::TestSuite {
         DBLogger dbLogger(5, dbHandler);
         dbLogger.startWorkerThread();
         TS_ASSERT(true);
+        dbLogger.log(NULL, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, true, "hejhej");
     }
 };
