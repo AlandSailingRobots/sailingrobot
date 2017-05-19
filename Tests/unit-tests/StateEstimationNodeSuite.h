@@ -55,39 +55,38 @@ public:
   void setUp()
   {
     // setup them up once in this test, delete them when the program closes
-    if(testCount == 0)
+    if(sEstimationNode == 0)
     {
       Logger::DisableLogging();
       logger = new MessageLogger(msgBus());
       stateMessageListener = new StateMessageListener(msgBus());
+      sEstimationNode = new StateEstimationNode(msgBus(), .5, speedLimit);
+
       srand (time(NULL));
       thr = new std::thread(runMessageLoop);
     }
-    sEstimationNode = new StateEstimationNode(msgBus(), .5, speedLimit);
     testCount++;
   }
 
   void tearDown()
   {
-    delete sEstimationNode;
     stateMessageListener->resetStateDataReceived();
     logger->clearState();
     if(testCount == STATE_ESTIMATIONODE_TEST_COUNT)
     {
+      delete sEstimationNode;
       delete logger;
       delete stateMessageListener;
     }
   }
 
-  void test_StateEstimationNodeStateMsgReceived(){
+  void test_StateEstimationNodeInit(){
     sEstimationNode->start();
     std::this_thread::sleep_for(std::chrono::milliseconds(2600));
     TS_ASSERT(!logger->stateDataReceived());
-    std::this_thread::sleep_for(std::chrono::milliseconds(500));
-    TS_ASSERT(!logger->stateDataReceived());
   }
 
-  void test_StateEstimationNodeInit(){
+  void test_StateEstimationNodeGPSNotOnline(){
     TS_ASSERT(sEstimationNode->init());
   }
 
@@ -173,7 +172,7 @@ public:
           TS_ASSERT(stateMessageListener->getVesselCourse() == heading);
         }
 
-        void test_SEstStateMsgSpdAndDeclZero(){
+        void test_StateEstStateMsgSpeedAndDeclZero(){
           sEstimationNode->start();
           std::this_thread::sleep_for(std::chrono::milliseconds(2600));
           int nextDeclination = 0;
@@ -206,7 +205,7 @@ public:
             TS_ASSERT_DELTA(stateMessageListener->getVesselCourse(), 0, 1e-7);
           }
 
-          void test_SEstStateMsgSpdAndDeclOverZero(){
+          void test_StateEstStateMsgSpeedAndDeclOverZero(){
             sEstimationNode->start();
             std::this_thread::sleep_for(std::chrono::milliseconds(2600));
 
@@ -231,8 +230,6 @@ public:
               sEstimationNode->processMessage(msgWayPoint);
               std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
-              TS_ASSERT_DELTA(stateMessageListener->getVesselheading(), 0, 1e-7);
-
               int heading = 100;
               MessagePtr compassMsgData = std::make_unique<CompassDataMsg>(heading, 80, 60);
               MessagePtr msgPtr = std::move(std::move(compassMsgData));
@@ -245,7 +242,7 @@ public:
               TS_ASSERT(stateMessageListener->getVesselCourse() > headingGPS);
             }
 
-            void test_SEstStateMsgSpdLessThanZero(){
+            void test_StateEstStateMsgSpeedLessThanZero(){
               sEstimationNode->start();
               std::this_thread::sleep_for(std::chrono::milliseconds(2600));
 
@@ -268,8 +265,6 @@ public:
                 Message* msgWayPoint = msgPtrWayPoint.get();
                 sEstimationNode->processMessage(msgWayPoint);
                 std::this_thread::sleep_for(std::chrono::milliseconds(500));
-
-                TS_ASSERT_DELTA(stateMessageListener->getVesselheading(), 0, 1e-7);
 
                 int heading = 100;
                 MessagePtr compassMsgData = std::make_unique<CompassDataMsg>(heading, 80, 60);
