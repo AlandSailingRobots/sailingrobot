@@ -24,7 +24,7 @@
 #include <chrono>
 #include <thread>
 
-#define CANWINDSENSORNODE_TEST_COUNT   5
+#define CANWINDSENSORNODE_TEST_COUNT   3
 
 
 class CANWindsensorNodeSuite : public CxxTest::TestSuite
@@ -118,21 +118,4 @@ public:
     TS_ASSERT(logger->windDataReceived());
   }
 
-  void test_CANWindsensorNodeparsePGN130306()
-  {
-    N2kMsg msg = {.PGN = 130306, .Priority = 1,
-    .Source = 10, .Destination = 2,
-    .DataLen = 5, .Data = someTestdata};
-
-    for (int i = 0; i < 1000; i++){
-      uint8_t SID, Ref;
-      float WS, WA;
-
-      canWindSensorNode->parsePGN130306(msg, SID, WS, WA, Ref);
-
-      TS_ASSERT(WA < 360 && WA > 0);
-      TS_ASSERT(WS > 0);
-      msg.Data = getUint8_tTestData();
-    }
-  }
 };
