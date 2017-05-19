@@ -30,7 +30,7 @@
 class LowLevelControllerNodeJanetSuite : public CxxTest::TestSuite
 {
 public:
-  LowLevelControllerNodeJanet* janet;
+  LowLevelControllerNodeJanet* nodeJanet;
 
   std::thread* thr;
   MessageLogger* logger;
@@ -50,30 +50,29 @@ public:
   void setUp()
   {
     // setup them up once in this test, delete them when the program closes
-    if(janet == 0)
+    if(nodeJanet == 0)
     {
       Logger::DisableLogging();
       logger = new MessageLogger(msgBus());
       srand (time(NULL));
 
-      janet = new LowLevelControllerNodeJanet(msgBus());
+      nodeJanet = new LowLevelControllerNodeJanet(msgBus());
       thr = new std::thread(runMessageLoop);
     }
     testCount++;
-    std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_FOR_MESSAGE));
   }
 
   void tearDown()
   {
     if(testCount == TEST_COUNT)
     {
-      delete janet;
+      delete nodeJanet;
       delete logger;
     }
   }
 
   void test_LowLevelControllerNodeJanetInit(){
-    TS_ASSERT(janet->init());
+    TS_ASSERT(nodeJanet->init());
   }
 
   void test_LowLevelCntNodeJanetActuatorPosMsgSent(){
