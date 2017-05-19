@@ -10,6 +10,15 @@
  * Developer Notes:
  *  - ./insertPredefinedWaypoints.sh  needs to be run first.
  *
+ *							12.4.17 JM
+ *
+ *	Functions that have tests:		Functions that does not have tests:
+ *
+ *	init 							processGPSMessage
+ *									waypointReached
+ *									sendMessage
+ *									harvestWaypoint
+ *
  ***************************************************************************************/
 
  #pragma once

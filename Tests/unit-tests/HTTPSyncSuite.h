@@ -12,6 +12,18 @@
  *      - ./installdb.sh  -  Server address needs to be "http://www.sailingrobots.com/testdata/sync/" or "http://localhost/Remote-sailing-robots/sync/"
  *      - ./insertPredefinedWaypoints.sh  -  Choose a waypoint that works
  *
+ *
+ *                          11.4.17 JM
+ *
+ *  Functions that have tests:      Functions that does not have tests:
+ *
+ *  init                            start
+ *  pushDatalogs                    private functions
+ *  pushWaypoints
+ *  pushConfigs
+ *  getWaypointsFromServer
+ *  getConfigsFromServer
+ *
  ***************************************************************************************/
 
 #pragma once
