@@ -55,17 +55,19 @@ public:
       Logger::DisableLogging();
       logger = new MessageLogger(msgBus());
       srand (time(NULL));
+
+      janet = new LowLevelControllerNodeJanet(msgBus());
       thr = new std::thread(runMessageLoop);
     }
-    janet = new LowLevelControllerNodeJanet(msgBus());
     testCount++;
+    std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_FOR_MESSAGE));
   }
 
   void tearDown()
   {
-    delete janet;
     if(testCount == TEST_COUNT)
     {
+      delete janet;
       delete logger;
     }
   }
@@ -78,9 +80,8 @@ public:
     msgBus().sendMessage(std::make_unique<NavigationControlMsg>(1.2, 2.3, false, NavigationState::sailToWaypoint));
     msgBus().sendMessage(std::make_unique<StateMessage>(1,2,3,4,5));
     msgBus().sendMessage(std::make_unique<WindStateMsg>(6,7,8,9));
-    std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+    std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_FOR_MESSAGE));
     TS_ASSERT(logger->actuatorPositionReceived());
-
   }
 
 };
