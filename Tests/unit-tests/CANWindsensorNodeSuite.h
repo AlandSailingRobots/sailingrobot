@@ -24,14 +24,14 @@
 #include <chrono>
 #include <thread>
 
-#define CANWINDSENSORNODE_TEST_COUNT   4
+#define CANWINDSENSORNODE_TEST_COUNT   5
 
 
 class CANWindsensorNodeSuite : public CxxTest::TestSuite
 {
 public:
 
-  CANWindsensorNode* can_windSensorNode;
+  CANWindsensorNode* canWindSensorNode;
   std::thread* thr;
   MessageLogger* logger;
   int testCount = 0;
@@ -48,8 +48,8 @@ public:
     return *cservice;
   }
 
-  static std::vector<uint8_t>& getUint8_tTestData(){
-    static std::vector<uint8_t>* uint8_tData = new std::vector<uint8_t>();
+   std::vector<uint8_t>& getUint8_tTestData(){
+    std::vector<uint8_t>* uint8_tData = new std::vector<uint8_t>();
     uint8_t data;
     for(int i = 0; i < 5; i++){
       data = rand() % 256;
@@ -67,34 +67,33 @@ public:
   {
     // Only want to setup them up once in this test, only going to delete them when the program closes and the OS destroys
     // the process's memory
-    if(can_windSensorNode == 0)
+    if(canWindSensorNode == 0)
     {
       Logger::DisableLogging();
       logger = new MessageLogger(msgBus());
-      can_windSensorNode = new CANWindsensorNode(msgBus(), canService(), 50);
-      can_windSensorNode->start();
-      srand (time(NULL));
+      canWindSensorNode = new CANWindsensorNode(msgBus(), canService(), 50);
+      canWindSensorNode->start();
       someTestdata = getUint8_tTestData();
 
+      srand (time(NULL));
       thr = new std::thread(runMessageLoop);
 
     }
     testCount++;
-    std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_FOR_MESSAGE));
   }
 
   void tearDown()
   {
     if(testCount == CANWINDSENSORNODE_TEST_COUNT)
     {
-      delete can_windSensorNode;
+      delete canWindSensorNode;
       delete logger;
     }
   }
 
   void test_CANWindsensorNodeInit()
   {
-    TS_ASSERT(can_windSensorNode->init())
+    TS_ASSERT(canWindSensorNode->init())
   }
 
   void test_CANWindsensorNodeprocessPGN130306()
@@ -102,7 +101,7 @@ public:
     N2kMsg msg = {.PGN = 130306, .Priority = 1,
     .Source = 10, .Destination = 2,
     .DataLen = 5, .Data = someTestdata};
-    can_windSensorNode->processPGN(msg);
+    canWindSensorNode->processPGN(msg);
 
     std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_FOR_MESSAGE));
     TS_ASSERT(logger->windDataReceived());
@@ -113,7 +112,7 @@ public:
     N2kMsg msg = {.PGN = 130311, .Priority = 1,
     .Source = 10, .Destination = 2,
     .DataLen = 5, .Data = someTestdata};
-    can_windSensorNode->processPGN(msg);
+    canWindSensorNode->processPGN(msg);
 
     std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_FOR_MESSAGE));
     TS_ASSERT(logger->windDataReceived());
@@ -129,7 +128,7 @@ public:
       uint8_t SID, Ref;
       float WS, WA;
 
-      can_windSensorNode->parsePGN130306(msg, SID, WS, WA, Ref);
+      canWindSensorNode->parsePGN130306(msg, SID, WS, WA, Ref);
 
       TS_ASSERT(WA < 360 && WA > 0);
       TS_ASSERT(WS > 0);
