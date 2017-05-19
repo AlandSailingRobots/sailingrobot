@@ -72,6 +72,7 @@ public:
       Logger::DisableLogging();
       logger = new MessageLogger(msgBus());
       can_windSensorNode = new CANWindsensorNode(msgBus(), canService(), 50);
+      can_windSensorNode->start();
       srand (time(NULL));
       someTestdata = getUint8_tTestData();
 
@@ -99,40 +100,40 @@ public:
   void test_CANWindsensorNodeprocessPGN130306()
   {
     N2kMsg msg = {.PGN = 130306, .Priority = 1,
-      .Source = 10, .Destination = 2,
-      .DataLen = 5, .Data = someTestdata};
-      can_windSensorNode->processPGN(msg);
+    .Source = 10, .Destination = 2,
+    .DataLen = 5, .Data = someTestdata};
+    can_windSensorNode->processPGN(msg);
 
-      std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_FOR_MESSAGE));
-      TS_ASSERT(logger->windDataReceived());
+    std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_FOR_MESSAGE));
+    TS_ASSERT(logger->windDataReceived());
+  }
+
+  void test_CANWindsensorNodeprocessPGN130311()
+  {
+    N2kMsg msg = {.PGN = 130311, .Priority = 1,
+    .Source = 10, .Destination = 2,
+    .DataLen = 5, .Data = someTestdata};
+    can_windSensorNode->processPGN(msg);
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_FOR_MESSAGE));
+    TS_ASSERT(logger->windDataReceived());
+  }
+
+  void test_CANWindsensorNodeparsePGN130306()
+  {
+    N2kMsg msg = {.PGN = 130306, .Priority = 1,
+    .Source = 10, .Destination = 2,
+    .DataLen = 5, .Data = someTestdata};
+
+    for (int i = 0; i < 1000; i++){
+      uint8_t SID, Ref;
+      float WS, WA;
+
+      can_windSensorNode->parsePGN130306(msg, SID, WS, WA, Ref);
+
+      TS_ASSERT(WA < 360 && WA > 0);
+      TS_ASSERT(WS > 0);
+      msg.Data = getUint8_tTestData();
     }
-
-    void test_CANWindsensorNodeprocessPGN130311()
-    {
-      N2kMsg msg = {.PGN = 130311, .Priority = 1,
-        .Source = 10, .Destination = 2,
-        .DataLen = 5, .Data = someTestdata};
-        can_windSensorNode->processPGN(msg);
-
-        std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_FOR_MESSAGE));
-        TS_ASSERT(logger->windDataReceived());
-      }
-
-      void test_CANWindsensorNodeparsePGN130306()
-      {
-        N2kMsg msg = {.PGN = 130306, .Priority = 1,
-          .Source = 10, .Destination = 2,
-          .DataLen = 5, .Data = someTestdata};
-
-          for (int i = 0; i < 1000; i++){
-            uint8_t SID, Ref;
-            float WS, WA;
-
-            can_windSensorNode->parsePGN130306(msg, SID, WS, WA, Ref);
-
-            TS_ASSERT(WA < 360 && WA > 0);
-            TS_ASSERT(WS > 0);
-            msg.Data = getUint8_tTestData();
-          }
-        }
-  };
+  }
+};

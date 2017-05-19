@@ -17,6 +17,7 @@ class CANMessageSuite : public CxxTest::TestSuite {
         Nmsg.PGN = 130311;
         std::vector<uint8_t> data = {1,2,3,4,5,6,7,8};
         Nmsg.Data = data;
+        Nmsg.DataLen = Nmsg.Data.size();
 
         N2kMsgToCanMsg(Nmsg, Cmsg);
         N2kMsg Nmsg2;
