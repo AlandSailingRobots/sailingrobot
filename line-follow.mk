@@ -38,7 +38,7 @@ $(EXECUTABLE): $(OBJECTS)
 	rm -f $(OBJECT_FILE)
 	@echo -n " " $(OBJECTS) >> $(OBJECT_FILE)
 	@echo Linking object files
-	$(CXX) $(LDFLAGS) @$(OBJECT_FILE) ./libwiringPi.so -Wl,-rpath=./ -o $@ $(LIBS)
+	$(CXX) $(LDFLAGS) @$(OBJECT_FILE) -Wl,-rpath=./ -o $@ $(LIBS)
 
 # Compile CPP files into the build folder
 $(BUILD_DIR)/%.o:$(SRC_DIR)/%.cpp

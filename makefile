@@ -29,7 +29,7 @@ TOOLCHAIN = 0
 
 
 export CPPFLAGS                = -g -Wall -pedantic -Werror -std=gnu++14
-export LIBS                    = -lsqlite3 -lgps -lrt -lcurl -lpthread
+export LIBS                    = -lsqlite3 -lgps -lrt -lcurl -lpthread -lwiringPi
 
 ifeq ($(TOOLCHAIN),1)
 export CC                      = arm-linux-gnueabihf-gcc
@@ -53,11 +53,7 @@ export DEFINES          	= -DTOOLCHAIN=$(TOOLCHAIN) -DSIMULATION=$(USE_SIM)
 export SRC_DIR				= ./
 export BUILD_DIR        	= build
 export EXEC_DIR         	= ./
-export INC_DIR         	 	= -I./ -I./libs -I./libs/wiringPi/wiringPi
-
-export WIRING_PI            = libwiringPi.so
-export WIRING_PI_PATH		= ./libs/wiringPi/wiringPi
-export WIRING_PI_STATIC		= ./libs/wiringPi/wiringPi/libwiringPi.so.2.32
+export INC_DIR         	 	= -I./ -I./libs
 
 LNM_DIR                 	= Nodes/LocalNavigationModule
 
@@ -128,27 +124,23 @@ export INTEGRATION_TEST		= Tests/integration/IntegrationTests/CANServiceIntegrat
 
 all: $(EXECUTABLE) stats
 
-dev-lnm: $(BUILD_DIR) $(WIRING_PI)
+dev-lnm: $(BUILD_DIR)
 	$(MAKE) -f dev-lnm.mk -j
 
-line-follow: $(BUILD_DIR) $(WIRING_PI)
+line-follow: $(BUILD_DIR)
 	$(MAKE) -f line-follow.mk -j4
 
 # Builds the intergration test, requires the whole system to be built before
-tests: $(BUILD_DIR) $(WIRING_PI)
+tests: $(BUILD_DIR)
 	$(MAKE) -C Tests
 	$(MAKE) -f tests.mk
 
-integration_tests: $(BUILD_DIR) $(WIRING_PI)
+integration_tests: $(BUILD_DIR)
 	$(MAKE) -f integration_tests.mk
 
 #  Create the directories needed
 $(BUILD_DIR):
 	@$(MKDIR_P) $(BUILD_DIR)
-
-$(WIRING_PI):
-	$(MAKE) -C $(WIRING_PI_PATH)
-	@mv $(WIRING_PI_STATIC) ./libwiringPi.so
 
 clean:
 	@echo Removing existing object files and executable
