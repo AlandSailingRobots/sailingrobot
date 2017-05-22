@@ -21,7 +21,7 @@
 
 class ArduinoNode : public ActiveNode {
 public:
-	ArduinoNode(MessageBus& msgBus);
+	ArduinoNode(MessageBus& msgBus, double loopTime);
 
 	///----------------------------------------------------------------------------------
 	/// Attempts to connect to the Arduino.
@@ -46,4 +46,5 @@ private:
 	int  m_sheet;
 	int  m_battery;
 	int	 m_RC;
+	double m_LoopTime;
 };
