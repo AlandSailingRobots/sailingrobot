@@ -7,8 +7,7 @@
 #define NORM_SAIL_COMMAND 0.6958
 
 SailCommand::SailCommand() {
-	  m_maxSailAngle = M_PI / 4.2f;
-	  m_minSailAngle = M_PI / 32.0f;
+
 }
 
 SailCommand::~SailCommand() {
