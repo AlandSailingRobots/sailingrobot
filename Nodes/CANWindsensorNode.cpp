@@ -147,13 +147,9 @@ void CANWindsensorNode::parsePGN130306(N2kMsg &NMsg, uint8_t &SID, float &WindSp
           Timer timer;
           timer.start();
 
-          // TODO : Use Timer instead of sleep
-
           while(true) {
-
             // Need to convert milliseconds into seconds for the argument
             timer.sleepUntil(node->m_TimeBetweenMsgs*1.0f / 1000);
-            timer.reset();
             node->m_lock.lock();
 
             if( node->m_WindDir == DATA_OUT_OF_RANGE &&  node->m_WindTemperature == DATA_OUT_OF_RANGE && node->m_WindSpeed == DATA_OUT_OF_RANGE){
@@ -164,8 +160,8 @@ void CANWindsensorNode::parsePGN130306(N2kMsg &NMsg, uint8_t &SID, float &WindSp
             MessagePtr windData = std::make_unique<WindDataMsg>(node->m_WindDir, node->m_WindSpeed, node->m_WindTemperature);
             node->m_MsgBus.sendMessage(std::move(windData));
 
-
             node->m_lock.unlock();
 
+            timer.reset();
           }
         }
