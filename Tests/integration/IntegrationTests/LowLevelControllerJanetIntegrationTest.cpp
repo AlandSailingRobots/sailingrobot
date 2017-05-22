@@ -18,7 +18,7 @@ int main() {
   Logger::DisableLogging();
   LowLevelControllerNodeJanet node(msgBus);
   MessageLogger logger(msgBus);
-  
+
   std::thread t (msgBusLoop);
   t.detach();
 
@@ -27,8 +27,12 @@ int main() {
   msgBus.sendMessage(std::make_unique<WindStateMsg>(6,7,8,9));
   std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_FOR_MESSAGE));
 
+  if(node.init() == true){
+    std::cout << "Init" << std::endl;
+  }
+
   if(logger.actuatorPositionReceived() == true){
-    std::cout << "ActuatorPosition Message Received" << std::endl;
+    std::cout << "actuatorPositionReceived" << std::endl;
   }
 
 
