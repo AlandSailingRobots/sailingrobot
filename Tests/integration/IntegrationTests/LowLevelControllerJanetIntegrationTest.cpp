@@ -11,25 +11,25 @@
 MessageBus msgBus;
 
 void msgBusLoop() {
-    msgBus.run();
+  msgBus.run();
 }
 
 int main() {
   Logger::DisableLogging();
-    LowLevelControllerNodeJanet node(msgBus);
-    MessageLogger logger(msgBus);
+  LowLevelControllerNodeJanet node(msgBus);
+  MessageLogger logger(msgBus);
+  
+  std::thread t (msgBusLoop);
+  t.detach();
 
-    std::thread t (msgBusLoop);
-    t.detach();
+  msgBus.sendMessage(std::make_unique<NavigationControlMsg>(1.2, 2.3, false, NavigationState::sailToWaypoint));
+  msgBus.sendMessage(std::make_unique<StateMessage>(1,2,3,4,5));
+  msgBus.sendMessage(std::make_unique<WindStateMsg>(6,7,8,9));
+  std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_FOR_MESSAGE));
 
-    msgBus.sendMessage(std::make_unique<NavigationControlMsg>(1.2, 2.3, false, NavigationState::sailToWaypoint));
-    msgBus.sendMessage(std::make_unique<StateMessage>(1,2,3,4,5));
-    msgBus.sendMessage(std::make_unique<WindStateMsg>(6,7,8,9));
-    std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_FOR_MESSAGE));
-
-    if(logger.actuatorPositionReceived() == true){
-      std::cout << "ActuatorPosition Message Received" << std::endl;
-    }
+  if(logger.actuatorPositionReceived() == true){
+    std::cout << "ActuatorPosition Message Received" << std::endl;
+  }
 
 
 }
