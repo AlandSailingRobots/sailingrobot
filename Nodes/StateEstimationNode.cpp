@@ -91,8 +91,6 @@ int StateEstimationNode::getCourse(){
   * (Compass heading compensated with declination)
   * or the GPS Course
   */
-
-  std::lock_guard<std::mutex> lock_guard(m_lock);
   if(m_VesselSpeed >= 0 && m_VesselSpeed <= m_SpeedLimit){
     int leftOperand = ( (m_SpeedLimit-m_VesselSpeed)/m_SpeedLimit )* m_VesselHeading;
     int rightOperand = (m_VesselSpeed/m_SpeedLimit)*m_VesselCourse;
@@ -115,15 +113,16 @@ void StateEstimationNode::StateEstimationNodeThreadFunc(ActiveNode* nodePtr)
   // at the start before we send out the state message.
   std::this_thread::sleep_for(std::chrono::milliseconds(node->STATE_INITIAL_SLEEP));
 
-
   Timer timer;
   timer.start();
 
   while(true)
   {
     timer.sleepUntil(node->m_LoopTime);
+
     if(node->m_GpsOnline){
-      MessagePtr stateMessage = std::make_unique<StateMessage>( node->m_VesselHeading, node->m_VesselLat,
+      std::lock_guard<std::mutex> lock_guard(node->m_lock);
+      MessagePtr stateMessage = std::make_unique<StateMessage>(node->m_VesselHeading, node->m_VesselLat,
         node->m_VesselLon, node->m_VesselSpeed, node->getCourse());
         node->m_MsgBus.sendMessage(std::move(stateMessage));
       }

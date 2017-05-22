@@ -18,5 +18,5 @@ int SailCommand::getSailCommand(double apparentWindDirection) {
 	{
 		sailCommand = MIN_SAIL_ANGLE;
 	}
-	return getCommand(sailCommand/NORM_SAIL_COMMAND);
+	return sailCommand/NORM_SAIL_COMMAND;
 }

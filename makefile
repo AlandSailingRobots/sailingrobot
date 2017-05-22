@@ -86,7 +86,7 @@ export LNM_SRC              = $(LNM_DIR)/ASRCourseBallot.cpp $(LNM_DIR)/ASRArbit
                             $(LNM_DIR)/Voters/ChannelVoter.cpp
 
 export LINE_FOLLOW_SRC      = Nodes/LineFollowNode.cpp waypointrouting/RudderCommand.cpp \
-                            waypointrouting/SailCommand.cpp Nodes/MessageLoggerNode.cpp waypointrouting/Commands.cpp
+                            Nodes/MessageLoggerNode.cpp waypointrouting/Commands.cpp
 
 export NETWORK_SRC          = Network/TCPServer.cpp Nodes/VesselStateNode.cpp Nodes/StateEstimationNode.cpp
 
@@ -117,7 +117,7 @@ export HTTP_SYNC_SRC        = Nodes/HTTPSyncNode.cpp
 export XBEE_NETWORK_SRC     = Network/DataLink.cpp Network/LinuxSerialDataLink.cpp Network/XbeePacketNetwork.cpp \
                             xBee/Xbee.cpp Nodes/XbeeSyncNode.cpp
 
-export INTEGRATION_TEST		= Tests/integration/IntegrationTests/CANServiceIntegrationTest.cpp Tests/integration/IntegrationTests/thread-master/ThreadRAII.cpp
+export INTEGRATION_TEST		= Tests/integration/IntegrationTests/LowLevelControllerJanetIntegrationTest.cpp Tests/integration/IntegrationTests/thread-master/ThreadRAII.cpp
 
 
 ###############################################################################

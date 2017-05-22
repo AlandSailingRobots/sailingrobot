@@ -27,14 +27,7 @@ void N2kMsgToCanMsg(N2kMsg &Nmsg, CanMsg &Cmsg)
 {
 	N2kMsgToId(Nmsg, Cmsg.id);
 
-	if(Nmsg.DataLen)
-	{
-		Cmsg.header.length = Nmsg.DataLen;
-	} 
-	else 
-	{
-		Cmsg.header.length = Nmsg.Data.size();
-	}
+	Cmsg.header.length = Nmsg.Data.size();
 	Cmsg.header.ide = 0;
 
 	for(int i = 0; i < Cmsg.header.length; ++i)
