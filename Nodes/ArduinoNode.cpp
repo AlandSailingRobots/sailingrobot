@@ -15,6 +15,8 @@
 #include "ArduinoNode.h"
 #include "Messages/ArduinoDataMsg.h"
 #include "SystemServices/Logger.h"
+#include "SystemServices/Timer.h"
+
 
 // For std::this_thread
 #include <chrono>
@@ -25,10 +27,9 @@
 
 #define DEFAULT_I2C_ADDRESS_PRESSURE 0x07
 
-#define ARDUINO_SENSOR_SLEEP_MS	100
 
-ArduinoNode::ArduinoNode(MessageBus& msgBus)
-: ActiveNode(NodeID::Arduino, msgBus), m_Initialised(false)
+ArduinoNode::ArduinoNode(MessageBus& msgBus,  double loopTime)
+: ActiveNode(NodeID::Arduino, msgBus), m_Initialised(false), m_LoopTime(loopTime)
 {
 
 }
@@ -88,9 +89,11 @@ void ArduinoNode::ArduinoThreadFunc(ActiveNode* nodePtr)
 
     Logger::info("Arduino thread started");
 
+		Timer timer;
+	  timer.start();
     while(true)
     {
-        std::this_thread::sleep_for(std::chrono::milliseconds(ARDUINO_SENSOR_SLEEP_MS));
+			timer.sleepUntil(node->m_LoopTime);
 
         uint8_t block[BLOCK_READ_SIZE];
         uint16_t reVal;
@@ -122,5 +125,6 @@ void ArduinoNode::ArduinoThreadFunc(ActiveNode* nodePtr)
 
         MessagePtr msg = std::make_unique<ArduinoDataMsg>(node->m_pressure, node->m_rudder, node->m_sheet, node->m_battery, node->m_RC);
         node->m_MsgBus.sendMessage(std::move(msg));
+				timer.reset();
     }
 }
