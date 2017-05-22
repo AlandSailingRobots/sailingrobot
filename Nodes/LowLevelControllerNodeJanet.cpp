@@ -55,7 +55,7 @@ LowLevelControllerNodeJanet::LowLevelControllerNodeJanet(MessageBus& msgBus,
   void LowLevelControllerNodeJanet::sendActuatorPosition(){
 
     double normalizedRudderAngle = m_CourseRegulator.calculateRudderAngle() / m_MaxRudderAngle;
-    double sailCommand = m_SailCommand.getSailCommand(m_ApparentWindDir);
+    double sailCommand = m_SailCommand.getCommand(m_ApparentWindDir);
 
     MessagePtr actuatorMsg = std::make_unique<ActuatorPositionMsg>(normalizedRudderAngle, sailCommand);
     m_MsgBus.sendMessage(std::move(actuatorMsg));

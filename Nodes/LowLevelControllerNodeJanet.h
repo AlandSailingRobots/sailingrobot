@@ -8,7 +8,7 @@
 #include "Messages/MessageTypes.h"
 #include "MessageBus/MessageBus.h"
 #include "SystemServices/CourseRegulator.h"
-#include "waypointrouting/SailCommand.h"
+#include "SystemServices/SailCommand.h"
 
 #define DATA_OUT_OF_RANGE -2000
 
