@@ -20,7 +20,8 @@ class MessageLogger: public Node {
 public:
 	MessageLogger(MessageBus& msgBus)
 	:Node(NodeID::MessageLogger, msgBus), m_DataRequest(false), m_WindData(false),
-	m_CompassData(false), m_GPSData(false), m_WindState(false), m_StateData(false),
+	m_CompassData(false), m_GPSData(false), m_waypointData(false),
+	m_actuatorPosition(false),m_WindState(false), m_StateData(false),
 	m_NavigationData(false)
 	{
 		msgBus.registerNode(*this);
@@ -82,7 +83,7 @@ public:
 	bool compassDataReceived() { return m_CompassData; }
 	bool gpsDataReceived() { return m_GPSData; }
 	bool waypointDataReceived() { return m_waypointData; }
-	bool actuatorPositionReceived() { return m_actuatorPosition; }
+	bool actuatorPositionReceived() {return m_actuatorPosition; }
 	bool windStateReceived() { return m_WindState; }
 	bool stateDataReceived() { return m_StateData; }
 	bool navigationDataReceived(){return m_NavigationData;}
