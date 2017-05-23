@@ -33,10 +33,7 @@ m_SpeedLimit(speedLimit), m_GpsOnline(false)
   msgBus.registerNode(*this, MessageType::WaypointData);
 }
 
-StateEstimationNode::~StateEstimationNode()
-{
-
-}
+StateEstimationNode::~StateEstimationNode() {}
 
 bool StateEstimationNode::init()
 {
