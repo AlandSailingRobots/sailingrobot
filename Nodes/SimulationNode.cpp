@@ -32,11 +32,6 @@
 
 
 
-#define COUNT_COMPASSDATA_MSG 1
-#define COUNT_GPSDATA_MSG 1
-#define COUNT_WINDDATA_MSG 1
-#define COUNT_ARDUINO_MSG 1
-
 
 SimulationNode::SimulationNode(MessageBus& msgBus, double loopTime)
 	: ActiveNode(NodeID::Simulator, msgBus),
