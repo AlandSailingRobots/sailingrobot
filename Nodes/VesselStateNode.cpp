@@ -25,8 +25,6 @@
 
 
 
-#define VESSEL_STATE_SLEEP_MS 400
-#define VESSEL_STATE_INITIAL_SLEEP 2000
 
 
 VesselStateNode::VesselStateNode(MessageBus& msgBus, double loopTime)
@@ -140,7 +138,7 @@ void VesselStateNode::VesselStateThreadFunc(ActiveNode* nodePtr)
 
 	// An initial sleep, its purpose is to ensure that most if not all the sensor data arrives
 	// at the start before we send out the vessel state message.
-	std::this_thread::sleep_for(std::chrono::milliseconds(VESSEL_STATE_INITIAL_SLEEP));
+	std::this_thread::sleep_for(std::chrono::milliseconds(node->VESSEL_STATE_INITIAL_SLEEP));
 
 	char buffer[1024];
 
