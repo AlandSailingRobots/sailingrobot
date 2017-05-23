@@ -29,7 +29,7 @@ public:
 	CANWindsensorNode(MessageBus& msgBus, CANService& can_service, int time_filter_ms);
 
 
-	~CANWindsensorNode(){};
+	~CANWindsensorNode();
 
 	/* data */
 	 void processPGN(N2kMsg &NMsg);
