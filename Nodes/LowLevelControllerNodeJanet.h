@@ -8,7 +8,7 @@
 #include "Messages/MessageTypes.h"
 #include "MessageBus/MessageBus.h"
 #include "SystemServices/CourseRegulator.h"
-#include "SystemServices/NewSailCommand.h"
+#include "SystemServices/SoftSailControl.h"
 
 #define DATA_OUT_OF_RANGE -2000
 
@@ -40,5 +40,5 @@ public:
     const float m_MaxRudderAngle;
 
     CourseRegulator m_CourseRegulator;
-    NewSailCommand m_SailCommand;
+    SoftSailControl m_SailCommand;
   };
