@@ -28,6 +28,8 @@ CANWindsensorNode::CANWindsensorNode(MessageBus& msgBus, CANService& can_service
 
 }
 
+CANWindsensorNode::~CANWindsensorNode(){}
+
 void CANWindsensorNode::processPGN(N2kMsg &NMsg)
 {
 
