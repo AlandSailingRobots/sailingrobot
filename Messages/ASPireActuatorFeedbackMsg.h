@@ -4,23 +4,23 @@
 #include "Messages/MessageTypes.h"
 #include "Nodes/NodeIDs.h"
 
-class ASPireActuatorFeedbackMessage : public Message {
+class ASPireActuatorFeedbackMsg : public Message {
 public:
-    ASPireActuatorFeedbackMessage(NodeID sourceID, NodeID destinationID, double wingsailFeedback,
+    ASPireActuatorFeedbackMsg(NodeID sourceID, NodeID destinationID, double wingsailFeedback,
                                 double rudderFeedback, double windvaneAngle, double windvaneActuatorPos)
     : Message(MessageType::ActuatorControlASPire, sourceID, destinationID),
     m_WingsailFeedback(wingsailFeedback), m_RudderFeedback(rudderFeedback),
     m_WindvaneSelfSteeringAngle(windvaneAngle), m_WindvaneActuatorPosition(windvaneActuatorPos)
     {  }
 
-    ASPireActuatorFeedbackMessage( double wingsailFeedback, double rudderFeedback, 
+    ASPireActuatorFeedbackMsg( double wingsailFeedback, double rudderFeedback, 
                                    double windvaneAngle, double windvaneActuatorPos)
     : Message(MessageType::ActuatorControlASPire, NodeID::None, NodeID::None),
     m_WingsailFeedback(wingsailFeedback), m_RudderFeedback(rudderFeedback),
     m_WindvaneSelfSteeringAngle(windvaneAngle), m_WindvaneActuatorPosition(windvaneActuatorPos)
     {  }
 
-    virtual ~ASPireActuatorFeedbackMessage() { }
+    virtual ~ASPireActuatorFeedbackMsg() { }
 
     double wingsailFeedback() const          { return m_WingsailFeedback; }
     double rudderFeedback() const            { return m_RudderFeedback; }

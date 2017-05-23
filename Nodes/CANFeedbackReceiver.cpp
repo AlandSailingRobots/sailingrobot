@@ -1,9 +1,9 @@
 #include "CANFeedbackReceiver.h"
 
-#include "Messages/ASPireActuatorFeedbackMessage.h"
+#include "Messages/ASPireActuatorFeedbackMsg.h"
 
-CANFeedbackReceiver::CANFeedbackReceiver(MessageBus& messageBus, CANService& canService, uint32_t canID) : 
-                    Node(NodeID::CANFeedbackReceiver, messageBus), CANFrameReceiver(canService, canID)
+CANFeedbackReceiver::CANFeedbackReceiver(MessageBus& messageBus, CANService& canService) : 
+                    Node(NodeID::CANFeedbackReceiver, messageBus), CANFrameReceiver(canService, 701)
 
 {  }
 
@@ -28,7 +28,7 @@ void CANFeedbackReceiver::processFrame(CanMsg& msg) {
         uint16_t windvaneSelfSteerAngle = (msg.data[5] << 8 | msg.data[4]);
         uint8_t windvaneActuatorPos = msg.data[7];
 
-        MessagePtr feedbackMsg = std::make_unique<ASPireActuatorFeedbackMessage>(rudderFeedback, wingsailFeedback,
+        MessagePtr feedbackMsg = std::make_unique<ASPireActuatorFeedbackMsg>(rudderFeedback, wingsailFeedback,
                                                                                  windvaneSelfSteerAngle, windvaneActuatorPos);
 
         m_MsgBus.sendMessage(std::move(feedbackMsg));

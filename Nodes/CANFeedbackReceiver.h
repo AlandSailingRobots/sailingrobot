@@ -9,7 +9,7 @@
 
 class CANFeedbackReceiver : public Node, public CANFrameReceiver {
 public:
-    CANFeedbackReceiver(MessageBus& messageBus, CANService& canService, uint32_t canID);
+    CANFeedbackReceiver(MessageBus& messageBus, CANService& canService);
     ~CANFeedbackReceiver();
     bool init();
     void processMessage(const Message* message);
