@@ -5,7 +5,6 @@
 #include <algorithm>
 #include <cmath>
 
-#define DATA_OUT_OF_RANGE -2000
 
 
 LowLevelControllerNodeJanet::LowLevelControllerNodeJanet(MessageBus& msgBus,
