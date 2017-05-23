@@ -10,7 +10,6 @@
 #include "SystemServices/CourseRegulator.h"
 #include "SystemServices/SoftSailControl.h"
 
-#define DATA_OUT_OF_RANGE -2000
 
 class LowLevelControllerNodeJanet: public Node {
 public:
@@ -41,4 +40,7 @@ public:
 
     CourseRegulator m_CourseRegulator;
     SoftSailControl m_SailCommand;
+
+    const int DATA_OUT_OF_RANGE = -2000;
+
   };
