@@ -23,6 +23,8 @@
 #include "SystemServices/Logger.h"
 #include "wiringPi.h"
 #include "Math/Utility.h"
+#include "SystemServices/Timer.h"
+
 
 // For std::this_thread
 #include <chrono>
@@ -54,11 +56,10 @@
 #define FLATFRONT 2 // Z = forward, -X = up
 
 
-#define COMPASS_SENSOR_SLEEP_MS	100
 
-
-HMC6343Node::HMC6343Node(MessageBus& msgBus, const int headingBufferSize)
-: ActiveNode(NodeID::Compass, msgBus), m_Initialised(false), m_HeadingBufferSize(headingBufferSize)
+HMC6343Node::HMC6343Node(MessageBus& msgBus, const int headingBufferSize,  double loopTime)
+: ActiveNode(NodeID::Compass, msgBus), m_Initialised(false), m_HeadingBufferSize(headingBufferSize),
+m_LoopTime(loopTime)
 {
 
 }
@@ -186,10 +187,12 @@ void HMC6343Node::HMC6343ThreadFunc(ActiveNode* nodePtr)
 	std::vector<float> headingData(node->m_HeadingBufferSize);
 	int headingIndex = 0;
 
+	Timer timer;
+	timer.start();
 	while(true)
 	{
 		// Controls how often we pump out messages
-		std::this_thread::sleep_for(std::chrono::milliseconds(COMPASS_SENSOR_SLEEP_MS));
+		timer.sleepUntil(node->m_LoopTime);
 
 		if(errorCount >= MAX_ERROR_COUNT)
 		{
@@ -226,5 +229,6 @@ void HMC6343Node::HMC6343ThreadFunc(ActiveNode* nodePtr)
 		{
 			errorCount++;
 		}
+		timer.reset();
 	}
 }
