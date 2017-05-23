@@ -8,6 +8,7 @@
 #include <stdlib.h>
 
 #define SLEEP_TIME_MS 50
+#define WIRINGPI_CODES 1
 
 bool CANService::registerForReading(CANPGNReceiver& receiver, uint32_t PGN)
 {
@@ -57,11 +58,8 @@ std::future<void> CANService::start()
 {
   setenv("WIRINGPI_CODES", "1", 0);
   m_Running.store(true);
-  if(!m_WiringPiInit) {
-    if(wiringPiSetup() == -1) {
-      std::cout << "Could not init wiringpi" << std::endl;
-    }
-    m_WiringPiInit = true;
+  if(wiringPiSetup() == -1) {
+    std::cout << "Could not setup wiring pi" << std::endl;
   }
   int SPISpeed = 1000000;
 
