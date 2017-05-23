@@ -26,7 +26,7 @@
 
 class VesselStateNode : public ActiveNode {
 public:
-	VesselStateNode(MessageBus& msgBus);
+	VesselStateNode(MessageBus& msgBus, double loopTime);
 	~VesselStateNode();
 
 	///----------------------------------------------------------------------------------
@@ -92,6 +92,7 @@ private:
 	int16_t waypointBearing;
 	double waypointDistance;
 	int16_t radius;
+  double m_LoopTime;
 
 
 	TCPServer server;
