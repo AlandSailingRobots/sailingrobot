@@ -1,12 +1,15 @@
 
 #include <string>
 #include "SystemServices/Logger.h"
-#include "Nodes/CANWindsensorNode.h"
 #include "MessageBus/MessageBus.h"
 #include "Nodes/MessageLoggerNode.h"
+#include "Nodes/LowLevelControllerNodeJanet.h"
 
 #if SIMULATION == 1
  #include "Nodes/SimulationNode.h"
+ #include "HardwareServices/CAN_Services/CANService.h"
+ #include "Nodes/CANWindsensorNode.h"
+ #include "Nodes/StateEstimationNode.h"
 #else
  #include "Nodes/CV7Node.h"
  #include "Nodes/HMC6343Node.h"
@@ -21,6 +24,7 @@
 #include "Nodes/XbeeSyncNode.h"
 #include "Nodes/LineFollowNode.h"
 
+
 #if USE_OPENCV_COLOR_DETECTION == 1
 #include "Nodes/obstacledetection/colorDetectionNode.h"
 #endif
@@ -29,6 +33,7 @@
 #include "dbhandler/DBHandler.h"
 #include "HardwareServices/MaestroController/MaestroController.h"
 #include "xBee/Xbee.h"
+
 
 #define DISABLE_LOGGING 0
 
@@ -115,8 +120,10 @@ int main(int argc, char *argv[])
 
 		#if SIMULATION == 1
 		printf("using simulation\n");
-		SimulationNode simulation(messageBus);
-
+		SimulationNode simulation(messageBus, 0.5);
+    CANService canservice;
+    CANWindsensorNode windNode(messageBus, canservice, 500);
+    StateEstimationNode stateEstimationNode(messageBus, .5, .5);
 		#else
 
 		XbeeSyncNode xbee(messageBus, dbHandler);
@@ -139,8 +146,10 @@ int main(int argc, char *argv[])
 
 
 		Node* sailingLogic;
+    Node* lowLevelControllerNodeJanet;
 
-			sailingLogic = new LineFollowNode(messageBus, dbHandler);
+		sailingLogic = new LineFollowNode(messageBus, dbHandler);
+    lowLevelControllerNodeJanet = new LowLevelControllerNodeJanet(messageBus);
 
 		#if SIMULATION == 0
 		int channel = dbHandler.retrieveCellAsInt("sail_servo_config", "1", "channel");
@@ -166,6 +175,9 @@ int main(int argc, char *argv[])
 
 		#if SIMULATION == 1
 		initialiseNode(simulation,"Simulation Node",NodeImportance::CRITICAL);
+    initialiseNode(windNode,"CANWindsensor Node",NodeImportance::CRITICAL);
+    initialiseNode(stateEstimationNode,"StateEstimation Node",NodeImportance::CRITICAL);
+
 		#else
 		initialiseNode(xbee, "Xbee Sync Node", NodeImportance::NOT_CRITICAL);
 		initialiseNode(windSensor, "Wind Sensor", NodeImportance::CRITICAL);
@@ -189,7 +201,8 @@ int main(int argc, char *argv[])
 
 		initialiseNode(vessel, "Vessel State Node", NodeImportance::CRITICAL);
 		initialiseNode(waypoint, "Waypoint Node", NodeImportance::CRITICAL);
-			initialiseNode(*sailingLogic, "LineFollow Node", NodeImportance::CRITICAL);
+		initialiseNode(*sailingLogic, "LineFollow Node", NodeImportance::CRITICAL);
+    initialiseNode(*lowLevelControllerNodeJanet, "LowLevelControllerNodeJanet Node", NodeImportance::CRITICAL);
 
 		// Start active nodes
 		#if SIMULATION == 1
