@@ -134,7 +134,7 @@ int main(int argc, char *argv[])
 
 
 		//HTTPSyncNode httpsync(messageBus, &dbHandler, 0, false);
-		VesselStateNode vessel(messageBus);
+		VesselStateNode vessel(messageBus, 0.4);
 		WaypointMgrNode waypoint(messageBus, dbHandler);
 
 
