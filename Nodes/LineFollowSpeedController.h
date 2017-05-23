@@ -1,19 +1,19 @@
- /****************************************************************************************
- *
- * File:
- * 		LineFollowNode.h
- *
- * Purpose:
- *		This class computes the actuator positions of the boat in order to follow
- *    lines given by the waypoints.
- *
- * Developer Notes: algorithm inspired and modified from Luc Jaulin and
- *    Fabrice Le Bars  "An Experimental Validation of a Robust Controller with the VAIMOS
- *    Autonomous Sailboat" and "Modeling and Control for an Autonomous Sailboat: A
- *    Case Study" from Jon Melin, Kjell Dahl and Matia Waller
- *
- *
- ***************************************************************************************/
+/****************************************************************************************
+*
+* File:
+* 		LineFollowNode.h
+*
+* Purpose:
+*		This class computes the actuator positions of the boat in order to follow
+*    lines given by the waypoints.
+*
+* Developer Notes: algorithm inspired and modified from Luc Jaulin and
+*    Fabrice Le Bars  "An Experimental Validation of a Robust Controller with the VAIMOS
+*    Autonomous Sailboat" and "Modeling and Control for an Autonomous Sailboat: A
+*    Case Study" from Jon Melin, Kjell Dahl and Matia Waller
+*
+*
+***************************************************************************************/
 
 #pragma once
 
@@ -49,16 +49,19 @@ private:
 	int 	m_nextWaypointDeclination;
 	int 	m_nextWaypointRadius;
 
-    int 	m_prevWaypointId;
+	int 	m_prevWaypointId;
 	double 	m_prevWaypointLon;
 	double 	m_prevWaypointLat;
 	int 	m_prevWaypointDeclination;
 	int 	m_prevWaypointRadius;
 
-    bool    m_tack;
-    double  m_maxCommandAngle, m_maxSailAngle, m_minSailAngle;
-    double  m_tackAngle;
-    int     m_tackingDirection;
+	bool    m_tack;
+	double  m_maxCommandAngle, m_maxSailAngle, m_minSailAngle;
+	double  m_tackAngle;
+	int     m_tackingDirection;
+
+	double NORM_RUDDER_COMMAND = 0.5166; // getCommand() take a value between -1 and 1 so we need to normalize the command correspond to 29.6 degree
+	double NORM_SAIL_COMMAND = 0.6958;
 
 	RudderCommand m_rudderCommand;
 	SailCommand m_sailCommand;
@@ -66,20 +69,20 @@ private:
 	std::vector<float> twdBuffer;
 	unsigned int twdBufferMaxSize;
 
-    double calculateAngleOfDesiredTrajectory(VesselStateMsg* msg);
+	double calculateAngleOfDesiredTrajectory(VesselStateMsg* msg);
 	void calculateActuatorPos(VesselStateMsg* msg);
-    void setPrevWaypointData(WaypointDataMsg* waypMsg, VesselStateMsg* vesselMsg);
+	void setPrevWaypointData(WaypointDataMsg* waypMsg, VesselStateMsg* vesselMsg);
 
 	virtual int getHeading(int gpsHeading, int compassHeading, double gpsSpeed, bool mockPosition, bool getHeadingFromCompass);
-  //Calculates a smooth transition between the compass and the gps. Do not call directly, use getHeading()
+	//Calculates a smooth transition between the compass and the gps. Do not call directly, use getHeading()
 	int getMergedHeading(int gpsHeading, int compassHeading, bool increaseCompassWeight);
 	void setupRudderCommand();
 	void setupSailCommand();
-    bool getGoingStarboard();
+	bool getGoingStarboard();
 	void setPrevWaypointToBoatPos(VesselStateMsg* msg);
 
 	/*void manageDatabase(VesselStateMsg* msg, double trueWindDirection, double rudder, double sail, double heading,
-                        double distanceToNextWaypoint, double bearingToNextWaypoint);*/
+	double distanceToNextWaypoint, double bearingToNextWaypoint);*/
 
 	float m_old_diff_v;
 	float m_int_diff_v;
