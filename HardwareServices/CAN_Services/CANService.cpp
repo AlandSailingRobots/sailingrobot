@@ -5,6 +5,7 @@
 #include <chrono>
 #include <thread>
 #include <future>
+#include <stdlib.h>
 
 #define SLEEP_TIME_MS 50
 
@@ -54,8 +55,14 @@ CanMsg CANService::getCANMessage()
 
 std::future<void> CANService::start() 
 {
+  setenv("WIRINGPI_CODES", "1", 0);
   m_Running.store(true);
-  wiringPiSetup();
+  if(!m_WiringPiInit) {
+    if(wiringPiSetup() == -1) {
+      std::cout << "Could not init wiringpi" << std::endl;
+    }
+    m_WiringPiInit = true;
+  }
   int SPISpeed = 1000000;
 
 	//pinMode(MCP2515_INT, INPUT);					//set the interrupt pin to input

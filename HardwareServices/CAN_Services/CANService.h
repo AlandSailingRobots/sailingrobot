@@ -74,4 +74,6 @@ private:
   std::mutex m_QueueMutex;
 
   std::atomic<bool> m_Running;
+
+  bool m_WiringPiInit = false;
 };
