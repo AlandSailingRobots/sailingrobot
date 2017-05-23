@@ -16,8 +16,6 @@
 #include "Messages/GPSDataMsg.h"
 #include "SystemServices/Timer.h"
 
-#define GPS_TIMEOUT_MICRO_SECS		50000000
-
 
 GPSDNode::GPSDNode(MessageBus& msgBus, double loopTime)
 	: ActiveNode(NodeID::GPS, msgBus), m_Initialised(false), m_GpsConnection(0),
@@ -78,7 +76,7 @@ void GPSDNode::GPSThreadFunc(ActiveNode* nodePtr)
 		// Controls how often we pump out messages
 		timer.sleepUntil(node->m_LoopTime);
 
-		if(not node->m_GpsConnection->waiting(GPS_TIMEOUT_MICRO_SECS))
+		if(not node->m_GpsConnection->waiting(node->GPS_TIMEOUT_MICRO_SECS))
 		{
 			Logger::warning("%s GPSD read time out!", __PRETTY_FUNCTION__);
 			continue;
