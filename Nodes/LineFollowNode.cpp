@@ -26,8 +26,7 @@
 #include <cmath>
 
 #define DEFAULT_TWD_BUFFERSIZE 200
-#define NORM_RUDDER_COMMAND 0.5166 // getCommand() take a value between -1 and 1 so we need to normalize the command correspond to 29.6 degree
-#define NORM_SAIL_COMMAND 0.6958
+
 
 
 FILE* file = fopen("./gps.txt", "w");
