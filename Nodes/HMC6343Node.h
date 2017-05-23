@@ -1,22 +1,22 @@
 /****************************************************************************************
- *
- * File:
- * 		HMC6343Node.h
- *
- * Purpose:
- *		The HMC6343 node communicates with a HMC6343 compass and provides CompassDataMsgs
- *		to the message bus.
- *
- * Developer Notes:
- * 		I2C Address
- *
- * 		The I2C address is different from what is mentioned in the datasheet. The
- * 		datasheet mentions it is 0x32, however when accessing the device you need to use
- * 		0x19 for successful communications. The register on the HMC6343 that contains the
- * 		I2C address returns 0x32, the address mentioned in the datasheet.
- *
- *
- ***************************************************************************************/
+*
+* File:
+* 		HMC6343Node.h
+*
+* Purpose:
+*		The HMC6343 node communicates with a HMC6343 compass and provides CompassDataMsgs
+*		to the message bus.
+*
+* Developer Notes:
+* 		I2C Address
+*
+* 		The I2C address is different from what is mentioned in the datasheet. The
+* 		datasheet mentions it is 0x32, however when accessing the device you need to use
+* 		0x19 for successful communications. The register on the HMC6343 that contains the
+* 		I2C address returns 0x32, the address mentioned in the datasheet.
+*
+*
+***************************************************************************************/
 
 #pragma once
 
@@ -34,7 +34,7 @@ enum class CompassOrientation {
 
 class HMC6343Node : public ActiveNode {
 public:
-	HMC6343Node(MessageBus& msgBus, const int headingBufferSize = 10);
+	HMC6343Node(MessageBus& msgBus, const int headingBufferSize = 10, double loopTime = 0.1);
 
 	virtual ~HMC6343Node() { }
 
@@ -47,8 +47,8 @@ public:
 	bool init();
 
 	///----------------------------------------------------------------------------------
- 	/// This function should be used to start the active nodes thread.
- 	///----------------------------------------------------------------------------------
+	/// This function should be used to start the active nodes thread.
+	///----------------------------------------------------------------------------------
 	void start();
 
 	///----------------------------------------------------------------------------------
@@ -76,6 +76,7 @@ protected:
 	static void HMC6343ThreadFunc(ActiveNode* nodePtr);
 
 	I2CController 	m_I2C;
-	bool 			m_Initialised;
+	bool 	m_Initialised;
 	const int		m_HeadingBufferSize;
+	double m_LoopTime;
 };
