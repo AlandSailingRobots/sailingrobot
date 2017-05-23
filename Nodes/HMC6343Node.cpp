@@ -50,10 +50,7 @@
 #define COM_ORIENT_SIDEWAYS 0x73
 #define COM_ORIENT_FLATFRONT 0x74
 
-// HMC6343 Orientations
-#define LEVEL 0 // X = forward, +Z = up (default)
-#define SIDEWAYS 1 // X = forward, +Y = up
-#define FLATFRONT 2 // Z = forward, -X = up
+
 
 
 
