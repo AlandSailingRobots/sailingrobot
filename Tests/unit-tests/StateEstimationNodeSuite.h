@@ -60,35 +60,34 @@ public:
       Logger::DisableLogging();
       logger = new MessageLogger(msgBus());
       stateMessageListener = new StateMessageListener(msgBus());
+      sEstimationNode = new StateEstimationNode(msgBus(), .5, speedLimit);
+      sEstimationNode->start();
+      std::this_thread::sleep_for(std::chrono::milliseconds(2600));
+
       srand (time(NULL));
       thr = new std::thread(runMessageLoop);
     }
-    sEstimationNode = new StateEstimationNode(msgBus(), .5, speedLimit);
     testCount++;
   }
 
   void tearDown()
   {
-    delete sEstimationNode;
     stateMessageListener->resetStateDataReceived();
     logger->clearState();
     if(testCount == STATE_ESTIMATIONODE_TEST_COUNT)
     {
+      delete sEstimationNode;
       delete logger;
       delete stateMessageListener;
     }
   }
 
   void test_StateEstimationNodeInit(){
-    TS_ASSERT(sEstimationNode->init());
+    TS_ASSERT(!logger->stateDataReceived());
   }
 
-  void test_StateEstimationNodeStateMsgReceived(){
-    sEstimationNode->start();
-    std::this_thread::sleep_for(std::chrono::milliseconds(2600));
-    TS_ASSERT(!logger->stateDataReceived());
-    std::this_thread::sleep_for(std::chrono::milliseconds(500));
-    TS_ASSERT(!logger->stateDataReceived());
+  void test_StateEstimationNodeGPSNotOnline(){
+    TS_ASSERT(sEstimationNode->init());
   }
 
   void test_StateMessageListener(){
@@ -99,8 +98,7 @@ public:
     double heading = 10;
     int satCount = 2;
     GPSMode mode = GPSMode::LatLonOk;
-    sEstimationNode->start();
-    std::this_thread::sleep_for(std::chrono::milliseconds(2600));
+
     MessagePtr gpsMsgData = std::make_unique<GPSDataMsg>(false,true,latitude,longitude,unixTime,speed,heading,satCount,
       mode);
       MessagePtr msgPtr = std::move(std::move(gpsMsgData));
@@ -119,8 +117,7 @@ public:
       double headingGPS = 10;
       int satCount = 2;
       GPSMode mode = GPSMode::LatLonOk;
-      sEstimationNode->start();
-      std::this_thread::sleep_for(std::chrono::milliseconds(2600));
+
       MessagePtr gpsMsgData = std::make_unique<GPSDataMsg>(false,true,latitude,longitude,unixTime,speed,headingGPS,satCount,
         mode);
         MessagePtr msgPtrGPS = std::move(std::move(gpsMsgData));
@@ -157,8 +154,6 @@ public:
         int satCount = 2;
         GPSMode mode = GPSMode::LatLonOk;
 
-        sEstimationNode->start();
-        std::this_thread::sleep_for(std::chrono::milliseconds(2600));
         MessagePtr gpsMsgData = std::make_unique<GPSDataMsg>(false,true,latitude,longitude,unixTime,speed,heading,satCount,
           mode);
           MessagePtr msgPtr = std::move(std::move(gpsMsgData));
@@ -173,9 +168,7 @@ public:
           TS_ASSERT(stateMessageListener->getVesselCourse() == heading);
         }
 
-        void test_SEstStateMsgSpdAndDeclZero(){
-          sEstimationNode->start();
-          std::this_thread::sleep_for(std::chrono::milliseconds(2600));
+        void test_StateEstStateMsgSpeedAndDeclZero(){
           int nextDeclination = 0;
           MessagePtr wayPointMsgData = std::make_unique<WaypointDataMsg>(2, 19.81, 60.2, nextDeclination, 6, 15,  1, 19.82, 60.1, 6, 15);
           MessagePtr msgPtrWayPoint = std::move(std::move(wayPointMsgData));
@@ -206,10 +199,7 @@ public:
             TS_ASSERT_DELTA(stateMessageListener->getVesselCourse(), 0, 1e-7);
           }
 
-          void test_SEstStateMsgSpdAndDeclOverZero(){
-            sEstimationNode->start();
-            std::this_thread::sleep_for(std::chrono::milliseconds(2600));
-
+          void test_StateEstStateMsgSpeedAndDeclOverZero(){
             double latitude = 60.09726;
             double longitude = 19.93481;
             double unixTime = 1;
@@ -231,8 +221,6 @@ public:
               sEstimationNode->processMessage(msgWayPoint);
               std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
-              TS_ASSERT_DELTA(stateMessageListener->getVesselheading(), 0, 1e-7);
-
               int heading = 100;
               MessagePtr compassMsgData = std::make_unique<CompassDataMsg>(heading, 80, 60);
               MessagePtr msgPtr = std::move(std::move(compassMsgData));
@@ -245,10 +233,7 @@ public:
               TS_ASSERT(stateMessageListener->getVesselCourse() > headingGPS);
             }
 
-            void test_SEstStateMsgSpdLessThanZero(){
-              sEstimationNode->start();
-              std::this_thread::sleep_for(std::chrono::milliseconds(2600));
-
+            void test_StateEstStateMsgSpeedLessThanZero(){
               double latitude = 60.09726;
               double longitude = 19.93481;
               double unixTime = 1;
@@ -268,8 +253,6 @@ public:
                 Message* msgWayPoint = msgPtrWayPoint.get();
                 sEstimationNode->processMessage(msgWayPoint);
                 std::this_thread::sleep_for(std::chrono::milliseconds(500));
-
-                TS_ASSERT_DELTA(stateMessageListener->getVesselheading(), 0, 1e-7);
 
                 int heading = 100;
                 MessagePtr compassMsgData = std::make_unique<CompassDataMsg>(heading, 80, 60);

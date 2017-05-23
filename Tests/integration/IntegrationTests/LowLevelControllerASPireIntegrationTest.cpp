@@ -20,8 +20,7 @@ int main() {
     std::thread t (msgBusLoop);
     t.detach();
 
-    NavigationControlMsg::NavigationState state =
-                    NavigationControlMsg::NavigationState::sailToWaypoint;
+    NavigationState state = NavigationState::sailToWaypoint;
     msgBus.sendMessage(std::make_unique<NavigationControlMsg>(1.2, 2.3, false, state));
     msgBus.sendMessage(std::make_unique<StateMessage>(1,2,3,4,5));
     msgBus.sendMessage(std::make_unique<WindStateMsg>(6,7,8,9));
@@ -39,6 +38,6 @@ int main() {
 
     int newAngle = (data2 << 8 | data1);
 
-    std::cout << newAngle / ratio << std::endl; 
+    std::cout << newAngle / ratio << std::endl;
 
 }
