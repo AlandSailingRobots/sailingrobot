@@ -8,7 +8,6 @@
 #include <stdlib.h>
 
 #define SLEEP_TIME_MS 50
-#define WIRINGPI_CODES 1
 
 bool CANService::registerForReading(CANPGNReceiver& receiver, uint32_t PGN)
 {
@@ -56,11 +55,9 @@ CanMsg CANService::getCANMessage()
 
 std::future<void> CANService::start() 
 {
-  setenv("WIRINGPI_CODES", "1", 0);
+  
   m_Running.store(true);
-  if(wiringPiSetup() == -1) {
-    std::cout << "Could not setup wiring pi" << std::endl;
-  }
+  wiringPiSetup();
   int SPISpeed = 1000000;
 
 	//pinMode(MCP2515_INT, INPUT);					//set the interrupt pin to input
