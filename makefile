@@ -91,7 +91,7 @@ export LINE_FOLLOW_SRC      = Nodes/LineFollowNode.cpp waypointrouting/RudderCom
 export NETWORK_SRC          = Network/TCPServer.cpp Nodes/VesselStateNode.cpp Nodes/StateEstimationNode.cpp
 
 export HARDWARE_NODES_SRC   = Nodes/CV7Node.cpp Nodes/HMC6343Node.cpp Nodes/GPSDNode.cpp \
-                            Nodes/ActuatorNode.cpp Nodes/ArduinoNode.cpp
+                            Nodes/ActuatorNode.cpp Nodes/ArduinoNode.cpp Nodes/CANFeedbackReceiver.cpp
 
 export SYSTEM_SERVICES_SRC  = SystemServices/Logger.cpp SystemServices/SysClock.cpp SystemServices/Timer.cpp \
                             dbhandler/DBHandler.cpp dbhandler/DBLogger.cpp SystemServices/WingsailControl.cpp \
