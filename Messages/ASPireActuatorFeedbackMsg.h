@@ -8,14 +8,14 @@ class ASPireActuatorFeedbackMsg : public Message {
 public:
     ASPireActuatorFeedbackMsg(NodeID sourceID, NodeID destinationID, double wingsailFeedback,
                                 double rudderFeedback, double windvaneAngle, double windvaneActuatorPos)
-    : Message(MessageType::ActuatorControlASPire, sourceID, destinationID),
+    : Message(MessageType::ASPireActuatorFeedback, sourceID, destinationID),
     m_WingsailFeedback(wingsailFeedback), m_RudderFeedback(rudderFeedback),
     m_WindvaneSelfSteeringAngle(windvaneAngle), m_WindvaneActuatorPosition(windvaneActuatorPos)
     {  }
 
     ASPireActuatorFeedbackMsg( double wingsailFeedback, double rudderFeedback, 
                                    double windvaneAngle, double windvaneActuatorPos)
-    : Message(MessageType::ActuatorControlASPire, NodeID::None, NodeID::None),
+    : Message(MessageType::ASPireActuatorFeedback, NodeID::None, NodeID::None),
     m_WingsailFeedback(wingsailFeedback), m_RudderFeedback(rudderFeedback),
     m_WindvaneSelfSteeringAngle(windvaneAngle), m_WindvaneActuatorPosition(windvaneActuatorPos)
     {  }

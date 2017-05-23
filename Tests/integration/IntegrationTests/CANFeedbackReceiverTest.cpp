@@ -22,6 +22,9 @@ int main() {
     CANFeedbackReceiver receiver(msgBus, canService);
     MessageVerifier verifier(msgBus);
     std::thread t1(runMessageLoop);
+    t1.detach();
+    auto f = canService.start();
+    canService.SetLoopBackMode();
 
     float ratio = 65535 / 60;
     uint16_t rudderFeedback = 21 * ratio;
@@ -46,4 +49,8 @@ int main() {
     
     std::this_thread::sleep_for(std::chrono::milliseconds(750));
     std::cout << verifier.verifyActuatorFeedbackMsg(&otherMsg) << std::endl;
+
+    canService.stop();
+    f.get();
+
 }
