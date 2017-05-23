@@ -146,4 +146,9 @@ private:
   int m_count_sleep;
   double m_LoopTime;
 
+  const int COUNT_COMPASSDATA_MSG = 1;
+  const int COUNT_GPSDATA_MSG = 1;
+  const int COUNT_WINDDATA_MSG = 1;
+  const int COUNT_ARDUINO_MSG = 1;
+
 };
