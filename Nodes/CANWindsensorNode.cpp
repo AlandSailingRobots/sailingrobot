@@ -19,8 +19,6 @@
 #include <chrono>
 #include <thread>
 
-#define DATA_OUT_OF_RANGE		-2000
-
 CANWindsensorNode::CANWindsensorNode(MessageBus& msgBus, CANService& can_service, int time_filter_ms)
 : CANPGNReceiver(can_service, {130306, 130311}), ActiveNode(NodeID::WindSensor, msgBus), m_TimeBetweenMsgs(time_filter_ms)
 {
@@ -152,7 +150,7 @@ void CANWindsensorNode::parsePGN130306(N2kMsg &NMsg, uint8_t &SID, float &WindSp
             timer.sleepUntil(node->m_TimeBetweenMsgs*1.0f / 1000);
             node->m_lock.lock();
 
-            if( node->m_WindDir == DATA_OUT_OF_RANGE &&  node->m_WindTemperature == DATA_OUT_OF_RANGE && node->m_WindSpeed == DATA_OUT_OF_RANGE){
+            if( node->m_WindDir == node->DATA_OUT_OF_RANGE &&  node->m_WindTemperature == node->DATA_OUT_OF_RANGE && node->m_WindSpeed == node->DATA_OUT_OF_RANGE){
               node->m_lock.unlock();
               continue;
             }
