@@ -62,4 +62,6 @@ private:
 	int m_currentDay;
 	double m_LoopTime;
 
+	const int GPS_TIMEOUT_MICRO_SECS = 50000000;
+
 };
