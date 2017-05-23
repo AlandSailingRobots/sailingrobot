@@ -27,7 +27,6 @@
 
 #define DEFAULT_I2C_ADDRESS_PRESSURE 0x07
 
-#define ARDUINO_SENSOR_SLEEP_MS	100
 
 
 ArduinoNodeForWindSensor::ArduinoNodeForWindSensor(MessageBus& msgBus, double loopTime)
