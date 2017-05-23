@@ -94,6 +94,9 @@ private:
 	int16_t radius;
   double m_LoopTime;
 
+  const int VESSEL_STATE_INITIAL_SLEEP = 2000;
+
+
 
 	TCPServer server;
 };
