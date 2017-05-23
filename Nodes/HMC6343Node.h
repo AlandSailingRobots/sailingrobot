@@ -79,4 +79,9 @@ protected:
 	bool 	m_Initialised;
 	const int		m_HeadingBufferSize;
 	double m_LoopTime;
+
+	// HMC6343 Orientations
+	const int LEVEL = 0; // X = forward, +Z = up (default)
+	const int SIDEWAYS = 1; // X = forward, +Y = up
+	const int FLATFRONT = 2; // Z = forward, -X = up
 };
