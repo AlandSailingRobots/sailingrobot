@@ -19,6 +19,9 @@ const int RUDDER_MAX_FEEDBACK = 680;
 const int RUDDER_MAESTRO_CHANNEL = 1;
 const int WINDSAIL_MAESTRO_CHANNEL = 2;
 
+const int RUDDER_FEEDBACK_PIN = A4;
+const int WINGSAIL_FEEDBACK_PIN = A5;
+
 /* On boards with a hardware serial port available for use, use
 that port to communicate with the Maestro. For other boards,
 create a SoftwareSerial object using pin 10 to receive (RX) and
@@ -45,8 +48,8 @@ double maestroCommandRatio = (MAESTRO_MAX_TARGET - MAESTRO_MIN_TARGET) / MAX_RUD
 void setup()
 {
   
-  pinMode(A4, INPUT);
-  pinMode(A5, INPUT);
+  pinMode(RUDDER_FEEDBACK_PIN, INPUT);
+  pinMode(WINGSAIL_FEEDBACK_PIN, INPUT);
   
   // Set the serial baud rate.
   maestroSerial.begin(9600);
@@ -57,8 +60,7 @@ void setup()
   }
  
   Serial.println("SETUP COMPLETE");  
-  
-  // INT8U sendMsgBuf(INT32U id, INT8U ext, INT8U len, const INT8U *buf, bool wait_sent=true);   /* send buf  */
+ 
 }
 
 void loop()
@@ -69,43 +71,65 @@ void loop()
     CanMsg msg;
     Canbus.GetMessage(&msg);
     if(msg.id == 700) {
-      uint16_t rawAngle = (msg.data[1]<<8 | msg.data[0]);
-      double actualAngle = rawAngle / angleratio;
-      Serial.print("Received rudder angle: "); Serial.println(actualAngle);
-      float target = (actualAngle * (MAESTRO_MAX_TARGET - MAESTRO_MIN_TARGET)/60)
-                      + MAESTRO_MIN_TARGET;
-
-      Serial.print("Servo target : "); Serial.println(target*4);      
-      maestro.setTarget(RUDDER_MAESTRO_CHANNEL, target*4);
-      Serial.print("Servo getPos : "); Serial.println(maestro.getPosition(RUDDER_MAESTRO_CHANNEL));
-
-      rawAngle = (msg.data[3]<<8 | msg.data[2]);
-      actualAngle = rawAngle / angleratio;
-      Serial.print("Received windsail angle: "); Serial.println(actualAngle);
-      target = (actualAngle * (MAESTRO_MAX_TARGET - MAESTRO_MIN_TARGET)/60)
-                      + MAESTRO_MIN_TARGET;
-
-      maestro.setTarget(WINDSAIL_MAESTRO_CHANNEL, target*4);
-
+      moveRudder(msg);
+      moveWingsail(msg);
       delay(5000);
+      CanMsg feedbackMsg;
+      feedbackMsg.id = 701;
+      feedbackMsg.header.ide = 0;
+      feedbackMsg.header.length = 7;
+      float rudderAngle = getRudderFeedback();
+      uint16_t angle16 = (uint16_t) mapInterval(rudderAngle, 0, 60, 0, 65535);
+      feedbackMsg.data[0] = (angle16 & 0xff);
+      feedbackMsg.data[1] = (angle16 >> 8);
 
+      float wingsailAngle = getWingsailFeedback();
+      angle16 = (uint16_t) mapInterval(wingsailAngle, 0, 60, 0, 65535);
+      feedbackMsg.data[2] = (angle16 & 0xff);
+      feedbackMsg.data[3] = (angle16 >> 8);
 
-      double rudderFeedback = analogRead(A4);
-      rudderFeedback = (rudderFeedback * (MAESTRO_MAX_TARGET - MAESTRO_MIN_TARGET)/4095)
-                          + MAESTRO_MIN_TARGET;
+      feedbackMsg.data[4] = 0;
+      feedbackMsg.data[5] = 0;
+      feedbackMsg.data[6] = 0;
 
-      rudderFeedback = (rudderFeedback - MAESTRO_MIN_TARGET)
-                        * (60)/(MAESTRO_MAX_TARGET-MAESTRO_MIN_TARGET);              
-      Serial.print("Calculated rudder angle from feedback: "); Serial.println(rudderFeedback);
-      Serial.print("Rudder feedback: "); Serial.println(analogRead(A4));
-      //Serial.print("Wingsail feedback: "); Serial.println(analogRead(A5));
+      Canbus.SendMessage(&feedbackMsg);
+      
       maestro.getErrors();
     }
   }
 }
 
-// Set a target as percentage to a given channel on the Maestro
-void moveServo(int channel, float target) {
-  float input =  target * 40.96;
-  maestro.setTarget(channel, input);
+void moveRudder(CanMsg& msg) {
+  uint16_t rawAngle = (msg.data[1]<<8 | msg.data[0]);
+  double actualAngle = rawAngle / angleratio;
+  Serial.print("Received rudder angle: "); Serial.println(actualAngle);
+  float target = mapInterval(actualAngle, 0, 60, 
+                      MAESTRO_MIN_TARGET, MAESTRO_MAX_TARGET);
+
+  maestro.setTarget(RUDDER_MAESTRO_CHANNEL, target*4);
 }
+
+void moveWingsail(CanMsg& msg) {
+  uint16_t rawAngle = (msg.data[3]<<8 | msg.data[2]);
+  double actualAngle = rawAngle / angleratio;
+  Serial.print("Received windsail angle: "); Serial.println(actualAngle);
+
+  float target = mapInterval(actualAngle, 0, 60,
+                  MAESTRO_MIN_TARGET, MAESTRO_MAX_TARGET);
+
+  maestro.setTarget(WINDSAIL_MAESTRO_CHANNEL, target*4);
+}
+
+float getRudderFeedback() {
+  return mapInterval(analogRead(RUDDER_FEEDBACK_PIN), RUDDER_MIN_FEEDBACK, RUDDER_MAX_FEEDBACK, 0, 60);
+}
+
+float getWingsailFeedback() {
+  // Obviously, these values should not actually be the same as for the rudder.
+  return mapInterval(analogRead(WINGSAIL_FEEDBACK_PIN), RUDDER_MIN_FEEDBACK, RUDDER_MAX_FEEDBACK, 0, 60);  
+}
+
+float mapInterval(float val, float fromMin, float fromMax, float toMin, float toMax) {
+  return (val - fromMin) / (fromMax - fromMin) * (toMax - toMin) + toMin;
+}
+
