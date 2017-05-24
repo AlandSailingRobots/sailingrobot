@@ -119,7 +119,6 @@ int main() {
 
     // Comment out this line if not running on the pi
     // otherwise program will crash.
-
     auto future = canService.start();
 
     SensorDataReceiver sensorReceiver(msgBus, 2000);
