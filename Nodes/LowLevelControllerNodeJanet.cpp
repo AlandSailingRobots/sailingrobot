@@ -8,9 +8,9 @@
 
 
 LowLevelControllerNodeJanet::LowLevelControllerNodeJanet(MessageBus& msgBus,
-  float maxRudderAngle,  float maxCourseAngleDiff) :
+  float maxRudderAngle,  float maxCourseAngleDiff, DBHandler& db):
   Node(NodeID::LowLevelControllerNodeJanet, msgBus),m_MaxRudderAngle(maxRudderAngle),
-  m_CourseRegulator(maxRudderAngle, maxCourseAngleDiff)
+  m_CourseRegulator(maxRudderAngle, maxCourseAngleDiff), m_db(db) 
   {
     msgBus.registerNode(*this, MessageType::NavigationControl);
     msgBus.registerNode(*this, MessageType::StateMessage);
@@ -19,7 +19,10 @@ LowLevelControllerNodeJanet::LowLevelControllerNodeJanet(MessageBus& msgBus,
 
   LowLevelControllerNodeJanet::~LowLevelControllerNodeJanet() {}
 
-  bool LowLevelControllerNodeJanet::init() { return true; }
+  bool LowLevelControllerNodeJanet::init() {
+    setupSailCommand();
+    return true;
+  }
 
   void LowLevelControllerNodeJanet::processMessage(const Message* message){
     MessageType type = message->messageType();
@@ -58,4 +61,9 @@ LowLevelControllerNodeJanet::LowLevelControllerNodeJanet(MessageBus& msgBus,
 
     MessagePtr actuatorMsg = std::make_unique<ActuatorPositionMsg>(normalizedRudderAngle, sailCommand);
     m_MsgBus.sendMessage(std::move(actuatorMsg));
+  }
+
+  void LowLevelControllerNodeJanet::setupSailCommand() {
+    m_SailCommand.setCommandValues( m_db.retrieveCellAsInt("sail_command_config", "1", "close_reach_command"),
+	        m_db.retrieveCellAsInt("sail_command_config", "1", "run_command"));
   }
