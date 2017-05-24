@@ -1,11 +1,13 @@
 #include "HardwareServices/CAN_Services/CANService.h"
+#include "HardwareServices/CAN_Services/N2kMsg.h"
+#include "SystemServices/Timer.h"
 #include "Messages/ASPireActuatorFeedbackMsg.h"
 #include "Messages/WindDataMsg.h"
-#include "SystemServices/Timer.h"
-#include "Nodes/ActiveNode.h"
 #include "Messages/MessageTypes.h"
 #include "MessageBus/MessageBus.h"
+#include "Nodes/ActiveNode.h"
 #include "Nodes/NodeIDs.h"
+#include "Nodes/CANWindsensorNode.h"
 
 #include <iostream>
 #include <thread>
@@ -66,26 +68,62 @@ private:
 };
 
 
-
-
+CANService canService;
 MessageBus msgBus;
 
 void messageLoop() {
     msgBus.run();
 }
 
+void sendActuatorCommands() {
+    CanMsg Cmsg;
+    Cmsg.id = 700;
+    Cmsg.header.ide = 0;
+    Cmsg.header.length = 8;
+
+    std::string rudderAngle;
+    std::string wingsailAngle;
+    uint16_t rudderAngle16;
+    uint16_t wingsailAngle16;
+    float ratio = 65535 / 60;
+
+    do {
+        std::cout << "Enter rudder angle (-30 to 30)" << std::endl;
+        std::getline(std::cin, rudderAngle);
+        rudderAngle16 = stoi(rudderAngle);
+    } while(rudderAngle16 < -30 || rudderAngle16 > 30);
+
+    do {
+        std::cout << "Enter wingsil angle (-30 to 30)" << std::endl;
+        std::getline(std::cin, wingsailAngle);
+        wingsailAngle16 = stoi(wingsailAngle);
+    } while(wingsailAngle16 < -30 || wingsailAngle16 > 30);
+
+    rudderAngle16 += 30;
+    wingsailAngle16 += 30;
+    rudderAngle16 *= ratio;
+    wingsailAngle16 *= ratio;
+
+    Cmsg.data[0] = rudderAngle16 & 0xff;
+    Cmsg.data[1] = rudderAngle16 >> 8;
+    Cmsg.data[2] = wingsailAngle16 & 0xff;
+    Cmsg.data[3] = wingsailAngle16 >> 8;
+
+    // More data to be added, windvane self steering
+
+    canService.sendCANMessage(Cmsg);
+
+}
+
 int main() {
-    // CANService canService;
+
+    canService.start();
+
     SensorDataReceiver sensorReceiver(msgBus, 2000);
+    CANWindsensorNode windSensor(msgBus, canService, 500);
+
     std::thread thr(messageLoop);
-   // sensorReceiver.start();
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
-
-    MessagePtr windData = std::make_unique<WindDataMsg>(1,2,3);
-    MessagePtr feedbackData = std::make_unique<ASPireActuatorFeedbackMsg>(20,30,15,3);
-
-    msgBus.sendMessage(std::move(windData));
-    msgBus.sendMessage(std::move(feedbackData));
 
     std::string command;
     std::string lastcommand;
@@ -102,13 +140,15 @@ int main() {
             sensorReceiver.printSensorData();
 
         } else if(command == "s") {
-            // sendActuatorCommands();
+             sendActuatorCommands();
         } else if(command.empty()) {
+
+        // This is John's idea, so it's easier to print out
+        // sensor data multiple times.
           if(lastcommand == "p") {
                 sensorReceiver.printSensorData();
             }
         }
-
     } while(command != "q");
 
 
