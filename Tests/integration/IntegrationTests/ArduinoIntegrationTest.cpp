@@ -121,7 +121,8 @@ int main() {
 
     SensorDataReceiver sensorReceiver(msgBus, 2000);
     CANWindsensorNode windSensor(msgBus, canService, 500);
-
+    windSensor.start();
+    
     std::thread thr(messageLoop);
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
