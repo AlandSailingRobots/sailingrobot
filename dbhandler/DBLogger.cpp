@@ -52,7 +52,8 @@ void DBLogger::startWorkerThread()
 	m_thread = new std::thread(workerThread, this);
 }
 
-void DBLogger::log(const WindStateMsg* msg, double rudder, double sail, int sailServoPosition, int rudderServoPosition,
+// const WindStateMsg* msg - this message isn't being used at the moment
+void DBLogger::log(double rudder, double sail, int sailServoPosition, int rudderServoPosition,
 		double distanceToWaypoint, double bearingToWaypoint, double courseToSteer, bool tack, bool goingStarboard,
 		int waypointId, double twd, bool routeStarted,std::string timestamp_str)
 {
@@ -77,7 +78,7 @@ void DBLogger::log(const WindStateMsg* msg, double rudder, double sail, int sail
 	item.m_windSpeed = setValue<float>(msg->windSpeed());
 	item.m_windTemp = setValue<float>(msg->windTemp()); if(item.m_windTemp == -1) item.m_windTemp = -1000;
 	item.m_arduinoPressure = msg->arduinoPressure();
-	item.m_arduinoRudder = msg->arduinoPressure();
+	item.m_arduinoRudder = msg->arduinoRudder();
 	item.m_arduinoSheet = msg->arduinoSheet();
 	item.m_arduinoBattery = msg->arduinoBattery();*/
 	item.m_rudder = setValue<double>(rudder);

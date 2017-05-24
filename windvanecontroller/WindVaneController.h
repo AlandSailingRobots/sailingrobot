@@ -1,8 +1,6 @@
 #ifndef __WINDVANECONTROLLER_H__
 #define __WINDVANECONTROLLER_H__
 
-#include "waypointrouting/WaypointRouting.h"
-
 class WindVaneController {
 
 public:

@@ -47,11 +47,11 @@ class DBLoggerNodeSuite : public CxxTest::TestSuite {
         DBLogger dbLogger(5, dbHandler);
         dbLogger.startWorkerThread();
         TS_ASSERT(true);
-        dbLogger.log(NULL, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, true, "hejhej");
-        dbLogger.log(NULL, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, true, "hejhej2");
-        dbLogger.log(NULL, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, true, "hejhej3");
-        dbLogger.log(NULL, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, true, "hejhej4");
-        dbLogger.log(NULL, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, true, "hejhej5");
+        dbLogger.log(1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, true, "hejhej");
+        dbLogger.log(1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, true, "hejhej2");
+        dbLogger.log(1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, true, "hejhej3");
+        dbLogger.log(1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, true, "hejhej4");
+        dbLogger.log(1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, true, "hejhej5");
         std::this_thread::sleep_for(std::chrono::seconds(DBLOGGER_WAIT_TIME));
     }
 };

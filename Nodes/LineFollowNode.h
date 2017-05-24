@@ -57,7 +57,7 @@ private:
 
 	bool 	m_externalControlActive;
 
-	bool    m_tack;
+	bool    m_tack = false;
 	double  m_maxCommandAngle, m_maxSailAngle, m_minSailAngle;
 	double  m_tackAngle;
 	int     m_tackingDirection;
@@ -80,7 +80,7 @@ private:
 	unsigned int twdBufferMaxSize;
 
 	double calculateAngleOfDesiredTrajectory();
-	void calculateActuatorPos(const WindStateMsg* msg);
+	void calculateActuatorPos();
 	void setPrevWaypointData(WaypointDataMsg* waypMsg);
 
 	virtual int getHeading(int gpsHeading, int compassHeading, double gpsSpeed, bool mockPosition, bool getHeadingFromCompass);
