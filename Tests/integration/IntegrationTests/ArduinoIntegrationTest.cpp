@@ -91,16 +91,17 @@ void sendActuatorCommands() {
         std::cout << "Enter rudder angle (-30 to 30)" << std::endl;
         std::getline(std::cin, rudderAngle);
         rudderAngle16 = stoi(rudderAngle);
-    } while(rudderAngle16 < -30 || rudderAngle16 > 30);
+        rudderAngle16 += 30;
+    } while(rudderAngle16 > 60);
 
     do {
         std::cout << "Enter wingsil angle (-30 to 30)" << std::endl;
         std::getline(std::cin, wingsailAngle);
-        wingsailAngle16 = stoi(wingsailAngle);
-    } while(wingsailAngle16 < -30 || wingsailAngle16 > 30);
+        wingsailAngle16 = stoi(rudderAngle);
+        wingsailAngle16 += 30;
+    } while(wingsailAngle16 > 60);
 
-    rudderAngle16 += 30;
-    wingsailAngle16 += 30;
+    
     rudderAngle16 *= ratio;
     wingsailAngle16 *= ratio;
 
