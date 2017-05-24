@@ -101,8 +101,8 @@ void sendActuatorCommands() {
             wingsailAngle16 += 30;
         } while(wingsailAngle16 > 60);
     } catch(std::invalid_argument ex) {
-        std::cout << "Integers only." << std::endl;
-        std::cout << ex.what() << std::endl;
+        std::cout << std::endl << "Actuator commands only works with integers." << std::endl << std::endl;
+//        std::cout << ex.what() << std::endl;
     }
     
 
