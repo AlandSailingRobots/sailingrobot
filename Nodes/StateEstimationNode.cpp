@@ -24,8 +24,6 @@
 #include "Math/Utility.h"
 #include "SystemServices/Timer.h"
 
-#define STATE_INITIAL_SLEEP 2000
-
 StateEstimationNode::StateEstimationNode(MessageBus& msgBus, double loopTime, double speedLimit): ActiveNode(NodeID::StateEstimation, msgBus),
 m_VesselHeading(0), m_VesselLat(0), m_VesselLon(0), m_VesselSpeed(0), m_VesselCourse(0), m_LoopTime(loopTime), m_Declination(0),
 m_SpeedLimit(speedLimit), m_GpsOnline(false)
@@ -112,8 +110,8 @@ void StateEstimationNode::StateEstimationNodeThreadFunc(ActiveNode* nodePtr)
   StateEstimationNode* node = dynamic_cast<StateEstimationNode*> (nodePtr);
 
   // An initial sleep, its purpose is to ensure that most if not all the sensor data arrives
-  // at the start before we send out the vessel state message.
-  std::this_thread::sleep_for(std::chrono::milliseconds(STATE_INITIAL_SLEEP));
+  // at the start before we send out the state message.
+  std::this_thread::sleep_for(std::chrono::milliseconds(node->STATE_INITIAL_SLEEP));
 
   Timer timer;
   timer.start();

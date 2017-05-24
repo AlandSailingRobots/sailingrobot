@@ -1,15 +1,15 @@
 /****************************************************************************************
- *
- * File:
- * 		ArduinoNodeForWindSensor.h
- *
- * Purpose:
- *		The Arduino node communicates with the arduino. Sends data about the wind direction.
- *
- * Developer Notes:
- *
- *
- ***************************************************************************************/
+*
+* File:
+* 		ArduinoNodeForWindSensor.h
+*
+* Purpose:
+*		The Arduino node communicates with the arduino. Sends data about the wind direction.
+*
+* Developer Notes:
+*
+*
+***************************************************************************************/
 
 #pragma once
 
@@ -21,7 +21,7 @@
 
 class ArduinoNodeForWindSensor : public ActiveNode {
 public:
-	ArduinoNodeForWindSensor(MessageBus& msgBus);
+	ArduinoNodeForWindSensor(MessageBus& msgBus, double loopTime);
 
 	///----------------------------------------------------------------------------------
 	/// Attempts to connect to the Arduino.
@@ -29,8 +29,8 @@ public:
 	bool init();
 
 	///----------------------------------------------------------------------------------
- 	/// This function should be used to start the active nodes thread.
- 	///----------------------------------------------------------------------------------
+	/// This function should be used to start the active nodes thread.
+	///----------------------------------------------------------------------------------
 	void start();
 
 	void processMessage(const Message* msg);
@@ -40,6 +40,8 @@ private:
 	static void ArduinoThreadFunc(ActiveNode* nodePtr);
 
 	I2CController 	m_I2C;
-	bool 			m_Initialised;
-    float             m_windDirection;
+	bool 	 m_Initialised;
+	float  m_windDirection;
+	double m_LoopTime;
+
 };

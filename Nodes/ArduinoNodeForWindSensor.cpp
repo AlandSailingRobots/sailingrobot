@@ -1,20 +1,22 @@
 /****************************************************************************************
- *
- * File:
- * 		ArduinoNodeForWindSensor.cpp
- *
- * Purpose:
- *		The Arduino node communicates with the arduino. Sends data about the pressure, rudder, sheet and battery.
- *
- *
- * Developer Notes:
- *
- *
- ***************************************************************************************/
+*
+* File:
+* 		ArduinoNodeForWindSensor.cpp
+*
+* Purpose:
+*		The Arduino node communicates with the arduino. Sends data about the pressure, rudder, sheet and battery.
+*
+*
+* Developer Notes:
+*
+*
+***************************************************************************************/
 
 #include "ArduinoNodeForWindSensor.h"
 #include "Messages/WindDataMsg.h"
 #include "SystemServices/Logger.h"
+#include "SystemServices/Timer.h"
+
 
 // For std::this_thread
 #include <chrono>
@@ -25,11 +27,10 @@
 
 #define DEFAULT_I2C_ADDRESS_PRESSURE 0x07
 
-#define ARDUINO_SENSOR_SLEEP_MS	100
 
 
-ArduinoNodeForWindSensor::ArduinoNodeForWindSensor(MessageBus& msgBus)
-: ActiveNode(NodeID::Arduino, msgBus), m_Initialised(false)
+ArduinoNodeForWindSensor::ArduinoNodeForWindSensor(MessageBus& msgBus, double loopTime)
+: ActiveNode(NodeID::Arduino, msgBus), m_Initialised(false), m_LoopTime(loopTime)
 {
 
 }
@@ -38,12 +39,12 @@ bool ArduinoNodeForWindSensor::init()
 {
 	m_Initialised = false;
 
-    if(m_I2C.init(DEFAULT_I2C_ADDRESS_PRESSURE))
+	if(m_I2C.init(DEFAULT_I2C_ADDRESS_PRESSURE))
 	{
 		m_I2C.beginTransmission();
 
-        uint8_t block[BLOCK_READ_SIZE];
-        m_I2C.readBlock(block, BLOCK_READ_SIZE);
+		uint8_t block[BLOCK_READ_SIZE];
+		m_I2C.readBlock(block, BLOCK_READ_SIZE);
 		uint8_t deviceID = block[BLOCK_I2C_ADDRESS_LOC];
 
 		m_I2C.endTransmission();
@@ -85,28 +86,30 @@ void ArduinoNodeForWindSensor::processMessage(const Message* msg)
 
 void ArduinoNodeForWindSensor::ArduinoThreadFunc(ActiveNode* nodePtr)
 {
-    ArduinoNodeForWindSensor* node = dynamic_cast<ArduinoNodeForWindSensor*> (nodePtr);
+	ArduinoNodeForWindSensor* node = dynamic_cast<ArduinoNodeForWindSensor*> (nodePtr);
 
-    Logger::info("Arduino thread started");
+	Logger::info("Arduino thread started");
 
-    while(true)
-    {
-        std::this_thread::sleep_for(std::chrono::milliseconds(ARDUINO_SENSOR_SLEEP_MS));
+	Timer timer;
+	timer.start();
+	while(true)
+	{
+		timer.sleepUntil(node->m_LoopTime);
+		uint8_t block[BLOCK_READ_SIZE],remainder,multiple;
+		//readValues(block)
 
-        uint8_t block[BLOCK_READ_SIZE],remainder,multiple;
-        //readValues(block)
+		node->m_I2C.beginTransmission();
+		node->m_I2C.readBlock(block, BLOCK_READ_SIZE);
+		node->m_I2C.endTransmission();
 
-        node->m_I2C.beginTransmission();
-            node->m_I2C.readBlock(block, BLOCK_READ_SIZE);
-        node->m_I2C.endTransmission();
-
-        remainder = (uint8_t)block[0];
-        multiple = (uint8_t)block[1];
-        node->m_windDirection = (remainder+multiple*255)*(360/1362.0);
-	if(node->m_windDirection > 360){
-		node->m_windDirection=360;
+		remainder = (uint8_t)block[0];
+		multiple = (uint8_t)block[1];
+		node->m_windDirection = (remainder+multiple*255)*(360/1362.0);
+		if(node->m_windDirection > 360){
+			node->m_windDirection=360;
+		}
+		MessagePtr msg = std::make_unique<WindDataMsg>(node->m_windDirection, 0, 0);
+		node->m_MsgBus.sendMessage(std::move(msg));
+		timer.reset();
 	}
-        MessagePtr msg = std::make_unique<WindDataMsg>(node->m_windDirection, 0, 0);
-        node->m_MsgBus.sendMessage(std::move(msg));
-    }
 }

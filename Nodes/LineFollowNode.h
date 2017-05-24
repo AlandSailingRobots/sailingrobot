@@ -73,6 +73,9 @@ private:
 	double m_apparentWindSpeed;
 	double m_apparentWindDir;
 
+	const double NORM_RUDDER_COMMAND = 0.5166; // getCommand() take a value between -1 and 1 so we need to normalize the command correspond to 29.6 degree
+	const double NORM_SAIL_COMMAND = 0.6958;
+
 	RudderCommand m_rudderCommand;
 	SailCommand m_sailCommand;
 

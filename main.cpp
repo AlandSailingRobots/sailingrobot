@@ -123,8 +123,10 @@ int main(int argc, char *argv[])
 		CV7Node windSensor(messageBus, dbHandler.retrieveCell("windsensor_config", "1", "port"), dbHandler.retrieveCellAsInt("windsensor_config", "1", "baud_rate"));
 
 		HMC6343Node compass(messageBus, dbHandler.retrieveCellAsInt("buffer_config", "1", "compass"));
-		GPSDNode gpsd(messageBus);
-		ArduinoNode arduino(messageBus);
+    //NOTE: the second parameter (sleep time in seconds) should probably be read from the database
+    GPSDNode gpsd(messageBus, 0.5);
+    //NOTE: the second parameter (sleep time in seconds) should probably be read from the database
+		ArduinoNode arduino(messageBus, 0.1);
 		std::vector<std::string> list;
 		list.push_back("red");
 		//colorDetectionNode colorDetection(messageBus, list, 0);
@@ -132,7 +134,7 @@ int main(int argc, char *argv[])
 
 
 		//HTTPSyncNode httpsync(messageBus, &dbHandler, 0, false);
-		VesselStateNode vessel(messageBus);
+		VesselStateNode vessel(messageBus, 0.4);
 		WaypointMgrNode waypoint(messageBus, dbHandler);
 
 

@@ -18,6 +18,8 @@
 #include "Messages/LocalWaypointChangeMsg.h"
 #include "Messages/ServerConfigsReceivedMsg.h"
 #include "Messages/ServerWaypointsReceivedMsg.h"
+#include "SystemServices/Timer.h"
+
 
 
 
@@ -34,10 +36,10 @@ HTTPSyncNode::HTTPSyncNode(MessageBus& msgBus, DBHandler *db, int delay, bool re
 
 bool HTTPSyncNode::init()
 {
-    
+
 
     m_initialised = false;
-    
+
     m_reportedConnectError = false;
 
     m_pushOnlyLatestLogs = m_dbHandler->retrieveCellAsInt("httpsync_config", "1", "push_only_latest_logs");
@@ -57,7 +59,7 @@ void HTTPSyncNode::start(){
 
     if (m_initialised)
     {
-        
+
         runThread(HTTPSyncThread);
     }
     else
@@ -89,7 +91,7 @@ void HTTPSyncNode::processMessage(const Message* msgPtr)
 void HTTPSyncNode::HTTPSyncThread(ActiveNode* nodePtr){
 
     HTTPSyncNode* node = dynamic_cast<HTTPSyncNode*> (nodePtr);
-    
+
 
     Logger::info("HTTPSync thread has started");
 
@@ -98,14 +100,16 @@ void HTTPSyncNode::HTTPSyncThread(ActiveNode* nodePtr){
     node->pushWaypoints();
     node->pushConfigs();
 
-
+    Timer timer;
+  	timer.start();
     while(true)
     {
-        std::this_thread::sleep_for(std::chrono::milliseconds(node->m_delay));
+        timer.sleepUntil(node->m_delay);
 
         node->getConfigsFromServer();
         node->getWaypointsFromServer();
         node->pushDatalogs();
+        timer.reset();
     }
 
     curl_global_cleanup();
@@ -152,7 +156,7 @@ bool HTTPSyncNode::pushWaypoints()
 
 bool HTTPSyncNode::pushConfigs() {
     std::string response;
-    
+
 	if(performCURLCall(m_dbHandler->getConfigs(), "pushConfigs", response))
 	{
 		Logger::info("Configs pushed to server");

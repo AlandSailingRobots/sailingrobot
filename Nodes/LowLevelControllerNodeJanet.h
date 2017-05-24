@@ -8,9 +8,8 @@
 #include "Messages/MessageTypes.h"
 #include "MessageBus/MessageBus.h"
 #include "SystemServices/CourseRegulator.h"
-#include "waypointrouting/SailCommand.h"
+#include "SystemServices/SoftSailControl.h"
 
-#define DATA_OUT_OF_RANGE -2000
 
 class LowLevelControllerNodeJanet: public Node {
 public:
@@ -40,5 +39,8 @@ public:
     const float m_MaxRudderAngle;
 
     CourseRegulator m_CourseRegulator;
-    SailCommand m_SailCommand;
+    SoftSailControl m_SailCommand;
+
+    const int DATA_OUT_OF_RANGE = -2000;
+
   };

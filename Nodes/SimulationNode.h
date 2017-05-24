@@ -71,7 +71,7 @@ struct HANDLERS_SOCKET
 
 class SimulationNode : public ActiveNode {
 public:
-	SimulationNode(MessageBus& msgBus);
+	SimulationNode(MessageBus& msgBus, double loopTime);
 
 	///----------------------------------------------------------------------------------
 	/// Initialize the TCP communication
@@ -144,5 +144,11 @@ private:
   struct HANDLERS_SOCKET m_handler_socket_client;
 
   int m_count_sleep;
+  double m_LoopTime;
+
+  const int COUNT_COMPASSDATA_MSG = 1;
+  const int COUNT_GPSDATA_MSG = 1;
+  const int COUNT_WINDDATA_MSG = 1;
+  const int COUNT_ARDUINO_MSG = 1;
 
 };
