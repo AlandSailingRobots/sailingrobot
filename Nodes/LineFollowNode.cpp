@@ -178,8 +178,7 @@ double LineFollowNode::calculateAngleOfDesiredTrajectory()
 
           MessagePtr navMsg = std::make_unique<NavigationControlMsg>(desiredHeading, 0, false, NavigationState::sailToWaypoint);
           m_MsgBus.sendMessage(std::move(navMsg));
-          //NOTE:Nothing is been logged currently
-          /*m_dbLogger.log(msg, rudderCommand_norm, sailCommand_norm, 0, 0, distanceToNextWaypoint, bearingToNextWaypoint, desiredHeading, m_tack, getGoingStarboard(), m_nextWaypointId, msg->trueWindDirection(), false,timestamp_str);*/
+          
         }
 
         void LineFollowNode::setPrevWaypointData(WaypointDataMsg* waypMsg)
