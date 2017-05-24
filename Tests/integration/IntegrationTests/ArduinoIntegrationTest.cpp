@@ -86,20 +86,25 @@ void sendActuatorCommands() {
     uint16_t rudderAngle16;
     uint16_t wingsailAngle16;
     float ratio = 65535 / 60;
-
-    do {
+    try {
+        do {
         std::cout << "Enter rudder angle (-30 to 30)" << std::endl;
         std::getline(std::cin, rudderAngle);
         rudderAngle16 = stoi(rudderAngle);
         rudderAngle16 += 30;
     } while(rudderAngle16 > 60);
 
-    do {
-        std::cout << "Enter wingsil angle (-30 to 30)" << std::endl;
-        std::getline(std::cin, wingsailAngle);
-        wingsailAngle16 = stoi(rudderAngle);
-        wingsailAngle16 += 30;
-    } while(wingsailAngle16 > 60);
+        do {
+            std::cout << "Enter wingsil angle (-30 to 30)" << std::endl;
+            std::getline(std::cin, wingsailAngle);
+            wingsailAngle16 = stoi(rudderAngle);
+            wingsailAngle16 += 30;
+        } while(wingsailAngle16 > 60);
+    } catch(std::invalid_argument ex) {
+        std::cout << "Integers only." << std::endl;
+        std::cout << ex.what() << std::endl;
+    }
+    
 
     
     rudderAngle16 *= ratio;
