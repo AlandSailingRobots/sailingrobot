@@ -138,7 +138,7 @@ int main(int argc, char *argv[])
 		#endif
 
 
-		//HTTPSyncNode httpsync(messageBus, &dbHandler, 0, false);
+		HTTPSyncNode httpsync(messageBus, &dbHandler, 0, false);
 		VesselStateNode vessel(messageBus, 0.4);
 		WaypointMgrNode waypoint(messageBus, dbHandler);
 
@@ -163,7 +163,7 @@ int main(int argc, char *argv[])
 		ActuatorNode rudder(messageBus, NodeID::RudderActuator, channel, speed, acceleration);
 		MaestroController::init(dbHandler.retrieveCell("maestro_controller_config", "1", "port"));
 		#endif
-		//bool requireNetwork = (bool) (dbHandler.retrieveCellAsInt("sailing_robot_config", "1", "require_network"));
+		bool requireNetwork = (bool) (dbHandler.retrieveCellAsInt("sailing_robot_config", "1", "require_network"));
 
 		// System services
 
@@ -188,14 +188,14 @@ int main(int argc, char *argv[])
 		//initialiseNode(colorDetection, "Colour detection node", NodeImportance::NOT_CRITICAL);
 		#endif
 
-		/*if (requireNetwork)
+		if (requireNetwork)
 		{
-			//initialiseNode(httpsync, "Httpsync Node", NodeImportance::CRITICAL);
+			initialiseNode(httpsync, "Httpsync Node", NodeImportance::CRITICAL);
 		}
 		else
 		{
-			//initialiseNode(httpsync, "Httpsync Node", NodeImportance::NOT_CRITICAL);
-		}*/
+			initialiseNode(httpsync, "Httpsync Node", NodeImportance::NOT_CRITICAL);
+		}
 
 		initialiseNode(vessel, "Vessel State Node", NodeImportance::CRITICAL);
 		initialiseNode(waypoint, "Waypoint Node", NodeImportance::CRITICAL);
@@ -215,7 +215,7 @@ int main(int argc, char *argv[])
 		arduino.start();
 		//colorDetection.start();
 		#endif
-		//httpsync.start();
+		httpsync.start();
 		vessel.start();
 
 		//delete sailingLogic;
