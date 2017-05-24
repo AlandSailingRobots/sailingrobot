@@ -149,7 +149,7 @@ int main(int argc, char *argv[])
     Node* lowLevelControllerNodeJanet;
 
 		sailingLogic = new LineFollowNode(messageBus, dbHandler);
-    lowLevelControllerNodeJanet = new LowLevelControllerNodeJanet(messageBus);
+    lowLevelControllerNodeJanet = new LowLevelControllerNodeJanet(messageBus, 30, 60, dbHandler);
 
 		#if SIMULATION == 0
 		int channel = dbHandler.retrieveCellAsInt("sail_servo_config", "1", "channel");
@@ -207,6 +207,9 @@ int main(int argc, char *argv[])
 		// Start active nodes
 		#if SIMULATION == 1
 		simulation.start();
+    auto canservice_future = canservice.start();
+    windNode.start();
+
 		#else
 
 		xbee.start();
