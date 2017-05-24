@@ -46,14 +46,14 @@ public:
         if(m_RudderAngle == -2000 || m_WingsailAngle == -2000 || m_WindSpeed == -2000 ||
                 m_WindDirection == -2000 || m_WindTemp == -2000)
         {
-            std::cout << "No data available.." << std::endl;
+            std::cout << std::endl << "_ SOME OR ALL DATA MISSING _" << std::endl;
         }
 
-        std::cout << "---------------------------------------------------" << std::endl;
+        std::cout << "------------------------------------------------" << std::endl;
         std::cout << "| " << "Rudder Angle : " << m_RudderAngle << "\t" << "Wingsail Angle : " << m_WingsailAngle << std::endl; 
         std::cout << "| " << "Wind Speed   : " << m_WindSpeed << "\t" << "Wind Direction : " << m_WindDirection << std::endl;
         std::cout << "| " << "Wind Temp    : " << m_WindTemp << std::endl;
-        std::cout << "---------------------------------------------------" << std::endl << std::endl;
+        std::cout << "------------------------------------------------" << std::endl << std::endl;
 
     }
 
@@ -117,12 +117,15 @@ void sendActuatorCommands() {
 
 int main() {
 
+    // Comment out this line if not running on the pi
+    // otherwise program will crash.
+    
     canService.start();
 
     SensorDataReceiver sensorReceiver(msgBus, 2000);
     CANWindsensorNode windSensor(msgBus, canService, 500);
     windSensor.start();
-    
+
     std::thread thr(messageLoop);
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
@@ -130,9 +133,13 @@ int main() {
     std::string lastcommand;
 
     do {
-        std::cout << "Enter command ('s' for sending a message, 'p' to print current sensor data, 'q' to quit." << std::endl;
+        std::cout << "Enter command: " << std::endl;
+        std::cout << "'s' for sending actuator commands." << std::endl;
+        std::cout << "'p' for printing lastest sensor readings." << std::endl;
+        std::cout << "'q' to quit program." << std::endl;
         std::cout << "#> ";
         std::getline(std::cin, command);
+
         if(!command.empty()) {
             lastcommand = command;
         }
