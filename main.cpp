@@ -3,13 +3,11 @@
 #include "SystemServices/Logger.h"
 #include "MessageBus/MessageBus.h"
 #include "Nodes/MessageLoggerNode.h"
-#include "Nodes/LowLevelControllerNodeJanet.h"
 
 #if SIMULATION == 1
  #include "Nodes/SimulationNode.h"
- #include "HardwareServices/CAN_Services/CANService.h"
- #include "Nodes/CANWindsensorNode.h"
  #include "Nodes/StateEstimationNode.h"
+ #include "Nodes/WindStateNode.h"
 #else
  #include "Nodes/CV7Node.h"
  #include "Nodes/HMC6343Node.h"
@@ -23,6 +21,7 @@
 #include "Nodes/HTTPSyncNode.h"
 #include "Nodes/XbeeSyncNode.h"
 #include "Nodes/LineFollowNode.h"
+#include "Nodes/LowLevelControllerNodeJanet.h"
 
 
 #if USE_OPENCV_COLOR_DETECTION == 1
@@ -121,9 +120,8 @@ int main(int argc, char *argv[])
 		#if SIMULATION == 1
 		printf("using simulation\n");
 		SimulationNode simulation(messageBus, 0.5);
-    CANService canservice;
-    CANWindsensorNode windNode(messageBus, canservice, 500);
     StateEstimationNode stateEstimationNode(messageBus, .5, .5);
+    WindStateNode windStateNode(messageBus, 500);
 		#else
 
 		XbeeSyncNode xbee(messageBus, dbHandler);
@@ -175,8 +173,8 @@ int main(int argc, char *argv[])
 
 		#if SIMULATION == 1
 		initialiseNode(simulation,"Simulation Node",NodeImportance::CRITICAL);
-    initialiseNode(windNode,"CANWindsensor Node",NodeImportance::CRITICAL);
     initialiseNode(stateEstimationNode,"StateEstimation Node",NodeImportance::CRITICAL);
+    initialiseNode(windStateNode,"WindState Node",NodeImportance::CRITICAL);
 
 		#else
 		initialiseNode(xbee, "Xbee Sync Node", NodeImportance::NOT_CRITICAL);
@@ -207,8 +205,6 @@ int main(int argc, char *argv[])
 		// Start active nodes
 		#if SIMULATION == 1
 		simulation.start();
-    auto canservice_future = canservice.start();
-    windNode.start();
 
 		#else
 
