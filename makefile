@@ -106,10 +106,8 @@ export HARDWARE_SERVICES_SRC = HardwareServices/MaestroController/MaestroControl
 
 export MATH_SRC             = Math/CourseCalculation.cpp Math/CourseMath.cpp Math/Utility.cpp
 
-export SIMULATOR_SRC        = Nodes/SimulationNode.cpp Nodes/StateEstimationNode.cpp Nodes/LowLevelControllerNodeJanet.cpp \
-															HardwareServices/CAN_Services/CANService.cpp Nodes/CANWindsensorNode.cpp \
-															HardwareServices/CAN_Services/mcp2515.cpp HardwareServices/CAN_Services/MsgFunctions.cpp \
-															HardwareServices/CAN_Services/CANPGNReceiver.cpp
+export SIMULATOR_SRC        = Nodes/SimulationNode.cpp Nodes/StateEstimationNode.cpp \
+															Nodes/LowLevelControllerNodeJanet.cpp Nodes/WindStateNode.cpp
 
 export CORE_SRC             = Nodes/WaypointMgrNode.cpp $(MESSAGE_BUS_SRC) $(NETWORK_SRC) \
                             $(SYSTEM_SERVICES_SRC) $(MATH_SRC)
