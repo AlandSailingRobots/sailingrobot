@@ -158,6 +158,7 @@ int main() {
         }
     } while(command != "q");
 
-
+    canService.stop();
+    future.get();
     thr.detach();
 }
