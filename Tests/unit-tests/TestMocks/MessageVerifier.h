@@ -14,7 +14,7 @@
 #include "Nodes/Node.h"
 #include "Messages/Message.h"
 #include "Messages/WindStateMsg.h"
-
+#include "Messages/ASPireActuatorFeedbackMsg.h"
 
 
 class MessageVerifier : public Node {
@@ -23,6 +23,7 @@ public:
     { 
         msgBus.registerNode(*this);
         msgBus.registerNode(*this, MessageType::WindState);
+        msgBus.registerNode(*this, MessageType::ASPireActuatorFeedback);
     }
 
     virtual ~MessageVerifier() {}
@@ -36,6 +37,8 @@ public:
 
         if(type == MessageType::WindState){
             m_WindStateMsg = dynamic_cast<WindStateMsg*>(const_cast<Message*>(message));
+        } else if(type == MessageType::ASPireActuatorFeedback) {
+            m_FeedbackMsg = dynamic_cast<ASPireActuatorFeedbackMsg*>(const_cast<Message*>(message));
         }
 
     }
@@ -63,8 +66,25 @@ public:
 
     }
 
+    bool verifyActuatorFeedbackMsg(const ASPireActuatorFeedbackMsg* otherMsg) {
+        if(m_FeedbackMsg == NULL) {
+            return false;
+        }
+
+        if(m_FeedbackMsg->rudderFeedback() == otherMsg->rudderFeedback() &&
+           m_FeedbackMsg->wingsailFeedback() == otherMsg->wingsailFeedback() &&
+           m_FeedbackMsg->windvaneSelfSteeringAngle() == otherMsg->windvaneSelfSteeringAngle() &&
+           m_FeedbackMsg->windvaneActuatorPosition() == otherMsg->windvaneActuatorPosition() )
+        {
+            return true;
+        }
+
+        return false;
+
+    }
+
 
 private:
     WindStateMsg* m_WindStateMsg;
-
+    ASPireActuatorFeedbackMsg* m_FeedbackMsg;
 };
