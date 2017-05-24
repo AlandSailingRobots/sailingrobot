@@ -106,7 +106,8 @@ export HARDWARE_SERVICES_SRC = HardwareServices/MaestroController/MaestroControl
 
 export MATH_SRC             = Math/CourseCalculation.cpp Math/CourseMath.cpp Math/Utility.cpp
 
-export SIMULATOR_SRC        = Nodes/SimulationNode.cpp
+export SIMULATOR_SRC        = Nodes/SimulationNode.cpp Nodes/StateEstimationNode.cpp \
+															Nodes/LowLevelControllerNodeJanet.cpp Nodes/WindStateNode.cpp
 
 #Add the following cpp files to SIMULATOR_SRC before compiling and running simulation
 															# Nodes/StateEstimationNode.cpp \
