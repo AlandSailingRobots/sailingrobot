@@ -9,12 +9,14 @@
 #include "MessageBus/MessageBus.h"
 #include "SystemServices/CourseRegulator.h"
 #include "SystemServices/SoftSailControl.h"
+#include "dbhandler/DBHandler.h"
+
 
 
 class LowLevelControllerNodeJanet: public Node {
 public:
-  LowLevelControllerNodeJanet(MessageBus& msgBus, float maxRudderAngle = 30,
-   float maxCourseAngleDiff = 60);
+  LowLevelControllerNodeJanet(MessageBus& msgBus, float maxRudderAngle,
+   float maxCourseAngleDiff, DBHandler& db);
 
     virtual ~LowLevelControllerNodeJanet();
     bool init();
@@ -26,6 +28,8 @@ public:
     void processNavigationControlMessage(const NavigationControlMsg* msg);
     void processWindStateMessage(const WindStateMsg* msg);
     void sendActuatorPosition();
+    void setupSailCommand();
+
 
     double  m_maxCommandAngle, m_maxSailAngle, m_minSailAngle;
 
@@ -42,5 +46,5 @@ public:
     SoftSailControl m_SailCommand;
 
     const int DATA_OUT_OF_RANGE = -2000;
-
+    DBHandler &m_db;
   };
