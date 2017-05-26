@@ -278,7 +278,6 @@ double LineFollowNode::calculateAngleOfDesiredTrajectory()
           m_db.retrieveCellAsInt("rudder_command_config", "1", "midship_command"));
         }
 
-<<<<<<< HEAD
         void LineFollowNode::setupSailCommand()
         {
           m_sailCommand.setCommandValues( m_db.retrieveCellAsInt("sail_command_config", "1", "close_reach_command"),
@@ -290,9 +289,6 @@ double LineFollowNode::calculateAngleOfDesiredTrajectory()
             if(m_tackingDirection == 1) return true;
             else return false;
         }
-
-=======
->>>>>>> develop
         void LineFollowNode::setPrevWaypointToBoatPos() //If boat passed waypoint or enters it, set new line from boat to waypoint.
         {                                                                  //Used if boat has to stay within waypoint for a set amount of time.
           double distanceAfterWaypoint = Utility::calculateWaypointsOrthogonalLine(m_nextWaypointLon, m_nextWaypointLat, m_prevWaypointLon,
