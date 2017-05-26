@@ -2,8 +2,8 @@
 #pragma once
 
 #include "SystemServices/Logger.h"
-#include "dbhandler/DBHandler.h"
-#include "dbhandler/DBLogger.h"
+#include "MessageBus/MessageBus.h"
+#include "Nodes/DBLoggerNode.h"
 #include "../cxxtest/cxxtest/TestSuite.h"
 
 #include <iostream>
@@ -11,17 +11,37 @@
 #include <chrono>
 #include <future>
 
-#define DBLOGGER_WAIT_TIME 2
+#define DBLOGGERNODE_WAIT_TIME 2
 
 class DBLoggerNodeSuite : public CxxTest::TestSuite {
 
     public:
 
-    void setUp() {}
+    DBHandler* dbHandler;
+    DBLoggerNode* dbLoggerNode;
+    std::thread* thr;
+
+    static MessageBus& msgBus(){
+   	 	static MessageBus* mbus = new MessageBus();
+    	return *mbus;
+  	}
+
+    static void runMessageLoop()
+ 	{
+    	msgBus().run();
+  	}
+
+    void setUp() {
+        if(dbLoggerNode == 0) {
+            dbHandler = new DBHandler("./asrtest.db");
+            dbLoggerNode = new DBLoggerNode(msgBus(), *dbHandler, DBLOGGERNODE_WAIT_TIME);
+            thr = new std::thread(runMessageLoop);
+        }
+    }
+    
     void tearDown() {}
 
     void test_LoggingToDB() {
-        DBHandler dbHandler("./asrtest.db");
 
         if (Logger::init())
         {
@@ -33,7 +53,7 @@ class DBLoggerNodeSuite : public CxxTest::TestSuite {
 		    Logger::error("Logger init\t\t[FAILED]");
 	    }
 
-        if(dbHandler.initialise()) 
+        if(dbHandler->initialise()) 
         {
 		    Logger::info("Database init\t\t[OK]");
 	    }
@@ -44,14 +64,6 @@ class DBLoggerNodeSuite : public CxxTest::TestSuite {
 		    exit(1);
 	    }
 
-        DBLogger dbLogger(5, dbHandler);
-        dbLogger.startWorkerThread();
-        TS_ASSERT(true);
-        dbLogger.log(1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, true, "hejhej");
-        dbLogger.log(1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, true, "hejhej2");
-        dbLogger.log(1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, true, "hejhej3");
-        dbLogger.log(1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, true, "hejhej4");
-        dbLogger.log(1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, true, "hejhej5");
-        std::this_thread::sleep_for(std::chrono::seconds(DBLOGGER_WAIT_TIME));
+        
     }
 };

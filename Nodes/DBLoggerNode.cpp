@@ -77,11 +77,16 @@ void DBLoggerNode::start() {
     runThread(DBLoggerNodeThreadFunc);
 }
 
+bool DBLoggerNode::init() {
+    return true;
+}
+
 void DBLoggerNode::DBLoggerNodeThreadFunc(ActiveNode* nodePtr) {
 
     DBLoggerNode* node = dynamic_cast<DBLoggerNode*> (nodePtr);
     Timer timer;
     timer.start();
+    node->m_dbLogger.startWorkerThread();
 
     while(true) {
 
