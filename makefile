@@ -90,31 +90,26 @@ export LINE_FOLLOW_SRC      = Nodes/LineFollowNode.cpp waypointrouting/RudderCom
 
 export NETWORK_SRC          = Network/TCPServer.cpp Nodes/VesselStateNode.cpp
 
-export HARDWARE_NODES_SRC   = Nodes/CV7Node.cpp Nodes/HMC6343Node.cpp Nodes/GPSDNode.cpp \
-                            Nodes/ActuatorNode.cpp Nodes/ArduinoNode.cpp Nodes/CANFeedbackReceiver.cpp
+export HARDWARE_NODES_SRC   = Nodes/CV7Node.cpp Nodes/HMC6343Node.cpp Nodes/GPSDNode.cpp Nodes/ActuatorNodeASPire.cpp \
+                            Nodes/ActuatorNode.cpp Nodes/ArduinoNode.cpp Nodes/CANFeedbackReceiver.cpp Nodes/CANWindsensorNode.cpp
 
 export SYSTEM_SERVICES_SRC  = SystemServices/Logger.cpp SystemServices/SysClock.cpp SystemServices/Timer.cpp \
                             dbhandler/DBHandler.cpp dbhandler/DBLogger.cpp SystemServices/WingsailControl.cpp \
 														SystemServices/CourseRegulator.cpp SystemServices/SoftSailControl.cpp
 
 export HARDWARE_SERVICES_SRC = HardwareServices/MaestroController/MaestroController.cpp HardwareServices/i2ccontroller/I2CController.cpp \
-															 HardwareServices/CAN_Services/CANPGNReceiver.cpp HardwareServices/CAN_Services/CANService.cpp \
-															 HardwareServices/CAN_Services/mcp2515.cpp HardwareServices/CAN_Services/MsgFunctions.cpp \
-															 Nodes/CANWindsensorNode.cpp Nodes/WindStateNode.cpp Nodes/LowLevelControllerNodeASPire.cpp \
-															 HardwareServices/CAN_Services/CANFrameReceiver.cpp Nodes/ActuatorNodeASPire.cpp \
-															 Nodes/LowLevelControllerNodeJanet.cpp Nodes/StateEstimationNode.cpp
+							   HardwareServices/CAN_Services/CANPGNReceiver.cpp HardwareServices/CAN_Services/CANService.cpp \
+							   HardwareServices/CAN_Services/mcp2515.cpp HardwareServices/CAN_Services/MsgFunctions.cpp \
+							   HardwareServices/CAN_Services/CANFrameReceiver.cpp
 
 export MATH_SRC             = Math/CourseCalculation.cpp Math/CourseMath.cpp Math/Utility.cpp
 
-export SIMULATOR_SRC        = Nodes/SimulationNode.cpp Nodes/StateEstimationNode.cpp \
-															Nodes/LowLevelControllerNodeJanet.cpp Nodes/WindStateNode.cpp
+export SIMULATOR_SRC        = Nodes/SimulationNode.cpp
 
-#Add the following cpp files to SIMULATOR_SRC before compiling and running simulation
-															# Nodes/StateEstimationNode.cpp \
-															Nodes/LowLevelControllerNodeJanet.cpp Nodes/WindStateNode.cpp
-
-export CORE_SRC             = Nodes/WaypointMgrNode.cpp $(MESSAGE_BUS_SRC) $(NETWORK_SRC) \
-                            $(SYSTEM_SERVICES_SRC) $(MATH_SRC)
+export CORE_SRC             = 	Nodes/WaypointMgrNode.cpp Nodes/LowLevelControllerNodeASPire.cpp \
+																Nodes/StateEstimationNode.cpp \
+							   								Nodes/LowLevelControllerNodeJanet.cpp Nodes/WindStateNode.cpp \
+								$(MESSAGE_BUS_SRC) $(NETWORK_SRC) $(SYSTEM_SERVICES_SRC) $(MATH_SRC)
 
 export HTTP_SYNC_SRC        = Nodes/HTTPSyncNode.cpp
 
