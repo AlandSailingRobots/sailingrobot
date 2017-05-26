@@ -28,21 +28,17 @@
 #include <unistd.h>
 #include "SystemServices/Logger.h"
 #include "SystemServices/SysClock.h"
+#include "SystemServices/Timer.h"
 
 
-#define BASE_SLEEP_MS 400
-#define COUNT_COMPASSDATA_MSG 1
-#define COUNT_GPSDATA_MSG 1
-#define COUNT_WINDDATA_MSG 1
-#define COUNT_ARDUINO_MSG 1
 
 
-SimulationNode::SimulationNode(MessageBus& msgBus)
+SimulationNode::SimulationNode(MessageBus& msgBus, double loopTime)
 	: ActiveNode(NodeID::Simulator, msgBus),
 		m_CompassHeading(0), m_CompassPitch(0), m_CompassRoll(0),
 		m_GPSHasFix(false), m_GPSOnline(false), m_GPSLat(0), m_GPSLon(0), m_GPSUnixTime(0), m_GPSSpeed(0),
 		m_GPSHeading(0), m_WindDir(0), m_WindSpeed(0), m_WindTemp(0), m_ArduinoPressure(0),
-		m_ArduinoRudder(0),m_ArduinoSheet(0),m_ArduinoBattery(0),m_ArduinoRC(0),m_rudder(0),m_sail(0),m_count_sleep(0)
+		m_ArduinoRudder(0),m_ArduinoSheet(0),m_ArduinoBattery(0),m_ArduinoRC(0),m_rudder(0),m_sail(0),m_count_sleep(0), m_LoopTime(loopTime)
 {
   m_MsgBus.registerNode(*this, MessageType::ActuatorPosition);
 }
@@ -220,8 +216,10 @@ void SimulationNode::SimulationThreadFunc(ActiveNode* nodePtr)
 
 	int bytes_received = 0;
 	struct DATA_SOCKET_RECEIVE dump_data_sock_receive;
+	Timer timer;
+	timer.start();
 	while(true){
-
+		timer.sleepUntil(node->m_LoopTime);
     //receive socket from simulation
     bytes_received += read(node->m_handler_socket_client.sockfd,&(node->m_data_receive)+bytes_received,sizeof(struct DATA_SOCKET_RECEIVE)-bytes_received);
     if (bytes_received==sizeof(struct DATA_SOCKET_RECEIVE)){
@@ -244,7 +242,6 @@ void SimulationNode::SimulationThreadFunc(ActiveNode* nodePtr)
 
     //send data to simulation
     write(node->m_handler_socket_client.sockfd,&(node->m_data_send), sizeof(struct DATA_SOCKET_SEND));
-
-		std::this_thread::sleep_for(std::chrono::milliseconds(BASE_SLEEP_MS));
+		timer.reset();
   }
 }

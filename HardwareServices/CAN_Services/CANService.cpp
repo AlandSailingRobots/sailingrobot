@@ -5,6 +5,7 @@
 #include <chrono>
 #include <thread>
 #include <future>
+#include <stdlib.h>
 
 #define SLEEP_TIME_MS 50
 
@@ -54,6 +55,7 @@ CanMsg CANService::getCANMessage()
 
 std::future<void> CANService::start() 
 {
+  
   m_Running.store(true);
   wiringPiSetup();
   int SPISpeed = 1000000;

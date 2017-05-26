@@ -1,12 +1,13 @@
 
 #include <string>
 #include "SystemServices/Logger.h"
-#include "Nodes/CANWindsensorNode.h"
 #include "MessageBus/MessageBus.h"
 #include "Nodes/MessageLoggerNode.h"
 
 #if SIMULATION == 1
  #include "Nodes/SimulationNode.h"
+ #include "Nodes/StateEstimationNode.h"
+ #include "Nodes/WindStateNode.h"
 #else
  #include "Nodes/CV7Node.h"
  #include "Nodes/HMC6343Node.h"
@@ -20,6 +21,8 @@
 #include "Nodes/HTTPSyncNode.h"
 #include "Nodes/XbeeSyncNode.h"
 #include "Nodes/LineFollowNode.h"
+#include "Nodes/LowLevelControllerNodeJanet.h"
+
 
 #if USE_OPENCV_COLOR_DETECTION == 1
 #include "Nodes/obstacledetection/colorDetectionNode.h"
@@ -29,6 +32,7 @@
 #include "dbhandler/DBHandler.h"
 #include "HardwareServices/MaestroController/MaestroController.h"
 #include "xBee/Xbee.h"
+
 
 #define DISABLE_LOGGING 0
 
@@ -115,30 +119,35 @@ int main(int argc, char *argv[])
 
 		#if SIMULATION == 1
 		printf("using simulation\n");
-		SimulationNode simulation(messageBus);
-
+		SimulationNode simulation(messageBus, 0.5);
+    StateEstimationNode stateEstimationNode(messageBus, .5, .5);
+    WindStateNode windStateNode(messageBus, 500);
 		#else
 
 		XbeeSyncNode xbee(messageBus, dbHandler);
 		CV7Node windSensor(messageBus, dbHandler.retrieveCell("windsensor_config", "1", "port"), dbHandler.retrieveCellAsInt("windsensor_config", "1", "baud_rate"));
 
 		HMC6343Node compass(messageBus, dbHandler.retrieveCellAsInt("buffer_config", "1", "compass"));
-		GPSDNode gpsd(messageBus);
-		ArduinoNode arduino(messageBus);
+    //NOTE: the second parameter (sleep time in seconds) should probably be read from the database
+    GPSDNode gpsd(messageBus, 0.5);
+    //NOTE: the second parameter (sleep time in seconds) should probably be read from the database
+		ArduinoNode arduino(messageBus, 0.1);
 		std::vector<std::string> list;
 		list.push_back("red");
 		//colorDetectionNode colorDetection(messageBus, list, 0);
 		#endif
 
 
-		//HTTPSyncNode httpsync(messageBus, &dbHandler, 0, false);
-		VesselStateNode vessel(messageBus);
+		HTTPSyncNode httpsync(messageBus, &dbHandler, 0, false);
+		VesselStateNode vessel(messageBus, 0.4);
 		WaypointMgrNode waypoint(messageBus, dbHandler);
 
 
 		Node* sailingLogic;
+    Node* lowLevelControllerNodeJanet;
 
-			sailingLogic = new LineFollowNode(messageBus, dbHandler);
+		sailingLogic = new LineFollowNode(messageBus, dbHandler);
+    lowLevelControllerNodeJanet = new LowLevelControllerNodeJanet(messageBus, 30, 60, dbHandler);
 
 		#if SIMULATION == 0
 		int channel = dbHandler.retrieveCellAsInt("sail_servo_config", "1", "channel");
@@ -154,7 +163,7 @@ int main(int argc, char *argv[])
 		ActuatorNode rudder(messageBus, NodeID::RudderActuator, channel, speed, acceleration);
 		MaestroController::init(dbHandler.retrieveCell("maestro_controller_config", "1", "port"));
 		#endif
-		//bool requireNetwork = (bool) (dbHandler.retrieveCellAsInt("sailing_robot_config", "1", "require_network"));
+		bool requireNetwork = (bool) (dbHandler.retrieveCellAsInt("sailing_robot_config", "1", "require_network"));
 
 		// System services
 
@@ -164,6 +173,9 @@ int main(int argc, char *argv[])
 
 		#if SIMULATION == 1
 		initialiseNode(simulation,"Simulation Node",NodeImportance::CRITICAL);
+    initialiseNode(stateEstimationNode,"StateEstimation Node",NodeImportance::CRITICAL);
+    initialiseNode(windStateNode,"WindState Node",NodeImportance::CRITICAL);
+
 		#else
 		initialiseNode(xbee, "Xbee Sync Node", NodeImportance::NOT_CRITICAL);
 		initialiseNode(windSensor, "Wind Sensor", NodeImportance::CRITICAL);
@@ -176,22 +188,24 @@ int main(int argc, char *argv[])
 		//initialiseNode(colorDetection, "Colour detection node", NodeImportance::NOT_CRITICAL);
 		#endif
 
-		/*if (requireNetwork)
+		if (requireNetwork)
 		{
-			//initialiseNode(httpsync, "Httpsync Node", NodeImportance::CRITICAL);
+			initialiseNode(httpsync, "Httpsync Node", NodeImportance::CRITICAL);
 		}
 		else
 		{
-			//initialiseNode(httpsync, "Httpsync Node", NodeImportance::NOT_CRITICAL);
-		}*/
+			initialiseNode(httpsync, "Httpsync Node", NodeImportance::NOT_CRITICAL);
+		}
 
 		initialiseNode(vessel, "Vessel State Node", NodeImportance::CRITICAL);
 		initialiseNode(waypoint, "Waypoint Node", NodeImportance::CRITICAL);
-			initialiseNode(*sailingLogic, "LineFollow Node", NodeImportance::CRITICAL);
+		initialiseNode(*sailingLogic, "LineFollow Node", NodeImportance::CRITICAL);
+    initialiseNode(*lowLevelControllerNodeJanet, "LowLevelControllerNodeJanet Node", NodeImportance::CRITICAL);
 
 		// Start active nodes
 		#if SIMULATION == 1
 		simulation.start();
+
 		#else
 
 		xbee.start();
@@ -201,7 +215,7 @@ int main(int argc, char *argv[])
 		arduino.start();
 		//colorDetection.start();
 		#endif
-		//httpsync.start();
+		httpsync.start();
 		vessel.start();
 
 		//delete sailingLogic;

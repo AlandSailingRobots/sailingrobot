@@ -4,10 +4,10 @@
  * 		LowLevelController.cpp
  *
  * Purpose:
- *		
+ *
  *
  * License:
- *      This file is subject to the terms and conditions defined in the file 
+ *      This file is subject to the terms and conditions defined in the file
  *      'LICENSE.txt', which is part of this source code package.
  *
  ***************************************************************************************/
@@ -24,15 +24,12 @@
 #include "SystemServices/Logger.h"
 
 
-#define HEADING_ERROR_VALUE     370
-
-#define MAX_RUDDER_ANGLE        30
-#define NORMALISE_RUDDER( val ) (float)val / (float)MAX_RUDDER_ANGLE       
+#define NORMALISE_RUDDER( val ) (float)val / (float)MAX_RUDDER_ANGLE
 
 
 ///----------------------------------------------------------------------------------
 LowLevelController::LowLevelController( MessageBus& msgBus, DBHandler& dbHandler, double configPGain, double configIGain )
-    :Node(NodeID::LowLevelController, msgBus), heading(HEADING_ERROR_VALUE), 
+    :Node(NodeID::LowLevelController, msgBus), heading(HEADING_ERROR_VALUE),
     desiredHeading(HEADING_ERROR_VALUE), pGain(configPGain), iGain(configIGain)
 {
     msgBus.registerNode( *this, MessageType::CompassData );
@@ -87,8 +84,8 @@ void LowLevelController::sendActuatorMsg()
 ///----------------------------------------------------------------------------------
 void LowLevelController::calculateRudder()
 {
-    // We convert the PI controller value into a normalised value which we then 
-    // apply to the range the rudder can move. This range is then added to the 
+    // We convert the PI controller value into a normalised value which we then
+    // apply to the range the rudder can move. This range is then added to the
     // midpoint value giving us our final rudder position in maestro's pwm range.
     rudder_ms = rudderMidpoint_ms + ( NORMALISE_RUDDER( pi() ) * rudderRange_ms );
 }
@@ -131,13 +128,13 @@ void LowLevelController::calculateSail( int windDir )
 ///----------------------------------------------------------------------------------
 int16_t LowLevelController::restrictRudder( int16_t val )
 {
-    if( val > MAX_RUDDER_ANGLE) 
-    { 
-        return MAX_RUDDER_ANGLE; 
-    } 
-    else if ( val < -MAX_RUDDER_ANGLE) 
-    { 
-        return -MAX_RUDDER_ANGLE; 
+    if( val > MAX_RUDDER_ANGLE)
+    {
+        return MAX_RUDDER_ANGLE;
+    }
+    else if ( val < -MAX_RUDDER_ANGLE)
+    {
+        return -MAX_RUDDER_ANGLE;
     }
 
     return val;
@@ -148,7 +145,7 @@ int16_t LowLevelController::restrictRudder( int16_t val )
 int16_t LowLevelController::pi()
 {
     static int16_t integral = 0;
-    const int16_t MAX_INTEGRAL = 10; 
+    const int16_t MAX_INTEGRAL = 10;
     int16_t error = 0;
 
     if( heading == HEADING_ERROR_VALUE ) { return 0; }

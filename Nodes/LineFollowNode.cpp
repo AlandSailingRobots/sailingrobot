@@ -26,8 +26,7 @@
 #include <cmath>
 
 #define DEFAULT_TWD_BUFFERSIZE 200
-#define NORM_RUDDER_COMMAND 0.5166 // getCommand() take a value between -1 and 1 so we need to normalize the command correspond to 29.6 degree
-#define NORM_SAIL_COMMAND 0.6958
+
 
 
 FILE* file = fopen("./gps.txt", "w");
@@ -55,9 +54,6 @@ m_tackingDirection(1)
   msgBus.registerNode(*this, MessageType::WaypointData);
   msgBus.registerNode(*this, MessageType::ExternalControl);
 
-  m_maxCommandAngle = M_PI / 6;
-  m_maxSailAngle = M_PI / 4.2f;
-  m_minSailAngle = M_PI / 32.0f;
   m_tackAngle = 0.872665; //50°
 
   fprintf( file, "%s,%ss,%s\n", "id", "latitude", "longitude" );
@@ -67,7 +63,7 @@ m_tackingDirection(1)
 bool LineFollowNode::init()
 {
   setupRudderCommand();
-  setupSailCommand();
+
   twdBufferMaxSize = m_db.retrieveCellAsInt("buffer_config", "1", "true_wind");
   if(twdBufferMaxSize == 0)
   twdBufferMaxSize = DEFAULT_TWD_BUFFERSIZE;
@@ -282,6 +278,7 @@ double LineFollowNode::calculateAngleOfDesiredTrajectory()
           m_db.retrieveCellAsInt("rudder_command_config", "1", "midship_command"));
         }
 
+<<<<<<< HEAD
         void LineFollowNode::setupSailCommand()
         {
           m_sailCommand.setCommandValues( m_db.retrieveCellAsInt("sail_command_config", "1", "close_reach_command"),
@@ -294,6 +291,8 @@ double LineFollowNode::calculateAngleOfDesiredTrajectory()
             else return false;
         }
 
+=======
+>>>>>>> develop
         void LineFollowNode::setPrevWaypointToBoatPos() //If boat passed waypoint or enters it, set new line from boat to waypoint.
         {                                                                  //Used if boat has to stay within waypoint for a set amount of time.
           double distanceAfterWaypoint = Utility::calculateWaypointsOrthogonalLine(m_nextWaypointLon, m_nextWaypointLat, m_prevWaypointLon,

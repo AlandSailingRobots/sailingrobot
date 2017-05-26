@@ -4,10 +4,10 @@
  * 		LowLevelController.h
  *
  * Purpose:
- *		
+ *
  *
  * License:
- *      This file is subject to the terms and conditions defined in the file 
+ *      This file is subject to the terms and conditions defined in the file
  *      'LICENSE.txt', which is part of this source code package.
  *
  ***************************************************************************************/
@@ -56,4 +56,9 @@ private:
 
     int16_t rudder_ms;
     int16_t sail_ms;
+
+
+    const int HEADING_ERROR_VALUE = 370;
+
+    const int MAX_RUDDER_ANGLE = 30;
 };
