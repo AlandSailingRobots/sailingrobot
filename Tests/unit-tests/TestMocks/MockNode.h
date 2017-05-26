@@ -18,7 +18,7 @@
 #include "../../../Nodes/Node.h"
 #include "../../../Messages/GPSDataMsg.h"
 #include "../../../Messages/WindDataMsg.h"
-#include "../../../Messages/CompassDataMsg.h"
+#include "../../../Messages/StateMessage.h"
 
 
 
@@ -29,7 +29,7 @@ public:
 	m_Online(false), m_WindDir(0), m_WindSpeed(0)
 	{
 		if(msgBus.registerNode(*this, MessageType::GPSData) && msgBus.registerNode(*this, MessageType::WindData) &&
-			msgBus.registerNode(*this, MessageType::CompassData))
+		msgBus.registerNode(*this, MessageType::StateMessage))
 		{
 			registered = true;
 		}
@@ -42,10 +42,12 @@ public:
 
 	void processMessage(const Message* message)
 	{
+
 		MessageType type = message->messageType();
 
 		switch(type)
 		{
+
 			case MessageType::GPSData:
 			{
 				m_MessageReceived = true;
@@ -68,12 +70,17 @@ public:
 			}
 			break;
 
-			case MessageType::CompassData:
+			case MessageType::StateMessage:
 			{
 				m_MessageReceived = true;
-				CompassDataMsg* compassMsg = (CompassDataMsg*)message;
-				m_Heading = compassMsg->heading();
+				StateMessage* stateMsg = (StateMessage*)message;
+				m_StateMsgHeading = stateMsg->heading();
+				m_StateMsglLat = stateMsg->latitude();
+				m_StateMsgLon = stateMsg->longitude();
+				m_StateMsgSpeed = stateMsg->speed();
+				m_StateMsgCourse = stateMsg->course();
 			}
+			break;
 			default:
 			return;
 		}
@@ -92,5 +99,11 @@ public:
 	float 	m_WindSpeed;
 	float 	m_WindTemp;
 	float 	m_Heading;
+
+	float 	m_StateMsgHeading;
+	double	m_StateMsglLat;
+	double	m_StateMsgLon;
+	double	m_StateMsgSpeed;
+	double  m_StateMsgCourse;
 
 };
