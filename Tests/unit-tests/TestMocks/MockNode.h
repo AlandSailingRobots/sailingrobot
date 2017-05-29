@@ -19,6 +19,8 @@
 #include "../../../Messages/GPSDataMsg.h"
 #include "../../../Messages/WindDataMsg.h"
 #include "../../../Messages/StateMessage.h"
+#include "../../../Messages/ActuatorPositionMsg.h"
+
 
 
 
@@ -47,7 +49,6 @@ public:
 
 		switch(type)
 		{
-
 			case MessageType::GPSData:
 			{
 				m_MessageReceived = true;
@@ -69,7 +70,6 @@ public:
 				m_WindTemp = windMsg->windTemp();
 			}
 			break;
-
 			case MessageType::StateMessage:
 			{
 				m_MessageReceived = true;
@@ -79,6 +79,14 @@ public:
 				m_StateMsgLon = stateMsg->longitude();
 				m_StateMsgSpeed = stateMsg->speed();
 				m_StateMsgCourse = stateMsg->course();
+			}
+			break;
+			case MessageType::ActuatorPosition:
+			{
+				m_MessageReceived = true;
+				ActuatorPositionMsg* actuatorMsg = (ActuatorPositionMsg*)message;
+				m_rudderPosition = actuatorMsg->rudderPosition();
+				m_sailPosition = actuatorMsg->sailPosition();
 			}
 			break;
 			default:
@@ -105,5 +113,8 @@ public:
 	double	m_StateMsgLon;
 	double	m_StateMsgSpeed;
 	double  m_StateMsgCourse;
+
+	int m_rudderPosition;
+	int m_sailPosition;
 
 };
