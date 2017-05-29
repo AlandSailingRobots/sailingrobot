@@ -8,7 +8,7 @@
 #include "Messages/MessageTypes.h"
 #include "MessageBus/MessageBus.h"
 #include "SystemServices/CourseRegulator.h"
-#include "SystemServices/SoftSailControl.h"
+#include "SystemServices/SoftsailControl.h"
 #include "dbhandler/DBHandler.h"
 
 
@@ -43,7 +43,7 @@ public:
     const float m_MaxRudderAngle;
 
     CourseRegulator m_CourseRegulator;
-    SoftSailControl m_SailCommand;
+    SoftsailControl m_SailCommand;
 
     const int DATA_OUT_OF_RANGE = -2000;
     DBHandler &m_db;
