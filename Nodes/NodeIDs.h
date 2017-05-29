@@ -46,7 +46,7 @@ enum class NodeID {
 	MessageVerifier,
 	ActuatorNodeASPire,
 	LowLevelControllerNodeJanet,
-	DBLoggerNode
+	DBLoggerNode,
 	CANFeedbackReceiver
 };
 

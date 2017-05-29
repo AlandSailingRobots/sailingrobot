@@ -23,35 +23,16 @@
 #include <mutex>
 #include <condition_variable>
 
-
 class DBLogger {
 public:
 
-	struct Item {
-		double 	rudder;
-		double 	sail;
-		int 	sailServoPosition;
-		int 	rudderServoPosition;
-		double 	distanceToWaypoint;
-		double 	bearingToWaypoint;
-		double 	courseToSteer;
-		bool 	tack;
-		bool 	goingStarboard;
-		int 	waypointId;
-		double 	twd;
-		bool 	routeStarted;
-		std::string timestamp_str;
-	};
 
 	DBLogger(unsigned int LogBufferSize, DBHandler& dbHandler);
 	~DBLogger();
 
 	void startWorkerThread();
 
-	void log(double rudder, double sail, int sailServoPosition, int rudderServoPosition,
-			double courseCalculationDistanceToWaypoint, double courseCalculationBearingToWaypoint,
-			double courseCalculationCourseToSteer, bool courseCalculationTack, bool courseCalculationGoingStarboard,
-			int waypointId, double trueWindDirectionCalc, bool routeStarted,std::string timestamp_str);
+	void log(LogItem item);
 
 	unsigned int bufferSize() { return m_bufferSize; }
 private:

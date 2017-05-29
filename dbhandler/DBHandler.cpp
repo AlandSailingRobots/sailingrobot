@@ -205,8 +205,6 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs)
 		  ss << "INSERT INTO " << "system_datalogs" << " VALUES(NULL, " << systemValues.str() << ");";
 		}
 
-		std::cout << ss.str() << std::endl;
-
 		if(queryTable(ss.str(), db))
 		{
 

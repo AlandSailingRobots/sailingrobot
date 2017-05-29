@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include "SystemServices/Timer.h"
 #include "SystemServices/Logger.h"
 #include "MessageBus/MessageBus.h"
 #include "Nodes/DBLoggerNode.h"
@@ -11,7 +12,11 @@
 #include <chrono>
 #include <future>
 
-#define DBLOGGERNODE_WAIT_TIME 2
+#define DBLOGGERNODE_WAIT_TIME 100
+
+#define DBLOGGERNODE_UPDATE_FREQUENCY 1000
+
+#define DBLOGGERNODE_QUEUE_SIZE 1
 
 class DBLoggerNodeSuite : public CxxTest::TestSuite {
 
@@ -34,12 +39,15 @@ class DBLoggerNodeSuite : public CxxTest::TestSuite {
     void setUp() {
         if(dbLoggerNode == 0) {
             dbHandler = new DBHandler("./asrtest.db");
-            dbLoggerNode = new DBLoggerNode(msgBus(), *dbHandler, DBLOGGERNODE_WAIT_TIME);
+            dbLoggerNode = new DBLoggerNode(msgBus(), *dbHandler, DBLOGGERNODE_WAIT_TIME, DBLOGGERNODE_UPDATE_FREQUENCY, DBLOGGERNODE_QUEUE_SIZE);
             thr = new std::thread(runMessageLoop);
         }
     }
     
-    void tearDown() {}
+    void tearDown() {
+        delete dbHandler;
+        delete dbLoggerNode;
+    }
 
     void test_LoggingToDB() {
 
@@ -64,6 +72,11 @@ class DBLoggerNodeSuite : public CxxTest::TestSuite {
 		    exit(1);
 	    }
 
-        
+        dbLoggerNode->start();
+
+        Timer timer;
+
+        timer.sleepUntil(DBLOGGERNODE_UPDATE_FREQUENCY/1000 + 0.1);
+
     }
 };
