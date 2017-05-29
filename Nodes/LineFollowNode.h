@@ -24,7 +24,6 @@
 #include "dbhandler/DBHandler.h"
 #include "dbhandler/DBLogger.h"
 #include "Messages/NavigationControlMsg.h"
-#include "waypointrouting/SailCommand.h"
 #include "waypointrouting/RudderCommand.h"
 #include "Math/CourseMath.h"
 
@@ -77,7 +76,6 @@ private:
 	const double NORM_SAIL_COMMAND = 0.6958;
 
 	RudderCommand m_rudderCommand;
-	SailCommand m_sailCommand;
 
 	std::vector<float> twdBuffer;
 	unsigned int twdBufferMaxSize;
