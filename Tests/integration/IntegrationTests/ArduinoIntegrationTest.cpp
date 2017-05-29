@@ -131,6 +131,7 @@ void messageLoop() {
 
 
 std::map<std::string, std::string> menuValues;
+std::map<std::string, std::string> lastSentValues;
 typedef std::map<std::string, std::string>::iterator menuIter;
 
 void printInputMenu(WINDOW* win, menuIter highlightedItem) {
@@ -156,8 +157,8 @@ void printInputMenu(WINDOW* win, menuIter highlightedItem) {
     }
 
     mvwprintw(win, pos, 20, "PRESS ENTER TO SEND");
-
     wrefresh(win);
+    
 } 
 
 void sendActuatorCommands() {
@@ -171,6 +172,13 @@ void sendActuatorCommands() {
     uint16_t windvaneAngle16;
 
     float ratio = 65535 / 60;
+
+    for(auto& it : menuValues) {
+        if(it.second.empty()) {
+            it.second = lastSentValues[it.first];
+        }
+    }
+
     try {
         rudderAngle16 = stoi(menuValues["Rudder Angle"]);
         wingsailAngle16 = stoi(menuValues["Wingsail Angle"]);
@@ -192,6 +200,7 @@ void sendActuatorCommands() {
 
     canService.sendCANMessage(Cmsg);
 
+    lastSentValues = menuValues;
 }
 
 int main() {
