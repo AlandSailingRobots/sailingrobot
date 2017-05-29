@@ -15,8 +15,9 @@ void msgBusLoop() {
 }
 
 int main() {
+  /*
   Logger::DisableLogging();
-  LowLevelControllerNodeJanet node(msgBus);
+  LowLevelControllerNodeJanet node(msgBus, 30, 60);
   MessageLogger logger(msgBus);
 
   std::thread t (msgBusLoop);
@@ -34,6 +35,7 @@ int main() {
   if(logger.actuatorPositionReceived() == true){
     std::cout << "actuatorPositionReceived" << std::endl;
   }
+  */
 
 
 }

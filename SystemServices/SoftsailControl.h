@@ -16,11 +16,11 @@
 #include <algorithm>
 #include <cmath>
 
-class SoftSailControl{
+class SoftsailControl{
 
 public:
-  SoftSailControl();
-  ~SoftSailControl();
+  SoftsailControl();
+  ~SoftsailControl();
 
   int getSailCommand(double apparentWindDirection);
 
