@@ -13,7 +13,16 @@
 #include <unordered_map>
 #include <thread>
 #include <chrono>
+#include <cctype>
 
+
+#define BACKSPACE 127
+#define ENTER 10
+#define TAB 9
+
+#define MAX_INPUT 20
+
+typedef std::unordered_map<std::string, float> SensorData;
 
 /*
     To add new sensors, the sensors should probably send out their data
@@ -23,13 +32,26 @@
         * Add the new member fields to the print function.
 */
 
-class SensorDataReceiver : public ActiveNode {
+class SensorDataReceiver : public Node {
 public:
     SensorDataReceiver(MessageBus& msgBus, float timeBetweenPrints) : 
-    ActiveNode(NodeID::None, msgBus), m_TimeBetweenPrints(timeBetweenPrints)
+    Node(NodeID::None, msgBus), m_TimeBetweenPrints(timeBetweenPrints)
     {
         msgBus.registerNode(*this, MessageType::WindData);
         msgBus.registerNode(*this, MessageType::ASPireActuatorFeedback);
+
+        m_SensorValues["Rudder Angle"] = -2000;
+        m_SensorValues["Wingsail Angle"] = -2000;
+        m_SensorValues["Wind Speed"] = -2000;        
+        m_SensorValues["Wind Direction"] = -2000;
+        m_SensorValues["Wind Temperature"] = -2000;
+
+
+        m_Win = newwin(6+2*m_SensorValues.size(),60,1,2);
+        
+        box(m_Win,0,0);
+        keypad(m_Win, FALSE);
+        wrefresh(m_Win);
     }
 
     bool init() { return true; }
@@ -50,58 +72,36 @@ public:
             m_SensorValues["Wind Temperature"] = windmsg->windTemp();
 
         }
-    }
 
-    void start() {
-
-        m_SensorValues["Rudder Angle"] = -2000;
-        m_SensorValues["Wingsail Angle"] = -2000;
-        m_SensorValues["Wind Speed"] = -2000;        
-        m_SensorValues["Wind Direction"] = -2000;
-        m_SensorValues["Wind Temperature"] = -2000;
-
-
-        m_Win = newwin(6+2*m_SensorValues.size(),56,2,2);
-        box(m_Win,0,0);
-        wrefresh(m_Win);
-
-        runThread(threadFunc);
-        
+        printSensorData();
     }
 
     void printSensorData() {
      
-        werase(m_Win);
-        wmove(m_Win, 2,20);
-        wprintw(m_Win, "SENSOR READINGS");
+       wclear(m_Win);
+       box(m_Win, 0, 0);
 
-    /*    wprintw(m_Win, "%s \t %f", "Rudder Angle : ", m_RudderAngle);
-        wprintw(m_Win, "%s \t %f", "Wingsail Angle : ", m_WingsailAngle);
-        wprintw(m_Win, "%s \t %f", "Wind Speed : ", m_WindSpeed);
-        wprintw(m_Win, "%s \t %f", "Wind Direction : ", m_WindDirection);
-        wprintw(m_Win, "%s \t %f", "Wind Temperature : ", m_WindTemp); */
+       wmove(m_Win, 2,20);
+       wprintw(m_Win, "SENSOR READINGS");
+       wmove(m_Win, 2, 10);
+       int pos = 4;    
+       for(auto it : m_SensorValues) {
+           wmove(m_Win, pos, 10);
+           wprintw(m_Win, "%s : ", it.first.c_str());
+           wmove(m_Win, pos, 35);
+           if(it.second == -2000) {
+              wprintw(m_Win, "%s", "Data not available.");
+           } else {
+              wprintw(m_Win, "%f", it.second);
+           }
+           pos+=2;
+       }
 
-        int pos = 4;
-        for(auto it : m_SensorValues) {
-            wmove(m_Win, pos, 10);
-            wprintw(m_Win, "%s : ", it.first.c_str());
-            wmove(m_Win, pos, 35);
-            wprintw(m_Win, "%f", it.second);
-            pos+=2;
-        }
-
-        wrefresh(m_Win);
+       wrefresh(m_Win);
     }
 
-    static void threadFunc(ActiveNode* nodePtr) {
-        SensorDataReceiver* node = dynamic_cast<SensorDataReceiver*> (nodePtr);
-        Timer timer;
-        timer.start();
-        while(true) {
-            timer.sleepUntil(node->m_TimeBetweenPrints*1.0f / 1000);
-            node->printSensorData();
-        }
-
+    SensorData getValues() {
+        return m_SensorValues;
     }
 
 private:
@@ -113,7 +113,7 @@ private:
     float m_WindDirection = -2000;
     float m_WindTemp = -2000;
 
-    std::unordered_map<std::string, float> m_SensorValues;
+    SensorData m_SensorValues;
 
     WINDOW* m_Win;
 
@@ -127,47 +127,68 @@ void messageLoop() {
     msgBus.run();
 }
 
+
+
+
+std::map<std::string, std::string> menuValues;
+typedef std::map<std::string, std::string>::iterator menuIter;
+
+void printInputMenu(WINDOW* win, menuIter highlightedItem) {
+    wclear(win);
+    box(win, 0,0);
+
+    wmove(win, 2, 20);
+    wprintw(win, "ACTUATOR COMMANDS");
+    int pos = 4;
+    for(auto it : menuValues) {
+        if(it == *highlightedItem) {
+            wattron(win, A_REVERSE);
+            mvwprintw(win, pos, 5, "%s", it.first.c_str());
+            wattroff(win, A_REVERSE);
+            wprintw(win, "\t :");
+        } else {
+            mvwprintw(win, pos, 5, "%s", it.first.c_str());
+            wprintw(win, "\t :");
+        }
+        mvwprintw(win, pos, 30, "%s", it.second.c_str());
+        
+        pos+=2;
+    }
+
+    mvwprintw(win, pos, 20, "PRESS ENTER TO SEND");
+
+    wrefresh(win);
+} 
+
 void sendActuatorCommands() {
     CanMsg Cmsg;
     Cmsg.id = 700;
     Cmsg.header.ide = 0;
     Cmsg.header.length = 8;
 
-    std::string rudderAngle;
-    std::string wingsailAngle;
     uint16_t rudderAngle16;
     uint16_t wingsailAngle16;
+    uint16_t windvaneAngle16;
+
     float ratio = 65535 / 60;
     try {
-        do {
-            std::cout << "Enter rudder angle (-30 to 30)" << std::endl;
-            std::getline(std::cin, rudderAngle);
-            rudderAngle16 = stoi(rudderAngle);
-            rudderAngle16 += 30;
-    } while(rudderAngle16 > 60);
-
-        do {
-            std::cout << "Enter wingsil angle (-30 to 30)" << std::endl;
-            std::getline(std::cin, wingsailAngle);
-            wingsailAngle16 = stoi(rudderAngle);
-            wingsailAngle16 += 30;
-        } while(wingsailAngle16 > 60);
+        rudderAngle16 = stoi(menuValues["Rudder Angle"]);
+        wingsailAngle16 = stoi(menuValues["Wingsail Angle"]);
+        windvaneAngle16 = stoi(menuValues["Windvane Angle"]);
     } catch(std::invalid_argument ex) {
         std::cout << std::endl << "Actuator commands only works with integers." << std::endl << std::endl;
-//        std::cout << ex.what() << std::endl;
     }
-    
-
     
     rudderAngle16 *= ratio;
     wingsailAngle16 *= ratio;
+    windvaneAngle16 *= ratio;
 
     Cmsg.data[0] = rudderAngle16 & 0xff;
     Cmsg.data[1] = rudderAngle16 >> 8;
     Cmsg.data[2] = wingsailAngle16 & 0xff;
     Cmsg.data[3] = wingsailAngle16 >> 8;
-
-    // More data to be added, windvane self steering
+    Cmsg.data[4] = windvaneAngle16 & 0xff;
+    Cmsg.data[5] = windvaneAngle16 >> 8;
 
     canService.sendCANMessage(Cmsg);
 
@@ -175,55 +196,79 @@ void sendActuatorCommands() {
 
 int main() {
 
+    // Initialize Ncurses
+    initscr();
+
     // Comment out this line if not running on the pi
     // otherwise program will crash.
-  //  auto future = canService.start();
-
-    initscr();
+    //  auto future = canService.start();
 
     SensorDataReceiver sensorReceiver(msgBus, 250);
     CANWindsensorNode windSensor(msgBus, canService, 500);
     windSensor.start();
-    sensorReceiver.start();
-
+    
     std::thread thr(messageLoop);
     thr.detach();
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
-    
-    getch();
-    endwin();
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
 
-/*
-    std::string command;
-    std::string lastcommand;
+    sensorReceiver.printSensorData();
 
-    do {
-        std::cout << "Enter command: " << std::endl;
-        std::cout << "'s' for sending actuator commands." << std::endl;
-        std::cout << "'p' for printing lastest sensor readings." << std::endl;
-        std::cout << "'q' to quit program." << std::endl;
-        std::cout << "#> ";
-        std::getline(std::cin, command);
+    menuValues["Rudder Angle"] = "";
+    menuValues["Wingsail Angle"] = "";
+    menuValues["Windvane Angle"] = "";
+  
+    menuIter highlighted = menuValues.begin();
 
-        if(!command.empty()) {
-            lastcommand = command;
-        }
+    SensorData values = sensorReceiver.getValues();
+    WINDOW* inputWin  = newwin(8+2*menuValues.size(),60, 2*values.size() + 10,2);
+    keypad(inputWin, TRUE);
+    cbreak();
 
-        if(command == "p") {
-            sensorReceiver.printSensorData();
-        } else if(command == "s") {
-             sendActuatorCommands();
-        } else if(command.empty()) {
-        // This is John's idea, so it's easier to print out
-        // sensor data multiple times.
-          if(lastcommand == "p") {
-                sensorReceiver.printSensorData();
+    printInputMenu(inputWin, highlighted);
+    while(1) {
+
+        int c = wgetch(inputWin);
+
+        if(isdigit(c)) {
+            c -= 48;
+            if(highlighted->second.size() <= MAX_INPUT) {
+                highlighted->second += std::to_string(c);
             }
         }
-    } while(command != "q");
 
-    canService.stop();
-    future.get();
-    thr.detach(); */
+        switch(c) {
+            case KEY_DOWN:
+                if(highlighted != --menuValues.end()) {
+                    highlighted++;
+                }
+                break;
+            case KEY_UP:
+                if(highlighted != menuValues.begin()) {
+                    --highlighted;
+                }
+                break;
+            case BACKSPACE:
+                if(!highlighted->second.empty()) {
+                    highlighted->second.pop_back();
+                }
+                break;
+            case ENTER:
+                sendActuatorCommands();
+                for(auto& it : menuValues) {
+                    it.second = "";
+                }
+                break;
+            case TAB:
+                if(highlighted == --menuValues.end()) {
+                    highlighted = menuValues.begin();
+                } else {
+                    ++highlighted;
+                }
+        }
+        printInputMenu(inputWin, highlighted);
+    }
+
+    
+    endwin();
     
 }
