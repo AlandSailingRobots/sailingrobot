@@ -16,6 +16,7 @@
 #include "Math/Utility.h"
 #include "../cxxtest/cxxtest/TestSuite.h"
 #include "SystemServices/CourseRegulator.h"
+#include "SystemServices/WingsailControl.h"
 #include "waypointrouting/Commands.h"
 
 
