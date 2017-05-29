@@ -33,7 +33,7 @@ FILE* file = fopen("./gps.txt", "w");
 
 
 LineFollowNode::LineFollowNode(MessageBus& msgBus, DBHandler& db)
-:  Node(NodeID::SailingLogic, msgBus), m_db(db), m_dbLogger(5, db),
+:  Node(NodeID::SailingLogic, msgBus), m_db(db),
 m_nextWaypointId(0),
 m_nextWaypointLon(0),
 m_nextWaypointLat(0),
@@ -67,7 +67,6 @@ bool LineFollowNode::init()
   twdBufferMaxSize = m_db.retrieveCellAsInt("buffer_config", "1", "true_wind");
   if(twdBufferMaxSize == 0)
   twdBufferMaxSize = DEFAULT_TWD_BUFFERSIZE;
-  m_dbLogger.startWorkerThread();
   return true;
 }
 
