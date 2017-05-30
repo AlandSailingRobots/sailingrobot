@@ -55,11 +55,11 @@ public:
 
   void setUp()
   {
+    mockNode = new MockNode(msgBus(), nodeRegistered);
     // setup them up once in this test, delete them when the program closes
     if(sEstimationNode == 0)
     {
       Logger::DisableLogging();
-      mockNode = new MockNode(msgBus(), nodeRegistered);
 
 
       sEstimationNode = new StateEstimationNode(msgBus(), .5, speedLimit);
@@ -77,6 +77,8 @@ public:
     {
       delete sEstimationNode;
     }
+    delete mockNode;
+
   }
 
   void test_StateEstimationNodeInit(){
@@ -133,7 +135,7 @@ public:
 
         float vesselHeading = Utility::addDeclinationToHeading(heading, nextDeclination);
         float stateEstimationNodeVesselHeading = mockNode->m_StateMsgHeading;
-        TS_ASSERT(stateEstimationNodeVesselHeading == vesselHeading);
+        TS_ASSERT_EQUALS(stateEstimationNodeVesselHeading, vesselHeading);
       }
 
       void test_StateEstimationStateMessageGPSData(){
@@ -150,10 +152,10 @@ public:
           msgBus().sendMessage(std::move(gpsData));
           std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
-          TS_ASSERT(mockNode->m_StateMsglLat == latitude);
-          TS_ASSERT(mockNode->m_StateMsgLon == longitude);
-          TS_ASSERT(mockNode->m_StateMsgSpeed == speed);
-          TS_ASSERT(mockNode->m_StateMsgCourse == heading);
+          TS_ASSERT_EQUALS(mockNode->m_StateMsglLat, latitude);
+          TS_ASSERT_EQUALS(mockNode->m_StateMsgLon, longitude);
+          TS_ASSERT_EQUALS(mockNode->m_StateMsgSpeed, speed);
+          TS_ASSERT_EQUALS(mockNode->m_StateMsgCourse, heading);
         }
 
         void test_StateEstStateMsgSpeedAndDeclZero(){
