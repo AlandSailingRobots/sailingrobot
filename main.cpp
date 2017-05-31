@@ -6,8 +6,6 @@
 
 #if SIMULATION == 1
  #include "Nodes/SimulationNode.h"
- #include "Nodes/StateEstimationNode.h"
- #include "Nodes/WindStateNode.h"
 #else
  #include "Nodes/CV7Node.h"
  #include "Nodes/HMC6343Node.h"
@@ -17,7 +15,9 @@
 #endif
 
 #include "Nodes/WaypointMgrNode.h"
-#include "Nodes/VesselStateNode.h"
+//#include "Nodes/VesselStateNode.h"
+#include "Nodes/StateEstimationNode.h"
+#include "Nodes/WindStateNode.h"
 #include "Nodes/HTTPSyncNode.h"
 #include "Nodes/XbeeSyncNode.h"
 #include "Nodes/LineFollowNode.h"
@@ -121,13 +121,11 @@ int main(int argc, char *argv[])
 		#if SIMULATION == 1
 		printf("using simulation\n");
 		SimulationNode simulation(messageBus, 0.5);
-    StateEstimationNode stateEstimationNode(messageBus, .5, .5);
-    WindStateNode windStateNode(messageBus, 500);
+
 		#else
 
 		XbeeSyncNode xbee(messageBus, dbHandler);
 		CV7Node windSensor(messageBus, dbHandler.retrieveCell("windsensor_config", "1", "port"), dbHandler.retrieveCellAsInt("windsensor_config", "1", "baud_rate"));
-
 		HMC6343Node compass(messageBus, dbHandler.retrieveCellAsInt("buffer_config", "1", "compass"));
     //NOTE: the second parameter (sleep time in seconds) should probably be read from the database
     GPSDNode gpsd(messageBus, 0.5);
@@ -140,7 +138,9 @@ int main(int argc, char *argv[])
 
 
 		HTTPSyncNode httpsync(messageBus, &dbHandler, 0, false);
-		VesselStateNode vessel(messageBus, 0.4);
+		//VesselStateNode vessel(messageBus, 0.4);
+	    StateEstimationNode stateEstimationNode(messageBus, .5, .5);
+    	WindStateNode windStateNode(messageBus, 500);
 		WaypointMgrNode waypoint(messageBus, dbHandler);
 
 
@@ -174,13 +174,9 @@ int main(int argc, char *argv[])
 
 		#if SIMULATION == 1
 		initialiseNode(simulation,"Simulation Node",NodeImportance::CRITICAL);
-    initialiseNode(stateEstimationNode,"StateEstimation Node",NodeImportance::CRITICAL);
-    initialiseNode(windStateNode,"WindState Node",NodeImportance::CRITICAL);
-
 		#else
 		initialiseNode(xbee, "Xbee Sync Node", NodeImportance::NOT_CRITICAL);
 		initialiseNode(windSensor, "Wind Sensor", NodeImportance::CRITICAL);
-
 		initialiseNode(compass, "Compass", NodeImportance::CRITICAL);
 		initialiseNode(gpsd, "GPSD Node", NodeImportance::CRITICAL);
 		initialiseNode(sail, "Sail Actuator", NodeImportance::CRITICAL);
@@ -198,10 +194,12 @@ int main(int argc, char *argv[])
 			initialiseNode(httpsync, "Httpsync Node", NodeImportance::NOT_CRITICAL);
 		}
 
-		initialiseNode(vessel, "Vessel State Node", NodeImportance::CRITICAL);
+		//initialiseNode(vessel, "Vessel State Node", NodeImportance::CRITICAL);
+	    initialiseNode(stateEstimationNode,"StateEstimation Node",NodeImportance::CRITICAL);
+    	initialiseNode(windStateNode,"WindState Node",NodeImportance::CRITICAL);
 		initialiseNode(waypoint, "Waypoint Node", NodeImportance::CRITICAL);
 		initialiseNode(*sailingLogic, "LineFollow Node", NodeImportance::CRITICAL);
-    initialiseNode(*lowLevelControllerNodeJanet, "LowLevelControllerNodeJanet Node", NodeImportance::CRITICAL);
+    	initialiseNode(*lowLevelControllerNodeJanet, "LowLevelControllerNodeJanet Node", NodeImportance::CRITICAL);
 
 		// Start active nodes
 		#if SIMULATION == 1
@@ -217,10 +215,8 @@ int main(int argc, char *argv[])
 		//colorDetection.start();
 		#endif
 		httpsync.start();
-		vessel.start();
-
-		//delete sailingLogic;
-
+		//vessel.start();
+		stateEstimationNode.start();
 
 		// NOTE - Jordan: Just to ensure messages are following through the system
 		MessagePtr dataRequest = std::make_unique<DataRequestMsg>(NodeID::MessageLogger);
@@ -238,6 +234,8 @@ int main(int argc, char *argv[])
 		messageBus.run();
 
 
-	Logger::shutdown();
-	exit(0);
+		Logger::shutdown();
+		delete sailingLogic;
+		delete lowLevelControllerNodeJanet;
+		exit(0);
 }
