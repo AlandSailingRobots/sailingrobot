@@ -55,10 +55,10 @@ private:
 	int 	m_prevWaypointDeclination;
 	int 	m_prevWaypointRadius;
 
-	bool    m_tack;
-	double  m_maxCommandAngle, m_maxSailAngle, m_minSailAngle;
-	double  m_tackAngle;
-	int     m_tackingDirection;
+    bool    m_tack = false;
+    double  m_maxCommandAngle, m_maxSailAngle, m_minSailAngle;
+    double  m_tackAngle;
+    int     m_tackingDirection;
 
 	double NORM_RUDDER_COMMAND = 0.5166; // getCommand() take a value between -1 and 1 so we need to normalize the command correspond to 29.6 degree
 	double NORM_SAIL_COMMAND = 0.6958;

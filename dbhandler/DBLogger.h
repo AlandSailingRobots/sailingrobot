@@ -17,23 +17,22 @@
 
 
 #include "DBHandler.h"
+#include <iostream>
 #include <vector>
 #include <thread>
 #include <mutex>
 #include <condition_variable>
 
-
 class DBLogger {
 public:
+
+
 	DBLogger(unsigned int LogBufferSize, DBHandler& dbHandler);
 	~DBLogger();
 
 	void startWorkerThread();
 
-	void log(const WindStateMsg* msg, double rudder, double sail, int sailServoPosition, int rudderServoPosition,
-			double courseCalculationDistanceToWaypoint, double courseCalculationBearingToWaypoint,
-			double courseCalculationCourseToSteer, bool courseCalculationTack, bool courseCalculationGoingStarboard,
-			int waypointId, double trueWindDirectionCalc, bool routeStarted,std::string timestamp_str);
+	void log(LogItem item);
 
 	unsigned int bufferSize() { return m_bufferSize; }
 private:

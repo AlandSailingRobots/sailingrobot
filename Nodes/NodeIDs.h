@@ -46,6 +46,7 @@ enum class NodeID {
 	MessageVerifier,
 	ActuatorNodeASPire,
 	LowLevelControllerNodeJanet,
+	DBLoggerNode,
 	CANFeedbackReceiver
 };
 
@@ -107,6 +108,8 @@ inline std::string nodeToString(NodeID id)
 		return "ActuatorNodeASPire";
 		case NodeID::LowLevelControllerNodeJanet:
 		return "LowLevelControllerJanet";
+		case NodeID::DBLoggerNode:
+		return "DBLoggerNode";
 		case NodeID::CANFeedbackReceiver:
 		return "CANFeedbackReceiver";
 	}

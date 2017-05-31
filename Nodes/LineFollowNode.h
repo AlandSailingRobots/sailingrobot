@@ -40,8 +40,8 @@ public:
 	float m_gpsHeadingWeight;
 
 private:
+
 	DBHandler &m_db;
-	DBLogger m_dbLogger;
 
 	int 	m_nextWaypointId;
 	double 	m_nextWaypointLon;
@@ -56,7 +56,7 @@ private:
 
 	bool 	m_externalControlActive;
 
-	bool    m_tack;
+	bool    m_tack = false;
 	double  m_maxCommandAngle, m_maxSailAngle, m_minSailAngle;
 	double  m_tackAngle;
 	int     m_tackingDirection;
@@ -81,13 +81,14 @@ private:
 	unsigned int twdBufferMaxSize;
 
 	double calculateAngleOfDesiredTrajectory();
-	void calculateActuatorPos(const WindStateMsg* msg);
+	void calculateActuatorPos();
 	void setPrevWaypointData(WaypointDataMsg* waypMsg);
 
 	virtual int getHeading(int gpsHeading, int compassHeading, double gpsSpeed, bool mockPosition, bool getHeadingFromCompass);
 	//Calculates a smooth transition between the compass and the gps. Do not call directly, use getHeading()
 	int getMergedHeading(int gpsHeading, int compassHeading, bool increaseCompassWeight);
 	void setupRudderCommand();
+	void setupSailCommand();
 
 	bool getGoingStarboard();
 	void setPrevWaypointToBoatPos();
