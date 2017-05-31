@@ -88,6 +88,7 @@ int StateEstimationNode::getCourse(){
   * (Compass heading compensated with declination)
   * or the GPS Course
   */
+
   if(m_VesselSpeed >= 0 && m_VesselSpeed <= m_SpeedLimit){
     int leftOperand = ( (m_SpeedLimit-m_VesselSpeed)/m_SpeedLimit )* m_VesselHeading;
     int rightOperand = (m_VesselSpeed/m_SpeedLimit)*m_VesselCourse;
@@ -109,6 +110,7 @@ void StateEstimationNode::StateEstimationNodeThreadFunc(ActiveNode* nodePtr)
   // An initial sleep, its purpose is to ensure that most if not all the sensor data arrives
   // at the start before we send out the state message.
   std::this_thread::sleep_for(std::chrono::milliseconds(node->STATE_INITIAL_SLEEP));
+
 
   Timer timer;
   timer.start();
