@@ -31,7 +31,7 @@
 
 class LineFollowNode : public Node {
 public:
-	LineFollowNode(MessageBus& msgBus);
+	LineFollowNode(MessageBus& msgBus, DBHandler& db);
 
 	bool init();
 
@@ -41,6 +41,8 @@ public:
 	float m_gpsHeadingWeight;
 
 private:
+
+	DBHandler &m_db;
 
 	int 	m_nextWaypointId;
 	double 	m_nextWaypointLon;

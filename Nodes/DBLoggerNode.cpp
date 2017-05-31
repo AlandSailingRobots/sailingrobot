@@ -23,6 +23,16 @@ DBLoggerNode::DBLoggerNode(MessageBus& msgBus, DBHandler& db, int TimeBetweenMsg
     m_queueSize(queueSize)
 
 {
+    msgBus.registerNode(*this, MessageType::CompassData);
+    msgBus.registerNode(*this, MessageType::GPSData);
+    msgBus.registerNode(*this, MessageType::WindData);
+    msgBus.registerNode(*this, MessageType::ActuatorPosition);
+    msgBus.registerNode(*this, MessageType::ActuatorControlASPire);
+    msgBus.registerNode(*this, MessageType::ASPireActuatorFeedback);
+    msgBus.registerNode(*this, MessageType::CourseData);
+    msgBus.registerNode(*this, MessageType::NavigationControl);
+    msgBus.registerNode(*this, MessageType::WaypointData);
+    msgBus.registerNode(*this, MessageType::WindState);
 }
 
 void DBLoggerNode::processMessage(const Message* msg) {

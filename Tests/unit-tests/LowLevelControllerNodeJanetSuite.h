@@ -89,7 +89,7 @@ public:
 
     MessagePtr msg = std::make_unique<WindStateMsg>(170, 30, 0, 200);
     MessagePtr sMsg = std::make_unique<StateMessage>(170, 30, 10, 200, 50);
-    MessagePtr nMsg = std::make_unique<NavigationControlMsg>(1.2, 2.3, false, state);
+    MessagePtr nMsg = std::make_unique<NavigationControlMsg>(1.2, 2.3, false, false, false, state);
 
     msgBus().sendMessage(std::move(msg));
     msgBus().sendMessage(std::move(sMsg));

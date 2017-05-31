@@ -30,6 +30,7 @@
 
 #include "Messages/DataRequestMsg.h"
 #include "dbhandler/DBHandler.h"
+#include "Nodes/DBLoggerNode.h"
 #include "HardwareServices/MaestroController/MaestroController.h"
 #include "xBee/Xbee.h"
 
@@ -185,7 +186,7 @@ int main(int argc, char *argv[])
 		initialiseNode(sail, "Sail Actuator", NodeImportance::CRITICAL);
 		initialiseNode(rudder, "Rudder Actuator", NodeImportance::CRITICAL);
 		initialiseNode(arduino, "Arduino Node", NodeImportance::NOT_CRITICAL);
-		//initialiseNode(colorDetection, "Colour detection node", NodeImportance::NOT_CRITICAL);
+		initialiseNode(colorDetection, "Colour detection node", NodeImportance::NOT_CRITICAL);
 		#endif
 
 		if (requireNetwork)
@@ -224,6 +225,14 @@ int main(int argc, char *argv[])
 		// NOTE - Jordan: Just to ensure messages are following through the system
 		MessagePtr dataRequest = std::make_unique<DataRequestMsg>(NodeID::MessageLogger);
 		messageBus.sendMessage(std::move(dataRequest));
+
+		int dbLoggerWaitTime = 100; 		// wait time (in milliseconds) between messages from the messageBus
+		int dbLoggerUpdateFrequency = 1000; // updating frequency to the database (in milliseconds)
+		int dbLoggerQueueSize = 5; 			// how many messages to log to the databse at a time
+
+		DBLoggerNode dbLoggerNode(messageBus, dbHandler, dbLoggerWaitTime, dbLoggerUpdateFrequency, dbLoggerQueueSize);
+		initialiseNode(dbLoggerNode, "DBLoggerNode", NodeImportance::CRITICAL);
+		dbLoggerNode.start();
 
 		Logger::info("Message bus started!");
 		messageBus.run();
