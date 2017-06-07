@@ -42,7 +42,9 @@ public:
 
     ///----------------------------------------------------------------------------------
  	/// Processes the following messages:
-    ///     * Vessel State Messages
+    ///     * GPS Data Messages
+    ///     * Compass Messages
+    ///     * Wind Messages
     ///     * New Waypoint Messages
     ///     * Course Request Message
  	///----------------------------------------------------------------------------------
