@@ -73,7 +73,7 @@ void LocalNavigationModule::processMessage( const Message* msg )
             GPSDataMsg* gps = (GPSDataMsg*)msg;
             boatState.lat = gps->latitude();
             boatState.lon = gps->longitude();
-            boatState.speed = gps->speed();
+            boatState.speed = gps->speed();¬
         }
             break;
 
@@ -112,7 +112,7 @@ void LocalNavigationModule::processMessage( const Message* msg )
 ///----------------------------------------------------------------------------------
 void LocalNavigationModule::registerVoter( ASRVoter* voter )
 {
-    if( voter != NULL )
+    if( voter != NULL )¬
     {
         voters.push_back(voter);
     }
