@@ -35,9 +35,6 @@
 #define WAKEUP_INTIAL_SLEEP     2000
 
 
-FILE* file = fopen("./gps.txt", "w");
-
-
 ///----------------------------------------------------------------------------------
 LocalNavigationModule::LocalNavigationModule( MessageBus& msgBus )
     :ActiveNode(NodeID::LocalNavigationModule, msgBus)
@@ -47,9 +44,6 @@ LocalNavigationModule::LocalNavigationModule( MessageBus& msgBus )
     msgBus.registerNode( *this, MessageType::WindData );
     msgBus.registerNode( *this, MessageType::WaypointData );
     msgBus.registerNode( *this, MessageType::RequestCourse );
-
-    fprintf( file, "%s,%ss,%s\n", "id", "latitude", "longitude" );
-    fflush( file );
 }
 
 ///----------------------------------------------------------------------------------
@@ -80,9 +74,6 @@ void LocalNavigationModule::processMessage( const Message* msg )
             boatState.lat = gps->latitude();
             boatState.lon = gps->longitude();
             boatState.speed = gps->speed();
-
-            fprintf( file, "%d,%f,%f\n", i, boatState.lat, boatState.lon );
-            fflush( file );
         }
             break;
 
