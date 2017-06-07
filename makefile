@@ -108,11 +108,16 @@ export XBEE_NETWORK_SRC     = Network/DataLink.cpp Network/LinuxSerialDataLink.c
                             xBee/Xbee.cpp Nodes/XbeeSyncNode.cpp
 
 
+export WIRING_PI            = libwiringPi.so
+export WIRING_PI_PATH		= ./libs/wiringPi/wiringPi
+export WIRING_PI_STATIC		= ./libs/wiringPi/wiringPi/libwiringPi.so.2.32
+
+
 ###############################################################################
 # Rules
 ###############################################################################
 
-.PHONY: clean
+.PHONY: clean $(WIRING_PI)
 
 all: $(EXECUTABLE) stats
 
