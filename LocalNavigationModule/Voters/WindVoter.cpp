@@ -32,7 +32,7 @@ const ASRCourseBallot& WindVoter::vote( const BoatState_t& boatState )
     uint16_t twd = Utility::getTrueWindDirection(boatState.windDir, boatState.windSpeed, 
                 boatState.speed, boatState.heading, trueWindBuffer, TW_BUFFER_SIZE);
 
-    // Set everything to 75% of the max vote
+    // Set everything to 66% of the max vote
     for( int i = 0; i < 360; i+= ASRCourseBallot::COURSE_RESOLUTION )
     {
         courseBallot.set( i, courseBallot.maxVotes() / 1.5 );
@@ -40,6 +40,7 @@ const ASRCourseBallot& WindVoter::vote( const BoatState_t& boatState )
 
     int16_t twdBearingDiff = abs(Utility::headingDifference( boatState.waypointBearing, twd ));
     
+    // Encourage tacking if necessary 
     if( twdBearingDiff <= TACK_ANGLE )
     {
         if ( abs( Utility::headingDifference( boatState.heading, twd + TACK_ANGLE ) ) < 
@@ -53,7 +54,7 @@ const ASRCourseBallot& WindVoter::vote( const BoatState_t& boatState )
         }
     }
 
-    // Add votes to the direction the boat is facing, less cost
+    // Add votes to the direction the boat is facing, less cost to change the vessel.
     for( int i = 0; i < 8; i += ASRCourseBallot::COURSE_RESOLUTION )
     {
         courseBallot.add( boatState.heading + i, (( 8 - i ) / 8) * (courseBallot.maxVotes() / 10) );

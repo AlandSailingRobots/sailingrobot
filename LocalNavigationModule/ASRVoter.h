@@ -34,8 +34,15 @@ public:
  	///----------------------------------------------------------------------------------
     virtual const ASRCourseBallot& vote( const BoatState_t& boatState ) = 0;
 
+    ///----------------------------------------------------------------------------------
+ 	/// Returns the voters weight, that was set during construction
+ 	///----------------------------------------------------------------------------------
     int16_t weight() { return voterWeight; }
 
+    ///----------------------------------------------------------------------------------
+ 	/// Returns the course with the highest number of votes. If there is a tie, the
+    /// first course in the tie that is found is chosen.
+ 	///----------------------------------------------------------------------------------
     uint16_t getBestCourse(int16_t& value)
     {
         uint16_t bestCourse = 0;
@@ -52,6 +59,9 @@ public:
         return bestCourse;
     }
 
+    ///----------------------------------------------------------------------------------
+ 	/// Returns the name of the voter
+ 	///----------------------------------------------------------------------------------
     std::string getName() { return name; }
 
 protected:

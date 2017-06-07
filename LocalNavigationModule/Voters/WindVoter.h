@@ -4,6 +4,11 @@
  * 		WindVoter.h
  *
  * Purpose:
+ *      This voter encourages the vessel not to sail into the no go zone, and to tack.
+ *      
+ *      By placing 66% of the max votes into every course apart from the no go zone, this
+ *      encourages the boat to not sail into the no go zone. Extra votes are also placed on
+ *      the tacking angles to encourage tacking when necessary.
  *		
  *
  * License:
