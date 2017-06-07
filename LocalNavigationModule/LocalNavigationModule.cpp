@@ -98,7 +98,7 @@ void LocalNavigationModule::processMessage( const Message* msg )
             double distance = CourseMath::calculateDTW( boatState.lon, boatState.lat, boatState.currWaypointLon, boatState.currWaypointLat );
             Logger::info( "New Waypoint! Lat: %f Lon: %f Distance: %f", boatState.currWaypointLat, boatState.currWaypointLon, distance );
 
-            // Delibrate dropdown after a new waypoint,0 we want to start a new ballot 
+            // Delibrate dropdown after a new waypoint, we want to start a new ballot 
             // and get a new heading
         }
         case MessageType::RequestCourse:
@@ -112,7 +112,7 @@ void LocalNavigationModule::processMessage( const Message* msg )
 ///----------------------------------------------------------------------------------
 void LocalNavigationModule::registerVoter( ASRVoter* voter )
 {
-    if( voter != NULL )¬
+    if( voter != NULL )
     {
         voters.push_back(voter);
     }
@@ -124,7 +124,7 @@ void LocalNavigationModule::startBallot()
     arbiter.clearBallot();
     boatState.waypointBearing = CourseMath::calculateBTW( boatState.lon, boatState.lat, boatState.currWaypointLon, boatState.currWaypointLat );
 
-    std::vector<ASRVoter*>::iterator it;  // declare an iterator to a vector of strings
+    std::vector<ASRVoter*>::iterator it;
 
     for( it = voters.begin(); it != voters.end(); it++ ) 
     {
@@ -132,7 +132,7 @@ void LocalNavigationModule::startBallot()
         arbiter.castVote( voter->weight(), voter->vote( boatState ) );
     }
 
-    printf("[Voters] ");
+    printf("[Voters] "); // Debug
     for( it = voters.begin(); it != voters.end(); it++ ) 
     {
         ASRVoter* voter = (*it);
@@ -140,7 +140,7 @@ void LocalNavigationModule::startBallot()
         uint16_t bestCourse = voter->getBestCourse(votes);
 
         std::string name = voter->getName();
-        printf("%s : %d %d ", name.c_str(), bestCourse, votes);
+        printf("%s : %d %d ", name.c_str(), bestCourse, votes); // Debug: Prints out some voting information
     }
     printf("\n");
 
