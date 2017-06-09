@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include "Node.h"
+#include "ActiveNode.h"
 #include "Messages/StateMessage.h"
 #include "Messages/WindStateMsg.h"
 #include "Messages/WaypointDataMsg.h"
@@ -28,16 +28,16 @@
 #include "Math/CourseMath.h"
 
 
-class LineFollowNode : public Node {
+class LineFollowNode : public ActiveNode {
 public:
 	LineFollowNode(MessageBus& msgBus, DBHandler& db);
+	~LineFollowNode();
 
 	bool init();
-
+	void start();
 	void processMessage(const Message* message);
 
-
-	float m_gpsHeadingWeight;
+//	float m_gpsHeadingWeight;
 
 private:
 
@@ -57,7 +57,6 @@ private:
 	bool 	m_externalControlActive;
 
 	bool    m_tack = false;
-	double  m_maxCommandAngle, m_maxSailAngle, m_minSailAngle;
 	double  m_tackAngle;
 	int     m_tackingDirection;
 
@@ -72,6 +71,7 @@ private:
 	double m_apparentWindSpeed;
 	double m_apparentWindDir;
 
+/*
 	const double NORM_RUDDER_COMMAND = 0.5166; // getCommand() take a value between -1 and 1 so we need to normalize the command correspond to 29.6 degree
 	const double NORM_SAIL_COMMAND = 0.6958;
 
@@ -79,20 +79,23 @@ private:
 
 	std::vector<float> twdBuffer;
 	unsigned int twdBufferMaxSize;
+*/
+	static void LineFollowNodeThreadFunc(ActiveNode* nodePtr);
 
-	double calculateAngleOfDesiredTrajectory();
-	void calculateActuatorPos();
+	void processStateMessage(const StateMessage* stateMsg);
+	void processWindStateMessage(const WindStateMsg* windStateMsg);
+	void processWaypointMessage(WaypointDataMsg* waypMsg);
 	void setPrevWaypointData(WaypointDataMsg* waypMsg);
 
-	virtual int getHeading(int gpsHeading, int compassHeading, double gpsSpeed, bool mockPosition, bool getHeadingFromCompass);
-	//Calculates a smooth transition between the compass and the gps. Do not call directly, use getHeading()
-	int getMergedHeading(int gpsHeading, int compassHeading, bool increaseCompassWeight);
-	void setupRudderCommand();
-	void setupSailCommand();
+	double calculateAngleOfDesiredTrajectory();
+	double calculateDesiredCourse();
 
-	bool getGoingStarboard();
+//	virtual int getHeading(int gpsHeading, int compassHeading, double gpsSpeed, bool mockPosition, bool getHeadingFromCompass);
+	//Calculates a smooth transition between the compass and the gps. Do not call directly, use getHeading()
+//	int getMergedHeading(int gpsHeading, int compassHeading, bool increaseCompassWeight);
+
+
+
 	void setPrevWaypointToBoatPos();
 
-	/*void manageDatabase(VesselStateMsg* msg, double trueWindDirection, double rudder, double sail, double heading,
-	double distanceToNextWaypoint, double bearingToNextWaypoint);*/
 };

@@ -15,7 +15,6 @@
 #endif
 
 #include "Nodes/WaypointMgrNode.h"
-//#include "Nodes/VesselStateNode.h"
 #include "Nodes/StateEstimationNode.h"
 #include "Nodes/WindStateNode.h"
 #include "Nodes/HTTPSyncNode.h"
@@ -133,22 +132,20 @@ int main(int argc, char *argv[])
 		ArduinoNode arduino(messageBus, 0.1);
 		std::vector<std::string> list;
 		list.push_back("red");
-		//colorDetectionNode colorDetection(messageBus, list, 0);
 		#endif
 
 
 		HTTPSyncNode httpsync(messageBus, &dbHandler, 0, false);
-		//VesselStateNode vessel(messageBus, 0.4);
 	    StateEstimationNode stateEstimationNode(messageBus, .5, .5);
     	WindStateNode windStateNode(messageBus, 500);
 		WaypointMgrNode waypoint(messageBus, dbHandler);
 
 
-		Node* sailingLogic;
-    Node* lowLevelControllerNodeJanet;
+		ActiveNode* sailingLogic;
+    	Node* lowLevelControllerNodeJanet;
 
 		sailingLogic = new LineFollowNode(messageBus, dbHandler);
-    lowLevelControllerNodeJanet = new LowLevelControllerNodeJanet(messageBus, 30, 60, dbHandler);
+    	lowLevelControllerNodeJanet = new LowLevelControllerNodeJanet(messageBus, 30, 60, dbHandler);
 
 		#if SIMULATION == 0
 		int channel = dbHandler.retrieveCellAsInt("sail_servo_config", "1", "channel");
@@ -204,19 +201,17 @@ int main(int argc, char *argv[])
 		// Start active nodes
 		#if SIMULATION == 1
 		simulation.start();
-
 		#else
-
 		xbee.start();
 		windSensor.start();
 		compass.start();
 		gpsd.start();
 		arduino.start();
-		//colorDetection.start();
 		#endif
+
 		httpsync.start();
-		//vessel.start();
 		stateEstimationNode.start();
+		sailingLogic->start();
 
 		// NOTE - Jordan: Just to ensure messages are following through the system
 		MessagePtr dataRequest = std::make_unique<DataRequestMsg>(NodeID::MessageLogger);

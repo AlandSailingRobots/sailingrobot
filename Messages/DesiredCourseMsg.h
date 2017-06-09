@@ -1,8 +1,7 @@
 /****************************************************************************************
  *
  * File:
- * 		DesiredCourseMsg
- .h
+ * 		DesiredCourseMsg.h
  *
  * Purpose:
  *
@@ -21,11 +20,11 @@
 
 class DesiredCourseMsg : public Message {
 public:
-	DesiredCourseMsg( NodeID destinationID, NodeID sourceID, uint16_t desiredCourse )
+	DesiredCourseMsg( NodeID destinationID, NodeID sourceID, double desiredCourse )
 		:Message( MessageType::DesiredCourse, sourceID, destinationID ), course( desiredCourse )
 	{ }
 
-	DesiredCourseMsg( uint16_t desiredCourse )
+	DesiredCourseMsg( double desiredCourse )
 		:Message( MessageType::DesiredCourse, NodeID::None, NodeID::None ), course( desiredCourse )
 	{ }
 
@@ -35,8 +34,8 @@ public:
 
 	virtual ~DesiredCourseMsg() { }
 
-	uint16_t desiredCourse() { return course; }
+	double desiredCourse() { return course; }
 
 private:
-	uint16_t course;
+	double course;
 };
