@@ -28,6 +28,7 @@ MessageLoggerNode::MessageLoggerNode(MessageBus& msgBus)
 	msgBus.registerNode(*this, MessageType::GPSData);
 	msgBus.registerNode(*this, MessageType::ArduinoData);
 	msgBus.registerNode(*this, MessageType::WaypointData);
+	msgBus.registerNode(*this, MessageType::StateMessage);
 
 }
 
@@ -59,6 +60,9 @@ void MessageLoggerNode::processMessage(const Message* message)
 			break;
 		case MessageType::WaypointData:
 			//Logger::info("WaypointData message received");
+			break;
+			case MessageType::StateMessage:
+			//Logger::info("StateMessage message received");
 			break;
 		default:
 			break;

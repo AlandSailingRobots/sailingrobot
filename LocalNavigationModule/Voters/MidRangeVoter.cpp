@@ -72,11 +72,11 @@ const ASRCourseBallot& MidRangeVoter::vote( const BoatState_t& boatState )
         }
         assignVotes(i, riskOfCollision);
 
-        if(i == 223)
-        {
-            Logger::info("CPA at tack: %f so votes is %d", closestCPA, courseBallot.get(i));
-            Logger::info("Distance: %f ", distance);
-        }
+        //if(closestCPA < 100)
+        //{
+        //Logger::info("CPA %f at %d so votes is %d", closestCPA, i, courseBallot.get(i));
+        //Logger::info("Distance: %f ", distance);
+        //}
 
         aisContacts.reset();
     }

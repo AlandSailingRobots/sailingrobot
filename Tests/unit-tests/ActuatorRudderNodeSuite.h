@@ -9,6 +9,11 @@
  *
  * Developer Notes:
  *
+ *							11.4.17 JM
+ *
+ *	Functions that have tests:		Functions that does not have tests:
+ *
+ *	init
  *
  ***************************************************************************************/
 
@@ -17,7 +22,7 @@
  #include "../cxxtest/cxxtest/TestSuite.h"
  #include "TestMocks/MessageLogger.h"
  #include "Nodes/ActuatorNode.h"
- #include "SystemServices/MaestroController.h"
+ #include "HardwareServices/MaestroController/MaestroController.h"
 
 // For std::this_thread
 #include <chrono>

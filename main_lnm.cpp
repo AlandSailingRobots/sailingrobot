@@ -24,7 +24,7 @@
 
 #include "Messages/DataRequestMsg.h"
 #include "dbhandler/DBHandler.h"
-#include "SystemServices/MaestroController.h"
+#include "HardwareServices/MaestroController/MaestroController.h"
 #include "xBee/Xbee.h"
 
 #include "LocalNavigationModule/LocalNavigationModule.h"
@@ -83,7 +83,7 @@ void development_LocalNavigationModule( MessageBus& messageBus, DBHandler& dbHan
 
 	Logger::info( "Using Local Navigation Module" );
 
-	VesselStateNode vesselState	( messageBus );
+	VesselStateNode vesselState	( messageBus, 0.2 );
 	WaypointMgrNode waypoint	( messageBus, dbHandler );
 	LocalNavigationModule lnm	( messageBus );
 	LowLevelController llc		( messageBus, dbHandler, PGAIN, IGAIN );

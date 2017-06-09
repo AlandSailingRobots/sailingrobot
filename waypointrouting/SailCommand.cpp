@@ -1,5 +1,10 @@
 #include "SailCommand.h"
 
+#include <math.h>
+#include <algorithm>
+#include <cmath>
+
+#define NORM_SAIL_COMMAND 0.6958
 
 SailCommand::SailCommand() {
 
@@ -15,7 +20,7 @@ int SailCommand::getCommand(double command) {
 		command = 0;
 	if (command > 1)
 		command = 1;
-	
+
 	return (m_runningCommand - m_closeReachCommand) * command + m_closeReachCommand;
 }
 

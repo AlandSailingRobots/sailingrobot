@@ -65,7 +65,7 @@ private:
     ///----------------------------------------------------------------------------------
  	/// Just a little hack for waking up the navigation module for now
  	///----------------------------------------------------------------------------------
-    static void WakeupThreadFunc( void* nodePtr );
+    static void WakeupThreadFunc( ActiveNode* nodePtr );
 
     std::vector<ASRVoter*> voters;
     BoatState_t boatState;

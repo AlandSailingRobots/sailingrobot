@@ -47,6 +47,6 @@ public:
  	///----------------------------------------------------------------------------------
     void clearBallot();
 private:
-    const int MAX_VOTES = 25;
+    const int MAX_VOTES = 150;
     ASRCourseBallot courseBallot;
 };

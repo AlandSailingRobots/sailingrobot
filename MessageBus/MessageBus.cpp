@@ -17,7 +17,7 @@
 // For std::this_thread
 #include <chrono>
 #include <thread>
-
+#include <iostream>
 
 #define SLEEP_TIME_MS	50
 
@@ -72,7 +72,7 @@ void MessageBus::sendMessage(MessagePtr msg)
 		m_FrontQueueMutex.lock();
 		Message* logMsg = msg.get();
 		m_FrontMessages->push(std::move(msg));
-		logMessageReceived(logMsg); 
+		logMessageReceived(logMsg);
 		m_FrontQueueMutex.unlock();
 	}
 }

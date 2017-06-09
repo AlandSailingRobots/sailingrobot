@@ -85,10 +85,16 @@ public:
 	void processActuatorPositionMessage(ActuatorPositionMsg* msg);
 
 private:
+
   ///----------------------------------------------------------------------------------
   /// Process a boat data message
   ///----------------------------------------------------------------------------------
   void processBoatData( TCPPacket_t& packet );
+
+	///----------------------------------------------------------------------------------
+	/// Communicate with the simulation receive sensor data and send actuator data
+	///----------------------------------------------------------------------------------
+	static void SimulationThreadFunc(ActiveNode* nodePtr);
 
   ///----------------------------------------------------------------------------------
   /// Process a AIS contact data message
@@ -108,7 +114,7 @@ private:
   ///----------------------------------------------------------------------------------
 	/// Communicate with the simulation receive sensor data and send actuator data
 	///----------------------------------------------------------------------------------
-	static void SimulationThreadFunc(void* nodePtr);
+	//static void SimulationThreadFunc(void* nodePtr);
 
   void createCompassMessage();
   void createGPSMessage();

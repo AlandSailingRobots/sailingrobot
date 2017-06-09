@@ -26,7 +26,7 @@
 
 class VesselStateNode : public ActiveNode {
 public:
-	VesselStateNode(MessageBus& msgBus);
+	VesselStateNode(MessageBus& msgBus, double loopTime);
 	~VesselStateNode();
 
 	///----------------------------------------------------------------------------------
@@ -64,7 +64,7 @@ private:
 	/// Starts the VesselStateNode's thread that pumps out VesselStateMsg which contains
 	/// data collected from the vessel's sensors
 	///----------------------------------------------------------------------------------
-	static void VesselStateThreadFunc(void* nodePtr);
+	static void VesselStateThreadFunc(ActiveNode* nodePtr);
 
 	int 	m_CompassHeading;
 	int 	m_CompassPitch;
@@ -92,6 +92,10 @@ private:
 	int16_t waypointBearing;
 	double waypointDistance;
 	int16_t radius;
+  double m_LoopTime;
+
+  const int VESSEL_STATE_INITIAL_SLEEP = 2000;
+
 
 
 	TCPServer server;

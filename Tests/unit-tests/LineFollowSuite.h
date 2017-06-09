@@ -1,91 +1,119 @@
 /****************************************************************************************
- *
- * File:
- * 		LineFollowSuite.h
- *
- * Purpose:
- *		A set of unit tests seeing if the LineFollowNode works as intended
- *
- * Developer Notes:
- *
- *
- ***************************************************************************************/
+*
+* File:
+* 		LineFollowSuite.h
+*
+* Purpose:
+*		A set of unit tests seeing if the LineFollowNode works as intended
+*
+* Developer Notes:
+*
+*							12.4.17 JM
+*
+*	Functions that have tests:		Functions that does not have tests:
+*
+*	init 						calculateAngleOfDesiredTrajectory
+*									calculateActuatorPos
+*									setPrevWaypointData
+*									getHeading
+*									getMergedHeading
+*									setupRudderCommand
+*									setupSailCommand
+*									getGoingStarboard
+*									setPrevWaypointToBoatPos
+*
+***************************************************************************************/
 
 #pragma once
 
 #include "../cxxtest/cxxtest/TestSuite.h"
 #include "../../MessageBus/MessageBus.h"
-#include "TestMocks/MessageLogger.h"
 #include "Nodes/LineFollowNode.h"
 #include "Messages/VesselStateMsg.h"
+#include "Messages/WindStateMsg.h"
+#include "Messages/StateMessage.h"
+#include "SystemServices/SoftsailControl.h"
+#include "Math/Utility.h"
+
 
 // For std::this_thread
 #include <chrono>
 #include <thread>
+#include <math.h>
 
 #define WAIT_FOR_MESSAGE		300
 #define LINEFOLLOW_TEST_COUNT   2
 
 class LineFollowSuite : public CxxTest::TestSuite {
-    public:
-    LineFollowNode* lineFollow;
-    std::thread* thr;
-	MessageLogger* logger;
-	int testCount = 0;
-	DBHandler* dbHandler;
+public:
+  LineFollowNode* lineFollow;
+  std::thread* thr;
 
-	// Cheeky method for declaring and initialising a static in a header file
-	static MessageBus& msgBus()
-	{
-		static MessageBus* mbus = new MessageBus();
-		return *mbus;
-	}
+  MockNode* mockNode;
+  bool nodeRegistered = false;
 
-	static void runMessageLoop()
-	{
-		msgBus().run();
-	}
+  int testCount = 0;
+  DBHandler* dbHandler;
 
-	void setUp()
-	{
-		// Only want to setup them up once in this test, only going to delete them when the program closes and the OS destroys
-		// the process's memory
-		if(lineFollow == 0)
-		{
-            dbHandler = new DBHandler("./asr.db");
-			Logger::DisableLogging();
-			logger = new MessageLogger(msgBus());
-			lineFollow = new LineFollowNode(msgBus(), *dbHandler);
-			thr = new std::thread(runMessageLoop);
-		}
-		testCount++;
-		std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_FOR_MESSAGE));
-	}
+  // Cheeky method for declaring and initialising a static in a header file
+  static MessageBus& msgBus()
+  {
+    static MessageBus* mbus = new MessageBus();
+    return *mbus;
+  }
 
-	void tearDown()
-	{
-		if(testCount == LINEFOLLOW_TEST_COUNT)
-		{
-			delete lineFollow;
-			delete logger;
-			delete dbHandler;
-		}
-	}
+  static void runMessageLoop()
+  {
+    msgBus().run();
+  }
 
-    void test_LineFollowInit()
+  void setUp()
+  {
+    // Only want to setup them up once in this test, only going to delete them when the program closes and the OS destroys
+    // the process's memory
+    if(lineFollow == 0)
     {
-        TS_ASSERT(lineFollow->init());
-    }
+      dbHandler = new DBHandler("./asr.db");
+      Logger::DisableLogging();
+      lineFollow = new LineFollowNode(msgBus(), *dbHandler);
 
-    void test_LineFollowCalculateActuatorPosition()
+      thr = new std::thread(runMessageLoop);
+    }
+    mockNode = new MockNode(msgBus(), nodeRegistered);
+    testCount++;
+    std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_FOR_MESSAGE));
+  }
+
+  void tearDown()
+  {
+    if(testCount == LINEFOLLOW_TEST_COUNT)
     {
-		TS_FAIL("Test is broken!");
-        /*MessagePtr msg = std::make_unique<VesselStateMsg>(170, 30, 0, true, true, 19.2, 60.02, 120.04, 2.1, 11, 170, 23.5f, 5.4f, 24.5f, 10, 5500, 4700, 2);
-        msgBus().sendMessage(std::move(msg));
-
-        std::this_thread::sleep_for(std::chrono::milliseconds(2000));
-		TS_TRACE("END OF LINEFOLLOW");*/
-        //TS_ASSERT(logger->actuatorPositionReceived());
+      delete lineFollow;
+      delete dbHandler;
     }
+    delete mockNode;
 
-};
+  }
+
+  void test_LineFollowInit()
+  {
+    TS_ASSERT(lineFollow->init());
+    TS_ASSERT(nodeRegistered);
+  }
+
+  void test_LineFollowCalculateActuatorPosition()
+  {
+
+    MessagePtr msg = std::make_unique<WindStateMsg>(170, 30, 0, 200);
+    MessagePtr sMsg = std::make_unique<StateMessage>(170, 30, 10, 200, 50);
+
+    msgBus().sendMessage(std::move(msg));
+    msgBus().sendMessage(std::move(sMsg));
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+    TS_TRACE("END OF LINEFOLLOW");
+    TS_ASSERT(mockNode->m_MessageReceived);
+  }
+
+
+  };

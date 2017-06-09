@@ -58,7 +58,6 @@ void LocalNavigationModule::start()
 ///----------------------------------------------------------------------------------
 void LocalNavigationModule::processMessage( const Message* msg )
 {
-    static int i = 0;
     switch( msg->messageType() )
     {
         case MessageType::CompassData:
@@ -73,7 +72,7 @@ void LocalNavigationModule::processMessage( const Message* msg )
             GPSDataMsg* gps = (GPSDataMsg*)msg;
             boatState.lat = gps->latitude();
             boatState.lon = gps->longitude();
-            boatState.speed = gps->speed();¬
+            boatState.speed = gps->speed();
         }
             break;
 
@@ -151,7 +150,7 @@ void LocalNavigationModule::startBallot()
 ///----------------------------------------------------------------------------------
 /// Just a little hack for waking up the navigation module for now
 ///----------------------------------------------------------------------------------
-void LocalNavigationModule::WakeupThreadFunc( void* nodePtr )
+void LocalNavigationModule::WakeupThreadFunc( ActiveNode* nodePtr )
 {
     LocalNavigationModule* node = (LocalNavigationModule*)nodePtr;
 

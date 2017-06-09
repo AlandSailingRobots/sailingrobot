@@ -13,8 +13,8 @@
 #   For the local navigation module with the simulator
 #   make dev-lnm USE_SIM=1
 #
-# For the default code 
-#   make 
+# For the default code
+#   make
 #
 ###############################################################################
 
@@ -41,21 +41,21 @@ export CXX                     = g++
 export SIZE                    = size
 endif
 
-export MKDIR_P          = mkdir -p
+export MKDIR_P          	= mkdir -p
 
-export DEFINES          = -DTOOLCHAIN=$(TOOLCHAIN) -DSIMULATION=$(USE_SIM)
+export DEFINES          	= -DTOOLCHAIN=$(TOOLCHAIN) -DSIMULATION=$(USE_SIM)
 
 
 ###############################################################################
 # Folder Paths
 ###############################################################################
 
-export SRC_DIR			= ./
-export BUILD_DIR        = build
-export EXEC_DIR         = ./
-export INC_DIR          = -I./ -I./libs -I./libs/wiringPi/wiringPi
+export SRC_DIR				= ./
+export BUILD_DIR        	= build
+export EXEC_DIR         	= ./
+export INC_DIR         	 	= -I./ -I./libs -I./libs/wiringPi/wiringPi
 
-LNM_DIR                 = LocalNavigationModule
+LNM_DIR                 	= LocalNavigationModule
 
 
 ###############################################################################
@@ -64,6 +64,9 @@ LNM_DIR                 = LocalNavigationModule
 
 # Target Output
 export EXECUTABLE           = sr
+export UNIT_TEST_EXEC 		= unit-tests.run
+export HARDWARE_TEST_EXEC 	= hardware-tests.run
+
 export OBJECT_FILE          = $(BUILD_DIR)/objects.tmp
 
 
@@ -82,35 +85,46 @@ export LNM_SRC              = $(LNM_DIR)/ASRCourseBallot.cpp $(LNM_DIR)/ASRArbit
 							$(LNM_DIR)/Voters/MidRangeVoter.cpp $(COLLIDABLE_MGR_SRC)
 
 export LINE_FOLLOW_SRC      = Nodes/LineFollowNode.cpp waypointrouting/RudderCommand.cpp \
-                            waypointrouting/SailCommand.cpp Nodes/MessageLoggerNode.cpp
+                            Nodes/MessageLoggerNode.cpp waypointrouting/Commands.cpp waypointrouting/SailCommand.cpp
 
 export NETWORK_SRC          = Network/TCPServer.cpp Nodes/VesselStateNode.cpp
 
-export HARDWARE_NODES_SRC   = Nodes/CV7Node.cpp Nodes/HMC6343Node.cpp Nodes/GPSDNode.cpp \
-                            Nodes/ActuatorNode.cpp Nodes/ArduinoNode.cpp
+export HARDWARE_NODES_SRC   = Nodes/CV7Node.cpp Nodes/HMC6343Node.cpp Nodes/GPSDNode.cpp Nodes/ActuatorNodeASPire.cpp \
+                            Nodes/ActuatorNode.cpp Nodes/ArduinoNode.cpp Nodes/CANFeedbackReceiver.cpp Nodes/CANWindsensorNode.cpp
 
 export SYSTEM_SERVICES_SRC  = SystemServices/Logger.cpp SystemServices/SysClock.cpp SystemServices/Timer.cpp \
-                            dbhandler/DBHandler.cpp dbhandler/DBLogger.cpp
+                            dbhandler/DBHandler.cpp dbhandler/DBLogger.cpp SystemServices/WingsailControl.cpp \
+														SystemServices/CourseRegulator.cpp SystemServices/SoftsailControl.cpp \
+														Nodes/DBLoggerNode.cpp
 
-export HARDWARE_SERVICES_SRC = SystemServices/MaestroController.cpp i2ccontroller/I2CController.cpp
+export HARDWARE_SERVICES_SRC = HardwareServices/MaestroController/MaestroController.cpp HardwareServices/i2ccontroller/I2CController.cpp \
+							   HardwareServices/CAN_Services/CANPGNReceiver.cpp HardwareServices/CAN_Services/CANService.cpp \
+							   HardwareServices/CAN_Services/mcp2515.cpp HardwareServices/CAN_Services/MsgFunctions.cpp \
+							   HardwareServices/CAN_Services/CANFrameReceiver.cpp
 
 export MATH_SRC             = Math/CourseCalculation.cpp Math/CourseMath.cpp Math/Utility.cpp
 
 export SIMULATOR_SRC        = Nodes/SimulationNode.cpp
 
-export CORE_SRC             = Nodes/WaypointMgrNode.cpp $(MESSAGE_BUS_SRC) $(NETWORK_SRC) \
-                            $(SYSTEM_SERVICES_SRC) $(MATH_SRC)
+export CORE_SRC             = 	Nodes/WaypointMgrNode.cpp Nodes/LowLevelControllerNodeASPire.cpp \
+																Nodes/StateEstimationNode.cpp \
+							   								Nodes/LowLevelControllerNodeJanet.cpp Nodes/WindStateNode.cpp \
+								$(MESSAGE_BUS_SRC) $(NETWORK_SRC) $(SYSTEM_SERVICES_SRC) $(MATH_SRC)
 
 export HTTP_SYNC_SRC        = Nodes/HTTPSyncNode.cpp
 
-# TODO: Break down for Xbee Remote
+# TODO: Break down for Xbee Remote0
 export XBEE_NETWORK_SRC     = Network/DataLink.cpp Network/LinuxSerialDataLink.cpp Network/XbeePacketNetwork.cpp \
                             xBee/Xbee.cpp Nodes/XbeeSyncNode.cpp
+
 
 
 export WIRING_PI            = libwiringPi.so
 export WIRING_PI_PATH		= ./libs/wiringPi/wiringPi
 export WIRING_PI_STATIC		= ./libs/wiringPi/wiringPi/libwiringPi.so.2.32
+
+export INTEGRATION_TEST		= Tests/integration/IntegrationTests/LowLevelControllerJanetIntegrationTest.cpp
+
 
 
 ###############################################################################
@@ -127,6 +141,14 @@ dev-lnm: $(BUILD_DIR) $(WIRING_PI)
 line-follow: $(BUILD_DIR) $(WIRING_PI)
 	$(MAKE) -f line-follow.mk -j4
 
+# Builds the intergration test, requires the whole system to be built before
+tests: $(BUILD_DIR) $(WIRING_PI)
+	$(MAKE) -C Tests
+	$(MAKE) -f tests.mk
+
+integration_tests: $(BUILD_DIR) $(WIRING_PI)
+	$(MAKE) -f integration_tests.mk
+
 #  Create the directories needed
 $(BUILD_DIR):
 	@$(MKDIR_P) $(BUILD_DIR)
@@ -140,5 +162,6 @@ clean:
 	-@rm -rd $(BUILD_DIR)
 	-@rm $(EXECUTABLE)
 	-$(MAKE) -C tests clean
-
+	-@rm $(UNIT_TEST_EXEC)
+	-@rm $(HARDWARE_TEST_EXEC)
 	@echo DONE

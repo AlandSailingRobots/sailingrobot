@@ -9,6 +9,14 @@
  *
  * Developer Notes:
  *
+ *							11.4.17 JM
+ *
+ *	Functions that have tests:		Functions that does not have tests:
+ *
+ *	init 							setOrientation
+ *	start
+ *	HMC6343ThreadFunc
+ *	readData
  *
  ***************************************************************************************/
 

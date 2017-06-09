@@ -4,18 +4,25 @@
  * 		MaestroControllerSuite.h
  *
  * Purpose:
- *		A set of unit tests for checking whether the MaestroController is working and 
+ *		A set of unit tests for checking whether the MaestroController is working and
  *      connected
  *
  * Developer Notes:
  *
+ *							12.4.17 JM
+ *
+ *	Functions that have tests:		Functions that does not have tests:
+ *
+ *	init 							writeCommand
+ *	writeCommand
+ *	getError
  *
  ***************************************************************************************/
 
  #pragma once
 
  #include "../cxxtest/cxxtest/TestSuite.h"
- #include "SystemServices/MaestroController.h"
+ #include "HardwareServices/MaestroController/MaestroController.h"
 
 // For std::this_thread
 #include <chrono>

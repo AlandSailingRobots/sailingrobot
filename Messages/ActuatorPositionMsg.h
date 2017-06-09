@@ -37,8 +37,8 @@ public:
 
 	virtual ~ActuatorPositionMsg() { }
 
-	int sailPosition() { return m_sailPosition; }
-	int rudderPosition() { return m_rudderPosition; }
+	int sailPosition() const { return m_sailPosition; }
+	int rudderPosition() const { return m_rudderPosition; }
 
 	///----------------------------------------------------------------------------------
 	/// Serialises the message into a MessageSerialiser

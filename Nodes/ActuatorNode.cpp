@@ -13,7 +13,7 @@
 
 #include "ActuatorNode.h"
 #include "Messages/ActuatorPositionMsg.h"
-#include "SystemServices/MaestroController.h"
+#include "HardwareServices/MaestroController/MaestroController.h"
 #include "SystemServices/Logger.h"
 
 

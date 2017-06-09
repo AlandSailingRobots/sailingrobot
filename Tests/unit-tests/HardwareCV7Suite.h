@@ -9,6 +9,14 @@
  *
  * Developer Notes:
  *
+ *							11.4.17 JM
+ *
+ *	Functions that have tests:		Functions that does not have tests:
+ *
+ *	init 							
+ *	start
+ *	parseString
+ *	WindSensorThread
  *
  ***************************************************************************************/
 
@@ -88,7 +96,6 @@ public:
 		float windSpeed = 0;
 		float windTemp = 0;
 
-		//cv7->parseString(sensorData, windDir, windSpeed, windTemp);
 		TS_ASSERT(cv7->parseString(sensorData, windDir, windSpeed, windTemp));
 
 		TS_ASSERT_EQUALS(windDir, 125.8f);
@@ -114,6 +121,6 @@ public:
 
 		std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_FOR_MESSAGE));
 
-		TS_ASSERT(logger->windDataReceived())
+		TS_ASSERT(logger->windDataReceived());
 	}
 };

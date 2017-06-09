@@ -201,10 +201,13 @@ void SimulationNode::sendActuatorData( int socketFD )
 	server.sendData( socketFD, &actuatorData, sizeof(ActuatorDataPacket_t) );
 }
 
+//<<<<<<< HEAD
 ///--------------------------------------------------------------------------------------
-void SimulationNode::SimulationThreadFunc(void* nodePtr)
+//void SimulationNode::SimulationThreadFunc(void* nodePtr)
+
+void SimulationNode::SimulationThreadFunc(ActiveNode* nodePtr)
 {
-	SimulationNode* node = (SimulationNode*)nodePtr;
+	SimulationNode* node = dynamic_cast<SimulationNode*> (nodePtr);
 
 	TCPPacket_t packet;
 	int simulatorFD = 0;
@@ -243,7 +246,6 @@ void SimulationNode::SimulationThreadFunc(void* nodePtr)
 			default:
 				continue;
 		}
-
 		// Reset our packet, better safe than sorry
 		packet.socketFD = 0;
 		packet.length = 0;

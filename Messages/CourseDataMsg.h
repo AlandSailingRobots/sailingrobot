@@ -51,9 +51,9 @@ public:
 		serialiser.serialise(m_ctw);
 	}
 
-	float trueWindDir() { return m_twd; }
-	float distanceToWP() { return m_dtw; }
-	float courseToWP() { return m_ctw; }
+	float trueWindDir() const { return m_twd; }
+	float distanceToWP() const { return m_dtw; }
+	float courseToWP() const { return m_ctw; }
 
 private:
 	float m_twd; // True wind direction

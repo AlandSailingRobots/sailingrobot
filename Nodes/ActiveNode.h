@@ -17,9 +17,6 @@
 #include "Node.h"
 #include <thread>
 
-typedef void (*ActiveNodeFunc) (void*); 
-
-
 class ActiveNode : public Node {
 public:
 	ActiveNode(NodeID id, MessageBus& msgBus) : Node(id, msgBus)
@@ -31,7 +28,7 @@ public:
  	///----------------------------------------------------------------------------------
 	virtual void start() = 0;
 protected:
-	void runThread(ActiveNodeFunc func);
+	void runThread(void(*func)(ActiveNode*));
 private:
 	std::thread* m_Thread;
 };

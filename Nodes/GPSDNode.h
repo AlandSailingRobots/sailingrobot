@@ -20,7 +20,7 @@
 
 class GPSDNode : public ActiveNode {
 public:
-	GPSDNode(MessageBus& msgBus);
+	GPSDNode(MessageBus& msgBus, double loopTime);
 
 	virtual ~GPSDNode();
 
@@ -49,7 +49,7 @@ private:
 	/// milliseconds, see GPS_SENSOR_SLEEP_MS in GPSDNode.cpp
 	///
 	///----------------------------------------------------------------------------------
-	static void GPSThreadFunc(void* nodePtr);
+	static void GPSThreadFunc(ActiveNode* nodePtr);
 
 	bool 	m_Initialised;
 	gpsmm* 	m_GpsConnection;
@@ -60,4 +60,8 @@ private:
 	double	m_Heading;
 
 	int m_currentDay;
+	double m_LoopTime;
+
+	const int GPS_TIMEOUT_MICRO_SECS = 50000000;
+
 };

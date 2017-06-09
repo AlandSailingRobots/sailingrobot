@@ -9,6 +9,18 @@
  *
  * Developer Notes:
  *
+ *							12.4.17 JM
+ *
+ *	Functions that have tests:		Functions that does not have tests:
+ *
+ *	sendMessage						registerNode
+ *	run 							getRegisteredNode
+ *									processMessages
+ *									startMessageLog
+ *									logMessageReceived
+ *									logMessage
+ *									logMessageConsumer
+ *									messageTimeStamp
  *
  ***************************************************************************************/
 
@@ -131,21 +143,19 @@ public:
 		TS_ASSERT(not response);
 	}
 
-//	void test_MessageWithDataReceived()
-//	{
-//		std::unique_ptr<WindDataMsg> windData = std::make_unique<WindDataMsg>(WindDataMsg(NodeID::MessageLogger, NodeID::None, 120, 90, 60));
-//
-//		//WindDataMsg* windData = new WindDataMsg(NodeID::MessageLogger, NodeID::None, 120, 90, 60);
-//
-//		msgBus().sendMessage(std::move(windData));
-//
-//		// Wait for the message to go through
-//		std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_FOR_MESSAGE));
-//
-//		TS_ASSERT_EQUALS(windData->windDirection(), 120);
-//		TS_ASSERT_EQUALS(windData->windSpeed(), 90);
-//		TS_ASSERT_EQUALS(windData->windTemp(), 60);
-//	}
+	void test_MessageWithDataReceived()
+	{
+		MessagePtr windData = std::make_unique<WindDataMsg>(WindDataMsg(NodeID::MessageLogger, NodeID::None, 120, 90, 60));
+
+		msgBus().sendMessage(std::move(windData));
+
+		// Wait for the message to go through
+		std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_FOR_MESSAGE));
+
+		TS_ASSERT_EQUALS(node->m_WindDir, 120);
+		TS_ASSERT_EQUALS(node->m_WindSpeed, 90);
+		TS_ASSERT_EQUALS(node->m_WindTemp, 60);
+	}
 };
 
 

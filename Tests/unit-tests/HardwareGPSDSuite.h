@@ -9,6 +9,13 @@
  *
  * Developer Notes:
  *
+ *							11.4.17 JM
+ *
+ *	Functions that have tests:		Functions that does not have tests:
+ *
+ *	init
+ *	start
+ *	GPSThreadFunc
  *
  ***************************************************************************************/
 
@@ -57,7 +64,7 @@ public:
 		{
 			Logger::DisableLogging();
 			logger = new MessageLogger(msgBus());
-			gps = new GPSDNode(msgBus());
+			gps = new GPSDNode(msgBus(), 0.5);
 			thr = new std::thread(runMessageLoop);
 		}
 		testCount++;

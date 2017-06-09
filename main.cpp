@@ -14,10 +14,14 @@
 #endif
 
 #include "Nodes/WaypointMgrNode.h"
-#include "Nodes/VesselStateNode.h"
+//#include "Nodes/VesselStateNode.h"
+#include "Nodes/StateEstimationNode.h"
+#include "Nodes/WindStateNode.h"
 #include "Nodes/HTTPSyncNode.h"
 #include "Nodes/XbeeSyncNode.h"
 #include "Nodes/LineFollowNode.h"
+#include "Nodes/LowLevelControllerNodeJanet.h"
+
 
 #if USE_OPENCV_COLOR_DETECTION == 1
 #include "Nodes/obstacledetection/colorDetectionNode.h"
@@ -25,8 +29,10 @@
 
 #include "Messages/DataRequestMsg.h"
 #include "dbhandler/DBHandler.h"
-#include "SystemServices/MaestroController.h"
+#include "Nodes/DBLoggerNode.h"
+#include "HardwareServices/MaestroController/MaestroController.h"
 #include "xBee/Xbee.h"
+
 
 #define DISABLE_LOGGING 0
 
@@ -113,34 +119,41 @@ int main(int argc, char *argv[])
 
 	#if SIMULATION == 1
 	printf("using simulation\n");
-	SimulationNode simulation(messageBus);
-	
+	SimulationNode simulation(messageBus, 0.5);
+
 	#else
 
 	XbeeSyncNode xbee(messageBus, dbHandler);
 	CV7Node windSensor(messageBus, dbHandler.retrieveCell("windsensor_config", "1", "port"), dbHandler.retrieveCellAsInt("windsensor_config", "1", "baud_rate"));
 	HMC6343Node compass(messageBus, dbHandler.retrieveCellAsInt("buffer_config", "1", "compass"));
-	GPSDNode gpsd(messageBus);
-	ArduinoNode arduino(messageBus);
+    //NOTE: the second parameter (sleep time in seconds) should probably be read from the database
+    GPSDNode gpsd(messageBus, 0.5);
+    //NOTE: the second parameter (sleep time in seconds) should probably be read from the database
+	ArduinoNode arduino(messageBus, 0.1);
 	std::vector<std::string> list;
 	list.push_back("red");
 	//colorDetectionNode colorDetection(messageBus, list, 0);
 	#endif
 
 
-	//HTTPSyncNode httpsync(messageBus, &dbHandler, 0, false);
-	VesselStateNode vessel(messageBus);
+	HTTPSyncNode httpsync(messageBus, &dbHandler, 0, false);
+	//VesselStateNode vessel(messageBus, 0.4);
+	StateEstimationNode stateEstimationNode(messageBus, .5, .5);
+	WindStateNode windStateNode(messageBus, 500);
 	WaypointMgrNode waypoint(messageBus, dbHandler);
 
 
-	Node* sailingLogic;
-
-		sailingLogic = new LineFollowNode(messageBus, dbHandler);
+	LineFollowNode sailingLogic(messageBus, dbHandler);;
+    LowLevelControllerNodeJanet lowLevelControllerNodeJanet(messageBus, 30, 60, dbHandler);
 
 	#if SIMULATION == 0
 	int channel = dbHandler.retrieveCellAsInt("sail_servo_config", "1", "channel");
 	int speed = dbHandler.retrieveCellAsInt("sail_servo_config", "1", "speed");
 	int acceleration = dbHandler.retrieveCellAsInt("sail_servo_config", "1", "acceleration");
+	ActuatorNode rudder(messageBus, NodeID::RudderActuator, channel, speed, acceleration);
+	MaestroController::init(dbHandler.retrieveCell("maestro_controller_config", "1", "port"));
+	#endif
+	bool requireNetwork = (bool) (dbHandler.retrieveCellAsInt("sailing_robot_config", "1", "require_network"));
 
 	ActuatorNode sail(messageBus, NodeID::SailActuator, channel, speed, acceleration);
 
@@ -152,51 +165,66 @@ int main(int argc, char *argv[])
 	MaestroController::init(dbHandler.retrieveCell("maestro_controller_config", "1", "port"));
 	#endif
 
-	HTTPSyncNode httpsync(messageBus, &dbHandler, 0, false);
-
-
-	// Initialise nodes
-	initialiseNode(msgLogger, "Message Logger", NodeImportance::NOT_CRITICAL);
-
 	#if SIMULATION == 1
 	initialiseNode(simulation,"Simulation Node",NodeImportance::CRITICAL);
 	#else
-    initialiseNode(xbee, "Xbee Sync Node", NodeImportance::NOT_CRITICAL);
+	initialiseNode(xbee, "Xbee Sync Node", NodeImportance::NOT_CRITICAL);
 	initialiseNode(windSensor, "Wind Sensor", NodeImportance::CRITICAL);
-
 	initialiseNode(compass, "Compass", NodeImportance::CRITICAL);
 	initialiseNode(gpsd, "GPSD Node", NodeImportance::CRITICAL);
 	initialiseNode(sail, "Sail Actuator", NodeImportance::CRITICAL);
 	initialiseNode(rudder, "Rudder Actuator", NodeImportance::CRITICAL);
 	initialiseNode(arduino, "Arduino Node", NodeImportance::NOT_CRITICAL);
+	initialiseNode(colorDetection, "Colour detection node", NodeImportance::NOT_CRITICAL);
 	#endif
 
-	initialiseNode(vessel, "Vessel State Node", NodeImportance::CRITICAL);
-	initialiseNode(waypoint, "Waypoint Node", NodeImportance::CRITICAL);
+	if (requireNetwork)
+	{
+		initialiseNode(httpsync, "Httpsync Node", NodeImportance::CRITICAL);
+	}
+	else
+	{
+		initialiseNode(httpsync, "Httpsync Node", NodeImportance::NOT_CRITICAL);
+	}
 
-	initialiseNode(*sailingLogic, "LineFollow Node", NodeImportance::CRITICAL);
+	//initialiseNode(vessel, "Vessel State Node", NodeImportance::CRITICAL);
+	initialiseNode(stateEstimationNode,"StateEstimation Node",NodeImportance::CRITICAL);
+	initialiseNode(windStateNode,"WindState Node",NodeImportance::CRITICAL);
+	initialiseNode(waypoint, "Waypoint Node", NodeImportance::CRITICAL);
+	initialiseNode(sailingLogic, "LineFollow Node", NodeImportance::CRITICAL);
+	initialiseNode(lowLevelControllerNodeJanet, "LowLevelControllerNodeJanet Node", NodeImportance::CRITICAL);
+
 	// Start active nodes
 	#if SIMULATION == 1
 	simulation.start();
-  	#else
+
+	#else
 
 	xbee.start();
 	windSensor.start();
 	compass.start();
 	gpsd.start();
 	arduino.start();
- 	#endif
-	vessel.start();
+	//colorDetection.start();
+	#endif
+	httpsync.start();
+	//vessel.start();
+	stateEstimationNode.start();
 
+	int dbLoggerWaitTime = 100; 		// wait time (in milliseconds) between messages from the messageBus
+	int dbLoggerUpdateFrequency = 1000; // updating frequency to the database (in milliseconds)
+	int dbLoggerQueueSize = 5; 			// how many messages to log to the databse at a time
 
-	// NOTE - Jordan: Just to ensure messages are following through the system
-	MessagePtr dataRequest = std::make_unique<DataRequestMsg>(NodeID::MessageLogger);
-	messageBus.sendMessage(std::move(dataRequest));
+	DBLoggerNode dbLoggerNode(messageBus, dbHandler, dbLoggerWaitTime, dbLoggerUpdateFrequency, dbLoggerQueueSize);
+	initialiseNode(dbLoggerNode, "DBLoggerNode", NodeImportance::CRITICAL);
+	dbLoggerNode.start();
 
 	Logger::info("Message bus started!");
 	messageBus.run();
 
+
 	Logger::shutdown();
 	delete sailingLogic;
+	delete lowLevelControllerNodeJanet;
 	exit(0);
 }

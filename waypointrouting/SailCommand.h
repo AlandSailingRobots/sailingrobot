@@ -13,10 +13,11 @@ public:
 
 	//sets the commandvalues returned by getSailCommand()
 	void setCommandValues(int closeReach, int running);
-	
+
 private:
 	int m_closeReachCommand;
 	int m_runningCommand;
+
 };
 
 #endif
