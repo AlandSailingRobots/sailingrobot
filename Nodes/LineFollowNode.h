@@ -94,8 +94,7 @@ private:
 	//Calculates a smooth transition between the compass and the gps. Do not call directly, use getHeading()
 //	int getMergedHeading(int gpsHeading, int compassHeading, bool increaseCompassWeight);
 
-
-
+	bool getGoingStarboard();
 	void setPrevWaypointToBoatPos();
 
 };

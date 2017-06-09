@@ -280,13 +280,13 @@ double LineFollowNode::calculateDesiredCourse()
           m_sailCommand.setCommandValues( m_db.retrieveCellAsInt("sail_command_config", "1", "close_reach_command"),
           m_db.retrieveCellAsInt("sail_command_config", "1", "run_command"));
         }
+*/
 
 bool LineFollowNode::getGoingStarboard()
 {
     if(m_tackingDirection == 1) return true;
     else return false;
 }
-*/
 
 void LineFollowNode::setPrevWaypointToBoatPos() //If boat passed waypoint or enters it, set new line from boat to waypoint.
 {                                                                  //Used if boat has to stay within waypoint for a set amount of time.
@@ -314,8 +314,9 @@ void LineFollowNode::LineFollowNodeThreadFunc(ActiveNode* nodePtr)
     while(true)
     {
         double desiredCourse = node->calculateDesiredCourse();
-        MessagePtr msg = std::make_unique<DesiredCourseMsg>(desiredCourse);
-        node->m_MsgBus.sendMessage( std::move( msg ) );
+        bool goingStarboard = node->getGoingStarboard();
+        MessagePtr navMsg = std::make_unique<NavigationControlMsg>(desiredCourse, 0, false, node->m_tack, goingStarboard, NavigationState::sailToWaypoint);
+        node->m_MsgBus.sendMessage( std::move( navMsg ) );
 
         timer.sleepUntil( LOOP_TIME );
         timer.reset();

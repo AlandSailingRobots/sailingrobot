@@ -20,11 +20,11 @@
 
 class DesiredCourseMsg : public Message {
 public:
-	DesiredCourseMsg( NodeID destinationID, NodeID sourceID, double desiredCourse )
+	DesiredCourseMsg( NodeID destinationID, NodeID sourceID, uint16_t desiredCourse )
 		:Message( MessageType::DesiredCourse, sourceID, destinationID ), course( desiredCourse )
 	{ }
 
-	DesiredCourseMsg( double desiredCourse )
+	DesiredCourseMsg( uint16_t desiredCourse )
 		:Message( MessageType::DesiredCourse, NodeID::None, NodeID::None ), course( desiredCourse )
 	{ }
 
@@ -34,8 +34,8 @@ public:
 
 	virtual ~DesiredCourseMsg() { }
 
-	double desiredCourse() { return course; }
+	uint16_t desiredCourse() { return course; }
 
 private:
-	double course;
+	uint16_t course;
 };
