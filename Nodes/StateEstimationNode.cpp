@@ -115,14 +115,14 @@ void StateEstimationNode::StateEstimationNodeThreadFunc(ActiveNode* nodePtr)
 
   while(true)
   {
-    timer.sleepUntil(node->m_LoopTime);
     if(node->m_GpsOnline){
       std::lock_guard<std::mutex> lock_guard(node->m_lock);
       MessagePtr stateMessage = std::make_unique<StateMessage>(node->m_VesselHeading, node->m_VesselLat,
-        node->m_VesselLon, node->m_VesselSpeed, node->getCourse());
+      node->m_VesselLon, node->m_VesselSpeed, node->getCourse());
       node->m_MsgBus.sendMessage(std::move(stateMessage));
     }
-  timer.reset();
+    timer.sleepUntil(node->m_LoopTime);
+    timer.reset();
   }
 
 }
