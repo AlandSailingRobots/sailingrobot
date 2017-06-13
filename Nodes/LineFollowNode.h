@@ -24,7 +24,6 @@
 #include "dbhandler/DBHandler.h"
 #include "dbhandler/DBLogger.h"
 #include "Messages/NavigationControlMsg.h"
-#include "waypointrouting/SailCommand.h"
 #include "waypointrouting/RudderCommand.h"
 #include "Math/CourseMath.h"
 
@@ -41,8 +40,8 @@ public:
 	float m_gpsHeadingWeight;
 
 private:
+
 	DBHandler &m_db;
-	DBLogger m_dbLogger;
 
 	int 	m_nextWaypointId;
 	double 	m_nextWaypointLon;
@@ -57,7 +56,7 @@ private:
 
 	bool 	m_externalControlActive;
 
-	bool    m_tack;
+	bool    m_tack = false;
 	double  m_maxCommandAngle, m_maxSailAngle, m_minSailAngle;
 	double  m_tackAngle;
 	int     m_tackingDirection;
@@ -73,14 +72,16 @@ private:
 	double m_apparentWindSpeed;
 	double m_apparentWindDir;
 
+	const double NORM_RUDDER_COMMAND = 0.5166; // getCommand() take a value between -1 and 1 so we need to normalize the command correspond to 29.6 degree
+	const double NORM_SAIL_COMMAND = 0.6958;
+
 	RudderCommand m_rudderCommand;
-	SailCommand m_sailCommand;
 
 	std::vector<float> twdBuffer;
 	unsigned int twdBufferMaxSize;
 
 	double calculateAngleOfDesiredTrajectory();
-	void calculateActuatorPos(const WindStateMsg* msg);
+	void calculateActuatorPos();
 	void setPrevWaypointData(WaypointDataMsg* waypMsg);
 
 	virtual int getHeading(int gpsHeading, int compassHeading, double gpsSpeed, bool mockPosition, bool getHeadingFromCompass);
@@ -88,6 +89,7 @@ private:
 	int getMergedHeading(int gpsHeading, int compassHeading, bool increaseCompassWeight);
 	void setupRudderCommand();
 	void setupSailCommand();
+
 	bool getGoingStarboard();
 	void setPrevWaypointToBoatPos();
 

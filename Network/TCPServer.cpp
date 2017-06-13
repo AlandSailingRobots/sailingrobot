@@ -24,6 +24,7 @@
 #include <cstring>
 
 #include "SystemServices/Logger.h"
+#include "SystemServices/SysClock.h"
 
 
 #define ERROR                   -1
@@ -178,32 +179,151 @@ void TCPServer::acceptConnections()
         if( eventCount > 0 && FD_ISSET( serverSocket, &tmp ) )
         {
             int clientFD = 0;
+            int rc = 0;
 
             do {
                 clientFD = accept( serverSocket, NULL, NULL );
-
-                // Make the socket non-blocking
-                if( clientFD > 0 )
-                {
-                    int rc = fcntl( clientFD, F_SETFL, fcntl(clientFD, F_GETFL, 0) | O_NONBLOCK );
-                    if( rc < 0 )
-                    {
-                        Logger::error( "Failed to make the client socket blocking!" );
-                        close ( clientFD );
-                        clientFD = 0;
-                    }
-                }
-
-                if( clientFD > 0 )
-                {
-                    Logger::info( "New client has connected!" );
-
-                    tcpClient_t client;
-                    client.socketFD = clientFD;
-                    client.connected = true;
-                    clients.push_back( client );
-                }
-            } while( clientFD != -1 );
+                rc = setupClient( clientFD );
+                
+            } while( rc <= 0 );
         }
     }
+}
+
+///----------------------------------------------------------------------------------
+int TCPServer::acceptConnection( uint32_t timeout )
+{
+    if( serverSocket > 0 )
+    {
+        bool timedOut = false;
+        int clientFD = 0;
+        int startTime = SysClock::unixTime();
+        unsigned long endTime = startTime + timeout;
+
+        while ( !timedOut )
+        {
+            clientFD = accept( serverSocket, NULL, NULL );
+
+            if( clientFD > 0 && setupClient(clientFD) )
+            {
+                return 1;
+            }
+
+            if( timeout > 0 && (SysClock::unixTime() > endTime) )
+            {
+                timedOut = false;
+            }
+        }
+    }
+
+    return 0;
+}
+
+///----------------------------------------------------------------------------------
+int TCPServer::readPacket( TCPPacket_t& packet, uint32_t timeout )
+{
+    if( serverSocket > 0 )
+    {
+        // Makes things a little more thread safe, but still not truely thread safe,
+        // our weakness being this copy
+        std::vector<tcpClient_t> clientCopy = clients;
+
+        int bytesRead = 0;
+        uint16_t length = 0;
+        bool timedOut = false;
+        int startTime = SysClock::unixTime();
+        unsigned long endTime = startTime + timeout;
+
+        while( !timedOut )
+        {
+            for( uint16_t i = 0; i < clientCopy.size(); i++ )
+            {
+                tcpClient_t* client = &clientCopy[i];
+                bytesRead = read( client->socketFD, &length, 2);
+
+                // We have a packet read for us
+                if( bytesRead == 2)
+                {
+                    bytesRead = read( client->socketFD, packet.data, length);
+
+                    // Valid packet
+                    if(bytesRead == length)
+                    {
+                        packet.socketFD = client->socketFD;
+                        packet.length = length;
+
+                        return 1;
+                    }
+                }
+            }
+
+            if( timeout > 0 && (SysClock::unixTime() > endTime) )
+            {
+                timedOut = false;
+            }
+        }
+    }
+
+    return 0;
+}
+
+///----------------------------------------------------------------------------------
+void TCPServer::clearSocketBuffer( int socketFD )
+{
+    static uint8_t buffer[512];
+
+    while( read( socketFD, buffer, 512 ) > 0 );
+}
+
+///----------------------------------------------------------------------------------
+int TCPServer::sendData( int socketFD, void* data, uint16_t size )
+{
+    if( socketFD > 0 )
+    {
+        int dataSent = 0;
+
+        // Send the length first
+        dataSent = write( socketFD, &size, 2 );
+
+        // The otherside has probably disconnected
+        if( dataSent != 2)
+        {
+            return 0;
+        }
+
+        // Send the data second
+        dataSent = write( socketFD, data, size );
+
+        // The otherside has probably disconnected
+        if( dataSent != size)
+        {
+            return 0;
+        }
+    }
+
+    return 0;
+}
+
+///----------------------------------------------------------------------------------
+int TCPServer::setupClient( int clientFD )
+{
+    // Make the socket non-blocking
+    if( clientFD > 0 )
+    {
+        int rc = fcntl( clientFD, F_SETFL, fcntl(clientFD, F_GETFL, 0) | O_NONBLOCK );
+        if( rc < 0 )
+        {
+            Logger::error( "Failed to make the client socket blocking!" );
+            close ( clientFD );
+            return 0;
+        }
+    }
+
+    Logger::info( "New client has connected!" );
+
+    tcpClient_t client;
+    client.socketFD = clientFD;
+    client.connected = true;
+    clients.push_back( client );
+    return 1;
 }

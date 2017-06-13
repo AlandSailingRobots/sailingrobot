@@ -16,7 +16,7 @@
 #pragma once
 
 
-#include "../ActiveNode.h"
+#include "Nodes/ActiveNode.h"
 #include "BoatState.h"
 #include "ASRVoter.h"
 #include "ASRArbiter.h"
@@ -42,7 +42,9 @@ public:
 
     ///----------------------------------------------------------------------------------
  	/// Processes the following messages:
-    ///     * Vessel State Messages
+    ///     * GPS Data Messages
+    ///     * Compass Messages
+    ///     * Wind Messages
     ///     * New Waypoint Messages
     ///     * Course Request Message
  	///----------------------------------------------------------------------------------
@@ -63,7 +65,7 @@ private:
     ///----------------------------------------------------------------------------------
  	/// Just a little hack for waking up the navigation module for now
  	///----------------------------------------------------------------------------------
-    static void WakeupThreadFunc( void* nodePtr );
+    static void WakeupThreadFunc( ActiveNode* nodePtr );
 
     std::vector<ASRVoter*> voters;
     BoatState_t boatState;

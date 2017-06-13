@@ -72,6 +72,7 @@ private:
 
   double m_SpeedLimit;
   bool m_GpsOnline;
+  const int STATE_INITIAL_SLEEP = 2000;
 
   std::mutex m_lock;
 

@@ -21,18 +21,18 @@
 #include "Messages/VesselStateMsg.h"
 #include "Math/CourseMath.h"
 #include "SystemServices/Logger.h"
+#include "SystemServices/Timer.h"
 
 
-#define VESSEL_STATE_SLEEP_MS 400
-#define VESSEL_STATE_INITIAL_SLEEP 2000
 
 
-VesselStateNode::VesselStateNode(MessageBus& msgBus)
+
+VesselStateNode::VesselStateNode(MessageBus& msgBus, double loopTime)
 	: ActiveNode(NodeID::VesselState, msgBus),
 		m_CompassHeading(0), m_CompassPitch(0), m_CompassRoll(0),
 		m_GPSHasFix(false), m_GPSOnline(false), m_GPSLat(0), m_GPSLon(0), m_GPSUnixTime(0), m_GPSSpeed(0),
 		m_GPSHeading(0), m_WindDir(0), m_WindSpeed(0), m_WindTemp(0), m_ArduinoPressure(0),
-		m_ArduinoRudder(0),m_ArduinoSheet(0),m_ArduinoBattery(0)
+		m_ArduinoRudder(0),m_ArduinoSheet(0),m_ArduinoBattery(0), m_LoopTime(loopTime)
 {
 
 	msgBus.registerNode(*this, MessageType::CompassData);
@@ -138,17 +138,19 @@ void VesselStateNode::VesselStateThreadFunc(ActiveNode* nodePtr)
 
 	// An initial sleep, its purpose is to ensure that most if not all the sensor data arrives
 	// at the start before we send out the vessel state message.
-	std::this_thread::sleep_for(std::chrono::milliseconds(VESSEL_STATE_INITIAL_SLEEP));
+	std::this_thread::sleep_for(std::chrono::milliseconds(node->VESSEL_STATE_INITIAL_SLEEP));
 
 	char buffer[1024];
 
+	Timer timer;
+	timer.start();
 	while(true)
-	{	
+	{
 		// Listen to new connections
 		node->server.acceptConnections();
 
 		// Controls how often we pump out messages
-		std::this_thread::sleep_for(std::chrono::milliseconds(VESSEL_STATE_SLEEP_MS));
+		timer.sleepUntil(node->m_LoopTime);
 
 		MessagePtr vesselState = std::make_unique<VesselStateMsg>(	node->m_CompassHeading, node->m_CompassPitch,
 																	node->m_CompassRoll, node->m_GPSHasFix, node->m_GPSOnline, node->m_GPSLat,
@@ -164,5 +166,6 @@ void VesselStateNode::VesselStateThreadFunc(ActiveNode* nodePtr)
 		{
 			node->server.broadcast( (uint8_t*)buffer, size );
 		}
+		timer.reset();
 	}
 }

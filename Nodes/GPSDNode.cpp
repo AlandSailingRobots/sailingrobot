@@ -14,14 +14,12 @@
 #include "GPSDNode.h"
 #include "SystemServices/Logger.h"
 #include "Messages/GPSDataMsg.h"
+#include "SystemServices/Timer.h"
 
 
-#define GPS_SENSOR_SLEEP_MS			50
-#define GPS_TIMEOUT_MICRO_SECS		50000000
-
-
-GPSDNode::GPSDNode(MessageBus& msgBus)
-	: ActiveNode(NodeID::GPS, msgBus), m_Initialised(false), m_GpsConnection(0), m_Lat(0), m_Lon(0), m_Speed(0), m_Heading(0)
+GPSDNode::GPSDNode(MessageBus& msgBus, double loopTime)
+	: ActiveNode(NodeID::GPS, msgBus), m_Initialised(false), m_GpsConnection(0),
+	m_Lat(0), m_Lon(0), m_Speed(0), m_Heading(0),m_LoopTime(loopTime)
 {
 
 }
@@ -71,12 +69,14 @@ void GPSDNode::GPSThreadFunc(ActiveNode* nodePtr)
 
 	Logger::info("GPSD thread started");
 
+	Timer timer;
+	timer.start();
 	while(true)
 	{
 		// Controls how often we pump out messages
-		std::this_thread::sleep_for(std::chrono::milliseconds(GPS_SENSOR_SLEEP_MS));
+		timer.sleepUntil(node->m_LoopTime);
 
-		if(not node->m_GpsConnection->waiting(GPS_TIMEOUT_MICRO_SECS))
+		if(not node->m_GpsConnection->waiting(node->GPS_TIMEOUT_MICRO_SECS))
 		{
 			Logger::warning("%s GPSD read time out!", __PRETTY_FUNCTION__);
 			continue;
@@ -120,6 +120,6 @@ void GPSDNode::GPSThreadFunc(ActiveNode* nodePtr)
 
 		MessagePtr msg = std::make_unique<GPSDataMsg>(gps_hasFix, gps_online, node->m_Lat, node->m_Lon, unixTime, node->m_Speed, node->m_Heading, satCount, mode);
 		node->m_MsgBus.sendMessage(std::move(msg));
-
+		timer.reset();
 	}
 }

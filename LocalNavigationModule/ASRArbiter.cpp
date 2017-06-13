@@ -48,6 +48,10 @@ const uint16_t ASRArbiter::getWinner() const
         }
     }
 
+    
+
+    printf("Winning Course: %d With Votes: %d\n", highestIndex, highestValue);
+
     return highestIndex;
 }
 

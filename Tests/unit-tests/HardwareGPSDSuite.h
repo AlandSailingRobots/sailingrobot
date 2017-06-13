@@ -64,7 +64,7 @@ public:
 		{
 			Logger::DisableLogging();
 			logger = new MessageLogger(msgBus());
-			gps = new GPSDNode(msgBus());
+			gps = new GPSDNode(msgBus(), 0.5);
 			thr = new std::thread(runMessageLoop);
 		}
 		testCount++;
