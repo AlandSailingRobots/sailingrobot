@@ -55,11 +55,7 @@ export BUILD_DIR        	= build
 export EXEC_DIR         	= ./
 export INC_DIR         	 	= -I./ -I./libs -I./libs/wiringPi/wiringPi
 
-export WIRING_PI            = libwiringPi.so
-export WIRING_PI_PATH		= ./libs/wiringPi/wiringPi
-export WIRING_PI_STATIC		= ./libs/wiringPi/wiringPi/libwiringPi.so.2.32
-
-LNM_DIR                 	= Nodes/LocalNavigationModule
+LNM_DIR                 	= LocalNavigationModule
 
 
 ###############################################################################
@@ -80,10 +76,13 @@ export MAIN_LNM_SRC         = main_lnm.cpp
 export MESSAGE_BUS_SRC      = MessageBus/MessageBus.cpp Nodes/ActiveNode.cpp Messages/MessageSerialiser.cpp \
                             Messages/MessageDeserialiser.cpp
 
+export COLLIDABLE_MGR_SRC	= CollidableMgr/CollidableMgr.cpp
+
 export LNM_SRC              = $(LNM_DIR)/ASRCourseBallot.cpp $(LNM_DIR)/ASRArbiter.cpp \
                             $(LNM_DIR)/LocalNavigationModule.cpp Nodes/LowLevelController.cpp \
                             $(LNM_DIR)/Voters/WaypointVoter.cpp $(LNM_DIR)/Voters/WindVoter.cpp  \
-                            $(LNM_DIR)/Voters/ChannelVoter.cpp
+                            $(LNM_DIR)/Voters/ChannelVoter.cpp $(LNM_DIR)/Voters/ProximityVoter.cpp \
+							$(LNM_DIR)/Voters/MidRangeVoter.cpp $(COLLIDABLE_MGR_SRC)
 
 export LINE_FOLLOW_SRC      = Nodes/LineFollowNode.cpp waypointrouting/RudderCommand.cpp \
                             Nodes/MessageLoggerNode.cpp waypointrouting/Commands.cpp waypointrouting/SailCommand.cpp
@@ -119,14 +118,20 @@ export XBEE_NETWORK_SRC     = Network/DataLink.cpp Network/LinuxSerialDataLink.c
                             xBee/Xbee.cpp Nodes/XbeeSyncNode.cpp
 
 
+
+export WIRING_PI            = libwiringPi.so
+export WIRING_PI_PATH		= ./libs/wiringPi/wiringPi
+export WIRING_PI_STATIC		= ./libs/wiringPi/wiringPi/libwiringPi.so.2.32
+
 export INTEGRATION_TEST		= Tests/integration/IntegrationTests/LowLevelControllerJanetIntegrationTest.cpp
+
 
 
 ###############################################################################
 # Rules
 ###############################################################################
 
-.PHONY: clean
+.PHONY: clean $(WIRING_PI)
 
 all: $(EXECUTABLE) stats
 
@@ -156,8 +161,7 @@ clean:
 	@echo Removing existing object files and executable
 	-@rm -rd $(BUILD_DIR)
 	-@rm $(EXECUTABLE)
-	$(MAKE) -C Tests clean
+	-$(MAKE) -C tests clean
 	-@rm $(UNIT_TEST_EXEC)
 	-@rm $(HARDWARE_TEST_EXEC)
-
 	@echo DONE

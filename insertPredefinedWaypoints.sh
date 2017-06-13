@@ -6,7 +6,7 @@
     # Add waypoints
 
 printf "\nThis will insert waypoints in the database\n"
-printf "1. ÅSS route, 2. Short route, 3. Long Harbour route, 4. Circle around ÅSS, 5. EckeroToGrisslehamn,\n\t 6. Test Cable North to South 7. Test Cable South to North 8. Test Left of Harbour (left Sviby) 9. Triangle 10. Tack Test 11. Long Tack Test 12. Long Tour\n" 
+printf "1. ÅSS route, 2. Short route, 3. Long Harbour route, 4. Circle around ÅSS, 5. EckeroToGrisslehamn,\n\t 6. Test Cable North to South 7. Test Cable South to North 8. Test Left of Harbour (left Sviby) 9. Triangle 10. Tack Test 11. Long Tack Test 12. Long Tour 13. Collision Test Track\n" 
 read -p "Choice: " C
 
 if [ $C -eq 1 ]
@@ -182,6 +182,20 @@ then
     sqlite3 asr.db "INSERT INTO waypoints (id,latitude,longitude,declination,radius,stay_time,harvested) VALUES (10,  60.0969054,  19.9228048, 6, 40, 0, 0);"
     sqlite3 asr.db "INSERT INTO waypoints (id,latitude,longitude,declination,radius,stay_time,harvested) VALUES (11,  60.1006921,  19.9211955, 6, 15, 0, 0);"
     sqlite3 asr.db "INSERT INTO waypoints (id,latitude,longitude,declination,radius,stay_time,harvested) VALUES (12,  60.1076011,  19.9222040, 6, 40, 0, 0);"
+elif [ $C -eq 13 ]
+then
+    sqlite3 asr.db "DROP TABLE waypoints;"
+    sqlite3 asr.db "create table waypoints ( id PRIMARY KEY, latitude INTEGER, longitude INTEGER, declination INTEGER, radius INTEGER, stay_time INTEGER, harvested BOOLEAN );"
+    
+    sqlite3 asr.db "INSERT INTO waypoints (id,latitude,longitude,declination,radius,stay_time,harvested) VALUES (1,  60.100863,  19.921260, 6, 40, 0, 0);"
+    sqlite3 asr.db "INSERT INTO waypoints (id,latitude,longitude,declination,radius,stay_time,harvested) VALUES (2,  60.097023,  19.921217, 6, 40, 0, 0);"
+elif [ $C -eq 14 ]
+then
+    sqlite3 asr.db "DROP TABLE waypoints;"
+    sqlite3 asr.db "create table waypoints ( id PRIMARY KEY, latitude INTEGER, longitude INTEGER, declination INTEGER, radius INTEGER, stay_time INTEGER, harvested BOOLEAN );"
+    
+    sqlite3 asr.db "INSERT INTO waypoints (id,latitude,longitude,declination,radius,stay_time,harvested) VALUES (1,  60.056853, 19.786497, 6, 40, 0, 0);"
+    sqlite3 asr.db "INSERT INTO waypoints (id,latitude,longitude,declination,radius,stay_time,harvested) VALUES (2,  60.053522, 19.786443, 6, 40, 0, 0);"
 fi
 
 

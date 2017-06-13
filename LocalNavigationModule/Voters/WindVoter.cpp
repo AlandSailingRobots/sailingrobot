@@ -20,7 +20,7 @@
 
 ///----------------------------------------------------------------------------------
 WindVoter::WindVoter( int16_t maxVotes, int16_t weight )
-    :ASRVoter( maxVotes, weight )
+    :ASRVoter( maxVotes, weight, "Wind" )
 {
 
 }
@@ -31,21 +31,16 @@ const ASRCourseBallot& WindVoter::vote( const BoatState_t& boatState )
     const int TACK_ANGLE = 45;
     uint16_t twd = Utility::getTrueWindDirection(boatState.windDir, boatState.windSpeed, 
                 boatState.speed, boatState.heading, trueWindBuffer, TW_BUFFER_SIZE);
-    //uint16_t twd = 180;
 
-    double distanceFromMiddle = Utility::calculateSignedDistanceToLine( boatState.currWaypointLon, 
-                                boatState.currWaypointLat, boatState.lastWaypointLon, 
-                                boatState.lastWaypointLat, boatState.lon, boatState.lat );
-
-    // Set everything to max votes
+    // Set everything to 66% of the max vote
     for( int i = 0; i < 360; i+= ASRCourseBallot::COURSE_RESOLUTION )
     {
         courseBallot.set( i, courseBallot.maxVotes() / 1.5 );
     }
 
     int16_t twdBearingDiff = abs(Utility::headingDifference( boatState.waypointBearing, twd ));
-    Logger::info("True Wind: %d Wind dir: %d, Tacking: %d, Waypoint Bearing: %d Heading: %d Distance from line: %f", twd, boatState.windDir, (twdBearingDiff <= TACK_ANGLE), boatState.waypointBearing, boatState.heading, distanceFromMiddle );
     
+    // Encourage tacking if necessary 
     if( twdBearingDiff <= TACK_ANGLE )
     {
         if ( abs( Utility::headingDifference( boatState.heading, twd + TACK_ANGLE ) ) < 
@@ -59,7 +54,7 @@ const ASRCourseBallot& WindVoter::vote( const BoatState_t& boatState )
         }
     }
 
-    // Add votes to the direction the boat is facing, less cost
+    // Add votes to the direction the boat is facing, less cost to change the vessel.
     for( int i = 0; i < 8; i += ASRCourseBallot::COURSE_RESOLUTION )
     {
         courseBallot.add( boatState.heading + i, (( 8 - i ) / 8) * (courseBallot.maxVotes() / 10) );

@@ -211,6 +211,11 @@ int16_t Utility::headingDifference(uint16_t h1, uint16_t h2)
 	}
 }
 
+int16_t Utility::signedHeadingDifference(uint16_t h1, uint16_t h2)
+{
+	return (h2 - h1 + 540) % 360 - 180;
+}
+
 uint16_t Utility::wrapAngle( int16_t angle)
 {
 	while ( angle < 0 || angle >= 360 )
@@ -444,4 +449,21 @@ double Utility::getApparentWindDirection(const int windsensorDir, const int wind
 	double apparentWindSpeed,apparentWindDirection;
 	calculateApparentWind(windsensorDir, windsensorSpeed, gpsSpeed, heading, trueWindDirection,apparentWindSpeed,apparentWindDirection);
 	return apparentWindDirection;
+}
+
+void Utility::sphericalCoordinateSystem( const double lat, const double lon, double& x, double& y)
+{
+	static const double EARTH_RADIUS = 6371.0;
+
+	double latR = lat * M_PI / 180;
+	double lonR = lon * M_PI / 180;
+
+	x = cos(latR) * cos(lonR) * EARTH_RADIUS;
+	y = cos(latR) * sin(lonR) * EARTH_RADIUS;
+}
+
+void Utility::calculateVelocity( const uint16_t course, const double speed, double& vX, double& vY )
+{
+	vX = speed * cos(course * (M_PI / 180));
+	vY = speed * sin(course * (M_PI / 180));
 }
