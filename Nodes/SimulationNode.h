@@ -24,54 +24,48 @@
 #include "Messages/WindDataMsg.h"
 #include "Messages/ArduinoDataMsg.h"
 #include "Messages/ActuatorPositionMsg.h"
+#include "Network/TCPServer.h"
+#include "CollidableMgr/CollidableMgr.h"
 
-//-----------------------------------------------------------------------------
-struct DATA_SOCKET_RECEIVE{
 
-  //=========================
-  float latitude=0;
-  float longitude=0;
-  float course_real = 0;
-  float course_magn = 0;
-  float speed_knot = 0;
+struct BoatDataPacket_t {
+  float latitude;
+  float longitude;
+  float speed;
+  uint16_t course;
 
-  //=========================
-  float windDirection = 120;
-  float windSpeed = 2.1;
-  float windTemperature = 24;
+  uint16_t windDir;
+  float windSpeed;
 
-  //=========================
-  uint16_t pressure;
+  uint16_t heading;
   uint16_t rudder;
-  uint16_t sheet;
-  uint16_t battery;
+  uint16_t sail;
+} __attribute__((packed));
 
+struct AISContactPacket_t {
+  uint32_t mmsi;
+  float latitude;
+  float longitude;
+  float speed;
+  uint16_t course;
+} __attribute__((packed));
 
-  //=========================
+struct VisualContactPacket_t {
+  uint32_t id;
+  float latitude;
+  float longitude;
+} __attribute__((packed));
 
-  uint16_t headingVector[3];
-  uint16_t magVector[3];
-  uint16_t tiltVector[3];
-  uint16_t accelVector[3];
-  uint8_t address_compass;
-  uint8_t address_arduino;
+struct ActuatorDataPacket_t {
+  uint16_t rudderCommand;
+  uint16_t sailCommand;
 }__attribute__((packed));
 
-struct DATA_SOCKET_SEND{
-  uint16_t rudder_command;
-  uint16_t sheet_command;
-}__attribute__((packed));
-//-----------------------------------------------------------------------------
-
-struct HANDLERS_SOCKET
-{
-    int sockfd;
-    struct sockaddr_in info_me;
-};
 
 class SimulationNode : public ActiveNode {
 public:
 	SimulationNode(MessageBus& msgBus);
+  SimulationNode(MessageBus& msgBus, CollidableMgr* collidableMgr);
 
 	///----------------------------------------------------------------------------------
 	/// Initialize the TCP communication
@@ -91,58 +85,54 @@ public:
 	void processActuatorPositionMessage(ActuatorPositionMsg* msg);
 
 private:
+
+  ///----------------------------------------------------------------------------------
+  /// Process a boat data message
+  ///----------------------------------------------------------------------------------
+  void processBoatData( TCPPacket_t& packet );
+
 	///----------------------------------------------------------------------------------
 	/// Communicate with the simulation receive sensor data and send actuator data
 	///----------------------------------------------------------------------------------
 	static void SimulationThreadFunc(ActiveNode* nodePtr);
 
   ///----------------------------------------------------------------------------------
-  /// Initalize socket server
+  /// Process a AIS contact data message
   ///----------------------------------------------------------------------------------
-  int init_socket(int port);
+  void processAISContact( TCPPacket_t& packet );
 
   ///----------------------------------------------------------------------------------
-  /// Manage data received from simulation
+  /// Process a visual contact data message
   ///----------------------------------------------------------------------------------
-  void processSocketData();
+  void processVisualContact( TCPPacket_t& packet );
 
   ///----------------------------------------------------------------------------------
-  /// Manage data to send to simulation
+  /// Send our actuator data
   ///----------------------------------------------------------------------------------
-  void setupDataSend();
+  void sendActuatorData( int socketFD );
+
+  ///----------------------------------------------------------------------------------
+	/// Communicate with the simulation receive sensor data and send actuator data
+	///----------------------------------------------------------------------------------
+	//static void SimulationThreadFunc(void* nodePtr);
 
   void createCompassMessage();
   void createGPSMessage();
   void createWindMessage();
   void createArduinoMessage();
 
-	int 	m_CompassHeading;
-	int 	m_CompassPitch;
-	int 	m_CompassRoll;
-	bool	m_GPSHasFix;
-	bool	m_GPSOnline;
+	int 	  m_CompassHeading;
 	double	m_GPSLat;
 	double	m_GPSLon;
-	double	m_GPSUnixTime;
 	double	m_GPSSpeed;
 	double	m_GPSHeading;
-	int		m_GPSSatellite;
-	float	m_WindDir;
-	float	m_WindSpeed;
-	float 	m_WindTemp;
-	int 	m_ArduinoPressure;
-	int 	m_ArduinoRudder;
-	int 	m_ArduinoSheet;
-  int 	m_ArduinoBattery;
-  int   m_ArduinoRC;
-  int   m_rudder;
-  int   m_sail;
+	int	    m_WindDir;
+	float	  m_WindSpeed;
+	int 	  m_ArduinoRudder;
+	int 	  m_ArduinoSheet;
 
-  struct DATA_SOCKET_RECEIVE m_data_receive;
-  struct DATA_SOCKET_SEND m_data_send;
-  struct HANDLERS_SOCKET m_handler_socket_server;
-  struct HANDLERS_SOCKET m_handler_socket_client;
-
-  int m_count_sleep;
+  ActuatorDataPacket_t actuatorData;
+  TCPServer server;
+  CollidableMgr* collidableMgr;
 
 };

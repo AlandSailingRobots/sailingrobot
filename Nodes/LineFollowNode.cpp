@@ -26,15 +26,14 @@
 #include <cmath>
 
 #define DEFAULT_TWD_BUFFERSIZE 200
-#define NORM_RUDDER_COMMAND 0.5166 // getCommand() take a value between -1 and 1 so we need to normalize the command correspond to 29.6 degree
-#define NORM_SAIL_COMMAND 0.6958
+
 
 
 FILE* file = fopen("./gps.txt", "w");
 
 
 LineFollowNode::LineFollowNode(MessageBus& msgBus, DBHandler& db)
-:  Node(NodeID::SailingLogic, msgBus), m_db(db), m_dbLogger(5, db),
+:  Node(NodeID::SailingLogic, msgBus), m_db(db),
 m_nextWaypointId(0),
 m_nextWaypointLon(0),
 m_nextWaypointLat(0),
@@ -55,9 +54,6 @@ m_tackingDirection(1)
   msgBus.registerNode(*this, MessageType::WaypointData);
   msgBus.registerNode(*this, MessageType::ExternalControl);
 
-  m_maxCommandAngle = M_PI / 6;
-  m_maxSailAngle = M_PI / 4.2f;
-  m_minSailAngle = M_PI / 32.0f;
   m_tackAngle = 0.872665; //50°
 
   fprintf( file, "%s,%ss,%s\n", "id", "latitude", "longitude" );
@@ -67,11 +63,10 @@ m_tackingDirection(1)
 bool LineFollowNode::init()
 {
   setupRudderCommand();
-  setupSailCommand();
+
   twdBufferMaxSize = m_db.retrieveCellAsInt("buffer_config", "1", "true_wind");
   if(twdBufferMaxSize == 0)
   twdBufferMaxSize = DEFAULT_TWD_BUFFERSIZE;
-  m_dbLogger.startWorkerThread();
   return true;
 }
 
@@ -106,7 +101,7 @@ void LineFollowNode::processMessage(const Message* msg)
 
       if(!m_externalControlActive)
       {
-        calculateActuatorPos(windStateMsg);
+        calculateActuatorPos();
       }else{
         fprintf( file, "%d,%f,%f\n", i, m_Latitude, m_Longitude);
       }
@@ -155,14 +150,16 @@ double LineFollowNode::calculateAngleOfDesiredTrajectory()
         return phi;
       }
 
-      void LineFollowNode::calculateActuatorPos(const WindStateMsg* msg)
+      void LineFollowNode::calculateActuatorPos()
       {
         /* add pi because trueWindDirection is originally origin of wind but algorithm need direction*/
-        double trueWindDirection_radian = Utility::degreeToRadian(msg->trueWindDirection())+M_PI;
+        double trueWindDirection_radian = Utility::degreeToRadian(m_trueWindDir)+M_PI;
 
         setPrevWaypointToBoatPos();
 
         //GET DIRECTION--------
+        double currentHeading = getHeading(m_Course, m_Heading, m_Speed, false, false);
+        double currentHeading_radian = Utility::degreeToRadian(currentHeading);
         double signedDistance = Utility::calculateSignedDistanceToLine(m_nextWaypointLon, m_nextWaypointLat, m_prevWaypointLon,
           m_prevWaypointLat, m_Longitude, m_Latitude);
           int maxTackDistance = 40; //'r'
@@ -177,13 +174,33 @@ double LineFollowNode::calculateAngleOfDesiredTrajectory()
             m_tackingDirection = -Utility::sgn(signedDistance);
           }
 
-            desiredHeading = M_PI + trueWindDirection_radian - m_tackingDirection * m_tackAngle;/* sail around the wind direction */
-            desiredHeading = Utility::limitRadianAngleRange(desiredHeading);
+          //Check if tacking is needed-----
+          //tacking may or may not be needed. Decide if this code is necessary
+          if( (cos(trueWindDirection_radian - desiredHeading) + cos(m_tackAngle) < 0) || (cos(trueWindDirection_radian - phi) + cos(m_tackAngle) < 0))
+          {
+              if(!m_tack) /* initialize tacking direction */
+              {
+                  m_tackingDirection = -Utility::sgn(currentHeading_radian-(fmod(trueWindDirection_radian+M_PI, 2*M_PI) - M_PI));
+                  m_tack = true;
+              }
 
-          MessagePtr navMsg = std::make_unique<NavigationControlMsg>(desiredHeading, 0, false, NavigationState::sailToWaypoint);
+              desiredHeading = M_PI + trueWindDirection_radian - m_tackingDirection * m_tackAngle;/* sail around the wind direction */
+              desiredHeading = Utility::limitRadianAngleRange(desiredHeading);
+          }
+          else
+          {
+              m_tack = false;
+          }
+
+          // CourseDataMsg not used anymore
+          double bearingToNextWaypoint = CourseMath::calculateBTW(m_Longitude, m_Latitude, m_nextWaypointLon, m_nextWaypointLat); //calculated for database
+          double distanceToNextWaypoint = CourseMath::calculateDTW(m_Longitude, m_Latitude, m_nextWaypointLon, m_nextWaypointLat);
+
+          MessagePtr courseMsg = std::make_unique<CourseDataMsg>(m_trueWindDir, distanceToNextWaypoint, bearingToNextWaypoint);
+          m_MsgBus.sendMessage(std::move(courseMsg)); 
+
+          MessagePtr navMsg = std::make_unique<NavigationControlMsg>(desiredHeading, 0, false, m_tack, getGoingStarboard(), NavigationState::sailToWaypoint);
           m_MsgBus.sendMessage(std::move(navMsg));
-          //NOTE:Nothing is been logged currently
-          /*m_dbLogger.log(msg, rudderCommand_norm, sailCommand_norm, 0, 0, distanceToNextWaypoint, bearingToNextWaypoint, desiredHeading, m_tack, getGoingStarboard(), m_nextWaypointId, msg->trueWindDirection(), false,timestamp_str);*/
         }
 
         void LineFollowNode::setPrevWaypointData(WaypointDataMsg* waypMsg)
@@ -266,7 +283,11 @@ double LineFollowNode::calculateAngleOfDesiredTrajectory()
           m_db.retrieveCellAsInt("sail_command_config", "1", "run_command"));
         }
 
-
+        bool LineFollowNode::getGoingStarboard()
+        {
+            if(m_tackingDirection == 1) return true;
+            else return false;
+        }
         void LineFollowNode::setPrevWaypointToBoatPos() //If boat passed waypoint or enters it, set new line from boat to waypoint.
         {                                                                  //Used if boat has to stay within waypoint for a set amount of time.
           double distanceAfterWaypoint = Utility::calculateWaypointsOrthogonalLine(m_nextWaypointLon, m_nextWaypointLat, m_prevWaypointLon,

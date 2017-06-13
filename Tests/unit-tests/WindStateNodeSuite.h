@@ -1,3 +1,5 @@
+#pragma once
+
 #include "Nodes/WindStateNode.h"
 #include "MessageBus/MessageBus.h"
 #include "Tests/unit-tests/TestMocks/MessageLogger.h"
@@ -9,9 +11,9 @@
 #include <chrono>
 #include <thread>
 
-#define WAIT_TIME 750
-
 #define WIND_STATE_TEST_COUNT 2
+
+#define WIND_STATE_WAIT_TIME 750
 
 class WindStateNodeSuite : public CxxTest::TestSuite {
 public:
@@ -68,7 +70,7 @@ public:
 		msgBus().sendMessage(std::make_unique<StateMessage>(compassHeading,latitude,longitude,gpsSpeed,gpsCourse));
 
 
-		std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_TIME));
+		std::this_thread::sleep_for(std::chrono::milliseconds(WIND_STATE_WAIT_TIME));
 		TS_ASSERT(logger->windStateReceived());
 
 	}

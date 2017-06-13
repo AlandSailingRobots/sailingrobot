@@ -16,10 +16,11 @@ UNIT_TEST_SRCS 			= MessageCoreSuite.h MessageSuite.h UtilitySuite.h HTTPSyncSui
 else
 
 UNIT_TEST_SRCS 			= MessageCoreSuite.h MessageSuite.h UtilitySuite.h HTTPSyncSuite.h WaypointNodeSuite.h LineFollowSuite.h CANWindsensorNodeSuite.h \
-						  WindStateNodeSuite.h StateEstimationNodeSuite.h WingsailControlSuite.h CourseRegulatorSuite.h CANMessageSuite.h
+						  WindStateNodeSuite.h StateEstimationNodeSuite.h WingsailControlSuite.h CourseRegulatorSuite.h CANMessageSuite.h DBLoggerNodeSuite.h \
+						  LowLevelControllerNodeJanetSuite.h LowLevelControllersFunctionsTestSuite.h
 
 HARDWARE_TEST_SRCS    	= HardwareXbeeSuite.h HardwareCompassSuite.h HardwareCV7Suite.h HardwareGPSDSuite.h MaestroControllerSuite.h ActuatorSailNodeSuite.h \
-						ActuatorRudderNodeSuite.h CANServiceSuite.h ActuatorNodeASPireSuite.h
+						ActuatorRudderNodeSuite.h CANServiceSuite.h ActuatorNodeASPireSuite.h CANFeedbackReceiverSuite.h
 						# source file of the tests of the I2C branch :
 						# ArduinoI2CSuite.h I2CControllerSuite.h HardwareWiringPiSuite.h
 

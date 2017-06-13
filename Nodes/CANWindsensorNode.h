@@ -29,7 +29,7 @@ public:
 	CANWindsensorNode(MessageBus& msgBus, CANService& can_service, int time_filter_ms);
 
 
-	~CANWindsensorNode(){};
+	~CANWindsensorNode();
 
 	/* data */
 	 void processPGN(N2kMsg &NMsg);
@@ -71,4 +71,6 @@ private:
 
 	std::mutex m_lock;
 	std::vector<uint32_t> PGNs {130306, 130311};
+
+	const int DATA_OUT_OF_RANGE	=	-2000;
 };

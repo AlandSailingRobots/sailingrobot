@@ -35,9 +35,6 @@
 #define WAKEUP_INTIAL_SLEEP     2000
 
 
-FILE* file = fopen("./gps.txt", "w");
-
-
 ///----------------------------------------------------------------------------------
 LocalNavigationModule::LocalNavigationModule( MessageBus& msgBus )
     :ActiveNode(NodeID::LocalNavigationModule, msgBus)
@@ -47,9 +44,6 @@ LocalNavigationModule::LocalNavigationModule( MessageBus& msgBus )
     msgBus.registerNode( *this, MessageType::WindData );
     msgBus.registerNode( *this, MessageType::WaypointData );
     msgBus.registerNode( *this, MessageType::RequestCourse );
-
-    fprintf( file, "%s,%ss,%s\n", "id", "latitude", "longitude" );
-    fflush( file );
 }
 
 ///----------------------------------------------------------------------------------
@@ -64,7 +58,6 @@ void LocalNavigationModule::start()
 ///----------------------------------------------------------------------------------
 void LocalNavigationModule::processMessage( const Message* msg )
 {
-    static int i = 0;
     switch( msg->messageType() )
     {
         case MessageType::CompassData:
@@ -80,9 +73,6 @@ void LocalNavigationModule::processMessage( const Message* msg )
             boatState.lat = gps->latitude();
             boatState.lon = gps->longitude();
             boatState.speed = gps->speed();
-
-            fprintf( file, "%d,%f,%f\n", i, boatState.lat, boatState.lon );
-            fflush( file );
         }
             break;
 
@@ -107,7 +97,7 @@ void LocalNavigationModule::processMessage( const Message* msg )
             double distance = CourseMath::calculateDTW( boatState.lon, boatState.lat, boatState.currWaypointLon, boatState.currWaypointLat );
             Logger::info( "New Waypoint! Lat: %f Lon: %f Distance: %f", boatState.currWaypointLat, boatState.currWaypointLon, distance );
 
-            // Delibrate dropdown after a new waypoint,0 we want to start a new ballot 
+            // Delibrate dropdown after a new waypoint, we want to start a new ballot 
             // and get a new heading
         }
         case MessageType::RequestCourse:
@@ -133,14 +123,25 @@ void LocalNavigationModule::startBallot()
     arbiter.clearBallot();
     boatState.waypointBearing = CourseMath::calculateBTW( boatState.lon, boatState.lat, boatState.currWaypointLon, boatState.currWaypointLat );
 
-    std::vector<ASRVoter*>::iterator it;  // declare an iterator to a vector of strings
+    std::vector<ASRVoter*>::iterator it;
 
     for( it = voters.begin(); it != voters.end(); it++ ) 
     {
         ASRVoter* voter = (*it);
-
         arbiter.castVote( voter->weight(), voter->vote( boatState ) );
     }
+
+    printf("[Voters] "); // Debug
+    for( it = voters.begin(); it != voters.end(); it++ ) 
+    {
+        ASRVoter* voter = (*it);
+        int16_t votes = 0;
+        uint16_t bestCourse = voter->getBestCourse(votes);
+
+        std::string name = voter->getName();
+        printf("%s : %d %d ", name.c_str(), bestCourse, votes); // Debug: Prints out some voting information
+    }
+    printf("\n");
 
     MessagePtr msg = std::make_unique<DesiredCourseMsg>( arbiter.getWinner() );
     m_MsgBus.sendMessage( std::move( msg ) );
@@ -149,7 +150,7 @@ void LocalNavigationModule::startBallot()
 ///----------------------------------------------------------------------------------
 /// Just a little hack for waking up the navigation module for now
 ///----------------------------------------------------------------------------------
-void LocalNavigationModule::WakeupThreadFunc( void* nodePtr )
+void LocalNavigationModule::WakeupThreadFunc( ActiveNode* nodePtr )
 {
     LocalNavigationModule* node = (LocalNavigationModule*)nodePtr;
 

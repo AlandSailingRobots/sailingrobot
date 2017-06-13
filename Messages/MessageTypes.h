@@ -41,7 +41,8 @@ enum class MessageType {
 	DesiredCourse,
 	WindState,
 	NavigationControl,
-	ActuatorControlASPire
+	ActuatorControlASPire,
+	ASPireActuatorFeedback
 };
 
 inline std::string msgToString(MessageType msgType)
@@ -92,6 +93,8 @@ inline std::string msgToString(MessageType msgType)
 		return "NavigationControl";
 		case MessageType::ActuatorControlASPire:
 		return "ActuatorControlASPire";
+		case MessageType::ASPireActuatorFeedback:
+		return "ASPireActuatorFeedback";
 	}
 	return "";
 }
