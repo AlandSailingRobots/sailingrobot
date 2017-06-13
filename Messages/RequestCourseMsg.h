@@ -15,7 +15,7 @@
 #pragma once
 
 
-#include "Message.h"
+#include "MessageBus/Message.h"
 
 
 class RequestCourseMsg : public Message {

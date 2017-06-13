@@ -12,7 +12,7 @@
 
 #pragma once
 
-#include "Message.h"
+#include "MessageBus/Message.h"
 
 
 enum class GPSMode

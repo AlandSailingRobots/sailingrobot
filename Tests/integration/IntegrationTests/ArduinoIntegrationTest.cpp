@@ -3,10 +3,10 @@
 #include "SystemServices/Timer.h"
 #include "Messages/ASPireActuatorFeedbackMsg.h"
 #include "Messages/WindDataMsg.h"
-#include "Messages/MessageTypes.h"
+#include "MessageBus/MessageTypes.h"
 #include "MessageBus/MessageBus.h"
-#include "Nodes/ActiveNode.h"
-#include "Nodes/NodeIDs.h"
+#include "MessageBus/ActiveNode.h"
+#include "MessageBus/NodeIDs.h"
 #include "Hardwares/CANWindsensorNode.h"
 
 #include <ncurses.h>

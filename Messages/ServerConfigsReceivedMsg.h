@@ -9,7 +9,8 @@
 
 #pragma once
 
-#include "Message.h"
+#include "MessageBus/Message.h"
+
 
 class ServerConfigsReceivedMsg : public Message {
 public:

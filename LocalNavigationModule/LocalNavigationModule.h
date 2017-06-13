@@ -16,7 +16,7 @@
 #pragma once
 
 
-#include "Nodes/ActiveNode.h"
+#include "MessageBus/ActiveNode.h"
 #include "BoatState.h"
 #include "ASRVoter.h"
 #include "ASRArbiter.h"

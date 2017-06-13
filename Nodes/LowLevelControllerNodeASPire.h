@@ -1,10 +1,10 @@
 #pragma once
 
-#include "Nodes/Node.h"
+#include "MessageBus/Node.h"
 #include "Messages/WindStateMsg.h"
 #include "Messages/StateMessage.h"
 #include "Messages/NavigationControlMsg.h"
-#include "Messages/MessageTypes.h"
+#include "MessageBus/MessageTypes.h"
 #include "MessageBus/MessageBus.h"
 #include "Hardwares/CAN_Services/CANService.h"
 #include "SystemServices/WingsailControl.h"

@@ -4,7 +4,7 @@
 #pragma once
 
 #include "MessageBus/MessageBus.h"
-#include "Messages/MessageTypes.h"
+#include "MessageBus/MessageTypes.h"
 #include "Messages/ActuatorControlASPireMessage.h"
 #include "Hardwares/CAN_Services/CANService.h"
 

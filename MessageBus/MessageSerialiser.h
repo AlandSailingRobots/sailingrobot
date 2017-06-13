@@ -17,8 +17,8 @@
 
 #include <stdint.h>
 #include <string>
-#include "../Nodes/NodeIDs.h"
-#include "MessageTypes.h"
+#include "MessageBus/NodeIDs.h"
+#include "MessageBus/MessageTypes.h"
 
 #define MAX_MESSAGE_SIZE 	256
 

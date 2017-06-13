@@ -12,7 +12,7 @@
  ***************************************************************************************/
 
 #include "Hardwares/CAN_Services/CANPGNReceiver.h"
-#include "Nodes/ActiveNode.h"
+#include "MessageBus/ActiveNode.h"
 #include "Hardwares/CAN_Services/CANService.h"
 #include "SystemServices/Timer.h"
 

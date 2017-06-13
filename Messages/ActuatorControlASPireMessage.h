@@ -3,9 +3,8 @@
 
 #pragma once
 
-#include "Messages/Message.h"
-#include "Messages/MessageTypes.h"
-#include "Nodes/NodeIDs.h"
+#include "MessageBus/Message.h"
+
 
 class ActuatorControlASPireMessage : public Message {
 public:

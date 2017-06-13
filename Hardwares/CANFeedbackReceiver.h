@@ -2,8 +2,7 @@
 #include "Hardwares/CAN_Services/CANFrameReceiver.h"
 #include "Hardwares/CAN_Services/N2kMsg.h"
 
-#include "Messages/Message.h"
-#include "Messages/MessageTypes.h"
+#include "MessageBus/Message.h"
 #include "MessageBus/MessageBus.h"
 
 

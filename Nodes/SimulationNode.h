@@ -18,7 +18,7 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 
-#include "ActiveNode.h"
+#include "MessageBus/ActiveNode.h"
 #include "Messages/CompassDataMsg.h"
 #include "Messages/GPSDataMsg.h"
 #include "Messages/WindDataMsg.h"

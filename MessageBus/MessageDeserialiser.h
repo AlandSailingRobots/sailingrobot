@@ -16,8 +16,8 @@
 
 
 #include <stdint.h>
-#include "MessageTypes.h"
-#include "../Nodes/NodeIDs.h"
+#include "MessageBus/MessageTypes.h"
+#include "MessageBus/NodeIDs.h"
 
 
 class MessageDeserialiser {

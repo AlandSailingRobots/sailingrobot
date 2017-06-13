@@ -1,8 +1,8 @@
 #pragma once
 
 #include "dbhandler/DBLogger.h"
-#include "Nodes/ActiveNode.h"
-#include "Messages/MessageTypes.h"
+#include "MessageBus/ActiveNode.h"
+#include "MessageBus/MessageTypes.h"
 #include "MessageBus/MessageBus.h"
 
 #include <mutex>

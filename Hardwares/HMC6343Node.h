@@ -21,7 +21,7 @@
 #pragma once
 
 
-#include "Nodes/ActiveNode.h"
+#include "MessageBus/ActiveNode.h"
 #include "Hardwares/i2ccontroller/I2CController.h"
 
 // Magic numbers correspond to the compass commands, see the datasheet for more info.

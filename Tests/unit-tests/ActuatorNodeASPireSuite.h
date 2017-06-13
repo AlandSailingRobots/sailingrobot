@@ -4,7 +4,7 @@
 #include "Hardwares/ActuatorNodeASPire.h"
 
 #include "MessageBus/MessageBus.h"
-#include "Messages/Message.h"
+#include "MessageBus/Message.h"
 #include "Messages/ActuatorControlASPireMessage.h"
 #include "Hardwares/CAN_Services/CANService.h"
 

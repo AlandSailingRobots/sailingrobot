@@ -9,7 +9,7 @@
 #include "SystemServices/Logger.h"
 #include "Messages/WindStateMsg.h"
 #include <mutex>
-#include "libs/json/src/json.hpp"
+#include "Libs/json/src/json.hpp"
 using Json = nlohmann::json;
 
 struct LogItem {

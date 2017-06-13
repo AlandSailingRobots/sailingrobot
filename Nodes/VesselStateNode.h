@@ -14,7 +14,7 @@
 
  #pragma once
 
-#include "ActiveNode.h"
+#include "MessageBus/ActiveNode.h"
 #include "Messages/CompassDataMsg.h"
 #include "Messages/GPSDataMsg.h"
 #include "Messages/WindDataMsg.h"

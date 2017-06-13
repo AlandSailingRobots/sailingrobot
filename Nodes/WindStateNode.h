@@ -7,7 +7,7 @@
 #pragma once
 
 #include "MessageBus/MessageBus.h"
-#include "Messages/MessageTypes.h"
+#include "MessageBus/MessageTypes.h"
 #include "Messages/StateMessage.h"
 #include "Messages/WindDataMsg.h"
 #include "Messages/WindStateMsg.h"

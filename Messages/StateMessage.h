@@ -13,7 +13,8 @@
 
 #pragma once
 
-#include "Message.h"
+#include "MessageBus/Message.h"
+
 
 class StateMessage : public Message {
 public:

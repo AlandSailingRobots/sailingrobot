@@ -11,7 +11,7 @@
  *
  ***************************************************************************************/
 
-#include "ActiveNode.h"
+#include "MessageBus/ActiveNode.h"
 
 #include <iostream>
 void ActiveNode::runThread(void(*func)(ActiveNode*))

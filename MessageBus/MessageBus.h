@@ -17,8 +17,8 @@
 
 #pragma once
 
-#include "Nodes/Node.h"
-#include "Messages/Message.h"
+#include "MessageBus/Node.h"
+#include "MessageBus/Message.h"
 #include <vector>
 #include <queue>
 #include <mutex>

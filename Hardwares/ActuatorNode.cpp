@@ -11,7 +11,7 @@
  *
  ***************************************************************************************/
 
-#include "ActuatorNode.h"
+#include "Hardwares/ActuatorNode.h"
 #include "Messages/ActuatorPositionMsg.h"
 #include "Hardwares/MaestroController/MaestroController.h"
 #include "SystemServices/Logger.h"

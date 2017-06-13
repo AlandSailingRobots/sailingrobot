@@ -54,7 +54,7 @@ export DEFINES          	= -DTOOLCHAIN=$(TOOLCHAIN) -DSIMULATION=$(USE_SIM)
 export SRC_DIR				= ./
 export BUILD_DIR        	= build
 export EXEC_DIR         	= ./
-export INC_DIR         	 	= -I./ -I./libs
+export INC_DIR         	 	= -I./ -I./Libs
 
 LNM_DIR                 	= LocalNavigationModule
 
@@ -74,8 +74,8 @@ export OBJECT_FILE          = $(BUILD_DIR)/objects.tmp
 export MAIN_SRC             = main.cpp
 export MAIN_LNM_SRC         = main_lnm.cpp
 
-export MESSAGE_BUS_SRC      = MessageBus/MessageBus.cpp Nodes/ActiveNode.cpp Messages/MessageSerialiser.cpp \
-                            Messages/MessageDeserialiser.cpp
+export MESSAGE_BUS_SRC      = MessageBus/MessageBus.cpp MessageBus/ActiveNode.cpp MessageBus/MessageSerialiser.cpp \
+                            MessageBus/MessageDeserialiser.cpp
 
 export COLLIDABLE_MGR_SRC	= CollidableMgr/CollidableMgr.cpp
 

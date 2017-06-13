@@ -14,7 +14,7 @@
 #pragma once
 
 
-#include "Node.h"
+#include "MessageBus/Node.h"
 #include "Messages/GPSDataMsg.h"
 #include "dbhandler/DBHandler.h"
 #include "Math/CourseMath.h"

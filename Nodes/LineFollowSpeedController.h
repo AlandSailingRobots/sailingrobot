@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include "Node.h"
+#include "MessageBus/Node.h"
 #include "Messages/VesselStateMsg.h"
 #include "Messages/WaypointDataMsg.h"
 #include "dbhandler/DBHandler.h"

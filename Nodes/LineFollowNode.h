@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include "ActiveNode.h"
+#include "MessageBus/ActiveNode.h"
 #include "Messages/StateMessage.h"
 #include "Messages/WindStateMsg.h"
 #include "Messages/WaypointDataMsg.h"

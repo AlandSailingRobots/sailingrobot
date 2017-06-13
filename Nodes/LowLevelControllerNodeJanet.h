@@ -1,11 +1,11 @@
 #pragma once
 
-#include "Nodes/Node.h"
+#include "MessageBus/Node.h"
 #include "Messages/WindStateMsg.h"
 #include "Messages/StateMessage.h"
 #include "Messages/ActuatorPositionMsg.h"
 #include "Messages/NavigationControlMsg.h"
-#include "Messages/MessageTypes.h"
+#include "MessageBus/MessageTypes.h"
 #include "MessageBus/MessageBus.h"
 #include "SystemServices/CourseRegulator.h"
 #include "SystemServices/SoftsailControl.h"

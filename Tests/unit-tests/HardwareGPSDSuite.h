@@ -23,7 +23,7 @@
 
  #include "../cxxtest/cxxtest/TestSuite.h"
 #include "Hardwares/GPSDNode.h"
-#include "../../MessageBus/MessageBus.h"
+#include "MessageBus/MessageBus.h"
 #include "SystemServices/Logger.h"
 #include "TestMocks/MessageLogger.h"
 #include <stdint.h>

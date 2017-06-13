@@ -13,10 +13,10 @@
 
 #pragma once
 
-#include "MessageTypes.h"
-#include "Nodes/NodeIDs.h"
-#include "MessageSerialiser.h"
-#include "MessageDeserialiser.h"
+#include "MessageBus/MessageTypes.h"
+#include "MessageBus/NodeIDs.h"
+#include "MessageBus/MessageSerialiser.h"
+#include "MessageBus/MessageDeserialiser.h"
 
 
 #define LOG_MESSAGES

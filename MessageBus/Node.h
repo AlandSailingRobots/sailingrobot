@@ -15,9 +15,9 @@
 
 class MessageBus;
 
-#include "NodeIDs.h"
+#include "MessageBus/NodeIDs.h"
 #include "MessageBus/MessageBus.h"
-#include "Messages/Message.h"
+#include "MessageBus/Message.h"
 
 class Node {
 public:

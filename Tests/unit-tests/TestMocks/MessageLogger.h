@@ -13,7 +13,7 @@
 
 #pragma once
 
-#include "Nodes/Node.h"
+#include "MessageBus/Node.h"
 
 
 class MessageLogger: public Node {

@@ -13,7 +13,7 @@
 
 #pragma once
 
-#include "Message.h"
+#include "MessageBus/Message.h"
 
 
 class CompassDataMsg : public Message {

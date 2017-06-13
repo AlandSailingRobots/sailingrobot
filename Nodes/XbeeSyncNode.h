@@ -16,7 +16,7 @@
 
  #pragma once
 
-#include "ActiveNode.h"
+#include "MessageBus/ActiveNode.h"
 #include "xBee/Xbee.h"
 #include "SystemServices/Logger.h"
 #include "dbhandler/DBHandler.h"

@@ -15,7 +15,7 @@
 #pragma once
 
 //TODO - Jordan: Improve include paths so they aren't sooo long
-#include "Nodes/Node.h"
+#include "MessageBus/Node.h"
 #include "Messages/GPSDataMsg.h"
 #include "Messages/WindDataMsg.h"
 #include "Messages/StateMessage.h"

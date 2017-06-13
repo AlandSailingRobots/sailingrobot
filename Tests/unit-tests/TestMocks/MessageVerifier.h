@@ -11,8 +11,8 @@
 	 ***************************************************************************************/
 #pragma once
 
-#include "Nodes/Node.h"
-#include "Messages/Message.h"
+#include "MessageBus/Node.h"
+#include "MessageBus/Message.h"
 #include "Messages/WindStateMsg.h"
 #include "Messages/ASPireActuatorFeedbackMsg.h"
 
