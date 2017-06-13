@@ -30,7 +30,7 @@ TOOLCHAIN = 0
 
 export CPPFLAGS                = -g -Wall -pedantic -Werror -std=gnu++14
 
-export LIBS                    = -lsqlite3 -lgps -lrt -lcurl -lpthread -lwiringPi
+export LIBS                    = -lsqlite3 -lgps -lrt -lcurl -lpthread -lwiringPi -lncurses
 
 ifeq ($(TOOLCHAIN),1)
 export CC                      = arm-linux-gnueabihf-gcc
@@ -86,7 +86,8 @@ export LNM_SRC              = $(LNM_DIR)/ASRCourseBallot.cpp $(LNM_DIR)/ASRArbit
 							$(LNM_DIR)/Voters/MidRangeVoter.cpp $(COLLIDABLE_MGR_SRC)
 
 export LINE_FOLLOW_SRC      = Nodes/LineFollowNode.cpp waypointrouting/RudderCommand.cpp \
-                            Nodes/MessageLoggerNode.cpp waypointrouting/Commands.cpp waypointrouting/SailCommand.cpp
+                            Nodes/MessageLoggerNode.cpp waypointrouting/Commands.cpp waypointrouting/SailCommand.cpp \
+                            $(COLLIDABLE_MGR_SRC)
 
 export NETWORK_SRC          = Network/TCPServer.cpp Nodes/VesselStateNode.cpp
 

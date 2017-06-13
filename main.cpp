@@ -115,11 +115,11 @@ int main(int argc, char *argv[])
 
 	// Create nodes
 	MessageLoggerNode msgLogger(messageBus);
+	CollidableMgr collidableMgr;
 
 	#if SIMULATION == 1
 	printf("using simulation\n");
-	SimulationNode simulation(messageBus, 0.5);
-
+	SimulationNode 	simulation	( messageBus, &collidableMgr );
 	#else
 
 	XbeeSyncNode xbee(messageBus, dbHandler);
@@ -213,41 +213,6 @@ int main(int argc, char *argv[])
 	// NOTE - Jordan: Just to ensure messages are following through the system
 	MessagePtr dataRequest = std::make_unique<DataRequestMsg>(NodeID::MessageLogger);
 	messageBus.sendMessage(std::move(dataRequest));
-
-	int dbLoggerWaitTime = 100; 		// wait time (in milliseconds) between messages from the messageBus
-	int dbLoggerUpdateFrequency = 1000; // updating frequency to the database (in milliseconds)
-	int dbLoggerQueueSize = 5; 			// how many messages to log to the databse at a time
-
-	DBLoggerNode dbLoggerNode(messageBus, dbHandler, dbLoggerWaitTime, dbLoggerUpdateFrequency, dbLoggerQueueSize);
-	initialiseNode(dbLoggerNode, "DBLoggerNode", NodeImportance::CRITICAL);
-	dbLoggerNode.start();
-
-	Logger::info("Message bus started!");
-	messageBus.run();
-
-	//initialiseNode(vessel, "Vessel State Node", NodeImportance::CRITICAL);
-	initialiseNode(stateEstimationNode,"StateEstimation Node",NodeImportance::CRITICAL);
-	initialiseNode(windStateNode,"WindState Node",NodeImportance::CRITICAL);
-	initialiseNode(waypoint, "Waypoint Node", NodeImportance::CRITICAL);
-	initialiseNode(sailingLogic, "LineFollow Node", NodeImportance::CRITICAL);
-	initialiseNode(lowLevelControllerNodeJanet, "LowLevelControllerNodeJanet Node", NodeImportance::CRITICAL);
-
-	// Start active nodes
-	#if SIMULATION == 1
-	simulation.start();
-
-	#else
-
-	xbee.start();
-	windSensor.start();
-	compass.start();
-	gpsd.start();
-	arduino.start();
-	//colorDetection.start();
-	#endif
-	httpsync.start();
-	//vessel.start();
-	stateEstimationNode.start();
 
 	int dbLoggerWaitTime = 100; 		// wait time (in milliseconds) between messages from the messageBus
 	int dbLoggerUpdateFrequency = 1000; // updating frequency to the database (in milliseconds)
