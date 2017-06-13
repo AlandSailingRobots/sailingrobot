@@ -1,5 +1,5 @@
-#include "HardwareServices/CAN_Services/CANService.h"
-#include "HardwareServices/CAN_Services/N2kMsg.h"
+#include "Hardwares/CAN_Services/CANService.h"
+#include "Hardwares/CAN_Services/N2kMsg.h"
 #include "SystemServices/Timer.h"
 #include "Messages/ASPireActuatorFeedbackMsg.h"
 #include "Messages/WindDataMsg.h"
@@ -7,7 +7,7 @@
 #include "MessageBus/MessageBus.h"
 #include "Nodes/ActiveNode.h"
 #include "Nodes/NodeIDs.h"
-#include "Nodes/CANWindsensorNode.h"
+#include "Hardwares/CANWindsensorNode.h"
 
 #include <ncurses.h>
 #include <unordered_map>

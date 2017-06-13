@@ -7,9 +7,9 @@
 
 #include "SystemServices/Logger.h"
 #include "TestMocks/MockCANReceiver.h"
-#include "HardwareServices/CAN_Services/CANService.h"
-#include "HardwareServices/CAN_Services/CANFrameReceiver.h"
-#include "HardwareServices/CAN_Services/N2kMsg.h"
+#include "Hardwares/CAN_Services/CANService.h"
+#include "Hardwares/CAN_Services/CANFrameReceiver.h"
+#include "Hardwares/CAN_Services/N2kMsg.h"
 #include "../cxxtest/cxxtest/TestSuite.h"
 
 #include <thread>

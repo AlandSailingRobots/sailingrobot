@@ -22,7 +22,7 @@
  #pragma once
 
  #include "../cxxtest/cxxtest/TestSuite.h"
- #include "HardwareServices/MaestroController/MaestroController.h"
+ #include "Hardwares/MaestroController/MaestroController.h"
 
 // For std::this_thread
 #include <chrono>

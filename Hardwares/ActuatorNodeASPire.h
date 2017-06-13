@@ -6,7 +6,7 @@
 #include "MessageBus/MessageBus.h"
 #include "Messages/MessageTypes.h"
 #include "Messages/ActuatorControlASPireMessage.h"
-#include "HardwareServices/CAN_Services/CANService.h"
+#include "Hardwares/CAN_Services/CANService.h"
 
 class ActuatorNodeASPire : public Node {
 public:

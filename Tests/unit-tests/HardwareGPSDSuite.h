@@ -22,7 +22,7 @@
  #pragma once
 
  #include "../cxxtest/cxxtest/TestSuite.h"
-#include "Nodes/GPSDNode.h"
+#include "Hardwares/GPSDNode.h"
 #include "../../MessageBus/MessageBus.h"
 #include "SystemServices/Logger.h"
 #include "TestMocks/MessageLogger.h"

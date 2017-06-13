@@ -11,9 +11,9 @@
  *
  ***************************************************************************************/
 
-#include "HardwareServices/CAN_Services/CANPGNReceiver.h"
+#include "Hardwares/CAN_Services/CANPGNReceiver.h"
 #include "Nodes/ActiveNode.h"
-#include "HardwareServices/CAN_Services/CANService.h"
+#include "Hardwares/CAN_Services/CANService.h"
 #include "SystemServices/Timer.h"
 
 #include <mutex>

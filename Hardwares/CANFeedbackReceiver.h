@@ -1,6 +1,6 @@
-#include "HardwareServices/CAN_Services/CANService.h"
-#include "HardwareServices/CAN_Services/CANFrameReceiver.h"
-#include "HardwareServices/CAN_Services/N2kMsg.h"
+#include "Hardwares/CAN_Services/CANService.h"
+#include "Hardwares/CAN_Services/CANFrameReceiver.h"
+#include "Hardwares/CAN_Services/N2kMsg.h"
 
 #include "Messages/Message.h"
 #include "Messages/MessageTypes.h"

@@ -1,12 +1,12 @@
 
 #pragma once
 
-#include "Nodes/ActuatorNodeASPire.h"
+#include "Hardwares/ActuatorNodeASPire.h"
 
 #include "MessageBus/MessageBus.h"
 #include "Messages/Message.h"
 #include "Messages/ActuatorControlASPireMessage.h"
-#include "HardwareServices/CAN_Services/CANService.h"
+#include "Hardwares/CAN_Services/CANService.h"
 
 #include "../cxxtest/cxxtest/TestSuite.h"
 #include "TestMocks/MockCANReceiver.h"

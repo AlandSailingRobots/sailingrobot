@@ -1,6 +1,6 @@
 #pragma once
 
-#include "HardwareServices/CAN_Services/N2kMsg.h"
+#include "Hardwares/CAN_Services/N2kMsg.h"
 #include "../cxxtest/cxxtest/TestSuite.h"
 #include <iostream>
 

@@ -22,8 +22,8 @@
  #include "../cxxtest/cxxtest/TestSuite.h"
  #include "../../MessageBus/MessageBus.h"
  #include "TestMocks/MessageLogger.h"
- #include "Nodes/ActuatorNode.h"
- #include "HardwareServices/MaestroController/MaestroController.h"
+ #include "Hardwares/ActuatorNode.h"
+ #include "Hardwares/MaestroController/MaestroController.h"
 
 // For std::this_thread
 #include <chrono>

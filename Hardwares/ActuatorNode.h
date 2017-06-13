@@ -13,7 +13,7 @@
 
 #pragma once
 
-#include "Node.h"
+#include "Nodes/Node.h"
 
 class ActuatorNode : public Node {
 public:

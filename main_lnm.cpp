@@ -9,11 +9,11 @@
 #if SIMULATION == 1
  #include "Nodes/SimulationNode.h"
 #else
- #include "Nodes/CV7Node.h"
- #include "Nodes/HMC6343Node.h"
- #include "Nodes/GPSDNode.h"
- #include "Nodes/ActuatorNode.h"
- #include "Nodes/ArduinoNode.h"
+ #include "Hardwares/CV7Node.h"
+ #include "Hardwares/HMC6343Node.h"
+ #include "Hardwares/GPSDNode.h"
+ #include "Hardwares/ActuatorNode.h"
+ #include "Hardwares/ArduinoNode.h"
 #endif
 
 #include "Nodes/WaypointMgrNode.h"
@@ -24,7 +24,7 @@
 
 #include "Messages/DataRequestMsg.h"
 #include "dbhandler/DBHandler.h"
-#include "HardwareServices/MaestroController/MaestroController.h"
+#include "Hardwares/MaestroController/MaestroController.h"
 #include "xBee/Xbee.h"
 
 #include "LocalNavigationModule/LocalNavigationModule.h"

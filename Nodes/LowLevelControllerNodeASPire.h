@@ -6,7 +6,7 @@
 #include "Messages/NavigationControlMsg.h"
 #include "Messages/MessageTypes.h"
 #include "MessageBus/MessageBus.h"
-#include "HardwareServices/CAN_Services/CANService.h"
+#include "Hardwares/CAN_Services/CANService.h"
 #include "SystemServices/WingsailControl.h"
 #include "SystemServices/CourseRegulator.h"
 

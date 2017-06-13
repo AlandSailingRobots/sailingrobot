@@ -1,5 +1,5 @@
 #include "LowLevelControllerNodeASPire.h"
-#include "HardwareServices/CAN_Services/N2kMsg.h"
+#include "Hardwares/CAN_Services/N2kMsg.h"
 #include "Messages/ActuatorControlASPireMessage.h"
 
 

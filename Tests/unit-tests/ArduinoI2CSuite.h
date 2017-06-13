@@ -22,7 +22,7 @@
 #include "../cxxtest/cxxtest/TestSuite.h"
 #include "../../MessageBus/MessageBus.h"
 #include "TestMocks/MessageLogger.h"
-#include "Nodes/ArduinoI2CNode.h"
+#include "Hardwares/ArduinoI2CNode.h"
 #include "SystemServices/Logger.h"
 
 // For std::this_thread

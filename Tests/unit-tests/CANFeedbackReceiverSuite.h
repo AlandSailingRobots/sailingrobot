@@ -1,9 +1,9 @@
 #pragma once
 
-#include "HardwareServices/CAN_Services/N2kMsg.h"
-#include "HardwareServices/CAN_Services/CANService.h"
+#include "Hardwares/CAN_Services/N2kMsg.h"
+#include "Hardwares/CAN_Services/CANService.h"
 
-#include "Nodes/CANFeedbackReceiver.h"
+#include "Hardwares/CANFeedbackReceiver.h"
 #include "Tests/unit-tests/TestMocks/MessageLogger.h"
 #include "Tests/unit-tests/TestMocks/MessageVerifier.h"
 #include "MessageBus/MessageBus.h"

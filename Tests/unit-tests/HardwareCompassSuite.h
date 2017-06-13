@@ -23,7 +23,7 @@
  #pragma once
 
  #include "../cxxtest/cxxtest/TestSuite.h"
-#include "Nodes/HMC6343Node.h"
+#include "Hardwares/HMC6343Node.h"
 #include "../../MessageBus/MessageBus.h"
 #include "SystemServices/Logger.h"
 #include "TestMocks/MessageLogger.h"

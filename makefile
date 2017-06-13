@@ -91,18 +91,18 @@ export LINE_FOLLOW_SRC      = Nodes/LineFollowNode.cpp waypointrouting/RudderCom
 
 export NETWORK_SRC          = Network/TCPServer.cpp Nodes/VesselStateNode.cpp
 
-export HARDWARE_NODES_SRC   = Nodes/CV7Node.cpp Nodes/HMC6343Node.cpp Nodes/GPSDNode.cpp Nodes/ActuatorNodeASPire.cpp \
-                            Nodes/ActuatorNode.cpp Nodes/ArduinoNode.cpp Nodes/CANFeedbackReceiver.cpp Nodes/CANWindsensorNode.cpp
+export HARDWARE_NODES_SRC   = Hardwares/CV7Node.cpp Hardwares/HMC6343Node.cpp Hardwares/GPSDNode.cpp Hardwares/ActuatorNodeASPire.cpp \
+                            Hardwares/ActuatorNode.cpp Hardwares/ArduinoNode.cpp Hardwares/CANFeedbackReceiver.cpp Hardwares/CANWindsensorNode.cpp
 
 export SYSTEM_SERVICES_SRC  = SystemServices/Logger.cpp SystemServices/SysClock.cpp SystemServices/Timer.cpp \
                             dbhandler/DBHandler.cpp dbhandler/DBLogger.cpp SystemServices/WingsailControl.cpp \
 														SystemServices/CourseRegulator.cpp SystemServices/SoftsailControl.cpp \
 														Nodes/DBLoggerNode.cpp
 
-export HARDWARE_SERVICES_SRC = HardwareServices/MaestroController/MaestroController.cpp HardwareServices/i2ccontroller/I2CController.cpp \
-							   HardwareServices/CAN_Services/CANPGNReceiver.cpp HardwareServices/CAN_Services/CANService.cpp \
-							   HardwareServices/CAN_Services/mcp2515.cpp HardwareServices/CAN_Services/MsgFunctions.cpp \
-							   HardwareServices/CAN_Services/CANFrameReceiver.cpp
+export HARDWARE_SERVICES_SRC = Hardwares/MaestroController/MaestroController.cpp Hardwares/i2ccontroller/I2CController.cpp \
+							   Hardwares/CAN_Services/CANPGNReceiver.cpp Hardwares/CAN_Services/CANService.cpp \
+							   Hardwares/CAN_Services/mcp2515.cpp Hardwares/CAN_Services/MsgFunctions.cpp \
+							   Hardwares/CAN_Services/CANFrameReceiver.cpp
 
 export MATH_SRC             = Math/CourseCalculation.cpp Math/CourseMath.cpp Math/Utility.cpp
 
