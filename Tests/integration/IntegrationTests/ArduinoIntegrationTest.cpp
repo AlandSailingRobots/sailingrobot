@@ -210,7 +210,7 @@ int main() {
 
     // Comment out this line if not running on the pi
     // otherwise program will crash.
-    //  auto future = canService.start();
+    auto future = canService.start();
 
     SensorDataReceiver sensorReceiver(msgBus, 250);
     CANWindsensorNode windSensor(msgBus, canService, 500);
