@@ -30,7 +30,7 @@ TOOLCHAIN = 0
 
 export CPPFLAGS                = -g -Wall -pedantic -Werror -std=gnu++14
 
-export LIBS                    = -lsqlite3 -lgps -lrt -lcurl -lpthread -lwiringPi -lncurses
+export LIBS                    = -lsqlite3 -lgps -lrt -lcurl -lpthread -lwiringPi
 
 ifeq ($(TOOLCHAIN),1)
 export CC                      = arm-linux-gnueabihf-gcc
