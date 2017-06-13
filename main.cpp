@@ -1,4 +1,3 @@
-
 #include <string>
 #include "SystemServices/Logger.h"
 #include "MessageBus/MessageBus.h"
@@ -114,123 +113,156 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 
-		// Create nodes
-		MessageLoggerNode msgLogger(messageBus);
+	// Create nodes
+	MessageLoggerNode msgLogger(messageBus);
 
-		#if SIMULATION == 1
-		printf("using simulation\n");
-		SimulationNode simulation(messageBus, 0.5);
+	#if SIMULATION == 1
+	printf("using simulation\n");
+	SimulationNode simulation(messageBus, 0.5);
 
-		#else
+	#else
 
-		XbeeSyncNode xbee(messageBus, dbHandler);
-		CV7Node windSensor(messageBus, dbHandler.retrieveCell("windsensor_config", "1", "port"), dbHandler.retrieveCellAsInt("windsensor_config", "1", "baud_rate"));
-		HMC6343Node compass(messageBus, dbHandler.retrieveCellAsInt("buffer_config", "1", "compass"));
+	XbeeSyncNode xbee(messageBus, dbHandler);
+	CV7Node windSensor(messageBus, dbHandler.retrieveCell("windsensor_config", "1", "port"), dbHandler.retrieveCellAsInt("windsensor_config", "1", "baud_rate"));
+	HMC6343Node compass(messageBus, dbHandler.retrieveCellAsInt("buffer_config", "1", "compass"));
     //NOTE: the second parameter (sleep time in seconds) should probably be read from the database
     GPSDNode gpsd(messageBus, 0.5);
     //NOTE: the second parameter (sleep time in seconds) should probably be read from the database
-		ArduinoNode arduino(messageBus, 0.1);
-		std::vector<std::string> list;
-		list.push_back("red");
-		#endif
+
+	ArduinoNode arduino(messageBus, 0.1);
+	std::vector<std::string> list;
+	list.push_back("red");
+	#endif
 
 
-		HTTPSyncNode httpsync(messageBus, &dbHandler, 0, false);
-	    StateEstimationNode stateEstimationNode(messageBus, .5, .5);
-    	WindStateNode windStateNode(messageBus, 500);
-		WaypointMgrNode waypoint(messageBus, dbHandler);
+	HTTPSyncNode httpsync(messageBus, &dbHandler, 0, false);
+    StateEstimationNode stateEstimationNode(messageBus, .5, .5);
+	WindStateNode windStateNode(messageBus, 500);
+	WaypointMgrNode waypoint(messageBus, dbHandler);
 
 
-		ActiveNode* sailingLogic;
-    	Node* lowLevelControllerNodeJanet;
+	ActiveNode* sailingLogic;
+	Node* lowLevelControllerNodeJanet;
 
-		sailingLogic = new LineFollowNode(messageBus, dbHandler);
-    	lowLevelControllerNodeJanet = new LowLevelControllerNodeJanet(messageBus, 30, 60, dbHandler);
+	sailingLogic = new LineFollowNode(messageBus, dbHandler);
+	lowLevelControllerNodeJanet = new LowLevelControllerNodeJanet(messageBus, 30, 60, dbHandler);
 
-		#if SIMULATION == 0
-		int channel = dbHandler.retrieveCellAsInt("sail_servo_config", "1", "channel");
-		int speed = dbHandler.retrieveCellAsInt("sail_servo_config", "1", "speed");
-		int acceleration = dbHandler.retrieveCellAsInt("sail_servo_config", "1", "acceleration");
+	#if SIMULATION == 0
+	int channel = dbHandler.retrieveCellAsInt("sail_servo_config", "1", "channel");
+	int speed = dbHandler.retrieveCellAsInt("sail_servo_config", "1", "speed");
+	int acceleration = dbHandler.retrieveCellAsInt("sail_servo_config", "1", "acceleration");
 
-		ActuatorNode sail(messageBus, NodeID::SailActuator, channel, speed, acceleration);
+	ActuatorNode sail(messageBus, NodeID::SailActuator, channel, speed, acceleration);
 
-		channel = dbHandler.retrieveCellAsInt("rudder_servo_config", "1", "channel");
-		speed = dbHandler.retrieveCellAsInt("rudder_servo_config", "1", "speed");
-		acceleration = dbHandler.retrieveCellAsInt("rudder_servo_config", "1", "acceleration");
+	channel = dbHandler.retrieveCellAsInt("rudder_servo_config", "1", "channel");
+	speed = dbHandler.retrieveCellAsInt("rudder_servo_config", "1", "speed");
+	acceleration = dbHandler.retrieveCellAsInt("rudder_servo_config", "1", "acceleration");
 
-		ActuatorNode rudder(messageBus, NodeID::RudderActuator, channel, speed, acceleration);
-		MaestroController::init(dbHandler.retrieveCell("maestro_controller_config", "1", "port"));
-		#endif
-		bool requireNetwork = (bool) (dbHandler.retrieveCellAsInt("sailing_robot_config", "1", "require_network"));
+	ActuatorNode rudder(messageBus, NodeID::RudderActuator, channel, speed, acceleration);
+	MaestroController::init(dbHandler.retrieveCell("maestro_controller_config", "1", "port"));
+	#endif
+	bool requireNetwork = (bool) (dbHandler.retrieveCellAsInt("sailing_robot_config", "1", "require_network"));
 
-		// System services
+	// Initialise nodes
+	initialiseNode(msgLogger, "Message Logger", NodeImportance::NOT_CRITICAL);
+
+	#if SIMULATION == 1
+	initialiseNode(simulation,"Simulation Node",NodeImportance::CRITICAL);
+	#else
+	initialiseNode(xbee, "Xbee Sync Node", NodeImportance::NOT_CRITICAL);
+	initialiseNode(windSensor, "Wind Sensor", NodeImportance::CRITICAL);
+	initialiseNode(compass, "Compass", NodeImportance::CRITICAL);
+	initialiseNode(gpsd, "GPSD Node", NodeImportance::CRITICAL);
+	initialiseNode(sail, "Sail Actuator", NodeImportance::CRITICAL);
+	initialiseNode(rudder, "Rudder Actuator", NodeImportance::CRITICAL);
+	initialiseNode(arduino, "Arduino Node", NodeImportance::NOT_CRITICAL);
+	initialiseNode(colorDetection, "Colour detection node", NodeImportance::NOT_CRITICAL);
+	#endif
+
+	if (requireNetwork)
+	{
+		initialiseNode(httpsync, "Httpsync Node", NodeImportance::CRITICAL);
+	}
+	else
+	{
+		initialiseNode(httpsync, "Httpsync Node", NodeImportance::NOT_CRITICAL);
+	}
+
+	//initialiseNode(vessel, "Vessel State Node", NodeImportance::CRITICAL);
+    initialiseNode(stateEstimationNode,"StateEstimation Node",NodeImportance::CRITICAL);
+	initialiseNode(windStateNode,"WindState Node",NodeImportance::CRITICAL);
+	initialiseNode(waypoint, "Waypoint Node", NodeImportance::CRITICAL);
+	initialiseNode(*sailingLogic, "LineFollow Node", NodeImportance::CRITICAL);
+	initialiseNode(*lowLevelControllerNodeJanet, "LowLevelControllerNodeJanet Node", NodeImportance::CRITICAL);
+
+	// Start active nodes
+	#if SIMULATION == 1
+	simulation.start();
+	#else
+	xbee.start();
+	windSensor.start();
+	compass.start();
+	gpsd.start();
+	arduino.start();
+	#endif
+
+	httpsync.start();
+	stateEstimationNode.start();
+	sailingLogic->start();
+
+	// NOTE - Jordan: Just to ensure messages are following through the system
+	MessagePtr dataRequest = std::make_unique<DataRequestMsg>(NodeID::MessageLogger);
+	messageBus.sendMessage(std::move(dataRequest));
+
+	int dbLoggerWaitTime = 100; 		// wait time (in milliseconds) between messages from the messageBus
+	int dbLoggerUpdateFrequency = 1000; // updating frequency to the database (in milliseconds)
+	int dbLoggerQueueSize = 5; 			// how many messages to log to the databse at a time
+
+	DBLoggerNode dbLoggerNode(messageBus, dbHandler, dbLoggerWaitTime, dbLoggerUpdateFrequency, dbLoggerQueueSize);
+	initialiseNode(dbLoggerNode, "DBLoggerNode", NodeImportance::CRITICAL);
+	dbLoggerNode.start();
+
+	Logger::info("Message bus started!");
+	messageBus.run();
+
+	//initialiseNode(vessel, "Vessel State Node", NodeImportance::CRITICAL);
+	initialiseNode(stateEstimationNode,"StateEstimation Node",NodeImportance::CRITICAL);
+	initialiseNode(windStateNode,"WindState Node",NodeImportance::CRITICAL);
+	initialiseNode(waypoint, "Waypoint Node", NodeImportance::CRITICAL);
+	initialiseNode(sailingLogic, "LineFollow Node", NodeImportance::CRITICAL);
+	initialiseNode(lowLevelControllerNodeJanet, "LowLevelControllerNodeJanet Node", NodeImportance::CRITICAL);
+
+	// Start active nodes
+	#if SIMULATION == 1
+	simulation.start();
+
+	#else
+
+	xbee.start();
+	windSensor.start();
+	compass.start();
+	gpsd.start();
+	arduino.start();
+	//colorDetection.start();
+	#endif
+	httpsync.start();
+	//vessel.start();
+	stateEstimationNode.start();
+
+	int dbLoggerWaitTime = 100; 		// wait time (in milliseconds) between messages from the messageBus
+	int dbLoggerUpdateFrequency = 1000; // updating frequency to the database (in milliseconds)
+	int dbLoggerQueueSize = 5; 			// how many messages to log to the databse at a time
+
+	DBLoggerNode dbLoggerNode(messageBus, dbHandler, dbLoggerWaitTime, dbLoggerUpdateFrequency, dbLoggerQueueSize);
+	initialiseNode(dbLoggerNode, "DBLoggerNode", NodeImportance::CRITICAL);
+	dbLoggerNode.start();
+
+	Logger::info("Message bus started!");
+	messageBus.run();
 
 
-		// Initialise nodes
-		initialiseNode(msgLogger, "Message Logger", NodeImportance::NOT_CRITICAL);
-
-		#if SIMULATION == 1
-		initialiseNode(simulation,"Simulation Node",NodeImportance::CRITICAL);
-		#else
-		initialiseNode(xbee, "Xbee Sync Node", NodeImportance::NOT_CRITICAL);
-		initialiseNode(windSensor, "Wind Sensor", NodeImportance::CRITICAL);
-		initialiseNode(compass, "Compass", NodeImportance::CRITICAL);
-		initialiseNode(gpsd, "GPSD Node", NodeImportance::CRITICAL);
-		initialiseNode(sail, "Sail Actuator", NodeImportance::CRITICAL);
-		initialiseNode(rudder, "Rudder Actuator", NodeImportance::CRITICAL);
-		initialiseNode(arduino, "Arduino Node", NodeImportance::NOT_CRITICAL);
-		initialiseNode(colorDetection, "Colour detection node", NodeImportance::NOT_CRITICAL);
-		#endif
-
-		if (requireNetwork)
-		{
-			initialiseNode(httpsync, "Httpsync Node", NodeImportance::CRITICAL);
-		}
-		else
-		{
-			initialiseNode(httpsync, "Httpsync Node", NodeImportance::NOT_CRITICAL);
-		}
-
-		//initialiseNode(vessel, "Vessel State Node", NodeImportance::CRITICAL);
-	    initialiseNode(stateEstimationNode,"StateEstimation Node",NodeImportance::CRITICAL);
-    	initialiseNode(windStateNode,"WindState Node",NodeImportance::CRITICAL);
-		initialiseNode(waypoint, "Waypoint Node", NodeImportance::CRITICAL);
-		initialiseNode(*sailingLogic, "LineFollow Node", NodeImportance::CRITICAL);
-    	initialiseNode(*lowLevelControllerNodeJanet, "LowLevelControllerNodeJanet Node", NodeImportance::CRITICAL);
-
-		// Start active nodes
-		#if SIMULATION == 1
-		simulation.start();
-		#else
-		xbee.start();
-		windSensor.start();
-		compass.start();
-		gpsd.start();
-		arduino.start();
-		#endif
-
-		httpsync.start();
-		stateEstimationNode.start();
-		sailingLogic->start();
-
-		// NOTE - Jordan: Just to ensure messages are following through the system
-		MessagePtr dataRequest = std::make_unique<DataRequestMsg>(NodeID::MessageLogger);
-		messageBus.sendMessage(std::move(dataRequest));
-
-		int dbLoggerWaitTime = 100; 		// wait time (in milliseconds) between messages from the messageBus
-		int dbLoggerUpdateFrequency = 1000; // updating frequency to the database (in milliseconds)
-		int dbLoggerQueueSize = 5; 			// how many messages to log to the databse at a time
-
-		DBLoggerNode dbLoggerNode(messageBus, dbHandler, dbLoggerWaitTime, dbLoggerUpdateFrequency, dbLoggerQueueSize);
-		initialiseNode(dbLoggerNode, "DBLoggerNode", NodeImportance::CRITICAL);
-		dbLoggerNode.start();
-
-		Logger::info("Message bus started!");
-		messageBus.run();
-
-
-		Logger::shutdown();
-		delete sailingLogic;
-		delete lowLevelControllerNodeJanet;
-		exit(0);
+	Logger::shutdown();
+	delete sailingLogic;
+	delete lowLevelControllerNodeJanet;
+	exit(0);
 }

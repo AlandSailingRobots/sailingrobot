@@ -29,7 +29,8 @@ TOOLCHAIN = 0
 
 
 export CPPFLAGS                = -g -Wall -pedantic -Werror -std=gnu++14
-export LIBS                    = -lsqlite3 -lgps -lrt -lcurl -lpthread
+
+export LIBS                    = -lsqlite3 -lgps -lrt -lcurl -lpthread -lwiringPi -lncurses
 
 ifeq ($(TOOLCHAIN),1)
 export CC                      = arm-linux-gnueabihf-gcc
@@ -53,13 +54,9 @@ export DEFINES          	= -DTOOLCHAIN=$(TOOLCHAIN) -DSIMULATION=$(USE_SIM)
 export SRC_DIR				= ./
 export BUILD_DIR        	= build
 export EXEC_DIR         	= ./
-export INC_DIR         	 	= -I./ -I./libs -I./libs/wiringPi/wiringPi
+export INC_DIR         	 	= -I./ -I./libs
 
-export WIRING_PI            = libwiringPi.so
-export WIRING_PI_PATH		= ./libs/wiringPi/wiringPi
-export WIRING_PI_STATIC		= ./libs/wiringPi/wiringPi/libwiringPi.so.2.32
-
-LNM_DIR                 	= Nodes/LocalNavigationModule
+LNM_DIR                 	= LocalNavigationModule
 
 
 ###############################################################################
@@ -80,10 +77,13 @@ export MAIN_LNM_SRC         = main_lnm.cpp
 export MESSAGE_BUS_SRC      = MessageBus/MessageBus.cpp Nodes/ActiveNode.cpp Messages/MessageSerialiser.cpp \
                             Messages/MessageDeserialiser.cpp
 
+export COLLIDABLE_MGR_SRC	= CollidableMgr/CollidableMgr.cpp
+
 export LNM_SRC              = $(LNM_DIR)/ASRCourseBallot.cpp $(LNM_DIR)/ASRArbiter.cpp \
                             $(LNM_DIR)/LocalNavigationModule.cpp Nodes/LowLevelController.cpp \
                             $(LNM_DIR)/Voters/WaypointVoter.cpp $(LNM_DIR)/Voters/WindVoter.cpp  \
-                            $(LNM_DIR)/Voters/ChannelVoter.cpp
+                            $(LNM_DIR)/Voters/ChannelVoter.cpp $(LNM_DIR)/Voters/ProximityVoter.cpp \
+							$(LNM_DIR)/Voters/MidRangeVoter.cpp $(COLLIDABLE_MGR_SRC)
 
 export LINE_FOLLOW_SRC      = Nodes/LineFollowNode.cpp waypointrouting/RudderCommand.cpp \
                             Nodes/MessageLoggerNode.cpp waypointrouting/Commands.cpp waypointrouting/SailCommand.cpp
@@ -118,46 +118,40 @@ export HTTP_SYNC_SRC        = Nodes/HTTPSyncNode.cpp
 export XBEE_NETWORK_SRC     = Network/DataLink.cpp Network/LinuxSerialDataLink.cpp Network/XbeePacketNetwork.cpp \
                             xBee/Xbee.cpp Nodes/XbeeSyncNode.cpp
 
-
-export INTEGRATION_TEST		= Tests/integration/IntegrationTests/LowLevelControllerJanetIntegrationTest.cpp
+export INTEGRATION_TEST		= Tests/integration/IntegrationTests/ArduinoIntegrationTest.cpp
 
 
 ###############################################################################
 # Rules
 ###############################################################################
 
-.PHONY: clean
+.PHONY: clean $(WIRING_PI)
 
 all: $(EXECUTABLE) stats
 
-dev-lnm: $(BUILD_DIR) $(WIRING_PI)
+dev-lnm: $(BUILD_DIR)
 	$(MAKE) -f dev-lnm.mk -j
 
-line-follow: $(BUILD_DIR) $(WIRING_PI)
+line-follow: $(BUILD_DIR)
 	$(MAKE) -f line-follow.mk -j4
 
 # Builds the intergration test, requires the whole system to be built before
-tests: $(BUILD_DIR) $(WIRING_PI)
+tests: $(BUILD_DIR)
 	$(MAKE) -C Tests
 	$(MAKE) -f tests.mk
 
-integration_tests: $(BUILD_DIR) $(WIRING_PI)
+integration_tests: $(BUILD_DIR)
 	$(MAKE) -f integration_tests.mk
 
 #  Create the directories needed
 $(BUILD_DIR):
 	@$(MKDIR_P) $(BUILD_DIR)
 
-$(WIRING_PI):
-	$(MAKE) -C $(WIRING_PI_PATH)
-	@mv $(WIRING_PI_STATIC) ./libwiringPi.so
-
 clean:
 	@echo Removing existing object files and executable
 	-@rm -rd $(BUILD_DIR)
 	-@rm $(EXECUTABLE)
-	$(MAKE) -C Tests clean
+	-$(MAKE) -C tests clean
 	-@rm $(UNIT_TEST_EXEC)
 	-@rm $(HARDWARE_TEST_EXEC)
-
 	@echo DONE

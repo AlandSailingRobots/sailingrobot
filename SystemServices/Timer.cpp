@@ -50,9 +50,9 @@ double Timer::timePassed()
 	}
 }
 
-double Timer::timeUntil(double seconds)
+double Timer::timeUntil(double unixTime)
 {
-	return seconds - timePassed();
+	return unixTime - timePassed();
 }
 
 void Timer::sleepUntil(double seconds)

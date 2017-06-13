@@ -1,7 +1,7 @@
 /****************************************************************************************
  *
  * File:
- * 		WindVoter.h
+ * 		ProximityVoter.h
  *
  * Purpose:
  *		
@@ -17,23 +17,24 @@
 
 
 #include "../ASRVoter.h"
+#include "CollidableMgr/CollidableMgr.h"
 
-#include <vector>
 
-
-class WindVoter : public ASRVoter {
+class ProximityVoter : public ASRVoter {
 public:
     ///----------------------------------------------------------------------------------
- 	/// Constructs the wind voter.
+ 	/// Constructs the proximity voter.
  	///----------------------------------------------------------------------------------
-    WindVoter( int16_t maxVotes, int16_t weight );
+    ProximityVoter( int16_t maxVotes, int16_t weight, CollidableMgr& collidableMgr );
 
     ///----------------------------------------------------------------------------------
- 	/// Triggers a ASR voter to place votes on the course headings. The wind voter
-    /// places voters on courses that allow the boat to go faster
+ 	/// Triggers a ASR voter to place votes on the course headings.
  	///----------------------------------------------------------------------------------
     const ASRCourseBallot& vote( const BoatState_t& boatState );
+
+    void bearingAvoidance( const BoatState_t& boatState, uint16_t bearing );
+
+    float aisAvoidance( const BoatState_t& boatState, AISCollidable_t& collidable );
 private:
-    const int TW_BUFFER_SIZE = 2;
-    std::vector<float> trueWindBuffer;
+    CollidableMgr& collidableMgr;
 };

@@ -35,6 +35,7 @@ public:
 	static double radianToDegree(double radians);
 
 	static int16_t headingDifference(uint16_t h1, uint16_t h2);
+	static int16_t signedHeadingDifference(uint16_t h1, uint16_t h2);
 	static uint16_t wrapAngle( int16_t angle);
 
 	static int addDeclinationToHeading(int heading, int declination);
@@ -56,7 +57,8 @@ public:
 	static double getApparentWindSpeed(const int windsensorDir, const int windsensorSpeed, const double gpsSpeed, const double heading, const double trueWindDirection);
 	static double getApparentWindDirection(const int windsensorDir, const int windsensorSpeed, const double gpsSpeed, const double heading, const double trueWindDirection);
 
-	
+	static void sphericalCoordinateSystem( const double lat, const double lon, double& x, double& y);
+	static void calculateVelocity( const uint16_t course, const double speed, double& vX, double& vY );
 };
 
 #endif
