@@ -2,6 +2,9 @@
 #include "SystemServices/Logger.h"
 #include "MessageBus/MessageBus.h"
 #include "Nodes/MessageLoggerNode.h"
+#include "CollidableMgr/CollidableMgr.h"
+
+#include "libs/json/src/json.hpp"
 
 #if SIMULATION == 1
  #include "Nodes/SimulationNode.h"
@@ -77,6 +80,23 @@ int main(int argc, char *argv[])
 {
 	// This is for eclipse development so the output is constantly pumped out.
 	setbuf(stdout, NULL);
+
+  //----- json testing----------
+  using json = nlohmann::json;
+  //json config;
+
+  std::ifstream ifs("configuration.json");
+  json config = json::parse(ifs);
+  std::cout << config.at("boat") << '\n';
+  std::cout << config << '\n';
+  //ifs >> config;
+  //printf(config["boat"]);
+  if(config.at("install_db")==1) {
+    //system(install_db.sh);
+    std::cout << "HEJ";
+  }
+
+  //----------------------------
 
 	// Database Path
 	std::string db_path;
@@ -176,7 +196,7 @@ int main(int argc, char *argv[])
 	initialiseNode(sail, "Sail Actuator", NodeImportance::CRITICAL);
 	initialiseNode(rudder, "Rudder Actuator", NodeImportance::CRITICAL);
 	initialiseNode(arduino, "Arduino Node", NodeImportance::NOT_CRITICAL);
-	initialiseNode(colorDetection, "Colour detection node", NodeImportance::NOT_CRITICAL);
+	//initialiseNode(colorDetection, "Colour detection node", NodeImportance::NOT_CRITICAL);
 	#endif
 
 	if (requireNetwork)
