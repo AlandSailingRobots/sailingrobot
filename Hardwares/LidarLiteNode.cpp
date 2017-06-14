@@ -1,20 +1,20 @@
-#include "lidarLiteNode.h"
+#include "LidarLiteNode.h"
 using namespace std;
 
 
-lidarLiteNode::lidarLiteNode(MessageBus& msgBus,int delay,bool debug)
+LidarLiteNode::LidarLiteNode(MessageBus& msgBus,int delay,bool debug)
 	: ActiveNode(NodeID::ColorDetection, msgBus),m_delay(delay),m_fd(0),m_debug(debug),m_Initialised(false)
 {
 
 }
 
-lidarLiteNode::lidarLiteNode(MessageBus& msgBus,int delay)
+LidarLiteNode::LidarLiteNode(MessageBus& msgBus,int delay)
 	: ActiveNode(NodeID::ColorDetection, msgBus),m_delay(delay),m_fd(0),m_debug(false),m_Initialised(false)
 {
 
 }
 
-bool lidarLiteNode::init(){
+bool LidarLiteNode::init(){
 
 	m_fd = lidar_init(m_debug);
 	if(m_fd != -1){
@@ -27,21 +27,21 @@ bool lidarLiteNode::init(){
 
 }
 
-void lidarLiteNode::start()
+void LidarLiteNode::start()
 {
 	if(m_Initialised)
 	{
-		runThread(lidarThreadFunc);
+		runThread(LidarThreadFunc);
 	}
 	else{
 		Logger::error("%sCannot open the Lidar connexion", __PRETTY_FUNCTION__);
 	}
 }
 
-void lidarLiteNode::lidarThreadFunc(void* nodePtr)
+void LidarLiteNode::LidarThreadFunc(void* nodePtr)
 {
-	lidarLiteNode* node = (lidarLiteNode*)nodePtr;
-	Logger::info("lidarLiteNode thread started");
+	LidarLiteNode* node = (LidarLiteNode*)nodePtr;
+	Logger::info("LidarLiteNode thread started");
 	int res, st;
 	for (;;) {
 		res = lidar_read(node->m_fd);
@@ -56,7 +56,7 @@ void lidarLiteNode::lidarThreadFunc(void* nodePtr)
 	}
 }
 
-void lidarLiteNode::processMessage(const Message* msgPtr)
+void LidarLiteNode::processMessage(const Message* msgPtr)
 {
 
 }

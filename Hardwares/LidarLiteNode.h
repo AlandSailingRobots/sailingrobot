@@ -2,10 +2,10 @@
 /****************************************************************************************
  *
  * File:
- * 		lidarLiteNode.h
+ * 		LidarLiteNode.h
  *
  * Purpose:
- *		A lidarLiteNode which uses a lidar to measure the distance.
+ *		A LidarLiteNode which uses a lidar to measure the distance.
  * 		Will be used to find the boat-obstacle distance.
  *
  * Developer Notes:
@@ -14,14 +14,14 @@
  ***************************************************************************************/
 
 #pragma once
-#include "../ActiveNode.h"
-#include "lidarLite.h"
+#include "MessageBus/ActiveNode.h"
+#include "lidarLite/lidarLite.h"
 #include "Messages/LidarMsg.h"
 
-class lidarLiteNode : public ActiveNode {
+class LidarLiteNode : public ActiveNode {
 public:
-    lidarLiteNode(MessageBus& msgBus,int delay,bool debug);//delay in msat least 2ms or too much timeout
-    lidarLiteNode(MessageBus& msgBus,int delay);
+    LidarLiteNode(MessageBus& msgBus,int delay,bool debug);//delay in msat least 2ms or too much timeout
+    LidarLiteNode(MessageBus& msgBus,int delay);
 
 	///----------------------------------------------------------------------------------
 	/// Initialises the connection with the lidar
@@ -42,7 +42,7 @@ public:
 	void start();
 private:
 
-	static void lidarThreadFunc(void* nodePtr);
+	static void LidarThreadFunc(void* nodePtr);
     int 	m_delay;
     int		m_fd;
     bool 	m_debug;
