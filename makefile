@@ -76,6 +76,8 @@ export EXECUTABLE           = sr
 export UNIT_TEST_EXEC 		= unit-tests.run
 export HARDWARE_TEST_EXEC 	= hardware-tests.run
 
+export CONFIG 							= readConfig.cpp #maybe remove
+
 export OBJECT_FILE          = $(BUILD_DIR)/objects.tmp
 
 export COLLIDABLE_MGR_SRC	= CollidableMgr/CollidableMgr.cpp
@@ -131,15 +133,15 @@ export INTEGRATION_TEST		= Tests/integration/IntegrationTests/LowLevelController
 export SRC
 
 ifeq ($(USE_LNM),1)
-SRC 											= $(MAIN_LNM_SRC) $(CORE_SRC) $(LNM_SRC)
+SRC 											= $(MAIN_LNM_SRC) $(CORE_SRC) $(LNM_SRC) $(CONFIG)
 else
-SRC 											= $(MAIN_SRC) $(CORE_SRC) $(LINE_FOLLOW_SRC) $(HTTP_SYNC_SRC)
+SRC 											= $(MAIN_SRC) $(CORE_SRC) $(LINE_FOLLOW_SRC) $(HTTP_SYNC_SRC) $(CONFIG)
 endif
 
 ifeq ($(USE_SIM),1)
 SRC 											+= $(SIMULATOR_SRC)
 else
-SRC 											+= $(HARDWARE_NODES_SRC) $(HARDWARE_SERVICES_SRC) $(XBEE_NETWORK_SRC) #Omitting xBEE temporarily
+SRC 											+= $(HARDWARE_NODES_SRC) $(HARDWARE_SERVICES_SRC) $(XBEE_NETWORK_SRC)
 endif
 
 ###############################################################################
