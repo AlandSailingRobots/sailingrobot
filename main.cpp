@@ -84,31 +84,22 @@ int main(int argc, char *argv[])
 	setbuf(stdout, NULL);
 
   //----- json testing----------
-  using json = nlohmann::json;
-  //json config;
-
-  std::ifstream ifs("configuration.json");
-  json config = json::parse(ifs);
-  std::cout << config.at("boat") << '\n';
-  std::cout << config.at("update_db") << '\n';
-  std::cout << config << '\n';
-  //ifs >> config;
-  //printf(config["boat"]);
-  if(config.at("install_db")==1) {
-    //system(install_db.sh);
-    std::cout << "HEJ";
-  }
-
-  printf("\n");
-  printf("\n");
-  printf("\n");
-
-  readConfig rc;
-  std::string f2 = "configuraion.json";
+  
+  const std::string& f2 = "configuraion.json";
+  std::cout << f2 << '\n';
   json c2;
-  c2 = rc.readFromJsonFile(f2);
+  readConfig::readFromJsonFile("configuration.json",c2);
   std::cout << c2 <<'\n';
+  std::cout << c2["boat"] <<'\n';
 
+  int idb = c2["install_db"];
+  int udb = c2["update_db"];
+  int i = idb + udb;
+  std::cout << i << '\n';
+
+  if (readConfig::exists(c2,"boat")) {
+    std::cout << "ASPire " << c2["boat"]<<'\n';
+  }
   //----------------------------
 
 	// Database Path
