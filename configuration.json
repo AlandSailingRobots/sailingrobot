@@ -7,5 +7,16 @@
 
 "windsail": 1,
 
-"waypoints": "FILENAME"
+"waypoints": "FILENAME",
+
+"course_calculation_config": {
+
+  "tack_angle": 10,
+  "tack_max_angle": 45,
+  "tack_min_speed": 2,
+  "sector_angle": 4
+
+}
+
+
 }

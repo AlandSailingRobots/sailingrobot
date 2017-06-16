@@ -36,7 +36,7 @@ bool DBHandler::initialise()
 	}
 }
 
-void DBHandler::getDataAsJson(std::string select, std::string table, std::string key, std::string id, Json& json, bool useArray) {
+void DBHandler::getDataAsJson(std::string select, std::string table, std::string key, std::string id, json& js, bool useArray) {
 	int rows = 0, columns = 0;
 	std::vector<std::string> values;
 	std::vector<std::string> columnNames;
@@ -58,19 +58,19 @@ void DBHandler::getDataAsJson(std::string select, std::string table, std::string
 			values.push_back(results[i]);
 	}
 
-	Json jsonEntry;
+	json jsonEntry;
 	for (int i = 0; i < rows; i++) {
 		for(unsigned int j = 0; j < columnNames.size(); j++) {
 			int index = j+(columns*i);
 			jsonEntry[columnNames.at(j)] = values.at(index);
 		}
 			if(useArray) {
-				if(!json[key].is_array()) {
-					json[key] = Json::array({});
+				if(!js[key].is_array()) {
+					js[key] = json::array({});
 				}
-				json[key].push_back(jsonEntry);
+				js[key].push_back(jsonEntry);
 			} else {
-				json[key] = jsonEntry;
+				js[key] = jsonEntry;
 			}
 
 	}
@@ -249,23 +249,61 @@ bool DBHandler::updateTableJson(std::string table, std::string data) {
 	}
 
 
-	Json json = Json::parse(data);
+	json js = json::parse(data);
 
 	std::stringstream ss;
 
 	//start at i = 1 to skip the id
 	ss << "SET ";
-	int fixedSize = json.size(); //Size would sometimes change, added this variable
+	int fixedSize = js.size(); //Size would sometimes change, added this variable
 	for (auto i = 1; i < fixedSize; i++) {
 		if (fixedSize > 1){
-			ss << columns.at(i) << " = " << json[columns.at(i)] << ","; //This crashes if the local database has fewer fields than the web database  (field out of range)
+			ss << columns.at(i) << " = " << js[columns.at(i)] << ","; //This crashes if the local database has fewer fields than the web database  (field out of range)
 		}
 	}
 
 	std::string values = ss.str();
 	values = values.substr(0, values.size()-1);
 
-	std::string id = json["id"];
+	std::string id = js["id"];
+
+	if(not queryTable("UPDATE " + table + " " + values + " WHERE ID = " + id + ";"))
+	{
+		Logger::error("%s Error: ", __PRETTY_FUNCTION__);
+		return false;
+	}
+	return true;
+}
+
+bool DBHandler::updateTableJsonObject(std::string table, json data) {
+
+
+	//m_logger.info(" updateTableJson:\n"+data);
+	std::vector<std::string> columns = getColumnInfo("name", table);
+
+	if(columns.size() <= 0 ){
+		Logger::error("%s Error: no such table %s", __PRETTY_FUNCTION__, table.c_str());
+		return false;
+	}
+
+
+	//Json json = data;
+
+	std::stringstream ss;
+
+	//start at i = 1 to skip the id
+	ss << "SET ";
+	int fixedSize = data.size(); //Size would sometimes change, added this variable
+	for (auto i = 1; i < fixedSize; i++) {
+		if (fixedSize > 1){
+			ss << columns.at(i) << " = " << data[columns.at(i)] << ","; //This crashes if the local database has fewer fields than the web database  (field out of range)
+		}
+	}
+
+	std::string values = ss.str();
+	values = values.substr(0, values.size()-1);
+
+	std::string id = data["id"];
 
 	if(not queryTable("UPDATE " + table + " " + values + " WHERE ID = " + id + ";"))
 	{
@@ -312,26 +350,26 @@ std::string DBHandler::retrieveCell(std::string table, std::string id, std::stri
 
 void DBHandler::updateConfigs(std::string configs) {
 
-	Json json = Json::parse(configs);
+	json js = json::parse(configs);
 
 	std::vector<std::string> tables;
 
-	for (auto i : Json::iterator_wrapper(json))  {
+	for (auto i : json::iterator_wrapper(js))  {
 		tables.push_back(i.key()); //For each table key
 	}
 
 	//tables = sailing_config buffer_config etc
 
 	for (auto table : tables) { //for each table in there
-		if(json[table] != NULL){
-			updateTableJson(table,json[table].dump()); //eg updatetablejson("sailing_config", configs['sailing_config'] as json)
+		if(js[table] != NULL){
+			updateTableJson(table,js[table].dump()); //eg updatetablejson("sailing_config", configs['sailing_config'] as json)
 		}
 	}
 }
 
 bool DBHandler::updateWaypoints(std::string waypoints){
 
-	Json json = Json::parse(waypoints);
+	json js = json::parse(waypoints);
 	std::string DBPrinter = "";
 	std::string tempValue = "";
 	int valuesLimit = 6; //"Dirty" fix for limiting the amount of values requested from server waypoint entries (amount of fields n = valuesLimit + 1)
@@ -343,15 +381,15 @@ bool DBHandler::updateWaypoints(std::string waypoints){
 	}
 
 
-	for (auto i : Json::iterator_wrapper(json))  {
+	for (auto i : json::iterator_wrapper(js))  {
 		//m_logger.info(i.value().dump());
 
-		for (auto y : Json::iterator_wrapper(i.value())){
+		for (auto y : json::iterator_wrapper(i.value())){
 
 			limitCounter = valuesLimit;
 			DBPrinter = "INSERT INTO waypoints (id,latitude,longitude,declination,radius,stay_time,harvested) VALUES (";
 
-			for (auto z : Json::iterator_wrapper(y.value())){
+			for (auto z : json::iterator_wrapper(y.value())){
 				//Each individual value
 				tempValue = z.value().dump();
 				tempValue = tempValue.substr(1, tempValue.size() - 2);
@@ -423,7 +461,7 @@ int DBHandler::getRows(std::string table) {
 }
 
 std::string DBHandler::getLogs(bool onlyLatest) {
-	Json json;
+	json js;
 
 	//fetch all datatables ending with "_datalogs"
 	std::vector<std::string> datalogTables = getTableNames("%_datalogs");
@@ -435,9 +473,9 @@ std::string DBHandler::getLogs(bool onlyLatest) {
 
 			if(onlyLatest){
 				//Gets the log entry with the highest id
-				getDataAsJson("*",table + " ORDER BY id DESC LIMIT 1",table,"",json,true);
+				getDataAsJson("*",table + " ORDER BY id DESC LIMIT 1",table,"",js,true);
 			}else{
-				getDataAsJson("*",table,table,"",json,true);
+				getDataAsJson("*",table,table,"",js,true);
 			}
 
 		}
@@ -446,7 +484,7 @@ std::string DBHandler::getLogs(bool onlyLatest) {
 		Logger::error("%s, Error: %s", __PRETTY_FUNCTION__, error);
 	}
 
-	return json.dump();
+	return js.dump();
 }
 
 
@@ -509,15 +547,15 @@ bool DBHandler::insert(std::string table, std::string fields, std::string values
 
 std::string DBHandler::getWaypoints() {
 	int rows = 0;
-	Json json;
+	json js;
 	std::string wp = "waypoint_";
 
 	rows = getRows("waypoints");
 	if (rows > 0) {
 		for (auto i = 1; i <= rows; ++i) {
-			getDataAsJson("id,latitude,longitude,declination,radius,stay_time", "waypoints", wp + std::to_string(i), std::to_string(i),json, true);
+			getDataAsJson("id,latitude,longitude,declination,radius,stay_time", "waypoints", wp + std::to_string(i), std::to_string(i),js, true);
 		}
-		return json.dump();
+		return js.dump();
 	}
 	else
 	{
@@ -897,7 +935,7 @@ std::vector<std::string> DBHandler::getColumnInfo(std::string info, std::string 
 
 bool DBHandler::getWaypointValues(int& nextId, double& nextLongitude, double& nextLatitude, int& nextDeclination, int& nextRadius, int& nextStayTime,
                         int& prevId, double& prevLongitude, double& prevLatitude, int& prevDeclination, int& prevRadius, bool& foundPrev)
-{	
+{
 	int rows, columns, rows2, columns2;
     std::vector<std::string> results;
 	std::vector<std::string> results2;
@@ -942,12 +980,12 @@ bool DBHandler::getWaypointValues(int& nextId, double& nextLongitude, double& ne
 		prevDeclination = retrieveCellAsInt("waypoints", results2[1], "declination");
 		prevRadius = retrieveCellAsInt("waypoints", results2[1], "radius");
 	}
-	
+
     return true;
 }
 
 std::string DBHandler::getConfigs() {
-	Json json;
+	json js;
 
 	//Fetch all table names ending with "_config"
 	std::vector<std::string> configTables = getTableNames("%_config");
@@ -955,10 +993,10 @@ std::string DBHandler::getConfigs() {
 	//Query config tables and select all from config tables with id "1"
 	//This json structure does not use arrays
 	for (auto table : configTables) {
-		getDataAsJson("*",table,table,"1",json,false);
+		getDataAsJson("*",table,table,"1",js,false);
 	}
 
-	return json.dump();
+	return js.dump();
 }
 
 

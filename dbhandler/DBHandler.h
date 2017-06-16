@@ -10,7 +10,7 @@
 #include "Messages/WindStateMsg.h"
 #include <mutex>
 #include "libs/json/src/json.hpp"
-using Json = nlohmann::json;
+using json = nlohmann::json;
 
 struct LogItem {
 		int 	m_compassHeading;
@@ -68,7 +68,7 @@ private:
 	//adds a table row into the json object as a array if array flag is true,
 	//otherwise it adds the table row as a json object
 	//id field is not obligatory, can be left empty
-	void getDataAsJson(std::string select, std::string table, std::string key, std::string id, Json& json, bool useArray);
+	void getDataAsJson(std::string select, std::string table, std::string key, std::string id, json& js, bool useArray);
 
 	//gets the id column from a given table
 	std::vector<std::string> getTableIds(std::string table);
@@ -106,6 +106,7 @@ public:
 
 	//updates table with json string (data)
 	bool updateTableJson(std::string table, std::string data);
+	bool updateTableJsonObject(std::string table, json data);
 
 	//updates table using values given
 	bool updateTable(std::string table, std::string column, std::string value, std::string id);

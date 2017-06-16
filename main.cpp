@@ -7,7 +7,7 @@
 #include "libs/json/src/json.hpp"
 
 #include "readConfig.h"
-
+#include "tr1/unordered_map"
 #if SIMULATION == 1
  #include "Nodes/SimulationNode.h"
 #else
@@ -36,7 +36,6 @@
 #include "Nodes/DBLoggerNode.h"
 #include "HardwareServices/MaestroController/MaestroController.h"
 #include "xBee/Xbee.h"
-
 
 #define DISABLE_LOGGING 0
 
@@ -84,7 +83,7 @@ int main(int argc, char *argv[])
 	setbuf(stdout, NULL);
 
   //----- json testing----------
-  
+
   const std::string& f2 = "configuraion.json";
   std::cout << f2 << '\n';
   json c2;
@@ -126,6 +125,11 @@ int main(int argc, char *argv[])
 	MessageBus messageBus;
 	DBHandler dbHandler(db_path);
 
+  printf("================================================================================\n");
+  printf("\t\t\t\tSailing Robot\n");
+  printf("\n");
+  printf("================================================================================\n");
+
 	if(dbHandler.initialise())
 	{
 		Logger::info("Database init\t\t[OK]");
@@ -137,6 +141,45 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 
+  json wp;
+  readConfig::waypointsInJson(wp,dbHandler);
+  std::cout << wp << '\n';
+
+  for (auto it = c2.begin(); it != c2.end(); ++it)
+  {
+    std::cout << it.key() << " | " << it.value() << "\n";
+  }
+
+  printf("\n\n\n");
+
+  json te = c2["course_calculation_config"];
+  std::string testr = te.dump();
+  std::cout << te << '\n';
+  std::cout << testr << '\n';
+  dbHandler.updateTableJson("course_calculation_config", te.get<std::string>());
+
+  for (auto it = c2.begin(); it != c2.end(); ++it)
+  {
+    std::cout << it.key() << " | " << it.value() << "\n";
+    if (it.key() == "course_calculation_config") {
+      std::cout << "I'm here!\n";
+      json temp = it.value();
+      json temp2 = it.key();
+      std::cout << temp << std::endl;
+
+      std::cout << it.key() << std::endl;
+      std::string tempString = temp2.get<std::string>();
+      std::cout << c2.at(it.key()) << std::endl;
+      std::cout << c2["course_calculation_config"] << '\n';
+      std::cout << c2["course_calculation_config"].dump() << '\n';
+      //dbHandler.updateTableJson("course_calculation_config", c2["course_calculation_config"].dump());
+    }
+  }
+
+  printf("================================================================================\n");
+	printf("\t\t\t\tSailing Robot\n");
+	printf("\n");
+	printf("================================================================================\n");
 	// Create nodes
 	MessageLoggerNode msgLogger(messageBus);
 	CollidableMgr collidableMgr;

@@ -1,7 +1,8 @@
 #include "readConfig.h"
+#include "dbhandler/DBHandler.h"
+#include "SystemServices/Logger.h"
 
 int main() {
-  //readConfig rc;
   const std::string& f2 = "configuraion.json";
   std::cout << f2 << '\n';
   json c2;
@@ -22,10 +23,20 @@ int main() {
   readConfig::readFromJsonFile("course_1.json", wp);
   std::cout << wp <<'\n';
   std::cout << '\n'<<wp["traffic"].flatten() <<'\n';
-  std::cout << wp.flatten()["/traffic/0/mmsi"] <<'\n';
+  std::cout << wp.flatten()["/traffic/0/heading"] <<'\n';
 
   json test;
   readConfig::readFromJsonFile("test.json",test);
   std::cout << test << '\n';
   std::cout << test["age"]["days"]<<'\n';
+
+  //json wp2;
+  //readConfig::waypointsInJson(wp2, "./asr.db");
+
+  for (auto it = c2.begin(); it != c2.end(); ++it)
+  {
+    json temp = it.value();
+    std::cout << it.key() << " | " << it.value() << "\n";
+    std::cout << temp <<'\n';
+  }
 }
