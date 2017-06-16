@@ -29,7 +29,7 @@
 
 #include "../cxxtest/cxxtest/TestSuite.h"
 #include "TestMocks/MockNode.h"
-#include "../../MessageBus/MessageBus.h"
+#include "MessageBus/MessageBus.h"
 #include "SystemServices/Logger.h"
 #include <stdint.h>
 #include <thread>

@@ -56,7 +56,7 @@ export BUILD_DIR        	= build
 export EXEC_DIR         	= ./
 export INC_DIR         	 	= -I./ -I./Libs
 
-LNM_DIR                 	= LocalNavigationModule
+LNM_DIR                 	= Navigation/LocalNavigationModule
 
 
 ###############################################################################
@@ -80,12 +80,12 @@ export MESSAGE_BUS_SRC      = MessageBus/MessageBus.cpp MessageBus/ActiveNode.cp
 export COLLIDABLE_MGR_SRC	= CollidableMgr/CollidableMgr.cpp
 
 export LNM_SRC              = $(LNM_DIR)/ASRCourseBallot.cpp $(LNM_DIR)/ASRArbiter.cpp \
-                            $(LNM_DIR)/LocalNavigationModule.cpp Nodes/LowLevelController.cpp \
+                            $(LNM_DIR)/LocalNavigationModule.cpp LowLevelControllers/LowLevelController.cpp \
                             $(LNM_DIR)/Voters/WaypointVoter.cpp $(LNM_DIR)/Voters/WindVoter.cpp  \
                             $(LNM_DIR)/Voters/ChannelVoter.cpp $(LNM_DIR)/Voters/ProximityVoter.cpp \
 							$(LNM_DIR)/Voters/MidRangeVoter.cpp $(COLLIDABLE_MGR_SRC)
 
-export LINE_FOLLOW_SRC      = Nodes/LineFollowNode.cpp waypointrouting/RudderCommand.cpp \
+export LINE_FOLLOW_SRC      = Navigation/LineFollowNode.cpp waypointrouting/RudderCommand.cpp \
                             Nodes/MessageLoggerNode.cpp waypointrouting/Commands.cpp waypointrouting/SailCommand.cpp \
                             $(COLLIDABLE_MGR_SRC)
 
@@ -108,9 +108,9 @@ export MATH_SRC             = Math/CourseCalculation.cpp Math/CourseMath.cpp Mat
 
 export SIMULATOR_SRC        = Nodes/SimulationNode.cpp
 
-export CORE_SRC             = 	Nodes/WaypointMgrNode.cpp Nodes/LowLevelControllerNodeASPire.cpp \
+export CORE_SRC             = Navigation/WaypointMgrNode.cpp LowLevelControllers/LowLevelControllerNodeASPire.cpp \
 																Nodes/StateEstimationNode.cpp \
-							   								Nodes/LowLevelControllerNodeJanet.cpp Nodes/WindStateNode.cpp \
+							   								LowLevelControllers/LowLevelControllerNodeJanet.cpp Nodes/WindStateNode.cpp \
 								$(MESSAGE_BUS_SRC) $(NETWORK_SRC) $(SYSTEM_SERVICES_SRC) $(MATH_SRC)
 
 export HTTP_SYNC_SRC        = Nodes/HTTPSyncNode.cpp

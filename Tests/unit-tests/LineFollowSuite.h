@@ -27,8 +27,8 @@
 #pragma once
 
 #include "../cxxtest/cxxtest/TestSuite.h"
-#include "../../MessageBus/MessageBus.h"
-#include "Nodes/LineFollowNode.h"
+#include "MessageBus/MessageBus.h"
+#include "Navigation/LineFollowNode.h"
 #include "Messages/VesselStateMsg.h"
 #include "Messages/WindStateMsg.h"
 #include "Messages/StateMessage.h"

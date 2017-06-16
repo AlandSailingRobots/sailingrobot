@@ -13,13 +13,13 @@
  #include "Hardwares/ArduinoNode.h"
 #endif
 
-#include "Nodes/WaypointMgrNode.h"
+#include "Navigation/WaypointMgrNode.h"
 #include "Nodes/StateEstimationNode.h"
 #include "Nodes/WindStateNode.h"
 #include "Nodes/HTTPSyncNode.h"
 #include "Nodes/XbeeSyncNode.h"
-#include "Nodes/LineFollowNode.h"
-#include "Nodes/LowLevelControllerNodeJanet.h"
+#include "Navigation/LineFollowNode.h"
+#include "LowLevelControllers/LowLevelControllerNodeJanet.h"
 
 
 #if USE_OPENCV_COLOR_DETECTION == 1

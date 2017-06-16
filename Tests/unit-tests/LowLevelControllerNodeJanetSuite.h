@@ -13,9 +13,9 @@
 
 #pragma once
 
-#include "Nodes/LowLevelControllerNodeJanet.h"
+#include "LowLevelControllers/LowLevelControllerNodeJanet.h"
 #include "../cxxtest/cxxtest/TestSuite.h"
-#include "../../MessageBus/MessageBus.h"
+#include "MessageBus/MessageBus.h"
 #include "TestMocks/MessageLogger.h"
 #include "TestMocks/MockNode.h"
 

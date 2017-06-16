@@ -16,24 +16,24 @@
  #include "Hardwares/ArduinoNode.h"
 #endif
 
-#include "Nodes/WaypointMgrNode.h"
+#include "Navigation/WaypointMgrNode.h"
 #include "Nodes/VesselStateNode.h"
 #include "Nodes/HTTPSyncNode.h"
 #include "Nodes/XbeeSyncNode.h"
-#include "Nodes/LineFollowNode.h"
+#include "Navigation/LineFollowNode.h"
 
 #include "Messages/DataRequestMsg.h"
 #include "DataBase/DBHandler.h"
 #include "Hardwares/MaestroController/MaestroController.h"
 #include "xBee/Xbee.h"
 
-#include "LocalNavigationModule/LocalNavigationModule.h"
-#include "LocalNavigationModule/Voters/WaypointVoter.h"
-#include "LocalNavigationModule/Voters/WindVoter.h"
-#include "LocalNavigationModule/Voters/ChannelVoter.h"
-#include "LocalNavigationModule/Voters/ProximityVoter.h"
-#include "LocalNavigationModule/Voters/MidRangeVoter.h"
-#include "Nodes/LowLevelController.h"
+#include "Navigation/LocalNavigationModule/LocalNavigationModule.h"
+#include "Navigation/LocalNavigationModule/Voters/WaypointVoter.h"
+#include "Navigation/LocalNavigationModule/Voters/WindVoter.h"
+#include "Navigation/LocalNavigationModule/Voters/ChannelVoter.h"
+#include "Navigation/LocalNavigationModule/Voters/ProximityVoter.h"
+#include "Navigation/LocalNavigationModule/Voters/MidRangeVoter.h"
+#include "LowLevelControllers/LowLevelController.h"
 
 #define DISABLE_LOGGING 0
 
