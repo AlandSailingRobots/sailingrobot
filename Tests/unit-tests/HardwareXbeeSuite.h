@@ -27,7 +27,7 @@
  #pragma once
 
  #include "../cxxtest/cxxtest/TestSuite.h"
-#include "xBee/Xbee.h"
+#include "Xbee/Xbee.h"
 #include "SystemServices/Logger.h"
 #include <stdint.h>
 #include <thread>

@@ -17,7 +17,7 @@
  #pragma once
 
 #include "MessageBus/ActiveNode.h"
-#include "xBee/Xbee.h"
+#include "Xbee/Xbee.h"
 #include "SystemServices/Logger.h"
 #include "DataBase/DBHandler.h"
 #include "Messages/VesselStateMsg.h"

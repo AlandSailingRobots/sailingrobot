@@ -106,18 +106,18 @@ export HARDWARE_SERVICES_SRC = Hardwares/MaestroController/MaestroController.cpp
 
 export MATH_SRC             = Math/CourseCalculation.cpp Math/CourseMath.cpp Math/Utility.cpp
 
-export SIMULATOR_SRC        = Nodes/SimulationNode.cpp
+export SIMULATOR_SRC        = Simulation/SimulationNode.cpp
 
 export CORE_SRC             = Navigation/WaypointMgrNode.cpp LowLevelControllers/LowLevelControllerNodeASPire.cpp \
 																WorldState/StateEstimationNode.cpp WorldState/VesselStateNode.cpp \
 							   								LowLevelControllers/LowLevelControllerNodeJanet.cpp WorldState/WindStateNode.cpp \
 								$(MESSAGE_BUS_SRC) $(NETWORK_SRC) $(SYSTEM_SERVICES_SRC) $(MATH_SRC)
 
-export HTTP_SYNC_SRC        = Nodes/HTTPSyncNode.cpp
+export HTTP_SYNC_SRC        = HTTPSync/HTTPSyncNode.cpp
 
 # TODO: Break down for Xbee Remote0
 export XBEE_NETWORK_SRC     = Network/DataLink.cpp Network/LinuxSerialDataLink.cpp Network/XbeePacketNetwork.cpp \
-                            xBee/Xbee.cpp Nodes/XbeeSyncNode.cpp
+                            Xbee/Xbee.cpp Xbee/XbeeSyncNode.cpp
 
 export INTEGRATION_TEST		= Tests/integration/IntegrationTests/ArduinoIntegrationTest.cpp
 

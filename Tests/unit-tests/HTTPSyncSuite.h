@@ -29,8 +29,8 @@
 #pragma once
 
 #include "../cxxtest/cxxtest/TestSuite.h"
-#include "Nodes/HTTPSyncNode.h"
-#include "../../MessageBus/MessageBus.h"
+#include "HTTPSync/HTTPSyncNode.h"
+#include "MessageBus/MessageBus.h"
 #include "SystemServices/Logger.h"
 #include "TestMocks/MessageLogger.h"
 #include "Messages/LocalWaypointChangeMsg.h"

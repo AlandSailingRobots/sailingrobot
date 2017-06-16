@@ -6,7 +6,7 @@
 #include "WorldState/CollidableMgr/CollidableMgr.h"
 
 #if SIMULATION == 1
- #include "Nodes/SimulationNode.h"
+ #include "Simulation/SimulationNode.h"
 #else
  #include "Hardwares/CV7Node.h"
  #include "Hardwares/HMC6343Node.h"
@@ -17,14 +17,14 @@
 
 #include "Navigation/WaypointMgrNode.h"
 #include "WorldState/VesselStateNode.h"
-#include "Nodes/HTTPSyncNode.h"
-#include "Nodes/XbeeSyncNode.h"
+#include "HTTPSync/HTTPSyncNode.h"
+#include "Xbee/XbeeSyncNode.h"
 #include "Navigation/LineFollowNode.h"
 
 #include "Messages/DataRequestMsg.h"
 #include "DataBase/DBHandler.h"
 #include "Hardwares/MaestroController/MaestroController.h"
-#include "xBee/Xbee.h"
+#include "Xbee/Xbee.h"
 
 #include "Navigation/LocalNavigationModule/LocalNavigationModule.h"
 #include "Navigation/LocalNavigationModule/Voters/WaypointVoter.h"

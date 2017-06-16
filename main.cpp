@@ -3,7 +3,7 @@
 #include "MessageBus/MessageBus.h"
 
 #if SIMULATION == 1
- #include "Nodes/SimulationNode.h"
+ #include "Simulation/SimulationNode.h"
 #else
  #include "Hardwares/CV7Node.h"
  #include "Hardwares/HMC6343Node.h"
@@ -15,8 +15,8 @@
 #include "Navigation/WaypointMgrNode.h"
 #include "WorldState/StateEstimationNode.h"
 #include "WorldState/WindStateNode.h"
-#include "Nodes/HTTPSyncNode.h"
-#include "Nodes/XbeeSyncNode.h"
+#include "HTTPSync/HTTPSyncNode.h"
+#include "Xbee/XbeeSyncNode.h"
 #include "Navigation/LineFollowNode.h"
 #include "LowLevelControllers/LowLevelControllerNodeJanet.h"
 
@@ -29,7 +29,7 @@
 #include "DataBase/DBHandler.h"
 #include "DataBase/DBLoggerNode.h"
 #include "Hardwares/MaestroController/MaestroController.h"
-#include "xBee/Xbee.h"
+#include "Xbee/Xbee.h"
 
 
 #define DISABLE_LOGGING 0
