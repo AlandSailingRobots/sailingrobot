@@ -17,7 +17,7 @@
 
 
 #include "../ASRVoter.h"
-#include "CollidableMgr/CollidableMgr.h"
+#include "WorldState/CollidableMgr/CollidableMgr.h"
 
 
 class ProximityVoter : public ASRVoter {

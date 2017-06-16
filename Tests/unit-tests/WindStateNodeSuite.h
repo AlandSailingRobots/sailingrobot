@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Nodes/WindStateNode.h"
+#include "WorldState/WindStateNode.h"
 #include "MessageBus/MessageBus.h"
 #include "Tests/unit-tests/TestMocks/MessageLogger.h"
 #include "Tests/unit-tests/TestMocks/MessageVerifier.h"

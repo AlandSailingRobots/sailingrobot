@@ -1,7 +1,6 @@
 #include <string>
 #include "SystemServices/Logger.h"
 #include "MessageBus/MessageBus.h"
-#include "Nodes/MessageLoggerNode.h"
 
 #if SIMULATION == 1
  #include "Nodes/SimulationNode.h"
@@ -14,8 +13,8 @@
 #endif
 
 #include "Navigation/WaypointMgrNode.h"
-#include "Nodes/StateEstimationNode.h"
-#include "Nodes/WindStateNode.h"
+#include "WorldState/StateEstimationNode.h"
+#include "WorldState/WindStateNode.h"
 #include "Nodes/HTTPSyncNode.h"
 #include "Nodes/XbeeSyncNode.h"
 #include "Navigation/LineFollowNode.h"
@@ -23,7 +22,7 @@
 
 
 #if USE_OPENCV_COLOR_DETECTION == 1
-#include "Nodes/obstacledetection/colorDetectionNode.h"
+#include "WorldState/obstacledetection/colorDetectionNode.h"
 #endif
 
 #include "Messages/DataRequestMsg.h"
@@ -114,7 +113,6 @@ int main(int argc, char *argv[])
 	}
 
 	// Create nodes
-	MessageLoggerNode msgLogger(messageBus);
 	CollidableMgr collidableMgr;
 
 	#if SIMULATION == 1
@@ -164,7 +162,6 @@ int main(int argc, char *argv[])
 	bool requireNetwork = (bool) (dbHandler.retrieveCellAsInt("sailing_robot_config", "1", "require_network"));
 
 	// Initialise nodes
-	initialiseNode(msgLogger, "Message Logger", NodeImportance::NOT_CRITICAL);
 
 	#if SIMULATION == 1
 	initialiseNode(simulation,"Simulation Node",NodeImportance::CRITICAL);

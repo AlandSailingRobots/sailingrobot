@@ -24,7 +24,7 @@
  #pragma once
 
  #include "../cxxtest/cxxtest/TestSuite.h"
- #include "Nodes/LocalNavigationModule/ASRArbiter.h"
+ #include "Navigation/LocalNavigationModule/ASRArbiter.h"
 
 
  class ASRArbiterSuite : public CxxTest::TestSuite {

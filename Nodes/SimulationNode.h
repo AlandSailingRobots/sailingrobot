@@ -25,7 +25,7 @@
 #include "Messages/ArduinoDataMsg.h"
 #include "Messages/ActuatorPositionMsg.h"
 #include "Network/TCPServer.h"
-#include "CollidableMgr/CollidableMgr.h"
+#include "WorldState/CollidableMgr/CollidableMgr.h"
 
 
 struct BoatDataPacket_t {

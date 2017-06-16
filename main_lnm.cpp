@@ -2,9 +2,8 @@
 #include <string>
 #include "SystemServices/Logger.h"
 #include "MessageBus/MessageBus.h"
-#include "Nodes/MessageLoggerNode.h"
 
-#include "CollidableMgr/CollidableMgr.h"
+#include "WorldState/CollidableMgr/CollidableMgr.h"
 
 #if SIMULATION == 1
  #include "Nodes/SimulationNode.h"
@@ -17,7 +16,7 @@
 #endif
 
 #include "Navigation/WaypointMgrNode.h"
-#include "Nodes/VesselStateNode.h"
+#include "WorldState/VesselStateNode.h"
 #include "Nodes/HTTPSyncNode.h"
 #include "Nodes/XbeeSyncNode.h"
 #include "Navigation/LineFollowNode.h"

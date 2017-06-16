@@ -13,7 +13,7 @@
 
 #pragma once
 
-#include "Nodes/StateEstimationNode.h"
+#include "WorldState/StateEstimationNode.h"
 #include "../cxxtest/cxxtest/TestSuite.h"
 #include "Messages/StateMessage.h"
 #include "../../MessageBus/MessageBus.h"

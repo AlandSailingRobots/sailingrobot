@@ -24,7 +24,7 @@
  #pragma once
 
  #include "../cxxtest/cxxtest/TestSuite.h"
- #include "Nodes/LocalNavigationModule/ASRCourseBallot.h"
+ #include "Navigation/LocalNavigationModule/ASRCourseBallot.h"
 
 
  class ASRCourseBallotSuite : public CxxTest::TestSuite {

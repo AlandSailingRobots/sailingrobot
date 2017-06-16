@@ -26,7 +26,7 @@
  #include "../cxxtest/cxxtest/TestSuite.h"
  #include "MessageBus/MessageBus.h"
  #include "TestMocks/MessageLogger.h"
- #include "Nodes/WaypointMgrNode.h"
+ #include "Navigation/WaypointMgrNode.h"
 
 // For std::this_thread
 #include <chrono>

@@ -77,7 +77,7 @@ export MAIN_LNM_SRC         = main_lnm.cpp
 export MESSAGE_BUS_SRC      = MessageBus/MessageBus.cpp MessageBus/ActiveNode.cpp MessageBus/MessageSerialiser.cpp \
                             MessageBus/MessageDeserialiser.cpp
 
-export COLLIDABLE_MGR_SRC	= CollidableMgr/CollidableMgr.cpp
+export COLLIDABLE_MGR_SRC	= WorldState/CollidableMgr/CollidableMgr.cpp
 
 export LNM_SRC              = $(LNM_DIR)/ASRCourseBallot.cpp $(LNM_DIR)/ASRArbiter.cpp \
                             $(LNM_DIR)/LocalNavigationModule.cpp LowLevelControllers/LowLevelController.cpp \
@@ -86,10 +86,10 @@ export LNM_SRC              = $(LNM_DIR)/ASRCourseBallot.cpp $(LNM_DIR)/ASRArbit
 							$(LNM_DIR)/Voters/MidRangeVoter.cpp $(COLLIDABLE_MGR_SRC)
 
 export LINE_FOLLOW_SRC      = Navigation/LineFollowNode.cpp waypointrouting/RudderCommand.cpp \
-                            Nodes/MessageLoggerNode.cpp waypointrouting/Commands.cpp waypointrouting/SailCommand.cpp \
+                            waypointrouting/Commands.cpp waypointrouting/SailCommand.cpp \
                             $(COLLIDABLE_MGR_SRC)
 
-export NETWORK_SRC          = Network/TCPServer.cpp Nodes/VesselStateNode.cpp
+export NETWORK_SRC          = Network/TCPServer.cpp
 
 export HARDWARE_NODES_SRC   = Hardwares/CV7Node.cpp Hardwares/HMC6343Node.cpp Hardwares/GPSDNode.cpp Hardwares/ActuatorNodeASPire.cpp \
                             Hardwares/ActuatorNode.cpp Hardwares/ArduinoNode.cpp Hardwares/CANFeedbackReceiver.cpp Hardwares/CANWindsensorNode.cpp
@@ -109,8 +109,8 @@ export MATH_SRC             = Math/CourseCalculation.cpp Math/CourseMath.cpp Mat
 export SIMULATOR_SRC        = Nodes/SimulationNode.cpp
 
 export CORE_SRC             = Navigation/WaypointMgrNode.cpp LowLevelControllers/LowLevelControllerNodeASPire.cpp \
-																Nodes/StateEstimationNode.cpp \
-							   								LowLevelControllers/LowLevelControllerNodeJanet.cpp Nodes/WindStateNode.cpp \
+																WorldState/StateEstimationNode.cpp WorldState/VesselStateNode.cpp \
+							   								LowLevelControllers/LowLevelControllerNodeJanet.cpp WorldState/WindStateNode.cpp \
 								$(MESSAGE_BUS_SRC) $(NETWORK_SRC) $(SYSTEM_SERVICES_SRC) $(MATH_SRC)
 
 export HTTP_SYNC_SRC        = Nodes/HTTPSyncNode.cpp
