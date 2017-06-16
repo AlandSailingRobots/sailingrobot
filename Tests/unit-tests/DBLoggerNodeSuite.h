@@ -4,7 +4,7 @@
 #include "SystemServices/Timer.h"
 #include "SystemServices/Logger.h"
 #include "MessageBus/MessageBus.h"
-#include "Nodes/DBLoggerNode.h"
+#include "DataBase/DBLoggerNode.h"
 #include "../cxxtest/cxxtest/TestSuite.h"
 
 #include <iostream>

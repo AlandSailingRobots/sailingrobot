@@ -16,7 +16,7 @@
 
 #include "MessageBus/Node.h"
 #include "Messages/GPSDataMsg.h"
-#include "dbhandler/DBHandler.h"
+#include "DataBase/DBHandler.h"
 #include "Math/CourseMath.h"
 #include "SystemServices/Timer.h"
 

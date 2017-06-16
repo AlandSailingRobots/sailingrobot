@@ -15,7 +15,6 @@
 #include "Messages/WaypointDataMsg.h"
 #include "Messages/ServerWaypointsReceivedMsg.h"
 #include "SystemServices/Logger.h"
-#include "dbhandler/DBHandler.h"
 #include "Math/Utility.h"
 #include <string>
 #include <vector>

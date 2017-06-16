@@ -95,9 +95,9 @@ export HARDWARE_NODES_SRC   = Hardwares/CV7Node.cpp Hardwares/HMC6343Node.cpp Ha
                             Hardwares/ActuatorNode.cpp Hardwares/ArduinoNode.cpp Hardwares/CANFeedbackReceiver.cpp Hardwares/CANWindsensorNode.cpp
 
 export SYSTEM_SERVICES_SRC  = SystemServices/Logger.cpp SystemServices/SysClock.cpp SystemServices/Timer.cpp \
-                            dbhandler/DBHandler.cpp dbhandler/DBLogger.cpp SystemServices/WingsailControl.cpp \
+                            DataBase/DBHandler.cpp DataBase/DBLogger.cpp SystemServices/WingsailControl.cpp \
 														SystemServices/CourseRegulator.cpp SystemServices/SoftsailControl.cpp \
-														Nodes/DBLoggerNode.cpp
+														DataBase/DBLoggerNode.cpp
 
 export HARDWARE_SERVICES_SRC = Hardwares/MaestroController/MaestroController.cpp Hardwares/i2ccontroller/I2CController.cpp \
 							   Hardwares/CAN_Services/CANPGNReceiver.cpp Hardwares/CAN_Services/CANService.cpp \

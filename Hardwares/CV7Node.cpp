@@ -13,7 +13,7 @@
 
 #include "CV7Node.h"
 #include "SystemServices/Logger.h"
-#include "dbhandler/DBHandler.h"
+#include "DataBase/DBHandler.h"
 #include "Messages/WindDataMsg.h"
 #include "Math/Utility.h"
 #include <cstring>

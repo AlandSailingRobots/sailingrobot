@@ -19,7 +19,7 @@
 #include "MessageBus/ActiveNode.h"
 #include "xBee/Xbee.h"
 #include "SystemServices/Logger.h"
-#include "dbhandler/DBHandler.h"
+#include "DataBase/DBHandler.h"
 #include "Messages/VesselStateMsg.h"
 #include "Network/XbeePacketNetwork.h"
 #include "Network/LinuxSerialDataLink.h"

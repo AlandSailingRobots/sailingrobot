@@ -27,8 +27,8 @@
 #endif
 
 #include "Messages/DataRequestMsg.h"
-#include "dbhandler/DBHandler.h"
-#include "Nodes/DBLoggerNode.h"
+#include "DataBase/DBHandler.h"
+#include "DataBase/DBLoggerNode.h"
 #include "Hardwares/MaestroController/MaestroController.h"
 #include "xBee/Xbee.h"
 
