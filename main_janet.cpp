@@ -97,6 +97,7 @@ int main(int argc, char *argv[])
 
 	if (Logger::init()) {
 		Logger::info("Built on %s at %s", __DATE__, __TIME__);
+    Logger::info("Janet");
 		Logger::info("Logger init\t\t[OK]");
 	}
 	else {

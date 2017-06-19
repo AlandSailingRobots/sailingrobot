@@ -57,7 +57,7 @@
 },
 
 "waypoint_routing_config": {
-  "radius_ratio": 0.5,
+  "radius_ratio": 0.1,
   "sail_adjust_time": 5,
   "adjust_degree_limit": 25,
   "max_command_angle": 90,

@@ -97,6 +97,7 @@ int main(int argc, char *argv[])
 
 	if (Logger::init()) {
 		Logger::info("Built on %s at %s", __DATE__, __TIME__);
+    Logger::info("ASPire");
 		Logger::info("Logger init\t\t[OK]");
 	}
 	else {
@@ -124,6 +125,7 @@ int main(int argc, char *argv[])
 	// Create nodes
 	MessageLoggerNode msgLogger(messageBus);
 	CollidableMgr collidableMgr;
+  CANService canService;
 
 	#if SIMULATION == 1
 	printf("using simulation\n");
@@ -131,13 +133,13 @@ int main(int argc, char *argv[])
 	#else
 
 	XbeeSyncNode xbee(messageBus, dbHandler);
-	CV7Node windSensor(messageBus, dbHandler.retrieveCell("windsensor_config", "1", "port"), dbHandler.retrieveCellAsInt("windsensor_config", "1", "baud_rate"));
+	//CV7Node windSensor(messageBus, dbHandler.retrieveCell("windsensor_config", "1", "port"), dbHandler.retrieveCellAsInt("windsensor_config", "1", "baud_rate"));
 	HMC6343Node compass(messageBus, dbHandler.retrieveCellAsInt("buffer_config", "1", "compass"));
     //NOTE: the second parameter (sleep time in seconds) should probably be read from the database
     GPSDNode gpsd(messageBus, 0.5);
     //NOTE: the second parameter (sleep time in seconds) should probably be read from the database
 
-	ArduinoNode arduino(messageBus, 0.1);
+	//ArduinoNode arduino(messageBus, 0.1);
 	std::vector<std::string> list;
 	list.push_back("red");
 	#endif
@@ -150,25 +152,29 @@ int main(int argc, char *argv[])
 
 
 	ActiveNode* sailingLogic;
-	Node* lowLevelControllerNodeJanet;
+	//Node* lowLevelControllerNodeJanet;
 
 	sailingLogic = new LineFollowNode(messageBus, dbHandler);
-	lowLevelControllerNodeJanet = new LowLevelControllerNodeJanet(messageBus, 30, 60, dbHandler);
+	//lowLevelControllerNodeJanet = new LowLevelControllerNodeJanet(messageBus, 30, 60, dbHandler);
 
+  /*
+  * Should be uncommented once ActuatorNodeAspire class is finsihed.
+  *
 	#if SIMULATION == 0
 	int channel = dbHandler.retrieveCellAsInt("sail_servo_config", "1", "channel");
 	int speed = dbHandler.retrieveCellAsInt("sail_servo_config", "1", "speed");
 	int acceleration = dbHandler.retrieveCellAsInt("sail_servo_config", "1", "acceleration");
 
-	ActuatorNode sail(messageBus, NodeID::SailActuator, channel, speed, acceleration);
+	//ActuatorNode sail(messageBus, NodeID::SailActuator, channel, speed, acceleration);
 
 	channel = dbHandler.retrieveCellAsInt("rudder_servo_config", "1", "channel");
 	speed = dbHandler.retrieveCellAsInt("rudder_servo_config", "1", "speed");
 	acceleration = dbHandler.retrieveCellAsInt("rudder_servo_config", "1", "acceleration");
 
-	ActuatorNode rudder(messageBus, NodeID::RudderActuator, channel, speed, acceleration);
-	MaestroController::init(dbHandler.retrieveCell("maestro_controller_config", "1", "port"));
+	//ActuatorNode rudder(messageBus, NodeID::RudderActuator, channel, speed, acceleration);
+	//MaestroController::init(dbHandler.retrieveCell("maestro_controller_config", "1", "port"));
 	#endif
+  */
 	bool requireNetwork = (bool) (dbHandler.retrieveCellAsInt("sailing_robot_config", "1", "require_network"));
 
 	// Initialise nodes
@@ -178,12 +184,12 @@ int main(int argc, char *argv[])
 	initialiseNode(simulation,"Simulation Node",NodeImportance::CRITICAL);
 	#else
 	initialiseNode(xbee, "Xbee Sync Node", NodeImportance::NOT_CRITICAL);
-	initialiseNode(windSensor, "Wind Sensor", NodeImportance::CRITICAL);
+	//initialiseNode(windSensor, "Wind Sensor", NodeImportance::CRITICAL);
 	initialiseNode(compass, "Compass", NodeImportance::CRITICAL);
 	initialiseNode(gpsd, "GPSD Node", NodeImportance::CRITICAL);
-	initialiseNode(sail, "Sail Actuator", NodeImportance::CRITICAL);
-	initialiseNode(rudder, "Rudder Actuator", NodeImportance::CRITICAL);
-	initialiseNode(arduino, "Arduino Node", NodeImportance::NOT_CRITICAL);
+	//initialiseNode(sail, "Sail Actuator", NodeImportance::CRITICAL);
+	//initialiseNode(rudder, "Rudder Actuator", NodeImportance::CRITICAL);
+	//initialiseNode(arduino, "Arduino Node", NodeImportance::NOT_CRITICAL);
 	//initialiseNode(colorDetection, "Colour detection node", NodeImportance::NOT_CRITICAL);
 	#endif
 
@@ -201,17 +207,17 @@ int main(int argc, char *argv[])
 	initialiseNode(windStateNode,"WindState Node",NodeImportance::CRITICAL);
 	initialiseNode(waypoint, "Waypoint Node", NodeImportance::CRITICAL);
 	initialiseNode(*sailingLogic, "LineFollow Node", NodeImportance::CRITICAL);
-	initialiseNode(*lowLevelControllerNodeJanet, "LowLevelControllerNodeJanet Node", NodeImportance::CRITICAL);
+	//initialiseNode(*lowLevelControllerNodeJanet, "LowLevelControllerNodeJanet Node", NodeImportance::CRITICAL);
 
 	// Start active nodes
 	#if SIMULATION == 1
 	simulation.start();
 	#else
 	xbee.start();
-	windSensor.start();
+	//windSensor.start();
 	compass.start();
 	gpsd.start();
-	arduino.start();
+	//arduino.start();
 	#endif
 
 	httpsync.start();
@@ -236,6 +242,6 @@ int main(int argc, char *argv[])
 
 	Logger::shutdown();
 	delete sailingLogic;
-	delete lowLevelControllerNodeJanet;
+	//delete lowLevelControllerNodeJanet;
 	exit(0);
 }
