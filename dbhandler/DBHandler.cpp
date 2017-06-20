@@ -240,7 +240,7 @@ void DBHandler::insertMessageLog(std::string gps_time, std::string type, std::st
 bool DBHandler::updateTableJson(std::string table, std::string data) {
 
 
-	//m_logger.info(" updateTableJson:\n"+data);
+	m_logger.info(" updateTableJson:\n"+data);
 	std::vector<std::string> columns = getColumnInfo("name", table);
 
 	if(columns.size() <= 0 ){
