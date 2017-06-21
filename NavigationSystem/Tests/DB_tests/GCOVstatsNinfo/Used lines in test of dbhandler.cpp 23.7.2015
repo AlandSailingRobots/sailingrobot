@@ -1,0 +1,440 @@
+        -:    0:Source:DBHandler.cpp
+        -:    0:Graph:DBHandler.gcno
+        -:    0:Data:DBHandler.gcda
+        -:    0:Runs:1
+        -:    0:Programs:1
+        -:    1:#include "DBHandler.h"
+        -:    2:#include "JSON.h"
+        -:    3:#include <iomanip>
+        -:    4:#include <string>
+        -:    5:#include <cstdlib>
+        -:    6:#include <cstdio>
+        -:    7:#include "models/SystemStateModel.h"
+        -:    8:#include "models/WaypointModel.h"
+        -:    9:#include "models/PositionModel.h"
+        -:   10:
+        -:   11:
+       10:   12:DBHandler::DBHandler(void) :
+       10:   13:	m_db(NULL)
+        -:   14:{
+       10:   15:	m_latestDataLogId = 1;
+       10:   16:}
+        -:   17:
+        -:   18:
+       20:   19:DBHandler::~DBHandler(void) {
+       10:   20:	closeDatabase();
+       10:   21:}
+        -:   22:
+        -:   23:
+        9:   24:void DBHandler::openDatabase(std::string fileName) {
+        -:   25:	
+        -:   26:	// check if file exists
+        9:   27:	FILE* db_file = fopen(fileName.c_str(), "r");
+        9:   28:	if (!db_file) {
+        2:   29:		std::string error = "DBHandler::openDatabase(), " + fileName +
+        2:   30:			" not found.";
+        1:   31:		throw error.c_str();
+        -:   32:	}
+        8:   33:	fclose(db_file);
+        -:   34:
+        8:   35:	m_rc = sqlite3_open(fileName.c_str(), &m_db);
+        -:   36:
+        8:   37:	if (m_rc) {
+    #####:   38:		std::stringstream errorStream;
+    #####:   39:		errorStream << "DBHandler::openDatabase(), " << sqlite3_errmsg(m_db);
+        -:   40:
+    #####:   41:		throw errorStream.str().c_str();
+        -:   42:	}
+        8:   43:}
+        -:   44:
+        -:   45:
+       10:   46:void DBHandler::closeDatabase(void) {
+       10:   47:	sqlite3_close(m_db);
+       10:   48:	m_db = NULL;
+       10:   49:}
+        -:   50:
+        -:   51:
+        2:   52:void DBHandler::insertDataLog(
+        -:   53:	SystemStateModel systemState,
+        -:   54:	int ss_pos,
+        -:   55:	int rs_pos,
+        -:   56:	double cc_dtw,
+        -:   57:	double cc_btw,
+        -:   58:	double cc_cts,
+        -:   59:	bool cc_tack,
+        -:   60:	bool cc_goingStarboard,
+        -:   61:	int wpt_cur) {
+        -:   62:
+        4:   63:	std::stringstream values;
+        2:   64:	values << std::setprecision(10)
+        4:   65:		<< "'" << systemState.gpsModel.timestamp << "', "
+        4:   66:		<< systemState.gpsModel.latitude << ", "
+        4:   67:		<< systemState.gpsModel.longitude << ", "
+        4:   68:		<< systemState.gpsModel.speed << ", "
+        4:   69:		<< systemState.gpsModel.heading << ", "
+        4:   70:		<< systemState.gpsModel.satellitesUsed << ", "
+        4:   71:		<< systemState.sail << ", "
+        4:   72:		<< systemState.rudder << ", "
+        2:   73:		<< ss_pos << ", "
+        2:   74:		<< rs_pos << ", "
+        2:   75:		<< cc_dtw << ", "
+        2:   76:		<< cc_btw << ", "
+        2:   77:		<< cc_cts << ", "
+        4:   78:		<< cc_tack << ", "
+        4:   79:		<< cc_goingStarboard << ", "
+        4:   80:		<< systemState.windsensorModel.direction << ", "
+        4:   81:		<< systemState.windsensorModel.speed << ", "
+        4:   82:		<< systemState.windsensorModel.temperature << ", "
+        2:   83:		<< wpt_cur << ", "
+        4:   84:		<< systemState.compassModel.heading << ", "
+        4:   85:		<< systemState.compassModel.pitch << ", "
+        4:   86:		<< systemState.compassModel.roll;
+        -:   87:	//printf("%s\n",values.str().c_str());
+        -:   88:
+        4:   89:	std::stringstream sstm;
+        2:   90:	sstm << "INSERT INTO datalogs VALUES(NULL, " << values.str() << ");";
+        -:   91:
+        3:   92:	queryTable(sstm.str());
+        1:   93:	m_latestDataLogId = sqlite3_last_insert_rowid(m_db);
+        1:   94:}
+        -:   95:
+        -:   96:
+        2:   97:void DBHandler::insertMessageLog(std::string gps_time, std::string type, std::string msg) {
+        4:   98:	std::string result;
+        4:   99:	std::stringstream sstm;
+        2:  100:	sstm << "INSERT INTO messages VALUES(NULL"
+        4:  101:		<< ", '" << gps_time << "', '" << type << "', '" << msg << "', " << (m_latestDataLogId)
+        2:  102:		<< ");";
+        3:  103:	queryTable(sstm.str());
+        1:  104:}
+        -:  105:
+        -:  106:
+        -:  107:
+    #####:  108:bool DBHandler::revChanged(std::string toCheck, std::string serverRevs) {
+    #####:  109:	JSONDecode decoder;
+    #####:  110:	decoder.addJSON(serverRevs);
+    #####:  111:	std::string serverConfig, localConfig;
+    #####:  112:	if (decoder.hasNext()) {
+    #####:  113:		serverConfig = decoder.getData(toCheck);
+        -:  114:	} else {
+    #####:  115:		throw ("DBHandler::revChanged(), coudn't find "+ toCheck + "in JSONdata.").c_str();
+        -:  116:	}
+    #####:  117:	if (getTableIds("state").size() == 0) {
+    #####:  118:		return true;
+        -:  119:	} else {
+    #####:  120:		localConfig = retriveCell("state", "1", toCheck);
+        -:  121:	}
+        -:  122:
+    #####:  123:	if ( serverConfig.compare(localConfig) != 0 ) {
+    #####:  124:		return true;
+        -:  125:	}
+    #####:  126:	return false;
+        -:  127:}
+        -:  128:
+        -:  129:
+    #####:  130:void DBHandler::updateTable(std::string table, std::string data) {
+    #####:  131:	JSONDecode decoder;
+    #####:  132:	decoder.addJSON(data);
+    #####:  133:	std::vector<std::string> types = getColumnInfo("type", table);
+    #####:  134:	std::vector<std::string> columns = getColumnInfo("name", table);
+        -:  135:
+    #####:  136:	clearTable(table);
+    #####:  137:	while(decoder.hasNext()) {
+        -:  138:
+    #####:  139:		if (decoder.getSize() != columns.size()) {
+    #####:  140:			throw ("DBHandler::updateTable(), decoder and columns size mismatch for table: " + table).c_str();
+        -:  141:		}
+        -:  142:
+    #####:  143:		std::string values = "";
+    #####:  144:		for (unsigned int i = 0; i < columns.size(); i++) {
+    #####:  145:			if (i > 0) {
+    #####:  146:				values += ", ";
+        -:  147:			}
+    #####:  148:			if (types[i].compare("VARCHAR") == 0) {
+    #####:  149:				values = values + "'" + decoder.getData(columns[i]) + "'";
+        -:  150:			} else {
+    #####:  151:				values += decoder.getData(columns[i]);
+        -:  152:			}
+        -:  153:		}
+    #####:  154:		queryTable("INSERT INTO " + table + " VALUES(" + values + ");");
+        -:  155:	}
+    #####:  156:}
+        -:  157:
+        -:  158:
+    #####:  159:std::string DBHandler::retriveCell(std::string table, std::string id, std::string column) {
+    #####:  160:	std::string query = "SELECT " + column + " FROM " + table +" WHERE id=" + id + ";";
+        -:  161:
+        -:  162:	int rows, columns;
+        -:  163:    char** results;
+    #####:  164:    results = retriveFromTable(query, rows, columns);
+        -:  165:
+    #####:  166:    if (columns < 1) {
+    #####:  167:		std::stringstream errorStream;
+    #####:  168:		errorStream << "DBHandler::retriveCell(), no columns from Query: " << query;
+    #####:  169:    	throw errorStream.str().c_str();
+        -:  170:    }
+        -:  171:
+    #####:  172:    if (rows < 1) {
+    #####:  173:		std::stringstream errorStream;
+    #####:  174:		errorStream << "DBHandler::retriveCell(), no rows from Query: " << query;
+    #####:  175:    	throw errorStream.str().c_str();
+        -:  176:    }
+        -:  177:
+    #####:  178:    return results[1];
+        -:  179:}
+        -:  180:
+        -:  181:
+    #####:  182:int DBHandler::retriveCellAsInt(std::string table, std::string id, std::string column) {
+        -:  183:	try {
+    #####:  184:		return atoi(retriveCell(table, id, column).c_str());
+        -:  185:	}
+    =====:  186:	catch (const char *  e) {
+    =====:  187:		std::cout << "exception thrown in retriveCellAsInt, is returned cell a int?  " << e << std::endl;
+    =====:  188:		return 0;
+        -:  189:	}
+        -:  190:	
+        -:  191:}
+        -:  192:
+        -:  193:
+    #####:  194:void DBHandler::clearTable(std::string table) {
+    #####:  195:	queryTable("DELETE FROM " + table + ";");
+    #####:  196:}
+        -:  197:
+        -:  198:
+    #####:  199:std::string DBHandler::getLogs() {
+        -:  200:
+    #####:  201:	std::vector<std::string> logIds;
+    #####:  202:	logIds = getTableIds("datalogs");
+    #####:  203:	JSONArray datalogs;
+    #####:  204:	datalogs.setName("datalogs");
+    #####:  205:	std::vector<std::string> datalogColumns = getColumnInfo("name", "datalogs");
+        -:  206:
+        -:  207:/*	for (unsigned int i = 0; i < logIds.size(); i++) {
+        -:  208:		JSONData data;
+        -:  209:
+        -:  210:		for (unsigned int j = 0; j < datalogColumns.size(); j++) {
+        -:  211:			data.add(datalogColumns[j], retriveCell("datalogs", logIds[i], datalogColumns[j]));
+        -:  212:		}
+        -:  213:
+        -:  214:		vector<string> stateColumns = getColumnInfo("name", "state");
+        -:  215:		for (unsigned int j = 0; j < stateColumns.size(); j++) {
+        -:  216:			data.add(stateColumns[j], retriveCell("state", "1", stateColumns[j]));
+        -:  217:		}
+        -:  218:
+        -:  219:		JSONBlock block;
+        -:  220:		block.add(data.toString());
+        -:  221:		datalogs.add(block.toString());
+        -:  222:	}
+        -:  223:
+        -:  224:	vector<string> msgIds;
+        -:  225:	msgIds = getTableIds("messages");
+        -:  226:	JSONArray messages;
+        -:  227:	messages.setName("messages");
+        -:  228:	vector<string> messageColumns = getColumnInfo("name", "messages");
+        -:  229:
+        -:  230:	for (unsigned int i = 0; i < msgIds.size(); i++) {
+        -:  231:		JSONData data;
+        -:  232:		for (unsigned int j = 0; j < messageColumns.size(); j++) {
+        -:  233:			data.add(messageColumns[j], retriveCell("messages", msgIds[i], messageColumns[j]));
+        -:  234:		}
+        -:  235:		JSONBlock block;
+        -:  236:		block.add(data.toString());
+        -:  237:		messages.add(block.toString());
+        -:  238:	}
+        -:  239:*/
+    #####:  240:	std::stringstream lastId;
+    #####:  241:	lastId << m_latestDataLogId;
+    #####:  242:	JSONData data;
+    #####:  243:	for (unsigned int j = 0; j < datalogColumns.size(); j++) {
+    #####:  244:		data.add(datalogColumns[j], retriveCell("datalogs", lastId.str(), datalogColumns[j]));
+        -:  245:	}
+    #####:  246:	JSONBlock block;
+    #####:  247:	block.add(data.toString());
+    #####:  248:	datalogs.add(block.toString());
+        -:  249:
+    #####:  250:	JSONBlock main;
+    #####:  251:	if(logIds.size() > 0)
+    #####:  252:		main.add(datalogs.toString());
+        -:  253:/*	if(msgIds.size() > 0)
+        -:  254:		main.add(messages.toString());
+        -:  255:*/
+        -:  256:
+    #####:  257:	return main.toString();
+        -:  258:}
+        -:  259:
+        -:  260:
+    #####:  261:void DBHandler::removeLogs(std::string lines) {
+    #####:  262:	JSONDecode decoder;
+    #####:  263:	decoder.addJSON(lines);
+    #####:  264:	while (decoder.hasNext()) {
+    #####:  265:		std::cout << "tab: " << decoder.getData("tab") << ", id: " << decoder.getData("id") << "\n";
+    #####:  266:		queryTable("DELETE FROM " + decoder.getData("tab") + " WHERE id = " + decoder.getData("id") + ";");
+        -:  267:	}
+    #####:  268:}
+        -:  269:
+        -:  270:
+        2:  271:void DBHandler::deleteRow(std::string table, std::string id) {
+        3:  272:	queryTable("DELETE FROM " + table + " WHERE id = " + id + ";");
+        1:  273:}
+        -:  274:
+    #####:  275:void DBHandler::insert(std::string table, std::string fields, std::string values)
+        -:  276:{
+    #####:  277:	queryTable("INSERT INTO " + table + "(" + fields +
+    #####:  278:		") VALUES(" + values + ");");
+    #####:  279:}
+        -:  280:
+    #####:  281:void DBHandler::insertScan(PositionModel position, float temperature)
+        -:  282:{
+    #####:  283:	std::string waypoint_id = getMinIdFromTable("waypoints");
+        -:  284:
+    #####:  285:	std::string i = "null", j = "null";
+        -:  286:
+        -:  287:	try {
+    #####:  288:		i = retriveCell("waypoint_index", waypoint_id, "i");
+    #####:  289:		j = retriveCell("waypoint_index", waypoint_id, "j");
+    =====:  290:	} catch (const char * error) {
+    =====:  291:		m_logger.error(error);
+        -:  292:	}
+        -:  293:
+    #####:  294:	std::ostringstream fields;
+    #####:  295:	fields << "waypoint_id,"
+    #####:  296:		<< "latitude,"
+    #####:  297:		<< "longitude,"
+    #####:  298:		<< "air_temperature,"
+    #####:  299:		<< "i,"
+    #####:  300:		<< "j";
+        -:  301:
+    #####:  302:	std::ostringstream values;
+    #####:  303:	values << waypoint_id << ","
+    #####:  304:		<< position.latitude << ","
+    #####:  305:		<< position.longitude << ","
+    #####:  306:		<< temperature << ","
+    #####:  307:		<< i << ","
+    #####:  308:		<< j;
+        -:  309:
+    #####:  310:	insert("scanning_measurements", fields.str(), values.str());
+    #####:  311:}
+        -:  312:
+        -:  313:
+        -:  314:////////////////////////////////////////////////////////////////////
+        -:  315:// private helpers
+        -:  316:////////////////////////////////////////////////////////////////////
+        -:  317:
+        6:  318:void DBHandler::queryTable(std::string sqlINSERT) {
+        6:  319:	if (m_db != NULL) {
+        -:  320:
+        4:  321:		m_rc = sqlite3_exec(m_db, sqlINSERT.c_str(), NULL, NULL, &m_error);
+        -:  322:
+        4:  323:		if (m_error != NULL) {
+        2:  324:			std::stringstream errorStream;
+        1:  325:			errorStream << "DBHandler::queryTable(), " << sqlite3_errmsg(m_db);
+        1:  326:			sqlite3_free(m_error);
+        -:  327:
+        1:  328:			throw errorStream.str().c_str();
+        -:  329:		}
+        -:  330:	}
+        -:  331:	else {
+        2:  332:		throw "DBHandler::queryTable(), no db connection";
+        -:  333:	}
+        3:  334:}
+        -:  335:
+        3:  336:char** DBHandler::retriveFromTable(std::string sqlSELECT, int &rows, int &columns) {
+        3:  337:	char **results = NULL;
+        -:  338:
+        3:  339:	if (m_db != NULL) {
+        -:  340:
+        3:  341:		sqlite3_get_table(m_db, sqlSELECT.c_str(), &results, &rows, &columns,
+        3:  342:				&m_error);
+        -:  343:
+        3:  344:		if (m_error != NULL) {
+    #####:  345:			std::stringstream errorStream;
+    #####:  346:			errorStream << "DBHandler::retrieveFromTable(), " << sqlite3_errmsg(m_db);
+    #####:  347:			sqlite3_free(m_error);
+        -:  348:
+    #####:  349:			throw errorStream.str().c_str();
+        -:  350:		}
+        -:  351:	}
+        -:  352:	else {
+    #####:  353:		throw "DBHandler::retrieveFromTable(), no db connection";
+        -:  354:	}
+        -:  355:
+        3:  356:	return results;
+        -:  357:}
+        -:  358:
+    #####:  359:std::vector<std::string> DBHandler::getTableIds(std::string table) {
+        -:  360:	int rows, columns;
+        -:  361:    char** results;
+    #####:  362:    results = retriveFromTable("SELECT id FROM " + table + ";", rows, columns);
+        -:  363:
+    #####:  364:    std::vector<std::string> ids;
+    #####:  365:    for (int i = 1; i <= rows; i++) {
+    #####:  366:    	ids.push_back(results[i]);
+        -:  367:    }
+        -:  368:
+    #####:  369:    return ids;
+        -:  370:}
+        -:  371:
+    #####:  372:std::vector<std::string> DBHandler::getColumnInfo(std::string info, std::string table) {
+        -:  373:	int rows, columns;
+        -:  374:    char** results;
+    #####:  375:    results = retriveFromTable("PRAGMA table_info(" + table + ");", rows, columns);
+    #####:  376:    std::vector<std::string> types;
+    #####:  377:    int infoIndex = 0;
+    #####:  378:    for (int i = 0; i < columns; i++) {
+    #####:  379:    	if (std::string(info).compare(results[i]) == 0) {
+    #####:  380:    		infoIndex = i;
+        -:  381:    	}
+        -:  382:    }
+        -:  383:
+    #####:  384:	for (int i = 1; i < rows+1; i++) {
+    #####:  385:		types.push_back(results[i * columns + infoIndex]);
+        -:  386:	}
+    #####:  387:    return types;
+        -:  388:}
+        -:  389:
+        1:  390:void DBHandler::getWaypointFromTable(WaypointModel &waypointModel){
+        -:  391:
+        -:  392:	int rows, columns;
+        -:  393:    char** results;
+        1:  394:    results = retriveFromTable("SELECT MIN(id) FROM waypoints WHERE harvested = 0;", rows, columns);
+        -:  395:    //std::cout << "result |" << rows << ":" << columns << "|" << results << std::endl;
+        1:  396:    if (rows * columns < 1 || results[1] == '\0') {
+        1:  397:    	waypointModel.id = "";
+        -:  398:    }
+        -:  399:    else {
+    #####:  400:    	waypointModel.id = results[1];
+        -:  401:    }
+        -:  402:
+        1:  403:	if(!waypointModel.id.empty())
+        -:  404:	{
+    #####:  405:		waypointModel.positionModel.latitude = atof(retriveCell("waypoints", waypointModel.id, "lat").c_str());
+    #####:  406:		waypointModel.positionModel.longitude = atof(retriveCell("waypoints", waypointModel.id, "lon").c_str());
+    #####:  407:		waypointModel.radius = retriveCellAsInt("waypoints",waypointModel.id, "radius");
+    #####:  408:		waypointModel.time = retriveCellAsInt("waypoint_stationary", waypointModel.id, "time");
+        -:  409:	}
+        -:  410:
+        1:  411:}
+        -:  412:
+        -:  413:
+    #####:  414:void DBHandler::changeOneValue(std::string table, std::string id,std::string newValue, std::string colName){
+        -:  415:
+    #####:  416:	queryTable("UPDATE " + table + " SET "+ colName + " = "+ newValue +" WHERE id = " + id +";");
+        -:  417:
+    #####:  418:}
+        -:  419:
+        2:  420:std::string DBHandler::getMinIdFromTable(std::string table) {
+        -:  421:	int rows, columns;
+        -:  422:    char** results;
+        2:  423:    results = retriveFromTable("SELECT MIN(id) FROM " + table + ";", rows, columns);
+        -:  424:    //std::cout << "result |" << rows << ":" << columns << "|" << results << std::endl;
+        2:  425:    if (rows * columns < 1) {
+    #####:  426:    	return "";
+        -:  427:    }
+        2:  428:    if(results[1] == '\0') {
+        1:  429:    	return "";
+        -:  430:    } else {
+        1:  431:    	return results[1];
+        -:  432:    }
+        3:  433:}
+        -:  434:
+        -:  435:

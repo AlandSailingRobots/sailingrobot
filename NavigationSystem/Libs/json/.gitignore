@@ -1,0 +1,14 @@
+json_unit
+json_benchmarks
+
+fuzz-testing
+
+*.dSYM
+
+working
+
+html
+me.nlohmann.json.docset
+
+android
+doc/xml
