@@ -8,16 +8,28 @@ db = conn.cursor()
 for table in cfg:
     data = cfg[table]
     setstr = ''
+    keystr = ''
+    valstr = ''
     for key, value in cfg[table].items():
         if isinstance(value, str):
             value = '"' + value + '"'
         else:
             value = str(value)
-        if setstr == '':
+        if (setstr == ''):
             setstr = key + ' = ' + value
+            keystr = key
+            valstr = value
         else:
             setstr = setstr + ', ' + key + ' = ' + value
-    db.execute('UPDATE ' + str(table) + ' SET '
-               + setstr + ' WHERE ID = 1;')
+            keystr = keystr + ', ' + key
+            valstr = valstr + ', ' + value
+    db.execute('SELECT count(*) FROM ' + str(table) + ';')
+    count = db.fetchone()[0]
+    if count == 0:
+        db.execute('INSERT INTO ' + str(table) + ' (' + keystr +
+                   ') VALUES (' + valstr + ');')
+    else:
+        db.execute('UPDATE ' + str(table) + ' SET '
+                   + setstr + ' WHERE ID = 1;')
 conn.commit()
 db.close()

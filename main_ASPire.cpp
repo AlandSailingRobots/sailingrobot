@@ -3,6 +3,7 @@
 #include "MessageBus/MessageBus.h"
 #include "Nodes/MessageLoggerNode.h"
 #include "CollidableMgr/CollidableMgr.h"
+#include "HardwareServices/CAN_Services/CANService.h"
 
 #include "libs/json/src/json.hpp"
 
@@ -117,10 +118,6 @@ int main(int argc, char *argv[])
 		Logger::shutdown();
 		exit(1);
 	}
-
-  if (readConfig::updateConfiguration("configuration.json", dbHandler)) {
-    Logger::info("Configuration update\t\t[OK]");
-  };
 
 	// Create nodes
 	MessageLoggerNode msgLogger(messageBus);

@@ -240,7 +240,7 @@ void DBHandler::insertMessageLog(std::string gps_time, std::string type, std::st
 bool DBHandler::updateTableJson(std::string table, std::string data) {
 
 
-	m_logger.info(" updateTableJson:\n"+data);
+	//m_logger.info(" updateTableJson:\n"+data);
 	std::vector<std::string> columns = getColumnInfo("name", table);
 
 	if(columns.size() <= 0 ){
@@ -442,6 +442,21 @@ int DBHandler::retrieveCellAsInt(std::string table, std::string id, std::string 
 
 }
 
+double DBHandler::retrieveCellAsDouble(std::string table, std::string id, std::string column) {
+
+	std::string data = retrieveCell(table, id, column);
+	std::string::size_type sz;
+	if (data.size() > 0)
+	{
+		return std::stod(data.c_str(), &sz);
+	}
+	else
+	{
+		Logger::error("%s, Error: No data in cell ", __PRETTY_FUNCTION__);
+		return 0;
+	}
+
+}
 
 void DBHandler::clearTable(std::string table) {
 	//If no table to delete, doesn't matter

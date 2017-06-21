@@ -1,4 +1,15 @@
 {
+
+"arduino_config": {
+  "loop_time": 0.1
+},
+
+"buffer_config": {
+  "compass": 1,
+  "true_wind": 80,
+  "windsensor": 1
+},
+
 "course_calculation_config": {
   "tack_angle": 20,
   "tack_max_angle": 60,
@@ -6,10 +17,8 @@
   "sector_angle": 10
 },
 
-"buffer_config": {
-  "compass": 1,
-  "true_wind": 100,
-  "windsensor": 1
+"GPSD_config": {
+  "loop_time": 0.5
 },
 
 "httpsync_config": {
@@ -56,6 +65,11 @@
   "require_network": 1
 },
 
+"vesselState_config": {
+  "loop_time": 0.5,
+  "speedLimit": 0.5
+},
+
 "waypoint_routing_config": {
   "radius_ratio": 0.1,
   "sail_adjust_time": 5,
@@ -73,6 +87,10 @@
 "windsensor_config": {
   "port": "/dev/ttyS0",
   "baud_rate": 4800
+},
+
+"windState_config": {
+  "time_filter_ms": 500
 },
 
 "xbee_config": {

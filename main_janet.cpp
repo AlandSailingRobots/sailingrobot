@@ -118,10 +118,6 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 
-  if (readConfig::updateConfiguration("configuration.json", dbHandler)) {
-    Logger::info("Configuration update\t\t[OK]");
-  };
-
 	// Create nodes
 	MessageLoggerNode msgLogger(messageBus);
 	CollidableMgr collidableMgr;
@@ -134,19 +130,19 @@ int main(int argc, char *argv[])
 	XbeeSyncNode xbee(messageBus, dbHandler);
 	CV7Node windSensor(messageBus, dbHandler.retrieveCell("windsensor_config", "1", "port"), dbHandler.retrieveCellAsInt("windsensor_config", "1", "baud_rate"));
 	HMC6343Node compass(messageBus, dbHandler.retrieveCellAsInt("buffer_config", "1", "compass"));
-    //NOTE: the second parameter (sleep time in seconds) should probably be read from the database
-    GPSDNode gpsd(messageBus, 0.5);
-    //NOTE: the second parameter (sleep time in seconds) should probably be read from the database
+  GPSDNode gpsd(messageBus, 0.5); //NOTE: the second parameter (sleep time in seconds) should probably be read from the database
+  double dbtest = dbHandler.retrieveCellAsDouble("wind_vane_config", "1", "self_steering_interval");
+  std::cout << "Double test: " << dbtest << ", dbtest/2: " << dbtest/2. << std::endl;
 
-	ArduinoNode arduino(messageBus, 0.1);
+	ArduinoNode arduino(messageBus, 0.1); //NOTE: Should be added to db
 	std::vector<std::string> list;
 	list.push_back("red");
 	#endif
 
 
-	HTTPSyncNode httpsync(messageBus, &dbHandler, 0, false);
-    StateEstimationNode stateEstimationNode(messageBus, .5, .5);
-	WindStateNode windStateNode(messageBus, 500);
+	HTTPSyncNode httpsync(messageBus, &dbHandler, 0, false); //NOTE: Should be added to db
+  StateEstimationNode stateEstimationNode(messageBus, .5, .5); //NOTE: Should be added to db
+	WindStateNode windStateNode(messageBus, 500); //NOTE: Should be added to db
 	WaypointMgrNode waypoint(messageBus, dbHandler);
 
 
@@ -154,7 +150,7 @@ int main(int argc, char *argv[])
 	Node* lowLevelControllerNodeJanet;
 
 	sailingLogic = new LineFollowNode(messageBus, dbHandler);
-	lowLevelControllerNodeJanet = new LowLevelControllerNodeJanet(messageBus, 30, 60, dbHandler);
+	lowLevelControllerNodeJanet = new LowLevelControllerNodeJanet(messageBus, 30, 60, dbHandler); //NOTE: Should be added to db
 
 	#if SIMULATION == 0
 	int channel = dbHandler.retrieveCellAsInt("sail_servo_config", "1", "channel");
