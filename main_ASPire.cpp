@@ -132,9 +132,8 @@ int main(int argc, char *argv[])
 	XbeeSyncNode xbee(messageBus, dbHandler);
 	//CV7Node windSensor(messageBus, dbHandler.retrieveCell("windsensor_config", "1", "port"), dbHandler.retrieveCellAsInt("windsensor_config", "1", "baud_rate"));
 	HMC6343Node compass(messageBus, dbHandler.retrieveCellAsInt("buffer_config", "1", "compass"));
-    //NOTE: the second parameter (sleep time in seconds) should probably be read from the database
-    GPSDNode gpsd(messageBus, 0.5);
-    //NOTE: the second parameter (sleep time in seconds) should probably be read from the database
+  GPSDNode gpsd(messageBus,
+                dbHandler.retrieveCellAsDouble("GPSD_config", "1", "loop_time"));
 
 	//ArduinoNode arduino(messageBus, 0.1);
 	std::vector<std::string> list;
@@ -142,9 +141,14 @@ int main(int argc, char *argv[])
 	#endif
 
 
-	HTTPSyncNode httpsync(messageBus, &dbHandler, 0, false);
-    StateEstimationNode stateEstimationNode(messageBus, .5, .5);
-	WindStateNode windStateNode(messageBus, 500);
+  HTTPSyncNode httpsync(messageBus, &dbHandler,
+                        dbHandler.retrieveCellAsInt("httpsync_config", "1","delay"),
+                        dbHandler.retrieveCellAsInt("httpsync_config","1","remove_logs"));
+  StateEstimationNode stateEstimationNode(messageBus,
+                                          dbHandler.retrieveCellAsDouble("vesselState_config","1", "loop_time"),
+                                          dbHandler.retrieveCellAsDouble("vesselState_config", "1", "speedLimit"));
+  WindStateNode windStateNode(messageBus,
+                              dbHandler.retrieveCellAsDouble("windState_config", "1", "time_filter_ms"));
 	WaypointMgrNode waypoint(messageBus, dbHandler);
 
 

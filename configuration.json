@@ -1,5 +1,4 @@
 {
-
 "arduino_config": {
   "loop_time": 0.1
 },
@@ -17,7 +16,7 @@
   "sector_angle": 10
 },
 
-"GPSD_config": {
+"gpsd_config": {
   "loop_time": 0.5
 },
 

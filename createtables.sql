@@ -79,8 +79,8 @@ CREATE TABLE course_calculation_datalogs (
 -- -----------------------------------------------------
 -- Table GPSD_config
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS "GPSD_config";
-CREATE TABLE GPSD_config (
+DROP TABLE IF EXISTS "gpsd_config";
+CREATE TABLE gpsd_config (
 	id INTEGER PRIMARY KEY AUTOINCREMENT,
 	loop_time DOUBLE
 );
