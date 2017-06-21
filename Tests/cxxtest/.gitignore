@@ -1,6 +1,0 @@
-python/cxxtest.egg-info/
-python/dist
-python/build
-
-unit-tests.run
-runner.cpp

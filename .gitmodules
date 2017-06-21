@@ -1,5 +1,5 @@
-[submodule "libs/json"]
-	path = libs/json
+[submodule "Libs/json"]
+	path = Libs/json
 	url = https://github.com/nlohmann/json.git
 [submodule "sailing_simulator"]
 	path = sailing_simulator
