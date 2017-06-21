@@ -26,6 +26,7 @@
 #include "Nodes/XbeeSyncNode.h"
 #include "Nodes/LineFollowNode.h"
 #include "Nodes/LowLevelControllerNodeJanet.h"
+#include "Nodes/CANWindsensorNode.h"
 
 
 #if USE_OPENCV_COLOR_DETECTION == 1
@@ -130,10 +131,13 @@ int main(int argc, char *argv[])
 	#else
 
 	XbeeSyncNode xbee(messageBus, dbHandler);
+  // TODO: Change to CANWindsenor
+  CANWindsensorNode windSensor(messageBus, canService,
+                                dbHandler.retrieveCellAsInt("windState_config","1","time_filter_ms"));
 	//CV7Node windSensor(messageBus, dbHandler.retrieveCell("windsensor_config", "1", "port"), dbHandler.retrieveCellAsInt("windsensor_config", "1", "baud_rate"));
 	HMC6343Node compass(messageBus, dbHandler.retrieveCellAsInt("buffer_config", "1", "compass"));
   GPSDNode gpsd(messageBus,
-                dbHandler.retrieveCellAsDouble("GPSD_config", "1", "loop_time"));
+                dbHandler.retrieveCellAsDouble("gpsd_config", "1", "loop_time"));
 
 	//ArduinoNode arduino(messageBus, 0.1);
 	std::vector<std::string> list;
@@ -153,12 +157,13 @@ int main(int argc, char *argv[])
 
 
 	ActiveNode* sailingLogic;
+  // TODO: Change to LLCASPire
 	//Node* lowLevelControllerNodeJanet;
 
 	sailingLogic = new LineFollowNode(messageBus, dbHandler);
 	//lowLevelControllerNodeJanet = new LowLevelControllerNodeJanet(messageBus, 30, 60, dbHandler);
 
-  /*
+  /* TODO: Fix AcutatorNode ASPire
   * Should be uncommented once ActuatorNodeAspire class is finsihed.
   *
 	#if SIMULATION == 0
@@ -185,7 +190,7 @@ int main(int argc, char *argv[])
 	initialiseNode(simulation,"Simulation Node",NodeImportance::CRITICAL);
 	#else
 	initialiseNode(xbee, "Xbee Sync Node", NodeImportance::NOT_CRITICAL);
-	//initialiseNode(windSensor, "Wind Sensor", NodeImportance::CRITICAL);
+	//initialiseNode(windSensor, "Wind Sensor", NodeImportance::CRITICAL); // TODO: Uncomment this when the rest is done
 	initialiseNode(compass, "Compass", NodeImportance::CRITICAL);
 	initialiseNode(gpsd, "GPSD Node", NodeImportance::CRITICAL);
 	//initialiseNode(sail, "Sail Actuator", NodeImportance::CRITICAL);
@@ -203,8 +208,8 @@ int main(int argc, char *argv[])
 		initialiseNode(httpsync, "Httpsync Node", NodeImportance::NOT_CRITICAL);
 	}
 
-	//initialiseNode(vessel, "Vessel State Node", NodeImportance::CRITICAL);
-    initialiseNode(stateEstimationNode,"StateEstimation Node",NodeImportance::CRITICAL);
+	//initialiseNode(vessel, "Vessel State Node", NodeImportance::CRITICAL); // TODO: Uncomment this when the rest is done
+  initialiseNode(stateEstimationNode,"StateEstimation Node",NodeImportance::CRITICAL);
 	initialiseNode(windStateNode,"WindState Node",NodeImportance::CRITICAL);
 	initialiseNode(waypoint, "Waypoint Node", NodeImportance::CRITICAL);
 	initialiseNode(*sailingLogic, "LineFollow Node", NodeImportance::CRITICAL);
@@ -229,6 +234,7 @@ int main(int argc, char *argv[])
 	MessagePtr dataRequest = std::make_unique<DataRequestMsg>(NodeID::MessageLogger);
 	messageBus.sendMessage(std::move(dataRequest));
 
+  // NOTE: Maybe add to db aswell?
 	int dbLoggerWaitTime = 100; 		// wait time (in milliseconds) between messages from the messageBus
 	int dbLoggerUpdateFrequency = 1000; // updating frequency to the database (in milliseconds)
 	int dbLoggerQueueSize = 5; 			// how many messages to log to the databse at a time
