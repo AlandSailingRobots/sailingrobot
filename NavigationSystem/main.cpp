@@ -111,12 +111,8 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 
-  if (readConfig::updateConfiguration("configuration.json", dbHandler)) {
-    Logger::info("Configuration update\t\t[OK]");
-  };
-
 	// Create nodes
-	CollidableMgr collidableMgr;
+	//CollidableMgr collidableMgr;
 
 	#if SIMULATION == 1
 	printf("using simulation\n");

@@ -16,24 +16,26 @@
 # Rules
 ###############################################################################
 
-SRC = main_janet.cpp
+# SRC = main_janet.cpp
+MAIN = main_janet.cpp
 OBJECTS = $(addprefix $(BUILD_DIR)/, $(SRC:.cpp=.o))
 
-HARDWARE_SERVICES_SRC = HardwareServices/MaestroController/MaestroController.cpp \
-										HardwareServices/i2ccontroller/I2CController.cpp
+HARDWARE_SERVICES_SRC = Hardwares/MaestroController/MaestroController.cpp \
+										Hardwares/i2ccontroller/I2CController.cpp
 
-HARDWARE_NODES_SRC   = Nodes/CV7Node.cpp Nodes/HMC6343Node.cpp Nodes/GPSDNode.cpp \
-                    Nodes/ActuatorNode.cpp Nodes/ArduinoNode.cpp
+HARDWARE_NODES_SRC   = Hardwares/CV7Node.cpp Hardwares/HMC6343Node.cpp Hardwares/GPSDNode.cpp \
+                    Hardwares/ActuatorNode.cpp Hardwares/ArduinoNode.cpp
 
 
-CORE_SRC             = 	Nodes/WaypointMgrNode.cpp Nodes/StateEstimationNode.cpp \
-										Nodes/LowLevelControllerNodeJanet.cpp Nodes/WindStateNode.cpp \
+CORE_SRC             = 	Navigation/WaypointMgrNode.cpp WorldState/StateEstimationNode.cpp \
+										LowLevelControllers/LowLevelControllerNodeJanet.cpp WorldState/WindStateNode.cpp \
+										WorldState/VesselStateNode.cpp \
 										$(MESSAGE_BUS_SRC) $(NETWORK_SRC) $(SYSTEM_SERVICES_SRC) $(MATH_SRC)
 
 ifeq ($(USE_LNM),1)
-SRC 											+= $(MAIN_LNM_SRC) $(CORE_SRC) $(LNM_SRC)
+SRC 											= $(MAIN) $(CORE_SRC) $(LNM_SRC)
 else
-SRC 											+= $(CORE_SRC) $(LINE_FOLLOW_SRC) $(HTTP_SYNC_SRC)
+SRC 											= $(MAIN) $(CORE_SRC) $(LINE_FOLLOW_SRC) $(HTTP_SYNC_SRC)
 endif
 
 ifeq ($(USE_SIM),1)
@@ -51,7 +53,7 @@ $(EXECUTABLE): $(OBJECTS)
 	rm -f $(OBJECT_FILE)
 	@echo -n " " $(OBJECTS) >> $(OBJECT_FILE)
 	@echo Linking object files
-	$(CXX) $(LDFLAGS) @$(OBJECT_FILE) ./libwiringPi.so -Wl,-rpath=./ -o $@ $(LIBS) #./libwiringPi.so
+	$(CXX) $(LDFLAGS) @$(OBJECT_FILE) -Wl,-rpath=./ -o $@ $(LIBS) #./libwiringPi.so
 
 # Compile CPP files into the build folder
 $(BUILD_DIR)/%.o:$(SRC_DIR)/%.cpp

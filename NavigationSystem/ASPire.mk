@@ -9,28 +9,24 @@
 # Files
 ###############################################################################
 
-# SRC += main_ASPire.cpp
-# OBJECTS = $(addprefix $(BUILD_DIR)/, $(SRC:.cpp=.o))
-
-
-SRC = main_ASPire.cpp
+MAIN = main_ASPire.cpp
 OBJECTS = $(addprefix $(BUILD_DIR)/, $(SRC:.cpp=.o))
 
-HARDWARE_SERVICES_SRC = HardwareServices/i2ccontroller/I2CController.cpp \
-							   HardwareServices/CAN_Services/CANPGNReceiver.cpp HardwareServices/CAN_Services/CANService.cpp \
-							   HardwareServices/CAN_Services/mcp2515.cpp HardwareServices/CAN_Services/MsgFunctions.cpp \
-							   HardwareServices/CAN_Services/CANFrameReceiver.cpp
+HARDWARE_SERVICES_SRC = Hardwares/i2ccontroller/I2CController.cpp \
+							   Hardwares/CAN_Services/CANPGNReceiver.cpp Hardwares/CAN_Services/CANService.cpp \
+							   Hardwares/CAN_Services/mcp2515.cpp Hardwares/CAN_Services/MsgFunctions.cpp \
+							   Hardwares/CAN_Services/CANFrameReceiver.cpp
 
-HARDWARE_NODES_SRC   = Nodes/HMC6343Node.cpp Nodes/GPSDNode.cpp Nodes/ActuatorNodeASPire.cpp \
-                            Nodes/CANFeedbackReceiver.cpp Nodes/CANWindsensorNode.cpp
+HARDWARE_NODES_SRC   = Hardwares/HMC6343Node.cpp Hardwares/GPSDNode.cpp Hardwares/ActuatorNodeASPire.cpp \
+                            Hardwares/CANFeedbackReceiver.cpp Hardwares/CANWindsensorNode.cpp
 
-CORE_SRC             = 	Nodes/WaypointMgrNode.cpp Nodes/LowLevelControllerNodeASPire.cpp \
-										Nodes/StateEstimationNode.cpp Nodes/WindStateNode.cpp \
+CORE_SRC             = 	Navigation/WaypointMgrNode.cpp LowLevelControllers/LowLevelControllerNodeASPire.cpp \
+										WorldState/StateEstimationNode.cpp WorldState/WindStateNode.cpp WorldState/VesselStateNode.cpp \
 										$(MESSAGE_BUS_SRC) $(NETWORK_SRC) $(SYSTEM_SERVICES_SRC) $(MATH_SRC)
 ifeq ($(USE_LNM),1)
-SRC 											+= $(MAIN_LNM_SRC) $(CORE_SRC) $(LNM_SRC)
+SRC 											= $(MAIN_LNM_SRC) $(CORE_SRC) $(LNM_SRC)
 else
-SRC 											+= $(CORE_SRC) $(LINE_FOLLOW_SRC) $(HTTP_SYNC_SRC)
+SRC 											= $(MAIN) $(CORE_SRC) $(LINE_FOLLOW_SRC) $(HTTP_SYNC_SRC)
 endif
 
 ifeq ($(USE_SIM),1)
@@ -49,7 +45,7 @@ $(EXECUTABLE): $(OBJECTS)
 		rm -f $(OBJECT_FILE)
 		@echo -n " " $(OBJECTS) >> $(OBJECT_FILE)
 		@echo Linking object files
-		$(CXX) $(LDFLAGS) @$(OBJECT_FILE) ./libwiringPi.so -Wl,-rpath=./ -o $@ $(LIBS)
+		$(CXX) $(LDFLAGS) @$(OBJECT_FILE) -Wl,-rpath=./ -o $@ $(LIBS) #./libwiringPi.so
 
 # Compile CPP files into the build folder
 $(BUILD_DIR)/%.o:$(SRC_DIR)/%.cpp
