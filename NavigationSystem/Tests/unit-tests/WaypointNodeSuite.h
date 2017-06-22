@@ -61,7 +61,7 @@
 		// the process's memory
 		if(waypoint == 0)
 		{
-			dbHandler = new DBHandler("./asr.db");
+			dbHandler = new DBHandler("../asr.db");
             Logger::DisableLogging();
 			logger = new MessageLogger(msgBus());
 			waypoint = new WaypointMgrNode(msgBus(), *dbHandler);
