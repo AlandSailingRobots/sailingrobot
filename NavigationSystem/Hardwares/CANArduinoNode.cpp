@@ -20,10 +20,12 @@ void CANArduinoNode::processMessage (const Message* message){
 }
 
 void CANArduinoNode::processFrame (CanMsg& msg) {
-	if (msg.id == 702) {
+	if (msg.id == 701) {
+		uint16_t rudderFeedback = (msg.data[1] << 8 | msg.data[0]);
+	} else if (msg.id == 702) {
 		uint16_t RC = (msg.data[1] << 8 | msg.data[0]);
 		
 		MessagePtr arduinoMsg = std::make_unique<ArduinoDataMsg>(0,0,0,0,RC);
 		m_MsgBus.sendMessage(std::move(arduinoMsg));
-	}
+	} 
 }
