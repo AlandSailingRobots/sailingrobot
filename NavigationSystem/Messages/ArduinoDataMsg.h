@@ -45,7 +45,7 @@ public:
 	int rudder() { return m_rudder; }
 	int sheet() { return m_sheet; }
     int battery() { return m_battery; }
-	int RC() { return m_RC; }
+	int RC() const  { return m_RC; }
 
     ///----------------------------------------------------------------------------------
 	/// Serialises the message into a MessageSerialiser

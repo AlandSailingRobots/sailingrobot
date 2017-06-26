@@ -8,7 +8,7 @@
 
 class CANFeedbackReceiver : public Node, public CANFrameReceiver {
 public:
-    CANFeedbackReceiver(MessageBus& messageBus, CANService& canService);
+    CANFeedbackReceiver(MessageBus& messageBus, CANService& canService, int time_filter_ms);
     ~CANFeedbackReceiver();
     bool init();
     void processMessage(const Message* message);

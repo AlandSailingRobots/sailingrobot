@@ -1,11 +1,16 @@
 #include "CANFeedbackReceiver.h"
-
 #include "Messages/ASPireActuatorFeedbackMsg.h"
+#include "SystemServices/Timer.h"
 
-CANFeedbackReceiver::CANFeedbackReceiver(MessageBus& messageBus, CANService& canService) : 
+#include <chrono>
+#include <thread>
+
+CANFeedbackReceiver::CANFeedbackReceiver(MessageBus& messageBus, CANService& canService, int time_filter_ms) : 
                     Node(NodeID::CANFeedbackReceiver, messageBus), CANFrameReceiver(canService, 701)
 
-{  }
+{  
+
+}
 
 
 CANFeedbackReceiver::~CANFeedbackReceiver() {
@@ -34,3 +39,15 @@ void CANFeedbackReceiver::processFrame(CanMsg& msg) {
         m_MsgBus.sendMessage(std::move(feedbackMsg));
     }
 }
+/*
+void CANFeedbackReceiver::CANFeedbackReceiverThreadFunc (ActiveNode* nodePtr) {
+   
+	CANFeedbackReceiver* node = dynamic_cast<CANFeedbackReceiver*> (nodePtr);
+	Timer timer;
+	timer.start();
+	while(true) {
+		timer.sleepUntil(node->m_TimeBetweenMsgs*1.0f / 1000);
+		node->m_lock.lock();
+		MessagePtr feedback = std::make_uni
+		
+*/

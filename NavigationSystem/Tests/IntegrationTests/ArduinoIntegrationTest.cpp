@@ -3,18 +3,22 @@
 #include "SystemServices/Timer.h"
 #include "Messages/ASPireActuatorFeedbackMsg.h"
 #include "Messages/WindDataMsg.h"
+#include "Messages/ArduinoDataMsg.h"
 #include "MessageBus/MessageTypes.h"
 #include "MessageBus/MessageBus.h"
 #include "MessageBus/ActiveNode.h"
 #include "MessageBus/NodeIDs.h"
 #include "Hardwares/CANWindsensorNode.h"
+#include "Hardwares/ArduinoNode.h"
+#include "Hardwares/CANArduinoNode.h"
+#include "Hardwares/CANFeedbackReceiver.h"
 
 #include <ncurses.h>
 #include <unordered_map>
 #include <thread>
 #include <chrono>
 #include <cctype>
-
+#include <sstream>
 
 #define BACKSPACE 127
 #define ENTER 10
@@ -39,13 +43,14 @@ public:
     {
         msgBus.registerNode(*this, MessageType::WindData);
         msgBus.registerNode(*this, MessageType::ASPireActuatorFeedback);
+	msgBus.registerNode(*this, MessageType::ArduinoData);
 
         m_SensorValues["Rudder Angle"] = -2000;
         m_SensorValues["Wingsail Angle"] = -2000;
         m_SensorValues["Wind Speed"] = -2000;        
         m_SensorValues["Wind Direction"] = -2000;
         m_SensorValues["Wind Temperature"] = -2000;
-
+	m_SensorValues["RC Mode"] = -2000;
 
         m_Win = newwin(6+2*m_SensorValues.size(),60,1,2);
         
@@ -71,8 +76,16 @@ public:
             m_SensorValues["Wind Direction"] = windmsg->windDirection();
             m_SensorValues["Wind Temperature"] = windmsg->windTemp();
 
-        }
-
+        } else if (type == MessageType::ArduinoData) {
+	    const ArduinoDataMsg* arduinomsg = dynamic_cast<const ArduinoDataMsg*>(message);
+	    //m_SensorValues["RC Mode"] = arduinomsg->RC();
+	    if (arduinomsg->RC() > 10) {
+	        m_SensorValues["RC Mode"] = -3000;
+	    }
+            else {
+                m_SensorValues["RC Mode"] = -4000;
+            }
+	}
         printSensorData();
     }
 
@@ -91,6 +104,10 @@ public:
            wmove(m_Win, pos, 35);
            if(it.second == -2000) {
               wprintw(m_Win, "%s", "Data not available.");
+	   } else if (it.second == -3000) {
+	      wprintw(m_Win, "%s", "On");
+           } else if (it.second == -4000) {
+              wprintw(m_Win, "%s", "Off");
            } else {
               wprintw(m_Win, "%f", it.second);
            }
@@ -127,7 +144,11 @@ void messageLoop() {
     msgBus.run();
 }
 
-
+std::string FloatToString (float number) {
+    std::ostringstream buff;
+    buff<<number;
+    return buff.str();
+}
 
 
 std::map<std::string, std::string> menuValues;
@@ -214,8 +235,10 @@ int main() {
 
     SensorDataReceiver sensorReceiver(msgBus, 250);
     CANWindsensorNode windSensor(msgBus, canService, 500);
+    CANFeedbackReceiver feedBack(msgBus, canService, 500);
+    CANArduinoNode arduino (msgBus, canService);
     windSensor.start();
-    
+
     std::thread thr(messageLoop);
     thr.detach();
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
