@@ -30,7 +30,7 @@
 #else
   #include "Navigation/LineFollowNode.h"
 #endif
-#include "LowLevelControllers/LowLevelControllerNodeJanet.h"
+// #include "LowLevelControllers/LowLevelControllerNodeJanet.h"
 
 
 #if USE_OPENCV_COLOR_DETECTION == 1
@@ -86,8 +86,8 @@ void initialiseNode(Node& node, const char* nodeName, NodeImportance importance)
 #if LOCAL_NAVIGATION_MODULE==1
 void development_LocalNavigationModule( MessageBus& messageBus, DBHandler& dbHandler)
 {
-	const double PGAIN = 0.20;
-	const double IGAIN = 0.30;
+	//const double PGAIN = 0.20;
+	//const double IGAIN = 0.30;
 	const int16_t MAX_VOTES = 25;
 
 	Logger::info( "Using Local Navigation Module" );
@@ -95,8 +95,8 @@ void development_LocalNavigationModule( MessageBus& messageBus, DBHandler& dbHan
 	VesselStateNode vesselState	( messageBus, 0.2 );
 	WaypointMgrNode waypoint	( messageBus, dbHandler );
 	LocalNavigationModule lnm	( messageBus );
-  Node* llc;
-	llc	= new LowLevelControllerNodeJanet( messageBus, PGAIN, IGAIN, dbHandler );
+  //Node* llc;
+	//llc	= new LowLevelControllerNodeJanet( messageBus, PGAIN, IGAIN, dbHandler );
 	CollidableMgr collidableMgr;
 
 	#if SIMULATION == 1
@@ -106,7 +106,7 @@ void development_LocalNavigationModule( MessageBus& messageBus, DBHandler& dbHan
 	initialiseNode( vesselState, 	"Vessel State Node", 		NodeImportance::CRITICAL );
 	initialiseNode( waypoint, 		"Waypoint Node", 			NodeImportance::CRITICAL );
 	initialiseNode( lnm,			"Local Navigation Module",	NodeImportance::CRITICAL );
-	initialiseNode( *llc,			"Low Level Controller",		NodeImportance::CRITICAL );
+	//initialiseNode( *llc,			"Low Level Controller",		NodeImportance::CRITICAL );
 
 	#if SIMULATION == 1
 	initialiseNode( simulation, 	"Simulation Node", 			NodeImportance::CRITICAL );
@@ -196,7 +196,6 @@ int main(int argc, char *argv[])
   #else
 
 	#if SIMULATION == 1
-	printf("using simulation\n");
 	SimulationNode 	simulation	( messageBus ); // , &collidableMgr );
 	#else
 

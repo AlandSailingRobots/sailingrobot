@@ -33,7 +33,7 @@ TOOLCHAIN = 0
 
 
 export CPPFLAGS                = -g -Wall -pedantic -Werror -std=gnu++14
-export LIBS                    = -lsqlite3 -lgps -lrt -lcurl -lpthread -lwiringPi
+export LIBS                    = -lsqlite3 -lgps -lrt -lcurl -lpthread -lwiringPi -lncurses
 
 ifeq ($(TOOLCHAIN),1)
 export CC                      = arm-linux-gnueabihf-gcc
@@ -75,10 +75,6 @@ export HARDWARE_TEST_EXEC 	= hardware-tests.run
 
 export OBJECT_FILE          = $(BUILD_DIR)/objects.tmp
 
-
-export MAIN_SRC             = main.cpp
-export MAIN_LNM_SRC         = main_lnm.cpp
-
 export MESSAGE_BUS_SRC      = MessageBus/MessageBus.cpp MessageBus/ActiveNode.cpp MessageBus/MessageSerialiser.cpp \
                             MessageBus/MessageDeserialiser.cpp
 
@@ -97,31 +93,52 @@ export LINE_FOLLOW_SRC      = Navigation/LineFollowNode.cpp waypointrouting/Rudd
 
 export NETWORK_SRC          = Network/TCPServer.cpp
 
-
-export HARDWARE_NODES_SRC   = Hardwares/CV7Node.cpp Hardwares/HMC6343Node.cpp Hardwares/GPSDNode.cpp Hardwares/ActuatorNodeASPire.cpp \
-                            Hardwares/ActuatorNode.cpp Hardwares/ArduinoNode.cpp Hardwares/CANFeedbackReceiver.cpp Hardwares/CANWindsensorNode.cpp
-
 export SYSTEM_SERVICES_SRC  = SystemServices/Logger.cpp SystemServices/SysClock.cpp SystemServices/Timer.cpp \
                             DataBase/DBHandler.cpp DataBase/DBLogger.cpp SystemServices/WingsailControl.cpp \
 														SystemServices/CourseRegulator.cpp SystemServices/SoftsailControl.cpp \
 														DataBase/DBLoggerNode.cpp
 
-export HARDWARE_SERVICES_SRC = Hardwares/MaestroController/MaestroController.cpp Hardwares/i2ccontroller/I2CController.cpp \
-							   						Hardwares/CAN_Services/CANPGNReceiver.cpp Hardwares/CAN_Services/CANService.cpp \
-							   						Hardwares/CAN_Services/mcp2515.cpp Hardwares/CAN_Services/MsgFunctions.cpp \
-							   						Hardwares/CAN_Services/CANFrameReceiver.cpp
-
 export MATH_SRC             = Math/CourseCalculation.cpp Math/CourseMath.cpp Math/Utility.cpp
 
 export SIMULATOR_SRC        = Simulation/SimulationNode.cpp
 
-
-export CORE_SRC             = Navigation/WaypointMgrNode.cpp LowLevelControllers/LowLevelControllerNodeASPire.cpp \
-															WorldState/StateEstimationNode.cpp WorldState/VesselStateNode.cpp \
-							   							LowLevelControllers/LowLevelControllerNodeJanet.cpp WorldState/WindStateNode.cpp \
-															$(MESSAGE_BUS_SRC) $(NETWORK_SRC) $(SYSTEM_SERVICES_SRC) $(MATH_SRC)
-
 export HTTP_SYNC_SRC        = HTTPSync/HTTPSyncNode.cpp
+
+### Boat specific variables
+
+### ASPire
+
+export MAIN_ASPIRE					= main_ASPire.cpp
+
+export HARDWARE_SERVICES_SRC_ASPIRE = Hardwares/i2ccontroller/I2CController.cpp \
+							   Hardwares/CAN_Services/CANPGNReceiver.cpp Hardwares/CAN_Services/CANService.cpp \
+							   Hardwares/CAN_Services/mcp2515.cpp Hardwares/CAN_Services/MsgFunctions.cpp \
+							   Hardwares/CAN_Services/CANFrameReceiver.cpp
+
+export HARDWARE_NODES_SRC_ASPIRE  = Hardwares/HMC6343Node.cpp Hardwares/GPSDNode.cpp Hardwares/ActuatorNodeASPire.cpp \
+                            Hardwares/CANFeedbackReceiver.cpp Hardwares/CANWindsensorNode.cpp
+
+export CORE_SRC_ASPIRE  	         	= 	Navigation/WaypointMgrNode.cpp LowLevelControllers/LowLevelControllerNodeASPire.cpp \
+										WorldState/StateEstimationNode.cpp WorldState/WindStateNode.cpp WorldState/VesselStateNode.cpp \
+										$(MESSAGE_BUS_SRC) $(NETWORK_SRC) $(SYSTEM_SERVICES_SRC) $(MATH_SRC)
+
+### Janet
+
+export MAIN_JANET = main_janet.cpp
+
+export HARDWARE_SERVICES_SRC_JANET = Hardwares/MaestroController/MaestroController.cpp \
+														Hardwares/i2ccontroller/I2CController.cpp
+
+export HARDWARE_NODES_SRC_JANET   = Hardwares/CV7Node.cpp Hardwares/HMC6343Node.cpp Hardwares/GPSDNode.cpp \
+										        Hardwares/ActuatorNode.cpp Hardwares/ArduinoNode.cpp
+
+
+export CORE_SRC_JANET             = 	Navigation/WaypointMgrNode.cpp WorldState/StateEstimationNode.cpp \
+													LowLevelControllers/LowLevelControllerNodeJanet.cpp WorldState/WindStateNode.cpp \
+													WorldState/VesselStateNode.cpp \
+													$(MESSAGE_BUS_SRC) $(NETWORK_SRC) $(SYSTEM_SERVICES_SRC) $(MATH_SRC)
+
+###
 
 # TODO: Break down for Xbee Remote0
 export XBEE_NETWORK_SRC     = Network/DataLink.cpp Network/LinuxSerialDataLink.cpp Network/XbeePacketNetwork.cpp \
@@ -141,34 +158,25 @@ export INTEGRATION_TEST		= Tests/IntegrationTests/ArduinoIntegrationTest.cpp
 ## Default, same as make ASPire
 all:
 	$(MAKE) ASPire
-#dev-lnm: $(BUILD_DIR) $(WIRING_PI)
-#	$(MAKE) -f dev-lnm.mk -j
 
-line-follow: $(BUILD_DIR) $(WIRING_PI)
-	$(MAKE) -f line-follow.mk -j4
-
-ASPire: $(BUILD_DIR) $(WIRING_PI) ## Builds the configuration for ASPire
+ASPire: $(BUILD_DIR) ## Builds the configuration for ASPire
 	$(MAKE) -f ASPire.mk -j
 
-Janet: $(BUILD_DIR) $(WIRING_PI) ## Builds the configuration for Janet
+Janet: $(BUILD_DIR) ## Builds the configuration for Janet
 	$(MAKE) -f Janet.mk -j
 
 
 ## Builds the integration test, requires the whole system to be built before
-tests: $(BUILD_DIR) $(WIRING_PI)
+tests: $(BUILD_DIR)
 	$(MAKE) -C Tests
 	$(MAKE) -f tests.mk
 
-integration_tests: $(BUILD_DIR) $(WIRING_PI) ## Integration test
+integration_tests: $(BUILD_DIR) ## Integration test
 	$(MAKE) -f integration_tests.mk
 
 #  Create the directories needed
 $(BUILD_DIR):
 	@$(MKDIR_P) $(BUILD_DIR)
-
-$(WIRING_PI):
-	$(MAKE) -C $(WIRING_PI_PATH)
-	@mv $(WIRING_PI_STATIC) ./libwiringPi.so
 
 clean: ## Removes object files and executables
 	@echo Removing existing object files and executable
