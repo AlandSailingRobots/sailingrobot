@@ -5,11 +5,9 @@
 #if SIMULATION == 1
  #include "Simulation/SimulationNode.h"
 #else
- #include "Hardwares/CV7Node.h"
  #include "Hardwares/HMC6343Node.h"
  #include "Hardwares/GPSDNode.h"
- #include "Hardwares/ActuatorNode.h"
- #include "Hardwares/ArduinoNode.h"
+ #include "Hardwares/ActuatorNodeASPire.h"
  #include "Hardwares/CAN_Services/CANService.h"
  #include "Hardwares/CANWindsensorNode.h"
 #endif
@@ -30,7 +28,7 @@
 #else
   #include "Navigation/LineFollowNode.h"
 #endif
-// #include "LowLevelControllers/LowLevelControllerNodeJanet.h"
+#include "LowLevelControllers/LowLevelControllerNodeASPire.h"
 
 
 #if USE_OPENCV_COLOR_DETECTION == 1
@@ -201,14 +199,14 @@ int main(int argc, char *argv[])
 
   CANService canService;
 	XbeeSyncNode xbee(messageBus, dbHandler);
-  // TODO: Change to CANWindsenor
+
   CANWindsensorNode windSensor(messageBus, canService,
                                 dbHandler.retrieveCellAsInt("windState_config","1","time_filter_ms"));
-	//CV7Node windSensor(messageBus, dbHandler.retrieveCell("windsensor_config", "1", "port"), dbHandler.retrieveCellAsInt("windsensor_config", "1", "baud_rate"));
 	HMC6343Node compass(messageBus, dbHandler.retrieveCellAsInt("buffer_config", "1", "compass"));
   GPSDNode gpsd(messageBus,
                 dbHandler.retrieveCellAsDouble("gpsd_config", "1", "loop_time"));
 
+  // NOTE: What replaces ArduinoNode, nothing?
 	//ArduinoNode arduino(messageBus, 0.1);
 	std::vector<std::string> list;
 	list.push_back("red");
@@ -227,30 +225,29 @@ int main(int argc, char *argv[])
 
 
 	ActiveNode* sailingLogic;
-  // TODO: Change to LLCASPire
-	//Node* lowLevelControllerNodeJanet;
+  Node* lowLevelControllerNodeASPire;
 
 	sailingLogic = new LineFollowNode(messageBus, dbHandler);
-	//lowLevelControllerNodeJanet = new LowLevelControllerNodeJanet(messageBus, 30, 60, dbHandler);
+  lowLevelControllerNodeASPire = new LowLevelControllerNodeASPire(messageBus, canService, 45, 30, 50, 10); // NOTE: Values to be read from db
 
-  /* TODO: Fix AcutatorNode ASPire
+  /* NOTE: It compiles, but is ActuatorNodeASPire really working as intended?
   * Should be uncommented once ActuatorNodeAspire class is finsihed.
   *
 	#if SIMULATION == 0
 	int channel = dbHandler.retrieveCellAsInt("sail_servo_config", "1", "channel");
 	int speed = dbHandler.retrieveCellAsInt("sail_servo_config", "1", "speed");
 	int acceleration = dbHandler.retrieveCellAsInt("sail_servo_config", "1", "acceleration");
-
-	//ActuatorNode sail(messageBus, NodeID::SailActuator, channel, speed, acceleration);
-
-	channel = dbHandler.retrieveCellAsInt("rudder_servo_config", "1", "channel");
-	speed = dbHandler.retrieveCellAsInt("rudder_servo_config", "1", "speed");
-	acceleration = dbHandler.retrieveCellAsInt("rudder_servo_config", "1", "acceleration");
-
-	//ActuatorNode rudder(messageBus, NodeID::RudderActuator, channel, speed, acceleration);
-	//MaestroController::init(dbHandler.retrieveCell("maestro_controller_config", "1", "port"));
-	#endif
   */
+	ActuatorNodeASPire sail(messageBus, canService);
+
+	//channel = dbHandler.retrieveCellAsInt("rudder_servo_config", "1", "channel");
+	//speed = dbHandler.retrieveCellAsInt("rudder_servo_config", "1", "speed");
+	//acceleration = dbHandler.retrieveCellAsInt("rudder_servo_config", "1", "acceleration");
+
+	ActuatorNodeASPire rudder(messageBus, canService);
+	//MaestroController::init(dbHandler.retrieveCell("maestro_controller_config", "1", "port"));
+	//#endif
+  /* */
 	bool requireNetwork = (bool) (dbHandler.retrieveCellAsInt("sailing_robot_config", "1", "require_network"));
 
 	// Initialise nodes
@@ -260,7 +257,7 @@ int main(int argc, char *argv[])
 	initialiseNode(simulation,"Simulation Node",NodeImportance::CRITICAL);
 	#else
 	initialiseNode(xbee, "Xbee Sync Node", NodeImportance::NOT_CRITICAL);
-	//initialiseNode(windSensor, "Wind Sensor", NodeImportance::CRITICAL); // TODO: Uncomment this when the rest is done
+	initialiseNode(windSensor, "Wind Sensor", NodeImportance::CRITICAL); // TODO: Uncomment this when the rest is done
 	initialiseNode(compass, "Compass", NodeImportance::CRITICAL);
 	initialiseNode(gpsd, "GPSD Node", NodeImportance::CRITICAL);
 	//initialiseNode(sail, "Sail Actuator", NodeImportance::CRITICAL);
@@ -283,7 +280,7 @@ int main(int argc, char *argv[])
 	initialiseNode(windStateNode,"WindState Node",NodeImportance::CRITICAL);
 	initialiseNode(waypoint, "Waypoint Node", NodeImportance::CRITICAL);
 	initialiseNode(*sailingLogic, "LineFollow Node", NodeImportance::CRITICAL);
-	//initialiseNode(*lowLevelControllerNodeJanet, "LowLevelControllerNodeJanet Node", NodeImportance::CRITICAL);
+	initialiseNode(*lowLevelControllerNodeASPire, "LowLevelControllerNodeJanet Node", NodeImportance::CRITICAL);
 
 	// Start active nodes
 	#if SIMULATION == 1
