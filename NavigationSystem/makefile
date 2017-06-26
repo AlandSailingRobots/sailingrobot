@@ -140,6 +140,21 @@ export CORE_SRC_JANET             = 	Navigation/WaypointMgrNode.cpp WorldState/S
 
 ###
 
+### Needed to compile the tests
+export CORE_SRC             = Navigation/WaypointMgrNode.cpp LowLevelControllers/LowLevelControllerNodeASPire.cpp \
+													WorldState/StateEstimationNode.cpp WorldState/VesselStateNode.cpp \
+							   					LowLevelControllers/LowLevelControllerNodeJanet.cpp WorldState/WindStateNode.cpp \
+													$(MESSAGE_BUS_SRC) $(NETWORK_SRC) $(SYSTEM_SERVICES_SRC) $(MATH_SRC)
+
+export HARDWARE_NODES_SRC   = Hardwares/CV7Node.cpp Hardwares/HMC6343Node.cpp Hardwares/GPSDNode.cpp Hardwares/ActuatorNodeASPire.cpp \
+								          Hardwares/ActuatorNode.cpp Hardwares/ArduinoNode.cpp Hardwares/CANFeedbackReceiver.cpp Hardwares/CANWindsensorNode.cpp
+
+export HARDWARE_SERVICES_SRC = Hardwares/MaestroController/MaestroController.cpp Hardwares/i2ccontroller/I2CController.cpp \
+													Hardwares/CAN_Services/CANPGNReceiver.cpp Hardwares/CAN_Services/CANService.cpp \
+													Hardwares/CAN_Services/mcp2515.cpp Hardwares/CAN_Services/MsgFunctions.cpp \
+													Hardwares/CAN_Services/CANFrameReceiver.cpp
+
+###
 # TODO: Break down for Xbee Remote0
 export XBEE_NETWORK_SRC     = Network/DataLink.cpp Network/LinuxSerialDataLink.cpp Network/XbeePacketNetwork.cpp \
                             	Xbee/Xbee.cpp Xbee/XbeeSyncNode.cpp

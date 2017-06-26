@@ -17,8 +17,9 @@
 #include "WorldState/WindStateNode.h"
 #include "HTTPSync/HTTPSyncNode.h"
 #include "Xbee/XbeeSyncNode.h"
+#include "WorldState/VesselStateNode.h"
+
 #if LOCAL_NAVIGATION_MODULE == 1
-  #include "WorldState/VesselStateNode.h"
   #include "Navigation/LocalNavigationModule/LocalNavigationModule.h"
   #include "Navigation/LocalNavigationModule/Voters/WaypointVoter.h"
   #include "Navigation/LocalNavigationModule/Voters/WindVoter.h"
@@ -148,7 +149,6 @@ int main(int argc, char *argv[])
 	// This is for eclipse development so the output is constantly pumped out.
 	setbuf(stdout, NULL);
 
-	// Database Path
 	std::string db_path;
 	if (argc < 2) {
 		db_path = "../asr.db";
@@ -184,40 +184,33 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 
-	// Create nodes
-	//MessageLoggerNode msgLogger(messageBus);
-	//CollidableMgr collidableMgr;
-
   #if LOCAL_NAVIGATION_MODULE == 1
     development_LocalNavigationModule(messageBus, dbHandler);
     Logger::shutdown();
   #else
 
 	#if SIMULATION == 1
-	SimulationNode 	simulation	( messageBus ); // , &collidableMgr );
+	SimulationNode 	simulation	( messageBus );
 	#else
 
   CANService canService;
 	XbeeSyncNode xbee(messageBus, dbHandler);
 
   CANWindsensorNode windSensor(messageBus, canService,
-                                dbHandler.retrieveCellAsInt("windState_config","1","time_filter_ms"));
+                                dbHandler.retrieveCellAsInt("windState_config", "1", "time_filter_ms"));
 	HMC6343Node compass(messageBus, dbHandler.retrieveCellAsInt("buffer_config", "1", "compass"));
   GPSDNode gpsd(messageBus,
                 dbHandler.retrieveCellAsDouble("gpsd_config", "1", "loop_time"));
 
-  // NOTE: What replaces ArduinoNode, nothing?
-	//ArduinoNode arduino(messageBus, 0.1);
 	std::vector<std::string> list;
 	list.push_back("red");
 	#endif
 
-
   HTTPSyncNode httpsync(messageBus, &dbHandler,
-                        dbHandler.retrieveCellAsInt("httpsync_config", "1","delay"),
-                        dbHandler.retrieveCellAsInt("httpsync_config","1","remove_logs"));
+                        dbHandler.retrieveCellAsInt("httpsync_config", "1", "delay"),
+                        dbHandler.retrieveCellAsInt("httpsync_config", "1", "remove_logs"));
   StateEstimationNode stateEstimationNode(messageBus,
-                                          dbHandler.retrieveCellAsDouble("vesselState_config","1", "loop_time"),
+                                          dbHandler.retrieveCellAsDouble("vesselState_config", "1", "loop_time"),
                                           dbHandler.retrieveCellAsDouble("vesselState_config", "1", "speedLimit"));
   WindStateNode windStateNode(messageBus,
                               dbHandler.retrieveCellAsDouble("windState_config", "1", "time_filter_ms"));
@@ -230,39 +223,22 @@ int main(int argc, char *argv[])
 	sailingLogic = new LineFollowNode(messageBus, dbHandler);
   lowLevelControllerNodeASPire = new LowLevelControllerNodeASPire(messageBus, canService, 45, 30, 50, 10); // NOTE: Values to be read from db
 
-  /* NOTE: It compiles, but is ActuatorNodeASPire really working as intended?
-  * Should be uncommented once ActuatorNodeAspire class is finsihed.
-  *
 	#if SIMULATION == 0
-	int channel = dbHandler.retrieveCellAsInt("sail_servo_config", "1", "channel");
-	int speed = dbHandler.retrieveCellAsInt("sail_servo_config", "1", "speed");
-	int acceleration = dbHandler.retrieveCellAsInt("sail_servo_config", "1", "acceleration");
-  */
 	ActuatorNodeASPire sail(messageBus, canService);
-
-	//channel = dbHandler.retrieveCellAsInt("rudder_servo_config", "1", "channel");
-	//speed = dbHandler.retrieveCellAsInt("rudder_servo_config", "1", "speed");
-	//acceleration = dbHandler.retrieveCellAsInt("rudder_servo_config", "1", "acceleration");
-
 	ActuatorNodeASPire rudder(messageBus, canService);
-	//MaestroController::init(dbHandler.retrieveCell("maestro_controller_config", "1", "port"));
-	//#endif
-  /* */
-	bool requireNetwork = (bool) (dbHandler.retrieveCellAsInt("sailing_robot_config", "1", "require_network"));
+	#endif
 
-	// Initialise nodes
-	//initialiseNode(msgLogger, "Message Logger", NodeImportance::NOT_CRITICAL);
+	bool requireNetwork = (bool) (dbHandler.retrieveCellAsInt("sailing_robot_config", "1", "require_network"));
 
 	#if SIMULATION == 1
 	initialiseNode(simulation,"Simulation Node",NodeImportance::CRITICAL);
 	#else
 	initialiseNode(xbee, "Xbee Sync Node", NodeImportance::NOT_CRITICAL);
-	initialiseNode(windSensor, "Wind Sensor", NodeImportance::CRITICAL); // TODO: Uncomment this when the rest is done
+	initialiseNode(windSensor, "Wind Sensor", NodeImportance::CRITICAL);
 	initialiseNode(compass, "Compass", NodeImportance::CRITICAL);
 	initialiseNode(gpsd, "GPSD Node", NodeImportance::CRITICAL);
-	//initialiseNode(sail, "Sail Actuator", NodeImportance::CRITICAL);
-	//initialiseNode(rudder, "Rudder Actuator", NodeImportance::CRITICAL);
-	//initialiseNode(arduino, "Arduino Node", NodeImportance::NOT_CRITICAL);
+	initialiseNode(sail, "Sail Actuator", NodeImportance::CRITICAL);
+	initialiseNode(rudder, "Rudder Actuator", NodeImportance::CRITICAL);
 	//initialiseNode(colorDetection, "Colour detection node", NodeImportance::NOT_CRITICAL);
 	#endif
 
@@ -275,7 +251,7 @@ int main(int argc, char *argv[])
 		initialiseNode(httpsync, "Httpsync Node", NodeImportance::NOT_CRITICAL);
 	}
 
-	//initialiseNode(vessel, "Vessel State Node", NodeImportance::CRITICAL); // TODO: Uncomment this when the rest is done
+	//initialiseNode(vessel, "Vessel State Node", NodeImportance::CRITICAL); // NOTE: Leave for now
   initialiseNode(stateEstimationNode,"StateEstimation Node",NodeImportance::CRITICAL);
 	initialiseNode(windStateNode,"WindState Node",NodeImportance::CRITICAL);
 	initialiseNode(waypoint, "Waypoint Node", NodeImportance::CRITICAL);
@@ -287,10 +263,9 @@ int main(int argc, char *argv[])
 	simulation.start();
 	#else
 	xbee.start();
-	//windSensor.start();
+	windSensor.start();
 	compass.start();
 	gpsd.start();
-	//arduino.start();
 	#endif
 
 	httpsync.start();
@@ -316,7 +291,7 @@ int main(int argc, char *argv[])
 
 	Logger::shutdown();
 	delete sailingLogic;
-	//delete lowLevelControllerNodeJanet;
+	delete lowLevelControllerNodeASPire;
   #endif
 	exit(0);
 }
