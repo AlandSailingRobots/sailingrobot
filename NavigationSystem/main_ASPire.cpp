@@ -9,9 +9,9 @@
  #include "Hardwares/GPSDNode.h"
  #include "Hardwares/ActuatorNodeASPire.h"
  #include "Hardwares/CAN_Services/CANService.h"
- #include "Hardwares/CANWindsensorNode.h"
 #endif
 
+#include "Hardwares/CANWindsensorNode.h"
 #include "Navigation/WaypointMgrNode.h"
 #include "WorldState/StateEstimationNode.h"
 #include "WorldState/WindStateNode.h"
@@ -31,18 +31,10 @@
 #endif
 #include "LowLevelControllers/LowLevelControllerNodeASPire.h"
 
-
-#if USE_OPENCV_COLOR_DETECTION == 1
-#include "WorldState/obstacledetection/colorDetectionNode.h"
-#endif
-
 #include "Messages/DataRequestMsg.h"
 #include "DataBase/DBHandler.h"
 #include "DataBase/DBLoggerNode.h"
-#include "Hardwares/MaestroController/MaestroController.h"
 #include "Xbee/Xbee.h"
-
-#define DISABLE_LOGGING 0
 
 enum class NodeImportance {
 	CRITICAL,
@@ -82,6 +74,7 @@ void initialiseNode(Node& node, const char* nodeName, NodeImportance importance)
 /// Used for development of the Local Navigation Module
 ///
 ///----------------------------------------------------------------------------------
+// TODO: Change so we don't have a separate fcn
 #if LOCAL_NAVIGATION_MODULE==1
 void development_LocalNavigationModule( MessageBus& messageBus, DBHandler& dbHandler)
 {
@@ -189,11 +182,12 @@ int main(int argc, char *argv[])
     Logger::shutdown();
   #else
 
+  CANService canService;
+
 	#if SIMULATION == 1
 	SimulationNode 	simulation	( messageBus );
 	#else
 
-  CANService canService;
 	XbeeSyncNode xbee(messageBus, dbHandler);
 
   CANWindsensorNode windSensor(messageBus, canService,
@@ -239,7 +233,6 @@ int main(int argc, char *argv[])
 	initialiseNode(gpsd, "GPSD Node", NodeImportance::CRITICAL);
 	initialiseNode(sail, "Sail Actuator", NodeImportance::CRITICAL);
 	initialiseNode(rudder, "Rudder Actuator", NodeImportance::CRITICAL);
-	//initialiseNode(colorDetection, "Colour detection node", NodeImportance::NOT_CRITICAL);
 	#endif
 
 	if (requireNetwork)
@@ -259,6 +252,8 @@ int main(int argc, char *argv[])
 	initialiseNode(*lowLevelControllerNodeASPire, "LowLevelControllerNodeJanet Node", NodeImportance::CRITICAL);
 
 	// Start active nodes
+  httpsync.start();
+
 	#if SIMULATION == 1
 	simulation.start();
 	#else
@@ -268,7 +263,6 @@ int main(int argc, char *argv[])
 	gpsd.start();
 	#endif
 
-	httpsync.start();
 	stateEstimationNode.start();
 	sailingLogic->start();
 

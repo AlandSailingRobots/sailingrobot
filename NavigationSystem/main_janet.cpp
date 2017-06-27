@@ -32,18 +32,11 @@
 
 #include "LowLevelControllers/LowLevelControllerNodeJanet.h"
 
-
-#if USE_OPENCV_COLOR_DETECTION == 1
-#include "WorldState/obstacledetection/colorDetectionNode.h"
-#endif
-
 #include "Messages/DataRequestMsg.h"
 #include "DataBase/DBHandler.h"
 #include "DataBase/DBLoggerNode.h"
 #include "Hardwares/MaestroController/MaestroController.h"
 #include "Xbee/Xbee.h"
-
-#define DISABLE_LOGGING 0
 
 enum class NodeImportance {
 	CRITICAL,
@@ -264,7 +257,6 @@ int main(int argc, char *argv[])
 	initialiseNode(sail, "Sail Actuator", NodeImportance::CRITICAL);
 	initialiseNode(rudder, "Rudder Actuator", NodeImportance::CRITICAL);
 	initialiseNode(arduino, "Arduino Node", NodeImportance::NOT_CRITICAL);
-	//initialiseNode(colorDetection, "Colour detection node", NodeImportance::NOT_CRITICAL);
 	#endif
 
 	if (requireNetwork)

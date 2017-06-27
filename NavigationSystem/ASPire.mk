@@ -10,7 +10,7 @@
 ###############################################################################
 
 ifeq ($(USE_LNM),1)
-SRC 											= $(MAIN_ASPIRE) $(CORE_SRC_ASPIRE) $(LNM_SRC)
+SRC 											= $(MAIN_ASPIRE) $(CORE_SRC_ASPIRE) $(LNM_SRC) $(HTTP_SYNC_SRC)
 else
 SRC 											= $(MAIN_ASPIRE) $(CORE_SRC_ASPIRE) $(LINE_FOLLOW_SRC) $(HTTP_SYNC_SRC)
 endif

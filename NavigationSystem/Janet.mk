@@ -10,7 +10,7 @@
 ###############################################################################
 
 ifeq ($(USE_LNM),1)
-SRC 											= $(MAIN_JANET) $(CORE_SRC_JANET) $(LNM_SRC)
+SRC 											= $(MAIN_JANET) $(CORE_SRC_JANET) $(LNM_SRC) $(HTTP_SYNC_SRC)
 else
 SRC 											= $(MAIN_JANET) $(CORE_SRC_JANET) $(LINE_FOLLOW_SRC) $(HTTP_SYNC_SRC)
 endif
