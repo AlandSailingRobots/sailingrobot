@@ -18,8 +18,11 @@ public:
 	bool init();
 	void processMessage (const Message* message);
 	void processFrame (CanMsg& msg);
+	void start ();
 	
 private:
+	
+	static void CANArduinoNodeThreadFunc(ActiveNode* nodePtr);
 	
 	float m_RudderFeedback;
   float m_WingsailFeedback; 

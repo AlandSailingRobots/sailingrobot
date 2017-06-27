@@ -2,6 +2,7 @@
 
 #include "CANArduinoNode.h"
 #include "Messages/ArduinoDataMsg.h"
+#include "Messages/ASPireActuatorFeedbackMsg.h"
 #include "SystemServices/Timer.h"
 
 #include <chrono>
