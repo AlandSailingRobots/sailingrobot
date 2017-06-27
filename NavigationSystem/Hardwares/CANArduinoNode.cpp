@@ -71,7 +71,7 @@ void CANArduinoNode::CANArduinoNodeThreadFunc(ActiveNode* nodePtr) {
 				continue;
 			}
 
-		MessagePtr feebackData = std::make_unique<ASPireActuatorFeedbackMsg>(node->m_RudderFeedback, node->m_WingsailFeedback, node->m_WindvaneSelfSteerAngle);
+		MessagePtr feebackData = std::make_unique<ASPireActuatorFeedbackMsg>(node->m_RudderFeedback, node->m_WingsailFeedback, node->m_WindvaneSelfSteerAngle, node->m_WindvaneActuatorPos);
 		node->m_MsgBus.sendMessage(std::move(feebackData));
 
 		node->m_lock.unlock();
