@@ -236,8 +236,9 @@ int main() {
     SensorDataReceiver sensorReceiver(msgBus, 250);
     CANWindsensorNode windSensor(msgBus, canService, 500);
     CANFeedbackReceiver feedBack(msgBus, canService, 500);
-    CANArduinoNode arduino (msgBus, canService);
+    CANArduinoNode arduino (msgBus, canService, 500);
     windSensor.start();
+		arduino.start ();
 
     std::thread thr(messageLoop);
     thr.detach();
