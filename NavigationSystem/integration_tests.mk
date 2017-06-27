@@ -5,11 +5,15 @@
 ###############################################################################
 
 
-INTEGRATION_TEST_EXEC	= integration-tests.run
-
 ###############################################################################
 # Files
 ###############################################################################
+
+CORE_SRC				+= $(CORE_ASPIRE) $(CORE_JANET)
+
+HARDWARE_NODES_SRC += $(HARDWARE_NODES_ASPIRE) $(HARDWARE_NODES_JANET)
+
+HARDWARE_SERVICES_SRC += $(CAN_HARDWARE_SRC) $(HARDWARE_SERVICES_JANET)
 
 SRC = $(CORE_SRC) $(HARDWARE_NODES_SRC) $(HARDWARE_SERVICES_SRC) $(INTEGRATION_TEST)
 
@@ -25,7 +29,7 @@ OBJECTS = $(addprefix $(BUILD_DIR)/, $(SRC:.cpp=.o))
 all: $(INTEGRATION_TEST_EXEC) stats
 
 # Link and build
-$(INTEGRATION_TEST_EXEC): $(OBJECTS) 
+$(INTEGRATION_TEST_EXEC): $(OBJECTS)
 	rm -f $(OBJECT_FILE)
 	@echo -n " " $(OBJECTS) >> $(OBJECT_FILE)
 	@echo Linking object files

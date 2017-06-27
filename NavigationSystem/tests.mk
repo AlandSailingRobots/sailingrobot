@@ -9,8 +9,11 @@
 # Files
 ###############################################################################
 
-#UNIT_TEST_SRC		= unit-tests/runner.cpp
-#HARDWARE_TESTS_SRC  = unit-tests/runnerHardware.cpp
+CORE_SRC				+= $(CORE_ASPIRE) $(CORE_JANET)
+
+HARDWARE_NODES_SRC += $(HARDWARE_NODES_ASPIRE) $(HARDWARE_NODES_JANET)
+
+HARDWARE_SERVICES_SRC += $(CAN_HARDWARE_SRC) $(HARDWARE_SERVICES_JANET)
 
 SRC         = $(CORE_SRC) $(LINE_FOLLOW_SRC) $(HTTP_SYNC_SRC) $(SIMULATOR_SRC) \
 			$(HARDWARE_NODES_SRC) $(HARDWARE_SERVICES_SRC) $(XBEE_NETWORK_SRC)

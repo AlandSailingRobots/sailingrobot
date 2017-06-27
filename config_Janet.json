@@ -64,6 +64,12 @@
   "require_network": 1
 },
 
+"server": {
+  "boat_id": "BOAT02",
+  "boat_pwd": "PWD02",
+  "srv_addr": "http://www.sailingrobots.com/testdata/sync/"
+},
+
 "vesselState_config": {
   "loop_time": 0.5,
   "speedLimit": 0.5

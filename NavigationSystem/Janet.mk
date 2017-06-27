@@ -9,17 +9,25 @@
 # Build the SRC varibale
 ###############################################################################
 
+CORE_SRC									+= $(CORE_JANET)
+
+HARDWARE_SERVICES_SRC			+= $(HARDWARE_SERVICES_JANET)
+
+HARDWARE_NODES_SRC				+= $(HARDWARE_NODES_JANET)
+
 ifeq ($(USE_LNM),1)
-SRC 											= $(MAIN_JANET) $(CORE_SRC_JANET) $(LNM_SRC) $(HTTP_SYNC_SRC)
+SRC 											= $(LNM_SRC)
 else
-SRC 											= $(MAIN_JANET) $(CORE_SRC_JANET) $(LINE_FOLLOW_SRC) $(HTTP_SYNC_SRC)
+SRC 											= $(LINE_FOLLOW_SRC)
 endif
 
 ifeq ($(USE_SIM),1)
 SRC 											+= $(SIMULATOR_SRC)
 else
-SRC 											+= $(HARDWARE_NODES_SRC_JANET) $(HARDWARE_SERVICES_SRC_JANET) $(XBEE_NETWORK_SRC)
+SRC 											+= $(HARDWARE_NODES_SRC) $(HARDWARE_SERVICES_SRC) $(XBEE_NETWORK_SRC)
 endif
+
+SRC												+= $(CORE_SRC) $(HTTP_SYNC_SRC) $(MAIN_JANET)
 
 OBJECTS = $(addprefix $(BUILD_DIR)/, $(SRC:.cpp=.o))
 

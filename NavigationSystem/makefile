@@ -2,12 +2,12 @@
 #
 # Control System Makefile
 #
-# Targets:
+#   Type make help to display help text, with targets and external variables
+#
+#   Targets:
 #
 #		* ASPire: Build for ASPire
 #		* Janet: Build for Janet
-#
-#		Type make help for short description of all targets
 #
 # External Variables
 #   * USE_SIM: Indicates if the simulator is to be used, 0 for off, 1 for on.
@@ -72,13 +72,11 @@ LNM_DIR                 	= Navigation/LocalNavigationModule
 export EXECUTABLE           = sr
 export UNIT_TEST_EXEC 			= unit-tests.run
 export HARDWARE_TEST_EXEC 	= hardware-tests.run
+export INTEGRATION_TEST_EXEC = integration-tests.run
 
 export OBJECT_FILE          = $(BUILD_DIR)/objects.tmp
 
-export MESSAGE_BUS_SRC      = MessageBus/MessageBus.cpp MessageBus/ActiveNode.cpp MessageBus/MessageSerialiser.cpp \
-                            MessageBus/MessageDeserialiser.cpp
-
-export COLLIDABLE_MGR_SRC	= WorldState/CollidableMgr/CollidableMgr.cpp
+COLLIDABLE_MGR_SRC					= WorldState/CollidableMgr/CollidableMgr.cpp
 
 export LNM_SRC              = $(LNM_DIR)/ASRCourseBallot.cpp $(LNM_DIR)/ASRArbiter.cpp \
                             $(LNM_DIR)/LocalNavigationModule.cpp LowLevelControllers/LowLevelController.cpp \
@@ -91,76 +89,67 @@ export LINE_FOLLOW_SRC      = Navigation/LineFollowNode.cpp waypointrouting/Rudd
                             waypointrouting/Commands.cpp waypointrouting/SailCommand.cpp \
                             $(COLLIDABLE_MGR_SRC)
 
-export NETWORK_SRC          = Network/TCPServer.cpp
+export SIMULATOR_SRC        = Simulation/SimulationNode.cpp
 
-export SYSTEM_SERVICES_SRC  = SystemServices/Logger.cpp SystemServices/SysClock.cpp SystemServices/Timer.cpp \
+HTTP_SYNC_SRC        				= HTTPSync/HTTPSyncNode.cpp
+
+MESSAGE_BUS_SRC      				= MessageBus/MessageBus.cpp MessageBus/ActiveNode.cpp MessageBus/MessageSerialiser.cpp \
+                            MessageBus/MessageDeserialiser.cpp
+
+MATH_SRC             				= Math/CourseCalculation.cpp Math/CourseMath.cpp Math/Utility.cpp
+
+SYSTEM_SERVICES_SRC  				= SystemServices/Logger.cpp SystemServices/SysClock.cpp SystemServices/Timer.cpp \
                             DataBase/DBHandler.cpp DataBase/DBLogger.cpp SystemServices/WingsailControl.cpp \
 														SystemServices/CourseRegulator.cpp SystemServices/SoftsailControl.cpp \
 														DataBase/DBLoggerNode.cpp
 
-export MATH_SRC             = Math/CourseCalculation.cpp Math/CourseMath.cpp Math/Utility.cpp
+NETWORK_SRC          				= Network/TCPServer.cpp
 
-export SIMULATOR_SRC        = Simulation/SimulationNode.cpp
+### Base CORE, HARDWARE_NODES, HARDWARE_SERVICES
 
-export HTTP_SYNC_SRC        = HTTPSync/HTTPSyncNode.cpp
+export CORE_SRC 						= Navigation/WaypointMgrNode.cpp WorldState/VesselStateNode.cpp \
+														WorldState/StateEstimationNode.cpp WorldState/WindStateNode.cpp \
+														$(MESSAGE_BUS_SRC) $(NETWORK_SRC) $(SYSTEM_SERVICES_SRC) $(MATH_SRC) \
+														$(HTTP_SYNC_SRC)
+
+export HARDWARE_SERVICES_SRC = Hardwares/i2ccontroller/I2CController.cpp
+
+export HARDWARE_NODES_SRC		= Hardwares/HMC6343Node.cpp Hardwares/GPSDNode.cpp
 
 ### Boat specific variables
-
 ### ASPire
 
 export MAIN_ASPIRE					= main_ASPire.cpp
 
-export HARDWARE_SERVICES_SRC_ASPIRE = Hardwares/i2ccontroller/I2CController.cpp \
-							   Hardwares/CAN_Services/CANPGNReceiver.cpp Hardwares/CAN_Services/CANService.cpp \
-							   Hardwares/CAN_Services/mcp2515.cpp Hardwares/CAN_Services/MsgFunctions.cpp \
-							   Hardwares/CAN_Services/CANFrameReceiver.cpp
+export CAN_HARDWARE_SRC 		= Hardwares/CAN_Services/CANPGNReceiver.cpp Hardwares/CAN_Services/CANService.cpp \
+							   						Hardwares/CAN_Services/mcp2515.cpp Hardwares/CAN_Services/MsgFunctions.cpp \
+							   						Hardwares/CAN_Services/CANFrameReceiver.cpp
 
-export HARDWARE_NODES_SRC_ASPIRE  = Hardwares/HMC6343Node.cpp Hardwares/GPSDNode.cpp Hardwares/ActuatorNodeASPire.cpp \
+export HARDWARE_NODES_ASPIRE = Hardwares/ActuatorNodeASPire.cpp \
                             Hardwares/CANFeedbackReceiver.cpp Hardwares/CANWindsensorNode.cpp
 
-export CORE_SRC_ASPIRE  	         	= 	Navigation/WaypointMgrNode.cpp LowLevelControllers/LowLevelControllerNodeASPire.cpp \
-										WorldState/StateEstimationNode.cpp WorldState/WindStateNode.cpp WorldState/VesselStateNode.cpp \
-										$(MESSAGE_BUS_SRC) $(NETWORK_SRC) $(SYSTEM_SERVICES_SRC) $(MATH_SRC)
+export CORE_ASPIRE  	      = LowLevelControllers/LowLevelControllerNodeASPire.cpp
 
 ### Janet
 
-export MAIN_JANET = main_janet.cpp
+export MAIN_JANET 					= main_janet.cpp
 
-export HARDWARE_SERVICES_SRC_JANET = Hardwares/MaestroController/MaestroController.cpp \
-														Hardwares/i2ccontroller/I2CController.cpp
+export HARDWARE_SERVICES_JANET = Hardwares/MaestroController/MaestroController.cpp
 
-export HARDWARE_NODES_SRC_JANET   = Hardwares/CV7Node.cpp Hardwares/HMC6343Node.cpp Hardwares/GPSDNode.cpp \
+export HARDWARE_NODES_JANET = Hardwares/CV7Node.cpp \
 										        Hardwares/ActuatorNode.cpp Hardwares/ArduinoNode.cpp
 
 
-export CORE_SRC_JANET             = 	Navigation/WaypointMgrNode.cpp WorldState/StateEstimationNode.cpp \
-													LowLevelControllers/LowLevelControllerNodeJanet.cpp WorldState/WindStateNode.cpp \
-													WorldState/VesselStateNode.cpp \
-													$(MESSAGE_BUS_SRC) $(NETWORK_SRC) $(SYSTEM_SERVICES_SRC) $(MATH_SRC)
+export CORE_JANET           = LowLevelControllers/LowLevelControllerNodeJanet.cpp
 
 ###
 
-### Needed to compile the tests
-export CORE_SRC             = Navigation/WaypointMgrNode.cpp LowLevelControllers/LowLevelControllerNodeASPire.cpp \
-													WorldState/StateEstimationNode.cpp WorldState/VesselStateNode.cpp \
-							   					LowLevelControllers/LowLevelControllerNodeJanet.cpp WorldState/WindStateNode.cpp \
-													$(MESSAGE_BUS_SRC) $(NETWORK_SRC) $(SYSTEM_SERVICES_SRC) $(MATH_SRC)
-
-export HARDWARE_NODES_SRC   = Hardwares/CV7Node.cpp Hardwares/HMC6343Node.cpp Hardwares/GPSDNode.cpp Hardwares/ActuatorNodeASPire.cpp \
-								          Hardwares/ActuatorNode.cpp Hardwares/ArduinoNode.cpp Hardwares/CANFeedbackReceiver.cpp Hardwares/CANWindsensorNode.cpp
-
-export HARDWARE_SERVICES_SRC = Hardwares/MaestroController/MaestroController.cpp Hardwares/i2ccontroller/I2CController.cpp \
-													Hardwares/CAN_Services/CANPGNReceiver.cpp Hardwares/CAN_Services/CANService.cpp \
-													Hardwares/CAN_Services/mcp2515.cpp Hardwares/CAN_Services/MsgFunctions.cpp \
-													Hardwares/CAN_Services/CANFrameReceiver.cpp
-
-###
 # TODO: Break down for Xbee Remote0
 export XBEE_NETWORK_SRC     = Network/DataLink.cpp Network/LinuxSerialDataLink.cpp Network/XbeePacketNetwork.cpp \
                             	Xbee/Xbee.cpp Xbee/XbeeSyncNode.cpp
 
 
-export INTEGRATION_TEST		= Tests/IntegrationTests/ArduinoIntegrationTest.cpp
+export INTEGRATION_TEST			= Tests/IntegrationTests/ArduinoIntegrationTest.cpp
 
 
 ###############################################################################
@@ -200,12 +189,13 @@ clean: ## Removes object files and executables
 	$(MAKE) -C Tests clean
 	-@rm $(UNIT_TEST_EXEC)
 	-@rm $(HARDWARE_TEST_EXEC)
-
+	-@rm $(INTEGRATION_TEST_EXEC)
 	@echo DONE
 
 
 ## Displays this help text
 help:
+
 	      $(info Available targets)
 	      @awk '/^[a-zA-Z\-\_0-9]+:/ {                    \
 	        nb = sub( /^## /, "", helpMsg );              \
@@ -218,3 +208,6 @@ help:
 	        }                                               \
 	        { helpMsg = $$0 }'                              \
 	        $(MAKEFILE_LIST) | column -ts:
+					@echo -e 'External Variables'
+					@echo -e 'USE_SIM \t   1: Use with simulator, 0: Without (default)'
+					@echo -e 'USE_LNM \t   1: Voter System, 0: Line-follow (default)'
