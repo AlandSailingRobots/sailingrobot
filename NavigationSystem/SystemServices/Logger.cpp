@@ -85,7 +85,7 @@ void Logger::log(std::string message)
 	#ifndef _WIN32
 	m_Mutex.lock();
 	#endif
-	
+
 	if(m_LogFile.is_open())
 	{
 		m_LogFile << message.c_str();
@@ -212,13 +212,14 @@ bool Logger::createLogFiles(const char* filename)
 
 	if(filename == 0)
 	{
-		snprintf(fileName, 256, "%s-%s", SysClock::hh_mm_ss().c_str(), DEFAULT_LOG_NAME);
+		snprintf(fileName, 256, "%s%s-%s", FILE_PATH, SysClock::hh_mm_ss().c_str(), DEFAULT_LOG_NAME);
 	}
 	else
 	{
-		snprintf(fileName, 256, "%s-%s", SysClock::hh_mm_ss().c_str(), filename);
+		snprintf(fileName, 256, "%s%s-%s", FILE_PATH, SysClock::hh_mm_ss().c_str(), filename);
 	}
 
+	mkdir(FILE_PATH, S_IRWXU | S_IRWXG | S_IRWXO);
 	m_LogFile.open(fileName, std::ios::out | std::ios::trunc);
 
 	#ifdef ENABLE_WRSC_LOGGING

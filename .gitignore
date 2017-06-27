@@ -9,7 +9,7 @@ sr
 *.db
 *.db-journal
 *.log
-
+log/
 
 # Other
 *.vim
