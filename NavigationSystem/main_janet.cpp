@@ -73,76 +73,11 @@ void initialiseNode(Node& node, const char* nodeName, NodeImportance importance)
 }
 
 ///----------------------------------------------------------------------------------
-/// Used for development of the Local Navigation Module
-///
-///----------------------------------------------------------------------------------
-#if LOCAL_NAVIGATION_MODULE==1
-void development_LocalNavigationModule( MessageBus& messageBus, DBHandler& dbHandler)
-{
-	const double PGAIN = 0.20;
-	const double IGAIN = 0.30;
-	const int16_t MAX_VOTES = 25;
-
-	Logger::info( "Using Local Navigation Module" );
-
-	VesselStateNode vesselState	( messageBus, 0.2 );
-	WaypointMgrNode waypoint	( messageBus, dbHandler );
-	LocalNavigationModule lnm	( messageBus );
-  Node* llc;
-	llc	= new LowLevelControllerNodeJanet( messageBus, PGAIN, IGAIN, dbHandler );
-	CollidableMgr collidableMgr;
-
-	#if SIMULATION == 1
-	SimulationNode 	simulation	( messageBus, &collidableMgr );
-	#endif
-
-	initialiseNode( vesselState, 	"Vessel State Node", 		NodeImportance::CRITICAL );
-	initialiseNode( waypoint, 		"Waypoint Node", 			NodeImportance::CRITICAL );
-	initialiseNode( lnm,			"Local Navigation Module",	NodeImportance::CRITICAL );
-	initialiseNode( *llc,			"Low Level Controller",		NodeImportance::CRITICAL );
-
-	#if SIMULATION == 1
-	initialiseNode( simulation, 	"Simulation Node", 			NodeImportance::CRITICAL );
-	#endif
-
-	WaypointVoter waypointVoter( MAX_VOTES, 1 );
-	WindVoter windVoter( MAX_VOTES, 1 );
-	ChannelVoter channelVoter( MAX_VOTES, 1 );
-	MidRangeVoter midRangeVoter( MAX_VOTES, 1, collidableMgr );
-	ProximityVoter proximityVoter( MAX_VOTES, 2, collidableMgr);
-
-	lnm.registerVoter( &waypointVoter );
-	lnm.registerVoter( &windVoter );
-	lnm.registerVoter( &channelVoter );
-	lnm.registerVoter( &proximityVoter );
-	lnm.registerVoter( &midRangeVoter );
-
-
-	vesselState.start();
-	lnm.start();
-
-	collidableMgr.startGC();
-
-	#if SIMULATION == 1
-	simulation.start();
-	#endif
-
-	Logger::info("Message bus started!");
-
-	// Returns when the program has been closed (Does the program ever close gracefully?)
-	messageBus.run();
-}
-#endif
-
-///----------------------------------------------------------------------------------
 /// Entry point, can accept one argument containing a relative path to the database.
 ///
 ///----------------------------------------------------------------------------------
 int main(int argc, char *argv[])
 {
-  #if LOCAL_NAVIGATION_MODULE == 0
-  printf("Line-follow\n");
-  #endif
 	// This is for eclipse development so the output is constantly pumped out.
 	setbuf(stdout, NULL);
 
@@ -183,17 +118,35 @@ int main(int argc, char *argv[])
 	}
 
   #if LOCAL_NAVIGATION_MODULE == 1
-  development_LocalNavigationModule( messageBus, dbHandler );
-  Logger::shutdown();
+  const double PGAIN = 0.20;
+  const double IGAIN = 0.30;
+  const int16_t MAX_VOTES = 25;
+  Logger::info( "Using Local Navigation Module" );
   #else
-	// Create nodes
-	// MessageLoggerNode msgLogger(messageBus);
-	// CollidableMgr collidableMgr;
+  Logger::info( "Using Line-follow" );
+  #endif
+
+  #if LOCAL_NAVIGATION_MODULE == 1
+  VesselStateNode vesselState	( messageBus, 0.2 );
+  LocalNavigationModule lnm	( messageBus );
+  Node* llc;
+  llc	= new LowLevelControllerNodeJanet( messageBus, PGAIN, IGAIN, dbHandler );
+  CollidableMgr collidableMgr;
+
+  #else
+  ActiveNode* sailingLogic;
+  Node* lowLevelControllerNodeJanet;
+  sailingLogic = new LineFollowNode(messageBus, dbHandler);
+  lowLevelControllerNodeJanet = new LowLevelControllerNodeJanet(messageBus, 30, 60, dbHandler); //TODO: Should be added to db
+  #endif
 
 	#if SIMULATION == 1
-	printf("using simulation\n");
+  #if LOCAL_NAVIGATION_MODULE == 1
+  SimulationNode 	simulation	( messageBus, &collidableMgr );
+  #else
 	SimulationNode 	simulation	( messageBus); //, &collidableMgr );
-	#else
+  #endif
+  #else
 
 	XbeeSyncNode xbee(messageBus, dbHandler);
 	CV7Node windSensor(messageBus,
@@ -206,8 +159,7 @@ int main(int argc, char *argv[])
 
 	ArduinoNode arduino(messageBus,
                       dbHandler.retrieveCellAsDouble("arduino_config", "1", "loop_time"));
-	std::vector<std::string> list;
-	list.push_back("red");
+
 	#endif
 
 
@@ -221,12 +173,6 @@ int main(int argc, char *argv[])
                               dbHandler.retrieveCellAsDouble("windState_config", "1", "time_filter_ms"));
 	WaypointMgrNode waypoint(messageBus, dbHandler);
 
-
-	ActiveNode* sailingLogic;
-	Node* lowLevelControllerNodeJanet;
-
-	sailingLogic = new LineFollowNode(messageBus, dbHandler);
-	lowLevelControllerNodeJanet = new LowLevelControllerNodeJanet(messageBus, 30, 60, dbHandler); //TODO: Should be added to db
 
 	#if SIMULATION == 0
 	int channel = dbHandler.retrieveCellAsInt("sail_servo_config", "1", "channel");
@@ -244,9 +190,6 @@ int main(int argc, char *argv[])
 	#endif
 	bool requireNetwork = (bool) (dbHandler.retrieveCellAsInt("sailing_robot_config", "1", "require_network"));
 
-	// Initialise nodes
-	// initialiseNode(msgLogger, "Message Logger", NodeImportance::NOT_CRITICAL);
-
 	#if SIMULATION == 1
 	initialiseNode(simulation,"Simulation Node",NodeImportance::CRITICAL);
 	#else
@@ -259,22 +202,37 @@ int main(int argc, char *argv[])
 	initialiseNode(arduino, "Arduino Node", NodeImportance::NOT_CRITICAL);
 	#endif
 
-	if (requireNetwork)
-	{
+	if (requireNetwork) {
 		initialiseNode(httpsync, "Httpsync Node", NodeImportance::CRITICAL);
 	}
-	else
-	{
+	else {
 		initialiseNode(httpsync, "Httpsync Node", NodeImportance::NOT_CRITICAL);
 	}
-
-	//initialiseNode(vessel, "Vessel State Node", NodeImportance::CRITICAL);
-    initialiseNode(stateEstimationNode,"StateEstimation Node",NodeImportance::CRITICAL);
+  initialiseNode(stateEstimationNode,"StateEstimation Node",NodeImportance::CRITICAL);
 	initialiseNode(windStateNode,"WindState Node",NodeImportance::CRITICAL);
 	initialiseNode(waypoint, "Waypoint Node", NodeImportance::CRITICAL);
+
+  #if LOCAL_NAVIGATION_MODULE == 1
+  initialiseNode( vesselState, 	"Vessel State Node", 		NodeImportance::CRITICAL );
+	initialiseNode( lnm,			"Local Navigation Module",	NodeImportance::CRITICAL );
+	initialiseNode( *llc,			"Low Level Controller",		NodeImportance::CRITICAL );
+
+  WaypointVoter waypointVoter( MAX_VOTES, 1 );
+	WindVoter windVoter( MAX_VOTES, 1 );
+	ChannelVoter channelVoter( MAX_VOTES, 1 );
+	MidRangeVoter midRangeVoter( MAX_VOTES, 1, collidableMgr );
+	ProximityVoter proximityVoter( MAX_VOTES, 2, collidableMgr);
+
+	lnm.registerVoter( &waypointVoter );
+	lnm.registerVoter( &windVoter );
+	lnm.registerVoter( &channelVoter );
+	lnm.registerVoter( &proximityVoter );
+	lnm.registerVoter( &midRangeVoter );
+
+  #else
 	initialiseNode(*sailingLogic, "LineFollow Node", NodeImportance::CRITICAL);
 	initialiseNode(*lowLevelControllerNodeJanet, "LowLevelControllerNodeJanet Node", NodeImportance::CRITICAL);
-
+  #endif
 	// Start active nodes
 	#if SIMULATION == 1
 	simulation.start();
@@ -287,8 +245,15 @@ int main(int argc, char *argv[])
 	#endif
 
 	httpsync.start();
-	stateEstimationNode.start();
+
+  #if LOCAL_NAVIGATION_MODULE == 1
+  vesselState.start();
+  lnm.start();
+  collidableMgr.startGC();
+  #else
+  stateEstimationNode.start();
 	sailingLogic->start();
+  #endif
 
 	// NOTE - Jordan: Just to ensure messages are following through the system
 	MessagePtr dataRequest = std::make_unique<DataRequestMsg>(NodeID::MessageLogger);
@@ -306,6 +271,7 @@ int main(int argc, char *argv[])
 	messageBus.run();
 
 	Logger::shutdown();
+  #if LOCAL_NAVIGATION_MODULE == 0
 	delete sailingLogic;
 	delete lowLevelControllerNodeJanet;
   #endif
