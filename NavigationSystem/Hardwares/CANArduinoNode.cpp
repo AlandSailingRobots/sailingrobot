@@ -14,6 +14,7 @@ ActiveNode(NodeID::CANArduino, messageBus), CANFrameReceiver(canService, {701,70
   m_RudderFeedback  = DATA_OUT_OF_RANGE;
   m_WingsailFeedback = DATA_OUT_OF_RANGE;
   m_WindvaneSelfSteerAngle = DATA_OUT_OF_RANGE;
+	m_RC = DATA_OUT_OF_RANGE;
 	}
 
 CANArduinoNode::~CANArduinoNode(){
@@ -30,17 +31,17 @@ void CANArduinoNode::processMessage (const Message* message){
 
 void CANArduinoNode::processFrame (CanMsg& msg) {
 	if (msg.id == 701) {
-		 uint16_t rudderFeedback = (msg.data[1] << 8 | msg.data[0]);
-     uint16_t wingsailFeedback = (msg.data[3] << 8 | msg.data[2]);
-     uint16_t windvaneSelfSteerAngle = (msg.data[5] << 8 | msg.data[4]);
-     uint8_t windvaneActuatorPos = msg.data[7];
+		 m_RudderFeedback = (msg.data[1] << 8 | msg.data[0]);
+     m_WingsailFeedback = (msg.data[3] << 8 | msg.data[2]);
+     m_WindvaneSelfSteerAngle = (msg.data[5] << 8 | msg.data[4]);
+     m_WindvaneActuatorPos = msg.data[7];
 
      //MessagePtr feedbackMsg = std::make_unique<ASPireActuatorFeedbackMsg>(rudderFeedback, wingsailFeedback,
      //                                                                            windvaneSelfSteerAngle, windvaneActuatorPos);
      //m_MsgBus.sendMessage(std::move(feedbackMsg))
 		 
 	} else if (msg.id == 702) {
-		uint16_t RC = (msg.data[1] << 8 | msg.data[0]);
+		m_RC = (msg.data[1] << 8 | msg.data[0]);
 		
 		//MessagePtr arduinoMsg = std::make_unique<ArduinoDataMsg>(0,0,0,0,RC);
 		//m_MsgBus.sendMessage(std::move(arduinoMsg));
@@ -68,8 +69,8 @@ void CANArduinoNode::CANArduinoNodeThreadFunc(ActiveNode* nodePtr) {
 				continue;
 			}
 
-		MessagePtr windData = std::make_unique<WindDataMsg>(node->m_RudderFeedback, node->m_WingsailFeedback, node->m_WindvaneSelfSteerAngle);
-		node->m_MsgBus.sendMessage(std::move(windData));
+		MessagePtr feebackData = std::make_unique<ASPireActuatorFeedbackMsg>(node->m_RudderFeedback, node->m_WingsailFeedback, node->m_WindvaneSelfSteerAngle);
+		node->m_MsgBus.sendMessage(std::move(feebackData));
 
 		node->m_lock.unlock();
 
