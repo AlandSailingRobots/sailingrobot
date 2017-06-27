@@ -67,7 +67,7 @@ void CANArduinoNode::CANArduinoNodeThreadFunc(ActiveNode* nodePtr) {
 			node->m_lock.lock();
 
 			if( node->m_RudderFeedback == node->DATA_OUT_OF_RANGE &&  node->m_WindvaneSelfSteerAngle == node->DATA_OUT_OF_RANGE && 
-															node->m_WingsailFeedback == node->DATA_OUT_OF_RANGE && node->m_WindvaneActuatorPos == DATA_OUT_OF_RANGE && node->m_RC ==DATA_OUT_OF_RANGE){
+															node->m_WingsailFeedback == node->DATA_OUT_OF_RANGE && node->m_WindvaneActuatorPos == node->DATA_OUT_OF_RANGE && node->m_RC ==node->DATA_OUT_OF_RANGE){
 				node->m_lock.unlock();
 				continue;
 			}
@@ -76,7 +76,7 @@ void CANArduinoNode::CANArduinoNodeThreadFunc(ActiveNode* nodePtr) {
 																	node->m_WindvaneSelfSteerAngle, node->m_WindvaneActuatorPos);
 		node->m_MsgBus.sendMessage(std::move(feebackData));
 
-		MessagePtr statusMsg = std::make_unique<ArduinoDataMsg>(0,0,0,0,m_RC);
+		MessagePtr statusMsg = std::make_unique<ArduinoDataMsg>(0,0,0,0,node->m_RC);
 		node->m_MsgBus.sendMessage(std::move(statusMsg));
 		
 		node->m_lock.unlock();

@@ -84,7 +84,7 @@ void loop()
      
       
       maestro.getErrors();
-      
+      delay (100);
     }
     
   }
