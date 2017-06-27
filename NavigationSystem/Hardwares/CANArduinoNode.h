@@ -24,6 +24,9 @@ private:
 	float m_RudderFeedback;
   float m_WingsailFeedback; 
   float m_WindvaneSelfSteerAngle;
+	float m_RC;
+	float m_WindvaneActuatorPos;
+	int m_TimeBetweenMsgs;
 
 	std::mutex m_lock;
 	
