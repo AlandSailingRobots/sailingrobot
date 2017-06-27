@@ -66,16 +66,16 @@ void setup()
 
 void loop()
 {
+  sendArduinoData ();
+  delay(250);
+  sendFeedback ();
+  delay(250);
 
-
-  while(Canbus.CheckForMessages()) {
+  if (Canbus.CheckForMessages()) {
     
     CanMsg msg;
     Canbus.GetMessage(&msg);
-    sendArduinoData ();
-    delay(250);
-    sendFeedback ();
-    delay(250);
+    
     if(msg.id == 700) {
       moveRudder(msg);
       moveWingsail(msg);
