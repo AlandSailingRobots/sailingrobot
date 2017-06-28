@@ -50,8 +50,8 @@ public:
         m_SensorValues["Wind Speed"] = -2000;        
         m_SensorValues["Wind Direction"] = -2000;
         m_SensorValues["Wind Temperature"] = -2000;
-	m_SensorValues["RC Mode"] = -2000;
-
+				m_SensorValues["RC Mode"] = -2000;
+				m_SensorVal
         m_Win = newwin(6+2*m_SensorValues.size(),60,1,2);
         
         box(m_Win,0,0);
@@ -232,19 +232,19 @@ int main() {
     // Comment out this line if not running on the pi
     // otherwise program will crash.
     auto future = canService.start();
-
+/*
     SensorDataReceiver sensorReceiver(msgBus, 250);
     CANWindsensorNode windSensor(msgBus, canService, 500);
-    //CANFeedbackReceiver feedBack(msgBus, canService, 500);
+    //CANFeedbackReceiver feedBack(msgBus, canService, 500); Old code, replaced by arduino node
     CANArduinoNode arduino (msgBus, canService, 500);
     windSensor.start();
 		arduino.start ();
-
+*/
     std::thread thr(messageLoop);
     thr.detach();
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
 
-    sensorReceiver.printSensorData();
+    //sensorReceiver.printSensorData();
 
     menuValues["Rudder Angle"] = "";
     menuValues["Wingsail Angle"] = "";

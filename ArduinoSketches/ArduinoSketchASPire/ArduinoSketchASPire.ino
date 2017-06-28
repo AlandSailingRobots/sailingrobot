@@ -24,6 +24,8 @@ const int RUDDER_FEEDBACK_PIN = A4;
 const int WINGSAIL_FEEDBACK_PIN = A5;
 const int RC_CONTROLL_OFF_PIN = A8;
 
+const int CANBUS_FREQUENCY = 10; //Sending freqvency (Hz)
+
 /* On boards with a hardware serial port available for use, use
 that port to communicate with the Maestro. For other boards,
 create a SoftwareSerial object using pin 10 to receive (RX) and
@@ -45,6 +47,8 @@ CanbusClass Canbus;
 
 double angleratio = 65535 / MAX_RUDDER_ANGLE;
 double maestroCommandRatio = (MAESTRO_MAX_TARGET - MAESTRO_MIN_TARGET) / MAX_RUDDER_ANGLE;
+double delayTime = 1000/(CANBUS_FREQUENCY*2);
+
 
 void setup()
 {
@@ -61,22 +65,25 @@ void setup()
   }
  
   Serial.println("SETUP COMPLETE");  
- 
+  Serial.print ("Delay between sends ");
+  Serial.println(delayTime);
 }
 
 void loop()
 {
   sendArduinoData ();
-  delay(250);
+  delay(delayTime);
   sendFeedback ();
-  delay(250);
+  delay(delayTime);
 
   if (Canbus.CheckForMessages()) {
     
     CanMsg msg;
     Canbus.GetMessage(&msg);
-    
+    //Serial.println (msg.id);
+    //Serial.println ("ok");
     if(msg.id == 700) {
+      
       moveRudder(msg);
       moveWingsail(msg);
       
@@ -84,7 +91,7 @@ void loop()
      
       
       maestro.getErrors();
-      delay (100);
+      delay (delayTime);
     }
     
   }
@@ -157,7 +164,7 @@ void sendFeedback (){
       feedbackMsg.data[6] = 0;
       
       Canbus.SendMessage(&feedbackMsg);
-      Serial.println("Sent feedback");
+      //Serial.println("Sent feedback");
 }
 
 void sendArduinoData (){
