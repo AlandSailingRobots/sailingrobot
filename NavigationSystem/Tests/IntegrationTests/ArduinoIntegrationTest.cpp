@@ -252,7 +252,7 @@ int main() {
   
     menuIter highlighted = menuValues.begin();
 
-    SensorData values = sensorReceiver.getValues();
+    //SensorData values = sensorReceiver.getValues();
     WINDOW* inputWin  = newwin(8+2*menuValues.size(),60, 2*values.size() + 10,2);
     keypad(inputWin, TRUE);
     cbreak();
