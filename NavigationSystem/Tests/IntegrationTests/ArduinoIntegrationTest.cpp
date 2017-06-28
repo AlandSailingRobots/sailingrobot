@@ -206,6 +206,7 @@ void sendActuatorCommands() {
         windvaneAngle16 = stoi(menuValues["Windvane Angle"]);
     } catch(std::invalid_argument ex) {
         std::cout << std::endl << "Actuator commands only works with integers." << std::endl << std::endl;
+				return;
     }
     
     rudderAngle16 *= ratio;
@@ -249,8 +250,13 @@ int main() {
     menuValues["Rudder Angle"] = "";
     menuValues["Wingsail Angle"] = "";
     menuValues["Windvane Angle"] = "";
-		lastSentValues = menuValues;
 		
+		lastSentValues = menuValues;
+		/*
+		lastSentValues["Rudder Angle"] = "0";
+    lastSentValues["Wingsail Angle"] = "0";
+		lastSentValues["Windvane Angle"] = "0";
+		*/
     menuIter highlighted = menuValues.begin();
 
     SensorData values = sensorReceiver.getValues();
