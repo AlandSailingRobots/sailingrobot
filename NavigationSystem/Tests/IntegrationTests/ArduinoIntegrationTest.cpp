@@ -20,7 +20,7 @@
 #include <cctype>
 #include <sstream>
 
-#define BACKSPACE 127
+#define BACKSPACE 8
 #define ENTER 10
 #define TAB 9
 
