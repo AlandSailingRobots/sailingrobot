@@ -244,7 +244,7 @@ int main() {
     thr.detach();
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
 
-    //sensorReceiver.printSensorData();
+    sensorReceiver.printSensorData();
 
     menuValues["Rudder Angle"] = "";
     menuValues["Wingsail Angle"] = "";

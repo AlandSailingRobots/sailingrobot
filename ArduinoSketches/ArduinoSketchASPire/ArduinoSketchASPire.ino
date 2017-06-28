@@ -72,29 +72,13 @@ void setup()
 void loop()
 {
   sendArduinoData ();
-  delay(delayTime);
+  checkCanbusFor (250);
+  
   sendFeedback ();
-  delay(delayTime);
-
-  if (Canbus.CheckForMessages()) {
-    
-    CanMsg msg;
-    Canbus.GetMessage(&msg);
-    //Serial.println (msg.id);
-    //Serial.println ("ok");
-    if(msg.id == 700) {
-      
-      moveRudder(msg);
-      moveWingsail(msg);
-      
-      
-     
-      
-      maestro.getErrors();
-      delay (delayTime);
-    }
-    
-  }
+  checkCanbusFor (250);
+  
+  
+ 
 }
 
 void moveRudder(CanMsg& msg) {
@@ -182,10 +166,29 @@ void sendArduinoData (){
     arduinoData.data[5] = 0;
     arduinoData.data[6] = 0;
 
-    Canbus.SendMessage(&arduinoData);
+    Canbus.SendMessage(&arduinoData);   
 
-
+}
+void checkCanbusFor (int timeMs){
+  int startTime= millis();
+  int timer = 0;
+  while (timer < timeMs){
+    if (Canbus.CheckForMessages()) {
     
-
+    CanMsg msg;
+    Canbus.GetMessage(&msg);
+    //Serial.println (msg.id);
+    //Serial.println ("ok");
+      if(msg.id == 700) {
+      
+        moveRudder(msg);
+        moveWingsail(msg);
+      
+        maestro.getErrors();
+      }
+    }
+    timer = millis() - startTime;
+    Serial.println(timer);
+  }
 }
 
