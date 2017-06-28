@@ -269,12 +269,12 @@ int main() {
 
         int c = wgetch(inputWin);
 
-        //if() {
-            //c -= 48;
+        if() {
+            c -= 48;
             if(highlighted->second.size() <= MAX_INPUT) {
                 highlighted->second += std::to_string(c);
             }
-        //} else {
+        } else {
 
 					switch(c) {
 							case KEY_DOWN:
@@ -287,7 +287,7 @@ int main() {
 											--highlighted;
 									}
 									break;
-							case BACKSPACE:
+							case KEY_BACKSPACE:
 									if(!highlighted->second.empty()) {
 											highlighted->second.pop_back();
 									}
@@ -305,7 +305,7 @@ int main() {
 											++highlighted;
 									}
 					}
-				//}
+				}
         printInputMenu(inputWin, highlighted);
     }
 
