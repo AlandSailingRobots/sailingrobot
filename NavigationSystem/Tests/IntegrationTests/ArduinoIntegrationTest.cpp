@@ -232,14 +232,14 @@ int main() {
     // Comment out this line if not running on the pi
     // otherwise program will crash.
     auto future = canService.start();
-/*
+
     SensorDataReceiver sensorReceiver(msgBus, 250);
     CANWindsensorNode windSensor(msgBus, canService, 500);
     //CANFeedbackReceiver feedBack(msgBus, canService, 500); Old code, replaced by arduino node
     CANArduinoNode arduino (msgBus, canService, 500);
     windSensor.start();
 		arduino.start ();
-*/
+
     std::thread thr(messageLoop);
     thr.detach();
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
@@ -252,7 +252,7 @@ int main() {
   
     menuIter highlighted = menuValues.begin();
 
-    //SensorData values = sensorReceiver.getValues();
+    SensorData values = sensorReceiver.getValues();
     WINDOW* inputWin  = newwin(8+2*menuValues.size(),60, 2*values.size() + 10,2);
     keypad(inputWin, TRUE);
     cbreak();
