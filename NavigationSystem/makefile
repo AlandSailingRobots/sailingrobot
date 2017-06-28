@@ -72,7 +72,7 @@ LNM_DIR                 	= Navigation/LocalNavigationModule
 export EXECUTABLE           = sr
 export UNIT_TEST_EXEC 			= unit-tests.run
 export HARDWARE_TEST_EXEC 	= hardware-tests.run
-export INTEGRATION_TEST_EXEC = integration-tests.run
+export INTEGRATION_TEST_EXEC_ASPIRE = integration-tests_ASPire.run
 
 export OBJECT_FILE          = $(BUILD_DIR)/objects.tmp
 
@@ -83,7 +83,6 @@ export LNM_SRC              = $(LNM_DIR)/ASRCourseBallot.cpp $(LNM_DIR)/ASRArbit
                             $(LNM_DIR)/Voters/WaypointVoter.cpp $(LNM_DIR)/Voters/WindVoter.cpp  \
                             $(LNM_DIR)/Voters/ChannelVoter.cpp $(LNM_DIR)/Voters/MidRangeVoter.cpp \
 														$(LNM_DIR)/Voters/ProximityVoter.cpp $(COLLIDABLE_MGR_SRC)
-
 
 export LINE_FOLLOW_SRC      = Navigation/LineFollowNode.cpp waypointrouting/RudderCommand.cpp \
                             waypointrouting/Commands.cpp waypointrouting/SailCommand.cpp \
@@ -139,7 +138,6 @@ export HARDWARE_SERVICES_JANET = Hardwares/MaestroController/MaestroController.c
 export HARDWARE_NODES_JANET = Hardwares/CV7Node.cpp \
 										        Hardwares/ActuatorNode.cpp Hardwares/ArduinoNode.cpp
 
-
 export CORE_JANET           = LowLevelControllers/LowLevelControllerNodeJanet.cpp
 
 ###
@@ -150,7 +148,6 @@ export XBEE_NETWORK_SRC     = Network/DataLink.cpp Network/LinuxSerialDataLink.c
 
 
 export INTEGRATION_TEST			= Tests/IntegrationTests/ArduinoIntegrationTest.cpp
-
 
 ###############################################################################
 # Rules
@@ -175,8 +172,8 @@ tests: $(BUILD_DIR)
 	$(MAKE) -C Tests
 	$(MAKE) -f tests.mk
 
-integration_tests: $(BUILD_DIR) ## Integration test
-	$(MAKE) -f integration_tests.mk
+integration_test_ASPire: $(BUILD_DIR) ## Integration test for ASPire
+	$(MAKE) -f integration_test_ASPire.mk
 
 #  Create the directories needed
 $(BUILD_DIR):
@@ -189,7 +186,7 @@ clean: ## Removes object files and executables
 	$(MAKE) -C Tests clean
 	-@rm $(UNIT_TEST_EXEC)
 	-@rm $(HARDWARE_TEST_EXEC)
-	-@rm $(INTEGRATION_TEST_EXEC)
+	-@rm $(INTEGRATION_TEST_EXEC_ASPIRE)
 	@echo DONE
 
 

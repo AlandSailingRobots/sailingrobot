@@ -122,18 +122,13 @@ int main(int argc, char *argv[])
   const double IGAIN = 0.30;
   const int16_t MAX_VOTES = 25;
   Logger::info( "Using Local Navigation Module" );
-  #else
-  Logger::info( "Using Line-follow" );
-  #endif
-
-  #if LOCAL_NAVIGATION_MODULE == 1
   VesselStateNode vesselState	( messageBus, 0.2 );
   LocalNavigationModule lnm	( messageBus );
   Node* llc;
   llc	= new LowLevelControllerNodeJanet( messageBus, PGAIN, IGAIN, dbHandler );
   CollidableMgr collidableMgr;
-
   #else
+  Logger::info( "Using Line-follow" );
   ActiveNode* sailingLogic;
   Node* lowLevelControllerNodeJanet;
   sailingLogic = new LineFollowNode(messageBus, dbHandler);

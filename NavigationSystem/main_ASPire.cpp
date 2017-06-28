@@ -9,9 +9,9 @@
  #include "Hardwares/GPSDNode.h"
  #include "Hardwares/ActuatorNodeASPire.h"
  #include "Hardwares/CAN_Services/CANService.h"
+ #include "Hardwares/CANWindsensorNode.h"
 #endif
 
-#include "Hardwares/CANWindsensorNode.h"
 #include "Navigation/WaypointMgrNode.h"
 #include "WorldState/StateEstimationNode.h"
 #include "WorldState/WindStateNode.h"
@@ -114,20 +114,16 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 
-  #if LOCAL_NAVIGATION_MODULE == 1
-  const int16_t MAX_VOTES = 25;
-  Logger::info( "Using Local Navigation Module" );
-  #else
-  Logger::info( "Using Line-follow" );
-  #endif
-
   CANService canService;
 
   #if LOCAL_NAVIGATION_MODULE == 1
+  const int16_t MAX_VOTES = 25;
+  Logger::info( "Using Local Navigation Module" );
   LocalNavigationModule lnm	( messageBus );
   VesselStateNode vesselState	( messageBus, 0.2 );
   CollidableMgr collidableMgr;
   #else
+  Logger::info( "Using Line-follow" );
 	ActiveNode* sailingLogic;
   Node* lowLevelControllerNodeASPire;
 	sailingLogic = new LineFollowNode(messageBus, dbHandler);
@@ -142,7 +138,8 @@ int main(int argc, char *argv[])
   #endif
 	#else
 
-	XbeeSyncNode xbee(messageBus, dbHandler);
+
+  XbeeSyncNode xbee(messageBus, dbHandler);
 
   CANWindsensorNode windSensor(messageBus, canService,
                                 dbHandler.retrieveCellAsInt("windState_config", "1", "time_filter_ms"));
