@@ -51,7 +51,7 @@ public:
         m_SensorValues["Wind Direction"] = -2000;
         m_SensorValues["Wind Temperature"] = -2000;
 				m_SensorValues["RC Mode"] = -2000;
-				m_SensorVal
+
         m_Win = newwin(6+2*m_SensorValues.size(),60,1,2);
         
         box(m_Win,0,0);
