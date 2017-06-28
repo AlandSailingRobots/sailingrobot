@@ -269,7 +269,7 @@ int main() {
 
         int c = wgetch(inputWin);
 
-        if() {
+        if(isdigit(c)) {
             c -= 48;
             if(highlighted->second.size() <= MAX_INPUT) {
                 highlighted->second += std::to_string(c);
