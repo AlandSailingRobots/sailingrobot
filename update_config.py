@@ -1,7 +1,19 @@
+#
+# Updates the configuration in the json to the database
+# Can run without argument for using standard file
+# Or specify the file by passing it as a argument
+#
 import json
 import sqlite3
+import sys
 
-cfg = json.load(open('configuration.json'))
+if len(sys.argv) > 1:
+    filename = str(sys.argv[1])
+else:
+    filename = 'config_ASPire.json'
+
+print(filename)
+cfg = json.load(open(filename))
 conn = sqlite3.connect('asr.db')
 db = conn.cursor()
 
