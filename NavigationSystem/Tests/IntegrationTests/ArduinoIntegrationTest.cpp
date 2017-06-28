@@ -274,37 +274,38 @@ int main() {
             if(highlighted->second.size() <= MAX_INPUT) {
                 highlighted->second += std::to_string(c);
             }
-        }
+        } else {
 
-        switch(c) {
-            case KEY_DOWN:
-                if(highlighted != --menuValues.end()) {
-                    highlighted++;
-                }
-                break;
-            case KEY_UP:
-                if(highlighted != menuValues.begin()) {
-                    --highlighted;
-                }
-                break;
-            case BACKSPACE:
-                if(!highlighted->second.empty()) {
-                    highlighted->second.pop_back();
-                }
-                break;
-            case ENTER:
-                sendActuatorCommands();
-                for(auto& it : menuValues) {
-                    it.second = "";
-                }
-                break;
-            case TAB:
-                if(highlighted == --menuValues.end()) {
-                    highlighted = menuValues.begin();
-                } else {
-                    ++highlighted;
-                }
-        }
+					switch(c) {
+							case KEY_DOWN:
+									if(highlighted != --menuValues.end()) {
+											highlighted++;
+									}
+									break;
+							case KEY_UP:
+									if(highlighted != menuValues.begin()) {
+											--highlighted;
+									}
+									break;
+							case BACKSPACE:
+									if(!highlighted->second.empty()) {
+											highlighted->second.pop_back();
+									}
+									break;
+							case ENTER:
+									sendActuatorCommands();
+									for(auto& it : menuValues) {
+											it.second = "";
+									}
+									break;
+							case TAB:
+									if(highlighted == --menuValues.end()) {
+											highlighted = menuValues.begin();
+									} else {
+											++highlighted;
+									}
+					}
+				}
         printInputMenu(inputWin, highlighted);
     }
 
