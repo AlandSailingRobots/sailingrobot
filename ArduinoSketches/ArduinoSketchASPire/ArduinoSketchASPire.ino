@@ -72,11 +72,11 @@ void setup()
 void loop()
 {
   sendArduinoData ();
-  checkCanbusFor (250);
+  delay (50);
+  //checkCanbusFor (100);
   
   sendFeedback ();
-  checkCanbusFor (250);
-  
+  checkCanbusFor (400);
   
  
 }
