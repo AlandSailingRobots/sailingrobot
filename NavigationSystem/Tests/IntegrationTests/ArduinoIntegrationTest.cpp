@@ -249,7 +249,8 @@ int main() {
     menuValues["Rudder Angle"] = "";
     menuValues["Wingsail Angle"] = "";
     menuValues["Windvane Angle"] = "";
-  
+		lastSentValues = menuValues;
+		
     menuIter highlighted = menuValues.begin();
 
     SensorData values = sensorReceiver.getValues();

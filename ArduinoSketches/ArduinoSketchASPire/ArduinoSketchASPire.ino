@@ -188,7 +188,7 @@ void checkCanbusFor (int timeMs){
       }
     }
     timer = millis() - startTime;
-    Serial.println(timer);
+    //Serial.println(timer);
   }
 }
 
