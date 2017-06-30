@@ -1,7 +1,7 @@
 {
 "buffer_config": {
   "compass": 1,
-  "true_wind": 80,
+  "true_wind": 100,
   "windsensor": 1
 },
 
