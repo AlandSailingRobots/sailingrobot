@@ -17,10 +17,10 @@ const int MAX_RUDDER_ANGLE = 60;
 const int RUDDER_MIN_FEEDBACK = 178;
 const int RUDDER_MAX_FEEDBACK = 680;
 
-const int RUDDER_MAESTRO_CHANNEL = 1;
+const int RUDDER_MAESTRO_CHANNEL = 0;
 const int WINDSAIL_MAESTRO_CHANNEL = 2;
 
-const int RUDDER_FEEDBACK_PIN = A4;
+const int RUDDER_FEEDBACK_PIN = A6;
 const int WINGSAIL_FEEDBACK_PIN = A5;
 const int RC_CONTROLL_OFF_PIN = A8;
 
@@ -104,7 +104,9 @@ void moveWingsail(CanMsg& msg) {
 }
 
 float getRudderFeedback() {
+  Serial.println (analogRead(RUDDER_FEEDBACK_PIN));
   return mapInterval(analogRead(RUDDER_FEEDBACK_PIN), RUDDER_MIN_FEEDBACK, RUDDER_MAX_FEEDBACK, 0, 60);
+  
 }
 
 float getWingsailFeedback() {
@@ -138,15 +140,18 @@ void sendFeedback (){
       feedbackMsg.data[0] = (angle16 & 0xff);
       feedbackMsg.data[1] = (angle16 >> 8);
 
-      float wingsailAngle = getWingsailFeedback();
-      angle16 = (uint16_t) mapInterval(wingsailAngle, 0, 60, 0, 65535);
-      feedbackMsg.data[2] = (angle16 & 0xff);
-      feedbackMsg.data[3] = (angle16 >> 8);
-
+     // float wingsailAngle = getWingsailFeedback();
+     // angle16 = (uint16_t) mapInterval(wingsailAngle, 0, 60, 0, 65535);
+     // feedbackMsg.data[2] = (angle16 & 0xff);
+    // feedbackMsg.data[3] = (angle16 >> 8);
+      
+      feedbackMsg.data[2] = 0;
+      feedbackMsg.data[3] = 0;
+      
       feedbackMsg.data[4] = 0;
       feedbackMsg.data[5] = 0;
       feedbackMsg.data[6] = 0;
-      
+     
       Canbus.SendMessage(&feedbackMsg);
       //Serial.println("Sent feedback");
 }
