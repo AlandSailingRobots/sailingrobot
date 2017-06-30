@@ -74,7 +74,7 @@ public:
 
         if (httpsync == 0)
         {
-            dbhandler = new DBHandler("./asr.db");
+            dbhandler = new DBHandler("../asr.db");
             logger = new MessageLogger(msgBus());
             httpsync = new HTTPSyncNode(msgBus(), dbhandler, 1, true);
             thr = new std::thread(runMessageLoop);
