@@ -10,7 +10,7 @@ from collections import OrderedDict
 if len(sys.argv) > 1:
     filepath = str(sys.argv[1])
 else:
-    filepath = 'json/Eckero_To_Grisslehamn.json'
+    filepath = 'Mission/Eckero_To_Grisslehamn.json'
 
 conn = sqlite3.connect('asr.db')
 db = conn.cursor()
