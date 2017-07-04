@@ -5,6 +5,7 @@
 #include "MessageBus/Message.h"
 #include "MessageBus/MessageBus.h"
 #include "SystemServices/Timer.h"
+#include "Messages/GPSDataMsg.h"
 
 #include <mutex>
 #include <vector>
@@ -17,12 +18,12 @@ public:
   CANSolarTrackerNode(MessageBus& msgBus, double loopTime);
   ~CANSolarTrackerNode();
   void processMessage (const Message* message);
-  void processFrame (CanMsg& msg);
+  void processPGN (N2kMsg& nMsg);
   void start();
 
 private:
 
-  void CANGPSDThreadFunc(ActiveNode* nodePtr);
+  void CANSolarTrackerThreadFunc(ActiveNode* nodePtr);
 
   gpsmm* 	m_GpsConnection;
 
@@ -34,5 +35,6 @@ private:
   int m_currentDay;
   double m_LoopTime;
 
+  const int DATA_OUT_OF_RANGE = -2000;
   const int GPS_TIMEOUT_MICRO_SECS = 50000000;
 }

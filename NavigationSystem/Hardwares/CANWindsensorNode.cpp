@@ -26,6 +26,7 @@ CANWindsensorNode::CANWindsensorNode(MessageBus& msgBus, CANService& can_service
   m_WindSpeed = DATA_OUT_OF_RANGE;
   m_WindTemperature = DATA_OUT_OF_RANGE;
 
+  msgBus.registerNode(*this, MessageType::DataRequest)
 }
 
 CANWindsensorNode::~CANWindsensorNode(){}
