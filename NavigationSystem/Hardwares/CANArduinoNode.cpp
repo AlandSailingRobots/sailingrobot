@@ -8,10 +8,10 @@
 #include <chrono>
 #include <thread>
 
-CANArduinoNode::CANArduinoNode(MessageBus& messageBus, CANService& canService, int time_filter_ms) : 
+CANArduinoNode::CANArduinoNode(MessageBus& messageBus, CANService& canService, int time_filter_ms) :
 ActiveNode(NodeID::CANArduino, messageBus), CANFrameReceiver(canService, {701,702}), m_TimeBetweenMsgs(time_filter_ms)
 
-{   
+{
   m_RudderFeedback  = DATA_OUT_OF_RANGE;
   m_WingsailFeedback = DATA_OUT_OF_RANGE;
   m_WindvaneSelfSteerAngle = DATA_OUT_OF_RANGE;
@@ -41,13 +41,13 @@ void CANArduinoNode::processFrame (CanMsg& msg) {
      //MessagePtr feedbackMsg = std::make_unique<ASPireActuatorFeedbackMsg>(rudderFeedback, wingsailFeedback,
      //                                                                            windvaneSelfSteerAngle, windvaneActuatorPos);
      //m_MsgBus.sendMessage(std::move(feedbackMsg))
-		 
+
 	} else if (msg.id == 702) {
 		m_RC = (msg.data[1] << 8 | msg.data[0]);
-		
+
 		//MessagePtr statusMsg = std::make_unique<ArduinoDataMsg>(0,0,0,0,RC);
 		//m_MsgBus.sendMessage(std::move(statusMsg));
-	} 
+	}
 }
 
 
@@ -66,19 +66,19 @@ void CANArduinoNode::CANArduinoNodeThreadFunc(ActiveNode* nodePtr) {
 			timer.sleepUntil(node->m_TimeBetweenMsgs*1.0f / 1000);
 			node->m_lock.lock();
 
-			if( node->m_RudderFeedback == node->DATA_OUT_OF_RANGE &&  node->m_WindvaneSelfSteerAngle == node->DATA_OUT_OF_RANGE && 
+			if( node->m_RudderFeedback == node->DATA_OUT_OF_RANGE &&  node->m_WindvaneSelfSteerAngle == node->DATA_OUT_OF_RANGE &&
 															node->m_WingsailFeedback == node->DATA_OUT_OF_RANGE && node->m_WindvaneActuatorPos == node->DATA_OUT_OF_RANGE && node->m_RC ==node->DATA_OUT_OF_RANGE){
 				node->m_lock.unlock();
 				continue;
 			}
 
-		MessagePtr feebackData = std::make_unique<ASPireActuatorFeedbackMsg>(node->m_WingsailFeedback, node->m_RudderFeedback, 
+		MessagePtr feebackData = std::make_unique<ASPireActuatorFeedbackMsg>(node->m_RudderFeedback, node->m_WingsailFeedback,
 																	node->m_WindvaneSelfSteerAngle, node->m_WindvaneActuatorPos);
 		node->m_MsgBus.sendMessage(std::move(feebackData));
 
 		MessagePtr statusMsg = std::make_unique<ArduinoDataMsg>(0,0,0,0,node->m_RC);
 		node->m_MsgBus.sendMessage(std::move(statusMsg));
-		
+
 		node->m_lock.unlock();
 
 		timer.reset();
