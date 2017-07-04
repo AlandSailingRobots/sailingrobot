@@ -52,13 +52,13 @@ To run the program use (no parameters needed)
 To update the configuration tables in the database, you run the update_config.py script with one of the configuration json files as a parameter
 
 ```
-python update_config.py config_ASPire.json
+./update_config.py config_ASPire.json
 ```
 
 To change the waypoints you use the waypoints.py together with one of the json in the Mission Folder
 
 ```
-python waypoints.py Mission/ASS.json
+./waypoints.py Mission/ASS.json
 ```
 
 ## sailing_simulator

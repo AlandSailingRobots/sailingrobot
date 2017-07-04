@@ -1,7 +1,8 @@
-#
+#!/usr/bin/python3
+
 # Python script to update/add waypoints to the database with data from a json
 # Can run without argument or with a filename as argument
-#
+
 import json
 import sqlite3
 import sys

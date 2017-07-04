@@ -1,8 +1,9 @@
-#
+#!/usr/bin/python3
+
 # Updates the configuration in the json to the database
 # Can run without argument for using standard file
 # Or specify the file by passing it as a argument
-#
+
 import json
 import sqlite3
 import sys
@@ -41,7 +42,7 @@ for table in cfg:
         db.execute('INSERT INTO ' + str(table) + ' (' + keystr +
                    ') VALUES (' + valstr + ');')
     else:
-        db.execute('UPDATE ' + str(table) + ' SET '
-                   + setstr + ' WHERE ID = 1;')
+        db.execute('UPDATE ' + str(table) + ' SET ' +
+                   setstr + ' WHERE ID = 1;')
 conn.commit()
 db.close()
