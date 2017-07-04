@@ -20,7 +20,7 @@ public:
 	/*
 	 * Use to realize a PI regulation on a ActiveNode
 	 */
-	static int16_t pi(double pGain, double iGain, int16_t heading, int16_t desiredHeading);
+	static int16_t pi(double pGain, double iGain, uint16_t heading, uint16_t desiredHeading);
 
 	/*
 	 * Converts an angle in degrees to cartesian coordinates (x,y) on the

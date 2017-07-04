@@ -25,8 +25,8 @@
 #include "SystemServices/Timer.h"
 
 
-CourseRegulatorNode::CourseRegulatorNode(MessageBus& msgBus,double loopTime, float maxRudderAngle,
-    double configPGain, double configIGain, DBHandler& dbhandler)
+CourseRegulatorNode::CourseRegulatorNode( MessageBus& msgBus,  DBHandler& dbhandler, double loopTime, float maxRudderAngle,
+    double configPGain, double configIGain)
     :ActiveNode(NodeID::CourseRegulatorNode,msgBus), m_VesselHeading(0),
     m_MaxRudderAngle(maxRudderAngle),m_DesiredHeading(0),
     pGain(configPGain),iGain(configIGain),m_db(dbhandler), m_LoopTime(loopTime) 
@@ -46,6 +46,12 @@ bool init(){ return true;}
 void CourseRegulatorNode::start()
 {
     runThread(CourseRegulatorNodeThreadFunc);
+}
+
+///----------------------------------------------------------------------------------
+double CourseRegulatorNode::getFrequencyThread()
+{
+    return m_LoopTime;
 }
 
 ///----------------------------------------------------------------------------------
@@ -142,7 +148,7 @@ void CourseRegulator::CourseRegulatorNodeThreadFunc(ActiveNode* nodePtr)
         node->m_MsgBus.sendMessage(std::move(actuatorMessage))
     
         // Broadcast() or selected sent???
-        timer.sleepUntil(node->m_LoopTime)
+        timer.sleepUntil(node->m_LoopTime) //insert updateFrequencyThread in the function ?
         timer.reset();
         node->updateFrequencyThread(); 
     }

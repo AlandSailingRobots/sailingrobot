@@ -119,16 +119,16 @@ int Utility::sgn(double value)
 	return 0;
 }
 
-int16_t Utility::pi(double pGain, double iGain,unint16_t heading, unint16_t desiredHeading)
+int16_t Utility::pi(double pGain, double iGain,uint16_t heading, uint16_t desiredHeading)
 {
     static int16_t integral = 0;
     const int16_t MAX_INTEGRAL = 10;
     int16_t error = 0;
 
-	// QUESTION : Pass in argument or prefer to 
+	/* QUESTION : Pass in argument or prefer to 
     if( heading == HEADING_ERROR_VALUE ) { return 0; }
     if( desiredHeading == HEADING_ERROR_VALUE) { return heading; }
-
+	*/
     error = headingDifference( heading, desiredHeading );
 
     integral = integral + ( error * 0.25 );

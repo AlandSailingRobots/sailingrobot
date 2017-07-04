@@ -47,8 +47,8 @@ enum class NodeID {
 	ActuatorNodeASPire,
 	LowLevelControllerNodeJanet,
 	DBLoggerNode,
-	CANFeedbackReceiver
-	CourseRegulatorNode
+	CANFeedbackReceiver,
+	CourseRegulatorNode,
 	SailControlNode
 };
 

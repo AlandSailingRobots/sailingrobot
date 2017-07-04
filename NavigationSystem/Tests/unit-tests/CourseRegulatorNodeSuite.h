@@ -19,7 +19,8 @@
 #include "../../MessageBus/MessageBus.h"
 #include "TestMocks/MessageLogger.h"
 #include "Messages/StateMessage.h"
-#include "Messages/DesiredCoureMsg.h"
+#include "Messages/DesiredCourseMsg.h"
+#include "Math/Utility.h"
 
 
 // For std::this_thread
@@ -36,17 +37,22 @@ public:
 
     MockNode* mockNode;
     bool nodeRegistered = false;
-    double Max_rudder_angle = 30;
-    double loopTime = 0.5;
+    double MaxRudderAngle = 30;
+    double loopTime = .5;
 
     std::thread* thr;
     int testCount = 0;
-    DBHandler* dbHandler;
+    
 
     static MessageBus& msgBus(){
         static MessageBus* mbus = new MessageBus();
         return *mbus;
     }
+
+    static DBHandler& dbHandler(){
+        static DBHandler* dbh = new DBHandler("./asr.db");
+        return *dbh;
+    } 
 
     // ----------------
     // Send messages 
@@ -66,10 +72,9 @@ public:
         // setup them up once in this test, delete them when the program closes
         if(cRegulatorNode == 0)
         {
-            dbHandler = new DBHandler("./asr.db");
             Logger::DisableLogging();   
 
-            cRegulatorNode = new CourseRegulatorNode(msgBus(),loopTime,15,0,0,*dbHandler);
+            cRegulatorNode = new CourseRegulatorNode(msgBus(),dbHandler(),loopTime,MaxRudderAngle,0,0);
             cRegulatorNode->start();
             std::this_thread::sleep_for(std::chrono::milliseconds(2600));
 
@@ -136,7 +141,7 @@ public:
         msgBus().sendMessage(std::move(desiredCourseData));
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
-        double rudderAngle = sgn(m_VesselSpeed)*(sin(heading-static_cast<double>(desiredcourse))*MaxRudderAngle);
+        double rudderAngle = Utility::sgn(speed)*(sin(heading-static_cast<double>(desiredcourse))*MaxRudderAngle);
         double courseRegulatorRudderAngle = mockNode->m_rudderPosition;
         TS_ASSERT_EQUALS(courseRegulatorRudderAngle,rudderAngle);
         //Test if not calculate false value without the desired heading (includ Desired_heading = 0)
@@ -151,7 +156,7 @@ public:
         double sailPosition = 20;
 
         // Test listening State Message
-        MessagePtr actuatorData = std::make_unique<ActuatorPosition>(rudderPosition,sailPosition);
+        MessagePtr actuatorData = std::make_unique<ActuatorPositionMsg>(rudderPosition,sailPosition);
         msgBus().sendMessage(std::move(actuatorData));
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
@@ -178,7 +183,7 @@ public:
         msgBus().sendMessage(std::move(desiredCourseData));
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
-        double rudderAngle = sgn(m_VesselSpeed)*sgn((sin(heading-static_cast<double>(desiredcourse)))*MaxRudderAngle);
+        double rudderAngle = Utility::sgn(speed)*Utility::sgn((sin(heading-static_cast<double>(desiredcourse)))*MaxRudderAngle);
         double courseRegulatorRudderAngle = mockNode->m_rudderPosition;
         TS_ASSERT_EQUALS(courseRegulatorRudderAngle,rudderAngle);
     }
@@ -201,7 +206,7 @@ public:
         msgBus().sendMessage(std::move(desiredCourseData));
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
-        double rudderAngle = sgn(m_VesselSpeed)*sin(heading-static_cast<double>(desiredcourse)))*MaxRudderAngle);
+        double rudderAngle = Utility::sgn(speed)*sin(heading-static_cast<double>(desiredcourse))*MaxRudderAngle;
         double courseRegulatorRudderAngle = mockNode->m_rudderPosition;
         TS_ASSERT_EQUALS(courseRegulatorRudderAngle,rudderAngle);
         
@@ -225,7 +230,7 @@ public:
         msgBus().sendMessage(std::move(desiredCourseData));
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
-        double rudderAngle = sgn(m_VesselSpeed)*sgn((sin(heading-static_cast<double>(desiredcourse)))*MaxRudderAngle);
+        double rudderAngle = Utility::sgn(speed)*Utility::sgn((sin(heading-static_cast<double>(desiredcourse)))*MaxRudderAngle);
         double courseRegulatorRudderAngle = mockNode->m_rudderPosition;
         TS_ASSERT_EQUALS(courseRegulatorRudderAngle,rudderAngle);
     }
@@ -234,11 +239,11 @@ public:
     // Test for update frequency
     // ----------------
     void test_CourseRegulatorUpdateFrequency(){
-        newLoopTime = 0.7;
-        dbHandler.changeOneValue("course_regulator","1",".7","loopTime");
+        double newLoopTime = 0.7;
+        dbHandler().changeOneValue("course_regulator","1",".7","loopTime");
         std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-
-        TS_ASSERT_EQUALS(cRegulatorNode->m_LoopTime,newLoopTime); 
+        double courseRegulatorFrequence = cRegulatorNode->getFrequencyThread();
+        TS_ASSERT_DIFFERS(courseRegulatorFrequence,newLoopTime); 
     }
 
 };

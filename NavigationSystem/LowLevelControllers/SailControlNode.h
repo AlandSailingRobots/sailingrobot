@@ -101,5 +101,5 @@ private:
     // Access to the database
     // -------------
     DBHandler &m_db;
-}
+};
 
