@@ -1,7 +1,7 @@
 #include "CANSolarTrackerNode.h"
 
-CANSolarTrackerNode::CANSolarTrackerNode(MessageBus& msgBus, double loopTime)
-	: ActiveNode(NodeID::GPS, msgBus), m_initialised, m_GpsConnection(0),
+CANSolarTrackerNode::CANSolarTrackerNode(MessageBus& msgBus, CANService& canService, double loopTime)
+	: ActiveNode(NodeID::CANSolarTracker, msgBus), m_initialised, m_GpsConnection(0),
 	m_Lat(0), m_Lon(0), m_Time(0), m_Heading(0),m_LoopTime(loopTime)
 {
 	m_Lat = DATA_OUT_OF_RANGE;

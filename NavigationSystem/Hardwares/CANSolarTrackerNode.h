@@ -5,7 +5,7 @@
 #include "MessageBus/Message.h"
 #include "MessageBus/MessageBus.h"
 #include "SystemServices/Timer.h"
-#include "Messages/GPSDataMsg.h"
+#include "Messages/StateMessage.h"
 
 #include <mutex>
 #include <vector>
@@ -15,10 +15,10 @@
 class CANSolarTrackerNode : public ActiveNode {
 public:
 
-  CANSolarTrackerNode(MessageBus& msgBus, double loopTime);
+  CANSolarTrackerNode(MessageBus& msgBus, CANService& canService, double loopTime);
   ~CANSolarTrackerNode();
   void processMessage (const Message* message);
-  void processPGN (N2kMsg& nMsg);
+  void processFrame (CanMsg& Msg);
   void start();
 
 private:
