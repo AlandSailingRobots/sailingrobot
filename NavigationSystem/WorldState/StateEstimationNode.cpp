@@ -96,6 +96,7 @@ int StateEstimationNode::getCourse(){
   return m_VesselCourse;
 }
 
+//---------------------------------------------------------------------------
 void StateEstimationNode::processWaypointMessage( const WaypointDataMsg* msg )
 {
   std::lock_guard<std::mutex> lock_guard(m_lock);
@@ -121,6 +122,7 @@ void StateEstimationNode::StateEstimationNodeThreadFunc(ActiveNode* nodePtr)
       node->m_VesselLon, node->m_VesselSpeed, node->getCourse());
       node->m_MsgBus.sendMessage(std::move(stateMessage));
     }
+    // TODO : Config timer or thread activity with a variable from the dbhandler ??? 
     timer.sleepUntil(node->m_LoopTime);
     timer.reset();
   }

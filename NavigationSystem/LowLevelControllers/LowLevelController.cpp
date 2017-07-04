@@ -153,6 +153,7 @@ int16_t LowLevelController::pi()
 
     error = Utility::headingDifference( heading, desiredHeading );
 
+    // TODO : value of 0.25 ???
     integral = integral + ( error * 0.25 );
 
     if( integral < -MAX_INTEGRAL )

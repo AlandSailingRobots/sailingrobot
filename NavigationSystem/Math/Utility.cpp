@@ -119,6 +119,39 @@ int Utility::sgn(double value)
 	return 0;
 }
 
+int16_t Utility::pi(double pGain, double iGain,unint16_t heading, unint16_t desiredHeading)
+{
+    static int16_t integral = 0;
+    const int16_t MAX_INTEGRAL = 10;
+    int16_t error = 0;
+
+	// QUESTION : Pass in argument or prefer to 
+    if( heading == HEADING_ERROR_VALUE ) { return 0; }
+    if( desiredHeading == HEADING_ERROR_VALUE) { return heading; }
+
+    error = headingDifference( heading, desiredHeading );
+
+    integral = integral + ( error * 0.25 );
+
+    if( integral < -MAX_INTEGRAL )
+    {
+        integral = -MAX_INTEGRAL;
+    }
+    else if(integral > MAX_INTEGRAL )
+    {
+        integral = MAX_INTEGRAL;
+    }
+
+    int16_t p = error * pGain;
+
+    int16_t i = integral * iGain;
+
+    //Logger::info("Desired Course: %d Heading: %d Rudder Angle: %d PI Integral: %d", desiredHeading, heading, restrictRudder(p + i), integral);
+
+    // Restrict to the angles the rudder can actually move to
+    return (p + i);
+}
+
 void Utility::polarToCartesian(float degrees, float& x, float& y)
 {
 	x = cos(degrees * M_PI/180);
@@ -232,6 +265,9 @@ uint16_t Utility::wrapAngle( int16_t angle)
 
     return angle;
 }
+
+// Add the (magnetic ? or Earth?)declination of the heading
+// TODO : explain +0.5 interest ???
 
 int Utility::addDeclinationToHeading(int heading, int declination) {
 	return static_cast<int> (Utility::limitAngleRange(heading + declination) + 0.5);

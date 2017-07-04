@@ -48,6 +48,8 @@ enum class NodeID {
 	LowLevelControllerNodeJanet,
 	DBLoggerNode,
 	CANFeedbackReceiver
+	CourseRegulatorNode
+	SailControlNode
 };
 
 inline std::string nodeToString(NodeID id)
@@ -112,6 +114,10 @@ inline std::string nodeToString(NodeID id)
 		return "DBLoggerNode";
 		case NodeID::CANFeedbackReceiver:
 		return "CANFeedbackReceiver";
+		case NodeID::CourseRegulatorNode:
+		return "CourseRegulatorNode";
+		case NodeID::SailControlNode:
+		return "SailControlNode";
 	}
 	return "";
 }

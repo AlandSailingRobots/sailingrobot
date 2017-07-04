@@ -397,51 +397,106 @@ CxxTest::StaticSuiteDescription suiteDescription_StateEstimationNodeSuite( "unit
 
 static class TestDescription_suite_StateEstimationNodeSuite_test_StateEstimationNodeInit : public CxxTest::RealTestDescription {
 public:
- TestDescription_suite_StateEstimationNodeSuite_test_StateEstimationNodeInit() : CxxTest::RealTestDescription( Tests_StateEstimationNodeSuite, suiteDescription_StateEstimationNodeSuite, 84, "test_StateEstimationNodeInit" ) {}
+ TestDescription_suite_StateEstimationNodeSuite_test_StateEstimationNodeInit() : CxxTest::RealTestDescription( Tests_StateEstimationNodeSuite, suiteDescription_StateEstimationNodeSuite, 97, "test_StateEstimationNodeInit" ) {}
  void runTest() { suite_StateEstimationNodeSuite.test_StateEstimationNodeInit(); }
 } testDescription_suite_StateEstimationNodeSuite_test_StateEstimationNodeInit;
 
 static class TestDescription_suite_StateEstimationNodeSuite_test_StateEstimationNodeGPSNotOnline : public CxxTest::RealTestDescription {
 public:
- TestDescription_suite_StateEstimationNodeSuite_test_StateEstimationNodeGPSNotOnline() : CxxTest::RealTestDescription( Tests_StateEstimationNodeSuite, suiteDescription_StateEstimationNodeSuite, 88, "test_StateEstimationNodeGPSNotOnline" ) {}
+ TestDescription_suite_StateEstimationNodeSuite_test_StateEstimationNodeGPSNotOnline() : CxxTest::RealTestDescription( Tests_StateEstimationNodeSuite, suiteDescription_StateEstimationNodeSuite, 104, "test_StateEstimationNodeGPSNotOnline" ) {}
  void runTest() { suite_StateEstimationNodeSuite.test_StateEstimationNodeGPSNotOnline(); }
 } testDescription_suite_StateEstimationNodeSuite_test_StateEstimationNodeGPSNotOnline;
 
 static class TestDescription_suite_StateEstimationNodeSuite_test_StateMessageListener : public CxxTest::RealTestDescription {
 public:
- TestDescription_suite_StateEstimationNodeSuite_test_StateMessageListener() : CxxTest::RealTestDescription( Tests_StateEstimationNodeSuite, suiteDescription_StateEstimationNodeSuite, 94, "test_StateMessageListener" ) {}
+ TestDescription_suite_StateEstimationNodeSuite_test_StateMessageListener() : CxxTest::RealTestDescription( Tests_StateEstimationNodeSuite, suiteDescription_StateEstimationNodeSuite, 113, "test_StateMessageListener" ) {}
  void runTest() { suite_StateEstimationNodeSuite.test_StateMessageListener(); }
 } testDescription_suite_StateEstimationNodeSuite_test_StateMessageListener;
 
 static class TestDescription_suite_StateEstimationNodeSuite_test_StateEstimationStateMsgHeading : public CxxTest::RealTestDescription {
 public:
- TestDescription_suite_StateEstimationNodeSuite_test_StateEstimationStateMsgHeading() : CxxTest::RealTestDescription( Tests_StateEstimationNodeSuite, suiteDescription_StateEstimationNodeSuite, 111, "test_StateEstimationStateMsgHeading" ) {}
+ TestDescription_suite_StateEstimationNodeSuite_test_StateEstimationStateMsgHeading() : CxxTest::RealTestDescription( Tests_StateEstimationNodeSuite, suiteDescription_StateEstimationNodeSuite, 133, "test_StateEstimationStateMsgHeading" ) {}
  void runTest() { suite_StateEstimationNodeSuite.test_StateEstimationStateMsgHeading(); }
 } testDescription_suite_StateEstimationNodeSuite_test_StateEstimationStateMsgHeading;
 
 static class TestDescription_suite_StateEstimationNodeSuite_test_StateEstimationStateMessageGPSData : public CxxTest::RealTestDescription {
 public:
- TestDescription_suite_StateEstimationNodeSuite_test_StateEstimationStateMessageGPSData() : CxxTest::RealTestDescription( Tests_StateEstimationNodeSuite, suiteDescription_StateEstimationNodeSuite, 141, "test_StateEstimationStateMessageGPSData" ) {}
+ TestDescription_suite_StateEstimationNodeSuite_test_StateEstimationStateMessageGPSData() : CxxTest::RealTestDescription( Tests_StateEstimationNodeSuite, suiteDescription_StateEstimationNodeSuite, 168, "test_StateEstimationStateMessageGPSData" ) {}
  void runTest() { suite_StateEstimationNodeSuite.test_StateEstimationStateMessageGPSData(); }
 } testDescription_suite_StateEstimationNodeSuite_test_StateEstimationStateMessageGPSData;
 
 static class TestDescription_suite_StateEstimationNodeSuite_test_StateEstStateMsgSpeedAndDeclZero : public CxxTest::RealTestDescription {
 public:
- TestDescription_suite_StateEstimationNodeSuite_test_StateEstStateMsgSpeedAndDeclZero() : CxxTest::RealTestDescription( Tests_StateEstimationNodeSuite, suiteDescription_StateEstimationNodeSuite, 161, "test_StateEstStateMsgSpeedAndDeclZero" ) {}
+ TestDescription_suite_StateEstimationNodeSuite_test_StateEstStateMsgSpeedAndDeclZero() : CxxTest::RealTestDescription( Tests_StateEstimationNodeSuite, suiteDescription_StateEstimationNodeSuite, 191, "test_StateEstStateMsgSpeedAndDeclZero" ) {}
  void runTest() { suite_StateEstimationNodeSuite.test_StateEstStateMsgSpeedAndDeclZero(); }
 } testDescription_suite_StateEstimationNodeSuite_test_StateEstStateMsgSpeedAndDeclZero;
 
 static class TestDescription_suite_StateEstimationNodeSuite_test_StateEstStateMsgSpeedAndDeclOverZero : public CxxTest::RealTestDescription {
 public:
- TestDescription_suite_StateEstimationNodeSuite_test_StateEstStateMsgSpeedAndDeclOverZero() : CxxTest::RealTestDescription( Tests_StateEstimationNodeSuite, suiteDescription_StateEstimationNodeSuite, 187, "test_StateEstStateMsgSpeedAndDeclOverZero" ) {}
+ TestDescription_suite_StateEstimationNodeSuite_test_StateEstStateMsgSpeedAndDeclOverZero() : CxxTest::RealTestDescription( Tests_StateEstimationNodeSuite, suiteDescription_StateEstimationNodeSuite, 217, "test_StateEstStateMsgSpeedAndDeclOverZero" ) {}
  void runTest() { suite_StateEstimationNodeSuite.test_StateEstStateMsgSpeedAndDeclOverZero(); }
 } testDescription_suite_StateEstimationNodeSuite_test_StateEstStateMsgSpeedAndDeclOverZero;
 
 static class TestDescription_suite_StateEstimationNodeSuite_test_StateEstStateMsgSpeedLessThanZero : public CxxTest::RealTestDescription {
 public:
- TestDescription_suite_StateEstimationNodeSuite_test_StateEstStateMsgSpeedLessThanZero() : CxxTest::RealTestDescription( Tests_StateEstimationNodeSuite, suiteDescription_StateEstimationNodeSuite, 216, "test_StateEstStateMsgSpeedLessThanZero" ) {}
+ TestDescription_suite_StateEstimationNodeSuite_test_StateEstStateMsgSpeedLessThanZero() : CxxTest::RealTestDescription( Tests_StateEstimationNodeSuite, suiteDescription_StateEstimationNodeSuite, 247, "test_StateEstStateMsgSpeedLessThanZero" ) {}
  void runTest() { suite_StateEstimationNodeSuite.test_StateEstStateMsgSpeedLessThanZero(); }
 } testDescription_suite_StateEstimationNodeSuite_test_StateEstStateMsgSpeedLessThanZero;
+
+#include "unit-tests/CourseRegulatorNodeSuite.h"
+
+static CourseRegulatorNodeSuite suite_CourseRegulatorNodeSuite;
+
+static CxxTest::List Tests_CourseRegulatorNodeSuite = { 0, 0 };
+CxxTest::StaticSuiteDescription suiteDescription_CourseRegulatorNodeSuite( "unit-tests/CourseRegulatorNodeSuite.h", 31, "CourseRegulatorNodeSuite", suite_CourseRegulatorNodeSuite, Tests_CourseRegulatorNodeSuite );
+
+static class TestDescription_suite_CourseRegulatorNodeSuite_test_CourseRegulatorNodeInit : public CxxTest::RealTestDescription {
+public:
+ TestDescription_suite_CourseRegulatorNodeSuite_test_CourseRegulatorNodeInit() : CxxTest::RealTestDescription( Tests_CourseRegulatorNodeSuite, suiteDescription_CourseRegulatorNodeSuite, 97, "test_CourseRegulatorNodeInit" ) {}
+ void runTest() { suite_CourseRegulatorNodeSuite.test_CourseRegulatorNodeInit(); }
+} testDescription_suite_CourseRegulatorNodeSuite_test_CourseRegulatorNodeInit;
+
+static class TestDescription_suite_CourseRegulatorNodeSuite_test_CourseRegulatorMsgListener : public CxxTest::RealTestDescription {
+public:
+ TestDescription_suite_CourseRegulatorNodeSuite_test_CourseRegulatorMsgListener() : CxxTest::RealTestDescription( Tests_CourseRegulatorNodeSuite, suiteDescription_CourseRegulatorNodeSuite, 104, "test_CourseRegulatorMsgListener" ) {}
+ void runTest() { suite_CourseRegulatorNodeSuite.test_CourseRegulatorMsgListener(); }
+} testDescription_suite_CourseRegulatorNodeSuite_test_CourseRegulatorMsgListener;
+
+static class TestDescription_suite_CourseRegulatorNodeSuite_test_CourseRegulatorCourseMsgRudder : public CxxTest::RealTestDescription {
+public:
+ TestDescription_suite_CourseRegulatorNodeSuite_test_CourseRegulatorCourseMsgRudder() : CxxTest::RealTestDescription( Tests_CourseRegulatorNodeSuite, suiteDescription_CourseRegulatorNodeSuite, 120, "test_CourseRegulatorCourseMsgRudder" ) {}
+ void runTest() { suite_CourseRegulatorNodeSuite.test_CourseRegulatorCourseMsgRudder(); }
+} testDescription_suite_CourseRegulatorNodeSuite_test_CourseRegulatorCourseMsgRudder;
+
+static class TestDescription_suite_CourseRegulatorNodeSuite_test_CourseRegulatorCourseMsgActuatorData : public CxxTest::RealTestDescription {
+public:
+ TestDescription_suite_CourseRegulatorNodeSuite_test_CourseRegulatorCourseMsgActuatorData() : CxxTest::RealTestDescription( Tests_CourseRegulatorNodeSuite, suiteDescription_CourseRegulatorNodeSuite, 149, "test_CourseRegulatorCourseMsgActuatorData" ) {}
+ void runTest() { suite_CourseRegulatorNodeSuite.test_CourseRegulatorCourseMsgActuatorData(); }
+} testDescription_suite_CourseRegulatorNodeSuite_test_CourseRegulatorCourseMsgActuatorData;
+
+static class TestDescription_suite_CourseRegulatorNodeSuite_test_CourseRegulatorNodeOppositeDesireHeading : public CxxTest::RealTestDescription {
+public:
+ TestDescription_suite_CourseRegulatorNodeSuite_test_CourseRegulatorNodeOppositeDesireHeading() : CxxTest::RealTestDescription( Tests_CourseRegulatorNodeSuite, suiteDescription_CourseRegulatorNodeSuite, 166, "test_CourseRegulatorNodeOppositeDesireHeading" ) {}
+ void runTest() { suite_CourseRegulatorNodeSuite.test_CourseRegulatorNodeOppositeDesireHeading(); }
+} testDescription_suite_CourseRegulatorNodeSuite_test_CourseRegulatorNodeOppositeDesireHeading;
+
+static class TestDescription_suite_CourseRegulatorNodeSuite_test_CourseRegulatorNodeNegSpeed : public CxxTest::RealTestDescription {
+public:
+ TestDescription_suite_CourseRegulatorNodeSuite_test_CourseRegulatorNodeNegSpeed() : CxxTest::RealTestDescription( Tests_CourseRegulatorNodeSuite, suiteDescription_CourseRegulatorNodeSuite, 189, "test_CourseRegulatorNodeNegSpeed" ) {}
+ void runTest() { suite_CourseRegulatorNodeSuite.test_CourseRegulatorNodeNegSpeed(); }
+} testDescription_suite_CourseRegulatorNodeSuite_test_CourseRegulatorNodeNegSpeed;
+
+static class TestDescription_suite_CourseRegulatorNodeSuite_test_CourseRegulatorNodeOppositeAndNegSpeed : public CxxTest::RealTestDescription {
+public:
+ TestDescription_suite_CourseRegulatorNodeSuite_test_CourseRegulatorNodeOppositeAndNegSpeed() : CxxTest::RealTestDescription( Tests_CourseRegulatorNodeSuite, suiteDescription_CourseRegulatorNodeSuite, 213, "test_CourseRegulatorNodeOppositeAndNegSpeed" ) {}
+ void runTest() { suite_CourseRegulatorNodeSuite.test_CourseRegulatorNodeOppositeAndNegSpeed(); }
+} testDescription_suite_CourseRegulatorNodeSuite_test_CourseRegulatorNodeOppositeAndNegSpeed;
+
+static class TestDescription_suite_CourseRegulatorNodeSuite_test_CourseRegulatorUpdateFrequency : public CxxTest::RealTestDescription {
+public:
+ TestDescription_suite_CourseRegulatorNodeSuite_test_CourseRegulatorUpdateFrequency() : CxxTest::RealTestDescription( Tests_CourseRegulatorNodeSuite, suiteDescription_CourseRegulatorNodeSuite, 236, "test_CourseRegulatorUpdateFrequency" ) {}
+ void runTest() { suite_CourseRegulatorNodeSuite.test_CourseRegulatorUpdateFrequency(); }
+} testDescription_suite_CourseRegulatorNodeSuite_test_CourseRegulatorUpdateFrequency;
 
 #include "unit-tests/CANMessageSuite.h"
 

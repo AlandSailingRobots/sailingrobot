@@ -30,6 +30,7 @@ void SoftsailControl::setCommandValues(int closeReach, int running) {
 int SoftsailControl::getSailCommand(double apparentWindDirection) {
   double sailCommand = fabs(((MIN_SAIL_ANGLE - MAX_SAIL_ANGLE) / M_PI) * fabs(apparentWindDirection + MAX_SAIL_ANGLE));/*!!! on some pc abs only ouptut an int (ubuntu 14.04 gcc 4.9.3)*/
 
+	// Manage the case when you are close reach configuration for tacking ?
 	if (cos(apparentWindDirection + M_PI) + cos(MAX_SAIL_ANGLE) <0 )
 	{
 		sailCommand = MIN_SAIL_ANGLE;
