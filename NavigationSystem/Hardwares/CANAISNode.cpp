@@ -19,19 +19,15 @@ void CANAISNode::processMessage(const Message* message) {
 }
 
 void CANAISNode::processFrame(CanMsg &msg) {
+  AISVessel vessel;
   N2kMsg nMsg;
   IdToN2kMsg(nMsg, msg.id)
   if (IsFastPackage(nMsg)) {
     ParseFastPkg(msg, nMsg);
-}
-  AISVessel vessel;
-  if (nMsg.PGN == 129038) {
-    parsePGN129038(nMsg, vessel);
-    m_VesselList.push_back(std::move(vessel));
-  }
-  else if (nMsg.PGN == 129039) {
-    parsePGN129039(nMsg, vessel);
-    m_VesselList.push_back(std::move(vessel));
+    if (nMsg.PGN == 129038 || nMsg.PGN == 129039) {
+      parsePGN129038_129039(nMsg, vessel);
+      m_VesselList.push_back(std::move(vessel));
+    }
   }
 }
 
@@ -39,20 +35,12 @@ void CANAISNode::processPGN(N2kMsg& nMsg) {
 
 }
 
-void CANAISNode::parsePGN129038(N2kMsg& nMsg, AISVessel vessel) {
-  vessel.MMSI = nMsg.data[1-4]...;
-  vessel.latitude = nMsg.data[5-8]...;
-  vessel.longitude = nMsg.data[9-12]...;
-  vessel.COG = nMsg.data[14-15]...;
-  vessel.SOG = nMsg.data[16-17]...;
-}
-
-void CANAISNode::parsePGN129039(N2kMsg& nMsg, AISVessel vessel) {
-  vessel.MMSI = nMsg.data[1-4]...;
-  vessel.latitude = nMsg.data[5-8]...;
-  vessel.longitude = nMsg.data[9-12]...;
-  vessel.COG = nMsg.data[14-15]...;
-  vessel.SOG = nMsg.data[16-17]...;
+void CANAISNode::parsePGN129038_129039(N2kMsg& nMsg, AISVessel vessel) {
+  vessel.MMSI = (nMsg.data[4] << 24 | nMsg.data[1]);
+  vessel.latitude = (nMsg.data[8] << 24 | nMsg.data[5]);
+  vessel.longitude = (nMsg.data[12] << 24 | nMsg.data[9]);
+  vessel.COG = (nMsg.data[15] << 8 | nMsg.data[14]);
+  vessel.SOG = (nMsg.data[17] << 8 | nMsg.data[16]);
 }
 
 void start() {
@@ -68,5 +56,12 @@ void CANAISNode::CANAISThreadFunc(ActiveNode* nodePtr) {
   while(true) {
     timer.sleepUntil(node->m_LoopTime*1.0f/1000);
     node->m_lock.lock();
+
+    MessagePtr AISList = std::make:unique<AISDataMsg>(node->m_VesselList);
+    node->msgBus.sendMessage(std::move(AISList));
+
+    node->m_lock.unlock();
+
+    timer.reset();
   }
 }

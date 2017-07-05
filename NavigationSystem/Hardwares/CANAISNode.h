@@ -12,11 +12,11 @@
 #include <iostream>
 
 struct AISVessel {
+  uint16_t COG;
+  uint16_t SOG;
   int MMSI;
   float latitude;
   float longitude;
-  uint16_t COG;
-  uint16_t SOG;
 }
 
 class CANAISNode : public ActiveNode {
@@ -26,14 +26,15 @@ public:
 
   bool init();
   void processMessage(const Message* message)
+  void processFrame(CanMsg& msg);
   void processPGN(N2kMsg& nMsg);
-  void parsePGN129038();
-  void parsePGN129039();
+  void parsePGN129038_129039();
   void start();
 
 private:
 
   void CANAISThreadFunc(ActiveNode* nodePtr);
   std::vector<AISVessel> m_VesselList;
+  std::mutex m_lock;
   double m_LoopTime;
 }

@@ -30,9 +30,9 @@ public:
 		:Message(deserialiser)
 	{
 		if(	!deserialiser.readDouble(m_latitude) ||
-			!deserialiser.readDouble(m_longitude)) ||
-			!deserialiser.readDouble(m_heading)) ||
-			!deserialiser.readDouble(m_time)
+			!deserialiser.readDouble(m_longitude) ||
+			!deserialiser.readDouble(m_heading) ||
+			!deserialiser.readDouble(m_time))
 		{
 			m_valid = false;
 		}

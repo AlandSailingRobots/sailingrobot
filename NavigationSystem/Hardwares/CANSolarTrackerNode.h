@@ -35,6 +35,8 @@ private:
   int m_currentDay;
   double m_LoopTime;
 
+  std::mutex m_lock;
+
   const int DATA_OUT_OF_RANGE = -2000;
   const int GPS_TIMEOUT_MICRO_SECS = 50000000;
 }
