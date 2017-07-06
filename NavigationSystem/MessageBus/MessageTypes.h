@@ -98,9 +98,9 @@ inline std::string msgToString(MessageType msgType)
 		case MessageType::ASPireActuatorFeedback:
 		return "ASPireActuatorFeedback";
 		case MessageType::SolarData:
-		return "SolarData"
+		return "SolarData";
 		case MessageType::AISData:
-		return "AISData"
+		return "AISData";
 	}
 	return "";
 }

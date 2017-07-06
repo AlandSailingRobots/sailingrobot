@@ -9,7 +9,7 @@
  * Developer Notes:
  *
  *							12.4.17 JM
- *	
+ *
  *	Functions that have tests:		Functions that does not have tests:
  *
  *	All Message-functions have tests
@@ -34,6 +34,9 @@
 #include "Messages/LocalConfigChangeMsg.h"
 #include "Messages/LocalWaypointChangeMsg.h"
 #include "Messages/StateMessage.h"
+#include "Messages/SolarDataMsg.h"
+#include "Messages/AISDataMsg.h"
+// #include "Hardwares/CANAISNode.h"
 
 
 class MessageSuite : public CxxTest::TestSuite {
@@ -351,4 +354,93 @@ public:
 		TS_ASSERT_EQUALS(msgTwo.course(), 30);
 	}
 
+	void test_SolarDataMsg() {
+		SolarDataMsg msg(60.2f, 19.1f, 200.5f, 1.0f);
+
+		TS_ASSERT_EQUALS(msg.messageType(), MessageType::SolarData);
+		TS_ASSERT_DELTA(msg.latitude(),60.2f,1e-7);
+		TS_ASSERT_DELTA(msg.longitude(),19.1f,1e-7);
+		TS_ASSERT_DELTA(msg.heading(),200.5f,1e-7);
+		TS_ASSERT_DELTA(msg.unixTime(),1.0f,1e-7);
+
+		MessageSerialiser serialiser;
+		msg.Serialise(serialiser);
+
+		MessageDeserialiser deserialiser(serialiser.data(),serialiser.size());
+		SolarDataMsg msgTwo(deserialiser);
+
+		TS_ASSERT(msgTwo.isValid());
+		TS_ASSERT_EQUALS(msgTwo.messageType(), MessageType::SolarData);
+		TS_ASSERT_DELTA(msgTwo.latitude(),60.2f,1e-7);
+		TS_ASSERT_DELTA(msgTwo.longitude(),19.1f,1e-7);
+		TS_ASSERT_DELTA(msgTwo.heading(),200.5f,1e-7);
+		TS_ASSERT_DELTA(msgTwo.unixTime(),1.0f,1e-7);
+	}
+
+	void test_AISDataMsg() {
+		std::vector<AISVessel> AISList;
+		AISVessel v1, v2, v3;
+		v1.MMSI = 1;
+		v1.latitude = 60.2f;
+		v1.longitude = 19.1f;
+		v1.COG = 200;
+		v1.SOG = 10;
+		v2.MMSI = 2;
+		v2.latitude = 62.f;
+		v2.longitude = 18.1f;
+		v2.COG = 100;
+		v2.SOG = 5;
+		v3.MMSI = 3;
+		v3.latitude = 61.5f;
+		v3.longitude = 18.7f;
+		v3.COG = 80;
+		v3.SOG = 7;
+		AISList.push_back(v1);
+		AISList.push_back(v2);
+		AISList.push_back(v3);
+
+		AISDataMsg msg(AISList);
+
+		TS_ASSERT_EQUALS(msg.messageType(), MessageType::AISData);
+		TS_ASSERT_EQUALS(msg.MMSI(0),1);
+		TS_ASSERT_DELTA(msg.latitude(0), 60.2f, 1e-7);
+		TS_ASSERT_DELTA(msg.longitude(0), 19.1f, 1e-7);
+		TS_ASSERT_EQUALS(msg.COG(0), 200);
+		TS_ASSERT_EQUALS(msg.SOG(0), 10);
+		TS_ASSERT_EQUALS(msg.MMSI(1), 2);
+		TS_ASSERT_DELTA(msg.latitude(1), 62.f, 1e-7);
+		TS_ASSERT_DELTA(msg.longitude(1), 18.1f, 1e-7);
+		TS_ASSERT_EQUALS(msg.COG(1), 100);
+		TS_ASSERT_EQUALS(msg.SOG(1), 5);
+		TS_ASSERT_EQUALS(msg.MMSI(2), 3);
+		TS_ASSERT_DELTA(msg.latitude(2), 61.5f, 1e-7);
+		TS_ASSERT_DELTA(msg.longitude(2), 18.7f, 1e-7);
+		TS_ASSERT_EQUALS(msg.COG(2), 80);
+		TS_ASSERT_EQUALS(msg.SOG(2), 7);
+
+		// std::cout << msg.vesselList().size() << '\n';
+		MessageSerialiser serialiser;
+		msg.Serialise(serialiser);
+
+		MessageDeserialiser deserialiser(serialiser.data(), serialiser.size());
+		AISDataMsg msgTwo(deserialiser);
+
+		// std::cout << "Test: " << msgTwo.vesselList().size() << '\n';
+		TS_ASSERT(msgTwo.isValid());
+		TS_ASSERT_EQUALS(msgTwo.MMSI(0),1);
+		TS_ASSERT_DELTA(msgTwo.latitude(0), 60.2f, 1e-7);
+		TS_ASSERT_DELTA(msgTwo.longitude(0), 19.1f, 1e-7);
+		TS_ASSERT_EQUALS(msgTwo.COG(0), 200);
+		TS_ASSERT_EQUALS(msgTwo.SOG(0), 10);
+		TS_ASSERT_EQUALS(msgTwo.MMSI(1), 2);
+		TS_ASSERT_DELTA(msgTwo.latitude(1), 62.f, 1e-7);
+		TS_ASSERT_DELTA(msgTwo.longitude(1), 18.1f, 1e-7);
+		TS_ASSERT_EQUALS(msgTwo.COG(1), 100);
+		TS_ASSERT_EQUALS(msgTwo.SOG(1), 5);
+		TS_ASSERT_EQUALS(msgTwo.MMSI(2), 3);
+		TS_ASSERT_DELTA(msgTwo.latitude(2), 61.5f, 1e-7);
+		TS_ASSERT_DELTA(msgTwo.longitude(2), 18.7f, 1e-7);
+		TS_ASSERT_EQUALS(msgTwo.COG(2), 80);
+		TS_ASSERT_EQUALS(msgTwo.SOG(2), 7);
+	}
 };

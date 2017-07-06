@@ -40,10 +40,10 @@ public:
 
 	virtual ~SolarDataMsg() { }
 
-	int latitude() { return m_latitude; }
-	int longitude() { return m_longitude; }
-	int heading() { return m_heading; }
-  int unixTime() { return m_time; }
+	double latitude() { return m_latitude; }
+	double longitude() { return m_longitude; }
+	double heading() { return m_heading; }
+  double unixTime() { return m_time; }
 
   ///----------------------------------------------------------------------------------
 	/// Serialises the message into a MessageSerialiser

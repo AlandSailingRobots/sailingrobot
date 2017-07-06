@@ -36,12 +36,12 @@ public:
 	static void runMessageLoop()
  	{
     	msgBus().run();
-        
+
   	}
 
 	void setUp() {
 		if(receiver == 0){
-            receiver = new CANFeedbackReceiver(msgBus(),canService());
+            receiver = new CANFeedbackReceiver(msgBus(),canService(),1);
 			verifier = new MessageVerifier(msgBus());
 			thr = new std::thread(runMessageLoop);
             canService().start();
@@ -65,7 +65,7 @@ public:
         Cmsg.id = 701;
         Cmsg.header.ide = 0;
         Cmsg.header.length = 7;
-        
+
         (Cmsg.data[0] = rudderFeedback & 0xff);
         (Cmsg.data[1] = rudderFeedback >> 8);
         (Cmsg.data[2] = wingsailFeedback & 0xff);
@@ -75,12 +75,12 @@ public:
         (Cmsg.data[6] = 0);
 
         canService().sendCANMessage(Cmsg);
-    
+
         ASPireActuatorFeedbackMsg otherMsg(rudderFeedback, wingsailFeedback, windvaneSteerAngle, 0);
-        
+
         std::this_thread::sleep_for(std::chrono::milliseconds(750));
         TS_ASSERT(verifier->verifyActuatorFeedbackMsg(&otherMsg))
-        
+
     }
 
 };

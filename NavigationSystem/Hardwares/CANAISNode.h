@@ -21,11 +21,11 @@ struct AISVessel {
 
 class CANAISNode : public ActiveNode {
 public:
-  CANAISNode(MessageBus& msgBus, CANService& canService, double loopTime)
+  CANAISNode(MessageBus& msgBus, CANService& canService, double loopTime);
   ~CANAISNode();
 
   bool init();
-  void processMessage(const Message* message)
+  void processMessage(const Message* message);
   void processFrame(CanMsg& msg);
   void processPGN(N2kMsg& nMsg);
   void parsePGN129038_129039();

@@ -37,9 +37,12 @@ public:
 
 	void resetInternalPtr() { m_index = 0;}
 
+	uint8_t* data();
+	uint8_t index();
+	uint8_t size();
+
 private:
 	uint8_t* 	m_data;
 	uint8_t		m_index;
 	uint8_t		m_size;
 };
-

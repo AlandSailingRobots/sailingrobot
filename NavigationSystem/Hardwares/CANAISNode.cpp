@@ -54,14 +54,16 @@ void CANAISNode::CANAISThreadFunc(ActiveNode* nodePtr) {
   timer.start();
 
   while(true) {
-    timer.sleepUntil(node->m_LoopTime*1.0f/1000);
+
     node->m_lock.lock();
 
-    MessagePtr AISList = std::make:unique<AISDataMsg>(node->m_VesselList);
-    node->msgBus.sendMessage(std::move(AISList));
+    // Maybe send a can messge instead, but it is to long?
 
+    MessagePtr AISList = std::make_unique<AISDataMsg>(node->m_VesselList);
+    node->msgBus.sendMessage(std::move(AISList));
     node->m_lock.unlock();
 
+    timer.sleepUntil(node->m_LoopTime*1.0f/1000);
     timer.reset();
   }
 }

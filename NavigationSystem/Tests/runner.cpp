@@ -69,91 +69,103 @@ public:
 static MessageSuite suite_MessageSuite;
 
 static CxxTest::List Tests_MessageSuite = { 0, 0 };
-CxxTest::StaticSuiteDescription suiteDescription_MessageSuite( "unit-tests/MessageSuite.h", 39, "MessageSuite", suite_MessageSuite, Tests_MessageSuite );
+CxxTest::StaticSuiteDescription suiteDescription_MessageSuite( "unit-tests/MessageSuite.h", 42, "MessageSuite", suite_MessageSuite, Tests_MessageSuite );
 
 static class TestDescription_suite_MessageSuite_test_CompassDataMsg : public CxxTest::RealTestDescription {
 public:
- TestDescription_suite_MessageSuite_test_CompassDataMsg() : CxxTest::RealTestDescription( Tests_MessageSuite, suiteDescription_MessageSuite, 45, "test_CompassDataMsg" ) {}
+ TestDescription_suite_MessageSuite_test_CompassDataMsg() : CxxTest::RealTestDescription( Tests_MessageSuite, suiteDescription_MessageSuite, 48, "test_CompassDataMsg" ) {}
  void runTest() { suite_MessageSuite.test_CompassDataMsg(); }
 } testDescription_suite_MessageSuite_test_CompassDataMsg;
 
 static class TestDescription_suite_MessageSuite_test_GPSDataMsg : public CxxTest::RealTestDescription {
 public:
- TestDescription_suite_MessageSuite_test_GPSDataMsg() : CxxTest::RealTestDescription( Tests_MessageSuite, suiteDescription_MessageSuite, 67, "test_GPSDataMsg" ) {}
+ TestDescription_suite_MessageSuite_test_GPSDataMsg() : CxxTest::RealTestDescription( Tests_MessageSuite, suiteDescription_MessageSuite, 70, "test_GPSDataMsg" ) {}
  void runTest() { suite_MessageSuite.test_GPSDataMsg(); }
 } testDescription_suite_MessageSuite_test_GPSDataMsg;
 
 static class TestDescription_suite_MessageSuite_test_WindDataMsg : public CxxTest::RealTestDescription {
 public:
- TestDescription_suite_MessageSuite_test_WindDataMsg() : CxxTest::RealTestDescription( Tests_MessageSuite, suiteDescription_MessageSuite, 101, "test_WindDataMsg" ) {}
+ TestDescription_suite_MessageSuite_test_WindDataMsg() : CxxTest::RealTestDescription( Tests_MessageSuite, suiteDescription_MessageSuite, 104, "test_WindDataMsg" ) {}
  void runTest() { suite_MessageSuite.test_WindDataMsg(); }
 } testDescription_suite_MessageSuite_test_WindDataMsg;
 
 static class TestDescription_suite_MessageSuite_test_DataRequestMsg : public CxxTest::RealTestDescription {
 public:
- TestDescription_suite_MessageSuite_test_DataRequestMsg() : CxxTest::RealTestDescription( Tests_MessageSuite, suiteDescription_MessageSuite, 123, "test_DataRequestMsg" ) {}
+ TestDescription_suite_MessageSuite_test_DataRequestMsg() : CxxTest::RealTestDescription( Tests_MessageSuite, suiteDescription_MessageSuite, 126, "test_DataRequestMsg" ) {}
  void runTest() { suite_MessageSuite.test_DataRequestMsg(); }
 } testDescription_suite_MessageSuite_test_DataRequestMsg;
 
 static class TestDescription_suite_MessageSuite_test_WaypointDataMsg : public CxxTest::RealTestDescription {
 public:
- TestDescription_suite_MessageSuite_test_WaypointDataMsg() : CxxTest::RealTestDescription( Tests_MessageSuite, suiteDescription_MessageSuite, 132, "test_WaypointDataMsg" ) {}
+ TestDescription_suite_MessageSuite_test_WaypointDataMsg() : CxxTest::RealTestDescription( Tests_MessageSuite, suiteDescription_MessageSuite, 135, "test_WaypointDataMsg" ) {}
  void runTest() { suite_MessageSuite.test_WaypointDataMsg(); }
 } testDescription_suite_MessageSuite_test_WaypointDataMsg;
 
 static class TestDescription_suite_MessageSuite_test_ActuatorPositionMsg : public CxxTest::RealTestDescription {
 public:
- TestDescription_suite_MessageSuite_test_ActuatorPositionMsg() : CxxTest::RealTestDescription( Tests_MessageSuite, suiteDescription_MessageSuite, 170, "test_ActuatorPositionMsg" ) {}
+ TestDescription_suite_MessageSuite_test_ActuatorPositionMsg() : CxxTest::RealTestDescription( Tests_MessageSuite, suiteDescription_MessageSuite, 173, "test_ActuatorPositionMsg" ) {}
  void runTest() { suite_MessageSuite.test_ActuatorPositionMsg(); }
 } testDescription_suite_MessageSuite_test_ActuatorPositionMsg;
 
 static class TestDescription_suite_MessageSuite_test_ArduinoDataMsg : public CxxTest::RealTestDescription {
 public:
- TestDescription_suite_MessageSuite_test_ArduinoDataMsg() : CxxTest::RealTestDescription( Tests_MessageSuite, suiteDescription_MessageSuite, 190, "test_ArduinoDataMsg" ) {}
+ TestDescription_suite_MessageSuite_test_ArduinoDataMsg() : CxxTest::RealTestDescription( Tests_MessageSuite, suiteDescription_MessageSuite, 193, "test_ArduinoDataMsg" ) {}
  void runTest() { suite_MessageSuite.test_ArduinoDataMsg(); }
 } testDescription_suite_MessageSuite_test_ArduinoDataMsg;
 
 static class TestDescription_suite_MessageSuite_test_VesselStateMsg : public CxxTest::RealTestDescription {
 public:
- TestDescription_suite_MessageSuite_test_VesselStateMsg() : CxxTest::RealTestDescription( Tests_MessageSuite, suiteDescription_MessageSuite, 216, "test_VesselStateMsg" ) {}
+ TestDescription_suite_MessageSuite_test_VesselStateMsg() : CxxTest::RealTestDescription( Tests_MessageSuite, suiteDescription_MessageSuite, 219, "test_VesselStateMsg" ) {}
  void runTest() { suite_MessageSuite.test_VesselStateMsg(); }
 } testDescription_suite_MessageSuite_test_VesselStateMsg;
 
 static class TestDescription_suite_MessageSuite_test_CourseDataMsg : public CxxTest::RealTestDescription {
 public:
- TestDescription_suite_MessageSuite_test_CourseDataMsg() : CxxTest::RealTestDescription( Tests_MessageSuite, suiteDescription_MessageSuite, 270, "test_CourseDataMsg" ) {}
+ TestDescription_suite_MessageSuite_test_CourseDataMsg() : CxxTest::RealTestDescription( Tests_MessageSuite, suiteDescription_MessageSuite, 273, "test_CourseDataMsg" ) {}
  void runTest() { suite_MessageSuite.test_CourseDataMsg(); }
 } testDescription_suite_MessageSuite_test_CourseDataMsg;
 
 static class TestDescription_suite_MessageSuite_test_ServerConfigsReceivedMsg : public CxxTest::RealTestDescription {
 public:
- TestDescription_suite_MessageSuite_test_ServerConfigsReceivedMsg() : CxxTest::RealTestDescription( Tests_MessageSuite, suiteDescription_MessageSuite, 292, "test_ServerConfigsReceivedMsg" ) {}
+ TestDescription_suite_MessageSuite_test_ServerConfigsReceivedMsg() : CxxTest::RealTestDescription( Tests_MessageSuite, suiteDescription_MessageSuite, 295, "test_ServerConfigsReceivedMsg" ) {}
  void runTest() { suite_MessageSuite.test_ServerConfigsReceivedMsg(); }
 } testDescription_suite_MessageSuite_test_ServerConfigsReceivedMsg;
 
 static class TestDescription_suite_MessageSuite_test_ServerWaypointsReceivedMsg : public CxxTest::RealTestDescription {
 public:
- TestDescription_suite_MessageSuite_test_ServerWaypointsReceivedMsg() : CxxTest::RealTestDescription( Tests_MessageSuite, suiteDescription_MessageSuite, 301, "test_ServerWaypointsReceivedMsg" ) {}
+ TestDescription_suite_MessageSuite_test_ServerWaypointsReceivedMsg() : CxxTest::RealTestDescription( Tests_MessageSuite, suiteDescription_MessageSuite, 304, "test_ServerWaypointsReceivedMsg" ) {}
  void runTest() { suite_MessageSuite.test_ServerWaypointsReceivedMsg(); }
 } testDescription_suite_MessageSuite_test_ServerWaypointsReceivedMsg;
 
 static class TestDescription_suite_MessageSuite_test_LocalConfigChangeMsg : public CxxTest::RealTestDescription {
 public:
- TestDescription_suite_MessageSuite_test_LocalConfigChangeMsg() : CxxTest::RealTestDescription( Tests_MessageSuite, suiteDescription_MessageSuite, 310, "test_LocalConfigChangeMsg" ) {}
+ TestDescription_suite_MessageSuite_test_LocalConfigChangeMsg() : CxxTest::RealTestDescription( Tests_MessageSuite, suiteDescription_MessageSuite, 313, "test_LocalConfigChangeMsg" ) {}
  void runTest() { suite_MessageSuite.test_LocalConfigChangeMsg(); }
 } testDescription_suite_MessageSuite_test_LocalConfigChangeMsg;
 
 static class TestDescription_suite_MessageSuite_test_LocalWaypointChangeMsg : public CxxTest::RealTestDescription {
 public:
- TestDescription_suite_MessageSuite_test_LocalWaypointChangeMsg() : CxxTest::RealTestDescription( Tests_MessageSuite, suiteDescription_MessageSuite, 319, "test_LocalWaypointChangeMsg" ) {}
+ TestDescription_suite_MessageSuite_test_LocalWaypointChangeMsg() : CxxTest::RealTestDescription( Tests_MessageSuite, suiteDescription_MessageSuite, 322, "test_LocalWaypointChangeMsg" ) {}
  void runTest() { suite_MessageSuite.test_LocalWaypointChangeMsg(); }
 } testDescription_suite_MessageSuite_test_LocalWaypointChangeMsg;
 
 static class TestDescription_suite_MessageSuite_test_StateDataMsg : public CxxTest::RealTestDescription {
 public:
- TestDescription_suite_MessageSuite_test_StateDataMsg() : CxxTest::RealTestDescription( Tests_MessageSuite, suiteDescription_MessageSuite, 328, "test_StateDataMsg" ) {}
+ TestDescription_suite_MessageSuite_test_StateDataMsg() : CxxTest::RealTestDescription( Tests_MessageSuite, suiteDescription_MessageSuite, 331, "test_StateDataMsg" ) {}
  void runTest() { suite_MessageSuite.test_StateDataMsg(); }
 } testDescription_suite_MessageSuite_test_StateDataMsg;
+
+static class TestDescription_suite_MessageSuite_test_SolarDataMsg : public CxxTest::RealTestDescription {
+public:
+ TestDescription_suite_MessageSuite_test_SolarDataMsg() : CxxTest::RealTestDescription( Tests_MessageSuite, suiteDescription_MessageSuite, 357, "test_SolarDataMsg" ) {}
+ void runTest() { suite_MessageSuite.test_SolarDataMsg(); }
+} testDescription_suite_MessageSuite_test_SolarDataMsg;
+
+static class TestDescription_suite_MessageSuite_test_AISDataMsg : public CxxTest::RealTestDescription {
+public:
+ TestDescription_suite_MessageSuite_test_AISDataMsg() : CxxTest::RealTestDescription( Tests_MessageSuite, suiteDescription_MessageSuite, 380, "test_AISDataMsg" ) {}
+ void runTest() { suite_MessageSuite.test_AISDataMsg(); }
+} testDescription_suite_MessageSuite_test_AISDataMsg;
 
 #include "unit-tests/UtilitySuite.h"
 
