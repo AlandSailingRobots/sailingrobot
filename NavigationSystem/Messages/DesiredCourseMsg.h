@@ -34,7 +34,7 @@ public:
 
 	virtual ~DesiredCourseMsg() { }
 
-	uint16_t desiredCourse() { return course; }
+	uint16_t desiredCourse() const { return course; }
 
 private:
 	uint16_t course;

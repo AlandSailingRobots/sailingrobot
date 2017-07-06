@@ -111,6 +111,7 @@ export SIMULATOR_SRC        = Simulation/SimulationNode.cpp
 export CORE_SRC             = Navigation/WaypointMgrNode.cpp LowLevelControllers/LowLevelControllerNodeASPire.cpp \
 																WorldState/StateEstimationNode.cpp WorldState/VesselStateNode.cpp \
 							   								LowLevelControllers/LowLevelControllerNodeJanet.cpp WorldState/WindStateNode.cpp \
+															   LowLevelControllers/CourseRegulatorNode.cpp\
 								$(MESSAGE_BUS_SRC) $(NETWORK_SRC) $(SYSTEM_SERVICES_SRC) $(MATH_SRC)
 
 export HTTP_SYNC_SRC        = HTTPSync/HTTPSyncNode.cpp

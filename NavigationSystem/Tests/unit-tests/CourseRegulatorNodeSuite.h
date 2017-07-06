@@ -21,11 +21,13 @@
 #include "Messages/StateMessage.h"
 #include "Messages/DesiredCourseMsg.h"
 #include "Math/Utility.h"
+#include "DataBase/DBHandler.h"
 
 
 // For std::this_thread
 #include <chrono>
 #include <thread>
+#include <iostream>
 
 #define COURSE_REGULATORNODE_TEST_COUNT 8
 
@@ -34,25 +36,27 @@ class CourseRegulatorNodeSuite : public CxxTest::TestSuite
 public:
 
     CourseRegulatorNode* cRegulatorNode;
-
+    DBHandler* dbHandler;
     MockNode* mockNode;
     bool nodeRegistered = false;
-    double MaxRudderAngle = 30;
-    double loopTime = .5;
+
+    double lTime = .5;
+    double MaxRudAng = 30;
 
     std::thread* thr;
     int testCount = 0;
-    
 
     static MessageBus& msgBus(){
         static MessageBus* mbus = new MessageBus();
         return *mbus;
     }
 
+/*
     static DBHandler& dbHandler(){
-        static DBHandler* dbh = new DBHandler("./asr.db");
+        static DBHandler* dbh = new DBHandler("./asr.db"); 
         return *dbh;
-    } 
+    }
+*/
 
     // ----------------
     // Send messages 
@@ -67,17 +71,21 @@ public:
     // ----------------
     void setUp()
     {
-        // Object to simulate the 
+            
+         // Object to simulate the 
         mockNode = new MockNode(msgBus(), nodeRegistered);
+        
         // setup them up once in this test, delete them when the program closes
         if(cRegulatorNode == 0)
-        {
+        {  
+            //attente = new std::chrono::milliseconds(2600);
+            //std::cout << " Count of ticks : " << attente->count() << std::endl;
+            dbHandler = new DBHandler("./asr.db");
             Logger::DisableLogging();   
-
-            cRegulatorNode = new CourseRegulatorNode(msgBus(),dbHandler(),loopTime,MaxRudderAngle,0,0);
+            
+            cRegulatorNode = new CourseRegulatorNode(msgBus(),*dbHandler,lTime,MaxRudAng,0,0);
             cRegulatorNode->start();
-            std::this_thread::sleep_for(std::chrono::milliseconds(2600));
-
+            std::this_thread::sleep_for(std::chrono::milliseconds(400));
             thr = new std::thread(runMessageLoop);
         }    
         testCount++;
@@ -110,7 +118,7 @@ public:
         double heading = 10;
         double speed = 1;
 
-        // Test listening State Message
+         // Test listening State Message
         MessagePtr stateData = std::make_unique<StateMessage>(heading,60.09726,19.93481,speed,0);
         msgBus().sendMessage(std::move(stateData));
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -141,7 +149,7 @@ public:
         msgBus().sendMessage(std::move(desiredCourseData));
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
-        double rudderAngle = Utility::sgn(speed)*(sin(heading-static_cast<double>(desiredcourse))*MaxRudderAngle);
+        double rudderAngle = Utility::sgn(speed)*(sin(heading-static_cast<double>(desiredcourse))*MaxRudAng);
         double courseRegulatorRudderAngle = mockNode->m_rudderPosition;
         TS_ASSERT_EQUALS(courseRegulatorRudderAngle,rudderAngle);
         //Test if not calculate false value without the desired heading (includ Desired_heading = 0)
@@ -152,17 +160,17 @@ public:
     // Test to see if the message, sent by the node, is with the values
     // ----------------
     void test_CourseRegulatorCourseMsgActuatorData(){
-        double rudderPosition = 10;
-        double sailPosition = 20;
+        double rudderPos = 10;
+        double sailPos = 20;
 
         // Test listening State Message
-        MessagePtr actuatorData = std::make_unique<ActuatorPositionMsg>(rudderPosition,sailPosition);
+        MessagePtr actuatorData = std::make_unique<ActuatorPositionMsg>(rudderPos,sailPos);
         msgBus().sendMessage(std::move(actuatorData));
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
         // Check if the message has been received by the object of simulation and without modification without desired_heading
-        TS_ASSERT_EQUALS(mockNode->m_rudderPosition, rudderPosition); 
-        TS_ASSERT_EQUALS(mockNode->m_sailPosition, sailPosition);
+        TS_ASSERT_EQUALS(mockNode->m_rudderPosition, rudderPos); 
+        TS_ASSERT_EQUALS(mockNode->m_sailPosition, sailPos);
     }
 
     // ----------------
@@ -183,7 +191,7 @@ public:
         msgBus().sendMessage(std::move(desiredCourseData));
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
-        double rudderAngle = Utility::sgn(speed)*Utility::sgn((sin(heading-static_cast<double>(desiredcourse)))*MaxRudderAngle);
+        double rudderAngle = Utility::sgn(speed)*Utility::sgn((sin(heading-static_cast<double>(desiredcourse)))*MaxRudAng);
         double courseRegulatorRudderAngle = mockNode->m_rudderPosition;
         TS_ASSERT_EQUALS(courseRegulatorRudderAngle,rudderAngle);
     }
@@ -206,7 +214,7 @@ public:
         msgBus().sendMessage(std::move(desiredCourseData));
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
-        double rudderAngle = Utility::sgn(speed)*sin(heading-static_cast<double>(desiredcourse))*MaxRudderAngle;
+        double rudderAngle = Utility::sgn(speed)*sin(heading-static_cast<double>(desiredcourse))*MaxRudAng;
         double courseRegulatorRudderAngle = mockNode->m_rudderPosition;
         TS_ASSERT_EQUALS(courseRegulatorRudderAngle,rudderAngle);
         
@@ -230,7 +238,7 @@ public:
         msgBus().sendMessage(std::move(desiredCourseData));
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
-        double rudderAngle = Utility::sgn(speed)*Utility::sgn((sin(heading-static_cast<double>(desiredcourse)))*MaxRudderAngle);
+        double rudderAngle = Utility::sgn(speed)*Utility::sgn((sin(heading-static_cast<double>(desiredcourse)))*MaxRudAng);
         double courseRegulatorRudderAngle = mockNode->m_rudderPosition;
         TS_ASSERT_EQUALS(courseRegulatorRudderAngle,rudderAngle);
     }
@@ -239,9 +247,9 @@ public:
     // Test for update frequency
     // ----------------
     void test_CourseRegulatorUpdateFrequency(){
-        double newLoopTime = 0.7;
-        dbHandler().changeOneValue("course_regulator","1",".7","loopTime");
-        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+        double newLoopTime= 0.7;
+        dbHandler->changeOneValue("course_regulator","1",".7","loopTime");
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
         double courseRegulatorFrequence = cRegulatorNode->getFrequencyThread();
         TS_ASSERT_DIFFERS(courseRegulatorFrequence,newLoopTime); 
     }

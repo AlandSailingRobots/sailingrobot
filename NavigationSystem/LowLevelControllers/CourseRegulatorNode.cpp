@@ -16,20 +16,17 @@
 #include <chrono>
 #include <thread>
 #include <math.h>
-#include <mutex>
+#include <cstdlib>
 #include "Math/Utility.h"
-#include "Messages/DesiredCourseMsg.h"
 #include "Messages/ActuatorPositionMsg.h"
 #include "Messages/StateMessage.h"
 #include "SystemServices/Logger.h"
 #include "SystemServices/Timer.h"
 
 
-CourseRegulatorNode::CourseRegulatorNode( MessageBus& msgBus,  DBHandler& dbhandler, double loopTime, float maxRudderAngle,
-    double configPGain, double configIGain)
-    :ActiveNode(NodeID::CourseRegulatorNode,msgBus), m_VesselHeading(0),
-    m_MaxRudderAngle(maxRudderAngle),m_DesiredHeading(0),
-    pGain(configPGain),iGain(configIGain),m_db(dbhandler), m_LoopTime(loopTime) 
+CourseRegulatorNode::CourseRegulatorNode( MessageBus& msgBus,  DBHandler& dbhandler, double loopTime, double maxRudderAngle,
+    double configPGain, double configIGain):ActiveNode(NodeID::CourseRegulatorNode,msgBus), m_VesselHeading(0),
+    m_MaxRudderAngle(maxRudderAngle),m_DesiredHeading(0),m_db(dbhandler), m_LoopTime(loopTime),pGain(configPGain),iGain(configIGain) 
 {
     msgBus.registerNode( *this, MessageType::StateMessage);
     msgBus.registerNode( *this, MessageType::DesiredCourse);
@@ -40,7 +37,7 @@ CourseRegulatorNode::CourseRegulatorNode( MessageBus& msgBus,  DBHandler& dbhand
 CourseRegulatorNode::~CourseRegulatorNode(){}
 
 ///----------------------------------------------------------------------------------
-bool init(){ return true;}
+bool CourseRegulatorNode::init(){ return true;}
 
 ///----------------------------------------------------------------------------------
 void CourseRegulatorNode::start()
@@ -65,7 +62,7 @@ void CourseRegulatorNode::processMessage( const Message* msg )
         case MessageType::DesiredCourse:
         processDesiredCourseMessage(static_cast< const DesiredCourseMsg*>(msg)); //verify
         break;
-        case MessageType::NavigationControlMsg:
+        case MessageType::NavigationControl:
         processNavigationControlMessage(static_cast< const NavigationControlMsg*>(msg));
         break;
         default:
@@ -90,7 +87,7 @@ void CourseRegulatorNode::processStateMessage(const StateMessage* msg)
 void CourseRegulatorNode::processDesiredCourseMessage(const DesiredCourseMsg* msg)
 {
     std::lock_guard<std::mutex> lock_guard(m_lock);
-    m_DesiredHeading = Utility::limitAngleRange(msg->course());
+    m_DesiredHeading = Utility::limitAngleRange(static_cast<double>(msg->desiredCourse()));
 }
 
 ///----------------------------------------------------------------------------------
@@ -109,33 +106,33 @@ void CourseRegulatorNode::processNavigationControlMessage(const NavigationContro
 ///----------------------------------------------------------------------------------
 double CourseRegulatorNode::calculateRudderAngle()
 {
-    double difference_Heading = m_VesselHeading - static_cast<double>(m_DesiredHeading);
+    double difference_Heading = m_VesselHeading - m_DesiredHeading;
     // Equation from book "Robotic Sailing 2015 ", page 141
     // The MAX_RUDDER_ANGLE is a parameter configuring the variation around the desired heading.
     // Also the reaction could be configure by the frequence of the thread.
     if(cos(difference_Heading) < 0) // Wrong sense because over 90°
     {
         // Max Rudder angle in the opposite way 
-         return sgn(m_VesselSpeed)*(sgn(sin(difference_Heading))*m_MaxRudderAngle);
+         return Utility::sgn(m_VesselSpeed)*(Utility::sgn(sin(difference_Heading))*m_MaxRudderAngle);
     }
     // Regulation of the rudder
-    return sgn(m_VesselSpeed)*(sin(difference_Heading)*m_MaxRudderAngle);
+    return Utility::sgn(m_VesselSpeed)*(sin(difference_Heading)*m_MaxRudderAngle);
 }
 
 ///----------------------------------------------------------------------------------
 void CourseRegulatorNode::updateFrequencyThread()
 {
-    m_LoopTime = m_db.retrieveCellAsInt("course_regulator","1","loopTime");
+    m_LoopTime = m_db.retrieveCellAsDouble("course_regulator","1","loopTime");
 }
 
 ///----------------------------------------------------------------------------------
-void CourseRegulator::CourseRegulatorNodeThreadFunc(ActiveNode* nodePtr)
+void CourseRegulatorNode::CourseRegulatorNodeThreadFunc(ActiveNode* nodePtr)
 {
     CourseRegulatorNode* node = dynamic_cast<CourseRegulatorNode*> (nodePtr);
     
     // An initial sleep, its purpose is to ensure that most if not all the sensor data arrives
     // at the start before we send out the state message.
-    std::this_thread::sleep_for(std::chrono::milliseconds(node->STATE_INITIAL_SLEEP))
+    std::this_thread::sleep_for(std::chrono::milliseconds(node->STATE_INITIAL_SLEEP));
 
     Timer timer;
     timer.start();
@@ -144,12 +141,12 @@ void CourseRegulator::CourseRegulatorNodeThreadFunc(ActiveNode* nodePtr)
     {
         std::lock_guard<std::mutex> lock_guard(node->m_lock);
         // TODO : Modify Actuator Message for adapt to this Node
-        MessagePtr actuatorMessage = std::make_unique<ActuatorPositionMessage>(node->calculateRudderAngle(),NULL);
-        node->m_MsgBus.sendMessage(std::move(actuatorMessage))
+        MessagePtr actuatorMessage = std::make_unique<ActuatorPositionMsg>(node->calculateRudderAngle(),0);
+        node->m_MsgBus.sendMessage(std::move(actuatorMessage));
     
         // Broadcast() or selected sent???
-        timer.sleepUntil(node->m_LoopTime) //insert updateFrequencyThread in the function ?
+        timer.sleepUntil(node->m_LoopTime); //insert updateFrequencyThread in the function ?
         timer.reset();
-        node->updateFrequencyThread(); 
+        //node->updateFrequencyThread(); 
     }
 }

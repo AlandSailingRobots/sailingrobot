@@ -404,6 +404,21 @@ int DBHandler::retrieveCellAsInt(std::string table, std::string id, std::string 
 
 }
 
+double DBHandler::retrieveCellAsDouble(std::string table, std::string id, std::string column) {
+
+	std::string data = retrieveCell(table, id, column);
+	if (data.size() > 0)
+	{
+		return strtod(data.c_str(), NULL);
+	}
+	else
+	{
+		Logger::error("%s, Error: No data in cell ", __PRETTY_FUNCTION__);
+		return 0;
+	}
+
+}
+
 
 void DBHandler::clearTable(std::string table) {
 	//If no table to delete, doesn't matter

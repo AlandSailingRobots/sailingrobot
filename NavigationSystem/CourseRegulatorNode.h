@@ -61,17 +61,32 @@ private:
     // Processing informations from the State Message
     // -------------
     void processStateMessage( const StateMessage* msg);
-       
+        // -------------
+        // Informations
+        float  m_VesselHeading; // units : ° (degrees), from 0 to 359
+        double m_VesselLatitude;
+        double m_VesselLongitude;
+        double m_VesselSpeed; // units : knts (knots)
+        double m_VesselCourse; // units : ° (degrees), from 0 to 359
+
     // -------------
     // Processing informations from the Desired course message
     // -------------
     void processDesiredCourseMessage( const DesiredCourseMsg* msg);
-     
+        // -------------
+        // Informations
+        double m_DesiredHeading; // units : ° (degrees), from 0 to 359
+
     // -------------
     // Processing informations from the Navigation Control Message
     // -------------
     void processNavigationControlMessage( const NavigationControlMsg* msg);
-        
+        // -------------
+        // Informations on Navigation control message
+        NavigationState m_NavigationState;
+        int m_CourseToSteer;
+        float m_TargetSpeed;
+        bool m_Tack = false;
 
     // -------------
     // Determinate the rudder angle according to the heading difference
@@ -87,47 +102,26 @@ private:
     // Actions during the activity of the node
     // -------------
     static void CourseRegulatorNodeThreadFunc(ActiveNode* nodePtr);
+        //----------
+        // Variable used
+        const int STATE_INITIAL_SLEEP = 2000;
+        std::mutex m_lock;                      //Mutex to lock the node
+        double m_LoopTime;   // Loop time where the thread is asleep. units : seconds
 
-    double  m_VesselHeading; // units : ° (degrees), from 0 to 359
-        
     // -------------
     // Parameters to regulate this node
     // -------------
     double m_MaxRudderAngle; // units :° (degrees), define the extreme value of the rudder
-    // -------------
-    // Informations
-    double m_DesiredHeading; // units : ° (degrees), from 0 to 359
-    // -------------
-    // Access to the database
-    // -------------
-    DBHandler &m_db;
-    // -------------
-    // Loop time where the thread is asleep. units : seconds
-    // -------------
-    double m_LoopTime;   
+        
     // -------------
     // Parameters to make a PI regulation
     // -------------
-    double pGain;
-    double iGain;
+    //double pGain;
+    //double iGain;
 
-    //----------
-    // Variable used
-    const int STATE_INITIAL_SLEEP = 2000;
-    std::mutex m_lock;                      //Mutex to lock the node
-   
     // -------------
-    // Informations on Navigation control message
-    NavigationState m_NavigationState;
-    int m_CourseToSteer;
-    float m_TargetSpeed;
-    bool m_Tack = false;
-
-     // -------------
-    // Informations
-    double m_VesselLatitude;
-    double m_VesselLongitude;
-    double m_VesselSpeed; // units : knts (knots)
-    double m_VesselCourse; // units : ° (degrees), from 0 to 359
-
+    // Access to the database
+    // -------------
+    //DBHandler &m_db;
+    
 };

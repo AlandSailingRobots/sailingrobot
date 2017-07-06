@@ -121,6 +121,9 @@ public:
     //retrieve one value from a table as integer
 	int retrieveCellAsInt(std::string table, std::string id, std::string column);
 
+	//retrieve one value from a table as double
+	double retrieveCellAsDouble(std::string table, std::string id, std::string column);
+
 	// returns all logs in database as json; supply onlyLatest to get only the ones with the highest id
 	std::string getLogs(bool onlyLatest);
 

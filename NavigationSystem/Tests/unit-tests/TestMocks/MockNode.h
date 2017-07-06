@@ -34,7 +34,8 @@ public:
 	m_WindvaneSelfSteeringOn(0)
 	{
 		if(msgBus.registerNode(*this, MessageType::GPSData) && msgBus.registerNode(*this, MessageType::WindData) &&
-		msgBus.registerNode(*this, MessageType::StateMessage) && msgBus.registerNode(*this, MessageType::NavigationControl))
+		msgBus.registerNode(*this, MessageType::StateMessage) && msgBus.registerNode(*this, MessageType::ActuatorPosition)
+		&& msgBus.registerNode(*this, MessageType::NavigationControl))
 		{
 			registered = true;
 		}
