@@ -18,12 +18,12 @@
 
 class SolarDataMsg : public Message {
 public:
-	SolarDataMsg(NodeID destinationID, NodeID sourceID, double latitude, double longitude, double heading, double unixTime)
-		:Message(MessageType::SolarData, sourceID, destinationID), m_latitude(latitude), m_longitude(longitude), m_heading(heading), m_time(unixTime)
+	SolarDataMsg(NodeID destinationID, NodeID sourceID, double latitude, double longitude, double heading, int hour, int min)
+		:Message(MessageType::SolarData, sourceID, destinationID), m_latitude(latitude), m_longitude(longitude), m_heading(heading), m_Hour(hour), m_Min(min)
 	{ }
 
-	SolarDataMsg(double latitude, double longitude, double heading, double unixTime)
-		:Message(MessageType::SolarData, NodeID::None, NodeID::None), m_latitude(latitude), m_longitude(longitude), m_heading(heading), m_time(unixTime)
+	SolarDataMsg(double latitude, double longitude, double heading, int hour, int min)
+		:Message(MessageType::SolarData, NodeID::None, NodeID::None), m_latitude(latitude), m_longitude(longitude), m_heading(heading), m_Hour(hour), m_Min(min)
 	{ }
 
 	SolarDataMsg(MessageDeserialiser deserialiser)
@@ -32,7 +32,8 @@ public:
 		if(	!deserialiser.readDouble(m_latitude) ||
 			!deserialiser.readDouble(m_longitude) ||
 			!deserialiser.readDouble(m_heading) ||
-			!deserialiser.readDouble(m_time))
+			!deserialiser.readInt(m_Hour) ||
+			!deserialiser.readInt(m_Min))
 		{
 			m_valid = false;
 		}
@@ -43,8 +44,8 @@ public:
 	double latitude() { return m_latitude; }
 	double longitude() { return m_longitude; }
 	double heading() { return m_heading; }
-  double unixTime() { return m_time; }
-
+  int hour() { return m_Hour; }
+	int min() { return m_Min; }
   ///----------------------------------------------------------------------------------
 	/// Serialises the message into a MessageSerialiser
 	///----------------------------------------------------------------------------------
@@ -55,12 +56,14 @@ public:
 		serialiser.serialise(m_latitude);
 		serialiser.serialise(m_longitude);
 		serialiser.serialise(m_heading);
-		serialiser.serialise(m_time);
+		serialiser.serialise(m_Hour);
+		serialiser.serialise(m_Min);
 	}
 
 private:
 	double m_latitude;
 	double m_longitude;
 	double m_heading;
-  double m_time;
-};
+	int m_Hour;
+	int m_Min;
+ };

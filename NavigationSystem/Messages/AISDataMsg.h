@@ -14,6 +14,7 @@
 #pragma once
 
 #include "MessageBus/Message.h"
+// #include "Hardwares/CANAISNode.h"
 
 typedef unsigned char uchar;
 
@@ -27,13 +28,16 @@ union i_tag {
    int fval;
 } ui;
 
-struct AISVessel {
-  uint16_t COG;
-  uint16_t SOG;
-  int MMSI;
-  float latitude;
-  float longitude;
-};
+// #ifndef AISDATAMSG_H
+// #define AISDATAMSG_H
+// struct AISVessel {
+//   uint16_t COG;
+//   uint16_t SOG;
+//   int MMSI;
+//   float latitude;
+//   float longitude;
+// };
+// #endif
 
 class AISDataMsg : public Message {
 public:
@@ -50,6 +54,7 @@ public:
 	{
 
 		AISVessel vessel;
+		// TypeConst is the constant size of the messagetype
 		int ves = 0, typeConst = 3;
 		while (deserialiser.size() > ves+typeConst) {
 			if (true) {
@@ -79,6 +84,7 @@ public:
 			else {
 				m_valid = false;
 			}
+			// Add the size of the struct AISVessel
 			ves += 16;
 		}
 	}
@@ -113,20 +119,6 @@ public:
 private:
 	uint16_t combuint8(uint8_t lower, uint8_t higher) {
 		return ((uint16_t) higher << 8) | lower;
-	}
-
-	int combuint8_int(uint8_t b0, uint8_t b1, uint8_t b2, uint8_t b3) {
-		int i;
-		uchar b[] = {b3, b2, b1, b0};
-		memcpy(&i, &b, sizeof(i));
-		return i;
-	}
-
-	float combuint8_float(uint8_t b0, uint8_t b1, uint8_t b2, uint8_t b3) {
-		float f;
-		uchar b[] = {b3, b2, b1, b0};
-		memcpy(&f, &b, sizeof(f));
-		return f;
 	}
 
 	std::vector<AISVessel> m_VesselList;

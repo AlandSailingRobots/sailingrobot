@@ -21,6 +21,8 @@
 #include "Messages/StateMessage.h"
 #include "Messages/ActuatorPositionMsg.h"
 #include "Messages/NavigationControlMsg.h"
+#include "Messages/SolarDataMsg.h"
+#include "Messages/AISDataMsg.h"
 
 
 
@@ -34,7 +36,9 @@ public:
 	m_WindvaneSelfSteeringOn(0)
 	{
 		if(msgBus.registerNode(*this, MessageType::GPSData) && msgBus.registerNode(*this, MessageType::WindData) &&
-		msgBus.registerNode(*this, MessageType::StateMessage) && msgBus.registerNode(*this, MessageType::NavigationControl))
+		msgBus.registerNode(*this, MessageType::StateMessage) && msgBus.registerNode(*this, MessageType::NavigationControl) &&
+		msgBus.registerNode(*this, MessageType::WindData) && msgBus.registerNode(*this, MessageType::SolarData) &&
+		msgBus.registerNode(*this, MessageType::AISData))
 		{
 			registered = true;
 		}
@@ -101,6 +105,24 @@ public:
 				m_WindvaneSelfSteeringOn = navigationControlMsg->windvaneSelfSteeringOn();
 			}
 			break;
+			case MessageType::SolarData:
+			{
+				m_MessageReceived = true;
+				SolarDataMsg* solarMsg = (SolarDataMsg*) message;
+				m_heading = solarMsg->heading();
+				m_latitude = solarMsg->latitude();
+				m_longitude = solarMsg->longitude();
+				m_Hour = solarMsg->hour();
+				m_Min = solarMsg->min();
+				// std::cout << solarMsg->heading() << "\n";
+				// std::cout << solarMsg->latitude() << "\n";
+				// std::cout << solarMsg->longitude() << "\n";
+			}
+			break;
+			case MessageType::AISData:
+			{
+				m_MessageReceived = true;
+			}
 			default:
 			return;
 		}
@@ -138,9 +160,16 @@ public:
 	int m_sailPosition;
 
 	  //NavigationControlMsg variables
-//=========================
+//=========================s
 	int m_CourseToSteer;
 	int m_TargetSpeed;
 	int m_WindvaneSelfSteeringOn;
 
+		//SolarDataMsg variables
+//=========================
+	double m_latitude;
+	double m_longitude;
+	double m_heading;
+	int m_Hour;
+	int m_Min;
 };

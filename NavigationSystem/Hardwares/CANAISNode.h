@@ -1,3 +1,5 @@
+#pragma once
+
 #include "Hardwares/CAN_Services/CANService.h"
 #include "Hardwares/CAN_Services/CANFrameReceiver.h"
 #include "Hardwares/CAN_Services/N2kMsg.h"
@@ -10,14 +12,6 @@
 #include <mutex>
 #include <vector>
 #include <iostream>
-
-struct AISVessel {
-  uint16_t COG;
-  uint16_t SOG;
-  int MMSI;
-  float latitude;
-  float longitude;
-}
 
 class CANAISNode : public ActiveNode {
 public:
@@ -33,8 +27,9 @@ public:
 
 private:
 
-  void CANAISThreadFunc(ActiveNode* nodePtr);
+  static void CANAISThreadFunc(ActiveNode* nodePtr);
   std::vector<AISVessel> m_VesselList;
   std::mutex m_lock;
   double m_LoopTime;
-}
+};
+// #endif

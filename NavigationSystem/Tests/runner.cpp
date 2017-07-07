@@ -163,9 +163,34 @@ public:
 
 static class TestDescription_suite_MessageSuite_test_AISDataMsg : public CxxTest::RealTestDescription {
 public:
- TestDescription_suite_MessageSuite_test_AISDataMsg() : CxxTest::RealTestDescription( Tests_MessageSuite, suiteDescription_MessageSuite, 380, "test_AISDataMsg" ) {}
+ TestDescription_suite_MessageSuite_test_AISDataMsg() : CxxTest::RealTestDescription( Tests_MessageSuite, suiteDescription_MessageSuite, 382, "test_AISDataMsg" ) {}
  void runTest() { suite_MessageSuite.test_AISDataMsg(); }
 } testDescription_suite_MessageSuite_test_AISDataMsg;
+
+#include "unit-tests/CanNodesSuite.h"
+
+static CanNodesSuite suite_CanNodesSuite;
+
+static CxxTest::List Tests_CanNodesSuite = { 0, 0 };
+CxxTest::StaticSuiteDescription suiteDescription_CanNodesSuite( "unit-tests/CanNodesSuite.h", 34, "CanNodesSuite", suite_CanNodesSuite, Tests_CanNodesSuite );
+
+static class TestDescription_suite_CanNodesSuite_test_CanInit : public CxxTest::RealTestDescription {
+public:
+ TestDescription_suite_CanNodesSuite_test_CanInit() : CxxTest::RealTestDescription( Tests_CanNodesSuite, suiteDescription_CanNodesSuite, 109, "test_CanInit" ) {}
+ void runTest() { suite_CanNodesSuite.test_CanInit(); }
+} testDescription_suite_CanNodesSuite_test_CanInit;
+
+static class TestDescription_suite_CanNodesSuite_test_MessageListening : public CxxTest::RealTestDescription {
+public:
+ TestDescription_suite_CanNodesSuite_test_MessageListening() : CxxTest::RealTestDescription( Tests_CanNodesSuite, suiteDescription_CanNodesSuite, 115, "test_MessageListening" ) {}
+ void runTest() { suite_CanNodesSuite.test_MessageListening(); }
+} testDescription_suite_CanNodesSuite_test_MessageListening;
+
+static class TestDescription_suite_CanNodesSuite_test_SolarData : public CxxTest::RealTestDescription {
+public:
+ TestDescription_suite_CanNodesSuite_test_SolarData() : CxxTest::RealTestDescription( Tests_CanNodesSuite, suiteDescription_CanNodesSuite, 129, "test_SolarData" ) {}
+ void runTest() { suite_CanNodesSuite.test_SolarData(); }
+} testDescription_suite_CanNodesSuite_test_SolarData;
 
 #include "unit-tests/UtilitySuite.h"
 
