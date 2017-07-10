@@ -114,14 +114,13 @@ public:
 				m_longitude = solarMsg->longitude();
 				m_Hour = solarMsg->hour();
 				m_Min = solarMsg->min();
-				// std::cout << solarMsg->heading() << "\n";
-				// std::cout << solarMsg->latitude() << "\n";
-				// std::cout << solarMsg->longitude() << "\n";
 			}
 			break;
 			case MessageType::AISData:
 			{
 				m_MessageReceived = true;
+				AISDataMsg* AISMsg = (AISDataMsg*) message;
+				m_VesselList = AISMsg->vesselList();
 			}
 			default:
 			return;
@@ -172,4 +171,8 @@ public:
 	double m_heading;
 	int m_Hour;
 	int m_Min;
+
+		//AISDataMsg variables
+//=========================
+	std::vector<AISVessel> m_VesselList;
 };

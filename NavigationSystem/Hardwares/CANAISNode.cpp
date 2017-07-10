@@ -19,12 +19,13 @@ void CANAISNode::processMessage(const Message* message) {
 }
 
 void CANAISNode::processFrame(CanMsg &msg) {
-  AISVessel vessel;
+
   N2kMsg nMsg;
-  IdToN2kMsg(nMsg, msg.id)
+  IdToN2kMsg(nMsg, msg.id);
   if (IsFastPackage(nMsg)) {
     ParseFastPkg(msg, nMsg);
     if (nMsg.PGN == 129038 || nMsg.PGN == 129039) {
+      AISVessel vessel;
       parsePGN129038_129039(nMsg, vessel);
       m_VesselList.push_back(std::move(vessel));
     }
@@ -32,23 +33,31 @@ void CANAISNode::processFrame(CanMsg &msg) {
 }
 
 void CANAISNode::processPGN(N2kMsg& nMsg) {
-
+  CanMsg msg;
+  if (IsFastPackage(nMsg)) {
+    ParseFastPkg(msg, nMsg);
+    if (nMsg.PGN == 129038 || nMsg.PGN == 129039) {
+      AISVessel vessel;
+      parsePGN129038_129039(nMsg, vessel);
+      m_VesselList.push_back(std::move(vessel));
+    }
+  }
 }
 
-void CANAISNode::parsePGN129038_129039(N2kMsg& nMsg, AISVessel vessel) {
-  vessel.MMSI = (nMsg.data[4] << 24 | nMsg.data[1]);
-  vessel.latitude = (nMsg.data[8] << 24 | nMsg.data[5]);
-  vessel.longitude = (nMsg.data[12] << 24 | nMsg.data[9]);
-  vessel.COG = (nMsg.data[15] << 8 | nMsg.data[14]);
-  vessel.SOG = (nMsg.data[17] << 8 | nMsg.data[16]);
+void CANAISNode::parsePGN129038_129039(N2kMsg& nMsg, AISVessel& vessel) {
+  vessel.MMSI = (nMsg.Data[4] << 24 | nMsg.Data[1]);
+  vessel.latitude = (nMsg.Data[8] << 24 | nMsg.Data[5]);
+  vessel.longitude = (nMsg.Data[12] << 24 | nMsg.Data[9]);
+  vessel.COG = (nMsg.Data[15] << 8 | nMsg.Data[14]);
+  vessel.SOG = (nMsg.Data[17] << 8 | nMsg.Data[16]);
 }
 
-void start() {
+void CANAISNode::start() {
   runThread(CANAISNode::CANAISThreadFunc);
 }
 
 void CANAISNode::CANAISThreadFunc(ActiveNode* nodePtr) {
-  CANAISNode node = dynamic_cast<CANAISNode*> (nodePtr);
+  CANAISNode* node = dynamic_cast<CANAISNode*> (nodePtr);
 
   Timer timer;
   timer.start();
@@ -60,7 +69,7 @@ void CANAISNode::CANAISThreadFunc(ActiveNode* nodePtr) {
     // Maybe send a can messge instead, but it is to long?
 
     MessagePtr AISList = std::make_unique<AISDataMsg>(node->m_VesselList);
-    node->msgBus.sendMessage(std::move(AISList));
+    node->m_MsgBus.sendMessage(std::move(AISList));
     node->m_lock.unlock();
 
     timer.sleepUntil(node->m_LoopTime*1.0f/1000);

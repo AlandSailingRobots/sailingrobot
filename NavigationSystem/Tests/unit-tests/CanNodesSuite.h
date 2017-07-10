@@ -14,7 +14,7 @@
 
 #pragma once
 
-// #include "Hardwares/CANAISNode.h"
+#include "Hardwares/CANAISNode.h"
 #include "Hardwares/CANSolarTrackerNode.h"
 // #include "Hardwares/CANWindsensorNode.h"
 #include "../cxxtest/cxxtest/TestSuite.h"
@@ -34,18 +34,20 @@
 class CanNodesSuite : public CxxTest::TestSuite {
 public:
 
-  // CANAISNode* aisNode;
+  CANAISNode* aisNode;
   CANSolarTrackerNode* solarNode;
   // CANWindsensorNode* windsensorNode;
 
+  MockNode* mockNode;
   // MockNode* aisMockNode;
-  MockNode* solarMockNode;
+  // MockNode* solarMockNode;
   // MockNode* windMockNode;
 
   // MockCANReceiver mockCan;
 
+  bool mockNodeRegistered = false;
   // bool aisNodeRegistered = false;
-  bool solarNodeRegisterered = false;
+  // bool solarNodeRegisterered = false;
   // bool windNodeRegistered = false;
 
   CANService* canService;
@@ -67,8 +69,9 @@ public:
 
     canService = new CANService();
 
+    mockNode = new MockNode(msgBus(), mockNodeRegistered);
     // aisMockNode = new MockNode(msgBus(),aisNodeRegistered);
-    solarMockNode = new MockNode(msgBus(),solarNodeRegisterered);
+    // solarMockNode = new MockNode(msgBus(),solarNodeRegisterered);
     // windMockNode = new MockNode(msgBus(),windNodeRegistered);
 
     // std::vector<uint32_t> canMessages; // = {700, 701};
@@ -79,7 +82,7 @@ public:
     if (solarNode == 0) {
       Logger::DisableLogging();
 
-      // aisNode = new CANAISNode(msgBus(), *canService, 1.0);
+      aisNode = new CANAISNode(msgBus(), *canService, 1.0);
       solarNode = new CANSolarTrackerNode(msgBus(), *canService, 1.0);
       // windsensorNode = new CANWindsensorNode(msgBus(), *canService, 1.0);
 
@@ -87,7 +90,7 @@ public:
       solarNode->start();
       // windsensorNode->start();
 
-      std::this_thread::sleep_for(std::chrono::milliseconds(3000));
+      std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
       thr = new std::thread(runMessageLoop);
     }
@@ -97,18 +100,20 @@ public:
 
   void tearDown() {
     if (testCount == CAN_TEST_COUNT) {
-      // delete aisNode;
+      delete aisNode;
       delete solarNode;
       // delete windsensorNode;
     }
+    delete mockNode;
     // delete aisMockNode;
-    delete solarMockNode;
+    // delete solarMockNode;
     // delete windMockNode;
   }
 
   void test_CanInit() {
+    TS_ASSERT(mockNodeRegistered);
     // TS_ASSERT(aisNodeRegistered);
-    TS_ASSERT(solarNodeRegisterered);
+    // TS_ASSERT(solarNodeRegisterered);
     // TS_ASSERT(windNodeRegistered);
   }
 
@@ -121,9 +126,10 @@ public:
 
     MessagePtr mockSolarMsg = std::make_unique<SolarDataMsg>(latitude,longitude,heading,hour,min);
     msgBus().sendMessage(std::move(mockSolarMsg));
-    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+    std::this_thread::sleep_for(std::chrono::milliseconds(700));
 
-    TS_ASSERT(solarMockNode->m_MessageReceived);
+    TS_ASSERT(mockNode->m_MessageReceived);
+    // TS_ASSERT(solarMockNode->m_MessageReceived);
   }
 
   void test_SolarData() {
@@ -134,10 +140,51 @@ public:
 
     MessagePtr mockSolarMsg = std::make_unique<StateMessage>(heading,latitude,longitude,1,20);
     msgBus().sendMessage(std::move(mockSolarMsg));
-    std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+    std::this_thread::sleep_for(std::chrono::milliseconds(700));
 
-    TS_ASSERT_DELTA(solarMockNode->m_latitude, latitude, 1e-3);
-    TS_ASSERT_DELTA(solarMockNode->m_longitude, longitude, 1e-3);
-    TS_ASSERT_DELTA(solarMockNode->m_heading, heading, 1e-3);
+    TS_ASSERT_DELTA(mockNode->m_latitude, latitude, 1e-3);
+    TS_ASSERT_DELTA(mockNode->m_longitude, longitude, 1e-3);
+    TS_ASSERT_DELTA(mockNode->m_heading, heading, 1e-3);
+  }
+
+  void test_RecieveCANData() {
+    
+  }
+
+  void test_AISData() {
+    std::vector<AISVessel> AISList;
+    AISVessel v1, v2, v3;
+    v1.MMSI = 1;
+    v1.latitude = 60.2f;
+    v1.longitude = 19.1f;
+    v1.COG = 200;
+    v1.SOG = 10;
+    v2.MMSI = 2;
+    v2.latitude = 62.f;
+    v2.longitude = 18.1f;
+    v2.COG = 100;
+    v2.SOG = 5;
+    v3.MMSI = 3;
+    v3.latitude = 61.5f;
+    v3.longitude = 18.7f;
+    v3.COG = 80;
+    v3.SOG = 7;
+    AISList.push_back(v1);
+    AISList.push_back(v2);
+    AISList.push_back(v3);
+
+    MessagePtr mockAISMsg = std::make_unique<AISDataMsg>(AISList);
+    msgBus().sendMessage(std::move(mockAISMsg));
+    std::this_thread::sleep_for(std::chrono::milliseconds(700));
+
+    AISVessel ves1 = mockNode->m_VesselList[0];
+
+    TS_ASSERT(mockNode->m_MessageReceived);
+    TS_ASSERT_EQUALS(mockNode->m_VesselList.size(), 3);
+    TS_ASSERT_EQUALS(ves1.MMSI,1);
+    TS_ASSERT_DELTA(ves1.latitude, 60.2f, 1e-4);
+    TS_ASSERT_DELTA(ves1.longitude, 19.1f, 1e-4);
+    TS_ASSERT_EQUALS(ves1.COG, 200);
+    TS_ASSERT_EQUALS(ves1.SOG, 10);
   }
 };

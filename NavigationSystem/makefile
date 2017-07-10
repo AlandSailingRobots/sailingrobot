@@ -92,7 +92,7 @@ export LINE_FOLLOW_SRC      = Navigation/LineFollowNode.cpp waypointrouting/Rudd
 export NETWORK_SRC          = Network/TCPServer.cpp
 
 export HARDWARE_NODES_SRC   = Hardwares/CV7Node.cpp Hardwares/HMC6343Node.cpp Hardwares/GPSDNode.cpp Hardwares/ActuatorNodeASPire.cpp Hardwares/CANSolarTrackerNode.cpp \
-                            Hardwares/ActuatorNode.cpp Hardwares/ArduinoNode.cpp Hardwares/CANFeedbackReceiver.cpp Hardwares/CANArduinoNode.cpp
+                            Hardwares/CANAISNode.cpp Hardwares/ActuatorNode.cpp Hardwares/ArduinoNode.cpp Hardwares/CANFeedbackReceiver.cpp Hardwares/CANArduinoNode.cpp
 
 export SYSTEM_SERVICES_SRC  = SystemServices/Logger.cpp SystemServices/SysClock.cpp SystemServices/Timer.cpp \
                             DataBase/DBHandler.cpp DataBase/DBLogger.cpp SystemServices/WingsailControl.cpp \

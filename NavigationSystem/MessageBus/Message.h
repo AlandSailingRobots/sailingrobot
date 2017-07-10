@@ -33,7 +33,6 @@ struct AISVessel {
   float longitude;
 };
 
-
 class Message {
 public:
 	///----------------------------------------------------------------------------------

@@ -7,13 +7,13 @@
 #include "MessageBus/Message.h"
 #include "MessageBus/MessageBus.h"
 #include "SystemServices/Timer.h"
-#include "Messages/StateMessage.h"
+#include "Messages/AISDataMsg.h"
 
 #include <mutex>
 #include <vector>
 #include <iostream>
 
-class CANAISNode : public ActiveNode {
+class CANAISNode : public CANPGNReceiver, public ActiveNode {
 public:
   CANAISNode(MessageBus& msgBus, CANService& canService, double loopTime);
   ~CANAISNode();
@@ -22,7 +22,7 @@ public:
   void processMessage(const Message* message);
   void processFrame(CanMsg& msg);
   void processPGN(N2kMsg& nMsg);
-  void parsePGN129038_129039();
+  void parsePGN129038_129039(N2kMsg& nMsg, AISVessel& vessel);
   void start();
 
 private:
@@ -32,4 +32,3 @@ private:
   std::mutex m_lock;
   double m_LoopTime;
 };
-// #endif
