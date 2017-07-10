@@ -71,21 +71,18 @@ public:
     // ----------------
     void setUp()
     {
-            
          // Object to simulate the 
         mockNode = new MockNode(msgBus(), nodeRegistered);
         
         // setup them up once in this test, delete them when the program closes
         if(cRegulatorNode == 0)
         {  
-            //attente = new std::chrono::milliseconds(2600);
-            //std::cout << " Count of ticks : " << attente->count() << std::endl;
-            dbHandler = new DBHandler("./asr.db");
+            dbHandler = new DBHandler("../asrtest.db");
             Logger::DisableLogging();   
             
             cRegulatorNode = new CourseRegulatorNode(msgBus(),*dbHandler,lTime,MaxRudAng,0,0);
             cRegulatorNode->start();
-            std::this_thread::sleep_for(std::chrono::milliseconds(400));
+            std::this_thread::sleep_for(std::chrono::milliseconds(2600));
             thr = new std::thread(runMessageLoop);
         }    
         testCount++;
@@ -100,6 +97,8 @@ public:
         if(testCount == COURSE_REGULATORNODE_TEST_COUNT)
         {
             delete cRegulatorNode;
+            delete thr;
+            delete dbHandler;
         }
         delete mockNode;
     }
@@ -122,7 +121,6 @@ public:
         MessagePtr stateData = std::make_unique<StateMessage>(heading,60.09726,19.93481,speed,0);
         msgBus().sendMessage(std::move(stateData));
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
-
         // Check if the message has been received by the object of simulation and without modification without desired_heading
         TS_ASSERT(mockNode->m_MessageReceived);
     }
@@ -140,37 +138,24 @@ public:
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
         // Check if the message has been received by the object of simulation and without modification without desired_heading
+        TS_ASSERT_EQUALS(mockNode->m_StateMsgHeading,heading);
+        TS_ASSERT_EQUALS(mockNode->m_StateMsgSpeed,speed);
         TS_ASSERT_DELTA(mockNode->m_rudderPosition, 0, 1e-7); //Heading_error_value : 370
-        // TODO: See how to find when the value is not good and interpreted it otherwise the utility::limitedAnnglerange change 370
+        // TODO: See how to find when the value is not good and interpreted it otherwise the utility::limitedAnglerange change 370
 
-        int16_t desiredcourse = 15;
+        double desiredcourse = 15;
         // Test listening desired course Message
         MessagePtr desiredCourseData = std::make_unique<DesiredCourseMsg>(desiredcourse);
         msgBus().sendMessage(std::move(desiredCourseData));
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
-        double rudderAngle = Utility::sgn(speed)*(sin(heading-static_cast<double>(desiredcourse))*MaxRudAng);
+        // Precision ?
+        double diffHeading = Utility::limitAngleRange(heading)-Utility::limitAngleRange(desiredcourse);
+        int rudderAngle = Utility::sgn(speed)*sin(Utility::degreeToRadian(diffHeading))*MaxRudAng;
         double courseRegulatorRudderAngle = mockNode->m_rudderPosition;
         TS_ASSERT_EQUALS(courseRegulatorRudderAngle,rudderAngle);
         //Test if not calculate false value without the desired heading (includ Desired_heading = 0)
         // Check after if the value is correct
-    }
-
-    // ----------------
-    // Test to see if the message, sent by the node, is with the values
-    // ----------------
-    void test_CourseRegulatorCourseMsgActuatorData(){
-        double rudderPos = 10;
-        double sailPos = 20;
-
-        // Test listening State Message
-        MessagePtr actuatorData = std::make_unique<ActuatorPositionMsg>(rudderPos,sailPos);
-        msgBus().sendMessage(std::move(actuatorData));
-        std::this_thread::sleep_for(std::chrono::milliseconds(500));
-
-        // Check if the message has been received by the object of simulation and without modification without desired_heading
-        TS_ASSERT_EQUALS(mockNode->m_rudderPosition, rudderPos); 
-        TS_ASSERT_EQUALS(mockNode->m_sailPosition, sailPos);
     }
 
     // ----------------
@@ -185,13 +170,15 @@ public:
         msgBus().sendMessage(std::move(stateData));
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
-        int16_t desiredcourse = -110;
+        double desiredcourse = 250;
         // Test listening desired course Message
         MessagePtr desiredCourseData = std::make_unique<DesiredCourseMsg>(desiredcourse);
         msgBus().sendMessage(std::move(desiredCourseData));
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
-        double rudderAngle = Utility::sgn(speed)*Utility::sgn((sin(heading-static_cast<double>(desiredcourse)))*MaxRudAng);
+        // Precision ?
+        double diffHeading = Utility::limitAngleRange(heading)-Utility::limitAngleRange(desiredcourse);
+        int rudderAngle = Utility::sgn(speed)*Utility::sgn(sin(Utility::degreeToRadian(diffHeading)))*MaxRudAng;
         double courseRegulatorRudderAngle = mockNode->m_rudderPosition;
         TS_ASSERT_EQUALS(courseRegulatorRudderAngle,rudderAngle);
     }
@@ -208,13 +195,15 @@ public:
         msgBus().sendMessage(std::move(stateData));
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
-        int16_t desiredcourse = -17;
+        double desiredcourse = 343;
         // Test listening desired course Message
         MessagePtr desiredCourseData = std::make_unique<DesiredCourseMsg>(desiredcourse);
         msgBus().sendMessage(std::move(desiredCourseData));
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
-        double rudderAngle = Utility::sgn(speed)*sin(heading-static_cast<double>(desiredcourse))*MaxRudAng;
+        // Precision ?
+        double diffHeading = Utility::limitAngleRange(heading)-Utility::limitAngleRange(desiredcourse);
+        int rudderAngle = Utility::sgn(speed)*sin(Utility::degreeToRadian(diffHeading))*MaxRudAng;
         double courseRegulatorRudderAngle = mockNode->m_rudderPosition;
         TS_ASSERT_EQUALS(courseRegulatorRudderAngle,rudderAngle);
         
@@ -232,13 +221,15 @@ public:
         msgBus().sendMessage(std::move(stateData));
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
-        int16_t desiredcourse = 200;
+        double desiredcourse = 200;
         // Test listening desired course Message
         MessagePtr desiredCourseData = std::make_unique<DesiredCourseMsg>(desiredcourse);
         msgBus().sendMessage(std::move(desiredCourseData));
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
-        double rudderAngle = Utility::sgn(speed)*Utility::sgn((sin(heading-static_cast<double>(desiredcourse)))*MaxRudAng);
+        // Precision ?
+        double diffHeading = Utility::limitAngleRange(heading)-Utility::limitAngleRange(desiredcourse);
+        int rudderAngle = Utility::sgn(speed)*Utility::sgn(sin(Utility::degreeToRadian(diffHeading)))*MaxRudAng;
         double courseRegulatorRudderAngle = mockNode->m_rudderPosition;
         TS_ASSERT_EQUALS(courseRegulatorRudderAngle,rudderAngle);
     }

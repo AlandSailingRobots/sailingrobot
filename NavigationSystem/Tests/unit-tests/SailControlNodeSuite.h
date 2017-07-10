@@ -13,20 +13,21 @@
 
 #pragma once
 
-#include "WorldState/SailControlNode.h"
+#include "LowLevelControllers/SailControlNode.h"
 #include "../cxxtest/cxxtest/TestSuite.h"
 #include "Messages/ActuatorPositionMsg.h"
 #include "../../MessageBus/MessageBus.h"
 #include "TestMocks/MessageLogger.h"
 #include "Messages/WindStateMsg.h"
 #include "Messages/StateMessage.h"
+#include "Math/Utility.h"
 
 
 // For std::this_thread
 #include <chrono>
 #include <thread>
-#include "All.h"
-#include <math>
+//#include "All.h"
+#include <math.h>
 
 #define SAIL_CONTROLNODE_TEST_COUNT   8
 
@@ -36,10 +37,13 @@ class SailControlNodeSuite : public CxxTest::TestSuite
 public:
 
   SailControlNode* sControlNode;
-
+  DBHandler* dbHandler;
   MockNode* mockNode;
   bool nodeRegistered = false;
+
   double loopTime = 0.5;
+  double MaxSailAngle = 90;
+  double MinSailAngle = 15;
 
   std::thread* thr;
   int testCount = 0;
@@ -71,10 +75,9 @@ public:
         Logger::DisableLogging();
 
 
-        sControlNode = new SailControlNode(msgBus(), .5,.79,.01,.1, 0, 0, dbHandler);
+        sControlNode = new SailControlNode(msgBus(), *dbHandler, .5, MaxSailAngle, MinSailAngle, 90, 0, 0);
         sControlNode->start();
         std::this_thread::sleep_for(std::chrono::milliseconds(2600));
-
         thr = new std::thread(runMessageLoop);
     }
     testCount++;
@@ -88,9 +91,10 @@ public:
     if(testCount == SAIL_CONTROLNODE_TEST_COUNT)
     {
       delete sControlNode;
+      delete thr;
+      delete dbHandler;
     }
     delete mockNode;
-
   }
 
   // ----------------
@@ -101,139 +105,75 @@ public:
   }
 
   // ----------------
-  // Test for the absence of a returned message by a offline GPS
-  // ----------------
-  void test_SailControlNode(){
-    TS_ASSERT(sControlNode->init());
-    TS_ASSERT(!mockNode->m_MessageReceived);
-
-  }
-
-  // ----------------
-  // Test to see if a message concerning the node will be listened
+  // Test to see if a message concerning the node will be listened and process
   // ----------------
   void test_SailControlMessageListener(){
-    double trueWindSpeed = 60.09726; //units ?
-    double trueWindDirection = 19.93481;
-    double apparentWindSpeed = 1; //units ?
-    double apparentWindDirection = 1;
+    double appWindDirection = 45;
+    double appWindSpeed = 10;
+    double appWindTemp = 15;
     
-    MessagePtr windData =  std::make_unique<WindStateMsg>(trueWindSpeed,trueWindDirection,apparentWindSpeed,apparentWindDirection);
-      msgBus().sendMessage(std::move(windData));
-      std::this_thread::sleep_for(std::chrono::milliseconds(500));
+    MessagePtr windData =  std::make_unique<WindDataMsg>(appWindDirection,appWindSpeed,appWindTemp);
+    msgBus().sendMessage(std::move(windData));
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
-      TS_ASSERT(mockNode->m_MessageReceived);
+    TS_ASSERT(mockNode->m_MessageReceived);
+    TS_ASSERT_EQUALS(mockNode->m_WindDir,appWindDirection);
+    TS_ASSERT_EQUALS(mockNode->m_WindSpeed,appWindSpeed);
+    TS_ASSERT_EQUALS(mockNode->m_WindTemp,appWindTemp);
+
+    //Check if there is the same result by the processing next to the Compass data has been received
+    double sailAngle = -Utility::sgn(appWindDirection)*(((MinSailAngle-MaxSailAngle)*std::abs(appWindDirection)/180)+MaxSailAngle);
+    double sailControlNodeSailAngle = mockNode->m_sailPosition;
+    std::cout << std::endl << " ##### Sail config : Angle " << sailAngle << std::endl ;
+    TS_ASSERT_EQUALS(sailControlNodeSailAngle,sailAngle);  
   }
 
   // ----------------
-  // Test to see if ,after the GPS messsage, the heading is not changed
+  // Test to see if a message concerning the node will be listened and process
   // ----------------
-  void test_SailControlNodeSailAngle(){
-    double trueWindSpeed = 60.09726; //units ? m/s
-    double trueWindDirection = 19.93481;
-    double apparentWindSpeed = 1; //units ? M/s
-    double apparentWindDirection = 50;
+  void test_SailControlNegativeBeamingDirection(){
+    double appWindDirection = -90;
+    double appWindSpeed = 10;
+    double appWindTemp = 15;
     
-      MessagePtr windData =  std::make_unique<WindStateMsg>(trueWindSpeed,trueWindDirection,apparentWindSpeed,apparentWindDirection);
-      msgBus().sendMessage(std::move(windData));
-      std::this_thread::sleep_for(std::chrono::milliseconds(500));
+    MessagePtr windData =  std::make_unique<WindDataMsg>(appWindDirection,appWindSpeed,appWindTemp);
+    msgBus().sendMessage(std::move(windData));
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
-        //Check if there is the same result by the processing next to the Compass data has been received
-        float sailAngle = -sgn(m_ApparentWind)*(((m_MinSailAngle-m_MaxSailAngle)*std::abs(m_ApparentWind)/M_PI)+m_MaxSailAngle);
-        float sailControlNodeSailAngle = mockNode->m_sailPosition;
-        TS_ASSERT_EQUALS(sailControlNodeSailAngle, sailAngle);
-      }
+    TS_ASSERT(mockNode->m_MessageReceived);
+    TS_ASSERT_EQUALS(mockNode->m_WindDir,appWindDirection);
+    TS_ASSERT_EQUALS(mockNode->m_WindSpeed,appWindSpeed);
+    TS_ASSERT_EQUALS(mockNode->m_WindTemp,appWindTemp);
 
-        // ----------------
-        // Test to see if the message, sent by the node, is with the values
-        // ----------------
-        void test_StateEstStateMsgSpeedAndDeclZero(){
-          int nextDeclination = 0;
-          MessagePtr wayPointMsgData = std::make_unique<WaypointDataMsg>(2, 19.81, 60.2, nextDeclination, 6, 15,  1, 19.82, 60.1, 6, 15);
-          msgBus().sendMessage(std::move(wayPointMsgData));
-          std::this_thread::sleep_for(std::chrono::milliseconds(500));
+    //Check if there is the same result by the processing next to the Compass data has been received
+    double sailAngle = -Utility::sgn(appWindDirection)*(((MinSailAngle-MaxSailAngle)*std::abs(appWindDirection)/180)+MaxSailAngle);
+    double sailControlNodeSailAngle = mockNode->m_sailPosition;
+    std::cout << std::endl << " ##### Sail config : Angle " << sailAngle << std::endl ;
+    TS_ASSERT_EQUALS(sailControlNodeSailAngle,sailAngle);  
+  }
 
-          int headingComp = 0;
-          MessagePtr compassMsgData = std::make_unique<CompassDataMsg>(headingComp, 80, 60);
-          msgBus().sendMessage(std::move(compassMsgData));
-          std::this_thread::sleep_for(std::chrono::milliseconds(500));
+  // ----------------
+  // Test to see if a message concerning the node will be listened and process
+  // ----------------
+  void test_SailControlRunningConfig(){
+    double appWindDirection = 180;
+    double appWindSpeed = 10;
+    double appWindTemp = 15;
+    
+    MessagePtr windData =  std::make_unique<WindDataMsg>(appWindDirection,appWindSpeed,appWindTemp);
+    msgBus().sendMessage(std::move(windData));
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
-          double latitude = 60.09726;
-          double longitude = 19.93481;
-          double unixTime = 1;
-          double speed = 0;
-          double headingGPS = 10;
-          int satCount = 2;
-          GPSMode mode = GPSMode::LatLonOk;
-          MessagePtr gpsMsgData = std::make_unique<GPSDataMsg>(false,true,latitude,longitude,unixTime,speed,headingGPS,satCount,
-            mode);
-            msgBus().sendMessage(std::move(gpsMsgData));
-            std::this_thread::sleep_for(std::chrono::milliseconds(500));
-            //Check if the Course keep a null value
-            TS_ASSERT_DELTA(mockNode->m_StateMsgCourse, 0, 1e-7);
-          }
+    TS_ASSERT(mockNode->m_MessageReceived);
+    TS_ASSERT_EQUALS(mockNode->m_WindDir,appWindDirection);
+    TS_ASSERT_EQUALS(mockNode->m_WindSpeed,appWindSpeed);
+    TS_ASSERT_EQUALS(mockNode->m_WindTemp,appWindTemp);
 
-          void test_StateEstStateMsgSpeedAndDeclOverZero(){
-            double latitude = 60.09726;
-            double longitude = 19.93481;
-            double unixTime = 1;
-            double speed = 0.5;
-            double headingGPS = 10;
-            int satCount = 2;
-            GPSMode mode = GPSMode::LatLonOk;
+    //Check if there is the same result by the processing next to the Compass data has been received
+    double sailAngle = -Utility::sgn(appWindDirection)*(((MinSailAngle-MaxSailAngle)*std::abs(appWindDirection)/180)+MaxSailAngle);
+    double sailControlNodeSailAngle = mockNode->m_sailPosition;
+    std::cout << std::endl << " ##### Sail config : Angle " << sailAngle << std::endl ;
+    TS_ASSERT_EQUALS(sailControlNodeSailAngle,sailAngle);  
+  }
 
-            MessagePtr gpsMsgData = std::make_unique<GPSDataMsg>(false,true,latitude,longitude,unixTime,speed,headingGPS,satCount,
-              mode);
-              msgBus().sendMessage(std::move(gpsMsgData));
-              std::this_thread::sleep_for(std::chrono::milliseconds(500));
-
-              int nextDeclination = 10;
-              MessagePtr wayPointMsgData = std::make_unique<WaypointDataMsg>(2, 19.81, 60.2, nextDeclination, 6, 15,  1, 19.82, 60.1, 6, 15);
-              msgBus().sendMessage(std::move(wayPointMsgData));
-              std::this_thread::sleep_for(std::chrono::milliseconds(500));
-
-              int heading = 100;
-              MessagePtr compassMsgData = std::make_unique<CompassDataMsg>(heading, 80, 60);
-              msgBus().sendMessage(std::move(compassMsgData));
-              std::this_thread::sleep_for(std::chrono::milliseconds(500));
-
-              float sailControlNodeVesselHeading = mockNode->m_StateMsgHeading;
-              // Check the modification and the new course
-              TS_ASSERT(sailControlNodeVesselHeading != 0);
-              TS_ASSERT(mockNode->m_StateMsgCourse > headingGPS);
-            }
-
-            void test_StateEstStateMsgSpeedLessThanZero(){
-              double latitude = 60.09726;
-              double longitude = 19.93481;
-              double unixTime = 1;
-              double speed = -1;
-              double headingGPS = 10.00;
-              int satCount = 2;
-              GPSMode mode = GPSMode::LatLonOk;
-
-              MessagePtr gpsMsgData = std::make_unique<GPSDataMsg>(false,true,latitude,longitude,unixTime,speed,headingGPS,satCount,
-                mode);
-                msgBus().sendMessage(std::move(gpsMsgData));
-
-                std::this_thread::sleep_for(std::chrono::milliseconds(500));
-                int nextDeclination = 10;
-                MessagePtr wayPointMsgData = std::make_unique<WaypointDataMsg>(2, 19.81, 60.2, nextDeclination, 6, 15,  1, 19.82, 60.1, 6, 15);
-                msgBus().sendMessage(std::move(wayPointMsgData));
-
-                std::this_thread::sleep_for(std::chrono::milliseconds(500));
-
-                int heading = 100;
-                MessagePtr compassMsgData = std::make_unique<CompassDataMsg>(heading, 80, 60);
-                MessagePtr compassData =  std::make_unique<CompassDataMsg>(heading, 80, 60);
-                msgBus().sendMessage(std::move(compassData));
-
-                std::this_thread::sleep_for(std::chrono::milliseconds(500));
-
-                float sailControlNodeVesselHeading = mockNode->m_StateMsgHeading;
-                //CHeck the modification of the heading and the same result of heading because of the negative speed
-                TS_ASSERT(sailControlNodeVesselHeading != 0);
-                TS_ASSERT_DELTA(mockNode->m_StateMsgCourse, headingGPS, 1e-7);
-              }
-
-            };
+};

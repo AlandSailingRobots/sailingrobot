@@ -15,7 +15,7 @@
 #pragma once
 
 #include "MessageBus/ActiveNode.h"
-#include "Messages/WindStateMsg.h"
+#include "Messages/WindDataMsg.h"
 #include "Messages/NavigationControlMsg.h"
 #include "Messages/ActuatorPositionMsg.h"
 #include "MessageBus/MessageBus.h"
@@ -29,8 +29,8 @@ public:
     //--------------
     // Constructor
     //--------------
-    SailControlNode(MessageBus& msgBus, double loopTime, float maxSailAngle, float minSailAngle
-                    float maxCommandAngle, double configPGain, double configIGain, DBHandler& dbhandler)
+    SailControlNode(MessageBus& msgBus, DBHandler& dbhandler, double loopTime, double maxSailAngle = 43, double minSailAngle = 5.5,
+                    double maxCommandAngle = 30, double configPGain = 0, double configIGain = 0);
     
     // -------------
     // Destructor
@@ -57,49 +57,68 @@ private:
     // -------------
     // Processing informations from the State Message
     // -------------
-    void processWindStateMessage(const WindStateMsg* msg);
-        // -------------
-        // Informations
-        double m_ApparentWindDir; // units : ° (degrees), from -180 to 180
-
+    void processWindDataMessage(const WindDataMsg* msg);
+        
     // -------------
     // Processing informations from the Navigation Control Message
     // -------------
     void processNavigationControlMessage(const NavigationControlMsg* msg);
-        // -------------
-        // Informations
-        NavigationState m_NavigationState;
-
 
     // -------------
     // Calculate the sail angle according to the apparent wind
     // -------------    
     double calculateSailAngle();
-        // ------------
-        // Informations
-        double m_MaxSailAngle; // units : ° (degrees)
-        double m_MinSailAngle; // units : ° (degrees)
-
+        
     // -------------
     // Limit the sail angle
     // -------------   
     double restrictSail(double val); 
-        // -------------
-        // Informations
-        double m_MaxCommandAngle; // units : ° (degrees)
+
+    // -------------
+    // Get and update the frequency of the thread
+    // -------------   
+    void updateFrequencyThread(SailControlNode* node);
 
     // -------------
     // Actions during the activity of the node
     // -------------
     static void SailControlNodeThreadFunc(ActiveNode* nodePtr);
-        // -------------
-        // Informations
-        std::mutex m_lock;
-        double m_LoopTime;
+
     
+    //m_maxCommandAngle = 30;
+    //m_maxSailAngle = 42.857;
+    //m_minSailAngle = 5.625;
+    // ------------
+    // Informations
+    double m_MaxSailAngle; // units : (radian)
+    double m_MinSailAngle; // units : (radian)
+    // -------------
+    // Informations
+    double m_MaxCommandAngle; // units : ° (degrees)
+
+    // -------------
+    // Informations
+    double m_ApparentWindDir; // units : ° (degrees), from -180 to 180
+
+    double pGain;
+    double iGain;
+
     // -------------
     // Access to the database
-    // -------------
+    // ------------
     DBHandler &m_db;
+    double m_LoopTime;
+
+    const int STATE_INITIAL_SLEEP = 2000;
+    
+
+    // -------------
+    // Informations
+    NavigationState m_NavigationState;
+
+
+    // -------------
+    // Informations
+    std::mutex m_lock;
 };
 

@@ -20,6 +20,7 @@
 #include "TestMocks/MessageLogger.h"
 #include "Messages/CompassDataMsg.h"
 #include "Messages/GPSDataMsg.h"
+#include "Math/Utility.h"
 
 
 // For std::this_thread
@@ -67,7 +68,6 @@ public:
     if(sEstimationNode == 0)
     {
       Logger::DisableLogging();
-
 
       sEstimationNode = new StateEstimationNode(msgBus(), .5, speedLimit);
       sEstimationNode->start();

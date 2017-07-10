@@ -16,17 +16,18 @@
 #include <chrono>
 #include <thread>
 #include <math.h>
-#include <cstdlib>
+//#include <cstdlib>
 #include "Math/Utility.h"
 #include "Messages/ActuatorPositionMsg.h"
 #include "Messages/StateMessage.h"
 #include "SystemServices/Logger.h"
 #include "SystemServices/Timer.h"
 
+#define HEADING_ERROR_VALUE 370
 
 CourseRegulatorNode::CourseRegulatorNode( MessageBus& msgBus,  DBHandler& dbhandler, double loopTime, double maxRudderAngle,
-    double configPGain, double configIGain):ActiveNode(NodeID::CourseRegulatorNode,msgBus), m_VesselHeading(0),
-    m_MaxRudderAngle(maxRudderAngle),m_DesiredHeading(0),m_db(dbhandler), m_LoopTime(loopTime),pGain(configPGain),iGain(configIGain) 
+    double configPGain, double configIGain):ActiveNode(NodeID::CourseRegulatorNode,msgBus), m_VesselHeading(HEADING_ERROR_VALUE),
+    m_MaxRudderAngle(maxRudderAngle),m_DesiredHeading(HEADING_ERROR_VALUE),m_db(dbhandler), m_LoopTime(loopTime),pGain(configPGain),iGain(configIGain) 
 {
     msgBus.registerNode( *this, MessageType::StateMessage);
     msgBus.registerNode( *this, MessageType::DesiredCourse);
@@ -54,7 +55,9 @@ double CourseRegulatorNode::getFrequencyThread()
 ///----------------------------------------------------------------------------------
 void CourseRegulatorNode::processMessage( const Message* msg )
 {
-    switch( msg->messageType() )
+    MessageType type = msg->messageType();
+    //std::cout << std::endl << " COURSE REG NODE ####### Message processing ######## " << msgToString(type) << std::endl ;
+    switch(type)
     {
         case MessageType::StateMessage:
         processStateMessage(static_cast< const StateMessage*>(msg));
@@ -74,26 +77,29 @@ void CourseRegulatorNode::processMessage( const Message* msg )
 ///----------------------------------------------------------------------------------
 void CourseRegulatorNode::processStateMessage(const StateMessage* msg)
 {
-    std::lock_guard<std::mutex> lock_guard(m_lock);
-    m_VesselHeading = Utility::limitAngleRange(msg->heading());
+    //std::lock_guard<std::mutex> lock_guard(m_lock);
+    //std::cout << std::endl << "COURSE REG NODE ########## In process ######## " << std::endl; 
+    m_VesselHeading = msg->heading();
     // Not use
     //m_VesselLatitude = msg->latitude();
     //m_VesselLongitude = msg->longitude();
     m_VesselSpeed = msg->speed(); 
     //m_VesselCourse = msg->course();
+    //std::cout << std::endl << "COURSE REG NODE ######### Receive State Message : H " << msg->heading() << " , V " << msg->speed();
 }
 
 ///----------------------------------------------------------------------------------
 void CourseRegulatorNode::processDesiredCourseMessage(const DesiredCourseMsg* msg)
 {
-    std::lock_guard<std::mutex> lock_guard(m_lock);
-    m_DesiredHeading = Utility::limitAngleRange(static_cast<double>(msg->desiredCourse()));
+    //std::lock_guard<std::mutex> lock_guard(m_lock);
+    m_DesiredHeading = static_cast<double>(msg->desiredCourse());
+    //std::cout << std::endl << "COURSE REG NODE ######### Receive DesiredCourse Message : DC " << msg->desiredCourse();
 }
 
 ///----------------------------------------------------------------------------------
 void CourseRegulatorNode::processNavigationControlMessage(const NavigationControlMsg* msg)
 {
-    std::lock_guard<std::mutex> lock_guard(m_lock);
+    //std::lock_guard<std::mutex> lock_guard(m_lock);
     m_NavigationState = msg->navigationState();
     // Not use
     //m_CourseToSteer = msg->courseToSteer();
@@ -106,17 +112,23 @@ void CourseRegulatorNode::processNavigationControlMessage(const NavigationContro
 ///----------------------------------------------------------------------------------
 double CourseRegulatorNode::calculateRudderAngle()
 {
-    double difference_Heading = m_VesselHeading - m_DesiredHeading;
-    // Equation from book "Robotic Sailing 2015 ", page 141
-    // The MAX_RUDDER_ANGLE is a parameter configuring the variation around the desired heading.
-    // Also the reaction could be configure by the frequence of the thread.
-    if(cos(difference_Heading) < 0) // Wrong sense because over 90°
-    {
-        // Max Rudder angle in the opposite way 
-         return Utility::sgn(m_VesselSpeed)*(Utility::sgn(sin(difference_Heading))*m_MaxRudderAngle);
+    if((m_DesiredHeading != HEADING_ERROR_VALUE) and (m_VesselHeading != HEADING_ERROR_VALUE)){
+
+        double difference_Heading = Utility::limitAngleRange(m_VesselHeading) - Utility::limitAngleRange(m_DesiredHeading);
+        //std::cout << std::endl << "COURSE REG NODE ######### Calc : DiffH " << difference_Heading;
+        // Equation from book "Robotic Sailing 2015 ", page 141
+        // The MAX_RUDDER_ANGLE is a parameter configuring the variation around the desired heading.
+        // Also the reaction could be configure by the frequence of the thread.
+        if(cos(Utility::degreeToRadian(difference_Heading)) < 0) // Wrong sense because over 90°
+        {
+            // Max Rudder angle in the opposite way 
+            return Utility::sgn(m_VesselSpeed)*(Utility::sgn(sin(Utility::degreeToRadian(difference_Heading))))*m_MaxRudderAngle;
+        }
+        // Regulation of the rudder
+        return Utility::sgn(m_VesselSpeed)*(sin(Utility::degreeToRadian(difference_Heading))*m_MaxRudderAngle);
+    
     }
-    // Regulation of the rudder
-    return Utility::sgn(m_VesselSpeed)*(sin(difference_Heading)*m_MaxRudderAngle);
+    return 0;
 }
 
 ///----------------------------------------------------------------------------------
@@ -142,6 +154,7 @@ void CourseRegulatorNode::CourseRegulatorNodeThreadFunc(ActiveNode* nodePtr)
         std::lock_guard<std::mutex> lock_guard(node->m_lock);
         // TODO : Modify Actuator Message for adapt to this Node
         MessagePtr actuatorMessage = std::make_unique<ActuatorPositionMsg>(node->calculateRudderAngle(),0);
+        //std::cout << std::endl << "COURSE REG NODE ######### Send : CalcR " << node->calculateRudderAngle();
         node->m_MsgBus.sendMessage(std::move(actuatorMessage));
     
         // Broadcast() or selected sent???

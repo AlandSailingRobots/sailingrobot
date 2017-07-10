@@ -21,7 +21,7 @@
 #include "Messages/StateMessage.h"
 #include "Messages/ActuatorPositionMsg.h"
 #include "Messages/NavigationControlMsg.h"
-
+#include "Messages/DesiredCourseMsg.h"
 
 
 
@@ -35,7 +35,7 @@ public:
 	{
 		if(msgBus.registerNode(*this, MessageType::GPSData) && msgBus.registerNode(*this, MessageType::WindData) &&
 		msgBus.registerNode(*this, MessageType::StateMessage) && msgBus.registerNode(*this, MessageType::ActuatorPosition)
-		&& msgBus.registerNode(*this, MessageType::NavigationControl))
+		&& msgBus.registerNode(*this, MessageType::NavigationControl)&& msgBus.registerNode(*this, MessageType::DesiredCourse))
 		{
 			registered = true;
 		}
@@ -83,14 +83,16 @@ public:
 				m_StateMsgLon = stateMsg->longitude();
 				m_StateMsgSpeed = stateMsg->speed();
 				m_StateMsgCourse = stateMsg->course();
+				//std::cout << std::endl << "MOCKNODE ######### Receive State Message : H " << m_StateMsgHeading << " , V " << m_StateMsgSpeed;
 			}
 			break;
 			case MessageType::ActuatorPosition:
-			{
+			{ 
 				m_MessageReceived = true;
 				ActuatorPositionMsg* actuatorMsg = (ActuatorPositionMsg*)message;
 				m_rudderPosition = actuatorMsg->rudderPosition();
 				m_sailPosition = actuatorMsg->sailPosition();
+				//std::cout << std::endl << "MOCKNODE ######### Receive Actuator Message : RP " << m_rudderPosition << " , SP " << m_sailPosition;
 			}
 			break;
 			case MessageType::NavigationControl:
@@ -100,6 +102,14 @@ public:
 				m_CourseToSteer = navigationControlMsg->courseToSteer();
 				m_TargetSpeed = navigationControlMsg->targetSpeed();
 				m_WindvaneSelfSteeringOn = navigationControlMsg->windvaneSelfSteeringOn();
+			}
+			break;
+			case MessageType::DesiredCourse:
+			{
+				m_MessageReceived = true;
+				DesiredCourseMsg* desiredCourseMsg = (DesiredCourseMsg*)message;
+				m_DesiredCourse = desiredCourseMsg->desiredCourse();
+				//std::cout << std::endl << " MOCKNODE ######### Receive Actuator Message : DC " << m_DesiredCourse << std::endl;
 			}
 			break;
 			default:
@@ -137,6 +147,10 @@ public:
 //=========================
 	int m_rudderPosition;
 	int m_sailPosition;
+
+	//ActuatorPosition variables
+//=========================
+	int16_t m_DesiredCourse;
 
 	  //NavigationControlMsg variables
 //=========================

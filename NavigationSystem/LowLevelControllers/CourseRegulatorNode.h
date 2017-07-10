@@ -114,8 +114,7 @@ private:
     //----------
     // Variable used
     const int STATE_INITIAL_SLEEP = 2000;
-    std::mutex m_lock;                      //Mutex to lock the node
-   
+    
     // -------------
     // Informations on Navigation control message
     NavigationState m_NavigationState;
@@ -130,4 +129,6 @@ private:
     double m_VesselSpeed; // units : knts (knots)
     double m_VesselCourse; // units : ° (degrees), from 0 to 359
 
+    std::mutex m_lock;                      //Mutex to lock the node
+   
 };
