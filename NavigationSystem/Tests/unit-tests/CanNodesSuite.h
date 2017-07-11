@@ -29,7 +29,7 @@
 #include <chrono>
 #include <thread>
 
-#define CAN_TEST_COUNT 8
+#define CAN_TEST_COUNT 4
 
 class CanNodesSuite : public CxxTest::TestSuite {
 public:
@@ -82,15 +82,15 @@ public:
     if (solarNode == 0) {
       Logger::DisableLogging();
 
-      aisNode = new CANAISNode(msgBus(), *canService, 1.0);
-      solarNode = new CANSolarTrackerNode(msgBus(), *canService, 1.0);
+      aisNode = new CANAISNode(msgBus(), *canService, 100);
+      solarNode = new CANSolarTrackerNode(msgBus(), *canService, 100);
       // windsensorNode = new CANWindsensorNode(msgBus(), *canService, 1.0);
+      aisNode->start();
 
-      // aisNode->start();
       solarNode->start();
       // windsensorNode->start();
 
-      std::this_thread::sleep_for(std::chrono::milliseconds(500));
+      std::this_thread::sleep_for(std::chrono::milliseconds(200));
 
       thr = new std::thread(runMessageLoop);
     }
@@ -105,6 +105,7 @@ public:
       // delete windsensorNode;
     }
     delete mockNode;
+    delete canService;
     // delete aisMockNode;
     // delete solarMockNode;
     // delete windMockNode;
@@ -123,10 +124,13 @@ public:
     double longitude = 19.1;
     int hour = 12;
     int min = 15;
+    // std::this_thread::sleep_for(std::chrono::milliseconds(700));
 
     MessagePtr mockSolarMsg = std::make_unique<SolarDataMsg>(latitude,longitude,heading,hour,min);
     msgBus().sendMessage(std::move(mockSolarMsg));
-    std::this_thread::sleep_for(std::chrono::milliseconds(700));
+    std::cout << std::endl << " ##### BREAKPOINT ##### " << std::endl;
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    std::cout << std::endl << " ##### BREAKPOINT ##### " << std::endl;
 
     TS_ASSERT(mockNode->m_MessageReceived);
     // TS_ASSERT(solarMockNode->m_MessageReceived);
@@ -137,6 +141,7 @@ public:
     double latitude = 60.2;
     double longitude = 19.1;
 
+    std::this_thread::sleep_for(std::chrono::milliseconds(700));
 
     MessagePtr mockSolarMsg = std::make_unique<StateMessage>(heading,latitude,longitude,1,20);
     msgBus().sendMessage(std::move(mockSolarMsg));
@@ -147,11 +152,8 @@ public:
     TS_ASSERT_DELTA(mockNode->m_heading, heading, 1e-3);
   }
 
-  void test_RecieveCANData() {
-    
-  }
-
   void test_AISData() {
+
     std::vector<AISVessel> AISList;
     AISVessel v1, v2, v3;
     v1.MMSI = 1;
@@ -173,9 +175,12 @@ public:
     AISList.push_back(v2);
     AISList.push_back(v3);
 
+    // std::cout<<AISList.size()<<"\n";
+    // std::this_thread::sleep_for(std::chrono::milliseconds(1100));
+
     MessagePtr mockAISMsg = std::make_unique<AISDataMsg>(AISList);
     msgBus().sendMessage(std::move(mockAISMsg));
-    std::this_thread::sleep_for(std::chrono::milliseconds(700));
+    std::this_thread::sleep_for(std::chrono::milliseconds(2000));
 
     AISVessel ves1 = mockNode->m_VesselList[0];
 

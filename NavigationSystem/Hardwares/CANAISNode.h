@@ -20,7 +20,6 @@ public:
 
   bool init();
   void processMessage(const Message* message);
-  void processFrame(CanMsg& msg);
   void processPGN(N2kMsg& nMsg);
   void parsePGN129038_129039(N2kMsg& nMsg, AISVessel& vessel);
   void start();

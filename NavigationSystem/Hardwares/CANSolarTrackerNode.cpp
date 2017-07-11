@@ -3,9 +3,9 @@
 CANSolarTrackerNode::CANSolarTrackerNode(MessageBus& msgBus, CANService& canService, double loopTime)
 	: CANFrameReceiver(canService, 700), ActiveNode(NodeID::CANSolarTracker, msgBus), m_LoopTime(loopTime)
 {
-	// m_Lat = DATA_OUT_OF_RANGE;
-	// m_Lon = DATA_OUT_OF_RANGE;
-	// m_Heading = DATA_OUT_OF_RANGE;
+	m_Lat = DATA_OUT_OF_RANGE;
+	m_Lon = DATA_OUT_OF_RANGE;
+	m_Heading = DATA_OUT_OF_RANGE;
 	// m_Time = DATA_OUT_OF_RANGE;
 
 	msgBus.registerNode(*this, MessageType::StateMessage);
@@ -34,6 +34,8 @@ void CANSolarTrackerNode::processMessage (const Message* message) {
 
 		m_Hour = timeinfo->tm_hour;
 		m_Minute = timeinfo->tm_min;
+
+		// m_Sent = 0;
 	}
 }
 
@@ -53,20 +55,23 @@ void CANSolarTrackerNode::CANSolarTrackerThreadFunc(ActiveNode* nodePtr) {
 	timer.start();
 
 	while(true) {
-		timer.sleepUntil(node->m_LoopTime*1.0f / 1000);
 		node->m_lock.lock();
+		timer.sleepUntil(node->m_LoopTime*1.0f / 1000);
 
-		if (node->m_Lat == node->DATA_OUT_OF_RANGE &&
-				node->m_Lon == node-> DATA_OUT_OF_RANGE &&
+		if (node->m_Lat == node->DATA_OUT_OF_RANGE ||
+				node->m_Lon == node-> DATA_OUT_OF_RANGE ||
 				node->m_Heading == node->DATA_OUT_OF_RANGE) {
 			node->m_lock.unlock();
 			continue;
 		}
-		MessagePtr solarMsg = std::make_unique<SolarDataMsg>(node->m_Lat, node->m_Lon, node->m_Heading, node->m_Hour, node->m_Minute);
-		node -> m_MsgBus.sendMessage(std::move(solarMsg));
-
+		// if (node->m_Sent == 0) {
+			MessagePtr solarMsg = std::make_unique<SolarDataMsg>(node->m_Lat, node->m_Lon, node->m_Heading, node->m_Hour, node->m_Minute);
+			//std::cout << std::endl << node->m_Lat << std::endl;
+			node -> m_MsgBus.sendMessage(std::move(solarMsg));
+			// node->m_Sent == 1;
+		// }
+		// node->m_Sent == 1;
 		node->m_lock.unlock();
-
 		timer.reset();
 	}
 }

@@ -37,6 +37,7 @@ private:
   float	m_Heading;
   bool m_initialised;
   double m_LoopTime;
+  // int m_Sent;
 
   std::mutex m_lock;
 
