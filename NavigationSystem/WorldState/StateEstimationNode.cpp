@@ -80,7 +80,6 @@ void StateEstimationNode::processGPSMessage(const GPSDataMsg* msg)
   m_VesselSpeed = msg->speed();
   m_VesselCourse = msg->heading();
   m_GpsOnline = msg->gpsOnline();
-  lock_guard.~lock_guard();
 }
 
 int StateEstimationNode::getCourse(){
@@ -120,11 +119,12 @@ void StateEstimationNode::StateEstimationNodeThreadFunc(ActiveNode* nodePtr)
   while(true)
   {
     if(node->m_GpsOnline){
-      std::lock_guard<std::mutex> lock_guard(node->m_lock);
+      //std::lock_guard<std::mutex> lock_guard(node->m_lock);
+      node->m_lock.lock();
       MessagePtr stateMessage = std::make_unique<StateMessage>(node->m_VesselHeading, node->m_VesselLat,
       node->m_VesselLon, node->m_VesselSpeed, node->getCourse());
       node->m_MsgBus.sendMessage(std::move(stateMessage));
-      lock_guard.~lock_guard();
+      node->m_lock.unlock();
     }
     // TODO : Config timer or thread activity with a variable from the dbhandler ??? 
     timer.sleepUntil(node->m_LoopTime);

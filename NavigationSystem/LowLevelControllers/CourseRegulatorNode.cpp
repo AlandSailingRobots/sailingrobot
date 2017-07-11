@@ -26,7 +26,7 @@
 #define HEADING_ERROR_VALUE 370
 
 CourseRegulatorNode::CourseRegulatorNode( MessageBus& msgBus,  DBHandler& dbhandler, double loopTime, double maxRudderAngle,
-    double configPGain, double configIGain):ActiveNode(NodeID::CourseRegulatorNode,msgBus), m_VesselHeading(HEADING_ERROR_VALUE),
+    double configPGain, double configIGain):ActiveNode(NodeID::CourseRegulatorNode,msgBus), m_VesselHeading(HEADING_ERROR_VALUE), m_VesselSpeed(0),
     m_MaxRudderAngle(maxRudderAngle),m_DesiredHeading(HEADING_ERROR_VALUE),m_db(dbhandler), m_LoopTime(loopTime),pGain(configPGain),iGain(configIGain) 
 {
     msgBus.registerNode( *this, MessageType::StateMessage);
@@ -100,7 +100,7 @@ void CourseRegulatorNode::processDesiredCourseMessage(const DesiredCourseMsg* ms
 void CourseRegulatorNode::processNavigationControlMessage(const NavigationControlMsg* msg)
 {
     //std::lock_guard<std::mutex> lock_guard(m_lock);
-    m_NavigationState = msg->navigationState();
+    //m_NavigationState = msg->navigationState();
     // Not use
     //m_CourseToSteer = msg->courseToSteer();
     //m_TargetSpeed = msg->targetSpeed();
@@ -151,11 +151,14 @@ void CourseRegulatorNode::CourseRegulatorNodeThreadFunc(ActiveNode* nodePtr)
 
     while(true)
     {
-        std::lock_guard<std::mutex> lock_guard(node->m_lock);
+
+        node->m_lock.lock();
+        //std::lock_guard<std::mutex> lock_guard(node->m_lock);
         // TODO : Modify Actuator Message for adapt to this Node
         MessagePtr actuatorMessage = std::make_unique<ActuatorPositionMsg>(node->calculateRudderAngle(),0);
         //std::cout << std::endl << "COURSE REG NODE ######### Send : CalcR " << node->calculateRudderAngle();
         node->m_MsgBus.sendMessage(std::move(actuatorMessage));
+        node->m_lock.unlock();
     
         // Broadcast() or selected sent???
         timer.sleepUntil(node->m_LoopTime); //insert updateFrequencyThread in the function ?

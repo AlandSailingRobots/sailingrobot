@@ -29,7 +29,7 @@ public:
     //--------------
     // Constructor
     //--------------
-    CourseRegulatorNode(MessageBus& msgBus, DBHandler& dbhandler, double loopTime, double maxRudderAngle = 30 ,double configPGain = 0, double configIGain = 0);
+    CourseRegulatorNode(MessageBus& msgBus, DBHandler& dbhandler, double loopTime = .5, double maxRudderAngle = 30 ,double configPGain = 0, double configIGain = 0);
     // -------------
     // Destructor
     // -------------
@@ -90,6 +90,7 @@ private:
 
     double  m_VesselHeading; // units : ° (degrees), from 0 to 359
         
+    double m_VesselSpeed; // units : knts (knots)
     // -------------
     // Parameters to regulate this node
     // -------------
@@ -117,8 +118,8 @@ private:
     
     // -------------
     // Informations on Navigation control message
-    NavigationState m_NavigationState;
-    int m_CourseToSteer;
+    //NavigationState m_NavigationState;
+    /*int m_CourseToSteer;
     float m_TargetSpeed;
     bool m_Tack = false;
 
@@ -126,9 +127,8 @@ private:
     // Informations
     double m_VesselLatitude;
     double m_VesselLongitude;
-    double m_VesselSpeed; // units : knts (knots)
     double m_VesselCourse; // units : ° (degrees), from 0 to 359
-
+    */
     std::mutex m_lock;                      //Mutex to lock the node
    
 };

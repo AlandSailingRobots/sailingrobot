@@ -79,7 +79,7 @@ public:
         sControlNode->start();
 
         std::cout << std::endl << " ###### BREAKPOINT ###### " << std::endl;
-        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        std::this_thread::sleep_for(std::chrono::milliseconds(2600));
         std::cout << std::endl << " ###### BREAKPOINT ###### " << std::endl;
 
         thr = new std::thread(runMessageLoop);
@@ -118,7 +118,9 @@ public:
     
     MessagePtr windData =  std::make_unique<WindDataMsg>(appWindDirection,appWindSpeed,appWindTemp);
     msgBus().sendMessage(std::move(windData));
+    std::cout << std::endl << " ###### BREAKPOINT ###### " << std::endl;
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
+    std::cout << std::endl << " ###### BREAKPOINT ###### " << std::endl;
 
     TS_ASSERT(mockNode->m_MessageReceived);
     TS_ASSERT_EQUALS(mockNode->m_WindDir,appWindDirection);
