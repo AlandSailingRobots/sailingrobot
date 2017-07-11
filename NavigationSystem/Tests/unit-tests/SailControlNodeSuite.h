@@ -77,7 +77,11 @@ public:
 
         sControlNode = new SailControlNode(msgBus(), *dbHandler, .5, MaxSailAngle, MinSailAngle, 90, 0, 0);
         sControlNode->start();
-        std::this_thread::sleep_for(std::chrono::milliseconds(2600));
+
+        std::cout << std::endl << " ###### BREAKPOINT ###### " << std::endl;
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        std::cout << std::endl << " ###### BREAKPOINT ###### " << std::endl;
+
         thr = new std::thread(runMessageLoop);
     }
     testCount++;
