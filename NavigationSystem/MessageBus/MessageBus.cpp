@@ -144,6 +144,9 @@ void MessageBus::processMessages()
 			{
 				if(node->isInterested( msg->messageType() ))
 				{
+					// if (!(msgToString(msg->messageType())=="SolarData")) {
+						// std::cout<<msgToString(msg->messageType())<<"\n";
+					// }
 					node->nodeRef.processMessage(msg);
 					logMessageConsumer(node->nodeRef.nodeID());
 
@@ -154,6 +157,7 @@ void MessageBus::processMessages()
 			{
 				if(node->nodeRef.nodeID() == msg->destinationID())
 				{
+
 					node->nodeRef.processMessage(msg);
 					logMessageConsumer(node->nodeRef.nodeID());
 

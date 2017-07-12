@@ -1,4 +1,4 @@
-/*Handels incoming data from Ardunin */
+/*Handels incoming data from Arduino */
 
 #include "CANArduinoNode.h"
 #include "Messages/ArduinoDataMsg.h"

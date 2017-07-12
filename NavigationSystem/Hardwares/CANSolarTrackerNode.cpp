@@ -1,12 +1,12 @@
 #include "CANSolarTrackerNode.h"
 
 CANSolarTrackerNode::CANSolarTrackerNode(MessageBus& msgBus, CANService& canService, double loopTime)
-	: ActiveNode(NodeID::CANSolarTracker, msgBus), m_initialised, m_GpsConnection(0),
-	m_Lat(0), m_Lon(0), m_Time(0), m_Heading(0),m_LoopTime(loopTime)
+	: CANFrameReceiver(canService, 700), ActiveNode(NodeID::CANSolarTracker, msgBus), m_LoopTime(loopTime)
 {
 	m_Lat = DATA_OUT_OF_RANGE;
 	m_Lon = DATA_OUT_OF_RANGE;
 	m_Heading = DATA_OUT_OF_RANGE;
+	// m_Time = DATA_OUT_OF_RANGE;
 
 	msgBus.registerNode(*this, MessageType::StateMessage);
 }
@@ -16,15 +16,26 @@ CANSolarTrackerNode::~CANSolarTrackerNode () {
 }
 
 bool CANSolarTrackerNode::init() {
-	m_initialised = true;
-	return m_initialised;
+	// m_initialised = true;
+	return true;
 }
 
 void CANSolarTrackerNode::processMessage (const Message* message) {
 	if (message->messageType() == MessageType::StateMessage) {
-		m_Heading = message->heading();
-		m_Lat = message->latitude();
-		m_Lon = message->longitude();
+		StateMessage* stateMsg = (StateMessage*) message;
+		m_Heading = stateMsg->heading();
+		m_Lat = stateMsg->latitude();
+		m_Lon = stateMsg->longitude();
+		time_t rawtime;
+		struct tm * timeinfo;
+
+		time ( &rawtime );
+		timeinfo = localtime ( &rawtime );
+
+		m_Hour = timeinfo->tm_hour;
+		m_Minute = timeinfo->tm_min;
+
+		// m_Sent = 0;
 	}
 }
 
@@ -38,27 +49,29 @@ void CANSolarTrackerNode::start() {
 
 void CANSolarTrackerNode::CANSolarTrackerThreadFunc(ActiveNode* nodePtr) {
 	CANSolarTrackerNode* node = dynamic_cast<CANSolarTrackerNode*> (nodePtr);
-
+	node->m_Hour = 0;
+	node->m_Minute = 0;
 	Timer timer;
 	timer.start();
 
 	while(true) {
-		timer.sleepUntil(node->m_LoopTime*1.0f / 1000);
 		node->m_lock.lock();
+		timer.sleepUntil(node->m_LoopTime*1.0f / 1000);
 
-		m_Time = STEADY_CLOCK::now;
-
-		if (node->m_Lat == node->DATA_OUT_OF_RANGE &&
-				node->m_Lon == node-> DATA_OUT_OF_RANGE &&
+		if (node->m_Lat == node->DATA_OUT_OF_RANGE ||
+				node->m_Lon == node-> DATA_OUT_OF_RANGE ||
 				node->m_Heading == node->DATA_OUT_OF_RANGE) {
-			m_lock.unlock();
+			node->m_lock.unlock();
 			continue;
 		}
-		MessagePtr solarMsg = std::make_unique<SolarDataMsg>(node->m_Lat, node->m_Lon, node->m_heading, node->m_Time);
-		node -> m_MsgBus.sendMessage(std::move(solarMsg));
-
+		// if (node->m_Sent == 0) {
+			MessagePtr solarMsg = std::make_unique<SolarDataMsg>(node->m_Lat, node->m_Lon, node->m_Heading, node->m_Hour, node->m_Minute);
+			//std::cout << std::endl << node->m_Lat << std::endl;
+			node -> m_MsgBus.sendMessage(std::move(solarMsg));
+			// node->m_Sent == 1;
+		// }
+		// node->m_Sent == 1;
 		node->m_lock.unlock();
-
 		timer.reset();
 	}
 }
