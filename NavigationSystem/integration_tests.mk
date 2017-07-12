@@ -11,7 +11,7 @@ INTEGRATION_TEST_EXEC	= integration-tests.run
 # Files
 ###############################################################################
 
-SRC = $(CORE_SRC) $(HARDWARE_NODES_SRC) $(HARDWARE_SERVICES_SRC) $(INTEGRATION_TEST)
+SRC = $(CORE_SRC) $(HARDWARE_NODES_SRC) $(HARDWARE_SERVICES_SRC) $(INTEGRATION_TEST) 
 
 # Object files
 OBJECTS = $(addprefix $(BUILD_DIR)/, $(SRC:.cpp=.o))
