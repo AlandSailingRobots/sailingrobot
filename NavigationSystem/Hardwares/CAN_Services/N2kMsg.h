@@ -75,7 +75,3 @@ void ParsePGN130312(N2kMsg &Msg, uint8_t &SID, uint8_t &TemperatureInstance,	//T
 
 void ParsePGN130314(N2kMsg &Msg, uint8_t &SID, uint8_t &PressureInstance,		//ActualPressure
 					uint8_t &PressureSource, double &Pressure);
-
-bool ParseFastPkg(CanMsg& msg, N2kMsg& nMsg);
-
-bool IsFastPackage(const N2kMsg &nMsg);

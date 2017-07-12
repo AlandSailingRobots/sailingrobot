@@ -16,42 +16,41 @@
 
 #include "Hardwares/CANAISNode.h"
 #include "Hardwares/CANSolarTrackerNode.h"
-#include "Hardwares/CANWindsensorNode.h"
+// #include "Hardwares/CANWindsensorNode.h"
 #include "../cxxtest/cxxtest/TestSuite.h"
 #include "Messages/StateMessage.h"
 #include "../../MessageBus/MessageBus.h"
 #include "TestMocks/MessageLogger.h"
 #include "Messages/CompassDataMsg.h"
 #include "Messages/GPSDataMsg.h"
+#include "TestMocks/MockCANReceiver.h"
 
 // For std::this_thread
 #include <chrono>
 #include <thread>
 
-#define CAN_TEST_COUNT 8
+#define CAN_TEST_COUNT 4
 
 class CanNodesSuite : public CxxTest::TestSuite {
 public:
 
   CANAISNode* aisNode;
   CANSolarTrackerNode* solarNode;
-  CANWindsensorNode windsensorNode;
+  // CANWindsensorNode* windsensorNode;
 
-  MockNode* aisMockNode;
-  MockNode* solarMockNode;
-  MockNode* windMockNode;
+  MockNode* mockNode;
+  // MockNode* windMockNode;
 
-  MockCANReceiver mockCan;
+  // MockCANReceiver mockCan;
 
-  bool aisNodeRegistered = false;
-  bool solarNodeRegistererd = false;
-  bool windNodeRegistered = false;
+  bool mockNodeRegistered = false;
+  // bool windNodeRegistered = false;
 
-  CANService canService;
+  CANService* canService;
 
   int testCount;
 
-  std::thread thr;
+  std::thread* thr;
 
   static MessageBus& msgBus(){
     static MessageBus* mbus = new MessageBus();
@@ -64,29 +63,32 @@ public:
 
   void setUp() {
 
-    canService->start();
+    canService = new CANService();
 
-    aisMockNode = new MockNode(msgBus(),aisNodeRegistered);
-    solarMockNode = new MockNode(msgBus(),solarNodeRegistererd);
-    windMockNode = new MockNode(msgBus(),windNodeRegistered);
+    mockNode = new MockNode(msgBus(), mockNodeRegistered);
+    // windMockNode = new MockNode(msgBus(),windNodeRegistered);
 
-    mockCan = new MockCANReceiver(canService, {700, 701});
-
-    if (aisNode == 0) {
+    // std::vector<uint32_t> canMessages; // = {700, 701};
+    // canMessages[0] = (uint32_t) 700;
+    // canMessages[1] = (uint32_t) 701;
+    // mockCan = new MockCANReceiver(*canService, *canMessages);
+    // canService->();
+    if (solarNode == 0) {
       Logger::DisableLogging();
 
-      aisNode = new CANAISNode(msgBus(), canService, 1.0);
-      solarNode = new CANSolarTrackerNode();
-      windsensorNode = new CANWindsensorNode();
+      aisNode = new CANAISNode(msgBus(), *canService, 100);
+      solarNode = new CANSolarTrackerNode(msgBus(), *canService, 100);
+      // windsensorNode = new CANWindsensorNode(msgBus(), *canService, 1.0);
 
       aisNode->start();
       solarNode->start();
-      windsensorNode->start();
+      // windsensorNode->start();
 
-      std::this_thread::sleep_for(std::chrono::milliseconds 3000);
+      std::this_thread::sleep_for(std::chrono::milliseconds(200));
 
-      thr = new std::thread(runMessageLoop());
+      thr = new std::thread(runMessageLoop);
     }
+
     testCount++;
   }
 
@@ -94,18 +96,93 @@ public:
     if (testCount == CAN_TEST_COUNT) {
       delete aisNode;
       delete solarNode;
-      delete windsensorNode;
+      // delete windsensorNode;
     }
-    delete aisMockNode;
-    delete solarMockNode;
-    delete windMockNode;
+    delete mockNode;
+    delete canService;
+    // delete windMockNode;
   }
 
   void test_CanInit() {
-    TS_ASSERT(aisNodeRegistered);
-    TS_ASSERT(solarNodeRegistererd);
-    TS_ASSERT(windNodeRegistered);
+    TS_ASSERT(mockNodeRegistered);
+    // TS_ASSERT(windNodeRegistered);
   }
 
-  void test
-}
+  void test_MessageListening() {
+    double heading = 200;
+    double latitude = 60.2;
+    double longitude = 19.1;
+    int hour = 12;
+    int min = 15;
+
+    MessagePtr mockSolarMsg = std::make_unique<SolarDataMsg>(latitude,longitude,heading,hour,min);
+    msgBus().sendMessage(std::move(mockSolarMsg));
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+
+    TS_ASSERT(mockNode->m_MessageReceived);
+  }
+
+  void test_SolarData() {
+    double heading = 200;
+    double latitude = 60.2;
+    double longitude = 19.1;
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(700));
+
+    MessagePtr mockSolarMsg = std::make_unique<StateMessage>(heading,latitude,longitude,1,20);
+    msgBus().sendMessage(std::move(mockSolarMsg));
+    std::this_thread::sleep_for(std::chrono::milliseconds(700));
+
+    TS_ASSERT_DELTA(mockNode->m_latitude, latitude, 1e-3);
+    TS_ASSERT_DELTA(mockNode->m_longitude, longitude, 1e-3);
+    TS_ASSERT_DELTA(mockNode->m_heading, heading, 1e-3);
+  }
+
+/* */
+  void test_AISData() {
+
+    std::vector<AISVessel> AISList;
+    AISVessel v1, v2, v3;
+    v1.MMSI = 1;
+    v1.latitude = 60.2f;
+    v1.longitude = 19.1f;
+    v1.COG = 200;
+    v1.SOG = 10;
+    v2.MMSI = 2;
+    v2.latitude = 62.f;
+    v2.longitude = 18.1f;
+    v2.COG = 100;
+    v2.SOG = 5;
+    v3.MMSI = 3;
+    v3.latitude = 61.5f;
+    v3.longitude = 18.7f;
+    v3.COG = 80;
+    v3.SOG = 7;
+    AISList.push_back(v1);
+    AISList.push_back(v2);
+    AISList.push_back(v3);
+
+    // std::cout<<AISList.size()<<"\n";
+    // std::this_thread::sleep_for(std::chrono::milliseconds(1100));
+
+    MessagePtr mockAISMsg = std::make_unique<AISDataMsg>(AISList);
+    msgBus().sendMessage(std::move(mockAISMsg));
+    std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+
+    AISVessel ves1 = mockNode->m_VesselList[0];
+
+    TS_ASSERT(mockNode->m_MessageReceived);
+    // TS_ASSERT_EQUALS(mockNode->m_VesselList.size(), 3);
+    // TS_ASSERT_EQUALS(ves1.MMSI,1);
+    // TS_ASSERT_DELTA(ves1.latitude, 60.2f, 1e-4);
+    // TS_ASSERT_DELTA(ves1.longitude, 19.1f, 1e-4);
+    // TS_ASSERT_EQUALS(ves1.COG, 200);
+    // TS_ASSERT_EQUALS(ves1.SOG, 10);
+  }
+
+  void test_SendCANMsg() {
+    N2kMsg tmp;
+    tmp.PGN = 129038;
+  }
+  // */
+};

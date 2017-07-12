@@ -68,6 +68,12 @@ private:
 
   void run();
 
+  bool ParseFastPkg(CanMsg& msg, N2kMsg& nMsg);
+
+  bool IsFastPackage(const N2kMsg &nMsg);
+
+  std::map<IDsID, N2kMsg> FastPKG_;
+  std::map<IDsID, int> BytesLeft_;
   std::map<uint32_t, CANPGNReceiver*>   m_RegisteredPGNReceivers;
   std::map<uint32_t, CANFrameReceiver*> m_RegisteredFrameReceivers;
   std::queue<CanMsg> m_MsgQueue;

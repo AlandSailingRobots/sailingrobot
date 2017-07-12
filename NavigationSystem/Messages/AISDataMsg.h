@@ -14,26 +14,20 @@
 #pragma once
 
 #include "MessageBus/Message.h"
+// #include "Hardwares/CANAISNode.h"
 
 typedef unsigned char uchar;
 
-union f_tag {
-   uint8_t b[4];
-   float fval;
-} uf;
-
-union i_tag {
-   uint8_t b[4];
-   int fval;
-} ui;
-
-struct AISVessel {
-  uint16_t COG;
-  uint16_t SOG;
-  int MMSI;
-  float latitude;
-  float longitude;
-};
+// #ifndef AISDATAMSG_H
+// #define AISDATAMSG_H
+// struct AISVessel {
+//   uint16_t COG;
+//   uint16_t SOG;
+//   int MMSI;
+//   float latitude;
+//   float longitude;
+// };
+// #endif
 
 class AISDataMsg : public Message {
 public:
@@ -49,7 +43,18 @@ public:
 		:Message(deserialiser)
 	{
 
+    union f_tag {
+       uint8_t b[4];
+       float fval;
+    } union_float;
+
+    union i_tag {
+       uint8_t b[4];
+       int fval;
+    } union_int;
+
 		AISVessel vessel;
+		// TypeConst is the constant size of the messagetype
 		int ves = 0, typeConst = 3;
 		while (deserialiser.size() > ves+typeConst) {
 			if (true) {
@@ -57,28 +62,29 @@ public:
 
 				vessel.SOG = combuint8(deserialiser.data()[typeConst+ves+2], deserialiser.data()[typeConst+ves+3]);
 
-				ui.b[0] = deserialiser.data()[typeConst+ves+4];
-				ui.b[1] = deserialiser.data()[typeConst+ves+5];
-				ui.b[2] = deserialiser.data()[typeConst+ves+6];
-				ui.b[3] = deserialiser.data()[typeConst+ves+7];
-				vessel.MMSI = ui.fval;
+				union_int.b[0] = deserialiser.data()[typeConst+ves+4];
+				union_int.b[1] = deserialiser.data()[typeConst+ves+5];
+				union_int.b[2] = deserialiser.data()[typeConst+ves+6];
+				union_int.b[3] = deserialiser.data()[typeConst+ves+7];
+				vessel.MMSI = union_int.fval;
 
-				uf.b[0] = deserialiser.data()[typeConst+ves+8];
-				uf.b[1] = deserialiser.data()[typeConst+ves+9];
-				uf.b[2] = deserialiser.data()[typeConst+ves+10];
-				uf.b[3] = deserialiser.data()[typeConst+ves+11];
-				vessel.latitude = uf.fval;
+				union_float.b[0] = deserialiser.data()[typeConst+ves+8];
+				union_float.b[1] = deserialiser.data()[typeConst+ves+9];
+				union_float.b[2] = deserialiser.data()[typeConst+ves+10];
+				union_float.b[3] = deserialiser.data()[typeConst+ves+11];
+				vessel.latitude = union_float.fval;
 
-				uf.b[0] = deserialiser.data()[typeConst+ves+12];
-				uf.b[1] = deserialiser.data()[typeConst+ves+13];
-				uf.b[2] = deserialiser.data()[typeConst+ves+14];
-				uf.b[3] = deserialiser.data()[typeConst+ves+15];
-				vessel.longitude = uf.fval;
+				union_float.b[0] = deserialiser.data()[typeConst+ves+12];
+				union_float.b[1] = deserialiser.data()[typeConst+ves+13];
+				union_float.b[2] = deserialiser.data()[typeConst+ves+14];
+				union_float.b[3] = deserialiser.data()[typeConst+ves+15];
+				vessel.longitude = union_float.fval;
 				m_VesselList.push_back(vessel);
 			}
 			else {
 				m_valid = false;
 			}
+			// Add the size of the struct AISVessel
 			ves += 16;
 		}
 	}
@@ -113,20 +119,6 @@ public:
 private:
 	uint16_t combuint8(uint8_t lower, uint8_t higher) {
 		return ((uint16_t) higher << 8) | lower;
-	}
-
-	int combuint8_int(uint8_t b0, uint8_t b1, uint8_t b2, uint8_t b3) {
-		int i;
-		uchar b[] = {b3, b2, b1, b0};
-		memcpy(&i, &b, sizeof(i));
-		return i;
-	}
-
-	float combuint8_float(uint8_t b0, uint8_t b1, uint8_t b2, uint8_t b3) {
-		float f;
-		uchar b[] = {b3, b2, b1, b0};
-		memcpy(&f, &b, sizeof(f));
-		return f;
 	}
 
 	std::vector<AISVessel> m_VesselList;
