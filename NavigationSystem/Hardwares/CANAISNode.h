@@ -8,7 +8,10 @@
 #include "MessageBus/MessageBus.h"
 #include "SystemServices/Timer.h"
 #include "Messages/AISDataMsg.h"
+#include "Math/Utility.h"
 
+#include <cstring>
+#include <cstdint>
 #include <mutex>
 #include <vector>
 #include <iostream>

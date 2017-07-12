@@ -39,15 +39,11 @@ public:
   // CANWindsensorNode* windsensorNode;
 
   MockNode* mockNode;
-  // MockNode* aisMockNode;
-  // MockNode* solarMockNode;
   // MockNode* windMockNode;
 
   // MockCANReceiver mockCan;
 
   bool mockNodeRegistered = false;
-  // bool aisNodeRegistered = false;
-  // bool solarNodeRegisterered = false;
   // bool windNodeRegistered = false;
 
   CANService* canService;
@@ -70,23 +66,21 @@ public:
     canService = new CANService();
 
     mockNode = new MockNode(msgBus(), mockNodeRegistered);
-    // aisMockNode = new MockNode(msgBus(),aisNodeRegistered);
-    // solarMockNode = new MockNode(msgBus(),solarNodeRegisterered);
     // windMockNode = new MockNode(msgBus(),windNodeRegistered);
 
     // std::vector<uint32_t> canMessages; // = {700, 701};
     // canMessages[0] = (uint32_t) 700;
     // canMessages[1] = (uint32_t) 701;
     // mockCan = new MockCANReceiver(*canService, *canMessages);
-
+    // canService->();
     if (solarNode == 0) {
       Logger::DisableLogging();
 
       aisNode = new CANAISNode(msgBus(), *canService, 100);
       solarNode = new CANSolarTrackerNode(msgBus(), *canService, 100);
       // windsensorNode = new CANWindsensorNode(msgBus(), *canService, 1.0);
-      aisNode->start();
 
+      aisNode->start();
       solarNode->start();
       // windsensorNode->start();
 
@@ -106,15 +100,11 @@ public:
     }
     delete mockNode;
     delete canService;
-    // delete aisMockNode;
-    // delete solarMockNode;
     // delete windMockNode;
   }
 
   void test_CanInit() {
     TS_ASSERT(mockNodeRegistered);
-    // TS_ASSERT(aisNodeRegistered);
-    // TS_ASSERT(solarNodeRegisterered);
     // TS_ASSERT(windNodeRegistered);
   }
 
@@ -124,16 +114,12 @@ public:
     double longitude = 19.1;
     int hour = 12;
     int min = 15;
-    // std::this_thread::sleep_for(std::chrono::milliseconds(700));
 
     MessagePtr mockSolarMsg = std::make_unique<SolarDataMsg>(latitude,longitude,heading,hour,min);
     msgBus().sendMessage(std::move(mockSolarMsg));
-    std::cout << std::endl << " ##### BREAKPOINT ##### " << std::endl;
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
-    std::cout << std::endl << " ##### BREAKPOINT ##### " << std::endl;
 
     TS_ASSERT(mockNode->m_MessageReceived);
-    // TS_ASSERT(solarMockNode->m_MessageReceived);
   }
 
   void test_SolarData() {
@@ -152,6 +138,7 @@ public:
     TS_ASSERT_DELTA(mockNode->m_heading, heading, 1e-3);
   }
 
+/* */
   void test_AISData() {
 
     std::vector<AISVessel> AISList;
@@ -185,11 +172,17 @@ public:
     AISVessel ves1 = mockNode->m_VesselList[0];
 
     TS_ASSERT(mockNode->m_MessageReceived);
-    TS_ASSERT_EQUALS(mockNode->m_VesselList.size(), 3);
-    TS_ASSERT_EQUALS(ves1.MMSI,1);
-    TS_ASSERT_DELTA(ves1.latitude, 60.2f, 1e-4);
-    TS_ASSERT_DELTA(ves1.longitude, 19.1f, 1e-4);
-    TS_ASSERT_EQUALS(ves1.COG, 200);
-    TS_ASSERT_EQUALS(ves1.SOG, 10);
+    // TS_ASSERT_EQUALS(mockNode->m_VesselList.size(), 3);
+    // TS_ASSERT_EQUALS(ves1.MMSI,1);
+    // TS_ASSERT_DELTA(ves1.latitude, 60.2f, 1e-4);
+    // TS_ASSERT_DELTA(ves1.longitude, 19.1f, 1e-4);
+    // TS_ASSERT_EQUALS(ves1.COG, 200);
+    // TS_ASSERT_EQUALS(ves1.SOG, 10);
   }
+
+  void test_SendCANMsg() {
+    N2kMsg tmp;
+    tmp.PGN = 129038;
+  }
+  // */
 };

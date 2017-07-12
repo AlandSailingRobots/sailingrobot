@@ -121,6 +121,8 @@ export XBEE_NETWORK_SRC     = Network/DataLink.cpp Network/LinuxSerialDataLink.c
 
 export INTEGRATION_TEST		= Tests/IntegrationTests/ArduinoIntegrationTest.cpp
 
+export CANAIS_INTEGRATION_TEST = Tests/IntegrationTests/CANAISTest.cpp
+
 
 ###############################################################################
 # Rules
@@ -143,6 +145,9 @@ tests: $(BUILD_DIR)
 
 integration_tests: $(BUILD_DIR)
 	$(MAKE) -f integration_tests.mk
+
+ais_integration: $(BUILD_DIR)
+	$(MAKE) -f ais_integration.mk
 
 #  Create the directories needed
 $(BUILD_DIR):

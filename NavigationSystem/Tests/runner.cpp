@@ -176,27 +176,33 @@ CxxTest::StaticSuiteDescription suiteDescription_CanNodesSuite( "unit-tests/CanN
 
 static class TestDescription_suite_CanNodesSuite_test_CanInit : public CxxTest::RealTestDescription {
 public:
- TestDescription_suite_CanNodesSuite_test_CanInit() : CxxTest::RealTestDescription( Tests_CanNodesSuite, suiteDescription_CanNodesSuite, 114, "test_CanInit" ) {}
+ TestDescription_suite_CanNodesSuite_test_CanInit() : CxxTest::RealTestDescription( Tests_CanNodesSuite, suiteDescription_CanNodesSuite, 106, "test_CanInit" ) {}
  void runTest() { suite_CanNodesSuite.test_CanInit(); }
 } testDescription_suite_CanNodesSuite_test_CanInit;
 
 static class TestDescription_suite_CanNodesSuite_test_MessageListening : public CxxTest::RealTestDescription {
 public:
- TestDescription_suite_CanNodesSuite_test_MessageListening() : CxxTest::RealTestDescription( Tests_CanNodesSuite, suiteDescription_CanNodesSuite, 121, "test_MessageListening" ) {}
+ TestDescription_suite_CanNodesSuite_test_MessageListening() : CxxTest::RealTestDescription( Tests_CanNodesSuite, suiteDescription_CanNodesSuite, 111, "test_MessageListening" ) {}
  void runTest() { suite_CanNodesSuite.test_MessageListening(); }
 } testDescription_suite_CanNodesSuite_test_MessageListening;
 
 static class TestDescription_suite_CanNodesSuite_test_SolarData : public CxxTest::RealTestDescription {
 public:
- TestDescription_suite_CanNodesSuite_test_SolarData() : CxxTest::RealTestDescription( Tests_CanNodesSuite, suiteDescription_CanNodesSuite, 139, "test_SolarData" ) {}
+ TestDescription_suite_CanNodesSuite_test_SolarData() : CxxTest::RealTestDescription( Tests_CanNodesSuite, suiteDescription_CanNodesSuite, 125, "test_SolarData" ) {}
  void runTest() { suite_CanNodesSuite.test_SolarData(); }
 } testDescription_suite_CanNodesSuite_test_SolarData;
 
 static class TestDescription_suite_CanNodesSuite_test_AISData : public CxxTest::RealTestDescription {
 public:
- TestDescription_suite_CanNodesSuite_test_AISData() : CxxTest::RealTestDescription( Tests_CanNodesSuite, suiteDescription_CanNodesSuite, 155, "test_AISData" ) {}
+ TestDescription_suite_CanNodesSuite_test_AISData() : CxxTest::RealTestDescription( Tests_CanNodesSuite, suiteDescription_CanNodesSuite, 142, "test_AISData" ) {}
  void runTest() { suite_CanNodesSuite.test_AISData(); }
 } testDescription_suite_CanNodesSuite_test_AISData;
+
+static class TestDescription_suite_CanNodesSuite_test_SendCANMsg : public CxxTest::RealTestDescription {
+public:
+ TestDescription_suite_CanNodesSuite_test_SendCANMsg() : CxxTest::RealTestDescription( Tests_CanNodesSuite, suiteDescription_CanNodesSuite, 183, "test_SendCANMsg" ) {}
+ void runTest() { suite_CanNodesSuite.test_SendCANMsg(); }
+} testDescription_suite_CanNodesSuite_test_SendCANMsg;
 
 #include "unit-tests/UtilitySuite.h"
 

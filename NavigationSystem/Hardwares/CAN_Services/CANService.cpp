@@ -77,6 +77,7 @@ std::future<void> CANService::start()
 void CANService::run()
 {
   bool done;
+  N2kMsg Nmsg;
   while(m_Running.load() == true)
   {
     std::this_thread::sleep_for(std::chrono::milliseconds(SLEEP_TIME_MS));
@@ -88,7 +89,6 @@ void CANService::run()
       if(Cmsg.header.ide == 1)
       {
         done = false;
-        N2kMsg Nmsg;
 
         IdToN2kMsg(Nmsg, Cmsg.id);
 
