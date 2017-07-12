@@ -41,7 +41,7 @@ public:
   MockNode* mockNode;
   bool nodeRegistered = false;
 
-  double loopTime = 0.5;
+  double lTime = 0.5;
   double MaxSailAngle = 90;
   double MinSailAngle = 15;
 
@@ -54,7 +54,7 @@ public:
   }
 
   // ----------------
-  // Send messages 
+  // Send messages
   // ----------------
   static void runMessageLoop()
   {
@@ -71,16 +71,14 @@ public:
     // setup them up once in this test, delete them when the program closes
     if(sControlNode == 0)
     {
-        dbHandler = new DBHandler("./asr.db");
+        dbHandler = new DBHandler("../asrtest.db");
         Logger::DisableLogging();
 
 
-        sControlNode = new SailControlNode(msgBus(), *dbHandler, .5, MaxSailAngle, MinSailAngle, 90, 0, 0);
+        sControlNode = new SailControlNode(msgBus(), *dbHandler, lTime, MaxSailAngle, MinSailAngle, 90, 0, 0);
         sControlNode->start();
 
-        std::cout << std::endl << " ###### BREAKPOINT ###### " << std::endl;
         std::this_thread::sleep_for(std::chrono::milliseconds(2600));
-        std::cout << std::endl << " ###### BREAKPOINT ###### " << std::endl;
 
         thr = new std::thread(runMessageLoop);
     }
@@ -115,12 +113,10 @@ public:
     double appWindDirection = 45;
     double appWindSpeed = 10;
     double appWindTemp = 15;
-    
+
     MessagePtr windData =  std::make_unique<WindDataMsg>(appWindDirection,appWindSpeed,appWindTemp);
     msgBus().sendMessage(std::move(windData));
-    std::cout << std::endl << " ###### BREAKPOINT ###### " << std::endl;
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
-    std::cout << std::endl << " ###### BREAKPOINT ###### " << std::endl;
 
     TS_ASSERT(mockNode->m_MessageReceived);
     TS_ASSERT_EQUALS(mockNode->m_WindDir,appWindDirection);
@@ -128,10 +124,9 @@ public:
     TS_ASSERT_EQUALS(mockNode->m_WindTemp,appWindTemp);
 
     //Check if there is the same result by the processing next to the Compass data has been received
-    double sailAngle = -Utility::sgn(appWindDirection)*(((MinSailAngle-MaxSailAngle)*std::abs(appWindDirection)/180)+MaxSailAngle);
+    int sailAngle = -Utility::sgn(appWindDirection)*(((MinSailAngle-MaxSailAngle)*std::abs(appWindDirection)/180)+MaxSailAngle);
     double sailControlNodeSailAngle = mockNode->m_sailPosition;
-    std::cout << std::endl << " ##### Sail config : Angle " << sailAngle << std::endl ;
-    TS_ASSERT_EQUALS(sailControlNodeSailAngle,sailAngle);  
+    TS_ASSERT_EQUALS(sailControlNodeSailAngle,sailAngle);
   }
 
   // ----------------
@@ -141,7 +136,7 @@ public:
     double appWindDirection = -90;
     double appWindSpeed = 10;
     double appWindTemp = 15;
-    
+
     MessagePtr windData =  std::make_unique<WindDataMsg>(appWindDirection,appWindSpeed,appWindTemp);
     msgBus().sendMessage(std::move(windData));
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -152,10 +147,9 @@ public:
     TS_ASSERT_EQUALS(mockNode->m_WindTemp,appWindTemp);
 
     //Check if there is the same result by the processing next to the Compass data has been received
-    double sailAngle = -Utility::sgn(appWindDirection)*(((MinSailAngle-MaxSailAngle)*std::abs(appWindDirection)/180)+MaxSailAngle);
+    int sailAngle = -Utility::sgn(appWindDirection)*(((MinSailAngle-MaxSailAngle)*std::abs(appWindDirection)/180)+MaxSailAngle);
     double sailControlNodeSailAngle = mockNode->m_sailPosition;
-    std::cout << std::endl << " ##### Sail config : Angle " << sailAngle << std::endl ;
-    TS_ASSERT_EQUALS(sailControlNodeSailAngle,sailAngle);  
+    TS_ASSERT_EQUALS(sailControlNodeSailAngle,sailAngle);
   }
 
   // ----------------
@@ -165,7 +159,7 @@ public:
     double appWindDirection = 180;
     double appWindSpeed = 10;
     double appWindTemp = 15;
-    
+
     MessagePtr windData =  std::make_unique<WindDataMsg>(appWindDirection,appWindSpeed,appWindTemp);
     msgBus().sendMessage(std::move(windData));
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -176,10 +170,9 @@ public:
     TS_ASSERT_EQUALS(mockNode->m_WindTemp,appWindTemp);
 
     //Check if there is the same result by the processing next to the Compass data has been received
-    double sailAngle = -Utility::sgn(appWindDirection)*(((MinSailAngle-MaxSailAngle)*std::abs(appWindDirection)/180)+MaxSailAngle);
+    int sailAngle = -Utility::sgn(appWindDirection)*(((MinSailAngle-MaxSailAngle)*std::abs(appWindDirection)/180)+MaxSailAngle);
     double sailControlNodeSailAngle = mockNode->m_sailPosition;
-    std::cout << std::endl << " ##### Sail config : Angle " << sailAngle << std::endl ;
-    TS_ASSERT_EQUALS(sailControlNodeSailAngle,sailAngle);  
+    TS_ASSERT_EQUALS(sailControlNodeSailAngle,sailAngle);
   }
 
 };

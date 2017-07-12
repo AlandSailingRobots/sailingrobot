@@ -83,16 +83,14 @@ public:
 				m_StateMsgLon = stateMsg->longitude();
 				m_StateMsgSpeed = stateMsg->speed();
 				m_StateMsgCourse = stateMsg->course();
-				//std::cout << std::endl << "MOCKNODE ######### Receive State Message : H " << m_StateMsgHeading << " , V " << m_StateMsgSpeed;
 			}
 			break;
 			case MessageType::ActuatorPosition:
-			{ 
+			{
 				m_MessageReceived = true;
 				ActuatorPositionMsg* actuatorMsg = (ActuatorPositionMsg*)message;
 				m_rudderPosition = actuatorMsg->rudderPosition();
 				m_sailPosition = actuatorMsg->sailPosition();
-				//std::cout << std::endl << "MOCKNODE ######### Receive Actuator Message : RP " << m_rudderPosition << " , SP " << m_sailPosition;
 			}
 			break;
 			case MessageType::NavigationControl:
@@ -109,7 +107,6 @@ public:
 				m_MessageReceived = true;
 				DesiredCourseMsg* desiredCourseMsg = (DesiredCourseMsg*)message;
 				m_DesiredCourse = desiredCourseMsg->desiredCourse();
-				//std::cout << std::endl << " MOCKNODE ######### Receive Actuator Message : DC " << m_DesiredCourse << std::endl;
 			}
 			break;
 			default:

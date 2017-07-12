@@ -45,7 +45,7 @@ bool SailControlNode::init(){ return true;}
 ///----------------------------------------------------------------------------------
 void SailControlNode::start()
 {
-    runThread(SailControlNodeThreadFunc);    
+    runThread(SailControlNodeThreadFunc);
 }
 
 ///----------------------------------------------------------------------------------
@@ -118,7 +118,7 @@ void SailControlNode::SailControlNodeThreadFunc(ActiveNode* nodePtr)
 
     // An initial sleep, its purpose is to ensure that most if not all the sensor data arrives
     // at the start before we send out the state message.
-    std::this_thread::sleep_for(std::chrono::milliseconds(node->STATE_INITIAL_SLEEP));
+    std::this_thread::sleep_for(std::chrono::milliseconds(2000));
 
     Timer timer;
     timer.start();
@@ -129,10 +129,10 @@ void SailControlNode::SailControlNodeThreadFunc(ActiveNode* nodePtr)
         // TODO : Modify Actuator Message for adapt to this Node
         MessagePtr actuatorMessage = std::make_unique<ActuatorPositionMsg>(0,node->calculateSailAngle());
         node->m_MsgBus.sendMessage(std::move(actuatorMessage));
-    
+
         // Broadcast() or selected sent???
         timer.sleepUntil(node->m_LoopTime);
         timer.reset();
-        node->updateFrequencyThread(node); 
+        //node->updateFrequencyThread(node);
     }
 }
