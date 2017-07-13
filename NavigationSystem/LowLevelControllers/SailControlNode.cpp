@@ -45,7 +45,7 @@ bool SailControlNode::init(){ return true;}
 ///----------------------------------------------------------------------------------
 void SailControlNode::start()
 {
-    runThread(SailControlNodeThreadFunc);    
+    runThread(SailControlNodeThreadFunc);
 }
 
 ///----------------------------------------------------------------------------------
@@ -75,7 +75,7 @@ void SailControlNode::processWindDataMessage(const WindDataMsg* msg)
 void SailControlNode::processNavigationControlMessage(const NavigationControlMsg* msg)
 {
     //std::lock_guard<std_mutex> lock_guard(m_lock);
-    m_NavigationState = msg->navigationState();
+    //m_NavigationState = msg->navigationState();
 }
 
 ///----------------------------------------------------------------------------------
@@ -118,8 +118,14 @@ void SailControlNode::SailControlNodeThreadFunc(ActiveNode* nodePtr)
 
     // An initial sleep, its purpose is to ensure that most if not all the sensor data arrives
     // at the start before we send out the state message.
-    std::this_thread::sleep_for(std::chrono::milliseconds(node->STATE_INITIAL_SLEEP));
-
+    std::cout << std::endl << "## App Wind : " << node->m_ApparentWindDir
+              << " ## MaxSailAngle : " << node->m_MaxSailAngle << " ## MinSailAngle : "
+              << node->m_MinSailAngle << " ## Max Cmd Ang : " << node->m_MaxCommandAngle
+              << " ## P gain " << node->pGain << " I " << node->iGain << " ## Loop Time : "
+              << node->m_LoopTime << " ## " << std::endl;
+    std::cout << std::endl << " ## Value out : " << node->calculateSailAngle() << std::endl;
+    std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+    std::cout << std::endl << " ## END INIT SLEEP ## " << std::endl;
     Timer timer;
     timer.start();
 
@@ -129,10 +135,10 @@ void SailControlNode::SailControlNodeThreadFunc(ActiveNode* nodePtr)
         // TODO : Modify Actuator Message for adapt to this Node
         MessagePtr actuatorMessage = std::make_unique<ActuatorPositionMsg>(0,node->calculateSailAngle());
         node->m_MsgBus.sendMessage(std::move(actuatorMessage));
-    
+
         // Broadcast() or selected sent???
         timer.sleepUntil(node->m_LoopTime);
         timer.reset();
-        node->updateFrequencyThread(node); 
+        node->updateFrequencyThread(node);
     }
 }

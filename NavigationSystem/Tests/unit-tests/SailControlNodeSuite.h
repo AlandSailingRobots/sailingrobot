@@ -18,7 +18,7 @@
 #include "Messages/ActuatorPositionMsg.h"
 #include "../../MessageBus/MessageBus.h"
 #include "TestMocks/MessageLogger.h"
-#include "Messages/WindStateMsg.h"
+#include "Messages/WindDataMsg.h"
 #include "Messages/StateMessage.h"
 #include "Math/Utility.h"
 
@@ -54,7 +54,7 @@ public:
   }
 
   // ----------------
-  // Send messages 
+  // Send messages
   // ----------------
   static void runMessageLoop()
   {
@@ -67,6 +67,8 @@ public:
   void setUp()
   {
     // Test Node for message
+    std::cout << std::endl << " ### Number front msg : " << msgBus().m_FrontMessages.size()
+              << " ### Number bqck msg : " << msgBus().m_BackMessages.size() << std::endl;
     mockNode = new MockNode(msgBus(), nodeRegistered);
     // setup them up once in this test, delete them when the program closes
     if(sControlNode == 0)
@@ -78,7 +80,7 @@ public:
         sControlNode = new SailControlNode(msgBus(), *dbHandler, .5, MaxSailAngle, MinSailAngle, 90, 0, 0);
         sControlNode->start();
 
-        std::cout << std::endl << " ###### BREAKPOINT ###### " << std::endl;
+        //std::cout << std::endl << " ###### BREAKPOINT ###### " << std::endl;
         std::this_thread::sleep_for(std::chrono::milliseconds(2600));
         std::cout << std::endl << " ###### BREAKPOINT ###### " << std::endl;
 
@@ -115,7 +117,7 @@ public:
     double appWindDirection = 45;
     double appWindSpeed = 10;
     double appWindTemp = 15;
-    
+
     MessagePtr windData =  std::make_unique<WindDataMsg>(appWindDirection,appWindSpeed,appWindTemp);
     msgBus().sendMessage(std::move(windData));
     std::cout << std::endl << " ###### BREAKPOINT ###### " << std::endl;
@@ -131,7 +133,7 @@ public:
     double sailAngle = -Utility::sgn(appWindDirection)*(((MinSailAngle-MaxSailAngle)*std::abs(appWindDirection)/180)+MaxSailAngle);
     double sailControlNodeSailAngle = mockNode->m_sailPosition;
     std::cout << std::endl << " ##### Sail config : Angle " << sailAngle << std::endl ;
-    TS_ASSERT_EQUALS(sailControlNodeSailAngle,sailAngle);  
+    TS_ASSERT_EQUALS(sailControlNodeSailAngle,sailAngle);
   }
 
   // ----------------
@@ -141,7 +143,7 @@ public:
     double appWindDirection = -90;
     double appWindSpeed = 10;
     double appWindTemp = 15;
-    
+
     MessagePtr windData =  std::make_unique<WindDataMsg>(appWindDirection,appWindSpeed,appWindTemp);
     msgBus().sendMessage(std::move(windData));
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -155,7 +157,7 @@ public:
     double sailAngle = -Utility::sgn(appWindDirection)*(((MinSailAngle-MaxSailAngle)*std::abs(appWindDirection)/180)+MaxSailAngle);
     double sailControlNodeSailAngle = mockNode->m_sailPosition;
     std::cout << std::endl << " ##### Sail config : Angle " << sailAngle << std::endl ;
-    TS_ASSERT_EQUALS(sailControlNodeSailAngle,sailAngle);  
+    TS_ASSERT_EQUALS(sailControlNodeSailAngle,sailAngle);
   }
 
   // ----------------
@@ -165,7 +167,7 @@ public:
     double appWindDirection = 180;
     double appWindSpeed = 10;
     double appWindTemp = 15;
-    
+
     MessagePtr windData =  std::make_unique<WindDataMsg>(appWindDirection,appWindSpeed,appWindTemp);
     msgBus().sendMessage(std::move(windData));
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -179,7 +181,7 @@ public:
     double sailAngle = -Utility::sgn(appWindDirection)*(((MinSailAngle-MaxSailAngle)*std::abs(appWindDirection)/180)+MaxSailAngle);
     double sailControlNodeSailAngle = mockNode->m_sailPosition;
     std::cout << std::endl << " ##### Sail config : Angle " << sailAngle << std::endl ;
-    TS_ASSERT_EQUALS(sailControlNodeSailAngle,sailAngle);  
+    TS_ASSERT_EQUALS(sailControlNodeSailAngle,sailAngle);
   }
 
 };

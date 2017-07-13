@@ -29,9 +29,9 @@ public:
     //--------------
     // Constructor
     //--------------
-    SailControlNode(MessageBus& msgBus, DBHandler& dbhandler, double loopTime = .5, double maxSailAngle = 43, double minSailAngle = 5.5,
+    SailControlNode(MessageBus& msgBus, DBHandler& dbhandler, double loopTime = 0.5, double maxSailAngle = 43, double minSailAngle = 5.5,
                     double maxCommandAngle = 30, double configPGain = 0, double configIGain = 0);
-    
+
     // -------------
     // Destructor
     // -------------
@@ -58,7 +58,7 @@ private:
     // Processing informations from the State Message
     // -------------
     void processWindDataMessage(const WindDataMsg* msg);
-        
+
     // -------------
     // Processing informations from the Navigation Control Message
     // -------------
@@ -66,17 +66,17 @@ private:
 
     // -------------
     // Calculate the sail angle according to the apparent wind
-    // -------------    
+    // -------------
     double calculateSailAngle();
-        
+
     // -------------
     // Limit the sail angle
-    // -------------   
-    double restrictSail(double val); 
+    // -------------
+    double restrictSail(double val);
 
     // -------------
     // Get and update the frequency of the thread
-    // -------------   
+    // -------------
     void updateFrequencyThread(SailControlNode* node);
 
     // -------------
@@ -84,7 +84,7 @@ private:
     // -------------
     static void SailControlNodeThreadFunc(ActiveNode* nodePtr);
 
-    
+
     //m_maxCommandAngle = 30;
     //m_maxSailAngle = 42.857;
     //m_minSailAngle = 5.625;
@@ -110,15 +110,14 @@ private:
     double m_LoopTime;
 
     const int STATE_INITIAL_SLEEP = 2000;
-    
+
 
     // -------------
     // Informations
-    NavigationState m_NavigationState;
+    //NavigationState m_NavigationState;
 
 
     // -------------
     // Informations
     std::mutex m_lock;
 };
-
