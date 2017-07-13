@@ -119,9 +119,10 @@ void moveWingsail(CanMsg& msg) {
 uint16_t getRudderFeedback() {
   //Serial.println (analogRead(RUDDER_FEEDBACK_PIN));
   int feedback = analogRead(RUDDER_FEEDBACK_PIN);
-  float c = -375;
-  float b1 =  1.920;
-  float b2 = -1.8480;
+   //-361.0000    1.8823   -1.8473
+  float c = -361.0000;
+  float b1 =  1.8823;
+  float b2 = -1.8473;
   float angle;
   //Serial.println (feedback);
   if (feedback < -c){
@@ -130,7 +131,7 @@ uint16_t getRudderFeedback() {
   } else {
     angle = b2* sqrt (feedback+c);
   }
-  //Serial.println (angle);
+  Serial.println (angle);
   uint16_t dataAngle = mapInterval (angle, -MAX_RUDDER_ANGLE, MAX_RUDDER_ANGLE, 0, INT16_SIZE);
   //Serial.println (INT16_SIZE);
   return dataAngle;
