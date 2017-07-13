@@ -15,6 +15,7 @@
 #include "CANWindsensorNode.h"
 #include "Messages/WindDataMsg.h"
 #include "SystemServices/Timer.h"
+// std::mutex m_lock;
 
 #include <chrono>
 #include <thread>
