@@ -50,7 +50,7 @@ public:
 
     union i_tag {
        uint8_t b[4];
-       int fval;
+       uint32_t fval;
     } union_int;
 
 		AISVessel vessel;
@@ -92,7 +92,7 @@ public:
 	virtual ~AISDataMsg() { }
 
 	std::vector<AISVessel> vesselList() { return m_VesselList; }
-	int MMSI(int vessel) { return m_VesselList[vessel].MMSI; }
+	uint32_t MMSI(int vessel) { return m_VesselList[vessel].MMSI; }
 	float latitude(int vessel) { return m_VesselList[vessel].latitude; }
 	float longitude(int vessel) { return m_VesselList[vessel].longitude; }
 	uint16_t COG(int vessel) { return m_VesselList[vessel].COG; }

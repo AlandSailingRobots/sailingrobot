@@ -24,21 +24,57 @@ AISProcessing::AISProcessing(MessageBus& msgBus, double loopTime)
 
   }
 
-  bool init() {
+  bool AISProcessing::init() {
     return true;
   }
 
-  void processMessage(const Message* msg) {
+  void AISProcessing::processMessage(const Message* msg) {
     MessageType type = msg->MessageType();
 
     switch (type) {
       case MessageType::AISData :
-        processAISMessage((AISDataMsg*) msg);
+        processAISMessage(dynamic_cast<const AISDataMsg*> msg);
         break;
       case MessageType::StateMessage :
-        processStateMessage((StadeMessage*)msg);
+        processStateMessage(dynamic_cast<const StateMessage*> msg);
         break;
       default:
         return;
+    }
+  }
+
+  void AISProcessing::processAISMessage(const AISDataMsg* msg) {
+    std::vector<AISVessel> list = msg.vesselList();
+    double dist;
+    for (auto vessel: list) {
+      dist = calculateDTW(m_latitude, m_longitude, vessel.latitude, vessel.longitude);
+      if (dist < RADIUS) {
+        m_VesselList.push_back(vessel);
+      }
+    }
+  }
+
+  void AISProcessing::processStateMessage(const StateMessage* msg) {
+    m_latitude = msg.latitude();
+    m_longitude = msg.longitude();
+  }
+
+  void AISProcessing::start() {
+    runThread(AISProcessingThreadFunc);
+  }
+
+  void AISProcessing::AISProcessingThreadFunc(ActiveNode* nodePtr) {
+    AISProcessing* node = dynamic_cast<AISProcessing*> nodePtr;
+
+    Timer timer;
+    timer.start();
+
+    while(true) {
+      node->m_lock.lock();
+      // Send data to CollidableMgr
+
+      node->m_lock.unlock();
+      timer.sleepUntil(node->m_LoopTime*1.0f/1000);
+      timer.reset();
     }
   }
