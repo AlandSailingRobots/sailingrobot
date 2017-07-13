@@ -2,6 +2,7 @@
 #include "Hardwares/CAN_Services/N2kMsg.h"
 #include "SystemServices/Timer.h"
 #include "Messages/ASPireActuatorFeedbackMsg.h"
+#include "Messages/ActuatorControlASPireMessage.h"
 #include "Messages/WindDataMsg.h"
 #include "Messages/ArduinoDataMsg.h"
 #include "MessageBus/MessageTypes.h"
@@ -12,6 +13,8 @@
 #include "Hardwares/ArduinoNode.h"
 #include "Hardwares/CANArduinoNode.h"
 #include "Hardwares/CANFeedbackReceiver.h"
+#include "Hardwares/ActuatorNodeASPire.h"
+
 
 #include <ncurses.h>
 #include <unordered_map>
@@ -43,7 +46,7 @@ public:
     {
         msgBus.registerNode(*this, MessageType::WindData);
         msgBus.registerNode(*this, MessageType::ASPireActuatorFeedback);
-	msgBus.registerNode(*this, MessageType::ArduinoData);
+				msgBus.registerNode(*this, MessageType::ArduinoData);
 
         m_SensorValues["Rudder Angle"] = -2000;
         m_SensorValues["Wingsail Angle"] = -2000;
@@ -51,7 +54,7 @@ public:
         m_SensorValues["Wind Direction"] = -2000;
         m_SensorValues["Wind Temperature"] = -2000;
 				m_SensorValues["RC Mode"] = -2000;
-
+				
         m_Win = newwin(6+2*m_SensorValues.size(),60,1,2);
         
         box(m_Win,0,0);
@@ -183,17 +186,14 @@ void printInputMenu(WINDOW* win, menuIter highlightedItem) {
 } 
 
 void sendActuatorCommands() {
-    CanMsg Cmsg;
-    Cmsg.id = 700;
-    Cmsg.header.ide = 0;
-    Cmsg.header.length = 8;
+    
 
-    uint16_t rudderAngle16;
-    uint16_t wingsailAngle16;
-    uint16_t windvaneAngle16;
+    int rudderAngle16;
+    int wingsailAngle16;
+    //uint16_t windvaneAngle16;
 
-    float ratio = 65535 / 60;
-
+  
+		
     for(auto& it : menuValues) {
         if(it.second.empty()) {
             it.second = lastSentValues[it.first];
@@ -203,16 +203,20 @@ void sendActuatorCommands() {
     try {
         rudderAngle16 = stoi(menuValues["Rudder Angle"]);
         wingsailAngle16 = stoi(menuValues["Wingsail Angle"]);
-        windvaneAngle16 = stoi(menuValues["Windvane Angle"]);
+        //windvaneAngle16 = stoi(menuValues["Windvane Angle"]);
     } catch(std::invalid_argument ex) {
         std::cout << std::endl << "Actuator commands only works with integers." << std::endl << std::endl;
 				return;
     }
     
-    rudderAngle16 *= ratio;
-    wingsailAngle16 *= ratio;
-    windvaneAngle16 *= ratio;
 
+    //windvaneAngle16 *= ratio;
+
+		MessagePtr actuatorMsg = std::make_unique<ActuatorControlASPireMessage>(wingsailAngle16, rudderAngle16, true );
+		msgBus.sendMessage(std::move(actuatorMsg));
+		
+		
+		/*
     Cmsg.data[0] = rudderAngle16 & 0xff;
     Cmsg.data[1] = rudderAngle16 >> 8;
     Cmsg.data[2] = wingsailAngle16 & 0xff;
@@ -221,7 +225,7 @@ void sendActuatorCommands() {
     Cmsg.data[5] = windvaneAngle16 >> 8;
 
     canService.sendCANMessage(Cmsg);
-
+*/
     lastSentValues = menuValues;
 }
 
@@ -238,6 +242,7 @@ int main() {
     CANWindsensorNode windSensor(msgBus, canService, 500);
     //CANFeedbackReceiver feedBack(msgBus, canService, 500); Old code, replaced by arduino node
     CANArduinoNode arduino (msgBus, canService, 500);
+		ActuatorNodeASPire actuators (msgBus, canService);
     windSensor.start();
 		arduino.start ();
 
@@ -274,8 +279,11 @@ int main() {
             if(highlighted->second.size() <= MAX_INPUT) {
                 highlighted->second += std::to_string(c);
             }
-        } else {
-
+        } else if (c == '-'){
+						if(highlighted->second.size() <= MAX_INPUT) {
+                highlighted->second += c;
+            }
+				}else {	
 					switch(c) {
 							case KEY_DOWN:
 									if(highlighted != --menuValues.end()) {

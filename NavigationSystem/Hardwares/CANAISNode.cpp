@@ -58,7 +58,7 @@ void CANAISNode::start() {
 
 void CANAISNode::CANAISThreadFunc(ActiveNode* nodePtr) {
   CANAISNode* node = dynamic_cast<CANAISNode*> (nodePtr);
-  // bool PRINT = true;
+  bool PRINT = false;
   Timer timer;
   timer.start();
 
@@ -69,15 +69,15 @@ void CANAISNode::CANAISThreadFunc(ActiveNode* nodePtr) {
     MessagePtr AISList = std::make_unique<AISDataMsg>(node->m_VesselList);
     node->m_MsgBus.sendMessage(std::move(AISList));
     node->m_lock.unlock();
-    // if (PRINT) {
-    //   if (node->m_VesselList.size() > 0) {
-    //     std::cout << std::endl << node->m_VesselList[0].MMSI << std::endl;
-    //     std::cout << node->m_VesselList[0].latitude << std::endl;
-    //     std::cout << node->m_VesselList[0].longitude << std::endl;
-    //     std::cout << node->m_VesselList[0].COG << std::endl;
-    //     std::cout << node->m_VesselList[0].SOG << std::endl;
-    //   }
-    // }
+    if (PRINT) {
+      if (node->m_VesselList.size() > 0) {
+        std::cout << std::endl << node->m_VesselList[0].MMSI << std::endl;
+        std::cout << node->m_VesselList[0].latitude << std::endl;
+        std::cout << node->m_VesselList[0].longitude << std::endl;
+        std::cout << node->m_VesselList[0].COG << std::endl;
+        std::cout << node->m_VesselList[0].SOG << std::endl;
+      }
+    }
     timer.sleepUntil(node->m_LoopTime*1.0f/1000);
     timer.reset();
   }
