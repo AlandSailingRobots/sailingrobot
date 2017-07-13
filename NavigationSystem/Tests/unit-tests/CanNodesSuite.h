@@ -161,10 +161,7 @@ public:
     AISList.push_back(v1);
     AISList.push_back(v2);
     AISList.push_back(v3);
-
-    // std::cout<<AISList.size()<<"\n";
-    // std::this_thread::sleep_for(std::chrono::milliseconds(1100));
-
+    
     MessagePtr mockAISMsg = std::make_unique<AISDataMsg>(AISList);
     msgBus().sendMessage(std::move(mockAISMsg));
     std::this_thread::sleep_for(std::chrono::milliseconds(2000));
