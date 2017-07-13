@@ -81,6 +81,10 @@ float Utility::mean(std::vector<float> values)
 	return sum / values.size();
 }
 
+float Utility::mapInterval(float val, float fromMin, float fromMax, float toMin, float toMax) {
+  return (val - fromMin) / (fromMax - fromMin) * (toMax - toMin) + toMin;
+}
+
 /*
  * uses formula for calculating mean of angles
  * https://en.wikipedia.org/wiki/Mean_of_circular_quantities

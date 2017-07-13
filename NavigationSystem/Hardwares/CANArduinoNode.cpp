@@ -1,9 +1,10 @@
-/*Handels incoming data from Ardunin */
+/*Handels incoming data from Arduino */
 
 #include "CANArduinoNode.h"
 #include "Messages/ArduinoDataMsg.h"
 #include "Messages/ASPireActuatorFeedbackMsg.h"
 #include "SystemServices/Timer.h"
+#include "Math/Utility.h"
 
 #include <chrono>
 #include <thread>
@@ -12,6 +13,7 @@ CANArduinoNode::CANArduinoNode(MessageBus& messageBus, CANService& canService, i
 ActiveNode(NodeID::CANArduino, messageBus), CANFrameReceiver(canService, {701,702}), m_TimeBetweenMsgs(time_filter_ms)
 
 {
+	
   m_RudderFeedback  = DATA_OUT_OF_RANGE;
   m_WingsailFeedback = DATA_OUT_OF_RANGE;
   m_WindvaneSelfSteerAngle = DATA_OUT_OF_RANGE;
@@ -32,9 +34,13 @@ void CANArduinoNode::processMessage (const Message* message){
 }
 
 void CANArduinoNode::processFrame (CanMsg& msg) {
+	
 	if (msg.id == 701) {
-		 m_RudderFeedback = (msg.data[1] << 8 | msg.data[0]);
-     m_WingsailFeedback = (msg.data[3] << 8 | msg.data[2]);
+		 rawData = (msg.data[1] << 8 | msg.data[0]);
+		 
+		 m_RudderFeedback = Utility::mapInterval (rawData, 0, INT16_SIZE, -MAX_RUDDER_ANGLE, MAX_RUDDER_ANGLE);
+		 rawData = (msg.data[3] << 8 | msg.data[2]);
+     m_WingsailFeedback = Utility::mapInterval (rawData, 0, INT16_SIZE, -MAX_WINGSAIL_ANGLE, MAX_WINGSAIL_ANGLE);
      m_WindvaneSelfSteerAngle = (msg.data[5] << 8 | msg.data[4]);
      m_WindvaneActuatorPos = msg.data[7];
 
@@ -72,7 +78,8 @@ void CANArduinoNode::CANArduinoNodeThreadFunc(ActiveNode* nodePtr) {
 				continue;
 			}
 
-		MessagePtr feebackData = std::make_unique<ASPireActuatorFeedbackMsg>(node->m_RudderFeedback, node->m_WingsailFeedback,
+		
+		MessagePtr feebackData = std::make_unique<ASPireActuatorFeedbackMsg>( node->m_WingsailFeedback, node->m_RudderFeedback,
 																	node->m_WindvaneSelfSteerAngle, node->m_WindvaneActuatorPos);
 		node->m_MsgBus.sendMessage(std::move(feebackData));
 
@@ -84,3 +91,12 @@ void CANArduinoNode::CANArduinoNodeThreadFunc(ActiveNode* nodePtr) {
 		timer.reset();
 		}
 }
+
+
+/*
+float CANArduinoNode::mapInterval(float val, float fromMin, float fromMax, float toMin, float toMax) {
+  return (val - fromMin) / (fromMax - fromMin) * (toMax - toMin) + toMin;
+}
+*/
+
+

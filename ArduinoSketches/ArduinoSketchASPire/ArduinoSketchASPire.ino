@@ -14,11 +14,13 @@ const int MAESTRO_SIGNAL_MULTIPLIER = 4;
 
 // Rudder should go from -30 to +30 degrees
 // which gives an effective range of 60.
-const int MAX_RUDDER_ANGLE = 60;
+const int MAX_RUDDER_ANGLE = 30;
 //Windsail should go from -13 to 13 degrees
 //range is 26
 
-const int MAX_WINGSAIL_ANGLE = 26;
+const int MAX_WINGSAIL_ANGLE = 13;
+
+const double INT16_SIZE = 65535;
 
 const int RUDDER_MIN_FEEDBACK = 278;
 const int RUDDER_MAX_FEEDBACK = 358;
@@ -92,9 +94,9 @@ void loop()
 
 void moveRudder(CanMsg& msg) {
   uint16_t rawAngle = (msg.data[1]<<8 | msg.data[0]);
-  double actualAngle = rawAngle / rudderAngleRatio;
+  double actualAngle = mapInterval (rawAngle, 0, INT16_SIZE, -MAX_RUDDER_ANGLE, MAX_RUDDER_ANGLE);
   Serial.print("Received rudder angle: "); Serial.println(actualAngle);
-  float target = mapInterval(actualAngle, 0, MAX_RUDDER_ANGLE, 
+  float target = mapInterval(actualAngle, -MAX_RUDDER_ANGLE, MAX_RUDDER_ANGLE, 
                       RUDDER_MAESTRO_MIN_TARGET, RUDDER_MAESTRO_MAX_TARGET);
   
   maestro.setTarget(RUDDER_MAESTRO_CHANNEL, target*4);
@@ -103,32 +105,35 @@ void moveRudder(CanMsg& msg) {
 
 void moveWingsail(CanMsg& msg) {
   uint16_t rawAngle = (msg.data[3]<<8 | msg.data[2]);
-  double actualAngle = rawAngle / wingsailAngleRatio;
-  Serial.print("Received windsail angle: "); Serial.println(actualAngle);
+  Serial.print("Received raw angle: "); Serial.println(rawAngle);
+  double actualAngle = mapInterval (rawAngle, 0, INT16_SIZE, -MAX_WINGSAIL_ANGLE, MAX_WINGSAIL_ANGLE);
+  Serial.print("Received wingsail angle: "); Serial.println(actualAngle);
 
-  float target = mapInterval(actualAngle, 0, MAX_WINGSAIL_ANGLE,
+  float target = mapInterval(actualAngle, -MAX_WINGSAIL_ANGLE, MAX_WINGSAIL_ANGLE,
                   WINGSAIL_MAESTRO_MIN_TARGET, WINGSAIL_MAESTRO_MAX_TARGET);
 
   maestro.setTarget(WINGSAIL_MAESTRO_CHANNEL, target*4);
   //Serial.println (target*4);
 }
 
-float getRudderFeedback() {
+uint16_t getRudderFeedback() {
   //Serial.println (analogRead(RUDDER_FEEDBACK_PIN));
   int feedback = analogRead(RUDDER_FEEDBACK_PIN);
-  float c = -316;
-  float b1 = 4.9140;
-  float b2 = -4.7980;
+  float c = -375;
+  float b1 =  1.920;
+  float b2 = -1.8480;
   float angle;
-  Serial.println (feedback);
+  //Serial.println (feedback);
   if (feedback < -c){
     
     angle = b1* sqrt (-(feedback+c));
   } else {
     angle = b2* sqrt (feedback+c);
   }
-  Serial.println (angle);
-  return angle + MAX_RUDDER_ANGLE/2;
+  //Serial.println (angle);
+  uint16_t dataAngle = mapInterval (angle, -MAX_RUDDER_ANGLE, MAX_RUDDER_ANGLE, 0, INT16_SIZE);
+  //Serial.println (INT16_SIZE);
+  return dataAngle;
   
 }
 
@@ -146,8 +151,9 @@ float getWingsailFeedback() {
   } else {
     angle = b2* sqrt (feedback+c);
   }
+  uint16_t dataAngle = mapInterval (angle, -MAX_WINGSAIL_ANGLE, MAX_WINGSAIL_ANGLE, 0, INT16_SIZE);
   //Serial.println (angle);
-  return angle + MAX_WINGSAIL_ANGLE/2;
+  return dataAngle;
   
   
 }
@@ -172,15 +178,11 @@ void sendFeedback (){
  CanMsg feedbackMsg;
       feedbackMsg.id = 701;
       feedbackMsg.header.ide = 0;
-      feedbackMsg.header.length = 7;
-      float rudderAngle = getRudderFeedback();
-      //uint16_t angle16 = (uint16_t) mapInterval(rudderAngle, 0, 60, 0, 65535);
-      uint16_t angle16 = (uint16_t) mapInterval(rudderAngle, 0, 60, 0, 60);
+      feedbackMsg.header.length = 7;      
+      uint16_t angle16 = getRudderFeedback ();
       feedbackMsg.data[0] = (angle16 & 0xff);
       feedbackMsg.data[1] = (angle16 >> 8);
-
-      float wingsailAngle = getWingsailFeedback();
-      angle16 = (uint16_t) wingsailAngle;
+      angle16 = getWingsailFeedback();
       feedbackMsg.data[2] = (angle16 & 0xff);
       feedbackMsg.data[3] = (angle16 >> 8);
 
