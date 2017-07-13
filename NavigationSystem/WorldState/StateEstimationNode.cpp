@@ -24,9 +24,9 @@
 #include "Math/Utility.h"
 #include "SystemServices/Timer.h"
 
-StateEstimationNode::StateEstimationNode(MessageBus& msgBus, double loopTime, double speedLimit): ActiveNode(NodeID::StateEstimation, msgBus),
+StateEstimationNode::StateEstimationNode(MessageBus& msgBus, DBHandler& dbhandler, double loopTime, double speedLimit): ActiveNode(NodeID::StateEstimation, msgBus),
 m_VesselHeading(0), m_VesselLat(0), m_VesselLon(0), m_VesselSpeed(0), m_VesselCourse(0), m_LoopTime(loopTime), m_Declination(0),
-m_SpeedLimit(speedLimit), m_GpsOnline(false)
+m_SpeedLimit(speedLimit), m_GpsOnline(false), m_db(dbhandler)
 {
   msgBus.registerNode(*this, MessageType::CompassData);
   msgBus.registerNode(*this, MessageType::GPSData);
@@ -69,7 +69,7 @@ void StateEstimationNode::processCompassMessage(const CompassDataMsg* msg)
   std::lock_guard<std::mutex> lock_guard(m_lock);
   float currentVesselHeading = msg->heading();
   m_VesselHeading = Utility::addDeclinationToHeading(currentVesselHeading, m_Declination);
-  lock_guard.~lock_guard();
+  //lock_guard.~lock_guard();
 }
 
 void StateEstimationNode::processGPSMessage(const GPSDataMsg* msg)
@@ -97,12 +97,23 @@ int StateEstimationNode::getCourse(){
   return m_VesselCourse;
 }
 
+///----------------------------------------------------------------------------------
+double StateEstimationNode::getFrequencyThread()
+{
+    return m_LoopTime;
+}
+
+///----------------------------------------------------------------------------------
+void StateEstimationNode::updateFrequencyThread()
+{
+    m_LoopTime = m_db.retrieveCellAsDouble("sailing_robot_config","1","loop_time");
+}
+
 //---------------------------------------------------------------------------
 void StateEstimationNode::processWaypointMessage( const WaypointDataMsg* msg )
 {
   std::lock_guard<std::mutex> lock_guard(m_lock);
   m_Declination = msg->nextDeclination();
-  lock_guard.~lock_guard();
 }
 
 void StateEstimationNode::StateEstimationNodeThreadFunc(ActiveNode* nodePtr)
@@ -119,14 +130,15 @@ void StateEstimationNode::StateEstimationNodeThreadFunc(ActiveNode* nodePtr)
   while(true)
   {
     if(node->m_GpsOnline){
-      //std::lock_guard<std::mutex> lock_guard(node->m_lock);
-      node->m_lock.lock();
+      std::lock_guard<std::mutex> lock_guard(node->m_lock);
+      //node->m_lock.lock();
       MessagePtr stateMessage = std::make_unique<StateMessage>(node->m_VesselHeading, node->m_VesselLat,
       node->m_VesselLon, node->m_VesselSpeed, node->getCourse());
       node->m_MsgBus.sendMessage(std::move(stateMessage));
-      node->m_lock.unlock();
+      node->updateFrequencyThread();
+      //node->m_lock.unlock();
     }
-    // TODO : Config timer or thread activity with a variable from the dbhandler ??? 
+    // TODO : Config timer or thread activity with a variable from the dbhandler ???
     timer.sleepUntil(node->m_LoopTime);
     timer.reset();
   }

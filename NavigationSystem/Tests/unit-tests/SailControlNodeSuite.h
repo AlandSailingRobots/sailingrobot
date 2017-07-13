@@ -29,7 +29,7 @@
 //#include "All.h"
 #include <math.h>
 
-#define SAIL_CONTROLNODE_TEST_COUNT   8
+#define SAIL_CONTROLNODE_TEST_COUNT   5
 
 
 class SailControlNodeSuite : public CxxTest::TestSuite
@@ -67,23 +67,18 @@ public:
   void setUp()
   {
     // Test Node for message
-    std::cout << std::endl << " ### Number front msg : " << msgBus().m_FrontMessages.size()
-              << " ### Number bqck msg : " << msgBus().m_BackMessages.size() << std::endl;
     mockNode = new MockNode(msgBus(), nodeRegistered);
     // setup them up once in this test, delete them when the program closes
     if(sControlNode == 0)
     {
-        dbHandler = new DBHandler("./asr.db");
+        dbHandler = new DBHandler("../test_asr.db");
         Logger::DisableLogging();
 
 
         sControlNode = new SailControlNode(msgBus(), *dbHandler, .5, MaxSailAngle, MinSailAngle, 90, 0, 0);
         sControlNode->start();
 
-        //std::cout << std::endl << " ###### BREAKPOINT ###### " << std::endl;
         std::this_thread::sleep_for(std::chrono::milliseconds(2600));
-        std::cout << std::endl << " ###### BREAKPOINT ###### " << std::endl;
-
         thr = new std::thread(runMessageLoop);
     }
     testCount++;
@@ -96,11 +91,17 @@ public:
   {
     if(testCount == SAIL_CONTROLNODE_TEST_COUNT)
     {
+       std::this_thread::sleep_for(std::chrono::milliseconds(1000));
       delete sControlNode;
-      delete thr;
       delete dbHandler;
+      delete mockNode;
+      //std::cout << std::endl << " #### DELETE OBJECT of the test #### " << std::endl;
+      // Stay here for process the last message which return system::error
+      std::this_thread::sleep_for(std::chrono::milliseconds(1000));
     }
-    delete mockNode;
+    else {
+            delete mockNode;
+    }
   }
 
   // ----------------
@@ -120,9 +121,7 @@ public:
 
     MessagePtr windData =  std::make_unique<WindDataMsg>(appWindDirection,appWindSpeed,appWindTemp);
     msgBus().sendMessage(std::move(windData));
-    std::cout << std::endl << " ###### BREAKPOINT ###### " << std::endl;
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
-    std::cout << std::endl << " ###### BREAKPOINT ###### " << std::endl;
 
     TS_ASSERT(mockNode->m_MessageReceived);
     TS_ASSERT_EQUALS(mockNode->m_WindDir,appWindDirection);
@@ -130,9 +129,8 @@ public:
     TS_ASSERT_EQUALS(mockNode->m_WindTemp,appWindTemp);
 
     //Check if there is the same result by the processing next to the Compass data has been received
-    double sailAngle = -Utility::sgn(appWindDirection)*(((MinSailAngle-MaxSailAngle)*std::abs(appWindDirection)/180)+MaxSailAngle);
+    int sailAngle = -Utility::sgn(appWindDirection)*(((MinSailAngle-MaxSailAngle)*std::abs(appWindDirection)/180)+MaxSailAngle);
     double sailControlNodeSailAngle = mockNode->m_sailPosition;
-    std::cout << std::endl << " ##### Sail config : Angle " << sailAngle << std::endl ;
     TS_ASSERT_EQUALS(sailControlNodeSailAngle,sailAngle);
   }
 
@@ -154,9 +152,8 @@ public:
     TS_ASSERT_EQUALS(mockNode->m_WindTemp,appWindTemp);
 
     //Check if there is the same result by the processing next to the Compass data has been received
-    double sailAngle = -Utility::sgn(appWindDirection)*(((MinSailAngle-MaxSailAngle)*std::abs(appWindDirection)/180)+MaxSailAngle);
+    int sailAngle = -Utility::sgn(appWindDirection)*(((MinSailAngle-MaxSailAngle)*std::abs(appWindDirection)/180)+MaxSailAngle);
     double sailControlNodeSailAngle = mockNode->m_sailPosition;
-    std::cout << std::endl << " ##### Sail config : Angle " << sailAngle << std::endl ;
     TS_ASSERT_EQUALS(sailControlNodeSailAngle,sailAngle);
   }
 
@@ -178,10 +175,22 @@ public:
     TS_ASSERT_EQUALS(mockNode->m_WindTemp,appWindTemp);
 
     //Check if there is the same result by the processing next to the Compass data has been received
-    double sailAngle = -Utility::sgn(appWindDirection)*(((MinSailAngle-MaxSailAngle)*std::abs(appWindDirection)/180)+MaxSailAngle);
+    int sailAngle = -Utility::sgn(appWindDirection)*(((MinSailAngle-MaxSailAngle)*std::abs(appWindDirection)/180)+MaxSailAngle);
     double sailControlNodeSailAngle = mockNode->m_sailPosition;
-    std::cout << std::endl << " ##### Sail config : Angle " << sailAngle << std::endl ;
     TS_ASSERT_EQUALS(sailControlNodeSailAngle,sailAngle);
+  }
+
+  // ----------------
+  // Test for update frequency
+  // ----------------
+  void test_SailControlUpdateFrequency(){
+      double newLoopTime= 0.7;
+      // TODO : Create table for each configuration of the new node including looptime variables
+      dbHandler->changeOneValue("sailing_robot_config","1",".7","loop_time");
+      std::this_thread::sleep_for(std::chrono::milliseconds(700));
+      double sailControlFrequence = sControlNode->getFrequencyThread();
+      TS_ASSERT_EQUALS(sailControlFrequence,newLoopTime);
+      dbHandler->changeOneValue("sailing_robot_config","1",".5","loop_time");
   }
 
 };

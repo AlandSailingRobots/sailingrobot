@@ -104,11 +104,16 @@ double SailControlNode::calculateSailAngle()
 }
 //*///----------------------------------------------------------------------------------
 
+///----------------------------------------------------------------------------------
+double SailControlNode::getFrequencyThread()
+{
+    return m_LoopTime;
+}
 
 ///----------------------------------------------------------------------------------
-void SailControlNode::updateFrequencyThread(SailControlNode* node)
+void SailControlNode::updateFrequencyThread()
 {
-    node->m_LoopTime = m_db.retrieveCellAsInt("sail_servo_config","1","loopTime");
+    m_LoopTime = m_db.retrieveCellAsDouble("sailing_robot_config","1","loop_time");
 }
 
 ///----------------------------------------------------------------------------------
@@ -118,14 +123,7 @@ void SailControlNode::SailControlNodeThreadFunc(ActiveNode* nodePtr)
 
     // An initial sleep, its purpose is to ensure that most if not all the sensor data arrives
     // at the start before we send out the state message.
-    std::cout << std::endl << "## App Wind : " << node->m_ApparentWindDir
-              << " ## MaxSailAngle : " << node->m_MaxSailAngle << " ## MinSailAngle : "
-              << node->m_MinSailAngle << " ## Max Cmd Ang : " << node->m_MaxCommandAngle
-              << " ## P gain " << node->pGain << " I " << node->iGain << " ## Loop Time : "
-              << node->m_LoopTime << " ## " << std::endl;
-    std::cout << std::endl << " ## Value out : " << node->calculateSailAngle() << std::endl;
     std::this_thread::sleep_for(std::chrono::milliseconds(2000));
-    std::cout << std::endl << " ## END INIT SLEEP ## " << std::endl;
     Timer timer;
     timer.start();
 
@@ -139,6 +137,6 @@ void SailControlNode::SailControlNodeThreadFunc(ActiveNode* nodePtr)
         // Broadcast() or selected sent???
         timer.sleepUntil(node->m_LoopTime);
         timer.reset();
-        node->updateFrequencyThread(node);
+        node->updateFrequencyThread();
     }
 }

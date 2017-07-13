@@ -29,7 +29,7 @@
 #include <thread>
 #include <iostream>
 
-#define COURSE_REGULATORNODE_TEST_COUNT 8
+#define COURSE_REGULATORNODE_TEST_COUNT 7
 
 class CourseRegulatorNodeSuite : public CxxTest::TestSuite
 {
@@ -53,13 +53,13 @@ public:
 
 /*
     static DBHandler& dbHandler(){
-        static DBHandler* dbh = new DBHandler("./asr.db"); 
+        static DBHandler* dbh = new DBHandler("./asr.db");
         return *dbh;
     }
 */
 
     // ----------------
-    // Send messages 
+    // Send messages
     // ----------------
     static void runMessageLoop()
     {
@@ -71,20 +71,22 @@ public:
     // ----------------
     void setUp()
     {
-         // Object to simulate the 
+         // Object to simulate the
         mockNode = new MockNode(msgBus(), nodeRegistered);
-        
         // setup them up once in this test, delete them when the program closes
         if(cRegulatorNode == 0)
-        {  
-            dbHandler = new DBHandler("../asrtest.db");
-            Logger::DisableLogging();   
-            
+        {
+            dbHandler = new DBHandler("../test_asr.db");
+            Logger::DisableLogging();
+
+
             cRegulatorNode = new CourseRegulatorNode(msgBus(),*dbHandler,lTime,MaxRudAng,0,0);
             cRegulatorNode->start();
+
             std::this_thread::sleep_for(std::chrono::milliseconds(2600));
             thr = new std::thread(runMessageLoop);
-        }    
+
+        }
         testCount++;
     }
 
@@ -96,11 +98,18 @@ public:
         // Counter of the number of test
         if(testCount == COURSE_REGULATORNODE_TEST_COUNT)
         {
+            std::this_thread::sleep_for(std::chrono::milliseconds(1000));
             delete cRegulatorNode;
-            delete thr;
             delete dbHandler;
+            delete mockNode;
+            //std::cout << std::endl << " #### DELETE OBJECT of the test #### " << std::endl;
+            // Stay here for process the last message which return system::error
+            std::this_thread::sleep_for(std::chrono::milliseconds(1000));
         }
-        delete mockNode;
+        else
+        {
+            delete mockNode;
+        }
     }
 
     // ----------------
@@ -206,7 +215,7 @@ public:
         int rudderAngle = Utility::sgn(speed)*sin(Utility::degreeToRadian(diffHeading))*MaxRudAng;
         double courseRegulatorRudderAngle = mockNode->m_rudderPosition;
         TS_ASSERT_EQUALS(courseRegulatorRudderAngle,rudderAngle);
-        
+
     }
 
     // ----------------
@@ -239,27 +248,12 @@ public:
     // ----------------
     void test_CourseRegulatorUpdateFrequency(){
         double newLoopTime= 0.7;
-        dbHandler->changeOneValue("course_regulator","1",".7","loopTime");
+        // TODO : Create table for each configuration of the new node including looptime variables
+        dbHandler->changeOneValue("sailing_robot_config","1",".7","loop_time");
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
         double courseRegulatorFrequence = cRegulatorNode->getFrequencyThread();
-        TS_ASSERT_DIFFERS(courseRegulatorFrequence,newLoopTime); 
+        TS_ASSERT_EQUALS(courseRegulatorFrequence,newLoopTime);
+        dbHandler->changeOneValue("sailing_robot_config","1",".5","loop_time");
     }
 
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -52,6 +52,8 @@ public:
     // -------------
     void processMessage(const Message* message);
 
+    double getFrequencyThread();
+
 private:
 
     // -------------
@@ -77,7 +79,7 @@ private:
     // -------------
     // Get and update the frequency of the thread
     // -------------
-    void updateFrequencyThread(SailControlNode* node);
+    void updateFrequencyThread();
 
     // -------------
     // Actions during the activity of the node

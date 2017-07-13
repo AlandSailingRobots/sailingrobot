@@ -20,6 +20,7 @@
 #include "TestMocks/MessageLogger.h"
 #include "Messages/CompassDataMsg.h"
 #include "Messages/GPSDataMsg.h"
+#include "DataBase/DBHandler.h"
 #include "Math/Utility.h"
 
 
@@ -27,7 +28,7 @@
 #include <chrono>
 #include <thread>
 
-#define STATE_ESTIMATIONODE_TEST_COUNT   8
+#define STATE_ESTIMATIONODE_TEST_COUNT   9
 
 
 class StateEstimationNodeSuite : public CxxTest::TestSuite
@@ -36,6 +37,7 @@ public:
 
   StateEstimationNode* sEstimationNode;
 
+  DBHandler* dbhandler;
   MockNode* mockNode;
   bool nodeRegistered = false;
 
@@ -50,7 +52,7 @@ public:
   }
 
   // ----------------
-  // Send messages 
+  // Send messages
   // ----------------
   static void runMessageLoop()
   {
@@ -67,9 +69,10 @@ public:
     // setup them up once in this test, delete them when the program closes
     if(sEstimationNode == 0)
     {
+      dbhandler = new DBHandler("../test_asr.db");
       Logger::DisableLogging();
 
-      sEstimationNode = new StateEstimationNode(msgBus(), .5, speedLimit);
+      sEstimationNode = new StateEstimationNode(msgBus(),*dbhandler , 1.5, speedLimit);
       sEstimationNode->start();
       std::this_thread::sleep_for(std::chrono::milliseconds(2600));
       thr = new std::thread(runMessageLoop);
@@ -85,9 +88,14 @@ public:
     if(testCount == STATE_ESTIMATIONODE_TEST_COUNT)
     {
       delete sEstimationNode;
+      delete dbhandler;
+      delete mockNode;
+      // Stay here for process the last message which return system::error
+      std::this_thread::sleep_for(std::chrono::milliseconds(1000));
     }
-    delete mockNode;
-
+    else{
+            delete mockNode;
+        }
   }
 
   // ----------------
@@ -122,7 +130,6 @@ public:
       mode);
       msgBus().sendMessage(std::move(gpsData));
       std::this_thread::sleep_for(std::chrono::milliseconds(500));
-
       TS_ASSERT(mockNode->m_MessageReceived);
   }
 
@@ -148,7 +155,7 @@ public:
         MessagePtr wayPointMsgData = std::make_unique<WaypointDataMsg>(2, 19.81, 60.2, nextDeclination, 6, 15,  1, 19.82, 60.1, 6, 15);
         msgBus().sendMessage(std::move(wayPointMsgData));
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
-        TS_ASSERT_DELTA(mockNode->m_StateMsgHeading, 0, 1e-7); // Check if Heading of the state message is null because we must wait a data from the compass message 
+        TS_ASSERT_DELTA(mockNode->m_StateMsgHeading, 0, 1e-7); // Check if Heading of the state message is null because we must wait a data from the compass message
 
         int heading = 100;
         MessagePtr compassData =  std::make_unique<CompassDataMsg>(heading, 80, 60);
@@ -274,6 +281,19 @@ public:
                 //CHeck the modification of the heading and the same result of heading because of the negative speed
                 TS_ASSERT(stateEstimationNodeVesselHeading != 0);
                 TS_ASSERT_DELTA(mockNode->m_StateMsgCourse, headingGPS, 1e-7);
+              }
+
+              // ----------------
+              // Test for update frequency
+              // ----------------
+              void test_StateEstimationUpdateFrequency(){
+                  double newLoopTime= 0.7;
+                  // TODO : Create table for each configuration of the new node including looptime variables
+                  dbhandler->changeOneValue("sailing_robot_config","1",".7","loop_time");
+                  std::this_thread::sleep_for(std::chrono::milliseconds(700));
+                  double stateEstimationFrequence = sEstimationNode->getFrequencyThread();
+                  TS_ASSERT_EQUALS(stateEstimationFrequence,newLoopTime);
+                  dbhandler->changeOneValue("sailing_robot_config","1",".5","loop_time");
               }
 
             };
