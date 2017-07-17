@@ -38,12 +38,12 @@ class DBLoggerNodeSuite : public CxxTest::TestSuite {
 
     void setUp() {
         if(dbLoggerNode == 0) {
-            dbHandler = new DBHandler("./asrtest.db");
+            dbHandler = new DBHandler("../asr.db");
             dbLoggerNode = new DBLoggerNode(msgBus(), *dbHandler, DBLOGGERNODE_WAIT_TIME, DBLOGGERNODE_UPDATE_FREQUENCY, DBLOGGERNODE_QUEUE_SIZE);
             thr = new std::thread(runMessageLoop);
         }
     }
-    
+
     void tearDown() {
         delete dbHandler;
         delete dbLoggerNode;
@@ -61,11 +61,11 @@ class DBLoggerNodeSuite : public CxxTest::TestSuite {
 		    Logger::error("Logger init\t\t[FAILED]");
 	    }
 
-        if(dbHandler->initialise()) 
+        if(dbHandler->initialise())
         {
 		    Logger::info("Database init\t\t[OK]");
 	    }
-	    else 
+	    else
         {
 		    Logger::error("Database init\t\t[FAILED]");
 		    Logger::shutdown();

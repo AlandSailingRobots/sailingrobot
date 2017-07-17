@@ -401,7 +401,7 @@ public:
 		AISList.push_back(v2);
 		AISList.push_back(v3);
 
-		AISDataMsg msg(AISList);
+		AISDataMsg msg(AISList, 60.1, 19.1);
 
 		TS_ASSERT_EQUALS(msg.messageType(), MessageType::AISData);
 		TS_ASSERT_EQUALS(msg.MMSI(0),1);

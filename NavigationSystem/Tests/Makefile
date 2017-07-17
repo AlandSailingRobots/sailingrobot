@@ -15,7 +15,7 @@ UNIT_TEST_SRCS 			= MessageCoreSuite.h MessageSuite.h UtilitySuite.h HTTPSyncSui
 
 else
 
-UNIT_TEST_SRCS 			= MessageCoreSuite.h MessageSuite.h CanNodesSuite.h UtilitySuite.h HTTPSyncSuite.h WaypointNodeSuite.h LineFollowSuite.h CANWindsensorNodeSuite.h \
+UNIT_TEST_SRCS 			= MessageCoreSuite.h MessageSuite.h AISProcSuite.h CanNodesSuite.h UtilitySuite.h HTTPSyncSuite.h WaypointNodeSuite.h LineFollowSuite.h CANWindsensorNodeSuite.h \
 						  WindStateNodeSuite.h StateEstimationNodeSuite.h WingsailControlSuite.h CourseRegulatorSuite.h CANMessageSuite.h DBLoggerNodeSuite.h \
 						  LowLevelControllerNodeJanetSuite.h LowLevelControllersFunctionsTestSuite.h
 

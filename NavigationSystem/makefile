@@ -110,7 +110,7 @@ export MATH_SRC             = Math/CourseCalculation.cpp Math/CourseMath.cpp Mat
 export SIMULATOR_SRC        = Simulation/SimulationNode.cpp
 
 export CORE_SRC             = Navigation/WaypointMgrNode.cpp LowLevelControllers/LowLevelControllerNodeASPire.cpp \
-																WorldState/StateEstimationNode.cpp WorldState/VesselStateNode.cpp \
+																WorldState/StateEstimationNode.cpp WorldState/VesselStateNode.cpp WorldState/AISProcessing.cpp \
 							   								LowLevelControllers/LowLevelControllerNodeJanet.cpp WorldState/WindStateNode.cpp \
 								$(MESSAGE_BUS_SRC) $(NETWORK_SRC) $(SYSTEM_SERVICES_SRC) $(MATH_SRC)
 

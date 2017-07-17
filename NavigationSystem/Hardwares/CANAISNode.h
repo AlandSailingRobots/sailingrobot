@@ -25,12 +25,15 @@ public:
   void processMessage(const Message* message);
   void processPGN(N2kMsg& nMsg);
   void parsePGN129038_129039(N2kMsg& nMsg, AISVessel& vessel);
+  void parsePGN129025(N2kMsg& nMsg);
   void start();
 
 private:
 
   static void CANAISThreadFunc(ActiveNode* nodePtr);
   std::vector<AISVessel> m_VesselList;
+  float m_PosLat;
+  float m_PosLon;
   std::mutex m_lock;
   double m_LoopTime;
 };

@@ -14,29 +14,17 @@
 #pragma once
 
 #include "MessageBus/Message.h"
-// #include "Hardwares/CANAISNode.h"
 
-typedef unsigned char uchar;
-
-// #ifndef AISDATAMSG_H
-// #define AISDATAMSG_H
-// struct AISVessel {
-//   uint16_t COG;
-//   uint16_t SOG;
-//   int MMSI;
-//   float latitude;
-//   float longitude;
-// };
-// #endif
+#include <vector>
 
 class AISDataMsg : public Message {
 public:
-	AISDataMsg(NodeID destinationID, NodeID sourceID, std::vector<AISVessel>(vesselList))
-		:Message(MessageType::AISData, sourceID, destinationID), m_VesselList(vesselList)
+	AISDataMsg(NodeID destinationID, NodeID sourceID, std::vector<AISVessel>(vesselList), float posLat, float posLon)
+		:Message(MessageType::AISData, sourceID, destinationID), m_VesselList(vesselList), m_PosLat(posLat), m_PosLon(posLon)
 	{ }
 
-	AISDataMsg(std::vector<AISVessel>(vesselList))
-		:Message(MessageType::AISData, NodeID::None, NodeID::None), m_VesselList(vesselList)
+	AISDataMsg(std::vector<AISVessel>(vesselList), float posLat, float posLon)
+		:Message(MessageType::AISData, NodeID::None, NodeID::None), m_VesselList(vesselList), m_PosLat(posLat), m_PosLon(posLon)
 	{ }
 
 	AISDataMsg(MessageDeserialiser deserialiser)
@@ -97,6 +85,8 @@ public:
 	float longitude(int vessel) { return m_VesselList[vessel].longitude; }
 	uint16_t COG(int vessel) { return m_VesselList[vessel].COG; }
 	uint16_t SOG(int vessel) { return m_VesselList[vessel].SOG; }
+	float posLat() { return m_PosLat; }
+	float posLon() { return m_PosLon; }
 
   ///----------------------------------------------------------------------------------
 	/// Serialises the message into a MessageSerialiser
@@ -114,6 +104,8 @@ public:
 			serialiser.serialise(vessel.latitude);
 			serialiser.serialise(vessel.longitude);
 		}
+		serialiser.serialise(m_PosLat);
+		serialiser.serialise(m_PosLon);
 	}
 
 private:
@@ -122,4 +114,6 @@ private:
 	}
 
 	std::vector<AISVessel> m_VesselList;
+	float m_PosLat;
+	float m_PosLon;
 };

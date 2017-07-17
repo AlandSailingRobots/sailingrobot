@@ -14,8 +14,9 @@
 #include <mutex>
 #include <vector>
 #include <iostream>
+#include <cstring>
 
-class CANSolarTrackerNode : public CANFrameReceiver, public ActiveNode {
+class CANSolarTrackerNode : public ActiveNode {
 public:
   CANSolarTrackerNode(MessageBus& msgBus, CANService& canService, double loopTime);
   ~CANSolarTrackerNode();
@@ -23,21 +24,21 @@ public:
   bool init();
   void processMessage (const Message* message);
   void processFrame (CanMsg& Msg);
+  void sendMsg (float lat, float lon, float head, uint16_t h, uint16_t m);
   void start();
 
 private:
 
   static void CANSolarTrackerThreadFunc(ActiveNode* nodePtr);
 
+  CANService* m_CANService;
   float	m_Lat;
   float	m_Lon;
-  // static std::chrono::_V2::steady_clock::time_point	m_Time;
-  int m_Hour;
-  int m_Minute;
+  uint16_t m_Hour;
+  uint16_t m_Minute;
   float	m_Heading;
   bool m_initialised;
   double m_LoopTime;
-  // int m_Sent;
 
   std::mutex m_lock;
 

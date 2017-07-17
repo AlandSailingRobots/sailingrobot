@@ -1,8 +1,8 @@
 #include "CANAISNode.h"
 
 CANAISNode::CANAISNode(MessageBus& msgBus, CANService& canService, double loopTime) :
-    CANPGNReceiver(canService, {129038, 129039}), ActiveNode(NodeID::CANAIS, msgBus),
-    m_VesselList({}), m_LoopTime(loopTime){
+    CANPGNReceiver(canService, {129025, 129038, 129039}), ActiveNode(NodeID::CANAIS, msgBus),
+    m_VesselList({}), m_PosLat(0), m_PosLon(0), m_LoopTime(loopTime){
       AISVessel v1;
       v1.MMSI = 0;
       v1.latitude = 0;
@@ -13,7 +13,7 @@ CANAISNode::CANAISNode(MessageBus& msgBus, CANService& canService, double loopTi
 }
 
 CANAISNode::~CANAISNode() {
-  std::cout << "HEJ" << std::endl;
+  
 }
 
 bool CANAISNode::init() {
@@ -29,6 +29,9 @@ void CANAISNode::processPGN(N2kMsg& nMsg) {
     AISVessel vessel;
     parsePGN129038_129039(nMsg, vessel);
     m_VesselList.push_back(std::move(vessel));
+  }
+  else if (nMsg.PGN == 129025) {
+    parsePGN129025(nMsg);
   }
 }
 
@@ -52,6 +55,23 @@ void CANAISNode::parsePGN129038_129039(N2kMsg& nMsg, AISVessel& vessel) {
   vessel.SOG = ((nMsg.Data[17]) << 8 | (nMsg.Data[16]));
 }
 
+void CANAISNode::parsePGN129025(N2kMsg& nMsg) {
+  uint8_t byte_arr[4];
+  float lat_pos,lon_pos;
+  byte_arr[0] = nMsg.Data[0];
+  byte_arr[1] = nMsg.Data[1];
+  byte_arr[2] = nMsg.Data[2];
+  byte_arr[3] = nMsg.Data[3];
+  std::memcpy(&lat_pos,&byte_arr,sizeof lat_pos);
+  byte_arr[0] = nMsg.Data[4];
+  byte_arr[1] = nMsg.Data[5];
+  byte_arr[2] = nMsg.Data[6];
+  byte_arr[3] = nMsg.Data[7];
+  std::memcpy(&lon_pos,&byte_arr,sizeof lon_pos);
+  m_PosLat = lat_pos;
+  m_PosLon = lon_pos;
+}
+
 void CANAISNode::start() {
   runThread(CANAISNode::CANAISThreadFunc);
 }
@@ -66,7 +86,7 @@ void CANAISNode::CANAISThreadFunc(ActiveNode* nodePtr) {
 
     node->m_lock.lock();
 
-    MessagePtr AISList = std::make_unique<AISDataMsg>(node->m_VesselList);
+    MessagePtr AISList = std::make_unique<AISDataMsg>(node->m_VesselList, node->m_PosLat, node->m_PosLon);
     node->m_MsgBus.sendMessage(std::move(AISList));
     node->m_lock.unlock();
     if (PRINT) {

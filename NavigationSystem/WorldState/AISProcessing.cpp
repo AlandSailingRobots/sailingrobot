@@ -14,10 +14,9 @@
 
 #include "AISProcessing.h"
 
-AISProcessing::AISProcessing(MessageBus& msgBus, double loopTime)
-  : ActiveNode(NodeID::AISProcessing, msgBus), m_LoopTime(loopTime) {
+AISProcessing::AISProcessing(MessageBus& msgBus, CollidableMgr* collidableMgr, double loopTime)
+  : ActiveNode(NodeID::AISProcessing, msgBus), m_LoopTime(loopTime), collidableMgr(collidableMgr) {
     msgBus.registerNode(*this, MessageType::AISData);
-    msgBus.registerNode(*this, MessageType::StateMessage);
   }
 
   AISProcessing::~AISProcessing() {
@@ -29,34 +28,38 @@ AISProcessing::AISProcessing(MessageBus& msgBus, double loopTime)
   }
 
   void AISProcessing::processMessage(const Message* msg) {
-    MessageType type = msg->MessageType();
+    MessageType type = msg->messageType();
 
     switch (type) {
       case MessageType::AISData :
-        processAISMessage(dynamic_cast<const AISDataMsg*> msg);
-        break;
-      case MessageType::StateMessage :
-        processStateMessage(dynamic_cast<const StateMessage*> msg);
+        processAISMessage((AISDataMsg*) msg);
         break;
       default:
         return;
     }
   }
 
-  void AISProcessing::processAISMessage(const AISDataMsg* msg) {
-    std::vector<AISVessel> list = msg.vesselList();
+  void AISProcessing::processAISMessage(AISDataMsg* msg) {
+    std::vector<AISVessel> list = msg->vesselList();
     double dist;
+    m_latitude = msg->posLat();
+    m_longitude = msg->posLon();
     for (auto vessel: list) {
-      dist = calculateDTW(m_latitude, m_longitude, vessel.latitude, vessel.longitude);
+      // std::cout << std::endl << "HEJ: " << m_Vessels.size() << std::endl;
+      dist = CourseMath::calculateDTW(m_latitude, m_longitude, vessel.latitude, vessel.longitude);
+      std::cout << std::endl << "HEJ: " << m_Vessels.size() << ", " << dist << std::endl;
+
       if (dist < RADIUS) {
-        m_VesselList.push_back(vessel);
+        m_Vessels.push_back(vessel);
       }
     }
+
   }
 
-  void AISProcessing::processStateMessage(const StateMessage* msg) {
-    m_latitude = msg.latitude();
-    m_longitude = msg.longitude();
+  void AISProcessing::sendAISData() {
+    for (auto vessel: m_Vessels) {
+      this->collidableMgr->addAISContact(vessel.MMSI, vessel.latitude, vessel.longitude, vessel.SOG, vessel.COG);
+    }
   }
 
   void AISProcessing::start() {
@@ -64,7 +67,7 @@ AISProcessing::AISProcessing(MessageBus& msgBus, double loopTime)
   }
 
   void AISProcessing::AISProcessingThreadFunc(ActiveNode* nodePtr) {
-    AISProcessing* node = dynamic_cast<AISProcessing*> nodePtr;
+    AISProcessing* node = dynamic_cast<AISProcessing*> (nodePtr);
 
     Timer timer;
     timer.start();
@@ -72,7 +75,8 @@ AISProcessing::AISProcessing(MessageBus& msgBus, double loopTime)
     while(true) {
       node->m_lock.lock();
       // Send data to CollidableMgr
-
+      node->sendAISData();
+      // MessagePtr collidableList = std::make_unique<AISDataMsg>(CollidableMgr, node->nodeID(), node->m_Vessels) // Dest, source, data!
       node->m_lock.unlock();
       timer.sleepUntil(node->m_LoopTime*1.0f/1000);
       timer.reset();

@@ -80,8 +80,8 @@ public:
       solarNode = new CANSolarTrackerNode(msgBus(), *canService, 100);
       // windsensorNode = new CANWindsensorNode(msgBus(), *canService, 1.0);
 
-      aisNode->start();
-      solarNode->start();
+      // aisNode->start();
+      // solarNode->start();
       // windsensorNode->start();
 
       std::this_thread::sleep_for(std::chrono::milliseconds(200));
@@ -94,8 +94,8 @@ public:
 
   void tearDown() {
     if (testCount == CAN_TEST_COUNT) {
-      delete aisNode;
-      delete solarNode;
+      // delete aisNode;
+      // delete solarNode;
       // delete windsensorNode;
     }
     delete mockNode;
@@ -161,12 +161,10 @@ public:
     AISList.push_back(v1);
     AISList.push_back(v2);
     AISList.push_back(v3);
-    
-    MessagePtr mockAISMsg = std::make_unique<AISDataMsg>(AISList);
+
+    MessagePtr mockAISMsg = std::make_unique<AISDataMsg>(AISList, 60.1, 19.1);
     msgBus().sendMessage(std::move(mockAISMsg));
     std::this_thread::sleep_for(std::chrono::milliseconds(2000));
-
-    AISVessel ves1 = mockNode->m_VesselList[0];
 
     TS_ASSERT(mockNode->m_MessageReceived);
     // TS_ASSERT_EQUALS(mockNode->m_VesselList.size(), 3);
