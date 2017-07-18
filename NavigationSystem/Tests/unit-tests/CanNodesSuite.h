@@ -76,17 +76,19 @@ public:
     if (solarNode == 0) {
       Logger::DisableLogging();
 
-      aisNode = new CANAISNode(msgBus(), *canService, 100);
-      solarNode = new CANSolarTrackerNode(msgBus(), *canService, 100);
+      aisNode = new CANAISNode(msgBus(), *canService, 500);
+      //solarNode = new CANSolarTrackerNode(msgBus(), *canService, 100);
       // windsensorNode = new CANWindsensorNode(msgBus(), *canService, 1.0);
 
-      // aisNode->start();
+      aisNode->start();
       // solarNode->start();
       // windsensorNode->start();
 
       std::this_thread::sleep_for(std::chrono::milliseconds(200));
 
       thr = new std::thread(runMessageLoop);
+
+
     }
 
     testCount++;
@@ -94,13 +96,13 @@ public:
 
   void tearDown() {
     if (testCount == CAN_TEST_COUNT) {
-      // delete aisNode;
-      // delete solarNode;
-      // delete windsensorNode;
+      thr->detach();
+      delete thr;
+      delete aisNode;
+      delete solarNode;
     }
     delete mockNode;
     delete canService;
-    // delete windMockNode;
   }
 
   void test_CanInit() {
@@ -127,57 +129,18 @@ public:
     double latitude = 60.2;
     double longitude = 19.1;
 
-    std::this_thread::sleep_for(std::chrono::milliseconds(700));
-
     MessagePtr mockSolarMsg = std::make_unique<StateMessage>(heading,latitude,longitude,1,20);
     msgBus().sendMessage(std::move(mockSolarMsg));
-    std::this_thread::sleep_for(std::chrono::milliseconds(700));
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
 
     TS_ASSERT_DELTA(mockNode->m_latitude, latitude, 1e-3);
     TS_ASSERT_DELTA(mockNode->m_longitude, longitude, 1e-3);
     TS_ASSERT_DELTA(mockNode->m_heading, heading, 1e-3);
   }
 
-/* */
   void test_AISData() {
-
-    std::vector<AISVessel> AISList;
-    AISVessel v1, v2, v3;
-    v1.MMSI = 1;
-    v1.latitude = 60.2f;
-    v1.longitude = 19.1f;
-    v1.COG = 200;
-    v1.SOG = 10;
-    v2.MMSI = 2;
-    v2.latitude = 62.f;
-    v2.longitude = 18.1f;
-    v2.COG = 100;
-    v2.SOG = 5;
-    v3.MMSI = 3;
-    v3.latitude = 61.5f;
-    v3.longitude = 18.7f;
-    v3.COG = 80;
-    v3.SOG = 7;
-    AISList.push_back(v1);
-    AISList.push_back(v2);
-    AISList.push_back(v3);
-
-    MessagePtr mockAISMsg = std::make_unique<AISDataMsg>(AISList, 60.1, 19.1);
-    msgBus().sendMessage(std::move(mockAISMsg));
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
-
     TS_ASSERT(mockNode->m_MessageReceived);
-    TS_ASSERT_EQUALS(mockNode->m_VesselList.size(), 3);
-    // TS_ASSERT_EQUALS(ves1.MMSI,1);
-    // TS_ASSERT_DELTA(ves1.latitude, 60.2f, 1e-4);
-    // TS_ASSERT_DELTA(ves1.longitude, 19.1f, 1e-4);
-    // TS_ASSERT_EQUALS(ves1.COG, 200);
-    // TS_ASSERT_EQUALS(ves1.SOG, 10);
   }
 
-  void test_SendCANMsg() {
-    N2kMsg tmp;
-    tmp.PGN = 129038;
-  }
-  // */
 };

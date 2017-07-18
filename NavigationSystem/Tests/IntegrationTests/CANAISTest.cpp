@@ -5,6 +5,7 @@
 #include "MessageBus/MessageTypes.h"
 #include "MessageBus/MessageBus.h"
 #include "MessageBus/ActiveNode.h"
+#include "SystemServices/Logger.h"
 
 CANService canService;
 MessageBus msgBus;
@@ -29,16 +30,16 @@ public:
   }
 
   void printData() {
-    std::cout << std::endl << m_VesselList.size() << std::endl;
+    Logger::info("Size: " + std::to_string(m_VesselList.size()));
+    Logger::info("");
     for (auto ves: m_VesselList) {
       std::cout << ves.MMSI << std::endl;
-    }
-    if (m_VesselList.size()>0) {
-      std::cout << m_VesselList[0].MMSI << std::endl;
-      std::cout << m_VesselList[0].latitude << std::endl;
-      std::cout << m_VesselList[0].longitude << std::endl;
-      std::cout << m_VesselList[0].COG << std::endl;
-      std::cout << m_VesselList[0].SOG << std::endl;
+      Logger::info("MMSI: " + std::to_string(ves.MMSI));
+      Logger::info("Lat: " + std::to_string(ves.latitude));
+      Logger::info("Lon: " + std::to_string(ves.longitude));
+      Logger::info("COG: " + std::to_string(ves.COG));
+      Logger::info("SOG: " + std::to_string(ves.SOG));// << std::endl;
+      Logger::info("");
     }
   }
 
@@ -52,7 +53,10 @@ void messageLoop() {
 }
 
 int main() {
+  Logger::init("AISTest.log");
+
   auto future = canService.start();
+
 
   AISDataReceiver aisRec(msgBus, 300);
   aisNode = new CANAISNode(msgBus, canService, 500);
@@ -67,6 +71,4 @@ int main() {
 
     aisRec.printData();
   }
-
-  std::cout << "MMMMMMMMMMMMMMMMMMM" << std::endl;
 }

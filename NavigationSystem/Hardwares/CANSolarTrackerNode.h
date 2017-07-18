@@ -18,19 +18,45 @@
 
 class CANSolarTrackerNode : public ActiveNode {
 public:
+  /*
+  * Constructor, pointer to a message bus and canservice
+  * double loopTime, how often we send messages
+  */
   CANSolarTrackerNode(MessageBus& msgBus, CANService& canService, double loopTime);
   ~CANSolarTrackerNode();
 
   bool init();
+
+  /*
+  * Processes the messages we receive
+  */
   void processMessage (const Message* message);
+
+  /*
+  * Processes the can messages we receive
+  */
   void processFrame (CanMsg& Msg);
+
+  /*
+  * Sends message on the canbus
+  */
   void sendMsg (float lat, float lon, float head, uint16_t h, uint16_t m);
+
+  /*
+  * Starts the worker thread
+  */
   void start();
 
 private:
 
+  /*
+  * The function that the thread works on
+  */
   static void CANSolarTrackerThreadFunc(ActiveNode* nodePtr);
 
+  /*
+  * Private variables
+  */
   CANService* m_CANService;
   float	m_Lat;
   float	m_Lon;

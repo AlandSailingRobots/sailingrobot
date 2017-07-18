@@ -43,7 +43,7 @@ public:
   void setUp() {
     mockNode = new MockNode(msgBus(), mockNodeRegistered);
     if (aisProc == 0) {
-      aisProc = new AISProcessing(msgBus(), &cMgr, 100.0);
+      aisProc = new AISProcessing(msgBus(), &cMgr, 300e6, 100.0);
 
       aisProc->start();
 
@@ -56,15 +56,41 @@ public:
 
   void tearDown() {
     if (testCount == AISPROC_TEST_COUNT) {
-      //  std::this_thread::sleep_for(std::chrono::milliseconds(1000));
       // delete aisProc;
-      //  std::this_thread::sleep_for(std::chrono::milliseconds(1000));
     }
     delete mockNode;
   }
 
   void test_ReceiveMessage(){
-    TS_ASSERT(true);
+    std::vector<AISVessel> AISList;
+    AISVessel v1, v2, v3;
+    v1.MMSI = 1;
+    v1.latitude = 60.2f;
+    v1.longitude = 19.1f;
+    v1.COG = 200;
+    v1.SOG = 10;
+    v2.MMSI = 2;
+    v2.latitude = 62.f;
+    v2.longitude = 18.1f;
+    v2.COG = 100;
+    v2.SOG = 5;
+    v3.MMSI = 3;
+    v3.latitude = 61.5f;
+    v3.longitude = 18.7f;
+    v3.COG = 80;
+    v3.SOG = 7;
+    AISList.push_back(v1);
+    AISList.push_back(v2);
+    AISList.push_back(v3);
+
+    MessagePtr mockAISMsg = std::make_unique<AISDataMsg>(AISList, 60.1, 19.1);
+    msgBus().sendMessage(std::move(mockAISMsg));
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(300));
+    TS_ASSERT(mockNode->m_MessageReceived);
+  }
+
+  void test_ReceiveData() {
     std::vector<AISVessel> AISList;
     AISVessel v1, v2, v3;
     v1.MMSI = 1;
@@ -93,33 +119,4 @@ public:
     std::this_thread::sleep_for(std::chrono::milliseconds(300));
     TS_ASSERT_EQUALS(cMgr.getAISContacts().length(),3);
   }
-
-  void test_ReceiveData() {
-    TS_ASSERT(true);
-    std::vector<AISVessel> AISList;
-    AISVessel v1, v2, v3;
-    v1.MMSI = 1;
-    v1.latitude = 60.2f;
-    v1.longitude = 19.1f;
-    v1.COG = 200;
-    v1.SOG = 10;
-    v2.MMSI = 2;
-    v2.latitude = 62.f;
-    v2.longitude = 18.1f;
-    v2.COG = 100;
-    v2.SOG = 5;
-    v3.MMSI = 3;
-    v3.latitude = 61.5f;
-    v3.longitude = 18.7f;
-    v3.COG = 80;
-    v3.SOG = 7;
-    AISList.push_back(v1);
-    AISList.push_back(v2);
-    AISList.push_back(v3);
-
-    MessagePtr mockAISMsg = std::make_unique<AISDataMsg>(AISList, 60.1, 19.1);
-    msgBus().sendMessage(std::move(mockAISMsg));
-
-    std::this_thread::sleep_for(std::chrono::milliseconds(300));
-    TS_ASSERT(mockNode->m_MessageReceived);  }
 };

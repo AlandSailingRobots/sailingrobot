@@ -3,13 +3,7 @@
 CANAISNode::CANAISNode(MessageBus& msgBus, CANService& canService, double loopTime) :
     CANPGNReceiver(canService, {129025, 129038, 129039}), ActiveNode(NodeID::CANAIS, msgBus),
     m_VesselList({}), m_PosLat(0), m_PosLon(0), m_LoopTime(loopTime){
-      // AISVessel v1;
-      // v1.MMSI = 0;
-      // v1.latitude = 0;
-      // v1.longitude = 0;
-      // v1.COG = 0;
-      // v1.SOG = 0;
-      // m_VesselList.push_back(v1);
+
 }
 
 CANAISNode::~CANAISNode() {
@@ -78,7 +72,6 @@ void CANAISNode::start() {
 
 void CANAISNode::CANAISThreadFunc(ActiveNode* nodePtr) {
   CANAISNode* node = dynamic_cast<CANAISNode*> (nodePtr);
-  bool PRINT = false;
   Timer timer;
   timer.start();
 
@@ -89,16 +82,8 @@ void CANAISNode::CANAISThreadFunc(ActiveNode* nodePtr) {
     MessagePtr AISList = std::make_unique<AISDataMsg>(node->m_VesselList, node->m_PosLat, node->m_PosLon);
     node->m_MsgBus.sendMessage(std::move(AISList));
     node->m_lock.unlock();
-    if (PRINT) {
-      if (node->m_VesselList.size() > 0) {
-        std::cout << std::endl << node->m_VesselList[0].MMSI << std::endl;
-        std::cout << node->m_VesselList[0].latitude << std::endl;
-        std::cout << node->m_VesselList[0].longitude << std::endl;
-        std::cout << node->m_VesselList[0].COG << std::endl;
-        std::cout << node->m_VesselList[0].SOG << std::endl;
-      }
-    }
-    timer.sleepUntil(node->m_LoopTime*1.0f/1000);
+
+    timer.sleepUntil(node->m_LoopTime);
     timer.reset();
   }
 }

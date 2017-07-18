@@ -15,7 +15,6 @@ CANSolarTrackerNode::~CANSolarTrackerNode () {
 }
 
 bool CANSolarTrackerNode::init() {
-	// m_initialised = true;
 	return true;
 }
 
@@ -33,8 +32,6 @@ void CANSolarTrackerNode::processMessage (const Message* message) {
 
 		m_Hour = timeinfo->tm_hour;
 		m_Minute = timeinfo->tm_min;
-
-		// m_Sent = 0;
 	}
 }
 
@@ -94,7 +91,7 @@ void CANSolarTrackerNode::CANSolarTrackerThreadFunc(ActiveNode* nodePtr) {
 
 	while(true) {
 		node->m_lock.lock();
-		timer.sleepUntil(node->m_LoopTime*1.0f / 1000);
+		;
 
 		if (node->m_Lat == node->DATA_OUT_OF_RANGE ||
 				node->m_Lon == node-> DATA_OUT_OF_RANGE ||
@@ -106,6 +103,7 @@ void CANSolarTrackerNode::CANSolarTrackerThreadFunc(ActiveNode* nodePtr) {
 		node->sendMsg(node->m_Lat, node->m_Lon, node->m_Heading, node->m_Hour, node->m_Minute);
 
 		node->m_lock.unlock();
+		timer.sleepUntil(node->m_LoopTime);
 		timer.reset();
 	}
 }
