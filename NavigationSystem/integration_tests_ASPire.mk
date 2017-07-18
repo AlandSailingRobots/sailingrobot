@@ -9,17 +9,16 @@
 # Files
 ###############################################################################
 
-CORE_SRC							+= $(CORE_ASPIRE)
+# Source files
+MAIN_INTEGRATION_TESTS 	= Tests/IntegrationTests/ArduinoIntegrationTest.cpp
 
-HARDWARE_NODES_SRC 		+= $(HARDWARE_NODES_ASPIRE)
+SRC 					= $(MAIN_INTEGRATION_TESTS) $(CORE_SRC) $(HW_SERVICES_ALL_SRC) \
+							$(CAN_SERVICES_SRC) $(HW_NODES_ALL_SRC) $(HW_NODES_ASPIRE_SRC)
 
-HARDWARE_SERVICES_SRC += $(CAN_HARDWARE_SRC)
-
-SRC 									= $(CORE_SRC) $(HARDWARE_NODES_SRC) $(HARDWARE_SERVICES_SRC) \
-											$(INTEGRATION_TEST)
 
 # Object files
 OBJECTS = $(addprefix $(BUILD_DIR)/, $(SRC:.cpp=.o))
+
 
 ###############################################################################
 # Rules
@@ -38,7 +37,6 @@ $(INTEGRATION_TEST_EXEC_ASPIRE): $(OBJECTS)
 $(BUILD_DIR)/%.o:$(SRC_DIR)/%.cpp
 	@mkdir -p $(dir $@)
 	@echo Compiling CPP File: $@
-
 	@$(CXX) -c $(CPPFLAGS) $(INC_DIR) -o ./$@ $< $(DEFINES) $(LIBS)
 
 stats:$(INTEGRATION_TEST_EXEC_ASPIRE)

@@ -6,38 +6,35 @@
 
 
 ###############################################################################
-# Build the SRC varibale
+# Files
 ###############################################################################
 
-CORE_SRC									+= $(CORE_JANET)
-
-HARDWARE_SERVICES_SRC			+= $(HARDWARE_SERVICES_JANET)
-
-HARDWARE_NODES_SRC				+= $(HARDWARE_NODES_JANET)
+# Source files
+SRC						= main_janet.cpp $(CORE_SRC)
 
 ifeq ($(USE_LNM),1)
-SRC 											= $(LNM_SRC)
+SRC						+= $(LNM_SRC) $(COLLIDABLE_MGR_SRC)
 else
-SRC 											= $(LINE_FOLLOW_SRC)
+SRC						+= $(LINE_FOLLOW_SRC)
 endif
 
 ifeq ($(USE_SIM),1)
-SRC 											+= $(SIMULATOR_SRC)
+SRC						+= $(SIMULATOR_SRC)
 else
-SRC 											+= $(HARDWARE_NODES_SRC) $(HARDWARE_SERVICES_SRC) $(XBEE_NETWORK_SRC)
+SRC						+= $(HW_SERVICES_ALL_SRC) $(HW_SERVICES_JANET_SRC) $(HW_NODES_ALL_SRC) \
+							$(HW_NODES_JANET_SRC) $(XBEE_NETWORK_SRC)
 endif
 
-SRC												+= $(CORE_SRC) $(HTTP_SYNC_SRC) $(MAIN_JANET)
 
+# Object files
 OBJECTS = $(addprefix $(BUILD_DIR)/, $(SRC:.cpp=.o))
+
 
 ###############################################################################
 # Rules
 ###############################################################################
 
 all: $(EXECUTABLE) stats
-
-#$(EXECUTABLE): $(OBJECTS)
 
 # Link and build
 $(EXECUTABLE): $(OBJECTS)
@@ -50,7 +47,6 @@ $(EXECUTABLE): $(OBJECTS)
 $(BUILD_DIR)/%.o:$(SRC_DIR)/%.cpp
 	@mkdir -p $(dir $@)
 	@echo Compiling CPP File: $@
-
 	@$(CXX) -c $(CPPFLAGS) $(INC_DIR) -o ./$@ $< $(DEFINES) $(LIBS)
 
 stats:$(EXECUTABLE)

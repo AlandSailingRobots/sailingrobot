@@ -9,14 +9,12 @@
 # Files
 ###############################################################################
 
-CORE_SRC				+= $(CORE_ASPIRE) $(CORE_JANET)
+# Source files
+SRC         = $(CORE_SRC) $(LNM_SRC) $(COLLIDABLE_MGR_SRC) $(LINE_FOLLOW_SRC) $(SIMULATOR_SRC) \
+				$(HW_SERVICES_ALL_SRC) $(CAN_SERVICES_SRC) $(HW_SERVICES_JANET_SRC) \
+				$(HW_NODES_ALL_SRC) $(HW_NODES_ASPIRE_SRC) $(HW_NODES_JANET_SRC) \
+				$(XBEE_NETWORK_SRC)
 
-HARDWARE_NODES_SRC += $(HARDWARE_NODES_ASPIRE) $(HARDWARE_NODES_JANET)
-
-HARDWARE_SERVICES_SRC += $(CAN_HARDWARE_SRC) $(HARDWARE_SERVICES_JANET)
-
-SRC         = $(CORE_SRC) $(LINE_FOLLOW_SRC) $(HTTP_SYNC_SRC) $(SIMULATOR_SRC) \
-			$(HARDWARE_NODES_SRC) $(HARDWARE_SERVICES_SRC) $(XBEE_NETWORK_SRC)
 
 # Object files
 OBJECTS = $(addprefix $(BUILD_DIR)/, $(SRC:.cpp=.o))
@@ -46,7 +44,6 @@ $(HARDWARE_TEST_EXEC): $(OBJECTS) Tests/runner.o
 $(BUILD_DIR)/%.o:$(SRC_DIR)/%.cpp
 	@mkdir -p $(dir $@)
 	@echo Compiling CPP File: $@
-
 	@$(CXX) -c $(CPPFLAGS) $(INC_DIR) -o ./$@ $< $(DEFINES) $(LIBS)
 
 stats:$(UNIT_TEST_EXEC) $(HARDWARE_TEST_EXEC)

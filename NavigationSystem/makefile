@@ -22,16 +22,14 @@
 #
 ###############################################################################
 
+TOOLCHAIN = 0
 export USE_SIM = 0
 export USE_LNM = 0
-
-TOOLCHAIN = 0
 
 
 ###############################################################################
 # Tools
 ###############################################################################
-
 
 export CPPFLAGS             = -g -Wall -pedantic -Werror -std=gnu++14
 export LIBS                 = -lsqlite3 -lgps -lrt -lcurl -lpthread -lwiringPi -lncurses
@@ -66,89 +64,85 @@ LNM_DIR                 	= Navigation/LocalNavigationModule
 
 
 ###############################################################################
-# Files
+# Target Output
 ###############################################################################
 
-# Target Output
 export EXECUTABLE           = sr
 export UNIT_TEST_EXEC 		= unit-tests.run
-export HARDWARE_TEST_EXEC 	= hardware-tests.run
-export INTEGRATION_TEST_EXEC_ASPIRE = integration-tests_ASPire.run
+export HARDWARE_TEST_EXEC 	= hardware-unit-tests.run
+export INTEGRATION_TEST_EXEC_ASPIRE = integration-tests-ASPire.run
 
 export OBJECT_FILE          = $(BUILD_DIR)/objects.tmp
 
-COLLIDABLE_MGR_SRC			= WorldState/CollidableMgr/CollidableMgr.cpp
+
+###############################################################################
+# Source Files
+###############################################################################
+
+# Core
+DATABASE_SRC				= DataBase/DBHandler.cpp DataBase/DBLogger.cpp DataBase/DBLoggerNode.cpp
+
+HTTP_SYNC_SRC        		= HTTPSync/HTTPSyncNode.cpp
+
+LOW_LEVEL_CONTROLLERS 		= SystemServices/WingsailControl.cpp SystemServices/CourseRegulator.cpp SystemServices/SoftsailControl.cpp \
+								LowLevelControllers/LowLevelControllerNodeASPire.cpp LowLevelControllers/LowLevelControllerNodeJanet.cpp \
+								LowLevelControllers/WindVaneController.cpp
+
+MATH_SRC             		= Math/CourseCalculation.cpp Math/CourseMath.cpp Math/Utility.cpp
+
+MESSAGE_BUS_SRC      		= MessageBus/MessageBus.cpp MessageBus/ActiveNode.cpp \
+                            	MessageBus/MessageSerialiser.cpp MessageBus/MessageDeserialiser.cpp
+
+NETWORK_SRC          		= Network/TCPServer.cpp
+
+NAVIGATION_SRC				= Navigation/WaypointMgrNode.cpp
+
+SYSTEM_SERVICES_SRC  		= SystemServices/Logger.cpp SystemServices/SysClock.cpp SystemServices/Timer.cpp
+
+WORLD_STATE_SRC				= WorldState/VesselStateNode.cpp WorldState/StateEstimationNode.cpp \
+								WorldState/WindStateNode.cpp
+
+export CORE_SRC 			= $(DATABASE_SRC) $(HTTP_SYNC_SRC) $(LOW_LEVEL_CONTROLLERS) $(MATH_SRC) \
+								$(MESSAGE_BUS_SRC) $(NETWORK_SRC) $(NAVIGATION_SRC) $(SYSTEM_SERVICES_SRC) \
+								$(WORLD_STATE_SRC)
+
+# Local navigation
+export LINE_FOLLOW_SRC      = Navigation/LineFollowNode.cpp waypointrouting/RudderCommand.cpp \
+                            	waypointrouting/Commands.cpp waypointrouting/SailCommand.cpp
 
 export LNM_SRC              = $(LNM_DIR)/ASRCourseBallot.cpp $(LNM_DIR)/ASRArbiter.cpp \
                             	$(LNM_DIR)/LocalNavigationModule.cpp LowLevelControllers/LowLevelController.cpp \
                             	$(LNM_DIR)/Voters/WaypointVoter.cpp $(LNM_DIR)/Voters/WindVoter.cpp  \
                             	$(LNM_DIR)/Voters/ChannelVoter.cpp $(LNM_DIR)/Voters/MidRangeVoter.cpp \
-								$(LNM_DIR)/Voters/ProximityVoter.cpp $(COLLIDABLE_MGR_SRC)
+								$(LNM_DIR)/Voters/ProximityVoter.cpp
 
-export LINE_FOLLOW_SRC      = Navigation/LineFollowNode.cpp waypointrouting/RudderCommand.cpp \
-                            	waypointrouting/Commands.cpp waypointrouting/SailCommand.cpp \
-                            	$(COLLIDABLE_MGR_SRC)
+# Obstacles detection
+export COLLIDABLE_MGR_SRC	= WorldState/CollidableMgr/CollidableMgr.cpp
 
+# Simulator
 export SIMULATOR_SRC        = Simulation/SimulationNode.cpp
 
-HTTP_SYNC_SRC        		= HTTPSync/HTTPSyncNode.cpp
+# Hardware services
+export HW_SERVICES_ALL_SRC	= Hardwares/i2ccontroller/I2CController.cpp
 
-MESSAGE_BUS_SRC      		= MessageBus/MessageBus.cpp MessageBus/ActiveNode.cpp \
-                            	MessageBus/MessageSerialiser.cpp MessageBus/MessageDeserialiser.cpp
-
-MATH_SRC             		= Math/CourseCalculation.cpp Math/CourseMath.cpp Math/Utility.cpp
-
-SYSTEM_SERVICES_SRC  		= SystemServices/Logger.cpp SystemServices/SysClock.cpp SystemServices/Timer.cpp \
-                            	DataBase/DBHandler.cpp DataBase/DBLogger.cpp SystemServices/WingsailControl.cpp \
-								SystemServices/CourseRegulator.cpp SystemServices/SoftsailControl.cpp \
-								DataBase/DBLoggerNode.cpp
-
-NETWORK_SRC          		= Network/TCPServer.cpp
-
-### Base CORE, HARDWARE_NODES, HARDWARE_SERVICES
-
-export CORE_SRC 			= Navigation/WaypointMgrNode.cpp WorldState/VesselStateNode.cpp \
-								WorldState/StateEstimationNode.cpp WorldState/WindStateNode.cpp \
-								$(MESSAGE_BUS_SRC) $(NETWORK_SRC) $(SYSTEM_SERVICES_SRC) $(MATH_SRC) \
-								$(HTTP_SYNC_SRC)
-
-export HARDWARE_SERVICES_SRC = Hardwares/i2ccontroller/I2CController.cpp
-
-export HARDWARE_NODES_SRC	= Hardwares/HMC6343Node.cpp Hardwares/GPSDNode.cpp
-
-### Boat specific variables
-### ASPire
-
-export MAIN_ASPIRE			= main_ASPire.cpp
-
-export CAN_HARDWARE_SRC 	= Hardwares/CAN_Services/CANPGNReceiver.cpp Hardwares/CAN_Services/CANService.cpp \
+export CAN_SERVICES_SRC 	= Hardwares/CAN_Services/CANPGNReceiver.cpp Hardwares/CAN_Services/CANService.cpp \
 							   	Hardwares/CAN_Services/mcp2515.cpp Hardwares/CAN_Services/MsgFunctions.cpp \
 							   	Hardwares/CAN_Services/CANFrameReceiver.cpp
 
-export HARDWARE_NODES_ASPIRE = Hardwares/ActuatorNodeASPire.cpp \
+export HW_SERVICES_JANET_SRC = Hardwares/MaestroController/MaestroController.cpp
+
+# Hardware nodes
+export HW_NODES_ALL_SRC		= Hardwares/HMC6343Node.cpp Hardwares/GPSDNode.cpp
+
+export HW_NODES_ASPIRE_SRC 	= Hardwares/ActuatorNodeASPire.cpp \
                             	Hardwares/CANFeedbackReceiver.cpp Hardwares/CANWindsensorNode.cpp
 
-export CORE_ASPIRE  	  	= LowLevelControllers/LowLevelControllerNodeASPire.cpp
+export HW_NODES_JANET_SRC 	= Hardwares/ActuatorNode.cpp Hardwares/CV7Node.cpp Hardwares/ArduinoNode.cpp
 
-### Janet
-
-export MAIN_JANET 			= main_janet.cpp
-
-export HARDWARE_SERVICES_JANET = Hardwares/MaestroController/MaestroController.cpp
-
-export HARDWARE_NODES_JANET = Hardwares/CV7Node.cpp \
-								Hardwares/ActuatorNode.cpp Hardwares/ArduinoNode.cpp
-
-export CORE_JANET           = LowLevelControllers/LowLevelControllerNodeJanet.cpp
-
-###
-
-# TODO: Break down for Xbee Remote0
+# XBee network
 export XBEE_NETWORK_SRC     = Network/DataLink.cpp Network/LinuxSerialDataLink.cpp Network/XbeePacketNetwork.cpp \
                             	Xbee/Xbee.cpp Xbee/XbeeSyncNode.cpp
 
-
-export INTEGRATION_TEST		= Tests/IntegrationTests/ArduinoIntegrationTest.cpp
 
 ###############################################################################
 # Rules
@@ -188,10 +182,10 @@ clean:
 	@echo Removing existing object files and executable
 	-@rm -rd $(BUILD_DIR)
 	-@rm $(EXECUTABLE)
-	$(MAKE) -C Tests clean
 	-@rm $(UNIT_TEST_EXEC)
 	-@rm $(HARDWARE_TEST_EXEC)
 	-@rm $(INTEGRATION_TEST_EXEC_ASPIRE)
+	-@$(MAKE) -C Tests clean
 	@echo DONE
 
 
