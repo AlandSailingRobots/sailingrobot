@@ -164,10 +164,10 @@ public:
 
     MessagePtr mockAISMsg = std::make_unique<AISDataMsg>(AISList, 60.1, 19.1);
     msgBus().sendMessage(std::move(mockAISMsg));
-    std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
 
     TS_ASSERT(mockNode->m_MessageReceived);
-    // TS_ASSERT_EQUALS(mockNode->m_VesselList.size(), 3);
+    TS_ASSERT_EQUALS(mockNode->m_VesselList.size(), 3);
     // TS_ASSERT_EQUALS(ves1.MMSI,1);
     // TS_ASSERT_DELTA(ves1.latitude, 60.2f, 1e-4);
     // TS_ASSERT_DELTA(ves1.longitude, 19.1f, 1e-4);

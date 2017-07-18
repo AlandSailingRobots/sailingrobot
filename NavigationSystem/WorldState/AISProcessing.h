@@ -28,7 +28,7 @@
 #include <mutex>
 
 // The radius in which we need to track all vessels, in meters
-#define RADIUS 300e9
+#define RADIUS 300e6 // Needs to be a lower radius, of course, but works right now for testing
 
 class AISProcessing : public ActiveNode {
 public:

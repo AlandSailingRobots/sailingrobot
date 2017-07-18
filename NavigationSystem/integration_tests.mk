@@ -11,7 +11,7 @@ INTEGRATION_TEST_EXEC	= integration-tests.run
 # Files
 ###############################################################################
 
-SRC = $(CORE_SRC) $(HARDWARE_NODES_SRC) $(HARDWARE_SERVICES_SRC) $(INTEGRATION_TEST) 
+SRC = $(CORE_SRC) $(HARDWARE_NODES_SRC) $(HARDWARE_SERVICES_SRC) $(INTEGRATION_TEST) WorldState/CollidableMgr/CollidableMgr.cpp 
 
 # Object files
 OBJECTS = $(addprefix $(BUILD_DIR)/, $(SRC:.cpp=.o))
@@ -25,7 +25,7 @@ OBJECTS = $(addprefix $(BUILD_DIR)/, $(SRC:.cpp=.o))
 all: $(INTEGRATION_TEST_EXEC) stats
 
 # Link and build
-$(INTEGRATION_TEST_EXEC): $(OBJECTS) 
+$(INTEGRATION_TEST_EXEC): $(OBJECTS)
 	rm -f $(OBJECT_FILE)
 	@echo -n " " $(OBJECTS) >> $(OBJECT_FILE)
 	@echo Linking object files

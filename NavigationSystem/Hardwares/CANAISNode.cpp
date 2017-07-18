@@ -3,17 +3,17 @@
 CANAISNode::CANAISNode(MessageBus& msgBus, CANService& canService, double loopTime) :
     CANPGNReceiver(canService, {129025, 129038, 129039}), ActiveNode(NodeID::CANAIS, msgBus),
     m_VesselList({}), m_PosLat(0), m_PosLon(0), m_LoopTime(loopTime){
-      AISVessel v1;
-      v1.MMSI = 0;
-      v1.latitude = 0;
-      v1.longitude = 0;
-      v1.COG = 0;
-      v1.SOG = 0;
-      m_VesselList.push_back(v1);
+      // AISVessel v1;
+      // v1.MMSI = 0;
+      // v1.latitude = 0;
+      // v1.longitude = 0;
+      // v1.COG = 0;
+      // v1.SOG = 0;
+      // m_VesselList.push_back(v1);
 }
 
 CANAISNode::~CANAISNode() {
-  
+
 }
 
 bool CANAISNode::init() {

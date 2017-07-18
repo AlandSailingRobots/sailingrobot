@@ -47,8 +47,7 @@ AISProcessing::AISProcessing(MessageBus& msgBus, CollidableMgr* collidableMgr, d
     for (auto vessel: list) {
       // std::cout << std::endl << "HEJ: " << m_Vessels.size() << std::endl;
       dist = CourseMath::calculateDTW(m_latitude, m_longitude, vessel.latitude, vessel.longitude);
-      std::cout << std::endl << "HEJ: " << m_Vessels.size() << ", " << dist << std::endl;
-
+      // std::cout << std::endl << "HEJ: " << m_Vessels.size() << ", " << dist << std::endl;
       if (dist < RADIUS) {
         m_Vessels.push_back(vessel);
       }

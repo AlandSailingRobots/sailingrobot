@@ -5,7 +5,6 @@
 #include "MessageBus/MessageTypes.h"
 #include "MessageBus/MessageBus.h"
 #include "MessageBus/ActiveNode.h"
-// #include "Hardwares/CAN_Services/CANService.cpp"
 
 CANService canService;
 MessageBus msgBus;
@@ -31,6 +30,9 @@ public:
 
   void printData() {
     std::cout << std::endl << m_VesselList.size() << std::endl;
+    for (auto ves: m_VesselList) {
+      std::cout << ves.MMSI << std::endl;
+    }
     if (m_VesselList.size()>0) {
       std::cout << m_VesselList[0].MMSI << std::endl;
       std::cout << m_VesselList[0].latitude << std::endl;
