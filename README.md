@@ -98,14 +98,18 @@ To change the waypoints you use the waypoints.py together with one of the json i
 ./update_waypoints.py Mission/ASS.json
 ```
 
-#### Execution
+#### Deployment
 
 To run the control system previously build, use (no parameters needed):
 ```shell
 ./NavigationSystem/sr
 ```
 
+#### Run Tests
+
 ## License
+GNU GPL v2
+[![License: GPL v2](https://img.shields.io/badge/License-GPL%20v2-blue.svg)](https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html)
 
 ## Links
 
