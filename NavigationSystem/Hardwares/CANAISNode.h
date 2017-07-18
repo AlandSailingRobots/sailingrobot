@@ -9,7 +9,9 @@
 #include "SystemServices/Timer.h"
 #include "Messages/AISDataMsg.h"
 #include "Math/Utility.h"
+#include "SystemServices/Logger.h"
 
+#include <fstream>
 #include <cstring>
 #include <cstdint>
 #include <mutex>

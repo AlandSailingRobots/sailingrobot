@@ -21,6 +21,7 @@
  #include "CANFrameReceiver.h"
  #include "mcp2515.h"
  #include "N2kMsg.h"
+ #include "SystemServices/Logger.h"
  #include <vector>
  #include <map>
  #include <mutex>

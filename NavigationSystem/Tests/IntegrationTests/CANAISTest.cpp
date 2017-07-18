@@ -58,8 +58,8 @@ int main() {
   auto future = canService.start();
 
 
-  AISDataReceiver aisRec(msgBus, 300);
-  aisNode = new CANAISNode(msgBus, canService, 500);
+  AISDataReceiver aisRec(msgBus, 10000);
+  aisNode = new CANAISNode(msgBus, canService, 50);
   aisNode->start();
 
 

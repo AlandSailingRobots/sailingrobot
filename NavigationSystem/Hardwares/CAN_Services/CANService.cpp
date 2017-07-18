@@ -93,6 +93,9 @@ void CANService::run()
         IdToN2kMsg(Nmsg, Cmsg.id);
 
         if (IsFastPackage(Nmsg)) {
+					std::cout << "It is a fast package!" << std::endl;
+	
+					std::cout << std::endl << Nmsg.PGN << std::endl;
           done = ParseFastPkg(Cmsg, Nmsg);
         }
         else {
@@ -193,11 +196,12 @@ bool CANService::ParseFastPkg(CanMsg& msg, N2kMsg& nMsg) { // Taken from the CAN
 		}
 		it->second -= 7;				//decrease bytes left
 
-		if(it->second <= 0) {			//have the whole message
+		if(it->second <= 0) {
+std::cout << std::endl << std::endl << std::endl << std::endl << std::endl <<	std::endl << "HEJ" << std::endl << std::endl;		//have the whole message
 			nMsg = FastPKG_[Key];
 			FastPKG_.erase(Key);
 			return true;
-		}
+		} 
 		else {
 			return false;
 		}
