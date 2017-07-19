@@ -34,7 +34,7 @@ const int RUDDER_FEEDBACK_PIN = A6;
 const int WINGSAIL_FEEDBACK_PIN = A4;
 const int RC_CONTROLL_OFF_PIN = A8;
 
-const int CANBUS_FREQUENCY = 10; //Sending freqvency (Hz)
+
 
 /* On boards with a hardware serial port available for use, use
 that port to communicate with the Maestro. For other boards,
@@ -57,8 +57,8 @@ CanbusClass Canbus;
 
 double rudderAngleRatio = 65535 / MAX_RUDDER_ANGLE;
 double wingsailAngleRatio = 65535 / MAX_WINGSAIL_ANGLE;
-//double maestroCommandRatio = (MAESTRO_MAX_TARGET - MAESTRO_MIN_TARGET) / MAX_RUDDER_ANGLE;
-double delayTime = 1000/(CANBUS_FREQUENCY*2);
+
+
 
 
 void setup()
@@ -76,15 +76,13 @@ void setup()
   }
  
   Serial.println("SETUP COMPLETE");  
-  //Serial.print ("Delay between sends ");
-  //Serial.println(delayTime);
 }
 
 void loop()
 {
   sendArduinoData ();
   delay (50);
-  //checkCanbusFor (100);
+  checkCanbusFor (50);
   
   sendFeedback ();
   checkCanbusFor (400);
@@ -113,18 +111,16 @@ void moveWingsail(CanMsg& msg) {
                   WINGSAIL_MAESTRO_MIN_TARGET, WINGSAIL_MAESTRO_MAX_TARGET);
 
   maestro.setTarget(WINGSAIL_MAESTRO_CHANNEL, target*4);
-  //Serial.println (target*4);
+
 }
 
 uint16_t getRudderFeedback() {
-  //Serial.println (analogRead(RUDDER_FEEDBACK_PIN));
   int feedback = analogRead(RUDDER_FEEDBACK_PIN);
    //-361.0000    1.8823   -1.8473
   float c = -361.0000;
   float b1 =  1.8823;
   float b2 = -1.8473;
   float angle;
-  //Serial.println (feedback);
   if (feedback < -c){
     
     angle = b1* sqrt (-(feedback+c));
@@ -133,19 +129,16 @@ uint16_t getRudderFeedback() {
   }
   Serial.println (angle);
   uint16_t dataAngle = mapInterval (angle, -MAX_RUDDER_ANGLE, MAX_RUDDER_ANGLE, 0, INT16_SIZE);
-  //Serial.println (INT16_SIZE);
   return dataAngle;
   
 }
 
 float getWingsailFeedback() {
-  // Obviously, these values should not actually be the same as for the rudder.
   int feedback = analogRead(WINGSAIL_FEEDBACK_PIN);
   float c = -450;
   float b1 = 0.7098;
   float b2 = -0.6455;
   float angle;
-  //Serial.println (feedback);
   if (feedback < -c){
     
     angle = b1* sqrt (-(feedback+c));
@@ -153,7 +146,6 @@ float getWingsailFeedback() {
     angle = b2* sqrt (feedback+c);
   }
   uint16_t dataAngle = mapInterval (angle, -MAX_WINGSAIL_ANGLE, MAX_WINGSAIL_ANGLE, 0, INT16_SIZE);
-  //Serial.println (angle);
   return dataAngle;
   
   
@@ -165,13 +157,11 @@ float mapInterval(float val, float fromMin, float fromMax, float toMin, float to
 
 int isRCOn (){
   
-  if (analogRead (RC_CONTROLL_OFF_PIN) > 250) {
-    //Serial.println("RC OFF");
+  if (analogRead (RC_CONTROLL_OFF_PIN) > 250) { //Value comes from the multiplexer indicator led
     return 0;
   }
   else {
-    //Serial.println("RC ON");
-    return 30;
+    return  INT16_SIZE/2;
   }
 }
     
@@ -200,8 +190,7 @@ void sendArduinoData (){
     arduinoData.id = 702;
     arduinoData.header.ide = 0;
     arduinoData.header.length = 7;
-    int RCon = isRCOn ();
-    uint16_t RCon16 = (uint16_t) mapInterval(RCon, 0, 60, 0, 65535);
+    uint16_t RCon16 = (uint16_t) isRCOn ();
     arduinoData.data[0] = (RCon16 & 0xff);
     arduinoData.data[1] = (RCon16 >> 8);
     arduinoData.data[2] = 0;
@@ -221,8 +210,6 @@ void checkCanbusFor (int timeMs){
     
     CanMsg msg;
     Canbus.GetMessage(&msg);
-    //Serial.println (msg.id);
-    //Serial.println ("ok");
       if(msg.id == 700) {
       
         moveRudder(msg);
@@ -232,7 +219,6 @@ void checkCanbusFor (int timeMs){
       }
     }
     timer = millis() - startTime;
-    //Serial.println(timer);
   }
 }
 
