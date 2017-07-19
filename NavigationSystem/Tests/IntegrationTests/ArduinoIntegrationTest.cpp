@@ -81,7 +81,6 @@ public:
 
         } else if (type == MessageType::ArduinoData) {
 	    const ArduinoDataMsg* arduinomsg = dynamic_cast<const ArduinoDataMsg*>(message);
-	    //m_SensorValues["RC Mode"] = arduinomsg->RC();
 	    if (arduinomsg->RC() > 10) {
 	        m_SensorValues["RC Mode"] = -3000;
 	    }
@@ -190,7 +189,7 @@ void sendActuatorCommands() {
 
     int rudderAngle16;
     int wingsailAngle16;
-    //uint16_t windvaneAngle16;
+    //int windvaneAngle16;
 
   
 		
@@ -210,22 +209,13 @@ void sendActuatorCommands() {
     }
     
 
-    //windvaneAngle16 *= ratio;
+
 
 		MessagePtr actuatorMsg = std::make_unique<ActuatorControlASPireMessage>(wingsailAngle16, rudderAngle16, true );
 		msgBus.sendMessage(std::move(actuatorMsg));
 		
 		
-		/*
-    Cmsg.data[0] = rudderAngle16 & 0xff;
-    Cmsg.data[1] = rudderAngle16 >> 8;
-    Cmsg.data[2] = wingsailAngle16 & 0xff;
-    Cmsg.data[3] = wingsailAngle16 >> 8;
-    Cmsg.data[4] = windvaneAngle16 & 0xff;
-    Cmsg.data[5] = windvaneAngle16 >> 8;
 
-    canService.sendCANMessage(Cmsg);
-*/
     lastSentValues = menuValues;
 }
 
@@ -240,7 +230,7 @@ int main() {
 
     SensorDataReceiver sensorReceiver(msgBus, 250);
     CANWindsensorNode windSensor(msgBus, canService, 500);
-    //CANFeedbackReceiver feedBack(msgBus, canService, 500); Old code, replaced by arduino node
+
     CANArduinoNode arduino (msgBus, canService, 500);
 		ActuatorNodeASPire actuators (msgBus, canService);
     windSensor.start();
@@ -254,13 +244,13 @@ int main() {
 
     menuValues["Rudder Angle"] = "";
     menuValues["Wingsail Angle"] = "";
-    menuValues["Windvane Angle"] = "";
+   // menuValues["Windvane Angle"] = "";
 		
 		lastSentValues = menuValues;
 		
 		lastSentValues["Rudder Angle"] = "0";
     lastSentValues["Wingsail Angle"] = "0";
-		lastSentValues["Windvane Angle"] = "0";
+		//lastSentValues["Windvane Angle"] = "0";
 		
     menuIter highlighted = menuValues.begin();
 

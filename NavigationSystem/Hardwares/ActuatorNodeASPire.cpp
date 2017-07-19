@@ -1,3 +1,18 @@
+/****************************************************************************************
+*
+* File:
+* 		CANArduinoNode.cpp
+*
+* Purpose:
+*		 Sends data to the Actuator unit with the rudder and wingsail angles over the CAN bus. 
+*
+* Developer Notes:
+*		 The CAN id numbers for the node are:
+*			700
+*
+***************************************************************************************/
+
+
 #include "Hardwares/ActuatorNodeASPire.h"
 #include "Math/Utility.h"
 #include "Messages/ActuatorControlASPireMessage.h"
