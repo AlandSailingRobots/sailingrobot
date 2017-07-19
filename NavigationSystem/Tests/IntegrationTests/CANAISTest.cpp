@@ -6,10 +6,14 @@
 #include "MessageBus/MessageBus.h"
 #include "MessageBus/ActiveNode.h"
 #include "SystemServices/Logger.h"
+#include "WorldState/AISProcessing.h"
+#include "WorldState/CollidableMgr/CollidableMgr.h"
 
 CANService canService;
 MessageBus msgBus;
 CANAISNode* aisNode;
+AISProcessing* aisProc;
+CollidableMgr cMgr;
 
 class AISDataReceiver : public Node {
 public:
@@ -55,13 +59,15 @@ void messageLoop() {
 int main() {
   Logger::init("AISTest.log");
 
-  auto future = canService.start();
+  // auto future = canService.start();
 
 
   AISDataReceiver aisRec(msgBus, 10000);
   aisNode = new CANAISNode(msgBus, canService, 50);
   aisNode->start();
 
+  aisProc = new AISProcessing(msgBus, &cMgr, 300e6, 100);
+  aisProc->start();
 
   std::thread thr(messageLoop);
   thr.detach();
@@ -69,6 +75,7 @@ int main() {
   while (true) {
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
+    Logger::info("Collidable manager size: " + std::to_string(cMgr.getAISContacts().length()));
     aisRec.printData();
   }
 }

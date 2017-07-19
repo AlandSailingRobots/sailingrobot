@@ -94,9 +94,12 @@ void CANService::run()
 
         if (IsFastPackage(Nmsg)) {
 					std::cout << "It is a fast package!" << std::endl;
-	
+
 					std::cout << std::endl << Nmsg.PGN << std::endl;
           done = ParseFastPkg(Cmsg, Nmsg);
+          if (done == true) {
+            Logger::info("Completetd parsing fast package");
+          }
         }
         else {
           CanMsgToN2kMsg(Cmsg, Nmsg);
@@ -201,7 +204,7 @@ std::cout << std::endl << std::endl << std::endl << std::endl << std::endl <<	st
 			nMsg = FastPKG_[Key];
 			FastPKG_.erase(Key);
 			return true;
-		} 
+		}
 		else {
 			return false;
 		}

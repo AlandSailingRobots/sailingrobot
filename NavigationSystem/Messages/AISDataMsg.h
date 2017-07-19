@@ -36,6 +36,11 @@ public:
        float fval;
     } union_float;
 
+		union d_tag {
+			 uint8_t b[8];
+			 double fval;
+		} union_double;
+
     union i_tag {
        uint8_t b[4];
        uint32_t fval;
@@ -46,34 +51,51 @@ public:
 		int ves = 0, typeConst = 3;
 		while (deserialiser.size() > ves+typeConst) {
 			if (true) {
-				vessel.COG = combuint8(deserialiser.data()[typeConst+ves], deserialiser.data()[typeConst+ves+1]);
-
-				vessel.SOG = combuint8(deserialiser.data()[typeConst+ves+2], deserialiser.data()[typeConst+ves+3]);
-
-				union_int.b[0] = deserialiser.data()[typeConst+ves+4];
-				union_int.b[1] = deserialiser.data()[typeConst+ves+5];
-				union_int.b[2] = deserialiser.data()[typeConst+ves+6];
-				union_int.b[3] = deserialiser.data()[typeConst+ves+7];
+				union_int.b[0] = deserialiser.data()[typeConst+ves];
+				union_int.b[1] = deserialiser.data()[typeConst+ves+1];
+				union_int.b[2] = deserialiser.data()[typeConst+ves+2];
+				union_int.b[3] = deserialiser.data()[typeConst+ves+3];
 				vessel.MMSI = union_int.fval;
+
+				union_float.b[0] = deserialiser.data()[typeConst+ves+4];
+				union_float.b[1] = deserialiser.data()[typeConst+ves+5];
+				union_float.b[2] = deserialiser.data()[typeConst+ves+6];
+				union_float.b[3] = deserialiser.data()[typeConst+ves+7];
+				vessel.COG = union_float.fval;
 
 				union_float.b[0] = deserialiser.data()[typeConst+ves+8];
 				union_float.b[1] = deserialiser.data()[typeConst+ves+9];
 				union_float.b[2] = deserialiser.data()[typeConst+ves+10];
 				union_float.b[3] = deserialiser.data()[typeConst+ves+11];
-				vessel.latitude = union_float.fval;
+				vessel.SOG = union_float.fval;
 
-				union_float.b[0] = deserialiser.data()[typeConst+ves+12];
-				union_float.b[1] = deserialiser.data()[typeConst+ves+13];
-				union_float.b[2] = deserialiser.data()[typeConst+ves+14];
-				union_float.b[3] = deserialiser.data()[typeConst+ves+15];
-				vessel.longitude = union_float.fval;
+				union_double.b[0] = deserialiser.data()[typeConst+ves+12];
+				union_double.b[1] = deserialiser.data()[typeConst+ves+13];
+				union_double.b[2] = deserialiser.data()[typeConst+ves+14];
+				union_double.b[3] = deserialiser.data()[typeConst+ves+15];
+				union_double.b[4] = deserialiser.data()[typeConst+ves+16];
+				union_double.b[5] = deserialiser.data()[typeConst+ves+17];
+				union_double.b[6] = deserialiser.data()[typeConst+ves+18];
+				union_double.b[7] = deserialiser.data()[typeConst+ves+19];
+				vessel.latitude = union_double.fval;
+
+				union_double.b[0] = deserialiser.data()[typeConst+ves+20];
+				union_double.b[1] = deserialiser.data()[typeConst+ves+21];
+				union_double.b[2] = deserialiser.data()[typeConst+ves+22];
+				union_double.b[3] = deserialiser.data()[typeConst+ves+23];
+				union_double.b[4] = deserialiser.data()[typeConst+ves+24];
+				union_double.b[5] = deserialiser.data()[typeConst+ves+25];
+				union_double.b[6] = deserialiser.data()[typeConst+ves+26];
+				union_double.b[7] = deserialiser.data()[typeConst+ves+27];
+				vessel.longitude = union_double.fval;
+
 				m_VesselList.push_back(vessel);
 			}
 			else {
 				m_valid = false;
 			}
-			// Add the size of the struct AISVessel
-			ves += 16;
+			// Add the size of the struct AISVessel [bytes]
+			ves += 28;
 		}
 	}
 
@@ -81,10 +103,10 @@ public:
 
 	std::vector<AISVessel> vesselList() { return m_VesselList; }
 	uint32_t MMSI(int vessel) { return m_VesselList[vessel].MMSI; }
-	float latitude(int vessel) { return m_VesselList[vessel].latitude; }
-	float longitude(int vessel) { return m_VesselList[vessel].longitude; }
-	uint16_t COG(int vessel) { return m_VesselList[vessel].COG; }
-	uint16_t SOG(int vessel) { return m_VesselList[vessel].SOG; }
+	double latitude(int vessel) { return m_VesselList[vessel].latitude; }
+	double longitude(int vessel) { return m_VesselList[vessel].longitude; }
+	float COG(int vessel) { return m_VesselList[vessel].COG; }
+	float SOG(int vessel) { return m_VesselList[vessel].SOG; }
 	float posLat() { return m_PosLat; }
 	float posLon() { return m_PosLon; }
 
@@ -98,9 +120,9 @@ public:
 			return;
 		}
 		for (auto &vessel: m_VesselList) {
+			serialiser.serialise(vessel.MMSI);
 			serialiser.serialise(vessel.COG);
 			serialiser.serialise(vessel.SOG);
-			serialiser.serialise(vessel.MMSI);
 			serialiser.serialise(vessel.latitude);
 			serialiser.serialise(vessel.longitude);
 		}

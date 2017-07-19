@@ -35,7 +35,7 @@ void CollidableMgr::startGC()
 }
 
 ///----------------------------------------------------------------------------------
-void CollidableMgr::addAISContact( uint32_t mmsi, float lat, float lon, float speed, uint16_t course )
+void CollidableMgr::addAISContact( uint32_t mmsi, double lat, double lon, float speed, float course )
 {
     if( !this->ownAISLock )
     {

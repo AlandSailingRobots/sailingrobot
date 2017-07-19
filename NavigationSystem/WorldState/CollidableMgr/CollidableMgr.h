@@ -32,7 +32,7 @@ public:
     ///----------------------------------------------------------------------------------
     void startGC();
 
-    void addAISContact(uint32_t mmsi, float lat, float lon, float speed, uint16_t course);
+    void addAISContact(uint32_t mmsi, double lat, double lon, float speed, float course);
     void addVisualContact(uint32_t id, uint16_t bearing);
 
     CollidableList<AISCollidable_t> getAISContacts();

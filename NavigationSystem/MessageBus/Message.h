@@ -26,11 +26,11 @@
 #endif
 
 struct AISVessel {
-  uint16_t COG;
-  uint16_t SOG;
   uint32_t MMSI;
-  float latitude;
-  float longitude;
+  float COG;
+  float SOG;
+  double latitude;
+  double longitude;
 };
 
 class Message {

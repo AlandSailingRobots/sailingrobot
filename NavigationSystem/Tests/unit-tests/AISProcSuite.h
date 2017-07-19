@@ -114,7 +114,7 @@ public:
 
     MessagePtr mockAISMsg = std::make_unique<AISDataMsg>(AISList, 60.1, 19.1);
     msgBus().sendMessage(std::move(mockAISMsg));
-
+    
     cMgr.getAISContacts();
     std::this_thread::sleep_for(std::chrono::milliseconds(300));
     TS_ASSERT_EQUALS(cMgr.getAISContacts().length(),3);

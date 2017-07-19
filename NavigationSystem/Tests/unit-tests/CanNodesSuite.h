@@ -16,7 +16,6 @@
 
 #include "Hardwares/CANAISNode.h"
 #include "Hardwares/CANSolarTrackerNode.h"
-// #include "Hardwares/CANWindsensorNode.h"
 #include "../cxxtest/cxxtest/TestSuite.h"
 #include "Messages/StateMessage.h"
 #include "../../MessageBus/MessageBus.h"
@@ -36,15 +35,9 @@ public:
 
   CANAISNode* aisNode;
   CANSolarTrackerNode* solarNode;
-  // CANWindsensorNode* windsensorNode;
-
   MockNode* mockNode;
-  // MockNode* windMockNode;
-
-  // MockCANReceiver mockCan;
 
   bool mockNodeRegistered = false;
-  // bool windNodeRegistered = false;
 
   CANService* canService;
 
@@ -62,23 +55,14 @@ public:
   }
 
   void setUp() {
-
     canService = new CANService();
-
     mockNode = new MockNode(msgBus(), mockNodeRegistered);
-    // windMockNode = new MockNode(msgBus(),windNodeRegistered);
 
-    // std::vector<uint32_t> canMessages; // = {700, 701};
-    // canMessages[0] = (uint32_t) 700;
-    // canMessages[1] = (uint32_t) 701;
-    // mockCan = new MockCANReceiver(*canService, *canMessages);
-    // canService->();
     if (solarNode == 0) {
       Logger::DisableLogging();
 
-      aisNode = new CANAISNode(msgBus(), *canService, 500);
-      //solarNode = new CANSolarTrackerNode(msgBus(), *canService, 100);
-      // windsensorNode = new CANWindsensorNode(msgBus(), *canService, 1.0);
+      aisNode = new CANAISNode(msgBus(), *canService, 100);
+      // solarNode = new CANSolarTrackerNode(msgBus(), *canService, 100);
 
       aisNode->start();
       // solarNode->start();
@@ -87,10 +71,7 @@ public:
       std::this_thread::sleep_for(std::chrono::milliseconds(200));
 
       thr = new std::thread(runMessageLoop);
-
-
     }
-
     testCount++;
   }
 
@@ -107,7 +88,6 @@ public:
 
   void test_CanInit() {
     TS_ASSERT(mockNodeRegistered);
-    // TS_ASSERT(windNodeRegistered);
   }
 
   void test_MessageListening() {
@@ -142,5 +122,4 @@ public:
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
     TS_ASSERT(mockNode->m_MessageReceived);
   }
-
 };
