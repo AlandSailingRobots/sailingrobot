@@ -15,7 +15,7 @@
 
     elif [ $C -eq 2 ]
     then
-            sqlite3 asr.db "UPDATE course_calculation_config SET tack_min_speed="1";"
+            sqlite3 asr.db "UPDATE course_calculation_config SET tack_min_speed="1";" # See what we do
             printf "\n\033[32m course_calculation_config updated.\033[0m\n\n"
     elif [ $C -eq 3 ]
     then
@@ -26,7 +26,7 @@
             sqlite3 asr.db "UPDATE mock SET gps="0", windsensor="0", analog_arduino="1", compass="0", position="0", maestro="0";"
             printf "\n\033[36m mock updated.\033[0m\n"
 
-            sqlite3 asr.db "UPDATE course_calculation_config SET tack_min_speed="1";"
+            sqlite3 asr.db "UPDATE course_calculation_config SET tack_min_speed="1";" #See what we do 
             printf "\033[36m course_calculation_config updated.\033[0m\n"
 
             sqlite3 asr.db "UPDATE sailing_robot_config SET loop_time="0.1";"
@@ -91,12 +91,12 @@
 
         if [ $C -eq 0 ]
         then
-            sqlite3 asr.db "UPDATE httpsync_config SET remove_logs="0";"
-            printf "\n\033[36m httpsync_config updated.\033[0m\n\n"
+            sqlite3 asr.db "UPDATE config_httpsync SET remove_logs="0";"
+            printf "\n\033[36m config_httpsync updated.\033[0m\n\n"
         elif [ $C -eq 1 ]
         then
-            sqlite3 asr.db "UPDATE httpsync_config SET remove_logs="1";"
-            printf "\n\033[36m httpsync_config updated.\033[0m\n\n"
+            sqlite3 asr.db "UPDATE config_httpsync SET remove_logs="1";"
+            printf "\n\033[36m config_httpsync updated.\033[0m\n\n"
         fi
     elif [ $C -eq 9 ]
     then

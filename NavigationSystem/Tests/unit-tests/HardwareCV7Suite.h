@@ -13,7 +13,7 @@
  *
  *	Functions that have tests:		Functions that does not have tests:
  *
- *	init 							
+ *	init
  *	start
  *	parseString
  *	WindSensorThread
@@ -68,7 +68,7 @@ public:
 
 			Logger::DisableLogging();
 			logger = new MessageLogger(msgBus());
-			cv7 = new CV7Node(msgBus(), dbHandler.retrieveCell("windsensor_config", "1", "port"), dbHandler.retrieveCellAsInt("windsensor_config", "1", "baud_rate"));
+			//cv7 = new CV7Node(msgBus(), dbHandler.retrieveCell("windsensor_config", "1", "port"), dbHandler.retrieveCellAsInt("windsensor_config", "1", "baud_rate")); // Not in the database
 			thr = new std::thread(runMessageLoop);
 		}
 		testCount++;
@@ -91,7 +91,7 @@ public:
 
 	void test_CV7ParseSuccesfully()
 	{
-		std::string sensorData = "$IIMWV,125.8,R,015.8,N,A*3F$WIXDR,C,036.5,C,,*52"; 
+		std::string sensorData = "$IIMWV,125.8,R,015.8,N,A*3F$WIXDR,C,036.5,C,,*52";
 		float windDir = 0;
 		float windSpeed = 0;
 		float windTemp = 0;

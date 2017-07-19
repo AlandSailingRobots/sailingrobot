@@ -37,7 +37,7 @@ public:
 	void start();
 	void processMessage(const Message* message);
 
-//	float m_gpsHeadingWeight;
+//	float m_gpsCourseWeight;
 
 private:
 

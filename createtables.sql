@@ -1,16 +1,15 @@
 PRAGMA foreign_keys = ON;
 BEGIN TRANSACTION;
 
-DROP TABLE IF EXISTS "buffer_config";
-CREATE TABLE buffer_config (id INTEGER PRIMARY KEY AUTOINCREMENT,
+DROP TABLE IF EXISTS "config_buffer";
+CREATE TABLE config_buffer (id INTEGER PRIMARY KEY AUTOINCREMENT,
 	compass INTEGER,
-	true_wind INTEGER,
-	windsensor INTEGER
 );
-INSERT INTO "buffer_config" VALUES(1,1,100,1);
+INSERT INTO "config_buffer" VALUES(1,1,100,1);
 
-DROP TABLE IF EXISTS "waypoints";
-CREATE TABLE waypoints (id INTEGER PRIMARY KEY AUTOINCREMENT, -- no autoincrement to ensure a correct order
+DROP TABLE IF EXISTS "current_Mission";
+CREATE TABLE current_Mission (id INTEGER PRIMARY KEY AUTOINCREMENT, -- no autoincrement to ensure a correct order
+	isCheckpoint BOOLEAN,
 	latitude DOUBLE,
 	longitude DOUBLE,
 	declination INTEGER,
@@ -19,53 +18,30 @@ CREATE TABLE waypoints (id INTEGER PRIMARY KEY AUTOINCREMENT, -- no autoincremen
 	harvested BOOLEAN
 );
 
-DROP TABLE IF EXISTS "waypoint_index";
-CREATE TABLE waypoint_index (
-	id INTEGER PRIMARY KEY,
-	i INTEGER,
-	j INTEGER,
-
-	-- not enforced: foreign_keys off (line 1)
-	FOREIGN KEY(id) REFERENCES waypoints(id)
-);
-
 
 -- -----------------------------------------------------
--- Table gps_datalogs
+-- Table dataLogs_gps
 -- -----------------------------------------------------
 
-DROP TABLE IF EXISTS "gps_datalogs";
-CREATE TABLE gps_datalogs (
+DROP TABLE IF EXISTS "dataLogs_gps";
+CREATE TABLE dataLogs_gps (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   time TIME,
   latitude DOUBLE,
   longitude DOUBLE,
   speed DOUBLE,
-  heading DOUBLE,
+  course DOUBLE,
   satellites_used INTEGER,
   route_started BOOLEAN
 );
 
 
--- -----------------------------------------------------
--- Table arduino_datalogs
--- -----------------------------------------------------
-
-DROP TABLE IF EXISTS "arduino_datalogs";
-CREATE TABLE arduino_datalogs (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  pressure INTEGER,
-  rudder INTEGER,
-  sheet INTEGER,
-  current INTEGER
-);
-
 
 -- -----------------------------------------------------
--- Table course_calculation_datalogs
+-- Table dataLogs_course_calculation
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS "course_calculation_datalogs";
-CREATE TABLE course_calculation_datalogs (
+DROP TABLE IF EXISTS "dataLogs_course_calculation";
+CREATE TABLE dataLogs_course_calculation (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   distance_to_waypoint DOUBLE,
   bearing_to_waypoint DOUBLE,
@@ -77,10 +53,10 @@ CREATE TABLE course_calculation_datalogs (
 
 
 -- -----------------------------------------------------
--- Table windsensor_datalogs
+-- Table dataLogs_windsensor
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS "windsensor_datalogs";
-CREATE TABLE windsensor_datalogs (
+DROP TABLE IF EXISTS "dataLogs_windsensor";
+CREATE TABLE dataLogs_windsensor (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   direction INTEGER,
   speed DOUBLE,
@@ -90,10 +66,10 @@ CREATE TABLE windsensor_datalogs (
 
 
 -- -----------------------------------------------------
--- Table compass_datalogs
+-- Table dataLogs_compass
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS "compass_datalogs";
-CREATE TABLE compass_datalogs (
+DROP TABLE IF EXISTS "dataLogs_compass";
+CREATE TABLE dataLogs_compass (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   heading INTEGER,
   pitch INTEGER,
@@ -103,146 +79,83 @@ CREATE TABLE compass_datalogs (
 
 
 -- -----------------------------------------------------
--- Table system_datalogs
+-- Table dataLogs_actuator_feedback
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS "system_datalogs";
-CREATE TABLE system_datalogs (
+DROP TABLE IF EXISTS "dataLogs_actuator_feedback";
+CREATE TABLE dataLogs_actuator_feedback (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  rudder_position DOUBLE,
+  wingsail_position DOUBLE,
+  rc_on BOOLEAN,
+  wind_vane_angle DOUBLE
+);
+
+
+
+-- -----------------------------------------------------
+-- Table dataLogs_actuator_feedback
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS "dataLogs_current_sensors";
+CREATE TABLE dataLogs_actuator_sensors (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  actuator_unit DOUBLE,
+  navigation_unit DOUBLE
+);
+
+
+
+-- -----------------------------------------------------
+-- Table dataLogs_system
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS "dataLogs_system";
+CREATE TABLE dataLogs_system (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   gps_id INTEGER,
-  course_calculation_id INTEGER,
-  arduino_id INTEGER,
+  --course_calculation_id INTEGER,
+  -- arduino_id INTEGER,
   windsensor_id INTEGER,
   compass_id INTEGER,
-  sail_command_sail_state INTEGER,
-  rudder_command_rudder_state INTEGER,
-  sail_servo_position INTEGER,
-  rudder_servo_position INTEGER,
-  waypoint_id INTEGER,
+  --sail_command_sail_state INTEGER,
+  --rudder_command_rudder_state INTEGER,
+  --sail_servo_position INTEGER,
+  --rudder_servo_position INTEGER,
+  waypoint_id INTEGER, -- Rename it ?
   true_wind_direction_calc DOUBLE,
   CONSTRAINT gps_id
     FOREIGN KEY (gps_id)
-    REFERENCES gps_datalogs (id),
+    REFERENCES dataLogs_gps (id),
   CONSTRAINT course_calculation_id
     FOREIGN KEY (course_calculation_id)
-    REFERENCES course_calculation_datalogs (id),
+    REFERENCES dataLogs_course_calculation (id),
   CONSTRAINT windsensor_id
     FOREIGN KEY (windsensor_id)
-    REFERENCES windsensor_datalogs (id),
+    REFERENCES dataLogs_windsensor (id),
   CONSTRAINT compass_id
     FOREIGN KEY (compass_id)
-    REFERENCES compass_datalogs (id),
-  CONSTRAINT arduino_id
-    FOREIGN KEY (arduino_id)
-    REFERENCES arduino_datalogs (id)
+    REFERENCES dataLogs_compass (id),
   );
 
 
-CREATE TRIGGER remove_logs AFTER DELETE ON "system_datalogs"
+CREATE TRIGGER remove_logs AFTER DELETE ON "dataLogs_system"
 BEGIN
 
-DELETE FROM "gps_datalogs" WHERE ID = OLD.gps_id;
-DELETE FROM "course_calculation_datalogs" WHERE ID = OLD.course_calculation_id;
-DELETE FROM "compass_datalogs" WHERE ID = OLD.compass_id;
-DELETE FROM "windsensor_datalogs" WHERE ID = OLD.windsensor_id;
-DELETE FROM "arduino_datalogs" WHERE ID = OLD.arduino_id;
+DELETE FROM "dataLogs_gps" WHERE ID = OLD.gps_id;
+DELETE FROM "dataLogs_course_calculation" WHERE ID = OLD.course_calculation_id;
+DELETE FROM "dataLogs_compass" WHERE ID = OLD.compass_id;
+DELETE FROM "dataLogs_windsensor" WHERE ID = OLD.windsensor_id;
 
 END;
 
--- -----------------------------------------------------
--- Table sail_command_config
--- -----------------------------------------------------
-DROP TABLE IF EXISTS "sail_command_config";
-CREATE TABLE sail_command_config (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  close_reach_command INTEGER,
-  run_command INTEGER
-);
-
 
 
 -- -----------------------------------------------------
--- Table rudder_command_config
+-- Table config_xbee
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS "rudder_command_config";
-CREATE TABLE rudder_command_config (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  extreme_command INTEGER,
-  midship_command INTEGER
-);
-
-
-
--- -----------------------------------------------------
--- Table course_calculation_config
--- -----------------------------------------------------
-DROP TABLE IF EXISTS "course_calculation_config";
-CREATE TABLE course_calculation_config (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  tack_angle DOUBLE,
-  tack_max_angle DOUBLE,
-  tack_min_speed DOUBLE,
-  sector_angle DOUBLE
-);
-
-
-
--- -----------------------------------------------------
--- Table windsensor_config
--- -----------------------------------------------------
-DROP TABLE IF EXISTS "windsensor_config";
-CREATE TABLE windsensor_config (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  port VARCHAR(45),
-  baud_rate INTEGER
-);
-
-
-
--- -----------------------------------------------------
--- Table rudder_servo_config
--- -----------------------------------------------------
-DROP TABLE IF EXISTS "rudder_servo_config";
-CREATE TABLE rudder_servo_config (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  channel INTEGER,
-  speed INTEGER,
-  acceleration INTEGER
-);
-
-
-
--- -----------------------------------------------------
--- Table sail_servo_config
--- -----------------------------------------------------
-DROP TABLE IF EXISTS "sail_servo_config";
-CREATE TABLE sail_servo_config (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  channel INTEGER,
-  speed INTEGER,
-  acceleration INTEGER
-);
-
-
-
--- -----------------------------------------------------
--- Table maestro_controller_config
--- -----------------------------------------------------
-DROP TABLE IF EXISTS "maestro_controller_config";
-CREATE TABLE maestro_controller_config (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  port VARCHAR(45)
-);
-
-
-
--- -----------------------------------------------------
--- Table xbee_config
--- -----------------------------------------------------
-DROP TABLE IF EXISTS "xbee_config";
-CREATE TABLE xbee_config (
+DROP TABLE IF EXISTS "config_xbee";
+CREATE TABLE config_xbee (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   send INTEGER,
-  recieve INTEGER,
+  receive INTEGER,
   send_logs INTEGER,
   loop_time DOUBLE,
   push_only_latest_logs BOOLEAN
@@ -251,10 +164,10 @@ CREATE TABLE xbee_config (
 
 
 -- -----------------------------------------------------
--- Table httpsync_config
+-- Table config_httpsync
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS "httpsync_config";
-CREATE TABLE httpsync_config (
+DROP TABLE IF EXISTS "config_httpsync";
+CREATE TABLE config_httpsync (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   delay INTEGER,
   remove_logs BOOLEAN,
@@ -264,39 +177,10 @@ CREATE TABLE httpsync_config (
 
 
 -- -----------------------------------------------------
--- Table sailing_robot_config
+-- Table config_wind_vane
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS "sailing_robot_config";
-CREATE TABLE sailing_robot_config (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  flag_heading_compass INTEGER,
-  loop_time DOUBLE,
-  scanning BOOLEAN,
-  line_follow BOOLEAN,
-  require_network BOOLEAN
-);
-
-
-
--- -----------------------------------------------------
--- Table waypoint_routing_configrudder_servo";
-DROP TABLE IF EXISTS "waypoint_routing_config";
-CREATE TABLE waypoint_routing_config (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  radius_ratio DOUBLE,
-  sail_adjust_time DOUBLE,
-  adjust_degree_limit DOUBLE,
-  max_command_angle DOUBLE,
-  rudder_speed_min DOUBLE
-);
-
-
-
--- -----------------------------------------------------
--- Table wind_vane_config
--- -----------------------------------------------------
-DROP TABLE IF EXISTS "wind_vane_config";
-CREATE TABLE wind_vane_config (
+DROP TABLE IF EXISTS "config_wind_vane";
+CREATE TABLE config_wind_vane (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   use_self_steering BOOLEAN,
   wind_sensor_self_steering BOOLEAN,
@@ -304,65 +188,29 @@ CREATE TABLE wind_vane_config (
 );
 
 -- -----------------------------------------------------
--- Table i2c_config
+-- Table config_i2c
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS "i2c_config";
-CREATE TABLE i2c_config (
+DROP TABLE IF EXISTS "config_i2c";
+CREATE TABLE config_i2c (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   loop_time DOUBLE
 );
 
 /*data for configs*/
-INSERT INTO "sail_command_config" VALUES(1, 4400,5300);
-INSERT INTO "rudder_command_config" VALUES(1,7000,5520);
-INSERT INTO "course_calculation_config" VALUES(1,45.0,60.0,1.0,5.0);
-INSERT INTO "windsensor_config" VALUES(1,'/dev/ttyS0',4800);
-INSERT INTO "maestro_controller_config" VALUES(1,'/dev/ttyACM0');
-INSERT INTO "rudder_servo_config" VALUES(1,4,0,0);
-INSERT INTO "sail_servo_config" VALUES(1,3,0,0);
-INSERT INTO "xbee_config" VALUES(1,1,1,0,0.1,1);
-INSERT INTO "httpsync_config" VALUES(1,0,0,1);
-INSERT INTO "sailing_robot_config" VALUES(1,1,0.5,0,1,1);
-INSERT INTO "waypoint_routing_config" VALUES(1,0.5,5,25,90.0,1.0);
-INSERT INTO "wind_vane_config" VALUES(1,1,0,1.5);
-INSERT INTO "i2c_config" VALUES(1, 0.1);
-
-
--- only used in DBHandler::getLogs commented code, remove?
-DROP TABLE IF EXISTS "messages";
-CREATE TABLE messages (id INTEGER PRIMARY KEY AUTOINCREMENT, -- remove log after sync to minimize db size
-	gps_time TIMESTAMP,
-	type VARCHAR,
-	msg VARCHAR,
-	log_id INTEGER				-- FK
-);
+INSERT INTO "config_xbee" VALUES(1,1,1,0,0.1,1);
+INSERT INTO "config_httpsync" VALUES(1,0,0,1);
+INSERT INTO "config_wind_vane" VALUES(1,1,0,1.5);
+INSERT INTO "config_i2c" VALUES(1, 0.1);
 
 -- HTTPSync
-DROP TABLE IF EXISTS "server";
-CREATE TABLE server (id INTEGER PRIMARY KEY AUTOINCREMENT,
+DROP TABLE IF EXISTS "config_HTTPSyncNode";
+CREATE TABLE config_HTTPSyncNode (id INTEGER PRIMARY KEY AUTOINCREMENT,
 	boat_id VARCHAR,	-- ex: boat01
 	boat_pwd VARCHAR,
-	srv_addr VARCHAR
-);
-
--- HTTPSync
-DROP TABLE IF EXISTS "state";
-CREATE TABLE state (id INTEGER PRIMARY KEY AUTOINCREMENT,
+	srv_addr VARCHAR,
 	configs_updated VARCHAR,
 	route_updated VARCHAR
 );
-
-DROP TABLE IF EXISTS "mock";
-CREATE TABLE mock (
-	id INTEGER PRIMARY KEY AUTOINCREMENT,
-	gps BOOLEAN,
-	windsensor BOOLEAN,
-	analog_arduino BOOLEAN,
-	compass BOOLEAN,
-	position BOOLEAN,
-	maestro BOOLEAN
-);
-INSERT INTO "mock" VALUES(1,1,1,1,1,1,1);
 
 DROP TABLE IF EXISTS "scanning_measurements";
 CREATE TABLE scanning_measurements (
@@ -372,11 +220,11 @@ CREATE TABLE scanning_measurements (
 	j INTEGER,
 	time_UTC TIMESTAMP, -- DEFAULT CURRENT_TIMESTAMP, -- this won't work, the pi does not know the time
 	latitude DOUBLE,							  -- use script to insert time from gps to pi, at startup,
-	longitude DOUBLE,							  -- or insert time with gpsmodel.time, as done with datalogs
+	longitude DOUBLE,							  -- or insert time with gpsmodel.time, as done with dataLogs
 	air_temperature DOUBLE,
 
 	-- not enforced: foreign_keys off (line 1)
-	FOREIGN KEY(waypoint_id) REFERENCES waypoints(id)
+	FOREIGN KEY(waypoint_id) REFERENCES waypoints(id) -- See the modification of waypoints
 );
 
 DELETE FROM sqlite_sequence;

@@ -7579,7 +7579,7 @@ class basic_json
 
         @param[in] type  the @ref number_float_t in use
 
-        @param[in,out] endptr recieves a pointer to the first character after
+        @param[in,out] endptr receives a pointer to the first character after
         the number
 
         @return the floating point number
@@ -7604,7 +7604,7 @@ class basic_json
 
         @param[in] type  the @ref number_float_t in use
 
-        @param[in,out] endptr  recieves a pointer to the first character after
+        @param[in,out] endptr  receives a pointer to the first character after
         the number
 
         @return the floating point number
@@ -7624,7 +7624,7 @@ class basic_json
 
         @param[in] type  the @ref number_float_t in use
 
-        @param[in,out] endptr  recieves a pointer to the first character after
+        @param[in,out] endptr  receives a pointer to the first character after
         the number
 
         @return the floating point number

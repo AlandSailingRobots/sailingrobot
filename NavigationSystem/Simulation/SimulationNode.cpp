@@ -51,7 +51,7 @@ enum SimulatorPacket {
 SimulationNode::SimulationNode(MessageBus& msgBus)
 	: ActiveNode(NodeID::Simulator, msgBus),
 		m_CompassHeading(0), m_GPSLat(0), m_GPSLon(0), m_GPSSpeed(0),
-		m_GPSHeading(0), m_WindDir(0), m_WindSpeed(0),
+		m_GPSCourse(0), m_WindDir(0), m_WindSpeed(0),
 		m_ArduinoRudder(0), m_ArduinoSheet(0), collidableMgr(NULL)
 {
   m_MsgBus.registerNode(*this, MessageType::ActuatorPosition);
@@ -60,7 +60,7 @@ SimulationNode::SimulationNode(MessageBus& msgBus)
 SimulationNode::SimulationNode(MessageBus& msgBus, CollidableMgr* collidableMgr)
 	: ActiveNode(NodeID::Simulator, msgBus),
 		m_CompassHeading(0), m_GPSLat(0), m_GPSLon(0), m_GPSSpeed(0),
-		m_GPSHeading(0), m_WindDir(0), m_WindSpeed(0),
+		m_GPSCourse(0), m_WindDir(0), m_WindSpeed(0),
 		m_ArduinoRudder(0), m_ArduinoSheet(0), collidableMgr(collidableMgr)
 {
   m_MsgBus.registerNode(*this, MessageType::ActuatorPosition);
@@ -124,7 +124,7 @@ void SimulationNode::createCompassMessage()
 
 void SimulationNode::createGPSMessage()
 {
-	MessagePtr msg = std::make_unique<GPSDataMsg>(GPSDataMsg(true, true, m_GPSLat, m_GPSLon, SysClock::unixTime(), m_GPSSpeed, m_GPSHeading, 0, GPSMode::LatLonOk));
+	MessagePtr msg = std::make_unique<GPSDataMsg>(GPSDataMsg(true, true, m_GPSLat, m_GPSLon, SysClock::unixTime(), m_GPSSpeed, m_GPSCourse, 0, GPSMode::LatLonOk));
 	m_MsgBus.sendMessage(std::move(msg));
 }
 
@@ -153,7 +153,7 @@ void SimulationNode::processBoatData( TCPPacket_t& packet )
 		m_GPSLat = boatData->latitude;
 		m_GPSLon = boatData->longitude;
 		m_GPSSpeed = boatData->speed;
-		m_GPSHeading = boatData->course;
+		m_GPSCourse = boatData->course;
 		m_WindDir = boatData->windDir;
 		m_WindSpeed = boatData->windSpeed;
 	 	m_ArduinoRudder = boatData->rudder;

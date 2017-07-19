@@ -22,7 +22,7 @@ struct LogItem {
 		double	m_gpsLon;
 		double	m_gpsUnixTime;
 		double	m_gpsSpeed;
-		double	m_gpsHeading;
+		double	m_gpsCourse;
 		int		m_gpsSatellite;
 		float	m_windDir;
 		float	m_windSpeed;
@@ -74,7 +74,7 @@ private:
 	std::vector<std::string> getTableIds(std::string table);
 
 	//gets all datatable names related to "ending" string
-	//used to fetch all tables ending with _datalogs or _config
+	//used to fetch all tables ending with _dataLogs or _config
 	std::vector<std::string> getTableNames(std::string like);
 
 	//gets information(for instance: name/datatype) about all columns

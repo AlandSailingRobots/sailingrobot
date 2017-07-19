@@ -289,11 +289,11 @@ public:
               void test_StateEstimationUpdateFrequency(){
                   double newLoopTime= 0.7;
                   // TODO : Create table for each configuration of the new node including looptime variables
-                  dbhandler->changeOneValue("sailing_robot_config","1",".7","loop_time");
+                  dbhandler->changeOneValue("???","1",".7","loop_time"); //See next table
                   std::this_thread::sleep_for(std::chrono::milliseconds(700));
                   double stateEstimationFrequence = sEstimationNode->getFrequencyThread();
                   TS_ASSERT_EQUALS(stateEstimationFrequence,newLoopTime);
-                  dbhandler->changeOneValue("sailing_robot_config","1",".5","loop_time");
+                  dbhandler->changeOneValue("???","1",".5","loop_time"); //see next table
               }
 
             };

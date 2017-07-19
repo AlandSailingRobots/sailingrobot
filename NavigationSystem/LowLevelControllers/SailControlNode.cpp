@@ -113,7 +113,7 @@ double SailControlNode::getFrequencyThread()
 ///----------------------------------------------------------------------------------
 void SailControlNode::updateFrequencyThread()
 {
-    m_LoopTime = m_db.retrieveCellAsDouble("sailing_robot_config","1","loop_time");
+    m_LoopTime = m_db.retrieveCellAsDouble("___","1","loop_time"); //see next table
 }
 
 ///----------------------------------------------------------------------------------

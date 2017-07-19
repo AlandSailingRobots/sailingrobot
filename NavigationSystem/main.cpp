@@ -122,7 +122,7 @@ int main(int argc, char *argv[])
 
 	XbeeSyncNode xbee(messageBus, dbHandler);
 	CV7Node windSensor(messageBus, dbHandler.retrieveCell("windsensor_config", "1", "port"), dbHandler.retrieveCellAsInt("windsensor_config", "1", "baud_rate"));
-	HMC6343Node compass(messageBus, dbHandler.retrieveCellAsInt("buffer_config", "1", "compass"));
+	HMC6343Node compass(messageBus, dbHandler.retrieveCellAsInt("config_buffer", "1", "compass"));
     //NOTE: the second parameter (sleep time in seconds) should probably be read from the database
     GPSDNode gpsd(messageBus, 0.5);
     //NOTE: the second parameter (sleep time in seconds) should probably be read from the database
@@ -157,7 +157,6 @@ int main(int argc, char *argv[])
 	acceleration = dbHandler.retrieveCellAsInt("rudder_servo_config", "1", "acceleration");
 
 	ActuatorNode rudder(messageBus, NodeID::RudderActuator, channel, speed, acceleration);
-	MaestroController::init(dbHandler.retrieveCell("maestro_controller_config", "1", "port"));
 	#endif
 	bool requireNetwork = (bool) (dbHandler.retrieveCellAsInt("sailing_robot_config", "1", "require_network"));
 

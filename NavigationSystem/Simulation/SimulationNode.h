@@ -125,7 +125,7 @@ private:
 	double	m_GPSLat;
 	double	m_GPSLon;
 	double	m_GPSSpeed;
-	double	m_GPSHeading;
+	double	m_GPSCourse;
 	int	    m_WindDir;
 	float	  m_WindSpeed;
 	int 	  m_ArduinoRudder;

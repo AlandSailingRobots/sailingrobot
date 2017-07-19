@@ -61,7 +61,7 @@ void DBLoggerNode::processMessage(const Message* msg) {
             item.m_gpsLon = GPSdataMsg->longitude();
             item.m_gpsUnixTime = GPSdataMsg->unixTime();
             item.m_gpsSpeed = GPSdataMsg->speed();
-            item.m_gpsHeading = GPSdataMsg->heading();
+            item.m_gpsCourse = GPSdataMsg->heading();
             item.m_gpsSatellite = GPSdataMsg->satelliteCount();
         }
         break;

@@ -4,7 +4,7 @@
  * 		DBLogger.h
  *
  * Purpose:
- *		Logs datalogs to the database in a efficient manor and offloads the work to a
+ *		Logs dataLogs to the database in a efficient manor and offloads the work to a
  *		worker thread.
  *
  * Developer Notes:

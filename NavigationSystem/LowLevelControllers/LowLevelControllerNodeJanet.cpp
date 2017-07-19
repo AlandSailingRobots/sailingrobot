@@ -10,7 +10,7 @@
 LowLevelControllerNodeJanet::LowLevelControllerNodeJanet(MessageBus& msgBus,
   float maxRudderAngle,  float maxCourseAngleDiff, DBHandler& db):
   Node(NodeID::LowLevelControllerNodeJanet, msgBus),m_MaxRudderAngle(maxRudderAngle),
-  m_CourseRegulator(maxRudderAngle, maxCourseAngleDiff), m_db(db) 
+  m_CourseRegulator(maxRudderAngle, maxCourseAngleDiff), m_db(db)
   {
     msgBus.registerNode(*this, MessageType::NavigationControl);
     msgBus.registerNode(*this, MessageType::StateMessage);
@@ -64,6 +64,6 @@ LowLevelControllerNodeJanet::LowLevelControllerNodeJanet(MessageBus& msgBus,
   }
 
   void LowLevelControllerNodeJanet::setupSailCommand() {
-    m_SailCommand.setCommandValues( m_db.retrieveCellAsInt("sail_command_config", "1", "close_reach_command"),
-	        m_db.retrieveCellAsInt("sail_command_config", "1", "run_command"));
+    // m_SailCommand.setCommandValues( m_db.retrieveCellAsInt("sail_command_config", "1", "close_reach_command"),
+	   //     m_db.retrieveCellAsInt("sail_command_config", "1", "run_command")); // Not use in DataBase
   }

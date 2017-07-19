@@ -79,7 +79,7 @@ bool WaypointMgrNode::waypointReached()
 
     if(harvestWaypoint())
     {
-        if(not m_db.changeOneValue("waypoints", std::to_string(m_nextId),"1","harvested"))
+        if(not m_db.changeOneValue("current_Mission", std::to_string(m_nextId),"1","harvested"))
         {
             Logger::error("Failed to harvest waypoint");
         }
@@ -168,7 +168,7 @@ bool WaypointMgrNode::harvestWaypoint()
             return true;
         }
 
-        return false;   
+        return false;
     }
     else //if no timer for waypoint, harvest it
     {

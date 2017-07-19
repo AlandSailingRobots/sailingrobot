@@ -42,11 +42,11 @@ bool HTTPSyncNode::init()
 
     m_reportedConnectError = false;
 
-    m_pushOnlyLatestLogs = m_dbHandler->retrieveCellAsInt("httpsync_config", "1", "push_only_latest_logs");
+    m_pushOnlyLatestLogs = m_dbHandler->retrieveCellAsInt("config_httpsync", "1", "push_only_latest_logs");
 
-    m_shipID = m_dbHandler->retrieveCell("server", "1", "boat_id");
-    m_serverURL = m_dbHandler->retrieveCell("server", "1", "srv_addr");
-    m_shipPWD = m_dbHandler->retrieveCell("server", "1", "boat_pwd");
+    m_shipID = m_dbHandler->retrieveCell("config_HTTPSyncNode", "1", "boat_id");
+    m_serverURL = m_dbHandler->retrieveCell("config_HTTPSyncNode", "1", "srv_addr");
+    m_shipPWD = m_dbHandler->retrieveCell("config_HTTPSyncNode", "1", "boat_pwd");
 
     m_initialised = true;
     Logger::info("HTTPSyncNode init() successful");
