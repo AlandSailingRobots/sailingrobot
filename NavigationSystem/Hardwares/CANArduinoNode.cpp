@@ -1,4 +1,16 @@
-/*Handels incoming data from Arduino */
+/****************************************************************************************
+*
+* File:
+* 		CANArduinoNode.cpp
+*
+* Purpose:
+*		 Process messages from the arduino in the Actuatorunit via the CAN-Service including ActuatorFeedback and RC status . 
+*
+* Developer Notes:
+*		 The CAN id numbers for the node are:
+*			701, 702, (more to be added later?)
+*
+***************************************************************************************/
 
 #include "CANArduinoNode.h"
 #include "Messages/ArduinoDataMsg.h"
