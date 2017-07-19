@@ -105,6 +105,8 @@ public:
             //std::cout << std::endl << " #### DELETE OBJECT of the test #### " << std::endl;
             // Stay here for process the last message which return system::error
             std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+            thr->detach();
+            delete thr;
         }
         else
         {
