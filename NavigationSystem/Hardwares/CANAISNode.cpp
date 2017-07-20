@@ -24,7 +24,7 @@ void CANAISNode::processPGN(N2kMsg& nMsg) {
   if (nMsg.PGN == 129038 || nMsg.PGN == 129039) {
 		Logger::info("I am in processPGN if pgn = 8/9");
     AISVessel vessel;
-    parsePGN129038_129039(nMsg, vessel);
+    CANAISNode::parsePGN129038_129039(nMsg, vessel);
     m_VesselList.push_back(std::move(vessel));
     Logger::info("Size after parsePGN129038_129039: " + std::to_string(m_VesselList.size()));
   }
@@ -35,7 +35,8 @@ void CANAISNode::processPGN(N2kMsg& nMsg) {
 }
 
 void CANAISNode::parsePGN129038_129039(N2kMsg& nMsg, AISVessel& vessel) {
-  // double res_pos = 1e-7;
+// void CANAISNode::parsePGN129038_129039(N2kMsg& nMsg) {
+  // AISVessel vessel;
   int lat_tmp, lon_tmp;
   uint16_t cog_tmp, sog_tmp;
 	Logger::info("I am in parsePGN129038_129039");
@@ -92,6 +93,8 @@ void CANAISNode::parsePGN129025(N2kMsg& nMsg) {
   Logger::info("Longiude in processPGN129025: " + std::to_string(m_PosLon));
   Logger::info("Latiude in processPGN129025 (test): " + std::to_string(lat_test));
   Logger::info("Longiude in processPGN129025 (test): " + std::to_string(lon_test));
+  Logger::info("Latiude in processPGN129025 (int): " + std::to_string(lat_tmp));
+  Logger::info("Longiude in processPGN129025 (int): " + std::to_string(lon_tmp));
 }
 
 void CANAISNode::start() {

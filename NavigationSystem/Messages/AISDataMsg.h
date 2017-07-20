@@ -131,11 +131,7 @@ public:
 	}
 
 private:
-	uint16_t combuint8(uint8_t lower, uint8_t higher) {
-		return ((uint16_t) higher << 8) | lower;
-	}
-
 	std::vector<AISVessel> m_VesselList;
-	float m_PosLat;
-	float m_PosLon;
+	double m_PosLat;
+	double m_PosLon;
 };

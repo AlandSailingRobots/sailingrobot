@@ -75,7 +75,8 @@ AISProcessing::AISProcessing(MessageBus& msgBus, CollidableMgr* collidableMgr, i
       node->m_lock.lock();
       node->sendAISData();
       node->m_lock.unlock();
-      timer.sleepUntil(node->m_LoopTime*1.0f/1000);
+      timer.sleepUntil(node->m_LoopTime);
+      // timer.sleepUntil(node->m_LoopTime*1.0f/1000);
       timer.reset();
     }
   }

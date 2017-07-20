@@ -59,7 +59,7 @@ void messageLoop() {
 int main() {
   Logger::init("AISTest.log");
 
-  // auto future = canService.start();
+  auto future = canService.start();
 
 
   AISDataReceiver aisRec(msgBus, 10000);
