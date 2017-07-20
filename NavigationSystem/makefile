@@ -1,6 +1,6 @@
 ###############################################################################
 #
-# Navigation System Makefile
+# Master makefile of the Navigation System
 #
 #   Type 'make help' to display help text, with targets and external variables
 #
@@ -69,7 +69,7 @@ LNM_DIR                 	= Navigation/LocalNavigationModule
 
 export EXECUTABLE           = sr
 export UNIT_TEST_EXEC 		= unit-tests.run
-export HARDWARE_TEST_EXEC 	= hardware-unit-tests.run
+export UNIT_TEST_HW_EXEC 	= unit-tests-hardware.run
 export INTEGRATION_TEST_EXEC_ASPIRE = integration-tests-ASPire.run
 
 export OBJECT_FILE          = $(BUILD_DIR)/objects.tmp
@@ -86,7 +86,7 @@ HTTP_SYNC_SRC        		= HTTPSync/HTTPSyncNode.cpp
 
 LOW_LEVEL_CONTROLLERS 		= SystemServices/WingsailControl.cpp SystemServices/CourseRegulator.cpp SystemServices/SoftsailControl.cpp \
 								LowLevelControllers/LowLevelControllerNodeASPire.cpp LowLevelControllers/LowLevelControllerNodeJanet.cpp \
-								LowLevelControllers/WindVaneController.cpp
+								LowLevelControllers/WindVaneController.cpp LowLevelControllers/LowLevelController.cpp
 
 MATH_SRC             		= Math/CourseCalculation.cpp Math/CourseMath.cpp Math/Utility.cpp
 
@@ -111,7 +111,7 @@ export LINE_FOLLOW_SRC      = Navigation/LineFollowNode.cpp waypointrouting/Rudd
                             	waypointrouting/Commands.cpp waypointrouting/SailCommand.cpp
 
 export LNM_SRC              = $(LNM_DIR)/ASRCourseBallot.cpp $(LNM_DIR)/ASRArbiter.cpp \
-                            	$(LNM_DIR)/LocalNavigationModule.cpp LowLevelControllers/LowLevelController.cpp \
+                            	$(LNM_DIR)/LocalNavigationModule.cpp \
                             	$(LNM_DIR)/Voters/WaypointVoter.cpp $(LNM_DIR)/Voters/WindVoter.cpp  \
                             	$(LNM_DIR)/Voters/ChannelVoter.cpp $(LNM_DIR)/Voters/MidRangeVoter.cpp \
 								$(LNM_DIR)/Voters/ProximityVoter.cpp
@@ -154,20 +154,20 @@ export XBEE_NETWORK_SRC     = Network/DataLink.cpp Network/LinuxSerialDataLink.c
 all:
 	$(MAKE) ASPire
 
-## Builds the configuration for ASPire
+## Build the control system for ASPire
 ASPire: $(BUILD_DIR)
 	$(MAKE) -f ASPire.mk -j
 
-## Builds the configuration for Janet
+## Build the control system for Janet
 Janet: $(BUILD_DIR)
 	$(MAKE) -f Janet.mk -j
 
-## Builds the unit_test
+## Build the unit tests
 unit_tests: $(BUILD_DIR)
 	$(MAKE) -C Tests
-	$(MAKE) -f tests.mk
+	$(MAKE) -f unit_tests.mk
 
-## Integration test for ASPire
+## Build the integration tests for ASPire
 integration_tests_ASPire: $(BUILD_DIR)
 	$(MAKE) -f integration_tests_ASPire.mk
 
@@ -177,7 +177,7 @@ $(BUILD_DIR):
 	@$(MKDIR_P) $(BUILD_DIR)
 
 
-## Removes object files and executables
+## Remove object files and executables
 clean:
 	@echo Removing existing object files and executable
 	-@rm -rd $(BUILD_DIR)

@@ -1,6 +1,8 @@
 ###############################################################################
 #
-# Janet Makefile
+# Makefile for building the control system for Janet
+#
+# This makefile cannot be run directly. Use the master makefile instead.
 #
 ###############################################################################
 
@@ -10,10 +12,10 @@
 ###############################################################################
 
 # Source files
-SRC						= main_janet.cpp $(CORE_SRC)
+SRC						= main_janet.cpp $(CORE_SRC) $(COLLIDABLE_MGR_SRC)
 
 ifeq ($(USE_LNM),1)
-SRC						+= $(LNM_SRC) $(COLLIDABLE_MGR_SRC)
+SRC						+= $(LNM_SRC)
 else
 SRC						+= $(LINE_FOLLOW_SRC)
 endif

@@ -1,6 +1,8 @@
 ###############################################################################
 #
-# Makefile for the integration test for ASPire
+# Makefile for building the integration tests for ASPire
+#
+# This makefile cannot be run directly. Use the master makefile instead.
 #
 ###############################################################################
 

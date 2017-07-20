@@ -1,6 +1,8 @@
 ###############################################################################
 #
-# Tests Makefile
+# Makefile for building the unit tests
+#
+# This makefile cannot be run directly. Use the master makefile instead.
 #
 ###############################################################################
 
@@ -25,7 +27,7 @@ OBJECTS = $(addprefix $(BUILD_DIR)/, $(SRC:.cpp=.o))
 ###############################################################################
 
 
-all: $(UNIT_TEST_EXEC) $(HARDWARE_TEST_EXEC) stats
+all: $(UNIT_TEST_EXEC) $(UNIT_TEST_HW_EXEC) stats
 
 # Link and build
 $(UNIT_TEST_EXEC): $(OBJECTS) Tests/runner.o
@@ -34,7 +36,7 @@ $(UNIT_TEST_EXEC): $(OBJECTS) Tests/runner.o
 	@echo Linking object files
 	$(CXX) $(LDFLAGS) Tests/runner.o @$(OBJECT_FILE) -Wl,-rpath=./ -o $@ $(LIBS)
 
-$(HARDWARE_TEST_EXEC): $(OBJECTS) Tests/runner.o
+$(UNIT_TEST_HW_EXEC): $(OBJECTS) Tests/runner.o
 	rm -f $(OBJECT_FILE)
 	@echo -n " " $(OBJECTS) >> $(OBJECT_FILE)
 	@echo Linking object files
@@ -46,7 +48,7 @@ $(BUILD_DIR)/%.o:$(SRC_DIR)/%.cpp
 	@echo Compiling CPP File: $@
 	@$(CXX) -c $(CPPFLAGS) $(INC_DIR) -o ./$@ $< $(DEFINES) $(LIBS)
 
-stats:$(UNIT_TEST_EXEC) $(HARDWARE_TEST_EXEC)
+stats:$(UNIT_TEST_EXEC) $(UNIT_TEST_HW_EXEC)
 	@echo Final executable size:
 	$(SIZE) $(UNIT_TEST_EXEC)
-	$(SIZE) $(HARDWARE_TEST_EXEC)
+	$(SIZE) $(UNIT_TEST_HW_EXEC)
