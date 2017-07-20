@@ -29,6 +29,8 @@ public:
     if (type == MessageType::AISData) {
       AISDataMsg* msg = (AISDataMsg*) message;
       m_VesselList = msg->vesselList();
+      posLat = msg->posLat();
+      posLon = msg->posLon();
       printData();
     }
   }
@@ -45,9 +47,14 @@ public:
       Logger::info("SOG: " + std::to_string(ves.SOG));// << std::endl;
       Logger::info("");
     }
+    Logger::info("Lat: " + std::to_string(posLat));
+    Logger::info("Lon: " + std::to_string(posLon));
+    Logger::info("");
   }
 
 private:
+  double posLat;
+  double posLon;
   float m_TimeBetweenPrints;
   std::vector<AISVessel> m_VesselList;
 };
@@ -66,7 +73,7 @@ int main() {
   aisNode = new CANAISNode(msgBus, canService, 50);
   aisNode->start();
 
-  aisProc = new AISProcessing(msgBus, &cMgr, 300e6, 100);
+  aisProc = new AISProcessing(msgBus, &cMgr, 300e6, 50);
   aisProc->start();
 
   std::thread thr(messageLoop);
