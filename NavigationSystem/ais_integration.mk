@@ -11,7 +11,7 @@ INTEGRATION_TEST_EXEC	= ais_integration-tests.run
 # Files
 ###############################################################################
 
-SRC = $(CORE_SRC) $(HARDWARE_NODES_SRC) $(HARDWARE_SERVICES_SRC) $(CANAIS_INTEGRATION_TEST) WorldState/CollidableMgr/CollidableMgr.cpp 
+SRC = $(CORE_SRC) $(HARDWARE_NODES_SRC) $(HARDWARE_SERVICES_SRC) $(CANAIS_INTEGRATION_TEST) WorldState/CollidableMgr/CollidableMgr.cpp
 
 # Object files
 OBJECTS = $(addprefix $(BUILD_DIR)/, $(SRC:.cpp=.o))

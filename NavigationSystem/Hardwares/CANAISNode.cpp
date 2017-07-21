@@ -29,7 +29,6 @@ void CANAISNode::processPGN(N2kMsg& nMsg) {
     Logger::info("Size after parsePGN129038_129039: " + std::to_string(m_VesselList.size()));
   }
   else if (nMsg.PGN == 129025) {
-
     parsePGN129025(nMsg);
   }
 }
@@ -51,8 +50,8 @@ void CANAISNode::parsePGN129038_129039(N2kMsg& nMsg, AISVessel& vessel) {
  byte_arr[2] = nMsg.Data[3];
  byte_arr[3] = nMsg.Data[4];
  std::memcpy(&mmsi_test, &byte_arr, sizeof mmsi_test);
-  vessel.MMSI = ((nMsg.Data[3] << 24) | (nMsg.Data[2] << 16) | (nMsg.Data[1] << 8) | (nMsg.Data[0]));
-  lat_tmp = ((nMsg.Data[9] << 24) | (nMsg.Data[8] << 16) | (nMsg.Data[7] << 8) | (nMsg.Data[6]));
+  vessel.MMSI = ((nMsg.Data[4] << 24) | (nMsg.Data[3] << 16) | (nMsg.Data[2] << 8) | (nMsg.Data[1]));
+  lat_tmp = ((nMsg.Data[8] << 24) | (nMsg.Data[7] << 16) | (nMsg.Data[6] << 8) | (nMsg.Data[5]));
   lon_tmp = ((nMsg.Data[12] << 24) | (nMsg.Data[11] << 16) | (nMsg.Data[10] << 8) | (nMsg.Data[9]));
   cog_tmp = ((nMsg.Data[15]) << 8 | (nMsg.Data[14]));
   sog_tmp = ((nMsg.Data[17]) << 8 | (nMsg.Data[16]));
@@ -60,33 +59,34 @@ void CANAISNode::parsePGN129038_129039(N2kMsg& nMsg, AISVessel& vessel) {
   vessel.longitude = lon_tmp * res_pos;
   vessel.COG = cog_tmp * res_cog;
   vessel.SOG = sog_tmp * res_sog;
-	Logger::info("MMSI Test: " + std::to_string(mmsi_test));
-	Logger::info(std::to_string(vessel.MMSI));
-	Logger::info(std::to_string(vessel.latitude));
-	Logger::info(std::to_string(vessel.longitude));
-	Logger::info(std::to_string(vessel.COG));
-	Logger::info(std::to_string(vessel.SOG));
+	Logger::info("MMSI Test:     " + std::to_string(mmsi_test));
+	Logger::info("MMSI:          " + std::to_string(vessel.MMSI));
+	Logger::info("Ves latitude:  " + std::to_string(vessel.latitude));
+	Logger::info("Ves longitude: " + std::to_string(vessel.longitude));
+	Logger::info("Ves cog:       " + std::to_string(vessel.COG));
+	Logger::info("Ves sog:       " + std::to_string(vessel.SOG));
+
+  // m_VesselList.push_back(vessel);
 }
 
 void CANAISNode::parsePGN129025(N2kMsg& nMsg) {
 //  double lat_test, lon_test;
-  uint8_t byte_arr[4];
+  // uint8_t byte_arr[4];
   int lat_pos,lon_pos; //, lat_tmp, lon_tmp;
-
-  byte_arr[0] = nMsg.Data[0];
-  byte_arr[1] = nMsg.Data[1];
-  byte_arr[2] = nMsg.Data[2];
-  byte_arr[3] = nMsg.Data[3];
-
-  std::memcpy(&lat_pos,&byte_arr,sizeof lat_pos);
-  byte_arr[0] = nMsg.Data[4];
-  byte_arr[1] = nMsg.Data[5];
-  byte_arr[2] = nMsg.Data[6];
-  byte_arr[3] = nMsg.Data[7];
-  std::memcpy(&lon_pos,&byte_arr,sizeof lon_pos);
-
- // lat_tmp = ((nMsg.Data[3] << 24) | (nMsg.Data[2] << 16) | (nMsg.Data[1] << 8) | (nMsg.Data[0]));
-//  lon_tmp = ((nMsg.Data[7] << 24) | (nMsg.Data[6] << 16) | (nMsg.Data[5] << 8) | (nMsg.Data[4]));
+  //
+  // byte_arr[0] = nMsg.Data[0];
+  // byte_arr[1] = nMsg.Data[1];
+  // byte_arr[2] = nMsg.Data[2];
+  // byte_arr[3] = nMsg.Data[3];
+  //
+  // std::memcpy(&lat_pos,&byte_arr,sizeof lat_pos);
+  // byte_arr[0] = nMsg.Data[4];
+  // byte_arr[1] = nMsg.Data[5];
+  // byte_arr[2] = nMsg.Data[6];
+  // byte_arr[3] = nMsg.Data[7];
+  // std::memcpy(&lon_pos,&byte_arr,sizeof lon_pos);
+ lat_pos = ((nMsg.Data[3] << 24) | (nMsg.Data[2] << 16) | (nMsg.Data[1] << 8) | (nMsg.Data[0]));
+ lon_pos = ((nMsg.Data[7] << 24) | (nMsg.Data[6] << 16) | (nMsg.Data[5] << 8) | (nMsg.Data[4]));
 
 //  lat_test =  lat_tmp * res_pos;
 //  lon_test =  lon_tmp * res_pos;
@@ -120,7 +120,7 @@ void CANAISNode::CANAISThreadFunc(ActiveNode* nodePtr) {
     MessagePtr AISList = std::make_unique<AISDataMsg>(node->m_VesselList, node->m_PosLat, node->m_PosLon);
     node->m_MsgBus.sendMessage(std::move(AISList));
     node->m_lock.unlock();
-
+    node->m_VesselList.clear(); // Should clear the list after a message is sent
     timer.sleepUntil(node->m_LoopTime);
     timer.reset();
   }

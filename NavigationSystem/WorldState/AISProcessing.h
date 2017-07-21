@@ -21,6 +21,7 @@
 #include "Math/CourseMath.h"
 #include "MessageBus/ActiveNode.h"
 #include "WorldState/CollidableMgr/CollidableMgr.h"
+#include "SystemServices/Logger.h"
 
 #include <chrono>
 #include <thread>
