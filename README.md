@@ -43,8 +43,9 @@ $ git submodule update # Updates the submodule to the latest version
 ```
 Install the wiringPi library:
 ```shell 
-$ cd libs/wiringPi
+$ cd NavigationSystem/Libs/wiringPi
 $ ./build #Install wiringPi as a dynamic library
+$ cd ../../..
 ```
 Install the database:
 ```shell 
