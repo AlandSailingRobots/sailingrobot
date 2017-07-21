@@ -1,0 +1,172 @@
+{
+"1": {
+  "latitude": 60.107101,
+  "longitude": 19.922842,
+  "declination": 6,
+  "radius": 5,
+  "stay_time": 0,
+  "harvested": 0
+},
+
+"2": {
+  "latitude": 60.104441,
+  "longitude": 19.921654,
+  "declination": 6,
+  "radius": 5,
+  "stay_time": 0,
+  "harvested": 0
+},
+
+"3": {
+  "latitude": 60.101783,
+  "longitude": 19.921775,
+  "declination": 6,
+  "radius": 5,
+  "stay_time": 0,
+  "harvested": 0
+},
+
+"4": {
+  "latitude": 60.100094,
+  "longitude": 19.921539,
+  "declination": 6,
+  "radius": 5,
+  "stay_time": 0,
+  "harvested": 0
+},
+
+"5": {
+  "latitude": 60.099065,
+  "longitude": 19.921859,
+  "declination": 6,
+  "radius": 5,
+  "stay_time": 0,
+  "harvested": 0
+},
+
+"6": {
+  "latitude": 60.097813,
+  "longitude": 19.922358,
+  "declination": 6,
+  "radius": 5,
+  "stay_time": 0,
+  "harvested": 0
+},
+
+"7": {
+  "latitude": 60.097802,
+  "longitude": 19.921231,
+  "declination": 6,
+  "radius": 5,
+  "stay_time": 0,
+  "harvested": 0
+},
+
+"8": {
+  "latitude": 60.100058,
+  "longitude": 19.920913,
+  "declination": 6,
+  "radius": 5,
+  "stay_time": 0,
+  "harvested": 0
+},
+
+"9": {
+  "latitude": 60.100010,
+  "longitude": 19.921713,
+  "declination": 6,
+  "radius": 5,
+  "stay_time": 0,
+  "harvested": 0
+},
+
+"10": {
+  "latitude": 60.097735,
+  "longitude": 19.922570,
+  "declination": 6,
+  "radius": 5,
+  "stay_time": 0,
+  "harvested": 0
+},
+
+"11": {
+  "latitude": 60.097666,
+  "longitude": 19.921369,
+  "declination": 6,
+  "radius": 5,
+  "stay_time": 0,
+  "harvested": 0
+},
+
+"12": {
+  "latitude": 60.100011,
+  "longitude": 19.920900,
+  "declination": 6,
+  "radius": 5,
+  "stay_time": 0,
+  "harvested": 0
+},
+
+"13": {
+  "latitude": 60.100070,
+  "longitude": 19.921582,
+  "declination": 6,
+  "radius": 5,
+  "stay_time": 0,
+  "harvested": 0
+},
+
+"14": {
+  "latitude": 60.098990,
+  "longitude": 19.921823,
+  "declination": 6,
+  "radius": 5,
+  "stay_time": 0,
+  "harvested": 0
+},
+
+"15": {
+  "latitude": 60.097723,
+  "longitude": 19.922552,
+  "declination": 6,
+  "radius": 5,
+  "stay_time": 0,
+  "harvested": 0
+},
+
+"16": {
+  "latitude": 60.097707,
+  "longitude": 19.921200,
+  "declination": 6,
+  "radius": 5,
+  "stay_time": 0,
+  "harvested": 0
+},
+
+"17": {
+  "latitude": 60.100151,
+  "longitude": 19.920995,
+  "declination": 6,
+  "radius": 5,
+  "stay_time": 0,
+  "harvested": 0
+},
+
+"18": {
+  "latitude": 60.102203,
+  "longitude": 19.920921,
+  "declination": 6,
+  "radius": 5,
+  "stay_time": 0,
+  "harvested": 0
+},
+
+"19": {
+  "latitude": 60.107353,
+  "longitude": 19.922158,
+  "declination": 6,
+  "radius": 5,
+  "stay_time": 0,
+  "harvested": 0
+}
+}

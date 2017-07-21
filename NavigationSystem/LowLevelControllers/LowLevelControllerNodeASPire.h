@@ -10,8 +10,6 @@
 #include "SystemServices/WingsailControl.h"
 #include "SystemServices/CourseRegulator.h"
 
-#define DATA_OUT_OF_RANGE -2000
-
 class LowLevelControllerNodeASPire : public Node {
 public:
     LowLevelControllerNodeASPire(MessageBus& msgBus, CANService &canService, float maxRudderAngle = 30,
@@ -22,6 +20,7 @@ public:
     void processMessage(const Message* message);
 
 private:
+    const int DATA_OUT_OF_RANGE = -2000;
 
     void processStateMessage(const StateMessage* msg);
     void processWindStateMessage(const WindStateMsg* msg);
@@ -34,9 +33,9 @@ private:
     double m_VesselCourse = DATA_OUT_OF_RANGE;
 
     double m_TrueWindSpeed = DATA_OUT_OF_RANGE;
-	double m_TrueWindDir = DATA_OUT_OF_RANGE;
-	double m_ApparentWindSpeed = DATA_OUT_OF_RANGE;
-	double m_ApparentWindDir = DATA_OUT_OF_RANGE;
+	  double m_TrueWindDir = DATA_OUT_OF_RANGE;
+	  double m_ApparentWindSpeed = DATA_OUT_OF_RANGE;
+	  double m_ApparentWindDir = DATA_OUT_OF_RANGE;
 
     NavigationState m_NavigationState;
     int m_CourseToSteer = DATA_OUT_OF_RANGE;
