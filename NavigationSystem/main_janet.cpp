@@ -268,11 +268,11 @@ int main(int argc, char *argv[])
 	#if SIMULATION == 1
 		simulation.start();
 	#else
-		xbee.start();
 		windSensor.start();
 		compass.start();
 		gpsd.start();
 		arduino.start();
+		// xbee.start();	// NOTE - Maël: Not configue with the new functional architecture yet
 	#endif
 
 	#if LOCAL_NAVIGATION_MODULE == 1
