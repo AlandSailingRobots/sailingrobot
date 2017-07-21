@@ -55,27 +55,28 @@ $ ./installdb.sh
 
 To build the Control system in *NavigationSystem*, type:
 ```shell 
-make [target] [ext variable 1] [ext variable 2]
-
+$ make [target] [ext variable 1] [ext variable 2]
+``` 
 Targets:
-	all: Default, same as make ASPire
-	ASPire: Build the control system for ASPire
-	Janet: Build the control system for Janet
-	unit_tests: Build the unit tests
-	integration_tests_ASPire: Build the integration test for ASPire
+* `all`: Default, same as make ASPire
+* `ASPire`: Build the control system for ASPire
+* `Janet`: Build the control system for Janet
+* `unit_tests`: Build the unit tests
+* `integration_tests_ASPire`: Build the integration test for ASPire
 
 External Variables (Only for building a control system):
-	USE_SIM:    1 To run with the sailing_simulator
-				0 to run on the Pi (default)
-	USE_LNM: Chooses which navigation algorithm you want to use. 
-				1 for the Local Navigation Module (Voter System)
-				0 for the line-follow algorithm (default)
-``` 
+* `USE_SIM`:
+  - `=1`: To run with the sailing_simulator
+  - `=0`: To run on the Pi (default)
+* `USE_LNM`: Chooses which navigation algorithm you want to use.
+  - `=1`: Local Navigation Module (Voter System)
+  - `=0`: Line-follow algorithm (default)
 
-Example :
-```
-# Build the ASPire control system with the line-follow algorithm, to be executed with the simulator.
-make ASPire USE_SIM=1
+
+Example :  
+Build the ASPire control system with the line-follow algorithm, to be executed with the simulator.
+```shell
+$ make ASPire USE_SIM=1
 ```
 
 ### Usage
@@ -89,26 +90,26 @@ The database has two functionalities:
 To update the configuration tables in the database, you run the update_config.py script with one of the configuration json files as a parameter.
 
 ```shell
-./update_config.py config_ASPire.json
+$ ./update_config.py config_ASPire.json
 ```
 
 To change the waypoints you use the waypoints.py together with one of the json in the Mission Folder.
 
 ```shell
-./update_waypoints.py Mission/ASS.json
+$ ./update_waypoints.py Mission/ASS.json
 ```
 
 #### Deployment
 
 To run the control system previously build, use (no parameters needed):
 ```shell
-./NavigationSystem/sr
+$ ./NavigationSystem/sr
 ```
 
 #### Run Tests
 
 ## License
-GNU GPL v2
+GNU GPL v2  
 [![License: GPL v2](https://img.shields.io/badge/License-GPL%20v2-blue.svg)](https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html)
 
 ## Links
