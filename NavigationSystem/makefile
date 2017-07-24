@@ -86,7 +86,8 @@ HTTP_SYNC_SRC        		= HTTPSync/HTTPSyncNode.cpp
 
 LOW_LEVEL_CONTROLLERS 		= SystemServices/WingsailControl.cpp SystemServices/CourseRegulator.cpp SystemServices/SoftsailControl.cpp \
 								LowLevelControllers/LowLevelControllerNodeASPire.cpp LowLevelControllers/LowLevelControllerNodeJanet.cpp \
-								LowLevelControllers/WindVaneController.cpp LowLevelControllers/LowLevelController.cpp
+								LowLevelControllers/WindVaneController.cpp LowLevelControllers/LowLevelController.cpp \
+								LowLevelControllers/CourseRegulatorNode.cpp LowLevelControllers/SailControlNode.cpp
 
 MATH_SRC             		= Math/CourseCalculation.cpp Math/CourseMath.cpp Math/Utility.cpp
 
