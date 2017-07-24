@@ -24,8 +24,7 @@ private:
 
     int DATA_OUT_OF_RANGE = -2000;
 
-    DBHandler &m_db;
-	DBLogger m_dbLogger;
+    DBLogger m_dbLogger;
 
 // struct used from DBHandler.h
     LogItem item {

@@ -22,6 +22,9 @@ public:
 	ActiveNode(NodeID id, MessageBus& msgBus) : Node(id, msgBus)
 	{ }
 
+	ActiveNode(NodeID id, MessageBus& msgBus, DBHandler& db) : Node(id, msgBus, db)
+	{ }
+
 	///----------------------------------------------------------------------------------
  	/// This function should be used to start the active nodes thread.
  	///
