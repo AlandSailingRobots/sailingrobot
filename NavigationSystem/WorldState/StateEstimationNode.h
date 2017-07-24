@@ -4,8 +4,8 @@
 * 		StateEstimationNode.h
 *
 *  Purpose:
-*		Maintains the "current" state listening to GPS and compass messages, sending out a
-* StateMessage
+*		Estimates the "current" state of the vessel. Collects datat from the GPS and compass messages.
+*       Returns a VesselStateMsg corresponding at the estimated state of the vessel.
 *
 * Developer Notes:
 *
@@ -14,64 +14,79 @@
 
 #pragma once
 
+#include <stdint.h>
+#include <mutex>
+
 #include "MessageBus/ActiveNode.h"
 #include "Messages/CompassDataMsg.h"
 #include "Messages/GPSDataMsg.h"
-#include "Messages/WindDataMsg.h"
-#include "Messages/ArduinoDataMsg.h"
 #include "Messages/WaypointDataMsg.h"
-#include "Network/TCPServer.h"
-#include <mutex>
-#include <stdint.h>
+
 
 class StateEstimationNode : public ActiveNode {
 public:
-  StateEstimationNode(MessageBus& msgBus, double loopTime, double speedLimit);
-  ~StateEstimationNode();
+    StateEstimationNode(MessageBus& msgBus, double loopTime, double speedLimit);
+    ~StateEstimationNode();
 
-  bool init();
+    bool init();
 
-  ///----------------------------------------------------------------------------------
-  /// Starts the StateEstimationNode's thread that pumps out StateMessages
-  ///----------------------------------------------------------------------------------
-  void start();
+    ///----------------------------------------------------------------------------------
+    /// Starts the StateEstimationNode's thread that pumps out VesselStateMsg.
+    ///----------------------------------------------------------------------------------
+    void start();
 
-  void processMessage(const Message* msg);
+    void processMessage(const Message* msg);
 
 private:
 
-  ///----------------------------------------------------------------------------------
-  /// Stores compass data from a CompassDataMsg.
-  ///----------------------------------------------------------------------------------
-  void processCompassMessage(const CompassDataMsg* msg);
-  ///----------------------------------------------------------------------------------
-  /// Stores the GPS data from a GPSDataMsg.
-  ///----------------------------------------------------------------------------------
-  void processGPSMessage(const GPSDataMsg* msg);
-  void processWaypointMessage(const WaypointDataMsg* msg );
+    const int STATE_INITIAL_SLEEP = 2000;
 
-  int getCourse();
+    ///----------------------------------------------------------------------------------
+    /// Stores compass data from a CompassDataMsg.
+    ///----------------------------------------------------------------------------------
+    void processCompassMessage(const CompassDataMsg* msg);
 
-  ///----------------------------------------------------------------------------------
-  /// Starts the StateEstimationNode's thread that pumps out StateMessages which contains
-  /// data collected from the sensors
-  ///----------------------------------------------------------------------------------
-  static void StateEstimationNodeThreadFunc(ActiveNode* nodePtr);
+    ///----------------------------------------------------------------------------------
+    /// Stores the GPS data from a GPSDataMsg.
+    ///----------------------------------------------------------------------------------
+    void processGPSMessage(const GPSDataMsg* msg);
 
-  float 	m_VesselHeading;
-  double	m_VesselLat;
-  double	m_VesselLon;
-  double	m_VesselSpeed;
-  double  m_VesselCourse;
+    ///----------------------------------------------------------------------------------
+    /// Stores the next declination from a WaypointDataMsg.
+    ///----------------------------------------------------------------------------------
+    void processWaypointMessage(const WaypointDataMsg* msg );
 
-  double m_LoopTime;
-  int m_Declination;
+    ///----------------------------------------------------------------------------------
+    /// Estimate the vessel course (angle of the velocity vector). When the vessel speed 
+    /// is sufficient use the course over ground given by the GPS. When the vessel speed
+    /// is not sufficient for the GPS to return good values use a combinaison of the vessel 
+    /// heading and the GPS course.
+    ///----------------------------------------------------------------------------------
+    int estimateVesselCourse();
 
-  double m_SpeedLimit;
-  bool m_GpsOnline;
-  const int STATE_INITIAL_SLEEP = 2000;
+    ///----------------------------------------------------------------------------------
+    /// Starts the StateEstimationNode's thread that pumps out StateMessages which contains
+    /// data collected from the sensors
+    ///----------------------------------------------------------------------------------
+    static void StateEstimationNodeThreadFunc(ActiveNode* nodePtr);
 
-  std::mutex m_lock;
+    float m_VesselHeading;
+    double m_VesselLat;
+    double m_VesselLon;
+    float m_VesselSpeed;
+    float m_VesselCourse;
+
+    double m_LoopTime;
+    int m_WaypointDeclination;
+
+    double m_SpeedLimit;
+    bool m_GpsOnline;
+    double  m_GPSLat;
+    double  m_GPSLon;
+    double  m_GPSSpeed;
+    double  m_GPSCourse;
+
+    std::mutex m_lock;
 
 
 };
