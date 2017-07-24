@@ -186,7 +186,7 @@ bool CANService::ParseFastPkg(CanMsg& msg, N2kMsg& nMsg) { // Taken from the CAN
 	uint8_t SequenceNumber = msg.data[0]&0x1F;
 
 	auto it = BytesLeft_.find(Key);
-//  Logger::info("Size of FastPKG_ map: " + std::to_string(FastPKG_.size()) + ", Size of BytesLeft_ map: " + std::to_string(BytesLeft_.size()));
+  Logger::info("Size of FastPKG_ map: " + std::to_string(FastPKG_.size()) + ", Size of BytesLeft_ map: " + std::to_string(BytesLeft_.size()));
 	if(it != BytesLeft_.end()) {				//have parts of the message already
 		int LastByte;
 		if(it->second >= 7)	{		//check if less than 7 bytes left, 1st byte is the sequence ID and Sequence number followed by 7 bytes of data
@@ -200,17 +200,17 @@ bool CANService::ParseFastPkg(CanMsg& msg, N2kMsg& nMsg) { // Taken from the CAN
 			FastPKG_[Key].Data[6+(SequenceNumber-1)*7 +i] = msg.data[i];
 		}
 		it->second -= 7;				//decrease bytes left
-//    Logger::info("PGN: " + std::to_string(nMsg.PGN) + ", Bytes left: " + std::to_string(it->second)); // + ", SequenceNumber: " + std::to_string(SequenceNumber));
+   Logger::info("PGN: " + std::to_string(nMsg.PGN) + ", Bytes left: " + std::to_string(it->second)); // + ", SequenceNumber: " + std::to_string(SequenceNumber));
 		if(it->second <= 0) {	//have the whole message
 			nMsg = FastPKG_[Key];
-			FILE* file = fopen("data.ais","wb");
-			fwrite(&nMsg.Data, 1, sizeof nMsg.Data, file);
-			fclose(file);
+			// FILE* file = fopen("data.ais","wb");
+			// fwrite(&nMsg.Data, 1, sizeof nMsg.Data, file);
+			// fclose(file);
 //			std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 			Logger::info("DONE");
-//			BytesLeft_.erase(Key);
+			BytesLeft_.erase(Key);
 			FastPKG_.erase(Key);
-//      Logger::info("Returning, whole message");
+     Logger::info("Returning, whole message");
 			return true;
 		}
 		else {
@@ -220,18 +220,18 @@ bool CANService::ParseFastPkg(CanMsg& msg, N2kMsg& nMsg) { // Taken from the CAN
 	else {								//not found, create new N2kMsg
 		uint8_t BytesInMsg = msg.data[1];
 		nMsg.DataLen = BytesInMsg;
-   // Logger::info("PGN: " + std::to_string(nMsg.PGN) + ", size of msg: " + std::to_string(BytesInMsg));
+    Logger::info("PGN: " + std::to_string(nMsg.PGN) + ", size of msg: " + std::to_string(BytesInMsg));
 		nMsg.Data.resize(BytesInMsg);
 		for(int i = 2; i < 8; ++i) {
 			nMsg.Data[i-2] = msg.data[i];
 		}
 		if(BytesInMsg <= 6) {
- //     Logger::info("Returning because bytes in msg < 6");
+      Logger::info("Returning because bytes in msg < 6");
 			return true;
 		}
 		else {
 			BytesLeft_[Key] = BytesInMsg-6;		//how many bytes left
-//      Logger::info("PGN: " + std::to_string(nMsg.PGN) + ", Bytes left: " + std::to_string(BytesInMsg));
+      Logger::info("PGN: " + std::to_string(nMsg.PGN) + ", Bytes left: " + std::to_string(BytesInMsg));
 			FastPKG_[Key] = nMsg;
 			return false;
 		}
