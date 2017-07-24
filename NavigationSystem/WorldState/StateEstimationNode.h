@@ -26,7 +26,7 @@
 
 class StateEstimationNode : public ActiveNode {
 public:
-  StateEstimationNode(MessageBus& msgBus, double loopTime, double speedLimit);
+  StateEstimationNode(MessageBus& msgBus, DBHandler& db, double loopTime, double speedLimit);
   ~StateEstimationNode();
 
   bool init();
@@ -36,7 +36,10 @@ public:
   ///----------------------------------------------------------------------------------
   void start();
 
+  void updateFromDB();
+
   void processMessage(const Message* msg);
+
 
 private:
 

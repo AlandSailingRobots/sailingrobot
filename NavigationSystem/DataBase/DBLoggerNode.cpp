@@ -41,7 +41,7 @@ void DBLoggerNode::processMessage(const Message* msg) {
 
     MessageType type = msg->messageType();
 
-    switch(type) 
+    switch(type)
     {
         case MessageType::CompassData:
         {
@@ -120,7 +120,7 @@ void DBLoggerNode::processMessage(const Message* msg) {
             item.m_waypointId = waypMsg->nextId();
         }
 
-        case MessageType::WindState: 
+        case MessageType::WindState:
         {
             const WindStateMsg* windStateMsg = static_cast<const WindStateMsg*>(msg);
             item.m_twd = windStateMsg->trueWindDirection();
@@ -140,6 +140,11 @@ bool DBLoggerNode::init() {
     return true;
 }
 
+void DBLoggerNode::updateFromDB()
+{
+    //m_LoopTime = m_dbHandler.retrieveCellAsDouble("config_StateEstimationNode","1","loop_time");
+}
+
 void DBLoggerNode::DBLoggerNodeThreadFunc(ActiveNode* nodePtr) {
 
     DBLoggerNode* node = dynamic_cast<DBLoggerNode*> (nodePtr);
@@ -157,7 +162,7 @@ void DBLoggerNode::DBLoggerNodeThreadFunc(ActiveNode* nodePtr) {
         std::string timestamp_str=SysClock::timeStampStr();
         timestamp_str+=".";
         timestamp_str+= std::to_string(SysClock::millis());
-        
+
         node->item.m_timestamp_str = timestamp_str;
 
         if(timer2.timePassed() * 1000 > node->m_updateFrequency) {
@@ -171,4 +176,3 @@ void DBLoggerNode::DBLoggerNodeThreadFunc(ActiveNode* nodePtr) {
 
     }
 }
-

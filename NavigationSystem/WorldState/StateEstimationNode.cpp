@@ -24,9 +24,9 @@
 #include "Math/Utility.h"
 #include "SystemServices/Timer.h"
 
-StateEstimationNode::StateEstimationNode(MessageBus& msgBus, double loopTime, double speedLimit): ActiveNode(NodeID::StateEstimation, msgBus),
+StateEstimationNode::StateEstimationNode(MessageBus& msgBus, DBHandler& db ,double loopTime, double speedLimit): ActiveNode(NodeID::StateEstimation, msgBus),
 m_VesselHeading(0), m_VesselLat(0), m_VesselLon(0), m_VesselSpeed(0), m_VesselCourse(0), m_LoopTime(loopTime), m_Declination(0),
-m_SpeedLimit(speedLimit), m_GpsOnline(false)
+m_SpeedLimit(speedLimit), m_GpsOnline(false), m_dbHandler(db)
 {
   msgBus.registerNode(*this, MessageType::CompassData);
   msgBus.registerNode(*this, MessageType::GPSData);
@@ -43,6 +43,12 @@ bool StateEstimationNode::init()
 void StateEstimationNode::start()
 {
   runThread(StateEstimationNodeThreadFunc);
+}
+
+void StateEstimationNode::updateFromDB()
+{
+    m_LoopTime = m_dbHandler.retrieveCellAsDouble("config_StateEstimationNode","1","loop_time");
+    m_SpeedLimit = m_dbHandler.retrieveCellAsInt("config_StateEstimationNode","1","speed_limit");
 }
 
 void StateEstimationNode::processMessage(const Message* msg)
