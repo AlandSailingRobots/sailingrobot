@@ -18,14 +18,10 @@ class MessageBus;
 #include "MessageBus/NodeIDs.h"
 #include "MessageBus/MessageBus.h"
 #include "MessageBus/Message.h"
-#include "DataBase/DBHandler.h"
 
 class Node {
 public:
 	Node(NodeID id, MessageBus& msgBus) : m_MsgBus(msgBus), m_NodeID(id)
-	{ }
-
-	Node(NodeID id, MessageBus& msgBus, DBHandler& dbh) : m_MsgBus(msgBus), m_NodeID(id), m_DbHandler(dbh)
 	{ }
 
 	virtual ~Node(){};
@@ -56,7 +52,6 @@ public:
 	NodeID nodeID() { return m_NodeID; }
 protected:
 	MessageBus& m_MsgBus;
-	DBHandler& m_DbHandler;
 private:
 	NodeID m_NodeID;
 };

@@ -15,7 +15,8 @@
 
 
 DBLoggerNode::DBLoggerNode(MessageBus& msgBus, DBHandler& db, int TimeBetweenMsgs, int updateFrequency, int queueSize)
-:   ActiveNode(NodeID::DBLoggerNode, msgBus, db),
+:   ActiveNode(NodeID::DBLoggerNode, msgBus),
+    m_db(db),
     m_dbLogger(queueSize, db),
     m_TimeBetweenMsgs(TimeBetweenMsgs),
     m_updateFrequency(updateFrequency),
@@ -139,8 +140,9 @@ bool DBLoggerNode::init() {
     return true;
 }
 
-void updateFromDB() {
-
+void DBLoggerNode::updateFromDB()
+{
+    //m_LoopTime = m_dbHandler.retrieveCellAsDouble("config_StateEstimationNode","1","loop_time");
 }
 
 void DBLoggerNode::DBLoggerNodeThreadFunc(ActiveNode* nodePtr) {
