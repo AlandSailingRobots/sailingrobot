@@ -43,7 +43,7 @@ public:
   * Processes and return the data of the message
   * if the PGN is 129038 or 129039
   */
-  void parsePGN129038_129039(N2kMsg& nMsg, AISVessel& vessel);
+  void parsePGN129038_129039(N2kMsg& nMsg);
 
   /*
   * Processes and return the data of the message

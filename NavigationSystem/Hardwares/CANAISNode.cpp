@@ -20,17 +20,13 @@ void CANAISNode::processMessage(const Message* message) {
 
 void CANAISNode::processPGN(N2kMsg& nMsg) {
   if (nMsg.PGN == 129038 || nMsg.PGN == 129039) {
-    // AISVessel vessel;
-    // CANAISNode::parsePGN129038_129039(nMsg, vessel);
     CANAISNode::parsePGN129038_129039(nMsg);
-    // m_VesselList.push_back(std::move(vessel));
   }
   else if (nMsg.PGN == 129025) {
     parsePGN129025(nMsg);
   }
 }
 
-// void CANAISNode::parsePGN129038_129039(N2kMsg& nMsg, AISVessel& vessel) {
 void CANAISNode::parsePGN129038_129039(N2kMsg& nMsg) {
   AISVessel vessel;
   int lon_tmp, lat_tmp, cog_tmp, sog_tmp;
@@ -72,20 +68,6 @@ void CANAISNode::CANAISThreadFunc(ActiveNode* nodePtr) {
     node->m_lock.lock();
 
     if (node->m_VesselList.size() != 0) {
-      Logger::info("Size: " + std::to_string(m_VesselList.size()));
-      Logger::info("");
-      for (auto ves: m_VesselList) {
-        std::cout << ves.MMSI << std::endl;
-        Logger::info("MMSI: " + std::to_string(ves.MMSI));
-        Logger::info("Lat: " + std::to_string(ves.latitude));
-        Logger::info("Lon: " + std::to_string(ves.longitude));
-        Logger::info("COG: " + std::to_string(ves.COG));
-        Logger::info("SOG: " + std::to_string(ves.SOG));// << std::endl;
-        Logger::info("");
-      }
-      Logger::info("Lat: " + std::to_string(posLat));
-      Logger::info("Lon: " + std::to_string(posLon));
-      Logger::info("");
       MessagePtr AISList = std::make_unique<AISDataMsg>(node->m_VesselList, node->m_PosLat, node->m_PosLon);
       node->m_MsgBus.sendMessage(std::move(AISList));
       node->m_lock.unlock();
