@@ -162,6 +162,26 @@ double Utility::limitAngleRange(double angle)
 		angle -= fullRevolution;
 
 	return angle;
+
+	// NOTE - Maël: An other possibility to set the angle in ]0, 360[ is to use a sawtooth function.
+	// return radianToDegree(2*atan(tan((degreeToRadian(angle) - M_PI)/2)) + M_PI);
+}
+
+double Utility::limitAngleRange180(double angle)
+{
+	const double fullRevolution = 360;
+	const double minAngle = -180;
+
+	while (angle < minAngle)
+		angle += fullRevolution;
+
+	while (angle >= minAngle + fullRevolution)
+		angle -= fullRevolution;
+
+	return angle;
+
+	// NOTE - Maël: An other possibility to set the angle in ]-180, 180[) is to use a sawtooth function.
+ 	// return radianToDegree(atan(tan((degreeToRadian(angle) - M_PI)/2)));
 }
 
 double Utility::limitRadianAngleRange(double angle)
@@ -178,6 +198,12 @@ double Utility::limitRadianAngleRange(double angle)
 	return angle;
 }
 
+double Utility::linearFunctionBetweenAngle(double x, double x1, double x2, double angle1, double angle2)
+{
+    float a = (limitAngleRange180(angle2 - angle1))/(x2 - x1); // Warning : error if x2==x1
+    float b = angle2 - a*x2;
+    return limitAngleRange(a*x + b);
+}
 
 double Utility::degreeToRadian(double degrees)
 {

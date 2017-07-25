@@ -30,7 +30,12 @@ public:
 	static bool isAngleInSector(double angle, double sectorAngle1, double sectorAngle2);
 	static double angleDifference(double angle1, double angle2);
 	static double limitAngleRange(double angle);
+	static double limitAngleRange180(double angle);
 	static double limitRadianAngleRange(double angle);
+	///----------------------------------------------------------------------------------
+    /// Stores compass data from a CompassDataMsg.
+    ///----------------------------------------------------------------------------------
+	static double linearFunctionBetweenAngle(double x, double x1, double x2, double angle1, double angle2);
 	static double degreeToRadian(double degrees);
 	static double radianToDegree(double radians);
 
