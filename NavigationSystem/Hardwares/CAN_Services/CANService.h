@@ -70,9 +70,6 @@ public:
   /* Stops the service */
   void stop();
 
-//	  std::map<IDsID, N2kMsg> FastPKG_;
-//  std::map<IDsID, int> BytesLeft_;
-//    std::map<IDsID, FastPKGInfo> FastPackages;
 private:
 
   void run();
@@ -81,8 +78,6 @@ private:
 
   bool IsFastPackage(const N2kMsg &nMsg);
 
-//  std::map<IDsID, N2kMsg> FastPKG_;
-//  std::map<IDsID, int> BytesLeft_;
   std::map<uint32_t, CANPGNReceiver*>   m_RegisteredPGNReceivers;
   std::map<uint32_t, CANFrameReceiver*> m_RegisteredFrameReceivers;
   std::map<IDsID, FastPKGInfo> FastPackages;
