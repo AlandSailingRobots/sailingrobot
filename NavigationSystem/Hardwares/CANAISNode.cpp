@@ -51,8 +51,8 @@ void CANAISNode::parsePGN129038_129039(N2kMsg& nMsg, AISVessel& vessel) {
  byte_arr[3] = nMsg.Data[4];
  std::memcpy(&mmsi_test, &byte_arr, sizeof mmsi_test);
   vessel.MMSI = ((nMsg.Data[4] << 24) | (nMsg.Data[3] << 16) | (nMsg.Data[2] << 8) | (nMsg.Data[1]));
-  lat_tmp = ((nMsg.Data[8] << 24) | (nMsg.Data[7] << 16) | (nMsg.Data[6] << 8) | (nMsg.Data[5]));
-  lon_tmp = ((nMsg.Data[12] << 24) | (nMsg.Data[11] << 16) | (nMsg.Data[10] << 8) | (nMsg.Data[9]));
+  lon_tmp = ((nMsg.Data[8] << 24) | (nMsg.Data[7] << 16) | (nMsg.Data[6] << 8) | (nMsg.Data[5]));
+  lat_tmp = ((nMsg.Data[12] << 24) | (nMsg.Data[11] << 16) | (nMsg.Data[10] << 8) | (nMsg.Data[9]));
   cog_tmp = ((nMsg.Data[15]) << 8 | (nMsg.Data[14]));
   sog_tmp = ((nMsg.Data[17]) << 8 | (nMsg.Data[16]));
   vessel.latitude = lat_tmp * res_pos;
@@ -117,6 +117,8 @@ void CANAISNode::CANAISThreadFunc(ActiveNode* nodePtr) {
 
     node->m_lock.lock();
 
+    Logger::info("Longiude in ThreadFunc: " + std::to_string(node->m_PosLon));
+    Logger::info("Latiude in ThreadFunc: " + std::to_string(node->m_PosLat));
     MessagePtr AISList = std::make_unique<AISDataMsg>(node->m_VesselList, node->m_PosLat, node->m_PosLon);
     node->m_MsgBus.sendMessage(std::move(AISList));
     node->m_lock.unlock();

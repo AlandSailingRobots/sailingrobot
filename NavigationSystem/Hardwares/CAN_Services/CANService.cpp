@@ -90,15 +90,16 @@ void CANService::run()
       if(Cmsg.header.ide == 1)
       {
         done = false;
-
+       // Logger::info("PGN: " + std::to_string(Nmsg.PGN));
         IdToN2kMsg(Nmsg, Cmsg.id);
         if (IsFastPackage(Nmsg)) {
-					std::cout << "It is a fast package: " << Nmsg.PGN << std::endl;
+		//			std::cout << "It is a fast package: " << Nmsg.PGN << std::endl;
 
           done = ParseFastPkg(Cmsg, Nmsg);
           if (done) {
 //            Logger::info("Completetd parsing fast package");
           }
+          //return;
         }
         else {
           CanMsgToN2kMsg(Cmsg, Nmsg);
@@ -109,7 +110,7 @@ void CANService::run()
         if(done) {
           if(receiverIt != m_RegisteredPGNReceivers.end())
           {  // Iterator is a pair, of which the second element is the actual receiver.
-            CANPGNReceiver* receiver = receiverIt->second;
+            CANPGNReceiver* receiver = receiverIt->second; 
             receiver->processPGN(Nmsg);
           }
         }
@@ -186,6 +187,9 @@ bool CANService::ParseFastPkg(CanMsg& msg, N2kMsg& nMsg) { // Taken from the CAN
 
 	auto it = BytesLeft_.find(Key);
 Logger::info("Size of FastPKG_ map: " + std::to_string(FastPKG_.size()) + ", Size of BytesLeft_ map: " + std::to_string(BytesLeft_.size()));
+    if (checkMissedMessages()){
+        Logger::error("Message missed");
+    }
     if(SequenceNumber != 0) {				//have parts of the message already
 		int LastByte;
         if (it == BytesLeft_.end()) {
