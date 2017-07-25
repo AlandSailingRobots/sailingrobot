@@ -17,15 +17,21 @@
 #include <stdint.h>
 #include <mutex>
 
+#include "Math/CourseMath.h"
+#include "Math/Utility.h"
 #include "MessageBus/ActiveNode.h"
 #include "Messages/CompassDataMsg.h"
 #include "Messages/GPSDataMsg.h"
 #include "Messages/WaypointDataMsg.h"
+#include "Messages/StateMessage.h"
+#include "SystemServices/Logger.h"
+#include "SystemServices/Timer.h"
 
 
 class StateEstimationNode : public ActiveNode {
 public:
-    StateEstimationNode(MessageBus& msgBus, double loopTime, double speedLimit);
+    StateEstimationNode(MessageBus& msgBus, double loopTime);
+    StateEstimationNode(MessageBus& msgBus, double loopTime, double speed_1, double speed_2);
     ~StateEstimationNode();
 
     bool init();
@@ -57,12 +63,20 @@ private:
     void processWaypointMessage(const WaypointDataMsg* msg );
 
     ///----------------------------------------------------------------------------------
-    /// Estimate the vessel course (angle of the velocity vector). When the vessel speed 
-    /// is sufficient use the course over ground given by the GPS. When the vessel speed
-    /// is not sufficient for the GPS to return good values use a combinaison of the vessel 
-    /// heading and the GPS course.
+    /// Estimates the vessel state from the sensor datas.
     ///----------------------------------------------------------------------------------
-    int estimateVesselCourse();
+    bool estimateVesselState();
+
+    ///----------------------------------------------------------------------------------
+    /// Returns an estimation of the vessel course (angle of the velocity vector). 
+    /// When the vessel speed is sufficient (higher than m_speed_2), use the course over 
+    /// ground given by the GPS.
+    /// When the vessel speed is not sufficient for the GPS to return good values (lower  
+    /// than m_speed_2) :
+    ///     * speed_1 < VesselSpeed < speed_2 : use a combinaison of vesselHeading and GPSCourse
+    ///     * VesselSpeed < speed_1 : use the vesselHeading 
+    ///----------------------------------------------------------------------------------
+    float estimateVesselCourse();
 
     ///----------------------------------------------------------------------------------
     /// Starts the StateEstimationNode's thread that pumps out StateMessages which contains
@@ -70,23 +84,26 @@ private:
     ///----------------------------------------------------------------------------------
     static void StateEstimationNodeThreadFunc(ActiveNode* nodePtr);
 
-    float m_VesselHeading;
-    double m_VesselLat;
-    double m_VesselLon;
-    float m_VesselSpeed;
-    float m_VesselCourse;
 
-    double m_LoopTime;
-    int m_WaypointDeclination;
+    double  m_LoopTime;
 
-    double m_SpeedLimit;
-    bool m_GpsOnline;
+    float   m_CompassHeading;
+    bool    m_GpsOnline;
     double  m_GPSLat;
     double  m_GPSLon;
     double  m_GPSSpeed;
     double  m_GPSCourse;
+    int     m_WaypointDeclination;
+
+    double  m_speed_1;
+    double  m_speed_2;
+
+    float   m_VesselHeading;
+    double  m_VesselLat;
+    double  m_VesselLon;
+    float   m_VesselSpeed;
+    float   m_VesselCourse;
 
     std::mutex m_lock;
-
 
 };
