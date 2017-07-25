@@ -70,9 +70,9 @@ public:
   /* Stops the service */
   void stop();
 
-	  std::map<IDsID, N2kMsg> FastPKG_;
-  std::map<IDsID, int> BytesLeft_;
-
+//	  std::map<IDsID, N2kMsg> FastPKG_;
+//  std::map<IDsID, int> BytesLeft_;
+//    std::map<IDsID, FastPKGInfo> FastPackages;
 private:
 
   void run();

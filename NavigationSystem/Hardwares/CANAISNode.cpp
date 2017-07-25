@@ -119,10 +119,15 @@ void CANAISNode::CANAISThreadFunc(ActiveNode* nodePtr) {
 
     Logger::info("Longiude in ThreadFunc: " + std::to_string(node->m_PosLon));
     Logger::info("Latiude in ThreadFunc: " + std::to_string(node->m_PosLat));
+    if (node->m_VesselList.size() != 0) {
     MessagePtr AISList = std::make_unique<AISDataMsg>(node->m_VesselList, node->m_PosLat, node->m_PosLon);
     node->m_MsgBus.sendMessage(std::move(AISList));
     node->m_lock.unlock();
     node->m_VesselList.clear(); // Should clear the list after a message is sent
+    }
+    else {
+        node->m_lock.unlock();
+    }
     timer.sleepUntil(node->m_LoopTime);
     timer.reset();
   }

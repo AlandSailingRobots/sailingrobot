@@ -90,7 +90,7 @@ void CANService::run()
       if(Cmsg.header.ide == 1)
       {
         done = false;
-       // Logger::info("PGN: " + std::to_string(Nmsg.PGN));
+        //Logger::info("PGN: " + std::to_string(Nmsg.PGN));
         IdToN2kMsg(Nmsg, Cmsg.id);
         if (IsFastPackage(Nmsg)) {
 		//			std::cout << "It is a fast package: " << Nmsg.PGN << std::endl;
@@ -186,7 +186,7 @@ bool CANService::ParseFastPkg(CanMsg& msg, N2kMsg& nMsg) { // Taken from the CAN
 	uint8_t SequenceNumber = msg.data[0]&0x1F;
 
 	auto it = FastPackages.find(Key);
-Logger::info("Size of FastPKG_ map: " + std::to_string(FastPKG_.size()) + ", Size of BytesLeft_ map: " + std::to_string(BytesLeft_.size()));
+Logger::info("Size of FastPKG_ map: " + std::to_string(FastPackages.size()));
 
     if(SequenceNumber != 0) {				//have parts of the message already
 		int LastByte;
@@ -194,6 +194,7 @@ Logger::info("Size of FastPKG_ map: " + std::to_string(FastPKG_.size()) + ", Siz
         Logger::error("Not in fast packages map");
         return false;
     } else if (FastPackages[Key].latestSeqnumber+1 != SequenceNumber) {
+        Logger::error("Wrong order, removing key");
       FastPackages.erase(Key);
       return false;
     }
