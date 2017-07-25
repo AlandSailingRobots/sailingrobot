@@ -46,6 +46,7 @@ AISProcessing::AISProcessing(MessageBus& msgBus, CollidableMgr* collidableMgr, i
     m_longitude = msg->posLon();
     for (auto vessel: list) {
       dist = CourseMath::calculateDTW(m_latitude, m_longitude, vessel.latitude, vessel.longitude);
+      std::cout << "Distance: " << dist << std::endl;
       if (dist < m_Radius) {
         m_Vessels.push_back(vessel);
       }
@@ -71,6 +72,7 @@ AISProcessing::AISProcessing(MessageBus& msgBus, CollidableMgr* collidableMgr, i
     while(true) {
       node->m_lock.lock();
       node->sendAISData();
+      node->m_Vessels.clear();
       node->m_lock.unlock();
       timer.sleepUntil(node->m_LoopTime);
       timer.reset();
