@@ -1,3 +1,11 @@
+/*
+ * This script is a modyfied coppy of the main ASPireArduinoScript as of Jully 2017. 
+ * It is used to get the analog feedback read for the angles to be used in MATLAB vector in GetRudder- and WingssailParamaters MATLAB files.
+ * It is only to be used for testing the angles and not to be used dureing operation.
+ */
+
+
+
 #include <SoftwareSerial.h>
 #include <PololuMaestro.h>
 #include <Canbus.h>
@@ -135,8 +143,7 @@ float mapInterval(float val, float fromMin, float fromMax, float toMin, float to
   return (val - fromMin) / (fromMax - fromMin) * (toMax - toMin) + toMin;
 }
 
-
-
+//The test loop is used to get all relevant data, the meny isteps is inorder to get a symetric data vector around zero 
 int  testLoop (int maxAngle, int stepLen, int angles[], int feedback[], String mode){
     int i = 0;
     int angle = -maxAngle;

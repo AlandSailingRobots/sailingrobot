@@ -20,7 +20,7 @@ public:
 	void processMessage (const Message* message);
 	void processFrame (CanMsg& msg);
 	void start ();
-	//float mapInterval(float val, float fromMin, float fromMax, float toMin, float toMax);
+
 	
 private:
 	
@@ -30,7 +30,7 @@ private:
 	float m_RudderFeedback;
   float m_WingsailFeedback; 
   float m_WindvaneSelfSteerAngle;
-	float m_RC;
+	float m_Radio_Controller_On;
 	float m_WindvaneActuatorPos;
 	int m_TimeBetweenMsgs;
 	uint16_t rawData;

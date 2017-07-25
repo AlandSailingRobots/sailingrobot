@@ -60,17 +60,7 @@ CREATE TABLE arduino_datalogs (
   current INTEGER
 );
 
--- -----------------------------------------------------
--- Table acutators
--- -----------------------------------------------------
 
-DROP TABLE IF EXISTS "actuators";
-CREATE TABLE actuators (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  rudder INTEGER,
-  wingsail INTEGER,
-	time TIME()
-);
 
 -- -----------------------------------------------------
 -- Table course_calculation_datalogs

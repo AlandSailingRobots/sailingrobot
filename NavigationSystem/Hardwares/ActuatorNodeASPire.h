@@ -17,8 +17,12 @@ public:
 
 private:
     CANService* m_CANService;
+		double rudderAngle;
+		double wingsailAngle;
+		bool WindvaneSelfSteeringOn;
 		const float MAX_RUDDER_ANGLE = 30;
 		const float MAX_WINGSAIL_ANGLE = 13;
 		const float INT16_SIZE = 65535;
+		
 
 };

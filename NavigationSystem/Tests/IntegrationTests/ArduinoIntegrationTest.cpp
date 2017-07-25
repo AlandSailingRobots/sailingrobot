@@ -1,3 +1,21 @@
+/****************************************************************************************
+*
+* File:
+* 		ArduinoIntegrationTest.cpp
+*
+* Purpose:
+*		 Monitor the values from the CAN-bus and able to sen comands to the actuators
+*
+* Developer Notes:
+		 Currently monetriring windsensor, actuator feedbacka and if the radio controller is in manual mode.  
+		 It is a interface between the messagebus and the CAN-bus that can be monitored.  
+*		 
+*			
+*
+***************************************************************************************/
+
+
+
 #include "Hardwares/CAN_Services/CANService.h"
 #include "Hardwares/CAN_Services/N2kMsg.h"
 #include "SystemServices/Timer.h"
@@ -66,6 +84,33 @@ public:
 
     void processMessage(const Message* message) {
         MessageType type = message->messageType();
+				
+				switch (type){
+					
+					case MessageType::ASPireActuatorFeedback:
+						const ASPireActuatorFeedbackMsg* actmsg = dynamic_cast<const ASPireActuatorFeedbackMsg*>(message);
+            m_SensorValues["Rudder Angle"] = actmsg->rudderFeedback();
+            m_SensorValues["Wingsail Angle"] = actmsg->wingsailFeedback();
+						break;
+					
+					case MessageType::WindData:
+						const WindDataMsg* windmsg = dynamic_cast<const WindDataMsg*>(message);
+            m_SensorValues["Wind Speed"] = windmsg->windSpeed();
+            m_SensorValues["Wind Direction"] = windmsg->windDirection();
+            m_SensorValues["Wind Temperature"] = windmsg->windTemp();
+						break;
+						
+					case MessageType::ArduinoData:
+						const ArduinoDataMsg* arduinomsg = dynamic_cast<const ArduinoDataMsg*>(message);
+						if (arduinomsg->RC() > 10) {
+							m_SensorValues["RC Mode"] = -3000;
+						} else {
+                m_SensorValues["RC Mode"] = -4000;
+            }
+            
+						
+				}
+/*
         if(type == MessageType::ASPireActuatorFeedback) {
 
             const ASPireActuatorFeedbackMsg* actmsg = dynamic_cast<const ASPireActuatorFeedbackMsg*>(message);
@@ -88,6 +133,7 @@ public:
                 m_SensorValues["RC Mode"] = -4000;
             }
 	}
+	*/
         printSensorData();
     }
 

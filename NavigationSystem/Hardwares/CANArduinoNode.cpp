@@ -30,7 +30,7 @@ ActiveNode(NodeID::CANArduino, messageBus), CANFrameReceiver(canService, {701,70
   m_WingsailFeedback = DATA_OUT_OF_RANGE;
   m_WindvaneSelfSteerAngle = DATA_OUT_OF_RANGE;
 	m_WindvaneActuatorPos = DATA_OUT_OF_RANGE;
-	m_RC = DATA_OUT_OF_RANGE;
+	m_Radio_Controller_On = DATA_OUT_OF_RANGE;
 	}
 
 CANArduinoNode::~CANArduinoNode(){
@@ -56,15 +56,12 @@ void CANArduinoNode::processFrame (CanMsg& msg) {
      m_WindvaneSelfSteerAngle = (msg.data[5] << 8 | msg.data[4]);
      m_WindvaneActuatorPos = msg.data[7];
 
-     //MessagePtr feedbackMsg = std::make_unique<ASPireActuatorFeedbackMsg>(rudderFeedback, wingsailFeedback,
-     //                                                                            windvaneSelfSteerAngle, windvaneActuatorPos);
-     //m_MsgBus.sendMessage(std::move(feedbackMsg))
+    )
 
 	} else if (msg.id == 702) {
-		m_RC = (msg.data[1] << 8 | msg.data[0]);
+		m_Radio_Controller_On = (msg.data[1] << 8 | msg.data[0]);
 
-		//MessagePtr statusMsg = std::make_unique<ArduinoDataMsg>(0,0,0,0,RC);
-		//m_MsgBus.sendMessage(std::move(statusMsg));
+
 	}
 }
 
@@ -85,7 +82,7 @@ void CANArduinoNode::CANArduinoNodeThreadFunc(ActiveNode* nodePtr) {
 			node->m_lock.lock();
 
 			if( node->m_RudderFeedback == node->DATA_OUT_OF_RANGE &&  node->m_WindvaneSelfSteerAngle == node->DATA_OUT_OF_RANGE &&
-															node->m_WingsailFeedback == node->DATA_OUT_OF_RANGE && node->m_WindvaneActuatorPos == node->DATA_OUT_OF_RANGE && node->m_RC ==node->DATA_OUT_OF_RANGE){
+															node->m_WingsailFeedback == node->DATA_OUT_OF_RANGE && node->m_WindvaneActuatorPos == node->DATA_OUT_OF_RANGE && node->m_Radio_Controller_On ==node->DATA_OUT_OF_RANGE){
 				node->m_lock.unlock();
 				continue;
 			}
@@ -95,7 +92,7 @@ void CANArduinoNode::CANArduinoNodeThreadFunc(ActiveNode* nodePtr) {
 																	node->m_WindvaneSelfSteerAngle, node->m_WindvaneActuatorPos);
 		node->m_MsgBus.sendMessage(std::move(feebackData));
 
-		MessagePtr statusMsg = std::make_unique<ArduinoDataMsg>(0,0,0,0,node->m_RC);
+		MessagePtr statusMsg = std::make_unique<ArduinoDataMsg>(0,0,0,0,node->m_Radio_Controller_On);
 		node->m_MsgBus.sendMessage(std::move(statusMsg));
 
 		node->m_lock.unlock();
@@ -105,10 +102,5 @@ void CANArduinoNode::CANArduinoNodeThreadFunc(ActiveNode* nodePtr) {
 }
 
 
-/*
-float CANArduinoNode::mapInterval(float val, float fromMin, float fromMax, float toMin, float toMax) {
-  return (val - fromMin) / (fromMax - fromMin) * (toMax - toMin) + toMin;
-}
-*/
 
 

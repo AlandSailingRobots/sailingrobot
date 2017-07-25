@@ -39,9 +39,9 @@ void ActuatorNodeASPire::processMessage(const Message* message)
 
     if(type == MessageType::ActuatorControlASPire) {
         const ActuatorControlASPireMessage* actMsg = dynamic_cast<const ActuatorControlASPireMessage*>(message);
-        double rudderAngle = actMsg->rudderAngle();
-        double wingsailAngle = actMsg->wingsailServoAngle();
-        bool WindvaneSelfSteeringOn = actMsg->windvaneSelfSteering();
+        rudderAngle = actMsg->rudderAngle();
+        wingsailAngle = actMsg->wingsailServoAngle();
+        WindvaneSelfSteeringOn = actMsg->windvaneSelfSteering();
         
 
         CanMsg Cmsg;
