@@ -18,8 +18,8 @@
 
 class ArduinoDataMsg : public Message {
 public:
-	ArduinoDataMsg(NodeID destinationID, NodeID souRadio_ControllereID, int pressure, int rudder, int sheet, int battery, int Radio_Controller)
-		:Message(MessageType::ArduinoData, souRadio_ControllereID, destinationID), m_pressure(pressure), m_rudder(rudder), m_sheet(sheet), m_battery(battery), m_Radio_Controller(Radio_Controller)
+	ArduinoDataMsg(NodeID destinationID, NodeID sourceID, int pressure, int rudder, int sheet, int battery, int Radio_Controller)
+		:Message(MessageType::ArduinoData, sourceID, destinationID), m_pressure(pressure), m_rudder(rudder), m_sheet(sheet), m_battery(battery), m_Radio_Controller(Radio_Controller)
 	{ }
 
 	ArduinoDataMsg(int pressure, int rudder, int sheet, int battery, int Radio_Controller)
