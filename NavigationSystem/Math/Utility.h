@@ -32,9 +32,10 @@ public:
 	static double limitAngleRange(double angle);
 	static double limitAngleRange180(double angle);
 	static double limitRadianAngleRange(double angle);
-	///----------------------------------------------------------------------------------
-    /// Stores compass data from a CompassDataMsg.
-    ///----------------------------------------------------------------------------------
+
+	/*
+	 * Returns the angle value corresponding to x by the linear function defined by the points (x1,angle1) and (x2,angle2).
+	 */
 	static double linearFunctionBetweenAngle(double x, double x1, double x2, double angle1, double angle2);
 	static double degreeToRadian(double degrees);
 	static double radianToDegree(double radians);
