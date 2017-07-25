@@ -53,7 +53,7 @@ void GPSDNode::updateConfigsFromDB()
 
 void GPSDNode::processMessage(const Message* msgPtr)
 {
-	MessageType type = msg->messageType();
+	MessageType type = msgPtr->messageType();
 	if( type == MessageType::ServerConfigsReceived)
 	{
 			updateConfigsFromDB();

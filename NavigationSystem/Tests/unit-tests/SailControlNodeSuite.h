@@ -182,17 +182,4 @@ public:
     TS_ASSERT_EQUALS(sailControlNodeSailAngle,sailAngle);
   }
 
-  // ----------------
-  // Test for update frequency
-  // ----------------
-  void test_SailControlUpdateFrequency(){
-      double newLoopTime= 0.7;
-      // TODO : Create table for each configuration of the new node including looptime variables
-      dbHandler->changeOneValue("sailing_robot_config","1",".7","loop_time");
-      std::this_thread::sleep_for(std::chrono::milliseconds(700));
-      double sailControlFrequence = sControlNode->getFrequencyThread();
-      TS_ASSERT_EQUALS(sailControlFrequence,newLoopTime);
-      dbHandler->changeOneValue("sailing_robot_config","1",".5","loop_time");
-  }
-
 };

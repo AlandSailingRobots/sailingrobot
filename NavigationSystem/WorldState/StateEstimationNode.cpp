@@ -66,7 +66,7 @@ void StateEstimationNode::processMessage(const Message* msg)
     case MessageType::WaypointData:
     processWaypointMessage(static_cast<const WaypointDataMsg*> (msg));
     break;
-    case MessageType::ServerConfigsReceived
+    case MessageType::ServerConfigsReceived:
     updateConfigsFromDB();
     break;
     default:

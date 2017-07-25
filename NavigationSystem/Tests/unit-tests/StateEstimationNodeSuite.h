@@ -71,7 +71,7 @@ public:
             Logger::DisableLogging();
 
 
-            sEstimationNode = new StateEstimationNode(msgBus(), .5, speedLimit);
+            sEstimationNode = new StateEstimationNode(msgBus(), *dbhandler, .5, speedLimit);
             sEstimationNode->start();
             std::this_thread::sleep_for(std::chrono::milliseconds(2600));
 
@@ -82,7 +82,7 @@ public:
 
     // ----------------
     // End of test when all test have been successfull
-    // ----------------  
+    // ----------------
     void tearDown()
     {
         if(testCount == STATE_ESTIMATIONODE_TEST_COUNT)
@@ -286,20 +286,6 @@ public:
         float stateEstimationNodeVesselHeading = mockNode->m_StateMsgHeading;
         TS_ASSERT(stateEstimationNodeVesselHeading != 0);
         TS_ASSERT_DELTA(mockNode->m_StateMsgCourse, headingGPS, 1e-7);
-    }
-
-    // ----------------
-    // Test for update frequency
-    // ----------------
-    void test_StateEstimationUpdateFrequency()
-    {
-        double newLoopTime= 0.7;
-        // TODO : Create table for each configuration of the new node including looptime variables
-        dbhandler->changeOneValue("sailing_robot_config","1",".7","loop_time");
-        std::this_thread::sleep_for(std::chrono::milliseconds(700));
-        double stateEstimationFrequence = sEstimationNode->getFrequencyThread();
-        TS_ASSERT_EQUALS(stateEstimationFrequence,newLoopTime);
-        dbhandler->changeOneValue("sailing_robot_config","1",".5","loop_time");
     }
 
 };

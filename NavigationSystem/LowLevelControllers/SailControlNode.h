@@ -53,8 +53,6 @@ public:
     // -------------
     void processMessage(const Message* message);
 
-    double getFrequencyThread();
-
 private:
 
     // -------------

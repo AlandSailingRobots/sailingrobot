@@ -15,7 +15,7 @@
 class HTTPSyncNode : public ActiveNode{
 	public:
 
-		HTTPSyncNode(MessageBus& msgBus,DBHandler *db,int delay, bool removeLogs);
+		HTTPSyncNode(MessageBus& msgBus, DBHandler *dbhandler,int delay, bool removeLogs);
 
 		virtual ~HTTPSyncNode() { }
 

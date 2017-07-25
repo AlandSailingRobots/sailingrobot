@@ -14,7 +14,7 @@
 #pragma once
 
 #include "MessageBus/Node.h"
-#include "DataBase"
+#include "DataBase/DBHandler.h"
 
 class ActuatorNode : public Node {
 public:

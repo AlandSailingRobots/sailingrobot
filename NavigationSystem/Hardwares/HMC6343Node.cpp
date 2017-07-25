@@ -110,7 +110,7 @@ void HMC6343Node::start()
 void HMC6343Node::updateConfigsFromDB()
 {
 	m_LoopTime = m_db.retrieveCellAsDouble("config_buffer","1","loop_time");
-	m_HeadingBufferSize = m_db.retrieveCellAsInt("config_buffer","1","compass");
+	// m_HeadingBufferSize = m_db.retrieveCellAsInt("config_buffer","1","compass"); // NOTE : Get he possible to modify or not ?
 }
 
 void HMC6343Node::processMessage(const Message* msg)

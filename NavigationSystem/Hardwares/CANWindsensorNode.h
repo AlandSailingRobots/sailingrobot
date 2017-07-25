@@ -50,6 +50,7 @@ public:
     void parsePGN130314(N2kMsg &Msg, uint8_t &SID, uint8_t &PressureInstance,		//ActualPressure
 					uint8_t &PressureSource, double &Pressure);
 
+    void updateConfigsFromDB();
 
 	///----------------------------------------------------------------------------------
  	/// Attempts to connect to the wind sensor.

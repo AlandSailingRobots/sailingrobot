@@ -44,11 +44,6 @@ bool WaypointMgrNode::init()
     return true;
 }
 
-void WaypointMgrNode::updateConfigsFromDB()
-{
-    // ???
-}
-
 void WaypointMgrNode::processMessage(const Message* msg)
 {
 	MessageType type = msg->messageType();
@@ -60,9 +55,7 @@ void WaypointMgrNode::processMessage(const Message* msg)
             break;
         case MessageType::ServerWaypointsReceived:
             sendMessage();
-        default:
-        case MessageType::ServerConfigsReceived:
-            updateConfigsFromDB();
+            break;
         default:
             return;
 	}

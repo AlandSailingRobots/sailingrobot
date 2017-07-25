@@ -19,7 +19,7 @@
 #include <chrono>
 #include <thread>
 
-CANWindsensorNode::CANWindsensorNode(MessageBus& msgBus, DBHandler& dbhandler CANService& can_service, int time_filter_ms)
+CANWindsensorNode::CANWindsensorNode(MessageBus& msgBus, DBHandler& dbhandler, CANService& can_service, int time_filter_ms)
 : CANPGNReceiver(can_service, {130306, 130311}), ActiveNode(NodeID::WindSensor, msgBus), m_TimeBetweenMsgs(time_filter_ms), m_db(dbhandler)
 {
   m_WindDir  = DATA_OUT_OF_RANGE;
