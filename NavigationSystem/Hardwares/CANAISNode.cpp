@@ -22,11 +22,11 @@ void CANAISNode::processPGN(N2kMsg& nMsg) {
 //	Logger::info("I am in processPGN" + std::to_string(nMsg.PGN));
 //	std::cout << nMsg.PGN << std::endl;
   if (nMsg.PGN == 129038 || nMsg.PGN == 129039) {
-//		Logger::info("I am in processPGN if pgn = 8/9");
+	Logger::info("I am in processPGN if pgn = 8/9");
     AISVessel vessel;
     CANAISNode::parsePGN129038_129039(nMsg, vessel);
     m_VesselList.push_back(std::move(vessel));
-//    Logger::info("Size after parsePGN129038_129039: " + std::to_string(m_VesselList.size()));
+    Logger::info("Size after parsePGN129038_129039: " + std::to_string(m_VesselList.size()));
   }
   else if (nMsg.PGN == 129025) {
     parsePGN129025(nMsg);
@@ -39,7 +39,7 @@ void CANAISNode::parsePGN129038_129039(N2kMsg& nMsg, AISVessel& vessel) {
   int lat_tmp, lon_tmp, mmsi_test;
   uint16_t cog_tmp, sog_tmp;
   uint8_t byte_arr[4];
-	Logger::info("I am in parsePGN129038_129039");
+//	Logger::info("I am in parsePGN129038_129039");
 //	char dat[27];
 //	std::memcpy(&dat, &nMsg.Data, sizeof dat);
 //	FILE* file = fopen( "myfile.ais", "wb" );
@@ -59,14 +59,14 @@ void CANAISNode::parsePGN129038_129039(N2kMsg& nMsg, AISVessel& vessel) {
   vessel.longitude = lon_tmp * res_pos;
   vessel.COG = cog_tmp * res_cog;
   vessel.SOG = sog_tmp * res_sog;
-//	Logger::info("MMSI Test:     " + std::to_string(mmsi_test));
-//	Logger::info("MMSI:          " + std::to_string(vessel.MMSI));
-//	Logger::info("Ves latitude:  " + std::to_string(vessel.latitude));
-//	Logger::info("Ves longitude: " + std::to_string(vessel.longitude));
-//	Logger::info("Ves cog:       " + std::to_string(vessel.COG));
-//	Logger::info("Ves sog:       " + std::to_string(vessel.SOG));
+	Logger::info("MMSI Test:     " + std::to_string(mmsi_test));
+	Logger::info("MMSI:          " + std::to_string(vessel.MMSI));
+	Logger::info("Ves latitude:  " + std::to_string(vessel.latitude));
+	Logger::info("Ves longitude: " + std::to_string(vessel.longitude));
+	Logger::info("Ves cog:       " + std::to_string(vessel.COG));
+	Logger::info("Ves sog:       " + std::to_string(vessel.SOG));
 
-  // m_VesselList.push_back(vessel);
+// m_VesselList.push_back(vessel);
 }
 
 void CANAISNode::parsePGN129025(N2kMsg& nMsg) {
@@ -94,10 +94,10 @@ void CANAISNode::parsePGN129025(N2kMsg& nMsg) {
   m_PosLat = lat_pos * res_pos;
   m_PosLon = lon_pos * res_pos;
 
-//  Logger::info(std::to_string(lat_pos));
+//    Logger::info(std::to_string(lat_pos));
 //	Logger::info(std::to_string(lon_pos));
-//  Logger::info("Latiude in processPGN129025: " + std::to_string(m_PosLat));
-//  Logger::info("Longiude in processPGN129025: " + std::to_string(m_PosLon));
+//    Logger::info("Latiude in processPGN129025: " + std::to_string(m_PosLat));
+//    Logger::info("Longiude in processPGN129025: " + std::to_string(m_PosLon));
 //  Logger::info("Latiude in processPGN129025 (test): " + std::to_string(lat_test));
 //  Logger::info("Longiude in processPGN129025 (test): " + std::to_string(lon_test));
 //  Logger::info("Latiude in processPGN129025 (int): " + std::to_string(lat_tmp));

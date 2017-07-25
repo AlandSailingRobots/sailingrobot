@@ -70,10 +70,10 @@ int main() {
 
 
   AISDataReceiver aisRec(msgBus, 10000);
-  aisNode = new CANAISNode(msgBus, canService, 50);
+  aisNode = new CANAISNode(msgBus, canService, 500);
   aisNode->start();
 
-  aisProc = new AISProcessing(msgBus, &cMgr, 300e6, 50);
+  aisProc = new AISProcessing(msgBus, &cMgr, 300e6, 500);
   aisProc->start();
 
   std::thread thr(messageLoop);
