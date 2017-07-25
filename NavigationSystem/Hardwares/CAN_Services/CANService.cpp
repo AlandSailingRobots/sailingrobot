@@ -110,7 +110,7 @@ void CANService::run()
         if(done) {
           if(receiverIt != m_RegisteredPGNReceivers.end())
           {  // Iterator is a pair, of which the second element is the actual receiver.
-            CANPGNReceiver* receiver = receiverIt->second; 
+            CANPGNReceiver* receiver = receiverIt->second;
             receiver->processPGN(Nmsg);
           }
         }
@@ -185,37 +185,36 @@ bool CANService::ParseFastPkg(CanMsg& msg, N2kMsg& nMsg) { // Taken from the CAN
 	IDsID Key = IDsID(msg.id, msg.data[0]&0xE0);		//message ID and sequence ID
 	uint8_t SequenceNumber = msg.data[0]&0x1F;
 
-	auto it = BytesLeft_.find(Key);
+	auto it = FastPackages.find(Key);
 Logger::info("Size of FastPKG_ map: " + std::to_string(FastPKG_.size()) + ", Size of BytesLeft_ map: " + std::to_string(BytesLeft_.size()));
-    if (checkMissedMessages()){
-        Logger::error("Message missed");
-    }
+
     if(SequenceNumber != 0) {				//have parts of the message already
 		int LastByte;
-        if (it == BytesLeft_.end()) {
-            Logger::error("Not in bytes left");
-            return false;
-        }
-		if(it->second >= 7)	{		//check if less than 7 bytes left, 1st byte is the sequence ID and Sequence number followed by 7 bytes of data
+    if (it == FastPackages.end()) {
+        Logger::error("Not in fast packages map");
+        return false;
+    } else if (FastPackages[Key].latestSeqnumber+1 != SequenceNumber) {
+      FastPackages.erase(Key);
+      return false;
+    }
+		if(it->second.bytesLeft >= 7)	{		//check if less than 7 bytes left, 1st byte is the sequence ID and Sequence number followed by 7 bytes of data
 			LastByte = 8;
 		}
 		else {
-			LastByte = it->second +1;
+			LastByte = it->second.bytesLeft +1;
 		}
 
 		for(int i = 1; i < LastByte; ++i) {
-			FastPKG_[Key].Data[6+(SequenceNumber-1)*7 +i-1] = msg.data[i];
+			FastPackages[Key].n2kmsg.Data[6+(SequenceNumber-1)*7 +i-1] = msg.data[i];
 		}
-		it->second -= 7;				//decrease bytes left
-    Logger::info("PGN: " + std::to_string(nMsg.PGN) + ", Bytes left: " + std::to_string(it->second) + ", SequenceNumber: " + std::to_string(SequenceNumber));
-		if(it->second <= 0) {	//have the whole message
-			nMsg = FastPKG_[Key];
-//			FILE* file = fopen("data.ais","wb");
-//			fwrite(&nMsg.Data, 1, sizeof nMsg.Data, file);
-//			fclose(file);
+		it->second.bytesLeft -= 7;				//decrease bytes left
+    it->second.latestSeqnumber = SequenceNumber;
+    Logger::info("PGN: " + std::to_string(nMsg.PGN) + ", Bytes left: " + std::to_string(it->second.bytesLeft) + ", SequenceNumber: " + std::to_string(SequenceNumber));
+		if(it->second.bytesLeft <= 0) {	//have the whole message
+			nMsg = FastPackages[Key].n2kmsg;
 			Logger::info("DONE");
-			BytesLeft_.erase(Key);
-			FastPKG_.erase(Key);
+			// BytesLeft_.erase(Key);
+			FastPackages.erase(Key);
 //      Logger::info("Returning, whole message");
 			return true;
 		}
@@ -237,9 +236,10 @@ Logger::info("Size of FastPKG_ map: " + std::to_string(FastPKG_.size()) + ", Siz
 			return true;
 		}
 		else {
-			BytesLeft_[Key] = BytesInMsg-6;		//how many bytes left
-             Logger::info("Else, PGN: " + std::to_string(nMsg.PGN) + ", Bytes left: " + std::to_string(BytesInMsg) + ", Seqnumber: " + std::to_string(SequenceNumber));
-			FastPKG_[Key] = nMsg;
+			FastPackages[Key].bytesLeft = BytesInMsg-6;		//how many bytes left
+      FastPackages[Key].latestSeqnumber = SequenceNumber;
+      Logger::info("Else, PGN: " + std::to_string(nMsg.PGN) + ", Bytes left: " + std::to_string(BytesInMsg) + ", Seqnumber: " + std::to_string(SequenceNumber));
+			FastPackages[Key].n2kmsg = nMsg;
 			return false;
 		}
 	}

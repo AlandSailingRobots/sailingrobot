@@ -30,6 +30,11 @@
  #include <future>
  #include <atomic>
 
+struct FastPKGInfo {
+  N2kMsg n2kmsg;
+  int bytesLeft;
+  uint8_t latestSeqnumber;
+};
 
 class CANService
 {
@@ -80,6 +85,7 @@ private:
 //  std::map<IDsID, int> BytesLeft_;
   std::map<uint32_t, CANPGNReceiver*>   m_RegisteredPGNReceivers;
   std::map<uint32_t, CANFrameReceiver*> m_RegisteredFrameReceivers;
+  std::map<IDsID, FastPKGInfo> FastPackages;
   std::queue<CanMsg> m_MsgQueue;
   std::mutex m_QueueMutex;
 
