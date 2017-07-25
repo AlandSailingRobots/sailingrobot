@@ -14,6 +14,8 @@ public:
 
     void processMessage(const Message* message);
 
+    void updateConfigsFromDB();
+
     void start();
 
     bool init();
@@ -22,7 +24,6 @@ private:
 
     static void DBLoggerNodeThreadFunc(ActiveNode* nodePtr);
 
-    void updateFromDB()
 
     int DATA_OUT_OF_RANGE = -2000;
 

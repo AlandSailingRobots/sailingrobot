@@ -32,6 +32,7 @@ SpeedRegulatorNode::SpeedRegulatorNode( MessageBus& msgBus,  DBHandler& dbhandle
     msgBus.registerNode( *this, MessageType::StateMessage);
     msgBus.registerNode( *this, MessageType::DesiredCourse);
     msgBus.registerNode( *this, MessageType::NavigationControl);
+    msgBus.registerNode( *this, MessageType::ServerConfigsReceived);
 }
 
 ///----------------------------------------------------------------------------------
@@ -66,6 +67,9 @@ void SpeedRegulatorNode::processMessage( const Message* msg )
         break;
         case MessageType::NavigationControl:
         processNavigationControlMessage(static_cast< const NavigationControlMsg*>(msg));
+        break;
+        case MessageType::ServerConfigsReceived:
+        updateConfigsFromDB();
         break;
         default:
         return;

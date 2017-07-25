@@ -43,6 +43,7 @@ m_externalControlActive(false), m_tackingDirection(1)
     msgBus.registerNode(*this, MessageType::WindState);
     msgBus.registerNode(*this, MessageType::WaypointData);
     msgBus.registerNode(*this, MessageType::ExternalControl);
+    msgBus.registerNode(*this, MessageType::ServerConfigsReceived);
 
     m_tackAngle = 0.872665; // in radian (= 50°)
 
@@ -68,6 +69,13 @@ void LineFollowNode::start()
   runThread(LineFollowNodeThreadFunc);
 }
 
+void LineFollowNode::updateConfigsFromDB()
+{
+    //m_LoopTime = m_db.retrieveCellAsInt("config_LineFollowNode","1","loop_time");
+    //m_MaxTackDistance = m_db.retrieveCellAsInt("config_LineFollowNode","1","max_tack_distance");
+    //m_TackAngle = m_db.retrieveCellAsInt("config_LineFollowNode","1","tack_angle");
+}
+
 void LineFollowNode::processMessage(const Message* msg)
 {
   MessageType type = msg->messageType();
@@ -84,6 +92,9 @@ void LineFollowNode::processMessage(const Message* msg)
         break;
     case MessageType::WaypointData:
         processWaypointMessage((WaypointDataMsg*)msg);
+        break;
+    case MessageType::ServerConfigsReceived:
+        updateConfigsFromDB();
         break;
     default:
         return;
@@ -143,12 +154,12 @@ double LineFollowNode::calculateAngleOfDesiredTrajectory()
 {
     int earthRadius = 6371000;
 
-    std::array<double, 3> prevWPCoord = {   
+    std::array<double, 3> prevWPCoord = {
         earthRadius * cos(Utility::degreeToRadian(m_prevWaypointLat)) * cos(Utility::degreeToRadian(m_prevWaypointLon)),
         earthRadius * cos(Utility::degreeToRadian(m_prevWaypointLat)) * sin(Utility::degreeToRadian(m_prevWaypointLon)),
         earthRadius * sin(Utility::degreeToRadian(m_prevWaypointLat))};
 
-    std::array<double, 3> nextWPCoord = {  
+    std::array<double, 3> nextWPCoord = {
         earthRadius * cos(Utility::degreeToRadian(m_nextWaypointLat)) * cos(Utility::degreeToRadian(m_nextWaypointLon)),
         earthRadius * cos(Utility::degreeToRadian(m_nextWaypointLat)) * sin(Utility::degreeToRadian(m_nextWaypointLon)),
         earthRadius * sin(Utility::degreeToRadian(m_nextWaypointLat))};

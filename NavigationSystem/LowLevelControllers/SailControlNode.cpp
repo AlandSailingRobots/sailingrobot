@@ -34,6 +34,7 @@ SailControlNode::SailControlNode(MessageBus& msgBus, DBHandler& dbhandler, doubl
 {
     msgBus.registerNode( *this, MessageType::WindData);
     msgBus.registerNode( *this, MessageType::NavigationControl);
+    msgBus.registerNode( *this, MessageType::ServerConfigsReceived);
 }
 
 ///----------------------------------------------------------------------------------
@@ -49,6 +50,17 @@ void SailControlNode::start()
 }
 
 ///----------------------------------------------------------------------------------
+void SailControlNode::updateConfigsFromDB()
+{
+    m_LoopTime = m_db.retrieveCellAsDouble("sailing_robot_config","1","loop_time");
+    m_MaxSailAngle = m_db.retrieveCellAsDouble("sailing_robot_config","1","???");
+    m_MinSailAngle = m_db.retrieveCellAsDouble("sailing_robot_config","1","???");
+    m_MaxCommandAngle = m_db.retrieveCellAsDouble("sailing_robot_config","1","???");
+    pGain = m_db.retrieveCellAsDouble("sailing_robot_config","1","???");
+    iGain = m_db.retrieveCellAsDouble("sailing_robot_config","1","???");
+}
+
+///----------------------------------------------------------------------------------
 void SailControlNode::processMessage( const Message* msg)
 {
     switch( msg->messageType() )
@@ -58,6 +70,9 @@ void SailControlNode::processMessage( const Message* msg)
         break;
         case MessageType::NavigationControl:
         processNavigationControlMessage(static_cast< const NavigationControlMsg*>(msg));
+        break;
+        case MessageType::ServerConfigsReceived:
+        updateConfigsFromDB();
         break;
         default:
         return;
@@ -105,18 +120,6 @@ double SailControlNode::calculateSailAngle()
 //*///----------------------------------------------------------------------------------
 
 ///----------------------------------------------------------------------------------
-double SailControlNode::getFrequencyThread()
-{
-    return m_LoopTime;
-}
-
-///----------------------------------------------------------------------------------
-void SailControlNode::updateFrequencyThread()
-{
-    m_LoopTime = m_db.retrieveCellAsDouble("sailing_robot_config","1","loop_time");
-}
-
-///----------------------------------------------------------------------------------
 void SailControlNode::SailControlNodeThreadFunc(ActiveNode* nodePtr)
 {
     SailControlNode* node = dynamic_cast<SailControlNode*> (nodePtr);
@@ -137,6 +140,5 @@ void SailControlNode::SailControlNodeThreadFunc(ActiveNode* nodePtr)
         // Broadcast() or selected sent???
         timer.sleepUntil(node->m_LoopTime);
         timer.reset();
-        node->updateFrequencyThread();
     }
 }

@@ -68,6 +68,11 @@ void HTTPSyncNode::start(){
 
 }
 
+void updateConfigsFromDB{
+    m_removeLogs = m_db.retrieveCellAsInt("config_httpsync","1","remove_logs");
+    m_delay = m_db.retrieveCellAsInt("config_httpsync","1","delay");
+}
+
 void HTTPSyncNode::processMessage(const Message* msgPtr)
 {
     MessageType msgType = msgPtr->messageType();
@@ -79,6 +84,9 @@ void HTTPSyncNode::processMessage(const Message* msgPtr)
             break;
         case MessageType::LocalConfigChange:
             pushConfigs();
+            break;
+        case MessageType::ServerConfigsReceived:
+            updateConfigsFromDB();
             break;
         default:
             break;
@@ -106,7 +114,7 @@ void HTTPSyncNode::HTTPSyncThread(ActiveNode* nodePtr){
         node->getConfigsFromServer();
         node->getWaypointsFromServer();
         node->pushDatalogs();
-        
+
         timer.sleepUntil(node->m_delay);
         timer.reset();
     }

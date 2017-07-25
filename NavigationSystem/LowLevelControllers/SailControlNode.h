@@ -47,6 +47,7 @@ public:
     // -------------
     void start();
 
+    void updateConfigsFromDB();
     // -------------
     // Listen the message concerning this Node
     // -------------

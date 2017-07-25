@@ -31,6 +31,7 @@ m_SpeedLimit(speedLimit), m_GpsOnline(false), m_dbHandler(db)
   msgBus.registerNode(*this, MessageType::CompassData);
   msgBus.registerNode(*this, MessageType::GPSData);
   msgBus.registerNode(*this, MessageType::WaypointData);
+  msgBus.registerNode(*this, MessageType::ServerConfigsReceived);
 }
 
 StateEstimationNode::~StateEstimationNode() {}
@@ -45,10 +46,10 @@ void StateEstimationNode::start()
   runThread(StateEstimationNodeThreadFunc);
 }
 
-void StateEstimationNode::updateFromDB()
+void StateEstimationNode::updateConfigsFromDB()
 {
-    m_LoopTime = m_dbHandler.retrieveCellAsDouble("config_StateEstimationNode","1","loop_time");
-    m_SpeedLimit = m_dbHandler.retrieveCellAsInt("config_StateEstimationNode","1","speed_limit");
+    m_LoopTime = m_dbHandler.retrieveCellAsDouble("config_vesselState","1","loop_time");
+    m_SpeedLimit = m_dbHandler.retrieveCellAsDouble("config_vesselState","1","speedLimit");
 }
 
 void StateEstimationNode::processMessage(const Message* msg)
@@ -64,6 +65,9 @@ void StateEstimationNode::processMessage(const Message* msg)
     break;
     case MessageType::WaypointData:
     processWaypointMessage(static_cast<const WaypointDataMsg*> (msg));
+    break;
+    case MessageType::ServerConfigsReceived
+    updateConfigsFromDB();
     break;
     default:
     return;

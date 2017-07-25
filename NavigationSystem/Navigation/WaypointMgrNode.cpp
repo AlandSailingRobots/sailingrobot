@@ -44,6 +44,10 @@ bool WaypointMgrNode::init()
     return true;
 }
 
+void WaypointMgrNode::updateConfigsFromDB()
+{
+    // ???
+}
 
 void WaypointMgrNode::processMessage(const Message* msg)
 {
@@ -56,6 +60,9 @@ void WaypointMgrNode::processMessage(const Message* msg)
             break;
         case MessageType::ServerWaypointsReceived:
             sendMessage();
+        default:
+        case MessageType::ServerConfigsReceived:
+            updateConfigsFromDB();
         default:
             return;
 	}
@@ -168,7 +175,7 @@ bool WaypointMgrNode::harvestWaypoint()
             return true;
         }
 
-        return false;   
+        return false;
     }
     else //if no timer for waypoint, harvest it
     {

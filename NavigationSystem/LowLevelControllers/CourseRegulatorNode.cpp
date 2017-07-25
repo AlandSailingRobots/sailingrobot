@@ -32,6 +32,7 @@ CourseRegulatorNode::CourseRegulatorNode( MessageBus& msgBus,  DBHandler& dbhand
     msgBus.registerNode( *this, MessageType::StateMessage);
     msgBus.registerNode( *this, MessageType::DesiredCourse);
     msgBus.registerNode( *this, MessageType::NavigationControl);
+    msgBus.registerNode( *this, MessageType::ServerConfigsReceived);
 }
 
 ///----------------------------------------------------------------------------------
@@ -47,9 +48,12 @@ void CourseRegulatorNode::start()
 }
 
 ///----------------------------------------------------------------------------------
-double CourseRegulatorNode::getFrequencyThread()
+void CourseRegulatorNode::updateConfigsFromDB()
 {
-    return m_LoopTime;
+    m_LoopTime = m_db.retrieveCellAsDouble("sailing_robot_config","1","loop_time");
+    m_MaxRudderAngle = m_db.retrieveCellAsDouble("sailing_robot_config","1","???");
+    pGain = m_db.retrieveCellAsDouble("sailing_robot_config","1","???");
+    iGain = m_db.retrieveCellAsDouble("sailing_robot_config","1","???");
 }
 
 ///----------------------------------------------------------------------------------
@@ -66,6 +70,9 @@ void CourseRegulatorNode::processMessage( const Message* msg )
         break;
         case MessageType::NavigationControl:
         processNavigationControlMessage(static_cast< const NavigationControlMsg*>(msg));
+        break;
+        case MessageType::ServerConfigsReceived:
+        updateConfigsFromDB();
         break;
         default:
         return;
@@ -121,12 +128,6 @@ double CourseRegulatorNode::calculateRudderAngle()
 }
 
 ///----------------------------------------------------------------------------------
-void CourseRegulatorNode::updateFrequencyThread()
-{
-    m_LoopTime = m_db.retrieveCellAsDouble("sailing_robot_config","1","loop_time");
-}
-
-///----------------------------------------------------------------------------------
 void CourseRegulatorNode::CourseRegulatorNodeThreadFunc(ActiveNode* nodePtr)
 {
     CourseRegulatorNode* node = dynamic_cast<CourseRegulatorNode*> (nodePtr);
@@ -152,6 +153,5 @@ void CourseRegulatorNode::CourseRegulatorNodeThreadFunc(ActiveNode* nodePtr)
         // Broadcast() or selected sent???
         timer.sleepUntil(node->m_LoopTime); //insert updateFrequencyThread in the function ?
         timer.reset();
-        node->updateFrequencyThread();
     }
 }

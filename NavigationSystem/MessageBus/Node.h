@@ -47,7 +47,7 @@ public:
 	/// which changes the behaviour of the Node and thus the sailing robot behaviour.
 	///
 	///----------------------------------------------------------------------------------
-	virtual void updateFromDB(){};
+	virtual void updateConfigsFromDB(){};
 
 	NodeID nodeID() { return m_NodeID; }
 protected:

@@ -11,15 +11,17 @@
 #include "Messages/StateMessage.h"
 #include "Messages/WindDataMsg.h"
 #include "Messages/WindStateMsg.h"
+#include "DataBase/DBHandler.h"
 
 #include <mutex>
 
 
 class WindStateNode : public Node {
 public:
-  WindStateNode(MessageBus& msgBus, int maxTwdBufferSize);
+  WindStateNode(MessageBus& msgBus, DBHandler& dbhandler, int maxTwdBufferSize);
   ~WindStateNode();
   bool init();
+  void updateConfigsFromDB();
   void processMessage(const Message* message);
 
 private:
@@ -58,6 +60,7 @@ private:
 
   std::vector<float> m_Twd;
   int m_MaxTwdBufferSize;
+  DBHandler& m_db;
 
   std::mutex m_Lock;
 

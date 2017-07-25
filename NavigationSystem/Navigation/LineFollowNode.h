@@ -36,6 +36,7 @@ public:
 	bool init();
 	void start();
 	void processMessage(const Message* message);
+	void updateConfigsFromDB();
 
 //	float m_gpsHeadingWeight;
 

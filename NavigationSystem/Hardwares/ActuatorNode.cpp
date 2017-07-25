@@ -21,6 +21,7 @@ ActuatorNode::ActuatorNode(MessageBus& msgBus, NodeID id, int channel, int speed
 	:Node(id, msgBus), m_Channel(channel), m_Speed(speed), m_Acceleration(acceleration)
 {
   msgBus.registerNode(*this,MessageType::ActuatorPosition);
+  msgBus.registerNode(*this,MessageType::ServerConfigsReceived);
 }
 
 bool ActuatorNode::init()
@@ -35,6 +36,10 @@ bool ActuatorNode::init()
 		Logger::error("%s Failed to write actuator speed and acceleration!", __PRETTY_FUNCTION__);
 		return false;
 	}
+
+}
+
+void ActuatorNode::updateConfigsFromDB(){
 
 }
 

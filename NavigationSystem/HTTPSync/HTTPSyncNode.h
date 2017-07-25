@@ -25,7 +25,7 @@ class HTTPSyncNode : public ActiveNode{
 		///----------------------------------------------------------------------------------
         bool init();
         void start();
-		void updateFromDB();
+		void updateConfigsFromDB();
 
 		///----------------------------------------------------------------------------------
 		/// Pushes waypoints or configurations on new local changes

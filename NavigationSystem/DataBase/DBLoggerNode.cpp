@@ -33,6 +33,7 @@ DBLoggerNode::DBLoggerNode(MessageBus& msgBus, DBHandler& db, int TimeBetweenMsg
     msgBus.registerNode(*this, MessageType::NavigationControl);
     msgBus.registerNode(*this, MessageType::WaypointData);
     msgBus.registerNode(*this, MessageType::WindState);
+    msgBus.registerNode(*this, MessageType::ServerConfigsReceived);
 }
 
 void DBLoggerNode::processMessage(const Message* msg) {
@@ -127,6 +128,10 @@ void DBLoggerNode::processMessage(const Message* msg) {
         }
         break;
 
+        case MessageType::ServerConfigsReceived:
+        updateConfigsFromDB();
+        break;
+
         default:
         return;
     }
@@ -140,9 +145,12 @@ bool DBLoggerNode::init() {
     return true;
 }
 
-void DBLoggerNode::updateFromDB()
+void DBLoggerNode::updateConfigsFromDB()
 {
-    //m_LoopTime = m_dbHandler.retrieveCellAsDouble("config_StateEstimationNode","1","loop_time");
+    //m_LoopTime = m_db.retrieveCellAsDouble("config_StateEstimationNode","1","loop_time");
+    m_TimeBetweenMsgs = m_db.retrieveCellAsInt("config_dblogger","1","???");
+    m_updateFrequency = m_db.retrieveCellAsInt("config_dblogger","1","???");
+    m_queueSize = m_db.retrieveCellAsInt("config_dblogger","1","???");
 }
 
 void DBLoggerNode::DBLoggerNodeThreadFunc(ActiveNode* nodePtr) {
