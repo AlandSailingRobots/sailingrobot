@@ -80,9 +80,9 @@ int main() {
   thr.detach();
 
   while (true) {
-    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    std::this_thread::sleep_for(std::chrono::milliseconds(10000));
 
-  //  Logger::info("Collidable manager size: " + std::to_string(cMgr.getAISContacts().length()));
-    //aisRec.printData();
+    Logger::info("Collidable manager size: " + std::to_string(cMgr.getAISContacts().length()));
+    aisRec.printData();
   }
 }

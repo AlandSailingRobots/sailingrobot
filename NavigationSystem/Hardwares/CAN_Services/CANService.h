@@ -67,17 +67,21 @@ public:
 
   bool checkMissedMessages();
 
-  /* Stops the service */
+/* Stops the service */
   void stop();
 
 private:
-
+/* Starts the CANService */
   void run();
 
+/* Recieves and parses the fast messages and stores everything *
+ * in the N2kMsg                                               */
   bool ParseFastPkg(CanMsg& msg, N2kMsg& nMsg);
 
+/* Checks if the message is a NMEA2000 fast package */
   bool IsFastPackage(const N2kMsg &nMsg);
 
+/* Private variables */
   std::map<uint32_t, CANPGNReceiver*>   m_RegisteredPGNReceivers;
   std::map<uint32_t, CANFrameReceiver*> m_RegisteredFrameReceivers;
   std::map<IDsID, FastPKGInfo> FastPackages;

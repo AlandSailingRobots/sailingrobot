@@ -39,6 +39,13 @@ public:
   */
   void processPGN(N2kMsg& nMsg);
 
+
+  /*
+  * Starts the worker thread
+  */
+  void start();
+
+private:
   /*
   * Processes and return the data of the message
   * if the PGN is 129038 or 129039
@@ -50,13 +57,6 @@ public:
   * if the PGN is 129025
   */
   void parsePGN129025(N2kMsg& nMsg);
-
-  /*
-  * Starts the worker thread
-  */
-  void start();
-
-private:
 
   /*
   * The function that the thread works on

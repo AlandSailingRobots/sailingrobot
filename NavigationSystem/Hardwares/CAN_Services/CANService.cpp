@@ -81,8 +81,6 @@ void CANService::run()
   N2kMsg Nmsg;
   while(m_Running.load() == true)
   {
-    //std::this_thread::sleep_for(std::chrono::milliseconds(SLEEP_TIME_MS));
-
     static CanMsg Cmsg;
 
     if(MCP2515_GetMessage(&Cmsg,0))
@@ -170,23 +168,27 @@ void CANService::stop()
   m_Running.store(false);
 }
 
-bool CANService::ParseFastPkg(CanMsg& msg, N2kMsg& nMsg) { // Taken from the CANBUS repo made by Viktor Måsala
-  // These are already defined in CANService.h, shouldn't be needed here!
-//	std::map<IDsID, N2kMsg> FastPKG_;
-//	std::map<IDsID, int> BytesLeft_;
+bool CANService::ParseFastPkg(CanMsg& msg, N2kMsg& nMsg) {
+  /*
+  * More in-depth about fast packages:
+  * All messages have a data part 8 bytes long but some of it is used to ID the message
+  * The first message has message ID and sequnce ID and Number in byte 0
+  * and how many bytes the entire fast package is in byte 1
+  * Bytes 2-7 is the actual data
+  * The rest of the messages will have the message ID and Sequnce number and ID in byte 0
+  * and the rest of the bytes (1-7) will contain the data!
+  */
 
 	IDsID Key = IDsID(msg.id, msg.data[0]&0xE0);		//message ID and sequence ID
 	uint8_t SequenceNumber = msg.data[0]&0x1F;
 
 	auto it = FastPackages.find(Key);
 
-    if(SequenceNumber != 0) {				//have parts of the message already
+  if(SequenceNumber != 0) {				//have parts of the message already
 		int LastByte;
-    if (it == FastPackages.end()) {
-        Logger::error("Not in fast packages map");
-        return false;
-    } else if (FastPackages[Key].latestSeqnumber+1 != SequenceNumber) {
-        Logger::error("Wrong order, removing key");
+    if (it == FastPackages.end()) { // Not in the map, even though SequenceNumber > 0 -> message received in wrong order
+      return false;
+    } else if (FastPackages[Key].latestSeqnumber+1 != SequenceNumber) { // Messages received in wrong order, remove the key entirely to avoid memory issues (It will get resent later)
       FastPackages.erase(Key);
       return false;
     }
@@ -202,48 +204,36 @@ bool CANService::ParseFastPkg(CanMsg& msg, N2kMsg& nMsg) { // Taken from the CAN
 		}
 		it->second.bytesLeft -= 7;				//decrease bytes left
     it->second.latestSeqnumber = SequenceNumber;
-//    Logger::info("PGN: " + std::to_string(nMsg.PGN) + ", Bytes left: " + std::to_string(it->second.bytesLeft) + ", SequenceNumber: " + std::to_string(SequenceNumber));
-		if(it->second.bytesLeft <= 0) {	//have the whole message
+		if(it->second.bytesLeft <= 0) {	//have the whole message, erase key and return true
 			nMsg = FastPackages[Key].n2kmsg;
 			Logger::info("DONE");
-			// BytesLeft_.erase(Key);
 			FastPackages.erase(Key);
-//      Logger::info("Returning, whole message");
 			return true;
 		}
-		else {
+		else { // Still bytes left to be received from another message
 			return false;
 		}
 	}
-	else {
-
-Logger::info("Size of FastPKG_ map: " + std::to_string(FastPackages.size()));
-for (auto i:FastPackages) {
-    Logger::info("PGN in fastpkg: " + std::to_string(i.second.n2kmsg.PGN));
-}
-        //not found, create new N2kMsg
+	else {        //not found, create new N2kMsg
 		uint8_t BytesInMsg = msg.data[1];
 		nMsg.DataLen = BytesInMsg;
-  //      Logger::info("PGN: " + std::to_string(nMsg.PGN) + ", size of msg: " + std::to_string(BytesInMsg));
 		nMsg.Data.resize(BytesInMsg);
 		for(int i = 2; i < 8; ++i) {
 			nMsg.Data[i-2] = msg.data[i];
 		}
 		if(BytesInMsg <= 6) {
-            Logger::info("Returning because bytes in msg <6");
 			return true;
 		}
 		else {
 			FastPackages[Key].bytesLeft = BytesInMsg-6;		//how many bytes left
       FastPackages[Key].latestSeqnumber = SequenceNumber;
-//      Logger::info("Else, PGN: " + std::to_string(nMsg.PGN) + ", Bytes left: " + std::to_string(BytesInMsg) + ", Seqnumber: " + std::to_string(SequenceNumber));
 			FastPackages[Key].n2kmsg = nMsg;
 			return false;
 		}
 	}
 }
 
-bool CANService::IsFastPackage(const N2kMsg &nMsg) { // Taken from the CANBUS repo made by Viktor Måsala
+bool CANService::IsFastPackage(const N2kMsg &nMsg) {
 	switch(nMsg.PGN) {
 		case 126464: return true;
 		case 126996: return true;

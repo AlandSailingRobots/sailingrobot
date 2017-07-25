@@ -28,6 +28,10 @@ void CANAISNode::processPGN(N2kMsg& nMsg) {
 }
 
 void CANAISNode::parsePGN129038_129039(N2kMsg& nMsg) {
+  /*
+  * To know which bytes to pick out check the spreadsheet on the drive (Software/CAN/Messages)
+  * Multiply the integers with their resolution to get the right numbers
+  */
   AISVessel vessel;
   int lon_tmp, lat_tmp, cog_tmp, sog_tmp;
 
@@ -45,7 +49,11 @@ void CANAISNode::parsePGN129038_129039(N2kMsg& nMsg) {
 }
 
 void CANAISNode::parsePGN129025(N2kMsg& nMsg) {
-  int lat_pos,lon_pos; //, lat_tmp, lon_tmp;
+  /*
+  * To know which bytes to pick out check the spreadsheet on the drive (Software/CAN/Messages)
+  * Multiply the integers with their resolution to get the right numbers
+  */
+  int lat_pos,lon_pos;
 
   lat_pos = ((nMsg.Data[3] << 24) | (nMsg.Data[2] << 16) | (nMsg.Data[1] << 8) | (nMsg.Data[0]));
   lon_pos = ((nMsg.Data[7] << 24) | (nMsg.Data[6] << 16) | (nMsg.Data[5] << 8) | (nMsg.Data[4]));
@@ -71,7 +79,7 @@ void CANAISNode::CANAISThreadFunc(ActiveNode* nodePtr) {
       MessagePtr AISList = std::make_unique<AISDataMsg>(node->m_VesselList, node->m_PosLat, node->m_PosLon);
       node->m_MsgBus.sendMessage(std::move(AISList));
       node->m_lock.unlock();
-      node->m_VesselList.clear(); // Clear the list after a message is sent
+      node->m_VesselList.clear();
     }
     else {
         node->m_lock.unlock();
