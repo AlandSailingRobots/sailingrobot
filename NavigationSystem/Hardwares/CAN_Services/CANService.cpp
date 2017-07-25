@@ -186,7 +186,6 @@ bool CANService::ParseFastPkg(CanMsg& msg, N2kMsg& nMsg) { // Taken from the CAN
 	uint8_t SequenceNumber = msg.data[0]&0x1F;
 
 	auto it = FastPackages.find(Key);
-Logger::info("Size of FastPKG_ map: " + std::to_string(FastPackages.size()));
 
     if(SequenceNumber != 0) {				//have parts of the message already
 		int LastByte;
@@ -210,7 +209,7 @@ Logger::info("Size of FastPKG_ map: " + std::to_string(FastPackages.size()));
 		}
 		it->second.bytesLeft -= 7;				//decrease bytes left
     it->second.latestSeqnumber = SequenceNumber;
-    Logger::info("PGN: " + std::to_string(nMsg.PGN) + ", Bytes left: " + std::to_string(it->second.bytesLeft) + ", SequenceNumber: " + std::to_string(SequenceNumber));
+//    Logger::info("PGN: " + std::to_string(nMsg.PGN) + ", Bytes left: " + std::to_string(it->second.bytesLeft) + ", SequenceNumber: " + std::to_string(SequenceNumber));
 		if(it->second.bytesLeft <= 0) {	//have the whole message
 			nMsg = FastPackages[Key].n2kmsg;
 			Logger::info("DONE");
@@ -224,10 +223,15 @@ Logger::info("Size of FastPKG_ map: " + std::to_string(FastPackages.size()));
 		}
 	}
 	else {
+         
+Logger::info("Size of FastPKG_ map: " + std::to_string(FastPackages.size()));
+for (auto i:FastPackages) {
+    Logger::info("PGN in fastpkg: " + std::to_string(i.second.n2kmsg.PGN));
+}
         //not found, create new N2kMsg
 		uint8_t BytesInMsg = msg.data[1];
 		nMsg.DataLen = BytesInMsg;
-        Logger::info("PGN: " + std::to_string(nMsg.PGN) + ", size of msg: " + std::to_string(BytesInMsg));
+  //      Logger::info("PGN: " + std::to_string(nMsg.PGN) + ", size of msg: " + std::to_string(BytesInMsg));
 		nMsg.Data.resize(BytesInMsg);
 		for(int i = 2; i < 8; ++i) {
 			nMsg.Data[i-2] = msg.data[i];
@@ -239,7 +243,7 @@ Logger::info("Size of FastPKG_ map: " + std::to_string(FastPackages.size()));
 		else {
 			FastPackages[Key].bytesLeft = BytesInMsg-6;		//how many bytes left
       FastPackages[Key].latestSeqnumber = SequenceNumber;
-      Logger::info("Else, PGN: " + std::to_string(nMsg.PGN) + ", Bytes left: " + std::to_string(BytesInMsg) + ", Seqnumber: " + std::to_string(SequenceNumber));
+//      Logger::info("Else, PGN: " + std::to_string(nMsg.PGN) + ", Bytes left: " + std::to_string(BytesInMsg) + ", Seqnumber: " + std::to_string(SequenceNumber));
 			FastPackages[Key].n2kmsg = nMsg;
 			return false;
 		}

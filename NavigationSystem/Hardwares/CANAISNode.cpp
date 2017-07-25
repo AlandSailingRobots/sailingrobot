@@ -22,11 +22,11 @@ void CANAISNode::processPGN(N2kMsg& nMsg) {
 //	Logger::info("I am in processPGN" + std::to_string(nMsg.PGN));
 //	std::cout << nMsg.PGN << std::endl;
   if (nMsg.PGN == 129038 || nMsg.PGN == 129039) {
-	Logger::info("I am in processPGN if pgn = 8/9");
+//	Logger::info("I am in processPGN if pgn = 8/9");
     AISVessel vessel;
     CANAISNode::parsePGN129038_129039(nMsg, vessel);
     m_VesselList.push_back(std::move(vessel));
-    Logger::info("Size after parsePGN129038_129039: " + std::to_string(m_VesselList.size()));
+//    Logger::info("Size after parsePGN129038_129039: " + std::to_string(m_VesselList.size()));
   }
   else if (nMsg.PGN == 129025) {
     parsePGN129025(nMsg);
@@ -59,12 +59,12 @@ void CANAISNode::parsePGN129038_129039(N2kMsg& nMsg, AISVessel& vessel) {
   vessel.longitude = lon_tmp * res_pos;
   vessel.COG = cog_tmp * res_cog;
   vessel.SOG = sog_tmp * res_sog;
-	Logger::info("MMSI Test:     " + std::to_string(mmsi_test));
-	Logger::info("MMSI:          " + std::to_string(vessel.MMSI));
-	Logger::info("Ves latitude:  " + std::to_string(vessel.latitude));
-	Logger::info("Ves longitude: " + std::to_string(vessel.longitude));
-	Logger::info("Ves cog:       " + std::to_string(vessel.COG));
-	Logger::info("Ves sog:       " + std::to_string(vessel.SOG));
+//	Logger::info("MMSI Test:     " + std::to_string(mmsi_test));
+//	Logger::info("MMSI:          " + std::to_string(vessel.MMSI));
+//	Logger::info("Ves latitude:  " + std::to_string(vessel.latitude));
+//	Logger::info("Ves longitude: " + std::to_string(vessel.longitude));
+//	Logger::info("Ves cog:       " + std::to_string(vessel.COG));
+//	Logger::info("Ves sog:       " + std::to_string(vessel.SOG));
 
 // m_VesselList.push_back(vessel);
 }
@@ -117,8 +117,8 @@ void CANAISNode::CANAISThreadFunc(ActiveNode* nodePtr) {
 
     node->m_lock.lock();
 
-    Logger::info("Longiude in ThreadFunc: " + std::to_string(node->m_PosLon));
-    Logger::info("Latiude in ThreadFunc: " + std::to_string(node->m_PosLat));
+  //  Logger::info("Longiude in ThreadFunc: " + std::to_string(node->m_PosLon));
+  //  Logger::info("Latiude in ThreadFunc: " + std::to_string(node->m_PosLat));
     if (node->m_VesselList.size() != 0) {
     MessagePtr AISList = std::make_unique<AISDataMsg>(node->m_VesselList, node->m_PosLat, node->m_PosLon);
     node->m_MsgBus.sendMessage(std::move(AISList));

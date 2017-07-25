@@ -69,11 +69,11 @@ int main() {
   auto future = canService.start();
 
 
-  AISDataReceiver aisRec(msgBus, 10000);
-  aisNode = new CANAISNode(msgBus, canService, 500);
+  //AISDataReceiver aisRec(msgBus, 10000);
+  aisNode = new CANAISNode(msgBus, canService, 10);
   aisNode->start();
 
-  aisProc = new AISProcessing(msgBus, &cMgr, 300e6, 500);
+  aisProc = new AISProcessing(msgBus, &cMgr, 300e6, 10);
   aisProc->start();
 
   std::thread thr(messageLoop);
@@ -82,7 +82,7 @@ int main() {
   while (true) {
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
-    Logger::info("Collidable manager size: " + std::to_string(cMgr.getAISContacts().length()));
-    aisRec.printData();
+  //  Logger::info("Collidable manager size: " + std::to_string(cMgr.getAISContacts().length()));
+    //aisRec.printData();
   }
 }
