@@ -56,7 +56,7 @@ void CANArduinoNode::processFrame (CanMsg& msg) {
      m_WindvaneSelfSteerAngle = (msg.data[5] << 8 | msg.data[4]);
      m_WindvaneActuatorPos = msg.data[7];
 
-    )
+    
 
 	} else if (msg.id == 702) {
 		m_Radio_Controller_On = (msg.data[1] << 8 | msg.data[0]);

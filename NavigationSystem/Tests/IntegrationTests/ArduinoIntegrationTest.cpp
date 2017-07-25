@@ -88,26 +88,36 @@ public:
 				switch (type){
 					
 					case MessageType::ASPireActuatorFeedback:
+						{
 						const ASPireActuatorFeedbackMsg* actmsg = dynamic_cast<const ASPireActuatorFeedbackMsg*>(message);
             m_SensorValues["Rudder Angle"] = actmsg->rudderFeedback();
             m_SensorValues["Wingsail Angle"] = actmsg->wingsailFeedback();
+						}	
 						break;
+						
+						
 					
 					case MessageType::WindData:
+					  {
 						const WindDataMsg* windmsg = dynamic_cast<const WindDataMsg*>(message);
             m_SensorValues["Wind Speed"] = windmsg->windSpeed();
             m_SensorValues["Wind Direction"] = windmsg->windDirection();
             m_SensorValues["Wind Temperature"] = windmsg->windTemp();
+						}
 						break;
 						
 					case MessageType::ArduinoData:
+						{
 						const ArduinoDataMsg* arduinomsg = dynamic_cast<const ArduinoDataMsg*>(message);
-						if (arduinomsg->RC() > 10) {
+						if (arduinomsg->Radio_Controller() > 10) {
 							m_SensorValues["RC Mode"] = -3000;
 						} else {
                 m_SensorValues["RC Mode"] = -4000;
             }
-            
+            }
+						break;
+					default:
+						break;
 						
 				}
 /*
