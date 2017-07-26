@@ -65,7 +65,7 @@ private:
   * Processes and return the data of the message
   * if the PGN is 129794
   */
-  void parsePGN129794(N2kMsg& nMsg)
+  void parsePGN129794(N2kMsg& nMsg);
 
 
   /*
@@ -73,7 +73,7 @@ private:
   * Processes and return the data of the message
   * if the PGN is 129810
   */
-  void parsePGN129810(N2kMsg& nMsg)
+  void parsePGN129810(N2kMsg& nMsg);
 
   /*
   * The function that the thread works on
@@ -86,8 +86,6 @@ private:
   std::vector<AISVessel> m_VesselList;
   double m_PosLat;
   double m_PosLon;
-  float m_Length;
-  float m_Beam;
   std::mutex m_lock;
   double m_LoopTime;
   double res_pos = 1e-7;

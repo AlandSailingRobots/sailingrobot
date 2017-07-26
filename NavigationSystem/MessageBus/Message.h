@@ -29,6 +29,8 @@ struct AISVessel {
   uint32_t MMSI;
   float COG;
   float SOG;
+  float length;
+  float beam;
   double latitude;
   double longitude;
 };
