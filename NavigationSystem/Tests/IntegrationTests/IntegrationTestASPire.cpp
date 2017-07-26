@@ -31,7 +31,6 @@
 #include "Hardwares/CANWindsensorNode.h"
 #include "Hardwares/ArduinoNode.h"
 #include "Hardwares/CANArduinoNode.h"
-#include "Hardwares/CANFeedbackReceiver.h"
 #include "Hardwares/ActuatorNodeASPire.h"
 
 

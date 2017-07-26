@@ -31,7 +31,7 @@ export USE_LNM = 0
 # Tools
 ###############################################################################
 
-export CPPFLAGS             = -g -Wall -pedantic -Werror -std=gnu++14 -Wno-psabit  
+export CPPFLAGS             = -g -Wall -pedantic -Werror -std=gnu++14 -Wno-psabi  
 export LIBS                 = -lsqlite3 -lgps -lrt -lcurl -lpthread -lwiringPi -lncurses
 
 ifeq ($(TOOLCHAIN),1)
