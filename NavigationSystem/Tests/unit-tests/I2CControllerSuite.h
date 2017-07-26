@@ -29,7 +29,7 @@
 #include <cstdlib>
 #include <stdint.h>
 #include <iostream>
-#include "i2ccontroller/I2CController.h"
+#include "Hardwares/i2ccontroller/I2CController.h"
 #include "../cxxtest/cxxtest/TestSuite.h"
 // For std::this_thread
 #include <chrono>
@@ -102,24 +102,24 @@ public:
 
 	}
 
-	void test_writeBlock()
-	{
-		std::cout << "\nstart write block...\n";
-		uint8_t block[12];
-		uint8_t size = 9;
-		int command = 20;
+	// void test_writeBlock()
+	// {
+	// 	std::cout << "\nstart write block...\n";
+	// 	uint8_t block[12];
+	// 	uint8_t size = 9;
+	// 	int command = 20;
 
-		std::cout << "\ncommand =: " << command << "\n";	
-		for (int i = 0; i < size; i++)
-		{
-			block[i]=i;
-			std::cout << "Val " << i << ": " << i << "\n";
-		}
-		uint8_t dataID = 0x77;
-		I2C.beginTransmission();
-		int retVal = I2C.writeBlock(block, size, dataID);
-		I2C.endTransmission();
-		TS_ASSERT(retVal != -1);
-	}
+	// 	std::cout << "\ncommand =: " << command << "\n";	
+	// 	for (int i = 0; i < size; i++)
+	// 	{
+	// 		block[i]=i;
+	// 		std::cout << "Val " << i << ": " << i << "\n";
+	// 	}
+	// 	uint8_t dataID = 0x77;
+	// 	I2C.beginTransmission();
+	// 	int retVal = I2C.writeBlock(block, size, dataID);
+	// 	I2C.endTransmission();
+	// 	TS_ASSERT(retVal != -1);
+	// }
 
 };

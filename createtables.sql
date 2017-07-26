@@ -78,6 +78,51 @@ CREATE TABLE course_calculation_datalogs (
 
 
 -- -----------------------------------------------------
+-- Table GPSD_config
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS "gpsd_config";
+CREATE TABLE gpsd_config (
+	id INTEGER PRIMARY KEY AUTOINCREMENT,
+	loop_time DOUBLE
+);
+
+
+
+-- -----------------------------------------------------
+-- Table arduino_config
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS "arduino_config";
+CREATE TABLE arduino_config (
+	id INTEGER PRIMARY KEY AUTOINCREMENT,
+	loop_time DOUBLE
+);
+
+
+
+-- -----------------------------------------------------
+-- Table vesselState_config
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS "vesselState_config";
+CREATE TABLE vesselState_config (
+	id INTEGER PRIMARY KEY AUTOINCREMENT,
+	loop_time DOUBLE,
+	speedLimit DOUBLE
+);
+
+
+
+-- -----------------------------------------------------
+-- Table windState_config
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS "windState_config";
+CREATE TABLE windState_config (
+	id INTEGER PRIMARY KEY AUTOINCREMENT,
+	time_filter_ms INTEGER
+);
+
+
+
+-- -----------------------------------------------------
 -- Table windsensor_datalogs
 -- -----------------------------------------------------
 DROP TABLE IF EXISTS "windsensor_datalogs";
