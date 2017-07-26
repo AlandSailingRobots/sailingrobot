@@ -73,6 +73,7 @@ private:
   bool stateMsgReceived = false;
 
   std::vector<AISVessel> m_Vessels;
+  std::vector<AISVesselInfo> m_InfoList;
   double m_latitude;
   double m_longitude;
   double m_LoopTime;

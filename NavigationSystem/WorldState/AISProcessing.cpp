@@ -41,6 +41,7 @@ AISProcessing::AISProcessing(MessageBus& msgBus, CollidableMgr* collidableMgr, i
 
   void AISProcessing::processAISMessage(AISDataMsg* msg) {
     std::vector<AISVessel> list = msg->vesselList();
+    m_InfoList = msg->vesselInfoList();
     double dist;
     m_latitude = msg->posLat();
     m_longitude = msg->posLon();
@@ -54,10 +55,11 @@ AISProcessing::AISProcessing(MessageBus& msgBus, CollidableMgr* collidableMgr, i
 
   void AISProcessing::sendAISData() {
     for (auto vessel: m_Vessels) {
-      //  std::cout << "COG: " << vessel.COG << ",\t";
       this->collidableMgr->addAISContact(vessel.MMSI, vessel.latitude, vessel.longitude, vessel.SOG, vessel.COG);
     }
-    //std::cout << std::endl;
+    for (auto info: m_InfoList) {
+      this->collidableMgr->addAISContact(info.MMSI, info.length, info. beam);
+    }
   }
 
   void AISProcessing::start() {

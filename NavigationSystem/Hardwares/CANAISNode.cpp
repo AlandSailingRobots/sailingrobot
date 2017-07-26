@@ -2,7 +2,7 @@
 
 CANAISNode::CANAISNode(MessageBus& msgBus, CANService& canService, double loopTime) :
     CANPGNReceiver(canService, {129025, 129038, 129039, 129794, 129810}), ActiveNode(NodeID::CANAIS, msgBus),
-    m_VesselList({}), m_PosLat(0), m_PosLon(0), m_LoopTime(loopTime){
+    m_VesselList({}), m_VesselInfoList({}), m_PosLat(0), m_PosLon(0), m_LoopTime(loopTime){
 
 }
 
@@ -45,7 +45,6 @@ void CANAISNode::parsePGN129038_129039(N2kMsg& nMsg) {
   */
   AISVessel vessel;
   int lon_tmp, lat_tmp, cog_tmp, sog_tmp;
-  bool added;
 
   vessel.MMSI = ((nMsg.Data[4] << 24) | (nMsg.Data[3] << 16) | (nMsg.Data[2] << 8) | (nMsg.Data[1]));
   lon_tmp = ((nMsg.Data[8] << 24) | (nMsg.Data[7] << 16) | (nMsg.Data[6] << 8) | (nMsg.Data[5]));
@@ -57,18 +56,7 @@ void CANAISNode::parsePGN129038_129039(N2kMsg& nMsg) {
   vessel.COG = cog_tmp * res_cog;
   vessel.SOG = sog_tmp * res_sog;
 
-  for(auto& ves: m_VesselList) {
-    if (ves.MMSI == vessel.MMSI) {
-      ves.latitude = vessel.latitude;
-      ves.longitude = vessel.longitude;
-      ves.COG = vessel.COG;
-      ves.SOG = vessel.SOG;
-      added = true;
-    }
-  }
-  if (!added) {
-    m_VesselList.push_back(vessel);
-  }
+  m_VesselList.push_back(vessel);
 }
 
 void CANAISNode::parsePGN129025(N2kMsg& nMsg) {
@@ -87,52 +75,30 @@ void CANAISNode::parsePGN129025(N2kMsg& nMsg) {
 
 void CANAISNode::parsePGN129794(N2kMsg& nMsg) {
   uint16_t len_tmp, beam_tmp;
-  uint32_t id;
-  bool added;
-  AISVessel vessel;
+  AISVesselInfo info;
 
-  id = ((nMsg.Data[4] << 24) | (nMsg.Data[3] << 16) | (nMsg.Data[2] << 8) | (nMsg.Data[1]));
+  info.MMSI = ((nMsg.Data[4] << 24) | (nMsg.Data[3] << 16) | (nMsg.Data[2] << 8) | (nMsg.Data[1]));
   len_tmp = ((nMsg.Data[38] << 8) | (nMsg.Data[37]));
   beam_tmp = ((nMsg.Data[40] << 8) | (nMsg.Data[39]));
 
-  for(auto& ves: m_VesselList) {
-    if (ves.MMSI == id) {
-      ves.length = len_tmp * res_size;
-      ves.beam = beam_tmp * res_size;
-      added = true;
-    }
-  }
-  if (!added) {
-    vessel.MMSI = id;
-    vessel.length = len_tmp * res_size;
-    vessel.beam = beam_tmp * res_size;
-    m_VesselList.push_back(vessel);
-  }
+  info.length = len_tmp * res_size;
+  info.beam = beam_tmp * res_size;
+
+  m_VesselInfoList.push_back(info);
 }
 
 void CANAISNode::parsePGN129810(N2kMsg& nMsg) {
   uint16_t len_tmp, beam_tmp;
-  uint32_t id;
-  bool added;
-  AISVessel vessel;
+  AISVesselInfo info;
 
-  id = ((nMsg.Data[4] << 24) | (nMsg.Data[3] << 16) | (nMsg.Data[2] << 8) | (nMsg.Data[1]));
+  info.MMSI = ((nMsg.Data[4] << 24) | (nMsg.Data[3] << 16) | (nMsg.Data[2] << 8) | (nMsg.Data[1]));
   len_tmp = ((nMsg.Data[21] << 8) | (nMsg.Data[20]));
   beam_tmp = ((nMsg.Data[23] << 8) | (nMsg.Data[22]));
 
-  for(auto& ves: m_VesselList) {
-    if (ves.MMSI == id) {
-      ves.length = len_tmp * res_size;
-      ves.beam = beam_tmp * res_size;
-      added = true;
-    }
-  }
-  if (!added) {
-    vessel.MMSI = id;
-    vessel.length = len_tmp * res_size;
-    vessel.beam = beam_tmp * res_size;
-    m_VesselList.push_back(vessel);
-  }
+  info.length = len_tmp * res_size;
+  info.beam = beam_tmp * res_size;
+
+  m_VesselInfoList.push_back(info);
 }
 
 void CANAISNode::start() {
@@ -147,11 +113,12 @@ void CANAISNode::CANAISThreadFunc(ActiveNode* nodePtr) {
   while(true) {
 
     node->m_lock.lock();
-    if (node->m_VesselList.size() != 0) {
-      MessagePtr AISList = std::make_unique<AISDataMsg>(node->m_VesselList, node->m_PosLat, node->m_PosLon);
+    if (node->m_VesselList.size() != 0 && node->m_VesselInfoList.size() != 0) {
+      MessagePtr AISList = std::make_unique<AISDataMsg>(node->m_VesselList, node->m_VesselInfoList, node->m_PosLat, node->m_PosLon);
       node->m_MsgBus.sendMessage(std::move(AISList));
       node->m_lock.unlock();
       node->m_VesselList.clear();
+      node->m_VesselInfoList.clear();
     }
     else {
         node->m_lock.unlock();

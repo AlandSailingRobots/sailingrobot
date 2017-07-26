@@ -84,6 +84,7 @@ private:
   * Private variables
   */
   std::vector<AISVessel> m_VesselList;
+  std::vector<AISVesselInfo> m_VesselInfoList;
   double m_PosLat;
   double m_PosLon;
   std::mutex m_lock;

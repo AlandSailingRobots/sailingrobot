@@ -77,7 +77,7 @@ int main() {
   aisProc->start();
 
   cMgr.startGC();
-  
+
   std::thread thr(messageLoop);
   thr.detach();
     int now;
@@ -89,7 +89,8 @@ int main() {
     for (int i = 0; i<cMgr.getAISContacts().length(); i++) {
         auto t = colList.next();
         Logger::info("MMSI: " + std::to_string(t.mmsi) + ", Lat: " + std::to_string(t.latitude) + ", Lon: " + std::to_string(t.longitude) +
-                ", COG: " + std::to_string(t.course) + " (" + std::to_string(t.course*180/3.141592) + ")" + ", SOG: " + std::to_string(t.speed) + " (" + std::to_string(t.speed*1.9438) + ")"
+                ", COG: " + std::to_string(t.course) + " (" + std::to_string(t.course*180/3.141592) + ")" + ", SOG: " + std::to_string(t.speed) +
+                " (" + std::to_string(t.speed*1.9438) + ")" + ", Length: " + std::to_string(t.length) + ", Beam: " + std::to_string(t.beam) + 
                 ", Report age: " + std::to_string(now-t.lastUpdated));
     }
   //  aisRec.printData();

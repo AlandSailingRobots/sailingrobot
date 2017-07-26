@@ -19,12 +19,12 @@
 
 class AISDataMsg : public Message {
 public:
-	AISDataMsg(NodeID destinationID, NodeID sourceID, std::vector<AISVessel>(vesselList), float posLat, float posLon)
-		:Message(MessageType::AISData, sourceID, destinationID), m_VesselList(vesselList), m_PosLat(posLat), m_PosLon(posLon)
+	AISDataMsg(NodeID destinationID, NodeID sourceID, std::vector<AISVessel>(vesselList), std::vector<AISVesselInfo>(infoList), float posLat, float posLon)
+		:Message(MessageType::AISData, sourceID, destinationID), m_VesselList(vesselList), m_VesselInfoList(infoList), m_PosLat(posLat), m_PosLon(posLon)
 	{ }
 
-	AISDataMsg(std::vector<AISVessel>(vesselList), float posLat, float posLon)
-		:Message(MessageType::AISData, NodeID::None, NodeID::None), m_VesselList(vesselList), m_PosLat(posLat), m_PosLon(posLon)
+	AISDataMsg(std::vector<AISVessel>(vesselList), std::vector<AISVesselInfo>(infoList), float posLat, float posLon)
+		:Message(MessageType::AISData, NodeID::None, NodeID::None), m_VesselList(vesselList), m_VesselInfoList(infoList), m_PosLat(posLat), m_PosLon(posLon)
 	{ }
 
 	AISDataMsg(MessageDeserialiser deserialiser)
@@ -102,6 +102,7 @@ public:
 	virtual ~AISDataMsg() { }
 
 	std::vector<AISVessel> vesselList() { return m_VesselList; }
+	std::vector<AISVesselInfo> vesselInfoList() { return m_VesselInfoList; }
 	uint32_t MMSI(int vessel) { return m_VesselList[vessel].MMSI; }
 	double latitude(int vessel) { return m_VesselList[vessel].latitude; }
 	double longitude(int vessel) { return m_VesselList[vessel].longitude; }
@@ -132,6 +133,7 @@ public:
 
 private:
 	std::vector<AISVessel> m_VesselList;
+	std::vector<AISVesselInfo> m_VesselInfoList;
 	double m_PosLat;
 	double m_PosLon;
 };

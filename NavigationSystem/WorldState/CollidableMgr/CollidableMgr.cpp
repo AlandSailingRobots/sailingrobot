@@ -69,10 +69,44 @@ void CollidableMgr::addAISContact( uint32_t mmsi, double lat, double lon, float 
         aisContact.lastUpdated = SysClock::unixTime();
 
         this->aisContacts.push_back(aisContact);
-
+      }
     this->aisListMutex.unlock();
     this->ownAISLock = false;
-  }
+}
+
+///----------------------------------------------------------------------------------
+void CollidableMgr::addAISContact( uint32_t mmsi, float length, float beam )
+{
+    if( !this->ownAISLock )
+    {
+        this->aisListMutex.lock();
+        this->ownAISLock = true;
+    }
+
+    // Check if the contact already exists, and if so update it
+    bool contactExists = false;
+    for( uint16_t i = 0; i < this->aisContacts.size() && !contactExists; i++ )
+    {
+        if( this->aisContacts[i].mmsi == mmsi)
+        {
+            this->aisContacts[i].length = length;
+            this->aisContacts[i].beam = beam;
+            contactExists = true;
+        }
+    }
+
+    if(!contactExists)
+    {
+        AISCollidable_t aisContact;
+        aisContact.mmsi = mmsi;
+        aisContact.length = length;
+        aisContact.beam = beam;
+        aisContact.lastUpdated = SysClock::unixTime();
+
+        this->aisContacts.push_back(aisContact);
+      }
+    this->aisListMutex.unlock();
+    this->ownAISLock = false;
 }
 
 ///----------------------------------------------------------------------------------
