@@ -19,11 +19,22 @@ void CANAISNode::processMessage(const Message* message) {
 }
 
 void CANAISNode::processPGN(N2kMsg& nMsg) {
-  if (nMsg.PGN == 129038 || nMsg.PGN == 129039) {
-    CANAISNode::parsePGN129038_129039(nMsg);
-  }
-  else if (nMsg.PGN == 129025) {
-    parsePGN129025(nMsg);
+  switch (nMsg.PGN) {
+    case 129038:
+    case 129039:
+      CANAISNode::parsePGN129038_129039(nMsg);
+      break;
+    case 129025:
+      CANAISNode::parsePGN129025(nMsg);
+      break;
+    case 129794:
+      CANAISNode::parsePGN129794(nMsg);
+      break;
+    case 129810:
+      CANAISNode::parsePGN129810(nMsg);
+      break;
+    default:
+      break;
   }
 }
 
@@ -60,6 +71,28 @@ void CANAISNode::parsePGN129025(N2kMsg& nMsg) {
 
   m_PosLat = lat_pos * res_pos;
   m_PosLon = lon_pos * res_pos;
+}
+
+void CANAISNode::parsePGN129794(N2kMsg& nMsg) {
+  uint16_t len_tmp, beam_tmp;
+
+  vessel.MMSI = ((nMsg.Data[4] << 24) | (nMsg.Data[3] << 16) | (nMsg.Data[2] << 8) | (nMsg.Data[1]));
+  len_tmp = ((nMsg.Data[38] << 8) | (nMsg.Data[37]));
+  beam_tmp = ((nMsg.Data[40] << 8) | (nMsg.Data[39]));
+
+  m_Length = len_tmp * res_size;
+  m_Beam = beam_tmp * res_size;
+}
+
+void CANAISNode::parsePGN129810(N2kMsg& nMsg) {
+  uint16_t len_tmp, beam_tmp;
+
+  vessel.MMSI = ((nMsg.Data[4] << 24) | (nMsg.Data[3] << 16) | (nMsg.Data[2] << 8) | (nMsg.Data[1]));
+  len_tmp = ((nMsg.Data[21] << 8) | (nMsg.Data[20]));
+  beam_tmp = ((nMsg.Data[23] << 8) | (nMsg.Data[22]));
+
+  m_Length = len_tmp * res_size;
+  m_Beam = beam_tmp * res_size;
 }
 
 void CANAISNode::start() {

@@ -47,16 +47,33 @@ public:
 
 private:
   /*
+  * Class A or B position report
   * Processes and return the data of the message
   * if the PGN is 129038 or 129039
   */
   void parsePGN129038_129039(N2kMsg& nMsg);
 
   /*
+  * GPS position, rapid update
   * Processes and return the data of the message
   * if the PGN is 129025
   */
   void parsePGN129025(N2kMsg& nMsg);
+
+  /*
+  * AIS Class A static and voyage related data
+  * Processes and return the data of the message
+  * if the PGN is 129794
+  */
+  void parsePGN129794(N2kMsg& nMsg)
+
+
+  /*
+  * AIS Class B static data part B
+  * Processes and return the data of the message
+  * if the PGN is 129810
+  */
+  void parsePGN129810(N2kMsg& nMsg)
 
   /*
   * The function that the thread works on
@@ -69,9 +86,12 @@ private:
   std::vector<AISVessel> m_VesselList;
   double m_PosLat;
   double m_PosLon;
+  float m_Length;
+  float m_Beam;
   std::mutex m_lock;
   double m_LoopTime;
   double res_pos = 1e-7;
   float res_cog = 1e-4;
   float res_sog = 1e-2;
+  float res_size = 1e-1;
 };
