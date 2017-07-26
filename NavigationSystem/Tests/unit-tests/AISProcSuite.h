@@ -43,7 +43,7 @@ public:
   void setUp() {
     mockNode = new MockNode(msgBus(), mockNodeRegistered);
     if (aisProc == 0) {
-      aisProc = new AISProcessing(msgBus(), &cMgr, 300e6, 100.0);
+      aisProc = new AISProcessing(msgBus(), &cMgr, 300e6, 1.0);
 
       aisProc->start();
 
@@ -114,9 +114,9 @@ public:
 
     MessagePtr mockAISMsg = std::make_unique<AISDataMsg>(AISList, 60.1, 19.1);
     msgBus().sendMessage(std::move(mockAISMsg));
-    
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+
     cMgr.getAISContacts();
-    std::this_thread::sleep_for(std::chrono::milliseconds(300));
     TS_ASSERT_EQUALS(cMgr.getAISContacts().length(),3);
   }
 };

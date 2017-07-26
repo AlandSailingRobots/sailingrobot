@@ -76,6 +76,8 @@ int main() {
   aisProc = new AISProcessing(msgBus, &cMgr, 300e6, 5);
   aisProc->start();
 
+  cMgr.startGC();
+  
   std::thread thr(messageLoop);
   thr.detach();
 

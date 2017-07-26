@@ -61,10 +61,10 @@ public:
     if (solarNode == 0) {
       Logger::DisableLogging();
 
-      aisNode = new CANAISNode(msgBus(), *canService, 100);
+      aisNode = new CANAISNode(msgBus(), *canService, 0.51);
       // solarNode = new CANSolarTrackerNode(msgBus(), *canService, 100);
 
-      aisNode->start();
+      // aisNode->start();
       // solarNode->start();
       // windsensorNode->start();
 
@@ -119,6 +119,29 @@ public:
   }
 
   void test_AISData() {
+    std::vector<AISVessel> AISList;
+    AISVessel v1, v2, v3;
+    v1.MMSI = 1;
+    v1.latitude = 60.2f;
+    v1.longitude = 19.1f;
+    v1.COG = 200;
+    v1.SOG = 10;
+    v2.MMSI = 2;
+    v2.latitude = 62.f;
+    v2.longitude = 18.1f;
+    v2.COG = 100;
+    v2.SOG = 5;
+    v3.MMSI = 3;
+    v3.latitude = 61.5f;
+    v3.longitude = 18.7f;
+    v3.COG = 80;
+    v3.SOG = 7;
+    AISList.push_back(v1);
+    AISList.push_back(v2);
+    AISList.push_back(v3);
+
+    MessagePtr mockAISMsg = std::make_unique<AISDataMsg>(AISList, 60.1, 19.1);
+    msgBus().sendMessage(std::move(mockAISMsg));
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
     TS_ASSERT(mockNode->m_MessageReceived);
   }

@@ -47,8 +47,6 @@ void CollidableMgr::addAISContact( uint32_t mmsi, double lat, double lon, float 
     bool contactExists = false;
     for( uint16_t i = 0; i < this->aisContacts.size() && !contactExists; i++ )
     {
-           // std::cout << this->aisContacts[i].mmsi << "\t" << mmsi << std::endl;
-           // std::cout << (this->aisContacts[i].mmsi == mmsi) <<std::endl;
         if( this->aisContacts[i].mmsi == mmsi)
         {
             this->aisContacts[i].latitude = lat;
@@ -71,14 +69,10 @@ void CollidableMgr::addAISContact( uint32_t mmsi, double lat, double lon, float 
         aisContact.lastUpdated = SysClock::unixTime();
 
         this->aisContacts.push_back(aisContact);
-        
-    for ( uint16_t i = 0; i<this->aisContacts.size(); i++) {
-        std::cout << i << ": " << this->aisContacts[i].mmsi << std::endl;
-    }
-    }
 
     this->aisListMutex.unlock();
     this->ownAISLock = false;
+  }
 }
 
 ///----------------------------------------------------------------------------------
