@@ -1,9 +1,10 @@
 /****************************************************************************************
 *
 * File:
-* 		ArduinoIntegrationTest.cpp
+* 		IntegrationTestASPire.cpp
 *
 * Purpose:
+		 Global Integrationtest for the ASPire	
 *		 Monitor the values from the CAN-bus and able to sen comands to the actuators
 *
 * Developer Notes:
