@@ -4,11 +4,16 @@
 * 		StateEstimationNode.cpp
 *
 * Purpose:
-*       Estimates the "current" state of the vessel. Collects datat from the GPS and compass messages.
+*       Estimates the "current" state of the vessel. Collects datas from the GPS and compass messages.
 *       Returns a VesselStateMsg corresponding at the estimated state of the vessel.
 *
 * Developer Notes:
-*
+*       Info about heading and magnetic direction : https://en.wikipedia.org/wiki/Course_(navigation)
+* 
+*       Maël 26/07/17 : The magnetic variation used to correct the magnetic heading (which yields
+*                       true heading) is the one at the next waypoint (setted up into the database)
+*                       and not the magnetic variation at the current vessel position. So the correction 
+*                       won't be perfect when the vessel is far away from the next waypoint.
 *
 ***************************************************************************************/
 
@@ -92,7 +97,7 @@ bool StateEstimationNode::estimateVesselState()
 {   
     std::lock_guard<std::mutex> lock_guard(m_lock);
 
-    m_VesselHeading = Utility::addDeclinationToHeading(m_CompassHeading, m_WaypointDeclination);
+    m_VesselHeading = Utility::limitAngleRange(m_CompassHeading + m_WaypointDeclination);
     if(m_GpsOnline)
     {
         m_VesselLat = m_GPSLat;

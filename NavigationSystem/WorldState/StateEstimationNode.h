@@ -3,12 +3,17 @@
 * File:
 * 		StateEstimationNode.h
 *
-*  Purpose:
-*		Estimates the "current" state of the vessel. Collects datat from the GPS and compass messages.
+* Purpose:
+*		Estimates the "current" state of the vessel. Collects datas from the GPS and compass messages.
 *       Returns a VesselStateMsg corresponding at the estimated state of the vessel.
 *
 * Developer Notes:
-*
+*       Info about heading and magnetic direction : https://en.wikipedia.org/wiki/Course_(navigation)
+* 
+*       Maël 26/07/17 : The magnetic variation used to correct the magnetic heading (which yields
+*                       true heading) is the one at the next waypoint (setted up into the database)
+*                       and not the magnetic variation at the current vessel position. So the correction 
+*                       won't be perfect when the vessel is far away from the next waypoint.
 *
 ***************************************************************************************/
 
@@ -93,7 +98,7 @@ private:
     double  m_GPSLon;
     double  m_GPSSpeed;
     double  m_GPSCourse;
-    int     m_WaypointDeclination;
+    float     m_WaypointDeclination;
 
     double  m_speed_1;
     double  m_speed_2;
