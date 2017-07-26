@@ -51,6 +51,12 @@ AISProcessing::AISProcessing(MessageBus& msgBus, CollidableMgr* collidableMgr, i
         m_Vessels.push_back(vessel);
       }
     }
+  for(auto& ves: m_Vessels) {
+    if (ves.length > 1) {
+        std::cout << "MMSI: " << ves.MMSI << ", Lat: " << ves.latitude << ", Lon: " << ves.longitude
+            << ", COG: " << ves.COG << ", SOG: " << ves.SOG << ", length: " << ves.length << ", beam: " << ves.beam << std::endl;
+    }
+  }
   }
 
   void AISProcessing::sendAISData() {
