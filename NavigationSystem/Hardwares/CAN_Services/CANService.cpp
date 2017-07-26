@@ -206,7 +206,6 @@ bool CANService::ParseFastPkg(CanMsg& msg, N2kMsg& nMsg) {
     it->second.latestSeqnumber = SequenceNumber;
 		if(it->second.bytesLeft <= 0) {	//have the whole message, erase key and return true
 			nMsg = FastPackages[Key].n2kmsg;
-			Logger::info("DONE");
 			FastPackages.erase(Key);
 			return true;
 		}

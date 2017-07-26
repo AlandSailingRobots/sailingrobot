@@ -28,7 +28,7 @@ TOOLCHAIN = 0
 ###############################################################################
 
 
-export CPPFLAGS                = -g -ggdb -Wall -pedantic -Werror -std=gnu++14 -Wno-psabi
+export CPPFLAGS                = -g -Wall -pedantic -Werror -std=gnu++14 -Wno-psabi
 
 export LIBS                    = -lsqlite3 -lgps -lrt -lcurl -lpthread -lwiringPi -lncurses
 

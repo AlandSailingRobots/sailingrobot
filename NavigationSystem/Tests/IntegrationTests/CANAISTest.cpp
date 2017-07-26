@@ -70,25 +70,28 @@ int main() {
 
 
  // AISDataReceiver aisRec(msgBus, 10000);
-  aisNode = new CANAISNode(msgBus, canService, 5);
+  aisNode = new CANAISNode(msgBus, canService, 1);
   aisNode->start();
 
-  aisProc = new AISProcessing(msgBus, &cMgr, 300e6, 5);
+  aisProc = new AISProcessing(msgBus, &cMgr, 300e6, 230082790, 1);
   aisProc->start();
 
   cMgr.startGC();
   
   std::thread thr(messageLoop);
   thr.detach();
-
+    int now;
   while (true) {
     std::this_thread::sleep_for(std::chrono::milliseconds(5000));
-
+    now = SysClock::unixTime();
     Logger::info("Collidable manager size: " + std::to_string(cMgr.getAISContacts().length()));
-   // for (int i = 0; i<cMgr.getAISContacts().length(); i++) {
-     //   auto t = cMgr.getAISContacts().next();
-       // Logger::info("MMSI: " + std::to_string(t.mmsi));
-   // }
+    auto colList = cMgr.getAISContacts();
+    for (int i = 0; i<cMgr.getAISContacts().length(); i++) {
+        auto t = colList.next();
+        Logger::info("MMSI: " + std::to_string(t.mmsi) + ", Lat: " + std::to_string(t.latitude) + ", Lon: " + std::to_string(t.longitude) +
+                ", COG: " + std::to_string(t.course) + " (" + std::to_string(t.course*180/3.141592) + ")" + ", SOG: " + std::to_string(t.speed) + " (" + std::to_string(t.speed*1.9438) + ")"
+                ", Report age: " + std::to_string(now-t.lastUpdated));
+    }
   //  aisRec.printData();
   }
 }

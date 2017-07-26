@@ -18,7 +18,7 @@
  #include <chrono>
 
 
- #define CONTACT_TIME_OUT       3600        // 1 Minute
+ #define CONTACT_TIME_OUT       120        // 2 Minutes
 
 
 ///----------------------------------------------------------------------------------

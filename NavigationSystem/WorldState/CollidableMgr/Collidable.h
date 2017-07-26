@@ -27,9 +27,9 @@ struct VisualCollidable_t {
 
 struct AISCollidable_t {
     uint32_t mmsi;
-    uint16_t course;
-    float latitude;
-    float longitude;
+    float course;
+    double latitude;
+    double longitude;
     float speed;
     int lastUpdated;
 };

@@ -74,7 +74,6 @@ void CANAISNode::CANAISThreadFunc(ActiveNode* nodePtr) {
   while(true) {
 
     node->m_lock.lock();
-    std::cout << "Size: " << node->m_VesselList.size() << std::endl;
     if (node->m_VesselList.size() != 0) {
       MessagePtr AISList = std::make_unique<AISDataMsg>(node->m_VesselList, node->m_PosLat, node->m_PosLon);
       node->m_MsgBus.sendMessage(std::move(AISList));

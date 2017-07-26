@@ -35,7 +35,7 @@ public:
   * int radius, the distance [meter] from us in which a vessel is interesting
   * double loopTime, how often we send messages
   */
-  AISProcessing(MessageBus& msgBus, CollidableMgr* collidableMgr, int radius, double loopTime);
+  AISProcessing(MessageBus& msgBus, CollidableMgr* collidableMgr, int radius, uint32_t mmsi, double loopTime);
   ~AISProcessing();
 
   bool init();
@@ -77,6 +77,7 @@ private:
   double m_longitude;
   double m_LoopTime;
   int m_Radius;
+  uint32_t m_MMSI;
   std::mutex m_lock;
   CollidableMgr* collidableMgr;
 };

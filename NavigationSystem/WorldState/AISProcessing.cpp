@@ -14,8 +14,8 @@
 
 #include "AISProcessing.h"
 
-AISProcessing::AISProcessing(MessageBus& msgBus, CollidableMgr* collidableMgr, int radius, double loopTime)
-  : ActiveNode(NodeID::AISProcessing, msgBus), m_LoopTime(loopTime), m_Radius(radius), collidableMgr(collidableMgr) {
+AISProcessing::AISProcessing(MessageBus& msgBus, CollidableMgr* collidableMgr, int radius, uint32_t mmsi, double loopTime)
+  : ActiveNode(NodeID::AISProcessing, msgBus), m_LoopTime(loopTime), m_Radius(radius), m_MMSI(mmsi), collidableMgr(collidableMgr) {
     msgBus.registerNode(*this, MessageType::AISData);
   }
 
@@ -46,7 +46,7 @@ AISProcessing::AISProcessing(MessageBus& msgBus, CollidableMgr* collidableMgr, i
     m_longitude = msg->posLon();
     for (auto vessel: list) {
       dist = CourseMath::calculateDTW(m_latitude, m_longitude, vessel.latitude, vessel.longitude);
-      if (dist < m_Radius) {
+      if (dist < m_Radius && vessel.MMSI != m_MMSI) {
         m_Vessels.push_back(vessel);
       }
     }
@@ -54,8 +54,10 @@ AISProcessing::AISProcessing(MessageBus& msgBus, CollidableMgr* collidableMgr, i
 
   void AISProcessing::sendAISData() {
     for (auto vessel: m_Vessels) {
+      //  std::cout << "COG: " << vessel.COG << ",\t";
       this->collidableMgr->addAISContact(vessel.MMSI, vessel.latitude, vessel.longitude, vessel.SOG, vessel.COG);
     }
+    //std::cout << std::endl;
   }
 
   void AISProcessing::start() {
