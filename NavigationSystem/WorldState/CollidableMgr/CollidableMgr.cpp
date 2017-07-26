@@ -19,7 +19,7 @@
 
 
  #define CONTACT_TIME_OUT       120        // 2 Minutes
-
+#define NOT_AVAILABLE 0
 
 ///----------------------------------------------------------------------------------
 CollidableMgr::CollidableMgr()
@@ -66,6 +66,8 @@ void CollidableMgr::addAISContact( uint32_t mmsi, double lat, double lon, float 
         aisContact.longitude = lon;
         aisContact.speed = speed;
         aisContact.course = course;
+        aisContact.length = NOT_AVAILABLE;
+        aisContact.beam = NOT_AVAILABLE;
         aisContact.lastUpdated = SysClock::unixTime();
 
         this->aisContacts.push_back(aisContact);
@@ -101,6 +103,10 @@ void CollidableMgr::addAISContact( uint32_t mmsi, float length, float beam )
         aisContact.mmsi = mmsi;
         aisContact.length = length;
         aisContact.beam = beam;
+        aisContact.latitude = NOT_AVAILABLE;
+        aisContact.longitude = NOT_AVAILABLE;
+        aisContact.speed = NOT_AVAILABLE;
+        aisContact.course = NOT_AVAILABLE;
         aisContact.lastUpdated = SysClock::unixTime();
 
         this->aisContacts.push_back(aisContact);
