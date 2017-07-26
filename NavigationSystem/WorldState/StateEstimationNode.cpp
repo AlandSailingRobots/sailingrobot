@@ -102,7 +102,7 @@ bool StateEstimationNode::estimateVesselState()
     {
         m_VesselLat = m_GPSLat;
         m_VesselLon = m_GPSLon;
-        m_VesselSpeed = m_GPSSpeed;
+        m_VesselSpeed = m_GPSSpeed; // Note - Maël : Need to use something like : Utility::directionAdjustedSpeed ?
         m_VesselCourse = estimateVesselCourse();
         return true;
     }
