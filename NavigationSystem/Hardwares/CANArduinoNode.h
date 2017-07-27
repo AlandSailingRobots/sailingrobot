@@ -25,21 +25,21 @@ public:
 private:
 	
 	static void CANArduinoNodeThreadFunc(ActiveNode* nodePtr);
-	
+
+	const int DATA_OUT_OF_RANGE	=	-2000;
+	const float MAX_RUDDER_ANGLE = 30;
+	const float MAX_WINGSAIL_ANGLE = 13;
+	const float INT16_SIZE = 65535;
 	
 	float m_RudderFeedback;
   	float m_WingsailFeedback; 
   	float m_WindvaneSelfSteerAngle;
 	float m_Radio_Controller_On;
 	float m_WindvaneActuatorPos;
-	int m_TimeBetweenMsgs;
-	uint16_t rawData;
+	int   m_loopTime;
 	std::mutex m_lock;
 	
-	const int DATA_OUT_OF_RANGE	=	-2000;
-	const float MAX_RUDDER_ANGLE = 30;
-	const float MAX_WINGSAIL_ANGLE = 13;
-	const float INT16_SIZE = 65535;
-};
+};	
+
 
 
