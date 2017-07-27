@@ -94,7 +94,7 @@ public:
 				m_SensorValues["Wingsail Angle"] = actmsg->wingsailFeedback();
 				}	
 				break;
-											
+				
 			case MessageType::WindData:
 				{
 				const WindDataMsg* windmsg = dynamic_cast<const WindDataMsg*>(message);
@@ -123,30 +123,30 @@ public:
 
 	void printSensorData() {
 	 
-	   wclear(m_Win);
-	   box(m_Win, 0, 0);
+		wclear(m_Win);
+		box(m_Win, 0, 0);
 
-	   wmove(m_Win, 2,20);
-	   wprintw(m_Win, "SENSOR READINGS");
-	   wmove(m_Win, 2, 10);
-	   int pos = 4;    
-	   for(auto it : m_SensorValues) {
-		   wmove(m_Win, pos, 10);
-		   wprintw(m_Win, "%s : ", it.first.c_str());
-		   wmove(m_Win, pos, 35);
-		   if(it.second == -2000) {
-			  wprintw(m_Win, "%s", "Data not available.");
-	   } else if (it.second == -3000) {
-		  wprintw(m_Win, "%s", "On");
-		   } else if (it.second == -4000) {
-			  wprintw(m_Win, "%s", "Off");
-		   } else {
-			  wprintw(m_Win, "%f", it.second);
-		   }
-		   pos+=2;
-	   }
+		wmove(m_Win, 2,20);
+		wprintw(m_Win, "SENSOR READINGS");
+		wmove(m_Win, 2, 10);
+		int pos = 4;
+		for(auto it : m_SensorValues) {
+			wmove(m_Win, pos, 10);
+			wprintw(m_Win, "%s : ", it.first.c_str());
+			wmove(m_Win, pos, 35);
+			if(it.second == -2000) {
+				wprintw(m_Win, "%s", "Data not available.");
+			} else if (it.second == -3000) {
+				wprintw(m_Win, "%s", "On");
+			} else if (it.second == -4000) {
+				wprintw(m_Win, "%s", "Off");
+			} else {
+				wprintw(m_Win, "%f", it.second);
+			}
+			pos+=2;
+		}
 
-	   wrefresh(m_Win);
+		wrefresh(m_Win);
 	}
 
 	SensorData getValues() {
