@@ -46,7 +46,7 @@ void CANArduinoNode::processMessage (const Message* message){
 }
 
 void CANArduinoNode::processFrame (CanMsg& msg) {
-	uint16_t rawData
+	uint16_t rawData;
 	if (msg.id == 701) {
 		rawData = (msg.data[1] << 8 | msg.data[0]);		 
 		m_RudderFeedback = Utility::mapInterval (rawData, 0, INT16_SIZE, -MAX_RUDDER_ANGLE, MAX_RUDDER_ANGLE);
