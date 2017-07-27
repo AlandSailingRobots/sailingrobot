@@ -28,8 +28,8 @@ private:
 	
 	
 	float m_RudderFeedback;
-  float m_WingsailFeedback; 
-  float m_WindvaneSelfSteerAngle;
+  	float m_WingsailFeedback; 
+  	float m_WindvaneSelfSteerAngle;
 	float m_Radio_Controller_On;
 	float m_WindvaneActuatorPos;
 	int m_TimeBetweenMsgs;

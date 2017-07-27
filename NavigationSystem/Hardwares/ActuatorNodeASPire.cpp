@@ -7,7 +7,7 @@
 *		 Sends data to the Actuator unit with the rudder and wingsail angles over the CAN bus. 
 *
 * Developer Notes:
-*		 The CAN id numbers for the node are:
+*		 The CAN frame ID nubmer that this node subscribe to are:
 *			700
 *
 ***************************************************************************************/
@@ -42,24 +42,19 @@ void ActuatorNodeASPire::processMessage(const Message* message)
         rudderAngle = actMsg->rudderAngle();
         wingsailAngle = actMsg->wingsailServoAngle();
         WindvaneSelfSteeringOn = actMsg->windvaneSelfSteering();
+                      
+        uint16_t rudderAngle16 = Utility::mapInterval (rudderAngle, -MAX_RUDDER_ANGLE, MAX_RUDDER_ANGLE, 0 , INT16_SIZE);
+        uint16_t wingsailAngle16 = Utility::mapInterval (wingsailAngle, -MAX_WINGSAIL_ANGLE, MAX_WINGSAIL_ANGLE, 0 , INT16_SIZE);
         
-
         CanMsg Cmsg;
         Cmsg.id = 700;
         Cmsg.header.ide = 0;
         Cmsg.header.length = 8;
-        
-       
-        uint16_t angle_16 = Utility::mapInterval (rudderAngle, -MAX_RUDDER_ANGLE, MAX_RUDDER_ANGLE, 0 , INT16_SIZE);
 
-        (Cmsg.data[0] = angle_16 & 0xff);
-        (Cmsg.data[1] = angle_16 >> 8);
-
-        
-        angle_16 = Utility::mapInterval (wingsailAngle, -MAX_WINGSAIL_ANGLE, MAX_WINGSAIL_ANGLE, 0 , INT16_SIZE);
-
-        (Cmsg.data[2] = angle_16 & 0xff);
-        (Cmsg.data[3] = angle_16 >> 8);
+        (Cmsg.data[0] = rudderAngle16 & 0xff);
+        (Cmsg.data[1] = rudderAngle16 >> 8);
+        (Cmsg.data[2] = wingsailAngle16 & 0xff);
+        (Cmsg.data[3] = wingsailAngle16 >> 8);
         (Cmsg.data[4] = 0);
         (Cmsg.data[5] = 0);
         (Cmsg.data[6] = WindvaneSelfSteeringOn);

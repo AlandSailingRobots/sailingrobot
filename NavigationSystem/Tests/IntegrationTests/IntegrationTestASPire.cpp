@@ -64,14 +64,14 @@ public:
     {
         msgBus.registerNode(*this, MessageType::WindData);
         msgBus.registerNode(*this, MessageType::ASPireActuatorFeedback);
-				msgBus.registerNode(*this, MessageType::ArduinoData);
+		msgBus.registerNode(*this, MessageType::ArduinoData);
 
         m_SensorValues["Rudder Angle"] = -2000;
         m_SensorValues["Wingsail Angle"] = -2000;
         m_SensorValues["Wind Speed"] = -2000;        
         m_SensorValues["Wind Direction"] = -2000;
         m_SensorValues["Wind Temperature"] = -2000;
-				m_SensorValues["RC Mode"] = -2000;
+		m_SensorValues["RC Mode"] = -2000;
 				
         m_Win = newwin(6+2*m_SensorValues.size(),60,1,2);
         
@@ -85,65 +85,39 @@ public:
     void processMessage(const Message* message) {
         MessageType type = message->messageType();
 				
-				switch (type){
+		switch (type){
 					
-					case MessageType::ASPireActuatorFeedback:
-						{
-						const ASPireActuatorFeedbackMsg* actmsg = dynamic_cast<const ASPireActuatorFeedbackMsg*>(message);
-            m_SensorValues["Rudder Angle"] = actmsg->rudderFeedback();
-            m_SensorValues["Wingsail Angle"] = actmsg->wingsailFeedback();
-						}	
-						break;
+			case MessageType::ASPireActuatorFeedback:
+				{
+				const ASPireActuatorFeedbackMsg* actmsg = dynamic_cast<const ASPireActuatorFeedbackMsg*>(message);
+                m_SensorValues["Rudder Angle"] = actmsg->rudderFeedback();
+                m_SensorValues["Wingsail Angle"] = actmsg->wingsailFeedback();
+				}	
+				break;
+											
+			case MessageType::WindData:
+				{
+				const WindDataMsg* windmsg = dynamic_cast<const WindDataMsg*>(message);
+                m_SensorValues["Wind Speed"] = windmsg->windSpeed();
+                m_SensorValues["Wind Direction"] = windmsg->windDirection();
+                m_SensorValues["Wind Temperature"] = windmsg->windTemp();
+				}
+				break;
 						
-						
-					
-					case MessageType::WindData:
-					  {
-						const WindDataMsg* windmsg = dynamic_cast<const WindDataMsg*>(message);
-            m_SensorValues["Wind Speed"] = windmsg->windSpeed();
-            m_SensorValues["Wind Direction"] = windmsg->windDirection();
-            m_SensorValues["Wind Temperature"] = windmsg->windTemp();
-						}
-						break;
-						
-					case MessageType::ArduinoData:
-						{
-						const ArduinoDataMsg* arduinomsg = dynamic_cast<const ArduinoDataMsg*>(message);
-						if (arduinomsg->Radio_Controller() > 10) {
-							m_SensorValues["RC Mode"] = -3000;
-						} else {
-                m_SensorValues["RC Mode"] = -4000;
-            }
-            }
-						break;
-					default:
-						break;
+			case MessageType::ArduinoData:
+				{
+				const ArduinoDataMsg* arduinomsg = dynamic_cast<const ArduinoDataMsg*>(message);
+				if (arduinomsg->Radio_Controller() > 10) {
+					m_SensorValues["RC Mode"] = -3000;
+				} else {
+                    m_SensorValues["RC Mode"] = -4000;
+                }
+                }        
+				break;
+				default:
+				break;
 						
 				}
-/*
-        if(type == MessageType::ASPireActuatorFeedback) {
-
-            const ASPireActuatorFeedbackMsg* actmsg = dynamic_cast<const ASPireActuatorFeedbackMsg*>(message);
-            m_SensorValues["Rudder Angle"] = actmsg->rudderFeedback();
-            m_SensorValues["Wingsail Angle"] = actmsg->wingsailFeedback();
-
-        } else if (type == MessageType::WindData) {
-
-            const WindDataMsg* windmsg = dynamic_cast<const WindDataMsg*>(message);
-            m_SensorValues["Wind Speed"] = windmsg->windSpeed();
-            m_SensorValues["Wind Direction"] = windmsg->windDirection();
-            m_SensorValues["Wind Temperature"] = windmsg->windTemp();
-
-        } else if (type == MessageType::ArduinoData) {
-	    const ArduinoDataMsg* arduinomsg = dynamic_cast<const ArduinoDataMsg*>(message);
-	    if (arduinomsg->RC() > 10) {
-	        m_SensorValues["RC Mode"] = -3000;
-	    }
-            else {
-                m_SensorValues["RC Mode"] = -4000;
-            }
-	}
-	*/
         printSensorData();
     }
 
@@ -230,8 +204,7 @@ void printInputMenu(WINDOW* win, menuIter highlightedItem) {
             mvwprintw(win, pos, 5, "%s", it.first.c_str());
             wprintw(win, "\t :");
         }
-        mvwprintw(win, pos, 30, "%s", it.second.c_str());
-        
+        mvwprintw(win, pos, 30, "%s", it.second.c_str());   
         pos+=2;
     }
 
@@ -242,13 +215,10 @@ void printInputMenu(WINDOW* win, menuIter highlightedItem) {
 
 void sendActuatorCommands() {
     
-
     int rudderAngle16;
     int wingsailAngle16;
-    //int windvaneAngle16;
-
+    //int windvaneAngle16; //For when the windvane is implemented
   
-		
     for(auto& it : menuValues) {
         if(it.second.empty()) {
             it.second = lastSentValues[it.first];
@@ -258,20 +228,15 @@ void sendActuatorCommands() {
     try {
         rudderAngle16 = stoi(menuValues["Rudder Angle"]);
         wingsailAngle16 = stoi(menuValues["Wingsail Angle"]);
-        //windvaneAngle16 = stoi(menuValues["Windvane Angle"]);
+        //windvaneAngle16 = stoi(menuValues["Windvane Angle"]); //For when the windvane is implemented
     } catch(std::invalid_argument ex) {
         std::cout << std::endl << "Actuator commands only works with integers." << std::endl << std::endl;
-				return;
+		return;
     }
     
-
-
-
-		MessagePtr actuatorMsg = std::make_unique<ActuatorControlASPireMessage>(wingsailAngle16, rudderAngle16, true );
-		msgBus.sendMessage(std::move(actuatorMsg));
+	MessagePtr actuatorMsg = std::make_unique<ActuatorControlASPireMessage>(wingsailAngle16, rudderAngle16, true );
+	msgBus.sendMessage(std::move(actuatorMsg));
 		
-		
-
     lastSentValues = menuValues;
 }
 
@@ -288,9 +253,9 @@ int main() {
     CANWindsensorNode windSensor(msgBus, canService, 500);
 
     CANArduinoNode arduino (msgBus, canService, 500);
-		ActuatorNodeASPire actuators (msgBus, canService);
+	ActuatorNodeASPire actuators (msgBus, canService);
     windSensor.start();
-		arduino.start ();
+	arduino.start ();
 
     std::thread thr(messageLoop);
     thr.detach();
@@ -302,11 +267,11 @@ int main() {
     menuValues["Wingsail Angle"] = "";
    // menuValues["Windvane Angle"] = "";
 		
-		lastSentValues = menuValues;
+	lastSentValues = menuValues;
 		
-		lastSentValues["Rudder Angle"] = "0";
+	lastSentValues["Rudder Angle"] = "0";
     lastSentValues["Wingsail Angle"] = "0";
-		//lastSentValues["Windvane Angle"] = "0";
+	//lastSentValues["Windvane Angle"] = "0";
 		
     menuIter highlighted = menuValues.begin();
 
@@ -326,44 +291,41 @@ int main() {
                 highlighted->second += std::to_string(c);
             }
         } else if (c == '-'){
-						if(highlighted->second.size() <= MAX_INPUT) {
-                highlighted->second += c;
-            }
-				}else {	
-					switch(c) {
-							case KEY_DOWN:
-									if(highlighted != --menuValues.end()) {
-											highlighted++;
-									}
-									break;
-							case KEY_UP:
-									if(highlighted != menuValues.begin()) {
-											--highlighted;
-									}
-									break;
-							case KEY_BACKSPACE:
-									if(!highlighted->second.empty()) {
-											highlighted->second.pop_back();
-									}
-									break;
-							case ENTER:
-									sendActuatorCommands();
-									for(auto& it : menuValues) {
-											it.second = "";
-									}
-									break;
-							case TAB:
-									if(highlighted == --menuValues.end()) {
-											highlighted = menuValues.begin();
-									} else {
-											++highlighted;
-									}
+				if(highlighted->second.size() <= MAX_INPUT) {
+                    highlighted->second += c;
+                }
+		}else {	
+			switch(c) {
+				case KEY_DOWN:
+					if(highlighted != --menuValues.end()) {
+						highlighted++;
 					}
-				}
+					break;
+				case KEY_UP:
+					if(highlighted != menuValues.begin()) {
+						--highlighted;
+					}
+					break;
+				case KEY_BACKSPACE:
+					if(!highlighted->second.empty()) {
+						highlighted->second.pop_back();
+					}
+					break;
+				case ENTER:
+					sendActuatorCommands();
+					for(auto& it : menuValues) {
+						it.second = "";
+					}
+					break;
+				case TAB:
+					if(highlighted == --menuValues.end()) {
+						highlighted = menuValues.begin();
+					} else {
+						++highlighted;
+					}
+			}
+		}
         printInputMenu(inputWin, highlighted);
     }
-
-    
     endwin();
-    
 }

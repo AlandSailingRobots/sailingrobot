@@ -7,7 +7,7 @@
 *		 Process messages from the arduino in the Actuatorunit via the CAN-Service including ActuatorFeedback and RC status . 
 *
 * Developer Notes:
-*		 The CAN id numbers for the node are:
+*		 The CAN frame id numbers that this node subscribes to are:
 *			701, 702, (more to be added later?)
 *
 ***************************************************************************************/
@@ -26,12 +26,12 @@ ActiveNode(NodeID::CANArduino, messageBus), CANFrameReceiver(canService, {701,70
 
 {
 	
-  m_RudderFeedback  = DATA_OUT_OF_RANGE;
-  m_WingsailFeedback = DATA_OUT_OF_RANGE;
-  m_WindvaneSelfSteerAngle = DATA_OUT_OF_RANGE;
+	m_RudderFeedback  = DATA_OUT_OF_RANGE;
+	m_WingsailFeedback = DATA_OUT_OF_RANGE;
+	m_WindvaneSelfSteerAngle = DATA_OUT_OF_RANGE;
 	m_WindvaneActuatorPos = DATA_OUT_OF_RANGE;
 	m_Radio_Controller_On = DATA_OUT_OF_RANGE;
-	}
+}
 
 CANArduinoNode::~CANArduinoNode(){
 
@@ -48,27 +48,22 @@ void CANArduinoNode::processMessage (const Message* message){
 void CANArduinoNode::processFrame (CanMsg& msg) {
 	
 	if (msg.id == 701) {
-		 rawData = (msg.data[1] << 8 | msg.data[0]);
-		 
-		 m_RudderFeedback = Utility::mapInterval (rawData, 0, INT16_SIZE, -MAX_RUDDER_ANGLE, MAX_RUDDER_ANGLE);
-		 rawData = (msg.data[3] << 8 | msg.data[2]);
-     m_WingsailFeedback = Utility::mapInterval (rawData, 0, INT16_SIZE, -MAX_WINGSAIL_ANGLE, MAX_WINGSAIL_ANGLE);
-     m_WindvaneSelfSteerAngle = (msg.data[5] << 8 | msg.data[4]);
-     m_WindvaneActuatorPos = msg.data[7];
-
-    
+		rawData = (msg.data[1] << 8 | msg.data[0]);		 
+		m_RudderFeedback = Utility::mapInterval (rawData, 0, INT16_SIZE, -MAX_RUDDER_ANGLE, MAX_RUDDER_ANGLE);
+		rawData = (msg.data[3] << 8 | msg.data[2]);
+     	m_WingsailFeedback = Utility::mapInterval (rawData, 0, INT16_SIZE, -MAX_WINGSAIL_ANGLE, MAX_WINGSAIL_ANGLE);
+    	m_WindvaneSelfSteerAngle = (msg.data[5] << 8 | msg.data[4]);
+    	m_WindvaneActuatorPos = msg.data[7];
 
 	} else if (msg.id == 702) {
 		m_Radio_Controller_On = (msg.data[1] << 8 | msg.data[0]);
-
-
 	}
 }
 
 
 void CANArduinoNode::start() {
 	runThread(CANArduinoNodeThreadFunc);
-	}
+}
 
 void CANArduinoNode::CANArduinoNodeThreadFunc(ActiveNode* nodePtr) {
 
