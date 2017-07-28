@@ -127,6 +127,11 @@ public:
 			serialiser.serialise(vessel.latitude);
 			serialiser.serialise(vessel.longitude);
 		}
+		for (auto& info: m_VesselInfoList) {
+			serialiser.serialise(info.MMSI);
+			serialiser.serialise(info.length);
+			serialiser.serialise(info.beam);
+		}
 		serialiser.serialise(m_PosLat);
 		serialiser.serialise(m_PosLon);
 	}

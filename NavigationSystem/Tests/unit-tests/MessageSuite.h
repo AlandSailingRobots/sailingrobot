@@ -381,6 +381,7 @@ public:
 
 	void test_AISDataMsg() {
 		std::vector<AISVessel> AISList;
+		std::vector<AISVesselInfo> AISInfo;
 		AISVessel v1, v2, v3;
 		v1.MMSI = 1;
 		v1.latitude = 60.2f;
@@ -400,8 +401,13 @@ public:
 		AISList.push_back(v1);
 		AISList.push_back(v2);
 		AISList.push_back(v3);
+		AISVesselInfo i1;
+		i1.MMSI=1;
+		i1.length=15;
+		i1.beam = 4;
+		AISInfo.push_back(i1);
 
-		AISDataMsg msg(AISList, 60.1, 19.1);
+		AISDataMsg msg(AISList, AISInfo, 60.1, 19.1);
 
 		TS_ASSERT_EQUALS(msg.messageType(), MessageType::AISData);
 		TS_ASSERT_EQUALS(msg.MMSI(0),1);

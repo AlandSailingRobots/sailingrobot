@@ -1,3 +1,18 @@
+/****************************************************************************************
+*
+* File:
+* 		CANSolarTrackerNode.cpp
+*
+* Purpose:
+*		Sends the position, heading and time to the solar tracker
+*
+*
+* Developer Notes:
+*		As of right now, only unit test exist, uncertain if it should work like this
+*		Since we don't have the solartracker yet I dont know exactly what messages to
+*		send but it is easily changed later
+*
+***************************************************************************************/
 #include "CANSolarTrackerNode.h"
 
 CANSolarTrackerNode::CANSolarTrackerNode(MessageBus& msgBus, CANService& canService, double loopTime)

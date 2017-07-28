@@ -120,6 +120,7 @@ public:
 
   void test_AISData() {
     std::vector<AISVessel> AISList;
+    std::vector<AISVesselInfo> AISInfo;
     AISVessel v1, v2, v3;
     v1.MMSI = 1;
     v1.latitude = 60.2f;
@@ -139,8 +140,14 @@ public:
     AISList.push_back(v1);
     AISList.push_back(v2);
     AISList.push_back(v3);
+    AISVesselInfo i1;
+    i1.MMSI=1;
+    i1.length=15;
+    i1.beam = 4;
+    AISInfo.push_back(i1);
 
-    MessagePtr mockAISMsg = std::make_unique<AISDataMsg>(AISList, 60.1, 19.1);
+
+    MessagePtr mockAISMsg = std::make_unique<AISDataMsg>(AISList, AISInfo, 60.1, 19.1);
     msgBus().sendMessage(std::move(mockAISMsg));
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
     TS_ASSERT(mockNode->m_MessageReceived);

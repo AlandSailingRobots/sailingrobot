@@ -1,7 +1,7 @@
 /****************************************************************************************
 *
 * File:
-* 		AISProcessing.cpp
+* 		AISProcessing.h
 *
 * Purpose:
 *     Receives the data from the CANAISNode and processes it and sends the vessels
@@ -33,6 +33,7 @@ public:
   /*
   * Constructor, pointer to messagebus and canservice
   * int radius, the distance [meter] from us in which a vessel is interesting
+  * uint32_t mmsi, the ID number of our shown vessel, makes sure it gets ignored and not added to the collidable manager
   * double loopTime, how often we send messages
   */
   AISProcessing(MessageBus& msgBus, CollidableMgr* collidableMgr, int radius, uint32_t mmsi, double loopTime);
@@ -69,9 +70,6 @@ private:
   /*
   * Private variables
   */
-  bool AISDataReceived = false;
-  bool stateMsgReceived = false;
-
   std::vector<AISVessel> m_Vessels;
   std::vector<AISVesselInfo> m_InfoList;
   double m_latitude;

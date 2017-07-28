@@ -29,7 +29,6 @@ AISProcessing::AISProcessing(MessageBus& msgBus, CollidableMgr* collidableMgr, i
 
   void AISProcessing::processMessage(const Message* msg) {
     MessageType type = msg->messageType();
-
     switch (type) {
       case MessageType::AISData :
         processAISMessage((AISDataMsg*) msg);
@@ -51,20 +50,18 @@ AISProcessing::AISProcessing(MessageBus& msgBus, CollidableMgr* collidableMgr, i
         m_Vessels.push_back(vessel);
       }
     }
-  //for(auto& ves: m_Vessels) {
-   // if (ves.length > 1) {
-       // std::cout << "MMSI: " << ves.MMSI << ", Lat: " << ves.latitude << ", Lon: " << ves.longitude
-     //       << ", COG: " << ves.COG << ", SOG: " << ves.SOG << ", length: " << ves.length << ", beam: " << ves.beam << std::endl;
-   // }
-  //}
   }
 
   void AISProcessing::sendAISData() {
+    /*
+    * First loop sends the position report to collidable manager
+    * And the second sends the static report
+    */
     for (auto vessel: m_Vessels) {
       this->collidableMgr->addAISContact(vessel.MMSI, vessel.latitude, vessel.longitude, vessel.SOG, vessel.COG);
     }
     for (auto info: m_InfoList) {
-      this->collidableMgr->addAISContact(info.MMSI, info.length, info. beam);
+      this->collidableMgr->addAISContact(info.MMSI, info.length, info.beam);
     }
   }
 

@@ -1,3 +1,17 @@
+/****************************************************************************************
+*
+* File:
+* 		CANAISNode.h
+*
+* Purpose:
+*		Receives the NMEA 2000 messages and picks out the important bits (MMSI, position, heading, speed,
+*   length and width) and sends it to AISProcessing
+*
+*
+* Developer Notes:
+*
+*
+***************************************************************************************/
 #pragma once
 
 #include "Hardwares/CAN_Services/CANService.h"

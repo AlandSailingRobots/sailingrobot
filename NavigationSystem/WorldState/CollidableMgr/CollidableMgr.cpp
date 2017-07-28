@@ -12,14 +12,15 @@
  ***************************************************************************************/
 
 
- #include "CollidableMgr.h"
- #include "SystemServices/SysClock.h"
- #include "SystemServices/Logger.h"
- #include <chrono>
+#include "CollidableMgr.h"
+#include "SystemServices/SysClock.h"
+#include "SystemServices/Logger.h"
+#include <chrono>
 
 
- #define CONTACT_TIME_OUT       120        // 2 Minutes
-#define NOT_AVAILABLE 0
+#define AIS_CONTACT_TIME_OUT        600        // 10 Minutes
+#define VISUAL_CONTACT_TIME_OUT 120
+#define NOT_AVAILABLE           0
 
 ///----------------------------------------------------------------------------------
 CollidableMgr::CollidableMgr()
@@ -176,7 +177,7 @@ void CollidableMgr::removeOldContacts()
 
     for (auto it = this->visualContacts.cbegin(); it != this->visualContacts.cend();)
     {
-        if ( (*it).lastUpdated + CONTACT_TIME_OUT < timeNow )
+        if ( (*it).lastUpdated + VISUAL_CONTACT_TIME_OUT < timeNow )
         {
             it = visualContacts.erase(it);
         }
@@ -199,7 +200,7 @@ void CollidableMgr::removeOldContacts()
 
     for (auto it = this->aisContacts.cbegin(); it != this->aisContacts.cend();)
     {
-        if ( (*it).lastUpdated + CONTACT_TIME_OUT < timeNow )
+        if ( (*it).lastUpdated + AIS_CONTACT_TIME_OUT < timeNow )
         {
             it = aisContacts.erase(it);
         }
@@ -218,7 +219,7 @@ void CollidableMgr::ContactGC(CollidableMgr* ptr)
 {
     while(true)
     {
-        std::this_thread::sleep_for(std::chrono::milliseconds(CONTACT_TIME_OUT));
+        std::this_thread::sleep_for(std::chrono::milliseconds(std::min(AIS_CONTACT_TIME_OUT, VISUAL_CONTACT_TIME_OUT)));
         ptr->removeOldContacts();
     }
 }
