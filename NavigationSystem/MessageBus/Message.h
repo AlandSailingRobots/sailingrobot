@@ -25,13 +25,7 @@
 #include "SystemServices/SysClock.h"
 #endif
 
-struct AISVessel {
-  uint16_t COG;
-  uint16_t SOG;
-  int MMSI;
-  float latitude;
-  float longitude;
-};
+
 
 class Message {
 public:
