@@ -57,7 +57,6 @@ const ASRCourseBallot& MidRangeVoter::vote( const BoatState_t& boatState )
         double riskOfCollision = 0;
         float distance = 0;
         SAFE_DISTANCE = DEFAULT_SAFE_DISTANCE;
-
         for(uint16_t j = 0; j < aisContacts.length(); j++)
         {
             AISCollidable_t collidable = aisContacts.next();
@@ -67,11 +66,12 @@ const ASRCourseBallot& MidRangeVoter::vote( const BoatState_t& boatState )
             {
                 continue;
             }
-
             if (collidable.length != 0 && collidable.beam != 0) { //Make sure size data is available
               SAFE_DISTANCE = std::max(SAFE_DISTANCE, 1.5*collidable.length);
+              // if (SAFE_DISTANCE > DEFAULT_SAFE_DISTANCE) {
+              //   Logger::info("Safe distance: %f", SAFE_DISTANCE);
+              // }
             }
-            // Logger::info("HEJHEJ");
 
             double time = 0;
             float cpa = getCPA( collidable, boatState, i, time);
@@ -90,11 +90,11 @@ const ASRCourseBallot& MidRangeVoter::vote( const BoatState_t& boatState )
         }
         assignVotes(i, riskOfCollision);
 
-        if(closestCPA < 100)
-        {
-        Logger::info("CPA %f at %d so votes is %d", closestCPA, i, courseBallot.get(i));
-        Logger::info("Distance: %f ", distance);
-        }
+        // if(closestCPA < 100)
+        // {
+        // Logger::info("CPA %f at %d so votes is %d", closestCPA, i, courseBallot.get(i));
+        // Logger::info("Distance: %f ", distance);
+        // }
 
         aisContacts.reset();
     }

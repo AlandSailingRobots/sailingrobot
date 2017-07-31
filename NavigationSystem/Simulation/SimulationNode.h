@@ -48,6 +48,8 @@ struct AISContactPacket_t {
   float longitude;
   float speed;
   uint16_t course;
+  float length;
+  float beam;
 } __attribute__((packed));
 
 struct VisualContactPacket_t {

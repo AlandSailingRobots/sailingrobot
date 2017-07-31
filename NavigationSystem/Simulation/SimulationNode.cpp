@@ -142,7 +142,7 @@ void SimulationNode::createArduinoMessage()
 
 ///--------------------------------------------------------------------------------------
 void SimulationNode::processBoatData( TCPPacket_t& packet )
-{	
+{
 	if( packet.length - 1 == sizeof(BoatDataPacket_t) )
 	{
 		// The first byte is the packet type, lets skip that
@@ -175,8 +175,8 @@ void SimulationNode::processAISContact( TCPPacket_t& packet )
 		// The first byte is the packet type, lets skip that
 		uint8_t* ptr = packet.data + 1;
 		AISContactPacket_t* aisData = (AISContactPacket_t*)ptr;
-
 		this->collidableMgr->addAISContact(aisData->mmsi, aisData->latitude, aisData->longitude, aisData->speed, aisData->course);
+		this->collidableMgr->addAISContact(aisData->mmsi, aisData->length, aisData->beam);
 	}
 }
 
