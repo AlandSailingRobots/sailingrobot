@@ -69,7 +69,6 @@ const ASRCourseBallot& MidRangeVoter::vote( const BoatState_t& boatState )
             }
 
             if (collidable.length != 0 && collidable.beam != 0) { //Make sure size data is available
-              Logger::info("HEJHEJ");
               SAFE_DISTANCE = std::max(SAFE_DISTANCE, 1.5*collidable.length);
             }
             // Logger::info("HEJHEJ");

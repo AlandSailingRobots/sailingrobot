@@ -4,10 +4,10 @@
  * 		WaypointVoter.cpp
  *
  * Purpose:
- *		
+ *
  *
  * License:
- *      This file is subject to the terms and conditions defined in the file 
+ *      This file is subject to the terms and conditions defined in the file
  *      'LICENSE.txt', which is part of this source code package.
  *
  ***************************************************************************************/
@@ -36,7 +36,6 @@ const ASRCourseBallot& WaypointVoter::vote( const BoatState_t& boatState )
 
     Logger::info("Bearing to WP: %d Distance to WP: %f", boatState.waypointBearing, distance);
 
-    //std::cout << "Waypoint Votes: ";
     for( int i = 0; i < 90; i+= ASRCourseBallot::COURSE_RESOLUTION )
     {
         int16_t votes = courseBallot.maxVotes() - ( ( i / 90.f ) * (float)( courseBallot.maxVotes() ));
