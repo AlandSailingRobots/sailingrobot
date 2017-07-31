@@ -10,14 +10,14 @@
 
 class ActuatorNodeASPire : public Node {
 public:
-    ActuatorNodeASPire(MessageBus& msgBus, CANService& canService);
-    ~ActuatorNodeASPire();
-    bool init();
-    void processMessage(const Message* message);
+	ActuatorNodeASPire(MessageBus& msgBus, CANService& canService);
+	~ActuatorNodeASPire();
+	bool init();
+	void processMessage(const Message* message);
 
 private:
-    CANService* m_CANService;
-    const float MAX_RUDDER_ANGLE = 30;
+	CANService* m_CANService;
+	const float MAX_RUDDER_ANGLE = 30;
 	const float MAX_WINGSAIL_ANGLE = 13;
 	const float INT16_SIZE = 65535;
 	double rudderAngle;
