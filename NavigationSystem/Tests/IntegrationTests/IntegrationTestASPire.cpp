@@ -83,10 +83,8 @@ public:
 	bool init() { return true; }
 
 
-    void processMessage(const Message* message) {
-        MessageType type = message->messageType();
-
-				
+	void processMessage(const Message* message) {
+		MessageType type = message->messageType();
 
 		switch (type){
 					
@@ -123,7 +121,7 @@ public:
 				}
 		printSensorData();
 	}
-
+	
 	void printSensorData() {
 	 
 		wclear(m_Win);
