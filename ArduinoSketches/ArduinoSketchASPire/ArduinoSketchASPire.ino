@@ -119,7 +119,7 @@ void sendFeedback (){
       feedbackMsg.data[4] = 0;
       feedbackMsg.data[5] = 0;
       feedbackMsg.data[6] = 0;
-     
+      
       Canbus.SendMessage(&feedbackMsg);
     
 }
@@ -137,7 +137,7 @@ void sendArduinoData (){
     arduinoData.data[4] = 0;
     arduinoData.data[5] = 0;
     arduinoData.data[6] = 0;
-
+    
     Canbus.SendMessage(&arduinoData);   
 
 }
