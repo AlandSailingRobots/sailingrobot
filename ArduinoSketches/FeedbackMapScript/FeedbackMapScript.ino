@@ -1,7 +1,7 @@
 /*
- * This script is a modyfied coppy of the main ASPireArduinoScript as of Jully 2017. 
+ * This script is a modyfied copy of the main ASPireArduinoScript as of July 2017. 
  * It is used to get the analog feedback read for the angles to be used in MATLAB vector in GetRudder- and WingssailParamaters MATLAB files.
- * It is only to be used for testing the angles and not to be used dureing operation.
+ * It is only to be used for testing the angles and not to be used during operation.
  */
 
 

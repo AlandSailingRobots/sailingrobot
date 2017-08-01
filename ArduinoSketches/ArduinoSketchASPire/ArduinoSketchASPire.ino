@@ -25,9 +25,9 @@ const int MAESTRO_SIGNAL_MULTIPLIER = 4;
 // Rudder should go from -30 to +30 degrees
 // which gives an effective range of 60.
 const int MAX_RUDDER_ANGLE = 30;
+
 //Windsail should go from -13 to 13 degrees
 //range is 26
-
 const int MAX_WINGSAIL_ANGLE = 13;
 
 const double INT16_SIZE = 65535;
