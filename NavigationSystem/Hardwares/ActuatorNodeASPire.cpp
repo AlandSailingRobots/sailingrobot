@@ -12,10 +12,8 @@
 *
 ***************************************************************************************/
 
-
 #include "Hardwares/ActuatorNodeASPire.h"
-#include "Math/Utility.h"
-#include "Messages/ActuatorControlASPireMessage.h"
+
 
 ActuatorNodeASPire::ActuatorNodeASPire(MessageBus& msgBus, CANService& CANService)
 : Node(NodeID::ActuatorNodeASPire, msgBus), m_CANService(&CANService)
@@ -39,9 +37,9 @@ void ActuatorNodeASPire::processMessage(const Message* message)
 
 	if(type == MessageType::ActuatorControlASPire) {
 		const ActuatorControlASPireMessage* actMsg = dynamic_cast<const ActuatorControlASPireMessage*>(message);
-		rudderAngle = actMsg->rudderAngle();
-		wingsailAngle = actMsg->wingsailServoAngle();
-		WindvaneSelfSteeringOn = actMsg->windvaneSelfSteering();
+		m_rudderAngle = actMsg->rudderAngle();
+		m_wingsailAngle = actMsg->wingsailServoAngle();
+		m_indvaneSelfSteeringOn = actMsg->windvaneSelfSteering();
 					  
 		uint16_t rudderAngle16 = Utility::mapInterval (rudderAngle, -MAX_RUDDER_ANGLE, MAX_RUDDER_ANGLE, 0 , INT16_SIZE);
 		uint16_t wingsailAngle16 = Utility::mapInterval (wingsailAngle, -MAX_WINGSAIL_ANGLE, MAX_WINGSAIL_ANGLE, 0 , INT16_SIZE);

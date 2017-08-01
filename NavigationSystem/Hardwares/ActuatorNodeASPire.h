@@ -1,8 +1,20 @@
-
-
+/****************************************************************************************
+*
+* File:
+* 		CANArduinoNode.h
+*
+* Purpose:
+*		 Sends data to the Actuator unit with the rudder and wingsail angles over the CAN bus. 
+*
+* Developer Notes:
+*		 The CAN frame ID nubmer that this node subscribe to are:
+*			700
+*
+***************************************************************************************/
 
 #pragma once
 
+#include "Math/Utility.h"
 #include "MessageBus/MessageBus.h"
 #include "MessageBus/MessageTypes.h"
 #include "Messages/ActuatorControlASPireMessage.h"
@@ -20,8 +32,8 @@ private:
 	const float MAX_RUDDER_ANGLE = 30;
 	const float MAX_WINGSAIL_ANGLE = 13;
 	const float INT16_SIZE = 65535;
-	double rudderAngle;
-	double wingsailAngle;
-	bool WindvaneSelfSteeringOn;
+	double m_rudderAngle;
+	double m_wingsailAngle;
+	bool m_windvaneSelfSteeringOn;
 	
 };
