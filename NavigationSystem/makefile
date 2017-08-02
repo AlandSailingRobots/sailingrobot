@@ -143,8 +143,6 @@ export HW_NODES_JANET_SRC 	= Hardwares/ActuatorNode.cpp Hardwares/CV7Node.cpp Ha
 export XBEE_NETWORK_SRC     = Network/DataLink.cpp Network/LinuxSerialDataLink.cpp Network/XbeePacketNetwork.cpp \
                             	Xbee/Xbee.cpp Xbee/XbeeSyncNode.cpp
 
-export CANAIS_INTEGRATION_TEST = Tests/IntegrationTests/CANAISTest.cpp
-
 
 ###############################################################################
 # Rules
