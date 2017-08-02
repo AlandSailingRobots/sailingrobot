@@ -39,10 +39,10 @@ void ActuatorNodeASPire::processMessage(const Message* message)
 		const ActuatorControlASPireMessage* actMsg = dynamic_cast<const ActuatorControlASPireMessage*>(message);
 		m_rudderAngle = actMsg->rudderAngle();
 		m_wingsailAngle = actMsg->wingsailServoAngle();
-		m_indvaneSelfSteeringOn = actMsg->windvaneSelfSteering();
+		m_windvaneSelfSteeringOn = actMsg->windvaneSelfSteering();
 					  
-		uint16_t rudderAngle16 = Utility::mapInterval (rudderAngle, -MAX_RUDDER_ANGLE, MAX_RUDDER_ANGLE, 0 , INT16_SIZE);
-		uint16_t wingsailAngle16 = Utility::mapInterval (wingsailAngle, -MAX_WINGSAIL_ANGLE, MAX_WINGSAIL_ANGLE, 0 , INT16_SIZE);
+		uint16_t rudderAngle16 = Utility::mapInterval (m_rudderAngle, -MAX_RUDDER_ANGLE, MAX_RUDDER_ANGLE, 0 , INT16_SIZE);
+		uint16_t wingsailAngle16 = Utility::mapInterval (m_wingsailAngle, -MAX_WINGSAIL_ANGLE, MAX_WINGSAIL_ANGLE, 0 , INT16_SIZE);
 		
 		CanMsg Cmsg;
 		Cmsg.id = 700;
@@ -55,7 +55,7 @@ void ActuatorNodeASPire::processMessage(const Message* message)
 		(Cmsg.data[3] = wingsailAngle16 >> 8);
 		(Cmsg.data[4] = 0);
 		(Cmsg.data[5] = 0);
-		(Cmsg.data[6] = WindvaneSelfSteeringOn);
+		(Cmsg.data[6] = m_windvaneSelfSteeringOn);
 		(Cmsg.data[7] = 0);
 
 		m_CANService->sendCANMessage(Cmsg);

@@ -38,7 +38,7 @@ void CANArduinoNode::processMessage (const Message* message){
 }
 
 void CANArduinoNode::processFrame (CanMsg& msg) {
-	uint16_t rawDat
+	uint16_t rawData;
 
 	if (msg.id == 701) {
 		rawData = (msg.data[1] << 8 | msg.data[0]);		 
@@ -49,8 +49,8 @@ void CANArduinoNode::processFrame (CanMsg& msg) {
 
 		m_WindvaneSelfSteerAngle = (msg.data[5] << 8 | msg.data[4]);
 		m_WindvaneActuatorPos = msg.data[7];
-
-	} else if (msg.id == 702) {
+	}
+	else if (msg.id == 702) {
 		m_Radio_Controller_On = (msg.data[1] << 8 | msg.data[0]);
 	}
 }
