@@ -65,9 +65,6 @@ MicroMaestro maestro(maestroSerial);
 
 CanbusClass Canbus;
 
-double rudderAngleRatio = 65535 / MAX_RUDDER_ANGLE;
-double wingsailAngleRatio = 65535 / MAX_WINGSAIL_ANGLE;
-
 
 
 
@@ -91,9 +88,7 @@ void setup()
 void loop()
 {
   sendArduinoData ();
-  delay (50);
-  checkCanbusFor (50);
-  
+  checkCanbusFor (50);  
   sendFeedback ();
   checkCanbusFor (400); 
 }
@@ -208,10 +203,10 @@ void processCANMessage (CanMsg& msg){
         if(msg.id == 700) {
           uint16_t rawCanData = (msg.data[1]<<8 | msg.data[0]);
           double rudderAngel = mapInterval (rawCanData, 0, INT16_SIZE, -MAX_RUDDER_ANGLE, MAX_RUDDER_ANGLE);
-          Serial.print("Received rudder angle: "); Serial.println(rudderAngel);
+          //Serial.print("Received rudder angle: "); Serial.println(rudderAngel);
           rawCanData = (msg.data[3]<<8 | msg.data[2]);
           double wingsailAngle = mapInterval (rawCanData, 0, INT16_SIZE, -MAX_WINGSAIL_ANGLE, MAX_WINGSAIL_ANGLE);
-          Serial.print("Received wingsail angle: "); Serial.println(wingsailAngle);
+          //Serial.print("Received wingsail angle: "); Serial.println(wingsailAngle);
           
           moveRudder(rudderAngel);
           moveWingsail(wingsailAngle);          

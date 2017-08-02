@@ -10,7 +10,7 @@
 #include <PololuMaestro.h>
 #include <Canbus.h>
 #include <MsgParsing.h>
-#include "functions.h"
+
 const int RUDDER_MAESTRO_MAX_TARGET = 1900;
 const int RUDDER_MAESTRO_MIN_TARGET = 1150;
 const int WINGSAIL_MAESTRO_MAX_TARGET = 1950;
