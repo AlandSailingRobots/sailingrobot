@@ -411,7 +411,7 @@ double Utility::calculateTrueWindSpeed(int windsensorDir, int windsensorSpeed, d
 	}
 
 	if(apparentWindSpeed < 0.001){
-		return heading;
+		return gpsSpeed;
 	}
 
 	double u = gpsSpeed * sin( heading ) - windsensorSpeed * sin (apparentWindAngle);

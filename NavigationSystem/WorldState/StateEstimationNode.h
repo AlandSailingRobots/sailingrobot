@@ -1,10 +1,10 @@
 /****************************************************************************************
 *
 * File:
-* 		StateEstimationNode.h
+*       StateEstimationNode.h
 *
 * Purpose:
-*		Estimates the "current" state of the vessel. Collects datas from the GPS and compass messages.
+*       Estimates the "current" state of the vessel. Collects datas from the GPS and compass messages.
 *       Returns a VesselStateMsg corresponding at the estimated state of the vessel.
 *
 * Developer Notes:
@@ -50,7 +50,7 @@ public:
 
 private:
 
-    const int STATE_INITIAL_SLEEP = 2000;
+    const int STATE_INITIAL_SLEEP = 2000;  //in milliseconds
 
     ///----------------------------------------------------------------------------------
     /// Stores compass data from a CompassDataMsg.
@@ -90,24 +90,24 @@ private:
     static void StateEstimationNodeThreadFunc(ActiveNode* nodePtr);
 
 
-    double  m_LoopTime;
+    double  m_LoopTime;             // second
 
-    float   m_CompassHeading;
+    float   m_CompassHeading;       // degree [0, 360[
     bool    m_GpsOnline;
     double  m_GPSLat;
     double  m_GPSLon;
-    double  m_GPSSpeed;
-    double  m_GPSCourse;
-    float     m_WaypointDeclination;
+    double  m_GPSSpeed;             // m/s
+    double  m_GPSCourse;            // degree [0, 360[
+    float   m_WaypointDeclination;  // degree [??]
 
-    double  m_speed_1;
-    double  m_speed_2;
+    double  m_speed_1;              // m/s
+    double  m_speed_2;              // m/s
 
-    float   m_VesselHeading;
+    float   m_VesselHeading;        // degree [0, 360[
     double  m_VesselLat;
     double  m_VesselLon;
-    float   m_VesselSpeed;
-    float   m_VesselCourse;
+    float   m_VesselSpeed;          // m/s
+    float   m_VesselCourse;         // degree [0, 360[
 
     std::mutex m_lock;
 

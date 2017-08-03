@@ -1,11 +1,11 @@
 /****************************************************************************************
 *
 * File:
-*     WindStateNode.cpp
+*       WindStateNode.cpp
 *
 * Purpose:
-*   Estimates the true wind (speed and direction) from wind sensor and Vessel State datas.
-*   Returns a WindStateMsg corresponding to the true and apparent wind state (speed and direction).
+*       Estimates the true wind (speed and direction) from wind sensor and Vessel State datas.
+*       Returns a WindStateMsg corresponding to the true and apparent wind state (speed and direction).
 *
 * Developer Notes:
 *

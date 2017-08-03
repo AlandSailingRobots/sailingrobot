@@ -1,11 +1,11 @@
 /****************************************************************************************
 *
 * File:
-*     WindStateNode.h
+*       WindStateNode.h
 *
 * Purpose:
-*   Estimates the true wind (speed and direction) from wind sensor and Vessel State datas.
-*   Returns a WindStateMsg corresponding to the true and apparent wind state (speed and direction).
+*       Estimates the true wind (speed and direction) from wind sensor and Vessel State datas.
+*       Returns a WindStateMsg corresponding to the true and apparent wind state (speed and direction).
 *
 * Developer Notes:
 *
@@ -42,14 +42,14 @@ private:
     void updateApparentWind();
     void updateTrueWind();
 
-    float 	 m_WindDir;
-    float 	 m_WindSpeed;
-    float	 m_WindTemp;
+    float 	m_WindDir;
+    float 	m_WindSpeed;
+    float	m_WindTemp;
 
-    float 	 m_vesselHeading;
-    double	 m_vesselLat;
-    double	 m_vesselLon;
-    double	 m_vesselSpeed;
+    float 	m_vesselHeading;
+    double	m_vesselLat;
+    double  m_vesselLon;
+    double	m_vesselSpeed;
 
     // True Wind Speed / Direction are calculated and
     // updated whenever a Wind Data Message is received.
