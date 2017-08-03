@@ -88,9 +88,10 @@ void setup()
 void loop()
 {
   sendArduinoData ();
-  checkCanbusFor (50);  
+  checkCanbusFor (50);
   sendFeedback ();
   checkCanbusFor (400); 
+ 
 }
 
 
@@ -101,22 +102,27 @@ float mapInterval(float val, float fromMin, float fromMax, float toMin, float to
 
 void sendFeedback (){
  CanMsg feedbackMsg;
+ uint16_t rudderAngle16;
+ uint16_t wingsailAngle16;
+ 
+      
+      rudderAngle16 = getRudderFeedback ();
+      wingsailAngle16 = getWingsailFeedback();
+
       feedbackMsg.id = 701;
       feedbackMsg.header.ide = 0;
-      feedbackMsg.header.length = 7;      
-      uint16_t angle16 = getRudderFeedback ();
-      feedbackMsg.data[0] = (angle16 & 0xff);
-      feedbackMsg.data[1] = (angle16 >> 8);
-      angle16 = getWingsailFeedback();
-      feedbackMsg.data[2] = (angle16 & 0xff);
-      feedbackMsg.data[3] = (angle16 >> 8);
-
+      feedbackMsg.header.length = 7;  
+      
+      feedbackMsg.data[0] = (rudderAngle16 & 0xff);
+      feedbackMsg.data[1] = (rudderAngle16 >> 8);
+      feedbackMsg.data[2] = (wingsailAngle16 & 0xff);
+      feedbackMsg.data[3] = (wingsailAngle16 >> 8);
       feedbackMsg.data[4] = 0;
       feedbackMsg.data[5] = 0;
       feedbackMsg.data[6] = 0;
       
       Canbus.SendMessage(&feedbackMsg);
-    
+      
 }
 
 void sendArduinoData (){
@@ -141,6 +147,7 @@ void checkCanbusFor (int timeMs){
   int timer = 0;
   while (timer < timeMs){
     if (Canbus.CheckForMessages()) {
+    
     
     CanMsg msg;
     Canbus.GetMessage(&msg);
@@ -200,6 +207,7 @@ int isRadioControllerUsed (){
    
 
 void processCANMessage (CanMsg& msg){
+    
         if(msg.id == 700) {
           uint16_t rawCanData = (msg.data[1]<<8 | msg.data[0]);
           double rudderAngel = mapInterval (rawCanData, 0, INT16_SIZE, -MAX_RUDDER_ANGLE, MAX_RUDDER_ANGLE);
@@ -209,22 +217,25 @@ void processCANMessage (CanMsg& msg){
           //Serial.print("Received wingsail angle: "); Serial.println(wingsailAngle);
           
           moveRudder(rudderAngel);
-          moveWingsail(wingsailAngle);          
+          
+          moveWingsail(wingsailAngle);      
+             
       }
 }
 
 void moveRudder(double angleToSet) {
   float target = mapInterval(angleToSet, -MAX_RUDDER_ANGLE, MAX_RUDDER_ANGLE, 
                       RUDDER_MAESTRO_MIN_TARGET, RUDDER_MAESTRO_MAX_TARGET);
+  
   maestro.setTarget(RUDDER_MAESTRO_CHANNEL, target*MAESTRO_SIGNAL_MULTIPLIER);
-  maestro.getErrors();
+  maestro.getErrors(); //Used to clear any errors on the maestro inorder for it not to lock up
 }
 
 void moveWingsail(double angleToSet) {
   float target = mapInterval(angleToSet, -MAX_WINGSAIL_ANGLE, MAX_WINGSAIL_ANGLE,
                   WINGSAIL_MAESTRO_MIN_TARGET, WINGSAIL_MAESTRO_MAX_TARGET);
-  maestro.setTarget(WINGSAIL_MAESTRO_CHANNEL, target*MAESTRO_SIGNAL_MULTIPLIER);
-  maestro.getErrors();
+  maestro.setTarget(WINGSAIL_MAESTRO_CHANNEL, target*MAESTRO_SIGNAL_MULTIPLIER);  
+  maestro.getErrors(); //Used to clear any errors on the maestro inorder for it not to lock up
 }
 
 
