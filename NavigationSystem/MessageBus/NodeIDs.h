@@ -47,7 +47,9 @@ enum class NodeID {
 	ActuatorNodeASPire,
 	LowLevelControllerNodeJanet,
 	DBLoggerNode,
-	CANFeedbackReceiver
+	CANFeedbackReceiver,
+	CANArduino,
+
 };
 
 inline std::string nodeToString(NodeID id)
@@ -112,6 +114,9 @@ inline std::string nodeToString(NodeID id)
 		return "DBLoggerNode";
 		case NodeID::CANFeedbackReceiver:
 		return "CANFeedbackReceiver";
+		case NodeID::CANArduino:
+		return "CANArduino";
+
 	}
 	return "";
 }

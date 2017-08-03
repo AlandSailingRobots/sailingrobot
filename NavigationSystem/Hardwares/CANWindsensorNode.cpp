@@ -13,11 +13,7 @@
 ***************************************************************************************/
 
 #include "CANWindsensorNode.h"
-#include "Messages/WindDataMsg.h"
-#include "SystemServices/Timer.h"
 
-#include <chrono>
-#include <thread>
 
 CANWindsensorNode::CANWindsensorNode(MessageBus& msgBus, CANService& can_service, int time_filter_ms)
 : CANPGNReceiver(can_service, {130306, 130311}), ActiveNode(NodeID::WindSensor, msgBus), m_TimeBetweenMsgs(time_filter_ms)
@@ -26,6 +22,7 @@ CANWindsensorNode::CANWindsensorNode(MessageBus& msgBus, CANService& can_service
   m_WindSpeed = DATA_OUT_OF_RANGE;
   m_WindTemperature = DATA_OUT_OF_RANGE;
 
+  msgBus.registerNode(*this, MessageType::DataRequest);
 }
 
 CANWindsensorNode::~CANWindsensorNode(){}
@@ -40,9 +37,6 @@ void CANWindsensorNode::processPGN(N2kMsg &NMsg)
     parsePGN130306(NMsg, SID, WS, WA, Ref);
     m_WindDir = WA;
     m_WindSpeed = WS;
-
-    //		MessagePtr windData = std::make_unique<WindDataMsg>(m_WindDir, m_WindSpeed, m_WindTemperature);
-    //		m_MsgBus.sendMessage(std::move(windData));
   }
   else if(NMsg.PGN == 130311)
   {
@@ -51,9 +45,6 @@ void CANWindsensorNode::processPGN(N2kMsg &NMsg)
     float Temp, Hum, AP;
     parsePGN130311(NMsg, SID, TI, HI, Temp, Hum, AP);
     m_WindTemperature = Temp;
-
-    //		MessagePtr windData = std::make_unique<WindDataMsg>(m_WindDir, m_WindSpeed, m_WindTemperature);
-    //		m_MsgBus.sendMessage(std::move(windData));
   }
   else if(NMsg.PGN == 130312)
   {

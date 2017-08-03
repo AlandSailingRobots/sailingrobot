@@ -2,6 +2,9 @@
 
 #include <stdint.h>
 #include <vector>
+#include <map>
+
+typedef std::tuple<uint32_t,uint8_t> IDsID;
 
 struct CanMsg
 {
