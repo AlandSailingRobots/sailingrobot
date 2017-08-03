@@ -13,6 +13,7 @@
 ***************************************************************************************/
 
 #include "CANArduinoNode.h"
+#include "SystemServices/Logger.h"
 
 
 CANArduinoNode::CANArduinoNode(MessageBus& messageBus, CANService& canService, int time_filter_ms) :
