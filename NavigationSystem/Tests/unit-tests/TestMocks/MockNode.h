@@ -26,7 +26,7 @@
 
 
 
-class MockNode : Node {
+class MockNode : public Node {
 public:
 	MockNode(MessageBus& msgBus, bool& registered)
 	:Node(NodeID::MessageLogger, msgBus), m_MessageReceived(false), m_HasFix(false),
@@ -34,7 +34,8 @@ public:
 	m_WindvaneSelfSteeringOn(0)
 	{
 		if(msgBus.registerNode(*this, MessageType::GPSData) && msgBus.registerNode(*this, MessageType::WindData) &&
-		msgBus.registerNode(*this, MessageType::StateMessage) && msgBus.registerNode(*this, MessageType::NavigationControl))
+		msgBus.registerNode(*this, MessageType::StateMessage) && msgBus.registerNode(*this, MessageType::NavigationControl) &&
+		msgBus.registerNode(*this, MessageType::ServerConfigsReceived) && msgBus.registerNode(*this, MessageType::ActuatorPosition))
 		{
 			registered = true;
 		}
@@ -47,7 +48,6 @@ public:
 
 	void processMessage(const Message* message)
 	{
-
 		MessageType type = message->messageType();
 
 		switch(type)
@@ -78,7 +78,7 @@ public:
 				m_MessageReceived = true;
 				StateMessage* stateMsg = (StateMessage*)message;
 				m_StateMsgHeading = stateMsg->heading();
-				m_StateMsglLat = stateMsg->latitude();
+				m_StateMsgLat = stateMsg->latitude();
 				m_StateMsgLon = stateMsg->longitude();
 				m_StateMsgSpeed = stateMsg->speed();
 				m_StateMsgCourse = stateMsg->course();
@@ -101,6 +101,10 @@ public:
 				m_WindvaneSelfSteeringOn = navigationControlMsg->windvaneSelfSteeringOn();
 			}
 			break;
+			case MessageType::ServerConfigsReceived:
+			{
+				m_MessageReceived = true;
+			}
 			default:
 			return;
 		}
@@ -127,7 +131,7 @@ public:
     //StateMessage variables
 //=========================
 	float 	m_StateMsgHeading;
-	double	m_StateMsglLat;
+	double	m_StateMsgLat;
 	double	m_StateMsgLon;
 	double	m_StateMsgSpeed;
 	double  m_StateMsgCourse;

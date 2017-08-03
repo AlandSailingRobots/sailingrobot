@@ -18,3 +18,8 @@ void ActiveNode::runThread(void(*func)(ActiveNode*))
 {
 	m_Thread = new std::thread(func, this);
 }
+
+void ActiveNode::stopThread(ActiveNode* node)
+{
+	node->m_Thread->join();
+}

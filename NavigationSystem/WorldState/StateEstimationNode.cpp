@@ -17,6 +17,7 @@
 // For std::this_thread
 #include <chrono>
 #include <thread>
+#include <atomic>
 
 #include "Messages/StateMessage.h"
 #include "Math/CourseMath.h"
@@ -43,7 +44,14 @@ bool StateEstimationNode::init()
 
 void StateEstimationNode::start()
 {
-  runThread(StateEstimationNodeThreadFunc);
+    m_Running.store(true);
+    runThread(StateEstimationNodeThreadFunc);
+}
+
+void StateEstimationNode::stop()
+{
+    m_Running.store(false);
+    stopThread(this);
 }
 
 void StateEstimationNode::updateConfigsFromDB()
@@ -76,14 +84,12 @@ void StateEstimationNode::processMessage(const Message* msg)
 
 void StateEstimationNode::processCompassMessage(const CompassDataMsg* msg)
 {
-  std::lock_guard<std::mutex> lock_guard(m_lock);
   float currentVesselHeading = msg->heading();
   m_VesselHeading = Utility::addDeclinationToHeading(currentVesselHeading, m_Declination);
 }
 
 void StateEstimationNode::processGPSMessage(const GPSDataMsg* msg)
 {
-  std::lock_guard<std::mutex> lock_guard(m_lock);
   m_VesselLat = msg->latitude();
   m_VesselLon = msg->longitude();
   m_VesselSpeed = msg->speed();
@@ -108,7 +114,6 @@ int StateEstimationNode::getCourse(){
 
 void StateEstimationNode::processWaypointMessage( const WaypointDataMsg* msg )
 {
-  std::lock_guard<std::mutex> lock_guard(m_lock);
   m_Declination = msg->nextDeclination();
 }
 
@@ -123,10 +128,10 @@ void StateEstimationNode::StateEstimationNodeThreadFunc(ActiveNode* nodePtr)
   Timer timer;
   timer.start();
 
-  while(true)
+  while(node->m_Running.load() == true)
   {
-    if(node->m_GpsOnline){
-      std::lock_guard<std::mutex> lock_guard(node->m_lock);
+    if(node->m_GpsOnline)
+    {
       MessagePtr stateMessage = std::make_unique<StateMessage>(node->m_VesselHeading, node->m_VesselLat,
       node->m_VesselLon, node->m_VesselSpeed, node->getCourse());
       node->m_MsgBus.sendMessage(std::move(stateMessage));

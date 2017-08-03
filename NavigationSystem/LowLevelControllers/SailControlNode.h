@@ -22,6 +22,7 @@
 #include "DataBase/DBHandler.h"
 #include <mutex>
 #include <stdint.h>
+#include <atomic>
 
 
 class SailControlNode : public ActiveNode {
@@ -46,6 +47,7 @@ public:
     // Start the thread for the active node
     // -------------
     void start();
+    void stop();
 
     void updateConfigsFromDB();
     // -------------
@@ -121,4 +123,5 @@ private:
     // -------------
     // Informations
     std::mutex m_lock;
+    std::atomic<bool> m_Running;
 };

@@ -1003,7 +1003,7 @@ std::string DBHandler::getConfigs() {
 	Json js;
 
 	//Fetch all table names ending with "_config"
-	std::vector<std::string> configTables = getTableNames("%_config");
+	std::vector<std::string> configTables = getTableNames("%_config"); // NOTE : Marc : Modify this point
 
 	//Query config tables and select all from config tables with id "1"
 	//This json structure does not use arrays

@@ -28,7 +28,7 @@
 #include <chrono>
 
 #define INITIAL_SLEEP     2000
-#define LOOP_TIME         500
+#define LOOP_TIME         0.5
 
 
 // FILE* file = fopen("./gps.txt", "w");
@@ -66,7 +66,14 @@ bool LineFollowNode::init()
 
 void LineFollowNode::start()
 {
-  runThread(LineFollowNodeThreadFunc);
+    m_Running.store(true);
+    runThread(LineFollowNodeThreadFunc);
+}
+
+void LineFollowNode::stop()
+{
+    m_Running.store(false);
+    stopThread(this);
 }
 
 void LineFollowNode::updateConfigsFromDB()
@@ -322,14 +329,15 @@ void LineFollowNode::LineFollowNodeThreadFunc(ActiveNode* nodePtr)
     Timer timer;
     timer.start();
 
-    while(true)
+
+    while(node->m_Running.load() == true)
     {
-        double desiredCourse = node->calculateDesiredCourse();
+        std::lock_guard<std::mutex> lock_guard(node->m_lock);        double desiredCourse = node->calculateDesiredCourse();
         bool goingStarboard = node->getGoingStarboard();
         MessagePtr navMsg = std::make_unique<NavigationControlMsg>(desiredCourse, 0, false, node->m_tack, goingStarboard, NavigationState::sailToWaypoint);
         node->m_MsgBus.sendMessage( std::move( navMsg ) );
 
-        timer.sleepUntil( LOOP_TIME );
+        timer.sleepUntil(LOOP_TIME);
         timer.reset();
     }
 }

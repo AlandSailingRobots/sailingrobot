@@ -44,16 +44,24 @@ bool CourseRegulatorNode::init(){ return true;}
 ///----------------------------------------------------------------------------------
 void CourseRegulatorNode::start()
 {
+    m_Running.store(true);
     runThread(CourseRegulatorNodeThreadFunc);
+}
+
+///----------------------------------------------------------------------------------
+void CourseRegulatorNode::stop()
+{
+    m_Running.store(false);
+    stopThread(this);
 }
 
 ///----------------------------------------------------------------------------------
 void CourseRegulatorNode::updateConfigsFromDB()
 {
-    m_LoopTime = m_db.retrieveCellAsDouble("sailing_robot_config","1","loop_time");
-    m_MaxRudderAngle = m_db.retrieveCellAsDouble("sailing_robot_config","1","???");
-    pGain = m_db.retrieveCellAsDouble("sailing_robot_config","1","???");
-    iGain = m_db.retrieveCellAsDouble("sailing_robot_config","1","???");
+    m_LoopTime = m_db.retrieveCellAsDouble("course_regulator_config","1","loop_time");
+    m_MaxRudderAngle = m_db.retrieveCellAsDouble("course_regulator_config","1","maxRudderAngle");
+    pGain = m_db.retrieveCellAsDouble("course_regulator_config","1","pGain");
+    iGain = m_db.retrieveCellAsDouble("course_regulator_config","1","iGain");
 }
 
 ///----------------------------------------------------------------------------------
@@ -109,8 +117,8 @@ void CourseRegulatorNode::processNavigationControlMessage(const NavigationContro
 ///----------------------------------------------------------------------------------
 double CourseRegulatorNode::calculateRudderAngle()
 {
-    if((m_DesiredHeading != HEADING_ERROR_VALUE) and (m_VesselHeading != HEADING_ERROR_VALUE)){
-
+    if((m_DesiredHeading != HEADING_ERROR_VALUE) and (m_VesselHeading != HEADING_ERROR_VALUE))
+    {
         double difference_Heading = Utility::limitAngleRange(m_VesselHeading) - Utility::limitAngleRange(m_DesiredHeading);
         // Equation from book "Robotic Sailing 2015 ", page 141
         // The MAX_RUDDER_ANGLE is a parameter configuring the variation around the desired heading.
@@ -121,7 +129,7 @@ double CourseRegulatorNode::calculateRudderAngle()
             return Utility::sgn(m_VesselSpeed)*(Utility::sgn(sin(Utility::degreeToRadian(difference_Heading))))*m_MaxRudderAngle;
         }
         // Regulation of the rudder
-        return Utility::sgn(m_VesselSpeed)*(sin(Utility::degreeToRadian(difference_Heading))*m_MaxRudderAngle);
+        return Utility::sgn(m_VesselSpeed)*sin(Utility::degreeToRadian(difference_Heading))*m_MaxRudderAngle;
 
     }
     return 0;
@@ -139,19 +147,12 @@ void CourseRegulatorNode::CourseRegulatorNodeThreadFunc(ActiveNode* nodePtr)
     Timer timer;
     timer.start();
 
-    while(true)
+    while(node->m_Running.load() == true)
     {
-
-        node->m_lock.lock();
-        //std::lock_guard<std::mutex> lock_guard(node->m_lock);
         // TODO : Modify Actuator Message for adapt to this Node
         MessagePtr actuatorMessage = std::make_unique<ActuatorPositionMsg>(node->calculateRudderAngle(),0);
-        //std::cout << std::endl << "COURSE REG NODE ######### Send : CalcR " << node->calculateRudderAngle();
         node->m_MsgBus.sendMessage(std::move(actuatorMessage));
-        node->m_lock.unlock();
-
-        // Broadcast() or selected sent???
-        timer.sleepUntil(node->m_LoopTime); //insert updateFrequencyThread in the function ?
+        timer.sleepUntil(node->m_LoopTime);
         timer.reset();
     }
 }

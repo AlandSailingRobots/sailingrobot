@@ -18,6 +18,8 @@ public:
 
     void start();
 
+    void stop();
+
     bool init();
 
 private:
@@ -70,5 +72,6 @@ private:
     int m_queueSize;
 
     std::mutex m_lock;
+    std::atomic<bool> m_Running;
 
 };

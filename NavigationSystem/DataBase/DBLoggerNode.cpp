@@ -129,7 +129,7 @@ void DBLoggerNode::processMessage(const Message* msg) {
         break;
 
         case MessageType::ServerConfigsReceived:
-        updateConfigsFromDB();
+        //updateConfigsFromDB();
         break;
 
         default:
@@ -138,8 +138,15 @@ void DBLoggerNode::processMessage(const Message* msg) {
 }
 
 void DBLoggerNode::start() {
+    m_Running.store(true);
     runThread(DBLoggerNodeThreadFunc);
 }
+
+void DBLoggerNode::stop() {
+    m_Running.store(false);
+    stopThread(this);
+}
+
 
 bool DBLoggerNode::init() {
     return true;
@@ -162,7 +169,7 @@ void DBLoggerNode::DBLoggerNodeThreadFunc(ActiveNode* nodePtr) {
     timer2.start();
     node->m_dbLogger.startWorkerThread();
 
-    while(true) {
+    while(node->m_Running.load() == true) {
 
         timer.sleepUntil(node->m_TimeBetweenMsgs*1.0f / 1000);
         timer.reset();

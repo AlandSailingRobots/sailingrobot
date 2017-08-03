@@ -4,7 +4,7 @@
  * 		MessageCoreSuite.h
  *
  * Purpose:
- *		A set of unit tests for ensuring messages flow through the system and tests for 
+ *		A set of unit tests for ensuring messages flow through the system and tests for
  *		core framework.
  *
  * Developer Notes:
@@ -32,13 +32,13 @@
 #include "MessageBus/MessageBus.h"
 #include "SystemServices/Logger.h"
 #include <stdint.h>
-#include <thread>
 
 // For std::this_thread
 #include <chrono>
 #include <thread>
 
 #define WAIT_FOR_MESSAGE		300
+#define MESSAGE_CORE_TESTCOUNT  6
 
 
 class MessageCoreSuite : public CxxTest::TestSuite {
@@ -46,6 +46,7 @@ public:
 	MockNode* node;
 	std::thread* thr;
 	bool registered;
+    int testcount = 0;
 
 	// Cheeky method for declaring and initialising a static in a header file
 	static MessageBus& msgBus()
@@ -70,12 +71,18 @@ public:
 			node = new MockNode(msgBus(), registered);
 			thr = new std::thread(runMessageLoop);
 		}
+        testcount++;
 		std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_FOR_MESSAGE));
 	}
 
 	void tearDown()
 	{
-		//delete node;
+        if(testcount == MESSAGE_CORE_TESTCOUNT){
+            msgBus().stop();
+            thr->join();
+            delete thr;
+            delete node;
+        }
 	}
 
 	void test_NodeRegisteredAtStart()
@@ -125,7 +132,7 @@ public:
 		bool response = node->m_MessageReceived;
 		node->m_MessageReceived = false;
 
-		TS_ASSERT(response); 
+		TS_ASSERT(response);
 	}
 
 	void test_DirectMessageToSomeoneElse()
@@ -148,8 +155,7 @@ public:
 		MessagePtr windData = std::make_unique<WindDataMsg>(WindDataMsg(NodeID::MessageLogger, NodeID::None, 120, 90, 60));
 
 		msgBus().sendMessage(std::move(windData));
-
-		// Wait for the message to go through
+	// Wait for the message to go through
 		std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_FOR_MESSAGE));
 
 		TS_ASSERT_EQUALS(node->m_WindDir, 120);
@@ -157,6 +163,3 @@ public:
 		TS_ASSERT_EQUALS(node->m_WindTemp, 60);
 	}
 };
-
-
-

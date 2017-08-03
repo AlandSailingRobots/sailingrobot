@@ -4,7 +4,7 @@
  * 		HTTPSyncSuite.h
  *
  * Purpose:
- *		
+ *
  *
  * Developer Notes:
  *  - Still copypasting
@@ -32,9 +32,13 @@
 #include "HTTPSync/HTTPSyncNode.h"
 #include "MessageBus/MessageBus.h"
 #include "SystemServices/Logger.h"
+#include "DataBase/DBHandler.h"
+#include "DataBase/DBLoggerNode.h"
+#include "SystemServices/Timer.h"
 #include "TestMocks/MessageLogger.h"
 #include "Messages/LocalWaypointChangeMsg.h"
 #include "Messages/LocalConfigChangeMsg.h"
+#include "Messages/CompassDataMsg.h"
 #include <stdint.h>
 #include <thread>
 
@@ -44,7 +48,7 @@
 
 //I think these are needed
 #define WAIT_FOR_MESSAGE		300
-#define HTTP_TEST_COUNT				5
+#define HTTP_TEST_COUNT				6
 
 class HTTPSyncSuite : public CxxTest::TestSuite {
 public:
@@ -53,6 +57,11 @@ public:
 	MessageLogger* logger;
 	int testCount = 0;
     DBHandler* dbhandler;
+    DBLoggerNode* dbloggernode;
+	MockNode* mockNode;
+	bool nodeRegistered = false;
+
+	//Timer timer;
 
 	// Cheeky method for declaring and initialising a static in a header file
 	static MessageBus& msgBus()
@@ -74,24 +83,36 @@ public:
 
         if (httpsync == 0)
         {
+			mockNode = new MockNode(msgBus(), nodeRegistered);
             dbhandler = new DBHandler("../asr.db");
-            logger = new MessageLogger(msgBus());
-            httpsync = new HTTPSyncNode(msgBus(), dbhandler, 1, true);
+			dbloggernode = new DBLoggerNode(msgBus(),*dbhandler,100,1000,1);
+			dbloggernode->start();
+			logger = new MessageLogger(msgBus());
+            httpsync = new HTTPSyncNode(msgBus(), dbhandler, 1, false);
+			httpsync -> start();
             thr = new std::thread(runMessageLoop);
         }
 
         testCount++;
 		std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_FOR_MESSAGE));
-        
+
 	}
 
     void tearDown()
 	{
 		if(testCount == HTTP_TEST_COUNT)
 		{
+			dbloggernode->stop();
+			httpsync->stop();
+			msgBus().stop();
+			thr->join();
+			delete thr;
 			delete httpsync;
+			delete dbloggernode;
 			delete logger;
             delete dbhandler;
+			delete mockNode;
+			std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 		}
 	}
 
@@ -151,18 +172,43 @@ public:
         std::string newConfigString = dbhandler->getConfigs();
 
         TS_ASSERT_EQUALS(configString.compare(newConfigString),0);
-        
+
     }
 
     void test_HTTPSyncPushDataLogs(){
 
-        TS_ASSERT(httpsync->pushDatalogs());
+		MessagePtr compassDatalogs = std::make_unique<CompassDataMsg>(3,2,1);
+        msgBus().sendMessage(std::move(compassDatalogs));
         std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_FOR_MESSAGE));
         std::string currentLogs = dbhandler->getLogs(true);
         std::string emptyJson = "null";
-        TS_ASSERT_EQUALS(currentLogs.compare(emptyJson),0); //Logs are cleared on a successful push
+        TS_ASSERT_DIFFERS(currentLogs.compare(emptyJson),0); //Logs are cleared on a successful push
 
-    }
+		dbhandler->changeOneValue("httpsync_config","1","1","remove_logs");
+		MessagePtr serverConfig = std::make_unique<ServerConfigsReceivedMsg>();
+        msgBus().sendMessage(std::move(serverConfig));
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
+		TS_ASSERT(httpsync->pushDatalogs());
+		std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_FOR_MESSAGE));
+		currentLogs = dbhandler->getLogs(true);
+        TS_ASSERT_EQUALS(currentLogs.compare(emptyJson),0); //Logs are cleared on a successful push*/
+	}
 
+	void test_HTTPSyncUpdateDelay(){
+		/* NOTE : Marc : Don't know gow to check it because there is no periodic value to check the frequence
+
+		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+		dbhandler->changeOneValue("httpsync_config","1","2","delay");
+		/*MessagePtr serverConfig = std::make_unique<ServerConfigsReceivedMsg>();
+		mockNode->m_MessageReceived = false;
+        msgBus().sendMessage(std::move(serverConfig));
+        std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_FOR_MESSAGE));
+        while(not mockNode->m_MessageReceived);
+        timer.start();
+        mockNode->m_MessageReceived = false;
+        while(not mockNode->m_MessageReceived);
+        timer.stop();
+        TS_ASSERT_DELTA(timer.timePassed(), 2, 1e-1);
+	*/}
 };

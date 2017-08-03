@@ -41,6 +41,22 @@
   "acceleration":0
 },
 
+"course_regulator_config": {
+  "loop_time": 0.5,
+  "maxRudderAngle": 25.0,
+  "pGain": 0.2,
+  "iGain": 0.3
+},
+
+"sail_control_config": {
+  "loop_time": 0.5,
+  "maxSailAngle": 85.0,
+  "minSailAngle": 15.0,
+  "maxCommandAngle": 30.0,
+  "pGain": 0.2,
+  "iGain": 0.3
+},
+
 "sail_command_config": {
   "close_reach_command": 4000,
   "run_command": 5000

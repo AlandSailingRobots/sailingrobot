@@ -24,6 +24,7 @@
 #include "Network/TCPServer.h"
 #include <mutex>
 #include <stdint.h>
+#include <atomic>
 
 class StateEstimationNode : public ActiveNode {
 public:
@@ -36,6 +37,8 @@ public:
   /// Starts the StateEstimationNode's thread that pumps out StateMessages
   ///----------------------------------------------------------------------------------
   void start();
+
+  void stop();
 
   void updateConfigsFromDB();
 
@@ -66,16 +69,17 @@ private:
   double	m_VesselLat;
   double	m_VesselLon;
   double	m_VesselSpeed;
-  double  m_VesselCourse;
+  double    m_VesselCourse;
 
-  double m_LoopTime;
-  int m_Declination;
+  double    m_LoopTime;
+  int       m_Declination;
 
-  double m_SpeedLimit;
-  bool m_GpsOnline;
+  double    m_SpeedLimit;
+  bool      m_GpsOnline;
   const int STATE_INITIAL_SLEEP = 2000;
 
-  std::mutex m_lock;
-  DBHandler& m_dbHandler;
+  std::mutex            m_lock;
+  std::atomic<bool>     m_Running;
+  DBHandler&            m_dbHandler;
 
 };

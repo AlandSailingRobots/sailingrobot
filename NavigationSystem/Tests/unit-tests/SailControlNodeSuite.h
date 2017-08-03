@@ -29,7 +29,7 @@
 //#include "All.h"
 #include <math.h>
 
-#define SAIL_CONTROLNODE_TEST_COUNT   5
+#define SAIL_CONTROLNODE_TEST_COUNT   4
 
 
 class SailControlNodeSuite : public CxxTest::TestSuite
@@ -71,7 +71,7 @@ public:
     // setup them up once in this test, delete them when the program closes
     if(sControlNode == 0)
     {
-        dbHandler = new DBHandler("../test_asr.db");
+        dbHandler = new DBHandler("../asr.db");
         Logger::DisableLogging();
 
 
@@ -91,19 +91,15 @@ public:
   {
     if(testCount == SAIL_CONTROLNODE_TEST_COUNT)
     {
-       std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+      sControlNode->stop();
+      msgBus().stop();
+      thr->join();
+      delete thr;
       delete sControlNode;
       delete dbHandler;
-      delete mockNode;
-      //std::cout << std::endl << " #### DELETE OBJECT of the test #### " << std::endl;
       // Stay here for process the last message which return system::error
-      //std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-      thr->detach();
-      delete thr;
     }
-    else {
-            delete mockNode;
-    }
+    delete mockNode;
   }
 
   // ----------------

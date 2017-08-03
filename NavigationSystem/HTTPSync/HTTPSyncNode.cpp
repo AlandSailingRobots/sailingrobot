@@ -20,7 +20,7 @@
 #include "Messages/ServerWaypointsReceivedMsg.h"
 #include "SystemServices/Timer.h"
 
-
+#include <atomic>
 
 
 size_t write_to_string(void *ptr, size_t size, size_t count, void *stream) {
@@ -31,7 +31,9 @@ size_t write_to_string(void *ptr, size_t size, size_t count, void *stream) {
 HTTPSyncNode::HTTPSyncNode(MessageBus& msgBus, DBHandler *dbhandler, int delay, bool removeLogs)
 	:ActiveNode(NodeID::HTTPSync, msgBus), m_removeLogs(removeLogs), m_delay(delay), m_dbHandler(dbhandler)
 {
-
+    msgBus.registerNode( *this, MessageType::LocalWaypointChange);
+    msgBus.registerNode( *this, MessageType::LocalConfigChange);
+    msgBus.registerNode( *this, MessageType::ServerConfigsReceived);
 }
 
 bool HTTPSyncNode::init()
@@ -44,9 +46,9 @@ bool HTTPSyncNode::init()
 
     m_pushOnlyLatestLogs = m_dbHandler->retrieveCellAsInt("httpsync_config", "1", "push_only_latest_logs");
 
-    m_shipID = m_dbHandler->retrieveCell("server", "1", "boat_id");
+    m_shipID =    m_dbHandler->retrieveCell("server", "1", "boat_id");
     m_serverURL = m_dbHandler->retrieveCell("server", "1", "srv_addr");
-    m_shipPWD = m_dbHandler->retrieveCell("server", "1", "boat_pwd");
+    m_shipPWD =   m_dbHandler->retrieveCell("server", "1", "boat_pwd");
 
     m_initialised = true;
 
@@ -58,19 +60,24 @@ void HTTPSyncNode::start(){
 
     if (m_initialised)
     {
-
+        m_Running.store(true);
         runThread(HTTPSyncThread);
     }
     else
     {
         Logger::error("%s Cannot start HTTPSYNC thread as the node was not correctly initialised!", __PRETTY_FUNCTION__);
     }
-
 }
 
-void HTTPSyncNode::updateConfigsFromDB(){
-    m_removeLogs = m_dbHandler->retrieveCellAsInt("config_httpsync","1","remove_logs");
-    m_delay = m_dbHandler->retrieveCellAsInt("config_httpsync","1","delay");
+void HTTPSyncNode::stop()
+{
+    m_Running.store(false);
+}
+
+void HTTPSyncNode::updateConfigsFromDB()
+{
+    m_removeLogs = m_dbHandler->retrieveCellAsInt("httpsync_config","1","remove_logs");
+    m_delay = m_dbHandler->retrieveCellAsInt("httpsync_config","1","delay");
 }
 
 void HTTPSyncNode::processMessage(const Message* msgPtr)
@@ -109,19 +116,22 @@ void HTTPSyncNode::HTTPSyncThread(ActiveNode* nodePtr){
 
     Timer timer;
   	timer.start();
-    while(true)
+    while(node->m_Running.load() == true)
     {
+        std::cout << "\n /* Httpsync loop actif */ \n";
         node->getConfigsFromServer();
         node->getWaypointsFromServer();
         node->pushDatalogs();
 
         timer.sleepUntil(node->m_delay);
         timer.reset();
+
     }
-
+    std::cout << "/* Out loop */" << '\n';
     curl_global_cleanup();
-
+    std::cout << "/* Curl globql cleanup */" << '\n';
     Logger::info("HTTPSync thread has exited");
+    std::cout << "/* Exit httpsync */" << '\n';
 }
 
 bool HTTPSyncNode::pushDatalogs() {

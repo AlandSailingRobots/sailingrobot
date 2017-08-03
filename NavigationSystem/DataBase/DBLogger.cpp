@@ -16,9 +16,6 @@
 #include "DBLogger.h"
 
 
-bool DBLogger::m_working;
-
-
 DBLogger::DBLogger(unsigned int logBufferSize, DBHandler& dbHandler)
 	:m_dbHandler(dbHandler), m_bufferSize(logBufferSize)
 {
@@ -32,7 +29,7 @@ DBLogger::DBLogger(unsigned int logBufferSize, DBHandler& dbHandler)
 
 DBLogger::~DBLogger()
 {
-	m_working = false;
+	m_working.store(false);
 
 	// Wait for the mutex to be unlocked.
 	{
@@ -41,14 +38,14 @@ DBLogger::~DBLogger()
 	// instruct the worker thread to work
 	m_cv.notify_one();
 
-	m_thread->join();
+	//m_thread->join();
 
-	delete m_thread;
+	//delete m_thread;
 }
 
 void DBLogger::startWorkerThread()
 {
-	m_working = true;
+	m_working.store(true);
 	m_thread = new std::thread(workerThread, this);
 }
 
@@ -85,11 +82,10 @@ FloatOrDouble DBLogger::setValue(FloatOrDouble value) //Function to check if val
 
 void DBLogger::workerThread(DBLogger* ptr)
 {
-	while(m_working)
+	while(ptr->m_working.load() == true)
 	{
 		std::unique_lock<std::mutex> lk(ptr->m_mutex);
 		ptr->m_cv.wait(lk);
-
 		if(ptr->m_logBufferBack->size() > 0)
 		{
 			ptr->m_dbHandler.insertDataLogs(*ptr->m_logBufferBack);

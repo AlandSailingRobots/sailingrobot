@@ -194,6 +194,32 @@ DELETE FROM "arduino_datalogs" WHERE ID = OLD.arduino_id;
 END;
 
 -- -----------------------------------------------------
+-- Table course_regulator_config
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS "course_regulator_config";
+CREATE TABLE course_regulator_config (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  loop_time DOUBLE,
+  maxRudderAngle DOUBLE,
+  pGain DOUBLE,
+  iGain DOUBLE
+);
+
+-- -----------------------------------------------------
+-- Table sail_control_config
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS "sail_control_config";
+CREATE TABLE sail_control_config (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  loop_time DOUBLE,
+  maxSailAngle DOUBLE,
+  minSailAngle DOUBLE,
+  maxCommandAngle DOUBLE,
+  pGain DOUBLE,
+  iGain DOUBLE
+);
+
+-- -----------------------------------------------------
 -- Table sail_command_config
 -- -----------------------------------------------------
 DROP TABLE IF EXISTS "sail_command_config";

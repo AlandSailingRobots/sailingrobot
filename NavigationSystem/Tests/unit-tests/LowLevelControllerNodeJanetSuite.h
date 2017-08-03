@@ -71,7 +71,12 @@ public:
   {
     if(testCount == NODE_JANET_TEST_COUNT)
     {
-      delete nodeJanet;
+        msgBus().stop();
+        thr -> join();
+        delete thr;
+        delete nodeJanet;
+        delete dbHandler;
+        delete mockNode;
     }
   }
 

@@ -27,6 +27,8 @@
 #include "waypointrouting/RudderCommand.h"
 #include "Math/CourseMath.h"
 
+#include <atomic>
+
 
 class LineFollowNode : public ActiveNode {
 public:
@@ -35,6 +37,7 @@ public:
 
 	bool init();
 	void start();
+	void stop();
 	void processMessage(const Message* message);
 	void updateConfigsFromDB();
 
@@ -43,6 +46,8 @@ public:
 private:
 
 	DBHandler &m_db;
+	std::mutex m_lock;
+	std::atomic<bool> m_Running;
 
 	int 	m_nextWaypointId;
 	double 	m_nextWaypointLon;

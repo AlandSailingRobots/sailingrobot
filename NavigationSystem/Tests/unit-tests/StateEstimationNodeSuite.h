@@ -28,7 +28,7 @@
 #include <chrono>
 #include <thread>
 
-#define STATE_ESTIMATIONODE_TEST_COUNT   9
+#define STATE_ESTIMATIONODE_TEST_COUNT   8
 
 
 class StateEstimationNodeSuite : public CxxTest::TestSuite {
@@ -69,8 +69,7 @@ public:
         // setup them up once in this test, delete them when the program closes
         if(sEstimationNode == 0){
             Logger::DisableLogging();
-
-
+            dbhandler = new DBHandler("../asr.db");
             sEstimationNode = new StateEstimationNode(msgBus(), *dbhandler, .5, speedLimit);
             sEstimationNode->start();
             std::this_thread::sleep_for(std::chrono::milliseconds(2600));
@@ -85,16 +84,16 @@ public:
     // ----------------
     void tearDown()
     {
+        delete mockNode;
         if(testCount == STATE_ESTIMATIONODE_TEST_COUNT)
         {
+            sEstimationNode -> stop();
+            msgBus().stop();
+            thr->join();
+            delete thr;
             delete sEstimationNode;
             delete dbhandler;
-            delete mockNode;
             // Stay here for process the last message which return system::error
-            std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-        }
-        else{
-            delete mockNode;
         }
     }
 
@@ -189,7 +188,7 @@ public:
         msgBus().sendMessage(std::move(gpsData));
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
-        TS_ASSERT_EQUALS(mockNode->m_StateMsglLat, latitude);
+        TS_ASSERT_EQUALS(mockNode->m_StateMsgLat, latitude);
         TS_ASSERT_EQUALS(mockNode->m_StateMsgLon, longitude);
         TS_ASSERT_EQUALS(mockNode->m_StateMsgSpeed, speed);
         TS_ASSERT_EQUALS(mockNode->m_StateMsgCourse, heading);

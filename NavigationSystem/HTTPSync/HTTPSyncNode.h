@@ -7,6 +7,7 @@
 
 
 #include <chrono>
+#include <atomic>
 #include <thread>
 #include <curl/curl.h>
 #include <string>
@@ -25,6 +26,7 @@ class HTTPSyncNode : public ActiveNode{
 		///----------------------------------------------------------------------------------
         bool init();
         void start();
+		void stop();
 		void updateConfigsFromDB();
 
 		///----------------------------------------------------------------------------------
@@ -85,12 +87,13 @@ class HTTPSyncNode : public ActiveNode{
 		bool m_reportedConnectError;
 
 		///----------------------------------------------------------------------------------
-		/// Determines wether or not to clear all local logs after a successful push to server
+		/// Determines whether or not to clear all local logs after a successful push to server
 		///----------------------------------------------------------------------------------
 		bool m_removeLogs;
 		int m_delay;
 		int m_pushOnlyLatestLogs;
 
+		std::atomic<bool> m_Running;
 		DBHandler *m_dbHandler;
 
 };

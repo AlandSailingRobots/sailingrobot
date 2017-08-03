@@ -75,6 +75,9 @@
 	{
 		if(testCount == WAYPOINT_TEST_COUNT)
 		{
+            msgBus().stop();
+            thr->join();
+            delete thr;
 			delete waypoint;
 			delete logger;
 			delete dbHandler;

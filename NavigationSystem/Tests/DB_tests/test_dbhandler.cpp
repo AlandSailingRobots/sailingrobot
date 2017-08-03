@@ -290,6 +290,17 @@ TEST_CASE("DBhandler")
 		REQUIRE(db.retrieveCell("rudder_command_config","2","midship_command").compare("3000") == 0);
 	}
 
+	SECTION("Get/insert course regulator config") {
+		DBHandler db("testdb.db");
+		db.insert("course_regulator_config","loop_time, maxRudderAngle, pGain, iGain" ,"0.5,25.0,0.2,0.3");
+
+		REQUIRE(db.retrieveCell("course_regulator_config","2","loop_time").compare("0.5") == 0);
+		REQUIRE(db.retrieveCell("course_regulator_config","2","maxRudderAngle").compare("25.0") == 0);
+		REQUIRE(db.retrieveCell("course_regulator_config","2","pGain").compare("0.2") == 0);
+		REQUIRE(db.retrieveCell("course_regulator_config","2","iGain").compare("0.3") == 0);
+	}
+
+
 	SECTION("Get/insert sailing command config") {
 		DBHandler db("testdb.db");
 		db.insert("sail_command_config","close_reach_command, run_command" ,"0,0");

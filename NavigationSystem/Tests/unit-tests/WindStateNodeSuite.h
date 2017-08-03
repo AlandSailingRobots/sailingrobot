@@ -59,9 +59,15 @@ public:
 	}
 
 	void tearDown() {
-		if(testCount == WIND_STATE_TEST_COUNT) {
+		if(testCount == WIND_STATE_TEST_COUNT)
+		{
+			msgBus().stop();
+			thr->join();
+			delete thr;
+			delete logger;
 			delete verifier;
 			delete windStateNode;
+			delete dbhandler;
 		}
 	}
 

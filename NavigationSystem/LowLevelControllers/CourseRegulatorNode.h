@@ -23,6 +23,7 @@
 #include "DataBase/DBHandler.h"
 #include <mutex>
 #include <stdint.h>
+#include <atomic>
 
 class CourseRegulatorNode : public ActiveNode{
 public:
@@ -44,6 +45,8 @@ public:
     // Start the thread for the active node
     // -------------
     void start();
+
+    void stop();
 
     // -------------
     // Listen the message concerning this Node
@@ -124,5 +127,5 @@ private:
     double m_VesselCourse; // units : ° (degrees), from 0 to 359
     */
     std::mutex m_lock;                      //Mutex to lock the node
-
+    std::atomic<bool> m_Running;
 };
