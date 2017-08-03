@@ -20,6 +20,7 @@
 #include "Hardwares/CAN_Services/CANService.h"
 #include "Hardwares/CAN_Services/N2kMsg.h"
 #include "SystemServices/Timer.h"
+#include "SystemServices/Logger.h"
 #include "Messages/ASPireActuatorFeedbackMsg.h"
 #include "Messages/ActuatorControlASPireMessage.h"
 #include "Messages/WindDataMsg.h"
@@ -47,6 +48,10 @@
 
 #define MAX_INPUT 20
 
+#define DATA_OUT_OF_RANGE -2000
+#define ON -3000
+#define OFF -4000
+
 typedef std::unordered_map<std::string, float> SensorData;
 
 /*
@@ -59,19 +64,19 @@ typedef std::unordered_map<std::string, float> SensorData;
 
 class SensorDataReceiver : public Node {
 public:
-	SensorDataReceiver(MessageBus& msgBus, float timeBetweenPrints) : 
-	Node(NodeID::None, msgBus), m_TimeBetweenPrints(timeBetweenPrints)
+	SensorDataReceiver(MessageBus& msgBus) : 
+	Node(NodeID::None, msgBus)
 	{
 		msgBus.registerNode(*this, MessageType::WindData);
 		msgBus.registerNode(*this, MessageType::ASPireActuatorFeedback);
 		msgBus.registerNode(*this, MessageType::ArduinoData);
 
-		m_SensorValues["Rudder Angle"] = -2000;
-		m_SensorValues["Wingsail Angle"] = -2000;
-		m_SensorValues["Wind Speed"] = -2000;        
-		m_SensorValues["Wind Direction"] = -2000;
-		m_SensorValues["Wind Temperature"] = -2000;
-		m_SensorValues["RC Mode"] = -2000;
+		m_SensorValues["Rudder Angle"] = DATA_OUT_OF_RANGE;
+		m_SensorValues["Wingsail Angle"] = DATA_OUT_OF_RANGE;
+		m_SensorValues["Wind Speed"] = DATA_OUT_OF_RANGE;        
+		m_SensorValues["Wind Direction"] = DATA_OUT_OF_RANGE;
+		m_SensorValues["Wind Temperature"] = DATA_OUT_OF_RANGE;
+		m_SensorValues["RC Mode"] = DATA_OUT_OF_RANGE;
 				
 		m_Win = newwin(6+2*m_SensorValues.size(),60,1,2);
 		
@@ -85,7 +90,6 @@ public:
 
 	void processMessage(const Message* message) {
 		MessageType type = message->messageType();
-
 		switch (type){
 					
 			case MessageType::ASPireActuatorFeedback:
@@ -109,9 +113,9 @@ public:
 				{
 				const ArduinoDataMsg* arduinomsg = dynamic_cast<const ArduinoDataMsg*>(message);
 				if (arduinomsg->Radio_Controller() > 10) {
-					m_SensorValues["RC Mode"] = -3000;
+					m_SensorValues["RC Mode"] = ON;
 				} else {
-					m_SensorValues["RC Mode"] = -4000;
+					m_SensorValues["RC Mode"] = OFF;
 				}
 				}        
 				break;
@@ -137,9 +141,9 @@ public:
 			wmove(m_Win, pos, 35);
 			if(it.second == -2000) {
 				wprintw(m_Win, "%s", "Data not available.");
-			} else if (it.second == -3000) {
+			} else if (it.second == ON) {
 				wprintw(m_Win, "%s", "On");
-			} else if (it.second == -4000) {
+			} else if (it.second == OFF) {
 				wprintw(m_Win, "%s", "Off");
 			} else {
 				wprintw(m_Win, "%f", it.second);
@@ -156,12 +160,6 @@ public:
 
 private:
 	
-	float m_TimeBetweenPrints;
-	float m_RudderAngle = -2000;
-	float m_WingsailAngle = -2000;
-	float m_WindSpeed = -2000;
-	float m_WindDirection = -2000;
-	float m_WindTemp = -2000;
 
 	SensorData m_SensorValues;
 
@@ -245,13 +243,14 @@ int main() {
 
 	// Initialize Ncurses
 	initscr();
+	Logger::init("integrationTest.log");
 
 	// Comment out this line if not running on the pi
 	// otherwise program will crash.
 	auto future = canService.start();
 
 
-	SensorDataReceiver sensorReceiver(msgBus, 250);
+	SensorDataReceiver sensorReceiver(msgBus);
 	CANWindsensorNode windSensor(msgBus, canService, 500);
 
 	CANArduinoNode arduino (msgBus, canService, 500);
