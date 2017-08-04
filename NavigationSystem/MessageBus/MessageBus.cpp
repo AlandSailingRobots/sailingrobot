@@ -154,7 +154,6 @@ void MessageBus::processMessages()
 			{
 				if(node->nodeRef.nodeID() == msg->destinationID())
 				{
-
 					node->nodeRef.processMessage(msg);
 					logMessageConsumer(node->nodeRef.nodeID());
 

@@ -39,6 +39,7 @@ struct AISVesselInfo {
   float beam;
 };
 
+
 class Message {
 public:
 	///----------------------------------------------------------------------------------

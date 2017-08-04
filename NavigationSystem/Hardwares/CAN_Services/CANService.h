@@ -82,6 +82,7 @@ private:
   bool IsFastPackage(const N2kMsg &nMsg);
 
 /* Private variables */
+
   std::map<uint32_t, CANPGNReceiver*>   m_RegisteredPGNReceivers;
   std::map<uint32_t, CANFrameReceiver*> m_RegisteredFrameReceivers;
   std::map<IDsID, FastPKGInfo> FastPackages;

@@ -1,0 +1,108 @@
+{
+"arduino_config": {
+  "loop_time": 0.1
+},
+
+"buffer_config": {
+  "compass": 1,
+  "true_wind": 80,
+  "windsensor": 1
+},
+
+"course_calculation_config": {
+  "tack_angle": 20,
+  "tack_max_angle": 60,
+  "tack_min_speed": 5,
+  "sector_angle": 10
+},
+
+"gpsd_config": {
+  "loop_time": 0.5
+},
+
+"httpsync_config": {
+  "delay": 0,
+  "remove_logs": 0,
+  "push_only_latest_logs": 1
+},
+
+"i2c_config": {
+  "loop_time": 0.1
+},
+
+"maestro_controller_config": {
+  "port": "/dev/ttyACM0"
+},
+
+"rudder_command_config": {
+  "extreme_command": 7000,
+  "midship_command": 5520
+},
+
+"rudder_servo_config": {
+  "channel": 4,
+  "speed":0,
+  "acceleration":0
+},
+
+"sail_command_config": {
+  "close_reach_command": 4000,
+  "run_command": 5000
+},
+
+"sail_servo_config": {
+  "channel": 3,
+  "speed": 0,
+  "acceleration":0
+},
+
+"sailing_robot_config": {
+  "flag_heading_compass": 1,
+  "loop_time": 0.5,
+  "scanning": 0,
+  "line_follow": 1,
+  "require_network": 1
+},
+
+"server": {
+  "boat_id": "BOAT02",
+  "boat_pwd": "PWD02",
+  "srv_addr": "http://www.sailingrobots.com/testdata/sync/"
+},
+
+"vesselState_config": {
+  "loop_time": 0.5,
+  "speedLimit": 0.5
+},
+
+"waypoint_routing_config": {
+  "radius_ratio": 0.1,
+  "sail_adjust_time": 5,
+  "adjust_degree_limit": 25,
+  "max_command_angle": 90,
+  "rudder_speed_min": 1
+},
+
+"wind_vane_config": {
+  "use_self_steering": 1,
+  "wind_sensor_self_steering": 1,
+  "self_steering_interval": 1.5
+},
+
+"windsensor_config": {
+  "port": "/dev/ttyS0",
+  "baud_rate": 4800
+},
+
+"windState_config": {
+  "time_filter_ms": 500
+},
+
+"xbee_config": {
+  "send": 1,
+  "recieve": 1,
+  "send_logs": 0,
+  "loop_time": 0.1,
+  "push_only_latest_logs": 1
+}
+}

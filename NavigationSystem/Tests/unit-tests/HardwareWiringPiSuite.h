@@ -34,7 +34,7 @@
 #include <cstdlib>
 #include <stdint.h>
 #include <iostream>
-#include "libs/wiringPi/wiringPi/wiringPiI2C.h"
+#include "Libs/wiringPi/wiringPi/wiringPiI2C.h"
 #include "../cxxtest/cxxtest/TestSuite.h"
 // For std::this_thread
 #include <chrono>
@@ -79,42 +79,42 @@ public:
 		}
 	}
 
-	void test_wiringPiWriteBlock()
-	{
-		std::cout << "\nstart read block...\n";
-		uint8_t block[12];
-		uint8_t size = 9;
-		int command = 20;
+	// void test_wiringPiWriteBlock()
+	// {
+	// 	std::cout << "\nstart read block...\n";
+	// 	uint8_t block[12];
+	// 	uint8_t size = 9;
+	// 	int command = 20;
 
-		std::cout << "\ncommand =: " << command << "\n";	
-		for (int i = 0; i < size; i++)
-		{
-			block[i]=i;
-			std::cout << "Val " << i << ": " << i << "\n";
-		}
+	// 	std::cout << "\ncommand =: " << command << "\n";	
+	// 	for (int i = 0; i < size; i++)
+	// 	{
+	// 		block[i]=i;
+	// 		std::cout << "Val " << i << ": " << i << "\n";
+	// 	}
 
-		int writeBlockRet = wiringPiI2CWriteBlock(deviceFD, command, (char*)block, size);
-		std::cout << "Return Val: " << writeBlockRet << "\n";
+	// 	int writeBlockRet = wiringPiI2CWriteBlock(deviceFD, command, (char*)block, size);
+	// 	std::cout << "Return Val: " << writeBlockRet << "\n";
 
-	}
+	// }
 
-	void test_wiringPiWriteI2CBlock()
-	{
-		std::cout << "\nstart read block...\n";
-		uint8_t block[12];
-		uint8_t size = 9;
-		int command = 20;
+	// void test_wiringPiWriteI2CBlock()
+	// {
+	// 	std::cout << "\nstart read block...\n";
+	// 	uint8_t block[12];
+	// 	uint8_t size = 9;
+	// 	int command = 20;
 
-		std::cout << "\ncommand =: " << command << "\n";	
-		for (int i = 0; i < size; i++)
-		{
-			block[i]=i;
-			std::cout << "Val " << i << ": " << i << "\n";
-		}
+	// 	std::cout << "\ncommand =: " << command << "\n";	
+	// 	for (int i = 0; i < size; i++)
+	// 	{
+	// 		block[i]=i;
+	// 		std::cout << "Val " << i << ": " << i << "\n";
+	// 	}
 
-		int writeBlockRet = wiringPiI2CWriteI2CBlock(deviceFD, command, (char*)block, size);
-		std::cout << "Return Val: " << writeBlockRet << "\n";
+	// 	int writeBlockRet = wiringPiI2CWriteI2CBlock(deviceFD, command, (char*)block, size);
+	// 	std::cout << "Return Val: " << writeBlockRet << "\n";
 
-	}
+	// }
 
 };

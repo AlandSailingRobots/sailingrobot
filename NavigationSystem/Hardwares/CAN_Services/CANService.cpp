@@ -1,3 +1,4 @@
+
 #include "CANService.h"
 #include "global.h"
 
@@ -77,7 +78,7 @@ std::future<void> CANService::start()
 
 void CANService::run()
 {
-  bool done;
+  bool ParsedEntireMessage;
   N2kMsg Nmsg;
   while(m_Running.load() == true)
   {
@@ -87,18 +88,18 @@ void CANService::run()
     {
       if(Cmsg.header.ide == 1)
       {
-        done = false;
+        ParsedEntireMessage = false;
         IdToN2kMsg(Nmsg, Cmsg.id);
         if (IsFastPackage(Nmsg)) {
-          done = ParseFastPkg(Cmsg, Nmsg);
+          ParsedEntireMessage = ParseFastPkg(Cmsg, Nmsg);
         }
         else {
           CanMsgToN2kMsg(Cmsg, Nmsg);
-          done = true;
+          ParsedEntireMessage = true;
         }
         auto receiverIt = m_RegisteredPGNReceivers.find(Nmsg.PGN);
 
-        if (done) {
+        if (ParsedEntireMessage) {
           if(receiverIt != m_RegisteredPGNReceivers.end())
           {  // Iterator is a pair, of which the second element is the actual receiver.
             CANPGNReceiver* receiver = receiverIt->second;

@@ -49,7 +49,6 @@ bool HTTPSyncNode::init()
     m_shipPWD = m_dbHandler->retrieveCell("server", "1", "boat_pwd");
 
     m_initialised = true;
-    Logger::info("HTTPSyncNode init() successful");
 
     return m_initialised;
 
@@ -104,11 +103,11 @@ void HTTPSyncNode::HTTPSyncThread(ActiveNode* nodePtr){
   	timer.start();
     while(true)
     {
-        timer.sleepUntil(node->m_delay);
-
         node->getConfigsFromServer();
         node->getWaypointsFromServer();
         node->pushDatalogs();
+        
+        timer.sleepUntil(node->m_delay);
         timer.reset();
     }
 
