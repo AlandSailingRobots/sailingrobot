@@ -50,7 +50,7 @@ public:
 		if(windStateNode == 0){
 			verifier = new MessageVerifier(msgBus());
 			logger = new MessageLogger(msgBus());
-			windStateNode = new WindStateNode(msgBus(), twdSize);
+			windStateNode = new WindStateNode(msgBus());
 			thr = new std::thread(runMessageLoop);
 		}
 		testCount++;

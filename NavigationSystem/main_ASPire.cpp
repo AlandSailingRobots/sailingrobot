@@ -144,8 +144,7 @@ int main(int argc, char *argv[])
 	bool removeLogs = dbHandler.retrieveCellAsInt("httpsync_config","1","remove_logs");
 	HTTPSyncNode httpsync(messageBus, &dbHandler, dbHandler_delay, removeLogs);
 
-  	int maxTwdBufferSize = dbHandler.retrieveCellAsDouble("windState_config", "1", "time_filter_ms");
-	WindStateNode windStateNode(messageBus, maxTwdBufferSize);
+	WindStateNode windStateNode(messageBus);
 
 	WaypointMgrNode waypoint(messageBus, dbHandler);
 
