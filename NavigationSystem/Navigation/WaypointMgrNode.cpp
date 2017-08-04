@@ -95,7 +95,7 @@ bool WaypointMgrNode::waypointReached()
         seconds = seconds % 60;
         Logger::info("\tTook %d:%d:%d to complete", hours, minutes, seconds);
         m_routeTime.reset();
-
+        sendMessage();
         return true;
     }
     else
@@ -168,7 +168,7 @@ bool WaypointMgrNode::harvestWaypoint()
             return true;
         }
 
-        return false;   
+        return false;
     }
     else //if no timer for waypoint, harvest it
     {

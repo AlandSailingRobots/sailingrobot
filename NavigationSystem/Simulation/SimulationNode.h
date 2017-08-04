@@ -24,6 +24,7 @@
 #include "Messages/WindDataMsg.h"
 #include "Messages/ArduinoDataMsg.h"
 #include "Messages/ActuatorPositionMsg.h"
+#include "Messages/WaypointDataMsg.h"
 #include "Network/TCPServer.h"
 #include "WorldState/CollidableMgr/CollidableMgr.h"
 
@@ -63,6 +64,20 @@ struct ActuatorDataPacket_t {
   uint16_t sailCommand;
 }__attribute__((packed));
 
+struct WaypointPacket_t {
+  int nextId;
+  double nextLongitude;
+  double nextLatitude;
+  int nextDeclination;
+  int nextRadius;
+  int nextStayTime;
+  int prevId;
+  double prevLongitude;
+  double prevLatitude;
+  int prevDeclination;
+  int prevRadius;
+}__attribute__((packed));
+
 
 class SimulationNode : public ActiveNode {
 public:
@@ -85,6 +100,8 @@ public:
 	/// Stores compass data from a ActuatorPositionMsg.
 	///----------------------------------------------------------------------------------
 	void processActuatorPositionMessage(ActuatorPositionMsg* msg);
+
+  void processWaypointMessage(WaypointDataMsg* msg);
 
 private:
 
@@ -114,6 +131,11 @@ private:
   void sendActuatorData( int socketFD );
 
   ///----------------------------------------------------------------------------------
+  /// Sends the waypoint
+  ///----------------------------------------------------------------------------------
+  void sendWaypoint( int socketFD );
+
+  ///----------------------------------------------------------------------------------
 	/// Communicate with the simulation receive sensor data and send actuator data
 	///----------------------------------------------------------------------------------
 	//static void SimulationThreadFunc(void* nodePtr);
@@ -134,6 +156,7 @@ private:
 	int 	  m_ArduinoSheet;
 
   ActuatorDataPacket_t actuatorData;
+  WaypointPacket_t waypoint;
   TCPServer server;
   CollidableMgr* collidableMgr;
 

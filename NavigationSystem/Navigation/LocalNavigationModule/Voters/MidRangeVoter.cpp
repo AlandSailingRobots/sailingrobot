@@ -37,7 +37,7 @@ const ASRCourseBallot& MidRangeVoter::vote( const BoatState_t& boatState )
     * Previously: We had a constant SAFE_DISTANCE = 100 and didn't account for size at all
     * New, improved and groundbreaking way:
     * A default safe distance that we use if size data is unavailable or it is a smaller vessel
-    * Otherwise the safe distance is 1.5 times it's length, meaning we want to stay 300 meters clear
+    * Otherwise the safe distance is LENGTH_FACTOR times it's length, meaning we want to stay 300 meters clear
     * of a vessel that is 200 meters long
     * cpa_weight is to make sure that if we are close to multiple vessels, the larger vessel
     * will be prioritized even though we may have a smaller cpa for the smaller vessel
@@ -47,6 +47,7 @@ const ASRCourseBallot& MidRangeVoter::vote( const BoatState_t& boatState )
     static const double MIN_DISTANCE = 100;//100; // 200 Metres
     static const double MAX_DISTANCE = 1000; // 1KM
     static const double DEFAULT_SAFE_DISTANCE = 100;
+    static const double LENGTH_FACTOR = 1.5;
     double SAFE_DISTANCE, cpa_weight, cpa_current_weight = 1., safe_dist_cpa = DEFAULT_SAFE_DISTANCE;
     CollidableList<AISCollidable_t> aisContacts = collidableMgr.getAISContacts();
 
@@ -67,10 +68,7 @@ const ASRCourseBallot& MidRangeVoter::vote( const BoatState_t& boatState )
                 continue;
             }
             if (collidable.length != 0 && collidable.beam != 0) { //Make sure size data is available
-              SAFE_DISTANCE = std::max(SAFE_DISTANCE, 1.5*collidable.length);
-              // if (SAFE_DISTANCE > DEFAULT_SAFE_DISTANCE) {
-              //   Logger::info("Safe distance: %f", SAFE_DISTANCE);
-              // }
+              SAFE_DISTANCE = std::max(SAFE_DISTANCE, LENGTH_FACTOR*collidable.length);
             }
 
             double time = 0;

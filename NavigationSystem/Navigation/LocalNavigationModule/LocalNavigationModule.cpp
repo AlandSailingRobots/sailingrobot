@@ -4,10 +4,10 @@
  * 		LocalNavigationModule.cpp
  *
  * Purpose:
- *		
+ *
  *
  * License:
- *      This file is subject to the terms and conditions defined in the file 
+ *      This file is subject to the terms and conditions defined in the file
  *      'LICENSE.txt', which is part of this source code package.
  *
  ***************************************************************************************/
@@ -73,6 +73,11 @@ void LocalNavigationModule::processMessage( const Message* msg )
             boatState.lat = gps->latitude();
             boatState.lon = gps->longitude();
             boatState.speed = gps->speed();
+            if ((boatState.lastWaypointLat == 0) & (boatState.lastWaypointLon == 0)) {
+              // Set the boats start position as last wp for the first waypoint
+              boatState.lastWaypointLat = boatState.lat;
+              boatState.lastWaypointLon = boatState.lon;
+            }
         }
             break;
 
@@ -97,7 +102,7 @@ void LocalNavigationModule::processMessage( const Message* msg )
             double distance = CourseMath::calculateDTW( boatState.lon, boatState.lat, boatState.currWaypointLon, boatState.currWaypointLat );
             Logger::info( "New Waypoint! Lat: %f Lon: %f Distance: %f", boatState.currWaypointLat, boatState.currWaypointLon, distance );
 
-            // Delibrate dropdown after a new waypoint, we want to start a new ballot 
+            // Delibrate dropdown after a new waypoint, we want to start a new ballot
             // and get a new heading
         }
         case MessageType::RequestCourse:
@@ -125,14 +130,14 @@ void LocalNavigationModule::startBallot()
 
     std::vector<ASRVoter*>::iterator it;
 
-    for( it = voters.begin(); it != voters.end(); it++ ) 
+    for( it = voters.begin(); it != voters.end(); it++ )
     {
         ASRVoter* voter = (*it);
         arbiter.castVote( voter->weight(), voter->vote( boatState ) );
     }
 
     printf("[Voters] "); // Debug
-    for( it = voters.begin(); it != voters.end(); it++ ) 
+    for( it = voters.begin(); it != voters.end(); it++ )
     {
         ASRVoter* voter = (*it);
         int16_t votes = 0;
