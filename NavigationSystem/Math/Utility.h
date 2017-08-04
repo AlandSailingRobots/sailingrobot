@@ -64,9 +64,12 @@ public:
 		                                         double &apparentWindSpeed, double &apparentWindDirection);
 	static double getApparentWindSpeed(const int windsensorDir, const int windsensorSpeed, const double gpsSpeed, const double heading, const double trueWindDirection);
 	static double getApparentWindDirection(const int windsensorDir, const int windsensorSpeed, const double gpsSpeed, const double heading, const double trueWindDirection);
-
-
-
+	
+	/*
+	 * Add two vectors expressed in polar coordinates and return the resulting vector (in polar coordinates).
+	 * vector = (radius, angle).		Angles are in radian, in [0, 2*PI[.
+	 */
+	static std::vector<double> polarVerctorsAddition(std::vector<double> v1, std::vector<double> v2);
 
 	static void sphericalCoordinateSystem( const double lat, const double lon, double& x, double& y);
 	static void calculateVelocity( const uint16_t course, const double speed, double& vX, double& vY );

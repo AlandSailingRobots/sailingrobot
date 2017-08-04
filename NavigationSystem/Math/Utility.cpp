@@ -364,6 +364,7 @@ double Utility::calculateWaypointsOrthogonalLine(const double nextLon, const dou
  * uses formula for calculating true Wind Direction
  * https://en.wikipedia.org/wiki/Apparent_wind
  */
+ // NOTE - Maël: confusion between heading and course.
 double Utility::calculateTrueWindDirection(const int windsensorDir, const int windsensorSpeed, const double gpsSpeed, const double heading){
 
 	//double knots = 1.94384;
@@ -397,6 +398,7 @@ double Utility::calculateTrueWindDirection(const int windsensorDir, const int wi
 	return twd;
 }
 
+ // NOTE - Maël: pbs de frame ?
 double Utility::calculateTrueWindSpeed(int windsensorDir, int windsensorSpeed, double gpsSpeed, double heading)
 {
 	//double knots = 1.94384;
@@ -450,6 +452,9 @@ double Utility::getTrueWindDirection(int windsensorDir, int windsensorSpeed, dou
 	return meanOfAngles(twdBuffer);
 }
 
+//------------------------------------------------------------
+// NOTE - Maël: the getApparentWindSpeed and getApparentWindDirection functions are useless.
+
 void Utility::calculateApparentWind(const int windsensorDir, const int windsensorSpeed, const double gpsSpeed, const double heading,
 	           const double trueWindDirection,double &apparentWindSpeed, double &apparentWindDirection)
 { //referenced from "Modeling, control and state-estimation for an autonomous sailboat" by Jon Melin
@@ -475,6 +480,23 @@ double Utility::getApparentWindDirection(const int windsensorDir, const int wind
 	double apparentWindSpeed,apparentWindDirection;
 	calculateApparentWind(windsensorDir, windsensorSpeed, gpsSpeed, heading, trueWindDirection,apparentWindSpeed,apparentWindDirection);
 	return apparentWindDirection;
+}
+//------------------------------------------------------------
+
+
+std::vector<double> Utility::polarVerctorsAddition(std::vector<double> v1, std::vector<double> v2)
+{
+	double r1 = v1[0];		double theta1 = v1[1];	// vector1 = (r1,theta1) theta1 in rad
+	double r2 = v2[0];		double theta2 = v2[1];	// vector2 = (r2,theta2) theta2 in rad
+
+	std::vector<double> v3(2);	// vector3
+	v3[0] = sqrt(pow(r1,2) + pow(r2,2) + 2*r1*r2*cos(theta2-theta1));	// r3
+	v3[1] = Utility::limitRadianAngleRange(atan2(r1*sin(theta1) + r2*sin(theta2), r1*cos(theta1) + r2*cos(theta2)));	// theta3 in rad
+
+	return v3;	// vector3 = vector1 + vector2
+
+	// NOTE : Discussion on different implementations
+	// https://math.stackexchange.com/questions/1365622/adding-two-polar-vectors
 }
 
 void Utility::sphericalCoordinateSystem( const double lat, const double lon, double& x, double& y)

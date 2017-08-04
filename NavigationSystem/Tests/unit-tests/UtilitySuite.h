@@ -38,7 +38,6 @@
 #include "SystemServices/Timer.h"
 #include <stdint.h> // uint8_t
 
-
 class UtilitySuite : public CxxTest::TestSuite {
 public:
 	void setUp() { }
@@ -264,5 +263,28 @@ public:
 		TS_ASSERT_DELTA(Utility::getTrueWindDirection(170, 5, 2, 100, twdBuffer, twdBufferMaxSize), 272.8526f, 1e-4);
 		TS_ASSERT_DELTA(Utility::getTrueWindDirection(171, 5, 2.1, 100.1, twdBuffer, twdBufferMaxSize), 273.2557f, 1e-4)
 		TS_ASSERT_DELTA(Utility::getTrueWindDirection(165, 5, 2, 100, twdBuffer, twdBufferMaxSize), 271.9276f, 1e-4);
+	}
+
+	void test_polarVerctorsAddition()
+	{
+		std::vector<double> v1(2), v2(2), v3(2);
+
+		v1[0] = 3;		v1[1] = Utility::degreeToRadian(0);
+		v2[0] = 4;		v2[1] = Utility::degreeToRadian(90);
+		v3 = Utility::polarVerctorsAddition(v1, v2);
+		TS_ASSERT_DELTA(v3[0], 5, 1e-7);
+		TS_ASSERT_DELTA(v3[1], 0.92729, 1e-4);
+
+		v1[0] = 3;		v1[1] = Utility::degreeToRadian(50);
+		v2[0] = 4.5;	v2[1] = Utility::degreeToRadian(230);
+		v3 = Utility::polarVerctorsAddition(v1, v2);
+		TS_ASSERT_DELTA(v3[0], 1.5, 1e-7);
+		TS_ASSERT_DELTA(v3[1], Utility::degreeToRadian(230), 1e-4);
+
+		v1[0] = 3;		v1[1] = Utility::degreeToRadian(0);
+		v2[0] = -3;		v2[1] = Utility::degreeToRadian(90);
+		v3 = Utility::polarVerctorsAddition(v1, v2);
+		TS_ASSERT_DELTA(v3[0], sqrt(18), 1e-7);
+		TS_ASSERT_DELTA(v3[1], Utility::degreeToRadian(315), 1e-4);
 	}
 };
