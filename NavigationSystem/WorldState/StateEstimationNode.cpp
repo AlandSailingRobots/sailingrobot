@@ -19,21 +19,27 @@
 
 #include "StateEstimationNode.h"
 
+#define DATA_OUT_OF_RANGE -2000
+
 
 StateEstimationNode::StateEstimationNode(MessageBus& msgBus, double loopTime, double speed_1, double speed_2): 
-ActiveNode(NodeID::StateEstimation, msgBus), m_LoopTime(loopTime), m_CompassHeading(0), m_GpsOnline(false),
-m_GPSLat(0), m_GPSLon(0), m_GPSSpeed(0), m_GPSCourse(0), m_WaypointDeclination(0), m_speed_1(speed_1), m_speed_2(speed_2),
-m_VesselHeading(0), m_VesselLat(0), m_VesselLon(0), m_VesselSpeed(0), m_VesselCourse(0)
+ActiveNode(NodeID::StateEstimation, msgBus), m_LoopTime(loopTime), m_CompassHeading(DATA_OUT_OF_RANGE), m_GpsOnline(false),
+m_GPSLat(DATA_OUT_OF_RANGE), m_GPSLon(DATA_OUT_OF_RANGE), m_GPSSpeed(DATA_OUT_OF_RANGE), m_GPSCourse(DATA_OUT_OF_RANGE), 
+m_WaypointDeclination(DATA_OUT_OF_RANGE), m_speed_1(speed_1), m_speed_2(speed_2), m_VesselHeading(DATA_OUT_OF_RANGE), 
+m_VesselLat(DATA_OUT_OF_RANGE), m_VesselLon(DATA_OUT_OF_RANGE), m_VesselSpeed(DATA_OUT_OF_RANGE), 
+m_VesselCourse(DATA_OUT_OF_RANGE)
 {
     msgBus.registerNode(*this, MessageType::CompassData);
     msgBus.registerNode(*this, MessageType::GPSData);
     msgBus.registerNode(*this, MessageType::WaypointData);
 }
 
-StateEstimationNode::StateEstimationNode(MessageBus& msgBus, double loopTime): 
-ActiveNode(NodeID::StateEstimation, msgBus), m_LoopTime(loopTime), m_CompassHeading(0), m_GpsOnline(false),
-m_GPSLat(0), m_GPSLon(0), m_GPSSpeed(0), m_GPSCourse(0), m_WaypointDeclination(0), m_speed_1(0), m_speed_2(1),
-m_VesselHeading(0), m_VesselLat(0), m_VesselLon(0), m_VesselSpeed(0), m_VesselCourse(0)
+StateEstimationNode::StateEstimationNode(MessageBus& msgBus, double loopTime):
+ActiveNode(NodeID::StateEstimation, msgBus), m_LoopTime(loopTime), m_CompassHeading(DATA_OUT_OF_RANGE), m_GpsOnline(false),
+m_GPSLat(DATA_OUT_OF_RANGE), m_GPSLon(DATA_OUT_OF_RANGE), m_GPSSpeed(DATA_OUT_OF_RANGE), m_GPSCourse(DATA_OUT_OF_RANGE), 
+m_WaypointDeclination(DATA_OUT_OF_RANGE), m_speed_1(0), m_speed_2(1), m_VesselHeading(DATA_OUT_OF_RANGE), 
+m_VesselLat(DATA_OUT_OF_RANGE), m_VesselLon(DATA_OUT_OF_RANGE), m_VesselSpeed(DATA_OUT_OF_RANGE), 
+m_VesselCourse(DATA_OUT_OF_RANGE)
 {
     msgBus.registerNode(*this, MessageType::CompassData);
     msgBus.registerNode(*this, MessageType::GPSData);

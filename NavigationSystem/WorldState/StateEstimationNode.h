@@ -92,22 +92,22 @@ private:
 
     double  m_LoopTime;             // second
 
-    float   m_CompassHeading;       // degree [0, 360[
+    float   m_CompassHeading;       // degree [0, 360[ in North-East reference frame (clockwise)
     bool    m_GpsOnline;
     double  m_GPSLat;
     double  m_GPSLon;
     double  m_GPSSpeed;             // m/s
-    double  m_GPSCourse;            // degree [0, 360[
+    double  m_GPSCourse;            // degree [0, 360[ in North-East reference frame (clockwise)
     float   m_WaypointDeclination;  // degree [??]
 
     double  m_speed_1;              // m/s
     double  m_speed_2;              // m/s
 
-    float   m_VesselHeading;        // degree [0, 360[
+    float   m_VesselHeading;        // degree [0, 360[ in North-East reference frame (clockwise)
     double  m_VesselLat;
     double  m_VesselLon;
     float   m_VesselSpeed;          // m/s
-    float   m_VesselCourse;         // degree [0, 360[
+    float   m_VesselCourse;         // degree [0, 360[ in North-East reference frame (clockwise)
 
     std::mutex m_lock;
 
