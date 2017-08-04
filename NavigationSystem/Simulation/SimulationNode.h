@@ -28,7 +28,7 @@
 #include "WorldState/CollidableMgr/CollidableMgr.h"
 
 
-struct BoatDataPacket_t {
+struct SailBoatDataPacket_t {
   float latitude;
   float longitude;
   float speed;
@@ -40,6 +40,20 @@ struct BoatDataPacket_t {
   uint16_t heading;
   uint16_t rudder;
   uint16_t sail;
+} __attribute__((packed));
+
+struct WingBoatDataPacket_t {
+  float latitude;
+  float longitude;
+  float speed;
+  uint16_t course;
+
+  uint16_t windDir;
+  float windSpeed;
+
+  uint16_t heading;
+  uint16_t rudder;
+  uint16_t tail;
 } __attribute__((packed));
 
 struct AISContactPacket_t {
@@ -87,9 +101,14 @@ public:
 private:
 
   ///----------------------------------------------------------------------------------
-  /// Process a boat data message
+  /// Process a conventionnal sail boat data message
   ///----------------------------------------------------------------------------------
-  void processBoatData( TCPPacket_t& packet );
+  void processSailBoatData( TCPPacket_t& packet );
+
+  ///----------------------------------------------------------------------------------
+  /// Process a wing sail boat data message
+  ///----------------------------------------------------------------------------------
+  void processWingBoatData( TCPPacket_t& packet );
 
 	///----------------------------------------------------------------------------------
 	/// Communicate with the simulation receive sensor data and send actuator data

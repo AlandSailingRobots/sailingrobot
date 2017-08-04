@@ -42,9 +42,11 @@
 
 
 enum SimulatorPacket {
-	BoatData = 0,
-	AISData = 1,
-	CameraData = 2
+	SailBoatData = 0,
+	WingBoatData =1,
+	AISData = 2,
+	CameraData = 3
+	
 };
 
 
@@ -141,13 +143,13 @@ void SimulationNode::createArduinoMessage()
 }
 
 ///--------------------------------------------------------------------------------------
-void SimulationNode::processBoatData( TCPPacket_t& packet )
+void SimulationNode::processSailBoatData( TCPPacket_t& packet )
 {	
-	if( packet.length - 1 == sizeof(BoatDataPacket_t) )
+	if( packet.length - 1 == sizeof(SailBoatDataPacket_t) )
 	{
 		// The first byte is the packet type, lets skip that
 		uint8_t* ptr = packet.data + 1;
-		BoatDataPacket_t* boatData = (BoatDataPacket_t*)ptr;
+		SailBoatDataPacket_t* boatData = (SailBoatDataPacket_t*)ptr;
 
 		m_CompassHeading = boatData->heading;
 		m_GPSLat = boatData->latitude;
@@ -158,6 +160,33 @@ void SimulationNode::processBoatData( TCPPacket_t& packet )
 		m_WindSpeed = boatData->windSpeed;
 	 	m_ArduinoRudder = boatData->rudder;
 	 	m_ArduinoSheet = boatData->sail;
+
+		// Send messages
+		createCompassMessage();
+		createGPSMessage();
+		createWindMessage();
+		createArduinoMessage();
+	}
+}
+
+///--------------------------------------------------------------------------------------
+void SimulationNode::processWingBoatData( TCPPacket_t& packet )
+{	
+	if( packet.length - 1 == sizeof(WingBoatDataPacket_t) )
+	{
+		// The first byte is the packet type, lets skip that
+		uint8_t* ptr = packet.data + 1;
+		WingBoatDataPacket_t* boatData = (WingBoatDataPacket_t*)ptr;
+
+		m_CompassHeading = boatData->heading;
+		m_GPSLat = boatData->latitude;
+		m_GPSLon = boatData->longitude;
+		m_GPSSpeed = boatData->speed;
+		m_GPSHeading = boatData->course;
+		m_WindDir = boatData->windDir;
+		m_WindSpeed = boatData->windSpeed;
+	 	m_ArduinoRudder = boatData->rudder;
+	 	//m_ArduinoSheet = boatData->sail;
 
 		// Send messages
 		createCompassMessage();
@@ -229,10 +258,14 @@ void SimulationNode::SimulationThreadFunc(ActiveNode* nodePtr)
 		// First byte is the message type
 		switch( packet.data[0] )
 		{
-			case SimulatorPacket::BoatData:
-				node->processBoatData( packet );
+			case SimulatorPacket::SailBoatData:
+				node->processSailBoatData( packet );
 				node->sendActuatorData( simulatorFD );
 			break;
+
+			case SimulatorPacket::WingBoatData:
+				node->processWingBoatData( packet );
+				node->sendActuatorData ( simulatorFD );
 
 			case SimulatorPacket::AISData:
 				node->processAISContact( packet );
