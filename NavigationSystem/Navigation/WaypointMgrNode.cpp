@@ -46,12 +46,12 @@ bool WaypointMgrNode::init()
 
 void WaypointMgrNode::processMessage(const Message* msg)
 {
-	MessageType type = msg->messageType();
+    MessageType type = msg->messageType();
 
 	switch(type)
 	{
         case MessageType::GPSData:
-            processGPSMessage((GPSDataMsg*)msg);
+            processGPSMessage(static_cast< const GPSDataMsg*>(msg));
             break;
         case MessageType::ServerWaypointsReceived:
             sendMessage();
@@ -66,7 +66,7 @@ void WaypointMgrNode::processMessage(const Message* msg)
     }
 }
 
-void WaypointMgrNode::processGPSMessage(GPSDataMsg* msg)
+void WaypointMgrNode::processGPSMessage(const GPSDataMsg* msg)
 {
     m_gpsLongitude = msg->longitude();
     m_gpsLatitude = msg->latitude();
@@ -76,7 +76,6 @@ bool WaypointMgrNode::waypointReached()
 {
     // double distanceAfterWaypoint = Utility::calculateWaypointsOrthogonalLine(m_nextLongitude, m_nextLatitude, m_prevLongitude,
     //             m_prevLatitude, m_gpsLongitude, m_gpsLatitude); //Checks if boat has passed the waypoint following the line, without entering waypoints radius
-
     if(harvestWaypoint())
     {
         if(not m_db.changeOneValue("waypoints", std::to_string(m_nextId),"1","harvested"))
@@ -89,6 +88,7 @@ bool WaypointMgrNode::waypointReached()
         m_routeTime.stop();
         int seconds = m_routeTime.timePassed();
         m_totalTime += m_routeTime.timePassed();
+
         int minutes = seconds / 60;
         int hours = minutes / 60;
         minutes = minutes % 60;
@@ -146,15 +146,15 @@ void WaypointMgrNode::sendMessage()
 
 bool WaypointMgrNode::harvestWaypoint()
 {
-    double DTW = CourseMath::calculateDTW(m_gpsLongitude, m_gpsLatitude, m_nextLongitude, m_nextLatitude); //Calculate distance to waypoint
-    if(DTW > m_nextRadius)
+    double DistanceToWaypoint = CourseMath::calculateDTW(m_gpsLongitude, m_gpsLatitude, m_nextLongitude, m_nextLatitude); //Calculate distance to waypoint
+    if(DistanceToWaypoint > m_nextRadius)
     {
         return false;
     }
 
     if(m_nextStayTime > 0) //if next waypoint has a time to stay inside its radius, start the timer
     {
-        m_waypointTimer.start();
+        m_waypointTimer.start(); //NOTE : Marc : writeTime has never been initialized
         if(not writeTime)
         {
             Logger::info("Started waypoint timer. Stay at waypoint for: %d seconds", m_nextStayTime);

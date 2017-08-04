@@ -31,7 +31,7 @@ public:
 	void processMessage(const Message* message);
 
 private:
-	void processGPSMessage(GPSDataMsg* msg);
+	void processGPSMessage(const GPSDataMsg* msg);
     bool waypointReached();
 
 	///----------------------------------------------------------------------------------

@@ -78,9 +78,9 @@ void LineFollowNode::stop()
 
 void LineFollowNode::updateConfigsFromDB()
 {
-    //m_LoopTime = m_db.retrieveCellAsInt("config_LineFollowNode","1","loop_time");
-    //m_MaxTackDistance = m_db.retrieveCellAsInt("config_LineFollowNode","1","max_tack_distance");
-    //m_TackAngle = m_db.retrieveCellAsInt("config_LineFollowNode","1","tack_angle");
+    m_LoopTime = m_db.retrieveCellAsInt("config_LineFollowNode","1","loop_time");
+    m_MaxTackDistance = m_db.retrieveCellAsInt("config_LineFollowNode","1","max_tack_distance");
+    m_tackAngle = m_db.retrieveCellAsInt("config_LineFollowNode","1","tack_angle");
 }
 
 void LineFollowNode::processMessage(const Message* msg)
@@ -188,7 +188,7 @@ double LineFollowNode::calculateAngleOfDesiredTrajectory()
 
 double LineFollowNode::calculateDesiredCourse()
 {
-    int maxTackDistance = 40; //'r'
+    int maxTackDistance = 40;
 
     /* add pi because trueWindDirection is originally origin of wind but algorithm need direction*/
     double trueWindDirection_radian = Utility::degreeToRadian(m_trueWindDir)+M_PI;
