@@ -8,7 +8,7 @@ DB_FILE=createtables.sql
 TEST_DB_FILE=testdb.db
 
 if [ -f "$TEST_DB_FILE" ]; then
-	rm "$TEST_DB_FILE" 
+	rm "$TEST_DB_FILE"
 fi
 
 cd $INSTALL_DIR
@@ -17,8 +17,8 @@ if [ -f "$DB_FILE" ]; then
 
 	echo "Creating db..."
 	sqlite3 "$TEST_DIR$TEST_DB_FILE" < "$DB_FILE"
-	
-	sqlite3 "$TEST_DIR$TEST_DB_FILE" "INSERT INTO waypoints VALUES(1,2.2,3.3,500,0,0);"
+
+	sqlite3 "$TEST_DIR$TEST_DB_FILE" "INSERT INTO current_Mission VALUES(1,0,2.2,3.3,500,0,0);"
 	sqlite3 "$TEST_DIR$TEST_DB_FILE" "INSERT INTO waypoint_stationary VALUES (1,1);"
 
 	cd $START_DIR
@@ -28,10 +28,10 @@ if [ -f "$DB_FILE" ]; then
 	if [ -f db_tests ]; then
 		echo "Running db tests:"
 		./db_tests
-	else 
+	else
 		echo "Missing db_tests."
 	fi
 
-else 
+else
 	echo "Missing createtables.sql"
 fi

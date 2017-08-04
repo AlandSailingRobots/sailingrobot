@@ -5,11 +5,11 @@ void CanMsgToN2kMsg(CanMsg &Cmsg, N2kMsg &Nmsg)
 {
 	IdToN2kMsg(Nmsg, Cmsg.id);
 
-	if(Cmsg.header.length) 
+	if(Cmsg.header.length)
 	{
 		Nmsg.DataLen = Cmsg.header.length;		//Single frame message
 	}
-	else 
+	else
 	{
 		Nmsg.DataLen = sizeof(Cmsg.data) / sizeof(Cmsg.data[0]);
 	}

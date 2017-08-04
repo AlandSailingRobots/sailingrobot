@@ -86,6 +86,7 @@ void StateEstimationNode::processCompassMessage(const CompassDataMsg* msg)
 {
   float currentVesselHeading = msg->heading();
   m_VesselHeading = Utility::addDeclinationToHeading(currentVesselHeading, m_Declination);
+  //lock_guard.~lock_guard();
 }
 
 void StateEstimationNode::processGPSMessage(const GPSDataMsg* msg)
@@ -112,6 +113,7 @@ int StateEstimationNode::getCourse(){
   return m_VesselCourse;
 }
 
+//---------------------------------------------------------------------------
 void StateEstimationNode::processWaypointMessage( const WaypointDataMsg* msg )
 {
   m_Declination = msg->nextDeclination();
@@ -135,7 +137,10 @@ void StateEstimationNode::StateEstimationNodeThreadFunc(ActiveNode* nodePtr)
       MessagePtr stateMessage = std::make_unique<StateMessage>(node->m_VesselHeading, node->m_VesselLat,
       node->m_VesselLon, node->m_VesselSpeed, node->getCourse());
       node->m_MsgBus.sendMessage(std::move(stateMessage));
+      node->updateFrequencyThread();
+      //node->m_lock.unlock();
     }
+    // TODO : Config timer or thread activity with a variable from the dbhandler ???
     timer.sleepUntil(node->m_LoopTime);
     timer.reset();
   }

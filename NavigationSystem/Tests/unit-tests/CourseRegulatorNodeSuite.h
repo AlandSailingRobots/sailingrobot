@@ -235,8 +235,8 @@ public:
     void test_CourseRegulatorUpdateFromDB(){
         Timer timer;
 
-        dbHandler->changeOneValue("course_regulator_config","1","0.7","loop_time");
-        dbHandler->changeOneValue("course_regulator_config","1","20.0","maxRudderAngle");
+        dbHandler->changeOneValue("config_course_regulator","1","0.7","loop_time");
+        dbHandler->changeOneValue("config_course_regulator","1","20.0","maxRudderAngle");
         MessagePtr serverConfig = std::make_unique<ServerConfigsReceivedMsg>();
         msgBus().sendMessage(std::move(serverConfig));
         std::this_thread::sleep_for(std::chrono::milliseconds(500));

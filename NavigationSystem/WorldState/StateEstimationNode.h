@@ -21,6 +21,7 @@
 #include "Messages/WindDataMsg.h"
 #include "Messages/ArduinoDataMsg.h"
 #include "Messages/WaypointDataMsg.h"
+#include "DataBase/DBHandler.h"
 #include "Network/TCPServer.h"
 #include <mutex>
 #include <stdint.h>
@@ -28,7 +29,7 @@
 
 class StateEstimationNode : public ActiveNode {
 public:
-  StateEstimationNode(MessageBus& msgBus, DBHandler& db, double loopTime, double speedLimit);
+  StateEstimationNode(MessageBus& msgBus, DBHandler& dbhandler, double loopTime, double speedLimit);
   ~StateEstimationNode();
 
   bool init();
@@ -43,6 +44,7 @@ public:
   void updateConfigsFromDB();
 
   void processMessage(const Message* msg);
+  double getFrequencyThread();
 
 
 private:
@@ -58,7 +60,6 @@ private:
   void processWaypointMessage(const WaypointDataMsg* msg );
 
   int getCourse();
-
   ///----------------------------------------------------------------------------------
   /// Starts the StateEstimationNode's thread that pumps out StateMessages which contains
   /// data collected from the sensors

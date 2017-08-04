@@ -24,7 +24,7 @@
 #include "Messages/StateMessage.h"
 #include "Messages/ActuatorPositionMsg.h"
 #include "Messages/NavigationControlMsg.h"
-
+#include "Messages/DesiredCourseMsg.h"
 
 
 
@@ -44,6 +44,7 @@ public:
 		&& msgBus.registerNode(*this, MessageType::StateMessage)
 		&& msgBus.registerNode(*this, MessageType::NavigationControl)
 		&& msgBus.registerNode(*this, MessageType::ServerConfigsReceived)
+		&& msgBus.registerNode(*this, MessageType::DesiredCourse)
 		&& msgBus.registerNode(*this, MessageType::ActuatorPosition))
 		{
 			registered = true;
@@ -154,6 +155,14 @@ public:
 			{
 				m_MessageReceived = true;
 			}
+			break;
+			case MessageType::DesiredCourse:
+			{
+				m_MessageReceived = true;
+				DesiredCourseMsg* desiredCourseMsg = (DesiredCourseMsg*)message;
+				m_DesiredCourse = desiredCourseMsg->desiredCourse();
+			}
+			break;
 			default:
 			return;
 		}
@@ -219,6 +228,10 @@ public:
 //=========================
 	int m_rudderPosition;
 	int m_sailPosition;
+
+	//ActuatorPosition variables
+//=========================
+	int16_t m_DesiredCourse;
 
 	  //NavigationControlMsg variables
 //=========================

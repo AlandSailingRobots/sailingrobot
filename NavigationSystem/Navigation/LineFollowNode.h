@@ -41,7 +41,7 @@ public:
 	void processMessage(const Message* message);
 	void updateConfigsFromDB();
 
-//	float m_gpsHeadingWeight;
+//	float m_gpsCourseWeight;
 
 private:
 

@@ -43,7 +43,7 @@ private:
      (double)   DATA_OUT_OF_RANGE,  // m_gpsLon;
      (double)   DATA_OUT_OF_RANGE,  // m_gpsUnixTime;
      (double)   DATA_OUT_OF_RANGE,  // m_gpsSpeed;
-     (double)   DATA_OUT_OF_RANGE,  // m_gpsHeading;
+     (double)   DATA_OUT_OF_RANGE,  // m_gpsCourse;
      (int)      DATA_OUT_OF_RANGE,  // m_gpsSatellite;
      (float)    DATA_OUT_OF_RANGE,  // m_windSpeed;
      (float)    DATA_OUT_OF_RANGE,  // m_windDir;

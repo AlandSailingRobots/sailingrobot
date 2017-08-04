@@ -11,15 +11,17 @@
  *
  ***************************************************************************************/
 
-#include "Hardwares/CAN_Services/CANPGNReceiver.h"
-#include "MessageBus/ActiveNode.h"
-#include "Hardwares/CAN_Services/CANService.h"
-#include "SystemServices/Timer.h"
-#include "DataBase/DBHandler.h"
-
 #include <mutex>
 #include <vector>
 #include <iostream>
+#include <chrono>
+#include <thread>
+
+#include "Hardwares/CAN_Services/CANService.h"
+#include "Hardwares/CAN_Services/CANPGNReceiver.h"
+#include "MessageBus/ActiveNode.h"
+#include "Messages/WindDataMsg.h"
+#include "SystemServices/Timer.h"
 
 #pragma once
 

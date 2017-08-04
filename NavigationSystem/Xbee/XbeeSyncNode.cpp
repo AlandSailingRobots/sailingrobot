@@ -28,11 +28,11 @@ XbeeSyncNode::XbeeSyncNode(MessageBus& msgBus, DBHandler& db) :
 	ActiveNode(NodeID::xBeeSync, msgBus), m_initialised(false), m_db(db), m_dataLink("/dev/xbee", XBEE_BAUD_RATE), m_xbeeNetwork(m_dataLink, false)
 {
 	m_firstMessageCall = true;
-	m_sending = m_db.retrieveCellAsInt("xbee_config", "1", "send");
-	m_receiving = m_db.retrieveCellAsInt("xbee_config", "1", "recieve");
-	m_sendLogs = m_db.retrieveCellAsInt("xbee_config", "1", "send_logs");
-	m_loopTime = stod(m_db.retrieveCell("xbee_config", "1", "loop_time"));
-	m_pushOnlyLatestLogs = m_db.retrieveCellAsInt("xbee_config", "1", "push_only_latest_logs");
+	m_sending = m_db.retrieveCellAsInt("config_xbee", "1", "send");
+	m_receiving = m_db.retrieveCellAsInt("config_xbee", "1", "receive");
+	m_sendLogs = m_db.retrieveCellAsInt("config_xbee", "1", "send_logs");
+	m_loopTime = stod(m_db.retrieveCell("config_xbee", "1", "loop_time"));
+	m_pushOnlyLatestLogs = m_db.retrieveCellAsInt("config_xbee", "1", "push_only_latest_logs");
 	msgBus.registerNode(*this, MessageType::VesselState);
 	msgBus.registerNode(*this, MessageType::CourseData);
 	msgBus.registerNode(*this, MessageType::WaypointData);

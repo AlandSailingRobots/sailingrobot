@@ -60,7 +60,7 @@ void VesselStateNode::start()
 void VesselStateNode::updateConfigsFromDB()
 {
 	m_LoopTime = m_db.retrieveCellAsDouble("config_VesselStateNode","1","loop_time");
-	
+
 }
 
 void VesselStateNode::processMessage(const Message* msg)
@@ -107,7 +107,7 @@ void VesselStateNode::processGPSMessage(GPSDataMsg* msg)
 	m_GPSLon = msg->longitude();
 	m_GPSUnixTime = msg->unixTime();
 	m_GPSSpeed = msg->speed();
-	m_GPSHeading = msg->heading();
+	m_GPSCourse = msg->heading();
 	m_GPSSatellite = msg->satelliteCount();
 	waypointBearing = CourseMath::calculateBTW( m_GPSLon, m_GPSLat, waypointLon, waypointLat );
 	waypointDistance = CourseMath::calculateDTW( m_GPSLon, m_GPSLat, waypointLon, waypointLat );
@@ -126,7 +126,7 @@ void VesselStateNode::processArduinoMessage(ArduinoDataMsg* msg)
 	m_ArduinoRudder = msg->rudder();
 	m_ArduinoSheet = msg->sheet();
 	m_ArduinoBattery = msg->battery();
-	m_ArduinoRC = msg->RC();
+	m_ArduinoRC = msg->Radio_Controller();
 }
 
 void VesselStateNode::processWaypointMessage( WaypointDataMsg* msg )
@@ -163,13 +163,13 @@ void VesselStateNode::VesselStateThreadFunc(ActiveNode* nodePtr)
 		MessagePtr vesselState = std::make_unique<VesselStateMsg>(	node->m_CompassHeading, node->m_CompassPitch,
 																	node->m_CompassRoll, node->m_GPSHasFix, node->m_GPSOnline, node->m_GPSLat,
 																	node->m_GPSLon, node->m_GPSUnixTime, node->m_GPSSpeed, node->m_GPSSatellite,
-																	node->m_GPSHeading, node->m_WindDir, node->m_WindSpeed,
+																	node->m_GPSCourse, node->m_WindDir, node->m_WindSpeed,
 																	node->m_WindTemp, node->m_ArduinoPressure, node->m_ArduinoRudder,
 																	node->m_ArduinoSheet, node->m_ArduinoBattery, node->m_ArduinoRC);
 		node->m_MsgBus.sendMessage(std::move(vesselState));
 
 		// Compass heading, Compass Pitch, Compass Roll, Wind Dir, Wind Speed, GPS Heading, GPS Lat, GPS Lon
-		int size = snprintf( buffer, 1024, "%d,%d,%d,%d,%d,%d,%f,%f,%f,%d,%f,%f,%d,%f,%d\n", (int)node->m_CompassHeading, (int)node->m_CompassPitch, (int)node->m_CompassRoll, (int)node->m_WindDir, (int)node->m_WindSpeed, (int)node->m_GPSHeading, (float)node->m_GPSSpeed, node->m_GPSLat, node->m_GPSLon, node->waypointID, node->waypointLat, node->waypointLon, (int)node->radius, node->waypointDistance, (int)node->waypointBearing );
+		int size = snprintf( buffer, 1024, "%d,%d,%d,%d,%d,%d,%f,%f,%f,%d,%f,%f,%d,%f,%d\n", (int)node->m_CompassHeading, (int)node->m_CompassPitch, (int)node->m_CompassRoll, (int)node->m_WindDir, (int)node->m_WindSpeed, (int)node->m_GPSCourse, (float)node->m_GPSSpeed, node->m_GPSLat, node->m_GPSLon, node->waypointID, node->waypointLat, node->waypointLon, (int)node->radius, node->waypointDistance, (int)node->waypointBearing );
 		if( size > 0 )
 		{
 			node->server.broadcast( (uint8_t*)buffer, size );

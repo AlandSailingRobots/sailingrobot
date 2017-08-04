@@ -15,8 +15,13 @@ public:
 	static std::vector<float> fixAngles(std::vector<float> v);
 	static float getMedianValue(std::vector<float> v);
 	static float mean(std::vector<float> values);
+	static float mapInterval (float val, float fromMin, float fromMax, float toMin, float toMax);
 	static float meanOfAngles(std::vector<float> anglesInDegrees);
 	static int sgn(double value);
+	/*
+	 * Use to realize a PI regulation on a ActiveNode
+	 */
+	static int16_t pi(double pGain, double iGain, uint16_t heading, uint16_t desiredHeading);
 
 	/*
 	 * Converts an angle in degrees to cartesian coordinates (x,y) on the
@@ -59,6 +64,9 @@ public:
 
 	static void sphericalCoordinateSystem( const double lat, const double lon, double& x, double& y);
 	static void calculateVelocity( const uint16_t course, const double speed, double& vX, double& vY );
+
+private:
+	const int HEADING_ERROR_VALUE = 370;
 };
 
 #endif

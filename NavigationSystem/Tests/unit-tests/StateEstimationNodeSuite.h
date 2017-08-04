@@ -46,24 +46,23 @@ public:
     std::thread* thr;
     int testCount = 0;
 
-    // Cheeky method for declaring and initialising a static in a header file
-    static MessageBus& msgBus() {
-        static MessageBus* mbus = new MessageBus();
-        return *mbus;
-    }
+  // ----------------
+  // Send messages
+  // ----------------
+  static void runMessageLoop()
+  {
+    msgBus().run();
+  }
 
-    // ----------------
-    // Send messages
-    // ----------------
-    static void runMessageLoop()
-    {
-        msgBus().run();
-    }
-
-    // ----------------
-    // Setup the objects to test
-    // ----------------
-    void setUp()
+  // ----------------
+  // Setup the objects to test
+  // ----------------
+  void setUp()
+  {
+    // Test Node for message
+    mockNode = new MockNode(msgBus(), nodeRegistered);
+    // setup them up once in this test, delete them when the program closes
+    if(sEstimationNode == 0)
     {
         mockNode = new MockNode(msgBus(), nodeRegistered);
         // setup them up once in this test, delete them when the program closes
@@ -95,15 +94,21 @@ public:
             delete dbhandler;
             // Stay here for process the last message which return system::error
         }
-    }
+  }
 
-    // ----------------
-    // Test Initialisation of the object
-    // ----------------
-    void test_StateEstimationNodeInit()
-    {
-        TS_ASSERT(nodeRegistered);
-    }
+  // ----------------
+  // Test Initialisation of the object
+  // ----------------
+  void test_StateEstimationNodeInit(){
+    TS_ASSERT(nodeRegistered);
+  }
+
+  // ----------------
+  // Test for the absence of a returned message by a offline GPS
+  // ----------------
+  void test_StateEstimationNodeGPSNotOnline(){
+    TS_ASSERT(sEstimationNode->init());
+    TS_ASSERT(!mockNode->m_MessageReceived);
 
     // ----------------
     // Test for the absence of a returned message by a offline GPS
@@ -114,39 +119,36 @@ public:
         TS_ASSERT(!mockNode->m_MessageReceived);
     }
 
-    // ----------------
-    // Test to see if a message concerning the node will be listened
-    // ----------------
-    void test_StateMessageListener()
-    {
-        double latitude = 60.09726;
-        double longitude = 19.93481;
-        double unixTime = 1;
-        double speed = 1;
-        double heading = 10;
-        int satCount = 2;
-        GPSMode mode = GPSMode::LatLonOk;
+  // ----------------
+  // Test to see if a message concerning the node will be listened
+  // ----------------
+  void test_StateMessageListener(){
+    double latitude = 60.09726;
+    double longitude = 19.93481;
+    double unixTime = 1;
+    double speed = 1;
+    double heading = 10;
+    int satCount = 2;
+    GPSMode mode = GPSMode::LatLonOk;
 
-        MessagePtr gpsData =  std::make_unique<GPSDataMsg>(false,true,latitude,longitude,unixTime,speed,heading,satCount,
-          mode);
-        msgBus().sendMessage(std::move(gpsData));
-        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+    MessagePtr gpsData =  std::make_unique<GPSDataMsg>(false,true,latitude,longitude,unixTime,speed,heading,satCount,
+      mode);
+      msgBus().sendMessage(std::move(gpsData));
+      std::this_thread::sleep_for(std::chrono::milliseconds(500));
+      TS_ASSERT(mockNode->m_MessageReceived);
+  }
 
-        TS_ASSERT(mockNode->m_MessageReceived);
-    }
-
-    // ----------------
-    // Test to see if ,after the GPS messsage, the heading is not changed
-    // ----------------
-    void test_StateEstimationStateMsgHeading()
-    {
-        double latitude = 60.09726;
-        double longitude = 19.93481;
-        double unixTime = 1;
-        double speed = 1;
-        double headingGPS = 10;
-        int satCount = 2;
-        GPSMode mode = GPSMode::LatLonOk;
+  // ----------------
+  // Test to see if ,after the GPS messsage, the heading is not changed
+  // ----------------
+  void test_StateEstimationStateMsgHeading(){
+      double latitude = 60.09726;
+      double longitude = 19.93481;
+      double unixTime = 1;
+      double speed = 1;
+      double headingGPS = 10;
+      int satCount = 2;
+      GPSMode mode = GPSMode::LatLonOk;
 
         MessagePtr gpsData =  std::make_unique<GPSDataMsg>(false,true,latitude,longitude,unixTime,speed,headingGPS,satCount,
         mode);
@@ -154,6 +156,7 @@ public:
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
         int nextDeclination = 10;
+        // TODO : Check the constructor because the variables seems not appropriate.
         MessagePtr wayPointMsgData = std::make_unique<WaypointDataMsg>(2, 19.81, 60.2, nextDeclination, 6, 15,  1, 19.82, 60.1, 6, 15);
         msgBus().sendMessage(std::move(wayPointMsgData));
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -170,11 +173,10 @@ public:
         TS_ASSERT_EQUALS(stateEstimationNodeVesselHeading, vesselHeading);
     }
 
-    // ----------------
-    // Test to see if the message, sent by the node, is with the values
-    // ----------------
-    void test_StateEstimationStateMessageGPSData()
-    {
+      // ----------------
+      // Test to see if the message, sent by the node, is with the values
+      // ----------------
+      void test_StateEstimationStateMessageGPSData(){
         double latitude = 60.09726;
         double longitude = 19.93481;
         double unixTime = 1;
@@ -285,6 +287,19 @@ public:
         float stateEstimationNodeVesselHeading = mockNode->m_StateMsgHeading;
         TS_ASSERT(stateEstimationNodeVesselHeading != 0);
         TS_ASSERT_DELTA(mockNode->m_StateMsgCourse, headingGPS, 1e-7);
+    }
+
+    // ----------------
+    // Test for update frequency
+    // ----------------
+    void test_StateEstimationUpdateFrequency(){
+        double newLoopTime= 0.7;
+        // TODO : Create table for each configuration of the new node including looptime variables
+        dbhandler->changeOneValue("???","1",".7","loop_time"); //See next table
+        std::this_thread::sleep_for(std::chrono::milliseconds(700));
+        double stateEstimationFrequence = sEstimationNode->getFrequencyThread();
+        TS_ASSERT_EQUALS(stateEstimationFrequence,newLoopTime);
+        dbhandler->changeOneValue("???","1",".5","loop_time"); //see next table
     }
 
 };

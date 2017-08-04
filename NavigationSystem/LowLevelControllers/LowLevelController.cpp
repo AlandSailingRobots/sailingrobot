@@ -36,10 +36,10 @@ LowLevelController::LowLevelController( MessageBus& msgBus, DBHandler& dbHandler
     msgBus.registerNode( *this, MessageType::WindData );
     msgBus.registerNode( *this, MessageType::DesiredCourse );
 
-    closeRange_ms = dbHandler.retrieveCellAsInt( "sail_command_config", "1", "close_reach_command" );
-    sailRange_ms = dbHandler.retrieveCellAsInt("sail_command_config", "1", "run_command") - closeRange_ms;
-    rudderMidpoint_ms = dbHandler.retrieveCellAsInt("rudder_command_config", "1", "midship_command");
-    rudderRange_ms = dbHandler.retrieveCellAsInt("rudder_command_config", "1","extreme_command") - rudderMidpoint_ms;
+    //closeRange_ms = dbHandler.retrieveCellAsInt( "sail_command_config", "1", "close_reach_command" );
+    //sailRange_ms = dbHandler.retrieveCellAsInt("sail_command_config", "1", "run_command") - closeRange_ms;
+    //rudderMidpoint_ms = dbHandler.retrieveCellAsInt("rudder_command_config", "1", "midship_command"); // Not use in DataBase
+    // rudderRange_ms = dbHandler.retrieveCellAsInt("rudder_command_config", "1","extreme_command") - rudderMidpoint_ms;
 }
 
 ///----------------------------------------------------------------------------------
@@ -153,6 +153,7 @@ int16_t LowLevelController::pi()
 
     error = Utility::headingDifference( heading, desiredHeading );
 
+    // TODO : value of 0.25 ???
     integral = integral + ( error * 0.25 );
 
     if( integral < -MAX_INTEGRAL )

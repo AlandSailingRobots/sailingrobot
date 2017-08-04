@@ -81,7 +81,6 @@ void DBHandler::getDataAsJson(std::string select, std::string table, std::string
 
 void DBHandler::insertDataLogs(std::vector<LogItem>& logs)
 {
-		std::stringstream arduinoValues;
 		std::stringstream gpsValues;
 		std::stringstream courseCalculationValues;
 		std::stringstream compassModelValues;
@@ -89,7 +88,6 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs)
 		std::stringstream windsensorValues;
 		std::stringstream ss;
 		int logNumber =0;
-		int arduinoId=0;
 		int windsensorId=0;
 		int gpsId=0;
 		int courceCalculationId=0;
@@ -109,27 +107,22 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs)
 		{
 		  Logger::info("Writing in the database last value: %s size logs %d",logs[0].m_timestamp_str.c_str(),logs.size());
     }
-		tableId = getIdFromTable("arduino_datalogs",true,db);
-		if(tableId.size() > 0)
-		{
-			arduinoId = (int)strtol(tableId.c_str(), NULL, 10);
-		}
-		tableId = getIdFromTable("windsensor_datalogs",true,db);
+		tableId = getIdFromTable("dataLogs_windsensor",true,db);
 		if(tableId.size() > 0)
 		{
 			windsensorId = (int)strtol(tableId.c_str(), NULL, 10);
 		}
-		tableId = getIdFromTable("gps_datalogs",true,db);
+		tableId = getIdFromTable("dataLogs_gps",true,db);
 		if(tableId.size() > 0)
 		{
 			gpsId = (int)strtol(tableId.c_str(), NULL, 10);
 		}
-		tableId = getIdFromTable("course_calculation_datalogs",true,db);
+		tableId = getIdFromTable("dataLogs_course_calculation",true,db);
 		if(tableId.size() > 0)
 		{
 			courceCalculationId = (int)strtol(tableId.c_str(), NULL, 10);
 		}
-		tableId = getIdFromTable("compass_datalogs",true,db);
+		tableId = getIdFromTable("dataLogs_compass",true,db);
 		if(tableId.size() > 0)
 		{
 			compassModelId = (int)strtol(tableId.c_str(), NULL, 10);
@@ -139,31 +132,22 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs)
 		for(auto log: logs)
 		{
       logNumber++;
-			arduinoValues.str("");
 			gpsValues.str("");
 			courseCalculationValues.str("");
 			compassModelValues.str("");
 			systemValues.str("");
 			windsensorValues.str("");
 
-			arduinoValues << std::setprecision(10)
-				<< log.m_arduinoPressure << ", "
-				<< log.m_arduinoRudder << ", "
-				<< log.m_arduinoSheet << ", "
-				<< log.m_arduinoBattery;
-
-		  ss << "INSERT INTO " << "arduino_datalogs" << " VALUES(NULL, " << arduinoValues.str() << ");";
-
 			gpsValues << std::setprecision(10) << "'"
 				<< log.m_timestamp_str.c_str() << "', "
 				<< log.m_gpsLat << ", "
 				<< log.m_gpsLon << ", "
 				<< log.m_gpsSpeed << ", "
-				<< log.m_gpsHeading << ", "
+				<< log.m_gpsCourse << ", "
 				<< log.m_gpsSatellite << ", "
 				<< log.m_routeStarted;
 
-		  ss << "INSERT INTO " << "gps_datalogs" << " VALUES(NULL, " << gpsValues.str() << ");";
+		  ss << "INSERT INTO " << "dataLogs_gps" << " VALUES(NULL, " << gpsValues.str() << ");";
 
 			courseCalculationValues << std::setprecision(10)
 				<< log.m_distanceToWaypoint << ", "
@@ -172,21 +156,21 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs)
 				<< log.m_tack << ", "
 				<< log.m_goingStarboard;
 
-		  ss << "INSERT INTO " << "course_calculation_datalogs" << " VALUES(NULL, " << courseCalculationValues.str() << ");";
+		  ss << "INSERT INTO " << "dataLogs_course_calculation" << " VALUES(NULL, " << courseCalculationValues.str() << ");";
 
 			compassModelValues << std::setprecision(10)
 				<< log.m_compassHeading << ", "
 				<< log.m_compassPitch << ", "
 				<< log.m_compassRoll;
 
-		  ss << "INSERT INTO " << "compass_datalogs" << " VALUES(NULL, " << compassModelValues.str() << ");";
+		  ss << "INSERT INTO " << "dataLogs_compass" << " VALUES(NULL, " << compassModelValues.str() << ");";
 
 			windsensorValues << std::setprecision(10)
 				<< log.m_windDir << ", "
 				<< log.m_windSpeed << ", "
 				<< log.m_windTemp;
 
-		  ss << "INSERT INTO " << "windsensor_datalogs" << " VALUES(NULL, " << windsensorValues.str() << ");";
+		  ss << "INSERT INTO " << "dataLogs_windsensor" << " VALUES(NULL, " << windsensorValues.str() << ");";
 
 			systemValues << std::setprecision(10)
 				<< gpsId+logNumber << ", "
@@ -202,13 +186,13 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs)
 				<< log.m_twd;
 
 
-		  ss << "INSERT INTO " << "system_datalogs" << " VALUES(NULL, " << systemValues.str() << ");";
+		  ss << "INSERT INTO " << "dataLogs_system" << " VALUES(NULL, " << systemValues.str() << ");";
 		}
 
 		if(queryTable(ss.str(), db))
 		{
 
-			tableId = getIdFromTable("system_datalogs",true,db);
+			tableId = getIdFromTable("dataLogs_system",true,db);
 			if(tableId.size() > 0)
 			{
 				m_latestDataLogId = (int)strtol(tableId.c_str(), NULL, 10);
@@ -228,12 +212,12 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs)
 }
 //TODO -Oliver: make private
 void DBHandler::insertMessageLog(std::string gps_time, std::string type, std::string msg) {
-	std::string result;
-	std::stringstream sstm;
-	sstm << "INSERT INTO messages VALUES(NULL"
-		<< ", '" << gps_time << "', '" << type << "', '" << msg << "', " << (m_latestDataLogId)
-		<< ");";
-	queryTable(sstm.str());
+	//std::string result;
+	//std::stringstream sstm;
+	//sstm << "INSERT INTO messages VALUES(NULL"
+		//<< ", '" << gps_time << "', '" << type << "', '" << msg << "', " << (m_latestDataLogId) // Not use in DataBase
+		//<< ");";
+	//queryTable(sstm.str());
 }
 
 
@@ -358,7 +342,7 @@ void DBHandler::updateConfigs(std::string configs) {
 		tables.push_back(i.key()); //For each table key
 	}
 
-	//tables = sailing_config buffer_config etc
+	//tables = sailing_config config_buffer etc
 
 	for (auto table : tables) { //for each table in there
 		if(js[table] != NULL){
@@ -375,7 +359,7 @@ bool DBHandler::updateWaypoints(std::string waypoints){
 	int valuesLimit = 6; //"Dirty" fix for limiting the amount of values requested from server waypoint entries (amount of fields n = valuesLimit + 1)
 	int limitCounter;
 
-	if(not queryTable("DELETE FROM waypoints;"))
+	if(not queryTable("DELETE FROM current_Mission;"))
 	{
 		Logger::error("%s, Error: failed to delete waypoints", __PRETTY_FUNCTION__);
 	}
@@ -387,7 +371,7 @@ bool DBHandler::updateWaypoints(std::string waypoints){
 		for (auto y : Json::iterator_wrapper(i.value())){
 
 			limitCounter = valuesLimit;
-			DBPrinter = "INSERT INTO waypoints (id,latitude,longitude,declination,radius,stay_time,harvested) VALUES (";
+			DBPrinter = "INSERT INTO current_Mission (id,isCheckpoint,latitude,longitude,declination,radius,stay_time,harvested) VALUES (";
 
 			for (auto z : Json::iterator_wrapper(y.value())){
 				//Each individual value
@@ -414,7 +398,7 @@ bool DBHandler::updateWaypoints(std::string waypoints){
 
 	//Make sure waypoints before the current waypoint are harvested
 	if (!m_currentWaypointId.empty()){
-		std::string updateHarvested = "UPDATE waypoints SET harvested = 1 WHERE id < ";
+		std::string updateHarvested = "UPDATE current_Mission SET harvested = 1 WHERE id < ";
 		updateHarvested += m_currentWaypointId + ";";
 
 		if(not queryTable(updateHarvested))
@@ -445,10 +429,16 @@ int DBHandler::retrieveCellAsInt(std::string table, std::string id, std::string 
 double DBHandler::retrieveCellAsDouble(std::string table, std::string id, std::string column) {
 
 	std::string data = retrieveCell(table, id, column);
+<<<<<<< HEAD
+	if (data.size() > 0)
+	{
+		return strtod(data.c_str(), NULL);
+=======
 	std::string::size_type sz;
 	if (data.size() > 0)
 	{
 		return std::stod(data.c_str(), &sz);
+>>>>>>> develop
 	}
 	else
 	{
@@ -457,6 +447,10 @@ double DBHandler::retrieveCellAsDouble(std::string table, std::string id, std::s
 	}
 
 }
+<<<<<<< HEAD
+
+=======
+>>>>>>> develop
 
 void DBHandler::clearTable(std::string table) {
 	//If no table to delete, doesn't matter
@@ -478,8 +472,8 @@ int DBHandler::getRows(std::string table) {
 std::string DBHandler::getLogs(bool onlyLatest) {
 	Json js;
 
-	//fetch all datatables ending with "_datalogs"
-	std::vector<std::string> datalogTables = getTableNames("%_datalogs");
+	//fetch all datatables ending with "_dataLogs"
+	std::vector<std::string> datalogTables = getTableNames("dataLogs_%");
 
 	try {
 		//insert all data in these tables as json array
@@ -504,7 +498,7 @@ std::string DBHandler::getLogs(bool onlyLatest) {
 
 
 void DBHandler::clearLogs() {
-	std::vector<std::string> datalogTables = getTableNames("%_datalogs");
+	std::vector<std::string> datalogTables = getTableNames("dataLogs_%");
 
 	for (auto table : datalogTables) {
 		clearTable(table);
@@ -568,7 +562,11 @@ std::string DBHandler::getWaypoints() {
 	rows = getRows("waypoints");
 	if (rows > 0) {
 		for (auto i = 1; i <= rows; ++i) {
+<<<<<<< HEAD
+			getDataAsJson("id,isCheckpoint,latitude,longitude,declination,radius,stay_time", "current_Mission", wp + std::to_string(i), std::to_string(i),json, true);
+=======
 			getDataAsJson("id,latitude,longitude,declination,radius,stay_time", "waypoints", wp + std::to_string(i), std::to_string(i),js, true);
+>>>>>>> develop
 		}
 		return js.dump();
 	}
@@ -956,8 +954,8 @@ bool DBHandler::getWaypointValues(int& nextId, double& nextLongitude, double& ne
 	std::vector<std::string> results2;
     try
     {
-        results = retrieveFromTable("SELECT MIN(id) FROM waypoints WHERE harvested = 0;", rows, columns);
-		results2 = retrieveFromTable("SELECT MAX(id) FROM waypoints WHERE harvested = 1;", rows2, columns2);
+        results = retrieveFromTable("SELECT MIN(id) FROM current_Mission WHERE harvested = 0;", rows, columns);
+		results2 = retrieveFromTable("SELECT MAX(id) FROM current_Mission WHERE harvested = 1;", rows2, columns2);
     }
     catch(const char* error)
     {
@@ -979,21 +977,21 @@ bool DBHandler::getWaypointValues(int& nextId, double& nextLongitude, double& ne
 	//Set values to next waypoint
     nextId = stoi(results[1]);
 
-    nextLongitude = atof(retrieveCell("waypoints", results[1], "longitude").c_str());
-    nextLatitude = atof(retrieveCell("waypoints", results[1], "latitude").c_str());
-    nextDeclination = retrieveCellAsInt("waypoints", results[1], "declination");
-    nextRadius = retrieveCellAsInt("waypoints", results[1], "radius");
-	nextStayTime = retrieveCellAsInt("waypoints", results[1], "stay_time");
+    nextLongitude = atof(retrieveCell("current_Mission", results[1], "longitude").c_str());
+    nextLatitude = atof(retrieveCell("current_Mission", results[1], "latitude").c_str());
+    nextDeclination = retrieveCellAsInt("current_Mission", results[1], "declination");
+    nextRadius = retrieveCellAsInt("current_Mission", results[1], "radius");
+	nextStayTime = retrieveCellAsInt("current_Mission", results[1], "stay_time");
 
 
 	if(foundPrev) //Set values to next waypoint if harvested waypoint found
 	{
 		prevId = stoi(results[1]);
 
-		prevLongitude = atof(retrieveCell("waypoints", results2[1], "longitude").c_str());
-		prevLatitude = atof(retrieveCell("waypoints", results2[1], "latitude").c_str());
-		prevDeclination = retrieveCellAsInt("waypoints", results2[1], "declination");
-		prevRadius = retrieveCellAsInt("waypoints", results2[1], "radius");
+		prevLongitude = atof(retrieveCell("current_Mission", results2[1], "longitude").c_str());
+		prevLatitude = atof(retrieveCell("current_Mission", results2[1], "latitude").c_str());
+		prevDeclination = retrieveCellAsInt("current_Mission", results2[1], "declination");
+		prevRadius = retrieveCellAsInt("current_Mission", results2[1], "radius");
 	}
 
     return true;
@@ -1003,7 +1001,7 @@ std::string DBHandler::getConfigs() {
 	Json js;
 
 	//Fetch all table names ending with "_config"
-	std::vector<std::string> configTables = getTableNames("%_config"); // NOTE : Marc : Modify this point
+	std::vector<std::string> configTables = getTableNames("config_%"); // NOTE : Marc : Modify this point
 
 	//Query config tables and select all from config tables with id "1"
 	//This json structure does not use arrays

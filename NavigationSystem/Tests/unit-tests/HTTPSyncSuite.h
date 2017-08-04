@@ -126,7 +126,7 @@ public:
 
         std::string url1 = "http://www.sailingrobots.com/testdata/sync/";
         std::string url2 = "http://localhost/Remote-sailing-robots/sync/";
-        std::string urlOrigin = dbhandler->retrieveCell("server", "1", "srv_addr");
+        std::string urlOrigin = dbhandler->retrieveCell("config_HTTPSyncNode", "1", "srv_addr");
 
         bool validCheck = (urlOrigin == url1 || urlOrigin == url2);
 

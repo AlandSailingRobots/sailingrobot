@@ -42,4 +42,3 @@ private:
 	uint8_t		m_index;
 	uint8_t		m_size;
 };
-

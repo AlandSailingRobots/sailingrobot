@@ -31,7 +31,7 @@ UNIT_TEST_SRCS 		= MessageCoreSuite.h MessageSuite.h UtilitySuite.h HTTPSyncSuit
 
 HARDWARE_TEST_SRCS	= HardwareXbeeSuite.h HardwareCompassSuite.h HardwareCV7Suite.h HardwareGPSDSuite.h \
 						MaestroControllerSuite.h ActuatorSailNodeSuite.h ActuatorRudderNodeSuite.h \
-						CANServiceSuite.h ActuatorNodeASPireSuite.h CANFeedbackReceiverSuite.h \
+						CANServiceSuite.h ActuatorNodeASPireSuite.h CANArduinoNodeSuite.h \
 						I2CControllerSuite.h HardwareWiringPiSuite.h
 
 TEST_MOCK_SRCS 		= MockNode.h

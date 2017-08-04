@@ -57,7 +57,7 @@ bool LineFollowNode::init()
 {
   //setupRudderCommand();
 /*
-  twdBufferMaxSize = m_db.retrieveCellAsInt("buffer_config", "1", "true_wind");
+  twdBufferMaxSize = m_db.retrieveCellAsInt("config_buffer", "1", "true_wind");
   if(twdBufferMaxSize == 0)
   twdBufferMaxSize = DEFAULT_TWD_BUFFERSIZE;
 */
@@ -264,11 +264,11 @@ double LineFollowNode::calculateDesiredCourse()
           int headingGps = gpsHeading;
 
           if (increaseCompassWeight){
-            m_gpsHeadingWeight = m_gpsHeadingWeight - tickRate; //Decrease gps weight
-            if (m_gpsHeadingWeight < 0.0) m_gpsHeadingWeight = 0;
+            m_gpsCourseWeight = m_gpsCourseWeight - tickRate; //Decrease gps weight
+            if (m_gpsCourseWeight < 0.0) m_gpsCourseWeight = 0;
           }else{
-            m_gpsHeadingWeight = m_gpsHeadingWeight + tickRate;
-            if (m_gpsHeadingWeight > 1.0) m_gpsHeadingWeight = 1.0;
+            m_gpsCourseWeight = m_gpsCourseWeight + tickRate;
+            if (m_gpsCourseWeight > 1.0) m_gpsCourseWeight = 1.0;
           }
 
           //Difference calculation
@@ -277,7 +277,7 @@ double LineFollowNode::calculateDesiredCourse()
           diff -= 180;
 
           //Merge angle calculation
-          int returnValue = 360 + headingCompass + (diff * m_gpsHeadingWeight);
+          int returnValue = 360 + headingCompass + (diff * m_gpsCourseWeight);
           while (returnValue > 360) returnValue -= 360;
 
           return returnValue;
