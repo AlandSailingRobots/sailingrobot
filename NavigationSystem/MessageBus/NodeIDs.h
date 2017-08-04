@@ -49,7 +49,10 @@ enum class NodeID {
 	DBLoggerNode,
 	CANFeedbackReceiver,
 	CourseRegulatorNode,
-	SailControlNode
+	SailControlNode,
+	SpeedRegulatorNode,
+	CANArduino,
+	WingsailControlNode
 };
 
 inline std::string nodeToString(NodeID id)
@@ -118,6 +121,12 @@ inline std::string nodeToString(NodeID id)
 		return "CourseRegulatorNode";
 		case NodeID::SailControlNode:
 		return "SailControlNode";
+		case NodeID::SpeedRegulatorNode:
+		return "SpeedRegulatorNode";
+		case NodeID::WingsailControlNode:
+		return "WingsailControlNode";
+		case NodeID::CANArduino:
+		return "CANArduino";
 	}
 	return "";
 }

@@ -31,25 +31,20 @@
 #define STATE_ESTIMATIONODE_TEST_COUNT   9
 
 
-class StateEstimationNodeSuite : public CxxTest::TestSuite
-{
+class StateEstimationNodeSuite : public CxxTest::TestSuite {
+
 public:
 
-  StateEstimationNode* sEstimationNode;
+    StateEstimationNode* sEstimationNode;
 
-  DBHandler* dbhandler;
-  MockNode* mockNode;
-  bool nodeRegistered = false;
+    DBHandler* dbhandler;
+    MockNode* mockNode;
+    bool nodeRegistered = false;
 
-  int speedLimit = 1;
+    int speedLimit = 1;
 
-  std::thread* thr;
-  int testCount = 0;
-  // Cheeky method for declaring and initialising a static in a header file
-  static MessageBus& msgBus(){
-    static MessageBus* mbus = new MessageBus();
-    return *mbus;
-  }
+    std::thread* thr;
+    int testCount = 0;
 
   // ----------------
   // Send messages
@@ -77,8 +72,6 @@ public:
       std::this_thread::sleep_for(std::chrono::milliseconds(2600));
       thr = new std::thread(runMessageLoop);
     }
-    testCount++;
-  }
 
   // ----------------
   // End of test when all test have been successfull
@@ -112,7 +105,14 @@ public:
     TS_ASSERT(sEstimationNode->init());
     TS_ASSERT(!mockNode->m_MessageReceived);
 
-  }
+    // ----------------
+    // Test for the absence of a returned message by a offline GPS
+    // ----------------
+    void test_StateEstimationNodeGPSNotOnline()
+    {
+        TS_ASSERT(sEstimationNode->init());
+        TS_ASSERT(!mockNode->m_MessageReceived);
+    }
 
   // ----------------
   // Test to see if a message concerning the node will be listened
@@ -145,7 +145,7 @@ public:
       int satCount = 2;
       GPSMode mode = GPSMode::LatLonOk;
 
-      MessagePtr gpsData =  std::make_unique<GPSDataMsg>(false,true,latitude,longitude,unixTime,speed,headingGPS,satCount,
+        MessagePtr gpsData =  std::make_unique<GPSDataMsg>(false,true,latitude,longitude,unixTime,speed,headingGPS,satCount,
         mode);
         msgBus().sendMessage(std::move(gpsData));
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -166,7 +166,7 @@ public:
         float vesselHeading = Utility::addDeclinationToHeading(heading, nextDeclination);
         float stateEstimationNodeVesselHeading = mockNode->m_StateMsgHeading;
         TS_ASSERT_EQUALS(stateEstimationNodeVesselHeading, vesselHeading);
-      }
+    }
 
       // ----------------
       // Test to see if the message, sent by the node, is with the values

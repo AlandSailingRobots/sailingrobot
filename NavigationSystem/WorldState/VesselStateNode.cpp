@@ -118,7 +118,7 @@ void VesselStateNode::processArduinoMessage(ArduinoDataMsg* msg)
 	m_ArduinoRudder = msg->rudder();
 	m_ArduinoSheet = msg->sheet();
 	m_ArduinoBattery = msg->battery();
-	m_ArduinoRC = msg->RC();
+	m_ArduinoRC = msg->Radio_Controller();
 }
 
 void VesselStateNode::processWaypointMessage( WaypointDataMsg* msg )

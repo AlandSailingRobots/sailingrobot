@@ -65,7 +65,7 @@ private:
     int m_TimeBetweenMsgs;
     int m_updateFrequency;
     int m_queueSize;
- 
+
     std::mutex m_lock;
 
 };

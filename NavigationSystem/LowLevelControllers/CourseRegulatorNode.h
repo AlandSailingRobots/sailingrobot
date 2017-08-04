@@ -61,17 +61,17 @@ private:
     // Processing informations from the State Message
     // -------------
     void processStateMessage( const StateMessage* msg);
-       
+
     // -------------
     // Processing informations from the Desired course message
     // -------------
     void processDesiredCourseMessage( const DesiredCourseMsg* msg);
-     
+
     // -------------
     // Processing informations from the Navigation Control Message
     // -------------
     void processNavigationControlMessage( const NavigationControlMsg* msg);
-        
+
 
     // -------------
     // Determinate the rudder angle according to the heading difference
@@ -89,7 +89,7 @@ private:
     static void CourseRegulatorNodeThreadFunc(ActiveNode* nodePtr);
 
     double  m_VesselHeading; // units : ° (degrees), from 0 to 359
-        
+
     double m_VesselSpeed; // units : knts (knots)
     // -------------
     // Parameters to regulate this node
@@ -105,7 +105,7 @@ private:
     // -------------
     // Loop time where the thread is asleep. units : seconds
     // -------------
-    double m_LoopTime;   
+    double m_LoopTime;
     // -------------
     // Parameters to make a PI regulation
     // -------------
@@ -115,7 +115,7 @@ private:
     //----------
     // Variable used
     const int STATE_INITIAL_SLEEP = 2000;
-    
+
     // -------------
     // Informations on Navigation control message
     //NavigationState m_NavigationState;
@@ -130,5 +130,5 @@ private:
     double m_VesselCourse; // units : ° (degrees), from 0 to 359
     */
     std::mutex m_lock;                      //Mutex to lock the node
-   
+
 };
