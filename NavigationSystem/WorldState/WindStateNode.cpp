@@ -5,7 +5,8 @@
 *
 * Purpose:
 *   Each time a vessel state message is received :
-*   - Calculates the true wind (speed and direction) from wind sensor and Vessel State datas.
+*   - Calculates the instantaneous true wind (speed and direction) from wind sensor and Vessel State
+*     datas.
 *   - Returns a WindStateMsg corresponding to the true and apparent wind state (speed and direction).
 *   The wind direction corresponds to the direction where the wind comes from.
 *

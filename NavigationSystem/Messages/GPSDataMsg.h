@@ -100,8 +100,8 @@ private:
 	double	m_Lat;
 	double	m_Lon;
 	double	m_UnixTime;
-	double	m_Speed;
-	double	m_Course;
+	double	m_Speed;		// m/s
+	double	m_Course;		// degree [0, 360[ in North-East reference frame (clockwise)
 	int		m_SatCount;
 	GPSMode	m_Mode;
 };

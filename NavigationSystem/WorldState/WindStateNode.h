@@ -5,7 +5,8 @@
 *
 * Purpose:
 *   Each time a vessel state message is received :
-*   - Calculates the true wind (speed and direction) from wind sensor and Vessel State datas.
+*   - Calculates the instantaneous true wind (speed and direction) from wind sensor and Vessel State
+*     datas.
 *   - Returns a WindStateMsg corresponding to the true and apparent wind state (speed and direction).
 *   The wind direction corresponds to the direction where the wind comes from.
 *
@@ -65,7 +66,7 @@ private:
     float   m_apparentWindSpeed;        // m/s
     float   m_apparentWindDirection;    // degree [0, 360[ in vessel reference frame (clockwise)
 
-    float  m_trueWindSpeed;             // m/s
-    float  m_trueWindDirection;         // degree [0, 360[ in North-East reference frame (clockwise)
+    float   m_trueWindSpeed;            // m/s
+    float   m_trueWindDirection;        // degree [0, 360[ in North-East reference frame (clockwise)
 
 };

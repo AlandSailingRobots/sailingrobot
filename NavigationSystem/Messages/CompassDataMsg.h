@@ -56,7 +56,7 @@ public:
 	}
 
 private:
-	int m_Heading;
-	int m_Pitch;
-	int m_Roll;
+	int m_Heading;		// ??
+	int m_Pitch;		// ??
+	int m_Roll;			// ??
 };
