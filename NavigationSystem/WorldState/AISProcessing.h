@@ -55,7 +55,7 @@ private:
   /*
   * Sends the data to the collidable manager
   */
-  void sendAISData();
+  void addAISDataToCollidableMgr();
 
   /*
   * Gets to process the message if the message received is an AISDataMsg

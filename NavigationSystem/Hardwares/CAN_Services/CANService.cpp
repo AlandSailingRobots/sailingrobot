@@ -59,7 +59,7 @@ std::future<void> CANService::start()
 
   m_Running.store(true);
   wiringPiSetup();
-  int SPISpeed = 5000000;
+  int SPISpeed = 1000000;
 
 	//pinMode(MCP2515_INT, INPUT);					//set the interrupt pin to input
 	if(wiringPiSPISetup(CHANNEL, SPISpeed) == -1)	//channel, SPI speed

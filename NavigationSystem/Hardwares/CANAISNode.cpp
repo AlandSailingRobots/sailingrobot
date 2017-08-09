@@ -14,6 +14,11 @@
 ***************************************************************************************/
 #include "CANAISNode.h"
 
+const double res_pos = 1e-7;
+const float res_cog = 1e-4;
+const float res_sog = 1e-2;
+const float res_size = 1e-1;
+
 CANAISNode::CANAISNode(MessageBus& msgBus, CANService& canService, double loopTime) :
     CANPGNReceiver(canService, {129025, 129038, 129039, 129794, 129810}), ActiveNode(NodeID::CANAIS, msgBus),
     m_VesselList({}), m_VesselInfoList({}), m_PosLat(0), m_PosLon(0), m_LoopTime(loopTime){
