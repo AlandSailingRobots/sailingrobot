@@ -12,8 +12,6 @@
 *
 ***************************************************************************************/
 
-#pragma once
-
 #include "Hardwares/CANAISNode.h"
 #include "Messages/AISDataMsg.h"
 #include "MessageBus/MessageTypes.h"
