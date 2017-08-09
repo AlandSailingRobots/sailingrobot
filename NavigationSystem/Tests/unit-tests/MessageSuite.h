@@ -34,6 +34,8 @@
 #include "Messages/LocalConfigChangeMsg.h"
 #include "Messages/LocalWaypointChangeMsg.h"
 #include "Messages/StateMessage.h"
+#include "Messages/SolarDataMsg.h"
+ #include "Messages/AISDataMsg.h"
 
 
 class MessageSuite : public CxxTest::TestSuite {

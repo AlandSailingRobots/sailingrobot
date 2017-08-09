@@ -100,20 +100,6 @@ public:
     TS_ASSERT(mockNode->m_MessageReceived);
   }
 
-  void test_SolarData() {
-    double heading = 200;
-    double latitude = 60.2;
-    double longitude = 19.1;
-
-    MessagePtr mockSolarMsg = std::make_unique<StateMessage>(heading,latitude,longitude,1,20);
-    msgBus().sendMessage(std::move(mockSolarMsg));
-    std::this_thread::sleep_for(std::chrono::milliseconds(200));
-
-    TS_ASSERT_DELTA(mockNode->m_latitude, latitude, 1e-3);
-    TS_ASSERT_DELTA(mockNode->m_longitude, longitude, 1e-3);
-    TS_ASSERT_DELTA(mockNode->m_heading, heading, 1e-3);
-  }
-
   void test_AISData() {
     std::vector<AISVessel> AISList;
     std::vector<AISVesselInfo> AISInfo;
