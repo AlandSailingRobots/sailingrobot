@@ -13,7 +13,6 @@
  *  NOTE: Change how we remove AIS contacts,
  *        rather than removing after a certain time,
  *        remove when the contact is outside the radius of interest
- *  NOTE: Use a smaller, separate loop time in ContactGC
  *
  * License:
  *      This file is subject to the terms and conditions defined in the file
@@ -28,9 +27,9 @@
 
 
 #define AIS_CONTACT_TIME_OUT        600        // 10 Minutes
-#define VISUAL_CONTACT_TIME_OUT 120
-#define NOT_AVAILABLE           -2000
-
+#define VISUAL_CONTACT_TIME_OUT     120
+#define NOT_AVAILABLE               -2000
+#define LOOP_TIME                   1000
 ///----------------------------------------------------------------------------------
 CollidableMgr::CollidableMgr()
     :ownAISLock(false), ownVisualLock(false)
@@ -229,7 +228,7 @@ void CollidableMgr::ContactGC(CollidableMgr* ptr)
 {
     while(true)
     {
-        std::this_thread::sleep_for(std::chrono::milliseconds(std::min(AIS_CONTACT_TIME_OUT, VISUAL_CONTACT_TIME_OUT)));
+        std::this_thread::sleep_for(std::chrono::milliseconds(LOOP_TIME));
         ptr->removeOldContacts();
     }
 }
