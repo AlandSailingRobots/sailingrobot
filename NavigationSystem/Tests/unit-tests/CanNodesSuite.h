@@ -4,14 +4,10 @@
 * 		CanNodesSuite.h
 *
 * Purpose:
-*		A set of unit tests for checking if the CANAIS, CanSolarTracker and
-*   CANWindsensor nodes works as intended
-*
-* Developer Notes:
-*
+*   Tests the messagetypes, SolarDataMsg and AISDataMsg, works as intended
+*   Sending and receiving the messages, serialising and deserialising the messages
 *
 ***************************************************************************************/
-
 #pragma once
 
 #include "Hardwares/CANAISNode.h"

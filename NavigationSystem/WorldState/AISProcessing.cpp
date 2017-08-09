@@ -4,7 +4,7 @@
 * 		AISProcessing.cpp
 *
 * Purpose:
-*     Receives the data from the CANAISNode and processes it and sends the vessels
+*     Receives the AIS data from the CANAISNode, processes it and adds the vessels
 *     that are in a certain radius to the collidableMgr
 *
 * Developer Notes:
@@ -40,7 +40,7 @@ AISProcessing::AISProcessing(MessageBus& msgBus, CollidableMgr* collidableMgr, i
 
   void AISProcessing::processAISMessage(AISDataMsg* msg) {
     std::vector<AISVessel> list = msg->vesselList();
-    m_InfoList = msg->vesselInfoList();
+    std::vector<AISVesselInfo> tmp_info = msg->vesselInfoList();
     double dist;
     m_latitude = msg->posLat();
     m_longitude = msg->posLon();
@@ -50,19 +50,36 @@ AISProcessing::AISProcessing(MessageBus& msgBus, CollidableMgr* collidableMgr, i
         m_Vessels.push_back(vessel);
       }
     }
+    for (auto tmp: tmp_info) {
+      for (auto info: m_InfoList) {
+        if (tmp.MMSI == info.MMSI) {
+          break;
+        }
+        m_InfoList.push_back(tmp);
+      }
+    }
   }
 
-  void AISProcessing::sendAISData() {
+  void AISProcessing::addAISDataToCollidableMgr() {
     /*
     * First loop sends the position report to collidable manager
     * And the second sends the static report
     */
+    std::vector<int> indexToRemove;
     for (auto vessel: m_Vessels) {
       this->collidableMgr->addAISContact(vessel.MMSI, vessel.latitude, vessel.longitude, vessel.SOG, vessel.COG);
+      for (uint32_t i = 0; i<m_InfoList.size();i++) {
+        if (vessel.MMSI == m_InfoList[i].MMSI) {
+          this->collidableMgr->addAISContact(m_InfoList[i].MMSI, m_InfoList[i].length, m_InfoList[i].beam);
+          indexToRemove.push_back(i);
+        }
+      }
     }
-    for (auto info: m_InfoList) {
-      this->collidableMgr->addAISContact(info.MMSI, info.length, info.beam);
+    for (auto i: indexToRemove) {
+      m_InfoList.erase(m_InfoList.begin() + i);
     }
+    indexToRemove.clear();
+    m_Vessels.clear();
   }
 
   void AISProcessing::start() {
@@ -77,8 +94,7 @@ AISProcessing::AISProcessing(MessageBus& msgBus, CollidableMgr* collidableMgr, i
 
     while(true) {
       node->m_lock.lock();
-      node->sendAISData();
-      node->m_Vessels.clear();
+      node->addAISDataToCollidableMgr();
       node->m_lock.unlock();
       timer.sleepUntil(node->m_LoopTime);
       timer.reset();

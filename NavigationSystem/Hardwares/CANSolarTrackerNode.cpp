@@ -15,6 +15,8 @@
 ***************************************************************************************/
 #include "CANSolarTrackerNode.h"
 
+const int DATA_OUT_OF_RANGE = -2000;
+
 CANSolarTrackerNode::CANSolarTrackerNode(MessageBus& msgBus, CANService& canService, double loopTime)
 	: ActiveNode(NodeID::CANSolarTracker, msgBus), m_CANService(&canService), m_LoopTime(loopTime)
 {
@@ -106,11 +108,10 @@ void CANSolarTrackerNode::CANSolarTrackerThreadFunc(ActiveNode* nodePtr) {
 
 	while(true) {
 		node->m_lock.lock();
-		;
 
-		if (node->m_Lat == node->DATA_OUT_OF_RANGE ||
-				node->m_Lon == node-> DATA_OUT_OF_RANGE ||
-				node->m_Heading == node->DATA_OUT_OF_RANGE) {
+		if (node->m_Lat == DATA_OUT_OF_RANGE ||
+				node->m_Lon ==  DATA_OUT_OF_RANGE ||
+				node->m_Heading == DATA_OUT_OF_RANGE) {
 			node->m_lock.unlock();
 			continue;
 		}

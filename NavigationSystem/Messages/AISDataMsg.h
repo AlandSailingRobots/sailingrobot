@@ -17,6 +17,20 @@
 
 #include <vector>
 
+struct AISVessel {
+  uint32_t MMSI;
+  float COG;
+  float SOG;
+  double latitude;
+  double longitude;
+};
+
+struct AISVesselInfo {
+  uint32_t MMSI;
+  float length;
+  float beam;
+};
+
 class AISDataMsg : public Message {
 public:
 	AISDataMsg(NodeID destinationID, NodeID sourceID, std::vector<AISVessel>(vesselList), std::vector<AISVesselInfo>(infoList), float posLat, float posLon)

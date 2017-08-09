@@ -103,8 +103,8 @@ private:
   double m_PosLon;
   std::mutex m_lock;
   double m_LoopTime;
-  double res_pos = 1e-7;
-  float res_cog = 1e-4;
-  float res_sog = 1e-2;
-  float res_size = 1e-1;
+  // double res_pos = 1e-7;
+  // float res_cog = 1e-4;
+  // float res_sog = 1e-2;
+  // float res_size = 1e-1;
 };

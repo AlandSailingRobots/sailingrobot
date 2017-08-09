@@ -172,7 +172,7 @@ unit_tests: $(BUILD_DIR)
 ## Build the integration tests for ASPire
 integration_tests_ASPire: $(BUILD_DIR)
 	$(MAKE) -f integration_tests_ASPire.mk
-
+	$(MAKE) -f ais_integration.mk
 
 #  Create the directories needed
 $(BUILD_DIR):

@@ -1,4 +1,3 @@
-
 #include "CANService.h"
 #include "global.h"
 
@@ -60,7 +59,7 @@ std::future<void> CANService::start()
 
   m_Running.store(true);
   wiringPiSetup();
-  int SPISpeed = 5000000;
+  int SPISpeed = 1000000;
 
 	//pinMode(MCP2515_INT, INPUT);					//set the interrupt pin to input
 	if(wiringPiSPISetup(CHANNEL, SPISpeed) == -1)	//channel, SPI speed
@@ -78,7 +77,7 @@ std::future<void> CANService::start()
 
 void CANService::run()
 {
-  bool ParsedEntireMessage;
+  bool done;
   N2kMsg Nmsg;
   while(m_Running.load() == true)
   {
@@ -88,18 +87,18 @@ void CANService::run()
     {
       if(Cmsg.header.ide == 1)
       {
-        ParsedEntireMessage = false;
+        done = false;
         IdToN2kMsg(Nmsg, Cmsg.id);
         if (IsFastPackage(Nmsg)) {
-          ParsedEntireMessage = ParseFastPkg(Cmsg, Nmsg);
+          done = ParseFastPkg(Cmsg, Nmsg);
         }
         else {
           CanMsgToN2kMsg(Cmsg, Nmsg);
-          ParsedEntireMessage = true;
+          done = true;
         }
         auto receiverIt = m_RegisteredPGNReceivers.find(Nmsg.PGN);
 
-        if (ParsedEntireMessage) {
+        if (done) {
           if(receiverIt != m_RegisteredPGNReceivers.end())
           {  // Iterator is a pair, of which the second element is the actual receiver.
             CANPGNReceiver* receiver = receiverIt->second;

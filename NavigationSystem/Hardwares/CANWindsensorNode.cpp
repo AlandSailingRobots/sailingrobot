@@ -13,7 +13,14 @@
 ***************************************************************************************/
 
 #include "CANWindsensorNode.h"
+#include "Messages/WindDataMsg.h"
+#include "SystemServices/Timer.h"
+// std::mutex m_lock;
 
+#include <chrono>
+#include <thread>
+
+const int DATA_OUT_OF_RANGE	=	-2000;
 
 CANWindsensorNode::CANWindsensorNode(MessageBus& msgBus, CANService& can_service, int time_filter_ms)
 : CANPGNReceiver(can_service, {130306, 130311}), ActiveNode(NodeID::WindSensor, msgBus), m_TimeBetweenMsgs(time_filter_ms)
@@ -37,6 +44,9 @@ void CANWindsensorNode::processPGN(N2kMsg &NMsg)
     parsePGN130306(NMsg, SID, WS, WA, Ref);
     m_WindDir = WA;
     m_WindSpeed = WS;
+
+    //		MessagePtr windData = std::make_unique<WindDataMsg>(m_WindDir, m_WindSpeed, m_WindTemperature);
+    //		m_MsgBus.sendMessage(std::move(windData));
   }
   else if(NMsg.PGN == 130311)
   {
@@ -45,6 +55,9 @@ void CANWindsensorNode::processPGN(N2kMsg &NMsg)
     float Temp, Hum, AP;
     parsePGN130311(NMsg, SID, TI, HI, Temp, Hum, AP);
     m_WindTemperature = Temp;
+
+    //		MessagePtr windData = std::make_unique<WindDataMsg>(m_WindDir, m_WindSpeed, m_WindTemperature);
+    //		m_MsgBus.sendMessage(std::move(windData));
   }
   else if(NMsg.PGN == 130312)
   {
@@ -140,10 +153,9 @@ void CANWindsensorNode::CANWindSensorNodeThreadFunc(ActiveNode* nodePtr) {
 
   while(true) {
     // Need to convert milliseconds into seconds for the argument
-    timer.sleepUntil(node->m_TimeBetweenMsgs*1.0f / 1000);
     node->m_lock.lock();
 
-    if( node->m_WindDir == node->DATA_OUT_OF_RANGE &&  node->m_WindTemperature == node->DATA_OUT_OF_RANGE && node->m_WindSpeed == node->DATA_OUT_OF_RANGE){
+    if( node->m_WindDir == DATA_OUT_OF_RANGE &&  node->m_WindTemperature == DATA_OUT_OF_RANGE && node->m_WindSpeed == DATA_OUT_OF_RANGE){
       node->m_lock.unlock();
       continue;
     }
@@ -152,7 +164,7 @@ void CANWindsensorNode::CANWindSensorNodeThreadFunc(ActiveNode* nodePtr) {
     node->m_MsgBus.sendMessage(std::move(windData));
 
     node->m_lock.unlock();
-
+    timer.sleepUntil(node->m_TimeBetweenMsgs*1.0f / 1000);
     timer.reset();
   }
 }

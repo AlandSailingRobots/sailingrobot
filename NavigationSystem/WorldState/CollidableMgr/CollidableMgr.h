@@ -4,8 +4,10 @@
  * 		CollidableMgr.h
  *
  * Purpose:
- *
- *
+ *    Handles the objects we can collide with, vessels found by the AIS
+ *    or smaller boats/obstacles found by the thermal imager
+ *    The AISProcessing adds/updates the data to the collidableMgr
+ *    Removes the data when enough time has gone without the contact being updated
  * License:
  *      This file is subject to the terms and conditions defined in the file
  *      'LICENSE.txt', which is part of this source code package.

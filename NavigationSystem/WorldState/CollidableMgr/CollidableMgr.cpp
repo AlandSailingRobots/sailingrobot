@@ -4,13 +4,22 @@
  * 		CollidableMgr.cpp
  *
  * Purpose:
+ *    Handles the objects we can collide with, vessels found by the AIS
+ *    or smaller boats/obstacles found by the thermal imager
+ *    The AISProcessing adds/updates the data to the collidableMgr
+ *    Removes the data when enough time has gone without the contact being updated
+ *
+ * Developer notes:
+ *  NOTE: Change how we remove AIS contacts,
+ *        rather than removing after a certain time,
+ *        remove when the contact is outside the radius of interest
+ *  NOTE: Use a smaller, separate loop time in ContactGC
  *
  * License:
  *      This file is subject to the terms and conditions defined in the file
  *      'LICENSE.txt', which is part of this source code package.
  *
  ***************************************************************************************/
-
 
 #include "CollidableMgr.h"
 #include "SystemServices/SysClock.h"
@@ -20,7 +29,7 @@
 
 #define AIS_CONTACT_TIME_OUT        600        // 10 Minutes
 #define VISUAL_CONTACT_TIME_OUT 120
-#define NOT_AVAILABLE           0
+#define NOT_AVAILABLE           -2000
 
 ///----------------------------------------------------------------------------------
 CollidableMgr::CollidableMgr()
@@ -197,6 +206,7 @@ void CollidableMgr::removeOldContacts()
     }
 
     timeNow = SysClock::unixTime();
+
 
     for (auto it = this->aisContacts.cbegin(); it != this->aisContacts.cend();)
     {

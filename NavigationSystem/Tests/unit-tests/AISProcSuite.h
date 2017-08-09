@@ -5,12 +5,11 @@
 *
 * Purpose:
 *		Testing the AISProcessing node!
-*
-* Developer Notes:
+*   One test that tests if we receive an AISData messages
+*   And another message that tests if we can add data to the collidable manager
 *
 *
 ***************************************************************************************/
-
 #include "WorldState/AISProcessing.h"
 #include "../cxxtest/cxxtest/TestSuite.h"
 #include "Messages/StateMessage.h"
