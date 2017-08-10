@@ -158,3 +158,4 @@ bool MessageDeserialiser::readNodeID(NodeID& data)
 
 	return false;
 }
+

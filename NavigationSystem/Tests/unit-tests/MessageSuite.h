@@ -9,7 +9,7 @@
  * Developer Notes:
  *
  *							12.4.17 JM
- *	
+ *
  *	Functions that have tests:		Functions that does not have tests:
  *
  *	All Message-functions have tests
@@ -196,7 +196,7 @@ public:
 		TS_ASSERT_EQUALS(msg.rudder(), 5500);
 		TS_ASSERT_EQUALS(msg.sheet(), 4700);
 		TS_ASSERT_EQUALS(msg.battery(), 2);
-		TS_ASSERT_EQUALS(msg.RC(), 3);
+		TS_ASSERT_EQUALS(msg.Radio_Controller(), 3);
 
 		MessageSerialiser serialiser;
 		msg.Serialise(serialiser);
@@ -210,7 +210,7 @@ public:
 		TS_ASSERT_EQUALS(msgTwo.rudder(), 5500);
 		TS_ASSERT_EQUALS(msgTwo.sheet(), 4700);
 		TS_ASSERT_EQUALS(msgTwo.battery(), 2);
-		TS_ASSERT_EQUALS(msgTwo.RC(), 3);
+		TS_ASSERT_EQUALS(msgTwo.Radio_Controller(), 3);
 	}
 
 	void test_VesselStateMsg()
@@ -350,5 +350,4 @@ public:
 		TS_ASSERT_EQUALS(msgTwo.speed(), 5);
 		TS_ASSERT_EQUALS(msgTwo.course(), 30);
 	}
-
 };

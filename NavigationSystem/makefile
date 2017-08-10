@@ -31,7 +31,7 @@ export USE_LNM = 0
 # Tools
 ###############################################################################
 
-export CPPFLAGS             = -g -Wall -pedantic -Werror -std=gnu++14
+export CPPFLAGS             = -g -Wall -pedantic -Werror -std=gnu++14 -Wno-psabi  
 export LIBS                 = -lsqlite3 -lgps -lrt -lcurl -lpthread -lwiringPi -lncurses
 
 ifeq ($(TOOLCHAIN),1)
@@ -135,7 +135,7 @@ export HW_SERVICES_JANET_SRC = Hardwares/MaestroController/MaestroController.cpp
 export HW_NODES_ALL_SRC		= Hardwares/HMC6343Node.cpp Hardwares/GPSDNode.cpp
 
 export HW_NODES_ASPIRE_SRC 	= Hardwares/ActuatorNodeASPire.cpp \
-                            	Hardwares/CANFeedbackReceiver.cpp Hardwares/CANWindsensorNode.cpp
+                            	Hardwares/CANWindsensorNode.cpp Hardwares/CANArduinoNode.cpp
 
 export HW_NODES_JANET_SRC 	= Hardwares/ActuatorNode.cpp Hardwares/CV7Node.cpp Hardwares/ArduinoNode.cpp
 

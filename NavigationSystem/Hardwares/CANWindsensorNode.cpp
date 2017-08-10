@@ -22,6 +22,7 @@ CANPGNReceiver(can_service, {130306, 130311}), ActiveNode(NodeID::WindSensor, ms
     m_WindSpeed = DATA_OUT_OF_RANGE;
     m_WindTemperature = DATA_OUT_OF_RANGE;
 
+  msgBus.registerNode(*this, MessageType::DataRequest);
 }
 
 CANWindsensorNode::~CANWindsensorNode(){}
