@@ -119,6 +119,35 @@ int Utility::sgn(double value)
 	return 0;
 }
 
+
+list::list Utility::maxAndIndex(list::list mylist)
+{
+        float maxi = 0;
+	int index = 0;
+	int i = 0;
+	int size = mylist.size();
+	list::list results;
+	
+
+	for (i = 0; i < size; i++)
+	{
+	        if (maxi < mylist.front())
+	        {
+		    maxi = mylist.front();
+		    index = i;
+	        }
+	        mylist.pop_front()
+		
+	}
+	results.push_back(maxi);
+	results.push_back(index);
+
+	return(results);
+}
+
+
+
+
 void Utility::polarToCartesian(float degrees, float& x, float& y)
 {
 	x = cos(degrees * M_PI/180);
