@@ -18,6 +18,7 @@
 #include <math.h>
 #include <mutex>
 #include <chrono>
+#include <list.h>
 //#include "All.h" // library for M_PI
 #include "Messages/WindDataMsg.h"
 #include "Messages/ActuatorPositionMsg.h"
@@ -25,6 +26,10 @@
 #include "SystemServices/Logger.h"
 #include "SystemServices/Timer.h"
 #include "Math/Utility.h"
+
+
+#DEFINE LIFTS = [];
+#DEFINE DRAGS = [];
 
 
 WingsailControlNode::WingsailControlNode(MessageBus& msgBus, DBHandler& dbhandler, double loopTime, double maxSailAngle,
@@ -94,6 +99,36 @@ double WingsailControlNode::calculateWingsailAngle()
     return -Utility::sgn(m_ApparentWindDir)*(((m_MinWingsailAngle-m_MaxWingsailAngle)*std::abs(m_ApparentWindDir)/180)+m_MaxWingsailAngle);
 }
 //*///----------------------------------------------------------------------------------
+
+///------------------------------------------------------------------------------------
+/* Return the angle to give to the tail to have maximum force toward
+ * boat heading */
+
+double WingsailControlNode::calculateTailAngle()
+{
+    // lists that will contain the forces on X and Y in the boat coordinates system
+    float xBoat_Forces [53];  
+    float yBoat_Forces [53];
+    
+    int i;
+    // transforming given calculated lifts and drags into forces in
+    // the boat coordinates system
+    for (i = 0;i < 54;i++)
+    {
+	*(xBoat_Forces+i) = cos(*(DRAGS + i)) - sin (*(LIFTS + i));
+	*(yBoat_Forces+i) = cos(*(LIFTS + i)) + sin (*(DRAGS + i));
+    }
+
+    list::list maxAndIndex_xBoat_Forces;
+    maxAndIndex_xBoat_Forces = Utility::maxAndIndex(xBoat_Forces);
+
+    double orderTail;
+    orderTail = maxAndIndex_xBoat_Forces.back() - 26;
+
+    return(orderTail)
+}
+
+
 
 /*----------------------------------------------------------------------------------
 double WingsailControlNode::calculateSailAngle()
