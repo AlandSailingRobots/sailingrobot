@@ -3,6 +3,7 @@
 #include "Hardwares/CAN_Services/N2kMsg.h"
 #include "Hardwares/CAN_Services/CANService.h"
 
+#include "DataBase/DBHandler.h"
 #include "Hardwares/CANArduinoNode.h"
 #include "Tests/unit-tests/TestMocks/MessageLogger.h"
 #include "Tests/unit-tests/TestMocks/MessageVerifier.h"
@@ -21,7 +22,7 @@ public:
     CANArduinoNode	* receiver;
   	std::thread* thr;
 	MessageVerifier* verifier;
-
+    DBHandler* dbhandler;
 
 	static MessageBus& msgBus(){
    	 	static MessageBus* mbus = new MessageBus();
@@ -41,7 +42,7 @@ public:
 
 	void setUp() {
 		if(receiver == 0){
-            receiver = new CANArduinoNode(msgBus(),canService(),1);
+            receiver = new CANArduinoNode(msgBus(),*dbhandler, canService(),1);
 			verifier = new MessageVerifier(msgBus());
 			thr = new std::thread(runMessageLoop);
             canService().start();

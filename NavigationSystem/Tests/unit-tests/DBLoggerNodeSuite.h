@@ -12,10 +12,7 @@
 #include <chrono>
 #include <future>
 
-#define DBLOGGERNODE_WAIT_TIME 100
-
-#define DBLOGGERNODE_UPDATE_FREQUENCY 1000
-
+#define DBLOGGERNODE_LOOP_TIME 1
 #define DBLOGGERNODE_QUEUE_SIZE 1
 
 class DBLoggerNodeSuite : public CxxTest::TestSuite {
@@ -39,7 +36,7 @@ class DBLoggerNodeSuite : public CxxTest::TestSuite {
     void setUp() {
         if(dbLoggerNode == 0) {
             dbHandler = new DBHandler("../asr.db");
-            dbLoggerNode = new DBLoggerNode(msgBus(), *dbHandler, DBLOGGERNODE_WAIT_TIME, DBLOGGERNODE_UPDATE_FREQUENCY, DBLOGGERNODE_QUEUE_SIZE);
+            dbLoggerNode = new DBLoggerNode(msgBus(), *dbHandler,DBLOGGERNODE_LOOP_TIME, DBLOGGERNODE_QUEUE_SIZE);
             thr = new std::thread(runMessageLoop);
         }
     }
@@ -80,7 +77,7 @@ class DBLoggerNodeSuite : public CxxTest::TestSuite {
 
         Timer timer;
 
-        timer.sleepUntil(DBLOGGERNODE_UPDATE_FREQUENCY/1000 + 0.1);
+        timer.sleepUntil(DBLOGGERNODE_LOOP_TIME + 0.1);
 
     }
 };

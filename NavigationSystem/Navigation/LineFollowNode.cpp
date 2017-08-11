@@ -28,13 +28,12 @@
 #include <chrono>
 
 #define INITIAL_SLEEP     2000
-#define LOOP_TIME         0.5
-
 
 // FILE* file = fopen("./gps.txt", "w");
 
 
 LineFollowNode::LineFollowNode(MessageBus& msgBus, DBHandler& db): ActiveNode(NodeID::SailingLogic, msgBus), m_db(db),
+m_LoopTime(0.5), m_MaxTackDistance(0), m_tackAngle(0.872665),
 m_nextWaypointId(0), m_nextWaypointLon(0), m_nextWaypointLat(0), m_nextWaypointDeclination(0), m_nextWaypointRadius(0),
 m_prevWaypointId(0), m_prevWaypointLon(0), m_prevWaypointLat(0), m_prevWaypointDeclination(0), m_prevWaypointRadius(0),
 m_externalControlActive(false), m_tackingDirection(1)
@@ -45,7 +44,8 @@ m_externalControlActive(false), m_tackingDirection(1)
     msgBus.registerNode(*this, MessageType::ExternalControl);
     msgBus.registerNode(*this, MessageType::ServerConfigsReceived);
 
-    m_tackAngle = 0.872665; // in radian (= 50°)
+// NOTE : Marc : conversion radian to degree
+    //m_tackAngle = 0.872665; // in radian (= 50°)
 
 //  fprintf( file, "%s,%ss,%s\n", "id", "latitude", "longitude" );
 //  fflush( file );
@@ -337,7 +337,7 @@ void LineFollowNode::LineFollowNodeThreadFunc(ActiveNode* nodePtr)
         MessagePtr navMsg = std::make_unique<NavigationControlMsg>(desiredCourse, 0, false, node->m_tack, goingStarboard, NavigationState::sailToWaypoint);
         node->m_MsgBus.sendMessage( std::move( navMsg ) );
 
-        timer.sleepUntil(LOOP_TIME);
+        timer.sleepUntil(node->m_LoopTime);
         timer.reset();
     }
 }

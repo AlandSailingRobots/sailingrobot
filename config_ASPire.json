@@ -1,120 +1,91 @@
 {
-"buffer_config": {
-  "compass": 1,
-  "true_wind": 100,
-  "windsensor": 1
+"config_ais": {
+  "loop_time":0.5
 },
 
-"course_calculation_config": {
-  "tack_angle": 20,
-  "tack_max_angle": 60,
-  "tack_min_speed": 5,
-  "sector_angle": 10
+"config_ais_processing": {
+  "loop_time":0.5,
+  "radius":0,
+  "mmsi_aspire":0
 },
 
-"gpsd_config": {
+"config_can_arduino": {
+  "loop_time":0.5
+},
+
+"config_compass": {
+  "loop_time":0.5,
+  "heading_buffer_size": 1
+},
+
+"config_course_regulator": {
+  "loop_time": 0.5,
+  "max_rudder_angle": 25.0,
+  "p_gain": 0.2,
+  "i_gain": 0.3,
+  "d_gain": 0.4
+},
+
+"config_dblogger": {
   "loop_time": 0.5
 },
 
-"httpsync_config": {
-  "delay": 0,
+
+"config_gps": {
+  "loop_time": 0.5
+},
+
+"config_httpsync": {
+  "loop_time": 0.5,
   "remove_logs": 0,
-  "push_only_latest_logs": 1
-},
-
-"i2c_config": {
-  "loop_time": 0.1
-},
-
-"maestro_controller_config": {
-  "port": "/dev/ttyACM0"
-},
-
-"rudder_command_config": {
-  "extreme_command": 7000,
-  "midship_command": 5520
-},
-
-"rudder_servo_config": {
-  "channel": 4,
-  "speed":0,
-  "acceleration":0
-},
-
-"course_regulator_config": {
-  "loop_time": 0.5,
-  "maxRudderAngle": 25.0,
-  "pGain": 0.2,
-  "iGain": 0.3
-},
-
-"sail_control_config": {
-  "loop_time": 0.5,
-  "maxSailAngle": 85.0,
-  "minSailAngle": 15.0,
-  "maxCommandAngle": 30.0,
-  "pGain": 0.2,
-  "iGain": 0.3
-},
-
-"sail_command_config": {
-  "close_reach_command": 4000,
-  "run_command": 5000
-},
-
-"sail_servo_config": {
-  "channel": 3,
-  "speed": 0,
-  "acceleration":0
-},
-
-"sailing_robot_config": {
-  "flag_heading_compass": 1,
-  "loop_time": 0.5,
-  "scanning": 0,
-  "line_follow": 1,
-  "require_network": 1
-},
-
-"server": {
+  "push_only_latest_logs": 0,
   "boat_id": "BOAT02",
   "boat_pwd": "PWD02",
-  "srv_addr": "http://www.sailingrobots.com/testdata/sync/"
+  "srv_addr": "http://www.sailingrobots.com/testdata/sync/",
+  "configs_updated": "",
+  "route_updated":""
 },
 
-"vesselState_config": {
+"config_sail_control": {
   "loop_time": 0.5,
-  "speedLimit": 0.5
+  "max_sail_angle": 85.0,
+  "min_sail_angle": 15.0
 },
 
-"waypoint_routing_config": {
-  "radius_ratio": 0.1,
-  "sail_adjust_time": 5,
-  "adjust_degree_limit": 25,
-  "max_command_angle": 90,
-  "rudder_speed_min": 1
+"config_simulator": {
+  "loop_time": 0.5
 },
 
-"wind_vane_config": {
-  "use_self_steering": 1,
-  "wind_sensor_self_steering": 1,
-  "self_steering_interval": 1.5
+"config_solar_tracker": {
+  "loop_time": 0.5
 },
 
-"windsensor_config": {
-  "port": "/dev/ttyS0",
-  "baud_rate": 4800
+"config_vessel_state": {
+  "loop_time": 0.5,
+  "course_config_speed_1": 1,
+  "course_config_speed_2": 2
 },
 
-"windState_config": {
-  "time_filter_ms": 500
+"config_voter_system": {
+  "loop_time": 0.5,
+  "max_vote": 25,
+  "waypoint_voter_weight": 1,
+  "wind_voter_weight": 1,
+  "channel_voter_weight": 1,
+  "midrange_voter_weight": 1,
+  "proximity_voter_weight": 2
 },
 
-"xbee_config": {
-  "send": 1,
-  "recieve": 1,
-  "send_logs": 0,
+"config_wind_sensor": {
+  "loop_time": 0.5
+},
+
+"config_xbee": {
   "loop_time": 0.1,
+  "send": 1,
+  "receive": 1,
+  "send_logs": 0,
   "push_only_latest_logs": 1
 }
+
 }

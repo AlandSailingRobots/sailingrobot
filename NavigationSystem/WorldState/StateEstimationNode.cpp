@@ -25,9 +25,10 @@
 #include "Math/Utility.h"
 #include "SystemServices/Timer.h"
 
-StateEstimationNode::StateEstimationNode(MessageBus& msgBus, DBHandler& db ,double loopTime, double speedLimit): ActiveNode(NodeID::StateEstimation, msgBus),
-m_VesselHeading(0), m_VesselLat(0), m_VesselLon(0), m_VesselSpeed(0), m_VesselCourse(0), m_LoopTime(loopTime), m_Declination(0),
-m_SpeedLimit(speedLimit), m_GpsOnline(false), m_dbHandler(db)
+StateEstimationNode::StateEstimationNode(MessageBus& msgBus, DBHandler& db ,double loopTime)
+:ActiveNode(NodeID::StateEstimation, msgBus),m_VesselHeading(0), m_VesselLat(0), m_VesselLon(0),
+m_VesselSpeed(0), m_VesselCourse(0), m_LoopTime(loopTime), m_Declination(0),
+m_SpeedLimit(1), m_GpsOnline(false), m_dbHandler(db)
 {
   msgBus.registerNode(*this, MessageType::CompassData);
   msgBus.registerNode(*this, MessageType::GPSData);
@@ -56,8 +57,8 @@ void StateEstimationNode::stop()
 
 void StateEstimationNode::updateConfigsFromDB()
 {
-    m_LoopTime = m_dbHandler.retrieveCellAsDouble("config_vesselState","1","loop_time");
-    m_SpeedLimit = m_dbHandler.retrieveCellAsDouble("config_vesselState","1","speedLimit");
+    m_LoopTime = m_dbHandler.retrieveCellAsDouble("config_vessel_state","1","loop_time");
+    m_SpeedLimit = m_dbHandler.retrieveCellAsDouble("config_vessel_state","1","speedLimit");
 }
 
 void StateEstimationNode::processMessage(const Message* msg)
@@ -86,7 +87,6 @@ void StateEstimationNode::processCompassMessage(const CompassDataMsg* msg)
 {
   float currentVesselHeading = msg->heading();
   m_VesselHeading = Utility::addDeclinationToHeading(currentVesselHeading, m_Declination);
-  //lock_guard.~lock_guard();
 }
 
 void StateEstimationNode::processGPSMessage(const GPSDataMsg* msg)
@@ -137,8 +137,6 @@ void StateEstimationNode::StateEstimationNodeThreadFunc(ActiveNode* nodePtr)
       MessagePtr stateMessage = std::make_unique<StateMessage>(node->m_VesselHeading, node->m_VesselLat,
       node->m_VesselLon, node->m_VesselSpeed, node->getCourse());
       node->m_MsgBus.sendMessage(std::move(stateMessage));
-      node->updateFrequencyThread();
-      //node->m_lock.unlock();
     }
     // TODO : Config timer or thread activity with a variable from the dbhandler ???
     timer.sleepUntil(node->m_LoopTime);

@@ -27,7 +27,7 @@ UNIT_TEST_SRCS 		= MessageCoreSuite.h MessageSuite.h UtilitySuite.h HTTPSyncSuit
 					  	CourseRegulatorSuite.h CANMessageSuite.h CourseRegulatorNodeSuite.h  \
 					  	SailControlNodeSuite.h  LowLevelControllersFunctionsTestSuite.h \
 					  	ASRCourseBallotSuite.h DBLoggerNodeSuite.h
-					  	# ASRArbiterSuite.h LowLevelControllerNodeJanetSuite.h // NOTE - Maël: This unit test suite is the source of a building error.
+					  	#ASRArbiterSuite.h  LowLevelControllerNodeJanetSuite.h // NOTE - Maël: This unit test suite is the source of a building error.
 
 HARDWARE_TEST_SRCS	= HardwareXbeeSuite.h HardwareCompassSuite.h HardwareCV7Suite.h HardwareGPSDSuite.h \
 						MaestroControllerSuite.h ActuatorSailNodeSuite.h ActuatorRudderNodeSuite.h \

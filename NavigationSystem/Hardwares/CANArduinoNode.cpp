@@ -4,7 +4,7 @@
 * 		CANArduinoNode.cpp
 *
 * Purpose:
-*		 Process messages from the arduino in the Actuatorunit via the CAN-Service including ActuatorFeedback and RC status . 
+*		 Process messages from the arduino in the Actuatorunit via the CAN-Service including ActuatorFeedback and RC status .
 *
 * Developer Notes:
 *		 The CAN frame id numbers that this node subscribes to are:
@@ -14,10 +14,11 @@
 
 #include "CANArduinoNode.h"
 #include "SystemServices/Logger.h"
+#include "MessageBus/MessageTypes.h"
 
 
-CANArduinoNode::CANArduinoNode(MessageBus& messageBus, CANService& canService, int time_filter_ms) :
-ActiveNode(NodeID::CANArduino, messageBus), CANFrameReceiver(canService, {701,702}), m_loopTime (time_filter_ms)
+CANArduinoNode::CANArduinoNode(MessageBus& messageBus, DBHandler& dbhandler, CANService& canService, double loopTime) :
+ActiveNode(NodeID::CANArduino, messageBus), CANFrameReceiver(canService, {701,702}), m_LoopTime (loopTime), m_db(dbhandler)
 {
 	m_RudderFeedback  = DATA_OUT_OF_RANGE;
 	m_WingsailFeedback = DATA_OUT_OF_RANGE;
@@ -34,15 +35,23 @@ bool CANArduinoNode::init() {
 	return true;
 }
 
-void CANArduinoNode::processMessage (const Message* message){
+void CANArduinoNode::updateConfigsFromDB()
+{
+    m_LoopTime = m_db.retrieveCellAsDouble("config_can_arduino","1","loop_time");
+}
 
+void CANArduinoNode::processMessage (const Message* message){
+	if(message->messageType() == MessageType::ServerConfigsReceived)
+	{
+		updateConfigsFromDB();
+	}
 }
 
 void CANArduinoNode::processFrame (CanMsg& msg) {
 	uint16_t rawData;
 
 	if (msg.id == 701) {
-		rawData = (msg.data[1] << 8 | msg.data[0]);		 
+		rawData = (msg.data[1] << 8 | msg.data[0]);
 		m_RudderFeedback = Utility::mapInterval (rawData, 0, INT16_SIZE, -MAX_RUDDER_ANGLE, MAX_RUDDER_ANGLE);
 
 		rawData = (msg.data[3] << 8 | msg.data[2]);
@@ -69,28 +78,24 @@ void CANArduinoNode::CANArduinoNodeThreadFunc(ActiveNode* nodePtr) {
 	timer.start();
 
 	while(true) {
-			
+
 		node->m_lock.lock();
 		if( node->m_RudderFeedback == node->DATA_OUT_OF_RANGE &&  node->m_WindvaneSelfSteerAngle == node->DATA_OUT_OF_RANGE &&
 															node->m_WingsailFeedback == node->DATA_OUT_OF_RANGE && node->m_WindvaneActuatorPos == node->DATA_OUT_OF_RANGE && node->m_Radio_Controller_On ==node->DATA_OUT_OF_RANGE){
 			node->m_lock.unlock();
 			continue;
 		}
-		MessagePtr feebackData = std::make_unique<ASPireActuatorFeedbackMsg>( node->m_WingsailFeedback, node->m_RudderFeedback,
+		MessagePtr feedBackData = std::make_unique<ASPireActuatorFeedbackMsg>( node->m_WingsailFeedback, node->m_RudderFeedback,
 																		node->m_WindvaneSelfSteerAngle, node->m_WindvaneActuatorPos);
-		node->m_MsgBus.sendMessage(std::move(feebackData));
-		
+		node->m_MsgBus.sendMessage(std::move(feedBackData));
+
 		MessagePtr statusMsg = std::make_unique<ArduinoDataMsg>(0,0,0,0,node->m_Radio_Controller_On);
 		node->m_MsgBus.sendMessage(std::move(statusMsg));
 
 		node->m_lock.unlock();
 
-		// Need to convert milliseconds into seconds for the argument
-		timer.sleepUntil(node->m_loopTime*1.0f / 1000);
+		//argument in seconds
+		timer.sleepUntil(node->m_LoopTime);
 		timer.reset();
 	}
 }
-
-
-
-

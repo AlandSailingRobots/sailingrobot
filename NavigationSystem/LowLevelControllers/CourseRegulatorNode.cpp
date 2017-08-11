@@ -23,11 +23,13 @@
 #include "SystemServices/Logger.h"
 #include "SystemServices/Timer.h"
 
+#define STATE_INITIAL_SLEEP 2000
 #define HEADING_ERROR_VALUE 370
 
-CourseRegulatorNode::CourseRegulatorNode( MessageBus& msgBus,  DBHandler& dbhandler, double loopTime, double maxRudderAngle,
-    double configPGain, double configIGain):ActiveNode(NodeID::CourseRegulatorNode,msgBus), m_VesselHeading(HEADING_ERROR_VALUE), m_VesselSpeed(0),
-    m_MaxRudderAngle(maxRudderAngle),m_DesiredHeading(HEADING_ERROR_VALUE),m_db(dbhandler), m_LoopTime(loopTime),pGain(configPGain),iGain(configIGain)
+CourseRegulatorNode::CourseRegulatorNode( MessageBus& msgBus,  DBHandler& dbhandler, double loopTime)
+:ActiveNode(NodeID::CourseRegulatorNode,msgBus), m_VesselHeading(HEADING_ERROR_VALUE), m_VesselSpeed(0),
+m_MaxRudderAngle(30),m_DesiredHeading(HEADING_ERROR_VALUE),m_db(dbhandler), m_LoopTime(loopTime),
+pGain(1),iGain(1),dGain(1)
 {
     msgBus.registerNode( *this, MessageType::StateMessage);
     msgBus.registerNode( *this, MessageType::DesiredCourse);
@@ -58,10 +60,11 @@ void CourseRegulatorNode::stop()
 ///----------------------------------------------------------------------------------
 void CourseRegulatorNode::updateConfigsFromDB()
 {
-    m_LoopTime = m_db.retrieveCellAsDouble("course_regulator_config","1","loop_time");
-    m_MaxRudderAngle = m_db.retrieveCellAsDouble("course_regulator_config","1","maxRudderAngle");
-    pGain = m_db.retrieveCellAsDouble("course_regulator_config","1","pGain");
-    iGain = m_db.retrieveCellAsDouble("course_regulator_config","1","iGain");
+    m_LoopTime = m_db.retrieveCellAsDouble("config_course_regulator","1","loop_time");
+    m_MaxRudderAngle = m_db.retrieveCellAsInt("config_course_regulator","1","max_rudder_angle");
+    pGain = m_db.retrieveCellAsDouble("config_course_regulator","1","p_gain");
+    iGain = m_db.retrieveCellAsDouble("config_course_regulator","1","i_gain");
+    dGain = m_db.retrieveCellAsDouble("config_course_regulator","1","d_gain");
 }
 
 ///----------------------------------------------------------------------------------
@@ -142,7 +145,7 @@ void CourseRegulatorNode::CourseRegulatorNodeThreadFunc(ActiveNode* nodePtr)
 
     // An initial sleep, its purpose is to ensure that most if not all the sensor data arrives
     // at the start before we send out the state message.
-    std::this_thread::sleep_for(std::chrono::milliseconds(node->STATE_INITIAL_SLEEP));
+    std::this_thread::sleep_for(std::chrono::milliseconds(STATE_INITIAL_SLEEP));
 
     Timer timer;
     timer.start();

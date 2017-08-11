@@ -29,7 +29,7 @@ public:
     //--------------
     // Constructor
     //--------------
-    WingsailControlNode(MessageBus& msgBus, DBHandler& dbhandler, double loopTime = 0.5, double maxSailAngle = 43, double minSailAngle = 5.5,
+    WingsailControlNode(MessageBus& msgBus, DBHandler& dbhandler, double loopTime, double maxSailAngle = 43, double minSailAngle = 5.5,
                     double maxCommandAngle = 30, double configPGain = 0, double configIGain = 0);
 
     // -------------

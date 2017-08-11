@@ -28,8 +28,8 @@ size_t write_to_string(void *ptr, size_t size, size_t count, void *stream) {
     return size*count;
 }
 
-HTTPSyncNode::HTTPSyncNode(MessageBus& msgBus, DBHandler *dbhandler, int delay, bool removeLogs)
-	:ActiveNode(NodeID::HTTPSync, msgBus), m_removeLogs(removeLogs), m_delay(delay), m_dbHandler(dbhandler)
+HTTPSyncNode::HTTPSyncNode(MessageBus& msgBus, DBHandler *dbhandler, double loopTime, bool removeLogs)
+	:ActiveNode(NodeID::HTTPSync, msgBus), m_removeLogs(removeLogs), m_LoopTime(loopTime), m_dbHandler(dbhandler)
 {
     msgBus.registerNode( *this, MessageType::LocalWaypointChange);
     msgBus.registerNode( *this, MessageType::LocalConfigChange);
@@ -45,10 +45,9 @@ bool HTTPSyncNode::init()
     m_reportedConnectError = false;
 
     m_pushOnlyLatestLogs = m_dbHandler->retrieveCellAsInt("config_httpsync", "1", "push_only_latest_logs");
-
-    m_shipID = m_dbHandler->retrieveCell("config_HTTPSyncNode", "1", "boat_id");
-    m_serverURL = m_dbHandler->retrieveCell("config_HTTPSyncNode", "1", "srv_addr");
-    m_shipPWD = m_dbHandler->retrieveCell("config_HTTPSyncNode", "1", "boat_pwd");
+    m_shipID = m_dbHandler->retrieveCell("config_httpsync", "1", "boat_id");
+    m_serverURL = m_dbHandler->retrieveCell("config_httpsync", "1", "srv_addr");
+    m_shipPWD = m_dbHandler->retrieveCell("config_httpsync", "1", "boat_pwd");
 
     m_initialised = true;
 
@@ -76,8 +75,8 @@ void HTTPSyncNode::stop()
 
 void HTTPSyncNode::updateConfigsFromDB()
 {
-    m_removeLogs = m_dbHandler->retrieveCellAsInt("httpsync_config","1","remove_logs");
-    m_delay = m_dbHandler->retrieveCellAsInt("httpsync_config","1","delay");
+    m_removeLogs = m_dbHandler->retrieveCellAsInt("config_httpsync","1","remove_logs");
+    m_LoopTime = m_dbHandler->retrieveCellAsDouble("config_httpsync","1","loop_time");
 }
 
 void HTTPSyncNode::processMessage(const Message* msgPtr)
@@ -118,28 +117,28 @@ void HTTPSyncNode::HTTPSyncThread(ActiveNode* nodePtr){
   	timer.start();
     while(node->m_Running.load() == true)
     {
-        std::cout << "\n /* Httpsync loop actif */ \n";
         node->getConfigsFromServer();
         node->getWaypointsFromServer();
         node->pushDatalogs();
 
-        timer.sleepUntil(node->m_delay);
+        timer.sleepUntil(node->m_LoopTime);
         timer.reset();
 
     }
-    std::cout << "/* Out loop */" << '\n';
     curl_global_cleanup();
-    std::cout << "/* Curl globql cleanup */" << '\n';
     Logger::info("HTTPSync thread has exited");
-    std::cout << "/* Exit httpsync */" << '\n';
 }
 
 bool HTTPSyncNode::pushDatalogs() {
     std::string response = "";
+
+    std::cout << "/* HTTPSyncNode Push Datalogs */" << m_dbHandler->getLogs(m_pushOnlyLatestLogs) << '\n';
+
     if(performCURLCall(m_dbHandler->getLogs(m_pushOnlyLatestLogs), "pushAllLogs", response))
     {
          //remove logs after push
         if(m_removeLogs) {
+            std::cout << "/* Clear logs */" << '\n';
             m_dbHandler->clearLogs();
         }
         return true;
@@ -271,6 +270,8 @@ bool HTTPSyncNode::getWaypointsFromServer() {
 
 bool HTTPSyncNode::performCURLCall(std::string data, std::string call, std::string& response) {
     std::string serverCall = "";
+
+    std::cout << "/* HTTPSyncNode Data used in curl for call " << call << " */" << data << '\n';
 
     if(data != "")
         serverCall = "serv="+call + "&id="+m_shipID+"&pwd="+m_shipPWD+"&data="+data;

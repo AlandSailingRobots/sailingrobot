@@ -72,7 +72,7 @@ public:
             dbHandler = new DBHandler("../asr.db");
             Logger::DisableLogging();
 
-            cRegulatorNode = new CourseRegulatorNode(msgBus(),*dbHandler,lTime,MaxRudAng,0,0);
+            cRegulatorNode = new CourseRegulatorNode(msgBus(),*dbHandler,lTime);
             cRegulatorNode->start();
 
             std::this_thread::sleep_for(std::chrono::milliseconds(2600));

@@ -48,7 +48,7 @@
 
 //I think these are needed
 #define WAIT_FOR_MESSAGE		300
-#define HTTP_TEST_COUNT				6
+#define HTTP_TEST_COUNT			6
 
 class HTTPSyncSuite : public CxxTest::TestSuite {
 public:
@@ -85,7 +85,7 @@ public:
         {
 			mockNode = new MockNode(msgBus(), nodeRegistered);
             dbhandler = new DBHandler("../asr.db");
-			dbloggernode = new DBLoggerNode(msgBus(),*dbhandler,100,1000,1);
+			dbloggernode = new DBLoggerNode(msgBus(),*dbhandler,1,1);
 			dbloggernode->start();
 			logger = new MessageLogger(msgBus());
             httpsync = new HTTPSyncNode(msgBus(), dbhandler, 1, false);
@@ -126,7 +126,7 @@ public:
 
         std::string url1 = "http://www.sailingrobots.com/testdata/sync/";
         std::string url2 = "http://localhost/Remote-sailing-robots/sync/";
-        std::string urlOrigin = dbhandler->retrieveCell("config_HTTPSyncNode", "1", "srv_addr");
+        std::string urlOrigin = dbhandler->retrieveCell("config_httpsync", "1", "srv_addr");
 
         bool validCheck = (urlOrigin == url1 || urlOrigin == url2);
 
@@ -184,7 +184,7 @@ public:
         std::string emptyJson = "null";
         TS_ASSERT_DIFFERS(currentLogs.compare(emptyJson),0); //Logs are cleared on a successful push
 
-		dbhandler->changeOneValue("httpsync_config","1","1","remove_logs");
+		dbhandler->changeOneValue("config_httpsync","1","1","remove_logs");
 		MessagePtr serverConfig = std::make_unique<ServerConfigsReceivedMsg>();
         msgBus().sendMessage(std::move(serverConfig));
         std::this_thread::sleep_for(std::chrono::milliseconds(1000));

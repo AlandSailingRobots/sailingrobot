@@ -41,7 +41,7 @@ private:
 
 	I2CController 	m_I2C;
 	bool 	 m_Initialised;
-	float  m_windDirection;
-	double m_LoopTime;
+	float  m_windDirection;	// in degrees [0-360]
+	double m_LoopTime;		//in seconds (ex: 0.5 s)
 
 };

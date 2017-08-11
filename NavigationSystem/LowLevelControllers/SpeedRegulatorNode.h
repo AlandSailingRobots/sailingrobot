@@ -29,7 +29,7 @@ public:
     //--------------
     // Constructor
     //--------------
-    SpeedRegulatorNode(MessageBus& msgBus, DBHandler& dbhandler, double loopTime = .5 ,double configPGain = 0, double configIGain = 0);
+    SpeedRegulatorNode(MessageBus& msgBus, DBHandler& dbhandler, double loopTime);
     // -------------
     // Destructor
     // -------------
@@ -111,10 +111,6 @@ private:
     // -------------
     double pGain;
     double iGain;
-
-    //----------
-    // Variable used
-    const int STATE_INITIAL_SLEEP = 2000;
 
     // -------------
     // Informations on Navigation control message

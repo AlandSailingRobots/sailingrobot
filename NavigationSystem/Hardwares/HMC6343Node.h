@@ -35,7 +35,7 @@ enum class CompassOrientation {
 
 class HMC6343Node : public ActiveNode {
 public:
-	HMC6343Node(MessageBus& msgBus, DBHandler& dbhandler, const int headingBufferSize = 10, double loopTime = 0.1);
+	HMC6343Node(MessageBus& msgBus, DBHandler& dbhandler, int headingBufferSize = 10, double loopTime = 0.1);
 
 	virtual ~HMC6343Node() { }
 
@@ -52,7 +52,6 @@ public:
 	///----------------------------------------------------------------------------------
 	void start();
 
-	void updateConfigsFromDB();
 
 	///----------------------------------------------------------------------------------
 	/// Doesn't process any messages.
@@ -78,10 +77,15 @@ protected:
 	///----------------------------------------------------------------------------------
 	static void HMC6343ThreadFunc(ActiveNode* nodePtr);
 
+	///----------------------------------------------------------------------------------
+	/// Update values from the database as the loop time of the thread and others parameters
+	///----------------------------------------------------------------------------------
+	void updateConfigsFromDB();
+
 	I2CController 	m_I2C;
-	bool 	m_Initialised;
-	const int		m_HeadingBufferSize;
-	double m_LoopTime;
+	bool 			m_Initialised;
+	int		m_HeadingBufferSize;	//Number of byte describing the compass data
+	double 			m_LoopTime;				// in seconds (ex : 0.5 s)
 	DBHandler& m_db;
 
 	// HMC6343 Orientations

@@ -30,8 +30,7 @@ public:
     //--------------
     // Constructor
     //--------------
-    SailControlNode(MessageBus& msgBus, DBHandler& dbhandler, double loopTime = 0.5, double maxSailAngle = 43, double minSailAngle = 5.5,
-                    double maxCommandAngle = 30, double configPGain = 0, double configIGain = 0);
+    SailControlNode(MessageBus& msgBus, DBHandler& dbhandler, double loopTime);
 
     // -------------
     // Destructor
@@ -49,7 +48,7 @@ public:
     void start();
     void stop();
 
-    void updateConfigsFromDB();
+
     // -------------
     // Listen the message concerning this Node
     // -------------
@@ -77,10 +76,10 @@ private:
     // -------------
     double restrictSail(double val);
 
-    // -------------
-    // Get and update the frequency of the thread
-    // -------------
-    void updateFrequencyThread();
+    ///----------------------------------------------------------------------------------
+	/// Update values from the database as the loop time of the thread and others parameters
+	///----------------------------------------------------------------------------------
+    void updateConfigsFromDB();
 
     // -------------
     // Actions during the activity of the node
@@ -93,8 +92,8 @@ private:
     //m_minSailAngle = 5.625;
     // ------------
     // Informations
-    double m_MaxSailAngle; // units : (radian)
-    double m_MinSailAngle; // units : (radian)
+    int m_MaxSailAngle; // units : (radian)
+    int m_MinSailAngle; // units : (radian)
     // -------------
     // Informations
     double m_MaxCommandAngle; // units : ° (degrees)
@@ -103,17 +102,14 @@ private:
     // Informations
     double m_ApparentWindDir; // units : ° (degrees), from -180 to 180
 
-    double pGain;
-    double iGain;
+    double pGain;   // without units
+    double iGain;   // without units
 
     // -------------
     // Access to the database
     // ------------
     DBHandler &m_db;
-    double m_LoopTime;
-
-    const int STATE_INITIAL_SLEEP = 2000;
-
+    double m_LoopTime;  //in seconds (ex: 0.5 s)
 
     // -------------
     // Informations

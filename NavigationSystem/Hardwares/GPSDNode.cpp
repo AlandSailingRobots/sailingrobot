@@ -48,7 +48,7 @@ bool GPSDNode::init()
 
 void GPSDNode::updateConfigsFromDB()
 {
-	m_LoopTime = m_db.retrieveCellAsDouble("config_GPSD","1","loop_time");
+	m_LoopTime = m_db.retrieveCellAsDouble("config_gps","1","loop_time");
 }
 
 void GPSDNode::processMessage(const Message* msgPtr)

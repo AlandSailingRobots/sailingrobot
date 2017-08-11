@@ -26,11 +26,11 @@
 #include "SystemServices/Timer.h"
 #include "Math/Utility.h"
 
+#define STATE_INITIAL_SLEEP 2000
 
-WingsailControlNode::WingsailControlNode(MessageBus& msgBus, DBHandler& dbhandler, double loopTime, double maxSailAngle,
-    double minSailAngle, double maxCommandAngle, double configPGain, double configIGain):ActiveNode(NodeID::WingsailControlNode,msgBus),
-    m_MaxWingsailAngle(maxSailAngle),m_MinWingsailAngle(minSailAngle),m_MaxCommandAngle(maxCommandAngle),m_ApparentWindDir(0),pGain(configPGain),
-    iGain(configIGain),m_db(dbhandler),m_LoopTime(loopTime)
+WingsailControlNode::WingsailControlNode(MessageBus& msgBus, DBHandler& dbhandler, double loopTime)
+:ActiveNode(NodeID::WingsailControlNode,msgBus),m_MaxWingsailAngle(43),m_MinWingsailAngle(5.5)
+,m_ApparentWindDir(0),m_db(dbhandler),m_LoopTime(loopTime)
 {
     msgBus.registerNode( *this, MessageType::WindData);
     msgBus.registerNode( *this, MessageType::NavigationControl);
@@ -67,23 +67,13 @@ void WingsailControlNode::processMessage( const Message* msg)
 ///----------------------------------------------------------------------------------
 void WingsailControlNode::processWindDataMessage(const WindDataMsg* msg)
 {
-    //std::lock_guard<std_mutex> lock_guard(m_lock);
     m_ApparentWindDir = msg->windDirection();
 }
 
 ///----------------------------------------------------------------------------------
 void WingsailControlNode::processNavigationControlMessage(const NavigationControlMsg* msg)
 {
-    //std::lock_guard<std_mutex> lock_guard(m_lock);
     //m_NavigationState = msg->navigationState();
-}
-
-///----------------------------------------------------------------------------------
-double WingsailControlNode::restrictWingsail(double val)
-{
-    if( val > m_MaxCommandAngle)        { return m_MaxCommandAngle; }
-    else if ( val < -m_MaxCommandAngle) { return -m_MaxCommandAngle; }
-    return val;
 }
 
 //*----------------------------------------------------------------------------------
@@ -113,7 +103,10 @@ double WingsailControlNode::getFrequencyThread()
 ///----------------------------------------------------------------------------------
 void WingsailControlNode::updateFrequencyThread()
 {
-    m_LoopTime = m_db.retrieveCellAsDouble("___","1","loop_time"); //see next table
+    m_LoopTime = m_db.retrieveCellAsDouble("config_wingsail_control","1","loop_time"); //see next table
+    m_MaxSailAngle = m_db.retrieveCellAsDouble("config_wingsail_control","1","loop_time"); //see next table
+    m_MinSailAngle = m_db.retrieveCellAsDouble("config_wingsail_control","1","loop_time"); //see next table
+
 }
 
 ///----------------------------------------------------------------------------------
@@ -123,18 +116,14 @@ void WingsailControlNode::WingsailControlNodeThreadFunc(ActiveNode* nodePtr)
 
     // An initial sleep, its purpose is to ensure that most if not all the sensor data arrives
     // at the start before we send out the state message.
-    std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+    std::this_thread::sleep_for(std::chrono::milliseconds(STATE_INITIAL_SLEEP));
     Timer timer;
     timer.start();
 
     while(true)
     {
-        std::lock_guard<std::mutex> lock_guard(node->m_lock);
-        // TODO : Modify Actuator Message for adapt to this Node
         MessagePtr actuatorMessage = std::make_unique<ActuatorPositionMsg>(0,node->calculateWingsailAngle());
         node->m_MsgBus.sendMessage(std::move(actuatorMessage));
-
-        // Broadcast() or selected sent???
         timer.sleepUntil(node->m_LoopTime);
         timer.reset();
         node->updateFrequencyThread();

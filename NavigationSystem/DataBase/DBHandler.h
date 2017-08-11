@@ -14,10 +14,24 @@
 using Json = nlohmann::json;
 
 struct LogItem {
-		int 	m_compassHeading;
-		int 	m_compassPitch;
-		int 	m_compassRoll;
-		bool	m_gpsHasFix;
+		double	m_rudderPosition; //dataLogs_actuator_feedback
+		double	m_wingsailPosition;
+		bool	m_radioControllerOn;
+		double	m_windVaneAngle;
+		double 	m_compassHeading; // dataLogs_compass
+		double 	m_compassPitch;
+		double 	m_compassRoll;
+		double 	m_distanceToWaypoint;//dataLogs_course_calculation
+		double 	m_bearingToWaypoint;
+		double 	m_courseToSteer;
+		bool 	m_tack;
+		bool 	m_goingStarboard;
+		double 	m_currentActuatorUnit;//dataLogs_current_sensors
+		double 	m_currentNavigationUnit;
+		double 	m_currentWindVaneAngle;
+		double 	m_currentWindVaneClutch;
+		double 	m_currentSailboatDrive;
+		bool	m_gpsHasFix; //dataLogs_gps
 		bool	m_gpsOnline;
 		double	m_gpsLat;
 		double	m_gpsLon;
@@ -25,25 +39,22 @@ struct LogItem {
 		double	m_gpsSpeed;
 		double	m_gpsCourse;
 		int		m_gpsSatellite;
-		float	m_windDir;
+		bool 	m_routeStarted;
+		float   m_temperature;//dataLogs_marine_sensors
+		float   m_conductivity;
+		float   m_ph;
+		double	m_vesselHeading;//dataLogs_vessel_state
+		double	m_vesselLat;
+		double	m_vesselLon;
+		double	m_vesselSpeed;
+		double	m_vesselCourse;
+		double	m_trueWindSpeed; //dataLogs_wind_state
+		double	m_trueWindDir;
+		double	m_apparentWindSpeed;
+		double	m_apparentWindDir;
+		float	m_windDir; //dataLogs_windsensor
 		float	m_windSpeed;
 		float 	m_windTemp;
-		int 	m_arduinoPressure;
-		int 	m_arduinoRudder;
-		int 	m_arduinoSheet;
-		int 	m_arduinoBattery;
-		double 	m_rudder;
-		double 	m_sail;
-		int 	m_sailServoPosition;
-		int 	m_rudderServoPosition;
-		double 	m_distanceToWaypoint;
-		double 	m_bearingToWaypoint;
-		double 	m_courseToSteer;
-		bool 	m_tack;
-		bool 	m_goingStarboard;
-		int 	m_waypointId;
-		double 	m_twd;
-		bool 	m_routeStarted;
 		std::string m_timestamp_str;
 	};
 

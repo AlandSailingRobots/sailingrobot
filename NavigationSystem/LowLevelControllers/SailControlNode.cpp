@@ -26,11 +26,11 @@
 #include "SystemServices/Timer.h"
 #include "Math/Utility.h"
 
+#define STATE_INITIAL_SLEEP 2000
 
-SailControlNode::SailControlNode(MessageBus& msgBus, DBHandler& dbhandler, double loopTime, double maxSailAngle,
-    double minSailAngle, double maxCommandAngle, double configPGain, double configIGain):ActiveNode(NodeID::SailControlNode,msgBus),
-    m_MaxSailAngle(maxSailAngle),m_MinSailAngle(minSailAngle),m_MaxCommandAngle(maxCommandAngle),m_ApparentWindDir(0),pGain(configPGain),
-    iGain(configIGain),m_db(dbhandler),m_LoopTime(loopTime)
+SailControlNode::SailControlNode(MessageBus& msgBus, DBHandler& dbhandler, double loopTime)
+    :ActiveNode(NodeID::SailControlNode,msgBus),m_MaxSailAngle(90),m_MinSailAngle(10),
+    m_ApparentWindDir(0),m_db(dbhandler),m_LoopTime(loopTime)
 {
     msgBus.registerNode( *this, MessageType::WindData);
     msgBus.registerNode( *this, MessageType::NavigationControl);
@@ -38,7 +38,10 @@ SailControlNode::SailControlNode(MessageBus& msgBus, DBHandler& dbhandler, doubl
 }
 
 ///----------------------------------------------------------------------------------
-SailControlNode::~SailControlNode(){}
+SailControlNode::~SailControlNode()
+{
+
+}
 
 ///----------------------------------------------------------------------------------
 bool SailControlNode::init(){ return true;}
@@ -60,12 +63,9 @@ void SailControlNode::stop()
 ///----------------------------------------------------------------------------------
 void SailControlNode::updateConfigsFromDB()
 {
-    m_LoopTime = m_db.retrieveCellAsDouble("sail_control_config","1","loop_time");
-    m_MaxSailAngle = m_db.retrieveCellAsDouble("sail_control_config","1","maxSailAngle");
-    m_MinSailAngle = m_db.retrieveCellAsDouble("sail_control_config","1","minSailAngle");
-    m_MaxCommandAngle = m_db.retrieveCellAsDouble("sail_control_config","1","maxCommandAngle");
-    pGain = m_db.retrieveCellAsDouble("sail_control_config","1","pGain");
-    iGain = m_db.retrieveCellAsDouble("sail_control_config","1","iGain");
+    m_LoopTime = m_db.retrieveCellAsDouble("config_sail_control","1","loop_time");
+    m_MaxSailAngle = m_db.retrieveCellAsInt("config_sail_control","1","max_sail_angle");
+    m_MinSailAngle = m_db.retrieveCellAsInt("config_sail_control","1","min_sail_angle");
 }
 
 ///----------------------------------------------------------------------------------
@@ -100,14 +100,6 @@ void SailControlNode::processNavigationControlMessage(const NavigationControlMsg
     //m_NavigationState = msg->navigationState();
 }
 
-///----------------------------------------------------------------------------------
-double SailControlNode::restrictSail(double val)
-{
-    if( val > m_MaxCommandAngle)        { return m_MaxCommandAngle; }
-    else if ( val < -m_MaxCommandAngle) { return -m_MaxCommandAngle; }
-    return val;
-}
-
 //*----------------------------------------------------------------------------------
 double SailControlNode::calculateSailAngle()
 {
@@ -133,7 +125,7 @@ void SailControlNode::SailControlNodeThreadFunc(ActiveNode* nodePtr)
 
     // An initial sleep, its purpose is to ensure that most if not all the sensor data arrives
     // at the start before we send out the state message.
-    std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+    std::this_thread::sleep_for(std::chrono::milliseconds(STATE_INITIAL_SLEEP));
     Timer timer;
     timer.start();
 

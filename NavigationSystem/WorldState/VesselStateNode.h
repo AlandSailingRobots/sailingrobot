@@ -39,7 +39,6 @@ public:
  	/// Starts the VesselStateNode's thread that pumps out VesselStateMsg's
  	///----------------------------------------------------------------------------------
 	void start();
-    void updateConfigsFromDB();
 
 	void processMessage(const Message* msg);
 
@@ -77,6 +76,7 @@ private:
 	double	m_GPSLon;
 	double	m_GPSUnixTime;
 	double	m_GPSSpeed;
+    double  m_GPSHeading;
 	double	m_GPSCourse;
 	int		m_GPSSatellite;
 	float	m_WindDir;

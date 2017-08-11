@@ -29,7 +29,7 @@
 
 class StateEstimationNode : public ActiveNode {
 public:
-  StateEstimationNode(MessageBus& msgBus, DBHandler& dbhandler, double loopTime, double speedLimit);
+  StateEstimationNode(MessageBus& msgBus, DBHandler& dbhandler, double loopTime);
   ~StateEstimationNode();
 
   bool init();
@@ -41,13 +41,17 @@ public:
 
   void stop();
 
-  void updateConfigsFromDB();
+
 
   void processMessage(const Message* msg);
-  double getFrequencyThread();
 
 
 private:
+
+  ///----------------------------------------------------------------------------------
+  /// Update values from the database as the loop time of the thread and others parameters
+  ///----------------------------------------------------------------------------------
+  void updateConfigsFromDB();
 
   ///----------------------------------------------------------------------------------
   /// Stores compass data from a CompassDataMsg.

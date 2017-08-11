@@ -57,12 +57,6 @@ void VesselStateNode::start()
 	runThread(VesselStateThreadFunc);
 }
 
-void VesselStateNode::updateConfigsFromDB()
-{
-	m_LoopTime = m_db.retrieveCellAsDouble("config_VesselStateNode","1","loop_time");
-
-}
-
 void VesselStateNode::processMessage(const Message* msg)
 {
 	MessageType type = msg->messageType();

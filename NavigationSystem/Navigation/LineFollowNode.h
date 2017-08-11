@@ -49,33 +49,36 @@ private:
 	std::mutex m_lock;
 	std::atomic<bool> m_Running;
 
+	double 	m_LoopTime;					// units : seconds (ex: 0.5 s)
+	double 	m_MaxTackDistance;			// units : meters
+	double  m_tackAngle;				// units : radian
+
 	int 	m_nextWaypointId;
-	double 	m_nextWaypointLon;
-	double 	m_nextWaypointLat;
-	int 	m_nextWaypointDeclination;
-	int 	m_nextWaypointRadius;
+	double 	m_nextWaypointLon;			// units : East(+) or West(-)  [0-180]
+	double 	m_nextWaypointLat;			// units : North(+) or South(-) [0-90]
+	int 	m_nextWaypointDeclination;	// NOTE : units ?
+	int 	m_nextWaypointRadius;		// NOTE : units ?
 	int 	m_prevWaypointId;
-	double 	m_prevWaypointLon;
-	double 	m_prevWaypointLat;
-	int 	m_prevWaypointDeclination;
-	int 	m_prevWaypointRadius;
+	double 	m_prevWaypointLon;			// units : East(+) or West(-)  [0-180]
+	double 	m_prevWaypointLat;			// units : North(+) or South(-) [0-90]
+	int 	m_prevWaypointDeclination;	// NOTE : units ?
+	int 	m_prevWaypointRadius;		// NOTE : units ?
 
 	bool 	m_externalControlActive;
 
 	bool    m_tack = false;
-	double  m_tackAngle;
 	int     m_tackingDirection;
 
-	float 	m_Heading;
-	double	m_Latitude;
-	double	m_Longitude;
-	double	m_Speed;
-	double  m_Course;
+	float 	m_Heading;		// units : [0-359] degrees
+	double	m_Latitude;		// units : East(+) or West(-)  [0-180]
+	double	m_Longitude;	// units : North(+) or South(-) [0-90]
+	double	m_Speed;		// units : m/s km/h or knots
+	double  m_Course;		// units : [0-359] degrees
 
-	double m_trueWindSpeed;
-	double m_trueWindDir;
-	double m_apparentWindSpeed;
-	double m_apparentWindDir;
+	double m_trueWindSpeed;			// units : m/s km/h or knots
+	double m_trueWindDir;			// units : [0-359] degrees
+	double m_apparentWindSpeed;		// units : m/s km/h or knots
+	double m_apparentWindDir;		// units : [0-359] degrees
 
 /*
 	const double NORM_RUDDER_COMMAND = 0.5166; // getCommand() take a value between -1 and 1 so we need to normalize the command correspond to 29.6 degree

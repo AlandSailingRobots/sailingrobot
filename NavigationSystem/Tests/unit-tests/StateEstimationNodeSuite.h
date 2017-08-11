@@ -46,6 +46,11 @@ public:
     std::thread* thr;
     int testCount = 0;
 
+    static MessageBus& msgBus(){
+        static MessageBus* mbus = new MessageBus();
+        return *mbus;
+    }
+
   // ----------------
   // Send messages
   // ----------------
@@ -69,7 +74,7 @@ public:
         if(sEstimationNode == 0){
             Logger::DisableLogging();
             dbhandler = new DBHandler("../asr.db");
-            sEstimationNode = new StateEstimationNode(msgBus(), *dbhandler, .5, speedLimit);
+            sEstimationNode = new StateEstimationNode(msgBus(), *dbhandler, .5);
             sEstimationNode->start();
             std::this_thread::sleep_for(std::chrono::milliseconds(2600));
 
@@ -77,6 +82,7 @@ public:
         }
         testCount++;
     }
+  }
 
     // ----------------
     // End of test when all test have been successfull
@@ -94,7 +100,7 @@ public:
             delete dbhandler;
             // Stay here for process the last message which return system::error
         }
-  }
+    }
 
   // ----------------
   // Test Initialisation of the object
@@ -109,15 +115,7 @@ public:
   void test_StateEstimationNodeGPSNotOnline(){
     TS_ASSERT(sEstimationNode->init());
     TS_ASSERT(!mockNode->m_MessageReceived);
-
-    // ----------------
-    // Test for the absence of a returned message by a offline GPS
-    // ----------------
-    void test_StateEstimationNodeGPSNotOnline()
-    {
-        TS_ASSERT(sEstimationNode->init());
-        TS_ASSERT(!mockNode->m_MessageReceived);
-    }
+  }
 
   // ----------------
   // Test to see if a message concerning the node will be listened
@@ -293,13 +291,11 @@ public:
     // Test for update frequency
     // ----------------
     void test_StateEstimationUpdateFrequency(){
-        double newLoopTime= 0.7;
         // TODO : Create table for each configuration of the new node including looptime variables
-        dbhandler->changeOneValue("???","1",".7","loop_time"); //See next table
+        dbhandler->changeOneValue("config_state_estimation","1",".7","loop_time"); //See next table
         std::this_thread::sleep_for(std::chrono::milliseconds(700));
-        double stateEstimationFrequence = sEstimationNode->getFrequencyThread();
-        TS_ASSERT_EQUALS(stateEstimationFrequence,newLoopTime);
-        dbhandler->changeOneValue("???","1",".5","loop_time"); //see next table
+        //TS_ASSERT_EQUALS(stateEstimationFrequence,newLoopTime);
+        dbhandler->changeOneValue("config_state_estimation","1",".5","loop_time"); //see next table
     }
 
 };

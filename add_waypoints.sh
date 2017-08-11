@@ -14,7 +14,7 @@
         read -p " enter LAT:" LAT
         read -p " enter LON:" LON
         read -p " enter RADIUS:" RADIUS
-        sqlite3 asr.db "INSERT INTO current_Mission (id,lat,lon,declination,radius,harvested) VALUES 
+        sqlite3 asr.db "INSERT INTO current_Mission (id,is_checkpoint,lat,lon,declination,radius,harvested) VALUES 
                         ('$COUNTER',$LAT,'$LON', 6, '$RADIUS', 0);"
         let COUNTER=COUNTER+1
         let C=C+1

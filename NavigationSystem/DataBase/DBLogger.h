@@ -33,7 +33,7 @@ public:
 
 	void startWorkerThread();
 
-	void log(LogItem item);
+	void log(LogItem& item);
 
 	unsigned int bufferSize() { return m_bufferSize; }
 private:

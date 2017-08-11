@@ -46,9 +46,9 @@
 #define EEPROM_ADDRESS			0x00
 
 
-#define COM_ORIENT_LEVEL 0x72
-#define COM_ORIENT_SIDEWAYS 0x73
-#define COM_ORIENT_FLATFRONT 0x74
+#define COM_ORIENT_LEVEL 		0x72
+#define COM_ORIENT_SIDEWAYS		0x73
+#define COM_ORIENT_FLATFRONT 	0x74
 
 
 
@@ -109,14 +109,13 @@ void HMC6343Node::start()
 
 void HMC6343Node::updateConfigsFromDB()
 {
-	m_LoopTime = m_db.retrieveCellAsDouble("config_buffer","1","loop_time");
-	// m_HeadingBufferSize = m_db.retrieveCellAsInt("config_buffer","1","compass"); // NOTE : Get he possible to modify or not ?
+	m_LoopTime = m_db.retrieveCellAsDouble("config_compass","1","loop_time");
+	m_HeadingBufferSize = m_db.retrieveCellAsInt("config_compass","1","heading_buffer_size");
 }
 
 void HMC6343Node::processMessage(const Message* msg)
 {
-	MessageType type = msg->messageType();
-	if( type == MessageType::ServerConfigsReceived)
+	if( msg->messageType() == MessageType::ServerConfigsReceived)
 	{
 			updateConfigsFromDB();
 	}
@@ -200,9 +199,6 @@ void HMC6343Node::HMC6343ThreadFunc(ActiveNode* nodePtr)
 	timer.start();
 	while(true)
 	{
-		// Controls how often we pump out messages
-		timer.sleepUntil(node->m_LoopTime);
-
 		if(errorCount >= MAX_ERROR_COUNT)
 		{
 			errorCount = 0;
@@ -238,6 +234,9 @@ void HMC6343Node::HMC6343ThreadFunc(ActiveNode* nodePtr)
 		{
 			errorCount++;
 		}
+
+		// Controls how often we pump out messages
+		timer.sleepUntil(node->m_LoopTime);
 		timer.reset();
 	}
 }

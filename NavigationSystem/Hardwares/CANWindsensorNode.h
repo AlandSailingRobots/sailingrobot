@@ -19,6 +19,7 @@
 
 #include "Hardwares/CAN_Services/CANService.h"
 #include "Hardwares/CAN_Services/CANPGNReceiver.h"
+#include "DataBase/DBHandler.h"
 #include "MessageBus/ActiveNode.h"
 #include "Messages/WindDataMsg.h"
 #include "SystemServices/Timer.h"
@@ -29,7 +30,7 @@
 class CANWindsensorNode : public CANPGNReceiver, public ActiveNode
 {
 public:
-	CANWindsensorNode(MessageBus& msgBus, DBHandler& dbhandler, CANService& can_service, int time_filter_ms);
+	CANWindsensorNode(MessageBus& msgBus, DBHandler& dbhandler, CANService& can_service, double loopTime);
 
 
 	~CANWindsensorNode();
@@ -52,6 +53,9 @@ public:
     void parsePGN130314(N2kMsg &Msg, uint8_t &SID, uint8_t &PressureInstance,		//ActualPressure
 					uint8_t &PressureSource, double &Pressure);
 
+	///----------------------------------------------------------------------------------
+	/// Update values from the database as the loop time of the thread and others parameters
+	///----------------------------------------------------------------------------------
     void updateConfigsFromDB();
 
 	///----------------------------------------------------------------------------------
@@ -68,10 +72,10 @@ private:
 
 	static void CANWindSensorNodeThreadFunc(ActiveNode* nodePtr);
 
-	float m_WindDir;
-	float m_WindSpeed;
-	float m_WindTemperature;
-	int m_TimeBetweenMsgs;
+	float m_WindDir;			// NOTE : degree 0 - 360 (273)
+	float m_WindSpeed;			// NOTE : m/s ou knots
+	float m_WindTemperature;	// NOTE : in degree Celsius
+	double m_LoopTime;			// in seconds (ex : 0.5 s)
 	DBHandler& m_db;
 
 	std::mutex m_lock;

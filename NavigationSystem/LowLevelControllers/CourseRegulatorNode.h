@@ -30,7 +30,7 @@ public:
     //--------------
     // Constructor
     //--------------
-    CourseRegulatorNode(MessageBus& msgBus, DBHandler& dbhandler, double loopTime = .5, double maxRudderAngle = 30 ,double configPGain = 0, double configIGain = 0);
+    CourseRegulatorNode(MessageBus& msgBus, DBHandler& dbhandler, double loopTime);
     // -------------
     // Destructor
     // -------------
@@ -75,9 +75,9 @@ private:
     // -------------
     double calculateRudderAngle();
 
-    // -------------
-    // Get and update the frequency of the thread
-    // -------------
+    ///----------------------------------------------------------------------------------
+	/// Update values from the database as the loop time of the thread and others parameters
+	///----------------------------------------------------------------------------------
     void updateConfigsFromDB();
 
     // -------------
@@ -102,16 +102,13 @@ private:
     // -------------
     // Loop time where the thread is asleep. units : seconds
     // -------------
-    double m_LoopTime;
+    double m_LoopTime;      // unit : seconds (ex: 0.5 s)
     // -------------
     // Parameters to make a PI regulation
     // -------------
-    double pGain;
-    double iGain;
-
-    //----------
-    // Variable used
-    const int STATE_INITIAL_SLEEP = 2000;
+    double pGain;       //without units
+    double iGain;       //without units
+    double dGain;       //without units
 
     // -------------
     // Informations on Navigation control message
