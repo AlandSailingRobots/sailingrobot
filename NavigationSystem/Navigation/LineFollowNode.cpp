@@ -1,17 +1,19 @@
 /****************************************************************************************
 *
 * File:
-* 		LineFollowNode.cpp
+*       LineFollowNode.cpp
 *
 * Purpose:
-*		This class computes the actuator positions of the boat in order to follow
+*       This class computes the actuator positions of the boat in order to follow
 *    lines given by the waypoints.
 *
-* Developer Notes: algorithm inspired and modified from Luc Jaulin and
+* Developer Notes:
+*    Algorithm inspired and modified from Luc Jaulin and
 *    Fabrice Le Bars  "An Experimental Validation of a Robust Controller with the VAIMOS
 *    Autonomous Sailboat" and "Modeling and Control for an Autonomous Sailboat: A
 *    Case Study" from Jon Melin, Kjell Dahl and Matia Waller
 *
+*    Info about Tacking and Beating : https://en.wikipedia.org/wiki/Tacking_(sailing)
 *
 ***************************************************************************************/
 
