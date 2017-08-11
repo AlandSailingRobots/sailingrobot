@@ -86,20 +86,6 @@ public:
     TS_ASSERT(mockNodeRegistered);
   }
 
-  void test_MessageListening() {
-    double heading = 200;
-    double latitude = 60.2;
-    double longitude = 19.1;
-    int hour = 12;
-    int min = 15;
-
-    MessagePtr mockSolarMsg = std::make_unique<SolarDataMsg>(latitude,longitude,heading,hour,min);
-    msgBus().sendMessage(std::move(mockSolarMsg));
-    std::this_thread::sleep_for(std::chrono::milliseconds(200));
-
-    TS_ASSERT(mockNode->m_MessageReceived);
-  }
-
   void test_AISData() {
     std::vector<AISVessel> AISList;
     std::vector<AISVesselInfo> AISInfo;

@@ -23,7 +23,6 @@
 #include "MessageBus/MessageBus.h"
 #include "SystemServices/Timer.h"
 #include "Messages/StateMessage.h"
-#include "Messages/SolarDataMsg.h"
 
 #include <time.h>
 #include <mutex>

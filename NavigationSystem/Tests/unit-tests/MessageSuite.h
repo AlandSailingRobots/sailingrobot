@@ -34,7 +34,6 @@
 #include "Messages/LocalConfigChangeMsg.h"
 #include "Messages/LocalWaypointChangeMsg.h"
 #include "Messages/StateMessage.h"
-#include "Messages/SolarDataMsg.h"
  #include "Messages/AISDataMsg.h"
 
 
@@ -351,31 +350,6 @@ public:
 		TS_ASSERT_EQUALS(msgTwo.longitude(), 60);
 		TS_ASSERT_EQUALS(msgTwo.speed(), 5);
 		TS_ASSERT_EQUALS(msgTwo.course(), 30);
-	}
-
-	void test_SolarDataMsg() {
-		SolarDataMsg msg(60.2f, 19.1f, 200.5f, 13, 25);
-
-		TS_ASSERT_EQUALS(msg.messageType(), MessageType::SolarData);
-		TS_ASSERT_DELTA(msg.latitude(),60.2f,1e-7);
-		TS_ASSERT_DELTA(msg.longitude(),19.1f,1e-7);
-		TS_ASSERT_DELTA(msg.heading(),200.5f,1e-7);
-		TS_ASSERT_EQUALS(msg.hour(),13);
-		TS_ASSERT_EQUALS(msg.min(), 25);
-
-		MessageSerialiser serialiser;
-		msg.Serialise(serialiser);
-
-		MessageDeserialiser deserialiser(serialiser.data(),serialiser.size());
-		SolarDataMsg msgTwo(deserialiser);
-
-		TS_ASSERT(msgTwo.isValid());
-		TS_ASSERT_EQUALS(msgTwo.messageType(), MessageType::SolarData);
-		TS_ASSERT_DELTA(msgTwo.latitude(),60.2f,1e-7);
-		TS_ASSERT_DELTA(msgTwo.longitude(),19.1f,1e-7);
-		TS_ASSERT_DELTA(msgTwo.heading(),200.5f,1e-7);
-		TS_ASSERT_EQUALS(msgTwo.hour(),13);
-		TS_ASSERT_EQUALS(msgTwo.min(), 25);
 	}
 
 	void test_AISDataMsg() {
