@@ -10,12 +10,12 @@
 #		* ASPire: Build for ASPire
 #		* Janet: Build for Janet
 #
-#   External Variables 
+#   External Variables
 #   	* USE_SIM: Indicates if the simulator is to be used, 0 for off, 1 for on.
 #		* USE_LNM: 1: Local Navigation Module (voter system), 0: Line-follow (default)
 #
 #   Example
-#   	Build the Janet navigation system with simulator interface and local navigation module 
+#   	Build the Janet navigation system with simulator interface and local navigation module
 #   	'make Janet USE_SIM=1 USE_LNM=1'
 #
 # For the default code:   'make'
@@ -31,7 +31,8 @@ export USE_LNM = 0
 # Tools
 ###############################################################################
 
-export CPPFLAGS             = -g -Wall -pedantic -Werror -std=gnu++14 -Wno-psabi  
+
+export CPPFLAGS             = -g -Wall -pedantic -Werror -std=gnu++14 -Wno-psabi
 export LIBS                 = -lsqlite3 -lgps -lrt -lcurl -lpthread -lwiringPi -lncurses
 
 ifeq ($(TOOLCHAIN),1)
@@ -117,10 +118,11 @@ export LNM_SRC              = $(LNM_DIR)/ASRCourseBallot.cpp $(LNM_DIR)/ASRArbit
 								$(LNM_DIR)/Voters/ProximityVoter.cpp
 
 # Obstacles detection
-export COLLIDABLE_MGR_SRC	= WorldState/CollidableMgr/CollidableMgr.cpp
+export COLLIDABLE_MGR_SRC	= WorldState/CollidableMgr/CollidableMgr.cpp WorldState/AISProcessing.cpp
 
 # Simulator
 export SIMULATOR_SRC        = Simulation/SimulationNode.cpp
+
 
 # Hardware services
 export HW_SERVICES_ALL_SRC	= Hardwares/i2ccontroller/I2CController.cpp
@@ -134,7 +136,7 @@ export HW_SERVICES_JANET_SRC = Hardwares/MaestroController/MaestroController.cpp
 # Hardware nodes
 export HW_NODES_ALL_SRC		= Hardwares/HMC6343Node.cpp Hardwares/GPSDNode.cpp
 
-export HW_NODES_ASPIRE_SRC 	= Hardwares/ActuatorNodeASPire.cpp \
+export HW_NODES_ASPIRE_SRC 	= Hardwares/ActuatorNodeASPire.cpp Hardwares/CANAISNode.cpp Hardwares/CANSolarTrackerNode.cpp\
                             	Hardwares/CANWindsensorNode.cpp Hardwares/CANArduinoNode.cpp
 
 export HW_NODES_JANET_SRC 	= Hardwares/ActuatorNode.cpp Hardwares/CV7Node.cpp Hardwares/ArduinoNode.cpp
@@ -170,7 +172,7 @@ unit_tests: $(BUILD_DIR)
 ## Build the integration tests for ASPire
 integration_tests_ASPire: $(BUILD_DIR)
 	$(MAKE) -f integration_tests_ASPire.mk
-
+	$(MAKE) -f ais_integration.mk
 
 #  Create the directories needed
 $(BUILD_DIR):

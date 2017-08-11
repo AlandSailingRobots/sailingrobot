@@ -10,7 +10,6 @@
  *
  *
  ***************************************************************************************/
-
 #include <mutex>
 #include <vector>
 #include <iostream>
@@ -22,6 +21,10 @@
 #include "MessageBus/ActiveNode.h"
 #include "Messages/WindDataMsg.h"
 #include "SystemServices/Timer.h"
+
+#include <mutex>
+#include <vector>
+#include <iostream>
 
 #pragma once
 
@@ -74,6 +77,4 @@ private:
 
 	std::mutex m_lock;
 	std::vector<uint32_t> PGNs {130306, 130311};
-
-	const int DATA_OUT_OF_RANGE	=	-2000;
 };

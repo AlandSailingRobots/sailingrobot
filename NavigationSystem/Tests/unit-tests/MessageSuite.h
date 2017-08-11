@@ -34,6 +34,7 @@
 #include "Messages/LocalConfigChangeMsg.h"
 #include "Messages/LocalWaypointChangeMsg.h"
 #include "Messages/StateMessage.h"
+ #include "Messages/AISDataMsg.h"
 
 
 class MessageSuite : public CxxTest::TestSuite {
@@ -349,5 +350,78 @@ public:
 		TS_ASSERT_EQUALS(msgTwo.longitude(), 60);
 		TS_ASSERT_EQUALS(msgTwo.speed(), 5);
 		TS_ASSERT_EQUALS(msgTwo.course(), 30);
+	}
+
+	void test_AISDataMsg() {
+		std::vector<AISVessel> AISList;
+		std::vector<AISVesselInfo> AISInfo;
+		AISVessel v1, v2, v3;
+		v1.MMSI = 1;
+		v1.latitude = 60.2f;
+		v1.longitude = 19.1f;
+		v1.COG = 200;
+		v1.SOG = 10;
+		v2.MMSI = 2;
+		v2.latitude = 62.f;
+		v2.longitude = 18.1f;
+		v2.COG = 100;
+		v2.SOG = 5;
+		v3.MMSI = 3;
+		v3.latitude = 61.5f;
+		v3.longitude = 18.7f;
+		v3.COG = 80;
+		v3.SOG = 7;
+		AISList.push_back(v1);
+		AISList.push_back(v2);
+		AISList.push_back(v3);
+		AISVesselInfo i1;
+		i1.MMSI=1;
+		i1.length=15;
+		i1.beam = 4;
+		AISInfo.push_back(i1);
+
+		AISDataMsg msg(AISList, AISInfo, 60.1, 19.1);
+
+		TS_ASSERT_EQUALS(msg.messageType(), MessageType::AISData);
+		TS_ASSERT_EQUALS(msg.MMSI(0),1);
+		TS_ASSERT_DELTA(msg.latitude(0), 60.2f, 1e-7);
+		TS_ASSERT_DELTA(msg.longitude(0), 19.1f, 1e-7);
+		TS_ASSERT_EQUALS(msg.COG(0), 200);
+		TS_ASSERT_EQUALS(msg.SOG(0), 10);
+		TS_ASSERT_EQUALS(msg.MMSI(1), 2);
+		TS_ASSERT_DELTA(msg.latitude(1), 62.f, 1e-7);
+		TS_ASSERT_DELTA(msg.longitude(1), 18.1f, 1e-7);
+		TS_ASSERT_EQUALS(msg.COG(1), 100);
+		TS_ASSERT_EQUALS(msg.SOG(1), 5);
+		TS_ASSERT_EQUALS(msg.MMSI(2), 3);
+		TS_ASSERT_DELTA(msg.latitude(2), 61.5f, 1e-7);
+		TS_ASSERT_DELTA(msg.longitude(2), 18.7f, 1e-7);
+		TS_ASSERT_EQUALS(msg.COG(2), 80);
+		TS_ASSERT_EQUALS(msg.SOG(2), 7);
+
+		// std::cout << msg.vesselList().size() << '\n';
+		MessageSerialiser serialiser;
+		msg.Serialise(serialiser);
+
+		MessageDeserialiser deserialiser(serialiser.data(), serialiser.size());
+		AISDataMsg msgTwo(deserialiser);
+
+		// std::cout << "Test: " << msgTwo.vesselList().size() << '\n';
+		TS_ASSERT(msgTwo.isValid());
+		TS_ASSERT_EQUALS(msgTwo.MMSI(0),1);
+		TS_ASSERT_DELTA(msgTwo.latitude(0), 60.2f, 1e-7);
+		TS_ASSERT_DELTA(msgTwo.longitude(0), 19.1f, 1e-7);
+		TS_ASSERT_EQUALS(msgTwo.COG(0), 200);
+		TS_ASSERT_EQUALS(msgTwo.SOG(0), 10);
+		TS_ASSERT_EQUALS(msgTwo.MMSI(1), 2);
+		TS_ASSERT_DELTA(msgTwo.latitude(1), 62.f, 1e-7);
+		TS_ASSERT_DELTA(msgTwo.longitude(1), 18.1f, 1e-7);
+		TS_ASSERT_EQUALS(msgTwo.COG(1), 100);
+		TS_ASSERT_EQUALS(msgTwo.SOG(1), 5);
+		TS_ASSERT_EQUALS(msgTwo.MMSI(2), 3);
+		TS_ASSERT_DELTA(msgTwo.latitude(2), 61.5f, 1e-7);
+		TS_ASSERT_DELTA(msgTwo.longitude(2), 18.7f, 1e-7);
+		TS_ASSERT_EQUALS(msgTwo.COG(2), 80);
+		TS_ASSERT_EQUALS(msgTwo.SOG(2), 7);
 	}
 };

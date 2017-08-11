@@ -25,7 +25,6 @@
 #include "SystemServices/SysClock.h"
 #endif
 
-
 class Message {
 public:
 	///----------------------------------------------------------------------------------

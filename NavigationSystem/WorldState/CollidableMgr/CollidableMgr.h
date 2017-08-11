@@ -4,10 +4,12 @@
  * 		CollidableMgr.h
  *
  * Purpose:
- *		
- *
+ *    Handles the objects we can collide with, vessels found by the AIS
+ *    or smaller boats/obstacles found by the thermal imager
+ *    The AISProcessing adds/updates the data to the collidableMgr
+ *    Removes the data when enough time has gone without the contact being updated
  * License:
- *      This file is subject to the terms and conditions defined in the file 
+ *      This file is subject to the terms and conditions defined in the file
  *      'LICENSE.txt', which is part of this source code package.
  *
  ***************************************************************************************/
@@ -32,7 +34,8 @@ public:
     ///----------------------------------------------------------------------------------
     void startGC();
 
-    void addAISContact(uint32_t mmsi, float lat, float lon, float speed, uint16_t course);
+    void addAISContact(uint32_t mmsi, double lat, double lon, float speed, float course);
+    void addAISContact(uint32_t mmsi, float length, float beam);
     void addVisualContact(uint32_t id, uint16_t bearing);
 
     CollidableList<AISCollidable_t> getAISContacts();
