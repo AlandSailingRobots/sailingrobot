@@ -61,7 +61,7 @@ public:
 				m_Lat = gpsMsg->latitude();
 				m_Lon = gpsMsg->longitude();
 				m_Speed = gpsMsg->speed();
-				m_Course = gpsMsg->heading();
+				m_Course = gpsMsg->course();
 			}
 			break;
 			case MessageType::WindData:

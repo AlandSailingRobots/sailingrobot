@@ -1,64 +1,72 @@
-// Listens to State and Wind Data messages, stores the information
-// and calculates true and apparent wind speed / direction,
-// and sends out new Wind State Messages containing this data
-// onto the message bus.
-
+/****************************************************************************************
+*
+* File:
+*       WindStateNode.cpp
+*
+* Purpose:
+*   Each time a vessel state message is received :
+*   - Calculates the instantaneous true wind (speed and direction) from wind sensor and Vessel State
+*     datas.
+*   - Returns a WindStateMsg corresponding to the true and apparent wind state (speed and direction).
+*   The wind direction corresponds to the direction where the wind comes from.
+*
+* Developer Notes:
+*
+*
+***************************************************************************************/
 
 #pragma once
 
+#include <mutex>
+#include <vector>
+
+#include "Math/Utility.h"
 #include "MessageBus/MessageBus.h"
 #include "MessageBus/MessageTypes.h"
 #include "Messages/StateMessage.h"
 #include "Messages/WindDataMsg.h"
 #include "Messages/WindStateMsg.h"
 
-#include <mutex>
-
 
 class WindStateNode : public Node {
 public:
-  WindStateNode(MessageBus& msgBus, int maxTwdBufferSize);
-  ~WindStateNode();
-  bool init();
-  void processMessage(const Message* message);
+    WindStateNode(MessageBus& msgBus);
+    ~WindStateNode();
+
+    bool init();
+    void processMessage(const Message* message);
 
 private:
 
-  void parseWindMessage(const WindDataMsg* msg);
-  void parseStateMessage(const StateMessage* msg);
-  void sendMessage();
+    ///----------------------------------------------------------------------------------
+    /// Stores vessel state datas from a StateMessage.
+    ///----------------------------------------------------------------------------------
+    void processVesselStateMessage(const StateMessage* msg);
 
-  void updateApparentWind();
-  void updateTrueWind();
+    ///----------------------------------------------------------------------------------
+    /// Stores apparent wind datas from a WindDataMsg.
+    ///----------------------------------------------------------------------------------
+    void processWindMessage(const WindDataMsg* msg);
 
-  float 	m_WindDir;
-	float 	m_WindSpeed;
-	float	  m_WindTemp;
+    ///----------------------------------------------------------------------------------
+    /// Sends windStateMsg.
+    ///----------------------------------------------------------------------------------    
+    void sendMessage();
 
-  float 	m_vesselHeading;
-  double	m_vesselLat;
-  double	m_vesselLon;
-  double	m_vesselSpeed;
+    ///----------------------------------------------------------------------------------
+    /// Calculates the instantaneous true wind (speed and direction).
+    ///----------------------------------------------------------------------------------
+    void calculateTrueWind();
 
-  // True Wind Speed / Direction are calculated and
-  // updated whenever a Wind Data Message is received.
 
-  double m_trueWindDirection;
-  double m_trueWindSpeed;
+    float   m_vesselHeading;            // degree [0, 360[ in North-East reference frame (clockwise)
+    float   m_vesselSpeed;              // m/s
+    float   m_vesselCourse;             // degree [0, 360[ in North-East reference frame (clockwise)
 
-  // Apparent Wind Speed / Direction are calculated and
-  // updated whenever a State Message is received, and will
-  // send out a new Wind State Message at the same time.
+    float   m_apparentWindSpeed;        // m/s
+    float   m_apparentWindDirection;    // degree [0, 360[ in vessel reference frame (clockwise)
 
-  double m_apparentWindDirection;
-  double m_apparentWindSpeed;
-
-  bool m_windDataReceived = false;
-  bool m_stateMsgReceived = false;
-
-  std::vector<float> m_Twd;
-  int m_MaxTwdBufferSize;
-
-  std::mutex m_Lock;
+    float   m_trueWindSpeed;            // m/s
+    float   m_trueWindDirection;        // degree [0, 360[ in North-East reference frame (clockwise)
 
 };

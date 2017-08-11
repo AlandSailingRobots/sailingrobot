@@ -76,7 +76,7 @@ public:
 		TS_ASSERT_DELTA(msg.longitude(), 48.2, 1e-7);
 		TS_ASSERT_DELTA(msg.unixTime(), 1993.6, 1e-7);
 		TS_ASSERT_DELTA(msg.speed(), 5.1, 1e-7);
-		TS_ASSERT_DELTA(msg.heading(), 100.8, 1e-7);
+		TS_ASSERT_DELTA(msg.course(), 100.8, 1e-7);
 		TS_ASSERT_EQUALS(msg.satelliteCount(), 11);
 		TS_ASSERT_EQUALS(msg.gpsMode(), GPSMode::NoFix);
 
@@ -94,7 +94,7 @@ public:
 		TS_ASSERT_DELTA(msgTwo.longitude(), 48.2, 1e-7);
 		TS_ASSERT_DELTA(msgTwo.unixTime(), 1993.6, 1e-7);
 		TS_ASSERT_DELTA(msgTwo.speed(), 5.1, 1e-7);
-		TS_ASSERT_DELTA(msgTwo.heading(), 100.8, 1e-7);
+		TS_ASSERT_DELTA(msgTwo.course(), 100.8, 1e-7);
 		TS_ASSERT_EQUALS(msgTwo.satelliteCount(), 11);
 		TS_ASSERT_EQUALS(msgTwo.gpsMode(), GPSMode::NoFix);
 	}
