@@ -4,10 +4,10 @@
  * 		ProximityVoter.cpp
  *
  * Purpose:
- *		
+ *
  *
  * License:
- *      This file is subject to the terms and conditions defined in the file 
+ *      This file is subject to the terms and conditions defined in the file
  *      'LICENSE.txt', which is part of this source code package.
  *
  ***************************************************************************************/
@@ -30,7 +30,7 @@ ProximityVoter::ProximityVoter( int16_t maxVotes, int16_t weight, CollidableMgr&
 ///----------------------------------------------------------------------------------
 const ASRCourseBallot& ProximityVoter::vote( const BoatState_t& boatState )
 {
-    //test1(boatState, courseBallot, collidableMgr);    
+    //test1(boatState, courseBallot, collidableMgr);
     courseBallot.clear();
 
     CollidableList<AISCollidable_t> aisContacts = collidableMgr.getAISContacts();
@@ -56,13 +56,18 @@ const ASRCourseBallot& ProximityVoter::vote( const BoatState_t& boatState )
             lifeTimeClosest = distance;
         }
     }
-
+    // 
+    // for (uint16_t i = 0; i<visualContacts.length(); i++) {
+    //   VisualCollidable_t collidable = visualContacts.next();
+    //
+    //
+    // }
 
     Logger::info("Lifetime Closest: %f Closest: %f", lifeTimeClosest, currClosest);
 
     // Need to take tacking into account, otherwise a upwind course might be chosen
     std::vector<float> trueWindBuffer;
-    uint16_t twd = Utility::getTrueWindDirection(boatState.windDir, boatState.windSpeed, 
+    uint16_t twd = Utility::getTrueWindDirection(boatState.windDir, boatState.windSpeed,
                 boatState.speed, boatState.heading, trueWindBuffer, 1);
 
     // Set 0 to courses into the no go zone.
@@ -113,7 +118,7 @@ float ProximityVoter::aisAvoidance( const BoatState_t& boatState, AISCollidable_
 
         //Logger::info("Collidable - Bearing: %d Course: %d %d %d", bearing, collidable.course, bearingDiffStarboard, bearingDiffPort);
 
-        // Work out course of escape 
+        // Work out course of escape
         if( bearingDiffStarboard < bearingDiffPort )
         {
             courseOfEscape = Utility::wrapAngle(collidable.course + 90);
@@ -135,7 +140,7 @@ float ProximityVoter::aisAvoidance( const BoatState_t& boatState, AISCollidable_
             // Away from the target's course, increase votes
             courseBallot.add(courseOfEscape + j, vote - (j/2));
             courseBallot.add(courseOfEscape - j, vote - (j/2));
-        }   
+        }
     }
 
     return distance;

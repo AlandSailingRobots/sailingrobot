@@ -75,5 +75,4 @@ private:
 
 	std::mutex m_lock;
 	std::vector<uint32_t> PGNs {130306, 130311};
-
 };

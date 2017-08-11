@@ -4,23 +4,32 @@
  * 		CollidableMgr.cpp
  *
  * Purpose:
+ *    Handles the objects we can collide with, vessels found by the AIS
+ *    or smaller boats/obstacles found by the thermal imager
+ *    The AISProcessing adds/updates the data to the collidableMgr
+ *    Removes the data when enough time has gone without the contact being updated
+ *
+ * Developer notes:
+ *  NOTE: Change how we remove AIS contacts,
+ *        rather than removing after a certain time,
+ *        remove when the contact is outside the radius of interest
  *
  * License:
- *      This file is subject to the terms and conditions defined in the file 
+ *      This file is subject to the terms and conditions defined in the file
  *      'LICENSE.txt', which is part of this source code package.
  *
  ***************************************************************************************/
 
-
- #include "CollidableMgr.h"
- #include "SystemServices/SysClock.h"
- #include "SystemServices/Logger.h"
- #include <chrono>
-
-
- #define CONTACT_TIME_OUT       3600        // 1 Minute
+#include "CollidableMgr.h"
+#include "SystemServices/SysClock.h"
+#include "SystemServices/Logger.h"
+#include <chrono>
 
 
+#define AIS_CONTACT_TIME_OUT        600        // 10 Minutes
+#define VISUAL_CONTACT_TIME_OUT     120
+#define NOT_AVAILABLE               -2000
+#define LOOP_TIME                   1000
 ///----------------------------------------------------------------------------------
 CollidableMgr::CollidableMgr()
     :ownAISLock(false), ownVisualLock(false)
@@ -35,7 +44,7 @@ void CollidableMgr::startGC()
 }
 
 ///----------------------------------------------------------------------------------
-void CollidableMgr::addAISContact( uint32_t mmsi, float lat, float lon, float speed, uint16_t course )
+void CollidableMgr::addAISContact( uint32_t mmsi, double lat, double lon, float speed, float course )
 {
     if( !this->ownAISLock )
     {
@@ -66,11 +75,51 @@ void CollidableMgr::addAISContact( uint32_t mmsi, float lat, float lon, float sp
         aisContact.longitude = lon;
         aisContact.speed = speed;
         aisContact.course = course;
+        aisContact.length = NOT_AVAILABLE;
+        aisContact.beam = NOT_AVAILABLE;
         aisContact.lastUpdated = SysClock::unixTime();
 
         this->aisContacts.push_back(aisContact);
+      }
+    this->aisListMutex.unlock();
+    this->ownAISLock = false;
+}
+
+///----------------------------------------------------------------------------------
+void CollidableMgr::addAISContact( uint32_t mmsi, float length, float beam )
+{
+    if( !this->ownAISLock )
+    {
+        this->aisListMutex.lock();
+        this->ownAISLock = true;
     }
 
+    // Check if the contact already exists, and if so update it
+    bool contactExists = false;
+    for( uint16_t i = 0; i < this->aisContacts.size() && !contactExists; i++ )
+    {
+        if( this->aisContacts[i].mmsi == mmsi)
+        {
+            this->aisContacts[i].length = length;
+            this->aisContacts[i].beam = beam;
+            contactExists = true;
+        }
+    }
+
+    if(!contactExists)
+    {
+        AISCollidable_t aisContact;
+        aisContact.mmsi = mmsi;
+        aisContact.length = length;
+        aisContact.beam = beam;
+        aisContact.latitude = NOT_AVAILABLE;
+        aisContact.longitude = NOT_AVAILABLE;
+        aisContact.speed = NOT_AVAILABLE;
+        aisContact.course = NOT_AVAILABLE;
+        aisContact.lastUpdated = SysClock::unixTime();
+
+        this->aisContacts.push_back(aisContact);
+      }
     this->aisListMutex.unlock();
     this->ownAISLock = false;
 }
@@ -136,7 +185,7 @@ void CollidableMgr::removeOldContacts()
 
     for (auto it = this->visualContacts.cbegin(); it != this->visualContacts.cend();)
     {
-        if ( (*it).lastUpdated + CONTACT_TIME_OUT < timeNow )
+        if ( (*it).lastUpdated + VISUAL_CONTACT_TIME_OUT < timeNow )
         {
             it = visualContacts.erase(it);
         }
@@ -157,9 +206,10 @@ void CollidableMgr::removeOldContacts()
 
     timeNow = SysClock::unixTime();
 
+
     for (auto it = this->aisContacts.cbegin(); it != this->aisContacts.cend();)
     {
-        if ( (*it).lastUpdated + CONTACT_TIME_OUT < timeNow )
+        if ( (*it).lastUpdated + AIS_CONTACT_TIME_OUT < timeNow )
         {
             it = aisContacts.erase(it);
         }
@@ -178,7 +228,7 @@ void CollidableMgr::ContactGC(CollidableMgr* ptr)
 {
     while(true)
     {
-        std::this_thread::sleep_for(std::chrono::milliseconds(CONTACT_TIME_OUT));
+        std::this_thread::sleep_for(std::chrono::milliseconds(LOOP_TIME));
         ptr->removeOldContacts();
     }
 }

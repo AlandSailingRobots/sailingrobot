@@ -14,6 +14,7 @@
 
 #include "CANWindsensorNode.h"
 
+const int DATA_OUT_OF_RANGE	=	-2000;
 
 CANWindsensorNode::CANWindsensorNode(MessageBus& msgBus, CANService& can_service, float loopTime):
 CANPGNReceiver(can_service, {130306, 130311}), ActiveNode(NodeID::WindSensor, msgBus), m_LoopTime(loopTime)
