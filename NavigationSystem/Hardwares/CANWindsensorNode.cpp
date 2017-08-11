@@ -13,6 +13,7 @@
 ***************************************************************************************/
 
 #include "CANWindsensorNode.h"
+#include "Math/Utility.h"
 
 
 CANWindsensorNode::CANWindsensorNode(MessageBus& msgBus, CANService& can_service, int time_filter_ms)
