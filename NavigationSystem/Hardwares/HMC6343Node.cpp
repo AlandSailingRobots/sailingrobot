@@ -189,7 +189,7 @@ void HMC6343Node::HMC6343ThreadFunc(ActiveNode* nodePtr)
 	while(true)
 	{
 		// Controls how often we pump out messages
-		timer.sleepUntil(node->m_LoopTime);
+		
 
 		if(errorCount >= MAX_ERROR_COUNT)
 		{
@@ -226,6 +226,7 @@ void HMC6343Node::HMC6343ThreadFunc(ActiveNode* nodePtr)
 		{
 			errorCount++;
 		}
+		timer.sleepUntil(node->m_LoopTime);
 		timer.reset();
 	}
 }

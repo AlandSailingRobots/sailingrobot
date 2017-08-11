@@ -25,6 +25,7 @@
 #include "Messages/ActuatorControlASPireMessage.h"
 #include "Messages/WindDataMsg.h"
 #include "Messages/ArduinoDataMsg.h"
+#include "Messages/CompassDataMsg.h"
 #include "MessageBus/MessageTypes.h"
 #include "MessageBus/MessageBus.h"
 #include "MessageBus/ActiveNode.h"
@@ -33,6 +34,7 @@
 #include "Hardwares/ArduinoNode.h"
 #include "Hardwares/CANArduinoNode.h"
 #include "Hardwares/ActuatorNodeASPire.h"
+#include "Hardwares/HMC6343Node.h"
 
 
 #include <ncurses.h>
@@ -70,6 +72,7 @@ public:
 		msgBus.registerNode(*this, MessageType::WindData);
 		msgBus.registerNode(*this, MessageType::ASPireActuatorFeedback);
 		msgBus.registerNode(*this, MessageType::ArduinoData);
+		msgBus.registerNode(*this, MessageType::CompassData);
 
 		m_SensorValues["Rudder Angle"] = DATA_OUT_OF_RANGE;
 		m_SensorValues["Wingsail Angle"] = DATA_OUT_OF_RANGE;
@@ -77,6 +80,9 @@ public:
 		m_SensorValues["Wind Direction"] = DATA_OUT_OF_RANGE;
 		m_SensorValues["Wind Temperature"] = DATA_OUT_OF_RANGE;
 		m_SensorValues["RC Mode"] = DATA_OUT_OF_RANGE;
+		m_SensorValues["Heading"] = DATA_OUT_OF_RANGE;
+    m_SensorValues["Roll"] = DATA_OUT_OF_RANGE;
+    m_SensorValues["Pitch"] = DATA_OUT_OF_RANGE;
 				
 		m_Win = newwin(6+2*m_SensorValues.size(),60,1,2);
 		
@@ -117,7 +123,16 @@ public:
 				} else {
 					m_SensorValues["RC Mode"] = OFF;
 				}
-				}        
+				}
+			case MessageType::CompassData:
+				{
+				const CompassDataMsg* compassmsg = dynamic_cast<const CompassDataMsg*>(message);
+        m_SensorValues["Heading"] = compassmsg->heading();
+        m_SensorValues["Roll"] = compassmsg->pitch();
+        m_SensorValues["Pitch"] = compassmsg->roll();
+				}
+				
+				
 				break;
 				default:
 				break;
@@ -252,12 +267,14 @@ int main() {
 
 	SensorDataReceiver sensorReceiver(msgBus);
 	CANWindsensorNode windSensor(msgBus, canService, 500);
-
+	HMC6343Node compass(msgBus, 2, 0.1);
+	compass.init ();
+	
 	CANArduinoNode arduino (msgBus, canService, 500);
 	ActuatorNodeASPire actuators (msgBus, canService);
 	windSensor.start();
 	arduino.start ();
-
+	compass.start ();
 	std::thread thr(messageLoop);
 	thr.detach();
 	std::this_thread::sleep_for(std::chrono::milliseconds(200));
