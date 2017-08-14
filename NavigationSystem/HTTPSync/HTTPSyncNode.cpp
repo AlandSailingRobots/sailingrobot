@@ -132,13 +132,10 @@ void HTTPSyncNode::HTTPSyncThread(ActiveNode* nodePtr){
 bool HTTPSyncNode::pushDatalogs() {
     std::string response = "";
 
-    std::cout << "/* HTTPSyncNode Push Datalogs */" << m_dbHandler->getLogs(m_pushOnlyLatestLogs) << '\n';
-
     if(performCURLCall(m_dbHandler->getLogs(m_pushOnlyLatestLogs), "pushAllLogs", response))
     {
          //remove logs after push
         if(m_removeLogs) {
-            std::cout << "/* Clear logs */" << '\n';
             m_dbHandler->clearLogs();
         }
         return true;
@@ -271,12 +268,10 @@ bool HTTPSyncNode::getWaypointsFromServer() {
 bool HTTPSyncNode::performCURLCall(std::string data, std::string call, std::string& response) {
     std::string serverCall = "";
 
-    std::cout << "/* HTTPSyncNode Data used in curl for call " << call << " */" << data << '\n';
-
     if(data != "")
-        serverCall = "serv="+call + "&id="+m_shipID+"&pwd="+m_shipPWD+"&data="+data;
+        serverCall = "serv="+call + "&id="+m_shipID +"&gen=ASPire"+"&pwd="+m_shipPWD+"&data="+data;
     else
-        serverCall = "serv="+call + "&id="+m_shipID+"&pwd="+m_shipPWD;
+        serverCall = "serv="+call + "&id="+m_shipID +"&gen=ASPire"+"&pwd="+m_shipPWD;
         //example: serv=getAllConfigs&id=BOATID&pwd=BOATPW
 
     curl = curl_easy_init();

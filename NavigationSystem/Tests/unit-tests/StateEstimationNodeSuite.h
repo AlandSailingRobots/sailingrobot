@@ -20,6 +20,7 @@
 #include "TestMocks/MessageLogger.h"
 #include "Messages/CompassDataMsg.h"
 #include "Messages/GPSDataMsg.h"
+#include "SystemServices/Timer.h"
 #include "DataBase/DBHandler.h"
 #include "Math/Utility.h"
 
@@ -69,19 +70,14 @@ public:
     // setup them up once in this test, delete them when the program closes
     if(sEstimationNode == 0)
     {
-        mockNode = new MockNode(msgBus(), nodeRegistered);
-        // setup them up once in this test, delete them when the program closes
-        if(sEstimationNode == 0){
-            Logger::DisableLogging();
-            dbhandler = new DBHandler("../asr.db");
-            sEstimationNode = new StateEstimationNode(msgBus(), *dbhandler, .5);
-            sEstimationNode->start();
-            std::this_thread::sleep_for(std::chrono::milliseconds(2600));
-
-            thr = new std::thread(runMessageLoop);
-        }
-        testCount++;
+        Logger::DisableLogging();
+        dbhandler = new DBHandler("../asr.db");
+        sEstimationNode = new StateEstimationNode(msgBus(), *dbhandler, .5);
+        sEstimationNode->start();
+        std::this_thread::sleep_for(std::chrono::milliseconds(2600));
+        thr = new std::thread(runMessageLoop);
     }
+    testCount++;
   }
 
     // ----------------
@@ -291,11 +287,44 @@ public:
     // Test for update frequency
     // ----------------
     void test_StateEstimationUpdateFrequency(){
-        // TODO : Create table for each configuration of the new node including looptime variables
-        dbhandler->changeOneValue("config_state_estimation","1",".7","loop_time"); //See next table
-        std::this_thread::sleep_for(std::chrono::milliseconds(700));
-        //TS_ASSERT_EQUALS(stateEstimationFrequence,newLoopTime);
-        dbhandler->changeOneValue("config_state_estimation","1",".5","loop_time"); //see next table
+        Timer timer;
+
+        dbhandler->changeOneValue("config_vessel_state","1","0.7","loop_time");
+        dbhandler->changeOneValue("config_vessel_state","1","20.0","max_rudder_angle");
+        MessagePtr serverConfig = std::make_unique<ServerConfigsReceivedMsg>();
+        msgBus().sendMessage(std::move(serverConfig));
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+        TS_ASSERT(mockNode->m_MessageReceived);
+
+        mockNode->m_MessageReceived = false;
+        while(not mockNode->m_MessageReceived);
+        timer.start();
+        mockNode->m_MessageReceived = false;
+        while(not mockNode->m_MessageReceived);
+        timer.stop();
+
+        TS_ASSERT_DELTA(timer.timePassed(), 0.70, 1e-2);
+
+        // double heading = 10;
+        // double speed = 1;
+        // MaxRudAng = 20.0;
+        // double desiredcourse = 15;
+        //
+        // MessagePtr stateData = std::make_unique<StateMessage>(heading,60.09726,19.93481,speed,0);
+        // msgBus().sendMessage(std::move(stateData));
+        // std::this_thread::sleep_for(std::chrono::milliseconds(700));
+        //
+        // MessagePtr desiredCourseData = std::make_unique<DesiredCourseMsg>(desiredcourse);
+        // msgBus().sendMessage(std::move(desiredCourseData));
+        // std::this_thread::sleep_for(std::chrono::milliseconds(700));
+        //
+        // double diffHeading = Utility::limitAngleRange(heading)-Utility::limitAngleRange(desiredcourse);
+        // int rudderAngle = Utility::sgn(speed)*sin(Utility::degreeToRadian(diffHeading))*MaxRudAng;
+        // std::this_thread::sleep_for(std::chrono::milliseconds(700));
+        // double courseRegulatorRudderAngle = mockNode->m_rudderPosition;
+        // TS_ASSERT_DELTA(courseRegulatorRudderAngle, rudderAngle, 1e-7);
+        dbhandler->changeOneValue("config_vessel_state","1","0.5","loop_time");
+        dbhandler->changeOneValue("config_vessel_state","1","30.0","max_rudder_angle");
     }
 
 };

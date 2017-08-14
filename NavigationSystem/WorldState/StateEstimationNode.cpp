@@ -85,12 +85,14 @@ void StateEstimationNode::processMessage(const Message* msg)
 
 void StateEstimationNode::processCompassMessage(const CompassDataMsg* msg)
 {
+  std::lock_guard<std::mutex>lock_guard(m_lock);
   float currentVesselHeading = msg->heading();
   m_VesselHeading = Utility::addDeclinationToHeading(currentVesselHeading, m_Declination);
 }
 
 void StateEstimationNode::processGPSMessage(const GPSDataMsg* msg)
 {
+  std::lock_guard<std::mutex>lock_guard(m_lock);
   m_VesselLat = msg->latitude();
   m_VesselLon = msg->longitude();
   m_VesselSpeed = msg->speed();
@@ -134,6 +136,7 @@ void StateEstimationNode::StateEstimationNodeThreadFunc(ActiveNode* nodePtr)
   {
     if(node->m_GpsOnline)
     {
+      std::lock_guard<std::mutex>lock_guard(node->m_lock);
       MessagePtr stateMessage = std::make_unique<StateMessage>(node->m_VesselHeading, node->m_VesselLat,
       node->m_VesselLon, node->m_VesselSpeed, node->getCourse());
       node->m_MsgBus.sendMessage(std::move(stateMessage));

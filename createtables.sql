@@ -13,9 +13,9 @@ CREATE TABLE current_Mission (id INTEGER PRIMARY KEY AUTOINCREMENT, -- no autoin
 );
 
 
------------------------------------------------------
-Table dataLogs_actuator_feedback
------------------------------------------------------
+-- -----------------------------------------------------
+-- Table dataLogs_actuator_feedback
+-- -----------------------------------------------------
 DROP TABLE IF EXISTS "dataLogs_actuator_feedback";
 CREATE TABLE dataLogs_actuator_feedback (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -26,9 +26,9 @@ CREATE TABLE dataLogs_actuator_feedback (
   t_timestamp		TIMESTAMP
 );
 
------------------------------------------------------
-Table dataLogs_compass
------------------------------------------------------
+-- -----------------------------------------------------
+-- Table dataLogs_compass
+-- -----------------------------------------------------
 DROP TABLE IF EXISTS "dataLogs_compass";
 CREATE TABLE dataLogs_compass (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -38,9 +38,9 @@ CREATE TABLE dataLogs_compass (
   t_timestamp 	TIMESTAMP
 );
 
------------------------------------------------------
-Table dataLogs_course_calculation
------------------------------------------------------
+-- -----------------------------------------------------
+-- Table dataLogs_course_calculation
+-- -----------------------------------------------------
 DROP TABLE IF EXISTS "dataLogs_course_calculation";
 CREATE TABLE dataLogs_course_calculation (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -62,7 +62,8 @@ CREATE TABLE dataLogs_current_sensors (
   navigation_unit 	DOUBLE,
   wind_vane_angle 	DOUBLE,
   wind_vane_clutch 	DOUBLE,
-  sailboat_drive 	DOUBLE
+  sailboat_drive 	DOUBLE,
+  t_timestamp		TIMESTAMP
 );
 
 -- -----------------------------------------------------

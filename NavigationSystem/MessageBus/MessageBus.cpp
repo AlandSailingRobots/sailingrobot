@@ -146,7 +146,7 @@ void MessageBus::processMessages()
 			{
 				if(node->isInterested( msg->messageType() ))
 				{
-					//std::cout << std::endl << "## Before processing Message : " << msgToString(msg->messageType()) << std::endl;
+					// std::cout << std::endl << "## Before processing Message : " << msgToString(msg->messageType()) << std::endl;
 					node->nodeRef.processMessage(msg);
 					logMessageConsumer(node->nodeRef.nodeID());
 

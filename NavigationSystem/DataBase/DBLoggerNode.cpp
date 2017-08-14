@@ -87,14 +87,14 @@ void DBLoggerNode::processMessage(const Message* msg) {
         }
         break;
 
-        // case MessageType::MarineSensorData:
-        // {
-        //     // const MarineSensorDataMsg* marineSensorMsg = static_cast<const MarineSensorDataMsg*>(msg);
-        //     // item.m_temperature = marineSensorMsg->temperature();
-        //     // item.m_conductivity = marineSensorMsg->conductivity();
-        //     // item.m_ph = marineSensorMsg->ph();
-        // }
-        // break;
+        case MessageType::MarineSensorData:
+        {
+            // const MarineSensorDataMsg* marineSensorMsg = static_cast<const MarineSensorDataMsg*>(msg);
+            // item.m_temperature = marineSensorMsg->temperature();
+            // item.m_conductivity = marineSensorMsg->conductivity();
+            // item.m_ph = marineSensorMsg->ph();
+        }
+        break;
 
         case MessageType::NavigationControl:
         {
@@ -104,7 +104,6 @@ void DBLoggerNode::processMessage(const Message* msg) {
             item.m_goingStarboard = navigationControlMsg->starboard();
         }
         break;
-
 
 
         // case MessageType::ActuatorPosition:
@@ -160,7 +159,7 @@ void DBLoggerNode::processMessage(const Message* msg) {
         break;
 
         case MessageType::ServerConfigsReceived:
-        //updateConfigsFromDB();
+        updateConfigsFromDB();
         break;
 
         default:
@@ -206,7 +205,6 @@ void DBLoggerNode::DBLoggerNodeThreadFunc(ActiveNode* nodePtr) {
 
         node->item.m_timestamp_str = timestamp_str;
         node->m_lock.lock();
-        std::cout << "/* DBLOGGERNODE Log object */" << '\n';
         node->m_dbLogger.log(node->item);
         node->m_lock.unlock();
         timer.sleepUntil(node->m_loopTime);

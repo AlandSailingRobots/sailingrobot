@@ -42,7 +42,7 @@ public:
   bool nodeRegistered = false;
 
   double loopTime = 0.5;
-  double MaxSailAngle = 90;
+  double MaxSailAngle = 85;
   double MinSailAngle = 15;
 
   std::thread* thr;
@@ -182,11 +182,41 @@ public:
   // Test for update frequency
   // ----------------
   void test_SailControlUpdateFrequency(){
-      // TODO : Create table for each configuration of the new node including looptime variables
-      dbHandler->changeOneValue("config_sail_control","1",".7","loop_time"); //See next table
+      Timer timer;
+
+      dbHandler->changeOneValue("config_sail_control","1","0.7","loop_time");
+      dbHandler->changeOneValue("config_sail_control","1","70.0","max_sail_angle");
+      MessagePtr serverConfig = std::make_unique<ServerConfigsReceivedMsg>();
+      msgBus().sendMessage(std::move(serverConfig));
+      std::this_thread::sleep_for(std::chrono::milliseconds(500));
+      TS_ASSERT(mockNode->m_MessageReceived);
+
+      mockNode->m_MessageReceived = false;
+      while(not mockNode->m_MessageReceived);
+      timer.start();
+      mockNode->m_MessageReceived = false;
+      while(not mockNode->m_MessageReceived);
+      timer.stop();
+
+      TS_ASSERT_DELTA(timer.timePassed(), 0.70, 1e-2);
+
+      double appWindDirection = 180;
+      double appWindSpeed = 10;
+      double appWindTemp = 15;
+      double MinSailAngle = 15;
+      double MaxSailAngle = 70;
+
+      MessagePtr windData =  std::make_unique<WindDataMsg>(appWindDirection,appWindSpeed,appWindTemp);
+      msgBus().sendMessage(std::move(windData));
       std::this_thread::sleep_for(std::chrono::milliseconds(700));
-      //TS_ASSERT_EQUALS(sailControlFrequence,newLoopTime);
-      dbHandler->changeOneValue("config_sail_control","1",".5","loop_time"); //See next table
+
+      int sailAngle = -Utility::sgn(appWindDirection)*(((MinSailAngle-MaxSailAngle)*std::abs(appWindDirection)/180)+MaxSailAngle);
+      std::this_thread::sleep_for(std::chrono::milliseconds(700));
+      double sailControlNodeSailAngle = mockNode->m_sailPosition;
+      TS_ASSERT_DELTA(sailControlNodeSailAngle, sailAngle, 1e-7);
+      dbHandler->changeOneValue("config_sail_control","1","0.5","loop_time");
+      dbHandler->changeOneValue("config_sail_control","1","85.0","max_sail_angle");
+
   }
 
 };

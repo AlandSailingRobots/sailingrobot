@@ -66,9 +66,9 @@
 		{
 			dbHandler = new DBHandler("../asr.db");
             //Reset of the database after reaching waypoints during test
-            dbHandler->updateTable("waypoints","harvested","0","1");
-            dbHandler->updateTable("waypoints","harvested","0","2");
-            dbHandler->updateTable("waypoints","harvested","0","3");
+            dbHandler->updateTable("current_mission","harvested","0","1");
+            dbHandler->updateTable("current_mission","harvested","0","2");
+            dbHandler->updateTable("current_mission","harvested","0","3");
             Logger::DisableLogging();
 			waypoint = new WaypointMgrNode(msgBus(), *dbHandler);
             thr = new std::thread(runMessageLoop);
@@ -145,7 +145,7 @@
         msgBus().sendMessage(std::move(gpsData));
         std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_FOR_MESSAGE));
 
-        bool proofWaypointReached = dbHandler->retrieveCellAsInt("waypoints","harvested","1");
+        bool proofWaypointReached = dbHandler->retrieveCellAsInt("current_mission","harvested","1");
         TS_ASSERT_EQUALS(proofWaypointReached,true);
 
         TS_ASSERT(mockNode->m_MessageReceived);
@@ -181,7 +181,7 @@
         msgBus().sendMessage(std::move(nextGpsData));
         std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_FOR_MESSAGE));
 
-        bool proofWaypointReached = dbHandler->retrieveCellAsInt("waypoints","harvested","2");
+        bool proofWaypointReached = dbHandler->retrieveCellAsInt("current_mission","harvested","2");
         TS_ASSERT_EQUALS(proofWaypointReached,true);
 
         TS_ASSERT(mockNode->m_MessageReceived);
@@ -223,7 +223,7 @@
         std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_FOR_MESSAGE));
         std::this_thread::sleep_for(std::chrono::seconds(stayTime/3));
 
-        bool proofWaypointReached = dbHandler->retrieveCellAsInt("waypoints","harvested","2");
+        bool proofWaypointReached = dbHandler->retrieveCellAsInt("current_mission","harvested","2");
         TS_ASSERT_EQUALS(proofWaypointReached,true);
 
         TS_ASSERT(mockNode->m_MessageReceived);

@@ -57,7 +57,6 @@ void DBLogger::log(LogItem& item)
 	if(m_logBufferFront->size() >= m_bufferSize)
 	{
 		std::vector<LogItem>* tmp = m_logBufferBack;
-		std::cout << "/* DBLOGGER Queue charge en logitem */" << '\n';
 		m_logBufferBack = m_logBufferFront;
 		m_logBufferFront = tmp;
 
@@ -89,7 +88,6 @@ void DBLogger::workerThread(DBLogger* ptr)
 		ptr->m_cv.wait(lk);
 		if(ptr->m_logBufferBack->size() > 0)
 		{
-			std::cout << "/* DBLOGGER Envoie de la queue charge en item */" << '\n';
 			ptr->m_dbHandler.insertDataLogs(*ptr->m_logBufferBack);
 			ptr->m_logBufferBack->clear();
 		}

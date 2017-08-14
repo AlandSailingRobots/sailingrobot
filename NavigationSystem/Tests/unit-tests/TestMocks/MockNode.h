@@ -176,10 +176,10 @@ public:
 	bool	m_Online;
 	double 	m_Lat;
 	double 	m_Lon;
-	double m_UnixTime;
-	double m_Speed;
-	double m_Course;
-	int m_SatCount;
+	double 	m_UnixTime;
+	double 	m_Speed;
+	double 	m_Course;
+	int 	m_SatCount;
 	GPSMode m_Mode;
 
 	  //WindData variables
@@ -204,17 +204,17 @@ public:
 
 	//WaypointData variables
 //=========================
-	int m_waypointNextId;
-	double m_waypointNextLongitude;
-	double m_waypointNextLatitude;
-	int m_waypointNextDeclination;
-	int m_waypointNextRadius;
-	int m_waypointStayTime;
-	int m_waypointPrevId;
-	double m_waypointPrevLongitude;
-	double m_waypointPrevLatitude;
-	int m_waypointPrevDeclination;
-	int m_waypointPrevRadius;
+	int 	m_waypointNextId;
+	double	m_waypointNextLongitude;
+	double 	m_waypointNextLatitude;
+	int 	m_waypointNextDeclination;
+	int 	m_waypointNextRadius;
+	int 	m_waypointStayTime;
+	int 	m_waypointPrevId;
+	double 	m_waypointPrevLongitude;
+	double 	m_waypointPrevLatitude;
+	int 	m_waypointPrevDeclination;
+	int 	m_waypointPrevRadius;
 
     //StateMessage variables
 //=========================
