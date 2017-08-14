@@ -59,42 +59,39 @@ public:
       msgBus().run();
   }
 
-    // ----------------
-    // Setup the objects to test
-    // ----------------
-    void setUp()
-    {
-        mockNode = new MockNode(msgBus(), nodeRegistered);
-        // setup them up once in this test, delete them when the program closes
-        if(sEstimationNode == 0){
-            Logger::DisableLogging();
-          sEstimationNode = new StateEstimationNode(msgBus(), .5, 0, 1);
-          sEstimationNode->start();
-          std::this_thread::sleep_for(std::chrono::milliseconds(2600));
-          thr = new std::thread(runMessageLoop);
-        }
-        testCount++;
+  // ----------------
+  // Setup the objects to test
+  // ----------------
+  void setUp()
+  {
+    mockNode = new MockNode(msgBus(), nodeRegistered);
+    // setup them up once in this test, delete them when the program closes
+    if(sEstimationNode == 0){
+        Logger::DisableLogging();
+      sEstimationNode = new StateEstimationNode(msgBus(),*dbhandler, .5, 0, 1);
+      sEstimationNode->start();
+      std::this_thread::sleep_for(std::chrono::milliseconds(2600));
+      thr = new std::thread(runMessageLoop);
     }
     testCount++;
   }
 
-    // ----------------
-    // End of test when all test have been successfull
-    // ----------------
-    void tearDown()
+  // ----------------
+  // End of test when all test have been successfull
+  // ----------------
+  void tearDown()
+  {
+    if(testCount == STATE_ESTIMATIONODE_TEST_COUNT)
     {
-        delete mockNode;
-        if(testCount == STATE_ESTIMATIONODE_TEST_COUNT)
-        {
-            sEstimationNode -> stop();
-            msgBus().stop();
-            thr->join();
-            delete thr;
-            delete sEstimationNode;
-            delete dbhandler;
-        }
-        delete mockNode;
+        sEstimationNode -> stop();
+        msgBus().stop();
+        thr->join();
+        delete thr;
+        delete sEstimationNode;
+        delete dbhandler;
     }
+    delete mockNode;
+  }
 
     // ----------------
     // Test Initialisation of the object

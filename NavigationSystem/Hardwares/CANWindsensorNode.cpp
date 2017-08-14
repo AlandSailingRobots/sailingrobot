@@ -24,6 +24,7 @@ CANWindsensorNode::CANWindsensorNode(MessageBus& msgBus, DBHandler& dbhandler, C
     m_WindTemperature = DATA_OUT_OF_RANGE;
 
   msgBus.registerNode(*this, MessageType::DataRequest);
+  msgBus.registerNode(*this, MessageType::ServerConfigsReceived);
 }
 
 CANWindsensorNode::~CANWindsensorNode(){}

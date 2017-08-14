@@ -29,7 +29,7 @@ VesselStateNode::VesselStateNode(MessageBus& msgBus, DBHandler& dbhandler, doubl
 		m_CompassHeading(0), m_CompassPitch(0), m_CompassRoll(0),
 		m_GPSHasFix(false), m_GPSOnline(false), m_GPSLat(0), m_GPSLon(0), m_GPSUnixTime(0), m_GPSSpeed(0),
 		m_GPSCourse(0), m_WindDir(0), m_WindSpeed(0), m_WindTemp(0), m_ArduinoPressure(0),
-		m_ArduinoRudder(0),m_ArduinoSheet(0),m_ArduinoBattery(0), m_LoopTime(loopTime)
+		m_ArduinoRudder(0),m_ArduinoSheet(0),m_ArduinoBattery(0), m_LoopTime(loopTime) , m_db(dbhandler)
 {
 
 	msgBus.registerNode(*this, MessageType::CompassData);

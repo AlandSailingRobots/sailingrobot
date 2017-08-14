@@ -16,7 +16,7 @@
 #define WIND_STATE_WAIT_TIME 750
 
 class WindStateNodeSuite : public CxxTest::TestSuite {
-public:>
+public:
 
 	WindStateNode* windStateNode;
 	DBHandler* dbhandler;

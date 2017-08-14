@@ -38,8 +38,8 @@
 
 class StateEstimationNode : public ActiveNode {
 public:
-    StateEstimationNode(MessageBus& msgBus, double loopTime);
-    StateEstimationNode(MessageBus& msgBus, double loopTime, double speed_1, double speed_2);
+    StateEstimationNode(MessageBus& msgBus, DBHandler& dbhandler, double loopTime);
+    StateEstimationNode(MessageBus& msgBus, DBHandler& dbhandler, double loopTime, double speed_1, double speed_2);
     ~StateEstimationNode();
 
     bool init();

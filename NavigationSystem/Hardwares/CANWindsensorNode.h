@@ -20,11 +20,8 @@
 #include <thread>
 
 #include "Hardwares/CAN_Services/CANPGNReceiver.h"
-<<<<<<< HEAD
 #include "DataBase/DBHandler.h"
-=======
 #include "Hardwares/CAN_Services/CANService.h"
->>>>>>> develop
 #include "MessageBus/ActiveNode.h"
 #include "Messages/WindDataMsg.h"
 #include "SystemServices/Timer.h"
@@ -32,13 +29,7 @@
 
 class CANWindsensorNode : public CANPGNReceiver, public ActiveNode {
 public:
-<<<<<<< HEAD
 	CANWindsensorNode(MessageBus& msgBus, DBHandler& dbhandler, CANService& can_service, double loopTime);
-=======
-	CANWindsensorNode(MessageBus& msgBus, CANService& can_service, float loopTime);
->>>>>>> develop
-
-
 	~CANWindsensorNode();
 
 	/* data */
@@ -80,18 +71,11 @@ private:
 
 	static void CANWindSensorNodeThreadFunc(ActiveNode* nodePtr);
 
-<<<<<<< HEAD
 	float m_WindDir;			// NOTE : degree 0 - 360 (273)
 	float m_WindSpeed;			// NOTE : m/s ou knots
 	float m_WindTemperature;	// NOTE : in degree Celsius
 	double m_LoopTime;			// in seconds (ex : 0.5 s)
 	DBHandler& m_db;
-=======
-	float m_WindDir;
-	float m_WindSpeed;
-	float m_WindTemperature;
-	float m_LoopTime;
->>>>>>> develop
 
 	std::mutex m_lock;
 	std::vector<uint32_t> PGNs {130306, 130311};
