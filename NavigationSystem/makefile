@@ -72,6 +72,7 @@ export EXECUTABLE           = sr
 export UNIT_TEST_EXEC 		= unit-tests.run
 export UNIT_TEST_HW_EXEC 	= unit-tests-hardware.run
 export INTEGRATION_TEST_EXEC_ASPIRE = integration-tests-ASPire.run
+export HTTP_SYNC_TEST_EXEC	= HTTPSync-test.run
 
 export OBJECT_FILE          = $(BUILD_DIR)/objects.tmp
 
@@ -173,6 +174,10 @@ unit_tests: $(BUILD_DIR)
 integration_tests_ASPire: $(BUILD_DIR)
 	$(MAKE) -f integration_tests_ASPire.mk
 	$(MAKE) -f ais_integration.mk
+
+## Build HTTPSync Test
+HTTPSync_test: $(BUILD_DIR)
+	$(MAKE) -f HTTP_sync_test.mk
 
 #  Create the directories needed
 $(BUILD_DIR):
