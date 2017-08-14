@@ -7,7 +7,7 @@
 #include "Messages/ActuatorPositionMsg.h"
 #include "Messages/ActuatorControlASPireMessage.h"
 #include "Messages/CourseDataMsg.h"
-#include "Messages/NavigationControlMsg.h"
+#include "Messages/LocalNavigationMsg.h"
 #include "Messages/WaypointDataMsg.h"
 #include "Messages/ASPireActuatorFeedbackMsg.h"
 #include "SystemServices/Timer.h"
@@ -30,7 +30,7 @@ DBLoggerNode::DBLoggerNode(MessageBus& msgBus, DBHandler& db, int TimeBetweenMsg
     msgBus.registerNode(*this, MessageType::ActuatorControlASPire);
     msgBus.registerNode(*this, MessageType::ASPireActuatorFeedback);
     msgBus.registerNode(*this, MessageType::CourseData);
-    msgBus.registerNode(*this, MessageType::NavigationControl);
+    msgBus.registerNode(*this, MessageType::LocalNavigation);
     msgBus.registerNode(*this, MessageType::WaypointData);
     msgBus.registerNode(*this, MessageType::WindState);
 }
@@ -105,14 +105,6 @@ void DBLoggerNode::processMessage(const Message* msg) {
             item.m_bearingToWaypoint = courseDataMsg->courseToWP();
         }
         break;
-
-        case MessageType::NavigationControl:
-        {
-            const NavigationControlMsg* navigationControlMsg = static_cast<const NavigationControlMsg*>(msg);
-            item.m_courseToSteer = navigationControlMsg->courseToSteer();
-            item.m_tack = navigationControlMsg->tack();
-            item.m_goingStarboard = navigationControlMsg->starboard();
-        }
 
         case MessageType::WaypointData:
         {
