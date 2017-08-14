@@ -1,10 +1,11 @@
 #############################################################################################
 #
-# Makefile for building the unit tests source and object files 
+# Makefile for building the unit tests source and object files
 #
 # This makefile does not creat the executable file. Use the master makefile instead.
 #
 #############################################################################################
+
 
 
 #############################################################################################
@@ -26,14 +27,15 @@ UNIT_TEST_SRCS 		= MessageCoreSuite.h MessageSuite.h UtilitySuite.h HTTPSyncSuit
 					  	WindStateNodeSuite.h StateEstimationNodeSuite.h WingsailControlSuite.h \
 					  	CourseRegulatorSuite.h CANMessageSuite.h DBLoggerNodeSuite.h \
 					  	LowLevelControllerNodeJanetSuite.h LowLevelControllersFunctionsTestSuite.h \
-					  	ASRCourseBallotSuite.h CourseRegulatorNodeSuite.h SailControlNodeSuite.h
+					  	ASRCourseBallotSuite.h CourseRegulatorNodeSuite.h SailControlNodeSuite.h \
+						AISProcSuite.h CanNodesSuite.h
 					  	# ASRArbiterSuite.h // NOTE - Maël: This unit test suite is the source of a building error.
 
 HARDWARE_TEST_SRCS	= HardwareXbeeSuite.h HardwareCompassSuite.h HardwareCV7Suite.h HardwareGPSDSuite.h \
 						MaestroControllerSuite.h ActuatorSailNodeSuite.h ActuatorRudderNodeSuite.h \
 						CANServiceSuite.h ActuatorNodeASPireSuite.h CANArduinoNodeSuite.h \
 						I2CControllerSuite.h HardwareWiringPiSuite.h
-						
+
 TEST_MOCK_SRCS 		= MockNode.h
 
 

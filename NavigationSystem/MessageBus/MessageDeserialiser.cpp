@@ -159,3 +159,12 @@ bool MessageDeserialiser::readNodeID(NodeID& data)
 	return false;
 }
 
+uint8_t MessageDeserialiser::size()
+{
+	return m_size;
+}
+
+uint8_t* MessageDeserialiser::data()
+{
+	return m_data;
+}

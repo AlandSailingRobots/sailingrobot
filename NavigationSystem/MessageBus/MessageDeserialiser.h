@@ -36,7 +36,9 @@ public:
 	bool readNodeID(NodeID& data);
 
 	void resetInternalPtr() { m_index = 0;}
-
+	uint8_t size();
+	uint8_t* data();
+	
 private:
 	uint8_t* 	m_data;
 	uint8_t		m_index;

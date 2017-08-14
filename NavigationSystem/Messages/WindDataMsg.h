@@ -58,7 +58,7 @@ public:
 	}
 
 private:
-	float 	m_WindDir;
-	float 	m_WindSpeed;
-	float	m_WindTemp;
+	float 	m_WindDir;		// degree [0, 360[ in vessel reference frame (clockwise)
+	float 	m_WindSpeed;	// m/s
+	float	m_WindTemp;		// degree Celsius
 };

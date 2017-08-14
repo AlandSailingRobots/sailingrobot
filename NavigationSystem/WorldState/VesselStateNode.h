@@ -75,7 +75,7 @@ private:
 	double	m_GPSLon;
 	double	m_GPSUnixTime;
 	double	m_GPSSpeed;
-	double	m_GPSHeading;
+	double	m_GPSCourse;
 	int		m_GPSSatellite;
 	float	m_WindDir;
 	float	m_WindSpeed;
