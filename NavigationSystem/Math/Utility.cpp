@@ -120,27 +120,28 @@ int Utility::sgn(double value)
 }
 
 
-list::list Utility::maxAndIndex(list::list mylist)
+float* Utility::maxAndIndex(float* mylist)
 {
         float maxi = 0;
 	int index = 0;
 	int i = 0;
-	int size = mylist.size();
-	list::list results;
+	int size = sizeof(mylist)/sizeof(float);
+	float* results;
+	results  = (float*) malloc(2*sizeof(float));
+	
 	
 
 	for (i = 0; i < size; i++)
 	{
-	        if (maxi < mylist.front())
-	        {
-		    maxi = mylist.front();
-		    index = i;
+	        if (maxi < *(mylist+i))
+		{
+		        maxi = *(mylist+i);
+		        index = i;
 	        }
-	        mylist.pop_front()
 		
 	}
-	results.push_back(maxi);
-	results.push_back(index);
+	*(results)   = maxi;
+	*(results+1) = index;
 
 	return(results);
 }

@@ -4,7 +4,6 @@
 #include <stdint.h> // uint8_t
 #include <vector>
 #include <array>
-#include <list.h>
 #include <iostream>
 
 
@@ -19,7 +18,7 @@ public:
 	static float mean(std::vector<float> values);
 	static float meanOfAngles(std::vector<float> anglesInDegrees);
         static int sgn(double value);
-        static list::list maxAndIndex(list::list mylist);
+        static float* maxAndIndex(float* mylist);
     
     
 
