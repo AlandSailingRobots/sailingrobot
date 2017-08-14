@@ -19,15 +19,24 @@
 
 #pragma once
 
+#include <math.h>
+#include <algorithm>
+#include <cmath>
+#include <chrono>
+
+#include "DataBase/DBHandler.h"
+#include "Math/CourseMath.h"
+#include "Math/Utility.h"
 #include "MessageBus/ActiveNode.h"
+#include "Messages/ExternalControlMsg.h"
 #include "Messages/StateMessage.h"
 #include "Messages/WindStateMsg.h"
 #include "Messages/WaypointDataMsg.h"
-#include "DataBase/DBHandler.h"
-#include "DataBase/DBLogger.h"
-#include "Messages/NavigationControlMsg.h"
+#include "Messages/LocalNavigationMsg.h"
+#include "SystemServices/SysClock.h"
+#include "SystemServices/Timer.h"
+
 #include "waypointrouting/RudderCommand.h"
-#include "Math/CourseMath.h"
 
 
 class LineFollowNode : public ActiveNode {
@@ -43,36 +52,6 @@ public:
 
 private:
 
-	DBHandler &m_db;
-
-	int 	m_nextWaypointId;
-	double 	m_nextWaypointLon;
-	double 	m_nextWaypointLat;
-	int 	m_nextWaypointDeclination;
-	int 	m_nextWaypointRadius;
-	int 	m_prevWaypointId;
-	double 	m_prevWaypointLon;
-	double 	m_prevWaypointLat;
-	int 	m_prevWaypointDeclination;
-	int 	m_prevWaypointRadius;
-
-	bool 	m_externalControlActive;
-
-	bool    m_tack = false;
-	double  m_tackAngle;
-	int     m_tackingDirection;
-
-	float 	m_Heading;
-	double	m_Latitude;
-	double	m_Longitude;
-	double	m_Speed;
-	double  m_Course;
-
-	double m_trueWindSpeed;
-	double m_trueWindDir;
-	double m_apparentWindSpeed;
-	double m_apparentWindDir;
-
 /*
 	const double NORM_RUDDER_COMMAND = 0.5166; // getCommand() take a value between -1 and 1 so we need to normalize the command correspond to 29.6 degree
 	const double NORM_SAIL_COMMAND = 0.6958;
@@ -87,7 +66,6 @@ private:
 	void processStateMessage(const StateMessage* stateMsg);
 	void processWindStateMessage(const WindStateMsg* windStateMsg);
 	void processWaypointMessage(WaypointDataMsg* waypMsg);
-	void setPrevWaypointData(WaypointDataMsg* waypMsg);
 
 	double calculateAngleOfDesiredTrajectory();
 	double calculateDesiredCourse();
@@ -98,5 +76,35 @@ private:
 
 	bool getGoingStarboard();
 	void setPrevWaypointToBoatPos();
+
+
+	DBHandler &m_db;
+
+    double  m_LoopTime;             // second	
+
+	bool 	m_externalControlActive;
+
+    float   m_VesselHeading;        // degree [0, 360[ in North-East reference frame (clockwise)
+    double  m_VesselLat;
+    double  m_VesselLon;
+    float   m_VesselSpeed;          // m/s
+    float   m_VesselCourse;         // degree [0, 360[ in North-East reference frame (clockwise)
+
+	double 	m_trueWindSpeed;		// m/s
+	double 	m_trueWindDir;			// degree [0, 360[ in North-East reference frame (clockwise)
+	double 	m_apparentWindSpeed;	// m/s
+	double 	m_apparentWindDir;		// degree [0, 360[ in vessel reference frame (clockwise)
+
+	double 	m_nextWaypointLon;
+	double 	m_nextWaypointLat;
+	int 	m_nextWaypointRadius;
+	
+	double 	m_prevWaypointLon;
+	double 	m_prevWaypointLat;
+	int 	m_prevWaypointRadius;
+
+	bool    m_tack = false;
+	double  m_tackAngle;
+	int     m_tackingDirection;
 
 };
