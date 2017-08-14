@@ -34,6 +34,7 @@ XbeeSyncNode::XbeeSyncNode(MessageBus& msgBus, DBHandler& db) :
 	msgBus.registerNode(*this, MessageType::VesselState);
 	msgBus.registerNode(*this, MessageType::CourseData);
 	msgBus.registerNode(*this, MessageType::WaypointData);
+	msgBus.registerNode(*this, MessageType::ServerConfigsReceived);
 	m_node = this;
 }
 
@@ -125,10 +126,6 @@ void XbeeSyncNode::incomingMessage(uint8_t* data, uint8_t size)
 				m_node->m_MsgBus.sendMessage(std::move(externalControl));
 			}
 			break;
-		case MessageType::ServerConfigsReceived:
-			{
-				updateConfigsFromDB();
-			}
 		default:
 			break;
 	}

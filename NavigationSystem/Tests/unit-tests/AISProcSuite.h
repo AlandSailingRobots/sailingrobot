@@ -13,6 +13,7 @@
 #include "WorldState/AISProcessing.h"
 #include "../cxxtest/cxxtest/TestSuite.h"
 #include "Messages/StateMessage.h"
+#include "DataBase/DBHandler.h"
 #include "../../MessageBus/MessageBus.h"
 #include "TestMocks/MessageLogger.h"
 #include "WorldState/CollidableMgr/CollidableMgr.h"
@@ -22,6 +23,7 @@
 class AISProcSuite : public CxxTest::TestSuite {
 public:
   AISProcessing* aisProc;
+  DBHandler* dbhandler;
   CollidableMgr cMgr;
   MockNode* mockNode;
   bool mockNodeRegistered = false;
@@ -42,7 +44,8 @@ public:
   void setUp() {
     mockNode = new MockNode(msgBus(), mockNodeRegistered);
     if (aisProc == 0) {
-      aisProc = new AISProcessing(msgBus(), &cMgr, 300e6, 2000, 1.0);
+      dbhandler = new DBHandler("../asr.db");
+      aisProc = new AISProcessing(msgBus(), *dbhandler, &cMgr, 300e6, 2000, 1.0);
 
       aisProc->start();
 

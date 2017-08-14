@@ -36,8 +36,8 @@
 
 
 ///----------------------------------------------------------------------------------
-LocalNavigationModule::LocalNavigationModule( MessageBus& msgBus )
-    :ActiveNode(NodeID::LocalNavigationModule, msgBus)
+LocalNavigationModule::LocalNavigationModule( MessageBus& msgBus,DBHandler& dbhandler, double loopTime )
+    :ActiveNode(NodeID::LocalNavigationModule, msgBus), m_LoopTime(loopTime), m_db(dbhandler)
 {
     msgBus.registerNode( *this, MessageType::CompassData );
     msgBus.registerNode( *this, MessageType::GPSData );

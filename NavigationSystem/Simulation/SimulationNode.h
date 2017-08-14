@@ -18,6 +18,7 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 
+#include "DataBase/DBHandler.h"
 #include "MessageBus/ActiveNode.h"
 #include "Messages/CompassDataMsg.h"
 #include "Messages/GPSDataMsg.h"
@@ -64,8 +65,8 @@ struct ActuatorDataPacket_t {
 
 class SimulationNode : public ActiveNode {
 public:
-	SimulationNode(MessageBus& msgBus, double loopTime);
-  SimulationNode(MessageBus& msgBus, CollidableMgr* collidableMgr, double loopTime);
+	SimulationNode(MessageBus& msgBus, DBHandler& dbhandler, double loopTime);
+  SimulationNode(MessageBus& msgBus, DBHandler& dbhandler, CollidableMgr* collidableMgr, double loopTime);
 
 	///----------------------------------------------------------------------------------
 	/// Initialize the TCP communication
@@ -140,5 +141,6 @@ private:
   TCPServer server;
   CollidableMgr* collidableMgr;
   double    m_LoopTime;
+  DBHandler& m_db;
 
 };

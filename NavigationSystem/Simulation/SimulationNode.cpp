@@ -48,22 +48,24 @@ enum SimulatorPacket {
 };
 
 
-SimulationNode::SimulationNode(MessageBus& msgBus, double loopTime)
+SimulationNode::SimulationNode(MessageBus& msgBus, DBHandler& dbhandler, double loopTime)
 	: ActiveNode(NodeID::Simulator, msgBus),
 		m_CompassHeading(0), m_GPSLat(0), m_GPSLon(0), m_GPSSpeed(0),
 		m_GPSCourse(0), m_WindDir(0), m_WindSpeed(0),
-		m_ArduinoRudder(0), m_ArduinoSheet(0), collidableMgr(NULL),m_LoopTime(loopTime)
+		m_ArduinoRudder(0), m_ArduinoSheet(0), collidableMgr(NULL),m_LoopTime(loopTime), m_db(dbhandler)
 {
   m_MsgBus.registerNode(*this, MessageType::ActuatorPosition);
+  m_MsgBus.registerNode(*this, MessageType::ServerConfigsReceived);
 }
 
-SimulationNode::SimulationNode(MessageBus& msgBus, CollidableMgr* collidableMgr, double loopTime)
+SimulationNode::SimulationNode(MessageBus& msgBus, DBHandler& dbhandler, CollidableMgr* collidableMgr, double loopTime)
 	: ActiveNode(NodeID::Simulator, msgBus),
 		m_CompassHeading(0), m_GPSLat(0), m_GPSLon(0), m_GPSSpeed(0),
 		m_GPSCourse(0), m_WindDir(0), m_WindSpeed(0),
-		m_ArduinoRudder(0), m_ArduinoSheet(0), collidableMgr(collidableMgr), m_LoopTime(loopTime)
+		m_ArduinoRudder(0), m_ArduinoSheet(0), collidableMgr(collidableMgr), m_LoopTime(loopTime), m_db(dbhandler)
 {
   m_MsgBus.registerNode(*this, MessageType::ActuatorPosition);
+  m_MsgBus.registerNode(*this, MessageType::ServerConfigsReceived);
 }
 
 void SimulationNode::start()
@@ -96,7 +98,7 @@ bool SimulationNode::init()
 }
 
 void SimulationNode::updateConfigsFromDB(){
-	m_LoopTime = m_dbHandler->retrieveCellAsDouble("config_simulator","1","loop_time");
+	m_LoopTime = m_db.retrieveCellAsDouble("config_simulator","1","loop_time");
 }
 
 void SimulationNode::processMessage(const Message* msg)

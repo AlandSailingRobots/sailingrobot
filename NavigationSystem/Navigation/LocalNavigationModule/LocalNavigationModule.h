@@ -17,6 +17,7 @@
 
 
 #include "MessageBus/ActiveNode.h"
+#include "DataBase/DBHandler.h"
 #include "BoatState.h"
 #include "ASRVoter.h"
 #include "ASRArbiter.h"
@@ -28,7 +29,7 @@ public:
     ///----------------------------------------------------------------------------------
  	/// Constructs the LocalNavigationModule
  	///----------------------------------------------------------------------------------
-    LocalNavigationModule( MessageBus& msgBus );
+    LocalNavigationModule( MessageBus& msgBus, DBHandler& dbhandler, double loopTime );
 
     ///----------------------------------------------------------------------------------
  	/// Does nothing
@@ -75,4 +76,6 @@ private:
     std::vector<ASRVoter*> voters;
     BoatState_t boatState;
     ASRArbiter arbiter;
+    double m_LoopTime;
+    DBHandler& m_db;
 };

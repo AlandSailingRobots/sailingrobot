@@ -140,8 +140,8 @@ int main(int argc, char *argv[])
 	int dbLoggerQueueSize = 5; 			// how many messages to log to the databse at a time
 	DBLoggerNode dbLoggerNode(messageBus, dbHandler,dbLoggerUpdateFrequency, dbLoggerQueueSize);
 
-	int dbHandler_delay = dbHandler.retrieveCellAsInt("httpsync_config", "1","delay");
-	bool removeLogs = dbHandler.retrieveCellAsInt("httpsync_config","1","remove_logs");
+	int dbHandler_delay = dbHandler.retrieveCellAsInt("config_httpsync", "1","loop_time");
+	bool removeLogs = dbHandler.retrieveCellAsInt("config_httpsync","1","remove_logs");
 	HTTPSyncNode httpsync(messageBus, &dbHandler, dbHandler_delay, removeLogs);
 
 	WindStateNode windStateNode(messageBus);
@@ -171,7 +171,7 @@ int main(int argc, char *argv[])
 		lnm.registerVoter( &proximityVoter );
 		lnm.registerVoter( &midRangeVoter );
   	#else
-		double vesselStateLoopTime = dbHandler.retrieveCellAsDouble("vesselState_config","1", "loop_time");
+		double vesselStateLoopTime = dbHandler.retrieveCellAsDouble("config_vessel_state","1", "loop_time");
 	  	StateEstimationNode stateEstimationNode(messageBus, dbHandler, vesselStateLoopTime); // NOTE - Maël: It will change
 
 		LineFollowNode sailingLogic(messageBus, dbHandler);
@@ -180,21 +180,21 @@ int main(int argc, char *argv[])
 
 	#if SIMULATION == 1
 	  	#if LOCAL_NAVIGATION_MODULE == 1
-	  		SimulationNode simulation(messageBus, &collidableMgr);
+	  		SimulationNode simulation(messageBus, dbHandler, &collidableMgr);
 	  	#else
-			SimulationNode simulation(messageBus);
+			SimulationNode simulation(messageBus, dbHandler);
 	  	#endif
   	#else
 		CANService canService;
 
-		const int headingBufferSize = dbHandler.retrieveCellAsInt("buffer_config", "1", "compass");
+		const int headingBufferSize = dbHandler.retrieveCellAsInt("config_compass", "1", "compass");
 		double compassLoopTime = 0.1;
 		HMC6343Node compass(messageBus, dbHandler, headingBufferSize, compassLoopTime);
 
-		double gpsdLoopTime = dbHandler.retrieveCellAsDouble("GPSD_config", "1", "loop_time");
+		double gpsdLoopTime = dbHandler.retrieveCellAsDouble("config_gps", "1", "loop_time");
 	  	GPSDNode gpsd(messageBus, dbHandler, gpsdLoopTime);
 
-		int time_filter_ms = dbHandler.retrieveCellAsInt("windState_config", "1", "time_filter_ms");
+		int time_filter_ms = dbHandler.retrieveCellAsInt("config_wind_sensor", "1", "time_filter_ms");
 	  	CANWindsensorNode windSensor(messageBus, dbHandler, canService, time_filter_ms);
 
 	  	ActuatorNodeASPire actuators(messageBus, canService);

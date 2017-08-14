@@ -17,8 +17,8 @@
 
 const int DATA_OUT_OF_RANGE = -2000;
 
-CANSolarTrackerNode::CANSolarTrackerNode(MessageBus& msgBus, CANService& canService, double loopTime)
-	: ActiveNode(NodeID::CANSolarTracker, msgBus), m_CANService(&canService), m_LoopTime(loopTime)
+CANSolarTrackerNode::CANSolarTrackerNode(MessageBus& msgBus, DBHandler& dbhandler, CANService& canService, double loopTime)
+	: ActiveNode(NodeID::CANSolarTracker, msgBus), m_CANService(&canService), m_LoopTime(loopTime), m_db(dbhandler)
 {
 	m_Lat = DATA_OUT_OF_RANGE;
 	m_Lon = DATA_OUT_OF_RANGE;
@@ -37,7 +37,7 @@ bool CANSolarTrackerNode::init() {
 }
 
 void CANSolarTrackerNode::updateConfigsFromDB(){
-	m_LoopTime = m_dbHandler->retrieveCellAsDouble("config_httpsync","1","loop_time");
+	m_LoopTime = m_db.retrieveCellAsDouble("config_solar_tracker","1","loop_time");
 }
 
 void CANSolarTrackerNode::processMessage (const Message* message) {
