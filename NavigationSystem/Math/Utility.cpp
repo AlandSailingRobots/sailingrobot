@@ -512,6 +512,8 @@ std::vector<double> Utility::polarVerctorsAddition(std::vector<double> v1, std::
 
 void Utility::sphericalCoordinateSystem( const double lat, const double lon, double& x, double& y)
 {
+	// Note Maël : One output coordinate seems to be missing - z= sin(latR) * EARTH_RADIUS;
+
 	static const double EARTH_RADIUS = 6371.0;
 
 	double latR = lat * M_PI / 180;
