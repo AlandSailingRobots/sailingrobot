@@ -25,6 +25,7 @@ CANSolarTrackerNode::CANSolarTrackerNode(MessageBus& msgBus, CANService& canServ
 	m_Heading = DATA_OUT_OF_RANGE;
 
 	msgBus.registerNode(*this, MessageType::StateMessage);
+	msgBus.registerNode(*this, MessageType::ServerConfigsReceived);
 }
 
 CANSolarTrackerNode::~CANSolarTrackerNode () {
@@ -35,8 +36,13 @@ bool CANSolarTrackerNode::init() {
 	return true;
 }
 
+void CANSolarTrackerNode::updateConfigsFromDB(){
+	m_LoopTime = m_dbHandler->retrieveCellAsDouble("config_httpsync","1","loop_time");
+}
+
 void CANSolarTrackerNode::processMessage (const Message* message) {
-	if (message->messageType() == MessageType::StateMessage) {
+	MessageType type = message->messageType();
+	if ( type == MessageType::StateMessage) {
 		StateMessage* stateMsg = (StateMessage*) message;
 		m_Heading = stateMsg->heading();
 		m_Lat = stateMsg->latitude();
@@ -49,6 +55,9 @@ void CANSolarTrackerNode::processMessage (const Message* message) {
 
 		m_Hour = timeinfo->tm_hour;
 		m_Minute = timeinfo->tm_min;
+	}
+	else if (type == MessageType::ServerConfigsReceived){
+		updateConfigsFromDB();
 	}
 }
 

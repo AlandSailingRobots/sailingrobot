@@ -4,10 +4,10 @@
  * 		LocalNavigationModule.h
  *
  * Purpose:
- *		
+ *
  *
  * License:
- *      This file is subject to the terms and conditions defined in the file 
+ *      This file is subject to the terms and conditions defined in the file
  *      'LICENSE.txt', which is part of this source code package.
  *
  ***************************************************************************************/
@@ -61,6 +61,11 @@ private:
     /// the final result is generated and a desired course message is created.
  	///----------------------------------------------------------------------------------
     void startBallot();
+
+    ///----------------------------------------------------------------------------------
+	/// Update values from the database as the loop time of the thread and others parameters
+	///----------------------------------------------------------------------------------
+    void updateConfigsFromDB();
 
     ///----------------------------------------------------------------------------------
  	/// Just a little hack for waking up the navigation module for now

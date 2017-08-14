@@ -73,8 +73,8 @@ void StateEstimationNode::stop()
 void StateEstimationNode::updateConfigsFromDB()
 {
     m_LoopTime = m_dbHandler.retrieveCellAsDouble("config_vessel_state","1","loop_time");
-    m_speed_1 = m_dbHandler.retrieveCellAsDouble("config_vessel_state","1","course_config_speed_1");
-    m_speed_2 = m_dbHandler.retrieveCellAsDouble("config_vessel_state","1","course_config_speed_2");
+    m_speed_1 = m_dbHandler.retrieveCellAsInt("config_vessel_state","1","course_config_speed_1");
+    m_speed_2 = m_dbHandler.retrieveCellAsInt("config_vessel_state","1","course_config_speed_2");
 }
 
 void StateEstimationNode::processMessage(const Message* msg)

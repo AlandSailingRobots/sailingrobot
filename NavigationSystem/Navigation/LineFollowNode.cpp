@@ -44,23 +44,15 @@ m_externalControlActive(false), m_tackingDirection(1)
     msgBus.registerNode(*this, MessageType::ExternalControl);
     msgBus.registerNode(*this, MessageType::ServerConfigsReceived);
 
-// NOTE : Marc : conversion radian to degree
-    //m_tackAngle = 0.872665; // in radian (= 50°)
-
-//  fprintf( file, "%s,%ss,%s\n", "id", "latitude", "longitude" );
-//  fflush( file );
+// NOTE : Marc : conversion radian to degree ????
+    m_tackAngle = 0.872665; // in radian (= 50°)
 }
 
 LineFollowNode::~LineFollowNode() {}
 
 bool LineFollowNode::init()
 {
-  //setupRudderCommand();
-/*
-  twdBufferMaxSize = m_db.retrieveCellAsInt("config_buffer", "1", "true_wind");
-  if(twdBufferMaxSize == 0)
-  twdBufferMaxSize = DEFAULT_TWD_BUFFERSIZE;
-*/
+
     return true;
 }
 
@@ -79,8 +71,6 @@ void LineFollowNode::stop()
 void LineFollowNode::updateConfigsFromDB()
 {
     m_LoopTime = m_db.retrieveCellAsInt("config_LineFollowNode","1","loop_time");
-    m_MaxTackDistance = m_db.retrieveCellAsInt("config_LineFollowNode","1","max_tack_distance");
-    m_tackAngle = m_db.retrieveCellAsInt("config_LineFollowNode","1","tack_angle");
 }
 
 void LineFollowNode::processMessage(const Message* msg)

@@ -65,6 +65,7 @@ void XbeeSyncNode::start()
 void XbeeSyncNode::updateConfigsFromDB(){
 	m_LoopTime = m_db.retrieveCellAsDouble("config_xbee","1","loop_time");
 	m_receiving = m_db.retrieveCellAsInt("config_xbee", "1", "receive");
+	m_sending = m_db.retrieveCellAsInt("config_xbee", "1", "send");
 	m_sendLogs = m_db.retrieveCellAsInt("config_xbee", "1", "send_logs");
 	m_pushOnlyLatestLogs = m_db.retrieveCellAsInt("config_xbee", "1", "push_only_latest_logs");
 }
@@ -124,6 +125,10 @@ void XbeeSyncNode::incomingMessage(uint8_t* data, uint8_t size)
 				m_node->m_MsgBus.sendMessage(std::move(externalControl));
 			}
 			break;
+		case MessageType::ServerConfigsReceived:
+			{
+				updateConfigsFromDB();
+			}
 		default:
 			break;
 	}

@@ -19,6 +19,7 @@
 #include "SystemServices/Timer.h"
 #include "MessageBus/Message.h"
 #include "Math/CourseMath.h"
+#include "DataBase/DBHandler.h"
 #include "MessageBus/ActiveNode.h"
 #include "WorldState/CollidableMgr/CollidableMgr.h"
 #include "SystemServices/Logger.h"
@@ -36,7 +37,7 @@ public:
   * uint32_t mmsi, the ID number of our shown vessel, makes sure it gets ignored and not added to the collidable manager
   * double loopTime, how often we send messages
   */
-  AISProcessing(MessageBus& msgBus, CollidableMgr* collidableMgr, int radius, uint32_t mmsi, double loopTime);
+  AISProcessing(MessageBus& msgBus, DBHandler& dbhandler, CollidableMgr* collidableMgr, int radius, uint32_t mmsi, double loopTime);
   ~AISProcessing();
 
   bool init();
@@ -52,6 +53,12 @@ public:
   void start();
 
 private:
+
+  /*
+  * Update values from the database as the loop time of the thread and others parameters
+  */
+  void updateConfigsFromDB();
+
   /*
   * Sends the data to the collidable manager
   */
@@ -79,4 +86,5 @@ private:
   uint32_t m_MMSI;
   std::mutex m_lock;
   CollidableMgr* collidableMgr;
+  DBHandler& m_db;
 };

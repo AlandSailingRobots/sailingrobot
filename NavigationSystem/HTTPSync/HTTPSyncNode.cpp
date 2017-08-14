@@ -77,6 +77,7 @@ void HTTPSyncNode::updateConfigsFromDB()
 {
     m_removeLogs = m_dbHandler->retrieveCellAsInt("config_httpsync","1","remove_logs");
     m_LoopTime = m_dbHandler->retrieveCellAsDouble("config_httpsync","1","loop_time");
+    //NOTE : Marc : See the others variables : configs_updated, route_updated
 }
 
 void HTTPSyncNode::processMessage(const Message* msgPtr)

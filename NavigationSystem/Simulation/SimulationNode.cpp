@@ -48,20 +48,20 @@ enum SimulatorPacket {
 };
 
 
-SimulationNode::SimulationNode(MessageBus& msgBus)
+SimulationNode::SimulationNode(MessageBus& msgBus, double loopTime)
 	: ActiveNode(NodeID::Simulator, msgBus),
 		m_CompassHeading(0), m_GPSLat(0), m_GPSLon(0), m_GPSSpeed(0),
 		m_GPSCourse(0), m_WindDir(0), m_WindSpeed(0),
-		m_ArduinoRudder(0), m_ArduinoSheet(0), collidableMgr(NULL)
+		m_ArduinoRudder(0), m_ArduinoSheet(0), collidableMgr(NULL),m_LoopTime(loopTime)
 {
   m_MsgBus.registerNode(*this, MessageType::ActuatorPosition);
 }
 
-SimulationNode::SimulationNode(MessageBus& msgBus, CollidableMgr* collidableMgr)
+SimulationNode::SimulationNode(MessageBus& msgBus, CollidableMgr* collidableMgr, double loopTime)
 	: ActiveNode(NodeID::Simulator, msgBus),
 		m_CompassHeading(0), m_GPSLat(0), m_GPSLon(0), m_GPSSpeed(0),
 		m_GPSCourse(0), m_WindDir(0), m_WindSpeed(0),
-		m_ArduinoRudder(0), m_ArduinoSheet(0), collidableMgr(collidableMgr)
+		m_ArduinoRudder(0), m_ArduinoSheet(0), collidableMgr(collidableMgr), m_LoopTime(loopTime)
 {
   m_MsgBus.registerNode(*this, MessageType::ActuatorPosition);
 }
@@ -95,6 +95,10 @@ bool SimulationNode::init()
 	return success;
 }
 
+void SimulationNode::updateConfigsFromDB(){
+	m_LoopTime = m_dbHandler->retrieveCellAsDouble("config_simulator","1","loop_time");
+}
+
 void SimulationNode::processMessage(const Message* msg)
 {
 	MessageType type = msg->messageType();
@@ -104,7 +108,9 @@ void SimulationNode::processMessage(const Message* msg)
 		case MessageType::ActuatorPosition:
 			processActuatorPositionMessage((ActuatorPositionMsg*)msg);
 		break;
-
+		case MessageType::ServerConfigsReceived:
+			updateConfigsFromDB();
+		break;
 		default:
 		return;
 	}
@@ -142,7 +148,7 @@ void SimulationNode::createArduinoMessage()
 
 ///--------------------------------------------------------------------------------------
 void SimulationNode::processBoatData( TCPPacket_t& packet )
-{	
+{
 	if( packet.length - 1 == sizeof(BoatDataPacket_t) )
 	{
 		// The first byte is the packet type, lets skip that

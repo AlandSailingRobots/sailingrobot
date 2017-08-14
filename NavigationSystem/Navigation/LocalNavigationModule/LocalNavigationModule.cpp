@@ -4,10 +4,10 @@
  * 		LocalNavigationModule.cpp
  *
  * Purpose:
- *		
+ *
  *
  * License:
- *      This file is subject to the terms and conditions defined in the file 
+ *      This file is subject to the terms and conditions defined in the file
  *      'LICENSE.txt', which is part of this source code package.
  *
  ***************************************************************************************/
@@ -44,6 +44,7 @@ LocalNavigationModule::LocalNavigationModule( MessageBus& msgBus )
     msgBus.registerNode( *this, MessageType::WindData );
     msgBus.registerNode( *this, MessageType::WaypointData );
     msgBus.registerNode( *this, MessageType::RequestCourse );
+    msgBus.registerNode( *this, MessageType::ServerConfigsReceived );
 }
 
 ///----------------------------------------------------------------------------------
@@ -53,6 +54,11 @@ bool LocalNavigationModule::init() { return true; }
 void LocalNavigationModule::start()
 {
     runThread(WakeupThreadFunc);
+}
+
+///----------------------------------------------------------------------------------
+void LocalNavigationModule::updateConfigsFromDB(){
+    m_LoopTime = m_db.retrieveCellAsDouble("config_voter_system","1","loop_time");
 }
 
 ///----------------------------------------------------------------------------------
@@ -97,11 +103,14 @@ void LocalNavigationModule::processMessage( const Message* msg )
             double distance = CourseMath::calculateDTW( boatState.lon, boatState.lat, boatState.currWaypointLon, boatState.currWaypointLat );
             Logger::info( "New Waypoint! Lat: %f Lon: %f Distance: %f", boatState.currWaypointLat, boatState.currWaypointLon, distance );
 
-            // Delibrate dropdown after a new waypoint, we want to start a new ballot 
+            // Delibrate dropdown after a new waypoint, we want to start a new ballot
             // and get a new heading
         }
         case MessageType::RequestCourse:
             startBallot();
+            break;
+        case MessageType::ServerConfigsReceived:
+            updateConfigsFromDB();
             break;
         default:
             break;
@@ -125,14 +134,14 @@ void LocalNavigationModule::startBallot()
 
     std::vector<ASRVoter*>::iterator it;
 
-    for( it = voters.begin(); it != voters.end(); it++ ) 
+    for( it = voters.begin(); it != voters.end(); it++ )
     {
         ASRVoter* voter = (*it);
         arbiter.castVote( voter->weight(), voter->vote( boatState ) );
     }
 
     printf("[Voters] "); // Debug
-    for( it = voters.begin(); it != voters.end(); it++ ) 
+    for( it = voters.begin(); it != voters.end(); it++ )
     {
         ASRVoter* voter = (*it);
         int16_t votes = 0;

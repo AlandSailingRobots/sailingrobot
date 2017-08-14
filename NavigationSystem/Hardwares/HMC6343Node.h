@@ -84,9 +84,9 @@ protected:
 
 	I2CController 	m_I2C;
 	bool 			m_Initialised;
-	int		m_HeadingBufferSize;	//Number of byte describing the compass data
+	int				m_HeadingBufferSize;	//Number of byte describing the compass data
 	double 			m_LoopTime;				// in seconds (ex : 0.5 s)
-	DBHandler& m_db;
+	DBHandler& 		m_db;
 
 	// HMC6343 Orientations
 	const int LEVEL = 0; // X = forward, +Z = up (default)

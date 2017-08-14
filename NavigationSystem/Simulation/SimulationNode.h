@@ -64,8 +64,8 @@ struct ActuatorDataPacket_t {
 
 class SimulationNode : public ActiveNode {
 public:
-	SimulationNode(MessageBus& msgBus);
-  SimulationNode(MessageBus& msgBus, CollidableMgr* collidableMgr);
+	SimulationNode(MessageBus& msgBus, double loopTime);
+  SimulationNode(MessageBus& msgBus, CollidableMgr* collidableMgr, double loopTime);
 
 	///----------------------------------------------------------------------------------
 	/// Initialize the TCP communication
@@ -85,6 +85,11 @@ public:
 	void processActuatorPositionMessage(ActuatorPositionMsg* msg);
 
 private:
+
+    ///----------------------------------------------------------------------------------
+	/// Update values from the database as the loop time of the thread and others parameters
+	///----------------------------------------------------------------------------------
+    void updateConfigsFromDB();
 
   ///----------------------------------------------------------------------------------
   /// Process a boat data message
@@ -134,5 +139,6 @@ private:
   ActuatorDataPacket_t actuatorData;
   TCPServer server;
   CollidableMgr* collidableMgr;
+  double    m_LoopTime;
 
 };

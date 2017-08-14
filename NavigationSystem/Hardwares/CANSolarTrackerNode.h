@@ -64,6 +64,11 @@ public:
 private:
 
   /*
+  * Update values from the database as the loop time of the thread and others parameters
+  */
+  void updateConfigsFromDB();
+
+  /*
   * The function that the thread works on
   */
   static void CANSolarTrackerThreadFunc(ActiveNode* nodePtr);
