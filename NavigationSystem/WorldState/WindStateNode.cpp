@@ -1,97 +1,91 @@
+/****************************************************************************************
+*
+* File:
+*       WindStateNode.cpp
+*
+* Purpose:
+*   Each time a vessel state message is received :
+*   - Calculates the instantaneous true wind (speed and direction) from wind sensor and Vessel State
+*     datas.
+*   - Returns a WindStateMsg corresponding to the true and apparent wind state (speed and direction).
+*   The wind direction corresponds to the direction where the wind comes from.
+*
+* Developer Notes:
+*
+*
+***************************************************************************************/
+
 #include "WindStateNode.h"
-#include "Math/Utility.h"
 
-#include <vector>
+#define DATA_OUT_OF_RANGE -2000
 
-WindStateNode::WindStateNode(MessageBus& msgBus, DBHandler& dbhandler, int maxTwdBufferSize)
-: Node(NodeID::WindStateNode, msgBus), m_MaxTwdBufferSize(maxTwdBufferSize), m_db(dbhandler)
+WindStateNode::WindStateNode(MessageBus& msgBus)
+: Node(NodeID::WindStateNode, msgBus)
 {
-  msgBus.registerNode(*this, MessageType::StateMessage);
-  msgBus.registerNode(*this, MessageType::WindData);
-  msgBus.registerNode(*this, MessageType::ServerConfigsReceived);
+    msgBus.registerNode(*this, MessageType::StateMessage);
+    msgBus.registerNode(*this, MessageType::WindData);
 }
 
-WindStateNode::~WindStateNode()
+WindStateNode::~WindStateNode(){}
+
+
+bool WindStateNode::init()
 {
-
+    return true;
 }
 
-bool WindStateNode::init(){
-  return true;
-}
+void WindStateNode::processMessage(const Message* message)
+{
+    MessageType type = message->messageType();
 
-void WindStateNode::updateConfigsFromDB(){
-    m_MaxTwdBufferSize = m_db.retrieveCellAsInt("config_WindStateNode","1","time_filter_ms");
-}
-
-// If we have not yet received the necessary messages
-// we do not have the information to calculate
-// true and apparent wind speeds, one of each message
-// needs to be received before any new messages are sent.
-// Should maybe be done in a nicer way.
-
-void WindStateNode::processMessage(const Message* message){
-  MessageType type = message->messageType();
-
-  if(type == MessageType::StateMessage){
-    m_stateMsgReceived = true;
-    parseStateMessage(dynamic_cast< const StateMessage*> (message));
-
-
-    if(!m_windDataReceived || !m_stateMsgReceived ){
-      return;
+    if(type == MessageType::StateMessage)
+    {
+        processVesselStateMessage(dynamic_cast< const StateMessage*> (message));
+        WindStateNode::calculateTrueWind();
+        sendMessage();
     }
-
-    updateApparentWind();
-    sendMessage();
-  }
-
-  else if(type == MessageType::WindData){
-    m_windDataReceived = true;
-    parseWindMessage(dynamic_cast< const WindDataMsg*> (message));
-
-    if(!m_stateMsgReceived){
-      return;
+    else if(type == MessageType::WindData)
+    {
+        processWindMessage(dynamic_cast< const WindDataMsg*> (message));
     }
-    updateTrueWind();
-  }
-
-  else if(type == MessageType::ServerConfigsReceived){
-      updateConfigsFromDB();
-  }
-
 }
 
-void WindStateNode::parseStateMessage(const StateMessage* msg) {
-  m_vesselHeading = msg->heading();
-  m_vesselLat     = msg->latitude();
-  m_vesselLon     = msg->longitude();
-  m_vesselSpeed   = msg->speed();
+void WindStateNode::processVesselStateMessage(const StateMessage* msg)
+{
+    m_vesselHeading = msg->heading();
+    m_vesselSpeed   = msg->speed();
+    m_vesselCourse  = msg->course();
 }
 
-void WindStateNode::parseWindMessage(const WindDataMsg* msg) {
-  m_WindDir       = msg->windDirection();
-  m_WindSpeed     = msg->windSpeed();
-  m_WindTemp      = msg->windTemp();
+void WindStateNode::processWindMessage(const WindDataMsg* msg)
+{
+    m_apparentWindSpeed     = msg->windSpeed();
+    m_apparentWindDirection = msg->windDirection();
 }
 
-void WindStateNode::sendMessage() {
-
-  std::lock_guard<std::mutex> lockGuard(m_Lock);
-
-  MessagePtr windState = std::make_unique<WindStateMsg>(m_trueWindSpeed, m_trueWindDirection,
-                                                    m_apparentWindSpeed, m_apparentWindDirection);
-  m_MsgBus.sendMessage(std::move(windState));
+void WindStateNode::sendMessage()
+{
+    MessagePtr windState = std::make_unique<WindStateMsg>(m_trueWindSpeed, m_trueWindDirection,
+        m_apparentWindSpeed, m_apparentWindDirection);
+    m_MsgBus.sendMessage(std::move(windState));
 }
 
+void WindStateNode::calculateTrueWind()
+{
+    std::vector<double> v1(2), v2(2), v3(2);
 
-void WindStateNode::updateApparentWind() {
-  Utility::calculateApparentWind(m_WindDir, m_WindSpeed, m_vesselSpeed, m_vesselHeading,
-                                     m_trueWindDirection, m_apparentWindSpeed, m_apparentWindDirection);
-}
+    // v1 = - ApparentWindVector in North-East reference frame
+    v1[0] = m_apparentWindSpeed;
+    v1[1] = Utility::degreeToRadian(m_vesselHeading + m_apparentWindDirection);
 
-void WindStateNode::updateTrueWind() {
+    // v2 = - VelocityVector in North-East reference frame
+    v2[0] = - m_vesselSpeed;
+    v2[1] = Utility::degreeToRadian(m_vesselCourse);
 
-  m_trueWindDirection = Utility::getTrueWindDirection(m_WindDir, m_WindSpeed, m_vesselSpeed, m_vesselHeading, m_Twd, 100);
-  m_trueWindSpeed     = Utility::calculateTrueWindSpeed(m_WindDir, m_WindSpeed, m_vesselSpeed, m_vesselHeading);
+    // v3 = v1 + v2 (TrueWindVector = ApparentWindVector + VelocityVector)
+    v3 = Utility::polarVerctorsAddition(v1, v2);
+
+    // v3 = - TrueWindVector in North-East reference frame
+    m_trueWindSpeed = v3[0];
+    m_trueWindDirection= Utility::radianToDegree(v3[1]);
 }

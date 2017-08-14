@@ -72,7 +72,7 @@ public:
 				m_Lon = gpsMsg->longitude();
 				m_UnixTime = gpsMsg->unixTime();
 				m_Speed = gpsMsg->speed();
-				m_Course = gpsMsg->heading();
+				m_Course = gpsMsg->course();
 				m_SatCount = gpsMsg->satelliteCount();
 				m_Mode = gpsMsg->gpsMode();
 			}

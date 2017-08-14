@@ -53,7 +53,10 @@ enum class NodeID {
 	SailControlNode,
 	SpeedRegulatorNode,
 	CANArduino,
-	WingsailControlNode
+	WingsailControlNode,
+	CANSolarTracker,
+	CANAIS,
+	AISProcessing
 };
 
 inline std::string nodeToString(NodeID id)
@@ -128,29 +131,12 @@ inline std::string nodeToString(NodeID id)
 		return "WingsailControlNode";
 		case NodeID::CANArduino:
 		return "CANArduino";
+		case NodeID::CANSolarTracker:
+		return "CanSolarTracker";
+		case NodeID::CANAIS:
+		return "CANAIS";
+		case NodeID::AISProcessing:
+		return "AISProcessing";
 	}
 	return "";
-}
-
-inline NodeID configToNode(std::string config){
-	std::map <std::string, NodeID> nodeConfigs;
-	nodeConfigs["config_arduino"]=			NodeID::Arduino;
-	nodeConfigs["config_buffer"]=			NodeID::Compass;
-	nodeConfigs["config_lidar"]=			NodeID::ColorDetection;
-	nodeConfigs["config_courseRegulator"]=	NodeID::CourseRegulatorNode;
-	nodeConfigs["config_dblogger"]=			NodeID::DBLoggerNode;
-	nodeConfigs["config_GPSD"]=				NodeID::GPS;
-	nodeConfigs["config_httpsync"]=			NodeID::HTTPSync;
-	nodeConfigs["config_rudderActuator"]=	NodeID::RudderActuator;
-	nodeConfigs["config_sailActuator"]=		NodeID::SailActuator;
-	nodeConfigs["config_sailControl"]=		NodeID::SailControlNode;
-	nodeConfigs["config_sailingLogic"]=		NodeID::SailingLogic;
-	nodeConfigs["config_simulator"]=		NodeID::Simulator;
-	nodeConfigs["config_speedRegulator"]=	NodeID::SpeedRegulatorNode;
-	nodeConfigs["config_stateEstimation"]=	NodeID::StateEstimation;
-	nodeConfigs["config_wingsailControl"]=	NodeID::WingsailControlNode;
-	nodeConfigs["config_windState"]=		NodeID::WindSensor;
-	//nodeConfigs["config_wind_vane"]=		NodeID::WindVane;
-	nodeConfigs["config_xbee"]=				NodeID::xBeeSync;
-	return nodeConfigs.find(config)->second;
 }

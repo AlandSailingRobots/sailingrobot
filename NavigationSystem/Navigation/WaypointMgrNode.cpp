@@ -12,12 +12,7 @@
  ***************************************************************************************/
 
 #include "WaypointMgrNode.h"
-#include "Messages/WaypointDataMsg.h"
-#include "Messages/ServerWaypointsReceivedMsg.h"
-#include "SystemServices/Logger.h"
-#include "Math/Utility.h"
-#include <string>
-#include <vector>
+
 
 WaypointMgrNode::WaypointMgrNode(MessageBus& msgBus, DBHandler& db)
 : Node(NodeID::Waypoint, msgBus), m_db(db),
@@ -34,7 +29,7 @@ WaypointMgrNode::WaypointMgrNode(MessageBus& msgBus, DBHandler& db)
     m_prevRadius(0),
     m_totalTime( 0 )
 {
-    msgBus.registerNode(*this, MessageType::GPSData);
+    msgBus.registerNode(*this, MessageType::StateMessage);
     msgBus.registerNode(*this, MessageType::ServerWaypointsReceived);
 }
 
@@ -50,8 +45,8 @@ void WaypointMgrNode::processMessage(const Message* msg)
 
 	switch(type)
 	{
-        case MessageType::GPSData:
-            processGPSMessage(static_cast< const GPSDataMsg*>(msg));
+        case MessageType::StateMessage:
+            processVesselStateMessage((StateMessage*)msg);
             break;
         case MessageType::ServerWaypointsReceived:
             sendMessage();
@@ -66,16 +61,17 @@ void WaypointMgrNode::processMessage(const Message* msg)
     }
 }
 
-void WaypointMgrNode::processGPSMessage(const GPSDataMsg* msg)
+void WaypointMgrNode::processVesselStateMessage(StateMessage* msg)
 {
-    m_gpsLongitude = msg->longitude();
-    m_gpsLatitude = msg->latitude();
+    m_vesselLongitude = msg->longitude();
+    m_vesselLatitude = msg->latitude();
 }
 
 bool WaypointMgrNode::waypointReached()
 {
     // double distanceAfterWaypoint = Utility::calculateWaypointsOrthogonalLine(m_nextLongitude, m_nextLatitude, m_prevLongitude,
-    //             m_prevLatitude, m_gpsLongitude, m_gpsLatitude); //Checks if boat has passed the waypoint following the line, without entering waypoints radius
+    //             m_prevLatitude, m_vesselLongitude, m_vesselLatitude); //Checks if boat has passed the waypoint following the line, without entering waypoints radius
+
     if(harvestWaypoint())
     {
         if(not m_db.changeOneValue("current_Mission", std::to_string(m_nextId),"1","harvested"))
@@ -112,8 +108,8 @@ void WaypointMgrNode::sendMessage()
     {
         if( !foundPrev )
         {
-            m_prevLatitude = m_gpsLatitude;
-            m_prevLongitude = m_gpsLongitude;
+            m_prevLatitude = m_vesselLatitude;
+            m_prevLongitude = m_vesselLongitude;
         }
 
         MessagePtr msg = std::make_unique<WaypointDataMsg>(m_nextId, m_nextLongitude, m_nextLatitude, m_nextDeclination, m_nextRadius, m_nextStayTime,
@@ -146,7 +142,7 @@ void WaypointMgrNode::sendMessage()
 
 bool WaypointMgrNode::harvestWaypoint()
 {
-    double DistanceToWaypoint = CourseMath::calculateDTW(m_gpsLongitude, m_gpsLatitude, m_nextLongitude, m_nextLatitude); //Calculate distance to waypoint
+    double DistanceToWaypoint = CourseMath::calculateDTW(m_vesselLongitude, m_vesselLatitude, m_nextLongitude, m_nextLatitude); //Calculate distance to waypoint
     if(DistanceToWaypoint > m_nextRadius)
     {
         return false;

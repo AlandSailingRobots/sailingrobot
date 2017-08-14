@@ -7,6 +7,7 @@
 #############################################################################################
 
 
+
 #############################################################################################
 # Tools
 #############################################################################################
@@ -24,10 +25,11 @@ CXX = g++ -c -Wall -W -I./unit-tests -I./cxxtest -I../ -std=c++14
 UNIT_TEST_SRCS 		= MessageCoreSuite.h MessageSuite.h UtilitySuite.h HTTPSyncSuite.h \
 						WaypointNodeSuite.h LineFollowSuite.h CANWindsensorNodeSuite.h \
 					  	WindStateNodeSuite.h StateEstimationNodeSuite.h WingsailControlSuite.h \
-					  	CourseRegulatorSuite.h CANMessageSuite.h CourseRegulatorNodeSuite.h  \
-					  	SailControlNodeSuite.h  LowLevelControllersFunctionsTestSuite.h \
-					  	ASRCourseBallotSuite.h DBLoggerNodeSuite.h
-					  	#ASRArbiterSuite.h  LowLevelControllerNodeJanetSuite.h // NOTE - Maël: This unit test suite is the source of a building error.
+					  	CourseRegulatorSuite.h CANMessageSuite.h DBLoggerNodeSuite.h \
+					  	LowLevelControllerNodeJanetSuite.h LowLevelControllersFunctionsTestSuite.h \
+					  	ASRCourseBallotSuite.h CourseRegulatorNodeSuite.h SailControlNodeSuite.h \
+						AISProcSuite.h CanNodesSuite.h
+					  	# ASRArbiterSuite.h // NOTE - Maël: This unit test suite is the source of a building error.
 
 HARDWARE_TEST_SRCS	= HardwareXbeeSuite.h HardwareCompassSuite.h HardwareCV7Suite.h HardwareGPSDSuite.h \
 						MaestroControllerSuite.h ActuatorSailNodeSuite.h ActuatorRudderNodeSuite.h \

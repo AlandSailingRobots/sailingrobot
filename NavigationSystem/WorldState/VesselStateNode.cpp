@@ -28,8 +28,8 @@ VesselStateNode::VesselStateNode(MessageBus& msgBus, DBHandler& dbhandler, doubl
 	: ActiveNode(NodeID::VesselState, msgBus),
 		m_CompassHeading(0), m_CompassPitch(0), m_CompassRoll(0),
 		m_GPSHasFix(false), m_GPSOnline(false), m_GPSLat(0), m_GPSLon(0), m_GPSUnixTime(0), m_GPSSpeed(0),
-		m_GPSHeading(0), m_WindDir(0), m_WindSpeed(0), m_WindTemp(0), m_ArduinoPressure(0),
-		m_ArduinoRudder(0),m_ArduinoSheet(0),m_ArduinoBattery(0), m_LoopTime(loopTime), m_db(dbhandler)
+		m_GPSCourse(0), m_WindDir(0), m_WindSpeed(0), m_WindTemp(0), m_ArduinoPressure(0),
+		m_ArduinoRudder(0),m_ArduinoSheet(0),m_ArduinoBattery(0), m_LoopTime(loopTime)
 {
 
 	msgBus.registerNode(*this, MessageType::CompassData);
@@ -101,7 +101,7 @@ void VesselStateNode::processGPSMessage(GPSDataMsg* msg)
 	m_GPSLon = msg->longitude();
 	m_GPSUnixTime = msg->unixTime();
 	m_GPSSpeed = msg->speed();
-	m_GPSCourse = msg->heading();
+	m_GPSCourse = msg->course();
 	m_GPSSatellite = msg->satelliteCount();
 	waypointBearing = CourseMath::calculateBTW( m_GPSLon, m_GPSLat, waypointLon, waypointLat );
 	waypointDistance = CourseMath::calculateDTW( m_GPSLon, m_GPSLat, waypointLon, waypointLat );
@@ -162,7 +162,7 @@ void VesselStateNode::VesselStateThreadFunc(ActiveNode* nodePtr)
 																	node->m_ArduinoSheet, node->m_ArduinoBattery, node->m_ArduinoRC);
 		node->m_MsgBus.sendMessage(std::move(vesselState));
 
-		// Compass heading, Compass Pitch, Compass Roll, Wind Dir, Wind Speed, GPS Heading, GPS Lat, GPS Lon
+		// Compass heading, Compass Pitch, Compass Roll, Wind Dir, Wind Speed, GPS Course, GPS Lat, GPS Lon
 		int size = snprintf( buffer, 1024, "%d,%d,%d,%d,%d,%d,%f,%f,%f,%d,%f,%f,%d,%f,%d\n", (int)node->m_CompassHeading, (int)node->m_CompassPitch, (int)node->m_CompassRoll, (int)node->m_WindDir, (int)node->m_WindSpeed, (int)node->m_GPSCourse, (float)node->m_GPSSpeed, node->m_GPSLat, node->m_GPSLon, node->waypointID, node->waypointLat, node->waypointLon, (int)node->radius, node->waypointDistance, (int)node->waypointBearing );
 		if( size > 0 )
 		{

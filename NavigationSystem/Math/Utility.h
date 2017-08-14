@@ -35,7 +35,13 @@ public:
 	static bool isAngleInSector(double angle, double sectorAngle1, double sectorAngle2);
 	static double angleDifference(double angle1, double angle2);
 	static double limitAngleRange(double angle);
+	static double limitAngleRange180(double angle);
 	static double limitRadianAngleRange(double angle);
+
+	/*
+	 * Returns the angle value corresponding to x by the linear function defined by the points (x1,angle1) and (x2,angle2).
+	 */
+	static double linearFunctionBetweenAngle(double x, double x1, double x2, double angle1, double angle2);
 	static double degreeToRadian(double degrees);
 	static double radianToDegree(double radians);
 
@@ -52,6 +58,8 @@ public:
 	static double calculateWaypointsOrthogonalLine(const double nextLon, const double nextLat, const double prevLon, const double prevLat, 
 					const double gpsLon, const double gpsLat);
 
+
+
 	static double calculateTrueWindDirection(const int windsensorDir, const int windsensorSpeed, const double gpsSpeed, const double heading);
 	static double calculateTrueWindSpeed(int windsensorDir, int windsensorSpeed, double gpsSpeed, double heading);
 	static double getTrueWindDirection(int windsensorDir, int windsensorSpeed, double gpsSpeed, int compassHeading, 
@@ -61,6 +69,12 @@ public:
 		                                         double &apparentWindSpeed, double &apparentWindDirection);
 	static double getApparentWindSpeed(const int windsensorDir, const int windsensorSpeed, const double gpsSpeed, const double heading, const double trueWindDirection);
 	static double getApparentWindDirection(const int windsensorDir, const int windsensorSpeed, const double gpsSpeed, const double heading, const double trueWindDirection);
+	
+	/*
+	 * Add two vectors expressed in polar coordinates and return the resulting vector (in polar coordinates).
+	 * vector = (radius, angle).		Angles are in radian, in [0, 2*PI[.
+	 */
+	static std::vector<double> polarVerctorsAddition(std::vector<double> v1, std::vector<double> v2);
 
 	static void sphericalCoordinateSystem( const double lat, const double lon, double& x, double& y);
 	static void calculateVelocity( const uint16_t course, const double speed, double& vX, double& vY );

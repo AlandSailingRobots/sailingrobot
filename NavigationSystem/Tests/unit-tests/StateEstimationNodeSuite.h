@@ -42,7 +42,6 @@ public:
     MockNode* mockNode;
     bool nodeRegistered = false;
 
-    int speedLimit = 1;
 
     std::thread* thr;
     int testCount = 0;
@@ -57,25 +56,24 @@ public:
   // ----------------
   static void runMessageLoop()
   {
-    msgBus().run();
+      msgBus().run();
   }
 
-  // ----------------
-  // Setup the objects to test
-  // ----------------
-  void setUp()
-  {
-    // Test Node for message
-    mockNode = new MockNode(msgBus(), nodeRegistered);
-    // setup them up once in this test, delete them when the program closes
-    if(sEstimationNode == 0)
+    // ----------------
+    // Setup the objects to test
+    // ----------------
+    void setUp()
     {
-        Logger::DisableLogging();
-        dbhandler = new DBHandler("../asr.db");
-        sEstimationNode = new StateEstimationNode(msgBus(), *dbhandler, .5);
-        sEstimationNode->start();
-        std::this_thread::sleep_for(std::chrono::milliseconds(2600));
-        thr = new std::thread(runMessageLoop);
+        mockNode = new MockNode(msgBus(), nodeRegistered);
+        // setup them up once in this test, delete them when the program closes
+        if(sEstimationNode == 0){
+            Logger::DisableLogging();
+          sEstimationNode = new StateEstimationNode(msgBus(), .5, 0, 1);
+          sEstimationNode->start();
+          std::this_thread::sleep_for(std::chrono::milliseconds(2600));
+          thr = new std::thread(runMessageLoop);
+        }
+        testCount++;
     }
     testCount++;
   }
@@ -94,43 +92,47 @@ public:
             delete thr;
             delete sEstimationNode;
             delete dbhandler;
-            // Stay here for process the last message which return system::error
         }
+        delete mockNode;
     }
 
-  // ----------------
-  // Test Initialisation of the object
-  // ----------------
-  void test_StateEstimationNodeInit(){
-    TS_ASSERT(nodeRegistered);
-  }
+    // ----------------
+    // Test Initialisation of the object
+    // ----------------
+    void test_StateEstimationNodeInit()
+    {
+        TS_ASSERT(nodeRegistered);
+    }
 
-  // ----------------
-  // Test for the absence of a returned message by a offline GPS
-  // ----------------
-  void test_StateEstimationNodeGPSNotOnline(){
-    TS_ASSERT(sEstimationNode->init());
-    TS_ASSERT(!mockNode->m_MessageReceived);
-  }
+    // ----------------
+    // Test for the absence of a returned message by a offline GPS
+    // ----------------
+    void test_StateEstimationNodeGPSNotOnline()
+    {
+        TS_ASSERT(sEstimationNode->init());
+        TS_ASSERT(!mockNode->m_MessageReceived);
+    }
 
-  // ----------------
-  // Test to see if a message concerning the node will be listened
-  // ----------------
-  void test_StateMessageListener(){
-    double latitude = 60.09726;
-    double longitude = 19.93481;
-    double unixTime = 1;
-    double speed = 1;
-    double heading = 10;
-    int satCount = 2;
-    GPSMode mode = GPSMode::LatLonOk;
+    // ----------------
+    // Test to see if a message concerning the node will be listened
+    // ----------------
+    void test_StateMessageListener()
+    {
+        double latitude = 60.09726;
+        double longitude = 19.93481;
+        double unixTime = 1;
+        double speed = 1;
+        double heading = 10;
+        int satCount = 2;
+        GPSMode mode = GPSMode::LatLonOk;
 
-    MessagePtr gpsData =  std::make_unique<GPSDataMsg>(false,true,latitude,longitude,unixTime,speed,heading,satCount,
-      mode);
-      msgBus().sendMessage(std::move(gpsData));
-      std::this_thread::sleep_for(std::chrono::milliseconds(500));
-      TS_ASSERT(mockNode->m_MessageReceived);
-  }
+        MessagePtr gpsData =  std::make_unique<GPSDataMsg>(false,true,latitude,longitude,unixTime,speed,heading,satCount,
+          mode);
+        msgBus().sendMessage(std::move(gpsData));
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
+        TS_ASSERT(mockNode->m_MessageReceived);
+    }
 
   // ----------------
   // Test to see if ,after the GPS messsage, the heading is not changed

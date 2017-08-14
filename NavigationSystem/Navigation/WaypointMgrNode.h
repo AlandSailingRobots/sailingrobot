@@ -13,12 +13,18 @@
 
 #pragma once
 
+#include <string>
+#include <vector>
 
-#include "MessageBus/Node.h"
-#include "Messages/GPSDataMsg.h"
 #include "DataBase/DBHandler.h"
 #include "Math/CourseMath.h"
+#include "Math/Utility.h"
+#include "MessageBus/Node.h"
+#include "Messages/StateMessage.h"
+#include "Messages/WaypointDataMsg.h"
+#include "Messages/ServerWaypointsReceivedMsg.h"
 #include "SystemServices/Timer.h"
+#include "SystemServices/Logger.h"
 
 
 class WaypointMgrNode : public Node {
@@ -31,7 +37,7 @@ public:
 	void processMessage(const Message* message);
 
 private:
-	void processGPSMessage(const GPSDataMsg* msg);
+	void processVesselStateMessage(StateMessage* msg);
     bool waypointReached();
 
 	///----------------------------------------------------------------------------------
@@ -56,8 +62,8 @@ private:
     int     m_prevDeclination;	// NOTE : units ?
     int     m_prevRadius;		// NOTE : units ?
 
-    double  m_gpsLongitude;		// units : North(+) or South(-) [0-90]
-    double  m_gpsLatitude;		// units : East(+) or West(-)  [0-180]
+    double  m_vesselLongitude;
+    double  m_vesselLatitude;
 
     Timer   m_waypointTimer;	// units : seconds
     Timer   m_routeTime;		// units : seconds
