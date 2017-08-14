@@ -4,6 +4,8 @@
 #include <stdint.h> // uint8_t
 #include <vector>
 #include <array>
+#include <iostream>
+#include <stdlib.h>
 
 
 class Utility {
@@ -16,7 +18,10 @@ public:
 	static float getMedianValue(std::vector<float> v);
 	static float mean(std::vector<float> values);
 	static float meanOfAngles(std::vector<float> anglesInDegrees);
-	static int sgn(double value);
+        static int sgn(double value);
+        static std::vector<double> maxAndIndex(std::vector<double> mylist);
+    
+    
 
 	/*
 	 * Converts an angle in degrees to cartesian coordinates (x,y) on the
