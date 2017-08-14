@@ -28,8 +28,8 @@ size_t write_to_string(void *ptr, size_t size, size_t count, void *stream) {
     return size*count;
 }
 
-HTTPSyncNode::HTTPSyncNode(MessageBus& msgBus, DBHandler *db, int delay, bool removeLogs)
-	:ActiveNode(NodeID::HTTPSync, msgBus), m_removeLogs(removeLogs), m_delay(delay), m_dbHandler(db)
+HTTPSyncNode::HTTPSyncNode(MessageBus& msgBus, DBHandler *dbhandler, int delay, bool removeLogs)
+	:ActiveNode(NodeID::HTTPSync, msgBus), m_removeLogs(removeLogs), m_delay(delay), m_dbHandler(dbhandler)
 {
 
 }
@@ -68,6 +68,11 @@ void HTTPSyncNode::start(){
 
 }
 
+void HTTPSyncNode::updateConfigsFromDB(){
+    m_removeLogs = m_dbHandler->retrieveCellAsInt("config_httpsync","1","remove_logs");
+    m_delay = m_dbHandler->retrieveCellAsInt("config_httpsync","1","delay");
+}
+
 void HTTPSyncNode::processMessage(const Message* msgPtr)
 {
     MessageType msgType = msgPtr->messageType();
@@ -79,6 +84,9 @@ void HTTPSyncNode::processMessage(const Message* msgPtr)
             break;
         case MessageType::LocalConfigChange:
             pushConfigs();
+            break;
+        case MessageType::ServerConfigsReceived:
+            updateConfigsFromDB();
             break;
         default:
             break;
@@ -106,7 +114,7 @@ void HTTPSyncNode::HTTPSyncThread(ActiveNode* nodePtr){
         node->getConfigsFromServer();
         node->getWaypointsFromServer();
         node->pushDatalogs();
-        
+
         timer.sleepUntil(node->m_delay);
         timer.reset();
     }

@@ -19,6 +19,7 @@ class WindStateNodeSuite : public CxxTest::TestSuite {
 public:
 
 	WindStateNode* windStateNode;
+	DBHandler* dbhandler;
   	std::thread* thr;
 	MessageVerifier* verifier;
 	MessageLogger* logger;
@@ -49,8 +50,9 @@ public:
 	void setUp() {
 		if(windStateNode == 0){
 			verifier = new MessageVerifier(msgBus());
+			dbhandler = new DBHandler("../asr.db");
 			logger = new MessageLogger(msgBus());
-			windStateNode = new WindStateNode(msgBus(), twdSize);
+			windStateNode = new WindStateNode(msgBus(), *dbhandler, twdSize);
 			thr = new std::thread(runMessageLoop);
 		}
 		testCount++;
@@ -64,7 +66,7 @@ public:
 	}
 
 	void test_NodeSendsMessage() {
-	
+
 		msgBus().sendMessage(std::make_unique<StateMessage>(compassHeading,latitude,longitude,gpsSpeed,gpsCourse));
 		msgBus().sendMessage(std::make_unique<WindDataMsg>(windDir,windSpeed,windTemp));
 		msgBus().sendMessage(std::make_unique<StateMessage>(compassHeading,latitude,longitude,gpsSpeed,gpsCourse));
@@ -96,7 +98,7 @@ public:
 			compassHeading,trueWindDirection,apparentWindSpeed,apparentWindDirection);
 
 		WindStateMsg windStateMsg(trueWindSpeed,trueWindDirection,apparentWindSpeed,apparentWindDirection);
-	
+
 		TS_ASSERT(verifier->verifyWindStateMsg(&windStateMsg));
 	}
 

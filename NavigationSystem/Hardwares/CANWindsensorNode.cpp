@@ -19,8 +19,8 @@
 #include <chrono>
 #include <thread>
 
-CANWindsensorNode::CANWindsensorNode(MessageBus& msgBus, CANService& can_service, int time_filter_ms)
-: CANPGNReceiver(can_service, {130306, 130311}), ActiveNode(NodeID::WindSensor, msgBus), m_TimeBetweenMsgs(time_filter_ms)
+CANWindsensorNode::CANWindsensorNode(MessageBus& msgBus, DBHandler& dbhandler, CANService& can_service, int time_filter_ms)
+: CANPGNReceiver(can_service, {130306, 130311}), ActiveNode(NodeID::WindSensor, msgBus), m_TimeBetweenMsgs(time_filter_ms), m_db(dbhandler)
 {
   m_WindDir  = DATA_OUT_OF_RANGE;
   m_WindSpeed = DATA_OUT_OF_RANGE;
@@ -122,46 +122,55 @@ void CANWindsensorNode::parsePGN130306(N2kMsg &NMsg, uint8_t &SID, float &WindSp
           Pressure = tmp / 1000.0f; 			//hPa
         }
 
-        void CANWindsensorNode::processMessage(const Message* message) {
+void CANWindsensorNode::updateConfigsFromDB() {
+    m_TimeBetweenMsgs = m_db.retrieveCellAsInt("config_windState","1","time_filter_ms");
+}
 
-          std::lock_guard<std::mutex> lock(m_lock);
+void CANWindsensorNode::processMessage(const Message* message) {
 
-          if(message->messageType() == MessageType::DataRequest)
-          {
-            // On system startup we won't have any valid data, so don't send any
-            if( m_WindDir!= DATA_OUT_OF_RANGE ||  m_WindTemperature != DATA_OUT_OF_RANGE || m_WindSpeed != DATA_OUT_OF_RANGE)
-            {
-              MessagePtr windData = std::make_unique<WindDataMsg>(message->sourceID(), this->nodeID(), m_WindDir, m_WindSpeed, m_WindTemperature);
-              m_MsgBus.sendMessage(std::move(windData));
-            }
-          }
-        }
+  std::lock_guard<std::mutex> lock(m_lock);
 
-        void CANWindsensorNode::start() {
-          runThread(CANWindSensorNodeThreadFunc);
-        }
+  if(message->messageType() == MessageType::DataRequest)
+  {
+    // On system startup we won't have any valid data, so don't send any
+    if( m_WindDir!= DATA_OUT_OF_RANGE ||  m_WindTemperature != DATA_OUT_OF_RANGE || m_WindSpeed != DATA_OUT_OF_RANGE)
+    {
+      MessagePtr windData = std::make_unique<WindDataMsg>(message->sourceID(), this->nodeID(), m_WindDir, m_WindSpeed, m_WindTemperature);
+      m_MsgBus.sendMessage(std::move(windData));
+    }
+  }
 
-        void CANWindsensorNode::CANWindSensorNodeThreadFunc(ActiveNode* nodePtr) {
+  else if(message->messageType() == MessageType::ServerConfigsReceived)
+  {
+        updateConfigsFromDB();
+  }
+}
 
-          CANWindsensorNode* node = dynamic_cast<CANWindsensorNode*> (nodePtr);
-          Timer timer;
-          timer.start();
+void CANWindsensorNode::start() {
+  runThread(CANWindSensorNodeThreadFunc);
+}
 
-          while(true) {
-            // Need to convert milliseconds into seconds for the argument
-            timer.sleepUntil(node->m_TimeBetweenMsgs*1.0f / 1000);
-            node->m_lock.lock();
+void CANWindsensorNode::CANWindSensorNodeThreadFunc(ActiveNode* nodePtr) {
 
-            if( node->m_WindDir == node->DATA_OUT_OF_RANGE &&  node->m_WindTemperature == node->DATA_OUT_OF_RANGE && node->m_WindSpeed == node->DATA_OUT_OF_RANGE){
-              node->m_lock.unlock();
-              continue;
-            }
+  CANWindsensorNode* node = dynamic_cast<CANWindsensorNode*> (nodePtr);
+  Timer timer;
+  timer.start();
 
-            MessagePtr windData = std::make_unique<WindDataMsg>(node->m_WindDir, node->m_WindSpeed, node->m_WindTemperature);
-            node->m_MsgBus.sendMessage(std::move(windData));
+  while(true) {
+    // Need to convert milliseconds into seconds for the argument
+    timer.sleepUntil(node->m_TimeBetweenMsgs*1.0f / 1000);
+    node->m_lock.lock();
 
-            node->m_lock.unlock();
+    if( node->m_WindDir == node->DATA_OUT_OF_RANGE &&  node->m_WindTemperature == node->DATA_OUT_OF_RANGE && node->m_WindSpeed == node->DATA_OUT_OF_RANGE){
+      node->m_lock.unlock();
+      continue;
+    }
 
-            timer.reset();
-          }
-        }
+    MessagePtr windData = std::make_unique<WindDataMsg>(node->m_WindDir, node->m_WindSpeed, node->m_WindTemperature);
+    node->m_MsgBus.sendMessage(std::move(windData));
+
+    node->m_lock.unlock();
+
+    timer.reset();
+  }
+}

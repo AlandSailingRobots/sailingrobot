@@ -3,11 +3,12 @@
 
 #include <vector>
 
-WindStateNode::WindStateNode(MessageBus& msgBus, int maxTwdBufferSize)
-: Node(NodeID::WindStateNode, msgBus), m_MaxTwdBufferSize(maxTwdBufferSize)
+WindStateNode::WindStateNode(MessageBus& msgBus, DBHandler& dbhandler, int maxTwdBufferSize)
+: Node(NodeID::WindStateNode, msgBus), m_MaxTwdBufferSize(maxTwdBufferSize), m_db(dbhandler)
 {
   msgBus.registerNode(*this, MessageType::StateMessage);
   msgBus.registerNode(*this, MessageType::WindData);
+  msgBus.registerNode(*this, MessageType::ServerConfigsReceived);
 }
 
 WindStateNode::~WindStateNode()
@@ -19,8 +20,12 @@ bool WindStateNode::init(){
   return true;
 }
 
+void WindStateNode::updateConfigsFromDB(){
+    m_MaxTwdBufferSize = m_db.retrieveCellAsInt("config_WindStateNode","1","time_filter_ms");
+}
+
 // If we have not yet received the necessary messages
-// we do not have the information to calculate 
+// we do not have the information to calculate
 // true and apparent wind speeds, one of each message
 // needs to be received before any new messages are sent.
 // Should maybe be done in a nicer way.
@@ -31,7 +36,7 @@ void WindStateNode::processMessage(const Message* message){
   if(type == MessageType::StateMessage){
     m_stateMsgReceived = true;
     parseStateMessage(dynamic_cast< const StateMessage*> (message));
-    
+
 
     if(!m_windDataReceived || !m_stateMsgReceived ){
       return;
@@ -49,6 +54,10 @@ void WindStateNode::processMessage(const Message* message){
       return;
     }
     updateTrueWind();
+  }
+
+  else if(type == MessageType::ServerConfigsReceived){
+      updateConfigsFromDB();
   }
 
 }
@@ -82,7 +91,7 @@ void WindStateNode::updateApparentWind() {
 }
 
 void WindStateNode::updateTrueWind() {
-  
+
   m_trueWindDirection = Utility::getTrueWindDirection(m_WindDir, m_WindSpeed, m_vesselSpeed, m_vesselHeading, m_Twd, 100);
   m_trueWindSpeed     = Utility::calculateTrueWindSpeed(m_WindDir, m_WindSpeed, m_vesselSpeed, m_vesselHeading);
 }

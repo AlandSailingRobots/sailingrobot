@@ -35,6 +35,7 @@
  class ActuatorSailNodeSuite : public CxxTest::TestSuite {
     public:
     ActuatorNode* sail;
+    DBHandler* dbhandler;
     MessageLogger* logger;
     std::thread* thr;
     int testCount = 0;
@@ -59,8 +60,9 @@
 		{
             Logger::DisableLogging();
 			logger = new MessageLogger(msgBus());
+            dbhandler = new DBHandler("../asr.db");
             int channel = 3, speed = 0, acceleration = 0;
-			sail = new ActuatorNode(msgBus(), NodeID::SailActuator, channel, speed, acceleration);
+			sail = new ActuatorNode(msgBus(), *dbhandler, NodeID::SailActuator, channel, speed, acceleration);
             thr = new std::thread(runMessageLoop);
 		}
 		testCount++;

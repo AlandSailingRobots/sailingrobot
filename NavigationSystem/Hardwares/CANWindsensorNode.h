@@ -15,6 +15,7 @@
 #include "MessageBus/ActiveNode.h"
 #include "Hardwares/CAN_Services/CANService.h"
 #include "SystemServices/Timer.h"
+#include "DataBase/DBHandler.h"
 
 #include <mutex>
 #include <vector>
@@ -26,7 +27,7 @@
 class CANWindsensorNode : public CANPGNReceiver, public ActiveNode
 {
 public:
-	CANWindsensorNode(MessageBus& msgBus, CANService& can_service, int time_filter_ms);
+	CANWindsensorNode(MessageBus& msgBus, DBHandler& dbhandler, CANService& can_service, int time_filter_ms);
 
 
 	~CANWindsensorNode();
@@ -49,6 +50,7 @@ public:
     void parsePGN130314(N2kMsg &Msg, uint8_t &SID, uint8_t &PressureInstance,		//ActualPressure
 					uint8_t &PressureSource, double &Pressure);
 
+    void updateConfigsFromDB();
 
 	///----------------------------------------------------------------------------------
  	/// Attempts to connect to the wind sensor.
@@ -68,6 +70,7 @@ private:
 	float m_WindSpeed;
 	float m_WindTemperature;
 	int m_TimeBetweenMsgs;
+	DBHandler& m_db;
 
 	std::mutex m_lock;
 	std::vector<uint32_t> PGNs {130306, 130311};

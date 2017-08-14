@@ -54,9 +54,9 @@
 
 
 
-HMC6343Node::HMC6343Node(MessageBus& msgBus, const int headingBufferSize,  double loopTime)
+HMC6343Node::HMC6343Node(MessageBus& msgBus, DBHandler& dbhandler, const int headingBufferSize,  double loopTime)
 : ActiveNode(NodeID::Compass, msgBus), m_Initialised(false), m_HeadingBufferSize(headingBufferSize),
-m_LoopTime(loopTime)
+m_LoopTime(loopTime), m_db(dbhandler)
 {
 
 }
@@ -107,8 +107,20 @@ void HMC6343Node::start()
 	}
 }
 
+void HMC6343Node::updateConfigsFromDB()
+{
+	m_LoopTime = m_db.retrieveCellAsDouble("config_buffer","1","loop_time");
+	// m_HeadingBufferSize = m_db.retrieveCellAsInt("config_buffer","1","compass"); // NOTE : Get he possible to modify or not ?
+}
+
 void HMC6343Node::processMessage(const Message* msg)
-{ }
+{
+	MessageType type = msg->messageType();
+	if( type == MessageType::ServerConfigsReceived)
+	{
+			updateConfigsFromDB();
+	}
+}
 
 
 bool HMC6343Node::readData(float& heading, float& pitch, float& roll)

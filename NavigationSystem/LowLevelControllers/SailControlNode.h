@@ -47,12 +47,11 @@ public:
     // -------------
     void start();
 
+    void updateConfigsFromDB();
     // -------------
     // Listen the message concerning this Node
     // -------------
     void processMessage(const Message* message);
-
-    double getFrequencyThread();
 
 private:
 

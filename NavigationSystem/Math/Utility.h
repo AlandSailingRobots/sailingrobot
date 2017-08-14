@@ -18,7 +18,7 @@ public:
 	static float mean(std::vector<float> values);
 	static float meanOfAngles(std::vector<float> anglesInDegrees);
         static int sgn(double value);
-        static float* maxAndIndex(float* mylist);
+        static std::vector<double> maxAndIndex(std::vector<double> mylist);
     
     
 

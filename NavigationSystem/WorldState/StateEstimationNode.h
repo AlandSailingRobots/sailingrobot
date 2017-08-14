@@ -14,6 +14,7 @@
 
 #pragma once
 
+#include "DataBase/DBHandler.h"
 #include "MessageBus/ActiveNode.h"
 #include "Messages/CompassDataMsg.h"
 #include "Messages/GPSDataMsg.h"
@@ -26,7 +27,7 @@
 
 class StateEstimationNode : public ActiveNode {
 public:
-  StateEstimationNode(MessageBus& msgBus, double loopTime, double speedLimit);
+  StateEstimationNode(MessageBus& msgBus, DBHandler& db, double loopTime, double speedLimit);
   ~StateEstimationNode();
 
   bool init();
@@ -36,7 +37,10 @@ public:
   ///----------------------------------------------------------------------------------
   void start();
 
+  void updateConfigsFromDB();
+
   void processMessage(const Message* msg);
+
 
 private:
 
@@ -72,6 +76,6 @@ private:
   const int STATE_INITIAL_SLEEP = 2000;
 
   std::mutex m_lock;
-
+  DBHandler& m_dbHandler;
 
 };

@@ -54,6 +54,7 @@ LineFollowNode::LineFollowNode(MessageBus& msgBus, DBHandler& db)
 {
     msgBus.registerNode(*this, MessageType::VesselState);
     msgBus.registerNode(*this, MessageType::WaypointData);
+    msgBus.registerNode(*this, MessageType::ServerConfigsReceived)
 
     m_maxCommandAngle = M_PI / 6;
     m_maxSailAngle = M_PI / 4.2f;
@@ -71,6 +72,11 @@ bool LineFollowNode::init()
     m_dbLogger.startWorkerThread();
     m_timer.start();
     return true;
+}
+
+void updateConfigsFromDB()
+{
+
 }
 
 void LineFollowNode::processMessage(const Message* msg)
@@ -93,6 +99,9 @@ void LineFollowNode::processMessage(const Message* msg)
             setPrevWaypointData(waypMsg, (VesselStateMsg*)msg);
         }
 		break;
+    case MessageType::ServerConfigsReceived:
+        updateConfigsFromDB();
+        break;
 	default:
 		return;
 	}

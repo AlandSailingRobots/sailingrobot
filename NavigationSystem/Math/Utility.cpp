@@ -1,6 +1,7 @@
 #include "Utility.h"
 #include <algorithm>
 #include <cmath>
+#include <stdlib.h>
 
 
 int Utility::combineBytes(uint8_t MSB, uint8_t LSB)
@@ -119,29 +120,27 @@ int Utility::sgn(double value)
 	return 0;
 }
 
-
-float* Utility::maxAndIndex(float* mylist)
+std::vector<double> Utility::maxAndIndex(std::vector<double> mylist)
 {
-        float maxi = 0;
-	int index = 0;
+        double maxi = 0.0;
+	double index = 0.0;
 	int i = 0;
-	int size = sizeof(mylist)/sizeof(float);
-	float* results;
-	results  = (float*) malloc(2*sizeof(float));
+	int size;
+	size = mylist.size();	
+	std::vector<double> results;
 	
-	
-
 	for (i = 0; i < size; i++)
 	{
-	        if (maxi < *(mylist+i))
+	        if (maxi < mylist[i])
 		{
-		        maxi = *(mylist+i);
+		        maxi = mylist[i];
 		        index = i;
 	        }
 		
 	}
-	*(results)   = maxi;
-	*(results+1) = index;
+	
+	results.push_back(maxi);
+	results.push_back(index);
 
 	return(results);
 }
