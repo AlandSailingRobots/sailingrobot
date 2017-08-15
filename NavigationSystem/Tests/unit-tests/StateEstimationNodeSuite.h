@@ -38,7 +38,6 @@ public:
   MockNode* mockNode;
   bool nodeRegistered = false;
 
-  int speedLimit = 1;
 
   std::thread* thr;
   int testCount = 0;
@@ -62,7 +61,7 @@ public:
       Logger::DisableLogging();
 
 
-      sEstimationNode = new StateEstimationNode(msgBus(), .5, speedLimit);
+      sEstimationNode = new StateEstimationNode(msgBus(), .5, 0, 1);
       sEstimationNode->start();
       std::this_thread::sleep_for(std::chrono::milliseconds(2600));
 
@@ -78,7 +77,6 @@ public:
       delete sEstimationNode;
     }
     delete mockNode;
-
   }
 
   void test_StateEstimationNodeInit(){

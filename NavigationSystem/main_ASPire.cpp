@@ -144,8 +144,7 @@ int main(int argc, char *argv[])
 	bool removeLogs = dbHandler.retrieveCellAsInt("httpsync_config","1","remove_logs");
 	HTTPSyncNode httpsync(messageBus, &dbHandler, dbHandler_delay, removeLogs);
 
-  	int maxTwdBufferSize = dbHandler.retrieveCellAsDouble("windState_config", "1", "time_filter_ms");
-	WindStateNode windStateNode(messageBus, maxTwdBufferSize);
+	WindStateNode windStateNode(messageBus);
 
 	WaypointMgrNode waypoint(messageBus, dbHandler);
 
@@ -173,8 +172,7 @@ int main(int argc, char *argv[])
 		lnm.registerVoter( &midRangeVoter );
   	#else
 		double vesselStateLoopTime = dbHandler.retrieveCellAsDouble("vesselState_config","1", "loop_time");
-		double speedLimit = dbHandler.retrieveCellAsDouble("vesselState_config", "1", "speedLimit");
-	  	StateEstimationNode stateEstimationNode(messageBus, vesselStateLoopTime, speedLimit); // NOTE - Maël: It will change
+	  	StateEstimationNode stateEstimationNode(messageBus, vesselStateLoopTime); // NOTE - Maël: It will change
 
 		LineFollowNode sailingLogic(messageBus, dbHandler);
   	#endif

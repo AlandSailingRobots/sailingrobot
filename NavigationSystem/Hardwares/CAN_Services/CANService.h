@@ -21,6 +21,7 @@
  #include "CANFrameReceiver.h"
  #include "mcp2515.h"
  #include "N2kMsg.h"
+ #include "SystemServices/Logger.h"
  #include <vector>
  #include <map>
  #include <mutex>
@@ -29,6 +30,11 @@
  #include <future>
  #include <atomic>
 
+struct FastPKGInfo {
+  N2kMsg n2kmsg;
+  int bytesLeft;
+  uint8_t latestSeqnumber;
+};
 
 class CANService
 {
@@ -61,15 +67,25 @@ public:
 
   bool checkMissedMessages();
 
-  /* Stops the service */
+/* Stops the service */
   void stop();
 
 private:
-
+/* Starts the CANService */
   void run();
+
+/* Recieves and parses the fast messages and stores everything *
+ * in the N2kMsg                                               */
+  bool ParseFastPkg(CanMsg& msg, N2kMsg& nMsg);
+
+/* Checks if the message is a NMEA2000 fast package */
+  bool IsFastPackage(const N2kMsg &nMsg);
+
+/* Private variables */
 
   std::map<uint32_t, CANPGNReceiver*>   m_RegisteredPGNReceivers;
   std::map<uint32_t, CANFrameReceiver*> m_RegisteredFrameReceivers;
+  std::map<IDsID, FastPKGInfo> FastPackages;
   std::queue<CanMsg> m_MsgQueue;
   std::mutex m_QueueMutex;
 

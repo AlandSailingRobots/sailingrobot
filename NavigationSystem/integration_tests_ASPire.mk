@@ -12,11 +12,10 @@
 ###############################################################################
 
 # Source files
-MAIN_INTEGRATION_TESTS 	= Tests/IntegrationTests/ArduinoIntegrationTest.cpp
+MAIN_INTEGRATION_TESTS 	= Tests/IntegrationTests/IntegrationTestASPire.cpp
 
 SRC 					= $(MAIN_INTEGRATION_TESTS) $(CORE_SRC) $(HW_SERVICES_ALL_SRC) \
 							$(CAN_SERVICES_SRC) $(HW_NODES_ALL_SRC) $(HW_NODES_ASPIRE_SRC)
-
 
 # Object files
 OBJECTS = $(addprefix $(BUILD_DIR)/, $(SRC:.cpp=.o))
