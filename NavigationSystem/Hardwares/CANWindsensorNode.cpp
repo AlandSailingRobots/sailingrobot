@@ -129,7 +129,6 @@ void CANWindsensorNode::processMessage(const Message* message) {
       m_MsgBus.sendMessage(std::move(windData));
     }
   }
-
   else if(message->messageType() == MessageType::ServerConfigsReceived)
   {
         updateConfigsFromDB();

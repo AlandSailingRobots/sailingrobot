@@ -43,6 +43,7 @@ m_externalControlActive(false), m_tackingDirection(1)
     msgBus.registerNode(*this, MessageType::WaypointData);
     msgBus.registerNode(*this, MessageType::ExternalControl);
     msgBus.registerNode(*this, MessageType::ServerConfigsReceived);
+    m_LoopTime = m_db.retrieveCellAsDouble("config_line_follow","1","loop_time");
 
 // NOTE : Marc : conversion radian to degree ????
     m_tackAngle = 0.872665; // in radian (= 50°)
@@ -70,7 +71,7 @@ void LineFollowNode::stop()
 
 void LineFollowNode::updateConfigsFromDB()
 {
-    m_LoopTime = m_db.retrieveCellAsInt("config_LineFollowNode","1","loop_time");
+    m_LoopTime = m_db.retrieveCellAsDouble("config_line_follow","1","loop_time");
 }
 
 void LineFollowNode::processMessage(const Message* msg)

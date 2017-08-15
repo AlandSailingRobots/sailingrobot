@@ -58,7 +58,7 @@ HMC6343Node::HMC6343Node(MessageBus& msgBus, DBHandler& dbhandler, const int hea
 : ActiveNode(NodeID::Compass, msgBus), m_Initialised(false), m_HeadingBufferSize(headingBufferSize),
 m_LoopTime(loopTime), m_db(dbhandler)
 {
-
+	msgBus.registerNode(*this, MessageType::ServerConfigsReceived);
 }
 
 

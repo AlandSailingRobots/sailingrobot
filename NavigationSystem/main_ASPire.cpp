@@ -135,8 +135,7 @@ int main(int argc, char *argv[])
 	// Declare nodes
 	//-------------------------------------------------------------------------------
 
-	int dbLoggerWaitTime = 100; 		// wait time (in milliseconds) between messages from the messageBus
-	int dbLoggerUpdateFrequency = 1000; // updating frequency to the database (in milliseconds)
+	double dbLoggerUpdateFrequency = dbHandler.retrieveCellAsDouble("config_dblogger", "1","loop_time"); // updating frequency to the database (in milliseconds)
 	int dbLoggerQueueSize = 5; 			// how many messages to log to the databse at a time
 	DBLoggerNode dbLoggerNode(messageBus, dbHandler,dbLoggerUpdateFrequency, dbLoggerQueueSize);
 
@@ -158,7 +157,7 @@ int main(int argc, char *argv[])
 		LocalNavigationModule lnm	( messageBus );
 		CollidableMgr collidableMgr;
 
-		const int16_t MAX_VOTES = 25;
+		const int16_t MAX_VOTES = dbHandler.retrieveCellAsInt("config_voter_system","1","max_vote");
 		WaypointVoter waypointVoter( MAX_VOTES, dbHandler.retrieveCellAsDouble("config_voter_system","1","waypoint_voter_weight")); // weight = 1
 		WindVoter windVoter( MAX_VOTES, dbHandler.retrieveCellAsDouble("config_voter_system","1","wind_voter_weight")); // weight = 1
 		ChannelVoter channelVoter( MAX_VOTES, dbHandler.retrieveCellAsDouble("config_voter_system","1","channel_voter_weight")); // weight = 1
@@ -177,18 +176,19 @@ int main(int argc, char *argv[])
 		LineFollowNode sailingLogic(messageBus, dbHandler);
   	#endif
 
+    double simuLoopTime = dbHandler.retrieveCellAsDouble("config_simulator","1", "loop_time");
 
 	#if SIMULATION == 1
 	  	#if LOCAL_NAVIGATION_MODULE == 1
-	  		SimulationNode simulation(messageBus, dbHandler, &collidableMgr);
+	  		SimulationNode simulation(messageBus, dbHandler,&collidableMgr, simuLoopTime);
 	  	#else
-			SimulationNode simulation(messageBus, dbHandler);
+			SimulationNode simulation(messageBus, dbHandler, simuLoopTime);
 	  	#endif
   	#else
 		CANService canService;
 
 		const int headingBufferSize = dbHandler.retrieveCellAsInt("config_compass", "1", "compass");
-		double compassLoopTime = 0.1;
+		double compassLoopTime = dbHandler.retrieveCellAsInt("config_compass", "1", "loop_time");;
 		HMC6343Node compass(messageBus, dbHandler, headingBufferSize, compassLoopTime);
 
 		double gpsdLoopTime = dbHandler.retrieveCellAsDouble("config_gps", "1", "loop_time");

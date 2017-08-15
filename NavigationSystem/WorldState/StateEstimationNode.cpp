@@ -37,6 +37,7 @@ m_VesselCourse(DATA_OUT_OF_RANGE), m_dbHandler(dbhandler)
     msgBus.registerNode(*this, MessageType::CompassData);
     msgBus.registerNode(*this, MessageType::GPSData);
     msgBus.registerNode(*this, MessageType::WaypointData);
+    msgBus.registerNode(*this, MessageType::ServerConfigsReceived);
 }
 
 StateEstimationNode::StateEstimationNode(MessageBus& msgBus, DBHandler& dbhandler, double loopTime):
@@ -49,6 +50,7 @@ m_VesselCourse(DATA_OUT_OF_RANGE), m_dbHandler(dbhandler)
     msgBus.registerNode(*this, MessageType::CompassData);
     msgBus.registerNode(*this, MessageType::GPSData);
     msgBus.registerNode(*this, MessageType::WaypointData);
+    msgBus.registerNode(*this, MessageType::ServerConfigsReceived);
 }
 
 StateEstimationNode::~StateEstimationNode() {}

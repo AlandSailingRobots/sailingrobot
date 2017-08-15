@@ -22,7 +22,7 @@ const float res_size = 1e-1;
 CANAISNode::CANAISNode(MessageBus& msgBus, DBHandler& dbhandler, CANService& canService, double loopTime) :
     CANPGNReceiver(canService, {129025, 129038, 129039, 129794, 129810}), ActiveNode(NodeID::CANAIS, msgBus),
     m_VesselList({}), m_VesselInfoList({}), m_PosLat(0), m_PosLon(0), m_LoopTime(loopTime), m_db(dbhandler){
-
+        msgBus.registerNode(*this, MessageType::ServerConfigsReceived);
 }
 
 CANAISNode::~CANAISNode() {
@@ -34,7 +34,9 @@ bool CANAISNode::init() {
 }
 
 void CANAISNode::processMessage(const Message* message) {
-
+    if(message->messageType() == MessageType::ServerConfigsReceived){
+        updateConfigsFromDB();
+    }
 }
 
 void CANAISNode::updateConfigsFromDB(){

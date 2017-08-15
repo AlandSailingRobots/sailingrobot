@@ -21,7 +21,7 @@ GPSDNode::GPSDNode(MessageBus& msgBus, DBHandler& dbhandler, double loopTime)
 	: ActiveNode(NodeID::GPS, msgBus), m_Initialised(false), m_GpsConnection(0),
 	m_Lat(0), m_Lon(0), m_Speed(0), m_Course(0),m_LoopTime(loopTime),m_db(dbhandler)
 {
-
+	msgBus.registerNode(*this, MessageType::ServerConfigsReceived);
 }
 
 GPSDNode::~GPSDNode()
