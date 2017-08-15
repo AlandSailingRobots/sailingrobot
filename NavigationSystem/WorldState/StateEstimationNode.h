@@ -19,11 +19,6 @@
 
 #pragma once
 
-#include "DataBase/DBHandler.h"
-#include <stdint.h>
-#include <mutex>
-#include "Math/CourseMath.h"
-#include "Math/Utility.h"
 #include "MessageBus/ActiveNode.h"
 #include "Messages/CompassDataMsg.h"
 #include "Messages/GPSDataMsg.h"
@@ -32,11 +27,18 @@
 #include "SystemServices/Logger.h"
 #include "SystemServices/Timer.h"
 
+#include "DataBase/DBHandler.h"
+#include "Math/CourseMath.h"
+#include "Math/Utility.h"
+#include <mutex>
+#include <stdint.h>
+#include <atomic>
+
 
 class StateEstimationNode : public ActiveNode {
 public:
-    StateEstimationNode(MessageBus& msgBus, double loopTime);
-    StateEstimationNode(MessageBus& msgBus, double loopTime, double speed_1, double speed_2);
+    StateEstimationNode(MessageBus& msgBus, DBHandler& dbhandler, double loopTime);
+    StateEstimationNode(MessageBus& msgBus, DBHandler& dbhandler, double loopTime, double speed_1, double speed_2);
     ~StateEstimationNode();
 
     bool init();
@@ -75,7 +77,7 @@ private:
     /// Update values from the database as the loop time pf the thread
     /// and others parameters
     ///----------------------------------------------------------------------------------
-    void processWaypointMessage(const WaypointDataMsg* msg );
+    void updateConfigsFromDB();
     
     ///----------------------------------------------------------------------------------
     /// Estimates the vessel state from the sensor datas.
@@ -119,7 +121,8 @@ private:
     float   m_VesselSpeed;          // m/s
     float   m_VesselCourse;         // degree [0, 360[ in North-East reference frame (clockwise)
 
-    std::mutex m_lock;
-
+    std::mutex        m_lock;
+    std::atomic<bool> m_Running;
+    DBHandler&        m_dbHandler;
 
 };
