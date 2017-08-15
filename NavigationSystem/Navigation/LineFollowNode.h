@@ -5,13 +5,14 @@
 *
 * Purpose:
 *		This class computes the actuator positions of the boat in order to follow
-*    lines given by the waypoints.
+*    line given by the waypoints.
 *
 * Developer Notes:
-*	 Algorithm inspired and modified from Luc Jaulin and
-*    Fabrice Le Bars  "An Experimental Validation of a Robust Controller with the VAIMOS
-*    Autonomous Sailboat" and "Modeling and Control for an Autonomous Sailboat: A
-*    Case Study" from Jon Melin, Kjell Dahl and Matia Waller
+*	 Algorithm inspired and modified from: 
+*	 - Luc Jaulin and Fabrice Le Bars "An Experimental Validation of a Robust Controller with 
+*		the VAIMOS Autonomous Sailboat" [1];
+*	 - Jon Melin, Kjell Dahl and Matia Waller "Modeling and Control for an Autonomous Sailboat:
+*   	A Case Study" [2].
 *
 *	 Info about Tacking and Beating : https://en.wikipedia.org/wiki/Tacking_(sailing)
 *
@@ -41,6 +42,7 @@
 
 class LineFollowNode : public ActiveNode {
 public:
+
 	LineFollowNode(MessageBus& msgBus, DBHandler& db);
 	~LineFollowNode();
 
@@ -48,7 +50,6 @@ public:
 	void start();
 	void processMessage(const Message* message);
 
-//	float m_gpsHeadingWeight;
 
 private:
 
@@ -56,32 +57,56 @@ private:
 	const double NORM_RUDDER_COMMAND = 0.5166; // getCommand() take a value between -1 and 1 so we need to normalize the command correspond to 29.6 degree
 	const double NORM_SAIL_COMMAND = 0.6958;
 
-	RudderCommand m_rudderCommand;
-
 	std::vector<float> twdBuffer;
 	unsigned int twdBufferMaxSize;
 */
-	static void LineFollowNodeThreadFunc(ActiveNode* nodePtr);
 
+    ///----------------------------------------------------------------------------------
+    /// Stores vessel state datas from a StateMessage.
+    ///----------------------------------------------------------------------------------
 	void processStateMessage(const StateMessage* stateMsg);
+
+	///----------------------------------------------------------------------------------
+    /// Stores Wind state datas from a WindStateMsg.
+    ///----------------------------------------------------------------------------------
 	void processWindStateMessage(const WindStateMsg* windStateMsg);
+
+	///----------------------------------------------------------------------------------
+    /// Stores the waypoint positions and radius from a WaypointDataMsg.
+    ///----------------------------------------------------------------------------------
 	void processWaypointMessage(WaypointDataMsg* waypMsg);
 
+	///----------------------------------------------------------------------------------
+    /// Calculate the angle of the line to be followed. in north east down reference frame.
+    ///----------------------------------------------------------------------------------
 	double calculateAngleOfDesiredTrajectory();
-	double calculateDesiredCourse();
 
-//	virtual int getHeading(int gpsHeading, int compassHeading, double gpsSpeed, bool mockPosition, bool getHeadingFromCompass);
-	//Calculates a smooth transition between the compass and the gps. Do not call directly, use getHeading()
-//	int getMergedHeading(int gpsHeading, int compassHeading, bool increaseCompassWeight);
+	///----------------------------------------------------------------------------------
+    /// Calculate the course to steer by using the line follow algorithm described in the papers.
+    ///----------------------------------------------------------------------------------
+	float calculateTargetCourse();
 
-	bool getGoingStarboard();
-	void setPrevWaypointToBoatPos();
+    ///----------------------------------------------------------------------------------
+    /// Starts the LineFollowNode's thread that pumps out LocalNavigationMsg.
+    ///----------------------------------------------------------------------------------
+	static void LineFollowNodeThreadFunc(ActiveNode* nodePtr);
 
 
 	DBHandler &m_db;
 
     double  m_LoopTime;             // second	
 
+
+	// Vecteur field parameters
+	float 	m_IncidenceAngle;		// degree.	[1]: (gamma_infiniy). 			[2]: (gamma).
+	float 	m_MaxDistanceFromLine;	// meter.	[1]: cutoff distance (r). 		[2]: waypoint radius (r).
+
+	// Close hauled sailing mode parameters
+	float  	m_CloseHauledAngle;		// degree. 	[1]: close hauled angle (zeta).	[2]: tacking angle (theta_t). 
+	float 	m_TackingDistance;		// meter. 	[1]: (r/2).						[2]: tacking distance (d).
+
+
+    // Input variables
 	bool 	m_externalControlActive;
 
     float   m_VesselHeading;        // degree [0, 360[ in North-East reference frame (clockwise)
@@ -97,14 +122,16 @@ private:
 
 	double 	m_nextWaypointLon;
 	double 	m_nextWaypointLat;
-	int 	m_nextWaypointRadius;
+	int 	m_nextWaypointRadius;	// m
 	
 	double 	m_prevWaypointLon;
 	double 	m_prevWaypointLat;
-	int 	m_prevWaypointRadius;
+	int 	m_prevWaypointRadius;	// m
 
-	bool    m_tack = false;
-	double  m_tackAngle;
-	int     m_tackingDirection;
+	// State variable (inout variable)
+	int     m_TackDirection;		// [1] and [2]: tack variable (q).
 
+	// Output variables
+	bool    m_BeatingState;			// True if the vessel is in beating motion (zig-zag motion).
+	bool	m_TargetTackStarboard;	// True if the desired tack of the vessel is starboard.
 };
