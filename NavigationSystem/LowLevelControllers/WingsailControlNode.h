@@ -71,6 +71,11 @@ private:
     // -------------
     double calculateWingsailAngle();
 
+    //--------------
+    // Calculate the angle to give to the tail
+    //
+    int calculateTailAngle()
+
     // -------------
     // Limit the sail angle
     // -------------
