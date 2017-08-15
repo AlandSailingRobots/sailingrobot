@@ -269,10 +269,11 @@ bool HTTPSyncNode::performCURLCall(std::string data, std::string call, std::stri
     std::string serverCall = "";
 
     if(data != "")
-        serverCall = "serv="+call + "&id="+m_shipID +"&gen=ASPire"+"&pwd="+m_shipPWD+"&data="+data;
+        serverCall = "serv="+call + "&id="+m_shipID +"&gen=aspire"+"&pwd="+m_shipPWD+"&data="+data;
     else
-        serverCall = "serv="+call + "&id="+m_shipID +"&gen=ASPire"+"&pwd="+m_shipPWD;
+        serverCall = "serv="+call + "&id="+m_shipID +"&gen=aspire"+"&pwd="+m_shipPWD;
         //example: serv=getAllConfigs&id=BOATID&pwd=BOATPW
+    std::cout << "/* Server call : " << call << "*/" << '\n';
 
     curl = curl_easy_init();
     if(curl) {
@@ -284,7 +285,7 @@ bool HTTPSyncNode::performCURLCall(std::string data, std::string call, std::stri
 		/* Perform the request, res will get the return code */
 		m_res = curl_easy_perform(curl);
 		/* Check for errors */
-        std::cout << "/* Reponse serveur : " << response << " */" << '\n';
+        std::cout << "/* Reponse serveur : " << response << " */" << "\n\n";
 		if (m_res != CURLE_OK)
 		{
 			if(!m_reportedConnectError)
