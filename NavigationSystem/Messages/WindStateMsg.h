@@ -41,8 +41,8 @@ public:
 	double apparentWindDirection() const { return m_apparentWindDir;   }
 
 private:
-	double m_trueWindSpeed;
-	double m_trueWindDir;
-	double m_apparentWindSpeed;
-	double m_apparentWindDir;
+	double m_trueWindSpeed;			// m/s
+	double m_trueWindDir;			// degree [0, 360[ in North-East reference frame (clockwise)
+	double m_apparentWindSpeed;		// m/s
+	double m_apparentWindDir;		// degree [0, 360[ in vessel reference frame (clockwise)
 };

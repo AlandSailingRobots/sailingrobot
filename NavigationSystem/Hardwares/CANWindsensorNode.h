@@ -11,29 +11,32 @@
  *
  ***************************************************************************************/
 
-#include "Hardwares/CAN_Services/CANPGNReceiver.h"
-#include "MessageBus/ActiveNode.h"
-#include "Hardwares/CAN_Services/CANService.h"
-#include "SystemServices/Timer.h"
-#include "DataBase/DBHandler.h"
-
-#include <mutex>
-#include <vector>
-#include <iostream>
 
 #pragma once
 
 
-class CANWindsensorNode : public CANPGNReceiver, public ActiveNode
-{
+#include <mutex>
+#include <vector>
+#include <iostream>
+#include <chrono>
+#include <thread>
+
+#include "Hardwares/CAN_Services/CANPGNReceiver.h"
+#include "DataBase/DBHandler.h"
+#include "Hardwares/CAN_Services/CANService.h"
+#include "MessageBus/ActiveNode.h"
+#include "Messages/WindDataMsg.h"
+#include "SystemServices/Timer.h"
+
+
+class CANWindsensorNode : public CANPGNReceiver, public ActiveNode {
 public:
-	CANWindsensorNode(MessageBus& msgBus, DBHandler& dbhandler, CANService& can_service, int time_filter_ms);
 
-
-	~CANWindsensorNode();
+    CANWindsensorNode(MessageBus& msgBus, DBHandler& dbhandler, CANService& can_service, double loopTime);
+    ~CANWindsensorNode();
 
 	/* data */
-	 void processPGN(N2kMsg &NMsg);
+    void processPGN(N2kMsg &NMsg);
 
 
     void parsePGN130306(N2kMsg &NMsg, uint8_t &SID, float &WindSpeed,				//WindData
@@ -64,16 +67,17 @@ public:
 
 private:
 
+	const int DATA_OUT_OF_RANGE	=	-2000;
+
 	static void CANWindSensorNodeThreadFunc(ActiveNode* nodePtr);
 
 	float m_WindDir;
 	float m_WindSpeed;
 	float m_WindTemperature;
-	int m_TimeBetweenMsgs;
-	DBHandler& m_db;
+        double  m_LoopTime;
+        DBHandler& m_db;
+	
 
 	std::mutex m_lock;
 	std::vector<uint32_t> PGNs {130306, 130311};
-
-	const int DATA_OUT_OF_RANGE	=	-2000;
 };

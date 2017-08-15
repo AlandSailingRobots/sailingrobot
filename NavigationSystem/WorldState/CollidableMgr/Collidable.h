@@ -4,10 +4,10 @@
  * 		Collidable_t.h
  *
  * Purpose:
- *		
+ *
  *
  * License:
- *      This file is subject to the terms and conditions defined in the file 
+ *      This file is subject to the terms and conditions defined in the file
  *      'LICENSE.txt', which is part of this source code package.
  *
  ***************************************************************************************/
@@ -27,9 +27,11 @@ struct VisualCollidable_t {
 
 struct AISCollidable_t {
     uint32_t mmsi;
-    uint16_t course;
-    float latitude;
-    float longitude;
+    float course;
+    double latitude;
+    double longitude;
     float speed;
     int lastUpdated;
+    float length;
+    float beam;
 };

@@ -59,7 +59,7 @@ private:
 	double	m_Lat;
 	double	m_Lon;
 	double	m_Speed;
-	double	m_Heading;
+	double	m_Course;
 
 	int m_currentDay;
 	double m_LoopTime;

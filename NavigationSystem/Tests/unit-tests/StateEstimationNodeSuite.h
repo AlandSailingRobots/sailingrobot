@@ -41,7 +41,6 @@ public:
     MockNode* mockNode;
     bool nodeRegistered = false;
 
-    int speedLimit = 1;
 
     std::thread* thr;
     int testCount = 0;
@@ -69,12 +68,9 @@ public:
         // setup them up once in this test, delete them when the program closes
         if(sEstimationNode == 0){
             Logger::DisableLogging();
-
-
-            sEstimationNode = new StateEstimationNode(msgBus(), *dbhandler, .5, speedLimit);
-            sEstimationNode->start();
-            std::this_thread::sleep_for(std::chrono::milliseconds(2600));
-
+	    sEstimationNode = new StateEstimationNode(msgBus(), .5, 0, 1);
+	    sEstimationNode->start();
+	    std::this_thread::sleep_for(std::chrono::milliseconds(2600));
             thr = new std::thread(runMessageLoop);
         }
         testCount++;
@@ -87,16 +83,17 @@ public:
     {
         if(testCount == STATE_ESTIMATIONODE_TEST_COUNT)
         {
-            delete sEstimationNode;
+	    sEstimationNode -> stop();
+	    msgBus().stop();
+	    thr->join();
+	    delete thr
+	    delete sEstimationNode;
             delete dbhandler;
-            delete mockNode;
-            // Stay here for process the last message which return system::error
-            std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-        }
-        else{
-            delete mockNode;
-        }
+	}
+	delete mockNode;
+        
     }
+
 
     // ----------------
     // Test Initialisation of the object
