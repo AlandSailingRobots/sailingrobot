@@ -186,7 +186,7 @@ void SimulationNode::processWingBoatData( TCPPacket_t& packet )
 		m_WindDir = boatData->windDir;
 		m_WindSpeed = boatData->windSpeed;
 	 	m_ArduinoRudder = boatData->rudder;
-	 	//m_ArduinoSheet = boatData->sail;
+	 	m_ArduinoSheet = boatData->tail;
 
 		// Send messages
 		createCompassMessage();
