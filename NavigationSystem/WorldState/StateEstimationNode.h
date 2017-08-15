@@ -84,8 +84,8 @@ private:
     float estimateVesselCourse();
 
     ///----------------------------------------------------------------------------------
-    /// Starts the StateEstimationNode's thread that pumps out StateMessages which contains
-    /// data collected from the sensors
+    /// Starts the StateEstimationNode's thread that pumps out VesselStateMsg corresponding 
+    /// at the estimated state of the vessel.
     ///----------------------------------------------------------------------------------
     static void StateEstimationNodeThreadFunc(ActiveNode* nodePtr);
 

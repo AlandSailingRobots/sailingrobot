@@ -36,6 +36,7 @@ public:
 
 	/*
 	 * Returns the angle value corresponding to x by the linear function defined by the points (x1,angle1) and (x2,angle2).
+	 * Angles are in degree. 
 	 */
 	static double linearFunctionBetweenAngle(double x, double x1, double x2, double angle1, double angle2);
 	static double degreeToRadian(double degrees);
