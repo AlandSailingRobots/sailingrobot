@@ -95,7 +95,7 @@ int main(int argc, char *argv[])
 	if (argc < 2)
 	{
 		db_path = "../asr.db";
-	} 
+	}
 	else
 	{
 		db_path = std::string(argv[1]);
@@ -138,8 +138,7 @@ int main(int argc, char *argv[])
 	// Declare nodes
 	//-------------------------------------------------------------------------------
 
-	int dbLoggerWaitTime = 100; 		// wait time (in milliseconds) between messages from the messageBus
-	int dbLoggerUpdateFrequency = 1000; // updating frequency to the database (in milliseconds)
+	double dbLoggerUpdateFrequency = dbHandler.retrieveCellAsDouble("config_dblogger", "1","loop_time"); // updating frequency to the database (in milliseconds)
 	int dbLoggerQueueSize = 5; 			// how many messages to log to the databse at a time
 	DBLoggerNode dbLoggerNode(messageBus, dbHandler, dbLoggerWaitTime, dbLoggerUpdateFrequency, dbLoggerQueueSize);
 
@@ -226,7 +225,7 @@ int main(int argc, char *argv[])
 	{
 		initialiseNode(httpsync, "Httpsync", NodeImportance::CRITICAL);
 	}
-	else 
+	else
 	{
 		initialiseNode(httpsync, "Httpsync", NodeImportance::NOT_CRITICAL);
 	}

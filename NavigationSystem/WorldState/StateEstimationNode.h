@@ -49,11 +49,11 @@ public:
     ///----------------------------------------------------------------------------------
     void start();
 
-  void stop();
+    void stop();
 
 
 
-  void processMessage(const Message* msg);
+    void processMessage(const Message* msg);
 
 
 private:

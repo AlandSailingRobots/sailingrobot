@@ -284,6 +284,7 @@ bool HTTPSyncNode::performCURLCall(std::string data, std::string call, std::stri
 		/* Perform the request, res will get the return code */
 		m_res = curl_easy_perform(curl);
 		/* Check for errors */
+        std::cout << "/* Reponse serveur : " << response << " */" << '\n';
 		if (m_res != CURLE_OK)
 		{
 			if(!m_reportedConnectError)
@@ -310,6 +311,7 @@ bool HTTPSyncNode::performCURLCall(std::string data, std::string call, std::stri
     }else{
         fprintf(stderr, "CURL IS FALSE");
     }
+
 
     return true;
 }
