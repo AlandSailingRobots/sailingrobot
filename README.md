@@ -25,8 +25,13 @@ The  *sailingrobot* repository is divided into different directories :
 ### Requirements
 
 Additional packages are required for building the Navigation System.
+- With Ubuntu :
 ```shell
-$ sudo apt-get install libncurses5-dev libncursesw5-dev
+$ sudo apt-get install libncurses5-dev libncursesw5-dev libgps-dev
+```
+- With Arch Linux :
+```shell
+$ pacman -S i2c-tools gpsd
 ```
 
 ### Installation
