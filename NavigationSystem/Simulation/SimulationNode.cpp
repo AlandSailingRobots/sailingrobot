@@ -55,6 +55,7 @@ SimulationNode::SimulationNode(MessageBus& msgBus)
 		m_ArduinoRudder(0), m_ArduinoSheet(0), collidableMgr(NULL)
 {
   m_MsgBus.registerNode(*this, MessageType::ActuatorPosition);
+	m_MsgBus.registerNode(*this, MessageType::WaypointData);
 }
 
 SimulationNode::SimulationNode(MessageBus& msgBus, CollidableMgr* collidableMgr)
@@ -64,6 +65,7 @@ SimulationNode::SimulationNode(MessageBus& msgBus, CollidableMgr* collidableMgr)
 		m_ArduinoRudder(0), m_ArduinoSheet(0), collidableMgr(collidableMgr)
 {
   m_MsgBus.registerNode(*this, MessageType::ActuatorPosition);
+	m_MsgBus.registerNode(*this, MessageType::WaypointData);
 }
 
 void SimulationNode::start()
@@ -104,7 +106,10 @@ void SimulationNode::processMessage(const Message* msg)
 		case MessageType::ActuatorPosition:
 			processActuatorPositionMessage((ActuatorPositionMsg*)msg);
 		break;
-
+		case MessageType::WaypointData:
+			Logger::info("Waypoint message received");
+			processWaypointMessage((WaypointDataMsg*) msg);
+		break;
 		default:
 		return;
 	}
@@ -114,6 +119,23 @@ void SimulationNode::processActuatorPositionMessage(ActuatorPositionMsg* msg)
 {
 	actuatorData.rudderCommand = msg->rudderPosition();
 	actuatorData.sailCommand = msg->sailPosition();
+}
+
+void SimulationNode::processWaypointMessage(WaypointDataMsg* msg)
+{
+	waypoint.nextId = msg->nextId();
+	waypoint.nextLongitude = msg->nextLongitude();
+	waypoint.nextLatitude = msg->nextLatitude();
+	waypoint.nextDeclination = msg->nextDeclination();
+	waypoint.nextRadius = msg->nextRadius();
+	waypoint.nextStayTime = msg->stayTime();
+	waypoint.prevId = msg->prevId();
+	waypoint.prevLongitude = msg->prevLongitude();
+	waypoint.prevLatitude = msg->prevLatitude();
+	waypoint.prevDeclination = msg->prevDeclination();
+	waypoint.prevRadius = msg->prevRadius();
+
+	Logger::info("In processmessage, lat: " + std::to_string(waypoint.nextLatitude) + ", Lon: " + std::to_string(waypoint.nextLongitude));
 }
 
 void SimulationNode::createCompassMessage()
@@ -142,7 +164,7 @@ void SimulationNode::createArduinoMessage()
 
 ///--------------------------------------------------------------------------------------
 void SimulationNode::processBoatData( TCPPacket_t& packet )
-{	
+{
 	if( packet.length - 1 == sizeof(BoatDataPacket_t) )
 	{
 		// The first byte is the packet type, lets skip that
@@ -177,6 +199,7 @@ void SimulationNode::processAISContact( TCPPacket_t& packet )
 		AISContactPacket_t* aisData = (AISContactPacket_t*)ptr;
 
 		this->collidableMgr->addAISContact(aisData->mmsi, aisData->latitude, aisData->longitude, aisData->speed, aisData->course);
+		this->collidableMgr->addAISContact(aisData->mmsi, aisData->length, aisData->beam);
 	}
 }
 
@@ -201,10 +224,13 @@ void SimulationNode::sendActuatorData( int socketFD )
 	server.sendData( socketFD, &actuatorData, sizeof(ActuatorDataPacket_t) );
 }
 
-//<<<<<<< HEAD
 ///--------------------------------------------------------------------------------------
-//void SimulationNode::SimulationThreadFunc(void* nodePtr)
+void SimulationNode::sendWaypoint( int socketFD )
+{
+	server.sendData( socketFD, &waypoint, sizeof(WaypointPacket_t) );
+}
 
+///--------------------------------------------------------------------------------------
 void SimulationNode::SimulationThreadFunc(ActiveNode* nodePtr)
 {
 	SimulationNode* node = dynamic_cast<SimulationNode*> (nodePtr);
@@ -232,6 +258,7 @@ void SimulationNode::SimulationThreadFunc(ActiveNode* nodePtr)
 			case SimulatorPacket::BoatData:
 				node->processBoatData( packet );
 				node->sendActuatorData( simulatorFD );
+				node->sendWaypoint( simulatorFD );
 			break;
 
 			case SimulatorPacket::AISData:
