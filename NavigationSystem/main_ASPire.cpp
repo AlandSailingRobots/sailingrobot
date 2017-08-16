@@ -11,6 +11,8 @@
 #include "WorldState/CollidableMgr/CollidableMgr.h"
 
 #include "LowLevelControllers/LowLevelController.h" // NOTE - Maël: It will change
+#include "LowLevelControllers/WingsailControlNode.h"
+#include "LowLevelControllers/CourseRegulatorNode.h"
 
 #if LOCAL_NAVIGATION_MODULE == 1
   #include "WorldState/VesselStateNode.h" // NOTE - Maël: It will change

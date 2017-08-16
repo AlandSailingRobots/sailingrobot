@@ -17,7 +17,7 @@
 #include "MessageBus/ActiveNode.h"
 #include "Messages/WindDataMsg.h"
 #include "Messages/LocalNavigationMsg.h"
-#include "Messages/ActuatorPositionMsg.h"
+#include "Messages/WingSailCommandMsg.h"
 #include "MessageBus/MessageBus.h"
 #include "DataBase/DBHandler.h"
 #include <mutex>
