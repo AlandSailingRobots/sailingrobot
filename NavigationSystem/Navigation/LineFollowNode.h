@@ -56,13 +56,10 @@ private:
 /*
 	const double NORM_RUDDER_COMMAND = 0.5166; // getCommand() take a value between -1 and 1 so we need to normalize the command correspond to 29.6 degree
 	const double NORM_SAIL_COMMAND = 0.6958;
-
-	std::vector<float> twdBuffer;
-	unsigned int twdBufferMaxSize;
 */
 
     ///----------------------------------------------------------------------------------
-    /// Stores vessel state datas from a StateMessage.
+    /// Stores vessel position datas from a StateMessage.
     ///----------------------------------------------------------------------------------
 	void processStateMessage(const StateMessage* stateMsg);
 
@@ -79,7 +76,7 @@ private:
 	///----------------------------------------------------------------------------------
     /// Calculate the angle of the line to be followed. in north east down reference frame.
     ///----------------------------------------------------------------------------------
-	double calculateAngleOfDesiredTrajectory();
+	float calculateAngleOfDesiredTrajectory();
 
 	///----------------------------------------------------------------------------------
     /// Calculate the course to steer by using the line follow algorithm described in the papers.
@@ -96,24 +93,24 @@ private:
 
     double  m_LoopTime;             // second	
 
+    std::mutex m_lock;
+
+	std::vector<float> m_TwdBuffer; // True wind direction buffer. angles in degree [0, 360[ in vessel reference frame (clockwise)
 
 	// Vecteur field parameters
-	float 	m_IncidenceAngle;		// degree.	[1]: (gamma_infiniy). 			[2]: (gamma).
+	float 	m_IncidenceAngle;		// radian.	[1]: (gamma_infiniy). 			[2]: (gamma).
 	float 	m_MaxDistanceFromLine;	// meter.	[1]: cutoff distance (r). 		[2]: waypoint radius (r).
 
 	// Close hauled sailing mode parameters
-	float  	m_CloseHauledAngle;		// degree. 	[1]: close hauled angle (zeta).	[2]: tacking angle (theta_t). 
+	float  	m_CloseHauledAngle;		// radian. 	[1]: close hauled angle (zeta).	[2]: tacking angle (theta_t). 
 	float 	m_TackingDistance;		// meter. 	[1]: (r/2).						[2]: tacking distance (d).
 
 
     // Input variables
 	bool 	m_externalControlActive;
 
-    float   m_VesselHeading;        // degree [0, 360[ in North-East reference frame (clockwise)
     double  m_VesselLat;
     double  m_VesselLon;
-    float   m_VesselSpeed;          // m/s
-    float   m_VesselCourse;         // degree [0, 360[ in North-East reference frame (clockwise)
 
 	double 	m_trueWindSpeed;		// m/s
 	double 	m_trueWindDir;			// degree [0, 360[ in North-East reference frame (clockwise)
@@ -132,6 +129,6 @@ private:
 	int     m_TackDirection;		// [1] and [2]: tack variable (q).
 
 	// Output variables
-	bool    m_BeatingState;			// True if the vessel is in beating motion (zig-zag motion).
+	bool    m_BeatingMode;			// True if the vessel is in beating motion (zig-zag motion).
 	bool	m_TargetTackStarboard;	// True if the desired tack of the vessel is starboard.
 };

@@ -510,6 +510,16 @@ std::vector<double> Utility::polarVerctorsAddition(std::vector<double> v1, std::
 	// https://math.stackexchange.com/questions/1365622/adding-two-polar-vectors
 }
 
+void Utility::addValueToBuffer(float value, std::vector<float> &buffer, unsigned int bufferMaxSize)
+{
+	buffer.push_back(value);
+
+	if(buffer.size() > bufferMaxSize)
+	{
+		buffer.erase(buffer.begin());
+	}
+}
+
 void Utility::sphericalCoordinateSystem( const double lat, const double lon, double& x, double& y)
 {
 	// Note Maël : One output coordinate seems to be missing - z= sin(latR) * EARTH_RADIUS;

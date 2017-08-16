@@ -72,6 +72,8 @@ public:
 	 * vector = (radius, angle).		Angles are in radian, in [0, 2*PI[.
 	 */
 	static std::vector<double> polarVerctorsAddition(std::vector<double> v1, std::vector<double> v2);
+	
+	static void addValueToBuffer(float value, std::vector<float> &buffer, unsigned int bufferMaxSize);
 
 	static void sphericalCoordinateSystem( const double lat, const double lon, double& x, double& y);
 	static void calculateVelocity( const uint16_t course, const double speed, double& vX, double& vY );
