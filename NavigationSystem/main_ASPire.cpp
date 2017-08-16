@@ -153,7 +153,8 @@ int main(int argc, char *argv[])
 	double PGAIN = 0.20;
 	double IGAIN = 0.30;
 	LowLevelController llc(messageBus, dbHandler, PGAIN, IGAIN); // NOTE - Maël: It will change
-
+	WingsailControlNode wingSailControlNode(messageBus, dbHandler);
+	CourseRegulatorNode courseRegulatorNode(messageBus, dbHandler);
 
   	#if LOCAL_NAVIGATION_MODULE == 1
 		VesselStateNode vesselState	( messageBus, 0.2 ); // NOTE - Maël: It will change
@@ -191,13 +192,13 @@ int main(int argc, char *argv[])
 
 		const int headingBufferSize = dbHandler.retrieveCellAsInt("buffer_config", "1", "compass");
 		double compassLoopTime = 0.1;
-		HMC6343Node compass(messageBus, headingBufferSize, compassLoopTime);
+		HMC6343Node compass(messageBus, dbHandler, headingBufferSize, compassLoopTime);
 
 		double gpsdLoopTime = dbHandler.retrieveCellAsDouble("GPSD_config", "1", "loop_time");
-	  	GPSDNode gpsd(messageBus, gpsdLoopTime);
+	  	GPSDNode gpsd(messageBus, dbHandler, gpsdLoopTime);
 
 		int time_filter_ms = dbHandler.retrieveCellAsInt("windState_config", "1", "time_filter_ms");
-	  	CANWindsensorNode windSensor(messageBus, canService, time_filter_ms);
+	  	CANWindsensorNode windSensor(messageBus, dbHandler, canService, time_filter_ms);
 
 	  	ActuatorNodeASPire actuators(messageBus, canService);
 	#endif
@@ -221,6 +222,8 @@ int main(int argc, char *argv[])
 	initialiseNode(waypoint, "Waypoint", NodeImportance::CRITICAL);
 
 	initialiseNode(llc, "Low Level Controller", NodeImportance::CRITICAL); // NOTE - Maël: It will change
+ 	initialiseNode(wingSailControlNode, "Wing Sail Controller", NodeImportance::CRITICAL);
+ 	initialiseNode(courseRegulatorNode, "course regulator", NodeImportance::CRITICAL);
 
 	#if LOCAL_NAVIGATION_MODULE == 1
 		initialiseNode( vesselState, "Vessel State", NodeImportance::CRITICAL ); // NOTE - Maël: It will change
@@ -237,7 +240,7 @@ int main(int argc, char *argv[])
 		initialiseNode(gpsd, "GPSD", NodeImportance::CRITICAL);
 		initialiseNode(windSensor, "Wind Sensor", NodeImportance::CRITICAL);
 		initialiseNode(actuators, "Actuators", NodeImportance::CRITICAL);
-		#endif
+	#endif
 
 	// Start active nodes
 	//-------------------------------------------------------------------------------
@@ -262,6 +265,8 @@ int main(int argc, char *argv[])
 		sailingLogic.start();
 	#endif
 
+	wingSailControlNode.start();
+	courseRegulatorNode.start();
 	//-------------------------------------------------------------------------------
 
 	// Begins running the message bus

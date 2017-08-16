@@ -29,8 +29,7 @@ public:
     //--------------
     // Constructor
     //--------------
-    WingsailControlNode(MessageBus& msgBus, DBHandler& dbhandler, double loopTime = 0.5, double maxSailAngle = 43, double minSailAngle = 5.5,
-                    double maxCommandAngle = 30, double configPGain = 0, double configIGain = 0);
+    WingsailControlNode(MessageBus& msgBus, DBHandler& dbhandler);
 
     // -------------
     // Destructor
@@ -92,13 +91,6 @@ private:
     static void WingsailControlNodeThreadFunc(ActiveNode* nodePtr);
 
 
-    //m_maxCommandAngle = 30;
-    //m_maxSailAngle = 42.857;
-    //m_minSailAngle = 5.625;
-    // ------------
-    // Informations
-    double m_MaxWingsailAngle; // units : (radian)
-    double m_MinWingsailAngle; // units : (radian)
     // -------------
     // Informations
     double m_MaxCommandAngle; // units : ° (degrees)
@@ -115,13 +107,6 @@ private:
     // ------------
     DBHandler &m_db;
     double m_LoopTime;
-
-    const int STATE_INITIAL_SLEEP = 2000;
-
-
-    // -------------
-    // Informations
-    //NavigationState m_NavigationState;
 
 
     // -------------
