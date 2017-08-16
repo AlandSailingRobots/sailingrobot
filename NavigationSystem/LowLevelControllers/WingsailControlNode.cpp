@@ -39,7 +39,7 @@ WingsailControlNode::WingsailControlNode(MessageBus& msgBus, DBHandler& dbhandle
     iGain(configIGain),m_db(dbhandler),m_LoopTime(loopTime)
 {
     msgBus.registerNode( *this, MessageType::WindData);
-    msgBus.registerNode( *this, MessageType::NavigationControl);
+    msgBus.registerNode( *this, MessageType::LocalNavigation);
 }
 
 ///----------------------------------------------------------------------------------
@@ -62,8 +62,8 @@ void WingsailControlNode::processMessage( const Message* msg)
         case MessageType::WindData:
         processWindDataMessage(static_cast< const WindDataMsg*>(msg));
         break;
-        case MessageType::NavigationControl:
-        processNavigationControlMessage(static_cast< const NavigationControlMsg*>(msg));
+        case MessageType::LocalNavigation:
+        processLocalNavigationMessage(static_cast< const LocalNavigationMsg*>(msg));
         break;
         default:
         return;
@@ -78,7 +78,7 @@ void WingsailControlNode::processWindDataMessage(const WindDataMsg* msg)
 }
 
 ///----------------------------------------------------------------------------------
-void WingsailControlNode::processNavigationControlMessage(const NavigationControlMsg* msg)
+void WingsailControlNode::processLocalNavigationMessage(const LocalNavigationMsg* msg)
 {
     //std::lock_guard<std_mutex> lock_guard(m_lock);
     //m_NavigationState = msg->navigationState();

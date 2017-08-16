@@ -31,7 +31,7 @@ CourseRegulatorNode::CourseRegulatorNode( MessageBus& msgBus,  DBHandler& dbhand
 {
     msgBus.registerNode( *this, MessageType::StateMessage);
     msgBus.registerNode( *this, MessageType::DesiredCourse);
-    msgBus.registerNode( *this, MessageType::NavigationControl);
+    msgBus.registerNode( *this, MessageType::LocalNavigation);
     msgBus.registerNode( *this, MessageType::ServerConfigsReceived);
 }
 
@@ -68,8 +68,8 @@ void CourseRegulatorNode::processMessage( const Message* msg )
         case MessageType::DesiredCourse:
         processDesiredCourseMessage(static_cast< const DesiredCourseMsg*>(msg)); //verify
         break;
-        case MessageType::NavigationControl:
-        processNavigationControlMessage(static_cast< const NavigationControlMsg*>(msg));
+        case MessageType::LocalNavigation:
+        processLocalNavigationMessage(static_cast< const LocalNavigationMsg*>(msg));
         break;
         case MessageType::ServerConfigsReceived:
         updateConfigsFromDB();
@@ -94,7 +94,7 @@ void CourseRegulatorNode::processDesiredCourseMessage(const DesiredCourseMsg* ms
 }
 
 ///----------------------------------------------------------------------------------
-void CourseRegulatorNode::processNavigationControlMessage(const NavigationControlMsg* msg)
+void CourseRegulatorNode::processLocalNavigationMessage(const LocalNavigationMsg* msg)
 {
     //std::lock_guard<std::mutex> lock_guard(m_lock);
     //m_NavigationState = msg->navigationState();

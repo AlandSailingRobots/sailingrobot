@@ -33,7 +33,7 @@ SailControlNode::SailControlNode(MessageBus& msgBus, DBHandler& dbhandler, doubl
     iGain(configIGain),m_db(dbhandler),m_LoopTime(loopTime)
 {
     msgBus.registerNode( *this, MessageType::WindData);
-    msgBus.registerNode( *this, MessageType::NavigationControl);
+    msgBus.registerNode( *this, MessageType::LocalNavigation);
     msgBus.registerNode( *this, MessageType::ServerConfigsReceived);
 }
 
@@ -68,8 +68,8 @@ void SailControlNode::processMessage( const Message* msg)
         case MessageType::WindData:
         processWindDataMessage(static_cast< const WindDataMsg*>(msg));
         break;
-        case MessageType::NavigationControl:
-        processNavigationControlMessage(static_cast< const NavigationControlMsg*>(msg));
+        case MessageType::LocalNavigation:
+        processLocalNavigationMessage(static_cast< const LocalNavigationMsg*>(msg));
         break;
         case MessageType::ServerConfigsReceived:
         updateConfigsFromDB();
@@ -87,7 +87,7 @@ void SailControlNode::processWindDataMessage(const WindDataMsg* msg)
 }
 
 ///----------------------------------------------------------------------------------
-void SailControlNode::processNavigationControlMessage(const NavigationControlMsg* msg)
+void SailControlNode::processLocalNavigationMessage(const LocalNavigationMsg* msg)
 {
     //std::lock_guard<std_mutex> lock_guard(m_lock);
     //m_NavigationState = msg->navigationState();

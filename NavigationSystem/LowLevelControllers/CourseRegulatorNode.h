@@ -16,7 +16,7 @@
 
 #include "MessageBus/ActiveNode.h"
 #include "Messages/StateMessage.h"
-#include "Messages/NavigationControlMsg.h"
+#include "Messages/LocalNavigationMsg.h"
 #include "Messages/ActuatorPositionMsg.h"
 #include "Messages/DesiredCourseMsg.h"
 #include "MessageBus/MessageBus.h"
@@ -65,7 +65,7 @@ private:
     // -------------
     // Processing informations from the Navigation Control Message
     // -------------
-    void processNavigationControlMessage( const NavigationControlMsg* msg);
+    void processLocalNavigationMessage( const LocalNavigationMsg* msg);
 
     // -------------
     // Determinate the rudder angle according to the heading difference
