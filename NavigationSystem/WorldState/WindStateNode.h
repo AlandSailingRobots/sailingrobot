@@ -1,7 +1,7 @@
 /****************************************************************************************
 *
 * File:
-*       WindStateNode.cpp
+*       WindStateNode.h
 *
 * Purpose:
 *   Each time a vessel state message is received :

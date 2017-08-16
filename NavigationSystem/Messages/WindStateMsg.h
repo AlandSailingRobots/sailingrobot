@@ -40,9 +40,22 @@ public:
 	double apparentWindSpeed() const	 { return m_apparentWindSpeed; }
 	double apparentWindDirection() const { return m_apparentWindDir;   }
 
+    ///----------------------------------------------------------------------------------
+    /// Serialises the message into a MessageSerialiser
+    ///----------------------------------------------------------------------------------
+    virtual void Serialise(MessageSerialiser& serialiser) const
+    {
+        Message::Serialise(serialiser);
+
+        serialiser.serialise(m_trueWindSpeed);
+        serialiser.serialise(m_trueWindDir);
+        serialiser.serialise(m_apparentWindSpeed);
+        serialiser.serialise(m_apparentWindDir);
+    }
+
 private:
-	double m_trueWindSpeed;			// m/s
-	double m_trueWindDir;			// degree [0, 360[ in North-East reference frame (clockwise)
-	double m_apparentWindSpeed;		// m/s
-	double m_apparentWindDir;		// degree [0, 360[ in vessel reference frame (clockwise)
+	double 	m_trueWindSpeed;		// m/s
+	double 	m_trueWindDir;			// degree [0, 360[ in North-East reference frame (clockwise)
+	double 	m_apparentWindSpeed;	// m/s
+	double 	m_apparentWindDir;		// degree [0, 360[ in vessel reference frame (clockwise)
 };
