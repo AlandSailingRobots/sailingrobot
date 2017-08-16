@@ -456,7 +456,7 @@ bool DBHandler::updateWaypoints(std::string waypoints){
 	Json js = Json::parse(waypoints);
 	std::string DBPrinter = "";
 	std::string tempValue = "";
-	int valuesLimit = 6; //"Dirty" fix for limiting the amount of values requested from server waypoint entries (amount of fields n = valuesLimit + 1)
+	int valuesLimit = 11; //"Dirty" fix for limiting the amount of values requested from server waypoint entries (amount of fields n = valuesLimit + 1)
 	int limitCounter;
 
 	if(not queryTable("DELETE FROM current_Mission;"))
@@ -471,12 +471,16 @@ bool DBHandler::updateWaypoints(std::string waypoints){
 		for (auto y : Json::iterator_wrapper(i.value())){
 
 			limitCounter = valuesLimit;
-			DBPrinter = "INSERT INTO current_Mission (id,is_checkpoint,latitude,longitude,declination,radius,stay_time,harvested) VALUES (";
+			DBPrinter = "INSERT INTO current_Mission (declination,harvested,id,id_mission,is_checkpoint,latitude,longitude,name,radius,rankInMission,stay_time) VALUES (";
 
 			for (auto z : Json::iterator_wrapper(y.value())){
 				//Each individual value
 				tempValue = z.value().dump();
 				tempValue = tempValue.substr(1, tempValue.size() - 2);
+				if (tempValue == "")
+				{
+					tempValue = "NULL";
+				}
 				if (limitCounter > 0){
 					limitCounter--;
 					DBPrinter = DBPrinter + tempValue + ",";
@@ -485,9 +489,9 @@ bool DBHandler::updateWaypoints(std::string waypoints){
 			}
 
 			//if (DBPrinter.size () > 0)  DBPrinter.resize (DBPrinter.size () - 1);
-			DBPrinter = DBPrinter + "0);";
-
-
+			//DBPrinter = DBPrinter + "0);";
+			DBPrinter = DBPrinter.substr(0, DBPrinter.size()-1) + ");";
+			std::cout << DBPrinter << "\n";
 			if(not queryTable(DBPrinter))
 			{
 				Logger::error("%s, Error: failed to add waypoints", __PRETTY_FUNCTION__);
