@@ -74,7 +74,7 @@ private:
     //--------------
     // Calculate the angle to give to the tail
     //
-    int calculateTailAngle()
+    double calculateTailAngle();
 
     // -------------
     // Limit the sail angle
