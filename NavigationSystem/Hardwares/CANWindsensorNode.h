@@ -76,4 +76,5 @@ private:
 	std::vector<uint32_t> PGNs {130306, 130311};
 
 	const int DATA_OUT_OF_RANGE	=	-2000;
+	
 };

@@ -15,6 +15,7 @@
 #include "CANWindsensorNode.h"
 #include "Math/Utility.h"
 
+#define pi 3.1415926535
 
 CANWindsensorNode::CANWindsensorNode(MessageBus& msgBus, CANService& can_service, int time_filter_ms)
 : CANPGNReceiver(can_service, {130306, 130311}), ActiveNode(NodeID::WindSensor, msgBus), m_TimeBetweenMsgs(time_filter_ms)
@@ -30,13 +31,13 @@ CANWindsensorNode::~CANWindsensorNode(){}
 
 void CANWindsensorNode::processPGN(N2kMsg &NMsg)
 {
-
+	
   if(NMsg.PGN == 130306){
     std::lock_guard<std::mutex> lock(m_lock);
     uint8_t SID, Ref;
     float WS, WA;
-    parsePGN130306(NMsg, SID, WS, WA, Ref);
-    m_WindDir = WA;
+    parsePGN130306(NMsg, SID, WS, WA, Ref);		
+    m_WindDir = Utility::mapInterval(WA, 0, 2*pi, 0, 360);
     m_WindSpeed = WS;
   }
   else if(NMsg.PGN == 130311)
@@ -45,7 +46,7 @@ void CANWindsensorNode::processPGN(N2kMsg &NMsg)
     uint8_t SID, TI, HI;
     float Temp, Hum, AP;
     parsePGN130311(NMsg, SID, TI, HI, Temp, Hum, AP);
-    m_WindTemperature = Temp;
+    m_WindTemperature = (Temp - 273.15); // To centigrade
   }
   else if(NMsg.PGN == 130312)
   {
