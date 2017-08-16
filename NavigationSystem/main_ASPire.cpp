@@ -157,7 +157,7 @@ int main(int argc, char *argv[])
 	CourseRegulatorNode courseRegulatorNode(messageBus, dbHandler);
 
   	#if LOCAL_NAVIGATION_MODULE == 1
-		VesselStateNode vesselState	( messageBus, 0.2 ); // NOTE - Maël: It will change
+		VesselStateNode vesselState	( messageBus, dbHandler, 0.2 ); // NOTE - Maël: It will change
 		LocalNavigationModule lnm	( messageBus );
 		CollidableMgr collidableMgr;
 
