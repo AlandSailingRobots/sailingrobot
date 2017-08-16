@@ -93,7 +93,7 @@ CREATE TABLE dataLogs_marine_sensors (
   temperature 	 DOUBLE,
   conductivity	 DOUBLE,
   ph			 DOUBLE,
-  t_t_timestamp	 TIMESTAMP
+  t_timestamp	 TIMESTAMP
 );
 
 -- -----------------------------------------------------

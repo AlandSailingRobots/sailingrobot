@@ -27,7 +27,7 @@
 },
 
 "config_dblogger": {
-  "loop_time": 0.5
+  "loop_time": 1
 },
 
 
