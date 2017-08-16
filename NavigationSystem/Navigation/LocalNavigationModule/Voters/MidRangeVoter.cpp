@@ -69,10 +69,9 @@ const ASRCourseBallot& MidRangeVoter::vote( const BoatState_t& boatState )
             }
 
             if (collidable.length != 0 && collidable.beam != 0) { //Make sure size data is available
-              Logger::info("HEJHEJ");
+
               SAFE_DISTANCE = std::max(SAFE_DISTANCE, 1.5*collidable.length);
             }
-            // Logger::info("HEJHEJ");
 
             double time = 0;
             float cpa = getCPA( collidable, boatState, i, time);
@@ -93,8 +92,8 @@ const ASRCourseBallot& MidRangeVoter::vote( const BoatState_t& boatState )
 
         if(closestCPA < 100)
         {
-        Logger::info("CPA %f at %d so votes is %d", closestCPA, i, courseBallot.get(i));
-        Logger::info("Distance: %f ", distance);
+        //Logger::info("CPA %f at %d so votes is %d", closestCPA, i, courseBallot.get(i));
+        //Logger::info("Distance: %f ", distance);
         }
 
         aisContacts.reset();
