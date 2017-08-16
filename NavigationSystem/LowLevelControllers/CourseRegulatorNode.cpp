@@ -23,11 +23,14 @@
 #include "SystemServices/Logger.h"
 #include "SystemServices/Timer.h"
 
-#define HEADING_ERROR_VALUE 370
+const int ERROR_VALUE = 370;
+const int STATE_INITIAL_SLEEP = 2000;
+const float NO_COMMAND = -2000; 
 
-CourseRegulatorNode::CourseRegulatorNode( MessageBus& msgBus,  DBHandler& dbhandler, double loopTime, double maxRudderAngle,
-    double configPGain, double configIGain):ActiveNode(NodeID::CourseRegulatorNode,msgBus), m_VesselHeading(HEADING_ERROR_VALUE), m_VesselSpeed(0),
-    m_MaxRudderAngle(maxRudderAngle),m_DesiredHeading(HEADING_ERROR_VALUE),m_db(dbhandler), m_LoopTime(loopTime),pGain(configPGain),iGain(configIGain)
+
+CourseRegulatorNode::CourseRegulatorNode( MessageBus& msgBus, DBHandler& dbhandler, double loopTime, double maxRudderAngle,
+    double configPGain, double configIGain):ActiveNode(NodeID::CourseRegulatorNode,msgBus), m_VesselCourse(ERROR_VALUE), m_VesselSpeed(0),
+    m_MaxRudderAngle(maxRudderAngle),m_DesiredCourse(ERROR_VALUE),m_db(dbhandler), m_LoopTime(loopTime),pGain(configPGain),iGain(configIGain)
 {
     msgBus.registerNode( *this, MessageType::StateMessage);
     msgBus.registerNode( *this, MessageType::DesiredCourse);
@@ -39,7 +42,11 @@ CourseRegulatorNode::CourseRegulatorNode( MessageBus& msgBus,  DBHandler& dbhand
 CourseRegulatorNode::~CourseRegulatorNode(){}
 
 ///----------------------------------------------------------------------------------
-bool CourseRegulatorNode::init(){ return true;}
+bool CourseRegulatorNode::init()
+{ 
+    updateConfigsFromDB();
+    return true;
+}
 
 ///----------------------------------------------------------------------------------
 void CourseRegulatorNode::start()
@@ -50,68 +57,63 @@ void CourseRegulatorNode::start()
 ///----------------------------------------------------------------------------------
 void CourseRegulatorNode::updateConfigsFromDB()
 {
-    m_LoopTime = m_db.retrieveCellAsDouble("sailing_robot_config","1","loop_time");
-    m_MaxRudderAngle = m_db.retrieveCellAsDouble("sailing_robot_config","1","???");
-    pGain = m_db.retrieveCellAsDouble("sailing_robot_config","1","???");
-    iGain = m_db.retrieveCellAsDouble("sailing_robot_config","1","???");
+    m_LoopTime = 0.5; //m_db.retrieveCellAsDouble("sailing_robot_config","1","loop_time");
+    m_MaxRudderAngle = 30;
 }
 
 ///----------------------------------------------------------------------------------
 void CourseRegulatorNode::processMessage( const Message* msg )
 {
-    MessageType type = msg->messageType();
-    switch(type)
+    switch(msg->messageType())
     {
-        case MessageType::StateMessage:
+    case MessageType::StateMessage:
         processStateMessage(static_cast< const StateMessage*>(msg));
         break;
-        case MessageType::DesiredCourse:
+    case MessageType::DesiredCourse:
         processDesiredCourseMessage(static_cast< const DesiredCourseMsg*>(msg)); //verify
         break;
-        case MessageType::LocalNavigation:
+    case MessageType::LocalNavigation:
         processLocalNavigationMessage(static_cast< const LocalNavigationMsg*>(msg));
         break;
-        case MessageType::ServerConfigsReceived:
+    case MessageType::ServerConfigsReceived:
         updateConfigsFromDB();
         break;
-        default:
+    default:
         return;
-        //Logger::info("Desired Course: %d Heading: %d", desiredHeading, heading);
     }
 }
 
 ///----------------------------------------------------------------------------------
 void CourseRegulatorNode::processStateMessage(const StateMessage* msg)
 {
-    m_VesselHeading = msg->heading();
+    std::lock_guard<std::mutex> lock_guard(m_lock);
+
+    m_VesselCourse = msg->course();
     m_VesselSpeed = msg->speed();
 }
 
 ///----------------------------------------------------------------------------------
 void CourseRegulatorNode::processDesiredCourseMessage(const DesiredCourseMsg* msg)
 {
-    m_DesiredHeading = static_cast<double>(msg->desiredCourse());
+    std::lock_guard<std::mutex> lock_guard(m_lock);
+
+    m_DesiredCourse = static_cast<double>(msg->desiredCourse());
 }
 
 ///----------------------------------------------------------------------------------
 void CourseRegulatorNode::processLocalNavigationMessage(const LocalNavigationMsg* msg)
 {
-    //std::lock_guard<std::mutex> lock_guard(m_lock);
-    //m_NavigationState = msg->navigationState();
-    // Not use
-    //m_CourseToSteer = msg->courseToSteer();
-    //m_TargetSpeed = msg->targetSpeed();
-    //Windvane?
-    //m_Tack = msg->tack(); // useful ?
-    // No definition for the starboard
+    std::lock_guard<std::mutex> lock_guard(m_lock);
+
+    m_DesiredCourse = msg->targetCourse();
 }
 
 ///----------------------------------------------------------------------------------
-double CourseRegulatorNode::calculateRudderAngle()
+float CourseRegulatorNode::calculateRudderAngle()
 {
-    if((m_DesiredHeading != HEADING_ERROR_VALUE) and (m_VesselHeading != HEADING_ERROR_VALUE)){
-
-        double difference_Heading = Utility::limitAngleRange(m_VesselHeading) - Utility::limitAngleRange(m_DesiredHeading);
+    if((m_DesiredCourse != ERROR_VALUE) and (m_VesselCourse != ERROR_VALUE))
+    {
+        double difference_Heading = Utility::limitAngleRange(m_VesselCourse) - Utility::limitAngleRange(m_DesiredCourse);
         // Equation from book "Robotic Sailing 2015 ", page 141
         // The MAX_RUDDER_ANGLE is a parameter configuring the variation around the desired heading.
         // Also the reaction could be configure by the frequence of the thread.
@@ -122,10 +124,13 @@ double CourseRegulatorNode::calculateRudderAngle()
         }
         // Regulation of the rudder
         return Utility::sgn(m_VesselSpeed)*(sin(Utility::degreeToRadian(difference_Heading))*m_MaxRudderAngle);
-
     }
-    return 0;
+    else
+    {
+        return NO_COMMAND;
+    }
 }
+    
 
 ///----------------------------------------------------------------------------------
 void CourseRegulatorNode::CourseRegulatorNodeThreadFunc(ActiveNode* nodePtr)
@@ -134,7 +139,7 @@ void CourseRegulatorNode::CourseRegulatorNodeThreadFunc(ActiveNode* nodePtr)
 
     // An initial sleep, its purpose is to ensure that most if not all the sensor data arrives
     // at the start before we send out the state message.
-    std::this_thread::sleep_for(std::chrono::milliseconds(node->STATE_INITIAL_SLEEP));
+    std::this_thread::sleep_for(std::chrono::milliseconds(STATE_INITIAL_SLEEP));
 
     Timer timer;
     timer.start();

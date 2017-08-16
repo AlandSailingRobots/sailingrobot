@@ -36,7 +36,7 @@ public:
     ~CourseRegulatorNode();
 
     // -------------
-    // Function to init the truth
+    // Function to init the node
     // -------------
     bool init();
 
@@ -70,7 +70,7 @@ private:
     // -------------
     // Determinate the rudder angle according to the heading difference
     // -------------
-    double calculateRudderAngle();
+    float calculateRudderAngle();
 
     // -------------
     // Get and update the frequency of the thread
@@ -82,16 +82,16 @@ private:
     // -------------
     static void CourseRegulatorNodeThreadFunc(ActiveNode* nodePtr);
 
-    double  m_VesselHeading; // units : ° (degrees), from 0 to 359
+    float  m_VesselCourse; // units : ° (degrees), from 0 to 359
 
-    double m_VesselSpeed; // units : knts (knots)
+    float m_VesselSpeed; // units : m/s
     // -------------
     // Parameters to regulate this node
     // -------------
-    double m_MaxRudderAngle; // units :° (degrees), define the extreme value of the rudder
+    float m_MaxRudderAngle; // units :° (degrees), define the extreme value of the rudder
     // -------------
     // Informations
-    double m_DesiredHeading; // units : ° (degrees), from 0 to 359
+    float m_DesiredCourse; // units : ° (degrees), from 0 to 359
     // -------------
     // Access to the database
     // -------------
@@ -103,26 +103,9 @@ private:
     // -------------
     // Parameters to make a PI regulation
     // -------------
-    double pGain;
-    double iGain;
+    float pGain;
+    float iGain;
 
-    //----------
-    // Variable used
-    const int STATE_INITIAL_SLEEP = 2000;
-
-    // -------------
-    // Informations on Navigation control message
-    //NavigationState m_NavigationState;
-    /*int m_CourseToSteer;
-    float m_TargetSpeed;
-    bool m_Tack = false;
-
-     // -------------
-    // Informations
-    double m_VesselLatitude;
-    double m_VesselLongitude;
-    double m_VesselCourse; // units : ° (degrees), from 0 to 359
-    */
-    std::mutex m_lock;                      //Mutex to lock the node
+    std::mutex m_lock;
 
 };
