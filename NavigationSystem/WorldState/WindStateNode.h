@@ -26,12 +26,14 @@
 #include "Messages/StateMessage.h"
 #include "Messages/WindDataMsg.h"
 #include "Messages/WindStateMsg.h"
+#include "DataBase/DBHandler.h"
 
 
 class WindStateNode : public Node {
 public:
     WindStateNode(MessageBus& msgBus);
     ~WindStateNode();
+
 
     bool init();
     void processMessage(const Message* message);
@@ -61,8 +63,7 @@ private:
 
     float   m_vesselHeading;            // degree [0, 360[ in North-East reference frame (clockwise)
     float   m_vesselSpeed;              // m/s
-    float   m_vesselCourse;             // degree [0, 360[ in North-East reference frame (clockwise)
-
+    float   m_vesselCourse;             // degree [0, 360[ in  North-East reference frame (clockwise)
     float   m_apparentWindSpeed;        // m/s
     float   m_apparentWindDirection;    // degree [0, 360[ in vessel reference frame (clockwise)
 

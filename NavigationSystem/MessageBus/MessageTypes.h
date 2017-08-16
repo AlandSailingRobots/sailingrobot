@@ -44,7 +44,9 @@ enum class MessageType {
 	ActuatorControlASPire,
 	ASPireActuatorFeedback,
 	SolarData,
-	AISData
+	AISData,
+	WingSailCommand,
+	RudderCommand
 };
 
 inline std::string msgToString(MessageType msgType)
@@ -101,6 +103,10 @@ inline std::string msgToString(MessageType msgType)
 		return "AISData";
 		case MessageType::SolarData:
 		return "SolarData";
+		case MessageType::WingSailCommand:
+		return "WingSailCommand";
+		case MessageType::RudderCommand:
+		return "RudderCommand";
 	}
 	return "";
 }

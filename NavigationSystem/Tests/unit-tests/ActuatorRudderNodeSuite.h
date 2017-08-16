@@ -34,6 +34,7 @@
  class ActuatorRudderNodeSuite : public CxxTest::TestSuite {
     public:
     ActuatorNode* rudder;
+    DBHandler* dbhandler;
     MessageLogger* logger;
     std::thread* thr;
     int testCount = 0;
@@ -58,8 +59,9 @@
 		{
             Logger::DisableLogging();
 			logger = new MessageLogger(msgBus());
+            dbhandler = new DBHandler("../asr.db");
             int channel = 3, speed = 0, acceleration = 0;
-			rudder = new ActuatorNode(msgBus(), NodeID::RudderActuator, channel, speed, acceleration);
+			rudder = new ActuatorNode(msgBus(), *dbhandler, NodeID::RudderActuator, channel, speed, acceleration);
             thr = new std::thread(runMessageLoop);
 		}
 		testCount++;

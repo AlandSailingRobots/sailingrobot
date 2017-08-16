@@ -35,6 +35,7 @@ m_TackDirection(1), m_BeatingMode(false), m_TargetTackStarboard(false)
     msgBus.registerNode(*this, MessageType::StateMessage);
     msgBus.registerNode(*this, MessageType::WindState);
     msgBus.registerNode(*this, MessageType::WaypointData);
+    msgBus.registerNode(*this, MessageType::ServerConfigsReceived);
 
     m_LoopTime = 0.5;
 
@@ -57,6 +58,10 @@ void LineFollowNode::start()
   runThread(LineFollowNodeThreadFunc);
 }
 
+void LineFollowNode::updateConfigsFromDB()
+{
+    //m_LoopTime = m_db.retrieveCellAsInt("config_LineFollowNode","1","loop_time");
+}
 
 void LineFollowNode::processMessage(const Message* msg)
 {
@@ -74,6 +79,9 @@ void LineFollowNode::processMessage(const Message* msg)
         break;
     case MessageType::WaypointData:
         processWaypointMessage((WaypointDataMsg*)msg);
+        break;
+    case MessageType::ServerConfigsReceived:
+        updateConfigsFromDB();
         break;
     default:
         return;
@@ -125,12 +133,12 @@ float LineFollowNode::calculateAngleOfDesiredTrajectory()
 {
     const int earthRadius = 6371000; //meters
 
-    std::array<double, 3> prevWPCoord = {   
+    std::array<double, 3> prevWPCoord = {
         earthRadius * cos(Utility::degreeToRadian(m_prevWaypointLat)) * cos(Utility::degreeToRadian(m_prevWaypointLon)),
         earthRadius * cos(Utility::degreeToRadian(m_prevWaypointLat)) * sin(Utility::degreeToRadian(m_prevWaypointLon)),
         earthRadius * sin(Utility::degreeToRadian(m_prevWaypointLat))};
 
-    std::array<double, 3> nextWPCoord = {  
+    std::array<double, 3> nextWPCoord = {
         earthRadius * cos(Utility::degreeToRadian(m_nextWaypointLat)) * cos(Utility::degreeToRadian(m_nextWaypointLon)),
         earthRadius * cos(Utility::degreeToRadian(m_nextWaypointLat)) * sin(Utility::degreeToRadian(m_nextWaypointLon)),
         earthRadius * sin(Utility::degreeToRadian(m_nextWaypointLat))};

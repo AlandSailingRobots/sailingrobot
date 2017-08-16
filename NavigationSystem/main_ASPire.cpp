@@ -172,7 +172,7 @@ int main(int argc, char *argv[])
 		lnm.registerVoter( &midRangeVoter );
   	#else
 		double vesselStateLoopTime = dbHandler.retrieveCellAsDouble("vesselState_config","1", "loop_time");
-	  	StateEstimationNode stateEstimationNode(messageBus, vesselStateLoopTime); // NOTE - Maël: It will change
+	  	StateEstimationNode stateEstimationNode(messageBus, dbHandler,vesselStateLoopTime); // NOTE - Maël: It will change
 
 		LineFollowNode sailingLogic(messageBus, dbHandler);
   	#endif

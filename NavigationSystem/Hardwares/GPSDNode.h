@@ -15,12 +15,13 @@
 
 
 #include "MessageBus/ActiveNode.h"
+#include "DataBase/DBHandler.h"
 #include <libgpsmm.h>
 
 
 class GPSDNode : public ActiveNode {
 public:
-	GPSDNode(MessageBus& msgBus, double loopTime);
+	GPSDNode(MessageBus& msgBus, DBHandler& dbhandler, double loopTime);
 
 	virtual ~GPSDNode();
 
@@ -37,6 +38,7 @@ public:
 	///----------------------------------------------------------------------------------
 	void processMessage(const Message* msgPtr);
 
+	void updateConfigsFromDB();
 	///----------------------------------------------------------------------------------
  	/// This function starts the GPS thread
  	///
@@ -61,6 +63,7 @@ private:
 
 	int m_currentDay;
 	double m_LoopTime;
+	DBHandler& m_db;
 
 	const int GPS_TIMEOUT_MICRO_SECS = 50000000;
 

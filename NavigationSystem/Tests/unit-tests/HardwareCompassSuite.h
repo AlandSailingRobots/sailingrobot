@@ -40,6 +40,7 @@
 
 class HardwareCompassSuite : public CxxTest::TestSuite {
 public:
+    DBHandler* dbhandler;
 	HMC6343Node* compass;
 	std::thread* thr;
 	MessageLogger* logger;
@@ -64,8 +65,9 @@ public:
 		if(compass == 0)
 		{
 			Logger::DisableLogging();
+            dbhandler = new DBHandler("../asr.db");
 			logger = new MessageLogger(msgBus());
-			compass = new HMC6343Node(msgBus());
+			compass = new HMC6343Node(msgBus(),*dbhandler);
 			thr = new std::thread(runMessageLoop);
 		}
 		testCount++;

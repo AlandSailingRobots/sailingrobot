@@ -1,6 +1,7 @@
 #include "Utility.h"
 #include <algorithm>
 #include <cmath>
+#include <stdlib.h>
 
 
 int Utility::combineBytes(uint8_t MSB, uint8_t LSB)
@@ -129,6 +130,34 @@ int Utility::sgn(double value)
 
 	return 0;
 }
+
+std::vector<double> Utility::maxAndIndex(std::vector<double> mylist)
+{
+        double maxi = 0.0;
+	double index = 0.0;
+	int i = 0;
+	int size;
+	size = mylist.size();	
+	std::vector<double> results;
+	
+	for (i = 0; i < size; i++)
+	{
+	        if (maxi < mylist[i])
+		{
+		        maxi = mylist[i];
+		        index = i;
+	        }
+		
+	}
+	
+	results.push_back(maxi);
+	results.push_back(index);
+
+	return(results);
+}
+
+
+
 
 void Utility::polarToCartesian(float degrees, float& x, float& y)
 {

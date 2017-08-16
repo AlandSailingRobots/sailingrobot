@@ -14,6 +14,8 @@ public:
 
     void processMessage(const Message* message);
 
+    void updateConfigsFromDB();
+
     void start();
 
     bool init();
@@ -22,10 +24,11 @@ private:
 
     static void DBLoggerNodeThreadFunc(ActiveNode* nodePtr);
 
+
     int DATA_OUT_OF_RANGE = -2000;
 
-    DBHandler &m_db;
-	DBLogger m_dbLogger;
+    DBHandler& m_db;
+    DBLogger m_dbLogger;
 
 // struct used from DBHandler.h
     LogItem item {

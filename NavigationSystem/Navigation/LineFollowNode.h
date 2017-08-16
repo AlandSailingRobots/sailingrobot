@@ -34,6 +34,7 @@
 #include "Messages/WindStateMsg.h"
 #include "Messages/WaypointDataMsg.h"
 #include "Messages/LocalNavigationMsg.h"
+#include "Messages/ServerConfigsReceivedMsg.h"
 #include "SystemServices/SysClock.h"
 #include "SystemServices/Timer.h"
 
@@ -49,6 +50,7 @@ public:
 	bool init();
 	void start();
 	void processMessage(const Message* message);
+	void updateConfigsFromDB();
 
 
 private:

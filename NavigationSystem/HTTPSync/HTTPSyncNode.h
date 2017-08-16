@@ -15,7 +15,7 @@
 class HTTPSyncNode : public ActiveNode{
 	public:
 
-		HTTPSyncNode(MessageBus& msgBus,DBHandler *db,int delay, bool removeLogs);
+		HTTPSyncNode(MessageBus& msgBus, DBHandler *dbhandler,int delay, bool removeLogs);
 
 		virtual ~HTTPSyncNode() { }
 
@@ -25,7 +25,8 @@ class HTTPSyncNode : public ActiveNode{
 		///----------------------------------------------------------------------------------
         bool init();
         void start();
-		        
+		void updateConfigsFromDB();
+
 		///----------------------------------------------------------------------------------
 		/// Pushes waypoints or configurations on new local changes
 		/// (Example of cause: xbeeSync functions)
@@ -49,12 +50,12 @@ class HTTPSyncNode : public ActiveNode{
 
 	private:
 
-		        
+
 		///----------------------------------------------------------------------------------
 		/// Sends server request in curl format - used for all syncing functionality
 		///----------------------------------------------------------------------------------
 		bool performCURLCall(std::string data, std::string call, std::string& response);
-		
+
 
 
         bool checkIfNewConfigs();
@@ -93,4 +94,3 @@ class HTTPSyncNode : public ActiveNode{
 		DBHandler *m_dbHandler;
 
 };
-
