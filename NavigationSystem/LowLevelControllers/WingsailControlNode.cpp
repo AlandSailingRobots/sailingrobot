@@ -19,6 +19,7 @@
 #include <mutex>
 #include <chrono>
 #include <vector>
+#include <stdlib.h>
 //#include "All.h" // library for M_PI
 #include "Messages/WindDataMsg.h"
 #include "Messages/ActuatorPositionMsg.h"
@@ -113,18 +114,22 @@ double WingsailControlNode::calculateTailAngle()
     int i;
     // transforming given calculated lifts and drags into forces in
     // the boat coordinates system
+    double apparentWindDir_counterClock =360-m_ApparentWindDir;
+    apparentWindDir_counterClock = Utility::degreeToRadian(apparentWindDir_counterClock);
+    apparentWindDir_counterClock = Utility::limitRadianAngleRange(apparentWindDir)
     for (i = 0;i < 54;i++)
     {
-	xBoat_Forces[i] = cos(DRAGS[i]) - sin (LIFTS[i]);
-	yBoat_Forces[i] = cos(LIFTS[i]) + sin (DRAGS[i]);
+	xBoat_Forces[i] = DRAGS[i]*cos(apparentWindDir_counterClock) - LIFTS[i]*sin (apparentWindDir_counterClock);
+	yBoat_Forces[i] = LIFTS[i]*cos(apparentWindDir_counterClock) + DRAGS[i]*sin (apparentWindDir_counterClock);
     }
 
     list::list maxAndIndex_xBoat_Forces;
     maxAndIndex_xBoat_Forces = Utility::maxAndIndex(xBoat_Forces);
 
     double orderTail;
-    orderTail = maxAndIndex_xBoat_Forces[1] - 26;
-
+    orderTail_counterClock = maxAndIndex_xBoat_Forces[1] - 26;
+    orderTail = -orderTail_counterClock;
+    std::cout << orderTail << std::endl;
     return(orderTail);
     
 }
@@ -167,8 +172,8 @@ void WingsailControlNode::WingsailControlNodeThreadFunc(ActiveNode* nodePtr)
     {
         std::lock_guard<std::mutex> lock_guard(node->m_lock);
         // TODO : Modify Actuator Message for adapt to this Node
-        MessagePtr actuatorMessage = std::make_unique<ActuatorPositionMsg>(0,node->calculateTailAngle);
-        node->m_MsgBus.sendMessage(std::move(actuatorMessage));
+        MessagePtr wingSailMessage = std::make_unique<WingSailCommandMsg>(node->calculateTailAngle);
+        node->m_MsgBus.sendMessage(std::move(wingSailMessage));
 
         // Broadcast() or selected sent???
         timer.sleepUntil(node->m_LoopTime);

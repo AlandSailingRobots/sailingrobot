@@ -233,7 +233,9 @@ void sendActuatorCommands() {
 	
 	MessagePtr actuatorMsg = std::make_unique<ActuatorControlASPireMessage>(wingsailAngle16, rudderAngle16, true );
 	msgBus.sendMessage(std::move(actuatorMsg));
-		
+	//MessagePtr rudderMsg = std::make_unique<rudderCommand>(rudderAngle16);
+
+
 	lastSentValues = menuValues;
 }
 
