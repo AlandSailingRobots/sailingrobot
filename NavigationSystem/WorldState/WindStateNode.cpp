@@ -57,12 +57,14 @@ void WindStateNode::processVesselStateMessage(const StateMessage* msg)
     m_vesselHeading = msg->heading();
     m_vesselSpeed   = msg->speed();
     m_vesselCourse  = msg->course();
+    // std::cout << "m_vesselHeading: " << m_vesselHeading <<std::endl;
 }
 
 void WindStateNode::processWindMessage(const WindDataMsg* msg)
 {
     m_apparentWindSpeed     = msg->windSpeed();
     m_apparentWindDirection = msg->windDirection();
+    // std::cout << "m_apparentWindDirection: " << m_apparentWindDirection <<std::endl;
 }
 
 void WindStateNode::sendMessage()

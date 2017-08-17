@@ -97,7 +97,7 @@ void CourseRegulatorNode::processDesiredCourseMessage(const DesiredCourseMsg* ms
 {
     std::lock_guard<std::mutex> lock_guard(m_lock);
 
-    m_DesiredCourse = static_cast<float>(msg->desiredCourse());
+    //m_DesiredCourse = static_cast<float>(msg->desiredCourse());
 }
 
 ///----------------------------------------------------------------------------------
@@ -113,11 +113,14 @@ float CourseRegulatorNode::calculateRudderAngle()
 {
     std::lock_guard<std::mutex> lock_guard(m_lock);
 
-    if((m_DesiredCourse != DATA_OUT_OF_RANGE) and (m_VesselCourse != DATA_OUT_OF_RANGE) and (m_VesselSpeed != DATA_OUT_OF_RANGE)) 
+    if((m_DesiredCourse != DATA_OUT_OF_RANGE) and (m_VesselCourse != DATA_OUT_OF_RANGE))
     {
         // Equation from book "Robotic Sailing 2015 ", page 141
         // The m_MaxRudderAngle is a parameter configuring the variation around the desired heading.
         // Also the reaction could be configure by the frequence of the thread.
+
+        //std::cout << "m_DesiredCourse : " << m_DesiredCourse <<std::endl;
+        //std::cout << "m_VesselCourse : " << m_VesselCourse <<std::endl;
 
         float difference_Heading = Utility::degreeToRadian(m_VesselCourse - m_DesiredCourse);
 
@@ -155,6 +158,8 @@ void CourseRegulatorNode::CourseRegulatorNodeThreadFunc(ActiveNode* nodePtr)
         float rudderCommand = node->calculateRudderAngle();
         if (rudderCommand != DATA_OUT_OF_RANGE)
         {
+
+            //std::cout << "rudder command node : " << rudderCommand <<std::endl;
             MessagePtr actuatorMessage = std::make_unique<RudderCommandMsg>(rudderCommand);
             node->m_MsgBus.sendMessage(std::move(actuatorMessage));
         }

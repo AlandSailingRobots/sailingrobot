@@ -22,13 +22,14 @@
 
 const int INITIAL_SLEEP = 2000;  //in milliseconds
 const float NO_COMMAND = -2000; 
+#define DATA_OUT_OF_RANGE -2000
 
 
 
 LineFollowNode::LineFollowNode(MessageBus& msgBus, DBHandler& db): ActiveNode(NodeID::SailingLogic, msgBus), m_db(db),
 m_externalControlActive(false), 
-m_nextWaypointLon(0), m_nextWaypointLat(0), m_nextWaypointRadius(0),
-m_prevWaypointLon(0), m_prevWaypointLat(0), m_prevWaypointRadius(0),
+m_nextWaypointLon(DATA_OUT_OF_RANGE), m_nextWaypointLat(DATA_OUT_OF_RANGE), m_nextWaypointRadius(DATA_OUT_OF_RANGE),
+m_prevWaypointLon(DATA_OUT_OF_RANGE), m_prevWaypointLat(DATA_OUT_OF_RANGE), m_prevWaypointRadius(DATA_OUT_OF_RANGE),
 m_TackDirection(1), m_BeatingMode(false), m_TargetTackStarboard(false)
 {
     msgBus.registerNode(*this, MessageType::ExternalControl);
@@ -102,6 +103,7 @@ void LineFollowNode::processWindStateMessage(const WindStateMsg* windStateMsg )
 
     m_trueWindSpeed = windStateMsg->trueWindSpeed();
     m_trueWindDir = windStateMsg->trueWindDirection();
+    // std::cout << "m_trueWindDir : " << m_trueWindDir <<std::endl;
 
     unsigned int twdBufferMaxSize = 200;
     Utility::addValueToBuffer(m_trueWindDir, m_TwdBuffer, twdBufferMaxSize);
@@ -165,41 +167,61 @@ float LineFollowNode::calculateTargetCourse()
 
     std::lock_guard<std::mutex> lock_guard(m_lock);
 
-    // Calculate the angle of the true wind vector.     [1]:(psi)       [2]:(psi_tw).
-    float meanTrueWindDir = Utility::meanOfAngles(m_TwdBuffer);
-    float trueWindAngle = Utility::degreeToRadian(meanTrueWindDir)+M_PI;
-
-    // Calculate signed distance to the line.           [1] and [2]: (e).
-    double signedDistance = Utility::calculateSignedDistanceToLine(m_nextWaypointLon, m_nextWaypointLat, m_prevWaypointLon,
-        m_prevWaypointLat, m_VesselLon, m_VesselLat);
-
-    // Calculate the angle of the line to be followed.  [1]:(phi)       [2]:(beta)
-    float phi = calculateAngleOfDesiredTrajectory();
-
-    // Calculate the target course in nominal mode.     [1]:(theta_*)   [2]:(theta_r) 
-    float targetCourse = phi + (2 * m_IncidenceAngle/M_PI) * atan(signedDistance/m_MaxDistanceFromLine);
-    targetCourse = Utility::limitRadianAngleRange(targetCourse); // in north east down reference frame.
-
-    // Change tack direction when reaching tacking distance
-    if(abs(signedDistance) > m_TackingDistance)
+    if ((m_nextWaypointLon == DATA_OUT_OF_RANGE) || (m_VesselLat == DATA_OUT_OF_RANGE) || (m_trueWindSpeed == DATA_OUT_OF_RANGE))
     {
-        m_TackDirection = Utility::sgn(signedDistance);
-    }
-
-    // Check if the targetcourse is inconsistent with the wind.
-    if( (cos(trueWindAngle - targetCourse) + cos(m_CloseHauledAngle) < 0) || (cos(trueWindAngle - phi) + cos(m_CloseHauledAngle) < 0))
-    {   
-        // Close hauled mode (Beating mode).
-        m_BeatingMode = true;
-        targetCourse = M_PI + trueWindAngle + m_TackDirection*m_CloseHauledAngle;
-        targetCourse = Utility::limitRadianAngleRange(targetCourse);
+        return DATA_OUT_OF_RANGE;
     }
     else
     {
-        m_BeatingMode = false;
-    }
+        // Calculate the angle of the true wind vector.     [1]:(psi)       [2]:(psi_tw).
+        //float meanTrueWindDir = Utility::meanOfAngles(m_TwdBuffer);
+        //float trueWindAngle = Utility::limitRadianAngleRange(Utility::degreeToRadian(meanTrueWindDir)+M_PI);
+        float trueWindAngle = Utility::degreeToRadian(m_trueWindDir);
 
-    return targetCourse; // in north east down reference frame.
+        // Calculate signed distance to the line.           [1] and [2]: (e).
+        double signedDistance = Utility::calculateSignedDistanceToLine(m_nextWaypointLon, m_nextWaypointLat, m_prevWaypointLon,
+            m_prevWaypointLat, m_VesselLon, m_VesselLat);
+        // std::cout << "m_nextWaypointLon : " << m_nextWaypointLon <<std::endl;
+        // std::cout << "m_nextWaypointLat : " << m_nextWaypointLat <<std::endl;
+        // std::cout << "m_prevWaypointLon : " << m_prevWaypointLon <<std::endl;
+        // std::cout << "m_prevWaypointLat : " << m_prevWaypointLat <<std::endl;
+        // std::cout << "m_VesselLon : " << m_VesselLon <<std::endl;
+        // std::cout << "m_VesselLat : " << m_VesselLat <<std::endl;
+        // std::cout << "signedDistance : " << signedDistance <<std::endl;
+        // std::cout << "signedDistance : " << signedDistance <<std::endl;
+
+        // Calculate the angle of the line to be followed.  [1]:(phi)       [2]:(beta)
+        float phi = calculateAngleOfDesiredTrajectory();
+        // std::cout << "phi : " << phi <<std::endl;
+
+        // Calculate the target course in nominal mode.     [1]:(theta_*)   [2]:(theta_r) 
+        float targetCourse = phi + (2 * m_IncidenceAngle/M_PI) * atan(signedDistance/m_MaxDistanceFromLine);
+        targetCourse = Utility::limitRadianAngleRange(targetCourse); // in north east down reference frame.
+        // std::cout << "targetCourse : " << targetCourse <<std::endl;
+
+        // Change tack direction when reaching tacking distance
+        if(abs(signedDistance) > m_TackingDistance)
+        {
+            m_TackDirection = Utility::sgn(signedDistance);
+        }
+
+        // Check if the targetcourse is inconsistent with the wind.
+        if( (cos(trueWindAngle - targetCourse) + cos(m_CloseHauledAngle) < 0) || (cos(trueWindAngle - phi) + cos(m_CloseHauledAngle) < 0))
+        {   
+            // Close hauled mode (Beating mode).
+            m_BeatingMode = true;
+            targetCourse = M_PI + trueWindAngle + m_TackDirection*m_CloseHauledAngle;
+            targetCourse = Utility::limitRadianAngleRange(targetCourse);
+        }
+        else
+        {
+            m_BeatingMode = false;
+        }
+
+        // std::cout << "trueWindAngle : " << trueWindAngle <<std::endl;
+
+        return targetCourse; // in north east down reference frame.
+    }
 }
 
 
@@ -216,9 +238,11 @@ void LineFollowNode::LineFollowNodeThreadFunc(ActiveNode* nodePtr)
     while(true)
     {
         float targetCourse = Utility::radianToDegree(node->calculateTargetCourse());
-        MessagePtr LocalNavMsg = std::make_unique<LocalNavigationMsg>(targetCourse, NO_COMMAND, node->m_BeatingMode, node->m_TargetTackStarboard);
-        node->m_MsgBus.sendMessage( std::move( LocalNavMsg ) );
-
+        // std::cout << "targetCourse : " << targetCourse <<std::endl;
+        if (targetCourse != DATA_OUT_OF_RANGE){
+            MessagePtr LocalNavMsg = std::make_unique<LocalNavigationMsg>(targetCourse, NO_COMMAND, node->m_BeatingMode, node->m_TargetTackStarboard);
+            node->m_MsgBus.sendMessage( std::move( LocalNavMsg ) );
+        }
         timer.sleepUntil(node->m_LoopTime);
         timer.reset();
     }

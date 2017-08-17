@@ -46,7 +46,7 @@ WingsailControlNode::~WingsailControlNode(){}
 
 ///----------------------------------------------------------------------------------
 bool WingsailControlNode::init(){ 
-    m_LoopTime = 0.5;
+    updateConfigsFromDB();
     return true;
 }
 
@@ -59,7 +59,7 @@ void WingsailControlNode::start()
 void WingsailControlNode::updateConfigsFromDB()
 {
     m_LoopTime = 0.5; //m_db.retrieveCellAsDouble("___","1","loop_time");
-    m_MaxCommandAngle = 26;
+    m_MaxCommandAngle = 15;
 }
 
 ///----------------------------------------------------------------------------------
@@ -133,7 +133,8 @@ double WingsailControlNode::calculateTailAngle()
         double orderTail;
         orderTail_counterClock = maxAndIndex_xBoat_Forces[1] - 25;
         orderTail = -orderTail_counterClock;
-        return(orderTail);
+        orderTail = restrictWingsail(orderTail);
+        return orderTail;
     }
     else
     {
@@ -157,6 +158,7 @@ void WingsailControlNode::WingsailControlNodeThreadFunc(ActiveNode* nodePtr)
         float wingSailCommand = (float)node->calculateTailAngle();
         if (wingSailCommand != DATA_OUT_OF_RANGE)
         {
+            // std::cout << "wingsail command node : " << wingSailCommand <<std::endl;
             MessagePtr wingSailMessage = std::make_unique<WingSailCommandMsg>(wingSailCommand);
             node->m_MsgBus.sendMessage(std::move(wingSailMessage));
         }

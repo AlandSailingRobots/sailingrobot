@@ -137,6 +137,7 @@ void SimulationNode::processWingSailCommandMessage(WingSailCommandMsg* msg)
     std::lock_guard<std::mutex> lock_guard(m_lock);
 
     m_TailCommand = msg->tailAngle();
+    std::cout << "tail command sim : " << m_TailCommand <<std::endl;
 }
 
 void SimulationNode::processRudderCommandMessage(RudderCommandMsg* msg)
@@ -144,7 +145,8 @@ void SimulationNode::processRudderCommandMessage(RudderCommandMsg* msg)
     std::lock_guard<std::mutex> lock_guard(m_lock);
 
     m_RudderCommand = msg->rudderAngle();
-    Logger::info("rudder command message :%f", m_RudderCommand);
+    //Logger::info("rudder command message :%f", m_RudderCommand);
+    std::cout << "rudder command sim : " << m_RudderCommand <<std::endl;
 }
 
 void SimulationNode::createCompassMessage()
@@ -270,9 +272,9 @@ void SimulationNode::sendActuatorData( int socketFD , int boatType)
             ActuatorDataWingPacket_t actuatorDataWing;
             actuatorDataWing.rudderCommand = m_RudderCommand;
             actuatorDataWing.tailCommand = m_TailCommand;
-            std::cout << sizeof(ActuatorDataWingPacket_t)<<std::endl;
+            //std::cout << sizeof(ActuatorDataWingPacket_t)<<std::endl;
             server.sendData( socketFD, &actuatorDataWing, sizeof(ActuatorDataWingPacket_t) );
-            Logger::info("rudder command :%f  tail command:%f", m_RudderCommand, m_TailCommand);
+            //Logger::info("rudder command :%f  tail command:%f", m_RudderCommand, m_TailCommand);
             break;
     }
         
@@ -309,13 +311,13 @@ void SimulationNode::SimulationThreadFunc(ActiveNode* nodePtr)
         case SimulatorPacket::SailBoatData:
             node->processSailBoatData( packet );
             node->sendActuatorData( simulatorFD, 0 );
-            Logger::info("SailBoatData");
+            //Logger::info("SailBoatData");
             break;
 
         case SimulatorPacket::WingBoatData:
             node->processWingBoatData( packet );
             node->sendActuatorData ( simulatorFD, 1 );
-            Logger::info("WingBoatData");
+            //Logger::info("WingBoatData");
             break;
 
         case SimulatorPacket::AISData:
