@@ -73,14 +73,14 @@ struct VisualContactPacket_t {
 } __attribute__((packed));
 
 struct ActuatorDataWingPacket_t {
-    int16_t rudderCommand;
-    int16_t tailCommand;
+    float rudderCommand;
+    float tailCommand;
 }__attribute__((packed));
 
 struct ActuatorDataSailPacket_t 
 {
-    int16_t rudderCommand;
-    int16_t sailCommand;
+    float rudderCommand;
+    float sailCommand;
 }__attribute__((packed));
     
 
@@ -158,9 +158,9 @@ private:
     void createWindMessage();
     void createArduinoMessage();
     
-    double  m_RudderCommand;
-    double  m_TailCommand;
-    double  m_SailCommand;
+    float  m_RudderCommand;
+    float  m_TailCommand;
+    float  m_SailCommand;
     
     
     

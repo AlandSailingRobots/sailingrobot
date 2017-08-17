@@ -18,7 +18,7 @@
 #include <chrono>
 #include <thread>
 #include <memory>
-
+#include <stdlib.h>
 #include <sys/types.h>
 #include <netdb.h>
 #include <fcntl.h>
@@ -251,6 +251,11 @@ void SimulationNode::sendActuatorData( int socketFD, int boatType )
             m_TailCommand   = -15.0;
             actuatorDataWing.rudderCommand = m_RudderCommand;
             actuatorDataWing.tailCommand   = m_TailCommand;
+            //std::cout <<"sent rudder command" << actuatorDataWing.rudderCommand << std::endl;
+            //std::cout <<"sent tail command" << actuatorDataWing.tailCommand << std::endl;
+            //std::cout <<"given rudder command" << m_RudderCommand << std::endl;
+            //std::cout <<"given tail command" << m_TailCommand << std::endl;
+            std::cout <<sizeof(ActuatorDataWingPacket_t) << std::endl;
             server.sendData( socketFD, &actuatorDataWing, sizeof(ActuatorDataWingPacket_t) );
     }
     
