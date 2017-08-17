@@ -23,7 +23,6 @@
 #include "MessageBus/ActiveNode.h"
 #include "MessageBus/Message.h"
 #include "MessageBus/MessageBus.h"
-#include "Messages/ArduinoDataMsg.h"
 #include "Messages/ASPireActuatorFeedbackMsg.h"
 #include "SystemServices/Timer.h"
 #include "Math/Utility.h"
@@ -51,7 +50,7 @@ private:
 	float m_RudderFeedback;
 	float m_WingsailFeedback; 
 	float m_WindvaneSelfSteerAngle;
-	float m_Radio_Controller_On;
+	bool  m_RadioControllerOn;
 	float m_WindvaneActuatorPos;
 	int   m_loopTime;
 	std::mutex m_lock;

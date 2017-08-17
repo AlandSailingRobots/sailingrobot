@@ -24,14 +24,12 @@
 #include "Messages/ASPireActuatorFeedbackMsg.h"
 #include "Messages/ActuatorControlASPireMessage.h"
 #include "Messages/WindDataMsg.h"
-#include "Messages/ArduinoDataMsg.h"
 #include "Messages/CompassDataMsg.h"
 #include "MessageBus/MessageTypes.h"
 #include "MessageBus/MessageBus.h"
 #include "MessageBus/ActiveNode.h"
 #include "MessageBus/NodeIDs.h"
 #include "Hardwares/CANWindsensorNode.h"
-#include "Hardwares/ArduinoNode.h"
 #include "Hardwares/CANArduinoNode.h"
 #include "Hardwares/ActuatorNodeASPire.h"
 #include "Hardwares/HMC6343Node.h"
@@ -71,7 +69,6 @@ public:
 	{
 		msgBus.registerNode(*this, MessageType::WindData);
 		msgBus.registerNode(*this, MessageType::ASPireActuatorFeedback);
-		msgBus.registerNode(*this, MessageType::ArduinoData);
 		msgBus.registerNode(*this, MessageType::CompassData);
 
 		m_SensorValues["Rudder Angle"] = DATA_OUT_OF_RANGE;
@@ -103,6 +100,11 @@ public:
 				const ASPireActuatorFeedbackMsg* actmsg = dynamic_cast<const ASPireActuatorFeedbackMsg*>(message);
 				m_SensorValues["Rudder Angle"] = actmsg->rudderFeedback();
 				m_SensorValues["Wingsail Angle"] = actmsg->wingsailFeedback();
+				if (actmsg->radioControllerOn()){
+					m_SensorValues["RC Mode"] = ON;
+				} else {
+					m_SensorValues["RC Mode"] = OFF;
+				}				
 				}	
 				break;
 				
@@ -115,17 +117,7 @@ public:
 				}
 				break;
 						
-			case MessageType::ArduinoData:
-				{
-				const ArduinoDataMsg* arduinomsg = dynamic_cast<const ArduinoDataMsg*>(message);
-				m_SensorValues["RC Mode"] = arduinomsg->Radio_Controller();
-				if (arduinomsg->Radio_Controller() > 10) {
-					m_SensorValues["RC Mode"] = ON;
-				} else {
-					m_SensorValues["RC Mode"] = OFF;
-				}
-				}
-				break;
+			
 			case MessageType::CompassData:
 				{
 				const CompassDataMsg* compassmsg = dynamic_cast<const CompassDataMsg*>(message);
