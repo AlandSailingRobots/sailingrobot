@@ -23,14 +23,14 @@
 #include "SystemServices/Logger.h"
 #include "SystemServices/Timer.h"
 
-const int ERROR_VALUE = 370;
+#define DATA_OUT_OF_RANGE -2000
+
 const int STATE_INITIAL_SLEEP = 2000;
-const float NO_COMMAND = -2000; 
 
 
 CourseRegulatorNode::CourseRegulatorNode( MessageBus& msgBus, DBHandler& dbhandler, double loopTime, double maxRudderAngle,
-    double configPGain, double configIGain):ActiveNode(NodeID::CourseRegulatorNode,msgBus), m_VesselCourse(ERROR_VALUE), m_VesselSpeed(0),
-    m_MaxRudderAngle(maxRudderAngle),m_DesiredCourse(ERROR_VALUE),m_db(dbhandler), m_LoopTime(loopTime),pGain(configPGain),iGain(configIGain)
+    double configPGain, double configIGain):ActiveNode(NodeID::CourseRegulatorNode,msgBus), m_VesselCourse(DATA_OUT_OF_RANGE), m_VesselSpeed(DATA_OUT_OF_RANGE),
+    m_MaxRudderAngle(maxRudderAngle),m_DesiredCourse(DATA_OUT_OF_RANGE),m_db(dbhandler), m_LoopTime(loopTime),pGain(configPGain),iGain(configIGain)
 {
     msgBus.registerNode( *this, MessageType::StateMessage);
     msgBus.registerNode( *this, MessageType::DesiredCourse);
@@ -97,7 +97,7 @@ void CourseRegulatorNode::processDesiredCourseMessage(const DesiredCourseMsg* ms
 {
     std::lock_guard<std::mutex> lock_guard(m_lock);
 
-    m_DesiredCourse = static_cast<double>(msg->desiredCourse());
+    m_DesiredCourse = static_cast<float>(msg->desiredCourse());
 }
 
 ///----------------------------------------------------------------------------------
@@ -111,23 +111,29 @@ void CourseRegulatorNode::processLocalNavigationMessage(const LocalNavigationMsg
 ///----------------------------------------------------------------------------------
 float CourseRegulatorNode::calculateRudderAngle()
 {
-    if((m_DesiredCourse != ERROR_VALUE) and (m_VesselCourse != ERROR_VALUE))
+    std::lock_guard<std::mutex> lock_guard(m_lock);
+
+    if((m_DesiredCourse != DATA_OUT_OF_RANGE) and (m_VesselCourse != DATA_OUT_OF_RANGE) and (m_VesselSpeed != DATA_OUT_OF_RANGE)) 
     {
-        double difference_Heading = Utility::limitAngleRange(m_VesselCourse) - Utility::limitAngleRange(m_DesiredCourse);
         // Equation from book "Robotic Sailing 2015 ", page 141
-        // The MAX_RUDDER_ANGLE is a parameter configuring the variation around the desired heading.
+        // The m_MaxRudderAngle is a parameter configuring the variation around the desired heading.
         // Also the reaction could be configure by the frequence of the thread.
-        if(cos(Utility::degreeToRadian(difference_Heading)) < 0) // Wrong sense because over 90°
+
+        float difference_Heading = Utility::degreeToRadian(m_VesselCourse - m_DesiredCourse);
+
+        if(cos(difference_Heading) < 0) // Wrong sense because over +/- 90°
         {
             // Max Rudder angle in the opposite way
-            return Utility::sgn(m_VesselSpeed)*(Utility::sgn(sin(Utility::degreeToRadian(difference_Heading))))*m_MaxRudderAngle;
+            return Utility::sgn(sin(difference_Heading))*m_MaxRudderAngle;
         }
-        // Regulation of the rudder
-        return Utility::sgn(m_VesselSpeed)*(sin(Utility::degreeToRadian(difference_Heading))*m_MaxRudderAngle);
+        else
+        {   // Regulation of the rudder 
+            return sin(difference_Heading)*m_MaxRudderAngle;
+        }
     }
     else
     {
-        return NO_COMMAND;
+        return DATA_OUT_OF_RANGE;
     }
 }
     
@@ -146,17 +152,13 @@ void CourseRegulatorNode::CourseRegulatorNodeThreadFunc(ActiveNode* nodePtr)
 
     while(true)
     {
-
-        node->m_lock.lock();
-        //std::lock_guard<std::mutex> lock_guard(node->m_lock);
-        // TODO : Modify Actuator Message for adapt to this Node
-        MessagePtr actuatorMessage = std::make_unique<RudderCommandMsg>((int16_t)node->calculateRudderAngle());
-        //std::cout << std::endl << "COURSE REG NODE ######### Send : CalcR " << node->calculateRudderAngle();
-        node->m_MsgBus.sendMessage(std::move(actuatorMessage));
-        node->m_lock.unlock();
-
-        // Broadcast() or selected sent???
-        timer.sleepUntil(node->m_LoopTime); //insert updateFrequencyThread in the function ?
+        float rudderCommand = node->calculateRudderAngle();
+        if (rudderCommand != DATA_OUT_OF_RANGE)
+        {
+            MessagePtr actuatorMessage = std::make_unique<RudderCommandMsg>(rudderCommand);
+            node->m_MsgBus.sendMessage(std::move(actuatorMessage));
+        }
+        timer.sleepUntil(node->m_LoopTime);
         timer.reset();
     }
 }

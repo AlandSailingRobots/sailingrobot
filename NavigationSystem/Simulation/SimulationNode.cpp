@@ -26,6 +26,7 @@
 #include <cerrno>
 #include <cstring>
 #include <unistd.h>
+#include <stdlib.h>
 #include "SystemServices/Logger.h"
 #include "SystemServices/SysClock.h"
 #include "Network/TCPServer.h"
@@ -52,6 +53,7 @@ enum SimulatorPacket {
 
 SimulationNode::SimulationNode(MessageBus& msgBus)
     : ActiveNode(NodeID::Simulator, msgBus),
+        m_RudderCommand(0), m_SailCommand(0), m_TailCommand(0),
         m_CompassHeading(0), m_GPSLat(0), m_GPSLon(0), m_GPSSpeed(0),
         m_GPSHeading(0), m_WindDir(0), m_WindSpeed(0),
         m_ArduinoRudder(0), m_ArduinoSheet(0), collidableMgr(NULL)
@@ -63,6 +65,7 @@ SimulationNode::SimulationNode(MessageBus& msgBus)
 
 SimulationNode::SimulationNode(MessageBus& msgBus, CollidableMgr* collidableMgr)
     : ActiveNode(NodeID::Simulator, msgBus),
+        m_RudderCommand(0), m_SailCommand(0), m_TailCommand(0),
         m_CompassHeading(0), m_GPSLat(0), m_GPSLon(0), m_GPSSpeed(0),
         m_GPSHeading(0), m_WindDir(0), m_WindSpeed(0),
         m_ArduinoRudder(0), m_ArduinoSheet(0), collidableMgr(collidableMgr)
@@ -123,18 +126,25 @@ void SimulationNode::processMessage(const Message* msg)
 
 void SimulationNode::processActuatorPositionMessage(ActuatorPositionMsg* msg)
 {
+    std::lock_guard<std::mutex> lock_guard(m_lock);
+
     m_RudderCommand = msg->rudderPosition();
     m_SailCommand = msg->sailPosition();
 }
 
 void SimulationNode::processWingSailCommandMessage(WingSailCommandMsg* msg)
 {
+    std::lock_guard<std::mutex> lock_guard(m_lock);
+
     m_TailCommand = msg->tailAngle();
 }
 
 void SimulationNode::processRudderCommandMessage(RudderCommandMsg* msg)
 {
+    std::lock_guard<std::mutex> lock_guard(m_lock);
+
     m_RudderCommand = msg->rudderAngle();
+    Logger::info("rudder command message :%f", m_RudderCommand);
 }
 
 void SimulationNode::createCompassMessage()
@@ -246,6 +256,8 @@ void SimulationNode::processVisualContact( TCPPacket_t& packet )
 ///--------------------------------------------------------------------------------------
 void SimulationNode::sendActuatorData( int socketFD , int boatType)
 {
+    std::lock_guard<std::mutex> lock_guard(m_lock);
+
     switch (boatType)
     {
         case 0:
@@ -253,14 +265,15 @@ void SimulationNode::sendActuatorData( int socketFD , int boatType)
             actuatorDataSail.rudderCommand = m_RudderCommand;
             actuatorDataSail.sailCommand = m_SailCommand;
             server.sendData( socketFD, &actuatorDataSail, sizeof(ActuatorDataSailPacket_t) );        
-    
+            break;
         case 1:
             ActuatorDataWingPacket_t actuatorDataWing;
             actuatorDataWing.rudderCommand = m_RudderCommand;
             actuatorDataWing.tailCommand = m_TailCommand;
+            std::cout << sizeof(ActuatorDataWingPacket_t)<<std::endl;
             server.sendData( socketFD, &actuatorDataWing, sizeof(ActuatorDataWingPacket_t) );
             Logger::info("rudder command :%f  tail command:%f", m_RudderCommand, m_TailCommand);
-
+            break;
     }
         
 }
@@ -291,31 +304,31 @@ void SimulationNode::SimulationThreadFunc(ActiveNode* nodePtr)
             simulatorFD = packet.socketFD;
         }
         // First byte is the message type
-        //Logger::info("data packet: %s",packet.data[0]);
         switch( packet.data[0] )
         {
-            case SimulatorPacket::SailBoatData:
-                node->processSailBoatData( packet );
-                node->sendActuatorData( simulatorFD, 0 );
-                
+        case SimulatorPacket::SailBoatData:
+            node->processSailBoatData( packet );
+            node->sendActuatorData( simulatorFD, 0 );
+            Logger::info("SailBoatData");
             break;
 
-            case SimulatorPacket::WingBoatData:
-                node->processWingBoatData( packet );
-                node->sendActuatorData ( simulatorFD, 1 );
-                
-
-            case SimulatorPacket::AISData:
-                node->processAISContact( packet );
+        case SimulatorPacket::WingBoatData:
+            node->processWingBoatData( packet );
+            node->sendActuatorData ( simulatorFD, 1 );
+            Logger::info("WingBoatData");
             break;
 
-            case SimulatorPacket::CameraData:
-                node->processVisualContact( packet );
+        case SimulatorPacket::AISData:
+            node->processAISContact( packet );
             break;
 
-            // unknown or deformed packet
-            default:
-                continue;
+        case SimulatorPacket::CameraData:
+            node->processVisualContact( packet );
+            break;
+
+        // unknown or deformed packet
+        default:
+            continue;
         }
         // Reset our packet, better safe than sorry
         packet.socketFD = 0;

@@ -51,14 +51,12 @@ public:
     // -------------
     void processMessage(const Message* message);
 
-    double getFrequencyThread();
-
 private:
 
     // -------------
     // Processing informations from the State Message
     // -------------
-    void processWindDataMessage(const WindDataMsg* msg);
+    void processWindStateMessage(const WindStateMsg* msg);
 
     // -------------
     // Processing informations from the Navigation Control Message
@@ -83,7 +81,7 @@ private:
     // -------------
     // Get and update the frequency of the thread
     // -------------
-    void updateFrequencyThread();
+    void updateConfigsFromDB();
 
     // -------------
     // Actions during the activity of the node
@@ -91,25 +89,15 @@ private:
     static void WingsailControlNodeThreadFunc(ActiveNode* nodePtr);
 
 
-    // -------------
-    // Informations
     double m_MaxCommandAngle; // units : ° (degrees)
 
-    // -------------
-    // Informations
     double m_ApparentWindDir; // units : ° (degrees), from -180 to 180
 
     double pGain;
     double iGain;
 
-    // -------------
-    // Access to the database
-    // ------------
     DBHandler &m_db;
     double m_LoopTime;
 
-
-    // -------------
-    // Informations
     std::mutex m_lock;
 };

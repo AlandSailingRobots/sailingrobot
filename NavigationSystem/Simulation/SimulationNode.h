@@ -73,13 +73,13 @@ struct VisualContactPacket_t {
 } __attribute__((packed));
 
 struct ActuatorDataSailPacket_t {
-  double rudderCommand;
-  double sailCommand;
+  float rudderCommand;
+  float sailCommand;
 }__attribute__((packed));
 
 struct ActuatorDataWingPacket_t {
-  double rudderCommand;
-  double tailCommand;
+  float rudderCommand;
+  float tailCommand;
 }__attribute__((packed));
 
 
@@ -157,9 +157,9 @@ private:
   void createWindMessage();
   void createArduinoMessage();
 
-  double  m_RudderCommand;
-  double  m_SailCommand;
-  double  m_TailCommand;
+  float  m_RudderCommand;
+  float  m_SailCommand;
+  float  m_TailCommand;
 
 	int 	  m_CompassHeading;
 	double	m_GPSLat;
@@ -173,5 +173,7 @@ private:
  
   TCPServer server;
   CollidableMgr* collidableMgr;
+
+  std::mutex m_lock;
 
 };

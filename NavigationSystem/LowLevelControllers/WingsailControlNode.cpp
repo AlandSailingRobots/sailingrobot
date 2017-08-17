@@ -20,14 +20,14 @@
 #include <chrono>
 #include <vector>
 #include <stdlib.h>
-#include "Messages/WindDataMsg.h"
+#include "Messages/WindStateMsg.h"
 #include "Messages/ActuatorPositionMsg.h"
 #include "Messages/StateMessage.h"
 #include "SystemServices/Logger.h"
 #include "SystemServices/Timer.h"
 #include "Math/Utility.h"
 
-const int STATE_INITIAL_SLEEP = 2000;
+#define DATA_OUT_OF_RANGE -2000
 const float NO_COMMAND = -2000;
 
 const double LIFTS[53] = {15.964797400676879, 15.350766731420075, 14.736736062163272, 14.122705392906468, 13.508674723649664, 12.894644054392863, 12.280613385136059, 11.666582715879256, 11.052552046622454, 10.438521377365651, 9.8244907081088488, 9.2104600388520446, 8.5964293695952421, 7.9823987003384396, 7.3683680310816362, 6.7543373618248319, 6.1403066925680294, 5.5262760233112269, 4.9122453540544244, 4.298214684797621, 3.6841840155408181, 3.0701533462840147, 2.4561226770272122, 1.842092007770409, 1.2280613385136061, 0.61403066925680305, 0.0, -0.61403066925680305, -1.2280613385136061, -1.842092007770409, -2.4561226770272122, -3.0701533462840147, -3.6841840155408181, -4.298214684797621, -4.9122453540544244, -5.5262760233112269, -6.1403066925680294, -6.7543373618248319, -7.3683680310816362, -7.9823987003384396, -8.5964293695952421, -9.2104600388520446, -9.8244907081088488, -10.438521377365651, -11.052552046622454, -11.666582715879256, -12.280613385136059, -12.894644054392863, -13.508674723649664, -14.122705392906468, -14.736736062163272, -15.350766731420075, -15.964797400676879};
@@ -45,12 +45,21 @@ WingsailControlNode::WingsailControlNode(MessageBus& msgBus, DBHandler& dbhandle
 WingsailControlNode::~WingsailControlNode(){}
 
 ///----------------------------------------------------------------------------------
-bool WingsailControlNode::init(){ return true;}
+bool WingsailControlNode::init(){ 
+    m_LoopTime = 0.5;
+    return true;
+}
 
 ///----------------------------------------------------------------------------------
 void WingsailControlNode::start()
 {
     runThread(WingsailControlNodeThreadFunc);
+}
+///----------------------------------------------------------------------------------
+void WingsailControlNode::updateConfigsFromDB()
+{
+    m_LoopTime = 0.5; //m_db.retrieveCellAsDouble("___","1","loop_time");
+    m_MaxCommandAngle = 26;
 }
 
 ///----------------------------------------------------------------------------------
@@ -59,7 +68,7 @@ void WingsailControlNode::processMessage( const Message* msg)
     switch( msg->messageType() )
     {
     case MessageType::WindData:
-        processWindDataMessage(static_cast< const WindDataMsg*>(msg));
+        processWindStateMessage(static_cast< const WindStateMsg*>(msg));
         break;
     case MessageType::LocalNavigation:
         processLocalNavigationMessage(static_cast< const LocalNavigationMsg*>(msg));
@@ -70,17 +79,17 @@ void WingsailControlNode::processMessage( const Message* msg)
 }
 
 ///----------------------------------------------------------------------------------
-void WingsailControlNode::processWindDataMessage(const WindDataMsg* msg)
+void WingsailControlNode::processWindStateMessage(const WindStateMsg* msg)
 {
-    //std::lock_guard<std_mutex> lock_guard(m_lock);
-    m_ApparentWindDir = msg->windDirection();
+    std::lock_guard<std::mutex> lock_guard(m_lock);
+
+    m_ApparentWindDir = msg->apparentWindDirection();
 }
 
 ///----------------------------------------------------------------------------------
 void WingsailControlNode::processLocalNavigationMessage(const LocalNavigationMsg* msg)
 {
-    //std::lock_guard<std_mutex> lock_guard(m_lock);
-    //m_NavigationState = msg->navigationState();
+        std::lock_guard<std::mutex> lock_guard(m_lock);
 }
 
 ///----------------------------------------------------------------------------------
@@ -98,52 +107,38 @@ double WingsailControlNode::restrictWingsail(double val)
 
 double WingsailControlNode::calculateTailAngle()
 {
-    // lists that will contain the forces on X and Y in the boat coordinates system
-    std::vector<double> xBoat_Forces ;  
-    std::vector<double> yBoat_Forces ;
-    
-    int i;
-    // transforming given calculated lifts and drags into forces in
-    // the boat coordinates system
-    double apparentWindDir_counterClock =360-m_ApparentWindDir;
-    apparentWindDir_counterClock = Utility::degreeToRadian(apparentWindDir_counterClock);
-    apparentWindDir_counterClock = Utility::limitRadianAngleRange(apparentWindDir_counterClock);
-    for (i = 0;i < 54;i++)
+    std::lock_guard<std::mutex> lock_guard(m_lock);
+
+    if(m_ApparentWindDir != DATA_OUT_OF_RANGE)
     {
-	xBoat_Forces.push_back(DRAGS[i]*cos(apparentWindDir_counterClock) - LIFTS[i]*sin (apparentWindDir_counterClock));
-	yBoat_Forces.push_back(LIFTS[i]*cos(apparentWindDir_counterClock) + DRAGS[i]*sin (apparentWindDir_counterClock));
+        // lists that will contain the forces on X and Y in the boat coordinates system
+        std::vector<double> xBoat_Forces ;  
+        std::vector<double> yBoat_Forces ;
+
+        int i;
+        // transforming given calculated lifts and drags into forces in
+        // the boat coordinates system
+        double apparentWindDir_counterClock =360-m_ApparentWindDir;
+        apparentWindDir_counterClock = Utility::degreeToRadian(apparentWindDir_counterClock);
+        apparentWindDir_counterClock = Utility::limitRadianAngleRange(apparentWindDir_counterClock);
+        for (i = 0;i < 54;i++)
+        {
+        xBoat_Forces.push_back(DRAGS[i]*cos(apparentWindDir_counterClock) - LIFTS[i]*sin (apparentWindDir_counterClock));
+        yBoat_Forces.push_back(LIFTS[i]*cos(apparentWindDir_counterClock) + DRAGS[i]*sin (apparentWindDir_counterClock));
+        }
+
+        std::vector<double> maxAndIndex_xBoat_Forces;
+        maxAndIndex_xBoat_Forces = Utility::maxAndIndex(xBoat_Forces);
+        double orderTail_counterClock;
+        double orderTail;
+        orderTail_counterClock = maxAndIndex_xBoat_Forces[1] - 25;
+        orderTail = -orderTail_counterClock;
+        return(orderTail);
     }
-
-    std::vector<double> maxAndIndex_xBoat_Forces;
-    maxAndIndex_xBoat_Forces = Utility::maxAndIndex(xBoat_Forces);
-    double orderTail_counterClock;
-    double orderTail;
-    orderTail_counterClock = maxAndIndex_xBoat_Forces[1] - 25;
-    orderTail = -orderTail_counterClock;
-    return(orderTail);
-}
-
-
-
-/*----------------------------------------------------------------------------------
-double WingsailControlNode::calculateSailAngle()
-{
-    // Equation from book "Robotic Sailing 2012 ", page 109
-    // Also the reaction could be configure by the frequence of the thread.
-    return (m_MaxWingsailAngle-m_MinWingsailAngle)*((cos(Utility::degreeToRadian(m_ApparentWindDir))+1)/2 + 1);
-}
-//*///----------------------------------------------------------------------------------
-
-///----------------------------------------------------------------------------------
-double WingsailControlNode::getFrequencyThread()
-{
-    return m_LoopTime;
-}
-
-///----------------------------------------------------------------------------------
-void WingsailControlNode::updateFrequencyThread()
-{
-    m_LoopTime = m_db.retrieveCellAsDouble("___","1","loop_time"); //see next table
+    else
+    {
+        return DATA_OUT_OF_RANGE;
+    }
 }
 
 ///----------------------------------------------------------------------------------
@@ -159,11 +154,12 @@ void WingsailControlNode::WingsailControlNodeThreadFunc(ActiveNode* nodePtr)
 
     while(true)
     {
-        std::lock_guard<std::mutex> lock_guard(node->m_lock);
-        // TODO : Modify Actuator Message for adapt to this Node
-        MessagePtr wingSailMessage = std::make_unique<WingSailCommandMsg>(node->calculateTailAngle());
-        node->m_MsgBus.sendMessage(std::move(wingSailMessage));
-
+        float wingSailCommand = (float)node->calculateTailAngle();
+        if (wingSailCommand != DATA_OUT_OF_RANGE)
+        {
+            MessagePtr wingSailMessage = std::make_unique<WingSailCommandMsg>(wingSailCommand);
+            node->m_MsgBus.sendMessage(std::move(wingSailMessage));
+        }
         timer.sleepUntil(node->m_LoopTime);
         timer.reset();
     }

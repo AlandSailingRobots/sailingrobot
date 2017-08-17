@@ -82,8 +82,7 @@ private:
     // -------------
     static void CourseRegulatorNodeThreadFunc(ActiveNode* nodePtr);
 
-    float  m_VesselCourse; // units : ° (degrees), from 0 to 359
-
+    float m_VesselCourse; // units : ° (degrees), from 0 to 359
     float m_VesselSpeed; // units : m/s
     // -------------
     // Parameters to regulate this node
