@@ -24,6 +24,8 @@
 #include "Messages/WindDataMsg.h"
 #include "Messages/ArduinoDataMsg.h"
 #include "Messages/ActuatorPositionMsg.h"
+#include "Messages/WingSailCommandMsg.h"
+#include "Messages/RudderCommandMsg.h"
 #include "Network/TCPServer.h"
 #include "WorldState/CollidableMgr/CollidableMgr.h"
 
@@ -70,9 +72,14 @@ struct VisualContactPacket_t {
   float longitude;
 } __attribute__((packed));
 
-struct ActuatorDataPacket_t {
-  uint16_t rudderCommand;
-  uint16_t sailCommand;
+struct ActuatorDataSailPacket_t {
+  double rudderCommand;
+  double sailCommand;
+}__attribute__((packed));
+
+struct ActuatorDataWingPacket_t {
+  double rudderCommand;
+  double tailCommand;
 }__attribute__((packed));
 
 
@@ -94,9 +101,19 @@ public:
 	void processMessage(const Message* msg);
 
 	///----------------------------------------------------------------------------------
-	/// Stores compass data from a ActuatorPositionMsg.
+	/// Stores actuator command data from a ActuatorPositionMsg.
 	///----------------------------------------------------------------------------------
 	void processActuatorPositionMessage(ActuatorPositionMsg* msg);
+
+  ///----------------------------------------------------------------------------------
+  /// Stores wing sail command data from a WingSailCommandMsg.
+  ///----------------------------------------------------------------------------------
+  void processWingSailCommandMessage(WingSailCommandMsg* msg);
+
+  ///----------------------------------------------------------------------------------
+  /// Stores rudder command data from a RudderCommandMsg.
+  ///----------------------------------------------------------------------------------
+  void processRudderCommandMessage(RudderCommandMsg* msg);
 
 private:
 
@@ -128,7 +145,7 @@ private:
   ///----------------------------------------------------------------------------------
   /// Send our actuator data
   ///----------------------------------------------------------------------------------
-  void sendActuatorData( int socketFD );
+  void sendActuatorData( int socketFD, int boatType );
 
   ///----------------------------------------------------------------------------------
 	/// Communicate with the simulation receive sensor data and send actuator data
@@ -140,6 +157,10 @@ private:
   void createWindMessage();
   void createArduinoMessage();
 
+  double  m_RudderCommand;
+  double  m_SailCommand;
+  double  m_TailCommand;
+
 	int 	  m_CompassHeading;
 	double	m_GPSLat;
 	double	m_GPSLon;
@@ -149,8 +170,7 @@ private:
 	float	  m_WindSpeed;
 	int 	  m_ArduinoRudder;
 	int 	  m_ArduinoSheet;
-
-  ActuatorDataPacket_t actuatorData;
+ 
   TCPServer server;
   CollidableMgr* collidableMgr;
 

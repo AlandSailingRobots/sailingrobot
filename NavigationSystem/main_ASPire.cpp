@@ -150,9 +150,9 @@ int main(int argc, char *argv[])
 
 	WaypointMgrNode waypoint(messageBus, dbHandler);
 
-	double PGAIN = 0.20;
-	double IGAIN = 0.30;
-	LowLevelController llc(messageBus, dbHandler, PGAIN, IGAIN); // NOTE - Maël: It will change
+	//double PGAIN = 0.20;
+	//double IGAIN = 0.30;
+	//LowLevelController llc(messageBus, dbHandler, PGAIN, IGAIN); // NOTE - Maël: It will change
 	WingsailControlNode wingSailControlNode(messageBus, dbHandler);
 	CourseRegulatorNode courseRegulatorNode(messageBus, dbHandler);
 
@@ -221,7 +221,7 @@ int main(int argc, char *argv[])
 	initialiseNode(windStateNode,"WindState",NodeImportance::CRITICAL);
 	initialiseNode(waypoint, "Waypoint", NodeImportance::CRITICAL);
 
-	initialiseNode(llc, "Low Level Controller", NodeImportance::CRITICAL); // NOTE - Maël: It will change
+	//initialiseNode(llc, "Low Level Controller", NodeImportance::CRITICAL); // NOTE - Maël: It will change
  	initialiseNode(wingSailControlNode, "Wing Sail Controller", NodeImportance::CRITICAL);
  	initialiseNode(courseRegulatorNode, "course regulator", NodeImportance::CRITICAL);
 

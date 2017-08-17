@@ -120,7 +120,6 @@ double WingsailControlNode::calculateTailAngle()
     double orderTail;
     orderTail_counterClock = maxAndIndex_xBoat_Forces[1] - 25;
     orderTail = -orderTail_counterClock;
-    
     return(orderTail);
 }
 

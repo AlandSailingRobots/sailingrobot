@@ -18,7 +18,7 @@
 #include <math.h>
 //#include <cstdlib>
 #include "Math/Utility.h"
-#include "Messages/ActuatorPositionMsg.h"
+#include "Messages/RudderCommandMsg.h"
 #include "Messages/StateMessage.h"
 #include "SystemServices/Logger.h"
 #include "SystemServices/Timer.h"
@@ -150,7 +150,7 @@ void CourseRegulatorNode::CourseRegulatorNodeThreadFunc(ActiveNode* nodePtr)
         node->m_lock.lock();
         //std::lock_guard<std::mutex> lock_guard(node->m_lock);
         // TODO : Modify Actuator Message for adapt to this Node
-        MessagePtr actuatorMessage = std::make_unique<ActuatorPositionMsg>(node->calculateRudderAngle(),0);
+        MessagePtr actuatorMessage = std::make_unique<RudderCommandMsg>((int16_t)node->calculateRudderAngle());
         //std::cout << std::endl << "COURSE REG NODE ######### Send : CalcR " << node->calculateRudderAngle();
         node->m_MsgBus.sendMessage(std::move(actuatorMessage));
         node->m_lock.unlock();
