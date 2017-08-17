@@ -4,10 +4,10 @@
  * 		MidRangeVoter.h
  *
  * Purpose:
- *		
+ *
  *
  * License:
- *      This file is subject to the terms and conditions defined in the file 
+ *      This file is subject to the terms and conditions defined in the file
  *      'LICENSE.txt', which is part of this source code package.
  *
  ***************************************************************************************/
@@ -32,12 +32,22 @@ MidRangeVoter::MidRangeVoter( int16_t maxVotes, int16_t weight, CollidableMgr& c
 ///----------------------------------------------------------------------------------
 const ASRCourseBallot& MidRangeVoter::vote( const BoatState_t& boatState )
 {
+    /*
+    * Changing so that safe distance takes vessel size into account
+    * Previously: We had a constant SAFE_DISTANCE = 100 and didn't account for size at all
+    * New, improved and groundbreaking way:
+    * A default safe distance that we use if size data is unavailable or it is a smaller vessel
+    * Otherwise the safe distance is 1.5 times it's length, meaning we want to stay 300 meters clear
+    * of a vessel that is 200 meters long
+    * cpa_weight is to make sure that if we are close to multiple vessels, the larger vessel
+    * will be prioritized even though we may have a smaller cpa for the smaller vessel
+    */
     courseBallot.clear();
 
     static const double MIN_DISTANCE = 100;//100; // 200 Metres
     static const double MAX_DISTANCE = 1000; // 1KM
-    static const double SAFE_DISTANCE = 100;
-
+    static const double DEFAULT_SAFE_DISTANCE = 100;
+    double SAFE_DISTANCE, cpa_weight, cpa_current_weight = 1., safe_dist_cpa = DEFAULT_SAFE_DISTANCE;
     CollidableList<AISCollidable_t> aisContacts = collidableMgr.getAISContacts();
 
     for(uint16_t i = 0; i < 360; i++)
@@ -46,6 +56,7 @@ const ASRCourseBallot& MidRangeVoter::vote( const BoatState_t& boatState )
         //float closestTime = 0;
         double riskOfCollision = 0;
         float distance = 0;
+        SAFE_DISTANCE = DEFAULT_SAFE_DISTANCE;
 
         for(uint16_t j = 0; j < aisContacts.length(); j++)
         {
@@ -57,26 +68,34 @@ const ASRCourseBallot& MidRangeVoter::vote( const BoatState_t& boatState )
                 continue;
             }
 
+            if (collidable.length != 0 && collidable.beam != 0) { //Make sure size data is available
+              Logger::info("HEJHEJ");
+              SAFE_DISTANCE = std::max(SAFE_DISTANCE, 1.5*collidable.length);
+            }
+            // Logger::info("HEJHEJ");
+
             double time = 0;
             float cpa = getCPA( collidable, boatState, i, time);
-
-            if(cpa < closestCPA && cpa < SAFE_DISTANCE && cpa >= 0)
+            cpa_weight = DEFAULT_SAFE_DISTANCE/SAFE_DISTANCE;
+            if(std::max(20.0,cpa*cpa_weight) < closestCPA*cpa_current_weight && cpa < SAFE_DISTANCE && cpa >= 0)
             {
                 closestCPA = cpa;
+                safe_dist_cpa = SAFE_DISTANCE;
+                cpa_current_weight = cpa_weight;
             }
         }
 
-        if(closestCPA < SAFE_DISTANCE)
+        if(closestCPA < safe_dist_cpa)
         {
-            riskOfCollision = (SAFE_DISTANCE - closestCPA) / SAFE_DISTANCE;
+            riskOfCollision = (safe_dist_cpa - closestCPA) / safe_dist_cpa;
         }
         assignVotes(i, riskOfCollision);
 
-        //if(closestCPA < 100)
-        //{
-        //Logger::info("CPA %f at %d so votes is %d", closestCPA, i, courseBallot.get(i));
-        //Logger::info("Distance: %f ", distance);
-        //}
+        if(closestCPA < 100)
+        {
+        Logger::info("CPA %f at %d so votes is %d", closestCPA, i, courseBallot.get(i));
+        Logger::info("Distance: %f ", distance);
+        }
 
         aisContacts.reset();
     }
@@ -112,7 +131,7 @@ const double MidRangeVoter::getCPA( const AISCollidable_t& collidable, const Boa
     double xRel = distance * cos( DEG_TO_RAD * bearing );
     double yRel = distance * sin( DEG_TO_RAD * bearing );
 
-    // Work out velocity 
+    // Work out velocity
     double asv_vX = 0;
     double asv_vY = 0;
     double vessel_vX = 0;
@@ -122,11 +141,11 @@ const double MidRangeVoter::getCPA( const AISCollidable_t& collidable, const Boa
     calculateVelocity( collidable.course, collidable.speed, vessel_vX, vessel_vY );
 
     double dVX = vessel_vX - asv_vX;
-    double dVY = vessel_vY - asv_vY; 
+    double dVY = vessel_vY - asv_vY;
 
     // Work out if our course is parallel
-    double coursesDotProduct = (xRel * dVX) + (yRel * dVY);  
-    if (coursesDotProduct == 0.0) 
+    double coursesDotProduct = (xRel * dVX) + (yRel * dVY);
+    if (coursesDotProduct == 0.0)
     {
         return -1;
     }
@@ -135,7 +154,7 @@ const double MidRangeVoter::getCPA( const AISCollidable_t& collidable, const Boa
     double dotProduct = 2 * coursesDotProduct;
 
     double cpa = sqrt(distance * distance - ( (dotProduct * dotProduct) / (4 * squaredVelocity) ));
-    
+
     time = ( -dotProduct / (2 * squaredVelocity) );
 
     if(time < 0)

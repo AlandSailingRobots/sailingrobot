@@ -12,10 +12,9 @@
 ###############################################################################
 
 # Source files
-MAIN_INTEGRATION_TESTS 	= Tests/IntegrationTests/IntegrationTestASPire.cpp
+HTTP_SYNC_TEST_MAIN	 	= Tests/IntegrationTests/HTTPSyncTest.cpp
 
-SRC 					= $(MAIN_INTEGRATION_TESTS) $(CORE_SRC) $(HW_SERVICES_ALL_SRC) \
-							$(CAN_SERVICES_SRC) $(HW_NODES_ALL_SRC) $(HW_NODES_ASPIRE_SRC)
+SRC 					= $(CORE_SRC) $(HTTP_SYNC_TEST_MAIN)
 
 # Object files
 OBJECTS = $(addprefix $(BUILD_DIR)/, $(SRC:.cpp=.o))
@@ -25,10 +24,10 @@ OBJECTS = $(addprefix $(BUILD_DIR)/, $(SRC:.cpp=.o))
 # Rules
 ###############################################################################
 
-all: $(INTEGRATION_TEST_EXEC_ASPIRE) stats
+all: $(HTTP_SYNC_TEST_EXEC) stats
 
 # Link and build
-$(INTEGRATION_TEST_EXEC_ASPIRE): $(OBJECTS)
+$(HTTP_SYNC_TEST_EXEC): $(OBJECTS)
 	rm -f $(OBJECT_FILE)
 	@echo -n " " $(OBJECTS) >> $(OBJECT_FILE)
 	@echo Linking object files
@@ -40,6 +39,6 @@ $(BUILD_DIR)/%.o:$(SRC_DIR)/%.cpp
 	@echo Compiling CPP File: $@
 	@$(CXX) -c $(CPPFLAGS) $(INC_DIR) -o ./$@ $< $(DEFINES) $(LIBS)
 
-stats:$(INTEGRATION_TEST_EXEC_ASPIRE)
+stats:$(HTTP_SYNC_TEST_EXEC)
 	@echo Final executable size:
-	$(SIZE) $(INTEGRATION_TEST_EXEC_ASPIRE)
+	$(SIZE) $(HTTP_SYNC_TEST_EXEC)
