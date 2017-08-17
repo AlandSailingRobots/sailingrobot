@@ -118,12 +118,14 @@ public:
 			case MessageType::ArduinoData:
 				{
 				const ArduinoDataMsg* arduinomsg = dynamic_cast<const ArduinoDataMsg*>(message);
+				m_SensorValues["RC Mode"] = arduinomsg->Radio_Controller();
 				if (arduinomsg->Radio_Controller() > 10) {
 					m_SensorValues["RC Mode"] = ON;
 				} else {
 					m_SensorValues["RC Mode"] = OFF;
 				}
 				}
+				break;
 			case MessageType::CompassData:
 				{
 				const CompassDataMsg* compassmsg = dynamic_cast<const CompassDataMsg*>(message);

@@ -37,7 +37,7 @@ void CANWindsensorNode::processPGN(N2kMsg &NMsg)
     uint8_t SID, Ref;
     float WS, WA;
     parsePGN130306(NMsg, SID, WS, WA, Ref);		
-    m_WindDir = Utility::mapInterval(WA, 0, 2*pi, 0, 360);
+    m_WindDir = Utility::radianToDegree(WA);
     m_WindSpeed = WS;
   }
   else if(NMsg.PGN == 130311)
