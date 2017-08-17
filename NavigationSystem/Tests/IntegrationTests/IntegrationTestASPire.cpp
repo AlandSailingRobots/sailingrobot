@@ -15,6 +15,8 @@
 *
 ***************************************************************************************/
 
+
+
 #include "Hardwares/CAN_Services/CANService.h"
 #include "Hardwares/CAN_Services/N2kMsg.h"
 #include "SystemServices/Timer.h"
@@ -25,6 +27,7 @@
 #include "Messages/WindDataMsg.h"
 #include "Messages/CompassDataMsg.h"
 #include "Messages/GPSDataMsg.h"
+#include "Messages/AISDataMsg.h"
 
 #include "MessageBus/MessageTypes.h"
 #include "MessageBus/MessageBus.h"
@@ -36,6 +39,7 @@
 #include "Hardwares/ActuatorNodeASPire.h"
 #include "Hardwares/HMC6343Node.h"
 #include "Hardwares/GPSDNode.h"
+#include "Hardwares/CANAISNode.h"
 
 
 
@@ -76,6 +80,7 @@ public:
 		msgBus.registerNode(*this, MessageType::ASPireActuatorFeedback);
 		msgBus.registerNode(*this, MessageType::CompassData);
 		msgBus.registerNode(*this, MessageType::GPSData);
+		msgBus.registerNode(*this, MessageType::AISData);
 
 		m_SensorValues["Rudder Angle"] = DATA_OUT_OF_RANGE;
 		m_SensorValues["Wingsail Angle"] = DATA_OUT_OF_RANGE;
@@ -86,10 +91,11 @@ public:
 		m_SensorValues["Heading"] = DATA_OUT_OF_RANGE;
     m_SensorValues["Roll"] = DATA_OUT_OF_RANGE;
     m_SensorValues["Pitch"] = DATA_OUT_OF_RANGE;
-		m_SensorValues["Longitude"] = DATA_OUT_OF_RANGE;
-		m_SensorValues["Longitude"] = DATA_OUT_OF_RANGE;
+		m_SensorValues["GPS Longitude"] = DATA_OUT_OF_RANGE;
+		m_SensorValues["GPS Latitude"] = DATA_OUT_OF_RANGE;
 		m_SensorValues["GPS Online"] = DATA_OUT_OF_RANGE;
-		
+		m_SensorValues["AIS Longitude"] = DATA_OUT_OF_RANGE;
+		m_SensorValues["AIS Latitude"] = DATA_OUT_OF_RANGE;
 				
 		m_Win = newwin(6+2*m_SensorValues.size(),60,1,2);
 		
@@ -140,8 +146,8 @@ public:
 			case MessageType::GPSData:
 				{
 				const GPSDataMsg* gpsdata = dynamic_cast<const GPSDataMsg*>(message);
-				m_SensorValues["Latitude"] = gpsdata->latitude();
-				m_SensorValues["Longitude"]	= gpsdata->longitude();
+				m_SensorValues["GPS Latitude"] = gpsdata->latitude();
+				m_SensorValues["GPS Longitude"]	= gpsdata->longitude();
 
 				if (gpsdata->gpsOnline()){
 					m_SensorValues["GPS Online"] = ON;
@@ -149,6 +155,14 @@ public:
 					m_SensorValues["GPS Online"] = OFF;
 				}
 				
+				}
+				break;
+				
+			case MessageType::AISData:
+				{
+					const AISDataMsg* aisdata = dynamic_cast<const AISDataMsg*>(message);
+					m_SensorValues["AIS Latitude"] = aisdata->posLat();
+					m_SensorValues["AIS Longitude"] = aisdata->posLon();
 				}
 				break;
 				
@@ -291,7 +305,9 @@ int main() {
 	ActuatorNodeASPire actuators (msgBus, canService);
 	GPSDNode gps (msgBus, 0.5);
 	gps.init();
+	CANAISNode ais (msgBus, canService, 1);
 	
+	ais.start();
 	gps.start();
 	windSensor.start();
 	arduino.start ();

@@ -64,7 +64,7 @@ public:
 
 private:
 
-	const int DATA_OUT_OF_RANGE	=	-2000;
+
 
 	static void CANWindSensorNodeThreadFunc(ActiveNode* nodePtr);
 
