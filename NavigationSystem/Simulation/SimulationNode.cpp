@@ -236,32 +236,32 @@ void SimulationNode::processVisualContact( TCPPacket_t& packet )
 }
 
 ///--------------------------------------------------------------------------------------
-void SimulationNode::sendActuatorData( int socketFD, int boatType )
+void SimulationNode::sendActuatorDataWing( int socketFD)
 {
-    switch (boatType)
-    {
-        case 0:
-            ActuatorDataSailPacket_t actuatorDataSail;
-            actuatorDataSail.rudderCommand = m_RudderCommand;
-            actuatorDataSail.sailCommand   = m_SailCommand;
-            server.sendData( socketFD, &actuatorDataSail, sizeof(ActuatorDataSailPacket_t) );    
-        case 1:
-            ActuatorDataWingPacket_t actuatorDataWing;
-            m_RudderCommand = 12.0;
-            m_TailCommand   = -15.0;
-            actuatorDataWing.rudderCommand = m_RudderCommand;
-            actuatorDataWing.tailCommand   = m_TailCommand;
-            //std::cout <<"sent rudder command" << actuatorDataWing.rudderCommand << std::endl;
-            //std::cout <<"sent tail command" << actuatorDataWing.tailCommand << std::endl;
-            //std::cout <<"given rudder command" << m_RudderCommand << std::endl;
-            //std::cout <<"given tail command" << m_TailCommand << std::endl;
-            std::cout <<sizeof(ActuatorDataWingPacket_t) << std::endl;
-            server.sendData( socketFD, &actuatorDataWing, sizeof(ActuatorDataWingPacket_t) );
-    }
+   
+    ActuatorDataWingPacket_t actuatorDataWing;
+    m_RudderCommand = 12.0;
+    m_TailCommand   = -15.0;
+    actuatorDataWing.rudderCommand = m_RudderCommand;
+    actuatorDataWing.tailCommand   = m_TailCommand;
+    //std::cout <<"sent rudder command" << actuatorDataWing.rudderCommand << std::endl;
+    //std::cout <<"sent tail command" << actuatorDataWing.tailCommand << std::endl;
+    //std::cout <<"given rudder command" << m_RudderCommand << std::endl;
+    //std::cout <<"given tail command" << m_TailCommand << std::endl;
+    //std::cout <<sizeof(ActuatorDataWingPacket_t) << std::endl;
+    server.sendData( socketFD, &actuatorDataWing, sizeof(ActuatorDataWingPacket_t) );
+
     
 }
 
-
+void SimulationNode::sendActuatorDataSail( int socketFD)
+{   
+    ActuatorDataSailPacket_t actuatorDataSail;
+    actuatorDataSail.rudderCommand = m_RudderCommand;
+    actuatorDataSail.sailCommand   = m_SailCommand;
+    server.sendData( socketFD, &actuatorDataSail, sizeof(ActuatorDataSailPacket_t) );    
+   
+}
 ///--------------------------------------------------------------------------------------
 //void SimulationNode::SimulationThreadFunc(void* nodePtr)
 
@@ -291,12 +291,12 @@ void SimulationNode::SimulationThreadFunc(ActiveNode* nodePtr)
         {
             case SimulatorPacket::SailBoatData:
                 node->processSailBoatData( packet );
-                node->sendActuatorData( simulatorFD, 0 );
+                node->sendActuatorDataSail( simulatorFD);
             break;
 
             case SimulatorPacket::WingBoatData:
                 node->processWingBoatData( packet );
-                node->sendActuatorData ( simulatorFD, 1 );
+                node->sendActuatorDataWing ( simulatorFD );
 
             case SimulatorPacket::AISData:
                 node->processAISContact( packet );

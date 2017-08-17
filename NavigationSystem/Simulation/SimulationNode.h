@@ -144,9 +144,15 @@ private:
     void processVisualContact( TCPPacket_t& packet );
 
     ///----------------------------------------------------------------------------------
-    /// Send our actuator data
+    /// Send our actuators data for a wing sail-equipped boat
     ///----------------------------------------------------------------------------------
-    void sendActuatorData( int socketFD, int boatType );
+    void SimulationNode::sendActuatorDataWing( int socketFD);
+
+    ///----------------------------------------------------------------------------------
+    /// Send our actuator data for a conventional sail-equipped boat
+    ///----------------------------------------------------------------------------------
+    void SimulationNode::sendActuatorDataSail( int socketFD);
+    
 
     ///----------------------------------------------------------------------------------
     /// Communicate with the simulation receive sensor data and send actuator data
