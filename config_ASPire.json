@@ -42,8 +42,8 @@
   "boat_id": "BOAT02",
   "boat_pwd": "aspirepassword123",
   "srv_addr": "http://localhost/tests/Tuto_OCR/SailingRobotsWebsite/sync/",
-  "configs_updated": "",
-  "route_updated":""
+  "configs_updated": "0",
+  "route_updated":"1"
 },
 
 "config_sail_control": {

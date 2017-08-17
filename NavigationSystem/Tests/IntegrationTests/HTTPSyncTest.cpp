@@ -106,8 +106,8 @@ int main(int argc, char *argv[])
 	// Declare nodes 
 	//-------------------------------------------------------------------------------
 
-	int dbHandler_delay = dbHandler.retrieveCellAsInt("httpsync_config", "1","delay");
-	bool removeLogs = dbHandler.retrieveCellAsInt("httpsync_config","1","remove_logs");
+	int dbHandler_delay = dbHandler.retrieveCellAsInt("config_httpsync", "1", "loop_time");
+	bool removeLogs = dbHandler.retrieveCellAsInt("config_httpsync","1","remove_logs");
 	HTTPSyncNode httpsync(messageBus, &dbHandler, dbHandler_delay, removeLogs);
 
 	DBLoggerNode dblogger(messageBus, dbHandler, 1, 5);

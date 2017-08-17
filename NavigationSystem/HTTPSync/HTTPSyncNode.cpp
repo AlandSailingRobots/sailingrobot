@@ -197,7 +197,7 @@ std::string HTTPSyncNode::getData(std::string call) {
 
 bool HTTPSyncNode::checkIfNewConfigs() {
     std::string result = getData("checkIfNewConfigs");
-    if (result == "1" || std::stoi(result) == 1)
+    if (std::stoi(result))
         return true;
 
     return false;
@@ -206,9 +206,11 @@ bool HTTPSyncNode::checkIfNewConfigs() {
 bool HTTPSyncNode::checkIfNewWaypoints(){
     std::string result = getData("checkIfNewWaypoints");
 
-    if (result == "1" || std::stoi(result) == 1)
+    if (std::stoi(result))
+    {
         std::cout << "/* check  : //////////////////////////////////////////////////////// "<< result <<  "\n*/" << "";
         return true;
+    }
 
     return false;
 }
@@ -276,7 +278,7 @@ bool HTTPSyncNode::performCURLCall(std::string data, std::string call, std::stri
     else
         serverCall = "serv="+call + "&id="+m_shipID +"&gen=aspire"+"&pwd="+m_shipPWD;
         //example: serv=getAllConfigs&id=BOATID&pwd=BOATPW
-    std::cout << "/* Server call : " << serverCall.substr(0, 50) << " */" << '\n';
+    std::cout << "/* Server call : " << serverCall.substr(0, 150) << " */" << '\n';
 
     curl = curl_easy_init();
     if(curl) {

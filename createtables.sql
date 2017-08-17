@@ -12,7 +12,7 @@ CREATE TABLE current_Mission (id INTEGER PRIMARY KEY AUTOINCREMENT, -- no autoin
 	harvested 		  BOOLEAN,
   id_mission      INTEGER,
   rankInMission   INTEGER,
-  name            VARCHAR
+  name            VARCHAR(200)
 );
 
 
