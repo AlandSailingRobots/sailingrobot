@@ -96,12 +96,13 @@ double WingsailControlNode::restrictWingsail(double val)
 /* Return the angle to give to the tail to have maximum force toward
  * boat heading */
 
-double WingsailControlNode::calculateTailAngle()
+float WingsailControlNode::calculateTailAngle()
 {
     // lists that will contain the forces on X and Y in the boat coordinates system
     std::vector<double> xBoat_Forces ;  
     std::vector<double> yBoat_Forces ;
-    
+    float maxTailAngle;
+    maxTailAngle = 15;
     int i;
     // transforming given calculated lifts and drags into forces in
     // the boat coordinates system
@@ -117,10 +118,19 @@ double WingsailControlNode::calculateTailAngle()
     std::vector<double> maxAndIndex_xBoat_Forces;
     maxAndIndex_xBoat_Forces = Utility::maxAndIndex(xBoat_Forces);
     double orderTail_counterClock;
-    double orderTail;
+    float orderTail;
     orderTail_counterClock = maxAndIndex_xBoat_Forces[1] - 25;
-    orderTail = -orderTail_counterClock;
+    orderTail = (float) -orderTail_counterClock;
     
+    if (orderTail > maxTailAngle)
+    {
+        orderTail = maxTailAngle;
+    }
+    else if (orderTail < -maxTailAngle)
+    {
+        orderTail = -maxTailAngle;
+    }
+    //std::cout << "final order tail  " << orderTail << std::endl;
     return(orderTail);
 }
 

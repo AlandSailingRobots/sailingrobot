@@ -7,16 +7,25 @@ class RudderCommandMsg : public Message {
 public:
  
 
-    RudderCommandMsg(NodeID sourceID, NodeID destinationID, double rudderAngle)
+    RudderCommandMsg(NodeID sourceID, NodeID destinationID, float rudderAngle)
     : Message(MessageType::RudderCommand, sourceID, destinationID),
     m_RudderAngle(rudderAngle)
     {  }
 
-    RudderCommandMsg(double rudderAngle)
+    RudderCommandMsg(float rudderAngle)
     : Message(MessageType::RudderCommand, NodeID::None, NodeID::None),
       m_RudderAngle(rudderAngle)
     {  }  
 
+
+    RudderCommandMsg(MessageDeserialiser deserialiser)
+        :Message(deserialiser)
+    {
+        if( !deserialiser.readFloat(m_RudderAngle))
+        {
+            m_valid = false;
+        }
+    }
 
     virtual void Serialise(MessageSerialiser& serialiser) const
     {
@@ -26,9 +35,9 @@ public:
     }
 
     virtual ~RudderCommandMsg() { }
-    double rudderAngle() const { return m_RudderAngle;}
+    float rudderAngle() const { return m_RudderAngle;}
 
 
 private:
-    double m_RudderAngle;
+    float m_RudderAngle;
 };

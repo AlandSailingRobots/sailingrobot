@@ -5,25 +5,25 @@
 
 class WingSailCommandMsg : public Message {
 public:
-    WingSailCommandMsg(NodeID sourceID, NodeID destinationID, double tailAngle)
+    WingSailCommandMsg(NodeID sourceID, NodeID destinationID, float tailAngle)
         :Message(MessageType::WingSailCommand, sourceID, destinationID), m_TailAngle(tailAngle)
     {  }
 
-    WingSailCommandMsg(double tailAngle)
+    WingSailCommandMsg(float tailAngle)
         :Message(MessageType::WingSailCommand, NodeID::None, NodeID::None), m_TailAngle(tailAngle)
     {  }
 
     WingSailCommandMsg(MessageDeserialiser deserialiser)
         :Message(deserialiser)
     {
-        if( !deserialiser.readDouble(m_TailAngle))
+        if( !deserialiser.readFloat(m_TailAngle))
         {
             m_valid = false;
         }
     }
 
     virtual ~WingSailCommandMsg() { }
-    double tailAngle() const { return m_TailAngle;}
+    float tailAngle() const { return m_TailAngle;}
 
     virtual void Serialise(MessageSerialiser& serialiser) const
     {
@@ -33,5 +33,5 @@ public:
     }
 
 private:
-    double m_TailAngle;
+    float m_TailAngle;
 };

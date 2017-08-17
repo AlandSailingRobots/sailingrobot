@@ -146,12 +146,12 @@ private:
     ///----------------------------------------------------------------------------------
     /// Send our actuators data for a wing sail-equipped boat
     ///----------------------------------------------------------------------------------
-    void SimulationNode::sendActuatorDataWing( int socketFD);
+    void sendActuatorDataWing( int socketFD);
 
     ///----------------------------------------------------------------------------------
     /// Send our actuator data for a conventional sail-equipped boat
     ///----------------------------------------------------------------------------------
-    void SimulationNode::sendActuatorDataSail( int socketFD);
+    void sendActuatorDataSail( int socketFD);
     
 
     ///----------------------------------------------------------------------------------

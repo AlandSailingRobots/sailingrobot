@@ -246,8 +246,8 @@ void SimulationNode::sendActuatorDataWing( int socketFD)
     actuatorDataWing.tailCommand   = m_TailCommand;
     //std::cout <<"sent rudder command" << actuatorDataWing.rudderCommand << std::endl;
     //std::cout <<"sent tail command" << actuatorDataWing.tailCommand << std::endl;
-    //std::cout <<"given rudder command" << m_RudderCommand << std::endl;
-    //std::cout <<"given tail command" << m_TailCommand << std::endl;
+    std::cout <<"given rudder command" << m_RudderCommand << std::endl;
+    std::cout <<"given tail command" << m_TailCommand << std::endl;
     //std::cout <<sizeof(ActuatorDataWingPacket_t) << std::endl;
     server.sendData( socketFD, &actuatorDataWing, sizeof(ActuatorDataWingPacket_t) );
 
