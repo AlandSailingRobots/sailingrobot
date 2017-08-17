@@ -5,7 +5,6 @@
 
 class WingSailCommandMsg : public Message {
 public:
-
     WingSailCommandMsg(NodeID sourceID, NodeID destinationID, float tailAngle)
         :Message(MessageType::WingSailCommand, sourceID, destinationID), m_TailAngle(tailAngle)
     {  }
@@ -24,7 +23,6 @@ public:
     }
 
     virtual ~WingSailCommandMsg() { }
-
     float tailAngle() const { return m_TailAngle;}
 
     virtual void Serialise(MessageSerialiser& serialiser) const
@@ -34,6 +32,5 @@ public:
     }
 
 private:
-    
     float m_TailAngle;
 };

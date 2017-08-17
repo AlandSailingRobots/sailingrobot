@@ -105,11 +105,12 @@ double WingsailControlNode::restrictWingsail(double val)
 /* Return the angle to give to the tail to have maximum force toward
  * boat heading */
 
-double WingsailControlNode::calculateTailAngle()
+float WingsailControlNode::calculateTailAngle()
 {
     std::lock_guard<std::mutex> lock_guard(m_lock);
 
     if(m_ApparentWindDir != DATA_OUT_OF_RANGE)
+
     {
         // lists that will contain the forces on X and Y in the boat coordinates system
         std::vector<double> xBoat_Forces ;  
@@ -140,6 +141,7 @@ double WingsailControlNode::calculateTailAngle()
     {
         return DATA_OUT_OF_RANGE;
     }
+
 }
 
 ///----------------------------------------------------------------------------------

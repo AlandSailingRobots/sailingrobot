@@ -26,18 +26,18 @@ public:
         }
     }
 
-    virtual ~RudderCommandMsg() { }
-
-    float rudderAngle() const { return m_RudderAngle;}
-
+    
     virtual void Serialise(MessageSerialiser& serialiser) const
     {
         Message::Serialise(serialiser);
         serialiser.serialise(m_RudderAngle);
     }
 
+    virtual ~RudderCommandMsg() { }
+    float rudderAngle() const { return m_RudderAngle;}
+
 
 private:
-    
+
     float m_RudderAngle;
 };
