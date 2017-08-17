@@ -40,8 +40,6 @@ struct SailBoatDataPacket_t {
     float windSpeed;
 
     uint16_t heading;
-    uint16_t rudder;
-    uint16_t sail;
 } __attribute__((packed));
 
 struct WingBoatDataPacket_t {
@@ -54,8 +52,6 @@ struct WingBoatDataPacket_t {
     float windSpeed;
 
     uint16_t heading;
-    uint16_t rudder;
-    uint16_t tail;
 } __attribute__((packed));
 
 struct AISContactPacket_t {
@@ -73,6 +69,12 @@ struct VisualContactPacket_t {
 } __attribute__((packed));
 
 
+struct ActuatorDataPacket_t 
+{
+    float rudderCommand;
+    float sailCommand;
+}__attribute__((packed));
+
 struct ActuatorDataWingPacket_t {
     float rudderCommand;
     float tailCommand;
@@ -88,7 +90,7 @@ struct ActuatorDataSailPacket_t
 class SimulationNode : public ActiveNode {
 public:
     SimulationNode(MessageBus& msgBus);
-  SimulationNode(MessageBus& msgBus, CollidableMgr* collidableMgr);
+    SimulationNode(MessageBus& msgBus, CollidableMgr* collidableMgr);
 
     ///----------------------------------------------------------------------------------
     /// Initialize the TCP communication
@@ -110,7 +112,7 @@ public:
     ///----------------------------------------------------------------------------------
     /// Stores wing sail command data from a WingSailCommandMsg.
     ///----------------------------------------------------------------------------------
-    void processWingSailCommandMessage(WingSailCommandMsg* msg);;
+    void processWingSailCommandMessage(WingSailCommandMsg* msg);
 
   ///----------------------------------------------------------------------------------
   /// Stores rudder command data from a RudderCommandMsg.
@@ -124,7 +126,7 @@ private:
     void processSailBoatData( TCPPacket_t& packet );
 
     ///----------------------------------------------------------------------------------
-    /// Process a wing sail boat data message
+    /// Process a wing sail data message
     ///----------------------------------------------------------------------------------
     void processWingBoatData( TCPPacket_t& packet );
 
@@ -165,11 +167,8 @@ private:
     void createArduinoMessage();
     
     float  m_RudderCommand;
-    float  m_TailCommand;
     float  m_SailCommand;
-    
-    
-    
+    float  m_TailCommand;
     int       m_CompassHeading;
     double  m_GPSLat;
     double  m_GPSLon;
@@ -184,6 +183,6 @@ private:
     CollidableMgr* collidableMgr;
 
 
-  std::mutex m_lock;
+    std::mutex m_lock;
 
 };

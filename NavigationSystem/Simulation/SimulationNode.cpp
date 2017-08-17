@@ -52,7 +52,7 @@ enum SimulatorPacket {
 
 
 SimulationNode::SimulationNode(MessageBus& msgBus)
-    : ActiveNode(NodeID::Simulator, msgBu
+    : ActiveNode(NodeID::Simulator, msgBus),
         m_RudderCommand(0), m_SailCommand(0), m_TailCommand(0),
         m_CompassHeading(0), m_GPSLat(0), m_GPSLon(0), m_GPSSpeed(0),
         m_GPSHeading(0), m_WindDir(0), m_WindSpeed(0),
@@ -125,7 +125,11 @@ void SimulationNode::processMessage(const Message* msg)
     }
 }
 		 
-
+void SimulationNode::processActuatorPositionMessage(ActuatorPositionMsg* msg)
+{
+    m_RudderCommand = msg->rudderPosition();
+    m_SailCommand = msg->sailPosition();
+}
 void SimulationNode::processWingSailCommandMessage(WingSailCommandMsg* msg)
 {
     m_TailCommand = msg->tailAngle();
@@ -177,8 +181,6 @@ void SimulationNode::processSailBoatData( TCPPacket_t& packet )
         m_GPSHeading = boatData->course;
         m_WindDir = boatData->windDir;
         m_WindSpeed = boatData->windSpeed;
-        m_ArduinoRudder = boatData->rudder;
-        m_ArduinoSheet = boatData->sail;
 
         // Send messages
         createCompassMessage();
@@ -204,8 +206,6 @@ void SimulationNode::processWingBoatData( TCPPacket_t& packet )
         m_GPSHeading = boatData->course;
         m_WindDir = boatData->windDir;
         m_WindSpeed = boatData->windSpeed;
-        m_ArduinoRudder = boatData->rudder;
-        m_ArduinoSheet = boatData->tail;
 
         // Send messages
         createCompassMessage();
@@ -248,8 +248,8 @@ void SimulationNode::sendActuatorDataWing( int socketFD)
 {
    
     ActuatorDataWingPacket_t actuatorDataWing;
-    m_RudderCommand = 12.0;
-    m_TailCommand   = -15.0;
+    //m_RudderCommand = 12.0;
+    //m_TailCommand   = -15.0;
     actuatorDataWing.rudderCommand = m_RudderCommand;
     actuatorDataWing.tailCommand   = m_TailCommand;
     //std::cout <<"sent rudder command" << actuatorDataWing.rudderCommand << std::endl;
