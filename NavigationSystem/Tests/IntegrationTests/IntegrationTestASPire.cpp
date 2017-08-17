@@ -21,18 +21,25 @@
 #include "Hardwares/CAN_Services/N2kMsg.h"
 #include "SystemServices/Timer.h"
 #include "SystemServices/Logger.h"
+
 #include "Messages/ASPireActuatorFeedbackMsg.h"
 #include "Messages/ActuatorControlASPireMessage.h"
 #include "Messages/WindDataMsg.h"
 #include "Messages/CompassDataMsg.h"
+#include "Messages/GPSDataMsg.h"
+
 #include "MessageBus/MessageTypes.h"
 #include "MessageBus/MessageBus.h"
 #include "MessageBus/ActiveNode.h"
 #include "MessageBus/NodeIDs.h"
+
 #include "Hardwares/CANWindsensorNode.h"
 #include "Hardwares/CANArduinoNode.h"
 #include "Hardwares/ActuatorNodeASPire.h"
 #include "Hardwares/HMC6343Node.h"
+#include "Hardwares/GPSDNode.h"
+
+
 
 
 #include <ncurses.h>
@@ -46,7 +53,7 @@
 #define ENTER 10
 #define TAB 9
 
-#define MAX_INPUT 20
+#define LONGEST_INPUT 20
 
 #define DATA_OUT_OF_RANGE -2000
 #define ON -3000
@@ -70,6 +77,7 @@ public:
 		msgBus.registerNode(*this, MessageType::WindData);
 		msgBus.registerNode(*this, MessageType::ASPireActuatorFeedback);
 		msgBus.registerNode(*this, MessageType::CompassData);
+		msgBus.registerNode(*this, MessageType::GPSData);
 
 		m_SensorValues["Rudder Angle"] = DATA_OUT_OF_RANGE;
 		m_SensorValues["Wingsail Angle"] = DATA_OUT_OF_RANGE;
@@ -80,6 +88,10 @@ public:
 		m_SensorValues["Heading"] = DATA_OUT_OF_RANGE;
     m_SensorValues["Roll"] = DATA_OUT_OF_RANGE;
     m_SensorValues["Pitch"] = DATA_OUT_OF_RANGE;
+		m_SensorValues["Longitude"] = DATA_OUT_OF_RANGE;
+		m_SensorValues["Longitude"] = DATA_OUT_OF_RANGE;
+		m_SensorValues["GPS Online"] = DATA_OUT_OF_RANGE;
+		
 				
 		m_Win = newwin(6+2*m_SensorValues.size(),60,1,2);
 		
@@ -125,9 +137,23 @@ public:
         m_SensorValues["Roll"] = compassmsg->pitch();
         m_SensorValues["Pitch"] = compassmsg->roll();
 				}
-				
-				
 				break;
+				
+			case MessageType::GPSData:
+				{
+				const GPSDataMsg* gpsdata = dynamic_cast<const GPSDataMsg*>(message);
+				m_SensorValues["Latitude"] = gpsdata->latitude();
+				m_SensorValues["Longitude"]	= gpsdata->longitude();
+
+				if (gpsdata->gpsOnline()){
+					m_SensorValues["GPS Online"] = ON;
+				}else{
+					m_SensorValues["GPS Online"] = OFF;
+				}
+				
+				}
+				break;
+				
 				default:
 				break;
 						
@@ -157,7 +183,7 @@ public:
 			} else {
 				wprintw(m_Win, "%f", it.second);
 			}
-			pos+=2;
+			pos+=1;
 		}
 
 		wrefresh(m_Win);
@@ -263,9 +289,12 @@ int main() {
 	CANWindsensorNode windSensor(msgBus, canService, 500);
 	HMC6343Node compass(msgBus, 2, 0.1);
 	compass.init ();
-	
 	CANArduinoNode arduino (msgBus, canService, 500);
 	ActuatorNodeASPire actuators (msgBus, canService);
+	GPSDNode gps (msgBus, 0.5);
+	gps.init();
+	
+	gps.start();
 	windSensor.start();
 	arduino.start ();
 	compass.start ();
@@ -300,11 +329,11 @@ int main() {
 
 		if(isdigit(c)) {
 			c -= 48;
-			if(highlighted->second.size() <= MAX_INPUT) {
+			if(highlighted->second.size() <= LONGEST_INPUT) {
 				highlighted->second += std::to_string(c);
 			}
 		} else if (c == '-'){
-				if(highlighted->second.size() <= MAX_INPUT) {
+				if(highlighted->second.size() <= LONGEST_INPUT) {
 					highlighted->second += c;
 				}
 		}else {	
