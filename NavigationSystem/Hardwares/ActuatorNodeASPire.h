@@ -18,6 +18,8 @@
 #include "MessageBus/MessageBus.h"
 #include "MessageBus/MessageTypes.h"
 #include "Messages/ActuatorControlASPireMessage.h"
+#include "Messages/RudderCommandMsg.h"
+#include "Messages/WingSailCommandMsg.h"
 #include "Hardwares/CAN_Services/CANService.h"
 
 class ActuatorNodeASPire : public Node {
@@ -26,6 +28,7 @@ public:
 	~ActuatorNodeASPire();
 	bool init();
 	void processMessage(const Message* message);
+	void sendCommandMessage();
 
 private:
 	CANService* m_CANService;

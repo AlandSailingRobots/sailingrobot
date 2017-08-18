@@ -192,7 +192,7 @@ int main(int argc, char *argv[])
 
 		const int headingBufferSize = dbHandler.retrieveCellAsInt("buffer_config", "1", "compass");
 		double compassLoopTime = 0.1;
-		HMC6343Node compass(messageBus, dbHandler, headingBufferSize, compassLoopTime);
+		HMC6343Node compass(messageBus, headingBufferSize, compassLoopTime);
 
 		double gpsdLoopTime = dbHandler.retrieveCellAsDouble("GPSD_config", "1", "loop_time");
 	  	GPSDNode gpsd(messageBus, dbHandler, gpsdLoopTime);
