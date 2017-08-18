@@ -71,7 +71,7 @@ bool HMC6343Node::init()
 		m_I2C.beginTransmission();
 		m_I2C.writeReg(COM_READ_EEPROM, EEPROM_ADDRESS);
 		delay(10);
-		uint8_t deviceID = m_I2C.read();
+		uint8_t deviceID = m_I2C.I2Cread();
 		printf("received %02x request %02x\n",deviceID,I2C_ADDRESS);
 
 		m_I2C.endTransmission();
@@ -121,14 +121,14 @@ bool HMC6343Node::readData(float& heading, float& pitch, float& roll)
 		// Extract the data from the compass, each piece of data is made up of two bytes, and their are
 		// 3 pieces of data.
 		m_I2C.beginTransmission();
-		m_I2C.write(COM_POST_HEADING);
+		m_I2C.I2Cwrite(COM_POST_HEADING);
 
 		delay(1);
 
 		int val = 0;
 		for(int i = 0; i < BYTES_TO_READ; i++)
 		{
-			val = m_I2C.read();
+			val = m_I2C.I2Cread();
 
 			if(val != -1)
 			{
@@ -162,7 +162,7 @@ bool HMC6343Node::setOrientation(CompassOrientation orientation)
 	if(m_Initialised)
 	{
 		m_I2C.beginTransmission();
-		m_I2C.write((uint8_t)orientation);
+		m_I2C.I2Cwrite((uint8_t)orientation);
 		m_I2C.endTransmission();
 		return true;
 	}
