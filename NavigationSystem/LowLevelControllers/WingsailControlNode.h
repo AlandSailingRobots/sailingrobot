@@ -91,13 +91,13 @@ private:
 
     double m_MaxCommandAngle; // units : ° (degrees)
 
-    double m_ApparentWindDir; // units : ° (degrees), from -180 to 180
-
     double pGain;
     double iGain;
 
     DBHandler &m_db;
     double m_LoopTime;
+    
+    double m_ApparentWindDir; // units : ° (degrees), from -180 to 180
 
     std::mutex m_lock;
 };

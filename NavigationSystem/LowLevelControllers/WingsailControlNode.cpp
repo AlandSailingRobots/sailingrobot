@@ -35,7 +35,7 @@ const double  DRAGS[53] = {-3.6222976277233707, -3.3490177771111052, -3.08645478
 
 
 WingsailControlNode::WingsailControlNode(MessageBus& msgBus, DBHandler& dbhandler):
-    ActiveNode(NodeID::WingsailControlNode,msgBus), m_db(dbhandler)
+    ActiveNode(NodeID::WingsailControlNode,msgBus), m_db(dbhandler), m_ApparentWindDir(DATA_OUT_OF_RANGE)
 {
     msgBus.registerNode( *this, MessageType::WindData);
     msgBus.registerNode( *this, MessageType::LocalNavigation);

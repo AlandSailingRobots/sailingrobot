@@ -27,7 +27,7 @@
 #define DATA_OUT_OF_RANGE -2000
 
 StateEstimationNode::StateEstimationNode(MessageBus& msgBus, DBHandler& dbhandler ,double loopTime, double speed_1, double speed_2): 
-ActiveNode(NodeID::StateEstimation, msgBus), m_LoopTime(loopTime), m_CompassHeading(DATA_OUT_OF_RANGE), m_GpsOnline(true),
+ActiveNode(NodeID::StateEstimation, msgBus), m_LoopTime(loopTime), m_CompassHeading(DATA_OUT_OF_RANGE), m_GpsOnline(false),
 m_GPSLat(DATA_OUT_OF_RANGE), m_GPSLon(DATA_OUT_OF_RANGE), m_GPSSpeed(DATA_OUT_OF_RANGE), m_GPSCourse(DATA_OUT_OF_RANGE), 
 m_WaypointDeclination(DATA_OUT_OF_RANGE), m_speed_1(speed_1), m_speed_2(speed_2), m_VesselHeading(DATA_OUT_OF_RANGE), 
 m_VesselLat(DATA_OUT_OF_RANGE), m_VesselLon(DATA_OUT_OF_RANGE), m_VesselSpeed(DATA_OUT_OF_RANGE), 
@@ -41,7 +41,7 @@ m_VesselLat(DATA_OUT_OF_RANGE), m_VesselLon(DATA_OUT_OF_RANGE), m_VesselSpeed(DA
 }
 
 StateEstimationNode::StateEstimationNode(MessageBus& msgBus, DBHandler& dbhandler,double loopTime):
-ActiveNode(NodeID::StateEstimation, msgBus), m_LoopTime(loopTime), m_CompassHeading(DATA_OUT_OF_RANGE), m_GpsOnline(true),
+ActiveNode(NodeID::StateEstimation, msgBus), m_LoopTime(loopTime), m_CompassHeading(DATA_OUT_OF_RANGE), m_GpsOnline(false),
 m_GPSLat(DATA_OUT_OF_RANGE), m_GPSLon(DATA_OUT_OF_RANGE), m_GPSSpeed(DATA_OUT_OF_RANGE), m_GPSCourse(DATA_OUT_OF_RANGE), 
 m_WaypointDeclination(DATA_OUT_OF_RANGE), m_speed_1(0), m_speed_2(1), m_VesselHeading(DATA_OUT_OF_RANGE), 
 m_VesselLat(DATA_OUT_OF_RANGE), m_VesselLon(DATA_OUT_OF_RANGE), m_VesselSpeed(DATA_OUT_OF_RANGE), 

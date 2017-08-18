@@ -78,12 +78,12 @@ private:
 	///----------------------------------------------------------------------------------
     /// Calculate the angle of the line to be followed. in north east down reference frame.
     ///----------------------------------------------------------------------------------
-	float calculateAngleOfDesiredTrajectory();
+	double calculateAngleOfDesiredTrajectory();
 
 	///----------------------------------------------------------------------------------
     /// Calculate the course to steer by using the line follow algorithm described in the papers.
     ///----------------------------------------------------------------------------------
-	float calculateTargetCourse();
+	double calculateTargetCourse();
 
     ///----------------------------------------------------------------------------------
     /// Starts the LineFollowNode's thread that pumps out LocalNavigationMsg.
