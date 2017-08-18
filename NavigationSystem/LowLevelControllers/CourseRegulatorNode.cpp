@@ -159,7 +159,7 @@ void CourseRegulatorNode::CourseRegulatorNodeThreadFunc(ActiveNode* nodePtr)
         if (rudderCommand != DATA_OUT_OF_RANGE)
         {
 
-            //std::cout << "rudder command node : " << rudderCommand <<std::endl;
+            std::cout << "rudder command : " << rudderCommand <<std::endl;
             MessagePtr actuatorMessage = std::make_unique<RudderCommandMsg>(rudderCommand);
             node->m_MsgBus.sendMessage(std::move(actuatorMessage));
         }

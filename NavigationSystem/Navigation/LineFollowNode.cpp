@@ -248,8 +248,8 @@ void LineFollowNode::LineFollowNodeThreadFunc(ActiveNode* nodePtr)
     while(true)
     {
         float targetCourse = Utility::radianToDegree(node->calculateTargetCourse());
-        // std::cout << "targetCourse : " << targetCourse <<std::endl;
         if (targetCourse != DATA_OUT_OF_RANGE){
+            std::cout << "targetCourse : " << targetCourse <<std::endl;
             MessagePtr LocalNavMsg = std::make_unique<LocalNavigationMsg>(targetCourse, NO_COMMAND, node->m_BeatingMode, node->m_TargetTackStarboard);
             node->m_MsgBus.sendMessage( std::move( LocalNavMsg ) );
         }
