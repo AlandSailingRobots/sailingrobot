@@ -44,6 +44,7 @@ m_TackDirection(1), m_BeatingMode(false), m_TargetTackStarboard(false)
     m_MaxDistanceFromLine = 40;
 
     m_CloseHauledAngle = Utility::degreeToRadian(45);
+    m_BroadReachAngle = Utility::degreeToRadian(30);
     m_TackingDistance = 20;
 }
 
@@ -206,11 +207,20 @@ float LineFollowNode::calculateTargetCourse()
         }
 
         // Check if the targetcourse is inconsistent with the wind.
-        if( (cos(trueWindAngle - targetCourse) + cos(m_CloseHauledAngle) < 0) || (cos(trueWindAngle - phi) + cos(m_CloseHauledAngle) < 0))
+        if( (cos(trueWindAngle - targetCourse) + cos(m_CloseHauledAngle) < 0) || 
+            ((cos(trueWindAngle - phi) + cos(m_CloseHauledAngle) < 0) and (abs(signedDistance) < m_MaxDistanceFromLine)) )
         {   
-            // Close hauled mode (Beating mode).
+            // Close hauled mode (Upwind beating mode).
             m_BeatingMode = true;
             targetCourse = M_PI + trueWindAngle + m_TackDirection*m_CloseHauledAngle;
+            targetCourse = Utility::limitRadianAngleRange(targetCourse);
+        }
+        else if( (cos(trueWindAngle - targetCourse) - cos(m_BroadReachAngle) < 0) || 
+                 ((cos(trueWindAngle - phi) - cos(m_BroadReachAngle) < 0) and (abs(signedDistance) < m_MaxDistanceFromLine)) )
+        {   
+            // Broad reach mode (Downwind beating mode).
+            m_BeatingMode = true;
+            targetCourse = M_PI + trueWindAngle + m_TackDirection*m_BroadReachAngle;
             targetCourse = Utility::limitRadianAngleRange(targetCourse);
         }
         else

@@ -103,8 +103,9 @@ private:
 	float 	m_IncidenceAngle;		// radian.	[1]: (gamma_infiniy). 			[2]: (gamma).
 	float 	m_MaxDistanceFromLine;	// meter.	[1]: cutoff distance (r). 		[2]: waypoint radius (r).
 
-	// Close hauled sailing mode parameters
-	float  	m_CloseHauledAngle;		// radian. 	[1]: close hauled angle (zeta).	[2]: tacking angle (theta_t). 
+	// Beating sailing mode parameters
+	float  	m_CloseHauledAngle;		// radian. 	[1]: close hauled angle (zeta).	[2]: tacking angle (theta_t).
+	float 	m_BroadReachAngle;		// radian.	Not in articles (new for downwind beating)
 	float 	m_TackingDistance;		// meter. 	[1]: (r/2).						[2]: tacking distance (d).
 
 
