@@ -24,6 +24,8 @@
 
 #include "Messages/ASPireActuatorFeedbackMsg.h"
 #include "Messages/ActuatorControlASPireMessage.h"
+#include "Messages/RudderCommandMsg.h"
+#include "Messages/WingSailCommandMsg.h"
 #include "Messages/WindDataMsg.h"
 #include "Messages/CompassDataMsg.h"
 #include "Messages/GPSDataMsg.h"
@@ -40,9 +42,6 @@
 #include "Hardwares/HMC6343Node.h"
 #include "Hardwares/GPSDNode.h"
 #include "Hardwares/CANAISNode.h"
-
-
-
 
 #include <ncurses.h>
 #include <unordered_map>
@@ -280,10 +279,12 @@ void sendActuatorCommands() {
 		return;
 	}
 	
-	MessagePtr actuatorMsg = std::make_unique<ActuatorControlASPireMessage>(wingsailAngle16, rudderAngle16, true );
-	msgBus.sendMessage(std::move(actuatorMsg));
-	//MessagePtr rudderMsg = std::make_unique<rudderCommand>(rudderAngle16);
-
+	// MessagePtr actuatorMsg = std::make_unique<ActuatorControlASPireMessage>(wingsailAngle16, rudderAngle16, true );
+	// msgBus.sendMessage(std::move(actuatorMsg));
+	MessagePtr rudderMsg = std::make_unique<RudderCommandMsg>(rudderAngle16);
+	msgBus.sendMessage(std::move(rudderMsg));
+	MessagePtr wingSailMsg = std::make_unique<WingSailCommandMsg>(wingsailAngle16);
+	msgBus.sendMessage(std::move(wingSailMsg));
 
 	lastSentValues = menuValues;
 }

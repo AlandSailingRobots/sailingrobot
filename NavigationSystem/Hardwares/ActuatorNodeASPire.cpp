@@ -20,6 +20,8 @@ ActuatorNodeASPire::ActuatorNodeASPire(MessageBus& msgBus, CANService& CANServic
 	m_wingsailAngle(0), m_windvaneSelfSteeringOn(0)
 {
 	msgBus.registerNode(*this, MessageType::ActuatorControlASPire);
+	msgBus.registerNode(*this, MessageType::WingSailCommand);
+	msgBus.registerNode(*this, MessageType::RudderCommand);
 }
 
 ActuatorNodeASPire::~ActuatorNodeASPire()
@@ -46,14 +48,14 @@ void ActuatorNodeASPire::processMessage(const Message* message)
 	else if(type == MessageType::WingSailCommand)
 	{
     	const WingSailCommandMsg* actMsg = dynamic_cast<const WingSailCommandMsg*>(message);
-		m_wingsailAngle = actMsg->tailAngle();
+		m_wingsailAngle = -actMsg->tailAngle();
     }
     else if (type == MessageType::RudderCommand)
     {
     	const RudderCommandMsg* actMsg = dynamic_cast<const RudderCommandMsg*>(message);
-		m_rudderAngle = actMsg->rudderAngle();
+		m_rudderAngle = -actMsg->rudderAngle();
     }
-    
+
     sendCommandMessage();
 }
 
