@@ -174,6 +174,20 @@ bool HMC6343Node::setOrientation(CompassOrientation orientation)
 	}
 }
 
+void HMC6343Node::calibrate(int calibrationTime){
+	Timer calTimer;
+	calTimer.start ();
+	calTimer.reset();
+	Logger::info("Started calibration");
+	m_I2C.beginTransmission();
+	m_I2C.I2Cwrite((uint8_t)113);
+	calTimer.sleepUntil(calibrationTime);
+	m_I2C.I2Cwrite((uint8_t)126);
+	m_I2C.endTransmission();
+	Logger::info("Calibration finished");
+	calTimer.stop();
+}
+
 void HMC6343Node::HMC6343ThreadFunc(ActiveNode* nodePtr)
 {
 	const int MAX_ERROR_COUNT = 100;

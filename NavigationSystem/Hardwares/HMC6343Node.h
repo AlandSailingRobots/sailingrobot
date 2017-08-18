@@ -66,6 +66,7 @@ public:
 	///----------------------------------------------------------------------------------
 	bool readData(float& heading, float& pitch, float& roll);
 
+	void calibrate(int calibrationTime);
 protected:
 
 	///----------------------------------------------------------------------------------

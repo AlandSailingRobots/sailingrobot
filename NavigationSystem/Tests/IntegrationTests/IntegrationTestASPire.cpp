@@ -299,8 +299,11 @@ int main() {
 
 	SensorDataReceiver sensorReceiver(msgBus);
 	CANWindsensorNode windSensor(msgBus, canService, 500);
-	HMC6343Node compass(msgBus, 2, 0.1);
+	HMC6343Node compass(msgBus, 3, 0.1);
 	compass.init ();
+	
+
+	
 	CANArduinoNode arduino (msgBus, canService, 500);
 	ActuatorNodeASPire actuators (msgBus, canService);
 	GPSDNode gps (msgBus, 0.5);
