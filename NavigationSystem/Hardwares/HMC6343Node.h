@@ -22,7 +22,6 @@
 
 
 #include "MessageBus/ActiveNode.h"
-#include "DataBase/DBHandler.h"
 #include "Hardwares/i2ccontroller/I2CController.h"
 
 // Magic numbers correspond to the compass commands, see the datasheet for more info.
@@ -35,7 +34,7 @@ enum class CompassOrientation {
 
 class HMC6343Node : public ActiveNode {
 public:
-	HMC6343Node(MessageBus& msgBus, DBHandler& dbhandler, const int headingBufferSize = 10, double loopTime = 0.1);
+	HMC6343Node(MessageBus& msgBus,  const int headingBufferSize, double loopTime);
 
 	virtual ~HMC6343Node() { }
 
@@ -52,8 +51,6 @@ public:
 	///----------------------------------------------------------------------------------
 	void start();
 
-	void updateConfigsFromDB();
-
 	///----------------------------------------------------------------------------------
 	/// Doesn't process any messages.
 	///----------------------------------------------------------------------------------
@@ -69,6 +66,7 @@ public:
 	///----------------------------------------------------------------------------------
 	bool readData(float& heading, float& pitch, float& roll);
 
+	void calibrate(int calibrationTime);
 protected:
 
 	///----------------------------------------------------------------------------------
@@ -78,11 +76,10 @@ protected:
 	///----------------------------------------------------------------------------------
 	static void HMC6343ThreadFunc(ActiveNode* nodePtr);
 
-	I2CController 	m_I2C;
+	I2CController m_I2C;
 	bool 	m_Initialised;
 	const int		m_HeadingBufferSize;
 	double m_LoopTime;
-	DBHandler& m_db;
 
 	// HMC6343 Orientations
 	const int LEVEL = 0; // X = forward, +Z = up (default)

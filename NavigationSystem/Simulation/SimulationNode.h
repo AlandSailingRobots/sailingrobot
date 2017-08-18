@@ -22,10 +22,11 @@
 #include "Messages/CompassDataMsg.h"
 #include "Messages/GPSDataMsg.h"
 #include "Messages/WindDataMsg.h"
-#include "Messages/ArduinoDataMsg.h"
 #include "Messages/ActuatorPositionMsg.h"
 #include "Messages/WingSailCommandMsg.h"
 #include "Messages/RudderCommandMsg.h"
+#include "Messages/WaypointDataMsg.h"
+
 #include "Network/TCPServer.h"
 #include "WorldState/CollidableMgr/CollidableMgr.h"
 
@@ -55,11 +56,13 @@ struct WingBoatDataPacket_t {
 } __attribute__((packed));
 
 struct AISContactPacket_t {
-    uint32_t mmsi;
-    float latitude;
-    float longitude;
-    float speed;
-    uint16_t course;
+  uint32_t mmsi;
+  float latitude;
+  float longitude;
+  float speed;
+  uint16_t course;
+  float length;
+  float beam;
 } __attribute__((packed));
 
 struct VisualContactPacket_t {
@@ -67,7 +70,6 @@ struct VisualContactPacket_t {
     float latitude;
     float longitude;
 } __attribute__((packed));
-
 
 struct ActuatorDataPacket_t 
 {
@@ -86,6 +88,20 @@ struct ActuatorDataSailPacket_t
     float sailCommand;
 }__attribute__((packed));
     
+struct WaypointPacket_t {
+  int nextId;
+  double nextLongitude;
+  double nextLatitude;
+  int nextDeclination;
+  int nextRadius;
+  int nextStayTime;
+  int prevId;
+  double prevLongitude;
+  double prevLatitude;
+  int prevDeclination;
+  int prevRadius;
+}__attribute__((packed));
+
 
 class SimulationNode : public ActiveNode {
 public:
@@ -114,10 +130,13 @@ public:
     ///----------------------------------------------------------------------------------
     void processWingSailCommandMessage(WingSailCommandMsg* msg);
 
-  ///----------------------------------------------------------------------------------
-  /// Stores rudder command data from a RudderCommandMsg.
-  ///----------------------------------------------------------------------------------
-  void processRudderCommandMessage(RudderCommandMsg* msg);
+
+    void processWaypointMessage(WaypointDataMsg* msg);
+
+    ///----------------------------------------------------------------------------------
+    /// Stores rudder command data from a RudderCommandMsg.
+    ///----------------------------------------------------------------------------------
+    void processRudderCommandMessage(RudderCommandMsg* msg);
 
 private:
     ///----------------------------------------------------------------------------------
@@ -155,6 +174,10 @@ private:
     ///----------------------------------------------------------------------------------
     void sendActuatorDataSail( int socketFD);
     
+    ///----------------------------------------------------------------------------------
+    /// Sends the waypoint
+    ///----------------------------------------------------------------------------------
+    void sendWaypoint( int socketFD );
 
     ///----------------------------------------------------------------------------------
     /// Communicate with the simulation receive sensor data and send actuator data
@@ -164,25 +187,22 @@ private:
     void createCompassMessage();
     void createGPSMessage();
     void createWindMessage();
-    void createArduinoMessage();
     
-    float  m_RudderCommand;
-    float  m_SailCommand;
-    float  m_TailCommand;
-    int       m_CompassHeading;
+    float   m_RudderCommand;
+    float   m_SailCommand;
+    float   m_TailCommand;
+    int     m_CompassHeading;
     double  m_GPSLat;
     double  m_GPSLon;
     double  m_GPSSpeed;
     double  m_GPSHeading;
     int     m_WindDir;
-    float     m_WindSpeed;
-    int       m_ArduinoRudder;
-    int       m_ArduinoSheet;
+    float   m_WindSpeed;
     
     TCPServer server;
     CollidableMgr* collidableMgr;
 
+    WaypointPacket_t waypoint;
 
     std::mutex m_lock;
-
 };

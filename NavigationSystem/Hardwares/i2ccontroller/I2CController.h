@@ -46,7 +46,7 @@ class I2CController {
 		///
 		/// @returns				Returns true if the operation was a success.
 		///----------------------------------------------------------------------------------
-		bool write(uint8_t data);
+		bool I2Cwrite(uint8_t data);
 
 		///----------------------------------------------------------------------------------
 		/// A simple I2C write, a wrapper for wiringPI wiringPiI2CWrite(int, int).
@@ -63,7 +63,7 @@ class I2CController {
 		/// @returns 				Returns a byte from the read, or a -1 if there was a
 		///							error.
 		///----------------------------------------------------------------------------------
-		int read();
+		int I2Cread();
 
 		///----------------------------------------------------------------------------------
 		/// A simple I2C read from a particular register, a wrapper for wiringPI
@@ -86,6 +86,7 @@ class I2CController {
 		///							error.
 		///----------------------------------------------------------------------------------
 		int readBlock(uint8_t* block, uint8_t size);
+		int writeBlock(uint8_t* block, uint8_t size);
 
 		///----------------------------------------------------------------------------------
 		/// Begins an I2C transmission, this should be called before any I2C operations are
@@ -99,9 +100,11 @@ class I2CController {
 		///----------------------------------------------------------------------------------
 		void endTransmission();
 
-	private:
-		static std::mutex m_mutex;		// Shared by all I2C Controller, this is the lock for
-										// the bus.
+	//private:
+	protected:
+																// Shared by all I2C Controller, this is the lock for
+		static std::mutex m_mutex;															// the bus.
 		bool m_Locked;					// Indicates if this I2C Controller owns the lock.
 		int m_DeviceFD;					// File descriptor for this I2C Device.
+		int m_busNr;
 };

@@ -37,7 +37,6 @@
 #define COUNT_COMPASSDATA_MSG 1
 #define COUNT_GPSDATA_MSG 1
 #define COUNT_WINDDATA_MSG 1
-#define COUNT_ARDUINO_MSG 1
 
 #define SERVER_PORT 6900
 
@@ -55,24 +54,24 @@ SimulationNode::SimulationNode(MessageBus& msgBus)
     : ActiveNode(NodeID::Simulator, msgBus),
         m_RudderCommand(0), m_SailCommand(0), m_TailCommand(0),
         m_CompassHeading(0), m_GPSLat(0), m_GPSLon(0), m_GPSSpeed(0),
-        m_GPSHeading(0), m_WindDir(0), m_WindSpeed(0),
-        m_ArduinoRudder(0), m_ArduinoSheet(0), collidableMgr(NULL)
+        m_GPSHeading(0), m_WindDir(0), m_WindSpeed(0), collidableMgr(NULL)
 {
     m_MsgBus.registerNode(*this, MessageType::ActuatorPosition);
     m_MsgBus.registerNode(*this, MessageType::WingSailCommand);
     m_MsgBus.registerNode(*this, MessageType::RudderCommand);
+    m_MsgBus.registerNode(*this, MessageType::WaypointData);
 }
 
 SimulationNode::SimulationNode(MessageBus& msgBus, CollidableMgr* collidableMgr)
     : ActiveNode(NodeID::Simulator, msgBus),
         m_RudderCommand(0), m_SailCommand(0), m_TailCommand(0),
         m_CompassHeading(0), m_GPSLat(0), m_GPSLon(0), m_GPSSpeed(0),
-        m_GPSHeading(0), m_WindDir(0), m_WindSpeed(0),
-        m_ArduinoRudder(0), m_ArduinoSheet(0), collidableMgr(collidableMgr)
+        m_GPSHeading(0), m_WindDir(0), m_WindSpeed(0), collidableMgr(collidableMgr)
 {
     m_MsgBus.registerNode(*this, MessageType::ActuatorPosition);
     m_MsgBus.registerNode(*this, MessageType::WingSailCommand);
     m_MsgBus.registerNode(*this, MessageType::RudderCommand);
+    m_MsgBus.registerNode(*this, MessageType::WaypointData);
 }
 
 void SimulationNode::start()
@@ -108,7 +107,6 @@ void SimulationNode::processMessage(const Message* msg)
 {
     MessageType type = msg->messageType();
 
-
     switch(type)
     {
     case MessageType::ActuatorPosition:
@@ -119,6 +117,10 @@ void SimulationNode::processMessage(const Message* msg)
         break;
     case MessageType::RudderCommand:
         processRudderCommandMessage((RudderCommandMsg*)msg);
+        break;
+    case MessageType::WaypointData:
+        Logger::info("Waypoint message received");
+        processWaypointMessage((WaypointDataMsg*) msg);
         break;
     default:
         return;
@@ -140,6 +142,22 @@ void SimulationNode::processRudderCommandMessage(RudderCommandMsg* msg)
     m_RudderCommand = msg->rudderAngle();
 }
 
+void SimulationNode::processWaypointMessage(WaypointDataMsg* msg)
+{
+	waypoint.nextId = msg->nextId();
+	waypoint.nextLongitude = msg->nextLongitude();
+	waypoint.nextLatitude = msg->nextLatitude();
+	waypoint.nextDeclination = msg->nextDeclination();
+	waypoint.nextRadius = msg->nextRadius();
+	waypoint.nextStayTime = msg->stayTime();
+	waypoint.prevId = msg->prevId();
+	waypoint.prevLongitude = msg->prevLongitude();
+	waypoint.prevLatitude = msg->prevLatitude();
+	waypoint.prevDeclination = msg->prevDeclination();
+	waypoint.prevRadius = msg->prevRadius();
+
+	Logger::info("In processmessage, lat: " + std::to_string(waypoint.nextLatitude) + ", Lon: " + std::to_string(waypoint.nextLongitude));
+}
 
 void SimulationNode::createCompassMessage()
 {
@@ -157,12 +175,6 @@ void SimulationNode::createWindMessage()
 {
     MessagePtr windData = std::make_unique<WindDataMsg>( WindDataMsg(m_WindDir, m_WindSpeed, 21) );
     m_MsgBus.sendMessage( std::move(windData) );
-}
-
-void SimulationNode::createArduinoMessage()
-{
-    MessagePtr msg = std::make_unique<ArduinoDataMsg>(ArduinoDataMsg(0, m_ArduinoRudder, m_ArduinoSheet, 0, 0 ));
-    m_MsgBus.sendMessage(std::move(msg));
 }
 
 ///--------------------------------------------------------------------------------------
@@ -186,7 +198,6 @@ void SimulationNode::processSailBoatData( TCPPacket_t& packet )
         createCompassMessage();
         createGPSMessage();
         createWindMessage();
-        createArduinoMessage();
     }
 }
 
@@ -211,21 +222,21 @@ void SimulationNode::processWingBoatData( TCPPacket_t& packet )
         createCompassMessage();
         createGPSMessage();
         createWindMessage();
-        createArduinoMessage();
     }
 }
 
 ///--------------------------------------------------------------------------------------
 void SimulationNode::processAISContact( TCPPacket_t& packet )
 {
-    if( this->collidableMgr != NULL )
-    {
-        // The first byte is the packet type, lets skip that
-        uint8_t* ptr = packet.data + 1;
-        AISContactPacket_t* aisData = (AISContactPacket_t*)ptr;
+	if( this->collidableMgr != NULL )
+	{
+		// The first byte is the packet type, lets skip that
+		uint8_t* ptr = packet.data + 1;
+		AISContactPacket_t* aisData = (AISContactPacket_t*)ptr;
 
-        this->collidableMgr->addAISContact(aisData->mmsi, aisData->latitude, aisData->longitude, aisData->speed, aisData->course);
-    }
+		this->collidableMgr->addAISContact(aisData->mmsi, aisData->latitude, aisData->longitude, aisData->speed, aisData->course);
+		this->collidableMgr->addAISContact(aisData->mmsi, aisData->length, aisData->beam);
+	}
 }
 
 ///--------------------------------------------------------------------------------------
@@ -260,18 +271,21 @@ void SimulationNode::sendActuatorDataWing( int socketFD)
     server.sendData( socketFD, &actuatorDataWing, sizeof(ActuatorDataWingPacket_t) );
 }
 
-
 void SimulationNode::sendActuatorDataSail( int socketFD)
 {   
     ActuatorDataSailPacket_t actuatorDataSail;
     actuatorDataSail.rudderCommand = m_RudderCommand;
     actuatorDataSail.sailCommand   = m_SailCommand;
-    server.sendData( socketFD, &actuatorDataSail, sizeof(ActuatorDataSailPacket_t) );    
-   
+    server.sendData( socketFD, &actuatorDataSail, sizeof(ActuatorDataSailPacket_t) );       
 }
-///--------------------------------------------------------------------------------------
-//void SimulationNode::SimulationThreadFunc(void* nodePtr)
 
+///--------------------------------------------------------------------------------------
+void SimulationNode::sendWaypoint( int socketFD )
+{
+	server.sendData( socketFD, &waypoint, sizeof(WaypointPacket_t) );
+}
+
+///--------------------------------------------------------------------------------------
 void SimulationNode::SimulationThreadFunc(ActiveNode* nodePtr)
 {
     SimulationNode* node = dynamic_cast<SimulationNode*> (nodePtr);
@@ -300,19 +314,21 @@ void SimulationNode::SimulationThreadFunc(ActiveNode* nodePtr)
             case SimulatorPacket::SailBoatData:
                 node->processSailBoatData( packet );
                 node->sendActuatorDataSail( simulatorFD);
-            break;
+                node->sendWaypoint( simulatorFD );
+                break;
 
             case SimulatorPacket::WingBoatData:
                 node->processWingBoatData( packet );
                 node->sendActuatorDataWing ( simulatorFD );
-
+                node->sendWaypoint( simulatorFD );
+                break;
             case SimulatorPacket::AISData:
                 node->processAISContact( packet );
-            break;
+                break;
 
             case SimulatorPacket::CameraData:
                 node->processVisualContact( packet );
-            break;
+                break;
 
             // unknown or deformed packet
             default:

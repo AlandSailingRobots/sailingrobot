@@ -7,6 +7,7 @@
 std::mutex I2CController::m_mutex;
 
 
+
 I2CController::I2CController()
 	: m_Locked(false), m_DeviceFD(-1)
 {
@@ -25,7 +26,7 @@ bool I2CController::init(const int deviceAddress)
 	return (m_DeviceFD < 0) ? false : true;
 }
 
-bool I2CController::write(uint8_t data)
+bool I2CController::I2Cwrite(uint8_t data)
 {
 	if (m_Locked)
 	{
@@ -47,7 +48,7 @@ bool I2CController::writeReg(uint8_t reg, uint8_t data)
 	return false;
 }
 
-int I2CController::read()
+int I2CController::I2Cread()
 {
 	if (m_Locked)
 	{
@@ -69,6 +70,7 @@ int I2CController::readReg(int regAddress)
 	return -1;
 }
 
+
 int I2CController::readBlock(uint8_t* block, uint8_t size)
 {
 	if(m_Locked)
@@ -78,8 +80,23 @@ int I2CController::readBlock(uint8_t* block, uint8_t size)
 			Logger::error("%s char* block is a null pointer!", __PRETTY_FUNCTION__);
 			return -1;
 		}
+		//return wiringPiI2CReadBlock(m_DeviceFD, (char*)block, size);
+		return read(m_DeviceFD, (char*)block, size);
+	}
 
-		return wiringPiI2CReadBlock(m_DeviceFD, (char*)block, size);
+	Logger::error("I2C controller transmission has not begun, call I2CController::beginTransmission!");
+	return -1;
+}
+int I2CController::writeBlock(uint8_t* block, uint8_t size)
+{
+	if(m_Locked)
+	{
+		if(block == NULL)
+		{
+			Logger::error("%s char* block is a null pointer!", __PRETTY_FUNCTION__);
+			return -1;
+		}
+		return write(m_DeviceFD, (char*)block, size);
 	}
 
 	Logger::error("I2C controller transmission has not begun, call I2CController::beginTransmission!");

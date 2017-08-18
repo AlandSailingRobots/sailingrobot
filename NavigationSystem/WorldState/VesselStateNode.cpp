@@ -126,7 +126,7 @@ void VesselStateNode::processArduinoMessage(ArduinoDataMsg* msg)
 	m_ArduinoRudder = msg->rudder();
 	m_ArduinoSheet = msg->sheet();
 	m_ArduinoBattery = msg->battery();
-	m_ArduinoRC = msg->Radio_Controller();
+	
 }
 
 void VesselStateNode::processWaypointMessage( WaypointDataMsg* msg )
@@ -165,7 +165,7 @@ void VesselStateNode::VesselStateThreadFunc(ActiveNode* nodePtr)
 																	node->m_GPSLon, node->m_GPSUnixTime, node->m_GPSSpeed, node->m_GPSSatellite,
 																	node->m_GPSCourse, node->m_WindDir, node->m_WindSpeed,
 																	node->m_WindTemp, node->m_ArduinoPressure, node->m_ArduinoRudder,
-																	node->m_ArduinoSheet, node->m_ArduinoBattery, node->m_ArduinoRC);
+																	node->m_ArduinoSheet, node->m_ArduinoBattery);
 		node->m_MsgBus.sendMessage(std::move(vesselState));
 
 		// Compass heading, Compass Pitch, Compass Roll, Wind Dir, Wind Speed, GPS Course, GPS Lat, GPS Lon

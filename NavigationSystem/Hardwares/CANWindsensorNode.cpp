@@ -13,6 +13,9 @@
 ***************************************************************************************/
 
 #include "CANWindsensorNode.h"
+#include "Math/Utility.h"
+
+
 
 const int DATA_OUT_OF_RANGE	=	-2000;
 
@@ -32,36 +35,39 @@ CANWindsensorNode::~CANWindsensorNode(){}
 
 void CANWindsensorNode::processPGN(N2kMsg &NMsg)
 {
-    if(NMsg.PGN == 130306){
-        std::lock_guard<std::mutex> lock(m_lock);
-        uint8_t SID, Ref;
-        float WS, WA;
-        parsePGN130306(NMsg, SID, WS, WA, Ref);
-        m_WindDir = WA;
-        m_WindSpeed = WS;
-    }
-    else if(NMsg.PGN == 130311)
-    {
-        std::lock_guard<std::mutex> lock(m_lock);
-        uint8_t SID, TI, HI;
-        float Temp, Hum, AP;
-        parsePGN130311(NMsg, SID, TI, HI, Temp, Hum, AP);
-        m_WindTemperature = Temp;
-    }
-    else if(NMsg.PGN == 130312)
-    {
-        std::lock_guard<std::mutex> lock(m_lock);
-        uint8_t SID, TI, TS;
-        float ATemp, STemp;
-        parsePGN130312(NMsg, SID, TI, TS, ATemp, STemp);
-    }
-    else if (NMsg.PGN == 130314)
-    {
-        std::lock_guard<std::mutex> lock(m_lock);
-        uint8_t SID, PI, PS;
-        double P;
-        parsePGN130314(NMsg, SID, PI, PS, P);
-    }
+
+	
+  if(NMsg.PGN == 130306){
+    std::lock_guard<std::mutex> lock(m_lock);
+    uint8_t SID, Ref;
+    float WS, WA;
+    parsePGN130306(NMsg, SID, WS, WA, Ref);		
+    m_WindDir = Utility::radianToDegree(WA);
+    m_WindSpeed = WS;
+  }
+  else if(NMsg.PGN == 130311)
+  {
+    std::lock_guard<std::mutex> lock(m_lock);
+    uint8_t SID, TI, HI;
+    float Temp, Hum, AP;
+    parsePGN130311(NMsg, SID, TI, HI, Temp, Hum, AP);
+    m_WindTemperature = (Temp - 273.15); // To centigrade
+  }
+  else if(NMsg.PGN == 130312)
+  {
+    std::lock_guard<std::mutex> lock(m_lock);
+    uint8_t SID, TI, TS;
+    float ATemp, STemp;
+    parsePGN130312(NMsg, SID, TI, TS, ATemp, STemp);
+  }
+  else if (NMsg.PGN == 130314)
+  {
+    std::lock_guard<std::mutex> lock(m_lock);
+    uint8_t SID, PI, PS;
+    double P;
+    parsePGN130314(NMsg, SID, PI, PS, P);
+  }
+
 }
 
 void CANWindsensorNode::parsePGN130306(N2kMsg &NMsg, uint8_t &SID, float &WindSpeed,				//WindData

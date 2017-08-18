@@ -67,7 +67,7 @@ public:
 
 private:
 
-	const int DATA_OUT_OF_RANGE	=	-2000;
+
 
 	static void CANWindSensorNodeThreadFunc(ActiveNode* nodePtr);
 
@@ -80,4 +80,8 @@ private:
 
 	std::mutex m_lock;
 	std::vector<uint32_t> PGNs {130306, 130311};
+
+
+	const int DATA_OUT_OF_RANGE	=	-2000;
+
 };

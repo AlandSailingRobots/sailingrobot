@@ -177,7 +177,7 @@ void StateEstimationNode::StateEstimationNodeThreadFunc(ActiveNode* nodePtr)
             MessagePtr stateMessage = std::make_unique<StateMessage>(node->m_VesselHeading, node->m_VesselLat,
                 node->m_VesselLon, node->m_VesselSpeed, node->m_VesselCourse);
             node->m_MsgBus.sendMessage(std::move(stateMessage));
-            td::cout << "m_VesselHeading : " << node->m_VesselHeading <<std::endl;
+            std::cout << "m_VesselHeading : " << node->m_VesselHeading <<std::endl;
         }
         timer.sleepUntil(node->m_LoopTime);
         timer.reset();

@@ -54,10 +54,11 @@
 
 
 
-HMC6343Node::HMC6343Node(MessageBus& msgBus, DBHandler& dbhandler, const int headingBufferSize,  double loopTime)
+HMC6343Node::HMC6343Node(MessageBus& msgBus, const int headingBufferSize,  double loopTime)
 : ActiveNode(NodeID::Compass, msgBus), m_Initialised(false), m_HeadingBufferSize(headingBufferSize),
-m_LoopTime(loopTime), m_db(dbhandler)
+m_LoopTime(loopTime)
 {
+	
 
 }
 
@@ -71,7 +72,7 @@ bool HMC6343Node::init()
 		m_I2C.beginTransmission();
 		m_I2C.writeReg(COM_READ_EEPROM, EEPROM_ADDRESS);
 		delay(10);
-		uint8_t deviceID = m_I2C.read();
+		uint8_t deviceID = m_I2C.I2Cread();
 		printf("received %02x request %02x\n",deviceID,I2C_ADDRESS);
 
 		m_I2C.endTransmission();
@@ -107,20 +108,8 @@ void HMC6343Node::start()
 	}
 }
 
-void HMC6343Node::updateConfigsFromDB()
-{
-	m_LoopTime = m_db.retrieveCellAsDouble("config_buffer","1","loop_time");
-	// m_HeadingBufferSize = m_db.retrieveCellAsInt("config_buffer","1","compass"); // NOTE : Get he possible to modify or not ?
-}
-
 void HMC6343Node::processMessage(const Message* msg)
-{
-	MessageType type = msg->messageType();
-	if( type == MessageType::ServerConfigsReceived)
-	{
-			updateConfigsFromDB();
-	}
-}
+{ }
 
 
 bool HMC6343Node::readData(float& heading, float& pitch, float& roll)
@@ -133,14 +122,14 @@ bool HMC6343Node::readData(float& heading, float& pitch, float& roll)
 		// Extract the data from the compass, each piece of data is made up of two bytes, and their are
 		// 3 pieces of data.
 		m_I2C.beginTransmission();
-		m_I2C.write(COM_POST_HEADING);
+		m_I2C.I2Cwrite(COM_POST_HEADING);
 
 		delay(1);
 
 		int val = 0;
 		for(int i = 0; i < BYTES_TO_READ; i++)
 		{
-			val = m_I2C.read();
+			val = m_I2C.I2Cread();
 
 			if(val != -1)
 			{
@@ -156,9 +145,9 @@ bool HMC6343Node::readData(float& heading, float& pitch, float& roll)
 		m_I2C.endTransmission();
 
 		// The data is stretched across two separate bytes in big endian format
-		heading = ((buffer[0] << 8) + buffer[1]) / 10.f;
-		pitch = ((buffer[2] << 8) + buffer[3]) / 10.f;
-		roll = (int(buffer[4] << 8) + buffer[5]) / 10.f;
+		heading = (static_cast<int16_t>((buffer[0] << 8) + buffer[1])) / 10.f;
+		pitch = (static_cast<int16_t>((buffer[2] << 8) + buffer[3])) / 10.f;
+		roll = (static_cast<int16_t>((buffer[4] << 8) + buffer[5])) / 10.f;
 
 		return true;
 	}
@@ -174,7 +163,7 @@ bool HMC6343Node::setOrientation(CompassOrientation orientation)
 	if(m_Initialised)
 	{
 		m_I2C.beginTransmission();
-		m_I2C.write((uint8_t)orientation);
+		m_I2C.I2Cwrite((uint8_t)orientation);
 		m_I2C.endTransmission();
 		return true;
 	}
@@ -183,6 +172,20 @@ bool HMC6343Node::setOrientation(CompassOrientation orientation)
 		Logger::error("%s Cannot set compass orientation as the node was not correctly initialised!", __PRETTY_FUNCTION__);
 		return false;
 	}
+}
+
+void HMC6343Node::calibrate(int calibrationTime){
+	Timer calTimer;
+	calTimer.start ();
+	calTimer.reset();
+	Logger::info("Started calibration");
+	m_I2C.beginTransmission();
+	m_I2C.I2Cwrite((uint8_t)113);
+	calTimer.sleepUntil(calibrationTime);
+	m_I2C.I2Cwrite((uint8_t)126);
+	m_I2C.endTransmission();
+	Logger::info("Calibration finished");
+	calTimer.stop();
 }
 
 void HMC6343Node::HMC6343ThreadFunc(ActiveNode* nodePtr)
@@ -195,13 +198,14 @@ void HMC6343Node::HMC6343ThreadFunc(ActiveNode* nodePtr)
 	unsigned int errorCount = 0;
 	std::vector<float> headingData(node->m_HeadingBufferSize);
 	int headingIndex = 0;
+	
 
 	Timer timer;
 	timer.start();
 	while(true)
 	{
 		// Controls how often we pump out messages
-		timer.sleepUntil(node->m_LoopTime);
+		
 
 		if(errorCount >= MAX_ERROR_COUNT)
 		{
@@ -238,6 +242,7 @@ void HMC6343Node::HMC6343ThreadFunc(ActiveNode* nodePtr)
 		{
 			errorCount++;
 		}
+		timer.sleepUntil(node->m_LoopTime);
 		timer.reset();
 	}
 }
