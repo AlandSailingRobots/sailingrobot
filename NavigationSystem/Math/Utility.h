@@ -74,6 +74,8 @@ public:
 
 	static void sphericalCoordinateSystem( const double lat, const double lon, double& x, double& y);
 	static void calculateVelocity( const uint16_t course, const double speed, double& vX, double& vY );
+	
+	static float calculateSalidety (const float temperature, const  float conductivety);
 };
 
 #endif

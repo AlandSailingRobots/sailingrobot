@@ -526,3 +526,23 @@ void Utility::calculateVelocity( const uint16_t course, const double speed, doub
 	vX = speed * cos(course * (M_PI / 180));
 	vY = speed * sin(course * (M_PI / 180));
 }
+
+//Use formula to calculate salidety from marine sensor data
+//http://www.chemiasoft.com/chemd/salinity_calculator
+
+float Utility::calculateSalidety (const float temperature, const  float conductivety){
+	const float Cs = conductivety; 
+	const float t = temperature;
+	
+	const float CKcl = -0.0267243*pow(t,3) + 4.6636947*pow(t,2) + 861.3027640*t + 29035.1640851;
+
+	const float Rt = Cs/CKcl;
+	
+	const float a0 = 0.0080, a1 = -0.1692, a2 = 25.3851, a3 = 14.0941, a4 = -7.0261, a5 = 2.7081; 
+	const float b0 = 0.0005, b1 = -0.0056, b2 = -0.0066, b3 = -0.0375, b4 = 0.0636, b5 = -0.0144;
+
+	float salidety = a0 + a1*sqrt(Rt) + a2*Rt + a3*sqrt (pow(Rt, 3)) + a4*pow(Rt,2) + a5*sqrt(pow(Rt,5)) +
+										(((t-15)/(1+0.0162*(t-15)))*(b0 + b1*sqrt(Rt) + b2*Rt + b3*sqrt(pow(Rt, 3)) + b4*pow(Rt,2) + b5*sqrt(pow(Rt,5))));
+											
+	return salidety;
+}
