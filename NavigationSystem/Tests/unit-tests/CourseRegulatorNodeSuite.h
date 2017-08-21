@@ -245,17 +245,4 @@ public:
         TS_ASSERT_EQUALS(courseRegulatorRudderAngle,rudderAngle);
     }
 
-    // ----------------
-    // Test for update frequency
-    // ----------------
-    void test_CourseRegulatorUpdateFrequency(){
-        double newLoopTime= 0.7;
-        // TODO : Create table for each configuration of the new node including looptime variables
-        dbHandler->changeOneValue("sailing_robot_config","1",".7","loop_time");
-        std::this_thread::sleep_for(std::chrono::milliseconds(500));
-        double courseRegulatorFrequence = cRegulatorNode->getFrequencyThread();
-        TS_ASSERT_EQUALS(courseRegulatorFrequence,newLoopTime);
-        dbHandler->changeOneValue("sailing_robot_config","1",".5","loop_time");
-    }
-
 };

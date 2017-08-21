@@ -1,7 +1,7 @@
 /****************************************************************************************
  *
  * File:
- * 		ActuatorSailNodeSuite.h
+ * 		ActuatorWingSailNodeSuite.h
  *
  * Purpose:
  *		A set of unit tests for checking whether the ActuatorSailNodeSuite is working
@@ -34,7 +34,8 @@
 
  class ActuatorSailNodeSuite : public CxxTest::TestSuite {
     public:
-    ActuatorNode* sail;
+    ActuatorNode* wingsail;
+    DBHandler* dbhandler;
     MessageLogger* logger;
     std::thread* thr;
     int testCount = 0;
@@ -59,8 +60,9 @@
 		{
             Logger::DisableLogging();
 			logger = new MessageLogger(msgBus());
+            dbhandler = new DBHandler("../asr.db");
             int channel = 3, speed = 0, acceleration = 0;
-			sail = new ActuatorNode(msgBus(), NodeID::SailActuator, channel, speed, acceleration);
+			wingsail = new ActuatorNode(msgBus(), *dbhandler, NodeID::WingSailActuator, channel, speed, acceleration);
             thr = new std::thread(runMessageLoop);
 		}
 		testCount++;
@@ -71,12 +73,12 @@
 	{
 		if(testCount == ACTUATOR_TEST_COUNT)
 		{
-			delete sail;
+			delete wingsail;
 			delete logger;
 		}
 	}
 
-    void test_ActuatorSailNodeInit()
+    void test_ActuatorWingSailNodeInit()
     {
         MaestroController::init("/dev/ttyACM0");
         TS_ASSERT(sail->init());

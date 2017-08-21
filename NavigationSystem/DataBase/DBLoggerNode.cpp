@@ -7,7 +7,7 @@
 #include "Messages/ActuatorPositionMsg.h"
 #include "Messages/ActuatorControlASPireMessage.h"
 #include "Messages/CourseDataMsg.h"
-#include "Messages/NavigationControlMsg.h"
+#include "Messages/LocalNavigationMsg.h"
 #include "Messages/WaypointDataMsg.h"
 #include "Messages/ASPireActuatorFeedbackMsg.h"
 #include "SystemServices/Timer.h"
@@ -30,9 +30,10 @@ DBLoggerNode::DBLoggerNode(MessageBus& msgBus, DBHandler& db, int TimeBetweenMsg
     msgBus.registerNode(*this, MessageType::ActuatorControlASPire);
     msgBus.registerNode(*this, MessageType::ASPireActuatorFeedback);
     msgBus.registerNode(*this, MessageType::CourseData);
-    msgBus.registerNode(*this, MessageType::NavigationControl);
+    msgBus.registerNode(*this, MessageType::LocalNavigation);
     msgBus.registerNode(*this, MessageType::WaypointData);
     msgBus.registerNode(*this, MessageType::WindState);
+    msgBus.registerNode(*this, MessageType::ServerConfigsReceived);
 }
 
 void DBLoggerNode::processMessage(const Message* msg) {
@@ -41,7 +42,7 @@ void DBLoggerNode::processMessage(const Message* msg) {
 
     MessageType type = msg->messageType();
 
-    switch(type) 
+    switch(type)
     {
         case MessageType::CompassData:
         {
@@ -106,25 +107,21 @@ void DBLoggerNode::processMessage(const Message* msg) {
         }
         break;
 
-        case MessageType::NavigationControl:
-        {
-            const NavigationControlMsg* navigationControlMsg = static_cast<const NavigationControlMsg*>(msg);
-            item.m_courseToSteer = navigationControlMsg->courseToSteer();
-            item.m_tack = navigationControlMsg->tack();
-            item.m_goingStarboard = navigationControlMsg->starboard();
-        }
-
         case MessageType::WaypointData:
         {
             WaypointDataMsg* waypMsg = (WaypointDataMsg*)msg;
             item.m_waypointId = waypMsg->nextId();
         }
 
-        case MessageType::WindState: 
+        case MessageType::WindState:
         {
             const WindStateMsg* windStateMsg = static_cast<const WindStateMsg*>(msg);
             item.m_twd = windStateMsg->trueWindDirection();
         }
+        break;
+
+        case MessageType::ServerConfigsReceived:
+        updateConfigsFromDB();
         break;
 
         default:
@@ -138,6 +135,14 @@ void DBLoggerNode::start() {
 
 bool DBLoggerNode::init() {
     return true;
+}
+
+void DBLoggerNode::updateConfigsFromDB()
+{
+    //m_LoopTime = m_db.retrieveCellAsDouble("config_StateEstimationNode","1","loop_time");
+    m_TimeBetweenMsgs = m_db.retrieveCellAsInt("config_dblogger","1","???");
+    m_updateFrequency = m_db.retrieveCellAsInt("config_dblogger","1","???");
+    m_queueSize = m_db.retrieveCellAsInt("config_dblogger","1","???");
 }
 
 void DBLoggerNode::DBLoggerNodeThreadFunc(ActiveNode* nodePtr) {
@@ -157,7 +162,7 @@ void DBLoggerNode::DBLoggerNodeThreadFunc(ActiveNode* nodePtr) {
         std::string timestamp_str=SysClock::timeStampStr();
         timestamp_str+=".";
         timestamp_str+= std::to_string(SysClock::millis());
-        
+
         node->item.m_timestamp_str = timestamp_str;
 
         if(timer2.timePassed() * 1000 > node->m_updateFrequency) {
@@ -171,4 +176,3 @@ void DBLoggerNode::DBLoggerNodeThreadFunc(ActiveNode* nodePtr) {
 
     }
 }
-

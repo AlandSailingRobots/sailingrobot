@@ -22,11 +22,14 @@ public:
       m_WindvaneSelfSteeringOn(selfSteering)
     {  }  
 
+
     virtual ~ActuatorControlASPireMessage() { }
 
     double wingsailServoAngle() const { return m_WingsailServoAngle; }
     double rudderAngle() const        { return m_RudderAngle; }
     bool windvaneSelfSteering() const { return m_WindvaneSelfSteeringOn; }
+
+
 private:
     double m_WingsailServoAngle;
     double m_RudderAngle;

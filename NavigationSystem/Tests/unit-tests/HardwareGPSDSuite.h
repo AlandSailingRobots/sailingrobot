@@ -40,6 +40,7 @@
 class HardwareGPSDSuite : public CxxTest::TestSuite {
 public:
 	GPSDNode* gps;
+    DBHandler* dbhandler;
 	std::thread* thr;
 	MessageLogger* logger;
 	int testCount = 0;
@@ -63,8 +64,9 @@ public:
 		if(gps == 0)
 		{
 			Logger::DisableLogging();
+            dbhandler = new DBHandler("../asr.db");
 			logger = new MessageLogger(msgBus());
-			gps = new GPSDNode(msgBus(), 0.5);
+			gps = new GPSDNode(msgBus(),*dbhandler, 0.5);
 			thr = new std::thread(runMessageLoop);
 		}
 		testCount++;

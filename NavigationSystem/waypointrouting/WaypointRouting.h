@@ -12,10 +12,10 @@ class WaypointRouting
 {
 public:
 	WaypointRouting(double lon, double lat, int radius, double innerRadiusRatio,
-		double tackAngle, double maxTackAngle, double minTackSpeed, double sectorAngle, 
+		double tackAngle, double maxTackAngle, double minTackSpeed, double sectorAngle,
 		double maxCommandAngle, double  rudderSpeedMin);
 	WaypointRouting(const WaypointRouting &) = delete;
-	WaypointRouting & operator=(const WaypointRouting &) = delete;	
+	WaypointRouting & operator=(const WaypointRouting &) = delete;
 	~WaypointRouting();
 
 	void getCommands(double & rudder, double & sail, double gpsLon, double gpsLat, int radius, int stayTime,
@@ -36,7 +36,6 @@ public:
 	void setUpdateInterval(double updateInterval);
 	void setMinimumDegreeLimit(double degLimit);
 
-	
 private:
 
 	bool reachedRadius(double radius, double gpsLon, double gpsLat) const;

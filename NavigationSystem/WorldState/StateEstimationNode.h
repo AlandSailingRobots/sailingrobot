@@ -19,11 +19,6 @@
 
 #pragma once
 
-#include <stdint.h>
-#include <mutex>
-
-#include "Math/CourseMath.h"
-#include "Math/Utility.h"
 #include "MessageBus/ActiveNode.h"
 #include "Messages/CompassDataMsg.h"
 #include "Messages/GPSDataMsg.h"
@@ -32,11 +27,18 @@
 #include "SystemServices/Logger.h"
 #include "SystemServices/Timer.h"
 
+#include "DataBase/DBHandler.h"
+#include "Math/CourseMath.h"
+#include "Math/Utility.h"
+#include <mutex>
+#include <stdint.h>
+#include <atomic>
+
 
 class StateEstimationNode : public ActiveNode {
 public:
-    StateEstimationNode(MessageBus& msgBus, double loopTime);
-    StateEstimationNode(MessageBus& msgBus, double loopTime, double speed_1, double speed_2);
+    StateEstimationNode(MessageBus& msgBus, DBHandler& dbhandler, double loopTime);
+    StateEstimationNode(MessageBus& msgBus, DBHandler& dbhandler, double loopTime, double speed_1, double speed_2);
     ~StateEstimationNode();
 
     bool init();
@@ -46,7 +48,11 @@ public:
     ///----------------------------------------------------------------------------------
     void start();
 
+    void stop();
+    
     void processMessage(const Message* msg);
+
+
 
 private:
 
@@ -68,6 +74,12 @@ private:
     void processWaypointMessage(const WaypointDataMsg* msg );
 
     ///----------------------------------------------------------------------------------
+    /// Update values from the database as the loop time pf the thread
+    /// and others parameters
+    ///----------------------------------------------------------------------------------
+    void updateConfigsFromDB();
+    
+    ///----------------------------------------------------------------------------------
     /// Estimates the vessel state from the sensor datas.
     ///----------------------------------------------------------------------------------
     bool estimateVesselState();
@@ -84,8 +96,8 @@ private:
     float estimateVesselCourse();
 
     ///----------------------------------------------------------------------------------
-    /// Starts the StateEstimationNode's thread that pumps out StateMessages which contains
-    /// data collected from the sensors
+    /// Starts the StateEstimationNode's thread that pumps out VesselStateMsg corresponding 
+    /// at the estimated state of the vessel.
     ///----------------------------------------------------------------------------------
     static void StateEstimationNodeThreadFunc(ActiveNode* nodePtr);
 
@@ -109,6 +121,8 @@ private:
     float   m_VesselSpeed;          // m/s
     float   m_VesselCourse;         // degree [0, 360[ in North-East reference frame (clockwise)
 
-    std::mutex m_lock;
+    std::mutex        m_lock;
+    std::atomic<bool> m_Running;
+    DBHandler&        m_dbHandler;
 
 };

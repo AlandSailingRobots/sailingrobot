@@ -20,7 +20,7 @@
 #include "Messages/WindDataMsg.h"
 #include "Messages/StateMessage.h"
 #include "Messages/ActuatorPositionMsg.h"
-#include "Messages/NavigationControlMsg.h"
+#include "Messages/LocalNavigationMsg.h"
 
 
 
@@ -30,11 +30,10 @@ class MockNode : Node {
 public:
 	MockNode(MessageBus& msgBus, bool& registered)
 	:Node(NodeID::MessageLogger, msgBus), m_MessageReceived(false), m_HasFix(false),
-	m_Online(false), m_WindDir(0), m_WindSpeed(0), m_CourseToSteer(0.5), m_TargetSpeed(0),
-	m_WindvaneSelfSteeringOn(0)
+	m_Online(false), m_WindDir(0), m_WindSpeed(0), m_TargetCourse(0.5), m_TargetSpeed(0)
 	{
 		if(msgBus.registerNode(*this, MessageType::GPSData) && msgBus.registerNode(*this, MessageType::WindData) &&
-		msgBus.registerNode(*this, MessageType::StateMessage) && msgBus.registerNode(*this, MessageType::NavigationControl))
+		msgBus.registerNode(*this, MessageType::StateMessage) && msgBus.registerNode(*this, MessageType::LocalNavigation))
 		{
 			registered = true;
 		}
@@ -92,13 +91,14 @@ public:
 				m_sailPosition = actuatorMsg->sailPosition();
 			}
 			break;
-			case MessageType::NavigationControl:
+			case MessageType::LocalNavigation:
 			{
 				m_MessageReceived = true;
-				NavigationControlMsg* navigationControlMsg = (NavigationControlMsg*)message;
-				m_CourseToSteer = navigationControlMsg->courseToSteer();
-				m_TargetSpeed = navigationControlMsg->targetSpeed();
-				m_WindvaneSelfSteeringOn = navigationControlMsg->windvaneSelfSteeringOn();
+				LocalNavigationMsg* localNavigationMsg = (LocalNavigationMsg*)message;
+				m_TargetCourse = localNavigationMsg->targetCourse();
+				m_TargetSpeed = localNavigationMsg->targetSpeed();
+				m_BeatingState = localNavigationMsg->beatingState();
+				m_TargetTackStarboard = localNavigationMsg->targetTackStarboard();
 			}
 			break;
 			default:
@@ -114,8 +114,8 @@ public:
 	bool	m_Online;
 	double 	m_Lat;
 	double 	m_Lon;
-	double m_Speed;
-	double m_Course;
+	double 	m_Speed;
+	double 	m_Course;
 
 	  //WindData variables
 //=========================
@@ -137,10 +137,11 @@ public:
 	int m_rudderPosition;
 	int m_sailPosition;
 
-	  //NavigationControlMsg variables
+	  //LocalNavigationMsg variables
 //=========================
-	int m_CourseToSteer;
-	int m_TargetSpeed;
-	int m_WindvaneSelfSteeringOn;
+    float   m_TargetCourse;
+    float   m_TargetSpeed;
+    bool    m_BeatingState;
+    bool    m_TargetTackStarboard;
 
 };

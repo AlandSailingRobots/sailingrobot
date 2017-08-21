@@ -11,6 +11,8 @@
 #include "WorldState/CollidableMgr/CollidableMgr.h"
 
 #include "LowLevelControllers/LowLevelController.h" // NOTE - Maël: It will change
+#include "LowLevelControllers/WingsailControlNode.h"
+#include "LowLevelControllers/CourseRegulatorNode.h"
 
 #if LOCAL_NAVIGATION_MODULE == 1
   #include "WorldState/VesselStateNode.h" // NOTE - Maël: It will change
@@ -148,13 +150,14 @@ int main(int argc, char *argv[])
 
 	WaypointMgrNode waypoint(messageBus, dbHandler);
 
-	double PGAIN = 0.20;
-	double IGAIN = 0.30;
-	LowLevelController llc(messageBus, dbHandler, PGAIN, IGAIN); // NOTE - Maël: It will change
-
+	//double PGAIN = 0.20;
+	//double IGAIN = 0.30;
+	//LowLevelController llc(messageBus, dbHandler, PGAIN, IGAIN); // NOTE - Maël: It will change
+	WingsailControlNode wingSailControlNode(messageBus, dbHandler);
+	CourseRegulatorNode courseRegulatorNode(messageBus, dbHandler);
 
   	#if LOCAL_NAVIGATION_MODULE == 1
-		VesselStateNode vesselState	( messageBus, 0.2 ); // NOTE - Maël: It will change
+		VesselStateNode vesselState	( messageBus, dbHandler, 0.2 ); // NOTE - Maël: It will change
 		LocalNavigationModule lnm	( messageBus );
 		CollidableMgr collidableMgr;
 
@@ -172,7 +175,7 @@ int main(int argc, char *argv[])
 		lnm.registerVoter( &midRangeVoter );
   	#else
 		double vesselStateLoopTime = dbHandler.retrieveCellAsDouble("vesselState_config","1", "loop_time");
-	  	StateEstimationNode stateEstimationNode(messageBus, vesselStateLoopTime); // NOTE - Maël: It will change
+	  	StateEstimationNode stateEstimationNode(messageBus, dbHandler,vesselStateLoopTime); // NOTE - Maël: It will change
 
 		LineFollowNode sailingLogic(messageBus, dbHandler);
   	#endif
@@ -192,10 +195,10 @@ int main(int argc, char *argv[])
 		HMC6343Node compass(messageBus, headingBufferSize, compassLoopTime);
 
 		double gpsdLoopTime = dbHandler.retrieveCellAsDouble("GPSD_config", "1", "loop_time");
-	  	GPSDNode gpsd(messageBus, gpsdLoopTime);
+	  	GPSDNode gpsd(messageBus, dbHandler, gpsdLoopTime);
 
 		int time_filter_ms = dbHandler.retrieveCellAsInt("windState_config", "1", "time_filter_ms");
-	  	CANWindsensorNode windSensor(messageBus, canService, time_filter_ms);
+	  	CANWindsensorNode windSensor(messageBus, dbHandler, canService, time_filter_ms);
 
 	  	ActuatorNodeASPire actuators(messageBus, canService);
 	#endif
@@ -218,7 +221,9 @@ int main(int argc, char *argv[])
 	initialiseNode(windStateNode,"WindState",NodeImportance::CRITICAL);
 	initialiseNode(waypoint, "Waypoint", NodeImportance::CRITICAL);
 
-	initialiseNode(llc, "Low Level Controller", NodeImportance::CRITICAL); // NOTE - Maël: It will change
+	//initialiseNode(llc, "Low Level Controller", NodeImportance::CRITICAL); // NOTE - Maël: It will change
+ 	initialiseNode(wingSailControlNode, "Wing Sail Controller", NodeImportance::CRITICAL);
+ 	initialiseNode(courseRegulatorNode, "course regulator", NodeImportance::CRITICAL);
 
 	#if LOCAL_NAVIGATION_MODULE == 1
 		initialiseNode( vesselState, "Vessel State", NodeImportance::CRITICAL ); // NOTE - Maël: It will change
@@ -235,7 +240,7 @@ int main(int argc, char *argv[])
 		initialiseNode(gpsd, "GPSD", NodeImportance::CRITICAL);
 		initialiseNode(windSensor, "Wind Sensor", NodeImportance::CRITICAL);
 		initialiseNode(actuators, "Actuators", NodeImportance::CRITICAL);
-		#endif
+	#endif
 
 	// Start active nodes
 	//-------------------------------------------------------------------------------
@@ -260,6 +265,8 @@ int main(int argc, char *argv[])
 		sailingLogic.start();
 	#endif
 
+	wingSailControlNode.start();
+	courseRegulatorNode.start();
 	//-------------------------------------------------------------------------------
 
 	// Begins running the message bus

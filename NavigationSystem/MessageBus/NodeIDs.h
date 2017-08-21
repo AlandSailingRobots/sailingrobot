@@ -51,6 +51,7 @@ enum class NodeID {
 	CourseRegulatorNode,
 	SailControlNode,
 	SpeedRegulatorNode,
+	WingsailControlNode,
 	CANArduino,
 	WingsailControlNode,
 	CANSolarTracker,

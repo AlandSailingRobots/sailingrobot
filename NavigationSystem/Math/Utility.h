@@ -4,6 +4,7 @@
 #include <stdint.h> // uint8_t
 #include <vector>
 #include <array>
+#include <iostream>
 
 
 class Utility {
@@ -17,7 +18,10 @@ public:
 	static float mean(std::vector<float> values);
 	static float mapInterval (float val, float fromMin, float fromMax, float toMin, float toMax);
 	static float meanOfAngles(std::vector<float> anglesInDegrees);
-	static int sgn(double value);
+        static int sgn(double value);
+        static std::vector<double> maxAndIndex(std::vector<double> mylist);
+    
+    
 
 	/*
 	 * Converts an angle in degrees to cartesian coordinates (x,y) on the
@@ -36,6 +40,7 @@ public:
 
 	/*
 	 * Returns the angle value corresponding to x by the linear function defined by the points (x1,angle1) and (x2,angle2).
+	 * Angles are in degree. 
 	 */
 	static double linearFunctionBetweenAngle(double x, double x1, double x2, double angle1, double angle2);
 	static double degreeToRadian(double degrees);
@@ -71,6 +76,8 @@ public:
 	 * vector = (radius, angle).		Angles are in radian, in [0, 2*PI[.
 	 */
 	static std::vector<double> polarVerctorsAddition(std::vector<double> v1, std::vector<double> v2);
+	
+	static void addValueToBuffer(float value, std::vector<float> &buffer, unsigned int bufferMaxSize);
 
 	static void sphericalCoordinateSystem( const double lat, const double lon, double& x, double& y);
 	static void calculateVelocity( const uint16_t course, const double speed, double& vX, double& vY );

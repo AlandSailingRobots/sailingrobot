@@ -34,7 +34,7 @@ enum class CompassOrientation {
 
 class HMC6343Node : public ActiveNode {
 public:
-	HMC6343Node(MessageBus& msgBus, const int headingBufferSize = 10, double loopTime = 0.1);
+	HMC6343Node(MessageBus& msgBus,  const int headingBufferSize, double loopTime);
 
 	virtual ~HMC6343Node() { }
 
@@ -66,6 +66,7 @@ public:
 	///----------------------------------------------------------------------------------
 	bool readData(float& heading, float& pitch, float& roll);
 
+	void calibrate(int calibrationTime);
 protected:
 
 	///----------------------------------------------------------------------------------
@@ -75,7 +76,7 @@ protected:
 	///----------------------------------------------------------------------------------
 	static void HMC6343ThreadFunc(ActiveNode* nodePtr);
 
-	I2CController 	m_I2C;
+	I2CController m_I2C;
 	bool 	m_Initialised;
 	const int		m_HeadingBufferSize;
 	double m_LoopTime;

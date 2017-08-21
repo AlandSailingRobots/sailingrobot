@@ -29,6 +29,7 @@ public:
 	virtual void start() = 0;
 protected:
 	void runThread(void(*func)(ActiveNode*));
+        void stopThread(ActiveNode* node);
 private:
 	std::thread* m_Thread;
 };

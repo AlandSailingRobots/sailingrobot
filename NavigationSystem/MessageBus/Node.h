@@ -35,11 +35,19 @@ public:
 
 	///----------------------------------------------------------------------------------
  	/// Called by the MessageBus when it has a message the node might be interested in.
- 	/// A node should register for messages it wants to receive using 
+ 	/// A node should register for messages it wants to receive using
  	/// MessageBus::registerNode(Node*, MessageType)
  	///
  	///----------------------------------------------------------------------------------
 	virtual void processMessage(const Message* message) = 0;
+
+	///----------------------------------------------------------------------------------
+	/// This function should get the last configuring values from the DataBase
+	/// That enables the user to change this values by the web interface
+	/// which changes the behaviour of the Node and thus the sailing robot behaviour.
+	///
+	///----------------------------------------------------------------------------------
+	virtual void updateConfigsFromDB(){};
 
 	NodeID nodeID() { return m_NodeID; }
 protected:

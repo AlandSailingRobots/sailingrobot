@@ -24,15 +24,12 @@
 #include "SystemServices/Timer.h"
 
 
-
-
-
-VesselStateNode::VesselStateNode(MessageBus& msgBus, double loopTime)
+VesselStateNode::VesselStateNode(MessageBus& msgBus, DBHandler& dbhandler, double loopTime)
 	: ActiveNode(NodeID::VesselState, msgBus),
 		m_CompassHeading(0), m_CompassPitch(0), m_CompassRoll(0),
 		m_GPSHasFix(false), m_GPSOnline(false), m_GPSLat(0), m_GPSLon(0), m_GPSUnixTime(0), m_GPSSpeed(0),
 		m_GPSCourse(0), m_WindDir(0), m_WindSpeed(0), m_WindTemp(0), m_ArduinoPressure(0),
-		m_ArduinoRudder(0),m_ArduinoSheet(0),m_ArduinoBattery(0), m_LoopTime(loopTime)
+	        m_ArduinoRudder(0),m_ArduinoSheet(0),m_ArduinoBattery(0), m_LoopTime(loopTime), m_db(dbhandler)
 {
 
 	msgBus.registerNode(*this, MessageType::CompassData);
@@ -40,6 +37,7 @@ VesselStateNode::VesselStateNode(MessageBus& msgBus, double loopTime)
 	msgBus.registerNode(*this, MessageType::WindData);
 	msgBus.registerNode(*this, MessageType::ArduinoData);
 	msgBus.registerNode(*this, MessageType::WaypointData);
+	msgBus.registerNode(*this, MessageType::ServerConfigsReceived);
 }
 
 //---------------------------------------------------------------------------------------
@@ -57,6 +55,12 @@ bool VesselStateNode::init()
 void VesselStateNode::start()
 {
 	runThread(VesselStateThreadFunc);
+}
+
+void VesselStateNode::updateConfigsFromDB()
+{
+	m_LoopTime = m_db.retrieveCellAsDouble("config_VesselStateNode","1","loop_time");
+	
 }
 
 void VesselStateNode::processMessage(const Message* msg)
@@ -79,6 +83,10 @@ void VesselStateNode::processMessage(const Message* msg)
 		break;
 	case MessageType::WaypointData:
 		processWaypointMessage((WaypointDataMsg*)msg);
+		break;
+	case MessageType::ServerConfigsReceived:
+		updateConfigsFromDB();
+		break;
 	default:
 		return;
 	}
@@ -118,7 +126,7 @@ void VesselStateNode::processArduinoMessage(ArduinoDataMsg* msg)
 	m_ArduinoRudder = msg->rudder();
 	m_ArduinoSheet = msg->sheet();
 	m_ArduinoBattery = msg->battery();
-	m_ArduinoRC = msg->Radio_Controller();
+	
 }
 
 void VesselStateNode::processWaypointMessage( WaypointDataMsg* msg )
@@ -157,7 +165,7 @@ void VesselStateNode::VesselStateThreadFunc(ActiveNode* nodePtr)
 																	node->m_GPSLon, node->m_GPSUnixTime, node->m_GPSSpeed, node->m_GPSSatellite,
 																	node->m_GPSCourse, node->m_WindDir, node->m_WindSpeed,
 																	node->m_WindTemp, node->m_ArduinoPressure, node->m_ArduinoRudder,
-																	node->m_ArduinoSheet, node->m_ArduinoBattery, node->m_ArduinoRC);
+																	node->m_ArduinoSheet, node->m_ArduinoBattery);
 		node->m_MsgBus.sendMessage(std::move(vesselState));
 
 		// Compass heading, Compass Pitch, Compass Roll, Wind Dir, Wind Speed, GPS Course, GPS Lat, GPS Lon
