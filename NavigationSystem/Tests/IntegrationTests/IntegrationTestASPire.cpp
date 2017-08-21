@@ -137,8 +137,8 @@ public:
 				{
 				const CompassDataMsg* compassmsg = dynamic_cast<const CompassDataMsg*>(message);
         m_SensorValues["Heading"] = compassmsg->heading();
-        m_SensorValues["Roll"] = compassmsg->pitch();
-        m_SensorValues["Pitch"] = compassmsg->roll();
+        m_SensorValues["Pitch"] = compassmsg->pitch();
+        m_SensorValues["Roll"] = compassmsg->roll();
 				}
 				break;
 				
