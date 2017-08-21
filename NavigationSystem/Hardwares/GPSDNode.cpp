@@ -32,6 +32,7 @@ GPSDNode::~GPSDNode()
 bool GPSDNode::init()
 {
 	m_Initialised = false;
+	updateConfigsFromDB();
 	m_GpsConnection = new gpsmm("localhost", DEFAULT_GPSD_PORT);
 	m_currentDay = SysClock::day();
 

@@ -32,7 +32,6 @@
 #include "Messages/VesselStateMsg.h"
 #include "Messages/WindStateMsg.h"
 #include "Messages/StateMessage.h"
-#include "SystemServices/SoftsailControl.h"
 #include "Math/Utility.h"
 
 

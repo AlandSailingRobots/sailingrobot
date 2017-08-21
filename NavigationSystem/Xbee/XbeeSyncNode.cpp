@@ -30,7 +30,6 @@ XbeeSyncNode::XbeeSyncNode(MessageBus& msgBus, DBHandler& db) :
 	ActiveNode(NodeID::xBeeSync, msgBus), m_initialised(false), m_db(db), m_dataLink("/dev/xbee", XBEE_BAUD_RATE), m_xbeeNetwork(m_dataLink, false)
 {
 	m_firstMessageCall = true;
-	updateConfigsFromDB();
 	msgBus.registerNode(*this, MessageType::VesselState);
 	msgBus.registerNode(*this, MessageType::CourseData);
 	msgBus.registerNode(*this, MessageType::WaypointData);
@@ -41,6 +40,7 @@ XbeeSyncNode::XbeeSyncNode(MessageBus& msgBus, DBHandler& db) :
 bool XbeeSyncNode::init()
 {
 	m_initialised = false;
+	updateConfigsFromDB();
 
 	if(m_dataLink.initialise(XBEE_PACKET_SIZE))
 	{

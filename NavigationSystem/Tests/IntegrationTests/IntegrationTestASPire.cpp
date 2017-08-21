@@ -15,23 +15,33 @@
 *
 ***************************************************************************************/
 
+
+
 #include "Hardwares/CAN_Services/CANService.h"
 #include "Hardwares/CAN_Services/N2kMsg.h"
 #include "SystemServices/Timer.h"
 #include "SystemServices/Logger.h"
+
 #include "Messages/ASPireActuatorFeedbackMsg.h"
 #include "Messages/ActuatorControlASPireMessage.h"
+#include "Messages/RudderCommandMsg.h"
+#include "Messages/WingSailCommandMsg.h"
 #include "Messages/WindDataMsg.h"
-#include "Messages/ArduinoDataMsg.h"
+#include "Messages/CompassDataMsg.h"
+#include "Messages/GPSDataMsg.h"
+#include "Messages/AISDataMsg.h"
+
 #include "MessageBus/MessageTypes.h"
 #include "MessageBus/MessageBus.h"
 #include "MessageBus/ActiveNode.h"
 #include "MessageBus/NodeIDs.h"
+
 #include "Hardwares/CANWindsensorNode.h"
-#include "Hardwares/ArduinoNode.h"
 #include "Hardwares/CANArduinoNode.h"
 #include "Hardwares/ActuatorNodeASPire.h"
-
+#include "Hardwares/HMC6343Node.h"
+#include "Hardwares/GPSDNode.h"
+#include "Hardwares/CANAISNode.h"
 
 #include <ncurses.h>
 #include <unordered_map>
@@ -44,7 +54,7 @@
 #define ENTER 10
 #define TAB 9
 
-#define MAX_INPUT 20
+#define LONGEST_INPUT 20
 
 #define DATA_OUT_OF_RANGE -2000
 #define ON -3000
@@ -67,7 +77,9 @@ public:
 	{
 		msgBus.registerNode(*this, MessageType::WindData);
 		msgBus.registerNode(*this, MessageType::ASPireActuatorFeedback);
-		msgBus.registerNode(*this, MessageType::ArduinoData);
+		msgBus.registerNode(*this, MessageType::CompassData);
+		msgBus.registerNode(*this, MessageType::GPSData);
+		msgBus.registerNode(*this, MessageType::AISData);
 
 		m_SensorValues["Rudder Angle"] = DATA_OUT_OF_RANGE;
 		m_SensorValues["Wingsail Angle"] = DATA_OUT_OF_RANGE;
@@ -75,6 +87,14 @@ public:
 		m_SensorValues["Wind Direction"] = DATA_OUT_OF_RANGE;
 		m_SensorValues["Wind Temperature"] = DATA_OUT_OF_RANGE;
 		m_SensorValues["RC Mode"] = DATA_OUT_OF_RANGE;
+		m_SensorValues["Heading"] = DATA_OUT_OF_RANGE;
+    m_SensorValues["Roll"] = DATA_OUT_OF_RANGE;
+    m_SensorValues["Pitch"] = DATA_OUT_OF_RANGE;
+		m_SensorValues["GPS Longitude"] = DATA_OUT_OF_RANGE;
+		m_SensorValues["GPS Latitude"] = DATA_OUT_OF_RANGE;
+		m_SensorValues["GPS Online"] = DATA_OUT_OF_RANGE;
+		m_SensorValues["AIS Longitude"] = DATA_OUT_OF_RANGE;
+		m_SensorValues["AIS Latitude"] = DATA_OUT_OF_RANGE;
 				
 		m_Win = newwin(6+2*m_SensorValues.size(),60,1,2);
 		
@@ -95,6 +115,11 @@ public:
 				const ASPireActuatorFeedbackMsg* actmsg = dynamic_cast<const ASPireActuatorFeedbackMsg*>(message);
 				m_SensorValues["Rudder Angle"] = actmsg->rudderFeedback();
 				m_SensorValues["Wingsail Angle"] = actmsg->wingsailFeedback();
+				if (actmsg->radioControllerOn()){
+					m_SensorValues["RC Mode"] = ON;
+				} else {
+					m_SensorValues["RC Mode"] = OFF;
+				}				
 				}	
 				break;
 				
@@ -107,16 +132,39 @@ public:
 				}
 				break;
 						
-			case MessageType::ArduinoData:
+			
+			case MessageType::CompassData:
 				{
-				const ArduinoDataMsg* arduinomsg = dynamic_cast<const ArduinoDataMsg*>(message);
-				if (arduinomsg->Radio_Controller() > 10) {
-					m_SensorValues["RC Mode"] = ON;
-				} else {
-					m_SensorValues["RC Mode"] = OFF;
+				const CompassDataMsg* compassmsg = dynamic_cast<const CompassDataMsg*>(message);
+        m_SensorValues["Heading"] = compassmsg->heading();
+        m_SensorValues["Roll"] = compassmsg->pitch();
+        m_SensorValues["Pitch"] = compassmsg->roll();
 				}
-				}        
 				break;
+				
+			case MessageType::GPSData:
+				{
+				const GPSDataMsg* gpsdata = dynamic_cast<const GPSDataMsg*>(message);
+				m_SensorValues["GPS Latitude"] = gpsdata->latitude();
+				m_SensorValues["GPS Longitude"]	= gpsdata->longitude();
+
+				if (gpsdata->gpsOnline()){
+					m_SensorValues["GPS Online"] = ON;
+				}else{
+					m_SensorValues["GPS Online"] = OFF;
+				}
+				
+				}
+				break;
+				
+			case MessageType::AISData:
+				{
+					const AISDataMsg* aisdata = dynamic_cast<const AISDataMsg*>(message);
+					m_SensorValues["AIS Latitude"] = aisdata->posLat();
+					m_SensorValues["AIS Longitude"] = aisdata->posLon();
+				}
+				break;
+				
 				default:
 				break;
 						
@@ -146,7 +194,7 @@ public:
 			} else {
 				wprintw(m_Win, "%f", it.second);
 			}
-			pos+=2;
+			pos+=1;
 		}
 
 		wrefresh(m_Win);
@@ -231,9 +279,13 @@ void sendActuatorCommands() {
 		return;
 	}
 	
-	MessagePtr actuatorMsg = std::make_unique<ActuatorControlASPireMessage>(wingsailAngle16, rudderAngle16, true );
-	msgBus.sendMessage(std::move(actuatorMsg));
-		
+	// MessagePtr actuatorMsg = std::make_unique<ActuatorControlASPireMessage>(wingsailAngle16, rudderAngle16, true );
+	// msgBus.sendMessage(std::move(actuatorMsg));
+	MessagePtr rudderMsg = std::make_unique<RudderCommandMsg>(rudderAngle16);
+	msgBus.sendMessage(std::move(rudderMsg));
+	MessagePtr wingSailMsg = std::make_unique<WingSailCommandMsg>(wingsailAngle16);
+	msgBus.sendMessage(std::move(wingSailMsg));
+
 	lastSentValues = menuValues;
 }
 
@@ -243,19 +295,46 @@ int main() {
 	initscr();
 	Logger::init("integrationTest.log");
 
+	// Database Path
+	std::string db_path = "../asr.db";
+	// Declare DBHandler and MessageBus
+	DBHandler dbHandler(db_path);
+	// Initialise DBHandler
+	if(dbHandler.initialise())
+	{
+		Logger::info("Database Handler init\t\t[OK]");
+	}
+	else
+	{
+		Logger::error("Database Handler init\t\t[FAILED]");
+		Logger::shutdown();
+		exit(1);
+	}
+
 	// Comment out this line if not running on the pi
 	// otherwise program will crash.
 	auto future = canService.start();
 
 
 	SensorDataReceiver sensorReceiver(msgBus);
-	CANWindsensorNode windSensor(msgBus, canService, 500);
+	CANWindsensorNode windSensor(msgBus, dbHandler, canService, 500);
+	HMC6343Node compass(msgBus, 3, 0.1);
+	compass.init ();
+	
 
+	
 	CANArduinoNode arduino (msgBus, canService, 500);
 	ActuatorNodeASPire actuators (msgBus, canService);
+	GPSDNode gps (msgBus, dbHandler, 0.5);
+	gps.init();
+	CANAISNode ais (msgBus, canService, 1);
+	
+	ais.start();
+	gps.start();
 	windSensor.start();
 	arduino.start ();
-
+	compass.start ();
+	
 	std::thread thr(messageLoop);
 	thr.detach();
 	std::this_thread::sleep_for(std::chrono::milliseconds(200));
@@ -286,11 +365,11 @@ int main() {
 
 		if(isdigit(c)) {
 			c -= 48;
-			if(highlighted->second.size() <= MAX_INPUT) {
+			if(highlighted->second.size() <= LONGEST_INPUT) {
 				highlighted->second += std::to_string(c);
 			}
 		} else if (c == '-'){
-				if(highlighted->second.size() <= MAX_INPUT) {
+				if(highlighted->second.size() <= LONGEST_INPUT) {
 					highlighted->second += c;
 				}
 		}else {	

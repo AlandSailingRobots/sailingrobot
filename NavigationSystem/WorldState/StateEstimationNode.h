@@ -19,7 +19,6 @@
 
 #pragma once
 
-
 #include "MessageBus/ActiveNode.h"
 #include "Messages/CompassDataMsg.h"
 #include "Messages/GPSDataMsg.h"
@@ -51,13 +50,11 @@ public:
 
     void stop();
 
-
-
     void processMessage(const Message* msg);
 
 
-private:
 
+private:
 
     const int STATE_INITIAL_SLEEP = 2000;  //in milliseconds
 
@@ -77,7 +74,8 @@ private:
     void processWaypointMessage(const WaypointDataMsg* msg );
 
     ///----------------------------------------------------------------------------------
-    /// Update values from the database as the loop time of the thread and others parameters
+    /// Update values from the database as the loop time pf the thread
+    /// and others parameters
     ///----------------------------------------------------------------------------------
     void updateConfigsFromDB();
 
@@ -98,8 +96,8 @@ private:
     float estimateVesselCourse();
 
     ///----------------------------------------------------------------------------------
-    /// Starts the StateEstimationNode's thread that pumps out StateMessages which contains
-    /// data collected from the sensors
+    /// Starts the StateEstimationNode's thread that pumps out VesselStateMsg corresponding
+    /// at the estimated state of the vessel.
     ///----------------------------------------------------------------------------------
     static void StateEstimationNodeThreadFunc(ActiveNode* nodePtr);
 
@@ -123,7 +121,8 @@ private:
     float   m_VesselSpeed;          // m/s
     float   m_VesselCourse;         // degree [0, 360[ in North-East reference frame (clockwise)
 
-    std::mutex          m_lock;
-    std::atomic<bool>   m_Running;
-    DBHandler&          m_dbHandler;
+    std::mutex        m_lock;
+    std::atomic<bool> m_Running;
+    DBHandler&        m_dbHandler;
+
 };

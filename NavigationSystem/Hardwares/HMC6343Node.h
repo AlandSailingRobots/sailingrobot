@@ -35,7 +35,7 @@ enum class CompassOrientation {
 
 class HMC6343Node : public ActiveNode {
 public:
-	HMC6343Node(MessageBus& msgBus, DBHandler& dbhandler, int headingBufferSize = 10, double loopTime = 0.1);
+	HMC6343Node(MessageBus& msgBus, DBHandler& dbhandler, double loopTime);
 
 	virtual ~HMC6343Node() { }
 
@@ -52,7 +52,6 @@ public:
 	///----------------------------------------------------------------------------------
 	void start();
 
-
 	///----------------------------------------------------------------------------------
 	/// Doesn't process any messages.
 	///----------------------------------------------------------------------------------
@@ -68,6 +67,7 @@ public:
 	///----------------------------------------------------------------------------------
 	bool readData(float& heading, float& pitch, float& roll);
 
+	void calibrate(int calibrationTime);
 protected:
 
 	///----------------------------------------------------------------------------------

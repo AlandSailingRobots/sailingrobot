@@ -122,8 +122,8 @@ public:
 	double longitude(int vessel) { return m_VesselList[vessel].longitude; }
 	float COG(int vessel) { return m_VesselList[vessel].COG; }
 	float SOG(int vessel) { return m_VesselList[vessel].SOG; }
-	float posLat() { return m_PosLat; }
-	float posLon() { return m_PosLon; }
+	float posLat() const { return m_PosLat; }
+	float posLon() const { return m_PosLon; }
 
   ///----------------------------------------------------------------------------------
 	/// Serialises the message into a MessageSerialiser

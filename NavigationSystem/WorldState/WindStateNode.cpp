@@ -29,10 +29,12 @@ WindStateNode::WindStateNode(MessageBus& msgBus)
 WindStateNode::~WindStateNode(){}
 
 
+
 bool WindStateNode::init()
 {
     return true;
 }
+
 
 void WindStateNode::processMessage(const Message* message)
 {
@@ -55,12 +57,14 @@ void WindStateNode::processVesselStateMessage(const StateMessage* msg)
     m_vesselHeading = msg->heading();
     m_vesselSpeed   = msg->speed();
     m_vesselCourse  = msg->course();
+    // std::cout << "m_vesselHeading: " << m_vesselHeading <<std::endl;
 }
 
 void WindStateNode::processWindMessage(const WindDataMsg* msg)
 {
     m_apparentWindSpeed     = msg->windSpeed();
     m_apparentWindDirection = msg->windDirection();
+    // std::cout << "m_apparentWindDirection: " << m_apparentWindDirection <<std::endl;
 }
 
 void WindStateNode::sendMessage()
@@ -87,5 +91,5 @@ void WindStateNode::calculateTrueWind()
 
     // v3 = - TrueWindVector in North-East reference frame
     m_trueWindSpeed = v3[0];
-    m_trueWindDirection= Utility::radianToDegree(v3[1]);
+    m_trueWindDirection = Utility::radianToDegree(v3[1]);
 }

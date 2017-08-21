@@ -1,6 +1,7 @@
 #include "Utility.h"
 #include <algorithm>
 #include <cmath>
+#include <stdlib.h>
 
 
 int Utility::combineBytes(uint8_t MSB, uint8_t LSB)
@@ -130,38 +131,64 @@ int Utility::sgn(double value)
 	return 0;
 }
 
-int16_t Utility::pi(double pGain, double iGain,uint16_t heading, uint16_t desiredHeading)
+std::vector<double> Utility::maxAndIndex(std::vector<double> mylist)
 {
-    static int16_t integral = 0;
-    const int16_t MAX_INTEGRAL = 10;
-    int16_t error = 0;
+        double maxi = 0.0;
+	double index = 0.0;
+	int i = 0;
+	int size;
+	size = mylist.size();
+	std::vector<double> results;
 
-	/* QUESTION : Pass in argument or prefer to 
-    if( heading == HEADING_ERROR_VALUE ) { return 0; }
-    if( desiredHeading == HEADING_ERROR_VALUE) { return heading; }
-	*/
-    error = headingDifference( heading, desiredHeading );
+	for (i = 0; i < size; i++)
+	{
+	        if (maxi < mylist[i])
+		{
+		        maxi = mylist[i];
+		        index = i;
+	        }
 
-    integral = integral + ( error * 0.25 );
+	}
 
-    if( integral < -MAX_INTEGRAL )
-    {
-        integral = -MAX_INTEGRAL;
-    }
-    else if(integral > MAX_INTEGRAL )
-    {
-        integral = MAX_INTEGRAL;
-    }
+	results.push_back(maxi);
+	results.push_back(index);
 
-    int16_t p = error * pGain;
-
-    int16_t i = integral * iGain;
-
-    //Logger::info("Desired Course: %d Heading: %d Rudder Angle: %d PI Integral: %d", desiredHeading, heading, restrictRudder(p + i), integral);
-
-    // Restrict to the angles the rudder can actually move to
-    return (p + i);
+	return(results);
 }
+
+
+// int16_t Utility::pi(double pGain, double iGain,uint16_t heading, uint16_t desiredHeading)
+// {
+//     static int16_t integral = 0;
+//     const int16_t MAX_INTEGRAL = 10;
+//     int16_t error = 0;
+//
+// 	/* QUESTION : Pass in argument or prefer to
+//     if( heading == HEADING_ERROR_VALUE ) { return 0; }
+//     if( desiredHeading == HEADING_ERROR_VALUE) { return heading; }
+// 	*/
+//     error = headingDifference( heading, desiredHeading );
+//
+//     integral = integral + ( error * 0.25 );
+//
+//     if( integral < -MAX_INTEGRAL )
+//     {
+//         integral = -MAX_INTEGRAL;
+//     }
+//     else if(integral > MAX_INTEGRAL )
+//     {
+//         integral = MAX_INTEGRAL;
+//     }
+//
+//     int16_t p = error * pGain;
+//
+//     int16_t i = integral * iGain;
+//
+//     //Logger::info("Desired Course: %d Heading: %d Rudder Angle: %d PI Integral: %d", desiredHeading, heading, restrictRudder(p + i), integral);
+//
+//     // Restrict to the angles the rudder can actually move to
+//     return (p + i);
+// }
 
 void Utility::polarToCartesian(float degrees, float& x, float& y)
 {
@@ -321,11 +348,11 @@ double Utility::directionAdjustedSpeed(double gpsHeading,double compassHeading,d
 		return speed;
 }
 
-double Utility::calculateSignedDistanceToLine(const double nextLon, const double nextLat, const double prevLon, const double prevLat, 
+double Utility::calculateSignedDistanceToLine(const double nextLon, const double nextLat, const double prevLon, const double prevLat,
 					const double gpsLon, const double gpsLat)
 {
     int earthRadius = 6371000;
-    
+
     std::array<double, 3> prevWPCoord = //a
      {  earthRadius * cos(degreeToRadian(prevLat)) * cos(degreeToRadian(prevLon)),
         earthRadius * cos(degreeToRadian(prevLat)) * sin(degreeToRadian(prevLon)),
@@ -338,7 +365,7 @@ double Utility::calculateSignedDistanceToLine(const double nextLon, const double
      {  earthRadius * cos(degreeToRadian(gpsLat)) * cos(degreeToRadian(gpsLon)),
         earthRadius * cos(degreeToRadian(gpsLat)) * sin(degreeToRadian(gpsLon)),
         earthRadius * sin(degreeToRadian(gpsLat))};
-    
+
     std::array<double, 3> oab = //vector normal to plane
     {   (prevWPCoord[1]*nextWPCoord[2] - prevWPCoord[2]*nextWPCoord[1]),       //Vector product: A^B divided by norm ||a^b||     a^b / ||a^b||
         (prevWPCoord[2]*nextWPCoord[0] - prevWPCoord[0]*nextWPCoord[2]),
@@ -355,13 +382,13 @@ double Utility::calculateSignedDistanceToLine(const double nextLon, const double
     return signedDistance;
 }
 
-double Utility::calculateWaypointsOrthogonalLine(const double nextLon, const double nextLat, const double prevLon, const double prevLat, 
+double Utility::calculateWaypointsOrthogonalLine(const double nextLon, const double nextLat, const double prevLon, const double prevLat,
 					const double gpsLon, const double gpsLat)
 {    /* Check to see if boat has passed the orthogonal to the line
      * otherwise the boat will continue to follow old line if it passed the waypoint without entering the radius
      */
     int earthRadius = 6371000;
-    
+
     std::array<double, 3> prevWPCoord = //a
      {  earthRadius * cos(degreeToRadian(prevLat)) * cos(degreeToRadian(prevLon)),
         earthRadius * cos(degreeToRadian(prevLat)) * sin(degreeToRadian(prevLon)),
@@ -374,7 +401,7 @@ double Utility::calculateWaypointsOrthogonalLine(const double nextLon, const dou
      {  earthRadius * cos(degreeToRadian(gpsLat)) * cos(degreeToRadian(gpsLon)),
         earthRadius * cos(degreeToRadian(gpsLat)) * sin(degreeToRadian(gpsLon)),
         earthRadius * sin(degreeToRadian(gpsLat))};
-    
+
     std::array<double, 3> oab = //vector normal to plane
     {   (prevWPCoord[1]*nextWPCoord[2] - prevWPCoord[2]*nextWPCoord[1]),       //Vector product: A^B divided by norm ||a^b||     a^b / ||a^b||
         (prevWPCoord[2]*nextWPCoord[0] - prevWPCoord[0]*nextWPCoord[2]),
@@ -475,7 +502,7 @@ double Utility::calculateTrueWindSpeed(int windsensorDir, int windsensorSpeed, d
 	//return trueWindSpeed;
 }
 
-double Utility::getTrueWindDirection(int windsensorDir, int windsensorSpeed, double gpsSpeed, int compassHeading, 
+double Utility::getTrueWindDirection(int windsensorDir, int windsensorSpeed, double gpsSpeed, int compassHeading,
 			std::vector<float> &twdBuffer, const unsigned int twdBufferMaxSize)
 {
 	static unsigned int trueWindIndex = 0;
@@ -546,8 +573,20 @@ std::vector<double> Utility::polarVerctorsAddition(std::vector<double> v1, std::
 	// https://math.stackexchange.com/questions/1365622/adding-two-polar-vectors
 }
 
+void Utility::addValueToBuffer(float value, std::vector<float> &buffer, unsigned int bufferMaxSize)
+{
+	buffer.push_back(value);
+
+	if(buffer.size() > bufferMaxSize)
+	{
+		buffer.erase(buffer.begin());
+	}
+}
+
 void Utility::sphericalCoordinateSystem( const double lat, const double lon, double& x, double& y)
 {
+	// Note Maël : One output coordinate seems to be missing - z= sin(latR) * EARTH_RADIUS;
+
 	static const double EARTH_RADIUS = 6371.0;
 
 	double latR = lat * M_PI / 180;

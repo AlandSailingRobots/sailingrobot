@@ -3,16 +3,16 @@ BEGIN TRANSACTION;
 
 DROP TABLE IF EXISTS "current_Mission";
 CREATE TABLE current_Mission (id INTEGER PRIMARY KEY AUTOINCREMENT, -- no autoincrement to ensure a correct order
-	is_checkpoint 	BOOLEAN,
-	latitude 		    DOUBLE,
-	longitude 		  DOUBLE,
-	declination 	  INTEGER,
-	radius 			    INTEGER,
- 	stay_time 		  INTEGER,
-	harvested 		  BOOLEAN,
-  id_mission      INTEGER,
-  rankInMission   INTEGER,
-  name            VARCHAR(200)
+	is_checkpoint BOOLEAN,
+	latitude      DOUBLE,
+	longitude     DOUBLE,
+	declination   INTEGER,
+	radius        INTEGER,
+ 	stay_time     INTEGER,
+	harvested     BOOLEAN,
+    id_mission    INTEGER,
+    rankInMission INTEGER,
+    name          VARCHAR(200)
 );
 
 
@@ -345,6 +345,16 @@ DROP TABLE IF EXISTS "config_wind_sensor";
 CREATE TABLE config_wind_sensor (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   loop_time DOUBLE
+);
+
+-- -----------------------------------------------------
+-- Table WingsailControlNode config
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS "config_wingsail_control";
+CREATE TABLE config_wingsail_control (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  loop_time      DOUBLE,
+  max_cmd_angle  INTEGER
 );
 
 -- -----------------------------------------------------

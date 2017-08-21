@@ -21,5 +21,5 @@ void ActiveNode::runThread(void(*func)(ActiveNode*))
 
 void ActiveNode::stopThread(ActiveNode* node)
 {
-	node->m_Thread->join();
+    node->m_Thread->join();
 }

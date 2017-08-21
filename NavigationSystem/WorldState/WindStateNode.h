@@ -1,7 +1,7 @@
 /****************************************************************************************
 *
 * File:
-*       WindStateNode.cpp
+*       WindStateNode.h
 *
 * Purpose:
 *   Each time a vessel state message is received :
@@ -34,6 +34,7 @@ public:
     WindStateNode(MessageBus& msgBus);
     ~WindStateNode();
 
+
     bool init();
     void processMessage(const Message* message);
 
@@ -62,8 +63,7 @@ private:
 
     float   m_vesselHeading;            // degree [0, 360[ in North-East reference frame (clockwise)
     float   m_vesselSpeed;              // m/s
-    float   m_vesselCourse;             // degree [0, 360[ in North-East reference frame (clockwise)
-
+    float   m_vesselCourse;             // degree [0, 360[ in  North-East reference frame (clockwise)
     float   m_apparentWindSpeed;        // m/s
     float   m_apparentWindDirection;    // degree [0, 360[ in vessel reference frame (clockwise)
 

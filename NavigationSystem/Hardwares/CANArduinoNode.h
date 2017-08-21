@@ -24,7 +24,6 @@
 #include "MessageBus/ActiveNode.h"
 #include "MessageBus/Message.h"
 #include "MessageBus/MessageBus.h"
-#include "Messages/ArduinoDataMsg.h"
 #include "Messages/ASPireActuatorFeedbackMsg.h"
 #include "SystemServices/Timer.h"
 #include "Math/Utility.h"

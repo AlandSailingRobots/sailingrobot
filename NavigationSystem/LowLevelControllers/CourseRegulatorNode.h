@@ -16,7 +16,7 @@
 
 #include "MessageBus/ActiveNode.h"
 #include "Messages/StateMessage.h"
-#include "Messages/NavigationControlMsg.h"
+#include "Messages/LocalNavigationMsg.h"
 #include "Messages/ActuatorPositionMsg.h"
 #include "Messages/DesiredCourseMsg.h"
 #include "MessageBus/MessageBus.h"
@@ -37,7 +37,7 @@ public:
     ~CourseRegulatorNode();
 
     // -------------
-    // Function to init the truth
+    // Function to init the node
     // -------------
     bool init();
 
@@ -68,12 +68,12 @@ private:
     // -------------
     // Processing informations from the Navigation Control Message
     // -------------
-    void processNavigationControlMessage( const NavigationControlMsg* msg);
+    void processLocalNavigationMessage( const LocalNavigationMsg* msg);
 
     // -------------
     // Determinate the rudder angle according to the heading difference
     // -------------
-    double calculateRudderAngle();
+    float calculateRudderAngle();
 
     ///----------------------------------------------------------------------------------
 	/// Update values from the database as the loop time of the thread and others parameters
@@ -85,16 +85,15 @@ private:
     // -------------
     static void CourseRegulatorNodeThreadFunc(ActiveNode* nodePtr);
 
-    double  m_VesselHeading; // units : ° (degrees), from 0 to 359
-
-    double m_VesselSpeed; // units : knts (knots)
+    float m_VesselCourse; // units : ° (degrees), from 0 to 359
+    float m_VesselSpeed; // units : m/s
     // -------------
     // Parameters to regulate this node
     // -------------
-    double m_MaxRudderAngle; // units :° (degrees), define the extreme value of the rudder
+    float m_MaxRudderAngle; // units :° (degrees), define the extreme value of the rudder
     // -------------
     // Informations
-    double m_DesiredHeading; // units : ° (degrees), from 0 to 359
+    float m_DesiredCourse; // units : ° (degrees), from 0 to 359
     // -------------
     // Access to the database
     // -------------

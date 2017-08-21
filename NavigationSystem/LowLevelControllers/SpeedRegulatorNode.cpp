@@ -32,7 +32,7 @@ m_DesiredHeading(HEADING_ERROR_VALUE),m_db(dbhandler), m_LoopTime(loopTime),pGai
 {
     msgBus.registerNode( *this, MessageType::StateMessage);
     msgBus.registerNode( *this, MessageType::DesiredCourse);
-    msgBus.registerNode( *this, MessageType::NavigationControl);
+    //msgBus.registerNode( *this, MessageType::NavigationControl);
     msgBus.registerNode( *this, MessageType::ServerConfigsReceived);
 }
 
@@ -69,9 +69,9 @@ void SpeedRegulatorNode::processMessage( const Message* msg )
         case MessageType::DesiredCourse:
         processDesiredCourseMessage(static_cast< const DesiredCourseMsg*>(msg)); //verify
         break;
-        case MessageType::NavigationControl:
-        processNavigationControlMessage(static_cast< const NavigationControlMsg*>(msg));
-        break;
+        // case MessageType::NavigationControl:
+        // processNavigationControlMessage(static_cast< const NavigationControlMsg*>(msg));
+        // break;
         case MessageType::ServerConfigsReceived:
         updateConfigsFromDB();
         break;

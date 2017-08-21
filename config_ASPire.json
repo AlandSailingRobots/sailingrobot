@@ -37,7 +37,7 @@
 
 "config_httpsync": {
   "loop_time": 0.5,
-  "remove_logs": 0,
+  "remove_logs": 1,
   "push_only_latest_logs": 0,
   "boat_id": "BOAT02",
   "boat_pwd": "aspirepassword123",
@@ -62,8 +62,8 @@
 
 "config_vessel_state": {
   "loop_time": 0.5,
-  "course_config_speed_1": 1,
-  "course_config_speed_2": 2
+  "course_config_speed_1": 0,
+  "course_config_speed_2": 1
 },
 
 "config_voter_system": {
@@ -78,6 +78,11 @@
 
 "config_wind_sensor": {
   "loop_time": 0.5
+},
+
+"config_wingsail_control": {
+  "loop_time": 0.5,
+  "max_cmd_angle":15
 },
 
 "config_xbee": {

@@ -77,7 +77,7 @@ public:
 
         canService().sendCANMessage(Cmsg);
 
-        ASPireActuatorFeedbackMsg otherMsg(rudderFeedback, wingsailFeedback, windvaneSteerAngle, 0);
+        ASPireActuatorFeedbackMsg otherMsg(wingsailFeedback, rudderFeedback, windvaneSteerAngle, 0, 0);
 
         std::this_thread::sleep_for(std::chrono::milliseconds(750));
         TS_ASSERT(verifier->verifyActuatorFeedbackMsg(&otherMsg))

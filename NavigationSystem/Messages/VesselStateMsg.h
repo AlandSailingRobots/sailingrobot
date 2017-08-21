@@ -21,22 +21,22 @@
   	VesselStateMsg(	NodeID destinationID, NodeID sourceID, int compassHeading, int compassPitch,
   					int compassRoll, bool gpsFix, bool gpsOnline, double lat, double lon, double unixTime,
   					double gpsSpeed, int gpsSatellite, double heading, float windDir, float windSpeed, float windTemp,
-  					int arduinoPressure, int arduinoRudder, int arduinoSheet, int arduinoBattery, int arduinoRC)
+  					int arduinoPressure, int arduinoRudder, int arduinoSheet, int arduinoBattery)
   		:Message(MessageType::VesselState, sourceID, destinationID),
   		m_CompassHeading(compassHeading), m_CompassPitch(compassPitch), m_CompassRoll(compassRoll),
   		m_GPSHasFix(gpsFix), m_GPSOnline(gpsOnline), m_GPSLat(lat), m_GPSLon(lon), m_GPSUnixTime(unixTime), m_GPSSpeed(gpsSpeed),
   		m_GPSCourse(heading), m_GPSSatellite(gpsSatellite) , m_WindDir(windDir), m_WindSpeed(windSpeed), m_WindTemp(windTemp), m_ArduinoPressure(arduinoPressure),
-  		m_ArduinoRudder(arduinoRudder), m_ArduinoSheet(arduinoSheet), m_ArduinoBattery(arduinoBattery), m_ArduinoRC(arduinoRC)
+  		m_ArduinoRudder(arduinoRudder), m_ArduinoSheet(arduinoSheet), m_ArduinoBattery(arduinoBattery)
   		{ }
 
   	VesselStateMsg(	int compassHeading, int compassPitch, int compassRoll, bool gpsFix, bool gpsOnline, double lat,
   					double lon, double unixTime, double gpsSpeed, int gpsSatellite, double heading, float windDir,
-  					float windSpeed, float windTemp, int arduinoPressure, int arduinoRudder, int arduinoSheet, int arduinoBattery, int arduinoRC)
+  					float windSpeed, float windTemp, int arduinoPressure, int arduinoRudder, int arduinoSheet, int arduinoBattery)
   		:Message(MessageType::VesselState, NodeID::None, NodeID::None),
   		m_CompassHeading(compassHeading), m_CompassPitch(compassPitch), m_CompassRoll(compassRoll),
   		m_GPSHasFix(gpsFix), m_GPSOnline(gpsOnline), m_GPSLat(lat), m_GPSLon(lon), m_GPSUnixTime(unixTime), m_GPSSpeed(gpsSpeed),
   		m_GPSCourse(heading), m_GPSSatellite(gpsSatellite), m_WindDir(windDir), m_WindSpeed(windSpeed), m_WindTemp(windTemp), m_ArduinoPressure(arduinoPressure),
-  		m_ArduinoRudder(arduinoRudder), m_ArduinoSheet(arduinoSheet), m_ArduinoBattery(arduinoBattery), m_ArduinoRC(arduinoRC)
+  		m_ArduinoRudder(arduinoRudder), m_ArduinoSheet(arduinoSheet), m_ArduinoBattery(arduinoBattery)
   		{ }
 
   	VesselStateMsg(MessageDeserialiser deserialiser)
@@ -59,8 +59,7 @@
   			!deserialiser.readInt(m_ArduinoPressure) ||
   			!deserialiser.readInt(m_ArduinoRudder) ||
   			!deserialiser.readInt(m_ArduinoSheet) ||
-  			!deserialiser.readInt(m_ArduinoBattery) ||
-  			!deserialiser.readInt(m_ArduinoRC))
+  			!deserialiser.readInt(m_ArduinoBattery))
   		{
   			m_valid = false;
   		}
@@ -89,7 +88,6 @@
   	int arduinoRudder() { return m_ArduinoRudder; }
   	int arduinoSheet() { return m_ArduinoSheet; }
   	int arduinoBattery() { return m_ArduinoBattery; }
-  	int arduinoRC() { return m_ArduinoRC; }
 
   	///----------------------------------------------------------------------------------
   	/// Serialises the message into a MessageSerialiser
@@ -116,7 +114,6 @@
   		serialiser.serialise(m_ArduinoRudder);
   		serialiser.serialise(m_ArduinoSheet);
   		serialiser.serialise(m_ArduinoBattery);
-  		serialiser.serialise(m_ArduinoRC);
   	}
 
 
@@ -139,5 +136,4 @@
   	int 	m_ArduinoRudder;
   	int 	m_ArduinoSheet;
     int 	m_ArduinoBattery;
-  	int		m_ArduinoRC;
   };

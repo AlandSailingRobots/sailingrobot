@@ -42,7 +42,6 @@ public:
     MockNode* mockNode;
     bool nodeRegistered = false;
 
-
     std::thread* thr;
     int testCount = 0;
 

@@ -18,6 +18,7 @@ AISProcessing::AISProcessing(MessageBus& msgBus, DBHandler& dbhandler, Collidabl
   : ActiveNode(NodeID::AISProcessing, msgBus), m_LoopTime(loopTime), m_Radius(radius), m_MMSI(mmsi), collidableMgr(collidableMgr), m_db(dbhandler) {
     msgBus.registerNode(*this, MessageType::AISData);
     msgBus.registerNode(*this, MessageType::ServerConfigsReceived);
+    updateConfigsFromDB();
   }
 
   AISProcessing::~AISProcessing() {

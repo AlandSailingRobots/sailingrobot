@@ -13,7 +13,6 @@
 ***************************************************************************************/
 
 #include "CANArduinoNode.h"
-#include "SystemServices/Logger.h"
 #include "MessageBus/MessageTypes.h"
 
 
@@ -26,6 +25,7 @@ ActiveNode(NodeID::CANArduino, messageBus), CANFrameReceiver(canService, {701,70
 	m_WindvaneActuatorPos = DATA_OUT_OF_RANGE;
 	m_Radio_Controller_On = DATA_OUT_OF_RANGE;
 	messageBus.registerNode(*this, MessageType::ServerConfigsReceived);
+
 }
 
 CANArduinoNode::~CANArduinoNode(){
@@ -33,6 +33,7 @@ CANArduinoNode::~CANArduinoNode(){
 }
 
 bool CANArduinoNode::init() {
+	updateConfigsFromDB();
 	return true;
 }
 
@@ -62,7 +63,12 @@ void CANArduinoNode::processFrame (CanMsg& msg) {
 		m_WindvaneActuatorPos = msg.data[7];
 	}
 	else if (msg.id == 702) {
-		m_Radio_Controller_On = (msg.data[1] << 8 | msg.data[0]);
+		rawData = (msg.data[1] << 8 | msg.data[0]);
+		if (rawData > 0){
+			m_Radio_Controller_On = true;
+		} else {
+			m_Radio_Controller_On = false;
+		}
 	}
 }
 
@@ -82,16 +88,15 @@ void CANArduinoNode::CANArduinoNodeThreadFunc(ActiveNode* nodePtr) {
 
 		node->m_lock.lock();
 		if( node->m_RudderFeedback == node->DATA_OUT_OF_RANGE &&  node->m_WindvaneSelfSteerAngle == node->DATA_OUT_OF_RANGE &&
-															node->m_WingsailFeedback == node->DATA_OUT_OF_RANGE && node->m_WindvaneActuatorPos == node->DATA_OUT_OF_RANGE && node->m_Radio_Controller_On ==node->DATA_OUT_OF_RANGE){
+															node->m_WingsailFeedback == node->DATA_OUT_OF_RANGE && node->m_WindvaneActuatorPos == node->DATA_OUT_OF_RANGE && node->m_Radio_Controller_On ==false){
 			node->m_lock.unlock();
 			continue;
 		}
-		MessagePtr feedBackData = std::make_unique<ASPireActuatorFeedbackMsg>( node->m_WingsailFeedback, node->m_RudderFeedback,
-																		node->m_WindvaneSelfSteerAngle, node->m_WindvaneActuatorPos);
-		node->m_MsgBus.sendMessage(std::move(feedBackData));
+		MessagePtr feebackData = std::make_unique<ASPireActuatorFeedbackMsg>( node->m_WingsailFeedback, node->m_RudderFeedback,
+																		node->m_WindvaneSelfSteerAngle, node->m_WindvaneActuatorPos, node->m_Radio_Controller_On);
+		node->m_MsgBus.sendMessage(std::move(feebackData));
 
-		MessagePtr statusMsg = std::make_unique<ArduinoDataMsg>(0,0,0,0,node->m_Radio_Controller_On);
-		node->m_MsgBus.sendMessage(std::move(statusMsg));
+
 
 		node->m_lock.unlock();
 

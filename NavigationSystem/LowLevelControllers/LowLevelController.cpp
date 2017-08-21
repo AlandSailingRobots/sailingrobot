@@ -20,6 +20,7 @@
 #include "Messages/CompassDataMsg.h"
 #include "Messages/WindDataMsg.h"
 #include "Messages/DesiredCourseMsg.h"
+#include "Messages/LocalNavigationMsg.h"
 #include "Messages/ActuatorPositionMsg.h"
 #include "SystemServices/Logger.h"
 
@@ -35,6 +36,7 @@ LowLevelController::LowLevelController( MessageBus& msgBus, DBHandler& dbHandler
     msgBus.registerNode( *this, MessageType::CompassData );
     msgBus.registerNode( *this, MessageType::WindData );
     msgBus.registerNode( *this, MessageType::DesiredCourse );
+    msgBus.registerNode( *this, MessageType::LocalNavigation );
 
     //closeRange_ms = dbHandler.retrieveCellAsInt( "sail_command_config", "1", "close_reach_command" );
     //sailRange_ms = dbHandler.retrieveCellAsInt("sail_command_config", "1", "run_command") - closeRange_ms;
@@ -67,6 +69,12 @@ void LowLevelController::processMessage( const Message* msg )
         {
             DesiredCourseMsg* courseMsg = (DesiredCourseMsg*)msg;
             desiredHeading = courseMsg->desiredCourse();
+        }
+            break;
+        case MessageType::LocalNavigation:
+        {
+            LocalNavigationMsg* localNavigationcourseMsg = (LocalNavigationMsg*)msg;
+            desiredHeading = localNavigationcourseMsg->targetCourse();
         }
             break;
         default:

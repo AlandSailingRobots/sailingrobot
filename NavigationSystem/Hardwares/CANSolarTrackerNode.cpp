@@ -33,6 +33,7 @@ CANSolarTrackerNode::~CANSolarTrackerNode () {
 }
 
 bool CANSolarTrackerNode::init() {
+	updateConfigsFromDB();
 	return true;
 }
 

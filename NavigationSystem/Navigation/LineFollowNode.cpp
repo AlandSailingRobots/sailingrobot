@@ -1,59 +1,54 @@
 /****************************************************************************************
 *
 * File:
-* 		LineFollowNode.cpp
+*       LineFollowNode.cpp
 *
 * Purpose:
-*		This class computes the actuator positions of the boat in order to follow
+*       This class computes the actuator positions of the boat in order to follow
 *    lines given by the waypoints.
 *
-* Developer Notes: algorithm inspired and modified from Luc Jaulin and
-*    Fabrice Le Bars  "An Experimental Validation of a Robust Controller with the VAIMOS
-*    Autonomous Sailboat" and "Modeling and Control for an Autonomous Sailboat: A
-*    Case Study" from Jon Melin, Kjell Dahl and Matia Waller
+* Developer Notes:
+*    Algorithm inspired and modified from:
+*    - Luc Jaulin and Fabrice Le Bars "An Experimental Validation of a Robust Controller with
+*       the VAIMOS Autonomous Sailboat" [1];
+*    - Jon Melin, Kjell Dahl and Matia Waller "Modeling and Control for an Autonomous Sailboat:
+*       A Case Study" [2].
 *
+*    Info about Tacking and Beating : https://en.wikipedia.org/wiki/Tacking_(sailing)
 *
 ***************************************************************************************/
 
 #include "LineFollowNode.h"
-#include "Messages/DesiredCourseMsg.h"
-#include "Messages/ExternalControlMsg.h"
-#include "Math/Utility.h"
-#include "SystemServices/SysClock.h"
-#include <math.h>
-#include <algorithm>
-#include <cmath>
 
-#include "SystemServices/Timer.h"
-#include <chrono>
-
-#define INITIAL_SLEEP     2000
-
-// FILE* file = fopen("./gps.txt", "w");
-
+const int INITIAL_SLEEP = 2000;  //in milliseconds
+const float NO_COMMAND = -2000;
+#define DATA_OUT_OF_RANGE -2000
 
 LineFollowNode::LineFollowNode(MessageBus& msgBus, DBHandler& db): ActiveNode(NodeID::SailingLogic, msgBus), m_db(db),
-m_LoopTime(0.5), m_MaxTackDistance(0), m_tackAngle(0.872665),
-m_nextWaypointId(0), m_nextWaypointLon(0), m_nextWaypointLat(0), m_nextWaypointDeclination(0), m_nextWaypointRadius(0),
-m_prevWaypointId(0), m_prevWaypointLon(0), m_prevWaypointLat(0), m_prevWaypointDeclination(0), m_prevWaypointRadius(0),
-m_externalControlActive(false), m_tackingDirection(1)
+m_LoopTime(0.5), m_externalControlActive(false),
+m_nextWaypointLon(DATA_OUT_OF_RANGE), m_nextWaypointLat(DATA_OUT_OF_RANGE), m_nextWaypointRadius(DATA_OUT_OF_RANGE),
+m_prevWaypointLon(DATA_OUT_OF_RANGE), m_prevWaypointLat(DATA_OUT_OF_RANGE), m_prevWaypointRadius(DATA_OUT_OF_RANGE),
+m_TackDirection(1), m_BeatingMode(false), m_TargetTackStarboard(false)
 {
+    msgBus.registerNode(*this, MessageType::ExternalControl);
     msgBus.registerNode(*this, MessageType::StateMessage);
     msgBus.registerNode(*this, MessageType::WindState);
     msgBus.registerNode(*this, MessageType::WaypointData);
-    msgBus.registerNode(*this, MessageType::ExternalControl);
     msgBus.registerNode(*this, MessageType::ServerConfigsReceived);
-    m_LoopTime = m_db.retrieveCellAsDouble("config_line_follow","1","loop_time");
 
-// NOTE : Marc : conversion radian to degree ????
-    m_tackAngle = 0.872665; // in radian (= 50°)
+    m_IncidenceAngle = Utility::degreeToRadian(45);
+    m_MaxDistanceFromLine = 40;
+
+    m_CloseHauledAngle = Utility::degreeToRadian(45);
+    m_BroadReachAngle = Utility::degreeToRadian(30);
+    m_TackingDistance = 20;
 }
 
 LineFollowNode::~LineFollowNode() {}
 
 bool LineFollowNode::init()
 {
-
+    updateConfigsFromDB();
     return true;
 }
 
@@ -99,58 +94,51 @@ void LineFollowNode::processMessage(const Message* msg)
     }
 }
 
-void LineFollowNode::processStateMessage(const StateMessage* stateMsg )
+void LineFollowNode::processStateMessage(const StateMessage* vesselStateMsg )
 {
-    m_Heading = stateMsg->heading();
-    m_Latitude = stateMsg->latitude();
-    m_Longitude = stateMsg->longitude();
-    m_Speed = stateMsg->speed();
-    m_Course = stateMsg->course();
+    std::lock_guard<std::mutex> lock_guard(m_lock);
+
+    m_VesselLat = vesselStateMsg->latitude();
+    m_VesselLon = vesselStateMsg->longitude();
 }
 
 void LineFollowNode::processWindStateMessage(const WindStateMsg* windStateMsg )
 {
+    std::lock_guard<std::mutex> lock_guard(m_lock);
+
     m_trueWindSpeed = windStateMsg->trueWindSpeed();
     m_trueWindDir = windStateMsg->trueWindDirection();
-    m_apparentWindSpeed = windStateMsg->apparentWindSpeed();
-    m_apparentWindDir = windStateMsg->apparentWindDirection();
+    // std::cout << "m_trueWindDir : " << m_trueWindDir <<std::endl;
+
+    unsigned int twdBufferMaxSize = 200;
+    Utility::addValueToBuffer(m_trueWindDir, m_TwdBuffer, twdBufferMaxSize);
 }
 
 void LineFollowNode::processWaypointMessage(WaypointDataMsg* waypMsg )
 {
-    m_nextWaypointId = waypMsg->nextId();
+    std::lock_guard<std::mutex> lock_guard(m_lock);
+
     m_nextWaypointLon = waypMsg->nextLongitude();
     m_nextWaypointLat = waypMsg->nextLatitude();
-    m_nextWaypointDeclination = waypMsg->nextDeclination();
     m_nextWaypointRadius = waypMsg->nextRadius();
-    setPrevWaypointData(waypMsg);
-}
 
-void LineFollowNode::setPrevWaypointData(WaypointDataMsg* waypMsg)
-{
-    if(waypMsg->prevId() == 0) //Set previous waypoint to boat position
-    {
-        m_prevWaypointId = 0;
-        m_prevWaypointLon = m_Longitude;
-        m_prevWaypointLat = m_Latitude;
-        m_prevWaypointDeclination = 0;
+    if(waypMsg->prevId() == 0)
+    {   //Set previous waypoint to boat position
+        m_prevWaypointLon = m_VesselLon;
+        m_prevWaypointLat = m_VesselLat;
         m_prevWaypointRadius = 15;
     }
-    else //Set previous waypoint to previously harvested waypoint
-    {
-        m_prevWaypointId = waypMsg->prevId();
+    else
+    {   //Set previous waypoint to previously harvested waypoint
         m_prevWaypointLon = waypMsg->prevLongitude();
         m_prevWaypointLat = waypMsg->prevLatitude();
-        m_prevWaypointDeclination = waypMsg->prevDeclination();
         m_prevWaypointRadius = waypMsg->prevRadius();
     }
 }
 
-
-
 double LineFollowNode::calculateAngleOfDesiredTrajectory()
 {
-    int earthRadius = 6371000;
+    const int earthRadius = 6371000; //meters
 
     std::array<double, 3> prevWPCoord = {
         earthRadius * cos(Utility::degreeToRadian(m_prevWaypointLat)) * cos(Utility::degreeToRadian(m_prevWaypointLon)),
@@ -163,153 +151,94 @@ double LineFollowNode::calculateAngleOfDesiredTrajectory()
         earthRadius * sin(Utility::degreeToRadian(m_nextWaypointLat))};
 
     double M[2][3] = {
-        {-sin(Utility::degreeToRadian(m_Latitude)), cos(Utility::degreeToRadian(m_Latitude )), 0},
-        {-cos(Utility::degreeToRadian(m_Latitude ))*sin(Utility::degreeToRadian(m_Latitude )),
-        -sin(Utility::degreeToRadian(m_Latitude ))*sin(Utility::degreeToRadian(m_Latitude )),
-        cos(Utility::degreeToRadian(m_Latitude ))}
+        {-sin(Utility::degreeToRadian(m_VesselLon)), cos(Utility::degreeToRadian(m_VesselLon )), 0},
+        {-cos(Utility::degreeToRadian(m_VesselLon ))*sin(Utility::degreeToRadian(m_VesselLat )),
+        -sin(Utility::degreeToRadian(m_VesselLon ))*sin(Utility::degreeToRadian(m_VesselLat )),
+        cos(Utility::degreeToRadian(m_VesselLat ))}
         };
 
     std::array<double, 3> bMinusA = { nextWPCoord[0]-prevWPCoord[0], nextWPCoord[1]-prevWPCoord[1], nextWPCoord[2]-prevWPCoord[2]};
 
-    // 2x3 * 1x3
-    double phi = atan2(M[0][0]*bMinusA[0] + M[0][1]*bMinusA[1] + M[0][2]*bMinusA[2],   M[1][0]*bMinusA[0] + M[1][1]*bMinusA[1] + M[1][2]*bMinusA[2]);
+    // 2x3 * 3x1
+    double phi = atan2(M[0][0]*bMinusA[0] + M[0][1]*bMinusA[1] + M[0][2]*bMinusA[2],
+        M[1][0]*bMinusA[0] + M[1][1]*bMinusA[1] + M[1][2]*bMinusA[2]);
 
-    return phi;
+    return phi;  // in north east down reference frame.
 }
 
-double LineFollowNode::calculateDesiredCourse()
+double LineFollowNode::calculateTargetCourse()
 {
-    int maxTackDistance = 40;
+    // In the articles the reference frame is East-North-Up. Here the reference frame is North-East-Down.
 
-    /* add pi because trueWindDirection is originally origin of wind but algorithm need direction*/
-    double trueWindDirection_radian = Utility::degreeToRadian(m_trueWindDir)+M_PI;
+    std::lock_guard<std::mutex> lock_guard(m_lock);
 
-//    double currentHeading = getHeading(m_Course, m_Heading, m_Speed, false, false);
-    double currentHeading_radian = Utility::degreeToRadian(m_Course);
-
-    setPrevWaypointToBoatPos();
-
-
-    //Get Course
-    double signedDistance = Utility::calculateSignedDistanceToLine(m_nextWaypointLon, m_nextWaypointLat, m_prevWaypointLon,
-        m_prevWaypointLat, m_Longitude, m_Latitude);
-    double phi = calculateAngleOfDesiredTrajectory();
-    double desiredHeading = phi + (2 * (M_PI / 4)/M_PI) * atan(signedDistance/maxTackDistance); //heading to smoothly join the line
-    desiredHeading = Utility::limitRadianAngleRange(desiredHeading);
-
-    //Change tacking direction when reaching max distance
-    if(abs(signedDistance) > maxTackDistance)
+    if ((m_nextWaypointLon == DATA_OUT_OF_RANGE) || (m_VesselLat == DATA_OUT_OF_RANGE) || (m_trueWindSpeed == DATA_OUT_OF_RANGE))
     {
-        m_tackingDirection = -Utility::sgn(signedDistance);
-    }
-
-    //Check if tacking is needed-----
-    //tacking may or may not be needed. Decide if this code is necessary
-    if( (cos(trueWindDirection_radian - desiredHeading) + cos(m_tackAngle) < 0) || (cos(trueWindDirection_radian - phi) + cos(m_tackAngle) < 0))
-    {
-        if(!m_tack) /* initialize tacking direction */
-        {
-            m_tackingDirection = -Utility::sgn(currentHeading_radian-(fmod(trueWindDirection_radian+M_PI, 2*M_PI) - M_PI));
-            m_tack = true;
-        }
-
-        desiredHeading = M_PI + trueWindDirection_radian - m_tackingDirection * m_tackAngle;/* sail around the wind direction */
-        desiredHeading = Utility::limitRadianAngleRange(desiredHeading);
+        return DATA_OUT_OF_RANGE;
     }
     else
     {
-        m_tack = false;
-    }
+        // Calculate the angle of the true wind vector.     [1]:(psi)       [2]:(psi_tw).
+        double meanTrueWindDir = Utility::meanOfAngles(m_TwdBuffer);
+        double trueWindAngle = Utility::limitRadianAngleRange(Utility::degreeToRadian(meanTrueWindDir)+M_PI);
+        //float trueWindAngle = Utility::degreeToRadian(m_trueWindDir);
+        std::cout << "trueWindAngle : " << trueWindAngle <<std::endl;
 
-    return desiredHeading;
-}
+        // Calculate signed distance to the line.           [1] and [2]: (e).
+        double signedDistance = Utility::calculateSignedDistanceToLine(m_nextWaypointLon, m_nextWaypointLat, m_prevWaypointLon,
+            m_prevWaypointLat, m_VesselLon, m_VesselLat);
+        // std::cout << "m_nextWaypointLon : " << m_nextWaypointLon <<std::endl;
+        // std::cout << "m_nextWaypointLat : " << m_nextWaypointLat <<std::endl;
+        // std::cout << "m_prevWaypointLon : " << m_prevWaypointLon <<std::endl;
+        // std::cout << "m_prevWaypointLat : " << m_prevWaypointLat <<std::endl;
+        // std::cout << "m_VesselLon : " << m_VesselLon <<std::endl;
+        // std::cout << "m_VesselLat : " << m_VesselLat <<std::endl;
+        std::cout << "signedDistance : " << signedDistance <<std::endl;
 
-/*
+        // Calculate the angle of the line to be followed.  [1]:(phi)       [2]:(beta)
+        double phi = calculateAngleOfDesiredTrajectory();
+        std::cout << "phi : " << phi <<std::endl;
 
+        // Calculate the target course in nominal mode.     [1]:(theta_*)   [2]:(theta_r)
+        double targetCourse = phi + (2 * m_IncidenceAngle/M_PI) * atan(signedDistance/m_MaxDistanceFromLine);
+        targetCourse = Utility::limitRadianAngleRange(targetCourse); // in north east down reference frame.
+        std::cout << "targetCourse in f: " << targetCourse <<std::endl;
 
-        int LineFollowNode::getHeading(int gpsHeading, int compassHeading, double gpsSpeed, bool mockPosition,bool getHeadingFromCompass)
+        // Change tack direction when reaching tacking distance
+        if(abs(signedDistance) > m_TackingDistance)
         {
-          //Use GPS for heading only if speed is higher than 1 m/s
-          int useGpsForHeadingMeterSecSpeed = 1;
-          bool gpsForbidden = Utility::directionAdjustedSpeed(gpsHeading, compassHeading, gpsSpeed) < useGpsForHeadingMeterSecSpeed;
-
-          getMergedHeading(gpsHeading, compassHeading, true); //decrease compass weight on each iteration
-
-          // if(mockPosition) { //TODO - MOCK
-          //     return position->getHeading(); //OUTCOMMENTED FOR NOW UNTIL WE FIGURE OUT MOCK
-          // }
-
-          if (getHeadingFromCompass) {
-            //Should return compass heading if below one knot and not currently merging and vice versa
-            return Utility::addDeclinationToHeading(getMergedHeading(gpsHeading, compassHeading, gpsForbidden), m_nextWaypointDeclination);
-          }
-          return gpsHeading;
+            m_TackDirection = Utility::sgn(signedDistance);
         }
 
-        int LineFollowNode::getMergedHeading(int gpsHeading, int compassHeading, bool increaseCompassWeight)
+        // Check if the targetcourse is inconsistent with the wind.
+        if( (cos(trueWindAngle - targetCourse) + cos(m_CloseHauledAngle) < 0) ||
+            ((cos(trueWindAngle - phi) + cos(m_CloseHauledAngle) < 0) and (abs(signedDistance) < m_MaxDistanceFromLine)) )
         {
-          //Shouldn't be hardcoded
-          float tickRate = 0.01;
-
-          int headingCompass = Utility::addDeclinationToHeading(compassHeading, m_nextWaypointDeclination);
-          int headingGps = gpsHeading;
-
-          if (increaseCompassWeight){
-            m_gpsCourseWeight = m_gpsCourseWeight - tickRate; //Decrease gps weight
-            if (m_gpsCourseWeight < 0.0) m_gpsCourseWeight = 0;
-          }else{
-            m_gpsCourseWeight = m_gpsCourseWeight + tickRate;
-            if (m_gpsCourseWeight > 1.0) m_gpsCourseWeight = 1.0;
-          }
-
-          //Difference calculation
-          float diff = ((headingGps - headingCompass) + 180 + 360);
-          while (diff > 360) diff -= 360;
-          diff -= 180;
-
-          //Merge angle calculation
-          int returnValue = 360 + headingCompass + (diff * m_gpsCourseWeight);
-          while (returnValue > 360) returnValue -= 360;
-
-          return returnValue;
+            // Close hauled mode (Upwind beating mode).
+            m_BeatingMode = true;
+            targetCourse = M_PI + trueWindAngle + m_TackDirection*m_CloseHauledAngle;
+            targetCourse = Utility::limitRadianAngleRange(targetCourse);
+        }
+        else if( (cos(trueWindAngle - targetCourse) - cos(m_BroadReachAngle) < 0) ||
+                 ((cos(trueWindAngle - phi) - cos(m_BroadReachAngle) < 0) and (abs(signedDistance) < m_MaxDistanceFromLine)) )
+        {
+            // Broad reach mode (Downwind beating mode).
+            m_BeatingMode = true;
+            targetCourse = M_PI + trueWindAngle + m_TackDirection*m_BroadReachAngle;
+            targetCourse = Utility::limitRadianAngleRange(targetCourse);
+        }
+        else
+        {
+            m_BeatingMode = false;
         }
 
-*/
+        // std::cout << "trueWindAngle : " << trueWindAngle <<std::endl;
 
-
-/*
-        void LineFollowNode::setupRudderCommand()
-        {
-          m_rudderCommand.setCommandValues(m_db.retrieveCellAsInt("rudder_command_config", "1","extreme_command"),
-          m_db.retrieveCellAsInt("rudder_command_config", "1", "midship_command"));
-        }
-
-        void LineFollowNode::setupSailCommand()
-        {
-          m_sailCommand.setCommandValues( m_db.retrieveCellAsInt("sail_command_config", "1", "close_reach_command"),
-          m_db.retrieveCellAsInt("sail_command_config", "1", "run_command"));
-        }
-*/
-
-bool LineFollowNode::getGoingStarboard()
-{
-    if(m_tackingDirection == 1) return true;
-    else return false;
-}
-
-void LineFollowNode::setPrevWaypointToBoatPos() //If boat passed waypoint or enters it, set new line from boat to waypoint.
-{                                                                  //Used if boat has to stay within waypoint for a set amount of time.
-    double distanceAfterWaypoint = Utility::calculateWaypointsOrthogonalLine(m_nextWaypointLon, m_nextWaypointLat, m_prevWaypointLon,
-    m_prevWaypointLat, m_Longitude, m_Latitude);
-
-    double DTW = CourseMath::calculateDTW(m_Longitude, m_Latitude, m_nextWaypointLon, m_nextWaypointLat);
-
-    if(distanceAfterWaypoint > 0 ||  DTW < m_nextWaypointRadius)
-    {
-        m_prevWaypointLon = m_Longitude;
-        m_prevWaypointLat = m_Latitude;
+        return targetCourse; // in north east down reference frame.
     }
 }
+
+
 
 void LineFollowNode::LineFollowNodeThreadFunc(ActiveNode* nodePtr)
 {
@@ -323,11 +252,12 @@ void LineFollowNode::LineFollowNodeThreadFunc(ActiveNode* nodePtr)
 
     while(node->m_Running.load() == true)
     {
-        std::lock_guard<std::mutex> lock_guard(node->m_lock);        double desiredCourse = node->calculateDesiredCourse();
-        bool goingStarboard = node->getGoingStarboard();
-        MessagePtr navMsg = std::make_unique<NavigationControlMsg>(desiredCourse, 0, false, node->m_tack, goingStarboard, NavigationState::sailToWaypoint);
-        node->m_MsgBus.sendMessage( std::move( navMsg ) );
-
+        float targetCourse = (float) Utility::radianToDegree(node->calculateTargetCourse());
+        if (targetCourse != DATA_OUT_OF_RANGE){
+            std::cout << "targetCourse end : " << targetCourse <<std::endl;
+            MessagePtr LocalNavMsg = std::make_unique<LocalNavigationMsg>(targetCourse, NO_COMMAND, node->m_BeatingMode, node->m_TargetTackStarboard);
+            node->m_MsgBus.sendMessage( std::move( LocalNavMsg ) );
+        }
         timer.sleepUntil(node->m_LoopTime);
         timer.reset();
     }

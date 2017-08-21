@@ -48,7 +48,11 @@ LocalNavigationModule::LocalNavigationModule( MessageBus& msgBus,DBHandler& dbha
 }
 
 ///----------------------------------------------------------------------------------
-bool LocalNavigationModule::init() { return true; }
+bool LocalNavigationModule::init()
+{
+    updateConfigsFromDB();
+    return true;
+}
 
 ///----------------------------------------------------------------------------------
 void LocalNavigationModule::start()

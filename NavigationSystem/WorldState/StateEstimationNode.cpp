@@ -26,13 +26,12 @@
 
 #define DATA_OUT_OF_RANGE -2000
 
-
-StateEstimationNode::StateEstimationNode(MessageBus& msgBus, DBHandler& dbhandler, double loopTime, double speed_1, double speed_2):
+StateEstimationNode::StateEstimationNode(MessageBus& msgBus, DBHandler& dbhandler ,double loopTime, double speed_1, double speed_2):
 ActiveNode(NodeID::StateEstimation, msgBus), m_LoopTime(loopTime), m_CompassHeading(DATA_OUT_OF_RANGE), m_GpsOnline(false),
 m_GPSLat(DATA_OUT_OF_RANGE), m_GPSLon(DATA_OUT_OF_RANGE), m_GPSSpeed(DATA_OUT_OF_RANGE), m_GPSCourse(DATA_OUT_OF_RANGE),
 m_WaypointDeclination(DATA_OUT_OF_RANGE), m_speed_1(speed_1), m_speed_2(speed_2), m_VesselHeading(DATA_OUT_OF_RANGE),
 m_VesselLat(DATA_OUT_OF_RANGE), m_VesselLon(DATA_OUT_OF_RANGE), m_VesselSpeed(DATA_OUT_OF_RANGE),
-m_VesselCourse(DATA_OUT_OF_RANGE), m_dbHandler(dbhandler)
+    m_VesselCourse(DATA_OUT_OF_RANGE),m_dbHandler(dbhandler)
 {
     msgBus.registerNode(*this, MessageType::CompassData);
     msgBus.registerNode(*this, MessageType::GPSData);
@@ -40,12 +39,12 @@ m_VesselCourse(DATA_OUT_OF_RANGE), m_dbHandler(dbhandler)
     msgBus.registerNode(*this, MessageType::ServerConfigsReceived);
 }
 
-StateEstimationNode::StateEstimationNode(MessageBus& msgBus, DBHandler& dbhandler, double loopTime):
+StateEstimationNode::StateEstimationNode(MessageBus& msgBus, DBHandler& dbhandler,double loopTime):
 ActiveNode(NodeID::StateEstimation, msgBus), m_LoopTime(loopTime), m_CompassHeading(DATA_OUT_OF_RANGE), m_GpsOnline(false),
 m_GPSLat(DATA_OUT_OF_RANGE), m_GPSLon(DATA_OUT_OF_RANGE), m_GPSSpeed(DATA_OUT_OF_RANGE), m_GPSCourse(DATA_OUT_OF_RANGE),
 m_WaypointDeclination(DATA_OUT_OF_RANGE), m_speed_1(0), m_speed_2(1), m_VesselHeading(DATA_OUT_OF_RANGE),
 m_VesselLat(DATA_OUT_OF_RANGE), m_VesselLon(DATA_OUT_OF_RANGE), m_VesselSpeed(DATA_OUT_OF_RANGE),
-m_VesselCourse(DATA_OUT_OF_RANGE), m_dbHandler(dbhandler)
+m_VesselCourse(DATA_OUT_OF_RANGE),m_dbHandler(dbhandler)
 {
     msgBus.registerNode(*this, MessageType::CompassData);
     msgBus.registerNode(*this, MessageType::GPSData);
@@ -57,6 +56,7 @@ StateEstimationNode::~StateEstimationNode() {}
 
 bool StateEstimationNode::init()
 {
+    updateConfigsFromDB();
     return true;
 }
 
@@ -181,6 +181,7 @@ void StateEstimationNode::StateEstimationNodeThreadFunc(ActiveNode* nodePtr)
             MessagePtr stateMessage = std::make_unique<StateMessage>(node->m_VesselHeading, node->m_VesselLat,
                 node->m_VesselLon, node->m_VesselSpeed, node->m_VesselCourse);
             node->m_MsgBus.sendMessage(std::move(stateMessage));
+            std::cout << "m_VesselHeading : " << node->m_VesselHeading <<std::endl;
         }
         timer.sleepUntil(node->m_LoopTime);
         timer.reset();

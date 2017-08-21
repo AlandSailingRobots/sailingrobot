@@ -23,8 +23,8 @@
 #include "Messages/WaypointDataMsg.h"
 #include "Messages/StateMessage.h"
 #include "Messages/ActuatorPositionMsg.h"
-#include "Messages/NavigationControlMsg.h"
 #include "Messages/DesiredCourseMsg.h"
+#include "Messages/LocalNavigationMsg.h"
 
 
 
@@ -33,8 +33,7 @@ class MockNode : public Node {
 public:
 	MockNode(MessageBus& msgBus, bool& registered)
 	:Node(NodeID::MessageLogger, msgBus), m_MessageReceived(false), m_HasFix(false),
-	m_Online(false), m_WindDir(0), m_WindSpeed(0), m_CourseToSteer(0.5), m_TargetSpeed(0),
-	m_WindvaneSelfSteeringOn(0)
+	m_Online(false), m_WindDir(0), m_WindSpeed(0), m_TargetCourse(0.5), m_TargetSpeed(0)
 	{
 		if(msgBus.registerNode(*this, MessageType::GPSData)
 		&& msgBus.registerNode(*this, MessageType::WindData)
@@ -42,10 +41,11 @@ public:
 		&& msgBus.registerNode(*this, MessageType::CompassData)
 		&& msgBus.registerNode(*this, MessageType::WaypointData)
 		&& msgBus.registerNode(*this, MessageType::StateMessage)
-		&& msgBus.registerNode(*this, MessageType::NavigationControl)
+		//&& msgBus.registerNode(*this, MessageType::NavigationControl)
 		&& msgBus.registerNode(*this, MessageType::ServerConfigsReceived)
 		&& msgBus.registerNode(*this, MessageType::DesiredCourse)
-		&& msgBus.registerNode(*this, MessageType::ActuatorPosition))
+		&& msgBus.registerNode(*this, MessageType::ActuatorPosition)
+		&& msgBus.registerNode(*this, MessageType::LocalNavigation))
 		{
 			registered = true;
 		}
@@ -142,13 +142,14 @@ public:
 				m_sailPosition = actuatorMsg->sailPosition();
 			}
 			break;
-			case MessageType::NavigationControl:
+			case MessageType::LocalNavigation:
 			{
 				m_MessageReceived = true;
-				NavigationControlMsg* navigationControlMsg = (NavigationControlMsg*)message;
-				m_CourseToSteer = navigationControlMsg->courseToSteer();
-				m_TargetSpeed = navigationControlMsg->targetSpeed();
-				m_WindvaneSelfSteeringOn = navigationControlMsg->windvaneSelfSteeringOn();
+				LocalNavigationMsg* localNavigationMsg = (LocalNavigationMsg*)message;
+				m_TargetCourse = localNavigationMsg->targetCourse();
+				m_TargetSpeed = localNavigationMsg->targetSpeed();
+				m_BeatingState = localNavigationMsg->beatingMode();
+				m_TargetTackStarboard = localNavigationMsg->targetTackStarboard();
 			}
 			break;
 			case MessageType::ServerConfigsReceived:
@@ -234,9 +235,12 @@ public:
 	int16_t m_DesiredCourse;
 
 	  //NavigationControlMsg variables
+
+	  //LocalNavigationMsg variables
 //=========================
-	int m_CourseToSteer;
-	int m_TargetSpeed;
-	int m_WindvaneSelfSteeringOn;
+    float   m_TargetCourse;
+    float   m_TargetSpeed;
+    bool    m_BeatingState;
+    bool    m_TargetTackStarboard;
 
 };

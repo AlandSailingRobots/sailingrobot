@@ -16,7 +16,7 @@
 
 #include "MessageBus/ActiveNode.h"
 #include "Messages/WindDataMsg.h"
-#include "Messages/NavigationControlMsg.h"
+#include "Messages/LocalNavigationMsg.h"
 #include "Messages/ActuatorPositionMsg.h"
 #include "MessageBus/MessageBus.h"
 #include "DataBase/DBHandler.h"
@@ -64,7 +64,7 @@ private:
     // -------------
     // Processing informations from the Navigation Control Message
     // -------------
-    void processNavigationControlMessage(const NavigationControlMsg* msg);
+    void processLocalNavigationMessage(const LocalNavigationMsg* msg);
 
     // -------------
     // Calculate the sail angle according to the apparent wind
