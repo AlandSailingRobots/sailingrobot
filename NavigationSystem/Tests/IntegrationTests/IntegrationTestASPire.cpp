@@ -250,7 +250,7 @@ void printInputMenu(WINDOW* win, menuIter highlightedItem) {
 			wprintw(win, "\t :");
 		}
 		mvwprintw(win, pos, 30, "%s", it.second.c_str());   
-		pos+=2;
+		pos+=1;
 	}
 
 	mvwprintw(win, pos, 20, "PRESS ENTER TO SEND");
@@ -317,7 +317,7 @@ int main() {
 
 
 	SensorDataReceiver sensorReceiver(msgBus);
-	CANWindsensorNode windSensor(msgBus, dbHandler, canService, 500);
+	CANWindsensorNode windSensor(msgBus, dbHandler, canService, 0.5);
 	HMC6343Node compass(msgBus, 3, 0.1);
 	compass.init ();
 	

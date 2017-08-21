@@ -141,21 +141,19 @@ void CANWindsensorNode::CANWindSensorNodeThreadFunc(ActiveNode* nodePtr) {
   Timer timer;
   timer.start();
 
-  while(true) {
-    // Need to convert milliseconds into seconds for the argument
-    timer.sleepUntil(node->m_LoopTime);
+  while(true)
+	{
+
     node->m_lock.lock();
 
-    if( node->m_WindDir == node->DATA_OUT_OF_RANGE &&  node->m_WindTemperature == node->DATA_OUT_OF_RANGE && node->m_WindSpeed == node->DATA_OUT_OF_RANGE){
-      node->m_lock.unlock();
-      continue;
+    if( not (node->m_WindDir == node->DATA_OUT_OF_RANGE &&  node->m_WindTemperature == node->DATA_OUT_OF_RANGE && node->m_WindSpeed == node->DATA_OUT_OF_RANGE) )
+		{
+		    MessagePtr windData = std::make_unique<WindDataMsg>(node->m_WindDir, node->m_WindSpeed, node->m_WindTemperature);
+        node->m_MsgBus.sendMessage(std::move(windData));
     }
-
-    MessagePtr windData = std::make_unique<WindDataMsg>(node->m_WindDir, node->m_WindSpeed, node->m_WindTemperature);
-    node->m_MsgBus.sendMessage(std::move(windData));
-
     node->m_lock.unlock();
-
+		
+    timer.sleepUntil(node->m_LoopTime);
     timer.reset();
   }
 }
