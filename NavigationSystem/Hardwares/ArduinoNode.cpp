@@ -119,11 +119,11 @@ void ArduinoNode::ArduinoThreadFunc(ActiveNode* nodePtr)
         reVal+=(uint16_t) block[7];
         node->m_battery = reVal;
 
-        reVal = block[9]<<8;
-        reVal+=(uint16_t) block[10];
-        node->m_RC = reVal;
+        // reVal = block[9]<<8;
+        // reVal+=(uint16_t) block[10];
+        // node->m_RC = reVal;
 
-        MessagePtr msg = std::make_unique<ArduinoDataMsg>(node->m_pressure, node->m_rudder, node->m_sheet, node->m_battery, node->m_RC);
+        MessagePtr msg = std::make_unique<ArduinoDataMsg>(node->m_pressure, node->m_rudder, node->m_sheet, node->m_battery);
         node->m_MsgBus.sendMessage(std::move(msg));
 				timer.reset();
     }

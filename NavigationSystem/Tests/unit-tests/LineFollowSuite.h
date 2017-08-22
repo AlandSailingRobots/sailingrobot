@@ -73,9 +73,8 @@ public:
     mockNode = new MockNode(msgBus(), nodeRegistered);
     if(lineFollow == 0)
     {
-      dbHandler = new DBHandler("../asr.db");
       Logger::DisableLogging();
-      lineFollow = new LineFollowNode(msgBus(), *dbHandler);
+      lineFollow = new LineFollowNode(msgBus(), 0.5);
       lineFollow -> start();
 
       std::this_thread::sleep_for(std::chrono::milliseconds(2500));

@@ -175,8 +175,7 @@ int main(int argc, char *argv[])
   	#else
 		double vesselStateLoopTime = dbHandler.retrieveCellAsDouble("config_vessel_state","1", "loop_time");
 	  	StateEstimationNode stateEstimationNode(messageBus, dbHandler, vesselStateLoopTime); // NOTE - Maël: It will change
-
-		LineFollowNode sailingLogic(messageBus, dbHandler);
+		LineFollowNode sailingLogic(messageBus, 0.5);
   	#endif
 
     double simuLoopTime = dbHandler.retrieveCellAsDouble("config_simulator","1", "loop_time");

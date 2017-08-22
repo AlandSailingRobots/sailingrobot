@@ -41,7 +41,7 @@
   "push_only_latest_logs": 0,
   "boat_id": "BOAT02",
   "boat_pwd": "aspirepassword123",
-  "srv_addr": "http://localhost/tests/Tuto_OCR/SailingRobotsWebsite/sync/",
+  "srv_addr": "https://sailingrobots.ax/aspire/sync/",
   "configs_updated": "0",
   "route_updated":"1"
 },

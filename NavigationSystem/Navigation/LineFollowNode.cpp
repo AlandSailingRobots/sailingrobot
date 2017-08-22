@@ -24,8 +24,8 @@ const int INITIAL_SLEEP = 2000;  //in milliseconds
 const float NO_COMMAND = -2000;
 #define DATA_OUT_OF_RANGE -2000
 
-LineFollowNode::LineFollowNode(MessageBus& msgBus, DBHandler& db): ActiveNode(NodeID::SailingLogic, msgBus), m_db(db),
-m_LoopTime(0.5), m_externalControlActive(false),
+LineFollowNode::LineFollowNode(MessageBus& msgBus, double loopTime): ActiveNode(NodeID::SailingLogic, msgBus),
+m_LoopTime(loopTime), m_externalControlActive(false),
 m_nextWaypointLon(DATA_OUT_OF_RANGE), m_nextWaypointLat(DATA_OUT_OF_RANGE), m_nextWaypointRadius(DATA_OUT_OF_RANGE),
 m_prevWaypointLon(DATA_OUT_OF_RANGE), m_prevWaypointLat(DATA_OUT_OF_RANGE), m_prevWaypointRadius(DATA_OUT_OF_RANGE),
 m_TackDirection(1), m_BeatingMode(false), m_TargetTackStarboard(false)
@@ -48,7 +48,6 @@ LineFollowNode::~LineFollowNode() {}
 
 bool LineFollowNode::init()
 {
-    updateConfigsFromDB();
     return true;
 }
 
@@ -62,11 +61,6 @@ void LineFollowNode::stop()
 {
     m_Running.store(false);
     stopThread(this);
-}
-
-void LineFollowNode::updateConfigsFromDB()
-{
-    m_LoopTime = m_db.retrieveCellAsDouble("config_line_follow","1","loop_time");
 }
 
 void LineFollowNode::processMessage(const Message* msg)
@@ -85,9 +79,6 @@ void LineFollowNode::processMessage(const Message* msg)
         break;
     case MessageType::WaypointData:
         processWaypointMessage((WaypointDataMsg*)msg);
-        break;
-    case MessageType::ServerConfigsReceived:
-        updateConfigsFromDB();
         break;
     default:
         return;

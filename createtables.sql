@@ -390,6 +390,7 @@ INSERT INTO "config_simulator" VALUES(1,0.5);
 INSERT INTO "config_vessel_state" VALUES(1, 0.5, 1, 2); -- NOTE: Marc: See the values of the course_config_speed
 INSERT INTO "config_voter_system" VALUES(1,0.5,25,1,1,1,1,2);
 INSERT INTO "config_wind_sensor" VALUES(1,0.5);
+INSERT INTO "config_wingsail_control" VALUES(1,0.5,15);
 INSERT INTO "config_xbee" VALUES(1,1,1,0,0.1,1);
 
 DELETE FROM sqlite_sequence;

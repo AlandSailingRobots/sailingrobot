@@ -67,6 +67,7 @@ public:
     // setup them up once in this test, delete them when the program closes
     if(sEstimationNode == 0){
         Logger::DisableLogging();
+        dbhandler = new DBHandler("../asr.db");
       sEstimationNode = new StateEstimationNode(msgBus(),*dbhandler, .5, 0, 1);
       sEstimationNode->start();
       std::this_thread::sleep_for(std::chrono::milliseconds(2600));

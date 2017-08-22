@@ -46,14 +46,13 @@
 class LineFollowNode : public ActiveNode {
 public:
 
-	LineFollowNode(MessageBus& msgBus, DBHandler& db);
+	LineFollowNode(MessageBus& msgBus, double loopTime);
 	~LineFollowNode();
 
 	bool init();
 	void start();
 	void stop();
 	void processMessage(const Message* message);
-	void updateConfigsFromDB();
 
 
 private:
@@ -92,9 +91,6 @@ private:
     /// Starts the LineFollowNode's thread that pumps out LocalNavigationMsg.
     ///----------------------------------------------------------------------------------
 	static void LineFollowNodeThreadFunc(ActiveNode* nodePtr);
-
-
-	DBHandler &m_db;
 
     double  m_LoopTime;             // second
 
