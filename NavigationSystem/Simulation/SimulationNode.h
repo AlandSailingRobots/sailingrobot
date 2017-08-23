@@ -45,24 +45,24 @@ struct SailBoatDataPacket_t {
     float latitude;
     float longitude;
     float speed;
-    uint16_t course;
+    int16_t course;
 
-    uint16_t windDir;
+    int16_t windDir;
     float windSpeed;
 
-    uint16_t heading;
+    int16_t heading;
 } __attribute__((packed));
 
 struct WingBoatDataPacket_t {
     float latitude;
     float longitude;
     float speed;
-    uint16_t course;
+    int16_t course;
 
-    uint16_t windDir;
+    int16_t windDir;
     float windSpeed;
 
-    uint16_t heading;
+    int16_t heading;
 } __attribute__((packed));
 
 struct AISContactPacket_t {

@@ -221,7 +221,7 @@ double Utility::limitAngleRange180(double angle)
 	return angle;
 
 	// NOTE - Maël: An other possibility to set the angle in ]-180, 180[) is to use a sawtooth function.
- 	// return radianToDegree(atan(tan((degreeToRadian(angle) - M_PI)/2)));
+ 	
 }
 
 double Utility::limitRadianAngleRange(double angle)

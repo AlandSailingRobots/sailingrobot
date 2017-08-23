@@ -179,12 +179,12 @@ void SimulationNode::processSailBoatData( TCPPacket_t& packet )
         uint8_t* ptr = packet.data + 1;
         SailBoatDataPacket_t* boatData = (SailBoatDataPacket_t*)ptr;
 
-        m_CompassHeading = boatData->heading;
+        m_CompassHeading = Utility::limitAngleRange(90 - boatData->heading); // [0, 360] north east down
         m_GPSLat = boatData->latitude;
         m_GPSLon = boatData->longitude;
         m_GPSSpeed = boatData->speed;
-        m_GPSHeading = boatData->course;
-        m_WindDir = boatData->windDir;
+        m_GPSHeading = Utility::limitAngleRange(90 - boatData->course); // [0, 360] north east down
+        m_WindDir = Utility::limitAngleRange(- boatData->windDir); // [0, 360] clockwize
         m_WindSpeed = boatData->windSpeed;
 
         // Send messages
@@ -203,12 +203,12 @@ void SimulationNode::processWingBoatData( TCPPacket_t& packet )
         uint8_t* ptr = packet.data + 1;
         WingBoatDataPacket_t* boatData = (WingBoatDataPacket_t*)ptr;
 
-        m_CompassHeading = boatData->heading;
+        m_CompassHeading = Utility::limitAngleRange(90 - boatData->heading); // [0, 360] north east down
         m_GPSLat = boatData->latitude;
         m_GPSLon = boatData->longitude;
         m_GPSSpeed = boatData->speed;
-        m_GPSHeading = boatData->course;
-        m_WindDir = boatData->windDir;
+        m_GPSHeading = Utility::limitAngleRange(90 - boatData->course); // [0, 360] north east down
+        m_WindDir = Utility::limitAngleRange(- boatData->windDir); // [0, 360] clockwize
         m_WindSpeed = boatData->windSpeed;
 
         // Send messages
@@ -251,7 +251,7 @@ void SimulationNode::processVisualContact( TCPPacket_t& packet )
 void SimulationNode::sendActuatorDataWing( int socketFD)
 {
     //m_RudderCommand = 12.0;
-    //m_TailCommand   = -15.0;
+    //m_TailCommand   = 15.0;
     actuatorDataWing.rudderCommand = - Utility::degreeToRadian(m_RudderCommand);
     actuatorDataWing.tailCommand   = - Utility::degreeToRadian(m_TailCommand);
     std::cout <<"sent rudder command" << actuatorDataWing.rudderCommand << std::endl;
@@ -327,8 +327,9 @@ void SimulationNode::SimulationThreadFunc(ActiveNode* nodePtr)
         packet.length = 0;
 
         node->sendActuatorDataWing ( simulatorFD );
-        //node->sendActuatorDataSail( simulatorFD);
         node->sendWaypoint( simulatorFD );
+        //node->sendActuatorDataSail( simulatorFD);
+        
         
         //std::this_thread::sleep_for(std::chrono::milliseconds(BASE_SLEEP_MS));
     }
