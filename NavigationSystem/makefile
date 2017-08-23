@@ -72,6 +72,7 @@ export UNIT_TEST_EXEC 		= unit-tests.run
 export UNIT_TEST_HW_EXEC 	= unit-tests-hardware.run
 export INTEGRATION_TEST_EXEC_ASPIRE = integration-tests-ASPire.run
 export HTTP_SYNC_TEST_EXEC	= HTTPSync-test.run
+export AIS_TEST_EXEC		= ais-integration-tests.run
 
 export OBJECT_FILE          = $(BUILD_DIR)/objects.tmp
 
@@ -172,7 +173,7 @@ unit_tests: $(BUILD_DIR)
 ## Build the integration tests for ASPire
 integration_tests_ASPire: $(BUILD_DIR)
 	$(MAKE) -f integration_tests_ASPire.mk
-	$(MAKE) -f ais_integration.mk
+	$(MAKE) -f ais_integration_tests.mk
 
 ## Build HTTPSync Test
 HTTPSync_test: $(BUILD_DIR)
@@ -189,8 +190,10 @@ clean:
 	-@rm -rd $(BUILD_DIR)
 	-@rm $(EXECUTABLE)
 	-@rm $(UNIT_TEST_EXEC)
-	-@rm $(HARDWARE_TEST_EXEC)
+	-@rm $(UNIT_TEST_HW_EXEC)
 	-@rm $(INTEGRATION_TEST_EXEC_ASPIRE)
+	-@rm $(INTEGRATION_TEST_EXEC_ASPIRE)
+	-@rm $(AIS_TEST_EXEC)
 	-@$(MAKE) -C Tests clean
 	@echo DONE
 
