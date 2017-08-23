@@ -26,9 +26,9 @@
 const int STATE_INITIAL_SLEEP = 2000;
 #define DATA_OUT_OF_RANGE -2000
 
-CourseRegulatorNode::CourseRegulatorNode( MessageBus& msgBus,  DBHandler& dbhandler, double loopTime)
+CourseRegulatorNode::CourseRegulatorNode( MessageBus& msgBus,  DBHandler& dbhandler)
 :ActiveNode(NodeID::CourseRegulatorNode,msgBus), m_VesselCourse(DATA_OUT_OF_RANGE), m_VesselSpeed(0),
-m_MaxRudderAngle(30),m_DesiredCourse(DATA_OUT_OF_RANGE),m_db(dbhandler), m_LoopTime(loopTime),
+m_MaxRudderAngle(30),m_DesiredCourse(DATA_OUT_OF_RANGE),m_db(dbhandler), m_LoopTime(0.5),
 pGain(1),iGain(1),dGain(1)
 {
     msgBus.registerNode( *this, MessageType::StateMessage);

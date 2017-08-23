@@ -17,12 +17,12 @@ print_result()
 printf "$CLR_INFO\nCreating database in $CLR_DIR$INSTALLATION_PATH$REPO_MAIN/$CLR_INFO\n"
 	if sqlite3 asr.db < $DIR/createtables.sql;
 	then print_result true; else print_result false; break; fi
-	printf "$CLR_ASK\nServer settings:\n$CLR_OPT"
-	read -p "Boat name: " BOATID
-	read -p "Boat password: " BOATPWD
-	read -p "Server address: " SRVADDR
-	printf "$CLR_INFO"
-	if sqlite3 asr.db "INSERT INTO config_httpsync(id, loop_time, remove_logs, push_only_latest_logs, boat_id, boat_pwd, srv_addr) VALUES('1', '0.5', '0', '0', '$BOATID', '$BOATPWD', '$SRVADDR')";
-		then print_result true;
-		cp asr.db test_asr.db
-	else print_result false; fi
+	# printf "$CLR_ASK\nServer settings:\n$CLR_OPT"
+	# read -p "Boat name: " BOATID
+	# read -p "Boat password: " BOATPWD
+	# read -p "Server address: " SRVADDR
+	# printf "$CLR_INFO"
+	# if sqlite3 asr.db "INSERT INTO config_httpsync(id, loop_time, remove_logs, push_only_latest_logs, boat_id, boat_pwd, srv_addr) VALUES('1', '0.5', '0', '0', '$BOATID', '$BOATPWD', '$SRVADDR')";
+	# 	then print_result true;
+	# 	cp asr.db test_asr.db
+	# else print_result false; fi

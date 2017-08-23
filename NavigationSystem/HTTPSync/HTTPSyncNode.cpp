@@ -28,8 +28,8 @@ size_t write_to_string(void *ptr, size_t size, size_t count, void *stream) {
     return size*count;
 }
 
-HTTPSyncNode::HTTPSyncNode(MessageBus& msgBus, DBHandler *dbhandler, double loopTime, bool removeLogs)
-	:ActiveNode(NodeID::HTTPSync, msgBus), m_removeLogs(removeLogs), m_LoopTime(loopTime), m_dbHandler(dbhandler)
+HTTPSyncNode::HTTPSyncNode(MessageBus& msgBus, DBHandler *dbhandler)
+	:ActiveNode(NodeID::HTTPSync, msgBus), m_removeLogs(1), m_LoopTime(0.5), m_dbHandler(dbhandler)
 {
     msgBus.registerNode( *this, MessageType::LocalWaypointChange);
     msgBus.registerNode( *this, MessageType::LocalConfigChange);

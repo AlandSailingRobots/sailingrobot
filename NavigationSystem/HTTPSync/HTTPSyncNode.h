@@ -16,7 +16,7 @@
 class HTTPSyncNode : public ActiveNode{
 	public:
 
-		HTTPSyncNode(MessageBus& msgBus, DBHandler *dbhandler,double loopTime, bool removeLogs);
+		HTTPSyncNode(MessageBus& msgBus, DBHandler *dbhandler);
 
 		virtual ~HTTPSyncNode() { }
 

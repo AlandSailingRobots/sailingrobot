@@ -50,9 +50,9 @@
 #define COM_ORIENT_SIDEWAYS 0x73
 #define COM_ORIENT_FLATFRONT 0x74
 
-HMC6343Node::HMC6343Node(MessageBus& msgBus, DBHandler& dbhandler,  double loopTime)
+HMC6343Node::HMC6343Node(MessageBus& msgBus, DBHandler& dbhandler)
 : ActiveNode(NodeID::Compass, msgBus), m_Initialised(false), m_HeadingBufferSize(1),
-m_LoopTime(loopTime), m_db(dbhandler)
+m_LoopTime(0.5), m_db(dbhandler)
 {
 
 }

@@ -137,16 +137,10 @@ int main(int argc, char *argv[])
 	// Declare nodes
 	//-------------------------------------------------------------------------------
 
-	double dbLoggerUpdateFrequency = dbHandler.retrieveCellAsDouble("config_dblogger", "1","loop_time"); // updating frequency to the database (in milliseconds)
 	int dbLoggerQueueSize = 5; 			// how many messages to log to the databse at a time
-	DBLoggerNode dbLoggerNode(messageBus, dbHandler,dbLoggerUpdateFrequency, dbLoggerQueueSize);
-
-	int dbHandler_delay = dbHandler.retrieveCellAsInt("config_httpsync", "1","loop_time");
-	bool removeLogs = dbHandler.retrieveCellAsInt("config_httpsync","1","remove_logs");
-	HTTPSyncNode httpsync(messageBus, &dbHandler, dbHandler_delay, removeLogs);
-
+	DBLoggerNode dbLoggerNode(messageBus, dbHandler, dbLoggerQueueSize);
+	HTTPSyncNode httpsync(messageBus, &dbHandler);
 	WindStateNode windStateNode(messageBus);
-
 	WaypointMgrNode waypoint(messageBus, dbHandler);
 
 	//double PGAIN = 0.20;
@@ -173,32 +167,24 @@ int main(int argc, char *argv[])
 		lnm.registerVoter( &proximityVoter );
 		lnm.registerVoter( &midRangeVoter );
   	#else
-		double vesselStateLoopTime = dbHandler.retrieveCellAsDouble("config_vessel_state","1", "loop_time");
-	  	StateEstimationNode stateEstimationNode(messageBus, dbHandler, vesselStateLoopTime); // NOTE - Maël: It will change
+	  	StateEstimationNode stateEstimationNode(messageBus, dbHandler); // NOTE - Maël: It will change
 		LineFollowNode sailingLogic(messageBus, 0.5);
   	#endif
 
-    double simuLoopTime = dbHandler.retrieveCellAsDouble("config_simulator","1", "loop_time");
+
 
 	#if SIMULATION == 1
 	  	#if LOCAL_NAVIGATION_MODULE == 1
-	  		SimulationNode simulation(messageBus, dbHandler,&collidableMgr, simuLoopTime);
+	  		SimulationNode simulation(messageBus, dbHandler,&collidableMgr);
 	  	#else
-			SimulationNode simulation(messageBus, dbHandler, simuLoopTime);
+			SimulationNode simulation(messageBus, dbHandler);
 	  	#endif
   	#else
 		CANService canService;
 
-		const int headingBufferSize = dbHandler.retrieveCellAsInt("config_compass", "1", "compass");
-		double compassLoopTime = dbHandler.retrieveCellAsInt("config_compass", "1", "loop_time");;
-		HMC6343Node compass(messageBus, dbHandler, headingBufferSize, compassLoopTime);
-
-		double gpsdLoopTime = dbHandler.retrieveCellAsDouble("config_gps", "1", "loop_time");
-	  	GPSDNode gpsd(messageBus, dbHandler, gpsdLoopTime);
-
-		int windSensorLoopTime = dbHandler.retrieveCellAsInt("config_wind_sensor", "1", "loop_time");
-	  	CANWindsensorNode windSensor(messageBus, dbHandler, canService, windSensorLoopTime);
-
+		HMC6343Node compass(messageBus, dbHandler);
+	  	GPSDNode gpsd(messageBus, dbHandler);
+		CANWindsensorNode windSensor(messageBus, dbHandler, canService);
 	  	ActuatorNodeASPire actuators(messageBus, canService);
 	#endif
 
@@ -206,15 +192,7 @@ int main(int argc, char *argv[])
 	// Initialise nodes
 	//-------------------------------------------------------------------------------
 
-	bool requireNetwork = (bool) (dbHandler.retrieveCellAsInt("sailing_robot_config", "1", "require_network"));
-	if (requireNetwork)
-	{
-		initialiseNode(httpsync, "Httpsync", NodeImportance::CRITICAL);
-	}
-	else
-	{
-		initialiseNode(httpsync, "Httpsync", NodeImportance::NOT_CRITICAL);
-	}
+	initialiseNode(httpsync, "Httpsync", NodeImportance::NOT_CRITICAL); // This node is not critical during the developement phase.
 
 	initialiseNode(dbLoggerNode, "DBLogger", NodeImportance::CRITICAL);
 	initialiseNode(windStateNode,"WindState",NodeImportance::CRITICAL);

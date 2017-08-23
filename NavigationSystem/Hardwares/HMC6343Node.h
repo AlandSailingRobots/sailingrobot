@@ -35,7 +35,7 @@ enum class CompassOrientation {
 
 class HMC6343Node : public ActiveNode {
 public:
-	HMC6343Node(MessageBus& msgBus, DBHandler& dbhandler, double loopTime);
+	HMC6343Node(MessageBus& msgBus, DBHandler& dbhandler);
 
 	virtual ~HMC6343Node() { }
 

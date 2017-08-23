@@ -41,7 +41,6 @@ public:
     MockNode* mockNode;
     bool nodeRegistered = false;
 
-    double lTime = .5;
     double MaxRudAng = 30;
     std::thread* thr;
     int testCount = 0;
@@ -72,7 +71,7 @@ public:
             dbHandler = new DBHandler("../asr.db");
             Logger::DisableLogging();
 
-            cRegulatorNode = new CourseRegulatorNode(msgBus(),*dbHandler,lTime);
+            cRegulatorNode = new CourseRegulatorNode(msgBus(),*dbHandler);
             cRegulatorNode->start();
 
             std::this_thread::sleep_for(std::chrono::milliseconds(2600));

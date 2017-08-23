@@ -106,8 +106,8 @@ struct WaypointPacket_t {
 
 class SimulationNode : public ActiveNode {
 public:
-	SimulationNode(MessageBus& msgBus, DBHandler& dbhandler, double loopTime);
-    SimulationNode(MessageBus& msgBus, DBHandler& dbhandler, CollidableMgr* collidableMgr, double loopTime);
+	SimulationNode(MessageBus& msgBus, DBHandler& dbhandler);
+    SimulationNode(MessageBus& msgBus, DBHandler& dbhandler, CollidableMgr* collidableMgr);
 
     ///----------------------------------------------------------------------------------
     /// Initialize the TCP communication

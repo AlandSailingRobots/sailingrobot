@@ -51,22 +51,22 @@ enum SimulatorPacket {
 };
 
 
-SimulationNode::SimulationNode(MessageBus& msgBus, DBHandler& dbhandler, double loopTime)
+SimulationNode::SimulationNode(MessageBus& msgBus, DBHandler& dbhandler)
 	: ActiveNode(NodeID::Simulator, msgBus),
 		m_CompassHeading(0), m_GPSLat(0), m_GPSLon(0), m_GPSSpeed(0),
 		m_GPSCourse(0), m_WindDir(0), m_WindSpeed(0),
-		collidableMgr(NULL),m_LoopTime(loopTime), m_db(dbhandler)
+		collidableMgr(NULL),m_LoopTime(0.5), m_db(dbhandler)
 {
   m_MsgBus.registerNode(*this, MessageType::ActuatorPosition);
   m_MsgBus.registerNode(*this, MessageType::ServerConfigsReceived);
   updateConfigsFromDB();
 }
 
-SimulationNode::SimulationNode(MessageBus& msgBus, DBHandler& dbhandler, CollidableMgr* collidableMgr, double loopTime)
+SimulationNode::SimulationNode(MessageBus& msgBus, DBHandler& dbhandler, CollidableMgr* collidableMgr)
 	: ActiveNode(NodeID::Simulator, msgBus),
 		m_CompassHeading(0), m_GPSLat(0), m_GPSLon(0), m_GPSSpeed(0),
 		m_GPSCourse(0), m_WindDir(0), m_WindSpeed(0),
-		collidableMgr(collidableMgr), m_LoopTime(loopTime), m_db(dbhandler)
+		collidableMgr(collidableMgr), m_LoopTime(0.5), m_db(dbhandler)
 {
   m_MsgBus.registerNode(*this, MessageType::ActuatorPosition);
   m_MsgBus.registerNode(*this, MessageType::ServerConfigsReceived);
@@ -81,6 +81,7 @@ void SimulationNode::start()
 bool SimulationNode::init()
 {
     bool success = false;
+    updateConfigsFromDB();
 
     int rc = server.start( SERVER_PORT );
 

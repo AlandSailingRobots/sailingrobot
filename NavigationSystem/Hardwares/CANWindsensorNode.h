@@ -32,7 +32,7 @@
 class CANWindsensorNode : public CANPGNReceiver, public ActiveNode {
 public:
 
-    CANWindsensorNode(MessageBus& msgBus, DBHandler& dbhandler, CANService& can_service, double loopTime);
+    CANWindsensorNode(MessageBus& msgBus, DBHandler& dbhandler, CANService& can_service);
     ~CANWindsensorNode();
 
 	/* data */

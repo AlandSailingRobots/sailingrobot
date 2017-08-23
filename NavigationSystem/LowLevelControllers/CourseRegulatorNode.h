@@ -30,7 +30,7 @@ public:
     //--------------
     // Constructor
     //--------------
-    CourseRegulatorNode(MessageBus& msgBus, DBHandler& dbhandler, double loopTime);
+    CourseRegulatorNode(MessageBus& msgBus, DBHandler& dbhandler);
     // -------------
     // Destructor
     // -------------

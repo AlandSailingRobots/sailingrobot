@@ -17,11 +17,11 @@
 #define STATE_INITIAL_SLEEP 100
 
 
-DBLoggerNode::DBLoggerNode(MessageBus& msgBus, DBHandler& db, double loopTime, int queueSize)
+DBLoggerNode::DBLoggerNode(MessageBus& msgBus, DBHandler& db,int queueSize)
 :   ActiveNode(NodeID::DBLoggerNode, msgBus),
     m_db(db),
     m_dbLogger(queueSize, db),
-    m_loopTime(loopTime),
+    m_loopTime(0.5),
     m_queueSize(queueSize)
 
 {
