@@ -40,7 +40,7 @@
 #include <thread>
 #include <math.h>
 
-#define WAIT_FOR_MESSAGE		300
+#define WAIT_FOR_MESSAGE		500
 #define LINEFOLLOW_TEST_COUNT   2
 
 class LineFollowSuite : public CxxTest::TestSuite {

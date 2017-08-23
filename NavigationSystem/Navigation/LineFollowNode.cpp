@@ -99,7 +99,6 @@ void LineFollowNode::processWindStateMessage(const WindStateMsg* windStateMsg )
 
     m_trueWindSpeed = windStateMsg->trueWindSpeed();
     m_trueWindDir = windStateMsg->trueWindDirection();
-    // std::cout << "m_trueWindDir : " << m_trueWindDir <<std::endl;
 
     unsigned int twdBufferMaxSize = 200;
     Utility::addValueToBuffer(m_trueWindDir, m_TwdBuffer, twdBufferMaxSize);
@@ -144,8 +143,8 @@ double LineFollowNode::calculateAngleOfDesiredTrajectory()
     double M[2][3] = {
         {-sin(Utility::degreeToRadian(m_VesselLon)), cos(Utility::degreeToRadian(m_VesselLon )), 0},
         {-cos(Utility::degreeToRadian(m_VesselLon ))*sin(Utility::degreeToRadian(m_VesselLat )),
-        -sin(Utility::degreeToRadian(m_VesselLon ))*sin(Utility::degreeToRadian(m_VesselLat )),
-        cos(Utility::degreeToRadian(m_VesselLat ))}
+         -sin(Utility::degreeToRadian(m_VesselLon ))*sin(Utility::degreeToRadian(m_VesselLat )),
+          cos(Utility::degreeToRadian(m_VesselLat ))}
         };
 
     std::array<double, 3> bMinusA = { nextWPCoord[0]-prevWPCoord[0], nextWPCoord[1]-prevWPCoord[1], nextWPCoord[2]-prevWPCoord[2]};

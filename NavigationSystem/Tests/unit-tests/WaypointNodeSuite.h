@@ -62,6 +62,7 @@
 		// Only want to setup them up once in this test, only going to delete them when the program closes and the OS destroys
 		// the process's memory
         mockNode = new MockNode(msgBus(),nodeRegistered);
+        std::cout << "/* New mocknode */" << '\n';
 		if(waypoint == 0)
 		{
 			dbHandler = new DBHandler("../asr.db");
@@ -78,7 +79,6 @@
 
 	void tearDown()
 	{
-        delete mockNode;
 		if(testCount == WAYPOINT_TEST_COUNT)
 		{
             std::this_thread::sleep_for(std::chrono::seconds(1));
@@ -88,6 +88,8 @@
 			delete waypoint;
 			delete dbHandler;
 		}
+        delete mockNode;
+        std::cout << "/* Del mocknode */" << '\n';
 	}
 
     void test_WaypointNodeInitListener()
@@ -109,18 +111,11 @@
         TS_ASSERT_EQUALS(mockNode->m_waypointPrevRadius,0);
     }
 
+
+
     void test_WaypointNodeGpsMsg()
     {
         // Work if the waypoints correspond to the value on the DB
-        double gpsLat = 60.45845845;
-        double gpsLon = 45.23523523;
-        MessagePtr gpsData = std::make_unique<GPSDataMsg>(true,true,gpsLat,gpsLon,12.12,1.7,273.0,2,GPSMode::LatLonOk);
-        msgBus().sendMessage(std::move(gpsData));
-        std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_FOR_MESSAGE));
-
-        TS_ASSERT_DELTA(mockNode->m_Lat,gpsLat,1e-8);
-        TS_ASSERT_DELTA(mockNode->m_Lon,gpsLon,1e-8);
-
         std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_FOR_MESSAGE));
         TS_ASSERT(mockNode->m_MessageReceived);
         TS_ASSERT_EQUALS(mockNode->m_waypointNextId,1);

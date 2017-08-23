@@ -133,7 +133,7 @@ void MessageBus::processMessages()
 {
 	while(m_BackMessages->size() > 0)
 	{
-
+		// std::cout << "/* Size back message queue " << m_BackMessages->size() << " */" << '\n';
 		MessagePtr msgPtr = std::move(m_BackMessages->front());
 		Message* msg = msgPtr.get();
 
@@ -146,7 +146,7 @@ void MessageBus::processMessages()
 			{
 				if(node->isInterested( msg->messageType() ))
 				{
-					std::cout << std::endl << "## Before processing Message : " << msgToString(msg->messageType()) << std::endl;
+					// std::cout << std::endl << "## Before processing " << nodeToString(node->nodeRef.nodeID()) << " Message : " << msgToString(msg->messageType()) << std::endl;
 					node->nodeRef.processMessage(msg);
 					logMessageConsumer(node->nodeRef.nodeID());
 

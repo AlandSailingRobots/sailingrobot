@@ -106,6 +106,7 @@ public:
     // ----------------
     void test_CourseRegulatorNodeInit(){
         TS_ASSERT(nodeRegistered);
+        cRegulatorNode->init();
     }
 
     // ----------------

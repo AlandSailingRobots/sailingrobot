@@ -289,7 +289,6 @@ public:
         Timer timer;
 
         dbhandler->changeOneValue("config_vessel_state","1","0.7","loop_time");
-        dbhandler->changeOneValue("config_vessel_state","1","20.0","max_rudder_angle");
         MessagePtr serverConfig = std::make_unique<ServerConfigsReceivedMsg>();
         msgBus().sendMessage(std::move(serverConfig));
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -323,7 +322,6 @@ public:
         // double courseRegulatorRudderAngle = mockNode->m_rudderPosition;
         // TS_ASSERT_DELTA(courseRegulatorRudderAngle, rudderAngle, 1e-7);
         dbhandler->changeOneValue("config_vessel_state","1","0.5","loop_time");
-        dbhandler->changeOneValue("config_vessel_state","1","30.0","max_rudder_angle");
     }
 
 };
