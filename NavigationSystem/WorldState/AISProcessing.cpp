@@ -14,8 +14,8 @@
 
 #include "AISProcessing.h"
 
-AISProcessing::AISProcessing(MessageBus& msgBus, DBHandler& dbhandler, CollidableMgr* collidableMgr, int radius, uint32_t mmsi, double loopTime)
-  : ActiveNode(NodeID::AISProcessing, msgBus), m_LoopTime(loopTime), m_Radius(radius), m_MMSI(mmsi), collidableMgr(collidableMgr), m_db(dbhandler) {
+AISProcessing::AISProcessing(MessageBus& msgBus, DBHandler& dbhandler, CollidableMgr* collidableMgr)
+  : ActiveNode(NodeID::AISProcessing, msgBus), m_LoopTime(0.5), m_Radius(300e6), m_MMSI(230082790), collidableMgr(collidableMgr), m_db(dbhandler) {
     msgBus.registerNode(*this, MessageType::AISData);
     msgBus.registerNode(*this, MessageType::ServerConfigsReceived);
     updateConfigsFromDB();
@@ -32,6 +32,7 @@ AISProcessing::AISProcessing(MessageBus& msgBus, DBHandler& dbhandler, Collidabl
   }
 
   bool AISProcessing::init() {
+    updateConfigsFromDB();
     return true;
   }
 

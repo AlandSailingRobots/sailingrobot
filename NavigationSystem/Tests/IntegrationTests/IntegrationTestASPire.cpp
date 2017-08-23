@@ -4,14 +4,14 @@
 * 		IntegrationTestASPire.cpp
 *
 * Purpose:
-		 Global Integrationtest for the ASPire	
+		 Global Integrationtest for the ASPire
 *		 Monitor the values from the CAN-bus and able to sen comands to the actuators
 *
 * Developer Notes:
-		 Currently monetriring windsensor, actuator feedbacka and if the radio controller is in manual mode.  
-		 It is a interface between the messagebus and the CAN-bus that can be monitored.  
-*		 
-*			
+		 Currently monetriring windsensor, actuator feedbacka and if the radio controller is in manual mode.
+		 It is a interface between the messagebus and the CAN-bus that can be monitored.
+*
+*
 *
 ***************************************************************************************/
 
@@ -72,7 +72,7 @@ typedef std::unordered_map<std::string, float> SensorData;
 
 class SensorDataReceiver : public Node {
 public:
-	SensorDataReceiver(MessageBus& msgBus) : 
+	SensorDataReceiver(MessageBus& msgBus) :
 	Node(NodeID::None, msgBus)
 	{
 		msgBus.registerNode(*this, MessageType::WindData);
@@ -83,7 +83,7 @@ public:
 
 		m_SensorValues["Rudder Angle"] = DATA_OUT_OF_RANGE;
 		m_SensorValues["Wingsail Angle"] = DATA_OUT_OF_RANGE;
-		m_SensorValues["Wind Speed"] = DATA_OUT_OF_RANGE;        
+		m_SensorValues["Wind Speed"] = DATA_OUT_OF_RANGE;
 		m_SensorValues["Wind Direction"] = DATA_OUT_OF_RANGE;
 		m_SensorValues["Wind Temperature"] = DATA_OUT_OF_RANGE;
 		m_SensorValues["RC Mode"] = DATA_OUT_OF_RANGE;
@@ -95,9 +95,9 @@ public:
 		m_SensorValues["GPS Online"] = DATA_OUT_OF_RANGE;
 		m_SensorValues["AIS Longitude"] = DATA_OUT_OF_RANGE;
 		m_SensorValues["AIS Latitude"] = DATA_OUT_OF_RANGE;
-				
+
 		m_Win = newwin(6+2*m_SensorValues.size(),60,1,2);
-		
+
 		box(m_Win,0,0);
 		keypad(m_Win, FALSE);
 		wrefresh(m_Win);
@@ -109,7 +109,7 @@ public:
 	void processMessage(const Message* message) {
 		MessageType type = message->messageType();
 		switch (type){
-					
+
 			case MessageType::ASPireActuatorFeedback:
 				{
 				const ASPireActuatorFeedbackMsg* actmsg = dynamic_cast<const ASPireActuatorFeedbackMsg*>(message);
@@ -119,10 +119,10 @@ public:
 					m_SensorValues["RC Mode"] = ON;
 				} else {
 					m_SensorValues["RC Mode"] = OFF;
-				}				
-				}	
+				}
+				}
 				break;
-				
+
 			case MessageType::WindData:
 				{
 				const WindDataMsg* windmsg = dynamic_cast<const WindDataMsg*>(message);
@@ -131,8 +131,8 @@ public:
 				m_SensorValues["Wind Temperature"] = windmsg->windTemp();
 				}
 				break;
-						
-			
+
+
 			case MessageType::CompassData:
 				{
 				const CompassDataMsg* compassmsg = dynamic_cast<const CompassDataMsg*>(message);
@@ -141,7 +141,7 @@ public:
         m_SensorValues["Roll"] = compassmsg->roll();
 				}
 				break;
-				
+
 			case MessageType::GPSData:
 				{
 				const GPSDataMsg* gpsdata = dynamic_cast<const GPSDataMsg*>(message);
@@ -153,10 +153,10 @@ public:
 				}else{
 					m_SensorValues["GPS Online"] = OFF;
 				}
-				
+
 				}
 				break;
-				
+
 			case MessageType::AISData:
 				{
 					const AISDataMsg* aisdata = dynamic_cast<const AISDataMsg*>(message);
@@ -164,16 +164,16 @@ public:
 					m_SensorValues["AIS Longitude"] = aisdata->posLon();
 				}
 				break;
-				
+
 				default:
 				break;
-						
+
 				}
 		printSensorData();
 	}
-	
+
 	void printSensorData() {
-	 
+
 		wclear(m_Win);
 		box(m_Win, 0, 0);
 
@@ -205,7 +205,7 @@ public:
 	}
 
 private:
-	
+
 
 	SensorData m_SensorValues;
 
@@ -249,21 +249,21 @@ void printInputMenu(WINDOW* win, menuIter highlightedItem) {
 			mvwprintw(win, pos, 5, "%s", it.first.c_str());
 			wprintw(win, "\t :");
 		}
-		mvwprintw(win, pos, 30, "%s", it.second.c_str());   
+		mvwprintw(win, pos, 30, "%s", it.second.c_str());
 		pos+=1;
 	}
 
 	mvwprintw(win, pos, 20, "PRESS ENTER TO SEND");
 	wrefresh(win);
-	
-} 
+
+}
 
 void sendActuatorCommands() {
-	
+
 	int rudderAngle16;
 	int wingsailAngle16;
 	//int windvaneAngle16; //For when the windvane is implemented
-  
+
 	for(auto& it : menuValues) {
 		if(it.second.empty()) {
 			it.second = lastSentValues[it.first];
@@ -278,7 +278,7 @@ void sendActuatorCommands() {
 		std::cout << std::endl << "Actuator commands only works with integers." << std::endl << std::endl;
 		return;
 	}
-	
+
 	// MessagePtr actuatorMsg = std::make_unique<ActuatorControlASPireMessage>(wingsailAngle16, rudderAngle16, true );
 	// msgBus.sendMessage(std::move(actuatorMsg));
 	MessagePtr rudderMsg = std::make_unique<RudderCommandMsg>(rudderAngle16);
@@ -317,24 +317,24 @@ int main() {
 
 
 	SensorDataReceiver sensorReceiver(msgBus);
-	CANWindsensorNode windSensor(msgBus, dbHandler, canService, 0.5);
-	HMC6343Node compass(msgBus, 3, 0.1);
+	CANWindsensorNode windSensor(msgBus, dbHandler, canService);
+	HMC6343Node compass(msgBus, dbHandler);
 	compass.init ();
-	
 
-	
-	CANArduinoNode arduino (msgBus, canService, 500);
+
+
+	CANArduinoNode arduino (msgBus, dbHandler, canService);
 	ActuatorNodeASPire actuators (msgBus, canService);
-	GPSDNode gps (msgBus, dbHandler, 0.5);
+	GPSDNode gps (msgBus, dbHandler);
 	gps.init();
-	CANAISNode ais (msgBus, canService, 1);
-	
+	CANAISNode ais (msgBus, dbHandler, canService);
+
 	ais.start();
 	gps.start();
 	windSensor.start();
 	arduino.start ();
 	compass.start ();
-	
+
 	std::thread thr(messageLoop);
 	thr.detach();
 	std::this_thread::sleep_for(std::chrono::milliseconds(200));
@@ -344,13 +344,13 @@ int main() {
 	menuValues["Rudder Angle"] = "";
 	menuValues["Wingsail Angle"] = "";
    // menuValues["Windvane Angle"] = "";
-		
+
 	lastSentValues = menuValues;
-		
+
 	lastSentValues["Rudder Angle"] = "0";
 	lastSentValues["Wingsail Angle"] = "0";
 	//lastSentValues["Windvane Angle"] = "0";
-		
+
 	menuIter highlighted = menuValues.begin();
 
 	SensorData values = sensorReceiver.getValues();
@@ -372,7 +372,7 @@ int main() {
 				if(highlighted->second.size() <= LONGEST_INPUT) {
 					highlighted->second += c;
 				}
-		}else {	
+		}else {
 			switch(c) {
 				case KEY_DOWN:
 					if(highlighted != --menuValues.end()) {

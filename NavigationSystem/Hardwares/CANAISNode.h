@@ -39,7 +39,7 @@ public:
   * Constructor, pointer to a message bus and canservice
   * double loopTime, how often we send messages
   */
-  CANAISNode(MessageBus& msgBus, DBHandler& dbhandler, CANService& canService, double loopTime);
+  CANAISNode(MessageBus& msgBus, DBHandler& dbhandler, CANService& canService);
   ~CANAISNode();
 
   bool init();

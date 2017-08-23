@@ -16,8 +16,8 @@
 #include "MessageBus/MessageTypes.h"
 
 
-CANArduinoNode::CANArduinoNode(MessageBus& messageBus, DBHandler& dbhandler, CANService& canService, double loopTime) :
-ActiveNode(NodeID::CANArduino, messageBus), CANFrameReceiver(canService, {701,702}), m_LoopTime (loopTime), m_db(dbhandler)
+CANArduinoNode::CANArduinoNode(MessageBus& messageBus, DBHandler& dbhandler, CANService& canService) :
+ActiveNode(NodeID::CANArduino, messageBus), CANFrameReceiver(canService, {701,702}), m_LoopTime (0.5), m_db(dbhandler)
 {
 	m_RudderFeedback  = DATA_OUT_OF_RANGE;
 	m_WingsailFeedback = DATA_OUT_OF_RANGE;

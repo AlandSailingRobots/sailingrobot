@@ -31,7 +31,7 @@
 
 class CANArduinoNode : public ActiveNode, public CANFrameReceiver {
 public:
-	CANArduinoNode(MessageBus& messageBus, DBHandler& dbhandler, CANService& canService, double loopTime);
+	CANArduinoNode(MessageBus& messageBus, DBHandler& dbhandler, CANService& canService);
 	~CANArduinoNode();
 	bool init();
 	void processMessage (const Message* message);

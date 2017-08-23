@@ -37,7 +37,7 @@ public:
   * uint32_t mmsi, the ID number of our shown vessel, makes sure it gets ignored and not added to the collidable manager
   * double loopTime, how often we send messages
   */
-  AISProcessing(MessageBus& msgBus, DBHandler& dbhandler, CollidableMgr* collidableMgr, int radius, uint32_t mmsi, double loopTime);
+  AISProcessing(MessageBus& msgBus, DBHandler& dbhandler, CollidableMgr* collidableMgr);
   ~AISProcessing();
 
   bool init();
