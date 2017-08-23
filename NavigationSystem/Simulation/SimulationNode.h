@@ -32,6 +32,16 @@
 #include "WorldState/CollidableMgr/CollidableMgr.h"
 
 
+enum SimulatorPacket : unsigned char {
+    SailBoatData = 0,
+    WingBoatData =1,
+    AISData = 2,
+    CameraData = 3,
+    WingBoatCmd = 4,
+    SailBoatCmd = 5,
+    WaypointData = 6
+};
+
 struct SailBoatDataPacket_t {
     float latitude;
     float longitude;
@@ -72,24 +82,21 @@ struct VisualContactPacket_t {
     float longitude;
 } __attribute__((packed));
 
-struct ActuatorDataPacket_t
-{
-    float rudderCommand;
-    float sailCommand;
-}__attribute__((packed));
-
 struct ActuatorDataWingPacket_t {
+    unsigned char simulatorPacket = WingBoatCmd;
     float rudderCommand;
     float tailCommand;
 }__attribute__((packed));
 
 struct ActuatorDataSailPacket_t
 {
+    unsigned char simulatorPacket = SailBoatCmd;
     float rudderCommand;
     float sailCommand;
 }__attribute__((packed));
 
 struct WaypointPacket_t {
+  unsigned char simulatorPacket = WaypointData;
   int nextId;
   double nextLongitude;
   double nextLatitude;
@@ -213,6 +220,8 @@ private:
     double m_LoopTime;
     DBHandler& m_db;
 
+    ActuatorDataWingPacket_t actuatorDataWing;
+    ActuatorDataSailPacket_t actuatorDataSail;
     WaypointPacket_t waypoint;
 
     std::mutex m_lock;

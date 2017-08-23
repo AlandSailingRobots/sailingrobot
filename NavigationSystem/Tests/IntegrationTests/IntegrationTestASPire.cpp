@@ -88,8 +88,8 @@ public:
 		m_SensorValues["Wind Temperature"] = DATA_OUT_OF_RANGE;
 		m_SensorValues["RC Mode"] = DATA_OUT_OF_RANGE;
 		m_SensorValues["Heading"] = DATA_OUT_OF_RANGE;
-    m_SensorValues["Roll"] = DATA_OUT_OF_RANGE;
-    m_SensorValues["Pitch"] = DATA_OUT_OF_RANGE;
+    	m_SensorValues["Roll"] = DATA_OUT_OF_RANGE;
+    	m_SensorValues["Pitch"] = DATA_OUT_OF_RANGE;
 		m_SensorValues["GPS Longitude"] = DATA_OUT_OF_RANGE;
 		m_SensorValues["GPS Latitude"] = DATA_OUT_OF_RANGE;
 		m_SensorValues["GPS Online"] = DATA_OUT_OF_RANGE;
@@ -136,9 +136,9 @@ public:
 			case MessageType::CompassData:
 				{
 				const CompassDataMsg* compassmsg = dynamic_cast<const CompassDataMsg*>(message);
-        m_SensorValues["Heading"] = compassmsg->heading();
-        m_SensorValues["Pitch"] = compassmsg->pitch();
-        m_SensorValues["Roll"] = compassmsg->roll();
+		        m_SensorValues["Heading"] = compassmsg->heading();
+		        m_SensorValues["Pitch"] = compassmsg->pitch();
+		        m_SensorValues["Roll"] = compassmsg->roll();
 				}
 				break;
 

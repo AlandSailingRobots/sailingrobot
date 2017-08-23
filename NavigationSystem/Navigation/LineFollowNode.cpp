@@ -172,7 +172,7 @@ double LineFollowNode::calculateTargetCourse()
         double meanTrueWindDir = Utility::meanOfAngles(m_TwdBuffer);
         double trueWindAngle = Utility::limitRadianAngleRange(Utility::degreeToRadian(meanTrueWindDir)+M_PI);
         //float trueWindAngle = Utility::degreeToRadian(m_trueWindDir);
-        std::cout << "trueWindAngle : " << trueWindAngle <<std::endl;
+        //std::cout << "trueWindAngle : " << trueWindAngle <<std::endl;
 
         // Calculate signed distance to the line.           [1] and [2]: (e).
         double signedDistance = Utility::calculateSignedDistanceToLine(m_nextWaypointLon, m_nextWaypointLat, m_prevWaypointLon,
@@ -183,16 +183,16 @@ double LineFollowNode::calculateTargetCourse()
         // std::cout << "m_prevWaypointLat : " << m_prevWaypointLat <<std::endl;
         // std::cout << "m_VesselLon : " << m_VesselLon <<std::endl;
         // std::cout << "m_VesselLat : " << m_VesselLat <<std::endl;
-        std::cout << "signedDistance : " << signedDistance <<std::endl;
+        //std::cout << "signedDistance : " << signedDistance <<std::endl;
 
         // Calculate the angle of the line to be followed.  [1]:(phi)       [2]:(beta)
         double phi = calculateAngleOfDesiredTrajectory();
-        std::cout << "phi : " << phi <<std::endl;
+        //std::cout << "phi : " << phi <<std::endl;
 
         // Calculate the target course in nominal mode.     [1]:(theta_*)   [2]:(theta_r)
         double targetCourse = phi + (2 * m_IncidenceAngle/M_PI) * atan(signedDistance/m_MaxDistanceFromLine);
         targetCourse = Utility::limitRadianAngleRange(targetCourse); // in north east down reference frame.
-        std::cout << "targetCourse in f: " << targetCourse <<std::endl;
+        //std::cout << "targetCourse in f: " << targetCourse <<std::endl;
 
         // Change tack direction when reaching tacking distance
         if(abs(signedDistance) > m_TackingDistance)
@@ -244,7 +244,7 @@ void LineFollowNode::LineFollowNodeThreadFunc(ActiveNode* nodePtr)
     {
         float targetCourse = (float) Utility::radianToDegree(node->calculateTargetCourse());
         if (targetCourse != DATA_OUT_OF_RANGE){
-            std::cout << "targetCourse end : " << targetCourse <<std::endl;
+            //std::cout << "targetCourse end : " << targetCourse <<std::endl;
             MessagePtr LocalNavMsg = std::make_unique<LocalNavigationMsg>(targetCourse, NO_COMMAND, node->m_BeatingMode, node->m_TargetTackStarboard);
             node->m_MsgBus.sendMessage( std::move( LocalNavMsg ) );
         }

@@ -32,6 +32,7 @@
 #include "SystemServices/SysClock.h"
 #include "Network/TCPServer.h"
 #include "Math/CourseMath.h"
+#include "Math/Utility.h"
 
 
 #define BASE_SLEEP_MS 200
@@ -41,14 +42,6 @@
 
 #define SERVER_PORT 6900
 
-
-enum SimulatorPacket {
-    SailBoatData = 0,
-    WingBoatData =1,
-    AISData = 2,
-    CameraData = 3
-
-};
 
 
 SimulationNode::SimulationNode(MessageBus& msgBus, DBHandler& dbhandler)
@@ -264,14 +257,12 @@ void SimulationNode::processVisualContact( TCPPacket_t& packet )
 ///--------------------------------------------------------------------------------------
 void SimulationNode::sendActuatorDataWing( int socketFD)
 {
-
-    ActuatorDataWingPacket_t actuatorDataWing;
     //m_RudderCommand = 12.0;
     //m_TailCommand   = -15.0;
-    actuatorDataWing.rudderCommand = m_RudderCommand;
-    actuatorDataWing.tailCommand   = m_TailCommand;
-    //std::cout <<"sent rudder command" << actuatorDataWing.rudderCommand << std::endl;
-    //std::cout <<"sent tail command" << actuatorDataWing.tailCommand << std::endl;
+    actuatorDataWing.rudderCommand = - Utility::degreeToRadian(m_RudderCommand);
+    actuatorDataWing.tailCommand   = - Utility::degreeToRadian(m_TailCommand);
+    std::cout <<"sent rudder command" << actuatorDataWing.rudderCommand << std::endl;
+    std::cout <<"sent tail command" << actuatorDataWing.tailCommand << std::endl;
     //std::cout <<"given rudder command" << m_RudderCommand << std::endl;
     //std::cout <<"given tail command" << m_TailCommand << std::endl;
     //std::cout <<sizeof(ActuatorDataWingPacket_t) << std::endl;
@@ -280,7 +271,6 @@ void SimulationNode::sendActuatorDataWing( int socketFD)
 
 void SimulationNode::sendActuatorDataSail( int socketFD)
 {
-    ActuatorDataSailPacket_t actuatorDataSail;
     actuatorDataSail.rudderCommand = m_RudderCommand;
     actuatorDataSail.sailCommand   = m_SailCommand;
     server.sendData( socketFD, &actuatorDataSail, sizeof(ActuatorDataSailPacket_t) );
@@ -323,14 +313,12 @@ void SimulationNode::SimulationThreadFunc(ActiveNode* nodePtr)
 
             case SimulatorPacket::SailBoatData:
                 node->processSailBoatData( packet );
-                node->sendActuatorDataSail( simulatorFD);
-                node->sendWaypoint( simulatorFD );
+                //std::cout<<"SailBoatData"<< std::endl;
                 break;
 
             case SimulatorPacket::WingBoatData:
                 node->processWingBoatData( packet );
-                node->sendActuatorDataWing ( simulatorFD );
-                node->sendWaypoint( simulatorFD );
+                //std::cout<<"WingBoatData"<< std::endl;
                 break;
             case SimulatorPacket::AISData:
                 node->processAISContact( packet );
@@ -347,6 +335,10 @@ void SimulationNode::SimulationThreadFunc(ActiveNode* nodePtr)
         // Reset our packet, better safe than sorry
         packet.socketFD = 0;
         packet.length = 0;
+
+        node->sendActuatorDataWing ( simulatorFD );
+        //node->sendActuatorDataSail( simulatorFD);
+        node->sendWaypoint( simulatorFD );
 
         //std::this_thread::sleep_for(std::chrono::milliseconds(BASE_SLEEP_MS));
         timer.sleepUntil(node->m_LoopTime);
