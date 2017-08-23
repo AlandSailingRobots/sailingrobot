@@ -73,7 +73,7 @@ export UNIT_TEST_HW_EXEC 	= unit-tests-hardware.run
 export INTEGRATION_TEST_EXEC_ASPIRE = integration-tests-ASPire.run
 export HTTP_SYNC_TEST_EXEC	= HTTPSync-test.run
 export AIS_TEST_EXEC		= ais-integration-tests.run
-export MARINE_SENSOR_TEST_EXCE = marine_sensor_test.run
+export MARINE_SENSOR_TEST_EXCE = marine-sensor-test.run
 
 export OBJECT_FILE          = $(BUILD_DIR)/objects.tmp
 

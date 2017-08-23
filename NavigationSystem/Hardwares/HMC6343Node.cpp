@@ -54,9 +54,9 @@
 
 
 
-HMC6343Node::HMC6343Node(MessageBus& msgBus, const int headingBufferSize,  double loopTime)
-: ActiveNode(NodeID::Compass, msgBus), m_Initialised(false), m_HeadingBufferSize(headingBufferSize),
-m_LoopTime(loopTime)
+HMC6343Node::HMC6343Node(MessageBus& msgBus, DBHandler& dbhandler)
+: ActiveNode(NodeID::Compass, msgBus), m_Initialised(false), m_HeadingBufferSize(1),
+m_LoopTime(0.5), m_db(dbhandler)
 {
 
 }
@@ -65,6 +65,7 @@ m_LoopTime(loopTime)
 bool HMC6343Node::init()
 {
 	m_Initialised = false;
+	updateConfigsFromDB();
 
 	if(m_I2C.init(I2C_ADDRESS))
 	{
@@ -107,8 +108,19 @@ void HMC6343Node::start()
 	}
 }
 
+void HMC6343Node::updateConfigsFromDB()
+{
+	m_LoopTime = m_db.retrieveCellAsDouble("config_compass","1","loop_time");
+	m_HeadingBufferSize = m_db.retrieveCellAsInt("config_compass","1","heading_buffer_size");
+}
+
 void HMC6343Node::processMessage(const Message* msg)
-{ }
+{
+	if( msg->messageType() == MessageType::ServerConfigsReceived)
+	{
+			updateConfigsFromDB();
+	}
+}
 
 
 bool HMC6343Node::readData(float& heading, float& pitch, float& roll)
