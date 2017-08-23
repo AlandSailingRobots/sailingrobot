@@ -47,7 +47,8 @@ enum class MessageType {
 	SolarData,
 	AISData,
 	WingSailCommand,
-	RudderCommand
+	RudderCommand,
+	MarineSensorData
 };
 
 inline std::string msgToString(MessageType msgType)
@@ -110,6 +111,8 @@ inline std::string msgToString(MessageType msgType)
 		return "WingSailCommand";
 		case MessageType::RudderCommand:
 		return "RudderCommand";
+		case MessageType::MarineSensorData:
+		return "MarineSensorData";
 	}
 	return "";
 }

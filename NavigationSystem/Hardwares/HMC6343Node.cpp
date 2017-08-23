@@ -50,9 +50,13 @@
 #define COM_ORIENT_SIDEWAYS 0x73
 #define COM_ORIENT_FLATFRONT 0x74
 
-HMC6343Node::HMC6343Node(MessageBus& msgBus, DBHandler& dbhandler)
-: ActiveNode(NodeID::Compass, msgBus), m_Initialised(false), m_HeadingBufferSize(1),
-m_LoopTime(0.5), m_db(dbhandler)
+
+
+
+
+HMC6343Node::HMC6343Node(MessageBus& msgBus, const int headingBufferSize,  double loopTime)
+: ActiveNode(NodeID::Compass, msgBus), m_Initialised(false), m_HeadingBufferSize(headingBufferSize),
+m_LoopTime(loopTime)
 {
 
 }
@@ -61,7 +65,6 @@ m_LoopTime(0.5), m_db(dbhandler)
 bool HMC6343Node::init()
 {
 	m_Initialised = false;
-	updateConfigsFromDB();
 
 	if(m_I2C.init(I2C_ADDRESS))
 	{
@@ -104,19 +107,8 @@ void HMC6343Node::start()
 	}
 }
 
-void HMC6343Node::updateConfigsFromDB()
-{
-	m_LoopTime = m_db.retrieveCellAsDouble("config_compass","1","loop_time");
-	m_HeadingBufferSize = m_db.retrieveCellAsInt("config_compass","1","heading_buffer_size");
-}
-
 void HMC6343Node::processMessage(const Message* msg)
-{
-	if( msg->messageType() == MessageType::ServerConfigsReceived)
-	{
-			updateConfigsFromDB();
-	}
-}
+{ }
 
 
 bool HMC6343Node::readData(float& heading, float& pitch, float& roll)
@@ -152,9 +144,9 @@ bool HMC6343Node::readData(float& heading, float& pitch, float& roll)
 		m_I2C.endTransmission();
 
 		// The data is stretched across two separate bytes in big endian format
-		heading = (static_cast<int16_t>((buffer[0] << 8) + buffer[1])) / 10.f;
-		pitch = (static_cast<int16_t>((buffer[2] << 8) + buffer[3])) / 10.f;
-		roll = (static_cast<int16_t>((buffer[4] << 8) + buffer[5])) / 10.f;
+		heading = ((buffer[0] << 8) + buffer[1]) / 10.f;
+		pitch = ((buffer[2] << 8) + buffer[3]) / 10.f;
+		roll = (int(buffer[4] << 8) + buffer[5]) / 10.f;
 
 		return true;
 	}
@@ -181,20 +173,6 @@ bool HMC6343Node::setOrientation(CompassOrientation orientation)
 	}
 }
 
-void HMC6343Node::calibrate(int calibrationTime){
-	Timer calTimer;
-	calTimer.start ();
-	calTimer.reset();
-	Logger::info("Started calibration");
-	m_I2C.beginTransmission();
-	m_I2C.I2Cwrite((uint8_t)113);
-	calTimer.sleepUntil(calibrationTime);
-	m_I2C.I2Cwrite((uint8_t)126);
-	m_I2C.endTransmission();
-	Logger::info("Calibration finished");
-	calTimer.stop();
-}
-
 void HMC6343Node::HMC6343ThreadFunc(ActiveNode* nodePtr)
 {
 	const int MAX_ERROR_COUNT = 100;
@@ -206,13 +184,12 @@ void HMC6343Node::HMC6343ThreadFunc(ActiveNode* nodePtr)
 	std::vector<float> headingData(node->m_HeadingBufferSize);
 	int headingIndex = 0;
 
-
 	Timer timer;
 	timer.start();
 	while(true)
 	{
 		// Controls how often we pump out messages
-
+		timer.sleepUntil(node->m_LoopTime);
 
 		if(errorCount >= MAX_ERROR_COUNT)
 		{
@@ -249,7 +226,6 @@ void HMC6343Node::HMC6343ThreadFunc(ActiveNode* nodePtr)
 		{
 			errorCount++;
 		}
-		timer.sleepUntil(node->m_LoopTime);
 		timer.reset();
 	}
 }
