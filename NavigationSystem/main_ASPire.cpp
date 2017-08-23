@@ -151,7 +151,7 @@ int main(int argc, char *argv[])
 
   	#if LOCAL_NAVIGATION_MODULE == 1
 		VesselStateNode vesselState	( messageBus, dbHandler, 0.2 ); // NOTE - Maël: It will change
-		LocalNavigationModule lnm	( messageBus );
+		LocalNavigationModule lnm	( messageBus, dbHandler );
 		CollidableMgr collidableMgr;
 
 		const int16_t MAX_VOTES = dbHandler.retrieveCellAsInt("config_voter_system","1","max_vote");

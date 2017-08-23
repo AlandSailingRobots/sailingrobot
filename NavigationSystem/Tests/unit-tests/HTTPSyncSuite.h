@@ -85,10 +85,10 @@ public:
         {
 			mockNode = new MockNode(msgBus(), nodeRegistered);
             dbhandler = new DBHandler("../asr.db");
-			dbloggernode = new DBLoggerNode(msgBus(),*dbhandler,1,1);
+			dbloggernode = new DBLoggerNode(msgBus(),*dbhandler,1);
 			dbloggernode->start();
 			logger = new MessageLogger(msgBus());
-            httpsync = new HTTPSyncNode(msgBus(), dbhandler, 1, false);
+            httpsync = new HTTPSyncNode(msgBus(), dbhandler);
 			httpsync -> start();
             thr = new std::thread(runMessageLoop);
         }

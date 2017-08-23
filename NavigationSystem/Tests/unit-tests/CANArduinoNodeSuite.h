@@ -42,7 +42,7 @@ public:
 
 	void setUp() {
 		if(receiver == 0){
-            receiver = new CANArduinoNode(msgBus(),*dbhandler, canService(),1);
+            receiver = new CANArduinoNode(msgBus(),*dbhandler, canService());
 			verifier = new MessageVerifier(msgBus());
 			thr = new std::thread(runMessageLoop);
             canService().start();

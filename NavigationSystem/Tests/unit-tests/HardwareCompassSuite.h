@@ -67,7 +67,7 @@ public:
 			Logger::DisableLogging();
             dbhandler = new DBHandler("../asr.db");
 			logger = new MessageLogger(msgBus());
-			compass = new HMC6343Node(msgBus(),*dbhandler, 0.5);
+			compass = new HMC6343Node(msgBus(),*dbhandler);
 			thr = new std::thread(runMessageLoop);
 		}
 		testCount++;

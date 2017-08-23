@@ -45,7 +45,7 @@ public:
     mockNode = new MockNode(msgBus(), mockNodeRegistered);
     if (aisProc == 0) {
       dbhandler = new DBHandler("../asr.db");
-      aisProc = new AISProcessing(msgBus(), *dbhandler, &cMgr, 300e6, 2000, 1.0);
+      aisProc = new AISProcessing(msgBus(), *dbhandler, &cMgr);
 
       aisProc->start();
 

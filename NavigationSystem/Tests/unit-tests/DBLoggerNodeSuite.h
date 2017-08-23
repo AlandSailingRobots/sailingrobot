@@ -36,7 +36,7 @@ class DBLoggerNodeSuite : public CxxTest::TestSuite {
     void setUp() {
         if(dbLoggerNode == 0) {
             dbHandler = new DBHandler("../asr.db");
-            dbLoggerNode = new DBLoggerNode(msgBus(), *dbHandler,DBLOGGERNODE_LOOP_TIME, DBLOGGERNODE_QUEUE_SIZE);
+            dbLoggerNode = new DBLoggerNode(msgBus(), *dbHandler, DBLOGGERNODE_QUEUE_SIZE);
             thr = new std::thread(runMessageLoop);
         }
     }

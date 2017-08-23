@@ -29,7 +29,7 @@ public:
     ///----------------------------------------------------------------------------------
  	/// Constructs the LocalNavigationModule
  	///----------------------------------------------------------------------------------
-    LocalNavigationModule( MessageBus& msgBus, DBHandler& dbhandler, double loopTime );
+    LocalNavigationModule( MessageBus& msgBus, DBHandler& dbhandler);
 
     ///----------------------------------------------------------------------------------
  	/// Does nothing

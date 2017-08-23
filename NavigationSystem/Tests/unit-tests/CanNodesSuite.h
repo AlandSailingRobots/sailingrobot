@@ -59,7 +59,7 @@ public:
       Logger::DisableLogging();
 
       dbhandler = new DBHandler("../asr.db");
-      aisNode = new CANAISNode(msgBus(),*dbhandler, *canService, 0.51);
+      aisNode = new CANAISNode(msgBus(),*dbhandler, *canService);
       // solarNode = new CANSolarTrackerNode(msgBus(), *canService, 100);
 
       // aisNode->start();

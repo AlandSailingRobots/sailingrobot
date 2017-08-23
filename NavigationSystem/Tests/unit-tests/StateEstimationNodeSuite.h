@@ -68,7 +68,7 @@ public:
     if(sEstimationNode == 0){
         Logger::DisableLogging();
         dbhandler = new DBHandler("../asr.db");
-      sEstimationNode = new StateEstimationNode(msgBus(),*dbhandler, .5, 0, 1);
+      sEstimationNode = new StateEstimationNode(msgBus(),*dbhandler);
       sEstimationNode->start();
       std::this_thread::sleep_for(std::chrono::milliseconds(2600));
       thr = new std::thread(runMessageLoop);
