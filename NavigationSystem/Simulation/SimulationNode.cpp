@@ -31,6 +31,7 @@
 #include "SystemServices/SysClock.h"
 #include "Network/TCPServer.h"
 #include "Math/CourseMath.h"
+#include "Math/Utility.h"
 
 
 #define BASE_SLEEP_MS 200
@@ -251,8 +252,8 @@ void SimulationNode::sendActuatorDataWing( int socketFD)
 {
     //m_RudderCommand = 12.0;
     //m_TailCommand   = -15.0;
-    actuatorDataWing.rudderCommand = m_RudderCommand;
-    actuatorDataWing.tailCommand   = m_TailCommand;
+    actuatorDataWing.rudderCommand = - Utility::degreeToRadian(m_RudderCommand);
+    actuatorDataWing.tailCommand   = - Utility::degreeToRadian(m_TailCommand);
     std::cout <<"sent rudder command" << actuatorDataWing.rudderCommand << std::endl;
     std::cout <<"sent tail command" << actuatorDataWing.tailCommand << std::endl;
     //std::cout <<"given rudder command" << m_RudderCommand << std::endl;
