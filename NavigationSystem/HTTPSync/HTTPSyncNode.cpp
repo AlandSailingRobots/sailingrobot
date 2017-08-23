@@ -273,6 +273,7 @@ bool HTTPSyncNode::getWaypointsFromServer() {
 bool HTTPSyncNode::performCURLCall(std::string data, std::string call, std::string& response) {
     std::string serverCall = "";
 
+    std::cout << "/* Request : " << call << " */" << '\n';
     if(data != "")
         serverCall = "serv="+call + "&id="+m_shipID +"&gen=aspire"+"&pwd="+m_shipPWD+"&data="+data;
     else

@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
 	if (argc < 2)
 	{
 		db_path = "../asr.db";
-	} 
+	}
 	else
 	{
 		db_path = std::string(argv[1]);
@@ -103,14 +103,13 @@ int main(int argc, char *argv[])
 	}
 
 
-	// Declare nodes 
+	// Declare nodes
 	//-------------------------------------------------------------------------------
 
-	int dbHandler_delay = dbHandler.retrieveCellAsInt("config_httpsync", "1", "loop_time");
-	bool removeLogs = dbHandler.retrieveCellAsInt("config_httpsync","1","remove_logs");
-	HTTPSyncNode httpsync(messageBus, &dbHandler, dbHandler_delay, removeLogs);
 
-	DBLoggerNode dblogger(messageBus, dbHandler, 1, 5);
+	HTTPSyncNode httpsync(messageBus, &dbHandler);
+
+	DBLoggerNode dblogger(messageBus, dbHandler, 5);
 
 
 	// Initialise nodes

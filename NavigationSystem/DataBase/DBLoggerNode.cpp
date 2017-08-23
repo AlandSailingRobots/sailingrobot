@@ -65,11 +65,12 @@ void DBLoggerNode::processMessage(const Message* msg) {
         }
         break;
 
-        case MessageType::CourseData:
+        case MessageType::LocalNavigation:
         {
-            const CourseDataMsg* courseDataMsg = static_cast<const CourseDataMsg*>(msg);
-            item.m_distanceToWaypoint = courseDataMsg->distanceToWP();
-            item.m_bearingToWaypoint = courseDataMsg->courseToWP();
+            const LocalNavigationMsg* localNavigationMsg = static_cast<const LocalNavigationMsg*>(msg);
+            item.m_courseToSteer = localNavigationMsg->targetCourse();
+            item.m_tack = localNavigationMsg->beatingMode();
+            item.m_goingStarboard = localNavigationMsg->targetTackStarboard();
         }
         break;
 

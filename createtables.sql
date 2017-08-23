@@ -284,6 +284,15 @@ CREATE TABLE config_httpsync (
 );
 
 -- -----------------------------------------------------
+-- Table LineFollowNode config
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS "config_line_follow";
+CREATE TABLE config_line_follow (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  loop_time DOUBLE
+);
+
+-- -----------------------------------------------------
 -- Table SailControlNode config
 -- -----------------------------------------------------
 DROP TABLE IF EXISTS "config_sail_control";
@@ -385,6 +394,7 @@ INSERT INTO "config_compass" VALUES(1,0.5,1);
 INSERT INTO "config_course_regulator" VALUES(1,0.5,30,1,1,1);
 INSERT INTO "config_dblogger" VALUES(1,0.5);
 INSERT INTO "config_gps" VALUES(1,0.5);
+INSERT INTO "config_line_follow" VALUES(1,0.5);
 INSERT INTO "config_sail_control" VALUES(1,0.5,70,15);
 INSERT INTO "config_simulator" VALUES(1,0.5);
 INSERT INTO "config_vessel_state" VALUES(1, 0.5, 1, 2); -- NOTE: Marc: See the values of the course_config_speed

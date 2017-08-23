@@ -168,7 +168,7 @@ int main(int argc, char *argv[])
 		lnm.registerVoter( &midRangeVoter );
   	#else
 	  	StateEstimationNode stateEstimationNode(messageBus, dbHandler); // NOTE - Maël: It will change
-		LineFollowNode sailingLogic(messageBus, 0.5);
+		LineFollowNode sailingLogic(messageBus, dbHandler);
   	#endif
 
 
@@ -192,7 +192,7 @@ int main(int argc, char *argv[])
 	// Initialise nodes
 	//-------------------------------------------------------------------------------
 
-	initialiseNode(httpsync, "Httpsync", NodeImportance::NOT_CRITICAL); // This node is not critical during the developement phase.
+	initialiseNode(httpsync, "Httpsync", NodeImportance::CRITICAL); // This node is not critical during the developement phase.
 
 	initialiseNode(dbLoggerNode, "DBLogger", NodeImportance::CRITICAL);
 	initialiseNode(windStateNode,"WindState",NodeImportance::CRITICAL);

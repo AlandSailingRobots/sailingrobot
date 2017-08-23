@@ -46,7 +46,7 @@
 class LineFollowNode : public ActiveNode {
 public:
 
-	LineFollowNode(MessageBus& msgBus, double loopTime);
+	LineFollowNode(MessageBus& msgBus, DBHandler& dbhandler);
 	~LineFollowNode();
 
 	bool init();
@@ -61,6 +61,7 @@ private:
 	const double NORM_RUDDER_COMMAND = 0.5166; // getCommand() take a value between -1 and 1 so we need to normalize the command correspond to 29.6 degree
 	const double NORM_SAIL_COMMAND = 0.6958;
 */
+	void updateConfigsFromDB();
 
     ///----------------------------------------------------------------------------------
     /// Stores vessel position datas from a StateMessage.
@@ -93,6 +94,7 @@ private:
 	static void LineFollowNodeThreadFunc(ActiveNode* nodePtr);
 
     double  m_LoopTime;             // second
+	DBHandler& m_db;
 
     std::mutex m_lock;
 	std::atomic<bool> m_Running;

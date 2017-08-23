@@ -74,7 +74,7 @@ public:
     if(lineFollow == 0)
     {
       Logger::DisableLogging();
-      lineFollow = new LineFollowNode(msgBus(), 0.5);
+      lineFollow = new LineFollowNode(msgBus(), *dbhandler);
       lineFollow -> start();
 
       std::this_thread::sleep_for(std::chrono::milliseconds(2500));
