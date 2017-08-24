@@ -30,14 +30,19 @@ DBLoggerNode::DBLoggerNode(MessageBus& msgBus, DBHandler& db,int queueSize)
     msgBus.registerNode(*this, MessageType::GPSData);
     msgBus.registerNode(*this, MessageType::WindData);
     msgBus.registerNode(*this, MessageType::ActuatorPosition);
-    msgBus.registerNode(*this, MessageType::ActuatorControlASPire);
     msgBus.registerNode(*this, MessageType::ASPireActuatorFeedback);
+    msgBus.registerNode(*this, MessageType::MarineSensorData);
+    
+    msgBus.registerNode(*this, MessageType::StateMessage);
+    msgBus.registerNode(*this, MessageType::WindState);
+
+    msgBus.registerNode(*this, MessageType::WaypointData);
     msgBus.registerNode(*this, MessageType::CourseData);
     msgBus.registerNode(*this, MessageType::LocalNavigation);
-    msgBus.registerNode(*this, MessageType::WaypointData);
-    msgBus.registerNode(*this, MessageType::WindState);
+    
     msgBus.registerNode(*this, MessageType::ServerConfigsReceived);
-    msgBus.registerNode(*this, MessageType::StateMessage);
+    
+    
 }
 
 void DBLoggerNode::processMessage(const Message* msg) {
@@ -113,14 +118,6 @@ void DBLoggerNode::processMessage(const Message* msg) {
         //     const ActuatorPositionMsg* actuatorPositionMsg = static_cast<const ActuatorPositionMsg*>(msg);
         //     item.m_rudder = actuatorPositionMsg->rudderPosition();
         //     item.m_sail = actuatorPositionMsg->sailPosition();
-        // }
-        // break;
-
-        // case MessageType::ActuatorControlASPire:
-        // {
-        //     const ActuatorControlASPireMessage* aspireMsg = static_cast<const ActuatorControlASPireMessage*>(msg);
-        //     item.m_rudder = aspireMsg->rudderAngle();
-        //     item.m_sail = aspireMsg->wingsailServoAngle();
         // }
         // break;
 
