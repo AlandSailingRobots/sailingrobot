@@ -20,8 +20,8 @@
 #define DATA_OUT_OF_RANGE 		-2000
 
 
-MarineSensorNode::MarineSensorNode(MessageBus& msgBus, const int sensorBufferSize, int minWaitTime)
-: Node(NodeID::MarineSensor, msgBus), m_minWaitTime(minWaitTime), m_Initialised(false), m_SensorBufferSize(sensorBufferSize)
+MarineSensorNode::MarineSensorNode(MessageBus& msgBus, int miniWaitTime)
+: Node(NodeID::MarineSensor, msgBus), m_miniWaitTime(miniWaitTime), m_Initialised(false)
 
 {
 	m_ph = DATA_OUT_OF_RANGE;
@@ -104,7 +104,7 @@ void  MarineSensorNode::processMessage(const Message* msg)
 	MessageType type = msg->messageType();
 	if (type == MessageType::DataRequest){
 		
-		m_timer.sleepUntil(m_minWaitTime);
+		m_timer.sleepUntil(m_miniWaitTime);
 		m_timer.reset();
 		if (readData(m_temp, m_conductivety, m_ph)){
 			m_salidety = Utility::calculateSalidety (m_temp, m_conductivety);
@@ -131,11 +131,11 @@ bool MarineSensorNode::readData(float& temperature, float& conductivity, float& 
 		m_I2C_TEMP.beginTransmission();
 		std::string TEMP = m_I2C_TEMP.ASQUERY("R");
 		m_I2C_TEMP.endTransmission();
-		m_timer.sleepUntil(m_minWaitTime/3);
+		m_timer.sleepUntil(m_miniWaitTime/3);
 		m_I2C_COND.beginTransmission();
 		std::string COND = m_I2C_COND.ASQUERY("R");
 		m_I2C_COND.endTransmission();
-		m_timer.sleepUntil(m_minWaitTime*2/3);
+		m_timer.sleepUntil(m_miniWaitTime*2/3);
 		m_I2C_PH.beginTransmission();
 		std::string PH = m_I2C_PH.ASQUERY("R");
 		m_I2C_PH.endTransmission();

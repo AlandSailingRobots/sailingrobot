@@ -61,34 +61,31 @@ public:
     }
 
     void processMessage(const Message* message)
-    {
-				
+    {		
         MessageType type = message->messageType();
-				Logger::info (msgToString(type));
+		Logger::info (msgToString(type));
         if(type == MessageType::MarineSensorData)
         {
             const MarineSensorDataMsg* actmsg = dynamic_cast<const MarineSensorDataMsg*>(message);
             m_SensorValues["Temperature"] = actmsg->temperature();
             m_SensorValues["Conductivity"] = actmsg->conductivity();
             m_SensorValues["Ph"] = actmsg->ph();
-						m_SensorValues["Salidety"] = actmsg->salidety();
+            m_SensorValues["Salidety"] = actmsg->salidety();
         }
-       
-					printSensorData();
+		printSensorData();
     }
 
     void printSensorData()
     {
-     
-       wclear(m_Win);
-       box(m_Win, 0, 0);
+        wclear(m_Win);
+        box(m_Win, 0, 0);
 
-       wmove(m_Win, 2,20);
-       wprintw(m_Win, "SENSOR READINGS");
-       wmove(m_Win, 2, 10);
-       int pos = 4;    
-       for(auto it : m_SensorValues)
-       {
+        wmove(m_Win, 2,20);
+        wprintw(m_Win, "SENSOR READINGS");
+        wmove(m_Win, 2, 10);
+        int pos = 4;    
+        for(auto it : m_SensorValues)
+        {
             wmove(m_Win, pos, 10);
             wprintw(m_Win, "%s : ", it.first.c_str());
             wmove(m_Win, pos, 35);
@@ -113,7 +110,6 @@ public:
        wrefresh(m_Win);
     }
 
-
 	SensorData getValues()
 	{
 		return m_SensorValues;
@@ -125,11 +121,13 @@ private:
     WINDOW* m_Win;
 };
 
+
 MessageBus msgBus;
 void messageLoop()
 {
     msgBus.run();
 }
+
 
 std::string FloatToString (float number)
 {
@@ -142,8 +140,6 @@ std::string FloatToString (float number)
 
 int main()
 {
-
-
 	Logger::init ("I2CLog.log");
 	
 	// Initialize Ncurses
@@ -152,36 +148,31 @@ int main()
 	NodeID marineSensorID;
 	
 	I2CDataReceiver sensorReceiver(msgBus, 250);
-	MarineSensorNode MarineSensors(msgBus, 2, 10);
+	MarineSensorNode MarineSensors(msgBus, 10);
 	marineSensorID = MarineSensors.nodeID ();
 	
 	if(MarineSensors.init())
 	{
-		//std::cout << "Marine sensor node init successfull\n";
 		Logger::info("Marine sensor node init successfull");
-
 	}
 	else
 	{
 		std::cout << "Marine sensor node init failed\n";
 	}
 
-
 	
 	std::thread thr(messageLoop);
 	thr.detach();
 
 	std::this_thread::sleep_for(std::chrono::milliseconds(5000));
-	
 
-
-	while (1)				//main loop
+    //main loop
+	while (1)
 	{
 		MessagePtr dataRequest = std::make_unique<DataRequestMsg>(marineSensorID);
 		msgBus.sendMessage(std::move(dataRequest));
 		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 	}
-    
 
     endwin();
 }

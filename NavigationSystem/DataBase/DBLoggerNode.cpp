@@ -11,6 +11,7 @@
 #include "Messages/WaypointDataMsg.h"
 #include "Messages/StateMessage.h"
 #include "Messages/ASPireActuatorFeedbackMsg.h"
+#include "Messages/MarineSensorDataMsg.h"
 #include "SystemServices/Timer.h"
 #include "SystemServices/SysClock.h"
 
@@ -90,10 +91,10 @@ void DBLoggerNode::processMessage(const Message* msg) {
 
         case MessageType::MarineSensorData:
         {
-            // const MarineSensorDataMsg* marineSensorMsg = static_cast<const MarineSensorDataMsg*>(msg);
-            // item.m_temperature = marineSensorMsg->temperature();
-            // item.m_conductivity = marineSensorMsg->conductivity();
-            // item.m_ph = marineSensorMsg->ph();
+            const MarineSensorDataMsg* marineSensorMsg = static_cast<const MarineSensorDataMsg*>(msg);
+            item.m_temperature = marineSensorMsg->temperature();
+            item.m_conductivity = marineSensorMsg->conductivity();
+            item.m_ph = marineSensorMsg->ph();
         }
         break;
 
