@@ -13,12 +13,26 @@ print_result()
 		printf "Failed\n"
 	fi
 }
+	if [ -f "./asr.db" ]
+	then
+		rm asr.db;
+	fi;
 
-printf "$CLR_INFO\nCreating database in $CLR_DIR$INSTALLATION_PATH$REPO_MAIN/$CLR_INFO\n"
-	if sqlite3 asr.db < $DIR/createtables.sql;
-	then print_result true; else print_result false; break; fi
-	# printf "$CLR_ASK\nServer settings:\n$CLR_OPT"
-	# read -p "Boat name: " BOATID
+	if [ $1 == ASPire ]
+	then
+		printf "$CLR_INFO\nCreating database ASPire in $CLR_DIR$INSTALLATION_PATH$REPO_MAIN/$CLR_INFO\n"
+		if sqlite3 asr.db < $DIR/createtablesASPire.sql;
+		then print_result true; else print_result false; break; fi
+	elif [ $1 == Janet ]
+	then
+		printf "$CLR_INFO\nCreating database Janet in $CLR_DIR$INSTALLATION_PATH$REPO_MAIN/$CLR_INFO\n"
+		if sqlite3 asr.db < $DIR/createtablesJanet.sql;
+		then print_result true; else print_result false; break; fi
+	else
+		printf "No arguments to create the DataBase: \nPlease insert 'ASPire' or 'Janet' as arguments to create the DB.\n"
+	fi;
+
+	#
 	# read -p "Boat password: " BOATPWD
 	# read -p "Server address: " SRVADDR
 	# printf "$CLR_INFO"

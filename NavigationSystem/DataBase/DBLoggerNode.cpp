@@ -97,15 +97,6 @@ void DBLoggerNode::processMessage(const Message* msg) {
         }
         break;
 
-        // case MessageType::NavigationControl:
-        // {
-        //     const NavigationControlMsg* navigationControlMsg = static_cast<const NavigationControlMsg*>(msg);
-        //     item.m_courseToSteer = navigationControlMsg->courseToSteer();
-        //     item.m_tack = navigationControlMsg->tack();
-        //     item.m_goingStarboard = navigationControlMsg->starboard();
-        // }
-        // break;
-
 
         // case MessageType::ActuatorPosition:
         // {
