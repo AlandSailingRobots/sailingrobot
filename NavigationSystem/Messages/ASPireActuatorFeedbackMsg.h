@@ -32,5 +32,5 @@ private:
     double m_RudderFeedback;
     double m_WindvaneSelfSteeringAngle;
     double m_WindvaneActuatorPosition;
-		bool   m_RadioControllerOn;
+	bool   m_RadioControllerOn;
 };

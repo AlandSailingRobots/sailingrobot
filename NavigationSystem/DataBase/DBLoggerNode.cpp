@@ -59,6 +59,7 @@ void DBLoggerNode::processMessage(const Message* msg) {
             item.m_rudderPosition = aspMsg->rudderFeedback();
             item.m_wingsailPosition = aspMsg->wingsailFeedback();
             item.m_windVaneAngle = aspMsg->windvaneSelfSteeringAngle();
+            item.m_radioControllerOn = aspMsg->m_RadioControllerOn();
         }
         break;
 
