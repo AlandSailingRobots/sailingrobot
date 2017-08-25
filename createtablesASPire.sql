@@ -293,17 +293,6 @@ CREATE TABLE config_line_follow (
 );
 
 -- -----------------------------------------------------
--- Table SailControlNode config
--- -----------------------------------------------------
-DROP TABLE IF EXISTS "config_sail_control";
-CREATE TABLE config_sail_control (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  loop_time 		DOUBLE,
-  max_sail_angle 	INTEGER,
-  min_sail_angle 	INTEGER
-);
-
--- -----------------------------------------------------
 -- Table Simulator config
 -- -----------------------------------------------------
 DROP TABLE IF EXISTS "config_simulator";
@@ -359,12 +348,12 @@ CREATE TABLE config_wind_sensor (
 -- -----------------------------------------------------
 -- Table WingsailControlNode config
 -- -----------------------------------------------------
--- DROP TABLE IF EXISTS "config_wingsail_control";
--- CREATE TABLE config_wingsail_control (
---   id INTEGER PRIMARY KEY AUTOINCREMENT,
---   loop_time      DOUBLE,
---   max_cmd_angle  INTEGER
--- );
+DROP TABLE IF EXISTS "config_wingsail_control";
+CREATE TABLE config_wingsail_control (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  loop_time      DOUBLE,
+  max_cmd_angle  INTEGER
+);
 
 -- -----------------------------------------------------
 -- Table config_xbee
@@ -395,12 +384,11 @@ INSERT INTO "config_course_regulator" VALUES(1,0.5,30,1,1,1);
 INSERT INTO "config_dblogger" VALUES(1,0.5);
 INSERT INTO "config_gps" VALUES(1,0.5);
 INSERT INTO "config_line_follow" VALUES(1,0.5);
-INSERT INTO "config_sail_control" VALUES(1,0.5,70,15);
 INSERT INTO "config_simulator" VALUES(1,0.5);
 INSERT INTO "config_vessel_state" VALUES(1, 0.5, 1, 2); -- NOTE: Marc: See the values of the course_config_speed
 INSERT INTO "config_voter_system" VALUES(1,0.5,25,1,1,1,1,2);
 INSERT INTO "config_wind_sensor" VALUES(1,0.5);
--- INSERT INTO "config_wingsail_control" VALUES(1,0.5,15);
+INSERT INTO "config_wingsail_control" VALUES(1,0.5,15);
 INSERT INTO "config_xbee" VALUES(1,1,1,0,0.1,1);
 
 DELETE FROM sqlite_sequence;

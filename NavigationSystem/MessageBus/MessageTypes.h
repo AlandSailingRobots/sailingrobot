@@ -47,7 +47,7 @@ enum class MessageType {
 	SolarData,
 	AISData,
 	WingSailCommand,
-	RudderCommand
+	RudderCommand,
 };
 
 inline std::string msgToString(MessageType msgType)

@@ -23,9 +23,8 @@ DROP TABLE IF EXISTS "dataLogs_actuator_feedback";
 CREATE TABLE dataLogs_actuator_feedback (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   rudder_position 	DOUBLE,
-  wingsail_position DOUBLE,
+  sail_position     DOUBLE,
   rc_on 			BOOLEAN,
-  wind_vane_angle 	DOUBLE,
   t_timestamp		TIMESTAMP
 );
 
@@ -63,8 +62,6 @@ CREATE TABLE dataLogs_current_sensors (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   actuator_unit   	DOUBLE,
   navigation_unit 	DOUBLE,
-  wind_vane_angle 	DOUBLE,
-  wind_vane_clutch 	DOUBLE,
   sailboat_drive 	DOUBLE,
   t_timestamp		TIMESTAMP
 );
@@ -202,28 +199,10 @@ DELETE FROM "dataLogs_windsensor" WHERE ID = OLD.windsensor_id;
 END;
 
 -- -----------------------------------------------------
--- Table communication CAN AIS config
+-- Table communication ArduinoNode config
 -- -----------------------------------------------------
 DROP TABLE IF EXISTS "config_arduino";
-CREATE TABLE config_ais (id INTEGER PRIMARY KEY AUTOINCREMENT,
-	loop_time DOUBLE
-);
-
--- -----------------------------------------------------
--- Table communication AIS processing config
--- -----------------------------------------------------
-DROP TABLE IF EXISTS "config_ais_processing";
-CREATE TABLE config_ais_processing (id INTEGER PRIMARY KEY AUTOINCREMENT,
-	loop_time 	DOUBLE,
-	radius 		INTEGER,
-	mmsi_aspire INTEGER
-);
-
--- -----------------------------------------------------
--- Table communication CAN arduino config
--- -----------------------------------------------------
-DROP TABLE IF EXISTS "config_can_arduino";
-CREATE TABLE config_can_arduino (id INTEGER PRIMARY KEY AUTOINCREMENT,
+CREATE TABLE config_arduino (id INTEGER PRIMARY KEY AUTOINCREMENT,
 	loop_time DOUBLE
 );
 
@@ -293,6 +272,16 @@ CREATE TABLE config_line_follow (
 );
 
 -- -----------------------------------------------------
+-- Table MaestroController config
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS "config_maestro_controller";
+CREATE TABLE config_maestro_controller (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  port VARCHAR[200]
+);
+
+
+-- -----------------------------------------------------
 -- Table SailControlNode config
 -- -----------------------------------------------------
 DROP TABLE IF EXISTS "config_sail_control";
@@ -308,15 +297,6 @@ CREATE TABLE config_sail_control (
 -- -----------------------------------------------------
 DROP TABLE IF EXISTS "config_simulator";
 CREATE TABLE config_simulator (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  loop_time DOUBLE
-);
-
--- -----------------------------------------------------
--- Table Solar Tracker config
--- -----------------------------------------------------
-DROP TABLE IF EXISTS "config_solar_tracker";
-CREATE TABLE config_solar_tracker (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   loop_time DOUBLE
 );
@@ -348,23 +328,24 @@ CREATE TABLE config_voter_system (
 );
 
 -- -----------------------------------------------------
--- Table CANWindSensorNode config
+-- Table CV7Node config
 -- -----------------------------------------------------
 DROP TABLE IF EXISTS "config_wind_sensor";
 CREATE TABLE config_wind_sensor (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
-  loop_time DOUBLE
+  loop_time DOUBLE,
+  port		VARCHAR[200],
+  baud_rate INTEGER
 );
 
 -- -----------------------------------------------------
--- Table WingsailControlNode config
+-- Table WindStateNode config
 -- -----------------------------------------------------
--- DROP TABLE IF EXISTS "config_wingsail_control";
--- CREATE TABLE config_wingsail_control (
---   id INTEGER PRIMARY KEY AUTOINCREMENT,
---   loop_time      DOUBLE,
---   max_cmd_angle  INTEGER
--- );
+DROP TABLE IF EXISTS "config_wind_state";
+CREATE TABLE config_wind_state (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  loop_time DOUBLE
+);
 
 -- -----------------------------------------------------
 -- Table config_xbee
@@ -387,20 +368,18 @@ CREATE TABLE sailing_zone (id INTEGER PRIMARY KEY AUTOINCREMENT
 );
 
 /*data for configs*/
-INSERT INTO "config_ais" VALUES(1,0.5);
-INSERT INTO "config_ais_processing" VALUES(1,0.5,0,0);
-INSERT INTO "config_can_arduino" VALUES(1,0.5);
+INSERT INTO "config_arduino" VALUES(1,0.5);
 INSERT INTO "config_compass" VALUES(1,0.5,1);
 INSERT INTO "config_course_regulator" VALUES(1,0.5,30,1,1,1);
 INSERT INTO "config_dblogger" VALUES(1,0.5);
 INSERT INTO "config_gps" VALUES(1,0.5);
 INSERT INTO "config_line_follow" VALUES(1,0.5);
+INSERT INTO "config_maestro_controller" VALUES(1,"/dev/ttyACM0");
 INSERT INTO "config_sail_control" VALUES(1,0.5,70,15);
 INSERT INTO "config_simulator" VALUES(1,0.5);
 INSERT INTO "config_vessel_state" VALUES(1, 0.5, 1, 2); -- NOTE: Marc: See the values of the course_config_speed
 INSERT INTO "config_voter_system" VALUES(1,0.5,25,1,1,1,1,2);
-INSERT INTO "config_wind_sensor" VALUES(1,0.5);
--- INSERT INTO "config_wingsail_control" VALUES(1,0.5,15);
+INSERT INTO "config_wind_sensor" VALUES(1,0.5,"/dev/ttyS0",4800);
 INSERT INTO "config_xbee" VALUES(1,1,1,0,0.1,1);
 
 DELETE FROM sqlite_sequence;

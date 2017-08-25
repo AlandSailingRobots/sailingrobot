@@ -50,12 +50,6 @@
   "loop_time": 0.5
 },
 
-"config_sail_control": {
-  "loop_time": 0.5,
-  "max_sail_angle": 85.0,
-  "min_sail_angle": 15.0
-},
-
 "config_simulator": {
   "loop_time": 0.5
 },

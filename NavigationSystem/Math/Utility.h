@@ -83,8 +83,12 @@ public:
 	static void sphericalCoordinateSystem( const double lat, const double lon, double& x, double& y);
 	static void calculateVelocity( const uint16_t course, const double speed, double& vX, double& vY );
 
-private:
-	const int HEADING_ERROR_VALUE = 370;
+	/*
+	 * Use formula to calculate salidety from marine sensor data
+	 * http://www.chemiasoft.com/chemd/salinity_calculator
+	 */
+	static float calculateSalidety (const float temperature, const  float conductivety);
+
 };
 
 #endif

@@ -15,13 +15,14 @@
 
 
 #include "MessageBus/ActiveNode.h"
+#include "DataBase/DBHandler.h"
 #include "Hardwares/i2ccontroller/I2CController.h"
 
 
 
 class ArduinoNode : public ActiveNode {
 public:
-	ArduinoNode(MessageBus& msgBus, double loopTime);
+	ArduinoNode(MessageBus& msgBus, DBHandler& dbhandler);
 
 	///----------------------------------------------------------------------------------
 	/// Attempts to connect to the Arduino.
@@ -37,6 +38,8 @@ public:
 
 
 private:
+	void updateConfigsFromDB();
+
 	static void ArduinoThreadFunc(ActiveNode* nodePtr);
 
 	I2CController 	m_I2C;
@@ -47,4 +50,5 @@ private:
 	int  m_battery;
 	int	 m_RC;
 	double m_LoopTime;
+	DBHandler& m_db;
 };

@@ -1,6 +1,6 @@
 ###############################################################################
 #
-# Makefile for building the integration tests for ASPire
+# Makefile for building the integration tests for the HTTPSync with the server.
 #
 # This makefile cannot be run directly. Use the master makefile instead.
 #

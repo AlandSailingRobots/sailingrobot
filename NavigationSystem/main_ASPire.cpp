@@ -35,6 +35,7 @@
   #include "Hardwares/CAN_Services/CANService.h"
   #include "Hardwares/CANWindsensorNode.h"
   #include "Hardwares/ActuatorNodeASPire.h"
+  #include "Hardwares/MarineSensorNode.h"
 #endif
 
 
@@ -186,13 +187,16 @@ int main(int argc, char *argv[])
 	  	GPSDNode gpsd(messageBus, dbHandler);
 		CANWindsensorNode windSensor(messageBus, dbHandler, canService);
 	  	ActuatorNodeASPire actuators(messageBus, canService);
+
+	  	int miniWaitTime = 20; 	// Periode (in seconds) during witch the measuements are performed.
+	  	MarineSensorNode marineSensors(messageBus, miniWaitTime);
 	#endif
 
 
 	// Initialise nodes
 	//-------------------------------------------------------------------------------
 
-	initialiseNode(httpsync, "Httpsync", NodeImportance::CRITICAL); // This node is not critical during the developement phase.
+	initialiseNode(httpsync, "Httpsync", NodeImportance::NOT_CRITICAL); // This node is not critical during the developement phase.
 
 	initialiseNode(dbLoggerNode, "DBLogger", NodeImportance::CRITICAL);
 	initialiseNode(windStateNode,"WindState",NodeImportance::CRITICAL);
@@ -217,6 +221,7 @@ int main(int argc, char *argv[])
 		initialiseNode(gpsd, "GPSD", NodeImportance::CRITICAL);
 		initialiseNode(windSensor, "Wind Sensor", NodeImportance::CRITICAL);
 		initialiseNode(actuators, "Actuators", NodeImportance::CRITICAL);
+		initialiseNode(marineSensors, "Marine Sensors", NodeImportance::NOT_CRITICAL);
 	#endif
 
 	// Start active nodes

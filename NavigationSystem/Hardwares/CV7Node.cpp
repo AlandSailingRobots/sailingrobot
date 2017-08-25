@@ -35,11 +35,15 @@
 #define DATA_OUT_OF_RANGE		-2000.
 
 
-CV7Node::CV7Node(MessageBus& msgBus, std::string portName, unsigned int baudRate)
-	:ActiveNode(NodeID::WindSensor, msgBus), m_Initialised(false), m_fd(-1), m_PortName(portName), m_BaudRate(baudRate),
-	 m_MeanWindDir(DATA_OUT_OF_RANGE), m_MeanWindSpeed(DATA_OUT_OF_RANGE), m_MeanWindTemp(DATA_OUT_OF_RANGE)
+CV7Node::CV7Node(MessageBus& msgBus, DBHandler& dbhandler)
+	:ActiveNode(NodeID::WindSensor, msgBus), m_Initialised(false), m_fd(-1), m_PortName("/dev/ttyS0"), m_BaudRate(4800),
+	 m_MeanWindDir(DATA_OUT_OF_RANGE), m_MeanWindSpeed(DATA_OUT_OF_RANGE), m_MeanWindTemp(DATA_OUT_OF_RANGE), m_LoopTime(0.5),
+	 m_db(dbhandler)
 {
-
+	msgBus.registerNode(*this, MessageType::DataRequest);
+	msgBus.registerNode(*this, MessageType::ServerConfigsReceived);
+	m_BaudRate = m_db.retrieveCellAsInt("config_wind_sensor","1","baud_rate");
+	m_PortName = m_db.retrieveCell("config_wind_sensor","1","port");
 }
 
 CV7Node::~CV7Node()
@@ -50,6 +54,7 @@ CV7Node::~CV7Node()
 
 bool CV7Node::init()
 {
+	updateConfigsFromDB();
   m_fd = serialOpen(m_PortName.c_str(),m_BaudRate);
 
 
@@ -77,6 +82,11 @@ void CV7Node::start()
 	}
 }
 
+void CV7Node::updateConfigsFromDB()
+{
+	m_LoopTime = m_db.retrieveCellAsDouble("config_wind_sensor","1","loop_time");
+}
+
 void CV7Node::processMessage(const Message* message)
 {
 	if(message->messageType() == MessageType::DataRequest)
@@ -87,6 +97,10 @@ void CV7Node::processMessage(const Message* message)
 			MessagePtr windData = std::make_unique<WindDataMsg>(message->sourceID(), this->nodeID(), m_MeanWindDir, m_MeanWindTemp, m_MeanWindSpeed);
 			m_MsgBus.sendMessage(std::move(windData));
 		}
+	}
+	else if(message->messageType() == MessageType::ServerConfigsReceived)
+	{
+		updateConfigsFromDB();
 	}
 }
 

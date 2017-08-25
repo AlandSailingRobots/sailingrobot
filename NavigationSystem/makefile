@@ -72,6 +72,8 @@ export UNIT_TEST_EXEC 		= unit-tests.run
 export UNIT_TEST_HW_EXEC 	= unit-tests-hardware.run
 export INTEGRATION_TEST_EXEC_ASPIRE = integration-tests-ASPire.run
 export HTTP_SYNC_TEST_EXEC	= HTTPSync-test.run
+export AIS_TEST_EXEC		= ais-integration-tests.run
+export MARINE_SENSOR_TEST_EXCE = marine-sensor-test.run
 
 export OBJECT_FILE          = $(BUILD_DIR)/objects.tmp
 
@@ -125,7 +127,7 @@ export SIMULATOR_SRC        = Simulation/SimulationNode.cpp
 
 
 # Hardware services
-export HW_SERVICES_ALL_SRC	= Hardwares/i2ccontroller/I2CController.cpp
+export HW_SERVICES_ALL_SRC	= Hardwares/i2ccontroller/I2CController.cpp Hardwares/AtlasScientificController/AtlasScientific.cpp
 
 export CAN_SERVICES_SRC 	= Hardwares/CAN_Services/CANPGNReceiver.cpp Hardwares/CAN_Services/CANService.cpp \
 							   	Hardwares/CAN_Services/mcp2515.cpp Hardwares/CAN_Services/MsgFunctions.cpp \
@@ -137,7 +139,7 @@ export HW_SERVICES_JANET_SRC = Hardwares/MaestroController/MaestroController.cpp
 export HW_NODES_ALL_SRC		= Hardwares/HMC6343Node.cpp Hardwares/GPSDNode.cpp
 
 export HW_NODES_ASPIRE_SRC 	= Hardwares/ActuatorNodeASPire.cpp Hardwares/CANAISNode.cpp Hardwares/CANSolarTrackerNode.cpp\
-                            	Hardwares/CANWindsensorNode.cpp Hardwares/CANArduinoNode.cpp
+                            	Hardwares/CANWindsensorNode.cpp Hardwares/CANArduinoNode.cpp Hardwares/MarineSensorNode.cpp
 
 export HW_NODES_JANET_SRC 	= Hardwares/ActuatorNode.cpp Hardwares/CV7Node.cpp Hardwares/ArduinoNode.cpp
 
@@ -172,7 +174,11 @@ unit_tests: $(BUILD_DIR)
 ## Build the integration tests for ASPire
 integration_tests_ASPire: $(BUILD_DIR)
 	$(MAKE) -f integration_tests_ASPire.mk
-	$(MAKE) -f ais_integration.mk
+	$(MAKE) -f ais_integration_test.mk
+	
+## Builid the test for the marine sensors
+marine_sensor_test: $(BUILD_DIR)
+	$(MAKE) -f marine_sensor_test.mk	
 
 ## Build HTTPSync Test
 HTTPSync_test: $(BUILD_DIR)
@@ -189,8 +195,11 @@ clean:
 	-@rm -rd $(BUILD_DIR)
 	-@rm $(EXECUTABLE)
 	-@rm $(UNIT_TEST_EXEC)
-	-@rm $(HARDWARE_TEST_EXEC)
+	-@rm $(UNIT_TEST_HW_EXEC)
 	-@rm $(INTEGRATION_TEST_EXEC_ASPIRE)
+	-@rm $(INTEGRATION_TEST_EXEC_ASPIRE)
+	-@rm $(AIS_TEST_EXEC)
+	-@rm $(MARINE_SENSOR_TEST_EXCE)
 	-@$(MAKE) -C Tests clean
 	@echo DONE
 
