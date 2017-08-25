@@ -75,14 +75,10 @@
   "baud_rate": 4800
 },
 
-"config_wind_state": {
-  "loop_time": 0.5
-},
-
 "config_xbee": {
   "loop_time": 0.1,
   "send": 1,
-  "recieve": 1,
+  "receive": 1,
   "send_logs": 0,
   "push_only_latest_logs": 1
 }

@@ -138,13 +138,10 @@ int main(int argc, char *argv[])
 	// Declare nodes
 	//-------------------------------------------------------------------------------
 
-	double dbLoggerUpdateFrequency = dbHandler.retrieveCellAsDouble("config_dblogger", "1","loop_time"); // updating frequency to the database (in milliseconds)
 	int dbLoggerQueueSize = 5; 			// how many messages to log to the databse at a time
-	DBLoggerNode dbLoggerNode(messageBus, dbHandler, dbLoggerWaitTime, dbLoggerUpdateFrequency, dbLoggerQueueSize);
+	DBLoggerNode dbLoggerNode(messageBus, dbHandler, dbLoggerQueueSize);
 
-	int dbHandler_delay = dbHandler.retrieveCellAsInt("httpsync_config", "1","delay");
-	bool removeLogs = dbHandler.retrieveCellAsInt("httpsync_config","1","remove_logs");
-	HTTPSyncNode httpsync(messageBus, &dbHandler, dbHandler_delay, removeLogs);
+	HTTPSyncNode httpsync(messageBus, &dbHandler);
 
 	WindStateNode windStateNode(messageBus);
 
@@ -156,16 +153,16 @@ int main(int argc, char *argv[])
 
 
   	#if LOCAL_NAVIGATION_MODULE == 1
-		VesselStateNode vesselState	( messageBus, 0.2 ); // NOTE - Maël: It will change
-		LocalNavigationModule lnm	( messageBus );
+		VesselStateNode vesselState	( messageBus, dbHandler, 0.2 ); // NOTE - Maël: It will change
+        LocalNavigationModule lnm	( messageBus, dbHandler );
 		CollidableMgr collidableMgr;
 
-		const int16_t MAX_VOTES = 25;
-		WaypointVoter waypointVoter( MAX_VOTES, 1 );
-		WindVoter windVoter( MAX_VOTES, 1 );
-		ChannelVoter channelVoter( MAX_VOTES, 1 );
-		MidRangeVoter midRangeVoter( MAX_VOTES, 1, collidableMgr );
-		ProximityVoter proximityVoter( MAX_VOTES, 2, collidableMgr);
+        const int16_t MAX_VOTES = dbHandler.retrieveCellAsInt("config_voter_system","1","max_vote");
+		WaypointVoter waypointVoter( MAX_VOTES, dbHandler.retrieveCellAsDouble("config_voter_system","1","waypoint_voter_weight")); // weight = 1
+		WindVoter windVoter( MAX_VOTES, dbHandler.retrieveCellAsDouble("config_voter_system","1","wind_voter_weight")); // weight = 1
+		ChannelVoter channelVoter( MAX_VOTES, dbHandler.retrieveCellAsDouble("config_voter_system","1","channel_voter_weight")); // weight = 1
+		MidRangeVoter midRangeVoter( MAX_VOTES, dbHandler.retrieveCellAsDouble("config_voter_system","1","midrange_voter_weight"), collidableMgr );
+		ProximityVoter proximityVoter( MAX_VOTES, dbHandler.retrieveCellAsDouble("config_voter_system","1","proximity_voter_weight"), collidableMgr);
 
 		lnm.registerVoter( &waypointVoter );
 		lnm.registerVoter( &windVoter );
@@ -173,8 +170,7 @@ int main(int argc, char *argv[])
 		lnm.registerVoter( &proximityVoter );
 		lnm.registerVoter( &midRangeVoter );
   	#else
-		double vesselStateLoopTime = dbHandler.retrieveCellAsDouble("vesselState_config","1", "loop_time");
-	  	StateEstimationNode stateEstimationNode(messageBus, dbHandler, vesselStateLoopTime); // NOTE - Maël: It will change
+		StateEstimationNode stateEstimationNode(messageBus, dbHandler); // NOTE - Maël: It will change
 
 		LineFollowNode sailingLogic(messageBus, dbHandler);
   	#endif
@@ -182,36 +178,28 @@ int main(int argc, char *argv[])
 
 	#if SIMULATION == 1
 	  	#if LOCAL_NAVIGATION_MODULE == 1
-	  		SimulationNode simulation(messageBus, &collidableMgr);
+	  		SimulationNode simulation(messageBus, dbHandler, &collidableMgr);
 	  	#else
-			SimulationNode simulation(messageBus);
+			SimulationNode simulation(messageBus, dbHandler);
 	  	#endif
   	#else
-		std::string portName = dbHandler.retrieveCell("windsensor_config", "1", "port");
-		unsigned int baudRate = dbHandler.retrieveCellAsInt("windsensor_config", "1", "baud_rate");
-		CV7Node windSensor(messageBus, portName, baudRate);
+		CV7Node windSensor(messageBus, dbHandler);
+		HMC6343Node compass(messageBus, dbHandler);
+	  	GPSDNode gpsd(messageBus, dbHandler);
+        ArduinoNode arduino(messageBus, dbHandler);
 
-		const int headingBufferSize = dbHandler.retrieveCellAsInt("buffer_config", "1", "compass");
-		double compassLoopTime = 0.1;
-		HMC6343Node compass(messageBus, headingBufferSize, compassLoopTime);
-
-		double gpsdLoopTime = dbHandler.retrieveCellAsDouble("GPSD_config", "1", "loop_time");
-	  	GPSDNode gpsd(messageBus, gpsdLoopTime);
-
-		double arduinoLoopTime = dbHandler.retrieveCellAsDouble("arduino_config", "1", "loop_time");
-		ArduinoNode arduino(messageBus, arduinoLoopTime);
-
-		int channel = dbHandler.retrieveCellAsInt("sail_servo_config", "1", "channel");
-		int speed = dbHandler.retrieveCellAsInt("sail_servo_config", "1", "speed");
-		int acceleration = dbHandler.retrieveCellAsInt("sail_servo_config", "1", "acceleration");
+        //NOTE : Marc : Modification or add in the DB Janet ?
+		int channel = 3;
+		int speed = 0;
+		int acceleration = 0;
 		ActuatorNode sail(messageBus, NodeID::SailActuator, channel, speed, acceleration);
 
-		channel = dbHandler.retrieveCellAsInt("rudder_servo_config", "1", "channel");
-		speed = dbHandler.retrieveCellAsInt("rudder_servo_config", "1", "speed");
-		acceleration = dbHandler.retrieveCellAsInt("rudder_servo_config", "1", "acceleration");
+		channel = 4;
+		speed = 0;
+		acceleration = 0;
 		ActuatorNode rudder(messageBus, NodeID::RudderActuator, channel, speed, acceleration);
 
-		MaestroController::init(dbHandler.retrieveCell("maestro_controller_config", "1", "port"));
+		MaestroController::init(dbHandler.retrieveCell("config_maestro_controller", "1", "port"));
 
 		XbeeSyncNode xbee(messageBus, dbHandler);
 	#endif
@@ -220,16 +208,7 @@ int main(int argc, char *argv[])
 	// Initialise nodes
 	//-------------------------------------------------------------------------------
 
-	bool requireNetwork = (bool) (dbHandler.retrieveCellAsInt("sailing_robot_config", "1", "require_network"));
-	if (requireNetwork)
-	{
-		initialiseNode(httpsync, "Httpsync", NodeImportance::CRITICAL);
-	}
-	else
-	{
-		initialiseNode(httpsync, "Httpsync", NodeImportance::NOT_CRITICAL);
-	}
-
+	initialiseNode(httpsync, "Httpsync", NodeImportance::NOT_CRITICAL);
 	initialiseNode(dbLoggerNode, "DBLogger", NodeImportance::CRITICAL);
 	initialiseNode(windStateNode,"WindState",NodeImportance::CRITICAL);
 	initialiseNode(waypoint, "Waypoint", NodeImportance::CRITICAL);

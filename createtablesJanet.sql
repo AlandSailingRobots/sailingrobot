@@ -339,15 +339,6 @@ CREATE TABLE config_wind_sensor (
 );
 
 -- -----------------------------------------------------
--- Table WindStateNode config
--- -----------------------------------------------------
-DROP TABLE IF EXISTS "config_wind_state";
-CREATE TABLE config_wind_state (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  loop_time DOUBLE
-);
-
--- -----------------------------------------------------
 -- Table config_xbee
 -- -----------------------------------------------------
 DROP TABLE IF EXISTS "config_xbee";
