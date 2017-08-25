@@ -184,7 +184,7 @@ void SimulationNode::processSailBoatData( TCPPacket_t& packet )
         m_GPSLon = boatData->longitude;
         m_GPSSpeed = boatData->speed;
         m_GPSHeading = Utility::limitAngleRange(90 - boatData->course); // [0, 360] north east down
-        m_WindDir = Utility::limitAngleRange(- boatData->windDir); // [0, 360] clockwize
+        m_WindDir = Utility::limitAngleRange( 180 - boatData->windDir); // [0, 360] clockwize, where the wind come from
         m_WindSpeed = boatData->windSpeed;
 
         // Send messages
@@ -210,6 +210,8 @@ void SimulationNode::processWingBoatData( TCPPacket_t& packet )
         m_GPSHeading = Utility::limitAngleRange(90 - boatData->course); // [0, 360] north east down
         m_WindDir = Utility::limitAngleRange(180 - boatData->windDir); // [0, 360] clockwize, where the wind come from
         m_WindSpeed = boatData->windSpeed;
+        std::cout <<"heading " << m_GPSHeading << std::endl;
+        std::cout <<"apparentWind " << m_WindDir << std::endl;
 
         // Send messages
         createCompassMessage();
@@ -227,7 +229,7 @@ void SimulationNode::processAISContact( TCPPacket_t& packet )
 		uint8_t* ptr = packet.data + 1;
 		AISContactPacket_t* aisData = (AISContactPacket_t*)ptr;
 
-		this->collidableMgr->addAISContact(aisData->mmsi, aisData->latitude, aisData->longitude, aisData->speed, aisData->course);
+		this->collidableMgr->addAISContact(aisData->mmsi, aisData->latitude, aisData->longitude, aisData->speed, Utility::limitAngleRange(90 - aisData->course) /* [0, 360] north east down*/);
 		this->collidableMgr->addAISContact(aisData->mmsi, aisData->length, aisData->beam);
 	}
 }
@@ -254,8 +256,8 @@ void SimulationNode::sendActuatorDataWing( int socketFD)
     //m_TailCommand   = 15.0;
     actuatorDataWing.rudderCommand = - Utility::degreeToRadian(m_RudderCommand);
     actuatorDataWing.tailCommand   = - Utility::degreeToRadian(m_TailCommand);
-    std::cout <<"sent rudder command" << actuatorDataWing.rudderCommand << std::endl;
-    std::cout <<"sent tail command" << actuatorDataWing.tailCommand << std::endl;
+    //std::cout <<"sent rudder command" << actuatorDataWing.rudderCommand << std::endl;
+    //std::cout <<"sent tail command" << actuatorDataWing.tailCommand << std::endl;
     //std::cout <<"given rudder command" << m_RudderCommand << std::endl;
     //std::cout <<"given tail command" << m_TailCommand << std::endl;
     //std::cout <<sizeof(ActuatorDataWingPacket_t) << std::endl;
@@ -264,8 +266,8 @@ void SimulationNode::sendActuatorDataWing( int socketFD)
 
 void SimulationNode::sendActuatorDataSail( int socketFD)
 {   
-    actuatorDataSail.rudderCommand = m_RudderCommand;
-    actuatorDataSail.sailCommand   = m_SailCommand;
+    actuatorDataSail.rudderCommand = - Utility::degreeToRadian(m_RudderCommand);
+    actuatorDataSail.sailCommand   = - Utility::degreeToRadian(m_SailCommand);
     server.sendData( socketFD, &actuatorDataSail, sizeof(ActuatorDataSailPacket_t) );       
 }
 

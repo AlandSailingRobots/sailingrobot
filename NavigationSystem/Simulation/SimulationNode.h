@@ -70,7 +70,7 @@ struct AISContactPacket_t {
   float latitude;
   float longitude;
   float speed;
-  uint16_t course;
+  int16_t course;
   float length;
   float beam;
 } __attribute__((packed));
