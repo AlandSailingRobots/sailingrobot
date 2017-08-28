@@ -1,6 +1,6 @@
 {
 "config_ais": {
-  "loop_time":0.5
+  "loop_time":1
 },
 
 "config_ais_processing": {
@@ -10,7 +10,7 @@
 },
 
 "config_can_arduino": {
-  "loop_time":0.5
+  "loop_time":1
 },
 
 "config_compass": {
@@ -30,7 +30,6 @@
   "loop_time": 1
 },
 
-
 "config_gps": {
   "loop_time": 0.5
 },
@@ -38,8 +37,8 @@
 "config_httpsync": {
   "loop_time": 0.5,
   "remove_logs": 0,
-  "push_only_latest_logs": 0,
-  "boat_id": "BOAT02",
+  "push_only_latest_logs": 1,
+  "boat_id": "ASPire",
   "boat_pwd": "aspirepassword123",
   "srv_addr": "https://sailingrobots.ax/aspire/sync/",
   "configs_updated": "0",
@@ -60,7 +59,7 @@
 
 "config_vessel_state": {
   "loop_time": 0.5,
-  "course_config_speed_1": 0,
+  "course_config_speed_1": 0.5,
   "course_config_speed_2": 1
 },
 
@@ -80,8 +79,8 @@
 
 "config_xbee": {
   "loop_time": 0.1,
-  "send": 1,
-  "receive": 1,
+  "send": 0,
+  "receive": 0,
   "send_logs": 0,
   "push_only_latest_logs": 1
 }

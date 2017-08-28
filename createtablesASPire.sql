@@ -317,8 +317,8 @@ DROP TABLE IF EXISTS "config_vessel_state";
 CREATE TABLE config_vessel_state (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   loop_time 			DOUBLE,
-  course_config_speed_1 INTEGER,
-  course_config_speed_2 INTEGER
+  course_config_speed_1 DOUBLE,
+  course_config_speed_2 DOUBLE
 );
 
 -- -----------------------------------------------------
