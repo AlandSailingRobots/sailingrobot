@@ -29,7 +29,7 @@ DBLoggerNode::DBLoggerNode(MessageBus& msgBus, DBHandler& db,int queueSize)
     msgBus.registerNode(*this, MessageType::CompassData);
     msgBus.registerNode(*this, MessageType::GPSData);
     msgBus.registerNode(*this, MessageType::WindData);
-    msgBus.registerNode(*this, MessageType::ActuatorPosition);
+    // msgBus.registerNode(*this, MessageType::ActuatorPosition);
     msgBus.registerNode(*this, MessageType::ASPireActuatorFeedback);
     msgBus.registerNode(*this, MessageType::MarineSensorData);
     
@@ -37,7 +37,6 @@ DBLoggerNode::DBLoggerNode(MessageBus& msgBus, DBHandler& db,int queueSize)
     msgBus.registerNode(*this, MessageType::WindState);
 
     msgBus.registerNode(*this, MessageType::WaypointData);
-    msgBus.registerNode(*this, MessageType::CourseData);
     msgBus.registerNode(*this, MessageType::LocalNavigation);
     
     msgBus.registerNode(*this, MessageType::ServerConfigsReceived);
@@ -143,14 +142,14 @@ void DBLoggerNode::processMessage(const Message* msg) {
         case MessageType::WindData:
         {
             const WindDataMsg* windDataMsg = static_cast<const WindDataMsg*>(msg);
-            item.m_windSpeed = windDataMsg->windDirection();
-            item.m_windDir = windDataMsg->windSpeed();
+            item.m_windDir = windDataMsg->windDirection();
+            item.m_windSpeed = windDataMsg->windSpeed();
             item.m_windTemp = windDataMsg->windTemp();
         }
         break;
 
         case MessageType::ServerConfigsReceived:
-        updateConfigsFromDB();
+            updateConfigsFromDB();
         break;
 
         default:
@@ -176,7 +175,7 @@ bool DBLoggerNode::init() {
 
 void DBLoggerNode::updateConfigsFromDB()
 {
-    m_loopTime = m_db.retrieveCellAsInt("config_dblogger","1","loop_time");
+    m_loopTime = m_db.retrieveCellAsDouble("config_dblogger","1","loop_time");
 }
 
 void DBLoggerNode::DBLoggerNodeThreadFunc(ActiveNode* nodePtr) {
