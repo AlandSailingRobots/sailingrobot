@@ -22,6 +22,7 @@
 #include "MessageBus/Node.h"
 #include "Messages/StateMessage.h"
 #include "Messages/WaypointDataMsg.h"
+#include "Messages/WaypointStationKeepingMsg.h"
 #include "Messages/ServerWaypointsReceivedMsg.h"
 #include "SystemServices/Timer.h"
 #include "SystemServices/Logger.h"

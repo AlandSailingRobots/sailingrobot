@@ -93,9 +93,9 @@ private:
 
 	DBHandler &m_db;
 
-    double  m_LoopTime;             // second	
+ 	double  m_LoopTime;             // second	
 
-    std::mutex m_lock;
+    	std::mutex m_lock;
 
 	std::vector<float> m_TwdBuffer; // True wind direction buffer. angles in degree [0, 360[ in vessel reference frame (clockwise)
 
@@ -112,8 +112,8 @@ private:
     // Input variables
 	bool 	m_externalControlActive;
 
-    double  m_VesselLat;
-    double  m_VesselLon;
+    	double  m_VesselLat;
+    	double  m_VesselLon;
 
 	double 	m_trueWindSpeed;		// m/s
 	double 	m_trueWindDir;			// degree [0, 360[ in North-East reference frame (clockwise)
@@ -129,9 +129,11 @@ private:
 	int 	m_prevWaypointRadius;	// m
 
 	// State variable (inout variable)
-	int     m_TackDirection;		// [1] and [2]: tack variable (q).
+	int       m_TackDirection;		// [1] and [2]: tack variable (q).
 
 	// Output variables
-	bool    m_BeatingMode;			// True if the vessel is in beating motion (zig-zag motion).
-	bool	m_TargetTackStarboard;	// True if the desired tack of the vessel is starboard.
+	bool     m_BeatingMode;			// True if the vessel is in beating motion (zig-zag motion).
+	bool     m_TargetTackStarboard;	// True if the desired tack of the vessel is starboard.
+
+	bool     m_lineFollow_On;  // activate or disactivate the lineFollow algorithm
 };

@@ -24,7 +24,7 @@
 #include "SystemServices/Timer.h"
 
 #define DATA_OUT_OF_RANGE -2000
-
+const float NO_COMMAND = -1000;
 const int STATE_INITIAL_SLEEP = 2000;
 
 
@@ -113,7 +113,7 @@ float CourseRegulatorNode::calculateRudderAngle()
 {
     std::lock_guard<std::mutex> lock_guard(m_lock);
 
-    if((m_DesiredCourse != DATA_OUT_OF_RANGE) and (m_VesselCourse != DATA_OUT_OF_RANGE))
+    if((m_DesiredCourse != DATA_OUT_OF_RANGE) and (m_VesselCourse != DATA_OUT_OF_RANGE) and (m_DesiredCourse != NO_COMMAND))
     {
         // Equation from book "Robotic Sailing 2015 ", page 141
         // The m_MaxRudderAngle is a parameter configuring the variation around the desired heading.

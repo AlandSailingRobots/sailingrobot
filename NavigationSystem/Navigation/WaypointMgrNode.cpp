@@ -148,7 +148,11 @@ bool WaypointMgrNode::harvestWaypoint()
     }
 
     if(m_nextStayTime > 0) //if next waypoint has a time to stay inside its radius, start the timer
-    {
+    {   
+        // send a WaypointStationKeeping message to trigger the station keeping
+        MessagePtr msg = std::make_unique<WaypointStationKeepingMsg>(m_nextId, m_nextLongitude, m_nextLatitude, m_nextDeclination, m_nextRadius, m_nextStayTime);
+        m_MsgBus.sendMessage(std::move(msg));
+
         m_waypointTimer.start();
         if(not writeTime)
         {

@@ -99,5 +99,7 @@ private:
     
     double m_ApparentWindDir; // units : ° (degrees), from -180 to 180
 
+    double m_DesiredCourse;
+
     std::mutex m_lock;
 };

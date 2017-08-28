@@ -21,7 +21,7 @@
 #include "LineFollowNode.h"
 
 const int INITIAL_SLEEP = 2000;  //in milliseconds
-const float NO_COMMAND = -2000; 
+const float NO_COMMAND = -1000; 
 #define DATA_OUT_OF_RANGE -2000
 
 
@@ -36,6 +36,7 @@ m_TackDirection(1), m_BeatingMode(false), m_TargetTackStarboard(false)
     msgBus.registerNode(*this, MessageType::StateMessage);
     msgBus.registerNode(*this, MessageType::WindState);
     msgBus.registerNode(*this, MessageType::WaypointData);
+    msgBus.registerNode(*this, MessageType::WaypointStationKeeping);
     msgBus.registerNode(*this, MessageType::ServerConfigsReceived);
 
     m_LoopTime = 0.5;
@@ -46,6 +47,7 @@ m_TackDirection(1), m_BeatingMode(false), m_TargetTackStarboard(false)
     m_CloseHauledAngle = Utility::degreeToRadian(45);
     m_BroadReachAngle = Utility::degreeToRadian(30);
     m_TackingDistance = 20;
+    m_lineFollow_On = 1;
 }
 
 LineFollowNode::~LineFollowNode() {}
@@ -80,10 +82,14 @@ void LineFollowNode::processMessage(const Message* msg)
         processWindStateMessage(static_cast<const WindStateMsg*>(msg));
         break;
     case MessageType::WaypointData:
+        m_lineFollow_On = 1;
         processWaypointMessage((WaypointDataMsg*)msg);
         break;
     case MessageType::ServerConfigsReceived:
         updateConfigsFromDB();
+        break;
+    case MessageType::WaypointStationKeeping:
+        m_lineFollow_On = 0;
         break;
     default:
         return;
@@ -247,12 +253,21 @@ void LineFollowNode::LineFollowNodeThreadFunc(ActiveNode* nodePtr)
 
     while(true)
     {
-        float targetCourse = (float) Utility::radianToDegree(node->calculateTargetCourse());
-        if (targetCourse != DATA_OUT_OF_RANGE){
-            //std::cout << "targetCourse end : " << targetCourse <<std::endl;
-            MessagePtr LocalNavMsg = std::make_unique<LocalNavigationMsg>(targetCourse, NO_COMMAND, node->m_BeatingMode, node->m_TargetTackStarboard);
-            node->m_MsgBus.sendMessage( std::move( LocalNavMsg ) );
+
+        if (node->m_lineFollow_On == 1){
+            float targetCourse = (float) Utility::radianToDegree(node->calculateTargetCourse());
+            if (targetCourse != DATA_OUT_OF_RANGE){
+                //std::cout << "targetCourse end : " << targetCourse <<std::endl;
+                MessagePtr LocalNavMsg = std::make_unique<LocalNavigationMsg>(targetCourse, NO_COMMAND, node->m_BeatingMode, node->m_TargetTackStarboard);
+                node->m_MsgBus.sendMessage( std::move( LocalNavMsg ) );
+            }
         }
+        else{
+            MessagePtr LocalNavMsg = std::make_unique<LocalNavigationMsg>(NO_COMMAND, NO_COMMAND, 0, 0);
+                node->m_MsgBus.sendMessage( std::move( LocalNavMsg ) );
+        }
+
+
         timer.sleepUntil(node->m_LoopTime);
         timer.reset();
     }
