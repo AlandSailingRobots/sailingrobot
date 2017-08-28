@@ -31,7 +31,7 @@ public:
 
 
 private:
-    double m_WingsailServoAngle;
-    double m_RudderAngle;
+    double m_WingsailServoAngle;  // degree in wing sail reference frame (clockwise from top view)
+    double m_RudderAngle;         // degree in vessel reference frame (clockwise from top view)
     bool m_WindvaneSelfSteeringOn;
 };

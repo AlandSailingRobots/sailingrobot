@@ -28,9 +28,9 @@ public:
 	bool radioControllerOn() 				   const { return m_RadioControllerOn; }
 
 private:
-    double m_WingsailFeedback;
-    double m_RudderFeedback;
-    double m_WindvaneSelfSteeringAngle;
+    double m_WingsailFeedback;          // degree in wing sail reference frame (clockwise from top view)
+    double m_RudderFeedback;            // degree in vessel reference frame (clockwise from top view)
+    double m_WindvaneSelfSteeringAngle; // degree
     double m_WindvaneActuatorPosition;
 	bool   m_RadioControllerOn;
 };
