@@ -57,7 +57,7 @@ void GPSDNode::processMessage(const Message* msgPtr)
 	MessageType type = msgPtr->messageType();
 	if( type == MessageType::ServerConfigsReceived)
 	{
-			updateConfigsFromDB();
+		updateConfigsFromDB();
 	}
 }
 
@@ -83,9 +83,6 @@ void GPSDNode::GPSThreadFunc(ActiveNode* nodePtr)
 	timer.start();
 	while(true)
 	{
-		// Controls how often we pump out messages
-		timer.sleepUntil(node->m_LoopTime);
-
 		if(not node->m_GpsConnection->waiting(node->GPS_TIMEOUT_MICRO_SECS))
 		{
 			Logger::warning("%s GPSD read time out!", __PRETTY_FUNCTION__);
@@ -130,6 +127,9 @@ void GPSDNode::GPSThreadFunc(ActiveNode* nodePtr)
 
 		MessagePtr msg = std::make_unique<GPSDataMsg>(gps_hasFix, gps_online, node->m_Lat, node->m_Lon, unixTime, node->m_Speed, node->m_Course, satCount, mode);
 		node->m_MsgBus.sendMessage(std::move(msg));
+
+		// Controls how often we pump out messages
+		timer.sleepUntil(node->m_LoopTime);
 		timer.reset();
 	}
 }

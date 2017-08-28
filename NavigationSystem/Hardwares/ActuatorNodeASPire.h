@@ -35,8 +35,8 @@ private:
 	const float MAX_RUDDER_ANGLE = 30;
 	const float MAX_WINGSAIL_ANGLE = 13;
 	const float INT16_SIZE = 65535;
-	double m_rudderAngle;
-	double m_wingsailAngle;
+	double m_rudderAngle;		// degree in vessel reference frame (counter clockwise from top view)
+	double m_wingsailAngle;		// degree in wing sail reference frame (counter clockwise from top view)
 	bool m_windvaneSelfSteeringOn;
 	
 };

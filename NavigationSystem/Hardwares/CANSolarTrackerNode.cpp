@@ -117,18 +117,17 @@ void CANSolarTrackerNode::CANSolarTrackerThreadFunc(ActiveNode* nodePtr) {
 	timer.start();
 
 	while(true) {
+
 		node->m_lock.lock();
 
-		if (node->m_Lat == DATA_OUT_OF_RANGE ||
-				node->m_Lon ==  DATA_OUT_OF_RANGE ||
-				node->m_Heading == DATA_OUT_OF_RANGE) {
-			node->m_lock.unlock();
-			continue;
+		if ( not ((node->m_Lat == DATA_OUT_OF_RANGE) || (node->m_Lon == DATA_OUT_OF_RANGE) ||
+			(node->m_Heading == DATA_OUT_OF_RANGE)))
+		{
+			node->sendMsg(node->m_Lat, node->m_Lon, node->m_Heading, node->m_Hour, node->m_Minute);
 		}
 
-		node->sendMsg(node->m_Lat, node->m_Lon, node->m_Heading, node->m_Hour, node->m_Minute);
-
 		node->m_lock.unlock();
+
 		timer.sleepUntil(node->m_LoopTime);
 		timer.reset();
 	}

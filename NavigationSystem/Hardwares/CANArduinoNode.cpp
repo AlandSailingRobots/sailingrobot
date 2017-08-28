@@ -15,6 +15,7 @@
 #include "CANArduinoNode.h"
 #include "MessageBus/MessageTypes.h"
 
+const int DATA_OUT_OF_RANGE = -2000;
 
 CANArduinoNode::CANArduinoNode(MessageBus& messageBus, DBHandler& dbhandler, CANService& canService) :
 ActiveNode(NodeID::CANArduino, messageBus), CANFrameReceiver(canService, {701,702}), m_LoopTime (0.5), m_db(dbhandler)
@@ -87,20 +88,16 @@ void CANArduinoNode::CANArduinoNodeThreadFunc(ActiveNode* nodePtr) {
 	while(true) {
 
 		node->m_lock.lock();
-		if( node->m_RudderFeedback == node->DATA_OUT_OF_RANGE &&  node->m_WindvaneSelfSteerAngle == node->DATA_OUT_OF_RANGE &&
-															node->m_WingsailFeedback == node->DATA_OUT_OF_RANGE && node->m_WindvaneActuatorPos == node->DATA_OUT_OF_RANGE && node->m_Radio_Controller_On ==false){
-			node->m_lock.unlock();
-			continue;
+
+		if( not (node->m_RudderFeedback == DATA_OUT_OF_RANGE &&  node->m_WindvaneSelfSteerAngle == DATA_OUT_OF_RANGE &&
+				node->m_WingsailFeedback == DATA_OUT_OF_RANGE && node->m_WindvaneActuatorPos == DATA_OUT_OF_RANGE))
+		{
+			MessagePtr feebackData = std::make_unique<ASPireActuatorFeedbackMsg>( node->m_WingsailFeedback, 
+				node->m_RudderFeedback, node->m_WindvaneSelfSteerAngle, node->m_WindvaneActuatorPos, node->m_Radio_Controller_On);
+			node->m_MsgBus.sendMessage(std::move(feebackData));
 		}
-		MessagePtr feebackData = std::make_unique<ASPireActuatorFeedbackMsg>( node->m_WingsailFeedback, node->m_RudderFeedback,
-																		node->m_WindvaneSelfSteerAngle, node->m_WindvaneActuatorPos, node->m_Radio_Controller_On);
-		node->m_MsgBus.sendMessage(std::move(feebackData));
-
-
-
 		node->m_lock.unlock();
 
-		//argument in seconds
 		timer.sleepUntil(node->m_LoopTime);
 		timer.reset();
 	}

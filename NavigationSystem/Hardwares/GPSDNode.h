@@ -62,7 +62,7 @@ private:
 
 	double	m_Lat;		// North(+) or South(-) [0-90]
 	double	m_Lon;		// East(+) or West(-)  [0-180]
-	double	m_Speed;	//NOTE : m/s , km/h or knots ?
+	double	m_Speed;	//NOTE : m/s
 	double	m_Course;	//NOTE : degree [0-360[
 
 	int m_currentDay;

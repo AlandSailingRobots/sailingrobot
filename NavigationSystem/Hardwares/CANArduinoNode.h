@@ -48,16 +48,15 @@ private:
 	///----------------------------------------------------------------------------------
 	void updateConfigsFromDB();
 
-	const int DATA_OUT_OF_RANGE	= -2000;
 	const float MAX_RUDDER_ANGLE = 30;
 	const float MAX_WINGSAIL_ANGLE = 13;
 	const float INT16_SIZE = 65535;
 
 	float m_RudderFeedback;			//NOTE : degree [-MAX_RUDDER_ANGLE ; MAX_RUDDER_ANGLE]
 	float m_WingsailFeedback;			//NOTE : degree [-MAX_WINGSAIL_ANGLE ; MAX_WINGSAIL_ANGLE]
-	float m_WindvaneSelfSteerAngle;		//NOTE : info ?
+	float m_WindvaneSelfSteerAngle;		//NOTE : degree
 	float m_Radio_Controller_On;		//NOTE : use to define message corresponding to the activity of the RC
-	float m_WindvaneActuatorPos;		//NOTE : degree [-? ; ?]
+	float m_WindvaneActuatorPos;		//NOTE :
 	double m_LoopTime;					// in seconds (ex: 0.5 s)
 	DBHandler& m_db;
 

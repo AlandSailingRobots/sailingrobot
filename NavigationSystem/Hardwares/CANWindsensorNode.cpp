@@ -16,7 +16,6 @@
 #include "Math/Utility.h"
 
 
-
 const int DATA_OUT_OF_RANGE	=	-2000;
 
 CANWindsensorNode::CANWindsensorNode(MessageBus& msgBus, DBHandler& dbhandler, CANService& can_service)
@@ -158,7 +157,7 @@ void CANWindsensorNode::CANWindSensorNodeThreadFunc(ActiveNode* nodePtr) {
 
     node->m_lock.lock();
 
-    if( not (node->m_WindDir == node->DATA_OUT_OF_RANGE &&  node->m_WindTemperature == node->DATA_OUT_OF_RANGE && node->m_WindSpeed == node->DATA_OUT_OF_RANGE) )
+    if( not (node->m_WindDir == DATA_OUT_OF_RANGE &&  node->m_WindTemperature == DATA_OUT_OF_RANGE && node->m_WindSpeed == DATA_OUT_OF_RANGE) )
 		{
 		    MessagePtr windData = std::make_unique<WindDataMsg>(node->m_WindDir, node->m_WindSpeed, node->m_WindTemperature);
         node->m_MsgBus.sendMessage(std::move(windData));

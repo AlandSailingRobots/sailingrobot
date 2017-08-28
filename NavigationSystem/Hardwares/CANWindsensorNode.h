@@ -74,16 +74,13 @@ private:
 
 	static void CANWindSensorNodeThreadFunc(ActiveNode* nodePtr);
 
-	float m_WindDir;			// NOTE : degree 0 - 360 (273)
-	float m_WindSpeed;			// NOTE : m/s ou knots
-	float m_WindTemperature;	// NOTE : in degree Celsius
-	double m_LoopTime;			// in seconds (ex : 0.5 s)
+	float m_WindDir;			// in degree 0 - 360 (273)
+	float m_WindSpeed;			// in m/s
+	float m_WindTemperature;	// in degree Celsius
+	double m_LoopTime;			// in seconds
 	DBHandler& m_db;
 
 	std::mutex m_lock;
 	std::vector<uint32_t> PGNs {130306, 130311};
-
-
-	const int DATA_OUT_OF_RANGE	=	-2000;
 
 };
