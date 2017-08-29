@@ -91,9 +91,6 @@ private:
 
     double m_MaxCommandAngle; // units : ° (degrees)
 
-    double pGain;
-    double iGain;
-
     DBHandler &m_db;
     double m_LoopTime;
 

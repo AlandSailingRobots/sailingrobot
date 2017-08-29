@@ -43,10 +43,9 @@ bool HTTPSyncNode::init()
     m_initialised = false;
 
     m_reportedConnectError = false;
-
-    m_pushOnlyLatestLogs = m_dbHandler->retrieveCellAsInt("config_httpsync", "1", "push_only_latest_logs");
-    m_shipID = m_dbHandler->retrieveCell("config_httpsync", "1", "boat_id");
+    
     m_serverURL = m_dbHandler->retrieveCell("config_httpsync", "1", "srv_addr");
+    m_shipID = m_dbHandler->retrieveCell("config_httpsync", "1", "boat_id");
     m_shipPWD = m_dbHandler->retrieveCell("config_httpsync", "1", "boat_pwd");
     updateConfigsFromDB();
 
@@ -77,6 +76,7 @@ void HTTPSyncNode::stop()
 void HTTPSyncNode::updateConfigsFromDB()
 {
     m_removeLogs = m_dbHandler->retrieveCellAsInt("config_httpsync","1","remove_logs");
+    m_pushOnlyLatestLogs = m_dbHandler->retrieveCellAsInt("config_httpsync", "1", "push_only_latest_logs");
     m_LoopTime = m_dbHandler->retrieveCellAsDouble("config_httpsync","1","loop_time");
 }
 

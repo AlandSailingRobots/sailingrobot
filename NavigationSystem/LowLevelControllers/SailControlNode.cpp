@@ -18,7 +18,6 @@
 #include <math.h>
 #include <mutex>
 #include <chrono>
-//#include "All.h" // library for M_PI
 #include "Messages/WindDataMsg.h"
 #include "Messages/ActuatorPositionMsg.h"
 #include "Messages/StateMessage.h"

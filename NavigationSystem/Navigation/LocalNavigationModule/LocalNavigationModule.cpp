@@ -21,6 +21,7 @@
 #include "Messages/WaypointDataMsg.h"
 #include "Messages/RequestCourseMsg.h"
 #include "SystemServices/Logger.h"
+#include "SystemServices/Timer.h"
 #include "Math/CourseMath.h"
 
 #include <cstdio>
@@ -31,7 +32,6 @@
 #include <thread>
 
 
-#define WAKEUP_SLEEP_MS         400
 #define WAKEUP_INTIAL_SLEEP     2000
 
 
@@ -165,18 +165,23 @@ void LocalNavigationModule::startBallot()
 ///----------------------------------------------------------------------------------
 void LocalNavigationModule::WakeupThreadFunc( ActiveNode* nodePtr )
 {
-    LocalNavigationModule* node = (LocalNavigationModule*)nodePtr;
+    LocalNavigationModule* node = dynamic_cast<LocalNavigationModule*> (nodePtr);
 
 	// An initial sleep, its purpose is to ensure that most if not all the sensor data arrives
 	// at the start before we send out the vessel state message.
 	std::this_thread::sleep_for( std::chrono::milliseconds( WAKEUP_INTIAL_SLEEP ) );
 
+    Timer timer;
+    timer.start();
+
 	while(true)
 	{
-		// Controls how often we pump out messages
-		std::this_thread::sleep_for( std::chrono::milliseconds( WAKEUP_SLEEP_MS ) );
-
         MessagePtr courseRequest = std::make_unique<RequestCourseMsg>();
 		node->m_MsgBus.sendMessage( std::move( courseRequest ) );
+
+        // Controls how often we pump out messages
+        timer.sleepUntil(node->m_LoopTime);
+        timer.reset();
 	}
 }
+

@@ -90,7 +90,7 @@ private:
     // -------------
     // Parameters to regulate this node
     // -------------
-    float m_MaxRudderAngle; // units :° (degrees), define the extreme value of the rudder
+    int m_MaxRudderAngle; // units :° (degrees), define the extreme value of the rudder
     // -------------
     // Informations
     float m_DesiredCourse; // units : ° (degrees), from 0 to 359
