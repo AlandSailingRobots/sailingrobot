@@ -23,6 +23,7 @@
 #include "MessageBus/MessageBus.h"
 #include "SystemServices/Timer.h"
 #include "Messages/StateMessage.h"
+#include "DataBase/DBHandler.h"
 
 #include <time.h>
 #include <mutex>
@@ -36,7 +37,7 @@ public:
   * Constructor, pointer to a message bus and canservice
   * double loopTime, how often we send messages
   */
-  CANSolarTrackerNode(MessageBus& msgBus, CANService& canService, double loopTime);
+  CANSolarTrackerNode(MessageBus& msgBus, DBHandler& dbhandler, CANService& canService, double loopTime);
   ~CANSolarTrackerNode();
 
   bool init();
@@ -64,6 +65,11 @@ public:
 private:
 
   /*
+  * Update values from the database as the loop time of the thread and others parameters
+  */
+  void updateConfigsFromDB();
+
+  /*
   * The function that the thread works on
   */
   static void CANSolarTrackerThreadFunc(ActiveNode* nodePtr);
@@ -79,6 +85,7 @@ private:
   float	m_Heading;
   bool m_initialised;
   double m_LoopTime;
+  DBHandler& m_db;
 
   std::mutex m_lock;
 };

@@ -25,7 +25,7 @@
   		:Message(MessageType::VesselState, sourceID, destinationID),
   		m_CompassHeading(compassHeading), m_CompassPitch(compassPitch), m_CompassRoll(compassRoll),
   		m_GPSHasFix(gpsFix), m_GPSOnline(gpsOnline), m_GPSLat(lat), m_GPSLon(lon), m_GPSUnixTime(unixTime), m_GPSSpeed(gpsSpeed),
-  		m_GPSHeading(heading), m_GPSSatellite(gpsSatellite) , m_WindDir(windDir), m_WindSpeed(windSpeed), m_WindTemp(windTemp), m_ArduinoPressure(arduinoPressure),
+  		m_GPSCourse(heading), m_GPSSatellite(gpsSatellite) , m_WindDir(windDir), m_WindSpeed(windSpeed), m_WindTemp(windTemp), m_ArduinoPressure(arduinoPressure),
   		m_ArduinoRudder(arduinoRudder), m_ArduinoSheet(arduinoSheet), m_ArduinoBattery(arduinoBattery)
   		{ }
 
@@ -35,7 +35,7 @@
   		:Message(MessageType::VesselState, NodeID::None, NodeID::None),
   		m_CompassHeading(compassHeading), m_CompassPitch(compassPitch), m_CompassRoll(compassRoll),
   		m_GPSHasFix(gpsFix), m_GPSOnline(gpsOnline), m_GPSLat(lat), m_GPSLon(lon), m_GPSUnixTime(unixTime), m_GPSSpeed(gpsSpeed),
-  		m_GPSHeading(heading), m_GPSSatellite(gpsSatellite), m_WindDir(windDir), m_WindSpeed(windSpeed), m_WindTemp(windTemp), m_ArduinoPressure(arduinoPressure),
+  		m_GPSCourse(heading), m_GPSSatellite(gpsSatellite), m_WindDir(windDir), m_WindSpeed(windSpeed), m_WindTemp(windTemp), m_ArduinoPressure(arduinoPressure),
   		m_ArduinoRudder(arduinoRudder), m_ArduinoSheet(arduinoSheet), m_ArduinoBattery(arduinoBattery)
   		{ }
 
@@ -51,7 +51,7 @@
   			!deserialiser.readDouble(m_GPSLon) ||
   			!deserialiser.readDouble(m_GPSUnixTime) ||
   			!deserialiser.readDouble(m_GPSSpeed) ||
-  			!deserialiser.readDouble(m_GPSHeading) ||
+  			!deserialiser.readDouble(m_GPSCourse) ||
   			!deserialiser.readInt(m_GPSSatellite) ||
   			!deserialiser.readFloat(m_WindDir) ||
   			!deserialiser.readFloat(m_WindSpeed) ||
@@ -77,7 +77,7 @@
   	double longitude() { return m_GPSLon; }
   	double unixTime() { return m_GPSUnixTime; }
   	double speed() { return m_GPSSpeed; }
-  	double gpsHeading() { return m_GPSHeading; }
+  	double gpsHeading() { return m_GPSCourse; }
   	int gpsSatellite() { return m_GPSSatellite; }
 
   	float windDir() { return m_WindDir; }
@@ -105,7 +105,7 @@
   		serialiser.serialise(m_GPSLon);
   		serialiser.serialise(m_GPSUnixTime);
   		serialiser.serialise(m_GPSSpeed);
-  		serialiser.serialise(m_GPSHeading);
+  		serialiser.serialise(m_GPSCourse);
   		serialiser.serialise(m_GPSSatellite);
   		serialiser.serialise(m_WindDir);
   		serialiser.serialise(m_WindSpeed);
@@ -127,7 +127,7 @@
   	double	m_GPSLon;
   	double	m_GPSUnixTime;
   	double	m_GPSSpeed;
-  	double	m_GPSHeading;
+  	double	m_GPSCourse;
   	int		m_GPSSatellite;
   	float	m_WindDir;
   	float	m_WindSpeed;

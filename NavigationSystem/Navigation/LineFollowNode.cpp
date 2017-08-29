@@ -8,8 +8,8 @@
 *    lines given by the waypoints.
 *
 * Developer Notes:
-*    Algorithm inspired and modified from: 
-*    - Luc Jaulin and Fabrice Le Bars "An Experimental Validation of a Robust Controller with 
+*    Algorithm inspired and modified from:
+*    - Luc Jaulin and Fabrice Le Bars "An Experimental Validation of a Robust Controller with
 *       the VAIMOS Autonomous Sailboat" [1];
 *    - Jon Melin, Kjell Dahl and Matia Waller "Modeling and Control for an Autonomous Sailboat:
 *       A Case Study" [2].
@@ -21,13 +21,11 @@
 #include "LineFollowNode.h"
 
 const int INITIAL_SLEEP = 2000;  //in milliseconds
-const float NO_COMMAND = -2000; 
+const float NO_COMMAND = -2000;
 #define DATA_OUT_OF_RANGE -2000
 
-
-
-LineFollowNode::LineFollowNode(MessageBus& msgBus, DBHandler& db): ActiveNode(NodeID::SailingLogic, msgBus), m_db(db),
-m_externalControlActive(false), 
+LineFollowNode::LineFollowNode(MessageBus& msgBus, DBHandler& dbhandler): ActiveNode(NodeID::SailingLogic, msgBus),
+m_LoopTime(0.5), m_db(dbhandler), m_externalControlActive(false),
 m_nextWaypointLon(DATA_OUT_OF_RANGE), m_nextWaypointLat(DATA_OUT_OF_RANGE), m_nextWaypointRadius(DATA_OUT_OF_RANGE),
 m_prevWaypointLon(DATA_OUT_OF_RANGE), m_prevWaypointLat(DATA_OUT_OF_RANGE), m_prevWaypointRadius(DATA_OUT_OF_RANGE),
 m_TackDirection(1), m_BeatingMode(false), m_TargetTackStarboard(false)
@@ -37,8 +35,6 @@ m_TackDirection(1), m_BeatingMode(false), m_TargetTackStarboard(false)
     msgBus.registerNode(*this, MessageType::WindState);
     msgBus.registerNode(*this, MessageType::WaypointData);
     msgBus.registerNode(*this, MessageType::ServerConfigsReceived);
-
-    m_LoopTime = 0.5;
 
     m_IncidenceAngle = Utility::degreeToRadian(45);
     m_MaxDistanceFromLine = 40;
@@ -52,17 +48,25 @@ LineFollowNode::~LineFollowNode() {}
 
 bool LineFollowNode::init()
 {
+    updateConfigsFromDB();
     return true;
 }
 
 void LineFollowNode::start()
 {
-  runThread(LineFollowNodeThreadFunc);
+    m_Running.store(true);
+    runThread(LineFollowNodeThreadFunc);
+}
+
+void LineFollowNode::stop()
+{
+    m_Running.store(false);
+    stopThread(this);
 }
 
 void LineFollowNode::updateConfigsFromDB()
 {
-    //m_LoopTime = m_db.retrieveCellAsInt("config_LineFollowNode","1","loop_time");
+    m_LoopTime = m_db.retrieveCellAsDouble("config_line_follow","1","loop_time");
 }
 
 void LineFollowNode::processMessage(const Message* msg)
@@ -81,9 +85,6 @@ void LineFollowNode::processMessage(const Message* msg)
         break;
     case MessageType::WaypointData:
         processWaypointMessage((WaypointDataMsg*)msg);
-        break;
-    case MessageType::ServerConfigsReceived:
-        updateConfigsFromDB();
         break;
     default:
         return;
@@ -104,7 +105,6 @@ void LineFollowNode::processWindStateMessage(const WindStateMsg* windStateMsg )
 
     m_trueWindSpeed = windStateMsg->trueWindSpeed();
     m_trueWindDir = windStateMsg->trueWindDirection();
-    // std::cout << "m_trueWindDir : " << m_trueWindDir <<std::endl;
 
     unsigned int twdBufferMaxSize = 200;
     Utility::addValueToBuffer(m_trueWindDir, m_TwdBuffer, twdBufferMaxSize);
@@ -149,8 +149,8 @@ double LineFollowNode::calculateAngleOfDesiredTrajectory()
     double M[2][3] = {
         {-sin(Utility::degreeToRadian(m_VesselLon)), cos(Utility::degreeToRadian(m_VesselLon )), 0},
         {-cos(Utility::degreeToRadian(m_VesselLon ))*sin(Utility::degreeToRadian(m_VesselLat )),
-        -sin(Utility::degreeToRadian(m_VesselLon ))*sin(Utility::degreeToRadian(m_VesselLat )),
-        cos(Utility::degreeToRadian(m_VesselLat ))}
+         -sin(Utility::degreeToRadian(m_VesselLon ))*sin(Utility::degreeToRadian(m_VesselLat )),
+          cos(Utility::degreeToRadian(m_VesselLat ))}
         };
 
     std::array<double, 3> bMinusA = { nextWPCoord[0]-prevWPCoord[0], nextWPCoord[1]-prevWPCoord[1], nextWPCoord[2]-prevWPCoord[2]};
@@ -195,7 +195,7 @@ double LineFollowNode::calculateTargetCourse()
         double phi = calculateAngleOfDesiredTrajectory();
         //std::cout << "phi : " << phi <<std::endl;
 
-        // Calculate the target course in nominal mode.     [1]:(theta_*)   [2]:(theta_r) 
+        // Calculate the target course in nominal mode.     [1]:(theta_*)   [2]:(theta_r)
         double targetCourse = phi + (2 * m_IncidenceAngle/M_PI) * atan(signedDistance/m_MaxDistanceFromLine);
         targetCourse = Utility::limitRadianAngleRange(targetCourse); // in north east down reference frame.
         //std::cout << "targetCourse in f: " << targetCourse <<std::endl;
@@ -207,17 +207,17 @@ double LineFollowNode::calculateTargetCourse()
         }
 
         // Check if the targetcourse is inconsistent with the wind.
-        if( (cos(trueWindAngle - targetCourse) + cos(m_CloseHauledAngle) < 0) || 
+        if( (cos(trueWindAngle - targetCourse) + cos(m_CloseHauledAngle) < 0) ||
             ((cos(trueWindAngle - phi) + cos(m_CloseHauledAngle) < 0) and (abs(signedDistance) < m_MaxDistanceFromLine)) )
-        {   
+        {
             // Close hauled mode (Upwind beating mode).
             m_BeatingMode = true;
             targetCourse = M_PI + trueWindAngle + m_TackDirection*m_CloseHauledAngle;
             targetCourse = Utility::limitRadianAngleRange(targetCourse);
         }
-        else if( (cos(trueWindAngle - targetCourse) - cos(m_BroadReachAngle) < 0) || 
+        else if( (cos(trueWindAngle - targetCourse) - cos(m_BroadReachAngle) < 0) ||
                  ((cos(trueWindAngle - phi) - cos(m_BroadReachAngle) < 0) and (abs(signedDistance) < m_MaxDistanceFromLine)) )
-        {   
+        {
             // Broad reach mode (Downwind beating mode).
             m_BeatingMode = true;
             targetCourse = M_PI + trueWindAngle + m_TackDirection*m_BroadReachAngle;
@@ -235,7 +235,7 @@ double LineFollowNode::calculateTargetCourse()
 }
 
 
- 
+
 void LineFollowNode::LineFollowNodeThreadFunc(ActiveNode* nodePtr)
 {
     LineFollowNode* node = dynamic_cast<LineFollowNode*> (nodePtr);
@@ -245,7 +245,8 @@ void LineFollowNode::LineFollowNodeThreadFunc(ActiveNode* nodePtr)
     Timer timer;
     timer.start();
 
-    while(true)
+
+    while(node->m_Running.load() == true)
     {
         float targetCourse = (float) Utility::radianToDegree(node->calculateTargetCourse());
         if (targetCourse != DATA_OUT_OF_RANGE){

@@ -1,5 +1,6 @@
 #include <string>
 #include "DataBase/DBHandler.h"
+#include "DataBase/DBLoggerNode.h"
 #include "HTTPSync/HTTPSyncNode.h"
 #include "MessageBus/MessageBus.h"
 #include "Messages/DataRequestMsg.h"
@@ -62,7 +63,7 @@ int main(int argc, char *argv[])
 	if (argc < 2)
 	{
 		db_path = "../asr.db";
-	} 
+	}
 	else
 	{
 		db_path = std::string(argv[1]);
@@ -105,9 +106,10 @@ int main(int argc, char *argv[])
 	// Declare nodes
 	//-------------------------------------------------------------------------------
 
-	int dbHandler_delay = dbHandler.retrieveCellAsInt("httpsync_config", "1","delay");
-	bool removeLogs = dbHandler.retrieveCellAsInt("httpsync_config","1","remove_logs");
-	HTTPSyncNode httpsync(messageBus, &dbHandler, dbHandler_delay, removeLogs);
+
+	HTTPSyncNode httpsync(messageBus, &dbHandler);
+
+	DBLoggerNode dblogger(messageBus, dbHandler, 5);
 
 
 	// Initialise nodes
@@ -121,7 +123,7 @@ int main(int argc, char *argv[])
 	//-------------------------------------------------------------------------------
 
 	httpsync.start();
-
+	dblogger.start();
 
 	//-------------------------------------------------------------------------------
 

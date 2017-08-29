@@ -32,7 +32,6 @@
 #include "Messages/VesselStateMsg.h"
 #include "Messages/WindStateMsg.h"
 #include "Messages/StateMessage.h"
-#include "SystemServices/SoftsailControl.h"
 #include "Math/Utility.h"
 
 
@@ -41,7 +40,7 @@
 #include <thread>
 #include <math.h>
 
-#define WAIT_FOR_MESSAGE		300
+#define WAIT_FOR_MESSAGE		500
 #define LINEFOLLOW_TEST_COUNT   2
 
 class LineFollowSuite : public CxxTest::TestSuite {
@@ -71,28 +70,31 @@ public:
   {
     // Only want to setup them up once in this test, only going to delete them when the program closes and the OS destroys
     // the process's memory
+    mockNode = new MockNode(msgBus(), nodeRegistered);
     if(lineFollow == 0)
     {
-      dbHandler = new DBHandler("./asr.db");
       Logger::DisableLogging();
       lineFollow = new LineFollowNode(msgBus(), *dbHandler);
+      lineFollow -> start();
 
+      std::this_thread::sleep_for(std::chrono::milliseconds(2500));
       thr = new std::thread(runMessageLoop);
     }
-    mockNode = new MockNode(msgBus(), nodeRegistered);
     testCount++;
-    std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_FOR_MESSAGE));
   }
 
   void tearDown()
   {
+    delete mockNode;
     if(testCount == LINEFOLLOW_TEST_COUNT)
     {
+      lineFollow->stop();
+      msgBus().stop();
+      thr->join();
+      delete thr;
       delete lineFollow;
       delete dbHandler;
     }
-    delete mockNode;
-
   }
 
   void test_LineFollowInit()
@@ -103,14 +105,14 @@ public:
 
   void test_LineFollowCalculateActuatorPosition()
   {
-
+     //WindState no register in the mocknode
     MessagePtr msg = std::make_unique<WindStateMsg>(170, 30, 0, 200);
     MessagePtr sMsg = std::make_unique<StateMessage>(170, 30, 10, 200, 50);
 
     msgBus().sendMessage(std::move(msg));
+    std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_FOR_MESSAGE));
     msgBus().sendMessage(std::move(sMsg));
-
-    std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+    std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_FOR_MESSAGE));
     TS_TRACE("END OF LINEFOLLOW");
     TS_ASSERT(mockNode->m_MessageReceived);
   }

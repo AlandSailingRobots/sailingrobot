@@ -17,12 +17,11 @@
 #include "SystemServices/Timer.h"
 
 
-GPSDNode::GPSDNode(MessageBus& msgBus, DBHandler& dbhandler, double loopTime)
+GPSDNode::GPSDNode(MessageBus& msgBus, DBHandler& dbhandler)
 	: ActiveNode(NodeID::GPS, msgBus), m_Initialised(false), m_GpsConnection(0),
-	  m_Lat(0), m_Lon(0), m_Speed(0), m_Course(0), m_LoopTime(loopTime),m_db(dbhandler)
-
+	m_Lat(0), m_Lon(0), m_Speed(0), m_Course(0),m_LoopTime(0.5),m_db(dbhandler)
 {
-    msgBus.registerNode(*this, MessageType::ServerConfigsReceived);
+	msgBus.registerNode(*this, MessageType::ServerConfigsReceived);
 }
 
 GPSDNode::~GPSDNode()
@@ -33,6 +32,7 @@ GPSDNode::~GPSDNode()
 bool GPSDNode::init()
 {
 	m_Initialised = false;
+	updateConfigsFromDB();
 	m_GpsConnection = new gpsmm("localhost", DEFAULT_GPSD_PORT);
 	m_currentDay = SysClock::day();
 
@@ -49,7 +49,7 @@ bool GPSDNode::init()
 
 void GPSDNode::updateConfigsFromDB()
 {
-	m_LoopTime = m_db.retrieveCellAsDouble("config_GPSD","1","loop_time");
+	m_LoopTime = m_db.retrieveCellAsDouble("config_gps","1","loop_time");
 }
 
 void GPSDNode::processMessage(const Message* msgPtr)
@@ -57,7 +57,7 @@ void GPSDNode::processMessage(const Message* msgPtr)
 	MessageType type = msgPtr->messageType();
 	if( type == MessageType::ServerConfigsReceived)
 	{
-			updateConfigsFromDB();
+		updateConfigsFromDB();
 	}
 }
 
@@ -83,9 +83,6 @@ void GPSDNode::GPSThreadFunc(ActiveNode* nodePtr)
 	timer.start();
 	while(true)
 	{
-		// Controls how often we pump out messages
-		timer.sleepUntil(node->m_LoopTime);
-
 		if(not node->m_GpsConnection->waiting(node->GPS_TIMEOUT_MICRO_SECS))
 		{
 			Logger::warning("%s GPSD read time out!", __PRETTY_FUNCTION__);
@@ -130,6 +127,9 @@ void GPSDNode::GPSThreadFunc(ActiveNode* nodePtr)
 
 		MessagePtr msg = std::make_unique<GPSDataMsg>(gps_hasFix, gps_online, node->m_Lat, node->m_Lon, unixTime, node->m_Speed, node->m_Course, satCount, mode);
 		node->m_MsgBus.sendMessage(std::move(msg));
+
+		// Controls how often we pump out messages
+		timer.sleepUntil(node->m_LoopTime);
 		timer.reset();
 	}
 }

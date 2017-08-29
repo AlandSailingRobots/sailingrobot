@@ -12,7 +12,7 @@ public:
     m_WindvaneSelfSteeringAngle(windvaneAngle), m_WindvaneActuatorPosition(windvaneActuatorPos), m_RadioControllerOn(radioControllerOn)
     {  }
 
-    ASPireActuatorFeedbackMsg( double wingsailFeedback, double rudderFeedback, 
+    ASPireActuatorFeedbackMsg( double wingsailFeedback, double rudderFeedback,
                                    double windvaneAngle, double windvaneActuatorPos, bool radioControllerOn)
     : Message(MessageType::ASPireActuatorFeedback, NodeID::None, NodeID::None),
     m_WingsailFeedback(wingsailFeedback), m_RudderFeedback(rudderFeedback),
@@ -25,12 +25,12 @@ public:
     double rudderFeedback() const            { return m_RudderFeedback; }
     double windvaneSelfSteeringAngle() const { return m_WindvaneSelfSteeringAngle; }
     double windvaneActuatorPosition()  const { return m_WindvaneActuatorPosition; }
-		bool radioControllerOn() 				   const { return m_RadioControllerOn; }
+	bool radioControllerOn() 				   const { return m_RadioControllerOn; }
 
 private:
-    double m_WingsailFeedback;
-    double m_RudderFeedback;
-    double m_WindvaneSelfSteeringAngle;
+    double m_WingsailFeedback;          // degree in wing sail reference frame (clockwise from top view)
+    double m_RudderFeedback;            // degree in vessel reference frame (clockwise from top view)
+    double m_WindvaneSelfSteeringAngle; // degree
     double m_WindvaneActuatorPosition;
-		bool   m_RadioControllerOn;
+	bool   m_RadioControllerOn;
 };

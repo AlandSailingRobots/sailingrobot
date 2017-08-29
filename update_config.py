@@ -9,12 +9,23 @@ import sqlite3
 import sys
 
 if len(sys.argv) > 1:
-    filename = str(sys.argv[1])
+    if str(sys.argv[1]) == 'ASPire':
+        filename = 'config_ASPire.json'
+    elif str(sys.argv[1]) == 'Janet':
+        filename = 'config_Janet.json'
+    else :
+        filename = str(sys.argv[1])
 else:
     filename = 'config_ASPire.json'
 
+
+
 print(filename)
-cfg = json.load(open(filename))
+try:
+    cfg = json.load(open(filename))
+except FileNotFoundError:
+    sys.exit('Error to open the file.\nPlease enter in argument either \'ASPire\', \'Janet\' or the filepath.')
+
 conn = sqlite3.connect('asr.db')
 db = conn.cursor()
 
@@ -36,7 +47,10 @@ for table in cfg:
             setstr = setstr + ', ' + key + ' = ' + value
             keystr = keystr + ', ' + key
             valstr = valstr + ', ' + value
-    db.execute('SELECT count(*) FROM ' + str(table) + ';')
+    try:
+        db.execute('SELECT count(*) FROM ' + str(table) + ';')
+    except sqlite3.OperationalError:
+        sys.exit('Error to retrieve the tables.\nCheck if the selected file \''+filename+'\' correspond to the current DataBase configuration')
     count = db.fetchone()[0]
     if count == 0:
         db.execute('INSERT INTO ' + str(table) + ' (' + keystr +

@@ -15,9 +15,12 @@ else:
 
 conn = sqlite3.connect('asr.db')
 db = conn.cursor()
-waypoints = json.load(open(filepath), object_pairs_hook=OrderedDict)
+try:
+    waypoints = json.load(open(filepath), object_pairs_hook=OrderedDict)
+except FileNotFoundError:
+    sys.exit('Error to open the file.\nPlease enter in argument a filepath in the folder Mission')
 
-db.execute('DELETE FROM waypoints')
+db.execute('DELETE FROM current_Mission')
 for wp in waypoints:
     keystr = 'id'
     valstr = str(wp)
@@ -25,7 +28,9 @@ for wp in waypoints:
         value = str(value)
         keystr = keystr + ', ' + key
         valstr = valstr + ', ' + value
-    db.execute('INSERT INTO waypoints (' + keystr +
+    db.execute('INSERT INTO current_Mission (' + keystr +
                ') VALUES (' + valstr + ')')
 conn.commit()
 db.close()
+
+print('Successful insertion of the mission : ' + filepath)

@@ -23,13 +23,14 @@
 #include "DataBase/DBHandler.h"
 #include <mutex>
 #include <stdint.h>
+#include <atomic>
 
 class CourseRegulatorNode : public ActiveNode{
 public:
     //--------------
     // Constructor
     //--------------
-    CourseRegulatorNode(MessageBus& msgBus, DBHandler& dbhandler, double loopTime = .5, double maxRudderAngle = 30 ,double configPGain = 0, double configIGain = 0);
+    CourseRegulatorNode(MessageBus& msgBus, DBHandler& dbhandler);
     // -------------
     // Destructor
     // -------------
@@ -44,6 +45,8 @@ public:
     // Start the thread for the active node
     // -------------
     void start();
+
+    void stop();
 
     // -------------
     // Listen the message concerning this Node
@@ -72,9 +75,9 @@ private:
     // -------------
     float calculateRudderAngle();
 
-    // -------------
-    // Get and update the frequency of the thread
-    // -------------
+    ///----------------------------------------------------------------------------------
+	/// Update values from the database as the loop time of the thread and others parameters
+	///----------------------------------------------------------------------------------
     void updateConfigsFromDB();
 
     // -------------
@@ -87,7 +90,7 @@ private:
     // -------------
     // Parameters to regulate this node
     // -------------
-    float m_MaxRudderAngle; // units :° (degrees), define the extreme value of the rudder
+    int m_MaxRudderAngle; // units :° (degrees), define the extreme value of the rudder
     // -------------
     // Informations
     float m_DesiredCourse; // units : ° (degrees), from 0 to 359
@@ -98,13 +101,27 @@ private:
     // -------------
     // Loop time where the thread is asleep. units : seconds
     // -------------
-    double m_LoopTime;
+    double m_LoopTime;      // unit : seconds (ex: 0.5 s)
     // -------------
     // Parameters to make a PI regulation
     // -------------
-    float pGain;
-    float iGain;
+    double pGain;       //without units
+    double iGain;       //without units
+    double dGain;       //without units
 
-    std::mutex m_lock;
+    // -------------
+    // Informations on Navigation control message
+    //NavigationState m_NavigationState;
+    /*int m_CourseToSteer;
+    float m_TargetSpeed;
+    bool m_Tack = false;
 
+     // -------------
+    // Informations
+    double m_VesselLatitude;
+    double m_VesselLongitude;
+    double m_VesselCourse; // units : ° (degrees), from 0 to 359
+    */
+    std::mutex m_lock;                      //Mutex to lock the node
+    std::atomic<bool> m_Running;
 };

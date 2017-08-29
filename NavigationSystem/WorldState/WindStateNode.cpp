@@ -81,11 +81,11 @@ void WindStateNode::calculateTrueWind()
     // v1 = - ApparentWindVector in North-East reference frame
     v1[0] = m_apparentWindSpeed;
     v1[1] = Utility::degreeToRadian(m_vesselHeading + m_apparentWindDirection);
-    
+
     // v2 = - VelocityVector in North-East reference frame
     v2[0] = - m_vesselSpeed;
     v2[1] = Utility::degreeToRadian(m_vesselCourse);
-    
+
     // v3 = v1 + v2 (TrueWindVector = ApparentWindVector + VelocityVector)
     v3 = Utility::polarVerctorsAddition(v1, v2);
 

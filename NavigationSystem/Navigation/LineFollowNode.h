@@ -8,8 +8,8 @@
 *    line given by the waypoints.
 *
 * Developer Notes:
-*	 Algorithm inspired and modified from: 
-*	 - Luc Jaulin and Fabrice Le Bars "An Experimental Validation of a Robust Controller with 
+*	 Algorithm inspired and modified from:
+*	 - Luc Jaulin and Fabrice Le Bars "An Experimental Validation of a Robust Controller with
 *		the VAIMOS Autonomous Sailboat" [1];
 *	 - Jon Melin, Kjell Dahl and Matia Waller "Modeling and Control for an Autonomous Sailboat:
 *   	A Case Study" [2].
@@ -40,17 +40,19 @@
 
 #include "waypointrouting/RudderCommand.h"
 
+#include <atomic>
+
 
 class LineFollowNode : public ActiveNode {
 public:
 
-	LineFollowNode(MessageBus& msgBus, DBHandler& db);
+	LineFollowNode(MessageBus& msgBus, DBHandler& dbhandler);
 	~LineFollowNode();
 
 	bool init();
 	void start();
+	void stop();
 	void processMessage(const Message* message);
-	void updateConfigsFromDB();
 
 
 private:
@@ -59,6 +61,7 @@ private:
 	const double NORM_RUDDER_COMMAND = 0.5166; // getCommand() take a value between -1 and 1 so we need to normalize the command correspond to 29.6 degree
 	const double NORM_SAIL_COMMAND = 0.6958;
 */
+	void updateConfigsFromDB();
 
     ///----------------------------------------------------------------------------------
     /// Stores vessel position datas from a StateMessage.
@@ -90,12 +93,11 @@ private:
     ///----------------------------------------------------------------------------------
 	static void LineFollowNodeThreadFunc(ActiveNode* nodePtr);
 
-
-	DBHandler &m_db;
-
-    double  m_LoopTime;             // second	
+    double  m_LoopTime;             // second
+	DBHandler& m_db;
 
     std::mutex m_lock;
+	std::atomic<bool> m_Running;
 
 	std::vector<float> m_TwdBuffer; // True wind direction buffer. angles in degree [0, 360[ in vessel reference frame (clockwise)
 
@@ -123,7 +125,7 @@ private:
 	double 	m_nextWaypointLon;
 	double 	m_nextWaypointLat;
 	int 	m_nextWaypointRadius;	// m
-	
+
 	double 	m_prevWaypointLon;
 	double 	m_prevWaypointLat;
 	int 	m_prevWaypointRadius;	// m

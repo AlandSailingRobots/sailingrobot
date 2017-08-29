@@ -33,8 +33,9 @@
   #include "Hardwares/HMC6343Node.h"
   #include "Hardwares/GPSDNode.h"
   #include "Hardwares/CAN_Services/CANService.h"
-  #include "Hardwares/CANWindsensorNode.h" 
+  #include "Hardwares/CANWindsensorNode.h"
   #include "Hardwares/ActuatorNodeASPire.h"
+  #include "Hardwares/MarineSensorNode.h"
 #endif
 
 
@@ -94,7 +95,7 @@ int main(int argc, char *argv[])
 	if (argc < 2)
 	{
 		db_path = "../asr.db";
-	} 
+	}
 	else
 	{
 		db_path = std::string(argv[1]);
@@ -137,17 +138,10 @@ int main(int argc, char *argv[])
 	// Declare nodes
 	//-------------------------------------------------------------------------------
 
-	int dbLoggerWaitTime = 100; 		// wait time (in milliseconds) between messages from the messageBus
-	int dbLoggerUpdateFrequency = 1000; // updating frequency to the database (in milliseconds)
 	int dbLoggerQueueSize = 5; 			// how many messages to log to the databse at a time
-	DBLoggerNode dbLoggerNode(messageBus, dbHandler, dbLoggerWaitTime, dbLoggerUpdateFrequency, dbLoggerQueueSize);
-
-	int dbHandler_delay = dbHandler.retrieveCellAsInt("httpsync_config", "1","delay");
-	bool removeLogs = dbHandler.retrieveCellAsInt("httpsync_config","1","remove_logs");
-	HTTPSyncNode httpsync(messageBus, &dbHandler, dbHandler_delay, removeLogs);
-
+	DBLoggerNode dbLoggerNode(messageBus, dbHandler, dbLoggerQueueSize);
+	HTTPSyncNode httpsync(messageBus, &dbHandler);
 	WindStateNode windStateNode(messageBus);
-
 	WaypointMgrNode waypoint(messageBus, dbHandler);
 
 	//double PGAIN = 0.20;
@@ -158,15 +152,15 @@ int main(int argc, char *argv[])
 
   	#if LOCAL_NAVIGATION_MODULE == 1
 		VesselStateNode vesselState	( messageBus, dbHandler, 0.2 ); // NOTE - Maël: It will change
-		LocalNavigationModule lnm	( messageBus );
+		LocalNavigationModule lnm	( messageBus, dbHandler );
 		CollidableMgr collidableMgr;
 
-		const int16_t MAX_VOTES = 25;
-		WaypointVoter waypointVoter( MAX_VOTES, 1 );
-		WindVoter windVoter( MAX_VOTES, 1 );
-		ChannelVoter channelVoter( MAX_VOTES, 1 );
-		MidRangeVoter midRangeVoter( MAX_VOTES, 1, collidableMgr );
-		ProximityVoter proximityVoter( MAX_VOTES, 2, collidableMgr);
+		const int16_t MAX_VOTES = dbHandler.retrieveCellAsInt("config_voter_system","1","max_vote");
+		WaypointVoter waypointVoter( MAX_VOTES, dbHandler.retrieveCellAsDouble("config_voter_system","1","waypoint_voter_weight")); // weight = 1
+		WindVoter windVoter( MAX_VOTES, dbHandler.retrieveCellAsDouble("config_voter_system","1","wind_voter_weight")); // weight = 1
+		ChannelVoter channelVoter( MAX_VOTES, dbHandler.retrieveCellAsDouble("config_voter_system","1","channel_voter_weight")); // weight = 1
+		MidRangeVoter midRangeVoter( MAX_VOTES, dbHandler.retrieveCellAsDouble("config_voter_system","1","midrange_voter_weight"), collidableMgr );
+		ProximityVoter proximityVoter( MAX_VOTES, dbHandler.retrieveCellAsDouble("config_voter_system","1","proximity_voter_weight"), collidableMgr);
 
 		lnm.registerVoter( &waypointVoter );
 		lnm.registerVoter( &windVoter );
@@ -174,48 +168,35 @@ int main(int argc, char *argv[])
 		lnm.registerVoter( &proximityVoter );
 		lnm.registerVoter( &midRangeVoter );
   	#else
-		double vesselStateLoopTime = dbHandler.retrieveCellAsDouble("vesselState_config","1", "loop_time");
-	  	StateEstimationNode stateEstimationNode(messageBus, dbHandler,vesselStateLoopTime); // NOTE - Maël: It will change
-
+	  	StateEstimationNode stateEstimationNode(messageBus, dbHandler); // NOTE - Maël: It will change
 		LineFollowNode sailingLogic(messageBus, dbHandler);
   	#endif
 
 
+
 	#if SIMULATION == 1
 	  	#if LOCAL_NAVIGATION_MODULE == 1
-	  		SimulationNode simulation(messageBus, &collidableMgr);
+	  		SimulationNode simulation(messageBus, dbHandler,&collidableMgr);
 	  	#else
-			SimulationNode simulation(messageBus);
+			SimulationNode simulation(messageBus, dbHandler);
 	  	#endif
   	#else
 		CANService canService;
 
-		const int headingBufferSize = dbHandler.retrieveCellAsInt("buffer_config", "1", "compass");
-		double compassLoopTime = 0.1;
-		HMC6343Node compass(messageBus, headingBufferSize, compassLoopTime);
-
-		double gpsdLoopTime = dbHandler.retrieveCellAsDouble("GPSD_config", "1", "loop_time");
-	  	GPSDNode gpsd(messageBus, dbHandler, gpsdLoopTime);
-
-		int time_filter_ms = dbHandler.retrieveCellAsInt("windState_config", "1", "time_filter_ms");
-	  	CANWindsensorNode windSensor(messageBus, dbHandler, canService, time_filter_ms);
-
+		HMC6343Node compass(messageBus, dbHandler);
+	  	GPSDNode gpsd(messageBus, dbHandler);
+		CANWindsensorNode windSensor(messageBus, dbHandler, canService);
 	  	ActuatorNodeASPire actuators(messageBus, canService);
+
+	  	int miniWaitTime = 20; 	// Periode (in seconds) during witch the measuements are performed.
+	  	MarineSensorNode marineSensors(messageBus, miniWaitTime);
 	#endif
 
 
 	// Initialise nodes
 	//-------------------------------------------------------------------------------
 
-	bool requireNetwork = (bool) (dbHandler.retrieveCellAsInt("sailing_robot_config", "1", "require_network"));
-	if (requireNetwork)
-	{
-		initialiseNode(httpsync, "Httpsync", NodeImportance::CRITICAL);
-	}
-	else 
-	{
-		initialiseNode(httpsync, "Httpsync", NodeImportance::NOT_CRITICAL);
-	}
+	initialiseNode(httpsync, "Httpsync", NodeImportance::NOT_CRITICAL); // This node is not critical during the developement phase.
 
 	initialiseNode(dbLoggerNode, "DBLogger", NodeImportance::CRITICAL);
 	initialiseNode(windStateNode,"WindState",NodeImportance::CRITICAL);
@@ -240,6 +221,7 @@ int main(int argc, char *argv[])
 		initialiseNode(gpsd, "GPSD", NodeImportance::CRITICAL);
 		initialiseNode(windSensor, "Wind Sensor", NodeImportance::CRITICAL);
 		initialiseNode(actuators, "Actuators", NodeImportance::CRITICAL);
+		initialiseNode(marineSensors, "Marine Sensors", NodeImportance::NOT_CRITICAL);
 	#endif
 
 	// Start active nodes

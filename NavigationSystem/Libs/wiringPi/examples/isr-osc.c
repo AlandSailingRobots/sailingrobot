@@ -21,7 +21,7 @@
  *
  *	at which point it will trigger an interrupt and the program will
  *	then do the up/down toggling for itself and run at full speed, and
- *	it will report the number of interrupts recieved every second.
+ *	it will report the number of interrupts received every second.
  *
  *	Copyright (c) 2013 Gordon Henderson. projects@drogon.net
  ***********************************************************************

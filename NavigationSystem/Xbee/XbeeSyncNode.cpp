@@ -20,6 +20,8 @@
 #include "Messages/ExternalControlMsg.h"
 #include "Messages/ActuatorPositionMsg.h"
 
+#include "SystemServices/Timer.h"
+
 
 XbeeSyncNode* XbeeSyncNode::m_node = NULL;
 
@@ -28,20 +30,17 @@ XbeeSyncNode::XbeeSyncNode(MessageBus& msgBus, DBHandler& db) :
 	ActiveNode(NodeID::xBeeSync, msgBus), m_initialised(false), m_db(db), m_dataLink("/dev/xbee", XBEE_BAUD_RATE), m_xbeeNetwork(m_dataLink, false)
 {
 	m_firstMessageCall = true;
-	m_sending = m_db.retrieveCellAsInt("xbee_config", "1", "send");
-	m_receiving = m_db.retrieveCellAsInt("xbee_config", "1", "recieve");
-	m_sendLogs = m_db.retrieveCellAsInt("xbee_config", "1", "send_logs");
-	m_loopTime = stod(m_db.retrieveCell("xbee_config", "1", "loop_time"));
-	m_pushOnlyLatestLogs = m_db.retrieveCellAsInt("xbee_config", "1", "push_only_latest_logs");
 	msgBus.registerNode(*this, MessageType::VesselState);
 	msgBus.registerNode(*this, MessageType::CourseData);
 	msgBus.registerNode(*this, MessageType::WaypointData);
+	msgBus.registerNode(*this, MessageType::ServerConfigsReceived);
 	m_node = this;
 }
 
 bool XbeeSyncNode::init()
 {
 	m_initialised = false;
+	updateConfigsFromDB();
 
 	if(m_dataLink.initialise(XBEE_PACKET_SIZE))
 	{
@@ -64,6 +63,14 @@ void XbeeSyncNode::start()
     }
 }
 
+void XbeeSyncNode::updateConfigsFromDB(){
+	m_LoopTime = m_db.retrieveCellAsDouble("config_xbee","1","loop_time");
+	m_receiving = m_db.retrieveCellAsInt("config_xbee", "1", "receive");
+	m_sending = m_db.retrieveCellAsInt("config_xbee", "1", "send");
+	m_sendLogs = m_db.retrieveCellAsInt("config_xbee", "1", "send_logs");
+	m_pushOnlyLatestLogs = m_db.retrieveCellAsInt("config_xbee", "1", "push_only_latest_logs");
+}
+
 void XbeeSyncNode::processMessage(const Message* msgPtr)
 {
     MessageType msgType = msgPtr->messageType();
@@ -79,6 +86,9 @@ void XbeeSyncNode::processMessage(const Message* msgPtr)
 		case MessageType::WaypointData:
 			sendMessage(msgPtr);
 			break;
+		case MessageType::ServerConfigsReceived:
+	        updateConfigsFromDB();
+	        break;
         default:
             break;
     }
@@ -127,11 +137,15 @@ void XbeeSyncNode::incomingMessage(uint8_t* data, uint8_t size)
 void XbeeSyncNode::xBeeSyncThread(ActiveNode* nodePtr)
 {
 	XbeeSyncNode* node = dynamic_cast<XbeeSyncNode*> (nodePtr);
+	Timer timer;
+	timer.start();
 
 	node->m_xbeeNetwork.setIncomingCallback(node->incomingMessage);
 
 	while(true)
 	{
 		node->m_xbeeNetwork.processRadioMessages();
+		timer.sleepUntil(node->m_LoopTime);
+		timer.reset();
 	}
 }

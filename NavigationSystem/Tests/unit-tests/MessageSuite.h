@@ -190,14 +190,13 @@ public:
 
 	void test_ArduinoDataMsg()
 	{
-		ArduinoDataMsg msg(10, 5500, 4700, 2, 3);
+		ArduinoDataMsg msg(10, 5500, 4700, 2);
 
 		TS_ASSERT_EQUALS(msg.messageType(), MessageType::ArduinoData);
 		TS_ASSERT_EQUALS(msg.pressure(), 10);
 		TS_ASSERT_EQUALS(msg.rudder(), 5500);
 		TS_ASSERT_EQUALS(msg.sheet(), 4700);
 		TS_ASSERT_EQUALS(msg.battery(), 2);
-		TS_ASSERT_EQUALS(msg.Radio_Controller(), 3);
 
 		MessageSerialiser serialiser;
 		msg.Serialise(serialiser);
@@ -211,12 +210,11 @@ public:
 		TS_ASSERT_EQUALS(msgTwo.rudder(), 5500);
 		TS_ASSERT_EQUALS(msgTwo.sheet(), 4700);
 		TS_ASSERT_EQUALS(msgTwo.battery(), 2);
-		TS_ASSERT_EQUALS(msgTwo.Radio_Controller(), 3);
 	}
 
 	void test_VesselStateMsg()
 	{
-		VesselStateMsg msg(170, 30, 0, true, true, 19.2, 60.02, 120.04, 2.1, 11, 170.5, 23.5f, 5.4f, 24.5f, 10, 5500, 4700, 2, 3);
+		VesselStateMsg msg(170, 30, 0, true, true, 19.2, 60.02, 120.04, 2.1, 11, 170.5, 23.5f, 5.4f, 24.5f, 10, 5500, 4700, 2);
 
 		TS_ASSERT_EQUALS(msg.messageType(), MessageType::VesselState);
 		TS_ASSERT_EQUALS(msg.compassHeading(), 170);
@@ -237,7 +235,6 @@ public:
 		TS_ASSERT_EQUALS(msg.arduinoRudder(), 5500);
 		TS_ASSERT_EQUALS(msg.arduinoSheet(), 4700);
 		TS_ASSERT_EQUALS(msg.arduinoBattery(), 2);
-		TS_ASSERT_EQUALS(msg.arduinoRC(), 3);
 
 		MessageSerialiser serialiser;
 		msg.Serialise(serialiser);
@@ -265,7 +262,6 @@ public:
 		TS_ASSERT_EQUALS(msgTwo.arduinoRudder(), 5500);
 		TS_ASSERT_EQUALS(msgTwo.arduinoSheet(), 4700);
 		TS_ASSERT_EQUALS(msgTwo.arduinoBattery(), 2);
-		TS_ASSERT_EQUALS(msg.arduinoRC(), 3);
 	}
 
 		void test_CourseDataMsg()

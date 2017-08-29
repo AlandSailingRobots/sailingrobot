@@ -21,7 +21,7 @@
 
 class GPSDNode : public ActiveNode {
 public:
-	GPSDNode(MessageBus& msgBus, DBHandler& dbhandler, double loopTime);
+	GPSDNode(MessageBus& msgBus, DBHandler& dbhandler);
 
 	virtual ~GPSDNode();
 
@@ -38,7 +38,11 @@ public:
 	///----------------------------------------------------------------------------------
 	void processMessage(const Message* msgPtr);
 
+	///----------------------------------------------------------------------------------
+	/// Update values from the database as the loop time of the thread and others parameters
+	///----------------------------------------------------------------------------------
 	void updateConfigsFromDB();
+
 	///----------------------------------------------------------------------------------
  	/// This function starts the GPS thread
  	///
@@ -56,13 +60,13 @@ private:
 	bool 	m_Initialised;
 	gpsmm* 	m_GpsConnection;
 
-	double	m_Lat;
-	double	m_Lon;
-	double	m_Speed;
-	double	m_Course;
+	double	m_Lat;		// North(+) or South(-) [0-90]
+	double	m_Lon;		// East(+) or West(-)  [0-180]
+	double	m_Speed;	//NOTE : m/s
+	double	m_Course;	//NOTE : degree [0-360[
 
 	int m_currentDay;
-	double m_LoopTime;
+	double m_LoopTime;	// in seconds (ex: 0.5 s)
 	DBHandler& m_db;
 
 	const int GPS_TIMEOUT_MICRO_SECS = 50000000;
