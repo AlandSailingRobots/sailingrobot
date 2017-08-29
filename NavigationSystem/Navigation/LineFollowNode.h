@@ -88,6 +88,11 @@ private:
     ///----------------------------------------------------------------------------------
 	double calculateTargetCourse();
 
+	///----------------------------------------------------------------------------------
+    /// Return true if the desired tack of the vessel is starboard (wind blowing from the right side )
+    ///----------------------------------------------------------------------------------
+	bool getTargetTackStarboard(double targetCourse);
+
     ///----------------------------------------------------------------------------------
     /// Starts the LineFollowNode's thread that pumps out LocalNavigationMsg.
     ///----------------------------------------------------------------------------------
@@ -133,5 +138,4 @@ private:
 
 	// Output variables
 	bool    m_BeatingMode;			// True if the vessel is in beating motion (zig-zag motion).
-	bool	m_TargetTackStarboard;	// True if the desired tack of the vessel is starboard.
 };

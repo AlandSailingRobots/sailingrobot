@@ -30,7 +30,7 @@ m_VesselLat(DATA_OUT_OF_RANGE), m_VesselLon(DATA_OUT_OF_RANGE),
 m_trueWindSpeed(DATA_OUT_OF_RANGE), m_trueWindDir(DATA_OUT_OF_RANGE),
 m_nextWaypointLon(DATA_OUT_OF_RANGE), m_nextWaypointLat(DATA_OUT_OF_RANGE), m_nextWaypointRadius(DATA_OUT_OF_RANGE),
 m_prevWaypointLon(DATA_OUT_OF_RANGE), m_prevWaypointLat(DATA_OUT_OF_RANGE), m_prevWaypointRadius(DATA_OUT_OF_RANGE),
-m_TackDirection(1), m_BeatingMode(false), m_TargetTackStarboard(false)
+m_TackDirection(1), m_BeatingMode(false)
 {
     msgBus.registerNode(*this, MessageType::ExternalControl);
     msgBus.registerNode(*this, MessageType::StateMessage);
@@ -187,11 +187,11 @@ double LineFollowNode::calculateTargetCourse()
         // Calculate signed distance to the line.           [1] and [2]: (e).
         double signedDistance = Utility::calculateSignedDistanceToLine(m_nextWaypointLon, m_nextWaypointLat, m_prevWaypointLon,
             m_prevWaypointLat, m_VesselLon, m_VesselLat);
-        // std::cout << "signedDistance : " << signedDistance <<std::endl;
+        std::cout << "signedDistance : " << signedDistance <<std::endl;
 
         // Calculate the angle of the line to be followed.  [1]:(phi)       [2]:(beta)
         double phi = calculateAngleOfDesiredTrajectory();
-        // std::cout << "phi : " << phi <<std::endl;
+        std::cout << "phi : " << phi <<std::endl;
 
         // Calculate the target course in nominal mode.     [1]:(theta_*)   [2]:(theta_r)
         double targetCourse = phi + (2 * m_IncidenceAngle/M_PI) * atan(signedDistance/m_MaxDistanceFromLine);
@@ -211,7 +211,7 @@ double LineFollowNode::calculateTargetCourse()
             // Close hauled mode (Upwind beating mode).
             m_BeatingMode = true;
             targetCourse = M_PI + trueWindAngle + m_TackDirection*m_CloseHauledAngle;
-            // std::cout << "Close hauled mode. targetCourse: " << targetCourse <<std::endl;
+            std::cout << "Close hauled mode. targetCourse: " << targetCourse <<std::endl;
         }
         else if( (cos(trueWindAngle - targetCourse) - cos(m_BroadReachAngle) > 0) ||
                  ((cos(trueWindAngle - phi) - cos(m_BroadReachAngle) > 0) and (abs(signedDistance) < m_MaxDistanceFromLine)) )
@@ -219,12 +219,12 @@ double LineFollowNode::calculateTargetCourse()
             // Broad reach mode (Downwind beating mode).
             m_BeatingMode = true;
             targetCourse = trueWindAngle + m_TackDirection*m_BroadReachAngle;
-            // std::cout << "Broad reach mode. targetCourse: " << targetCourse <<std::endl;
+            std::cout << "Broad reach mode. targetCourse: " << targetCourse <<std::endl;
         }
         else
         {
             m_BeatingMode = false;
-            // std::cout << "Nominal mode. targetCourse: " << targetCourse <<std::endl;
+            std::cout << "Nominal mode. targetCourse: " << targetCourse <<std::endl;
         }
 
         // std::cout << "trueWindAngle : " << trueWindAngle <<std::endl;
@@ -236,6 +236,17 @@ double LineFollowNode::calculateTargetCourse()
     }
 }
 
+bool LineFollowNode::getTargetTackStarboard(double targetCourse)
+{
+    std::lock_guard<std::mutex> lock_guard(m_lock);
+
+    double meanTrueWindDir = Utility::meanOfAngles(m_TwdBuffer);
+    if (sin(Utility::degreeToRadian(targetCourse - meanTrueWindDir)) < 0){
+        return true;
+    } else {
+        return false;
+    }
+}
 
 
 void LineFollowNode::LineFollowNodeThreadFunc(ActiveNode* nodePtr)
@@ -253,13 +264,14 @@ void LineFollowNode::LineFollowNodeThreadFunc(ActiveNode* nodePtr)
         double targetCourse = node->calculateTargetCourse();
         if (targetCourse != DATA_OUT_OF_RANGE)
         {
-            std::cout << "targetCourse end : " << targetCourse << std::endl;
-            MessagePtr LocalNavMsg = std::make_unique<LocalNavigationMsg>((float) targetCourse, NO_COMMAND, node->m_BeatingMode, node->m_TargetTackStarboard);
+            bool targetTackStarboard = node->getTargetTackStarboard(targetCourse);
+            MessagePtr LocalNavMsg = std::make_unique<LocalNavigationMsg>((float) targetCourse, NO_COMMAND, node->m_BeatingMode, targetTackStarboard);
             node->m_MsgBus.sendMessage( std::move( LocalNavMsg ) );
+            std::cout << "send targetCourse : " << targetCourse << std::endl;
         }
         else
         {
-            std::cout << "targetCourse end : DATA_OUT_OF_RANGE" << std::endl;
+            std::cout << "send targetCourse : DATA_OUT_OF_RANGE" << std::endl;
         }
         timer.sleepUntil(node->m_LoopTime);
         timer.reset();
