@@ -29,7 +29,7 @@
 
 
 ArduinoNode::ArduinoNode(MessageBus& msgBus,  DBHandler& dbhandler)
-: ActiveNode(NodeID::Arduino, msgBus), m_Initialised(false), m_LoopTime(0.5)
+: ActiveNode(NodeID::Arduino, msgBus), m_Initialised(false), m_LoopTime(0.5), m_db(dbhandler)
 {
 	msgBus.registerNode(*this, MessageType::ServerConfigsReceived);
 }
