@@ -185,6 +185,13 @@ void SimulationNode::createWindMessage()
     m_MsgBus.sendMessage( std::move(windData) );
 }
 
+void SimulationNode::createASPireActuatorFeedbackMessage()
+{
+    MessagePtr ASPireActuatorFeedback = std::make_unique<ASPireActuatorFeedbackMsg>( ASPireActuatorFeedbackMsg(-2000, -2000, -2000, -2000, 0) );
+    m_MsgBus.sendMessage( std::move(ASPireActuatorFeedback) );
+}
+
+
 ///--------------------------------------------------------------------------------------
 void SimulationNode::processSailBoatData( TCPPacket_t& packet )
 {
@@ -237,6 +244,7 @@ void SimulationNode::processWingBoatData( TCPPacket_t& packet )
         createCompassMessage();
         createGPSMessage();
         createWindMessage();
+        createASPireActuatorFeedbackMessage();
     }
 }
 
@@ -272,10 +280,10 @@ void SimulationNode::processVisualContact( TCPPacket_t& packet )
 ///--------------------------------------------------------------------------------------
 void SimulationNode::sendActuatorDataWing( int socketFD)
 {
-    //m_RudderCommand = 12.0;
-    //m_TailCommand   = 15.0;
+    // m_RudderCommand = 0;
+    // m_TailCommand   = 15.0;
     actuatorDataWing.rudderCommand = - Utility::degreeToRadian(m_RudderCommand);
-    actuatorDataWing.tailCommand   = Utility::degreeToRadian(m_TailCommand);
+    actuatorDataWing.tailCommand   = - Utility::degreeToRadian(m_TailCommand);
     // std::cout <<"sent rudder command " << actuatorDataWing.rudderCommand << std::endl;
     // std::cout <<"sent tail command " << actuatorDataWing.tailCommand << std::endl;
     // std::cout <<"given rudder command " << m_RudderCommand << std::endl;

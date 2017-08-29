@@ -24,6 +24,7 @@
 #include "Messages/GPSDataMsg.h"
 #include "Messages/WindDataMsg.h"
 #include "Messages/ActuatorPositionMsg.h"
+#include "Messages/ASPireActuatorFeedbackMsg.h"
 #include "Messages/WingSailCommandMsg.h"
 #include "Messages/RudderCommandMsg.h"
 #include "Messages/WaypointDataMsg.h"
@@ -203,6 +204,7 @@ private:
     void createCompassMessage();
     void createGPSMessage();
     void createWindMessage();
+    void createASPireActuatorFeedbackMessage();
 
     float   m_RudderCommand;
     float   m_SailCommand;
