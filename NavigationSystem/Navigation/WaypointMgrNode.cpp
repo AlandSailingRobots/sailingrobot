@@ -65,13 +65,13 @@ void WaypointMgrNode::processVesselStateMessage(StateMessage* msg)
 {
     m_vesselLongitude = msg->longitude();
     m_vesselLatitude = msg->latitude();
+    // std::cout << "processVesselStateMessage long: " << m_vesselLongitude << "lat: " << m_vesselLatitude << std::endl;
 }
 
 bool WaypointMgrNode::waypointReached()
 {
     // double distanceAfterWaypoint = Utility::calculateWaypointsOrthogonalLine(m_nextLongitude, m_nextLatitude, m_prevLongitude,
     //             m_prevLatitude, m_vesselLongitude, m_vesselLatitude); //Checks if boat has passed the waypoint following the line, without entering waypoints radius
-
     if(harvestWaypoint())
     {
         if(not m_db.changeOneValue("current_Mission", std::to_string(m_nextId),"1","harvested"))
@@ -103,6 +103,7 @@ bool WaypointMgrNode::waypointReached()
 void WaypointMgrNode::sendMessage()
 {
     bool foundPrev = false;
+    
     if(m_db.getWaypointValues(m_nextId, m_nextLongitude, m_nextLatitude, m_nextDeclination, m_nextRadius, m_nextStayTime,
                         m_prevId, m_prevLongitude, m_prevLatitude, m_prevDeclination, m_prevRadius, foundPrev))
     {
@@ -115,6 +116,7 @@ void WaypointMgrNode::sendMessage()
         MessagePtr msg = std::make_unique<WaypointDataMsg>(m_nextId, m_nextLongitude, m_nextLatitude, m_nextDeclination, m_nextRadius, m_nextStayTime,
                         m_prevId, m_prevLongitude, m_prevLatitude, m_prevDeclination, m_prevRadius);
         m_MsgBus.sendMessage(std::move(msg));
+        std::cout << "send WaypointDataMsg. Next id:  " << m_nextId << std::endl;
 
         if( !m_routeTime.started() )
         {
@@ -143,6 +145,7 @@ void WaypointMgrNode::sendMessage()
 bool WaypointMgrNode::harvestWaypoint()
 {
     double DistanceToWaypoint = CourseMath::calculateDTW(m_vesselLongitude, m_vesselLatitude, m_nextLongitude, m_nextLatitude); //Calculate distance to waypoint
+    // std::cout << "DistanceToWaypoint: " << DistanceToWaypoint << std::endl;
     if(DistanceToWaypoint > m_nextRadius)
     {
         return false;

@@ -165,8 +165,8 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs)
 		{
 			windsensorId = (int)strtol(tableId.c_str(), NULL, 10);
 		}
-		// NOTE : Marc : To update the id of current_mission in the DB
-		tableId = getIdFromTable("current_mission",true,db);
+		// NOTE : Marc : To update the id of current_Mission in the DB
+		tableId = getIdFromTable("current_Mission",true,db);
 		if(tableId.size() > 0)
 		{
 			currentMissionId = (int)strtol(tableId.c_str(), NULL, 10);
@@ -651,6 +651,7 @@ std::string DBHandler::getWaypoints() { // NOTE : Marc : change this otherwise i
 	std::string wp = "waypoint_";
 
 	rows = getRows("current_Mission");
+	// std::cout << "rows current mission " << rows << std::endl;
 	if (rows > 0) {
 		for (auto i = 1; i <= rows; ++i) {
 			//getDataAsJson("id,is_checkpoint,latitude,longitude,declination,radius,stay_time", "current_Mission", wp + std::to_string(i), std::to_string(i),json, true);

@@ -20,7 +20,7 @@
 
 "config_course_regulator": {
   "loop_time": 0.5,
-  "max_rudder_angle": 25.0,
+  "max_rudder_angle": 30,
   "p_gain": 0.2,
   "i_gain": 0.3,
   "d_gain": 0.4

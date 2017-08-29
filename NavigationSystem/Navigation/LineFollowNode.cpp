@@ -21,7 +21,7 @@
 #include "LineFollowNode.h"
 
 const int INITIAL_SLEEP = 2000;  //in milliseconds
-const float NO_COMMAND = -2000;
+const float NO_COMMAND = -1000;
 #define DATA_OUT_OF_RANGE -2000
 
 LineFollowNode::LineFollowNode(MessageBus& msgBus, DBHandler& dbhandler): ActiveNode(NodeID::SailingLogic, msgBus),

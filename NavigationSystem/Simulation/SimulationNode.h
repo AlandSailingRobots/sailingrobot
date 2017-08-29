@@ -207,6 +207,7 @@ private:
     float   m_RudderCommand;
     float   m_SailCommand;
     float   m_TailCommand;
+    
     int     m_CompassHeading;
     double  m_GPSLat;
     double  m_GPSLon;
@@ -214,6 +215,8 @@ private:
     double  m_GPSCourse;
     int     m_WindDir;
     float   m_WindSpeed;
+
+    int     m_nextDeclination;  // units : degrees
 
     TCPServer server;
     CollidableMgr* collidableMgr;
