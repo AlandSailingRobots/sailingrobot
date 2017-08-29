@@ -5,7 +5,6 @@
 #include "Messages/WindDataMsg.h"
 #include "Messages/WindStateMsg.h"
 #include "Messages/ActuatorPositionMsg.h"
-#include "Messages/ActuatorControlASPireMessage.h"
 #include "Messages/CourseDataMsg.h"
 #include "Messages/LocalNavigationMsg.h"
 #include "Messages/WaypointDataMsg.h"

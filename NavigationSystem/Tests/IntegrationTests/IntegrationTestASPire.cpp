@@ -23,7 +23,6 @@
 #include "SystemServices/Logger.h"
 
 #include "Messages/ASPireActuatorFeedbackMsg.h"
-#include "Messages/ActuatorControlASPireMessage.h"
 #include "Messages/RudderCommandMsg.h"
 #include "Messages/WingSailCommandMsg.h"
 #include "Messages/WindDataMsg.h"
@@ -279,8 +278,6 @@ void sendActuatorCommands() {
 		return;
 	}
 
-	// MessagePtr actuatorMsg = std::make_unique<ActuatorControlASPireMessage>(wingsailAngle16, rudderAngle16, true );
-	// msgBus.sendMessage(std::move(actuatorMsg));
 	MessagePtr rudderMsg = std::make_unique<RudderCommandMsg>(rudderAngle16);
 	msgBus.sendMessage(std::move(rudderMsg));
 	MessagePtr wingSailMsg = std::make_unique<WingSailCommandMsg>(wingsailAngle16);

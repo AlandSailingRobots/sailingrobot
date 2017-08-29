@@ -5,7 +5,7 @@
 
 #include "MessageBus/MessageBus.h"
 #include "MessageBus/Message.h"
-#include "Messages/ActuatorControlASPireMessage.h"
+#include "Messages/RudderCommandMsg.h"
 #include "Hardwares/CAN_Services/CANService.h"
 
 #include "../cxxtest/cxxtest/TestSuite.h"
@@ -35,7 +35,7 @@ public:
         CANService CANService;
 
         ActuatorNodeASPire node(msgBus(), CANService);
-        MessagePtr msg = std::make_unique<ActuatorControlASPireMessage>(2.3, 1.5, false);
+        MessagePtr msg = std::make_unique<RudderCommandMsg>(20);
         // Listen to PGN 700
         std::vector<uint32_t> PGNs = { 700 };
         MockCANReceiver mockReceiver(CANService, PGNs);
