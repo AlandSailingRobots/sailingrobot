@@ -258,10 +258,10 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs)
 		  ss << "INSERT INTO " << "dataLogs_vessel_state" << " VALUES(NULL, " << vesselStateValues.str() << "'); \n";
 
 		  windStateValues << std::setprecision(10)
-			  << log.m_trueWindDir << ", "
 			  << log.m_trueWindSpeed << ", "
-			  << log.m_apparentWindDir << ", "
-			  << log.m_apparentWindSpeed << ",'"
+			  << log.m_trueWindDir << ", "
+			  << log.m_apparentWindSpeed << ", "
+			  << log.m_apparentWindDir << ",'"
 			  << log.m_timestamp_str.c_str();
 
 		  ss << "INSERT INTO " << "dataLogs_wind_state" << " VALUES(NULL, " << windStateValues.str() << "'); \n";
