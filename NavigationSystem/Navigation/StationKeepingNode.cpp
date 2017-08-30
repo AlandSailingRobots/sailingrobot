@@ -12,10 +12,12 @@
 #include "StationKeepingNode.h"
 
 const int INITIAL_SLEEP = 2000;  //in milliseconds
+const float NO_COMMAND = -1000; 
 #define DATA_OUT_OF_RANGE -2000
 
 StationKeepingNode::StationKeepingNode(MessageBus& msgBus, DBHandler& db): ActiveNode(NodeID::SailingLogic, msgBus), m_db(db),
-m_waypointLon(DATA_OUT_OF_RANGE), m_waypointLat(DATA_OUT_OF_RANGE), m_waypointRadius(DATA_OUT_OF_RANGE)
+m_waypointLon(DATA_OUT_OF_RANGE), m_waypointLat(DATA_OUT_OF_RANGE), m_waypointRadius(DATA_OUT_OF_RANGE),
+m_TackDirection(1), m_BeatingMode(false), m_TargetTackStarboard(false)
 {
     msgBus.registerNode(*this, MessageType::StateMessage);
     msgBus.registerNode(*this, MessageType::WindState);
@@ -120,20 +122,18 @@ double StationKeepingNode::computeTargetCourse()
         }
 
         // Check if the targetcourse is inconsistent with the wind.
-        if( (cos(trueWindAngle - targetCourse) + cos(m_CloseHauledAngle) < 0) || 
-            ((cos(trueWindAngle - phi) + cos(m_CloseHauledAngle) < 0)) ) // need to be checked
+        if (cos(trueWindAngle - targetCourse) + cos(m_CloseHauledAngle) < 0) 
         {   
             // Close hauled mode (Upwind beating mode).
             m_BeatingMode = true;
             targetCourse = M_PI + trueWindAngle + m_TackDirection*m_CloseHauledAngle;
             targetCourse = Utility::limitRadianAngleRange(targetCourse);
         }
-        else if( (cos(trueWindAngle - targetCourse) - cos(m_BroadReachAngle) < 0) || 
-                 ((cos(trueWindAngle - phi) - cos(m_BroadReachAngle) < 0) ) )
+        else if (cos(trueWindAngle - targetCourse) - cos(m_BroadReachAngle) > 0)
         {   
             // Broad reach mode (Downwind beating mode).
             m_BeatingMode = true;
-            targetCourse = M_PI + trueWindAngle + m_TackDirection*m_BroadReachAngle;
+            targetCourse =  trueWindAngle + m_TackDirection*m_BroadReachAngle;
             targetCourse = Utility::limitRadianAngleRange(targetCourse);
         }
         else
@@ -151,7 +151,7 @@ double StationKeepingNode::computeTargetCourse()
 
 double StationKeepingNode::computeRudder()
 {
-
+    return 0;
 }
 
 void StationKeepingNode::StationKeepingNodeThreadFunc(ActiveNode* nodePtr)
@@ -168,7 +168,7 @@ void StationKeepingNode::StationKeepingNodeThreadFunc(ActiveNode* nodePtr)
 
         if (node->m_stationKeeping_On == 1){
             if (CourseMath::calculateDTW(node->m_VesselLon, node->m_VesselLat, node->m_waypointLon, node->m_waypointLat) > node->m_waypointRadius/2){
-                double targetCourse =  node->calculateTargetCourse();
+                double targetCourse =  node->computeTargetCourse();
                 if (targetCourse != DATA_OUT_OF_RANGE){
                     MessagePtr LocalNavMsg = std::make_unique<LocalNavigationMsg>((float) targetCourse, NO_COMMAND, node->m_BeatingMode, node->m_TargetTackStarboard);
                     node->m_MsgBus.sendMessage( std::move( LocalNavMsg ) );
