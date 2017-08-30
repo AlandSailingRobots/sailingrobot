@@ -31,6 +31,8 @@ m_TackDirection(1), m_BeatingMode(false), m_TargetTackStarboard(false)
     m_TackingDistance = 3;
 
     m_stationKeeping_On = 0;
+
+    m_MaxRudderAngle = 30;
 }
 
 StationKeepingNode::~StationKeepingNode() {}
@@ -75,6 +77,7 @@ void StationKeepingNode::processStateMessage(const StateMessage* vesselStateMsg 
     m_VesselLat = vesselStateMsg->latitude();
     m_VesselLon = vesselStateMsg->longitude();
     m_VesselSpeed = vesselStateMsg->speed();
+    m_VesselHeading = vesselStateMsg->heading();
 }
 
 void StationKeepingNode::processWindStateMessage(const WindStateMsg* windStateMsg )
@@ -152,7 +155,16 @@ double StationKeepingNode::computeTargetCourse()
 
 double StationKeepingNode::computeRudder()
 {
-    return 0;
+    if (m_VesselHeading == DATA_OUT_OF_RANGE)
+    {
+        return DATA_OUT_OF_RANGE;
+    }
+    else
+    {   
+        double meanTrueWindDir = Utility::meanOfAngles(m_TwdBuffer);
+        double rudderCommand = (- Utility::signedHeadingDifference(meanTrueWindDir, m_VesselHeading))*(m_MaxRudderAngle/180);
+        return rudderCommand;
+    }
 }
 
 void StationKeepingNode::StationKeepingNodeThreadFunc(ActiveNode* nodePtr)
@@ -177,23 +189,31 @@ void StationKeepingNode::StationKeepingNodeThreadFunc(ActiveNode* nodePtr)
                 }
             }
             else
-            {
-                if (node->m_VesselSpeed > 0) // the boat is drifting forward
-                {
+            {   // try to stay straight in the wind
+                MessagePtr wingSailMessage = std::make_unique<WingSailCommandMsg>(0);
+                node->m_MsgBus.sendMessage(std::move(wingSailMessage));
 
-                }
-                else if (node->m_VesselSpeed <0) // the boat is drifting backward
-                {
+                double rudderCommand = node->computeRudder();
 
-                }
-                else //the boat is not manoeuvrable
-                {
-                    
+                if (rudderCommand != DATA_OUT_OF_RANGE){
+                    if (node->m_VesselSpeed > 0) // the boat is drifting forward
+                    {
+                        MessagePtr actuatorMessage = std::make_unique<RudderCommandMsg>(rudderCommand);
+                        node->m_MsgBus.sendMessage(std::move(actuatorMessage));
+                    }
+                    else if (node->m_VesselSpeed <0) // the boat is drifting backward
+                    {
+                        MessagePtr actuatorMessage = std::make_unique<RudderCommandMsg>(- rudderCommand);
+                        node->m_MsgBus.sendMessage(std::move(actuatorMessage));
+                    }
+                    else //the boat is not manoeuvrable
+                    {}
                 }
             }
         }
         else{
-            
+            MessagePtr LocalNavMsg = std::make_unique<LocalNavigationMsg>(NO_COMMAND, NO_COMMAND, 0, 0);
+            node->m_MsgBus.sendMessage( std::move( LocalNavMsg ) );
         }
 
 

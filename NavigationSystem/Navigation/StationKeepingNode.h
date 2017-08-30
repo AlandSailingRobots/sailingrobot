@@ -27,6 +27,8 @@
 #include "Messages/WindStateMsg.h"
 #include "Messages/WaypointStationKeepingMsg.h"
 #include "Messages/LocalNavigationMsg.h"
+#include "Messages/WingSailCommandMsg.h"
+#include "Messages/RudderCommandMsg.h"
 #include "SystemServices/SysClock.h"
 #include "SystemServices/Timer.h"
 
@@ -68,6 +70,7 @@ private:
 	double  m_VesselLat;
     	double  m_VesselLon;
     	double m_VesselSpeed;
+    	double m_VesselHeading;
 
 	double 	m_trueWindSpeed;		// m/s
 	double 	m_trueWindDir;			// degree [0, 360[ in North-East reference frame (clockwise)
@@ -87,4 +90,6 @@ private:
 	bool     m_TargetTackStarboard;	// True if the desired tack of the vessel is starboard. 
 
 	bool     m_stationKeeping_On;  // activate or disactivate the station keeping algorithm
+
+	double m_MaxRudderAngle;
 };

@@ -264,7 +264,7 @@ void LineFollowNode::LineFollowNodeThreadFunc(ActiveNode* nodePtr)
         }
         else{
             MessagePtr LocalNavMsg = std::make_unique<LocalNavigationMsg>(NO_COMMAND, NO_COMMAND, 0, 0);
-                node->m_MsgBus.sendMessage( std::move( LocalNavMsg ) );
+            node->m_MsgBus.sendMessage( std::move( LocalNavMsg ) );
         }
 
 
