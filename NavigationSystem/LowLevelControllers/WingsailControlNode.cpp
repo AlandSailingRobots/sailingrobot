@@ -117,7 +117,7 @@ float WingsailControlNode::calculateTailAngle()
         double apparentWindDir_counterClock =360-m_ApparentWindDir;
         apparentWindDir_counterClock = Utility::degreeToRadian(apparentWindDir_counterClock);
         apparentWindDir_counterClock = Utility::limitRadianAngleRange(apparentWindDir_counterClock);
-        for (i = 0;i < 54;i++)
+        for (i = 0;i < 53;i++)
         {
         xBoat_Forces.push_back(DRAGS[i]*cos(apparentWindDir_counterClock) - LIFTS[i]*sin (apparentWindDir_counterClock));
         yBoat_Forces.push_back(LIFTS[i]*cos(apparentWindDir_counterClock) + DRAGS[i]*sin (apparentWindDir_counterClock));
@@ -127,7 +127,7 @@ float WingsailControlNode::calculateTailAngle()
         maxAndIndex_xBoat_Forces = Utility::maxAndIndex(xBoat_Forces);
         double orderTail_counterClock;
         double orderTail;
-        orderTail_counterClock = maxAndIndex_xBoat_Forces[1] - 25;
+        orderTail_counterClock = maxAndIndex_xBoat_Forces[1] - 26;
         orderTail = -orderTail_counterClock;
         orderTail = restrictWingsail(orderTail);
         return orderTail;
