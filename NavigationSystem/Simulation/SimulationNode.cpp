@@ -232,13 +232,13 @@ void SimulationNode::processWingBoatData( TCPPacket_t& packet )
         m_GPSCourse = Utility::limitAngleRange(90 - boatData->course); // [0, 360] north east down
         m_WindDir = Utility::limitAngleRange(180 - boatData->windDir); // [0, 360] clockwize, where the wind come from
         m_WindSpeed = boatData->windSpeed;
-        std::cout <<"heading " << m_CompassHeading << std::endl;
-        std::cout <<"lat " << m_GPSLat << std::endl;
-        std::cout <<"long " << m_GPSLon << std::endl;
-        std::cout <<"speed " << m_GPSSpeed << std::endl;
-        std::cout <<"course " << m_GPSCourse << std::endl;
-        std::cout <<"windSpeed " << m_WindSpeed << std::endl;
-        std::cout <<"WindDir " << m_WindDir << std::endl;
+        // std::cout <<"heading " << m_CompassHeading << std::endl;
+        // std::cout <<"lat " << m_GPSLat << std::endl;
+        // std::cout <<"long " << m_GPSLon << std::endl;
+        // std::cout <<"speed " << m_GPSSpeed << std::endl;
+        // std::cout <<"course " << m_GPSCourse << std::endl;
+        // std::cout <<"windSpeed " << m_WindSpeed << std::endl;
+        // std::cout <<"WindDir " << m_WindDir << std::endl;
 
         // Send messages
         createCompassMessage();
