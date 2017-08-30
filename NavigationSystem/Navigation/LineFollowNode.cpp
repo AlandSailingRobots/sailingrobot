@@ -38,7 +38,7 @@ m_TackDirection(1), m_BeatingMode(false)
     msgBus.registerNode(*this, MessageType::WaypointData);
     msgBus.registerNode(*this, MessageType::ServerConfigsReceived);
 
-    m_IncidenceAngle = Utility::degreeToRadian(45);
+    m_IncidenceAngle = Utility::degreeToRadian(90);
     m_MaxDistanceFromLine = 40;
 
     m_CloseHauledAngle = Utility::degreeToRadian(45);
