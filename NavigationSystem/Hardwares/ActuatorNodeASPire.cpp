@@ -40,7 +40,7 @@ void ActuatorNodeASPire::processMessage(const Message* message)
 	if(type == MessageType::WingSailCommand)
 	{
     	const WingSailCommandMsg* actMsg = dynamic_cast<const WingSailCommandMsg*>(message);
-		m_wingsailAngle = -actMsg->tailAngle()/2;
+		m_wingsailAngle = actMsg->tailAngle();
     }
     else if (type == MessageType::RudderCommand)
     {
