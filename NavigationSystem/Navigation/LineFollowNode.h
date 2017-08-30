@@ -117,8 +117,7 @@ private:
 
 	double 	m_trueWindSpeed;		// m/s
 	double 	m_trueWindDir;			// degree [0, 360[ in North-East reference frame (clockwise)
-	double 	m_apparentWindSpeed;	// m/s
-	double 	m_apparentWindDir;		// degree [0, 360[ in vessel reference frame (clockwise)
+
 
 	double 	m_nextWaypointLon;
 	double 	m_nextWaypointLat;

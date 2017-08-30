@@ -236,7 +236,7 @@ double LineFollowNode::calculateTargetCourse()
 
         // std::cout << "trueWindAngle : " << trueWindAngle <<std::endl;
 
-        return targetCourse; // in north east down reference frame.
+        return Utility::radianToDegree(targetCourse); // in north east down reference frame.
     }
 }
 
@@ -255,10 +255,10 @@ void LineFollowNode::LineFollowNodeThreadFunc(ActiveNode* nodePtr)
     {
 
         if (node->m_lineFollow_On == 1){
-            float targetCourse = (float) Utility::radianToDegree(node->calculateTargetCourse());
+            double targetCourse =  node->calculateTargetCourse();
             if (targetCourse != DATA_OUT_OF_RANGE){
                 //std::cout << "targetCourse end : " << targetCourse <<std::endl;
-                MessagePtr LocalNavMsg = std::make_unique<LocalNavigationMsg>(targetCourse, NO_COMMAND, node->m_BeatingMode, node->m_TargetTackStarboard);
+                MessagePtr LocalNavMsg = std::make_unique<LocalNavigationMsg>((float) targetCourse, NO_COMMAND, node->m_BeatingMode, node->m_TargetTackStarboard);
                 node->m_MsgBus.sendMessage( std::move( LocalNavMsg ) );
             }
         }

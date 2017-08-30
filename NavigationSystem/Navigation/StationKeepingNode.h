@@ -18,6 +18,7 @@
 #include <chrono>
 
 
+#include "DataBase/DBHandler.h"
 #include "Math/CourseMath.h"
 #include "Math/Utility.h"
 #include "MessageBus/ActiveNode.h"
@@ -48,6 +49,38 @@ private:
 
 	void processWindStateMessage(const WindStateMsg* windStateMsg);
 
-	void processWaypointMessage(WaypointStationKeepingMsg* waypMsg);
+	void processWaypointMessage(const WaypointStationKeepingMsg* waypMsg);
 
-	static void LineFollowNodeThreadFunc(ActiveNode* nodePtr);
+	double computeTargetCourse();
+
+	double computeRudder();
+
+	static void StationKeepingNodeThreadFunc(ActiveNode* nodePtr);
+
+	DBHandler &m_db;
+
+	double  m_LoopTime;             // second	
+
+	std::mutex m_lock;
+
+	std::vector<float> m_TwdBuffer; // True wind direction buffer. angles in degree [0, 360[ in vessel reference frame (clockwise)
+
+	double  m_VesselLat;
+    	double  m_VesselLon;
+
+	double 	m_trueWindSpeed;		// m/s
+	double 	m_trueWindDir;			// degree [0, 360[ in North-East reference frame (clockwise)
+
+	double 	m_waypointLon;
+	double 	m_waypointLat;
+	int 	m_waypointRadius;	// m
+
+	// Beating sailing mode parameters
+	float  	m_CloseHauledAngle;		// radian.
+	float 	m_BroadReachAngle;		// radian.
+	float 	m_TackingDistance;		// meter.
+
+	int       m_TackDirection;	 
+
+	bool     m_stationKeeping_On;  // activate or disactivate the station keeping algorithm
+};

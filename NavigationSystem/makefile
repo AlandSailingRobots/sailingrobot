@@ -109,7 +109,7 @@ export CORE_SRC 			= $(DATABASE_SRC) $(HTTP_SYNC_SRC) $(LOW_LEVEL_CONTROLLERS) $
 								$(WORLD_STATE_SRC)
 
 # Local navigation
-export LINE_FOLLOW_SRC      = Navigation/LineFollowNode.cpp waypointrouting/RudderCommand.cpp \
+export LINE_FOLLOW_SRC      = Navigation/LineFollowNode.cpp  Navigation/StationKeepingNode.cpp waypointrouting/RudderCommand.cpp \
                             	waypointrouting/Commands.cpp waypointrouting/SailCommand.cpp
 
 export LNM_SRC              = $(LNM_DIR)/ASRCourseBallot.cpp $(LNM_DIR)/ASRArbiter.cpp \
