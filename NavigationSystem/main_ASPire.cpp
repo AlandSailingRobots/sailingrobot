@@ -33,6 +33,7 @@
   #include "Hardwares/CAN_Services/CANService.h"
   #include "Hardwares/CANWindsensorNode.h"
   #include "Hardwares/ActuatorNodeASPire.h"
+  #include "Hardwares/CANArduinoNode.h"
   #include "Hardwares/MarineSensorNode.h"
 #endif
 
@@ -180,6 +181,7 @@ int main(int argc, char *argv[])
 	  	GPSDNode gpsd(messageBus, dbHandler);
 		CANWindsensorNode windSensor(messageBus, dbHandler, canService);
 	  	ActuatorNodeASPire actuators(messageBus, canService);
+	  	CANArduinoNode actuatorFeedback(messageBus, dbHandler, canService);
 
 	  	int miniWaitTime = 20; 	// Periode (in seconds) during witch the measuements are performed.
 	  	MarineSensorNode marineSensors(messageBus, miniWaitTime);
@@ -212,6 +214,7 @@ int main(int argc, char *argv[])
 		initialiseNode(gpsd, "GPSD", NodeImportance::CRITICAL);
 		initialiseNode(windSensor, "Wind Sensor", NodeImportance::CRITICAL);
 		initialiseNode(actuators, "Actuators", NodeImportance::CRITICAL);
+		initialiseNode(actuatorFeedback, "Actuator Feedback", NodeImportance::NOT_CRITICAL);
 		initialiseNode(marineSensors, "Marine Sensors", NodeImportance::NOT_CRITICAL);
 	#endif
 
@@ -229,6 +232,7 @@ int main(int argc, char *argv[])
 		compass.start();
 		gpsd.start();
 		windSensor.start();
+		actuatorFeedback.start();
 	#endif
 
 	#if LOCAL_NAVIGATION_MODULE == 1
