@@ -15,9 +15,8 @@
 
 #include "LocalNavigationModule.h"
 #include "Messages/DesiredCourseMsg.h"
-#include "Messages/CompassDataMsg.h"
-#include "Messages/GPSDataMsg.h"
-#include "Messages/WindDataMsg.h"
+#include "Messages/StateMessage.h"
+#include "Messages/WindStateMsg.h"
 #include "Messages/WaypointDataMsg.h"
 #include "Messages/RequestCourseMsg.h"
 #include "SystemServices/Logger.h"
@@ -39,9 +38,8 @@
 LocalNavigationModule::LocalNavigationModule( MessageBus& msgBus,DBHandler& dbhandler)
     :ActiveNode(NodeID::LocalNavigationModule, msgBus), m_LoopTime(0.5), m_db(dbhandler)
 {
-    msgBus.registerNode( *this, MessageType::CompassData );
-    msgBus.registerNode( *this, MessageType::GPSData );
-    msgBus.registerNode( *this, MessageType::WindData );
+    msgBus.registerNode( *this, MessageType::StateMessage );
+    msgBus.registerNode( *this, MessageType::WindState );
     msgBus.registerNode( *this, MessageType::WaypointData );
     msgBus.registerNode( *this, MessageType::RequestCourse );
     msgBus.registerNode( *this, MessageType::ServerConfigsReceived );
@@ -70,27 +68,21 @@ void LocalNavigationModule::processMessage( const Message* msg )
 {
     switch( msg->messageType() )
     {
-        case MessageType::CompassData:
+        case MessageType::StateMessage:
         {
-            CompassDataMsg* compass = (CompassDataMsg*)msg;
-            boatState.heading = compass->heading();
+            StateMessage* vesselStateMsg = (StateMessage*)msg;
+            boatState.heading = vesselStateMsg->heading();
+            boatState.lat = vesselStateMsg->latitude();
+            boatState.lon = vesselStateMsg->longitude();
+            boatState.speed = vesselStateMsg->speed();
         }
             break;
 
-        case MessageType::GPSData:
+        case MessageType::WindState:
         {
-            GPSDataMsg* gps = (GPSDataMsg*)msg;
-            boatState.lat = gps->latitude();
-            boatState.lon = gps->longitude();
-            boatState.speed = gps->speed();
-        }
-            break;
-
-        case MessageType::WindData:
-        {
-            WindDataMsg* wind = (WindDataMsg*)msg;
-            boatState.windDir = wind->windDirection();
-            boatState.windSpeed = wind->windSpeed();
+            WindStateMsg* windStateMsg = (WindStateMsg*)msg;
+            boatState.windDir = windStateMsg->apparentWindDirection();
+            boatState.windSpeed = windStateMsg->apparentWindSpeed();
         }
             break;
 

@@ -107,7 +107,7 @@ void CourseRegulatorNode::processDesiredCourseMessage(const DesiredCourseMsg* ms
 {
     std::lock_guard<std::mutex> lock_guard(m_lock);
 
-    //m_DesiredCourse = static_cast<float>(msg->desiredCourse());
+    m_DesiredCourse = static_cast<float>(msg->desiredCourse());
 }
 
 ///----------------------------------------------------------------------------------
