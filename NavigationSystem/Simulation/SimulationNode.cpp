@@ -288,7 +288,6 @@ void SimulationNode::sendActuatorDataWing( int socketFD)
     // std::cout <<"sent tail command " << actuatorDataWing.tailCommand << std::endl;
     // std::cout <<"given rudder command " << m_RudderCommand << std::endl;
     // std::cout <<"given tail command " << m_TailCommand << std::endl;
-    // std::cout <<sizeof(ActuatorDataWingPacket_t) << std::endl;
 
     server.sendData( socketFD, &actuatorDataWing, sizeof(ActuatorDataWingPacket_t) );
 }
@@ -311,8 +310,8 @@ void SimulationNode::SimulationThreadFunc(ActiveNode* nodePtr)
 {
     SimulationNode* node = dynamic_cast<SimulationNode*> (nodePtr);
 
-    Timer timer;
-    timer.start();
+    //Timer timer;
+    //timer.start();
 
     TCPPacket_t packet;
     int simulatorFD = 0;
@@ -364,7 +363,7 @@ void SimulationNode::SimulationThreadFunc(ActiveNode* nodePtr)
         //node->sendActuatorDataSail( simulatorFD);
         node->sendWaypoint( simulatorFD );
 
-        timer.sleepUntil(node->m_LoopTime);
-        timer.reset();
+        //timer.sleepUntil(node->m_LoopTime);
+        //timer.reset();
     }
 }
