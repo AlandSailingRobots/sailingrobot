@@ -64,7 +64,7 @@ void WindStateNode::processWindMessage(const WindDataMsg* msg)
 {
     m_apparentWindSpeed     = msg->windSpeed();
     m_apparentWindDirection = msg->windDirection();
-    // std::cout << "m_apparentWindDirection: " << m_apparentWindDirection <<std::endl;
+    //std::cout << "m_apparentWindDirection in wind state: " << m_apparentWindDirection <<std::endl;
 }
 
 void WindStateNode::sendMessage()

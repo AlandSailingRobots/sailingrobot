@@ -38,7 +38,7 @@ const double  DRAGS[53] = {-3.6222976277233707, -3.3490177771111052, -3.08645478
 WingsailControlNode::WingsailControlNode(MessageBus& msgBus, DBHandler& dbhandler):
     ActiveNode(NodeID::WingsailControlNode,msgBus), m_db(dbhandler), m_ApparentWindDir(DATA_OUT_OF_RANGE)
 {
-    msgBus.registerNode( *this, MessageType::WindData);
+    msgBus.registerNode( *this, MessageType::WindState);
     msgBus.registerNode( *this, MessageType::LocalNavigation);
 }
 
@@ -62,7 +62,7 @@ void WingsailControlNode::processMessage( const Message* msg)
 {
     switch( msg->messageType() )
     {
-    case MessageType::WindData:
+    case MessageType::WindState:
         processWindStateMessage(static_cast< const WindStateMsg*>(msg));
         break;
     case MessageType::LocalNavigation:
@@ -128,7 +128,7 @@ float WingsailControlNode::calculateTailAngle()
         double orderTail_counterClock;
         double orderTail;
         orderTail_counterClock = maxAndIndex_xBoat_Forces[1] - 26;
-        orderTail = -orderTail_counterClock;
+        orderTail = - orderTail_counterClock;
         orderTail = restrictWingsail(orderTail);
         return orderTail;
     }
