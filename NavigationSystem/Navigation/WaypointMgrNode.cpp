@@ -27,7 +27,7 @@ WaypointMgrNode::WaypointMgrNode(MessageBus& msgBus, DBHandler& db)
     m_prevLatitude(0),
     m_prevDeclination(0),
     m_prevRadius(0),
-    m_totalTime( 0 )
+    m_totalTime(0)
 {
     msgBus.registerNode(*this, MessageType::StateMessage);
     msgBus.registerNode(*this, MessageType::ServerWaypointsReceived);

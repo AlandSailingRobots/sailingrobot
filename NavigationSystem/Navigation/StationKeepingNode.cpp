@@ -74,6 +74,7 @@ void StationKeepingNode::processStateMessage(const StateMessage* vesselStateMsg 
 
     m_VesselLat = vesselStateMsg->latitude();
     m_VesselLon = vesselStateMsg->longitude();
+    m_VesselSpeed = vesselStateMsg->speed();
 }
 
 void StationKeepingNode::processWindStateMessage(const WindStateMsg* windStateMsg )
@@ -167,11 +168,27 @@ void StationKeepingNode::StationKeepingNodeThreadFunc(ActiveNode* nodePtr)
     {
 
         if (node->m_stationKeeping_On == 1){
-            if (CourseMath::calculateDTW(node->m_VesselLon, node->m_VesselLat, node->m_waypointLon, node->m_waypointLat) > node->m_waypointRadius/2){
+            if (CourseMath::calculateDTW(node->m_VesselLon, node->m_VesselLat, node->m_waypointLon, node->m_waypointLat) > node->m_waypointRadius/2)
+            {
                 double targetCourse =  node->computeTargetCourse();
                 if (targetCourse != DATA_OUT_OF_RANGE){
                     MessagePtr LocalNavMsg = std::make_unique<LocalNavigationMsg>((float) targetCourse, NO_COMMAND, node->m_BeatingMode, node->m_TargetTackStarboard);
                     node->m_MsgBus.sendMessage( std::move( LocalNavMsg ) );
+                }
+            }
+            else
+            {
+                if (node->m_VesselSpeed > 0) // the boat is drifting forward
+                {
+
+                }
+                else if (node->m_VesselSpeed <0) // the boat is drifting backward
+                {
+
+                }
+                else //the boat is not manoeuvrable
+                {
+                    
                 }
             }
         }
