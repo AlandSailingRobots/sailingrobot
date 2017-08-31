@@ -289,7 +289,10 @@ CREATE TABLE config_httpsync (
 DROP TABLE IF EXISTS "config_line_follow";
 CREATE TABLE config_line_follow (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
-  loop_time DOUBLE
+  loop_time DOUBLE,
+  close_hauled_angle DOUBLE,
+  broad_reach_angle DOUBLE,
+  tacking_distance DOUBLE
 );
 
 
@@ -375,7 +378,7 @@ INSERT INTO "config_compass" VALUES(1,0.5,1);
 INSERT INTO "config_course_regulator" VALUES(1,0.5,30,1,1,1);
 INSERT INTO "config_dblogger" VALUES(1,0.5);
 INSERT INTO "config_gps" VALUES(1,0.5);
-INSERT INTO "config_line_follow" VALUES(1,0.5);
+INSERT INTO "config_line_follow" VALUES(1,0.5,45,30,15);
 INSERT INTO "config_solar_tracker" VALUES(1,1);
 INSERT INTO "config_vessel_state" VALUES(1, 0.5, 0.5, 1);
 INSERT INTO "config_voter_system" VALUES(1,0.5,25,1,1,1,1,2);

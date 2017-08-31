@@ -14,7 +14,7 @@
 },
 
 "config_compass": {
-  "loop_time":0.5,
+  "loop_time":0.1,
   "heading_buffer_size": 1
 },
 
@@ -46,7 +46,10 @@
 },
 
 "config_line_follow": {
-  "loop_time": 0.5
+  "loop_time": 0.5,
+  "close_hauled_angle": 45,
+  "broad_reach_angle": 30,
+  "tacking_distance": 15
 },
 
 "config_solar_tracker": {

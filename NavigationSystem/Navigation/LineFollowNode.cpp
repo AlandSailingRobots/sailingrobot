@@ -69,6 +69,13 @@ void LineFollowNode::stop()
 void LineFollowNode::updateConfigsFromDB()
 {
     m_LoopTime = m_db.retrieveCellAsDouble("config_line_follow","1","loop_time");
+    m_CloseHauledAngle = Utility::degreeToRadian(m_db.retrieveCellAsDouble("config_line_follow","1","close_hauled_angle"));
+    m_BroadReachAngle = Utility::degreeToRadian(m_db.retrieveCellAsDouble("config_line_follow","1","broad_reach_angle"));
+    m_TackingDistance = m_db.retrieveCellAsDouble("config_line_follow","1","tacking_distance");
+    std::cout << "m_LoopTime : " << m_LoopTime << std::endl;
+    std::cout << "m_CloseHauledAngle : " << m_CloseHauledAngle << std::endl;
+    std::cout << "m_BroadReachAngle : " << m_BroadReachAngle << std::endl;
+    std::cout << "m_TackingDistance : " << m_TackingDistance << std::endl;
 }
 
 void LineFollowNode::processMessage(const Message* msg)
