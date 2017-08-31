@@ -73,6 +73,7 @@ export UNIT_TEST_HW_EXEC 	= unit-tests-hardware.run
 export INTEGRATION_TEST_EXEC_ASPIRE = integration-tests-ASPire.run
 export HTTP_SYNC_TEST_EXEC	= HTTPSync-test.run
 export AIS_TEST_EXEC		= ais-integration-tests.run
+export OBSTACLE_DETECTION_TEST_EXEC	= obstacle-detection-tests.run
 export MARINE_SENSOR_TEST_EXCE = marine-sensor-test.run
 
 export OBJECT_FILE          = $(BUILD_DIR)/objects.tmp
@@ -143,6 +144,8 @@ export HW_NODES_ASPIRE_SRC 	= Hardwares/ActuatorNodeASPire.cpp Hardwares/CANAISN
 
 export HW_NODES_JANET_SRC 	= Hardwares/ActuatorNode.cpp Hardwares/CV7Node.cpp Hardwares/ArduinoNode.cpp
 
+export HW_NODES_CAMERA		= 
+
 # XBee network
 export XBEE_NETWORK_SRC     = Network/DataLink.cpp Network/LinuxSerialDataLink.cpp Network/XbeePacketNetwork.cpp \
                             	Xbee/Xbee.cpp Xbee/XbeeSyncNode.cpp
@@ -175,8 +178,12 @@ unit_tests: $(BUILD_DIR)
 integration_tests_ASPire: $(BUILD_DIR)
 	$(MAKE) -f integration_tests_ASPire.mk
 	$(MAKE) -f ais_integration_test.mk
+
+## Build the obstacle detection integration test
+obstacle_detection_test: $(BUILD_DIR)
+	$(MAKE) -f obstacle_detection_test.mk
 	
-## Builid the test for the marine sensors
+## Build the test for the marine sensors
 marine_sensor_test: $(BUILD_DIR)
 	$(MAKE) -f marine_sensor_test.mk	
 
@@ -197,9 +204,10 @@ clean:
 	-@rm $(UNIT_TEST_EXEC)
 	-@rm $(UNIT_TEST_HW_EXEC)
 	-@rm $(INTEGRATION_TEST_EXEC_ASPIRE)
-	-@rm $(INTEGRATION_TEST_EXEC_ASPIRE)
 	-@rm $(AIS_TEST_EXEC)
+	-@rm $(OBSTACLE_DETECTION_TEST_EXEC)
 	-@rm $(MARINE_SENSOR_TEST_EXCE)
+	-@rm $(HTTP_SYNC_TEST_EXEC)
 	-@$(MAKE) -C Tests clean
 	@echo DONE
 
