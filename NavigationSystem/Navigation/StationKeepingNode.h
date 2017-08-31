@@ -91,5 +91,7 @@ private:
 
 	bool     m_stationKeeping_On;  // activate or disactivate the station keeping algorithm
 
+	bool     m_outOfZone;  // true if we are outside the zone where we turn around
+
 	double m_MaxRudderAngle;
 };

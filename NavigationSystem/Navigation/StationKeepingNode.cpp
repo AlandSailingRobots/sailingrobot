@@ -33,6 +33,8 @@ m_TackDirection(1), m_BeatingMode(false), m_TargetTackStarboard(false)
     m_stationKeeping_On = 0;
 
     m_MaxRudderAngle = 30;
+
+    m_outOfZone = 1;
 }
 
 StationKeepingNode::~StationKeepingNode() {}
@@ -153,20 +155,6 @@ double StationKeepingNode::computeTargetCourse()
 
 
 
-double StationKeepingNode::computeRudder()
-{
-    if (m_VesselHeading == DATA_OUT_OF_RANGE)
-    {
-        return DATA_OUT_OF_RANGE;
-    }
-    else
-    {   
-        double meanTrueWindDir = Utility::meanOfAngles(m_TwdBuffer);
-        double rudderCommand = (- Utility::signedHeadingDifference(meanTrueWindDir, m_VesselHeading))*(m_MaxRudderAngle/180);
-        return rudderCommand;
-    }
-}
-
 void StationKeepingNode::StationKeepingNodeThreadFunc(ActiveNode* nodePtr)
 {
     StationKeepingNode* node = dynamic_cast<StationKeepingNode*> (nodePtr);
@@ -180,7 +168,7 @@ void StationKeepingNode::StationKeepingNodeThreadFunc(ActiveNode* nodePtr)
     {
 
         if (node->m_stationKeeping_On == 1){
-            if (CourseMath::calculateDTW(node->m_VesselLon, node->m_VesselLat, node->m_waypointLon, node->m_waypointLat) > node->m_waypointRadius/2)
+            if ((CourseMath::calculateDTW(node->m_VesselLon, node->m_VesselLat, node->m_waypointLon, node->m_waypointLat) > node->m_waypointRadius/2) and (node->m_outOfZone == 1))
             {
                 double targetCourse =  node->computeTargetCourse();
                 if (targetCourse != DATA_OUT_OF_RANGE){
@@ -189,30 +177,26 @@ void StationKeepingNode::StationKeepingNodeThreadFunc(ActiveNode* nodePtr)
                 }
             }
             else
-            {   // try to stay straight in the wind
+            {   
+                if (CourseMath::calculateDTW(node->m_VesselLon, node->m_VesselLat, node->m_waypointLon, node->m_waypointLat) > 2*node->m_waypointRadius/3)
+                {
+                    node->m_outOfZone = 1;
+                }
+                else
+                {
+                    node->m_outOfZone = 0;
+                }
                 MessagePtr wingSailMessage = std::make_unique<WingSailCommandMsg>(0);
                 node->m_MsgBus.sendMessage(std::move(wingSailMessage));
 
-                double rudderCommand = node->computeRudder();
+                double rudderCommand = node->m_MaxRudderAngle;
 
-                if (rudderCommand != DATA_OUT_OF_RANGE){
-                    if (node->m_VesselSpeed > 0) // the boat is drifting forward
-                    {
-                        MessagePtr actuatorMessage = std::make_unique<RudderCommandMsg>(rudderCommand);
-                        node->m_MsgBus.sendMessage(std::move(actuatorMessage));
-                    }
-                    else if (node->m_VesselSpeed <0) // the boat is drifting backward
-                    {
-                        MessagePtr actuatorMessage = std::make_unique<RudderCommandMsg>(- rudderCommand);
-                        node->m_MsgBus.sendMessage(std::move(actuatorMessage));
-                    }
-                    else //the boat is not manoeuvrable
-                    {}
-                }
+                MessagePtr actuatorMessage = std::make_unique<RudderCommandMsg>(rudderCommand);
+                node->m_MsgBus.sendMessage(std::move(actuatorMessage));
             }
         }
         else{
-            MessagePtr LocalNavMsg = std::make_unique<LocalNavigationMsg>(NO_COMMAND, NO_COMMAND, 0, 0);
+            MessagePtr LocalNavMsg = std::make_unique<LocalNavigationMsg>(NO_COMMAND, NO_COMMAND, 0, NO_COMMAND);
             node->m_MsgBus.sendMessage( std::move( LocalNavMsg ) );
         }
 
