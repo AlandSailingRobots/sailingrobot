@@ -30,6 +30,7 @@ class CanNodesSuite : public CxxTest::TestSuite {
 public:
 
   CANAISNode* aisNode;
+  DBHandler* dbhandler;
   CANSolarTrackerNode* solarNode;
   MockNode* mockNode;
 
@@ -57,7 +58,8 @@ public:
     if (solarNode == 0) {
       Logger::DisableLogging();
 
-      aisNode = new CANAISNode(msgBus(), *canService, 0.51);
+      dbhandler = new DBHandler("../asr.db");
+      aisNode = new CANAISNode(msgBus(),*dbhandler, *canService);
       // solarNode = new CANSolarTrackerNode(msgBus(), *canService, 100);
 
       // aisNode->start();

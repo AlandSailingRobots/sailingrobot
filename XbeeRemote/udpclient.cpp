@@ -2,7 +2,7 @@
  * \file
  * Brief description. Longer description.
  *
- * 
+ *
  * \author $Author$
  * \date $Date$
  */
@@ -33,16 +33,16 @@ bool udpSend(const char *hostip, int port, const char *msg){
         perror("cannot open socket");
         return false;
     }
-    
-    
+
+
     bzero(&servaddr,sizeof(servaddr));
     servaddr.sin_family = AF_INET;
     servaddr.sin_addr.s_addr = inet_addr(hostip);
     servaddr.sin_port = htons(port);
-    
+
     char opt=1;
     setsockopt(fd, SOL_SOCKET, SO_BROADCAST, &opt, sizeof(int));
-          
+
     if (sendto(fd, msg, strlen(msg)+1, 0, // +1 to include terminator
                (sockaddr*)&servaddr, sizeof(servaddr)) < 0){
         perror("cannot send message");
@@ -57,7 +57,7 @@ bool udpSend(const char *hostip, int port, const char *msg){
 static double gettime(){
     timespec ts;
     clock_gettime(CLOCK_REALTIME,&ts);
-    
+
     double t = ts.tv_nsec;
     t *= 1e-9;
     t += ts.tv_sec;
@@ -73,7 +73,6 @@ void udpwrite(const char *s,...){
     sprintf(buf,"time=%f ",gettime());
     vsnprintf(buf+strlen(buf),1024-strlen(buf),s,args);
     //printf("%s\n",buf);
-    udpSend(serverAddr,outport,buf); // SEND TO 
+    udpSend(serverAddr,outport,buf); // SEND TO
     va_end(args);
 }
-

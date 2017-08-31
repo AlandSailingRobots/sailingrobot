@@ -23,20 +23,24 @@
 #include "SystemServices/Logger.h"
 #include "SystemServices/Timer.h"
 
+#define STATE_INITIAL_SLEEP 2000
 #define HEADING_ERROR_VALUE 370
 
-SpeedRegulatorNode::SpeedRegulatorNode( MessageBus& msgBus,  DBHandler& dbhandler, double loopTime
-    double configPGain, double configIGain):ActiveNode(NodeID::SpeedRegulatorNode,msgBus), m_VesselHeading(HEADING_ERROR_VALUE), m_VesselSpeed(0),
-    ,m_DesiredHeading(HEADING_ERROR_VALUE),m_db(dbhandler), m_LoopTime(loopTime),pGain(configPGain),iGain(configIGain)
+SpeedRegulatorNode::SpeedRegulatorNode( MessageBus& msgBus,  DBHandler& dbhandler, double loopTime):
+ActiveNode(NodeID::SpeedRegulatorNode,msgBus), m_VesselHeading(HEADING_ERROR_VALUE), m_VesselSpeed(0),
+m_DesiredHeading(HEADING_ERROR_VALUE),m_db(dbhandler), m_LoopTime(loopTime),pGain(1),iGain(1)
 {
     msgBus.registerNode( *this, MessageType::StateMessage);
     msgBus.registerNode( *this, MessageType::DesiredCourse);
-    msgBus.registerNode( *this, MessageType::NavigationControl);
+    //msgBus.registerNode( *this, MessageType::NavigationControl);
     msgBus.registerNode( *this, MessageType::ServerConfigsReceived);
 }
 
 ///----------------------------------------------------------------------------------
-SpeedRegulatorNode::~SpeedRegulatorNode(){}
+SpeedRegulatorNode::~SpeedRegulatorNode()
+{
+
+}
 
 ///----------------------------------------------------------------------------------
 bool SpeedRegulatorNode::init(){ return true;}
@@ -65,9 +69,9 @@ void SpeedRegulatorNode::processMessage( const Message* msg )
         case MessageType::DesiredCourse:
         processDesiredCourseMessage(static_cast< const DesiredCourseMsg*>(msg)); //verify
         break;
-        case MessageType::NavigationControl:
-        processNavigationControlMessage(static_cast< const NavigationControlMsg*>(msg));
-        break;
+        // case MessageType::NavigationControl:
+        // processNavigationControlMessage(static_cast< const NavigationControlMsg*>(msg));
+        // break;
         case MessageType::ServerConfigsReceived:
         updateConfigsFromDB();
         break;
@@ -137,7 +141,7 @@ void SpeedRegulatorNode::SpeedRegulatorNodeThreadFunc(ActiveNode* nodePtr)
 
     // An initial sleep, its purpose is to ensure that most if not all the sensor data arrives
     // at the start before we send out the state message.
-    std::this_thread::sleep_for(std::chrono::milliseconds(node->STATE_INITIAL_SLEEP));
+    std::this_thread::sleep_for(std::chrono::milliseconds(STATE_INITIAL_SLEEP));
 
     Timer timer;
     timer.start();
@@ -146,15 +150,11 @@ void SpeedRegulatorNode::SpeedRegulatorNodeThreadFunc(ActiveNode* nodePtr)
     {
 
         node->m_lock.lock();
-        //std::lock_guard<std::mutex> lock_guard(node->m_lock);
         // TODO : Modify Actuator Message for adapt to this Node
         MessagePtr actuatorMessage = std::make_unique<ActuatorPositionMsg>(node->calculateRudderAngle(),0);
-        //std::cout << std::endl << "COURSE REG NODE ######### Send : CalcR " << node->calculateRudderAngle();
         node->m_MsgBus.sendMessage(std::move(actuatorMessage));
         node->m_lock.unlock();
-
-        // Broadcast() or selected sent???
-        timer.sleepUntil(node->m_LoopTime); //insert updateFrequencyThread in the function ?
+        timer.sleepUntil(node->m_LoopTime);
         timer.reset();
         node->updateFrequencyThread();
     }

@@ -27,10 +27,10 @@
 const float NO_COMMAND = -1000;
 const int STATE_INITIAL_SLEEP = 2000;
 
-
-CourseRegulatorNode::CourseRegulatorNode( MessageBus& msgBus, DBHandler& dbhandler, double loopTime, double maxRudderAngle,
-    double configPGain, double configIGain):ActiveNode(NodeID::CourseRegulatorNode,msgBus), m_VesselCourse(DATA_OUT_OF_RANGE), m_VesselSpeed(DATA_OUT_OF_RANGE),
-    m_MaxRudderAngle(maxRudderAngle),m_DesiredCourse(DATA_OUT_OF_RANGE),m_db(dbhandler), m_LoopTime(loopTime),pGain(configPGain),iGain(configIGain)
+CourseRegulatorNode::CourseRegulatorNode( MessageBus& msgBus,  DBHandler& dbhandler)
+:ActiveNode(NodeID::CourseRegulatorNode,msgBus), m_VesselCourse(DATA_OUT_OF_RANGE), m_VesselSpeed(0),
+m_MaxRudderAngle(30),m_DesiredCourse(DATA_OUT_OF_RANGE),m_db(dbhandler), m_LoopTime(0.5),
+pGain(1),iGain(1),dGain(1)
 {
     msgBus.registerNode( *this, MessageType::StateMessage);
     msgBus.registerNode( *this, MessageType::DesiredCourse);
@@ -43,7 +43,7 @@ CourseRegulatorNode::~CourseRegulatorNode(){}
 
 ///----------------------------------------------------------------------------------
 bool CourseRegulatorNode::init()
-{ 
+{
     updateConfigsFromDB();
     return true;
 }
@@ -51,14 +51,25 @@ bool CourseRegulatorNode::init()
 ///----------------------------------------------------------------------------------
 void CourseRegulatorNode::start()
 {
+    m_Running.store(true);
     runThread(CourseRegulatorNodeThreadFunc);
+}
+
+///----------------------------------------------------------------------------------
+void CourseRegulatorNode::stop()
+{
+    m_Running.store(false);
+    stopThread(this);
 }
 
 ///----------------------------------------------------------------------------------
 void CourseRegulatorNode::updateConfigsFromDB()
 {
-    m_LoopTime = 0.5; //m_db.retrieveCellAsDouble("sailing_robot_config","1","loop_time");
-    m_MaxRudderAngle = 30;
+    m_LoopTime = m_db.retrieveCellAsDouble("config_course_regulator","1","loop_time");
+    m_MaxRudderAngle = m_db.retrieveCellAsInt("config_course_regulator","1","max_rudder_angle");
+    pGain = m_db.retrieveCellAsDouble("config_course_regulator","1","p_gain");
+    iGain = m_db.retrieveCellAsDouble("config_course_regulator","1","i_gain");
+    dGain = m_db.retrieveCellAsDouble("config_course_regulator","1","d_gain");
 }
 
 ///----------------------------------------------------------------------------------
@@ -97,7 +108,7 @@ void CourseRegulatorNode::processDesiredCourseMessage(const DesiredCourseMsg* ms
 {
     std::lock_guard<std::mutex> lock_guard(m_lock);
 
-    //m_DesiredCourse = static_cast<float>(msg->desiredCourse());
+    m_DesiredCourse = static_cast<float>(msg->desiredCourse());
 }
 
 ///----------------------------------------------------------------------------------
@@ -130,16 +141,16 @@ float CourseRegulatorNode::calculateRudderAngle()
             return Utility::sgn(sin(difference_Heading))*m_MaxRudderAngle;
         }
         else
-        {   // Regulation of the rudder 
+        {   // Regulation of the rudder
             return sin(difference_Heading)*m_MaxRudderAngle;
         }
     }
     else
     {
-        return DATA_OUT_OF_RANGE;
+        return NO_COMMAND;
     }
 }
-    
+
 
 ///----------------------------------------------------------------------------------
 void CourseRegulatorNode::CourseRegulatorNodeThreadFunc(ActiveNode* nodePtr)
@@ -153,13 +164,13 @@ void CourseRegulatorNode::CourseRegulatorNodeThreadFunc(ActiveNode* nodePtr)
     Timer timer;
     timer.start();
 
-    while(true)
+    while(node->m_Running.load() == true)
     {
         float rudderCommand = node->calculateRudderAngle();
-        if (rudderCommand != DATA_OUT_OF_RANGE)
+        if (rudderCommand != NO_COMMAND)
         {
 
-            //std::cout << "rudder command : " << rudderCommand <<std::endl;
+            // std::cout << "rudder command : " << rudderCommand <<std::endl;
             MessagePtr actuatorMessage = std::make_unique<RudderCommandMsg>(rudderCommand);
             node->m_MsgBus.sendMessage(std::move(actuatorMessage));
         }

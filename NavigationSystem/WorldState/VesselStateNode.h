@@ -39,7 +39,6 @@ public:
  	/// Starts the VesselStateNode's thread that pumps out VesselStateMsg's
  	///----------------------------------------------------------------------------------
 	void start();
-    void updateConfigsFromDB();
 
 	void processMessage(const Message* msg);
 

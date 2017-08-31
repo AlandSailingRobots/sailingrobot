@@ -66,7 +66,7 @@ bool LineFollowNode::init()
 {
     setupRudderCommand();
     setupSailCommand();
-    twdBufferMaxSize = m_db.retrieveCellAsInt("buffer_config", "1", "true_wind");
+    // twdBufferMaxSize = m_db.retrieveCellAsInt("config_buffer", "1", "true_wind"); // Not use in DataBase
     if(twdBufferMaxSize == 0)
       twdBufferMaxSize = DEFAULT_TWD_BUFFERSIZE;
     m_dbLogger.startWorkerThread();
@@ -319,11 +319,11 @@ int LineFollowNode::getMergedHeading(int gpsHeading, int compassHeading, bool in
 	int headingGps = gpsHeading;
 
 	if (increaseCompassWeight){
-		m_gpsHeadingWeight = m_gpsHeadingWeight - tickRate; //Decrease gps weight
-		if (m_gpsHeadingWeight < 0.0) m_gpsHeadingWeight = 0;
+		m_gpsCourseWeight = m_gpsCourseWeight - tickRate; //Decrease gps weight
+		if (m_gpsCourseWeight < 0.0) m_gpsCourseWeight = 0;
 	}else{
-		m_gpsHeadingWeight = m_gpsHeadingWeight + tickRate;
-		if (m_gpsHeadingWeight > 1.0) m_gpsHeadingWeight = 1.0;
+		m_gpsCourseWeight = m_gpsCourseWeight + tickRate;
+		if (m_gpsCourseWeight > 1.0) m_gpsCourseWeight = 1.0;
 	}
 
 	//Difference calculation
@@ -332,7 +332,7 @@ int LineFollowNode::getMergedHeading(int gpsHeading, int compassHeading, bool in
 	diff -= 180;
 
 	//Merge angle calculation
-	int returnValue = 360 + headingCompass + (diff * m_gpsHeadingWeight);
+	int returnValue = 360 + headingCompass + (diff * m_gpsCourseWeight);
 	while (returnValue > 360) returnValue -= 360;
 
 	return returnValue;
@@ -340,14 +340,14 @@ int LineFollowNode::getMergedHeading(int gpsHeading, int compassHeading, bool in
 
 void LineFollowNode::setupRudderCommand()
 {
-	m_rudderCommand.setCommandValues(m_db.retrieveCellAsInt("rudder_command_config", "1","extreme_command"),
-	        m_db.retrieveCellAsInt("rudder_command_config", "1", "midship_command"));
+    //m_rudderCommand.setCommandValues(m_db.retrieveCellAsInt("rudder_command_config", "1","extreme_command"), // Not existing table
+	  //      m_db.retrieveCellAsInt("rudder_command_config", "1", "midship_command"));
 }
 
 void LineFollowNode::setupSailCommand()
 {
-	m_sailCommand.setCommandValues( m_db.retrieveCellAsInt("sail_command_config", "1", "close_reach_command"),
-	        m_db.retrieveCellAsInt("sail_command_config", "1", "run_command"));
+	//m_sailCommand.setCommandValues( m_db.retrieveCellAsInt("sail_command_config", "1", "close_reach_command"),
+	  //       m_db.retrieveCellAsInt("sail_command_config", "1", "run_command"));   // Not use in DataBase
 }
 
 bool LineFollowNode::getGoingStarboard()

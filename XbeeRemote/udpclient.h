@@ -1,7 +1,7 @@
 /**
  * \file
  * Brief description. Longer description.
- * 
+ *
  * \author $Author$
  * \date $Date$
  */

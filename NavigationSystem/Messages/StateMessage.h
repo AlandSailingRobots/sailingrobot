@@ -69,8 +69,8 @@ public:
 
 private:
     float 	m_VesselHeading;     // degree [0, 360[ in North-East reference frame (clockwise)
-    double	m_VesselLat;
-    double	m_VesselLon;
+    double	m_VesselLat;         // degree
+    double	m_VesselLon;         // degree
     double	m_VesselSpeed;       // m/s
     double  m_VesselCourse;      // degree [0, 360[ in North-East reference frame (clockwise)
 };

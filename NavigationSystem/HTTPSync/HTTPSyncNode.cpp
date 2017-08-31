@@ -20,7 +20,7 @@
 #include "Messages/ServerWaypointsReceivedMsg.h"
 #include "SystemServices/Timer.h"
 
-
+#include <atomic>
 
 
 size_t write_to_string(void *ptr, size_t size, size_t count, void *stream) {
@@ -28,10 +28,12 @@ size_t write_to_string(void *ptr, size_t size, size_t count, void *stream) {
     return size*count;
 }
 
-HTTPSyncNode::HTTPSyncNode(MessageBus& msgBus, DBHandler *dbhandler, int delay, bool removeLogs)
-	:ActiveNode(NodeID::HTTPSync, msgBus), m_removeLogs(removeLogs), m_delay(delay), m_dbHandler(dbhandler)
+HTTPSyncNode::HTTPSyncNode(MessageBus& msgBus, DBHandler *dbhandler)
+	:ActiveNode(NodeID::HTTPSync, msgBus), m_removeLogs(1), m_LoopTime(0.5), m_dbHandler(dbhandler)
 {
-
+    msgBus.registerNode( *this, MessageType::LocalWaypointChange);
+    msgBus.registerNode( *this, MessageType::LocalConfigChange);
+    msgBus.registerNode( *this, MessageType::ServerConfigsReceived);
 }
 
 bool HTTPSyncNode::init()
@@ -41,12 +43,11 @@ bool HTTPSyncNode::init()
     m_initialised = false;
 
     m_reportedConnectError = false;
-
-    m_pushOnlyLatestLogs = m_dbHandler->retrieveCellAsInt("httpsync_config", "1", "push_only_latest_logs");
-
-    m_shipID = m_dbHandler->retrieveCell("server", "1", "boat_id");
-    m_serverURL = m_dbHandler->retrieveCell("server", "1", "srv_addr");
-    m_shipPWD = m_dbHandler->retrieveCell("server", "1", "boat_pwd");
+    
+    m_serverURL = m_dbHandler->retrieveCell("config_httpsync", "1", "srv_addr");
+    m_shipID = m_dbHandler->retrieveCell("config_httpsync", "1", "boat_id");
+    m_shipPWD = m_dbHandler->retrieveCell("config_httpsync", "1", "boat_pwd");
+    updateConfigsFromDB();
 
     m_initialised = true;
 
@@ -58,19 +59,25 @@ void HTTPSyncNode::start(){
 
     if (m_initialised)
     {
-
+        m_Running.store(true);
         runThread(HTTPSyncThread);
     }
     else
     {
         Logger::error("%s Cannot start HTTPSYNC thread as the node was not correctly initialised!", __PRETTY_FUNCTION__);
     }
-
 }
 
-void HTTPSyncNode::updateConfigsFromDB(){
+void HTTPSyncNode::stop()
+{
+    m_Running.store(false);
+}
+
+void HTTPSyncNode::updateConfigsFromDB()
+{
     m_removeLogs = m_dbHandler->retrieveCellAsInt("config_httpsync","1","remove_logs");
-    m_delay = m_dbHandler->retrieveCellAsInt("config_httpsync","1","delay");
+    m_pushOnlyLatestLogs = m_dbHandler->retrieveCellAsInt("config_httpsync", "1", "push_only_latest_logs");
+    m_LoopTime = m_dbHandler->retrieveCellAsDouble("config_httpsync","1","loop_time");
 }
 
 void HTTPSyncNode::processMessage(const Message* msgPtr)
@@ -109,23 +116,23 @@ void HTTPSyncNode::HTTPSyncThread(ActiveNode* nodePtr){
 
     Timer timer;
   	timer.start();
-    while(true)
+    while(node->m_Running.load() == true)
     {
         node->getConfigsFromServer();
         node->getWaypointsFromServer();
         node->pushDatalogs();
 
-        timer.sleepUntil(node->m_delay);
+        timer.sleepUntil(node->m_LoopTime);
         timer.reset();
+
     }
-
     curl_global_cleanup();
-
     Logger::info("HTTPSync thread has exited");
 }
 
 bool HTTPSyncNode::pushDatalogs() {
     std::string response = "";
+
     if(performCURLCall(m_dbHandler->getLogs(m_pushOnlyLatestLogs), "pushAllLogs", response))
     {
          //remove logs after push
@@ -190,22 +197,26 @@ std::string HTTPSyncNode::getData(std::string call) {
 }
 
 bool HTTPSyncNode::checkIfNewConfigs() {
-    if (getData("checkIfNewConfigs") == "1")
+    std::string result = getData("checkIfNewConfigs");
+    if (std::stoi(result))
         return true;
 
     return false;
 }
 
 bool HTTPSyncNode::checkIfNewWaypoints(){
-    if (getData("checkIfNewWaypoints") == "1")
-   	    return true;
+    std::string result = getData("checkIfNewWaypoints");
+
+    if (std::stoi(result))
+    {
+        return true;
+    }
 
     return false;
 }
 
 
 bool HTTPSyncNode::getConfigsFromServer() {
-
     if(checkIfNewConfigs())
     {
         std::string configs = getData("getAllConfigs");
@@ -262,11 +273,13 @@ bool HTTPSyncNode::getWaypointsFromServer() {
 bool HTTPSyncNode::performCURLCall(std::string data, std::string call, std::string& response) {
     std::string serverCall = "";
 
+    //std::cout << "/* Request : " << call << " */" << '\n';
     if(data != "")
-        serverCall = "serv="+call + "&id="+m_shipID+"&pwd="+m_shipPWD+"&data="+data;
+        serverCall = "serv="+call + "&id="+m_shipID +"&gen=aspire"+"&pwd="+m_shipPWD+"&data="+data;
     else
-        serverCall = "serv="+call + "&id="+m_shipID+"&pwd="+m_shipPWD;
+        serverCall = "serv="+call + "&id="+m_shipID +"&gen=aspire"+"&pwd="+m_shipPWD;
         //example: serv=getAllConfigs&id=BOATID&pwd=BOATPW
+    //std::cout << "/* Server call : " << serverCall.substr(0, 150) << " */" << '\n';
 
     curl = curl_easy_init();
     if(curl) {
@@ -278,6 +291,7 @@ bool HTTPSyncNode::performCURLCall(std::string data, std::string call, std::stri
 		/* Perform the request, res will get the return code */
 		m_res = curl_easy_perform(curl);
 		/* Check for errors */
+        //std::cout << "/* Reponse serveur : " << response << "\n*/" << "\n\n\n\n";
 		if (m_res != CURLE_OK)
 		{
 			if(!m_reportedConnectError)
@@ -304,6 +318,7 @@ bool HTTPSyncNode::performCURLCall(std::string data, std::string call, std::stri
     }else{
         fprintf(stderr, "CURL IS FALSE");
     }
+
 
     return true;
 }

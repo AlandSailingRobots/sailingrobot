@@ -1,19 +1,20 @@
 ###############################################################################
 #
-# Tests Makefile
+# Makefile for building the integration tests for the AIS.
+#
+# This makefile cannot be run directly. Use the master makefile instead.
 #
 ###############################################################################
 
-
-INTEGRATION_TEST_EXEC	= ais_integration-tests.run
 
 ###############################################################################
 # Files
 ###############################################################################
 
+# Source files
 CANAIS_INTEGRATION_TEST = Tests/IntegrationTests/CANAISTest.cpp
 
-SRC = $(CORE_SRC) $(HW_NODES_ASPIRE_SRC) $(HARDWARE_SERVICES_SRC) $(CAN_SERVICES_SRC) $(CANAIS_INTEGRATION_TEST) $(COLLIDABLE_MGR_SRC)
+SRC = $(CORE_SRC) $(HW_NODES_ASPIRE_SRC) $(HW_SERVICES_ALL_SRC) $(CAN_SERVICES_SRC) $(CANAIS_INTEGRATION_TEST) $(COLLIDABLE_MGR_SRC)
 
 # Object files
 OBJECTS = $(addprefix $(BUILD_DIR)/, $(SRC:.cpp=.o))
@@ -24,10 +25,10 @@ OBJECTS = $(addprefix $(BUILD_DIR)/, $(SRC:.cpp=.o))
 ###############################################################################
 
 
-all: $(INTEGRATION_TEST_EXEC) stats
+all: $(AIS_TEST_EXEC) stats
 
 # Link and build
-$(INTEGRATION_TEST_EXEC): $(OBJECTS)
+$(AIS_TEST_EXEC): $(OBJECTS)
 	rm -f $(OBJECT_FILE)
 	@echo -n " " $(OBJECTS) >> $(OBJECT_FILE)
 	@echo Linking object files
@@ -40,6 +41,6 @@ $(BUILD_DIR)/%.o:$(SRC_DIR)/%.cpp
 
 	@$(CXX) -c $(CPPFLAGS) $(INC_DIR) -o ./$@ $< $(DEFINES) $(LIBS)
 
-stats:$(INTEGRATION_TEST_EXEC)
+stats:$(AIS_TEST_EXEC)
 	@echo Final executable size:
-	$(SIZE) $(INTEGRATION_TEST_EXEC)
+	$(SIZE) $(AIS_TEST_EXEC)

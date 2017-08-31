@@ -18,11 +18,13 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 
+#include "DataBase/DBHandler.h"
 #include "MessageBus/ActiveNode.h"
 #include "Messages/CompassDataMsg.h"
 #include "Messages/GPSDataMsg.h"
 #include "Messages/WindDataMsg.h"
 #include "Messages/ActuatorPositionMsg.h"
+#include "Messages/ASPireActuatorFeedbackMsg.h"
 #include "Messages/WingSailCommandMsg.h"
 #include "Messages/RudderCommandMsg.h"
 #include "Messages/WaypointDataMsg.h"
@@ -87,13 +89,13 @@ struct ActuatorDataWingPacket_t {
     float tailCommand;
 }__attribute__((packed));
 
-struct ActuatorDataSailPacket_t 
+struct ActuatorDataSailPacket_t
 {
     unsigned char simulatorPacket = SailBoatCmd;
     float rudderCommand;
     float sailCommand;
 }__attribute__((packed));
-    
+
 struct WaypointPacket_t {
   unsigned char simulatorPacket = WaypointData;
   int nextId;
@@ -112,8 +114,8 @@ struct WaypointPacket_t {
 
 class SimulationNode : public ActiveNode {
 public:
-    SimulationNode(MessageBus& msgBus);
-    SimulationNode(MessageBus& msgBus, CollidableMgr* collidableMgr);
+	SimulationNode(MessageBus& msgBus, DBHandler& dbhandler);
+    SimulationNode(MessageBus& msgBus, DBHandler& dbhandler, CollidableMgr* collidableMgr);
 
     ///----------------------------------------------------------------------------------
     /// Initialize the TCP communication
@@ -124,6 +126,8 @@ public:
     /// Starts the SimulationNode's thread that create all sensors messages
     ///----------------------------------------------------------------------------------
     void start();
+
+
 
     void processMessage(const Message* msg);
 
@@ -146,6 +150,12 @@ public:
     void processRudderCommandMessage(RudderCommandMsg* msg);
 
 private:
+
+    ///----------------------------------------------------------------------------------
+    /// Update values from the database as the loop time of the thread and others parameters
+    ///----------------------------------------------------------------------------------
+    void updateConfigsFromDB();
+
     ///----------------------------------------------------------------------------------
     /// Process a conventionnal sail boat data message
     ///----------------------------------------------------------------------------------
@@ -180,7 +190,7 @@ private:
     /// Send our actuator data for a conventional sail-equipped boat
     ///----------------------------------------------------------------------------------
     void sendActuatorDataSail( int socketFD);
-    
+
     ///----------------------------------------------------------------------------------
     /// Sends the waypoint
     ///----------------------------------------------------------------------------------
@@ -194,21 +204,26 @@ private:
     void createCompassMessage();
     void createGPSMessage();
     void createWindMessage();
-    
+    void createASPireActuatorFeedbackMessage();
+
     float   m_RudderCommand;
     float   m_SailCommand;
     float   m_TailCommand;
+    
     int     m_CompassHeading;
     double  m_GPSLat;
     double  m_GPSLon;
     double  m_GPSSpeed;
-    double  m_GPSHeading;
+    double  m_GPSCourse;
     int     m_WindDir;
     float   m_WindSpeed;
-    
+
+    int     m_nextDeclination;  // units : degrees
+
     TCPServer server;
     CollidableMgr* collidableMgr;
-    
+    DBHandler& m_db;
+
     ActuatorDataWingPacket_t actuatorDataWing;
     ActuatorDataSailPacket_t actuatorDataSail;
     WaypointPacket_t waypoint;

@@ -8,8 +8,8 @@
 *    line given by the waypoints.
 *
 * Developer Notes:
-*	 Algorithm inspired and modified from: 
-*	 - Luc Jaulin and Fabrice Le Bars "An Experimental Validation of a Robust Controller with 
+*	 Algorithm inspired and modified from:
+*	 - Luc Jaulin and Fabrice Le Bars "An Experimental Validation of a Robust Controller with
 *		the VAIMOS Autonomous Sailboat" [1];
 *	 - Jon Melin, Kjell Dahl and Matia Waller "Modeling and Control for an Autonomous Sailboat:
 *   	A Case Study" [2].
@@ -40,17 +40,19 @@
 
 #include "waypointrouting/RudderCommand.h"
 
+#include <atomic>
+
 
 class LineFollowNode : public ActiveNode {
 public:
 
-	LineFollowNode(MessageBus& msgBus, DBHandler& db);
+	LineFollowNode(MessageBus& msgBus, DBHandler& dbhandler);
 	~LineFollowNode();
 
 	bool init();
 	void start();
+	void stop();
 	void processMessage(const Message* message);
-	void updateConfigsFromDB();
 
 
 private:
@@ -59,6 +61,7 @@ private:
 	const double NORM_RUDDER_COMMAND = 0.5166; // getCommand() take a value between -1 and 1 so we need to normalize the command correspond to 29.6 degree
 	const double NORM_SAIL_COMMAND = 0.6958;
 */
+	void updateConfigsFromDB();
 
     ///----------------------------------------------------------------------------------
     /// Stores vessel position datas from a StateMessage.
@@ -85,17 +88,21 @@ private:
     ///----------------------------------------------------------------------------------
 	double calculateTargetCourse();
 
+	///----------------------------------------------------------------------------------
+    /// Return true if the desired tack of the vessel is starboard (wind blowing from the right side )
+    ///----------------------------------------------------------------------------------
+	bool getTargetTackStarboard(double targetCourse);
+
     ///----------------------------------------------------------------------------------
     /// Starts the LineFollowNode's thread that pumps out LocalNavigationMsg.
     ///----------------------------------------------------------------------------------
 	static void LineFollowNodeThreadFunc(ActiveNode* nodePtr);
 
+    double  m_LoopTime;             // second
+	DBHandler& m_db;
 
-	DBHandler &m_db;
-
- 	double  m_LoopTime;             // second	
-
-    	std::mutex m_lock;
+    std::mutex m_lock;
+	std::atomic<bool> m_Running;
 
 	std::vector<float> m_TwdBuffer; // True wind direction buffer. angles in degree [0, 360[ in vessel reference frame (clockwise)
 
@@ -112,27 +119,24 @@ private:
     // Input variables
 	bool 	m_externalControlActive;
 
-    	double  m_VesselLat;
-    	double  m_VesselLon;
+	double  m_VesselLat;
+	double  m_VesselLon;
 
 	double 	m_trueWindSpeed;		// m/s
 	double 	m_trueWindDir;			// degree [0, 360[ in North-East reference frame (clockwise)
 
-
 	double 	m_nextWaypointLon;
 	double 	m_nextWaypointLat;
 	int 	m_nextWaypointRadius;	// m
-	
+
 	double 	m_prevWaypointLon;
 	double 	m_prevWaypointLat;
 	int 	m_prevWaypointRadius;	// m
 
 	// State variable (inout variable)
 	int       m_TackDirection;		// [1] and [2]: tack variable (q).
+	bool     m_lineFollow_On;  		// activate or disactivate the lineFollow algorithm
 
 	// Output variables
 	bool     m_BeatingMode;			// True if the vessel is in beating motion (zig-zag motion).
-	bool     m_TargetTackStarboard;	// True if the desired tack of the vessel is starboard.
-
-	bool     m_lineFollow_On;  // activate or disactivate the lineFollow algorithm
 };

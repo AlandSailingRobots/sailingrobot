@@ -39,5 +39,5 @@ public:
 
 private:
 
-    float m_RudderAngle;
+    float m_RudderAngle; // degree [-30, +30[ in vessel reference frame (clockwise from top view)
 };

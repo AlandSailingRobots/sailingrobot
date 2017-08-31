@@ -4,7 +4,7 @@
  * 		DBLogger.h
  *
  * Purpose:
- *		Logs datalogs to the database in a efficient manor and offloads the work to a
+ *		Logs dataLogs to the database in a efficient manor and offloads the work to a
  *		worker thread.
  *
  * Developer Notes:
@@ -21,6 +21,7 @@
 #include <vector>
 #include <thread>
 #include <mutex>
+#include <atomic>
 #include <condition_variable>
 
 class DBLogger {
@@ -32,7 +33,7 @@ public:
 
 	void startWorkerThread();
 
-	void log(LogItem item);
+	void log(LogItem& item);
 
 	unsigned int bufferSize() { return m_bufferSize; }
 private:
@@ -43,7 +44,7 @@ private:
 	static void workerThread(DBLogger* ptr);
 
 	std::thread* 			m_thread;
-	static bool				m_working;
+	std::atomic<bool>		m_working;
 	std::mutex				m_mutex;
 	std::condition_variable m_cv;
 	DBHandler& 				m_dbHandler;

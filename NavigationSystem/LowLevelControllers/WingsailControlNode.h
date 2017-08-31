@@ -73,6 +73,8 @@ private:
     //
     float calculateTailAngle();
 
+    float simpleCalculateTailAngle();
+
     // -------------
     // Limit the sail angle
     // -------------
@@ -91,15 +93,13 @@ private:
 
     double m_MaxCommandAngle; // units : ° (degrees)
 
-    double pGain;
-    double iGain;
-
     DBHandler &m_db;
     double m_LoopTime;
-    
+
     double m_ApparentWindDir; // units : ° (degrees), from -180 to 180
 
     double m_DesiredCourse;
+    bool m_targetTackStarboard;
 
     std::mutex m_lock;
 };

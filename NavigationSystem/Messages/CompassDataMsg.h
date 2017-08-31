@@ -56,7 +56,7 @@ public:
 	}
 
 private:
-	int m_Heading;		// ??
-	int m_Pitch;		// ??
-	int m_Roll;			// ??
+	int m_Heading;		// degree [0, 360[ in North-East-Down reference frame
+	int m_Pitch;		// degree ]-90, +90] in North-East-Down reference frame
+	int m_Roll;			// degree ]-180, +180] in North-East-Down reference frame
 };

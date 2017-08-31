@@ -17,6 +17,7 @@
 #include "Hardwares/CAN_Services/CANService.h"
 #include "Hardwares/CAN_Services/CANFrameReceiver.h"
 #include "Hardwares/CAN_Services/N2kMsg.h"
+#include "DataBase/DBHandler.h"
 #include "MessageBus/ActiveNode.h"
 #include "MessageBus/Message.h"
 #include "MessageBus/MessageBus.h"
@@ -38,7 +39,7 @@ public:
   * Constructor, pointer to a message bus and canservice
   * double loopTime, how often we send messages
   */
-  CANAISNode(MessageBus& msgBus, CANService& canService, double loopTime);
+  CANAISNode(MessageBus& msgBus, DBHandler& dbhandler, CANService& canService);
   ~CANAISNode();
 
   bool init();
@@ -60,6 +61,12 @@ public:
   void start();
 
 private:
+
+  /*
+  * Update values from the database as the loop time of the thread and others parameters
+  */
+  void updateConfigsFromDB();
+
   /*
   * Class A or B position report
   * Processes and return the data of the message
@@ -103,4 +110,5 @@ private:
   double m_PosLon;
   std::mutex m_lock;
   double m_LoopTime;
+  DBHandler& m_db;
 };

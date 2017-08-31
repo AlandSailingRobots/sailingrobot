@@ -58,13 +58,19 @@ public:
 	}
 
 	void tearDown() {
-		if(testCount == WIND_STATE_TEST_COUNT) {
+		if(testCount == WIND_STATE_TEST_COUNT)
+		{
+			msgBus().stop();
+			thr->join();
+			delete thr;
+			delete logger;
 			delete verifier;
 			delete windStateNode;
+			delete dbhandler;
 		}
 	}
 
-        void test_NodeSendsMessage()
+	void test_NodeSendsMessage()
 	{
 		msgBus().sendMessage(std::make_unique<WindDataMsg>(windDirection,windSpeed,windTemp));
 		msgBus().sendMessage(std::make_unique<StateMessage>(vesselHeading,vesselLat,vesselLon,vesselSpeed,vesselCourse));
@@ -92,6 +98,3 @@ public:
 		TS_ASSERT(verifier->verifyWindStateMsg(&windStateMsg));
 	}
 };
-
-
-

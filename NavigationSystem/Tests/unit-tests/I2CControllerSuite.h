@@ -4,7 +4,7 @@
  * 		I2CControllerSuite.h
  *
  * Purpose:
- *		
+ *
  *
  * Developer Notes:
  *
@@ -46,7 +46,7 @@ class I2CControllerSuite : public CxxTest::TestSuite {
 public:
 	int testCount = 0;
 	I2CController 	I2C;
-	
+
 	void setUp()
 	{
 		I2C.init(ARDUINO_ADDRESS);
@@ -56,9 +56,9 @@ public:
 	void tearDown()
 	{
 	}
-	
-	
-	
+
+
+
 	void test_initRead()
 	{
 		I2C.beginTransmission();
@@ -76,7 +76,7 @@ public:
 	{
 		I2C.beginTransmission();
 
-		std::cout << I2C.read();
+		std::cout << I2C.I2Cread();
 
 		I2C.endTransmission();
 
@@ -85,10 +85,10 @@ public:
 	void test_readBlock()
 	{
 		std::cout << "\nstart read block...\n";
-        uint8_t data[BLOCK_READ_SIZE];       
+        uint8_t data[BLOCK_READ_SIZE];
         int val;
 
-        I2C.beginTransmission();        
+        I2C.beginTransmission();
         int readBlockRet = I2C.readBlock(data, READ_COMMAND);
         I2C.endTransmission();
 
@@ -109,7 +109,7 @@ public:
 	// 	uint8_t size = 9;
 	// 	int command = 20;
 
-	// 	std::cout << "\ncommand =: " << command << "\n";	
+	// 	std::cout << "\ncommand =: " << command << "\n";
 	// 	for (int i = 0; i < size; i++)
 	// 	{
 	// 		block[i]=i;

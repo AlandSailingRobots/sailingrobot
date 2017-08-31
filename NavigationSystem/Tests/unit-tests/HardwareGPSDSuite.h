@@ -66,7 +66,7 @@ public:
 			Logger::DisableLogging();
             dbhandler = new DBHandler("../asr.db");
 			logger = new MessageLogger(msgBus());
-			gps = new GPSDNode(msgBus(),*dbhandler, 0.5);
+			gps = new GPSDNode(msgBus(),*dbhandler);
 			thr = new std::thread(runMessageLoop);
 		}
 		testCount++;

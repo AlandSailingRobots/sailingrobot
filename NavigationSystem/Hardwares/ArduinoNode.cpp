@@ -28,15 +28,21 @@
 #define DEFAULT_I2C_ADDRESS_PRESSURE 0x07
 
 
-ArduinoNode::ArduinoNode(MessageBus& msgBus,  double loopTime)
-: ActiveNode(NodeID::Arduino, msgBus), m_Initialised(false), m_LoopTime(loopTime)
+ArduinoNode::ArduinoNode(MessageBus& msgBus,  DBHandler& dbhandler)
+: ActiveNode(NodeID::Arduino, msgBus), m_Initialised(false), m_LoopTime(0.5), m_db(dbhandler)
 {
+	msgBus.registerNode(*this, MessageType::ServerConfigsReceived);
+}
 
+void ArduinoNode::updateConfigsFromDB()
+{
+	m_LoopTime = m_db.retrieveCellAsDouble("config_arduino","1","loop_time");
 }
 
 bool ArduinoNode::init()
 {
 	m_Initialised = false;
+	updateConfigsFromDB();
 
     if(m_I2C.init(DEFAULT_I2C_ADDRESS_PRESSURE))
 	{
@@ -80,7 +86,9 @@ void ArduinoNode::start()
 
 void ArduinoNode::processMessage(const Message* msg)
 {
-
+	if(msg->messageType() == MessageType::ServerConfigsReceived){
+		updateConfigsFromDB();
+	}
 }
 
 void ArduinoNode::ArduinoThreadFunc(ActiveNode* nodePtr)
@@ -93,7 +101,6 @@ void ArduinoNode::ArduinoThreadFunc(ActiveNode* nodePtr)
 	  timer.start();
     while(true)
     {
-			timer.sleepUntil(node->m_LoopTime);
 
         uint8_t block[BLOCK_READ_SIZE];
         uint16_t reVal;
@@ -119,12 +126,14 @@ void ArduinoNode::ArduinoThreadFunc(ActiveNode* nodePtr)
         reVal+=(uint16_t) block[7];
         node->m_battery = reVal;
 
-        reVal = block[9]<<8;
-        reVal+=(uint16_t) block[10];
-        node->m_RC = reVal;
+        // reVal = block[9]<<8;
+        // reVal+=(uint16_t) block[10];
+        // node->m_RC = reVal;
 
-        MessagePtr msg = std::make_unique<ArduinoDataMsg>(node->m_pressure, node->m_rudder, node->m_sheet, node->m_battery, node->m_RC);
+        MessagePtr msg = std::make_unique<ArduinoDataMsg>(node->m_pressure, node->m_rudder, node->m_sheet, node->m_battery);
         node->m_MsgBus.sendMessage(std::move(msg));
-				timer.reset();
+
+		timer.sleepUntil(node->m_LoopTime);
+		timer.reset();
     }
 }

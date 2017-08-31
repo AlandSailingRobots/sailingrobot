@@ -39,10 +39,6 @@ bool ActuatorNode::init()
 
 }
 
-void ActuatorNode::updateConfigsFromDB(){
-
-}
-
 void ActuatorNode::processMessage(const Message* message)
 {
 	if(message->messageType() == MessageType::ActuatorPosition)

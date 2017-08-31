@@ -16,19 +16,18 @@
 #include "Math/Utility.h"
 
 
-
 const int DATA_OUT_OF_RANGE	=	-2000;
 
-
-CANWindsensorNode::CANWindsensorNode(MessageBus& msgBus, DBHandler& dbhandler,CANService& can_service, double loopTime):
-  CANPGNReceiver(can_service, {130306, 130311}), ActiveNode(NodeID::WindSensor, msgBus), m_LoopTime(loopTime), m_db(dbhandler)
-
+CANWindsensorNode::CANWindsensorNode(MessageBus& msgBus, DBHandler& dbhandler, CANService& can_service)
+: CANPGNReceiver(can_service, {130306, 130311}), ActiveNode(NodeID::WindSensor, msgBus), m_LoopTime(0.5), m_db(dbhandler)
 {
     m_WindDir  = DATA_OUT_OF_RANGE;
     m_WindSpeed = DATA_OUT_OF_RANGE;
     m_WindTemperature = DATA_OUT_OF_RANGE;
 
   msgBus.registerNode(*this, MessageType::DataRequest);
+  msgBus.registerNode(*this, MessageType::ServerConfigsReceived);
+  updateConfigsFromDB();
 }
 
 CANWindsensorNode::~CANWindsensorNode(){}
@@ -36,12 +35,12 @@ CANWindsensorNode::~CANWindsensorNode(){}
 void CANWindsensorNode::processPGN(N2kMsg &NMsg)
 {
 
-	
+
   if(NMsg.PGN == 130306){
     std::lock_guard<std::mutex> lock(m_lock);
     uint8_t SID, Ref;
     float WS, WA;
-    parsePGN130306(NMsg, SID, WS, WA, Ref);		
+    parsePGN130306(NMsg, SID, WS, WA, Ref);
     m_WindDir = Utility::radianToDegree(WA);
     m_WindSpeed = WS;
   }
@@ -108,6 +107,16 @@ void CANWindsensorNode::parsePGN130312(N2kMsg &NMsg, uint8_t &SID, uint8_t &Temp
     SetTemperature = tmp*0.01;
 }
 
+void CANWindsensorNode::parsePGN130314(N2kMsg &NMsg, uint8_t &SID, uint8_t &PressureInstance,		//ActualPressure
+uint8_t &PressureSource, double &Pressure)
+{
+    SID = NMsg.Data[0];
+    PressureInstance = NMsg.Data[1];
+    PressureSource = NMsg.Data[2];
+
+    uint32_t tmp = NMsg.Data[3] | (NMsg.Data[4]<<8) | (NMsg.Data[5]<<16) | (NMsg.Data[6]<<24);
+    Pressure = tmp / 1000.0f; 			//hPa
+}
 
 void CANWindsensorNode::updateConfigsFromDB() {
     m_LoopTime = m_db.retrieveCellAsDouble("config_wind_sensor","1","loop_time");
@@ -126,14 +135,16 @@ void CANWindsensorNode::processMessage(const Message* message) {
       m_MsgBus.sendMessage(std::move(windData));
     }
   }
-
   else if(message->messageType() == MessageType::ServerConfigsReceived)
   {
         updateConfigsFromDB();
   }
 }
 
-
+void CANWindsensorNode::start()
+{
+    runThread(CANWindSensorNodeThreadFunc);
+}
 
 void CANWindsensorNode::CANWindSensorNodeThreadFunc(ActiveNode* nodePtr) {
 
@@ -146,33 +157,14 @@ void CANWindsensorNode::CANWindSensorNodeThreadFunc(ActiveNode* nodePtr) {
 
     node->m_lock.lock();
 
-    if( not (node->m_WindDir == node->DATA_OUT_OF_RANGE &&  node->m_WindTemperature == node->DATA_OUT_OF_RANGE && node->m_WindSpeed == node->DATA_OUT_OF_RANGE) )
+    if( not (node->m_WindDir == DATA_OUT_OF_RANGE &&  node->m_WindTemperature == DATA_OUT_OF_RANGE && node->m_WindSpeed == DATA_OUT_OF_RANGE) )
 		{
 		    MessagePtr windData = std::make_unique<WindDataMsg>(node->m_WindDir, node->m_WindSpeed, node->m_WindTemperature);
         node->m_MsgBus.sendMessage(std::move(windData));
     }
     node->m_lock.unlock();
-		
+
     timer.sleepUntil(node->m_LoopTime);
     timer.reset();
   }
 }
-
-  
-void CANWindsensorNode::parsePGN130314(N2kMsg &NMsg, uint8_t &SID, uint8_t &PressureInstance,		//ActualPressure
-uint8_t &PressureSource, double &Pressure)
-{
-    SID = NMsg.Data[0];
-    PressureInstance = NMsg.Data[1];
-    PressureSource = NMsg.Data[2];
-
-    uint32_t tmp = NMsg.Data[3] | (NMsg.Data[4]<<8) | (NMsg.Data[5]<<16) | (NMsg.Data[6]<<24);
-    Pressure = tmp / 1000.0f; 			//hPa
-}
-
-void CANWindsensorNode::start()
-{
-    runThread(CANWindSensorNodeThreadFunc);
-}
-
-

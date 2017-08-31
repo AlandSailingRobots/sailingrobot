@@ -64,7 +64,7 @@ void WindStateNode::processWindMessage(const WindDataMsg* msg)
 {
     m_apparentWindSpeed     = msg->windSpeed();
     m_apparentWindDirection = msg->windDirection();
-    // std::cout << "m_apparentWindDirection: " << m_apparentWindDirection <<std::endl;
+    //std::cout << "m_apparentWindDirection in wind state: " << m_apparentWindDirection <<std::endl;
 }
 
 void WindStateNode::sendMessage()
@@ -72,6 +72,10 @@ void WindStateNode::sendMessage()
     MessagePtr windState = std::make_unique<WindStateMsg>(m_trueWindSpeed, m_trueWindDirection,
         m_apparentWindSpeed, m_apparentWindDirection);
     m_MsgBus.sendMessage(std::move(windState));
+    // std::cout << "m_trueWindSpeed: " << m_trueWindSpeed <<std::endl;
+    // std::cout << "m_trueWindDirection: " << m_trueWindDirection <<std::endl;
+    // std::cout << "m_apparentWindSpeed: " << m_apparentWindSpeed <<std::endl;
+    // std::cout << "m_apparentWindDirection: " << m_apparentWindDirection <<std::endl;
 }
 
 void WindStateNode::calculateTrueWind()
@@ -81,11 +85,11 @@ void WindStateNode::calculateTrueWind()
     // v1 = - ApparentWindVector in North-East reference frame
     v1[0] = m_apparentWindSpeed;
     v1[1] = Utility::degreeToRadian(m_vesselHeading + m_apparentWindDirection);
-    
+
     // v2 = - VelocityVector in North-East reference frame
     v2[0] = - m_vesselSpeed;
     v2[1] = Utility::degreeToRadian(m_vesselCourse);
-    
+
     // v3 = v1 + v2 (TrueWindVector = ApparentWindVector + VelocityVector)
     v3 = Utility::polarVerctorsAddition(v1, v2);
 

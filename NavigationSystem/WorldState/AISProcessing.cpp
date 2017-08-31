@@ -14,16 +14,25 @@
 
 #include "AISProcessing.h"
 
-AISProcessing::AISProcessing(MessageBus& msgBus, CollidableMgr* collidableMgr, int radius, uint32_t mmsi, double loopTime)
-  : ActiveNode(NodeID::AISProcessing, msgBus), m_LoopTime(loopTime), m_Radius(radius), m_MMSI(mmsi), collidableMgr(collidableMgr) {
+AISProcessing::AISProcessing(MessageBus& msgBus, DBHandler& dbhandler, CollidableMgr* collidableMgr)
+  : ActiveNode(NodeID::AISProcessing, msgBus), m_LoopTime(0.5), m_Radius(300e6), m_MMSI(230082790), collidableMgr(collidableMgr), m_db(dbhandler) {
     msgBus.registerNode(*this, MessageType::AISData);
+    msgBus.registerNode(*this, MessageType::ServerConfigsReceived);
+    updateConfigsFromDB();
   }
 
   AISProcessing::~AISProcessing() {
 
   }
 
+  void AISProcessing::updateConfigsFromDB(){
+      m_LoopTime = m_db.retrieveCellAsDouble("config_ais_processing","1","loop_time");
+      m_Radius = m_db.retrieveCellAsInt("config_ais_processing","1","radius");
+      m_MMSI = m_db.retrieveCellAsInt("config_ais_processing","1","mmsi_aspire");
+  }
+
   bool AISProcessing::init() {
+    updateConfigsFromDB();
     return true;
   }
 
@@ -32,6 +41,9 @@ AISProcessing::AISProcessing(MessageBus& msgBus, CollidableMgr* collidableMgr, i
     switch (type) {
       case MessageType::AISData :
         processAISMessage((AISDataMsg*) msg);
+        break;
+      case MessageType::ServerConfigsReceived :
+        updateConfigsFromDB();
         break;
       default:
         return;

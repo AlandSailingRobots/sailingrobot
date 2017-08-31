@@ -1,5 +1,6 @@
 {
 "1": {
+  "is_checkpoint": 0,
   "latitude": 60.056853,
   "longitude": 19.786497,
   "declination": 6,
@@ -9,6 +10,7 @@
 },
 
 "2": {
+  "is_checkpoint": 0,
   "latitude": 60.053522,
   "longitude": 19.786443,
   "declination": 6,

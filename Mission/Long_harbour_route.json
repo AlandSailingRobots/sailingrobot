@@ -1,5 +1,6 @@
 {
 "1": {
+  "is_checkpoint": 0,
   "latitude": 60.107464,
   "longitude": 19.922077,
   "declination": 6,
@@ -9,6 +10,7 @@
 },
 
 "2": {
+  "is_checkpoint": 0,
   "latitude": 60.076216,
   "longitude": 19.923036,
   "declination": 6,
@@ -18,6 +20,7 @@
 },
 
 "3": {
+  "is_checkpoint": 0,
   "latitude": 60.107342,
   "longitude": 19.921907,
   "declination": 6,
@@ -27,6 +30,7 @@
 },
 
 "4": {
+  "is_checkpoint": 0,
   "latitude": 60.103847,
   "longitude": 19.920787,
   "declination": 6,
@@ -36,6 +40,7 @@
 },
 
 "5": {
+  "is_checkpoint": 0,
   "latitude": 60.079803,
   "longitude": 19.922063,
   "declination": 6,
@@ -45,6 +50,7 @@
 },
 
 "6": {
+  "is_checkpoint": 0,
   "latitude": 60.101038,
   "longitude": 19.920719,
   "declination": 6,
@@ -54,6 +60,7 @@
 },
 
 "7": {
+  "is_checkpoint": 0,
   "latitude": 60.078905,
   "longitude": 19.917712,
   "declination": 6,
@@ -63,6 +70,7 @@
 },
 
 "8": {
+  "is_checkpoint": 0,
   "latitude": 60.099931,
   "longitude": 19.920847,
   "declination": 6,
@@ -72,6 +80,7 @@
 },
 
 "9": {
+  "is_checkpoint": 0,
   "latitude": 60.077419,
   "longitude": 19.922884,
   "declination": 6,
@@ -81,6 +90,7 @@
 },
 
 "10": {
+  "is_checkpoint": 0,
   "latitude": 60.098854,
   "longitude": 19.921091,
   "declination": 6,
@@ -90,6 +100,7 @@
 },
 
 "11": {
+  "is_checkpoint": 0,
   "latitude": 60.085830,
   "longitude": 19.926167,
   "declination": 6,
@@ -99,6 +110,7 @@
 },
 
 "12": {
+  "is_checkpoint": 0,
   "latitude": 60.097491,
   "longitude": 19.921879,
   "declination": 6,
@@ -108,6 +120,7 @@
 },
 
 "13": {
+  "is_checkpoint": 0,
   "latitude": 60.086950,
   "longitude": 19.925755,
   "declination": 6,
@@ -117,6 +130,7 @@
 },
 
 "14": {
+  "is_checkpoint": 0,
   "latitude": 60.094855,
   "longitude": 19.921304,
   "declination": 6,
@@ -126,6 +140,7 @@
 },
 
 "15": {
+  "is_checkpoint": 0,
   "latitude": 60.091133,
   "longitude": 19.918932,
   "declination": 6,
@@ -135,6 +150,7 @@
 },
 
 "16": {
+  "is_checkpoint": 0,
   "latitude": 60.089916,
   "longitude": 19.920983,
   "declination": 6,
@@ -144,6 +160,7 @@
 },
 
 "17": {
+  "is_checkpoint": 0,
   "latitude": 60.094149,
   "longitude": 19.921904,
   "declination": 6,
@@ -153,6 +170,7 @@
 },
 
 "18": {
+  "is_checkpoint": 0,
   "latitude": 60.086341,
   "longitude": 19.926303,
   "declination": 6,
@@ -162,6 +180,7 @@
 },
 
 "19": {
+  "is_checkpoint": 0,
   "latitude": 60.097382,
   "longitude": 19.922033,
   "declination": 6,
@@ -171,6 +190,7 @@
 },
 
 "20": {
+  "is_checkpoint": 0,
   "latitude": 60.082129,
   "longitude": 19.924239,
   "declination": 6,
@@ -180,6 +200,7 @@
 },
 
 "21": {
+  "is_checkpoint": 0,
   "latitude": 60.098451,
   "longitude": 19.920969,
   "declination": 6,
@@ -189,6 +210,7 @@
 },
 
 "22": {
+  "is_checkpoint": 0,
   "latitude": 60.078823,
   "longitude": 19.917433,
   "declination": 6,
@@ -198,6 +220,7 @@
 },
 
 "23": {
+  "is_checkpoint": 0,
   "latitude": 60.100148,
   "longitude": 19.920535,
   "declination": 6,

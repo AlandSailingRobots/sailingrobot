@@ -32,5 +32,5 @@ public:
     }
 
 private:
-    float m_TailAngle;
+    float m_TailAngle; // degree [-26, +26[ in wing sail reference frame (clockwise from top view)
 };
