@@ -222,7 +222,6 @@ private:
 
     TCPServer server;
     CollidableMgr* collidableMgr;
-    double m_LoopTime;
     DBHandler& m_db;
 
     ActuatorDataWingPacket_t actuatorDataWing;

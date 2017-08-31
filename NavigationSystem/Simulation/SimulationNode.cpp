@@ -49,7 +49,7 @@ SimulationNode::SimulationNode(MessageBus& msgBus, DBHandler& dbhandler)
         m_RudderCommand(0), m_SailCommand(0), m_TailCommand(0),
 		m_CompassHeading(0), m_GPSLat(0), m_GPSLon(0), m_GPSSpeed(0),
 		m_GPSCourse(0), m_WindDir(0), m_WindSpeed(0), m_nextDeclination(0),
-		collidableMgr(NULL),m_LoopTime(0.5), m_db(dbhandler)
+		collidableMgr(NULL), m_db(dbhandler)
 {
     msgBus.registerNode(*this, MessageType::WingSailCommand);
     msgBus.registerNode(*this, MessageType::RudderCommand);
@@ -62,7 +62,7 @@ SimulationNode::SimulationNode(MessageBus& msgBus, DBHandler& dbhandler, Collida
         m_RudderCommand(0), m_SailCommand(0), m_TailCommand(0),
 		m_CompassHeading(0), m_GPSLat(0), m_GPSLon(0), m_GPSSpeed(0),
 		m_GPSCourse(0), m_WindDir(0), m_WindSpeed(0), m_nextDeclination(0),
-		collidableMgr(collidableMgr), m_LoopTime(0.5), m_db(dbhandler)
+		collidableMgr(collidableMgr), m_db(dbhandler)
 {
     msgBus.registerNode(*this, MessageType::WingSailCommand);
     msgBus.registerNode(*this, MessageType::RudderCommand);
@@ -100,9 +100,7 @@ bool SimulationNode::init()
     return success;
 }
 
-void SimulationNode::updateConfigsFromDB(){
-	m_LoopTime = m_db.retrieveCellAsDouble("config_simulator","1","loop_time");
-}
+void SimulationNode::updateConfigsFromDB(){}
 
 void SimulationNode::processMessage(const Message* msg)
 {
@@ -310,9 +308,6 @@ void SimulationNode::SimulationThreadFunc(ActiveNode* nodePtr)
 {
     SimulationNode* node = dynamic_cast<SimulationNode*> (nodePtr);
 
-    //Timer timer;
-    //timer.start();
-
     TCPPacket_t packet;
     int simulatorFD = 0;
 
@@ -362,8 +357,5 @@ void SimulationNode::SimulationThreadFunc(ActiveNode* nodePtr)
         node->sendActuatorDataWing ( simulatorFD );
         //node->sendActuatorDataSail( simulatorFD);
         node->sendWaypoint( simulatorFD );
-
-        //timer.sleepUntil(node->m_LoopTime);
-        //timer.reset();
     }
 }
