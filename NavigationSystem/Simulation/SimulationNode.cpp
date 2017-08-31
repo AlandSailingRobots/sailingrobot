@@ -202,8 +202,17 @@ void SimulationNode::processSailBoatData( TCPPacket_t& packet )
         m_CompassHeading = Utility::limitAngleRange(90 - boatData->heading); // [0, 360] north east down
         m_GPSLat = boatData->latitude;
         m_GPSLon = boatData->longitude;
-        m_GPSSpeed = boatData->speed;
-        m_GPSCourse = Utility::limitAngleRange(90 - boatData->course); // [0, 360] north east down
+
+        m_GPSSpeed = std::abs(boatData->speed); // norm of the speed vector
+        if (boatData->speed >= 0)
+        {
+            m_GPSCourse = Utility::limitAngleRange(90 - boatData->course); // [0, 360] north east down
+        }
+        else
+        {
+            m_GPSCourse = Utility::limitAngleRange(90 - boatData->course + 180); // [0, 360] north east down
+        }
+        
         m_WindDir = Utility::limitAngleRange( 180 - boatData->windDir); // [0, 360] clockwize, where the wind come from
         m_WindSpeed = boatData->windSpeed;
 
@@ -227,8 +236,8 @@ void SimulationNode::processWingBoatData( TCPPacket_t& packet )
         m_GPSLat = boatData->latitude;
         m_GPSLon = boatData->longitude;
 
-        m_GPSSpeed = abs(boatData->speed); // norm of the speed vector
-        if (boatData->speed > 0)
+        m_GPSSpeed = std::abs(boatData->speed); // norm of the speed vector
+        if (boatData->speed >= 0)
         {
             m_GPSCourse = Utility::limitAngleRange(90 - boatData->course); // [0, 360] north east down
         }
