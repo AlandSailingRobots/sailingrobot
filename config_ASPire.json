@@ -49,10 +49,6 @@
   "loop_time": 0.5
 },
 
-"config_simulator": {
-  "loop_time": 0.5
-},
-
 "config_solar_tracker": {
   "loop_time": 0.5
 },
@@ -75,6 +71,11 @@
 
 "config_wind_sensor": {
   "loop_time": 0.5
+},
+
+"config_wingsail_control": {
+  "loop_time": 0.5,
+  "max_cmd_angle": 13
 },
 
 "config_xbee": {

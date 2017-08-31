@@ -292,14 +292,6 @@ CREATE TABLE config_line_follow (
   loop_time DOUBLE
 );
 
--- -----------------------------------------------------
--- Table Simulator config
--- -----------------------------------------------------
-DROP TABLE IF EXISTS "config_simulator";
-CREATE TABLE config_simulator (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  loop_time DOUBLE
-);
 
 -- -----------------------------------------------------
 -- Table Solar Tracker config
@@ -311,7 +303,7 @@ CREATE TABLE config_solar_tracker (
 );
 
 -- -----------------------------------------------------
--- Table StateEstimationNode config
+-- Table StateEstimationNode config (Will be renamed VesselStateNode)
 -- -----------------------------------------------------
 DROP TABLE IF EXISTS "config_vessel_state";
 CREATE TABLE config_vessel_state (
@@ -384,8 +376,8 @@ INSERT INTO "config_course_regulator" VALUES(1,0.5,30,1,1,1);
 INSERT INTO "config_dblogger" VALUES(1,0.5);
 INSERT INTO "config_gps" VALUES(1,0.5);
 INSERT INTO "config_line_follow" VALUES(1,0.5);
-INSERT INTO "config_simulator" VALUES(1,0.5);
-INSERT INTO "config_vessel_state" VALUES(1, 0.5, 1, 2); -- NOTE: Marc: See the values of the course_config_speed
+INSERT INTO "config_solar_tracker" VALUES(1,1);
+INSERT INTO "config_vessel_state" VALUES(1, 0.5, 0.5, 1);
 INSERT INTO "config_voter_system" VALUES(1,0.5,25,1,1,1,1,2);
 INSERT INTO "config_wind_sensor" VALUES(1,0.5);
 INSERT INTO "config_wingsail_control" VALUES(1,0.5,15);
