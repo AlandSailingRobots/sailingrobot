@@ -36,7 +36,8 @@ const double  DRAGS[53] = {-3.6222976277233707, -3.3490177771111052, -3.08645478
 
 
 WingsailControlNode::WingsailControlNode(MessageBus& msgBus, DBHandler& dbhandler):
-    ActiveNode(NodeID::WingsailControlNode,msgBus), m_db(dbhandler), m_ApparentWindDir(DATA_OUT_OF_RANGE)
+    ActiveNode(NodeID::WingsailControlNode,msgBus), m_MaxCommandAngle(13), m_db(dbhandler), m_ApparentWindDir(DATA_OUT_OF_RANGE)
+    
 {
     msgBus.registerNode( *this, MessageType::WindState);
     msgBus.registerNode( *this, MessageType::LocalNavigation);
@@ -85,6 +86,8 @@ void WingsailControlNode::processWindStateMessage(const WindStateMsg* msg)
 void WingsailControlNode::processLocalNavigationMessage(const LocalNavigationMsg* msg)
 {
         std::lock_guard<std::mutex> lock_guard(m_lock);
+
+        m_targetTackStarboard = msg->targetTackStarboard();
 }
 
 ///----------------------------------------------------------------------------------
@@ -138,6 +141,18 @@ float WingsailControlNode::calculateTailAngle()
     }
 }
 
+float WingsailControlNode::simpleCalculateTailAngle()
+{
+    if (m_targetTackStarboard)
+    {
+        return m_MaxCommandAngle;
+    }
+    else
+    {
+        return - m_MaxCommandAngle;
+    }
+}
+
 ///----------------------------------------------------------------------------------
 void WingsailControlNode::updateConfigsFromDB()
 {
@@ -158,10 +173,11 @@ void WingsailControlNode::WingsailControlNodeThreadFunc(ActiveNode* nodePtr)
 
     while(true)
     {
-        float wingSailCommand = (float)node->calculateTailAngle();
+        //float wingSailCommand = (float)node->calculateTailAngle();
+        float wingSailCommand = (float)node->simpleCalculateTailAngle();
         if (wingSailCommand != DATA_OUT_OF_RANGE)
         {
-            // std::cout << "wingsail command node : " << wingSailCommand <<std::endl;
+            std::cout << "wingsail command node : " << wingSailCommand <<std::endl;
             MessagePtr wingSailMessage = std::make_unique<WingSailCommandMsg>(wingSailCommand);
             node->m_MsgBus.sendMessage(std::move(wingSailMessage));
         }

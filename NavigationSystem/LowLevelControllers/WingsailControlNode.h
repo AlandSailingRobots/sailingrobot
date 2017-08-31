@@ -73,6 +73,8 @@ private:
     //
     float calculateTailAngle();
 
+    float simpleCalculateTailAngle();
+
     // -------------
     // Limit the sail angle
     // -------------
@@ -95,6 +97,8 @@ private:
     double m_LoopTime;
 
     double m_ApparentWindDir; // units : ° (degrees), from -180 to 180
+
+    bool m_targetTackStarboard;
 
     std::mutex m_lock;
 };
