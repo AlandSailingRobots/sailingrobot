@@ -261,6 +261,19 @@ bool LineFollowNode::getTargetTackStarboard(double targetCourse)
     }
 }
 
+void LineFollowNode::ifBoatPassedOrEnteredWP_setPrevWPToBoatPos()
+{
+    double distanceAfterWaypoint = Utility::calculateWaypointsOrthogonalLine(m_nextWaypointLon, m_nextWaypointLat, m_prevWaypointLon,
+            m_prevWaypointLat, m_VesselLon, m_VesselLat);
+
+    double DTW = CourseMath::calculateDTW(m_VesselLon, m_VesselLat, m_nextWaypointLon, m_nextWaypointLat);
+
+    if(distanceAfterWaypoint > 0 ||  DTW < m_nextWaypointRadius)
+    {
+        m_prevWaypointLon = m_VesselLon;
+        m_prevWaypointLat = m_VesselLat;
+    }
+}
 
 void LineFollowNode::LineFollowNodeThreadFunc(ActiveNode* nodePtr)
 {
@@ -275,6 +288,7 @@ void LineFollowNode::LineFollowNodeThreadFunc(ActiveNode* nodePtr)
     while(node->m_Running.load() == true)
     {
         if (node->m_lineFollow_On == 1){
+					  //node->ifBoatPassedOrEnteredWP_setPrevWPToBoatPos();
             double targetCourse =  node->calculateTargetCourse();
             if (targetCourse != DATA_OUT_OF_RANGE){
                 //std::cout << "targetCourse end : " << targetCourse <<std::endl;
@@ -287,7 +301,6 @@ void LineFollowNode::LineFollowNodeThreadFunc(ActiveNode* nodePtr)
             MessagePtr LocalNavMsg = std::make_unique<LocalNavigationMsg>(NO_COMMAND, NO_COMMAND, 0, 0);     
             node->m_MsgBus.sendMessage( std::move( LocalNavMsg ) );
         }
-
         timer.sleepUntil(node->m_LoopTime);
         timer.reset();
     }

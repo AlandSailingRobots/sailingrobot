@@ -186,7 +186,7 @@ void WingsailControlNode::WingsailControlNodeThreadFunc(ActiveNode* nodePtr)
         float wingSailCommand = (float)node->simpleCalculateTailAngle();
         if (wingSailCommand != NO_COMMAND)
         {
-            std::cout << "wingsail command node : " << wingSailCommand <<std::endl;
+            // std::cout << "wingsail command node : " << wingSailCommand <<std::endl;
             MessagePtr wingSailMessage = std::make_unique<WingSailCommandMsg>(wingSailCommand);
             node->m_MsgBus.sendMessage(std::move(wingSailMessage));
         }

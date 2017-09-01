@@ -229,6 +229,9 @@ int main(int argc, char *argv[])
 	#if SIMULATION == 1
 		simulation.start();
 	#else
+	  // Comment out this line if not running on the pi
+	  // otherwise program will crash.
+	  auto future = canService.start();
 		compass.start();
 		gpsd.start();
 		windSensor.start();

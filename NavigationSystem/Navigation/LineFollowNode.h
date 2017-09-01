@@ -94,6 +94,12 @@ private:
 	bool getTargetTackStarboard(double targetCourse);
 
     ///----------------------------------------------------------------------------------
+    /// If boat passed waypoint or enters it, set new line from boat to next waypoint.
+    /// Used if boat has to stay within waypoint for a set amount of time (Station Keeping).
+    ///----------------------------------------------------------------------------------
+	void ifBoatPassedOrEnteredWP_setPrevWPToBoatPos();
+
+    ///----------------------------------------------------------------------------------
     /// Starts the LineFollowNode's thread that pumps out LocalNavigationMsg.
     ///----------------------------------------------------------------------------------
 	static void LineFollowNodeThreadFunc(ActiveNode* nodePtr);
