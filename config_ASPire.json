@@ -58,8 +58,8 @@
 
 "config_vessel_state": {
   "loop_time": 0.5,
-  "course_config_speed_1": 0.5,
-  "course_config_speed_2": 1
+  "course_config_speed_1": 0.2,
+  "course_config_speed_2": 0.5
 },
 
 "config_voter_system": {
