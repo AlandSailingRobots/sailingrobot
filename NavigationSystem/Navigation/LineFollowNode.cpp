@@ -39,7 +39,7 @@ m_TackDirection(1), m_BeatingMode(false)
     msgBus.registerNode(*this, MessageType::ServerConfigsReceived);
 
     m_IncidenceAngle = Utility::degreeToRadian(90);
-    m_MaxDistanceFromLine = 40;
+    m_MaxDistanceFromLine = 20;
 
     m_CloseHauledAngle = Utility::degreeToRadian(45);
     m_BroadReachAngle = Utility::degreeToRadian(30);
@@ -277,7 +277,7 @@ void LineFollowNode::LineFollowNodeThreadFunc(ActiveNode* nodePtr)
 
     while(node->m_Running.load() == true)
     {
-        //node->ifBoatPassedOrEnteredWP_setPrevWPToBoatPos();
+        node->ifBoatPassedOrEnteredWP_setPrevWPToBoatPos();
         double targetCourse = node->calculateTargetCourse();
         if (targetCourse != DATA_OUT_OF_RANGE)
         {
