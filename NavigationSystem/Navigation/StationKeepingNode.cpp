@@ -28,7 +28,7 @@ m_TackDirection(1), m_BeatingMode(false), m_TargetTackStarboard(false)
 
     m_CloseHauledAngle = Utility::degreeToRadian(45);
     m_BroadReachAngle = Utility::degreeToRadian(30);
-    m_TackingDistance = 3;
+    m_TackingDistance = 10;
 
     m_stationKeeping_On = 0;
 
