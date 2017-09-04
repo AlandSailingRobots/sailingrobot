@@ -102,6 +102,7 @@ void StateEstimationNode::processGPSMessage(const GPSDataMsg* msg)
     m_GPSLon = msg->longitude();
     m_GPSSpeed = msg->speed();
     m_GPSCourse = msg->course();
+    Logger::logWRSC(m_GPSLat, m_GPSLon);
 }
 
 void StateEstimationNode::processWaypointMessage( const WaypointDataMsg* msg )
