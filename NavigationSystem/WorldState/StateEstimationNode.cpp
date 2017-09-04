@@ -144,7 +144,7 @@ float StateEstimationNode::estimateVesselCourse()
         m_VesselCourse = m_GPSCourse;
     }
 
-    std::cout << "m_VesselSpeed: " << m_VesselSpeed << "std::abs(m_VesselSpeed) : " << std::abs(m_VesselSpeed) << std::endl;
+    // std::cout << "m_VesselSpeed: " << m_VesselSpeed << "std::abs(m_VesselSpeed) : " << std::abs(m_VesselSpeed) << std::endl;
 
     if(std::abs(m_VesselSpeed) < m_speed_1)
     {
