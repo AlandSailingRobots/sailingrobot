@@ -102,6 +102,7 @@ void StateEstimationNode::processGPSMessage(const GPSDataMsg* msg)
     m_GPSLon = msg->longitude();
     m_GPSSpeed = msg->speed();
     m_GPSCourse = msg->course();
+    Logger::logWRSC(m_GPSLat, m_GPSLon);
 }
 
 void StateEstimationNode::processWaypointMessage( const WaypointDataMsg* msg )
@@ -136,17 +137,27 @@ float StateEstimationNode::estimateVesselCourse()
         m_speed_1 =  m_speed_2;
     }
 
-    if(m_VesselSpeed < m_speed_1)
+    if (cos(Utility::degreeToRadian(m_VesselHeading - m_GPSCourse)) < 0){
+        m_VesselCourse = Utility::limitAngleRange(m_GPSCourse + 180);
+        m_VesselSpeed = -m_VesselSpeed;
+    }
+    else{
+        m_VesselCourse = m_GPSCourse;
+    }
+
+    // std::cout << "m_VesselSpeed: " << m_VesselSpeed << "std::abs(m_VesselSpeed) : " << std::abs(m_VesselSpeed) << std::endl;
+
+    if(std::abs(m_VesselSpeed) < m_speed_1)
     {
         return m_VesselHeading;
     }
-    else if(m_VesselSpeed >= m_speed_2)
+    else if(std::abs(m_VesselSpeed) >= m_speed_2)
     {
-        return m_GPSCourse;
+        return m_VesselCourse;
     }
     else // m_speed_1 <= m_VesselSpeed < m_speed_2
     {
-        return Utility::linearFunctionBetweenAngle(m_VesselSpeed, m_speed_1, m_speed_2, m_VesselHeading, m_GPSCourse);
+        return Utility::linearFunctionBetweenAngle(m_VesselSpeed, m_speed_1, m_speed_2, m_VesselHeading, m_VesselCourse);
     }
 }
 

@@ -160,7 +160,7 @@ all:
 
 ## Build the control system for ASPire
 ASPire: $(BUILD_DIR)
-	$(MAKE) -f ASPire.mk -j
+	$(MAKE) -f ASPire.mk
 
 ## Build the control system for Janet
 Janet: $(BUILD_DIR)

@@ -24,6 +24,7 @@
 #include "Messages/WaypointDataMsg.h"
 #include "Messages/WaypointStationKeepingMsg.h"
 #include "Messages/ServerWaypointsReceivedMsg.h"
+#include "Messages/CourseDataMsg.h"
 #include "SystemServices/Timer.h"
 #include "SystemServices/Logger.h"
 
@@ -46,6 +47,7 @@ private:
  	///----------------------------------------------------------------------------------
     void sendMessage();
     bool harvestWaypoint();
+    void sendNavigationInformation();
 
     DBHandler &m_db;
     bool writeTime;

@@ -28,6 +28,7 @@
 
 #define MAX_LOG_SIZE	256*2
 #define MAX_MSG_BUFFER 100
+#define ENABLE_WRSC_LOGGING 1
 
 std::string 				Logger::m_LogFilePath;
 std::ofstream 				Logger::m_LogFile;
@@ -187,9 +188,9 @@ void Logger::logWRSC(double latitude, double longitude)
 	if(m_LogFileWRSC.is_open())
 	{
 		char logBuffer[MAX_LOG_SIZE];
-		snprintf(logBuffer, MAX_LOG_SIZE, "%s%d, %d, %d\n", SysClock::hh_mm_ss().c_str(), SysClock::day(),
-															(int)(gps->positionModel.latitude*10000000),
-															(int)(gps->positionModel.longitude*10000000));
+		snprintf(logBuffer, MAX_LOG_SIZE, "%s0%d, %d, %d\n", SysClock::hh_mm_ss().c_str(), SysClock::day(),
+															(int)(latitude*10000000),
+															(int)(longitude*10000000));
 		m_LogFileWRSC << logBuffer;
 		m_LogFileWRSC.flush();
 	}

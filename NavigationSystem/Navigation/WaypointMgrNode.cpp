@@ -59,6 +59,7 @@ void WaypointMgrNode::processMessage(const Message* msg)
     {
         sendMessage();
     }
+    sendNavigationInformation();
 }
 
 void WaypointMgrNode::processVesselStateMessage(StateMessage* msg)
@@ -180,4 +181,14 @@ bool WaypointMgrNode::harvestWaypoint()
     {
         return true;
     }
+}
+
+void WaypointMgrNode::sendNavigationInformation()
+{
+    double distanceToWaypoint = CourseMath::calculateDTW(m_vesselLongitude, m_vesselLatitude, m_nextLongitude, m_nextLatitude);
+    int16_t bearingToWaypoint = CourseMath::calculateBTW(m_vesselLongitude, m_vesselLatitude, m_nextLongitude, m_nextLatitude);
+
+    MessagePtr msg = std::make_unique<CourseDataMsg>(0, distanceToWaypoint, bearingToWaypoint);
+    m_MsgBus.sendMessage(std::move(msg));
+    // std::cout << "distanceToWaypoint: " << distanceToWaypoint << "  bearingToWaypoint: " << bearingToWaypoint << std::endl;
 }

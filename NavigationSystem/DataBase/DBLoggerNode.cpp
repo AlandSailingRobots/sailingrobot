@@ -11,6 +11,7 @@
 #include "Messages/StateMessage.h"
 #include "Messages/ASPireActuatorFeedbackMsg.h"
 #include "Messages/MarineSensorDataMsg.h"
+#include "Messages/CourseDataMsg.h"
 #include "SystemServices/Timer.h"
 #include "SystemServices/SysClock.h"
 
@@ -36,6 +37,7 @@ DBLoggerNode::DBLoggerNode(MessageBus& msgBus, DBHandler& db,int queueSize)
     msgBus.registerNode(*this, MessageType::WindState);
 
     msgBus.registerNode(*this, MessageType::WaypointData);
+    msgBus.registerNode(*this, MessageType::CourseData);
     msgBus.registerNode(*this, MessageType::LocalNavigation);
     
     msgBus.registerNode(*this, MessageType::ServerConfigsReceived);
@@ -144,6 +146,14 @@ void DBLoggerNode::processMessage(const Message* msg) {
             item.m_windDir = windDataMsg->windDirection();
             item.m_windSpeed = windDataMsg->windSpeed();
             item.m_windTemp = windDataMsg->windTemp();
+        }
+        break;
+
+        case MessageType::CourseData:
+        {
+            const CourseDataMsg* courseDataMsg = static_cast<const CourseDataMsg*>(msg);
+            item.m_distanceToWaypoint = courseDataMsg->distanceToWP();
+            item.m_bearingToWaypoint = courseDataMsg->courseToWP();
         }
         break;
 

@@ -78,7 +78,7 @@
 
 "config_wingsail_control": {
   "loop_time": 0.5,
-  "max_cmd_angle": 13
+  "max_cmd_angle": 10
 },
 
 "config_xbee": {
