@@ -148,6 +148,7 @@ bool WaypointMgrNode::harvestWaypoint()
     // std::cout << "DistanceToWaypoint: " << DistanceToWaypoint << std::endl;
     if(DistanceToWaypoint > m_nextRadius)
     {
+        std::cout << "not inside waypoint" << std::endl;
         return false;
     }
 
@@ -156,6 +157,7 @@ bool WaypointMgrNode::harvestWaypoint()
         // send a WaypointStationKeeping message to trigger the station keeping
         MessagePtr msg = std::make_unique<WaypointStationKeepingMsg>(m_nextId, m_nextLongitude, m_nextLatitude, m_nextDeclination, m_nextRadius, m_nextStayTime);
         m_MsgBus.sendMessage(std::move(msg));
+        std::cout << "starting station Keeping " << std::endl;
 
         m_waypointTimer.start();
 

@@ -23,6 +23,7 @@
   #include "Navigation/LocalNavigationModule/Voters/MidRangeVoter.h"
 #else
   #include "Navigation/LineFollowNode.h"
+  #include "Navigation/StationKeepingNode.h"
 #endif
 
 #if SIMULATION == 1
@@ -166,6 +167,7 @@ int main(int argc, char *argv[])
 		lnm.registerVoter( &midRangeVoter );
   	#else
 		LineFollowNode sailingLogic(messageBus, dbHandler);
+        StationKeepingNode stationKeeping(messageBus, dbHandler);
   	#endif
 
 	#if SIMULATION == 1
@@ -205,6 +207,7 @@ int main(int argc, char *argv[])
 		initialiseNode( lnm, "Local Navigation Module",	NodeImportance::CRITICAL );
 	#else
 		initialiseNode(sailingLogic, "LineFollow", NodeImportance::CRITICAL);
+        initialiseNode(stationKeeping, "StationKeeping", NodeImportance::CRITICAL);
 	#endif
 
 	#if SIMULATION == 1
@@ -243,6 +246,7 @@ int main(int argc, char *argv[])
 		collidableMgr.startGC();
 	#else
 		sailingLogic.start();
+        stationKeeping.start();
 	#endif
 
 	wingSailControlNode.start();

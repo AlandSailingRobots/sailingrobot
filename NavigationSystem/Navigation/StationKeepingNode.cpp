@@ -174,7 +174,7 @@ void StationKeepingNode::StationKeepingNodeThreadFunc(ActiveNode* nodePtr)
                 if (targetCourse != DATA_OUT_OF_RANGE){
                     MessagePtr LocalNavMsg = std::make_unique<LocalNavigationMsg>((float) targetCourse, NO_COMMAND, node->m_BeatingMode, node->m_TargetTackStarboard);
                     node->m_MsgBus.sendMessage( std::move( LocalNavMsg ) );
-                    std::cout << "stationKeeping message " << targetcourse << std::endl;
+                    std::cout << "stationKeeping message " << targetCourse << std::endl;
                 }
             }
             else
