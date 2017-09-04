@@ -174,6 +174,7 @@ void StationKeepingNode::StationKeepingNodeThreadFunc(ActiveNode* nodePtr)
                 if (targetCourse != DATA_OUT_OF_RANGE){
                     MessagePtr LocalNavMsg = std::make_unique<LocalNavigationMsg>((float) targetCourse, NO_COMMAND, node->m_BeatingMode, node->m_TargetTackStarboard);
                     node->m_MsgBus.sendMessage( std::move( LocalNavMsg ) );
+                    std::cout << "stationKeeping message " << targetcourse << std::endl;
                 }
             }
             else
@@ -193,11 +194,13 @@ void StationKeepingNode::StationKeepingNodeThreadFunc(ActiveNode* nodePtr)
 
                 MessagePtr actuatorMessage = std::make_unique<RudderCommandMsg>(rudderCommand);
                 node->m_MsgBus.sendMessage(std::move(actuatorMessage));
+                std::cout << "stationKeeping message " << "no message" << std::endl;
             }
         }
         else{
             MessagePtr LocalNavMsg = std::make_unique<LocalNavigationMsg>(NO_COMMAND, NO_COMMAND, 0, NO_COMMAND);
             node->m_MsgBus.sendMessage( std::move( LocalNavMsg ) );
+            std::cout << "stationKeeping message " << NO_COMMAND << std::endl;
         }
 
 
