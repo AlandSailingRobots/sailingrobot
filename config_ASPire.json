@@ -49,7 +49,7 @@
   "loop_time": 0.5,
   "close_hauled_angle": 45,
   "broad_reach_angle": 30,
-  "tacking_distance": 10
+  "tacking_distance": 15
 },
 
 "config_solar_tracker": {
@@ -58,8 +58,8 @@
 
 "config_vessel_state": {
   "loop_time": 0.5,
-  "course_config_speed_1": 0.2,
-  "course_config_speed_2": 0.5
+  "course_config_speed_1": 0.5,
+  "course_config_speed_2": 1
 },
 
 "config_voter_system": {
@@ -78,7 +78,7 @@
 
 "config_wingsail_control": {
   "loop_time": 0.5,
-  "max_cmd_angle": 13
+  "max_cmd_angle": 10
 },
 
 "config_xbee": {
