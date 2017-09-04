@@ -49,7 +49,7 @@
   "loop_time": 0.5,
   "close_hauled_angle": 45,
   "broad_reach_angle": 30,
-  "tacking_distance": 15
+  "tacking_distance": 10
 },
 
 "config_solar_tracker": {
