@@ -70,9 +70,12 @@ private:
 	std::vector<float> m_TwdBuffer; // True wind direction buffer. angles in degree [0, 360[ in vessel reference frame (clockwise)
 
 	double  m_VesselLat;
-    	double  m_VesselLon;
-    	double m_VesselSpeed;
-    	double m_VesselHeading;
+    double  m_VesselLon;
+    double m_VesselSpeed;
+    double m_VesselHeading;
+
+    double m_refLat;
+    double m_refLong;
 
 	double 	m_trueWindSpeed;		// m/s
 	double 	m_trueWindDir;			// degree [0, 360[ in North-East reference frame (clockwise)

@@ -66,6 +66,8 @@ void StationKeepingNode::processMessage(const Message* msg)
         break;
     case MessageType::WaypointStationKeeping:
         m_stationKeeping_On = 1;
+        m_refLat = m_VesselLat;
+        m_refLong = m_VesselLon;
         std::cout << "m_stationKeeping_On received" << std::endl;
         processWaypointMessage(static_cast<const WaypointStationKeepingMsg*>(msg));
         break;
@@ -124,8 +126,8 @@ double StationKeepingNode::computeTargetCourse()
         double targetCourse = CourseMath::calculateBTW(m_VesselLon, m_VesselLat, m_waypointLon, m_waypointLat);
 
         // Calculate signed distance to the line defined by the waypoint and the wind mean direction
-        double signedDistance = Utility::calculateSignedDistanceToLine(m_waypointLon, m_waypointLat, m_waypointLon + cos(trueWindAngle),
-            m_waypointLat + sin(trueWindAngle), m_VesselLon, m_VesselLat);
+        double signedDistance = Utility::calculateSignedDistanceToLine(m_waypointLon, m_waypointLat, m_refLong,
+            m_refLat, m_VesselLon, m_VesselLat);
         // double signedDistance = Utility::calculateSignedDistanceTrueWindAngle(trueWindAngle, m_waypointLon, m_waypointLat,
         //     m_VesselLon, m_VesselLat);
 
@@ -202,6 +204,8 @@ void StationKeepingNode::StationKeepingNodeThreadFunc(ActiveNode* nodePtr)
                 if (CourseMath::calculateDTW(node->m_VesselLon, node->m_VesselLat, node->m_waypointLon, node->m_waypointLat) > 2*node->m_waypointRadius/3)
                 {
                     node->m_outOfZone = 1;
+                    node->m_refLat = node->m_VesselLat;
+                    node->m_refLong = node->m_VesselLon;
                 }
                 else
                 {
