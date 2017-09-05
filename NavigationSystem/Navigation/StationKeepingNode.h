@@ -57,6 +57,8 @@ private:
 
 	double computeRudder();
 
+	bool getTargetTackStarboard(double targetCourse);
+
 	static void StationKeepingNodeThreadFunc(ActiveNode* nodePtr);
 
 	DBHandler &m_db;
@@ -87,7 +89,6 @@ private:
 	int       m_TackDirection;	
 
 	bool     m_BeatingMode;			// True if the vessel is in beating motion (zig-zag motion).
-	bool     m_TargetTackStarboard;	// True if the desired tack of the vessel is starboard. 
 
 	bool     m_stationKeeping_On;  // activate or disactivate the station keeping algorithm
 

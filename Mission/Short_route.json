@@ -4,8 +4,8 @@
   "latitude": 60.107415,
   "longitude": 19.922481,
   "declination": 6,
-  "radius": 15,
-  "stay_time": 0,
+  "radius": 18,
+  "stay_time": 60,
   "harvested": 0
 },
 

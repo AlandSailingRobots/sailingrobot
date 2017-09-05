@@ -15,16 +15,16 @@ const int INITIAL_SLEEP = 2000;  //in milliseconds
 const float NO_COMMAND = -1000; 
 #define DATA_OUT_OF_RANGE -2000
 
-StationKeepingNode::StationKeepingNode(MessageBus& msgBus, DBHandler& db): ActiveNode(NodeID::SailingLogic, msgBus), m_db(db),
+StationKeepingNode::StationKeepingNode(MessageBus& msgBus, DBHandler& db): ActiveNode(NodeID::stationKeeping, msgBus), m_db(db),
 m_waypointLon(DATA_OUT_OF_RANGE), m_waypointLat(DATA_OUT_OF_RANGE), m_waypointRadius(DATA_OUT_OF_RANGE),
-m_TackDirection(1), m_BeatingMode(false), m_TargetTackStarboard(false)
+m_TackDirection(1), m_BeatingMode(false)
 {
     msgBus.registerNode(*this, MessageType::StateMessage);
     msgBus.registerNode(*this, MessageType::WindState);
     msgBus.registerNode(*this, MessageType::WaypointData);
     msgBus.registerNode(*this, MessageType::WaypointStationKeeping);
 
-    m_LoopTime = 0.1;
+    m_LoopTime = 0.5;
 
     m_CloseHauledAngle = Utility::degreeToRadian(45);
     m_BroadReachAngle = Utility::degreeToRadian(30);
@@ -58,6 +58,7 @@ void StationKeepingNode::processMessage(const Message* msg)
         processStateMessage(static_cast<const StateMessage*>(msg));
         break;
     case MessageType::WindState:
+        std::cout << "WindState recieved" << std::endl;
         processWindStateMessage(static_cast<const WindStateMsg*>(msg));
         break;
     case MessageType::WaypointData:
@@ -65,6 +66,7 @@ void StationKeepingNode::processMessage(const Message* msg)
         break;
     case MessageType::WaypointStationKeeping:
         m_stationKeeping_On = 1;
+        std::cout << "m_stationKeeping_On received" << std::endl;
         processWaypointMessage(static_cast<const WaypointStationKeepingMsg*>(msg));
         break;
     default:
@@ -105,7 +107,11 @@ void StationKeepingNode::processWaypointMessage(const WaypointStationKeepingMsg*
 
 double StationKeepingNode::computeTargetCourse()
 {
-     if ((m_waypointLon == DATA_OUT_OF_RANGE) || (m_VesselLat == DATA_OUT_OF_RANGE) || (m_trueWindSpeed == DATA_OUT_OF_RANGE))
+    std::lock_guard<std::mutex> lock_guard(m_lock);
+
+    if ((m_VesselLat == DATA_OUT_OF_RANGE) || (m_VesselLon == DATA_OUT_OF_RANGE) || 
+        (m_trueWindSpeed == DATA_OUT_OF_RANGE) || (m_trueWindDir == DATA_OUT_OF_RANGE) ||
+        (m_waypointLon == DATA_OUT_OF_RANGE) || (m_waypointLat == DATA_OUT_OF_RANGE) || (m_waypointRadius == DATA_OUT_OF_RANGE) )
     {
         return DATA_OUT_OF_RANGE;
     }
@@ -120,6 +126,8 @@ double StationKeepingNode::computeTargetCourse()
         // Calculate signed distance to the line defined by the waypoint and the wind mean direction
         double signedDistance = Utility::calculateSignedDistanceToLine(m_waypointLon, m_waypointLat, m_waypointLon + cos(trueWindAngle),
             m_waypointLat + sin(trueWindAngle), m_VesselLon, m_VesselLat);
+        // double signedDistance = Utility::calculateSignedDistanceTrueWindAngle(trueWindAngle, m_waypointLon, m_waypointLat,
+        //     m_VesselLon, m_VesselLat);
 
         // Change tack direction when reaching tacking distance
         if(abs(signedDistance) > m_TackingDistance)
@@ -153,6 +161,17 @@ double StationKeepingNode::computeTargetCourse()
     }
 }
 
+bool StationKeepingNode::getTargetTackStarboard(double targetCourse)
+{
+    std::lock_guard<std::mutex> lock_guard(m_lock);
+
+    double meanTrueWindDir = Utility::meanOfAngles(m_TwdBuffer);
+    if (sin(Utility::degreeToRadian(targetCourse - meanTrueWindDir)) < 0){
+        return true;
+    } else {
+        return false;
+    }
+}
 
 
 void StationKeepingNode::StationKeepingNodeThreadFunc(ActiveNode* nodePtr)
@@ -172,7 +191,8 @@ void StationKeepingNode::StationKeepingNodeThreadFunc(ActiveNode* nodePtr)
             {
                 double targetCourse =  node->computeTargetCourse();
                 if (targetCourse != DATA_OUT_OF_RANGE){
-                    MessagePtr LocalNavMsg = std::make_unique<LocalNavigationMsg>((float) targetCourse, NO_COMMAND, node->m_BeatingMode, node->m_TargetTackStarboard);
+                    bool targetTackStarboard = node->getTargetTackStarboard(targetCourse);
+                    MessagePtr LocalNavMsg = std::make_unique<LocalNavigationMsg>((float) targetCourse, NO_COMMAND, node->m_BeatingMode, targetTackStarboard);
                     node->m_MsgBus.sendMessage( std::move( LocalNavMsg ) );
                     std::cout << "stationKeeping message " << targetCourse << std::endl;
                 }
@@ -198,7 +218,7 @@ void StationKeepingNode::StationKeepingNodeThreadFunc(ActiveNode* nodePtr)
             }
         }
         else{
-            MessagePtr LocalNavMsg = std::make_unique<LocalNavigationMsg>(NO_COMMAND, NO_COMMAND, 0, NO_COMMAND);
+            MessagePtr LocalNavMsg = std::make_unique<LocalNavigationMsg>(NO_COMMAND, NO_COMMAND, 0, 0);
             node->m_MsgBus.sendMessage( std::move( LocalNavMsg ) );
             std::cout << "stationKeeping message " << NO_COMMAND << std::endl;
         }

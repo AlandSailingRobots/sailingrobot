@@ -288,7 +288,7 @@ void LineFollowNode::LineFollowNodeThreadFunc(ActiveNode* nodePtr)
     while(node->m_Running.load() == true)
     {
         if (node->m_lineFollow_On == 1){
-					  //node->ifBoatPassedOrEnteredWP_setPrevWPToBoatPos();
+			node->ifBoatPassedOrEnteredWP_setPrevWPToBoatPos();
             double targetCourse =  node->calculateTargetCourse();
             if (targetCourse != DATA_OUT_OF_RANGE){
                 //std::cout << "targetCourse end : " << targetCourse <<std::endl;

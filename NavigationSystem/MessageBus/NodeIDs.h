@@ -33,6 +33,7 @@ enum class NodeID {
 	Waypoint,
 	xBeeSync,
 	SailingLogic,
+	stationKeeping,
 	ColorDetection,
 	CollisionAvoidanceBehaviour,
 	Lidar,
@@ -88,6 +89,8 @@ inline std::string nodeToString(NodeID id)
 		return "Waypoint";
 		case NodeID::SailingLogic:
 		return "SailingLogic";
+		case NodeID::stationKeeping:
+		return "stationKeeping";
 		case NodeID::xBeeSync:
 		return "xBeeSync";
 		case NodeID::ColorDetection:

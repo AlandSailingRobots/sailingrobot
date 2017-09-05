@@ -382,6 +382,40 @@ double Utility::calculateSignedDistanceToLine(const double nextLon, const double
     return signedDistance;
 }
 
+// double Utility::calculateSignedDistanceTrueWindAngle(const double radianTrueWindAngle, const double nextLon, const double nextLat,
+// 					const double gpsLon, const double gpsLat)
+// {
+//     int earthRadius = 6371000;
+
+//     std::array<double, 3> nextWPCoord = //b
+//      {  earthRadius * cos(degreeToRadian(nextLat)) * cos(degreeToRadian(nextLon)),
+//         earthRadius * cos(degreeToRadian(nextLat)) * sin(degreeToRadian(nextLon)),
+//         earthRadius * sin(degreeToRadian(nextLat))};
+//     std::array<double, 3> prevWPCoord = //a
+//     {nextWPCoord[],
+//     nextWPCoord[],
+// 	nextWPCoord[]};
+//     std::array<double, 3> boatCoord = //m
+//     {  earthRadius * cos(degreeToRadian(gpsLat)) * cos(degreeToRadian(gpsLon)),
+//         earthRadius * cos(degreeToRadian(gpsLat)) * sin(degreeToRadian(gpsLon)),
+//         earthRadius * sin(degreeToRadian(gpsLat))};
+
+//     std::array<double, 3> oab = //vector normal to plane
+//     {   (prevWPCoord[1]*nextWPCoord[2] - prevWPCoord[2]*nextWPCoord[1]),       //Vector product: A^B divided by norm ||a^b||     a^b / ||a^b||
+//         (prevWPCoord[2]*nextWPCoord[0] - prevWPCoord[0]*nextWPCoord[2]),
+//         (prevWPCoord[0]*nextWPCoord[1] - prevWPCoord[1]*nextWPCoord[0])};
+
+//     double normOAB =  sqrt(pow(oab[0],2)+ pow(oab[1],2) + pow(oab[2],2));
+
+//     oab[0] = oab[0]/normOAB;
+//     oab[1] = oab[1]/normOAB;
+//     oab[2] = oab[2]/normOAB;
+
+//     double signedDistance = boatCoord[0]*oab[0] + boatCoord[1]*oab[1] + boatCoord[2]*oab[2];
+
+//     return signedDistance;
+// }
+
 double Utility::calculateWaypointsOrthogonalLine(const double nextLon, const double nextLat, const double prevLon, const double prevLat,
 					const double gpsLon, const double gpsLat)
 {    /* Check to see if boat has passed the orthogonal to the line

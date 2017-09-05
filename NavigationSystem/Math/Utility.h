@@ -57,6 +57,8 @@ public:
 
 	static double calculateSignedDistanceToLine(const double nextLon, const double nextLat, const double prevLon, const double prevLat,
 					const double gpsLon, const double gpsLat);
+	//static double calculateSignedDistanceTrueWindAngle(const double radianTrueWindAngle, const double nextLon, const double nextLat,
+	//				const double gpsLon, const double gpsLat);
 	static double calculateWaypointsOrthogonalLine(const double nextLon, const double nextLat, const double prevLon, const double prevLat,
 					const double gpsLon, const double gpsLat);
 
