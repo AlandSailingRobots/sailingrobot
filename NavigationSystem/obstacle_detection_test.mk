@@ -11,6 +11,8 @@
 # Files
 ###############################################################################
 
+LIBS += $(shell pkg-config --cflags --libs opencv)
+
 # Source files
 OBSTACLE_DETECTION_INTEGRATION_TEST = Tests/IntegrationTests/ObstacleDetectionTest.cpp
 

@@ -144,7 +144,7 @@ export HW_NODES_ASPIRE_SRC 	= Hardwares/ActuatorNodeASPire.cpp Hardwares/CANAISN
 
 export HW_NODES_JANET_SRC 	= Hardwares/ActuatorNode.cpp Hardwares/CV7Node.cpp Hardwares/ArduinoNode.cpp
 
-export HW_NODES_CAMERA		= 
+export HW_NODES_CAMERA		= WorldState/obstacledetection/CameraProcessingNode.cpp
 
 # XBee network
 export XBEE_NETWORK_SRC     = Network/DataLink.cpp Network/LinuxSerialDataLink.cpp Network/XbeePacketNetwork.cpp \
