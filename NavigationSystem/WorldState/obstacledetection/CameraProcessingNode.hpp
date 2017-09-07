@@ -41,7 +41,7 @@ public:
   /*
   * Constructor, gets a pointer to messagebus and canservice
   */
-  CameraProcessingNode(MessageBus& msgBus, CollidableMgr* collidableMgr);
+  CameraProcessingNode(MessageBus& msgBus, CollidableMgr& collidableMgr);
   
   /*
    *  Empty destructor
