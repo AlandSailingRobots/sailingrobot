@@ -27,7 +27,7 @@
 
 
 #define AIS_CONTACT_TIME_OUT        600        // 10 Minutes
-#define VISUAL_CONTACT_TIME_OUT     120
+#define VISUAL_CONTACT_TIME_OUT     5
 #define NOT_AVAILABLE               -2000
 #define LOOP_TIME                   1000
 ///----------------------------------------------------------------------------------

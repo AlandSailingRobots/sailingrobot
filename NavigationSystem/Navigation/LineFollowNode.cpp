@@ -24,13 +24,13 @@ const int INITIAL_SLEEP = 2000;  //in milliseconds
 const float NO_COMMAND = -1000;
 #define DATA_OUT_OF_RANGE -2000
 
-LineFollowNode::LineFollowNode(MessageBus& msgBus, DBHandler& dbhandler): ActiveNode(NodeID::SailingLogic, msgBus),
+LineFollowNode::LineFollowNode(MessageBus& msgBus, DBHandler& dbhandler, CollidableMgr& collidableMgr ): ActiveNode(NodeID::SailingLogic, msgBus),
 m_LoopTime(0.5), m_db(dbhandler), m_externalControlActive(false),
 m_VesselLat(DATA_OUT_OF_RANGE), m_VesselLon(DATA_OUT_OF_RANGE), 
 m_trueWindSpeed(DATA_OUT_OF_RANGE), m_trueWindDir(DATA_OUT_OF_RANGE),
 m_nextWaypointLon(DATA_OUT_OF_RANGE), m_nextWaypointLat(DATA_OUT_OF_RANGE), m_nextWaypointRadius(DATA_OUT_OF_RANGE),
 m_prevWaypointLon(DATA_OUT_OF_RANGE), m_prevWaypointLat(DATA_OUT_OF_RANGE), m_prevWaypointRadius(DATA_OUT_OF_RANGE),
-m_TackDirection(1), m_BeatingMode(false)
+m_TackDirection(1), m_BeatingMode(false), collidableMgr(collidableMgr), m_lastAvoidanceCourse(DATA_OUT_OF_RANGE)
 {
     msgBus.registerNode(*this, MessageType::ExternalControl);
     msgBus.registerNode(*this, MessageType::StateMessage);
@@ -235,6 +235,8 @@ double LineFollowNode::calculateTargetCourse()
         targetCourse = Utility::limitRadianAngleRange(targetCourse);
         targetCourse = Utility::radianToDegree(targetCourse);
 
+        targetCourse = checkIfObstacleInCourse(targetCourse,trueWindAngle);
+
         return targetCourse; // in north east down reference frame.
     }
 }
@@ -263,6 +265,61 @@ void LineFollowNode::ifBoatPassedOrEnteredWP_setPrevWPToBoatPos()
         m_prevWaypointLon = m_VesselLon;
         m_prevWaypointLat = m_VesselLat;
     }
+}
+
+double LineFollowNode::checkIfObstacleInCourse(double targetCourse, double trueWindAngle)
+{
+    int FreeIntervalAngle = 60;
+    double collidableBearingMean;
+    std::vector<float> collidableBearingVector;
+
+    if(m_ObstacleAvoidanceTimer.timeReached(30))
+    {
+        m_ObstacleAvoidanceTimer.stop();
+    }
+
+    CollidableList<VisualCollidable_t> visualContacts = collidableMgr.getVisualContacts();
+    for (uint16_t i = 0; i<visualContacts.length(); i++)
+    {
+        VisualCollidable_t collidable = visualContacts.next();
+        collidableBearingVector.push_back(collidable.bearing);
+    }
+    collidableBearingMean = Utility::meanOfAngles(collidableBearingVector);
+
+    if (Utility::isAngleInSector(targetCourse, collidableBearingMean - FreeIntervalAngle/2, collidableBearingMean + FreeIntervalAngle/2))
+    {
+        // Obstacle in the targetCourse
+        m_ObstacleAvoidanceTimer.start();
+
+        if (Utility::isAngleInSector(targetCourse, collidableBearingMean - FreeIntervalAngle/2, collidableBearingMean))
+        {
+            targetCourse = Utility::limitAngleRange(collidableBearingMean - 40);
+
+            if ((cos(trueWindAngle - targetCourse) + cos(m_CloseHauledAngle) < 0) || (cos(trueWindAngle - targetCourse) - cos(m_BroadReachAngle) > 0))
+            {
+                targetCourse = Utility::limitAngleRange(targetCourse + 80);
+            }
+        }
+        else if (Utility::isAngleInSector(targetCourse, collidableBearingMean, collidableBearingMean + FreeIntervalAngle/2))
+        {
+            targetCourse = Utility::limitAngleRange(collidableBearingMean + 40);
+
+            if ((cos(trueWindAngle - targetCourse) + cos(m_CloseHauledAngle) < 0) || (cos(trueWindAngle - targetCourse) - cos(m_BroadReachAngle) > 0))
+            {
+                targetCourse = Utility::limitAngleRange(targetCourse - 80);
+            }
+        }
+        m_lastAvoidanceCourse = targetCourse;
+    }
+    else
+    {
+        if (m_ObstacleAvoidanceTimer.started())
+        {
+            targetCourse = m_lastAvoidanceCourse;
+        }
+    }
+
+    return targetCourse;
 }
 
 void LineFollowNode::LineFollowNodeThreadFunc(ActiveNode* nodePtr)

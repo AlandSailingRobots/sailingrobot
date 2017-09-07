@@ -24,6 +24,7 @@
 #include <algorithm>
 #include <cmath>
 #include <chrono>
+#include <vector>
 
 #include "DataBase/DBHandler.h"
 #include "Math/CourseMath.h"
@@ -37,6 +38,7 @@
 #include "Messages/ServerConfigsReceivedMsg.h"
 #include "SystemServices/SysClock.h"
 #include "SystemServices/Timer.h"
+#include "WorldState/CollidableMgr/CollidableMgr.h"
 
 #include "waypointrouting/RudderCommand.h"
 
@@ -46,7 +48,7 @@
 class LineFollowNode : public ActiveNode {
 public:
 
-	LineFollowNode(MessageBus& msgBus, DBHandler& dbhandler);
+	LineFollowNode(MessageBus& msgBus, DBHandler& dbhandler, CollidableMgr& collidableMgr);
 	~LineFollowNode();
 
 	bool init();
@@ -99,6 +101,8 @@ private:
     ///----------------------------------------------------------------------------------
 	void ifBoatPassedOrEnteredWP_setPrevWPToBoatPos();
 
+	double checkIfObstacleInCourse(double targetCourse,double trueWindAngle);
+
     ///----------------------------------------------------------------------------------
     /// Starts the LineFollowNode's thread that pumps out LocalNavigationMsg.
     ///----------------------------------------------------------------------------------
@@ -144,4 +148,8 @@ private:
 
 	// Output variables
 	bool    m_BeatingMode;			// True if the vessel is in beating motion (zig-zag motion).
+
+	CollidableMgr& collidableMgr;
+	Timer   m_ObstacleAvoidanceTimer;
+	double  m_lastAvoidanceCourse;
 };

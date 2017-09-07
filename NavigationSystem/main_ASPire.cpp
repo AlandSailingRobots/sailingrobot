@@ -165,7 +165,7 @@ int main(int argc, char *argv[])
 		lnm.registerVoter( &proximityVoter );
 		lnm.registerVoter( &midRangeVoter );
   	#else
-		LineFollowNode sailingLogic(messageBus, dbHandler);
+		LineFollowNode sailingLogic(messageBus, dbHandler, collidableMgr);
   	#endif
 
 	#if SIMULATION == 1
