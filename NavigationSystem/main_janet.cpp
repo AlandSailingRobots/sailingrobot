@@ -7,13 +7,13 @@
 #include "SystemServices/Logger.h"
 
 #include "Navigation/WaypointMgrNode.h"
+#include "WorldState/StateEstimationNode.h"
 #include "WorldState/WindStateNode.h"
 #include "WorldState/CollidableMgr/CollidableMgr.h"
 
 #include "LowLevelControllers/LowLevelController.h" // NOTE - Maël: It will change
 
 #if LOCAL_NAVIGATION_MODULE == 1
-  #include "WorldState/VesselStateNode.h" // NOTE - Maël: It will change
   #include "Navigation/LocalNavigationModule/LocalNavigationModule.h"
   #include "Navigation/LocalNavigationModule/Voters/WaypointVoter.h"
   #include "Navigation/LocalNavigationModule/Voters/WindVoter.h"
@@ -21,7 +21,6 @@
   #include "Navigation/LocalNavigationModule/Voters/ProximityVoter.h"
   #include "Navigation/LocalNavigationModule/Voters/MidRangeVoter.h"
 #else
-  #include "WorldState/StateEstimationNode.h" // NOTE - Maël: It will change
   #include "Navigation/LineFollowNode.h"
 #endif
 
@@ -143,8 +142,8 @@ int main(int argc, char *argv[])
 
 	//HTTPSyncNode httpsync(messageBus, &dbHandler);
 
+	StateEstimationNode stateEstimationNode(messageBus, dbHandler);
 	WindStateNode windStateNode(messageBus);
-
 	WaypointMgrNode waypoint(messageBus, dbHandler);
 
 	double PGAIN = 0.20;
@@ -153,7 +152,6 @@ int main(int argc, char *argv[])
 
 
   	#if LOCAL_NAVIGATION_MODULE == 1
-		VesselStateNode vesselState	( messageBus, dbHandler, 0.2 ); // NOTE - Maël: It will change
         LocalNavigationModule lnm	( messageBus, dbHandler );
 		CollidableMgr collidableMgr;
 
@@ -170,8 +168,6 @@ int main(int argc, char *argv[])
 		lnm.registerVoter( &proximityVoter );
 		lnm.registerVoter( &midRangeVoter );
   	#else
-		StateEstimationNode stateEstimationNode(messageBus, dbHandler); // NOTE - Maël: It will change
-
 		LineFollowNode sailingLogic(messageBus, dbHandler);
   	#endif
 
@@ -210,16 +206,16 @@ int main(int argc, char *argv[])
 
 	//initialiseNode(httpsync, "Httpsync", NodeImportance::NOT_CRITICAL);
 	initialiseNode(dbLoggerNode, "DBLogger", NodeImportance::CRITICAL);
+
+	initialiseNode(stateEstimationNode,"StateEstimation",NodeImportance::CRITICAL);
 	initialiseNode(windStateNode,"WindState",NodeImportance::CRITICAL);
 	initialiseNode(waypoint, "Waypoint", NodeImportance::CRITICAL);
 
 	initialiseNode(llc, "Low Level Controller", NodeImportance::CRITICAL); // NOTE - Maël: It will change
 
 	#if LOCAL_NAVIGATION_MODULE == 1
-		initialiseNode( vesselState, "Vessel State", NodeImportance::CRITICAL ); // NOTE - Maël: It will change
 		initialiseNode( lnm, "Local Navigation Module",	NodeImportance::CRITICAL );
 	#else
-		initialiseNode(stateEstimationNode,"StateEstimation",NodeImportance::CRITICAL); // NOTE - Maël: It will change
 		initialiseNode(sailingLogic, "LineFollow", NodeImportance::CRITICAL);
 	#endif
 
@@ -241,6 +237,8 @@ int main(int argc, char *argv[])
 	//httpsync.start();
 	dbLoggerNode.start();
 
+	stateEstimationNode.start();
+
 	#if SIMULATION == 1
 		simulation.start();
 	#else
@@ -252,11 +250,9 @@ int main(int argc, char *argv[])
 	#endif
 
 	#if LOCAL_NAVIGATION_MODULE == 1
-		vesselState.start(); // NOTE - Maël: It will change
 		lnm.start();
 		collidableMgr.startGC();
 	#else
-		stateEstimationNode.start(); // NOTE - Maël: It will change
 		sailingLogic.start();
 	#endif
 
