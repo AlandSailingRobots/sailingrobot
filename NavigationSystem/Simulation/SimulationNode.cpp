@@ -44,12 +44,12 @@
 
 
 
-SimulationNode::SimulationNode(MessageBus& msgBus, DBHandler& dbhandler)
+SimulationNode::SimulationNode(MessageBus& msgBus, DBHandler& dbhandler, bool boatType)
 	: ActiveNode(NodeID::Simulator, msgBus),
         m_RudderCommand(0), m_SailCommand(0), m_TailCommand(0),
 		m_CompassHeading(0), m_GPSLat(0), m_GPSLon(0), m_GPSSpeed(0),
 		m_GPSCourse(0), m_WindDir(0), m_WindSpeed(0), m_nextDeclination(0),
-		collidableMgr(NULL), m_db(dbhandler)
+		collidableMgr(NULL), m_db(dbhandler), m_boatType(boatType)
 {
     msgBus.registerNode(*this, MessageType::WingSailCommand);
     msgBus.registerNode(*this, MessageType::RudderCommand);
@@ -57,12 +57,12 @@ SimulationNode::SimulationNode(MessageBus& msgBus, DBHandler& dbhandler)
     msgBus.registerNode(*this, MessageType::ServerConfigsReceived);
 }
 
-SimulationNode::SimulationNode(MessageBus& msgBus, DBHandler& dbhandler, CollidableMgr* collidableMgr)
+SimulationNode::SimulationNode(MessageBus& msgBus, DBHandler& dbhandler, bool boatType, CollidableMgr* collidableMgr)
 	: ActiveNode(NodeID::Simulator, msgBus),
         m_RudderCommand(0), m_SailCommand(0), m_TailCommand(0),
 		m_CompassHeading(0), m_GPSLat(0), m_GPSLon(0), m_GPSSpeed(0),
 		m_GPSCourse(0), m_WindDir(0), m_WindSpeed(0), m_nextDeclination(0),
-		collidableMgr(collidableMgr), m_db(dbhandler)
+		collidableMgr(collidableMgr), m_db(dbhandler),m_boatType(boatType)
 {
     msgBus.registerNode(*this, MessageType::WingSailCommand);
     msgBus.registerNode(*this, MessageType::RudderCommand);
@@ -371,9 +371,14 @@ void SimulationNode::SimulationThreadFunc(ActiveNode* nodePtr)
         // Reset our packet, better safe than sorry
         packet.socketFD = 0;
         packet.length = 0;
-
-        node->sendActuatorDataWing ( simulatorFD );
-        //node->sendActuatorDataSail( simulatorFD);
+        if (node->m_boatType == 0){
+            node->sendActuatorDataSail( simulatorFD);
+        }
+        else if (node->m_boatType ==1){
+            node->sendActuatorDataWing ( simulatorFD );
+        }
+        
+        //
         node->sendWaypoint( simulatorFD );
     }
 }

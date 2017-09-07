@@ -170,9 +170,9 @@ int main(int argc, char *argv[])
 
 	#if SIMULATION == 1
 	  	#if LOCAL_NAVIGATION_MODULE == 1
-	  		SimulationNode simulation(messageBus, dbHandler,&collidableMgr);
+	  		SimulationNode simulation(messageBus, dbHandler, 1,&collidableMgr);
 	  	#else
-			SimulationNode simulation(messageBus, dbHandler);
+			SimulationNode simulation(messageBus, dbHandler, 1);
 	  	#endif
   	#else
 		CANService canService;

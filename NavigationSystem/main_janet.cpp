@@ -141,7 +141,7 @@ int main(int argc, char *argv[])
 	int dbLoggerQueueSize = 5; 			// how many messages to log to the databse at a time
 	DBLoggerNode dbLoggerNode(messageBus, dbHandler, dbLoggerQueueSize);
 
-	HTTPSyncNode httpsync(messageBus, &dbHandler);
+	//HTTPSyncNode httpsync(messageBus, &dbHandler);
 
 	WindStateNode windStateNode(messageBus);
 
@@ -178,9 +178,9 @@ int main(int argc, char *argv[])
 
 	#if SIMULATION == 1
 	  	#if LOCAL_NAVIGATION_MODULE == 1
-	  		SimulationNode simulation(messageBus, dbHandler, &collidableMgr);
+	  		SimulationNode simulation(messageBus, dbHandler, 0, &collidableMgr);
 	  	#else
-			SimulationNode simulation(messageBus, dbHandler);
+			SimulationNode simulation(messageBus, dbHandler, 0);
 	  	#endif
   	#else
 		CV7Node windSensor(messageBus, dbHandler);
@@ -208,7 +208,7 @@ int main(int argc, char *argv[])
 	// Initialise nodes
 	//-------------------------------------------------------------------------------
 
-	initialiseNode(httpsync, "Httpsync", NodeImportance::NOT_CRITICAL);
+	//initialiseNode(httpsync, "Httpsync", NodeImportance::NOT_CRITICAL);
 	initialiseNode(dbLoggerNode, "DBLogger", NodeImportance::CRITICAL);
 	initialiseNode(windStateNode,"WindState",NodeImportance::CRITICAL);
 	initialiseNode(waypoint, "Waypoint", NodeImportance::CRITICAL);
@@ -238,7 +238,7 @@ int main(int argc, char *argv[])
 	// Start active nodes
 	//-------------------------------------------------------------------------------
 
-	httpsync.start();
+	//httpsync.start();
 	dbLoggerNode.start();
 
 	#if SIMULATION == 1

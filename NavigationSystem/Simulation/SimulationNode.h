@@ -114,8 +114,8 @@ struct WaypointPacket_t {
 
 class SimulationNode : public ActiveNode {
 public:
-	SimulationNode(MessageBus& msgBus, DBHandler& dbhandler);
-    SimulationNode(MessageBus& msgBus, DBHandler& dbhandler, CollidableMgr* collidableMgr);
+	SimulationNode(MessageBus& msgBus, DBHandler& dbhandler, bool boatType);
+    SimulationNode(MessageBus& msgBus, DBHandler& dbhandler, bool boatType, CollidableMgr* collidableMgr);
 
     ///----------------------------------------------------------------------------------
     /// Initialize the TCP communication
@@ -223,6 +223,8 @@ private:
     TCPServer server;
     CollidableMgr* collidableMgr;
     DBHandler& m_db;
+
+    bool m_boatType;
 
     ActuatorDataWingPacket_t actuatorDataWing;
     ActuatorDataSailPacket_t actuatorDataSail;
