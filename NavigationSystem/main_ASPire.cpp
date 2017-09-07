@@ -144,13 +144,13 @@ int main(int argc, char *argv[])
 	StateEstimationNode stateEstimationNode(messageBus, dbHandler);
 	WindStateNode windStateNode(messageBus);
 	WaypointMgrNode waypoint(messageBus, dbHandler);
+	CollidableMgr collidableMgr;
 
 	WingsailControlNode wingSailControlNode(messageBus, dbHandler);
 	CourseRegulatorNode courseRegulatorNode(messageBus, dbHandler);
 
   	#if LOCAL_NAVIGATION_MODULE == 1
 		LocalNavigationModule lnm	( messageBus, dbHandler );
-		CollidableMgr collidableMgr;
 
 		const int16_t MAX_VOTES = dbHandler.retrieveCellAsInt("config_voter_system","1","max_vote");
 		WaypointVoter waypointVoter( MAX_VOTES, dbHandler.retrieveCellAsDouble("config_voter_system","1","waypoint_voter_weight")); // weight = 1
@@ -169,11 +169,7 @@ int main(int argc, char *argv[])
   	#endif
 
 	#if SIMULATION == 1
-	  	#if LOCAL_NAVIGATION_MODULE == 1
-	  		SimulationNode simulation(messageBus, dbHandler,&collidableMgr);
-	  	#else
-			SimulationNode simulation(messageBus, dbHandler);
-	  	#endif
+  		SimulationNode simulation(messageBus, dbHandler,&collidableMgr);
   	#else
 		CANService canService;
 
@@ -225,6 +221,7 @@ int main(int argc, char *argv[])
 	dbLoggerNode.start();
 
 	stateEstimationNode.start();
+	collidableMgr.startGC();
 
 	#if SIMULATION == 1
 		simulation.start();
@@ -240,7 +237,6 @@ int main(int argc, char *argv[])
 
 	#if LOCAL_NAVIGATION_MODULE == 1
 		lnm.start();
-		collidableMgr.startGC();
 	#else
 		sailingLogic.start();
 	#endif
