@@ -286,9 +286,10 @@ double LineFollowNode::checkIfObstacleInCourse(double targetCourse, double trueW
     }
     collidableBearingMean = Utility::meanOfAngles(collidableBearingVector);
 
-    if (Utility::isAngleInSector(targetCourse, collidableBearingMean - FreeIntervalAngle/2, collidableBearingMean + FreeIntervalAngle/2))
+    if ((visualContacts.length() > 0) && Utility::isAngleInSector(targetCourse, collidableBearingMean - FreeIntervalAngle/2, collidableBearingMean + FreeIntervalAngle/2))
     {
         // Obstacle in the targetCourse
+        Logger::info("Obstacle in Sector -30,+30 degree");
         m_ObstacleAvoidanceTimer.start();
 
         if (Utility::isAngleInSector(targetCourse, collidableBearingMean - FreeIntervalAngle/2, collidableBearingMean))
@@ -315,6 +316,7 @@ double LineFollowNode::checkIfObstacleInCourse(double targetCourse, double trueW
     {
         if (m_ObstacleAvoidanceTimer.started())
         {
+            Logger::info("In Avoidance mode");
             targetCourse = m_lastAvoidanceCourse;
         }
     }

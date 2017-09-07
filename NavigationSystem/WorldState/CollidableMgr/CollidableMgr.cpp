@@ -127,6 +127,7 @@ void CollidableMgr::addAISContact( uint32_t mmsi, float length, float beam )
 ///----------------------------------------------------------------------------------
 void CollidableMgr::addVisualContact( uint32_t id, uint16_t bearing )
 {
+    Logger::info("addVisualContact. bearing = %s", std::to_string(bearing));
     if( !this->ownVisualLock )
     {
         this->visualListMutex.lock();
