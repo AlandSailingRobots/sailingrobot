@@ -67,6 +67,11 @@ public:
   * Starts the worker thread
   */
   void start();
+  
+  /*
+  * Initialisation function
+  */
+  bool init();
 
 private:
     struct Compass

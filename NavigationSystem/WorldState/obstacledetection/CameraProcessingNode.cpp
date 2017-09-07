@@ -91,6 +91,11 @@ CameraProcessingNode::CameraProcessingNode(MessageBus& msgBus, CollidableMgr& co
     }
   }
   
+  bool CameraProcessingNode::init()
+  {
+      return true;
+  }
+  
   void CameraProcessingNode::detectObstacles()
   {
       Mat imgOriginal; // Input raw image
