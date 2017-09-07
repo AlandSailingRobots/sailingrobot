@@ -8,7 +8,7 @@
 *     the obstacles found to the collidableMgr
 *
 * Developer Notes:
-*
+* NEW VERSION
 *
 ***************************************************************************************/
 #include <opencv2/core.hpp>
