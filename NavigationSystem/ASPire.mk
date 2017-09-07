@@ -11,6 +11,8 @@
 # Files
 ###############################################################################
 
+LIBS += $(shell pkg-config --cflags --libs opencv)
+
 # Source files
 SRC						= main_ASPire.cpp $(CORE_SRC) $(COLLIDABLE_MGR_SRC)
 
@@ -24,7 +26,7 @@ ifeq ($(USE_SIM),1)
 SRC 					+= $(SIMULATOR_SRC)
 else
 SRC 					+= $(HW_SERVICES_ALL_SRC) $(CAN_SERVICES_SRC) $(HW_NODES_ALL_SRC) \
-							$(HW_NODES_ASPIRE_SRC)
+							$(HW_NODES_ASPIRE_SRC) $(HW_NODES_CAMERA)
 endif
 
 

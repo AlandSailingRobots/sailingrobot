@@ -35,6 +35,7 @@
   #include "Hardwares/ActuatorNodeASPire.h"
   #include "Hardwares/CANArduinoNode.h"
   #include "Hardwares/MarineSensorNode.h"
+  #include "WorldState/obstacledetection/CameraProcessingNode.hpp"
 #endif
 
 
@@ -181,6 +182,7 @@ int main(int argc, char *argv[])
 
 	  	int miniWaitTime = 20; 	// Periode (in seconds) during witch the measuements are performed.
 	  	MarineSensorNode marineSensors(messageBus, miniWaitTime);
+	  	CameraProcessingNode cameraProcessingNode(messageBus, &collidableMgr);
 	#endif
 
 
@@ -212,6 +214,7 @@ int main(int argc, char *argv[])
 		initialiseNode(actuators, "Actuators", NodeImportance::CRITICAL);
 		initialiseNode(actuatorFeedback, "Actuator Feedback", NodeImportance::NOT_CRITICAL);
 		initialiseNode(marineSensors, "Marine Sensors", NodeImportance::NOT_CRITICAL);
+		initialiseNode(cameraProcessingNode, "Marine Sensors", NodeImportance::NOT_CRITICAL);
 	#endif
 
 	// Start active nodes
@@ -233,6 +236,7 @@ int main(int argc, char *argv[])
 		gpsd.start();
 		windSensor.start();
 		actuatorFeedback.start();
+		cameraProcessingNode.start();
 	#endif
 
 	#if LOCAL_NAVIGATION_MODULE == 1
