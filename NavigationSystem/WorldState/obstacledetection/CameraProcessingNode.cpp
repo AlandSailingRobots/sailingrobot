@@ -44,7 +44,7 @@ using namespace cv;
 vector<Obstacle> obstacle_list;
  
 CameraProcessingNode::CameraProcessingNode(MessageBus& msgBus, CollidableMgr& collidableMgr)
-  : ActiveNode(NodeID::CameraProcessingNode, msgBus), m_LoopTime(0.5), collidableMgr(collidableMgr) {
+  : ActiveNode(NodeID::CameraProcessingNode, msgBus), m_LoopTime(0.5), collidableMgr(&collidableMgr) {
     msgBus.registerNode(*this, MessageType::CompassData);
   }
 
