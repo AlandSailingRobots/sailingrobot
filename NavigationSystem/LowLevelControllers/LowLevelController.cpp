@@ -86,6 +86,7 @@ void LowLevelController::processMessage( const Message* msg )
 void LowLevelController::sendActuatorMsg()
 {
     MessagePtr actuatorMsg = std::make_unique<ActuatorPositionMsg>( rudder_ms, sail_ms );
+    //std::cout << "llc mesage : " << rudder_ms << " " << sail_ms << std::endl;
     m_MsgBus.sendMessage( std::move( actuatorMsg ) );
 }
 
