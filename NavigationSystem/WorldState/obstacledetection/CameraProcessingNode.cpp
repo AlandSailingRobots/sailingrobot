@@ -8,7 +8,7 @@
 *     the obstacles found to the collidableMgr
 *
 * Developer Notes:
-* NEW VERSION
+*
 *
 ***************************************************************************************/
 #include <opencv2/core.hpp>
@@ -21,15 +21,7 @@
 #include <opencv2/tracking.hpp>
 #include <opencv2/video.hpp>
 
-#include <vector>
-
-#include "MessageBus/MessageTypes.h"
-#include "MessageBus/MessageBus.h"
-#include "MessageBus/ActiveNode.h"
-#include "SystemServices/Logger.h"
-#include "WorldState/CollidableMgr/CollidableMgr.h"
-#include "Obstacle.hpp"
-#include "CameraProcessingNode.hpp"
+#include "CameraProcessingNode.h"
 
 using namespace std;
 using namespace cv;
@@ -44,7 +36,8 @@ using namespace cv;
 vector<Obstacle> obstacle_list;
  
 CameraProcessingNode::CameraProcessingNode(MessageBus& msgBus, CollidableMgr& collidableMgr)
-  : ActiveNode(NodeID::CameraProcessingNode, msgBus), m_LoopTime(0.5), collidableMgr(collidableMgr) {
+  : ActiveNode(NodeID::CameraProcessingNode, msgBus), m_LoopTime(0.5), collidableMgr(collidableMgr) 
+  {
     msgBus.registerNode(*this, MessageType::CompassData);
   }
 
@@ -67,7 +60,7 @@ CameraProcessingNode::CameraProcessingNode(MessageBus& msgBus, CollidableMgr& co
   void CameraProcessingNode::processCompassMessage(CompassDataMsg* msg) {
       m_compass_data.roll = msg->roll();
       m_compass_data.heading = msg->heading();
-      m_compass_data.tmsp = SysClock::unixTime(); /** @todo Messages should have an internal timestamp, time not reliable due to possible glitches in message processing */
+      m_compass_data.tmsp = SysClock::unixTime(); /** @todo Messages should have an internal timestamp, received time not reliable due to possible glitches in message processing */
   }
 
   void CameraProcessingNode::addObstacleToCollidableMgr() {
@@ -99,8 +92,8 @@ CameraProcessingNode::CameraProcessingNode(MessageBus& msgBus, CollidableMgr& co
   void CameraProcessingNode::detectObstacles()
   {
       Mat imgOriginal; // Input raw image
-      Mat hsvImg;
-      Mat threshImg;
+      Mat hsvImg; // HSV converted image
+      Mat threshImg; // Filtered HSV image
       
       // Blob detection
       SimpleBlobDetector::Params params;
@@ -117,15 +110,14 @@ CameraProcessingNode::CameraProcessingNode(MessageBus& msgBus, CollidableMgr& co
       params.filterByColor = true;
       params.blobColor = 255;
       
-#if CV_MAJOR_VERSION < 3   // For OpenCV 2
-      // Set up detector with params
-      SimpleBlobDetector detector(params);
-#else
       // Set up detector with params
       Ptr<SimpleBlobDetector> detector = SimpleBlobDetector::create(params);
-#endif
+
       vector<KeyPoint> blobs;
       
+      // For green dot detection
+      vector<Vec3f> circles;
+
       // Tilt correction
       Mat rot;
       Rect imageBox;
@@ -149,7 +141,12 @@ CameraProcessingNode::CameraProcessingNode(MessageBus& msgBus, CollidableMgr& co
             break;
         }
           
-        // Correct tilted image
+        /*
+         *-----------------------------------------------------------------
+         * Correct tilted image
+         *-----------------------------------------------------------------
+         */
+        // Check if compass data is up to date
         if(SysClock::unixTime() - m_compass_data.tmsp < MAX_COMPASS_FRAME_TIMEFRAME)
         {            
             // Create the rotation matrix
@@ -163,17 +160,55 @@ CameraProcessingNode::CameraProcessingNode(MessageBus& msgBus, CollidableMgr& co
             warpAffine(imgOriginal, imgOriginal, rot, imageBox.size());
         }
         
+        /*
+         *-----------------------------------------------------------------
+         * Convert image to HSV color space
+         *-----------------------------------------------------------------
+         */
         // Convert Original Image to HSV Thresh Image
         cvtColor(imgOriginal, hsvImg, CV_BGR2HSV); 
         
-        // detect only the chosen color
-        inRange(hsvImg, Scalar(0, 59, 222), Scalar(179, 166, 255), threshImg);
+        /* 
+         *-----------------------------------------------------------------
+         * Find green circle indicating camera recalibration
+         *-----------------------------------------------------------------
+         */
+        // Find green pixels
+        inRange(hsvImg, Scalar(45, 100, 100), Scalar(75, 255, 255), hsv_image);
+
+        // Avoid false positives with a general blur
+        GaussianBlur(hsvImg, hsvImg, Size(9, 9), 2, 2);
+
+        // Find circles
+        HoughCircles(hsvImg, circles, CV_HOUGH_GRADIENT, 1, hsvImg.rows/8, 85, 15, 0, 0);
+
+        if(circles.size() != 0) 
+        {
+            // A green circle has been detected, he thermal camera is recalibrating and frames may be unreliable and corrupted, sleep thread
+            Logger::info("Camera is recalibrating, thread will sleep for 3 seconds");
+            Timer t;
+            t.start();
+            t.sleepUntl(3);
+            t.reset;
+            continue;
+        }
         
+        /*
+         *-----------------------------------------------------------------
+         * Denoising
+         *-----------------------------------------------------------------
+         */
         // Apply filters
         GaussianBlur(threshImg, threshImg, Size(3, 3), 0);
+        medianBlur(threshImg, threshImg, 3);
         dilate(threshImg, threshImg, 0);
         erode(threshImg, threshImg, 0);
         
+        /*
+         *-----------------------------------------------------------------
+         * Find blobs
+         *-----------------------------------------------------------------
+         */
         // Init detector
         detector->detect( threshImg, blobs );
         

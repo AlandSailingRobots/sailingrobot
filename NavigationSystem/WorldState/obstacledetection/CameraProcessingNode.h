@@ -1,7 +1,7 @@
 /****************************************************************************************
 *
 * File:
-* 		CameraProcessingNode.hpp
+* 		CameraProcessingNode.h
 *
 * Purpose:
 *     Receives compass data from the CAN BUS and processes frames coming from the camera
@@ -14,27 +14,22 @@
 
 #pragma once
 
-#include <opencv2/core.hpp>
-#include <opencv2/imgcodecs.hpp>
-#include <opencv2/videoio.hpp>
-#include <opencv2/highgui.hpp>
-#include <opencv2/imgproc.hpp>
-#include <opencv2/photo.hpp>
-#include <opencv2/videostab.hpp>
-#include <opencv2/tracking.hpp>
-#include <opencv2/video.hpp>
-
+#include <mutex>
+#include <vector>
 #include <chrono>
 #include <thread>
-#include <mutex>
 
 #include "Messages/CompassDataMsg.h"
 #include "Messages/StateMessage.h"
-#include "SystemServices/Timer.h"
 #include "MessageBus/Message.h"
 #include "MessageBus/ActiveNode.h"
+#include "MessageBus/MessageTypes.h"
+#include "MessageBus/MessageBus.h"
 #include "WorldState/CollidableMgr/CollidableMgr.h"
 #include "SystemServices/Logger.h"
+#include "SystemServices/Timer.h"
+
+#include "Obstacle.hpp"
 
 class CameraProcessingNode : public ActiveNode {
 public:
