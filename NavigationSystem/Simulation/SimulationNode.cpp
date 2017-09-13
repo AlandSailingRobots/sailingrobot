@@ -186,12 +186,6 @@ void SimulationNode::createWindMessage()
     m_MsgBus.sendMessage( std::move(windData) );
 }
 
-void SimulationNode::createASPireActuatorFeedbackMessage()
-{
-    MessagePtr ASPireActuatorFeedback = std::make_unique<ASPireActuatorFeedbackMsg>( ASPireActuatorFeedbackMsg(-2000, -2000, -2000, -2000, 0) );
-    m_MsgBus.sendMessage( std::move(ASPireActuatorFeedback) );
-}
-
 
 ///--------------------------------------------------------------------------------------
 void SimulationNode::processSailBoatData( TCPPacket_t& packet )
@@ -202,7 +196,7 @@ void SimulationNode::processSailBoatData( TCPPacket_t& packet )
         uint8_t* ptr = packet.data + 1;
         SailBoatDataPacket_t* boatData = (SailBoatDataPacket_t*)ptr;
 
-        m_CompassHeading = Utility::limitAngleRange(90 - boatData->heading); // [0, 360] north east down
+        m_CompassHeading = Utility::limitAngleRange(90 - boatData->heading - m_nextDeclination); // [0, 360] north east down
         m_GPSLat = boatData->latitude;
         m_GPSLon = boatData->longitude;
 
@@ -263,7 +257,6 @@ void SimulationNode::processWingBoatData( TCPPacket_t& packet )
         createCompassMessage();
         createGPSMessage();
         createWindMessage();
-        createASPireActuatorFeedbackMessage();
     }
 }
 
@@ -314,7 +307,7 @@ void SimulationNode::sendActuatorDataWing( int socketFD)
 void SimulationNode::sendActuatorDataSail( int socketFD)
 {   
     actuatorDataSail.rudderCommand = m_RudderCommand;
-    actuatorDataSail.sailCommand   = m_SailCommand;
+    actuatorDataSail.sailCommand   = Utility::degreeToRadian(m_SailCommand);
     server.sendData( socketFD, &actuatorDataSail, sizeof(ActuatorDataSailPacket_t) );       
 }
 

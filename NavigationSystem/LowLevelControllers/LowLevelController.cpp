@@ -18,7 +18,7 @@
 #include <stdlib.h>
 #include "Math/Utility.h"
 #include "Messages/CompassDataMsg.h"
-#include "Messages/WindDataMsg.h"
+#include "Messages/WindStateMsg.h"
 #include "Messages/DesiredCourseMsg.h"
 #include "Messages/LocalNavigationMsg.h"
 #include "Messages/ActuatorPositionMsg.h"
@@ -34,7 +34,7 @@ LowLevelController::LowLevelController( MessageBus& msgBus, DBHandler& dbHandler
     desiredHeading(HEADING_ERROR_VALUE), pGain(configPGain), iGain(configIGain)
 {
     msgBus.registerNode( *this, MessageType::CompassData );
-    msgBus.registerNode( *this, MessageType::WindData );
+    msgBus.registerNode( *this, MessageType::WindState );
     msgBus.registerNode( *this, MessageType::DesiredCourse );
     msgBus.registerNode( *this, MessageType::LocalNavigation );
 
@@ -58,10 +58,10 @@ void LowLevelController::processMessage( const Message* msg )
             //Logger::info("Desired Course: %d Heading: %d", desiredHeading, heading);
         }
             break;
-        case MessageType::WindData:
+        case MessageType::WindState:
         {
-            WindDataMsg* wind = (WindDataMsg*)msg;
-            calculateSail( wind->windDirection() );
+            WindStateMsg* windState = (WindStateMsg*)msg;
+            calculateSail( windState->apparentWindDirection() );
             sendActuatorMsg();
         }
             break;
@@ -107,7 +107,7 @@ void LowLevelController::calculateSail( int windDir )
     static const int closeReach  = 20;
     static const int beamReach   = 50;
     static const int broadReach  = 70;
-    static const int running     = 100;
+    static const int running     = 90;
 
     int command = 0;
 
@@ -131,7 +131,7 @@ void LowLevelController::calculateSail( int windDir )
     }
 
     // the / 100 puts us into the correct range, and prevents floating point maths
-    sail_ms = closeRange_ms + ( ( command * sailRange_ms ) / 100);
+    sail_ms = command; //closeRange_ms + ( ( command * sailRange_ms ) / 100);
 }
 
 ///----------------------------------------------------------------------------------

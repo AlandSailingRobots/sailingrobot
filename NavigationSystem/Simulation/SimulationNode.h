@@ -204,7 +204,6 @@ private:
     void createCompassMessage();
     void createGPSMessage();
     void createWindMessage();
-    void createASPireActuatorFeedbackMessage();
 
     float   m_RudderCommand;
     float   m_SailCommand;
