@@ -14,12 +14,13 @@
 #pragma once
 
 #include "MessageBus/ActiveNode.h"
+#include "DataBase/DBHandler.h"
 #include <map>
 
 
 class CV7Node : public ActiveNode{
 public:
-	CV7Node(MessageBus& msgBus, std::string m_PortName, unsigned int baudRate);
+	CV7Node(MessageBus& msgBus, DBHandler& dbhandler);
 
 	virtual ~CV7Node();
 
@@ -49,6 +50,9 @@ public:
 	bool parseString(std::string& buffer_to_parse, float& windDir, float& windSpeed, float& windTemp) const;
 
 private:
+
+	void updateConfigsFromDB();
+
 	///----------------------------------------------------------------------------------
  	/// Parses a NMEA wind sensor string and returns true if the parse was successful.
 	/// The data that is parsed is put into a number of referenced values.
@@ -70,4 +74,6 @@ private:
 	float m_MeanWindDir;
 	float m_MeanWindSpeed;
 	float m_MeanWindTemp;
+	double m_LoopTime;
+	DBHandler& m_db;
 };

@@ -41,7 +41,7 @@
 //	to move the server fully left, and 2ms meaning to move it fully
 //	right. Then you need a long gap before sending the next pulse.
 //	The reason for this is that you send a multiplexed stream of these
-//	pulses up the radio signal into the reciever which de-multiplexes
+//	pulses up the radio signal into the receiver which de-multiplexes
 //	them into the signals for each individual servo. Typically there
 //	might be 8 channels, so you need at least 8 "slots" of 2mS pulses
 //	meaning the entire frame must fit into a 16mS slot - which would

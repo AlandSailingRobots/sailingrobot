@@ -4,6 +4,7 @@
 #include <stdint.h> // uint8_t
 #include <vector>
 #include <array>
+#include <iostream>
 
 
 class Utility {
@@ -17,7 +18,11 @@ public:
 	static float mean(std::vector<float> values);
 	static float mapInterval (float val, float fromMin, float fromMax, float toMin, float toMax);
 	static float meanOfAngles(std::vector<float> anglesInDegrees);
-	static int sgn(double value);
+    static int sgn(double value);
+	// static int16_t pi(double pGain, double iGain, uint16_t heading, uint16_t desiredHeading);
+    static std::vector<double> maxAndIndex(std::vector<double> mylist);
+
+
 
 	/*
 	 * Converts an angle in degrees to cartesian coordinates (x,y) on the
@@ -36,6 +41,7 @@ public:
 
 	/*
 	 * Returns the angle value corresponding to x by the linear function defined by the points (x1,angle1) and (x2,angle2).
+	 * Angles are in degree.
 	 */
 	static double linearFunctionBetweenAngle(double x, double x1, double x2, double angle1, double angle2);
 	static double degreeToRadian(double degrees);
@@ -49,31 +55,40 @@ public:
 
 	static double directionAdjustedSpeed(double gpsHeading,double compassHeading,double gpsSpeed);
 
-	static double calculateSignedDistanceToLine(const double nextLon, const double nextLat, const double prevLon, const double prevLat, 
+	static double calculateSignedDistanceToLine(const double nextLon, const double nextLat, const double prevLon, const double prevLat,
 					const double gpsLon, const double gpsLat);
-	static double calculateWaypointsOrthogonalLine(const double nextLon, const double nextLat, const double prevLon, const double prevLat, 
+	static double calculateWaypointsOrthogonalLine(const double nextLon, const double nextLat, const double prevLon, const double prevLat,
 					const double gpsLon, const double gpsLat);
 
 
 
 	static double calculateTrueWindDirection(const int windsensorDir, const int windsensorSpeed, const double gpsSpeed, const double heading);
 	static double calculateTrueWindSpeed(int windsensorDir, int windsensorSpeed, double gpsSpeed, double heading);
-	static double getTrueWindDirection(int windsensorDir, int windsensorSpeed, double gpsSpeed, int compassHeading, 
+	static double getTrueWindDirection(int windsensorDir, int windsensorSpeed, double gpsSpeed, int compassHeading,
 			std::vector<float> &twdBuffer, const unsigned int twdBufferMaxSize);
 
 	static void calculateApparentWind(const int windsensorDir, const int windsensorSpeed, const double gpsSpeed, const double heading, const double trueWindDirection,
 		                                         double &apparentWindSpeed, double &apparentWindDirection);
 	static double getApparentWindSpeed(const int windsensorDir, const int windsensorSpeed, const double gpsSpeed, const double heading, const double trueWindDirection);
 	static double getApparentWindDirection(const int windsensorDir, const int windsensorSpeed, const double gpsSpeed, const double heading, const double trueWindDirection);
-	
+
 	/*
 	 * Add two vectors expressed in polar coordinates and return the resulting vector (in polar coordinates).
 	 * vector = (radius, angle).		Angles are in radian, in [0, 2*PI[.
 	 */
 	static std::vector<double> polarVerctorsAddition(std::vector<double> v1, std::vector<double> v2);
 
+	static void addValueToBuffer(float value, std::vector<float> &buffer, unsigned int bufferMaxSize);
+
 	static void sphericalCoordinateSystem( const double lat, const double lon, double& x, double& y);
 	static void calculateVelocity( const uint16_t course, const double speed, double& vX, double& vY );
+
+	/*
+	 * Use formula to calculate salidety from marine sensor data
+	 * http://www.chemiasoft.com/chemd/salinity_calculator
+	 */
+	static float calculateSalidety (const float temperature, const  float conductivety);
+
 };
 
 #endif

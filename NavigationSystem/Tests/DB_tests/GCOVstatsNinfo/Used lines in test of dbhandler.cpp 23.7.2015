@@ -27,7 +27,7 @@
         -:   22:
         -:   23:
         9:   24:void DBHandler::openDatabase(std::string fileName) {
-        -:   25:	
+        -:   25:
         -:   26:	// check if file exists
         9:   27:	FILE* db_file = fopen(fileName.c_str(), "r");
         9:   28:	if (!db_file) {
@@ -92,7 +92,7 @@
         -:   87:	//printf("%s\n",values.str().c_str());
         -:   88:
         4:   89:	std::stringstream sstm;
-        2:   90:	sstm << "INSERT INTO datalogs VALUES(NULL, " << values.str() << ");";
+        2:   90:	sstm << "INSERT INTO dataLogs VALUES(NULL, " << values.str() << ");";
         -:   91:
         3:   92:	queryTable(sstm.str());
         1:   93:	m_latestDataLogId = sqlite3_last_insert_rowid(m_db);
@@ -192,7 +192,7 @@
     =====:  187:		std::cout << "exception thrown in retriveCellAsInt, is returned cell a int?  " << e << std::endl;
     =====:  188:		return 0;
         -:  189:	}
-        -:  190:	
+        -:  190:
         -:  191:}
         -:  192:
         -:  193:
@@ -204,16 +204,16 @@
     #####:  199:std::string DBHandler::getLogs() {
         -:  200:
     #####:  201:	std::vector<std::string> logIds;
-    #####:  202:	logIds = getTableIds("datalogs");
-    #####:  203:	JSONArray datalogs;
-    #####:  204:	datalogs.setName("datalogs");
-    #####:  205:	std::vector<std::string> datalogColumns = getColumnInfo("name", "datalogs");
+    #####:  202:	logIds = getTableIds("dataLogs");
+    #####:  203:	JSONArray dataLogs;
+    #####:  204:	dataLogs.setName("dataLogs");
+    #####:  205:	std::vector<std::string> datalogColumns = getColumnInfo("name", "dataLogs");
         -:  206:
         -:  207:/*	for (unsigned int i = 0; i < logIds.size(); i++) {
         -:  208:		JSONData data;
         -:  209:
         -:  210:		for (unsigned int j = 0; j < datalogColumns.size(); j++) {
-        -:  211:			data.add(datalogColumns[j], retriveCell("datalogs", logIds[i], datalogColumns[j]));
+        -:  211:			data.add(datalogColumns[j], retriveCell("dataLogs", logIds[i], datalogColumns[j]));
         -:  212:		}
         -:  213:
         -:  214:		vector<string> stateColumns = getColumnInfo("name", "state");
@@ -223,7 +223,7 @@
         -:  218:
         -:  219:		JSONBlock block;
         -:  220:		block.add(data.toString());
-        -:  221:		datalogs.add(block.toString());
+        -:  221:		dataLogs.add(block.toString());
         -:  222:	}
         -:  223:
         -:  224:	vector<string> msgIds;
@@ -246,15 +246,15 @@
     #####:  241:	lastId << m_latestDataLogId;
     #####:  242:	JSONData data;
     #####:  243:	for (unsigned int j = 0; j < datalogColumns.size(); j++) {
-    #####:  244:		data.add(datalogColumns[j], retriveCell("datalogs", lastId.str(), datalogColumns[j]));
+    #####:  244:		data.add(datalogColumns[j], retriveCell("dataLogs", lastId.str(), datalogColumns[j]));
         -:  245:	}
     #####:  246:	JSONBlock block;
     #####:  247:	block.add(data.toString());
-    #####:  248:	datalogs.add(block.toString());
+    #####:  248:	dataLogs.add(block.toString());
         -:  249:
     #####:  250:	JSONBlock main;
     #####:  251:	if(logIds.size() > 0)
-    #####:  252:		main.add(datalogs.toString());
+    #####:  252:		main.add(dataLogs.toString());
         -:  253:/*	if(msgIds.size() > 0)
         -:  254:		main.add(messages.toString());
         -:  255:*/

@@ -1,5 +1,6 @@
 {
 "1": {
+  "is_checkpoint": 0,
   "latitude": 60.107415,
   "longitude": 19.922481,
   "declination": 6,
@@ -9,6 +10,7 @@
 },
 
 "2": {
+  "is_checkpoint": 0,
   "latitude": 60.106236,
   "longitude": 19.922452,
   "declination": 6,
@@ -18,6 +20,7 @@
 },
 
 "3": {
+  "is_checkpoint": 0,
   "latitude": 60.104709,
   "longitude": 19.922034,
   "declination": 6,
@@ -27,6 +30,7 @@
 },
 
 "4": {
+  "is_checkpoint": 0,
   "latitude": 60.104634,
   "longitude": 19.920027,
   "declination": 6,
@@ -36,6 +40,7 @@
 },
 
 "5": {
+  "is_checkpoint": 0,
   "latitude": 60.107097,
   "longitude": 19.920955,
   "declination": 6,
@@ -45,6 +50,7 @@
 },
 
 "6": {
+  "is_checkpoint": 0,
   "latitude": 60.107415,
   "longitude": 19.922481,
   "declination": 6,

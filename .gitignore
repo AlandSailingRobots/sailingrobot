@@ -17,6 +17,7 @@ logs/
 *.gch
 gps.txt
 org.kde.konsole.desktop
+NavigationSystem/nohup.out
 
 # for unit tests
 NavigationSystem/Tests/cxxtest/python/python3/cxxtest/__pycache__/

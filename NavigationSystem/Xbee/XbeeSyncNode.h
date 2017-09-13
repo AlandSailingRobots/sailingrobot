@@ -43,7 +43,7 @@ public:
 	void start();
 
 	void processMessage(const Message*);
-	
+
 private:
 
 	///----------------------------------------------------------------------------------
@@ -61,6 +61,11 @@ private:
 	///----------------------------------------------------------------------------------
 	static void xBeeSyncThread(ActiveNode* nodePtr);
 
+    ///----------------------------------------------------------------------------------
+	/// Update values from the database as the loop time of the thread and others parameters
+	///----------------------------------------------------------------------------------
+    void updateConfigsFromDB();
+
 	bool 					m_initialised;
 	DBHandler& 				m_db;
 	LinuxSerialDataLink 	m_dataLink;
@@ -72,10 +77,8 @@ private:
 	bool m_receiving;
 	bool m_sendLogs;
 	bool m_pushOnlyLatestLogs;
-	double m_loopTime;
+	double m_LoopTime;
 	double m_lastMessageCallTime;
 	bool m_firstMessageCall;
 
 };
-
-

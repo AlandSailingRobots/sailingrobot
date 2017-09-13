@@ -28,7 +28,7 @@ wp_lat = .0
 wp_lon = .0
 wp_radius = 0
 wp_distance = .0
-wp_bearing = 0
+wp_bearing = 00
 
 compassRadius = 10
 

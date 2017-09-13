@@ -19,6 +19,7 @@ class WindStateNodeSuite : public CxxTest::TestSuite {
 public:
 
 	WindStateNode* windStateNode;
+	DBHandler* dbhandler;
   	std::thread* thr;
 	MessageVerifier* verifier;
 	MessageLogger* logger;
@@ -48,6 +49,7 @@ public:
 	void setUp() {
 		if(windStateNode == 0){
 			verifier = new MessageVerifier(msgBus());
+			dbhandler = new DBHandler("../asr.db");
 			logger = new MessageLogger(msgBus());
 			windStateNode = new WindStateNode(msgBus());
 			thr = new std::thread(runMessageLoop);
@@ -56,9 +58,15 @@ public:
 	}
 
 	void tearDown() {
-		if(testCount == WIND_STATE_TEST_COUNT) {
+		if(testCount == WIND_STATE_TEST_COUNT)
+		{
+			msgBus().stop();
+			thr->join();
+			delete thr;
+			delete logger;
 			delete verifier;
 			delete windStateNode;
+			delete dbhandler;
 		}
 	}
 
@@ -86,7 +94,7 @@ public:
 		float trueWindDirection = 0;
 
 		WindStateMsg windStateMsg(trueWindSpeed,trueWindDirection,apparentWindSpeed,apparentWindDirection);
-	
+
 		TS_ASSERT(verifier->verifyWindStateMsg(&windStateMsg));
 	}
 };

@@ -19,7 +19,6 @@
 
 #define DATA_OUT_OF_RANGE -2000
 
-
 WindStateNode::WindStateNode(MessageBus& msgBus)
 : Node(NodeID::WindStateNode, msgBus)
 {
@@ -30,10 +29,12 @@ WindStateNode::WindStateNode(MessageBus& msgBus)
 WindStateNode::~WindStateNode(){}
 
 
+
 bool WindStateNode::init()
 {
     return true;
 }
+
 
 void WindStateNode::processMessage(const Message* message)
 {
@@ -56,12 +57,14 @@ void WindStateNode::processVesselStateMessage(const StateMessage* msg)
     m_vesselHeading = msg->heading();
     m_vesselSpeed   = msg->speed();
     m_vesselCourse  = msg->course();
+    // std::cout << "m_vesselHeading: " << m_vesselHeading <<std::endl;
 }
 
 void WindStateNode::processWindMessage(const WindDataMsg* msg)
 {
     m_apparentWindSpeed     = msg->windSpeed();
     m_apparentWindDirection = msg->windDirection();
+    //std::cout << "m_apparentWindDirection in wind state: " << m_apparentWindDirection <<std::endl;
 }
 
 void WindStateNode::sendMessage()
@@ -69,6 +72,10 @@ void WindStateNode::sendMessage()
     MessagePtr windState = std::make_unique<WindStateMsg>(m_trueWindSpeed, m_trueWindDirection,
         m_apparentWindSpeed, m_apparentWindDirection);
     m_MsgBus.sendMessage(std::move(windState));
+    // std::cout << "m_trueWindSpeed: " << m_trueWindSpeed <<std::endl;
+    // std::cout << "m_trueWindDirection: " << m_trueWindDirection <<std::endl;
+    // std::cout << "m_apparentWindSpeed: " << m_apparentWindSpeed <<std::endl;
+    // std::cout << "m_apparentWindDirection: " << m_apparentWindDirection <<std::endl;
 }
 
 void WindStateNode::calculateTrueWind()
@@ -78,15 +85,15 @@ void WindStateNode::calculateTrueWind()
     // v1 = - ApparentWindVector in North-East reference frame
     v1[0] = m_apparentWindSpeed;
     v1[1] = Utility::degreeToRadian(m_vesselHeading + m_apparentWindDirection);
-    
+
     // v2 = - VelocityVector in North-East reference frame
     v2[0] = - m_vesselSpeed;
     v2[1] = Utility::degreeToRadian(m_vesselCourse);
-    
+
     // v3 = v1 + v2 (TrueWindVector = ApparentWindVector + VelocityVector)
     v3 = Utility::polarVerctorsAddition(v1, v2);
 
     // v3 = - TrueWindVector in North-East reference frame
     m_trueWindSpeed = v3[0];
-    m_trueWindDirection= Utility::radianToDegree(v3[1]);
+    m_trueWindDirection = Utility::radianToDegree(v3[1]);
 }

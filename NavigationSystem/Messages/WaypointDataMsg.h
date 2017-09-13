@@ -91,15 +91,15 @@ public:
 private:
 
     int     m_nextId;
-    double  m_nextLongitude;
-    double  m_nextLatitude;
-    int     m_nextDeclination;
-    int     m_nextRadius;
-    int     m_nextStayTime;
+    double  m_nextLongitude;	// units : North(+) or South(-) [0-90]
+    double  m_nextLatitude;		// units : East(+) or West(-)  [0-180]
+    int     m_nextDeclination;	// units : degrees
+    int     m_nextRadius;		// units : meters
+    int     m_nextStayTime;		// units : seconds
 
     int     m_prevId;
-    double  m_prevLongitude;
-    double  m_prevLatitude;
-    int     m_prevDeclination;
-    int     m_prevRadius;
+    double  m_prevLongitude;	// units : North(+) or South(-) [0-90]
+    double  m_prevLatitude;		// units : East(+) or West(-)  [0-180]
+    int     m_prevDeclination;	// units : degrees
+    int     m_prevRadius;		// units : meters
 };

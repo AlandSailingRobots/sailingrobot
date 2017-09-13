@@ -14,10 +14,11 @@
 #pragma once
 
 #include "MessageBus/Node.h"
+#include "DataBase/DBHandler.h"
 
 class ActuatorNode : public Node {
 public:
-	ActuatorNode(MessageBus& msgBus, NodeID id, int channel, int speed, int acceleration);
+	ActuatorNode(MessageBus& msgBus, DBHandler& dbhandler, NodeID id, int channel, int speed, int acceleration);
 
 	///----------------------------------------------------------------------------------
  	/// Setups the actuator.
@@ -35,4 +36,5 @@ private:
 	int m_Channel;
 	int m_Speed;
 	int m_Acceleration;
+	DBHandler& m_db;
 };

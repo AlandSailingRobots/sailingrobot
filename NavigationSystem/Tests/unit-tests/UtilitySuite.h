@@ -37,6 +37,7 @@
 #include "Math/Utility.h"
 #include "SystemServices/Timer.h"
 #include <stdint.h> // uint8_t
+#include <stdlib.h>
 
 class UtilitySuite : public CxxTest::TestSuite {
 public:
@@ -264,6 +265,17 @@ public:
 		TS_ASSERT_DELTA(Utility::getTrueWindDirection(171, 5, 2.1, 100.1, twdBuffer, twdBufferMaxSize), 273.2557f, 1e-4)
 		TS_ASSERT_DELTA(Utility::getTrueWindDirection(165, 5, 2, 100, twdBuffer, twdBufferMaxSize), 271.9276f, 1e-4);
 	}
+
+
+        void test_maxAndIndex()
+        {
+	    std::vector<double> mylist = {6.0,45.0,26.0,32.0};
+	    std::vector<double> results;
+	    std::vector<double> compare = {45.0,1.0} ;
+	    results = Utility::maxAndIndex(mylist);
+	    TS_ASSERT_EQUALS(results,compare);
+	}
+    
 
 	void test_polarVerctorsAddition()
 	{

@@ -80,11 +80,10 @@ void MessageBus::sendMessage(MessagePtr msg)
 void MessageBus::run()
 {
 	// Prevent nodes from being registered now
-	m_Running = true;
-
+	m_Running.store(true);
 	startMessageLog();
 
-	while(m_Running)
+	while(m_Running.load() == true)
 	{
 		// TODO - Jordan: Wake up only when messages have been pushed into the queue.
 
@@ -99,14 +98,17 @@ void MessageBus::run()
 
 			tmpPtr = m_FrontMessages;
 			m_FrontMessages = m_BackMessages;
-
 			m_FrontQueueMutex.unlock();
 
 			m_BackMessages = tmpPtr;
-
 			processMessages();
 		}
 	}
+}
+
+void MessageBus::stop()
+{
+	m_Running.store(false);
 }
 
 //TODO - Jordan: What would cause this to return a null pointer?
@@ -131,7 +133,7 @@ void MessageBus::processMessages()
 {
 	while(m_BackMessages->size() > 0)
 	{
-
+		// std::cout << "/* Size back message queue " << m_BackMessages->size() << " */" << '\n';
 		MessagePtr msgPtr = std::move(m_BackMessages->front());
 		Message* msg = msgPtr.get();
 
@@ -144,6 +146,7 @@ void MessageBus::processMessages()
 			{
 				if(node->isInterested( msg->messageType() ))
 				{
+					// std::cout << std::endl << "## Before processing " << nodeToString(node->nodeRef.nodeID()) << " Message : " << msgToString(msg->messageType()) << std::endl;
 					node->nodeRef.processMessage(msg);
 					logMessageConsumer(node->nodeRef.nodeID());
 

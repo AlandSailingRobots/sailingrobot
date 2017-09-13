@@ -18,8 +18,9 @@
 #include <stdlib.h>
 #include "Math/Utility.h"
 #include "Messages/CompassDataMsg.h"
-#include "Messages/WindDataMsg.h"
+#include "Messages/WindStateMsg.h"
 #include "Messages/DesiredCourseMsg.h"
+#include "Messages/LocalNavigationMsg.h"
 #include "Messages/ActuatorPositionMsg.h"
 #include "SystemServices/Logger.h"
 
@@ -33,13 +34,14 @@ LowLevelController::LowLevelController( MessageBus& msgBus, DBHandler& dbHandler
     desiredHeading(HEADING_ERROR_VALUE), pGain(configPGain), iGain(configIGain)
 {
     msgBus.registerNode( *this, MessageType::CompassData );
-    msgBus.registerNode( *this, MessageType::WindData );
+    msgBus.registerNode( *this, MessageType::WindState );
     msgBus.registerNode( *this, MessageType::DesiredCourse );
+    msgBus.registerNode( *this, MessageType::LocalNavigation );
 
-    closeRange_ms = dbHandler.retrieveCellAsInt( "sail_command_config", "1", "close_reach_command" );
-    sailRange_ms = dbHandler.retrieveCellAsInt("sail_command_config", "1", "run_command") - closeRange_ms;
-    rudderMidpoint_ms = dbHandler.retrieveCellAsInt("rudder_command_config", "1", "midship_command");
-    rudderRange_ms = dbHandler.retrieveCellAsInt("rudder_command_config", "1","extreme_command") - rudderMidpoint_ms;
+    closeRange_ms = 4000; //dbHandler.retrieveCellAsInt( "sail_command_config", "1", "close_reach_command" );
+    sailRange_ms = 5000 - closeRange_ms; //dbHandler.retrieveCellAsInt("sail_command_config", "1", "run_command") - closeRange_ms;
+    rudderMidpoint_ms = 5520; //dbHandler.retrieveCellAsInt("rudder_command_config", "1", "midship_command"); // Not use in DataBase
+    rudderRange_ms = 7000 - rudderMidpoint_ms; //dbHandler.retrieveCellAsInt("rudder_command_config", "1","extreme_command") - rudderMidpoint_ms;
 }
 
 ///----------------------------------------------------------------------------------
@@ -56,10 +58,10 @@ void LowLevelController::processMessage( const Message* msg )
             //Logger::info("Desired Course: %d Heading: %d", desiredHeading, heading);
         }
             break;
-        case MessageType::WindData:
+        case MessageType::WindState:
         {
-            WindDataMsg* wind = (WindDataMsg*)msg;
-            calculateSail( wind->windDirection() );
+            WindStateMsg* windState = (WindStateMsg*)msg;
+            calculateSail( windState->apparentWindDirection() );
             sendActuatorMsg();
         }
             break;
@@ -67,6 +69,12 @@ void LowLevelController::processMessage( const Message* msg )
         {
             DesiredCourseMsg* courseMsg = (DesiredCourseMsg*)msg;
             desiredHeading = courseMsg->desiredCourse();
+        }
+            break;
+        case MessageType::LocalNavigation:
+        {
+            LocalNavigationMsg* localNavigationcourseMsg = (LocalNavigationMsg*)msg;
+            desiredHeading = localNavigationcourseMsg->targetCourse();
         }
             break;
         default:
@@ -78,6 +86,7 @@ void LowLevelController::processMessage( const Message* msg )
 void LowLevelController::sendActuatorMsg()
 {
     MessagePtr actuatorMsg = std::make_unique<ActuatorPositionMsg>( rudder_ms, sail_ms );
+    //std::cout << "llc mesage : " << rudder_ms << " " << sail_ms << std::endl;
     m_MsgBus.sendMessage( std::move( actuatorMsg ) );
 }
 
@@ -94,11 +103,11 @@ void LowLevelController::calculateRudder()
 void LowLevelController::calculateSail( int windDir )
 {
     // Fixed sail angles normalised
-    static const int closeHauled = 0;
-    static const int closeReach  = 20;
+    static const int closeHauled = 10;
+    static const int closeReach  = 30;
     static const int beamReach   = 50;
     static const int broadReach  = 70;
-    static const int running     = 100;
+    static const int running     = 90;
 
     int command = 0;
 
@@ -122,7 +131,7 @@ void LowLevelController::calculateSail( int windDir )
     }
 
     // the / 100 puts us into the correct range, and prevents floating point maths
-    sail_ms = closeRange_ms + ( ( command * sailRange_ms ) / 100);
+    sail_ms = command; //closeRange_ms + ( ( command * sailRange_ms ) / 100);
 }
 
 ///----------------------------------------------------------------------------------
@@ -153,6 +162,7 @@ int16_t LowLevelController::pi()
 
     error = Utility::headingDifference( heading, desiredHeading );
 
+    // TODO : value of 0.25 ???
     integral = integral + ( error * 0.25 );
 
     if( integral < -MAX_INTEGRAL )

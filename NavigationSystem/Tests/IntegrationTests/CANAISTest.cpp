@@ -12,6 +12,7 @@
 *
 ***************************************************************************************/
 
+#include "DataBase/DBHandler.h"
 #include "Hardwares/CANAISNode.h"
 #include "Messages/AISDataMsg.h"
 #include "MessageBus/MessageTypes.h"
@@ -22,6 +23,7 @@
 #include "WorldState/CollidableMgr/CollidableMgr.h"
 
 CANService canService;
+DBHandler dbHandler("../asr.db");
 MessageBus msgBus;
 CANAISNode* aisNode;
 AISProcessing* aisProc;
@@ -36,10 +38,10 @@ int main() {
 
   auto future = canService.start();
 
-  aisNode = new CANAISNode(msgBus, canService, 1);
+  aisNode = new CANAISNode(msgBus, dbHandler, canService);
   aisNode->start();
 
-  aisProc = new AISProcessing(msgBus, &cMgr, 300e6, 230082790, 1);
+  aisProc = new AISProcessing(msgBus,dbHandler, &cMgr);
   aisProc->start();
 
   cMgr.startGC();

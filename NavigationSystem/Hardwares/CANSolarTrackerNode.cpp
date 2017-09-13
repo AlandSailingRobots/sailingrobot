@@ -17,14 +17,15 @@
 
 const int DATA_OUT_OF_RANGE = -2000;
 
-CANSolarTrackerNode::CANSolarTrackerNode(MessageBus& msgBus, CANService& canService, double loopTime)
-	: ActiveNode(NodeID::CANSolarTracker, msgBus), m_CANService(&canService), m_LoopTime(loopTime)
+CANSolarTrackerNode::CANSolarTrackerNode(MessageBus& msgBus, DBHandler& dbhandler, CANService& canService, double loopTime)
+	: ActiveNode(NodeID::CANSolarTracker, msgBus), m_CANService(&canService), m_LoopTime(loopTime), m_db(dbhandler)
 {
 	m_Lat = DATA_OUT_OF_RANGE;
 	m_Lon = DATA_OUT_OF_RANGE;
 	m_Heading = DATA_OUT_OF_RANGE;
 
 	msgBus.registerNode(*this, MessageType::StateMessage);
+	msgBus.registerNode(*this, MessageType::ServerConfigsReceived);
 }
 
 CANSolarTrackerNode::~CANSolarTrackerNode () {
@@ -32,11 +33,17 @@ CANSolarTrackerNode::~CANSolarTrackerNode () {
 }
 
 bool CANSolarTrackerNode::init() {
+	updateConfigsFromDB();
 	return true;
 }
 
+void CANSolarTrackerNode::updateConfigsFromDB(){
+	m_LoopTime = m_db.retrieveCellAsDouble("config_solar_tracker","1","loop_time");
+}
+
 void CANSolarTrackerNode::processMessage (const Message* message) {
-	if (message->messageType() == MessageType::StateMessage) {
+	MessageType type = message->messageType();
+	if ( type == MessageType::StateMessage) {
 		StateMessage* stateMsg = (StateMessage*) message;
 		m_Heading = stateMsg->heading();
 		m_Lat = stateMsg->latitude();
@@ -49,6 +56,9 @@ void CANSolarTrackerNode::processMessage (const Message* message) {
 
 		m_Hour = timeinfo->tm_hour;
 		m_Minute = timeinfo->tm_min;
+	}
+	else if (type == MessageType::ServerConfigsReceived){
+		updateConfigsFromDB();
 	}
 }
 
@@ -107,18 +117,17 @@ void CANSolarTrackerNode::CANSolarTrackerThreadFunc(ActiveNode* nodePtr) {
 	timer.start();
 
 	while(true) {
+
 		node->m_lock.lock();
 
-		if (node->m_Lat == DATA_OUT_OF_RANGE ||
-				node->m_Lon ==  DATA_OUT_OF_RANGE ||
-				node->m_Heading == DATA_OUT_OF_RANGE) {
-			node->m_lock.unlock();
-			continue;
+		if ( not ((node->m_Lat == DATA_OUT_OF_RANGE) || (node->m_Lon == DATA_OUT_OF_RANGE) ||
+			(node->m_Heading == DATA_OUT_OF_RANGE)))
+		{
+			node->sendMsg(node->m_Lat, node->m_Lon, node->m_Heading, node->m_Hour, node->m_Minute);
 		}
 
-		node->sendMsg(node->m_Lat, node->m_Lon, node->m_Heading, node->m_Hour, node->m_Minute);
-
 		node->m_lock.unlock();
+
 		timer.sleepUntil(node->m_LoopTime);
 		timer.reset();
 	}

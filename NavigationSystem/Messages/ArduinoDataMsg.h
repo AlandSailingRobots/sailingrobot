@@ -18,12 +18,12 @@
 
 class ArduinoDataMsg : public Message {
 public:
-	ArduinoDataMsg(NodeID destinationID, NodeID sourceID, int pressure, int rudder, int sheet, int battery, int Radio_Controller)
-		:Message(MessageType::ArduinoData, sourceID, destinationID), m_pressure(pressure), m_rudder(rudder), m_sheet(sheet), m_battery(battery), m_Radio_Controller(Radio_Controller)
+	ArduinoDataMsg(NodeID destinationID, NodeID sourceID, int pressure, int rudder, int sheet, int battery)
+		:Message(MessageType::ArduinoData, sourceID, destinationID), m_pressure(pressure), m_rudder(rudder), m_sheet(sheet), m_battery(battery)
 	{ }
 
-	ArduinoDataMsg(int pressure, int rudder, int sheet, int battery, int Radio_Controller)
-		:Message(MessageType::ArduinoData, NodeID::None, NodeID::None), m_pressure(pressure), m_rudder(rudder), m_sheet(sheet), m_battery(battery), m_Radio_Controller(Radio_Controller)
+	ArduinoDataMsg(int pressure, int rudder, int sheet, int battery)
+		:Message(MessageType::ArduinoData, NodeID::None, NodeID::None), m_pressure(pressure), m_rudder(rudder), m_sheet(sheet), m_battery(battery)
 	{ }
 
 	ArduinoDataMsg(MessageDeserialiser deserialiser)
@@ -32,8 +32,8 @@ public:
 		if(	!deserialiser.readInt(m_pressure) ||
 			!deserialiser.readInt(m_rudder) ||
 			!deserialiser.readInt(m_sheet) ||
-			!deserialiser.readInt(m_battery) ||
-			!deserialiser.readInt(m_Radio_Controller))
+			!deserialiser.readInt(m_battery))
+			
 		{
 			m_valid = false;
 		}
@@ -45,7 +45,7 @@ public:
 	int rudder() { return m_rudder; }
 	int sheet() { return m_sheet; }
     int battery() { return m_battery; }
-	int Radio_Controller() const  { return m_Radio_Controller; }
+	
 
     ///----------------------------------------------------------------------------------
 	/// Serialises the message into a MessageSerialiser
@@ -58,13 +58,13 @@ public:
 		serialiser.serialise(m_rudder);
 		serialiser.serialise(m_sheet);
 		serialiser.serialise(m_battery);
-		serialiser.serialise(m_Radio_Controller);
+		
 	}
 
 private:
 	int m_pressure;
 	int m_rudder;
 	int m_sheet;
-    int m_battery;
-	int m_Radio_Controller;
+  int m_battery;
+	
 };

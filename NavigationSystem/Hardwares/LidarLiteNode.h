@@ -43,7 +43,7 @@ public:
 private:
 
 	static void LidarThreadFunc(void* nodePtr);
-    int 	m_delay;
+    int 	m_delay;           //units : milliseconds
     int		m_fd;
     bool 	m_debug;
     bool 	m_Initialised;

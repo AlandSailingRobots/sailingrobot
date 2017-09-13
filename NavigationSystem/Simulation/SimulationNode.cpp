@@ -1,10 +1,10 @@
 /****************************************************************************************
  *
  * File:
- * 		SimulationNode.cpp
+ *      SimulationNode.cpp
  *
  * Purpose:
- *		Discuss with simulation via TCP, create message for the program from the
+ *      Discuss with simulation via TCP, create message for the program from the
  *    data from simulation and send the command data to the simulation.
  *
  * Developer Notes:
@@ -18,7 +18,7 @@
 #include <chrono>
 #include <thread>
 #include <memory>
-
+#include <stdlib.h>
 #include <sys/types.h>
 #include <netdb.h>
 #include <fcntl.h>
@@ -26,99 +26,124 @@
 #include <cerrno>
 #include <cstring>
 #include <unistd.h>
+#include <stdlib.h>
+#include "SystemServices/Timer.h"
 #include "SystemServices/Logger.h"
 #include "SystemServices/SysClock.h"
 #include "Network/TCPServer.h"
 #include "Math/CourseMath.h"
+#include "Math/Utility.h"
 
 
 #define BASE_SLEEP_MS 200
 #define COUNT_COMPASSDATA_MSG 1
 #define COUNT_GPSDATA_MSG 1
 #define COUNT_WINDDATA_MSG 1
-#define COUNT_ARDUINO_MSG 1
 
-#define SERVER_PORT	6900
-
-
-enum SimulatorPacket {
-	BoatData = 0,
-	AISData = 1,
-	CameraData = 2
-};
+#define SERVER_PORT 6900
 
 
-SimulationNode::SimulationNode(MessageBus& msgBus)
+
+SimulationNode::SimulationNode(MessageBus& msgBus, DBHandler& dbhandler, bool boatType)
 	: ActiveNode(NodeID::Simulator, msgBus),
+        m_RudderCommand(0), m_SailCommand(0), m_TailCommand(0),
 		m_CompassHeading(0), m_GPSLat(0), m_GPSLon(0), m_GPSSpeed(0),
-		m_GPSHeading(0), m_WindDir(0), m_WindSpeed(0),
-		m_ArduinoRudder(0), m_ArduinoSheet(0), collidableMgr(NULL)
+		m_GPSCourse(0), m_WindDir(0), m_WindSpeed(0), m_nextDeclination(0),
+		collidableMgr(NULL), m_db(dbhandler), m_boatType(boatType)
 {
-  m_MsgBus.registerNode(*this, MessageType::ActuatorPosition);
-	m_MsgBus.registerNode(*this, MessageType::WaypointData);
+    msgBus.registerNode(*this, MessageType::WingSailCommand);
+    msgBus.registerNode(*this, MessageType::RudderCommand);
+    msgBus.registerNode(*this, MessageType::WaypointData);
+    msgBus.registerNode(*this, MessageType::ServerConfigsReceived);
+    msgBus.registerNode(*this, MessageType::ActuatorPosition);
 }
 
-SimulationNode::SimulationNode(MessageBus& msgBus, CollidableMgr* collidableMgr)
+SimulationNode::SimulationNode(MessageBus& msgBus, DBHandler& dbhandler, bool boatType, CollidableMgr* collidableMgr)
 	: ActiveNode(NodeID::Simulator, msgBus),
+        m_RudderCommand(0), m_SailCommand(0), m_TailCommand(0),
 		m_CompassHeading(0), m_GPSLat(0), m_GPSLon(0), m_GPSSpeed(0),
-		m_GPSHeading(0), m_WindDir(0), m_WindSpeed(0),
-		m_ArduinoRudder(0), m_ArduinoSheet(0), collidableMgr(collidableMgr)
+		m_GPSCourse(0), m_WindDir(0), m_WindSpeed(0), m_nextDeclination(0),
+		collidableMgr(collidableMgr), m_db(dbhandler),m_boatType(boatType)
 {
-  m_MsgBus.registerNode(*this, MessageType::ActuatorPosition);
-	m_MsgBus.registerNode(*this, MessageType::WaypointData);
+    msgBus.registerNode(*this, MessageType::WingSailCommand);
+    msgBus.registerNode(*this, MessageType::RudderCommand);
+    msgBus.registerNode(*this, MessageType::WaypointData);
+    msgBus.registerNode(*this, MessageType::ServerConfigsReceived);
+    msgBus.registerNode(*this, MessageType::ActuatorPosition);
 }
 
 void SimulationNode::start()
 {
-	runThread(SimulationThreadFunc);
+    runThread(SimulationThreadFunc);
 }
 
 bool SimulationNode::init()
 {
-	bool success = false;
+    bool success = false;
+    updateConfigsFromDB();
 
-	int rc = server.start( SERVER_PORT );
+    int rc = server.start( SERVER_PORT );
 
-	if( rc > 0 )
-	{
-		Logger::info("Waiting for simulation client...\n");
+    if( rc > 0 )
+    {
+        Logger::info("Waiting for simulation client...\n");
 
-		// Block until connection, don't timeout
-		server.acceptConnection( 0 );
+        // Block until connection, don't timeout
+        server.acceptConnection( 0 );
 
-		success = true;
-	}
-	else
-	{
-		Logger::error( "Failed to start the simulator server" );
-		success = false;
-	}
+        success = true;
+    }
+    else
+    {
+        Logger::error( "Failed to start the simulator server" );
+        success = false;
+    }
 
-	return success;
+    return success;
 }
+
+void SimulationNode::updateConfigsFromDB(){}
 
 void SimulationNode::processMessage(const Message* msg)
 {
-	MessageType type = msg->messageType();
+    MessageType type = msg->messageType();
 
-	switch(type)
-	{
-		case MessageType::ActuatorPosition:
-			processActuatorPositionMessage((ActuatorPositionMsg*)msg);
-		break;
-		case MessageType::WaypointData:
-			Logger::info("Waypoint message received");
-			processWaypointMessage((WaypointDataMsg*) msg);
-		break;
-		default:
-		return;
-	}
+    switch(type)
+    {
+    case MessageType::ActuatorPosition:
+        processActuatorPositionMessage((ActuatorPositionMsg*)msg);
+        break;
+    case MessageType::WingSailCommand:
+        processWingSailCommandMessage((WingSailCommandMsg*)msg);
+        break;
+    case MessageType::RudderCommand:
+        processRudderCommandMessage((RudderCommandMsg*)msg);
+        break;
+    case MessageType::WaypointData:
+        processWaypointMessage((WaypointDataMsg*) msg);
+        break;
+    case MessageType::ServerConfigsReceived:
+		updateConfigsFromDB();
+	    break;
+    default:
+        return;
+    }
 }
 
 void SimulationNode::processActuatorPositionMessage(ActuatorPositionMsg* msg)
 {
-	actuatorData.rudderCommand = msg->rudderPosition();
-	actuatorData.sailCommand = msg->sailPosition();
+    m_RudderCommand = msg->rudderPosition();
+    m_SailCommand = msg->sailPosition();
+    // std::cout << "rudder : " << m_RudderCommand << " sail : " << m_SailCommand << std::endl;
+}
+void SimulationNode::processWingSailCommandMessage(WingSailCommandMsg* msg)
+{
+    m_TailCommand = msg->tailAngle();
+}
+
+void SimulationNode::processRudderCommandMessage(RudderCommandMsg* msg)
+{
+    m_RudderCommand = msg->rudderAngle();
 }
 
 void SimulationNode::processWaypointMessage(WaypointDataMsg* msg)
@@ -135,58 +160,99 @@ void SimulationNode::processWaypointMessage(WaypointDataMsg* msg)
 	waypoint.prevDeclination = msg->prevDeclination();
 	waypoint.prevRadius = msg->prevRadius();
 
-	Logger::info("In processmessage, lat: " + std::to_string(waypoint.nextLatitude) + ", Lon: " + std::to_string(waypoint.nextLongitude));
+    m_nextDeclination = msg->nextDeclination();
 }
 
 void SimulationNode::createCompassMessage()
 {
-	MessagePtr msg = std::make_unique<CompassDataMsg>(CompassDataMsg( m_CompassHeading, 0, 0));
-	m_MsgBus.sendMessage(std::move(msg));
+    MessagePtr msg = std::make_unique<CompassDataMsg>(CompassDataMsg( m_CompassHeading, 0, 0));
+    m_MsgBus.sendMessage(std::move(msg));
 }
 
 void SimulationNode::createGPSMessage()
 {
-	MessagePtr msg = std::make_unique<GPSDataMsg>(GPSDataMsg(true, true, m_GPSLat, m_GPSLon, SysClock::unixTime(), m_GPSSpeed, m_GPSHeading, 0, GPSMode::LatLonOk));
-	m_MsgBus.sendMessage(std::move(msg));
+    MessagePtr msg = std::make_unique<GPSDataMsg>(GPSDataMsg(true, true, m_GPSLat, m_GPSLon, SysClock::unixTime(), m_GPSSpeed, m_GPSCourse, 0, GPSMode::LatLonOk));
+    m_MsgBus.sendMessage(std::move(msg));
 }
 
 void SimulationNode::createWindMessage()
 {
-	MessagePtr windData = std::make_unique<WindDataMsg>( WindDataMsg(m_WindDir, m_WindSpeed, 21) );
-	m_MsgBus.sendMessage( std::move(windData) );
+    MessagePtr windData = std::make_unique<WindDataMsg>( WindDataMsg(m_WindDir, m_WindSpeed, 21) );
+    m_MsgBus.sendMessage( std::move(windData) );
 }
 
-void SimulationNode::createArduinoMessage()
+
+///--------------------------------------------------------------------------------------
+void SimulationNode::processSailBoatData( TCPPacket_t& packet )
 {
-	MessagePtr msg = std::make_unique<ArduinoDataMsg>(ArduinoDataMsg(0, m_ArduinoRudder, m_ArduinoSheet, 0, 0 ));
-	m_MsgBus.sendMessage(std::move(msg));
+    if( packet.length - 1 == sizeof(SailBoatDataPacket_t) )
+    {
+        // The first byte is the packet type, lets skip that
+        uint8_t* ptr = packet.data + 1;
+        SailBoatDataPacket_t* boatData = (SailBoatDataPacket_t*)ptr;
+
+        m_CompassHeading = Utility::limitAngleRange(90 - boatData->heading - m_nextDeclination); // [0, 360] north east down
+        m_GPSLat = boatData->latitude;
+        m_GPSLon = boatData->longitude;
+
+        m_GPSSpeed = std::abs(boatData->speed); // norm of the speed vector
+        if (boatData->speed >= 0)
+        {
+            m_GPSCourse = Utility::limitAngleRange(90 - boatData->course); // [0, 360] north east down
+        }
+        else
+        {
+            m_GPSCourse = Utility::limitAngleRange(90 - boatData->course + 180); // [0, 360] north east down
+        }
+        
+        m_WindDir = Utility::limitAngleRange( 180 - boatData->windDir); // [0, 360] clockwize, where the wind come from
+        m_WindSpeed = boatData->windSpeed;
+
+        // Send messages
+        createCompassMessage();
+        createGPSMessage();
+        createWindMessage();
+    }
 }
 
 ///--------------------------------------------------------------------------------------
-void SimulationNode::processBoatData( TCPPacket_t& packet )
+void SimulationNode::processWingBoatData( TCPPacket_t& packet )
 {
-	if( packet.length - 1 == sizeof(BoatDataPacket_t) )
-	{
-		// The first byte is the packet type, lets skip that
-		uint8_t* ptr = packet.data + 1;
-		BoatDataPacket_t* boatData = (BoatDataPacket_t*)ptr;
+    if( packet.length - 1 == sizeof(WingBoatDataPacket_t) )
+    {
+        // The first byte is the packet type, lets skip that
+        uint8_t* ptr = packet.data + 1;
+        WingBoatDataPacket_t* boatData = (WingBoatDataPacket_t*)ptr;
 
-		m_CompassHeading = boatData->heading;
-		m_GPSLat = boatData->latitude;
-		m_GPSLon = boatData->longitude;
-		m_GPSSpeed = boatData->speed;
-		m_GPSHeading = boatData->course;
-		m_WindDir = boatData->windDir;
-		m_WindSpeed = boatData->windSpeed;
-	 	m_ArduinoRudder = boatData->rudder;
-	 	m_ArduinoSheet = boatData->sail;
+        m_CompassHeading = Utility::limitAngleRange(90 - boatData->heading - m_nextDeclination); // [0, 360] north east down
+        m_GPSLat = boatData->latitude;
+        m_GPSLon = boatData->longitude;
 
-		// Send messages
-		createCompassMessage();
-		createGPSMessage();
-		createWindMessage();
-		createArduinoMessage();
-	}
+        m_GPSSpeed = std::abs(boatData->speed); // norm of the speed vector
+        if (boatData->speed >= 0)
+        {
+            m_GPSCourse = Utility::limitAngleRange(90 - boatData->course); // [0, 360] north east down
+        }
+        else
+        {
+            m_GPSCourse = Utility::limitAngleRange(90 - boatData->course + 180); // [0, 360] north east down
+        }
+
+        m_WindDir = Utility::limitAngleRange(180 - boatData->windDir); // [0, 360] clockwize, where the wind come from
+        m_WindSpeed = boatData->windSpeed;
+        // std::cout <<"heading " << m_CompassHeading << std::endl;
+        // std::cout <<"lat " << m_GPSLat << std::endl;
+        // std::cout <<"long " << m_GPSLon << std::endl;
+        // std::cout <<"speed " << m_GPSSpeed << std::endl;
+        // std::cout <<"course " << m_GPSCourse << std::endl;
+        // std::cout <<"windSpeed " << m_WindSpeed << std::endl;
+        // std::cout <<"WindDir " << m_WindDir << std::endl;
+
+        // Send messages
+        createCompassMessage();
+        createGPSMessage();
+        createWindMessage();
+    }
 }
 
 ///--------------------------------------------------------------------------------------
@@ -198,7 +264,7 @@ void SimulationNode::processAISContact( TCPPacket_t& packet )
 		uint8_t* ptr = packet.data + 1;
 		AISContactPacket_t* aisData = (AISContactPacket_t*)ptr;
 
-		this->collidableMgr->addAISContact(aisData->mmsi, aisData->latitude, aisData->longitude, aisData->speed, aisData->course);
+		this->collidableMgr->addAISContact(aisData->mmsi, aisData->latitude, aisData->longitude, aisData->speed, Utility::limitAngleRange(90 - aisData->course) /* [0, 360] north east down*/);
 		this->collidableMgr->addAISContact(aisData->mmsi, aisData->length, aisData->beam);
 	}
 }
@@ -206,22 +272,33 @@ void SimulationNode::processAISContact( TCPPacket_t& packet )
 ///--------------------------------------------------------------------------------------
 void SimulationNode::processVisualContact( TCPPacket_t& packet )
 {
-	if( this->collidableMgr != NULL )
-	{
-		// The first byte is the packet type, lets skip that
-		uint8_t* ptr = packet.data + 1;
-		VisualContactPacket_t* data = (VisualContactPacket_t*)ptr;
+    if( this->collidableMgr != NULL )
+    {
+        // The first byte is the packet type, lets skip that
+        uint8_t* ptr = packet.data + 1;
+        VisualContactPacket_t* data = (VisualContactPacket_t*)ptr;
 
-		uint16_t bearing = CourseMath::calculateBTW(m_GPSLon, m_GPSLat, data->longitude, data->latitude);
+        uint16_t bearing = CourseMath::calculateBTW(m_GPSLon, m_GPSLat, data->longitude, data->latitude);
 
-		this->collidableMgr->addVisualContact(data->id, bearing);
-	}
+        this->collidableMgr->addVisualContact(data->id, bearing);
+    }
 }
 
 ///--------------------------------------------------------------------------------------
-void SimulationNode::sendActuatorData( int socketFD )
+void SimulationNode::sendActuatorDataWing( int socketFD)
 {
-	server.sendData( socketFD, &actuatorData, sizeof(ActuatorDataPacket_t) );
+    actuatorDataWing.rudderCommand = - Utility::degreeToRadian(m_RudderCommand);
+    actuatorDataWing.tailCommand   = - Utility::degreeToRadian(m_TailCommand);
+
+    server.sendData( socketFD, &actuatorDataWing, sizeof(ActuatorDataWingPacket_t) );
+}
+
+void SimulationNode::sendActuatorDataSail( int socketFD)
+{   
+    actuatorDataSail.rudderCommand = m_RudderCommand;
+    actuatorDataSail.sailCommand   = Utility::degreeToRadian(m_SailCommand);
+    
+    server.sendData( socketFD, &actuatorDataSail, sizeof(ActuatorDataSailPacket_t) );       
 }
 
 ///--------------------------------------------------------------------------------------
@@ -233,50 +310,61 @@ void SimulationNode::sendWaypoint( int socketFD )
 ///--------------------------------------------------------------------------------------
 void SimulationNode::SimulationThreadFunc(ActiveNode* nodePtr)
 {
-	SimulationNode* node = dynamic_cast<SimulationNode*> (nodePtr);
+    SimulationNode* node = dynamic_cast<SimulationNode*> (nodePtr);
 
-	TCPPacket_t packet;
-	int simulatorFD = 0;
+    TCPPacket_t packet;
+    int simulatorFD = 0;
 
-	while(true)
-	{
-		// Don't timeout on a packet read
-		node->server.readPacket( packet, 0 );
+    while(true)
+    {
+        // Don't timeout on a packet read
+        node->server.readPacket( packet, 0 );
 
-		// We only care about the latest packet, so clear out the old ones
-		//node->server.clearSocketBuffer( packet.socketFD );
+        // We only care about the latest packet, so clear out the old ones
+        //node->server.clearSocketBuffer( packet.socketFD );
 
-		// We can safely assume that the first packet we receive will actually be from
-		// the simulator as we only should ever accept one connection, the first one/
-		if( simulatorFD == 0 )
-		{
-			simulatorFD = packet.socketFD;
-		}
-		// First byte is the message type
-		switch( packet.data[0] )
-		{
-			case SimulatorPacket::BoatData:
-				node->processBoatData( packet );
-				node->sendActuatorData( simulatorFD );
-				node->sendWaypoint( simulatorFD );
-			break;
+        // We can safely assume that the first packet we receive will actually be from
+        // the simulator as we only should ever accept one connection, the first one/
+        if( simulatorFD == 0 )
+        {
+            simulatorFD = packet.socketFD;
+        }
+        // First byte is the message type
+        switch( packet.data[0] )
+        {
 
-			case SimulatorPacket::AISData:
-				node->processAISContact( packet );
-			break;
+            case SimulatorPacket::SailBoatData:
+                node->processSailBoatData( packet );
+                //std::cout<<"SailBoatData"<< std::endl;
+                break;
 
-			case SimulatorPacket::CameraData:
-				node->processVisualContact( packet );
-			break;
+            case SimulatorPacket::WingBoatData:
+                node->processWingBoatData( packet );
+                //std::cout<<"WingBoatData"<< std::endl;
+                break;
+            case SimulatorPacket::AISData:
+                node->processAISContact( packet );
+                break;
 
-			// unknown or deformed packet
-			default:
-				continue;
-		}
-		// Reset our packet, better safe than sorry
-		packet.socketFD = 0;
-		packet.length = 0;
+            case SimulatorPacket::CameraData:
+                node->processVisualContact( packet );
+                break;
 
-		//std::this_thread::sleep_for(std::chrono::milliseconds(BASE_SLEEP_MS));
-	}
+            // unknown or deformed packet
+            default:
+                continue;
+        }
+        // Reset our packet, better safe than sorry
+        packet.socketFD = 0;
+        packet.length = 0;
+        if (node->m_boatType == 0){
+            node->sendActuatorDataSail( simulatorFD);
+        }
+        else if (node->m_boatType ==1){
+            node->sendActuatorDataWing ( simulatorFD );
+        }
+        
+        //
+        node->sendWaypoint( simulatorFD );
+    }
 }

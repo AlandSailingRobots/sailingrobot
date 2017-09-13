@@ -4,10 +4,10 @@
  * 		LocalNavigationModule.h
  *
  * Purpose:
- *		
+ *
  *
  * License:
- *      This file is subject to the terms and conditions defined in the file 
+ *      This file is subject to the terms and conditions defined in the file
  *      'LICENSE.txt', which is part of this source code package.
  *
  ***************************************************************************************/
@@ -17,6 +17,7 @@
 
 
 #include "MessageBus/ActiveNode.h"
+#include "DataBase/DBHandler.h"
 #include "BoatState.h"
 #include "ASRVoter.h"
 #include "ASRArbiter.h"
@@ -28,7 +29,7 @@ public:
     ///----------------------------------------------------------------------------------
  	/// Constructs the LocalNavigationModule
  	///----------------------------------------------------------------------------------
-    LocalNavigationModule( MessageBus& msgBus );
+    LocalNavigationModule( MessageBus& msgBus, DBHandler& dbhandler);
 
     ///----------------------------------------------------------------------------------
  	/// Does nothing
@@ -63,6 +64,11 @@ private:
     void startBallot();
 
     ///----------------------------------------------------------------------------------
+	/// Update values from the database as the loop time of the thread and others parameters
+	///----------------------------------------------------------------------------------
+    void updateConfigsFromDB();
+
+    ///----------------------------------------------------------------------------------
  	/// Just a little hack for waking up the navigation module for now
  	///----------------------------------------------------------------------------------
     static void WakeupThreadFunc( ActiveNode* nodePtr );
@@ -70,4 +76,6 @@ private:
     std::vector<ASRVoter*> voters;
     BoatState_t boatState;
     ASRArbiter arbiter;
+    double m_LoopTime;
+    DBHandler& m_db;
 };

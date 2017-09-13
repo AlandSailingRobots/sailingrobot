@@ -32,7 +32,7 @@ public:
 		msgBus.registerNode(*this, MessageType::ActuatorPosition);
 		msgBus.registerNode(*this, MessageType::WindState);
 		msgBus.registerNode(*this, MessageType::StateMessage);
-		msgBus.registerNode(*this, MessageType::NavigationControl);
+		msgBus.registerNode(*this, MessageType::LocalNavigation);
 	}
 
 	virtual ~MessageLogger() { }
@@ -69,7 +69,7 @@ public:
 			case MessageType::StateMessage:
 			m_StateData = true;
 			break;
-			case MessageType::NavigationControl:
+			case MessageType::LocalNavigation:
 			m_NavigationData = true;
 			break;
 			default:

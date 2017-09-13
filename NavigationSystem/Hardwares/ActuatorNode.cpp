@@ -17,10 +17,11 @@
 #include "SystemServices/Logger.h"
 
 
-ActuatorNode::ActuatorNode(MessageBus& msgBus, NodeID id, int channel, int speed, int acceleration)
-	:Node(id, msgBus), m_Channel(channel), m_Speed(speed), m_Acceleration(acceleration)
+ActuatorNode::ActuatorNode(MessageBus& msgBus, DBHandler& dbhandler, NodeID id, int channel, int speed, int acceleration)
+	:Node(id, msgBus), m_Channel(channel), m_Speed(speed), m_Acceleration(acceleration), m_db(dbhandler)
 {
   msgBus.registerNode(*this,MessageType::ActuatorPosition);
+  msgBus.registerNode(*this,MessageType::ServerConfigsReceived);
 }
 
 bool ActuatorNode::init()

@@ -20,13 +20,14 @@
 #include "Messages/WindDataMsg.h"
 #include "Messages/ArduinoDataMsg.h"
 #include "Messages/WaypointDataMsg.h"
+#include "DataBase/DBHandler.h"
 #include "Network/TCPServer.h"
 #include <stdint.h>
 
 
 class VesselStateNode : public ActiveNode {
 public:
-	VesselStateNode(MessageBus& msgBus, double loopTime);
+	VesselStateNode(MessageBus& msgBus, DBHandler& dbhandler, double loopTime);
 	~VesselStateNode();
 
 	///----------------------------------------------------------------------------------
@@ -84,7 +85,7 @@ private:
 	int 	m_ArduinoRudder;
 	int 	m_ArduinoSheet;
     int 	m_ArduinoBattery;
-	int		m_ArduinoRC;
+	
 
 	int waypointID;
 	double waypointLat;
@@ -92,7 +93,8 @@ private:
 	int16_t waypointBearing;
 	double waypointDistance;
 	int16_t radius;
-  double m_LoopTime;
+    double m_LoopTime;
+    DBHandler& m_db;
 
   const int VESSEL_STATE_INITIAL_SLEEP = 2000;
 

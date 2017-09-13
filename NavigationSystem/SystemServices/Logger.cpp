@@ -29,6 +29,9 @@
 #define MAX_LOG_SIZE	256*2
 #define MAX_MSG_BUFFER 100
 
+// Uncomment for a WRSC2017 position log file
+// #define ENABLE_WRSC_LOGGING
+
 std::string 				Logger::m_LogFilePath;
 std::ofstream 				Logger::m_LogFile;
 std::vector<std::string> 	Logger::m_LogBuffer;
@@ -187,9 +190,9 @@ void Logger::logWRSC(double latitude, double longitude)
 	if(m_LogFileWRSC.is_open())
 	{
 		char logBuffer[MAX_LOG_SIZE];
-		snprintf(logBuffer, MAX_LOG_SIZE, "%s%d, %d, %d\n", SysClock::hh_mm_ss().c_str(), SysClock::day(),
-															(int)(gps->positionModel.latitude*10000000),
-															(int)(gps->positionModel.longitude*10000000));
+		snprintf(logBuffer, MAX_LOG_SIZE, "%s0%d, %d, %d\n", SysClock::hh_mm_ss().c_str(), SysClock::day(),
+															(int)(latitude*10000000),
+															(int)(longitude*10000000));
 		m_LogFileWRSC << logBuffer;
 		m_LogFileWRSC.flush();
 	}
@@ -224,7 +227,7 @@ bool Logger::createLogFiles(const char* filename)
 
 	#ifdef ENABLE_WRSC_LOGGING
 		char wrscFileName[256];
-		snprintf(wrscFileName, 256, "%s-%s", SysClock::hh_mm_ss().c_str(), DEFAULT_LOG_NAME_WRSC);
+		snprintf(wrscFileName, 256, "%s%s-%s", FILE_PATH, SysClock::hh_mm_ss().c_str(), DEFAULT_LOG_NAME_WRSC);
 		m_LogFileWRSC.open(wrscFileName, std::ios::out | std::ios::trunc);
 
 		if(m_LogFile.is_open() && m_LogFileWRSC.is_open())

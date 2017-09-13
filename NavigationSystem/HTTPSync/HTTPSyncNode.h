@@ -7,6 +7,7 @@
 
 
 #include <chrono>
+#include <atomic>
 #include <thread>
 #include <curl/curl.h>
 #include <string>
@@ -15,7 +16,7 @@
 class HTTPSyncNode : public ActiveNode{
 	public:
 
-		HTTPSyncNode(MessageBus& msgBus,DBHandler *db,int delay, bool removeLogs);
+		HTTPSyncNode(MessageBus& msgBus, DBHandler *dbhandler);
 
 		virtual ~HTTPSyncNode() { }
 
@@ -25,7 +26,8 @@ class HTTPSyncNode : public ActiveNode{
 		///----------------------------------------------------------------------------------
         bool init();
         void start();
-		        
+		void stop();
+
 		///----------------------------------------------------------------------------------
 		/// Pushes waypoints or configurations on new local changes
 		/// (Example of cause: xbeeSync functions)
@@ -49,12 +51,12 @@ class HTTPSyncNode : public ActiveNode{
 
 	private:
 
-		        
+
 		///----------------------------------------------------------------------------------
 		/// Sends server request in curl format - used for all syncing functionality
 		///----------------------------------------------------------------------------------
 		bool performCURLCall(std::string data, std::string call, std::string& response);
-		
+
 
 
         bool checkIfNewConfigs();
@@ -67,6 +69,8 @@ class HTTPSyncNode : public ActiveNode{
 		///----------------------------------------------------------------------------------
         static void HTTPSyncThread(ActiveNode* nodePtr);
 
+
+		void updateConfigsFromDB();
 
 		///----------------------------------------------------------------------------------
 		/// Convenience function: creates curl call from argument and returns response (json data)
@@ -84,13 +88,13 @@ class HTTPSyncNode : public ActiveNode{
 		bool m_reportedConnectError;
 
 		///----------------------------------------------------------------------------------
-		/// Determines wether or not to clear all local logs after a successful push to server
+		/// Determines whether or not to clear all local logs after a successful push to server
 		///----------------------------------------------------------------------------------
 		bool m_removeLogs;
-		int m_delay;
+		double m_LoopTime;			//units : seconds (ex : 0.5 s)
 		int m_pushOnlyLatestLogs;
 
+		std::atomic<bool> m_Running;
 		DBHandler *m_dbHandler;
 
 };
-

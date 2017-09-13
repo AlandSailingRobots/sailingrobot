@@ -46,7 +46,7 @@ int main(int argc, char** argv) {
 			cout << "Please enter a message" << endl;
 			cin >> data;
 			xbee.transmitData(port, data);
-			cout << data + " printed to xBee reciever" << endl;
+			cout << data + " printed to xBee receiver" << endl;
 
 		}
 
