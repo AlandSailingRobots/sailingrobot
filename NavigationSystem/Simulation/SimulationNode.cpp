@@ -114,15 +114,12 @@ void SimulationNode::processMessage(const Message* msg)
         processActuatorPositionMessage((ActuatorPositionMsg*)msg);
         break;
     case MessageType::WingSailCommand:
-        // Logger::info("WingSailCommand message received");
         processWingSailCommandMessage((WingSailCommandMsg*)msg);
         break;
     case MessageType::RudderCommand:
-        // Logger::info("RudderCommand message received");
         processRudderCommandMessage((RudderCommandMsg*)msg);
         break;
     case MessageType::WaypointData:
-        Logger::info("WaypointData message received");
         processWaypointMessage((WaypointDataMsg*) msg);
         break;
     case MessageType::ServerConfigsReceived:
@@ -137,7 +134,7 @@ void SimulationNode::processActuatorPositionMessage(ActuatorPositionMsg* msg)
 {
     m_RudderCommand = msg->rudderPosition();
     m_SailCommand = msg->sailPosition();
-    std::cout << "rudder : " << m_RudderCommand << " sail : " << m_SailCommand << std::endl;
+    // std::cout << "rudder : " << m_RudderCommand << " sail : " << m_SailCommand << std::endl;
 }
 void SimulationNode::processWingSailCommandMessage(WingSailCommandMsg* msg)
 {
@@ -164,8 +161,6 @@ void SimulationNode::processWaypointMessage(WaypointDataMsg* msg)
 	waypoint.prevRadius = msg->prevRadius();
 
     m_nextDeclination = msg->nextDeclination();
-
-	Logger::info("In processmessage, lat: " + std::to_string(waypoint.nextLatitude) + ", Lon: " + std::to_string(waypoint.nextLongitude));
 }
 
 void SimulationNode::createCompassMessage()
@@ -292,14 +287,8 @@ void SimulationNode::processVisualContact( TCPPacket_t& packet )
 ///--------------------------------------------------------------------------------------
 void SimulationNode::sendActuatorDataWing( int socketFD)
 {
-    // m_RudderCommand = 0;
-    // m_TailCommand   = 15.0;
     actuatorDataWing.rudderCommand = - Utility::degreeToRadian(m_RudderCommand);
     actuatorDataWing.tailCommand   = - Utility::degreeToRadian(m_TailCommand);
-    // std::cout <<"sent rudder command " << actuatorDataWing.rudderCommand << std::endl;
-    // std::cout <<"sent tail command " << actuatorDataWing.tailCommand << std::endl;
-    // std::cout <<"given rudder command " << m_RudderCommand << std::endl;
-    // std::cout <<"given tail command " << m_TailCommand << std::endl;
 
     server.sendData( socketFD, &actuatorDataWing, sizeof(ActuatorDataWingPacket_t) );
 }
@@ -308,6 +297,7 @@ void SimulationNode::sendActuatorDataSail( int socketFD)
 {   
     actuatorDataSail.rudderCommand = m_RudderCommand;
     actuatorDataSail.sailCommand   = Utility::degreeToRadian(m_SailCommand);
+    
     server.sendData( socketFD, &actuatorDataSail, sizeof(ActuatorDataSailPacket_t) );       
 }
 

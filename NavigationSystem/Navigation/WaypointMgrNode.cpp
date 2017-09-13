@@ -79,7 +79,7 @@ bool WaypointMgrNode::waypointReached()
         {
             Logger::error("Failed to harvest waypoint");
         }
-        Logger::info("Waypoint harvested");
+        Logger::info("Waypoint %d harvested", m_nextId);
         m_waypointTimer.stop();
 
         m_routeTime.stop();
@@ -117,7 +117,7 @@ void WaypointMgrNode::sendMessage()
         MessagePtr msg = std::make_unique<WaypointDataMsg>(m_nextId, m_nextLongitude, m_nextLatitude, m_nextDeclination, m_nextRadius, m_nextStayTime,
                         m_prevId, m_prevLongitude, m_prevLatitude, m_prevDeclination, m_prevRadius);
         m_MsgBus.sendMessage(std::move(msg));
-        std::cout << "send WaypointDataMsg. Next id:  " << m_nextId << std::endl;
+        // std::cout << "send WaypointDataMsg. Next id:  " << m_nextId << std::endl;
 
         if( !m_routeTime.started() )
         {
