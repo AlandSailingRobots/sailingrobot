@@ -103,8 +103,8 @@ void LowLevelController::calculateRudder()
 void LowLevelController::calculateSail( int windDir )
 {
     // Fixed sail angles normalised
-    static const int closeHauled = 0;
-    static const int closeReach  = 20;
+    static const int closeHauled = 10;
+    static const int closeReach  = 30;
     static const int beamReach   = 50;
     static const int broadReach  = 70;
     static const int running     = 90;
