@@ -14,7 +14,7 @@
 
 
 #include "LocalNavigationModule.h"
-#include "Messages/DesiredCourseMsg.h"
+#include "Messages/LocalNavigationMsg.h"
 #include "Messages/StateMessage.h"
 #include "Messages/WindStateMsg.h"
 #include "Messages/WaypointDataMsg.h"
@@ -22,6 +22,7 @@
 #include "SystemServices/Logger.h"
 #include "SystemServices/Timer.h"
 #include "Math/CourseMath.h"
+#include "Math/Utility.h"
 
 #include <cstdio>
 
@@ -30,13 +31,15 @@
 #include <chrono>
 #include <thread>
 
-
+#define DATA_OUT_OF_RANGE -2000
 #define WAKEUP_INTIAL_SLEEP     2000
+const float NO_COMMAND = -1000;
 
 
 ///----------------------------------------------------------------------------------
 LocalNavigationModule::LocalNavigationModule( MessageBus& msgBus,DBHandler& dbhandler)
-    :ActiveNode(NodeID::LocalNavigationModule, msgBus), m_LoopTime(0.5), m_db(dbhandler)
+    :ActiveNode(NodeID::LocalNavigationModule, msgBus), m_LoopTime(0.5), m_db(dbhandler), 
+    m_trueWindDir(DATA_OUT_OF_RANGE)
 {
     msgBus.registerNode( *this, MessageType::StateMessage );
     msgBus.registerNode( *this, MessageType::WindState );
@@ -83,6 +86,7 @@ void LocalNavigationModule::processMessage( const Message* msg )
             WindStateMsg* windStateMsg = (WindStateMsg*)msg;
             boatState.windDir = windStateMsg->apparentWindDirection();
             boatState.windSpeed = windStateMsg->apparentWindSpeed();
+            m_trueWindDir = windStateMsg->trueWindDirection();
         }
             break;
 
@@ -148,8 +152,20 @@ void LocalNavigationModule::startBallot()
     }
     printf("\n");
 
-    MessagePtr msg = std::make_unique<DesiredCourseMsg>( arbiter.getWinner() );
+    uint16_t targetCourse = arbiter.getWinner();
+    bool targetTackStarboard = getTargetTackStarboard((double) targetCourse);
+    MessagePtr msg = std::make_unique<LocalNavigationMsg>((float) targetCourse, NO_COMMAND, 0, targetTackStarboard);
     m_MsgBus.sendMessage( std::move( msg ) );
+}
+
+///----------------------------------------------------------------------------------
+bool LocalNavigationModule::getTargetTackStarboard(double targetCourse)
+{
+    if (sin(Utility::degreeToRadian(targetCourse - m_trueWindDir)) < 0){
+        return true;
+    } else {
+        return false;
+    }
 }
 
 ///----------------------------------------------------------------------------------
