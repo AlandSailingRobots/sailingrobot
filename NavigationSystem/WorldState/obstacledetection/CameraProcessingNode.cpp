@@ -11,16 +11,6 @@
 *
 *
 ***************************************************************************************/
-#include <opencv2/core.hpp>
-#include <opencv2/imgcodecs.hpp>
-#include <opencv2/videoio.hpp>
-#include <opencv2/highgui.hpp>
-#include <opencv2/imgproc.hpp>
-#include <opencv2/photo.hpp>
-#include <opencv2/videostab.hpp>
-#include <opencv2/tracking.hpp>
-#include <opencv2/video.hpp>
-
 #include "CameraProcessingNode.h"
 
 using namespace std;
@@ -35,7 +25,7 @@ using namespace cv;
 
 vector<Obstacle> obstacle_list;
  
-CameraProcessingNode::CameraProcessingNode(MessageBus& msgBus, CollidableMgr& collidableMgr)
+CameraProcessingNode::CameraProcessingNode(MessageBus& msgBus, CollidableMgr* collidableMgr)
   : ActiveNode(NodeID::CameraProcessingNode, msgBus), m_LoopTime(0.5), collidableMgr(collidableMgr) 
   {
     msgBus.registerNode(*this, MessageType::CompassData);
@@ -174,7 +164,7 @@ CameraProcessingNode::CameraProcessingNode(MessageBus& msgBus, CollidableMgr& co
          *-----------------------------------------------------------------
          */
         // Find green pixels
-        inRange(hsvImg, Scalar(45, 100, 100), Scalar(75, 255, 255), hsv_image);
+        inRange(hsvImg, Scalar(45, 100, 100), Scalar(75, 255, 255), hsvImg);
 
         // Avoid false positives with a general blur
         GaussianBlur(hsvImg, hsvImg, Size(9, 9), 2, 2);
@@ -188,8 +178,8 @@ CameraProcessingNode::CameraProcessingNode(MessageBus& msgBus, CollidableMgr& co
             Logger::info("Camera is recalibrating, thread will sleep for 3 seconds");
             Timer t;
             t.start();
-            t.sleepUntl(3);
-            t.reset;
+            t.sleepUntil(3);
+            t.reset();
             continue;
         }
         

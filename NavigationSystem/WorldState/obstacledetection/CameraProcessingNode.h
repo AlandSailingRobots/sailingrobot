@@ -19,6 +19,16 @@
 #include <chrono>
 #include <thread>
 
+#include <opencv2/core.hpp>
+#include <opencv2/imgcodecs.hpp>
+#include <opencv2/videoio.hpp>
+#include <opencv2/highgui.hpp>
+#include <opencv2/imgproc.hpp>
+#include <opencv2/photo.hpp>
+#include <opencv2/videostab.hpp>
+#include <opencv2/tracking.hpp>
+#include <opencv2/video.hpp>
+
 #include "Messages/CompassDataMsg.h"
 #include "Messages/StateMessage.h"
 #include "MessageBus/Message.h"
@@ -36,7 +46,7 @@ public:
   /*
   * Constructor, gets a pointer to messagebus and canservice
   */
-  CameraProcessingNode(MessageBus& msgBus, CollidableMgr& collidableMgr);
+  CameraProcessingNode(MessageBus& msgBus, CollidableMgr* collidableMgr);
   
   /*
    *  Empty destructor

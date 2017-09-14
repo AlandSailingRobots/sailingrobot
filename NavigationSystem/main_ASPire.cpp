@@ -35,7 +35,7 @@
   #include "Hardwares/ActuatorNodeASPire.h"
   #include "Hardwares/CANArduinoNode.h"
   #include "Hardwares/MarineSensorNode.h"
-  #include "WorldState/obstacledetection/CameraProcessingNode.hpp"
+  #include "WorldState/obstacledetection/CameraProcessingNode.h"
 #endif
 
 
@@ -182,7 +182,7 @@ int main(int argc, char *argv[])
 
 	  	int miniWaitTime = 20; 	// Periode (in seconds) during witch the measuements are performed.
 	  	MarineSensorNode marineSensors(messageBus, miniWaitTime);
-	  	CameraProcessingNode cameraProcessingNode(messageBus, &collidableMgr);
+	  	CameraProcessingNode cameraProcessingNode(messageBus, &collidableMgr); /** @todo normalise pointer/reference mess up (choose either byref or normal byval */
 	#endif
 
 
