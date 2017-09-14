@@ -28,7 +28,9 @@
 
 #define MAX_LOG_SIZE	256*2
 #define MAX_MSG_BUFFER 100
-#define ENABLE_WRSC_LOGGING 1
+
+// Uncomment for a WRSC2017 position log file
+// #define ENABLE_WRSC_LOGGING
 
 std::string 				Logger::m_LogFilePath;
 std::ofstream 				Logger::m_LogFile;
@@ -225,7 +227,7 @@ bool Logger::createLogFiles(const char* filename)
 
 	#ifdef ENABLE_WRSC_LOGGING
 		char wrscFileName[256];
-		snprintf(wrscFileName, 256, "%s-%s", SysClock::hh_mm_ss().c_str(), DEFAULT_LOG_NAME_WRSC);
+		snprintf(wrscFileName, 256, "%s%s-%s", FILE_PATH, SysClock::hh_mm_ss().c_str(), DEFAULT_LOG_NAME_WRSC);
 		m_LogFileWRSC.open(wrscFileName, std::ios::out | std::ios::trunc);
 
 		if(m_LogFile.is_open() && m_LogFileWRSC.is_open())

@@ -167,7 +167,7 @@ ASPire: $(BUILD_DIR)
 
 ## Build the control system for Janet
 Janet: $(BUILD_DIR)
-	$(MAKE) -f Janet.mk -j
+	$(MAKE) -f Janet.mk
 
 ## Build the unit tests
 unit_tests: $(BUILD_DIR)
