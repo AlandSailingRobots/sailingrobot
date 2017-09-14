@@ -4,124 +4,83 @@
  * 		CourseRegulatorNode.h
  *
  * Purpose:
- *      This file realize the regulation of the rudder by the desired course.
- *      It sends the value to the rudder actuator node
+ *      Calculates the command angle of the rudder in order to regulate the vessel course.
+ *      It sends a RudderCommandMsg corresponding to the command angle of the rudder.
  *
- * License:
- *      This file is subject to the terms and conditions defined in the file
- *      'LICENSE.txt', which is part of this source code package.
+ * Developer Notes:
  *
  ***************************************************************************************/
 #pragma once
 
+#include <thread>
+#include <math.h>
+#include <mutex>
+#include <chrono>
+#include <vector>
+#include <stdint.h>
+
+#include "DataBase/DBHandler.h"
+#include "Math/Utility.h"
 #include "MessageBus/ActiveNode.h"
+#include "MessageBus/MessageBus.h"
 #include "Messages/StateMessage.h"
 #include "Messages/LocalNavigationMsg.h"
-#include "Messages/ActuatorPositionMsg.h"
-#include "Messages/DesiredCourseMsg.h"
-#include "MessageBus/MessageBus.h"
-#include "DataBase/DBHandler.h"
-#include <mutex>
-#include <stdint.h>
-#include <atomic>
+#include "Messages/RudderCommandMsg.h"
+#include "SystemServices/Timer.h"
+
 
 class CourseRegulatorNode : public ActiveNode{
 public:
-    //--------------
-    // Constructor
-    //--------------
     CourseRegulatorNode(MessageBus& msgBus, DBHandler& dbhandler);
-    // -------------
-    // Destructor
-    // -------------
     ~CourseRegulatorNode();
 
-    // -------------
-    // Function to init the node
-    // -------------
     bool init();
-
-    // -------------
-    // Start the thread for the active node
-    // -------------
     void start();
-
     void stop();
-
-    // -------------
-    // Listen the message concerning this Node
-    // -------------
     void processMessage(const Message* message);
 
 private:
 
-    // -------------
-    // Processing informations from the State Message
-    // -------------
+    ///----------------------------------------------------------------------------------
+    /// Updates the values of the parameters from the database
+    ///----------------------------------------------------------------------------------
+    void updateConfigsFromDB();
+
+    ///----------------------------------------------------------------------------------
+    /// Stores vessel speed and course datas from a StateMessage.
+    ///----------------------------------------------------------------------------------
     void processStateMessage( const StateMessage* msg);
 
-    // -------------
-    // Processing informations from the Desired course message
-    // -------------
-    void processDesiredCourseMessage( const DesiredCourseMsg* msg);
-
-    // -------------
-    // Processing informations from the Navigation Control Message
-    // -------------
+    ///----------------------------------------------------------------------------------
+    /// Stores target course data from a LocalNavigationMsg.
+    ///----------------------------------------------------------------------------------
     void processLocalNavigationMessage( const LocalNavigationMsg* msg);
 
-    // -------------
-    // Determinate the rudder angle according to the heading difference
-    // -------------
+    ///----------------------------------------------------------------------------------
+    /// Calculates the command rudder angle according to the course difference.
+    /// Equation from book "Robotic Sailing 2015 ", page 141.
+    ///----------------------------------------------------------------------------------
     float calculateRudderAngle();
 
     ///----------------------------------------------------------------------------------
-	/// Update values from the database as the loop time of the thread and others parameters
-	///----------------------------------------------------------------------------------
-    void updateConfigsFromDB();
-
-    // -------------
-    // Actions during the activity of the node
-    // -------------
+    /// Starts the CourseRegulatorNode's thread that pumps out RudderCommandMsg.
+    ///----------------------------------------------------------------------------------
     static void CourseRegulatorNodeThreadFunc(ActiveNode* nodePtr);
 
-    float m_VesselCourse; // units : ° (degrees), from 0 to 359
-    float m_VesselSpeed; // units : m/s
-    // -------------
-    // Parameters to regulate this node
-    // -------------
-    int m_MaxRudderAngle; // units :° (degrees), define the extreme value of the rudder
-    // -------------
-    // Informations
-    float m_DesiredCourse; // units : ° (degrees), from 0 to 359
-    // -------------
-    // Access to the database
-    // -------------
     DBHandler &m_db;
-    // -------------
-    // Loop time where the thread is asleep. units : seconds
-    // -------------
-    double m_LoopTime;      // unit : seconds (ex: 0.5 s)
-    // -------------
-    // Parameters to make a PI regulation
-    // -------------
-    double pGain;       //without units
-    double iGain;       //without units
-    double dGain;       //without units
-
-    // -------------
-    // Informations on Navigation control message
-    //NavigationState m_NavigationState;
-    /*int m_CourseToSteer;
-    float m_TargetSpeed;
-    bool m_Tack = false;
-
-     // -------------
-    // Informations
-    double m_VesselLatitude;
-    double m_VesselLongitude;
-    double m_VesselCourse; // units : ° (degrees), from 0 to 359
-    */
-    std::mutex m_lock;                      //Mutex to lock the node
+    std::mutex m_lock;
     std::atomic<bool> m_Running;
+
+    double  m_LoopTime;             // seconds
+    double  m_MaxRudderAngle;       // degrees
+
+    double  m_pGain;
+    double  m_iGain;
+    double  m_dGain;
+
+    float   m_VesselCourse;         // degree [0, 360[ in North-East reference frame (clockwise)
+    float   m_VesselSpeed;          // m/s
+
+    float   m_DesiredCourse;        // degree [0, 360[ in North-East reference frame (clockwise)
+
 };

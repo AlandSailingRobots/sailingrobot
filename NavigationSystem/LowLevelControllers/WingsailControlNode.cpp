@@ -4,10 +4,15 @@
  * 		WingsailControlNode.cpp
  *
  * Purpose:
- *      This file realize the control of the wingsail by the wind state.
- *      It sends the direct command to the actuator who control the tail wing angle.
+ *      Calculates the desired tail wing angle of the wingsail.
+ *      It sends a WingSailComandMsg corresponding to the command angle of the tail wing.
  *
  * Developer Notes:
+ *      Two functions have been developed to calculate the desiered tail angle :
+ *          - calculateTailAngle(),
+ *          - simpleCalculateTailAngle().
+ *      You can choose the one you want to use by commenting/uncommenting lines 
+ *      in WingsailControlNodeThreadFunc().   
  *
  ***************************************************************************************/
 
@@ -23,11 +28,13 @@ const double  DRAGS[53] = {-3.6222976277233707, -3.3490177771111052, -3.08645478
 
 ///----------------------------------------------------------------------------------
 WingsailControlNode::WingsailControlNode(MessageBus& msgBus, DBHandler& dbhandler):
-    ActiveNode(NodeID::WingsailControlNode,msgBus), m_MaxCommandAngle(13), m_db(dbhandler), m_ApparentWindDir(DATA_OUT_OF_RANGE)
+    ActiveNode(NodeID::WingsailControlNode,msgBus), m_db(dbhandler), m_LoopTime(0.5), m_MaxCommandAngle(13),
+    m_ApparentWindDir(DATA_OUT_OF_RANGE), m_TargetCourse(DATA_OUT_OF_RANGE), m_TargetTackStarboard(0)
     
 {
     msgBus.registerNode( *this, MessageType::WindState);
     msgBus.registerNode( *this, MessageType::LocalNavigation);
+    msgBus.registerNode( *this, MessageType::ServerConfigsReceived);
 }
 
 ///----------------------------------------------------------------------------------
@@ -56,6 +63,9 @@ void WingsailControlNode::processMessage( const Message* msg)
     case MessageType::LocalNavigation:
         processLocalNavigationMessage(static_cast< const LocalNavigationMsg*>(msg));
         break;
+    case MessageType::ServerConfigsReceived:
+        updateConfigsFromDB();
+        break;
     default:
         return;
     }
@@ -81,6 +91,7 @@ void WingsailControlNode::processLocalNavigationMessage(const LocalNavigationMsg
 {
     std::lock_guard<std::mutex> lock_guard(m_lock);
 
+    m_TargetCourse = msg->targetCourse();
     m_TargetTackStarboard = msg->targetTackStarboard();
 }
 
@@ -125,7 +136,7 @@ float WingsailControlNode::calculateTailAngle()
     }
     else
     {
-        return DATA_OUT_OF_RANGE;
+        return NO_COMMAND;
     }
 }
 
@@ -134,13 +145,20 @@ float WingsailControlNode::simpleCalculateTailAngle()
 {
     std::lock_guard<std::mutex> lock_guard(m_lock);
 
-    if (m_TargetTackStarboard)
+    if(m_TargetCourse != DATA_OUT_OF_RANGE && m_TargetCourse != NO_COMMAND)
     {
-        return m_MaxCommandAngle;
+        if (m_TargetTackStarboard)
+        {
+            return m_MaxCommandAngle;
+        }
+        else
+        {
+            return - m_MaxCommandAngle;
+        }
     }
     else
     {
-        return - m_MaxCommandAngle;
+        return NO_COMMAND;
     }
 }
 
@@ -160,7 +178,7 @@ void WingsailControlNode::WingsailControlNodeThreadFunc(ActiveNode* nodePtr)
     {
         //float wingSailCommand = (float)node->calculateTailAngle();
         float wingSailCommand = (float)node->simpleCalculateTailAngle();
-        if (wingSailCommand != DATA_OUT_OF_RANGE)
+        if (wingSailCommand != NO_COMMAND)
         {
             MessagePtr wingSailMessage = std::make_unique<WingSailCommandMsg>(wingSailCommand);
             node->m_MsgBus.sendMessage(std::move(wingSailMessage));

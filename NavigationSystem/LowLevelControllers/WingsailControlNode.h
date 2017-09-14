@@ -4,10 +4,15 @@
  * 		WingsailControlNode.h
  *
  * Purpose:
- *      This file realize the control of the wingsail by the wind state.
- *      It sends the direct command to the actuator who control the tail wing angle.
+ *      Calculates the desired tail wing angle of the wingsail.
+ *      It sends a WingSailComandMsg corresponding to the command angle of the tail wing.
  *
  * Developer Notes:
+ *      Two functions have been developed to calculate the desiered tail angle :
+ *          - calculateTailAngle(),
+ *          - simpleCalculateTailAngle().
+ *      You can choose the one you want to use by commenting/uncommenting lines 
+ *      in WingsailControlNodeThreadFunc().   
  *
  ***************************************************************************************/
 #pragma once
@@ -43,37 +48,39 @@ public:
 private:
 
     ///----------------------------------------------------------------------------------
-    /// Update values from the database
+    /// Updates the values of the parameters from the database.
     ///----------------------------------------------------------------------------------
     void updateConfigsFromDB();
 
     ///----------------------------------------------------------------------------------
-    /// Processing informations from the State Message
+    /// Stores apparent wind direction from a WindStateMsg.
     ///----------------------------------------------------------------------------------
     void processWindStateMessage(const WindStateMsg* msg);
 
     ///----------------------------------------------------------------------------------
-    /// Processing informations from the Local Navigation Message
+    /// Stores target course and tack data from a LocalNavigationMsg.
     ///----------------------------------------------------------------------------------
     void processLocalNavigationMessage(const LocalNavigationMsg* msg);
 
     ///----------------------------------------------------------------------------------
-    /// Limit the command tail angle to m_MaxCommandAngle
+    /// Limits the command tail angle to m_MaxCommandAngle.
     ///----------------------------------------------------------------------------------
     double restrictWingsail(double val);
 
     ///----------------------------------------------------------------------------------
-    /// Calculate the angle to give to the tail to have maximum force toward boat heading
+    /// Calculates the angle to give to the tail to have maximum force toward boat heading.
+    /// The parameters used by this function have been calculated by CFD simulation. It is 
+    /// possible that the values of these parameters do not describe the real wing sail behaviour.
     ///----------------------------------------------------------------------------------
     float calculateTailAngle();
 
     ///----------------------------------------------------------------------------------
-    /// Set the tail command angle to +/- m_MaxCommandAngle in function of the desired tack of the vessel
+    /// Sets the tail command angle to +/- m_MaxCommandAngle in function of the desired tack of the vessel.
     ///----------------------------------------------------------------------------------
     float simpleCalculateTailAngle();
 
     ///----------------------------------------------------------------------------------
-    /// Actions during the activity of the node
+    /// Starts the WingsailControlNode's thread that pumps out WingSailCommandMsg.
     ///----------------------------------------------------------------------------------
     static void WingsailControlNodeThreadFunc(ActiveNode* nodePtr);
 
@@ -85,6 +92,7 @@ private:
     double  m_MaxCommandAngle;      // degrees
 
     double  m_ApparentWindDir;      // degrees [0, 360[ in North-East reference frame (clockwise)
+    float   m_TargetCourse;         // degree [0, 360[ in North-East reference frame (clockwise)
     bool    m_TargetTackStarboard;  // True if the desired tack of the vessel is starboard.
-    
+
 };
