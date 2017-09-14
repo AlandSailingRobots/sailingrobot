@@ -5,100 +5,86 @@
  *
  * Purpose:
  *      This file realize the control of the wingsail by the wind state.
- *      It sends the direct command to the actuator who control the sail queue angle.
+ *      It sends the direct command to the actuator who control the tail wing angle.
  *
- * License:
- *      This file is subject to the terms and conditions defined in the file
- *      'LICENSE.txt', which is part of this source code package.
+ * Developer Notes:
  *
  ***************************************************************************************/
 #pragma once
 
+#include <thread>
+#include <math.h>
+#include <mutex>
+#include <chrono>
+#include <vector>
+#include <stdint.h>
+
+#include "DataBase/DBHandler.h"
+#include "Math/Utility.h"
 #include "MessageBus/ActiveNode.h"
-#include "Messages/WindDataMsg.h"
+#include "MessageBus/MessageBus.h"
+#include "Messages/WindStateMsg.h"
+#include "Messages/StateMessage.h"
 #include "Messages/LocalNavigationMsg.h"
 #include "Messages/WingSailCommandMsg.h"
-#include "MessageBus/MessageBus.h"
-#include "DataBase/DBHandler.h"
-#include <mutex>
-#include <stdint.h>
+#include "SystemServices/Timer.h"
 
 
 class WingsailControlNode : public ActiveNode {
 public:
-    //--------------
-    // Constructor
-    //--------------
-    WingsailControlNode(MessageBus& msgBus, DBHandler& dbhandler);
 
-    // -------------
-    // Destructor
-    // -------------
+    WingsailControlNode(MessageBus& msgBus, DBHandler& dbhandler);
     ~WingsailControlNode();
 
-    // -------------
-    // Function to init the truth
-    // -------------
     bool init();
-
-    // -------------
-    // Start the thread for the active node
-    // -------------
     void start();
-
-    // -------------
-    // Listen the message concerning this Node
-    // -------------
     void processMessage(const Message* message);
 
 private:
 
-    // -------------
-    // Processing informations from the State Message
-    // -------------
-    void processWindStateMessage(const WindStateMsg* msg);
-
-    // -------------
-    // Processing informations from the Navigation Control Message
-    // -------------
-    void processLocalNavigationMessage(const LocalNavigationMsg* msg);
-
-    // -------------
-    // Calculate the sail angle according to the apparent wind
-    // -------------
-    double calculateWingsailAngle();
-
-    //--------------
-    // Calculate the angle to give to the tail
-    //
-    float calculateTailAngle();
-
-    float simpleCalculateTailAngle();
-
-    // -------------
-    // Limit the sail angle
-    // -------------
-    double restrictWingsail(double val);
-
-    // -------------
-    // Get and update the frequency of the thread
-    // -------------
+    ///----------------------------------------------------------------------------------
+    /// Update values from the database
+    ///----------------------------------------------------------------------------------
     void updateConfigsFromDB();
 
-    // -------------
-    // Actions during the activity of the node
-    // -------------
+    ///----------------------------------------------------------------------------------
+    /// Processing informations from the State Message
+    ///----------------------------------------------------------------------------------
+    void processWindStateMessage(const WindStateMsg* msg);
+
+    ///----------------------------------------------------------------------------------
+    /// Processing informations from the Local Navigation Message
+    ///----------------------------------------------------------------------------------
+    void processLocalNavigationMessage(const LocalNavigationMsg* msg);
+
+    ///----------------------------------------------------------------------------------
+    /// Limit the command tail angle to m_MaxCommandAngle
+    ///----------------------------------------------------------------------------------
+    double restrictWingsail(double val);
+
+    ///----------------------------------------------------------------------------------
+    /// Calculate the angle to give to the tail to have maximum force toward boat heading
+    ///----------------------------------------------------------------------------------
+    float calculateTailAngle();
+
+    ///----------------------------------------------------------------------------------
+    /// Set the tail command angle to +/- m_MaxCommandAngle in function of the desired tack of the vessel
+    ///----------------------------------------------------------------------------------
+    float simpleCalculateTailAngle();
+
+    ///----------------------------------------------------------------------------------
+    /// Actions during the activity of the node
+    ///----------------------------------------------------------------------------------
     static void WingsailControlNodeThreadFunc(ActiveNode* nodePtr);
 
 
-    double m_MaxCommandAngle; // units : ° (degrees)
-
     DBHandler &m_db;
-    double m_LoopTime;
-
-    double m_ApparentWindDir; // units : ° (degrees), from -180 to 180
-
-    bool m_targetTackStarboard;
-
     std::mutex m_lock;
+
+    double  m_LoopTime;             // seconds
+    double  m_MaxCommandAngle;      // degrees
+
+    double  m_ApparentWindDir;      // degrees [0, 360[ in North-East reference frame (clockwise)
+    bool    m_TargetTackStarboard;  // True if the desired tack of the vessel is starboard.
+    
 };
