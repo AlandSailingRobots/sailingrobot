@@ -4,12 +4,10 @@
  * 		CourseRegulatorNode.cpp
  *
  * Purpose:
- *      This file realize the regulation of the rudder by the desired course.
- *      It sends the value to the rudder actuator Node
+ *      Calculates the command angle of the rudder in order to regulate the vessel course.
+ *      It sends a RudderCommandMsg corresponding to the command angle of the rudder.
  *
- * License:
- *      This file is subject to the terms and conditions defined in the file
- *      'LICENSE.txt', which is part of this source code package.
+ * Developer Notes:
  *
  ***************************************************************************************/
 
@@ -23,8 +21,8 @@ const float NO_COMMAND = -1000;
 
 ///----------------------------------------------------------------------------------
 CourseRegulatorNode::CourseRegulatorNode( MessageBus& msgBus,  DBHandler& dbhandler)
-:ActiveNode(NodeID::CourseRegulatorNode,msgBus), m_db(dbhandler), m_LoopTime(0.5), m_MaxRudderAngle(30),
-m_pGain(1), m_iGain(1), m_dGain(1),
+:ActiveNode(NodeID::CourseRegulatorNode,msgBus), m_db(dbhandler), m_Running(0), 
+m_LoopTime(0.5), m_MaxRudderAngle(30), m_pGain(1), m_iGain(1), m_dGain(1),
 m_VesselCourse(DATA_OUT_OF_RANGE), m_VesselSpeed(DATA_OUT_OF_RANGE), m_DesiredCourse(DATA_OUT_OF_RANGE)
 
 {
@@ -58,16 +56,6 @@ void CourseRegulatorNode::stop()
 }
 
 ///----------------------------------------------------------------------------------
-void CourseRegulatorNode::updateConfigsFromDB()
-{
-    m_LoopTime = m_db.retrieveCellAsDouble("config_course_regulator","1","loop_time");
-    m_MaxRudderAngle = m_db.retrieveCellAsInt("config_course_regulator","1","max_rudder_angle");
-    m_pGain = m_db.retrieveCellAsDouble("config_course_regulator","1","p_gain");
-    m_iGain = m_db.retrieveCellAsDouble("config_course_regulator","1","i_gain");
-    m_dGain = m_db.retrieveCellAsDouble("config_course_regulator","1","d_gain");
-}
-
-///----------------------------------------------------------------------------------
 void CourseRegulatorNode::processMessage( const Message* msg )
 {
     switch(msg->messageType())
@@ -84,6 +72,16 @@ void CourseRegulatorNode::processMessage( const Message* msg )
     default:
         return;
     }
+}
+
+///----------------------------------------------------------------------------------
+void CourseRegulatorNode::updateConfigsFromDB()
+{
+    m_LoopTime = m_db.retrieveCellAsDouble("config_course_regulator","1","loop_time");
+    m_MaxRudderAngle = m_db.retrieveCellAsInt("config_course_regulator","1","max_rudder_angle");
+    m_pGain = m_db.retrieveCellAsDouble("config_course_regulator","1","p_gain");
+    m_iGain = m_db.retrieveCellAsDouble("config_course_regulator","1","i_gain");
+    m_dGain = m_db.retrieveCellAsDouble("config_course_regulator","1","d_gain");
 }
 
 ///----------------------------------------------------------------------------------
@@ -145,8 +143,8 @@ void CourseRegulatorNode::CourseRegulatorNodeThreadFunc(ActiveNode* nodePtr)
         float rudderCommand = node->calculateRudderAngle();
         if (rudderCommand != NO_COMMAND)
         {
-            MessagePtr actuatorMessage = std::make_unique<RudderCommandMsg>(rudderCommand);
-            node->m_MsgBus.sendMessage(std::move(actuatorMessage));
+            MessagePtr rudderCommandMsg = std::make_unique<RudderCommandMsg>(rudderCommand);
+            node->m_MsgBus.sendMessage(std::move(rudderCommandMsg));
         }
         timer.sleepUntil(node->m_LoopTime);
         timer.reset();

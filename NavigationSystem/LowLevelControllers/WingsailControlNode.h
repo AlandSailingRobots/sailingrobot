@@ -8,7 +8,7 @@
  *      It sends a WingSailComandMsg corresponding to the command angle of the tail wing.
  *
  * Developer Notes:
- *      Two functions have been developed to calculate the desiered tail angle :
+ *      Two functions have been developed to calculate the desired tail angle :
  *          - calculateTailAngle(),
  *          - simpleCalculateTailAngle().
  *      You can choose the one you want to use by commenting/uncommenting lines 

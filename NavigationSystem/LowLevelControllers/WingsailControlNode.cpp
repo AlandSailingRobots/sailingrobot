@@ -8,7 +8,7 @@
  *      It sends a WingSailComandMsg corresponding to the command angle of the tail wing.
  *
  * Developer Notes:
- *      Two functions have been developed to calculate the desiered tail angle :
+ *      Two functions have been developed to calculate the desired tail angle :
  *          - calculateTailAngle(),
  *          - simpleCalculateTailAngle().
  *      You can choose the one you want to use by commenting/uncommenting lines 
@@ -180,8 +180,8 @@ void WingsailControlNode::WingsailControlNodeThreadFunc(ActiveNode* nodePtr)
         float wingSailCommand = (float)node->simpleCalculateTailAngle();
         if (wingSailCommand != NO_COMMAND)
         {
-            MessagePtr wingSailMessage = std::make_unique<WingSailCommandMsg>(wingSailCommand);
-            node->m_MsgBus.sendMessage(std::move(wingSailMessage));
+            MessagePtr wingSailCommandMsg = std::make_unique<WingSailCommandMsg>(wingSailCommand);
+            node->m_MsgBus.sendMessage(std::move(wingSailCommandMsg));
         }
         timer.sleepUntil(node->m_LoopTime);
         timer.reset();

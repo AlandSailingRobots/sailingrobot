@@ -18,6 +18,7 @@
 #include <chrono>
 #include <vector>
 #include <stdint.h>
+#include <atomic>
 
 #include "DataBase/DBHandler.h"
 #include "Math/Utility.h"
