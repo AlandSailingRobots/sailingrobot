@@ -36,7 +36,10 @@
 },
 
 "config_line_follow": {
-  "loop_time": 0.5
+  "loop_time": 0.5,
+  "close_hauled_angle": 45,
+  "broad_reach_angle": 10,
+  "tacking_distance": 15
 },
 
 "config_maestro_controller": {

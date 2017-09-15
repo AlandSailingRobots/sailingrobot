@@ -87,8 +87,7 @@ DATABASE_SRC				= DataBase/DBHandler.cpp DataBase/DBLogger.cpp DataBase/DBLogger
 
 HTTP_SYNC_SRC        		= HTTPSync/HTTPSyncNode.cpp
 
-LOW_LEVEL_CONTROLLERS 		= LowLevelControllers/LowLevelController.cpp \
-								LowLevelControllers/CourseRegulatorNode.cpp LowLevelControllers/SailControlNode.cpp \
+LOW_LEVEL_CONTROLLERS 		= LowLevelControllers/CourseRegulatorNode.cpp LowLevelControllers/SailControlNode.cpp \
 								LowLevelControllers/WingsailControlNode.cpp
 
 MATH_SRC             		= Math/CourseCalculation.cpp Math/CourseMath.cpp Math/Utility.cpp

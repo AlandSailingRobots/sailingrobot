@@ -51,11 +51,11 @@ SimulationNode::SimulationNode(MessageBus& msgBus, DBHandler& dbhandler, bool bo
 		m_GPSCourse(0), m_WindDir(0), m_WindSpeed(0), m_nextDeclination(0),
 		collidableMgr(NULL), m_db(dbhandler), m_boatType(boatType)
 {
+    msgBus.registerNode(*this, MessageType::SailCommand);    
     msgBus.registerNode(*this, MessageType::WingSailCommand);
     msgBus.registerNode(*this, MessageType::RudderCommand);
     msgBus.registerNode(*this, MessageType::WaypointData);
     msgBus.registerNode(*this, MessageType::ServerConfigsReceived);
-    msgBus.registerNode(*this, MessageType::ActuatorPosition);
 }
 
 SimulationNode::SimulationNode(MessageBus& msgBus, DBHandler& dbhandler, bool boatType, CollidableMgr* collidableMgr)
@@ -65,11 +65,11 @@ SimulationNode::SimulationNode(MessageBus& msgBus, DBHandler& dbhandler, bool bo
 		m_GPSCourse(0), m_WindDir(0), m_WindSpeed(0), m_nextDeclination(0),
 		collidableMgr(collidableMgr), m_db(dbhandler),m_boatType(boatType)
 {
+    msgBus.registerNode(*this, MessageType::SailCommand);
     msgBus.registerNode(*this, MessageType::WingSailCommand);
     msgBus.registerNode(*this, MessageType::RudderCommand);
     msgBus.registerNode(*this, MessageType::WaypointData);
     msgBus.registerNode(*this, MessageType::ServerConfigsReceived);
-    msgBus.registerNode(*this, MessageType::ActuatorPosition);
 }
 
 void SimulationNode::start()
@@ -110,8 +110,8 @@ void SimulationNode::processMessage(const Message* msg)
 
     switch(type)
     {
-    case MessageType::ActuatorPosition:
-        processActuatorPositionMessage((ActuatorPositionMsg*)msg);
+    case MessageType::SailCommand:
+        processSailCommandMessage((SailCommandMsg*)msg);
         break;
     case MessageType::WingSailCommand:
         processWingSailCommandMessage((WingSailCommandMsg*)msg);
@@ -130,12 +130,11 @@ void SimulationNode::processMessage(const Message* msg)
     }
 }
 
-void SimulationNode::processActuatorPositionMessage(ActuatorPositionMsg* msg)
+void SimulationNode::processSailCommandMessage(SailCommandMsg* msg)
 {
-    m_RudderCommand = msg->rudderPosition();
-    m_SailCommand = msg->sailPosition();
-    // std::cout << "rudder : " << m_RudderCommand << " sail : " << m_SailCommand << std::endl;
+    m_SailCommand = msg->maxSailAngle();
 }
+
 void SimulationNode::processWingSailCommandMessage(WingSailCommandMsg* msg)
 {
     m_TailCommand = msg->tailAngle();
@@ -295,7 +294,7 @@ void SimulationNode::sendActuatorDataWing( int socketFD)
 
 void SimulationNode::sendActuatorDataSail( int socketFD)
 {   
-    actuatorDataSail.rudderCommand = m_RudderCommand;
+    actuatorDataSail.rudderCommand = - Utility::degreeToRadian(m_RudderCommand);
     actuatorDataSail.sailCommand   = Utility::degreeToRadian(m_SailCommand);
     
     server.sendData( socketFD, &actuatorDataSail, sizeof(ActuatorDataSailPacket_t) );       

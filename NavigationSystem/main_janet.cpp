@@ -11,7 +11,8 @@
 #include "WorldState/WindStateNode.h"
 #include "WorldState/CollidableMgr/CollidableMgr.h"
 
-#include "LowLevelControllers/LowLevelController.h" // NOTE - Maël: It will change
+#include "LowLevelControllers/SailControlNode.h"
+#include "LowLevelControllers/CourseRegulatorNode.h"
 
 #if LOCAL_NAVIGATION_MODULE == 1
   #include "Navigation/LocalNavigationModule/LocalNavigationModule.h"
@@ -146,10 +147,8 @@ int main(int argc, char *argv[])
 	WindStateNode windStateNode(messageBus);
 	WaypointMgrNode waypoint(messageBus, dbHandler);
 
-	double PGAIN = 0.20;
-	double IGAIN = 0.30;
-	LowLevelController llc(messageBus, dbHandler, PGAIN, IGAIN); // NOTE - Maël: It will change
-
+	SailControlNode sailControlNode(messageBus, dbHandler);
+	CourseRegulatorNode courseRegulatorNode(messageBus, dbHandler);
 
   	#if LOCAL_NAVIGATION_MODULE == 1
         LocalNavigationModule lnm	( messageBus, dbHandler );
@@ -184,7 +183,6 @@ int main(int argc, char *argv[])
 	  	GPSDNode gpsd(messageBus, dbHandler);
         ArduinoNode arduino(messageBus, dbHandler);
 
-        //NOTE : Marc : Modification or add in the DB Janet ?
 		int channel = 3;
 		int speed = 0;
 		int acceleration = 0;
@@ -204,14 +202,15 @@ int main(int argc, char *argv[])
 	// Initialise nodes
 	//-------------------------------------------------------------------------------
 
-	//initialiseNode(httpsync, "Httpsync", NodeImportance::NOT_CRITICAL);
+	//initialiseNode(httpsync, "Httpsync", NodeImportance::NOT_CRITICAL); // This node is not critical during the developement phase.
 	initialiseNode(dbLoggerNode, "DBLogger", NodeImportance::CRITICAL);
 
 	initialiseNode(stateEstimationNode,"StateEstimation",NodeImportance::CRITICAL);
 	initialiseNode(windStateNode,"WindState",NodeImportance::CRITICAL);
 	initialiseNode(waypoint, "Waypoint", NodeImportance::CRITICAL);
 
-	initialiseNode(llc, "Low Level Controller", NodeImportance::CRITICAL); // NOTE - Maël: It will change
+ 	initialiseNode(sailControlNode, "Sail Controller", NodeImportance::CRITICAL);
+ 	initialiseNode(courseRegulatorNode, "Course Regulator", NodeImportance::CRITICAL);
 
 	#if LOCAL_NAVIGATION_MODULE == 1
 		initialiseNode( lnm, "Local Navigation Module",	NodeImportance::CRITICAL );
@@ -239,6 +238,9 @@ int main(int argc, char *argv[])
 
 	stateEstimationNode.start();
 
+	sailControlNode.start();
+	courseRegulatorNode.start();
+
 	#if SIMULATION == 1
 		simulation.start();
 	#else
@@ -246,7 +248,6 @@ int main(int argc, char *argv[])
 		compass.start();
 		gpsd.start();
 		arduino.start();
-		// xbee.start();	// NOTE - Maël: Not configue with the new functional architecture yet
 	#endif
 
 	#if LOCAL_NAVIGATION_MODULE == 1
@@ -256,11 +257,11 @@ int main(int argc, char *argv[])
 		sailingLogic.start();
 	#endif
 
-	//-------------------------------------------------------------------------------
-
 	// Begins running the message bus
+	//-------------------------------------------------------------------------------
 	Logger::info("Message bus started!");
 	messageBus.run();
+
 
 	Logger::shutdown();
 	exit(0);

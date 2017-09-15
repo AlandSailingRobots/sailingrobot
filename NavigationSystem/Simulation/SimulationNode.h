@@ -23,7 +23,7 @@
 #include "Messages/CompassDataMsg.h"
 #include "Messages/GPSDataMsg.h"
 #include "Messages/WindDataMsg.h"
-#include "Messages/ActuatorPositionMsg.h"
+#include "Messages/SailCommandMsg.h"
 #include "Messages/ASPireActuatorFeedbackMsg.h"
 #include "Messages/WingSailCommandMsg.h"
 #include "Messages/RudderCommandMsg.h"
@@ -132,9 +132,9 @@ public:
     void processMessage(const Message* msg);
 
     ///----------------------------------------------------------------------------------
-    /// Stores compass data from a ActuatorPositionMsg.
+    /// Stores sail command data from a SailCommandMsg.
     ///----------------------------------------------------------------------------------
-    void processActuatorPositionMessage(ActuatorPositionMsg* msg);
+    void processSailCommandMessage(SailCommandMsg* msg);
 
     ///----------------------------------------------------------------------------------
     /// Stores wing sail command data from a WingSailCommandMsg.

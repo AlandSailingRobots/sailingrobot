@@ -4,46 +4,46 @@
  * 		SailControlNode.cpp
  *
  * Purpose:
- *      This file realize the control of the sail by the wind state.
- *      It sends the direct command to the actuator who control the sail sheet.
+ *      Calculates the desired sail angle.
+ *      It sends a SailComandMsg corresponding to the command angle of the sail.
  *
- * License:
- *      This file is subject to the terms and conditions defined in the file
- *      'LICENSE.txt', which is part of this source code package.
+ * Developer Notes:
+ *      Two functions have been developed to calculate the desired sail angle :
+ *          - calculateSailAngleLinear(),
+ *          - calculateSailAngleCardioid().
+ *      You can choose the one you want to use by commenting/uncommenting lines 
+ *      in SailControlNodeThreadFunc(). 
  *
  ***************************************************************************************/
 
 #include "SailControlNode.h"
-#include <thread>
-#include <math.h>
-#include <mutex>
-#include <chrono>
-#include "Messages/WindDataMsg.h"
-#include "Messages/ActuatorPositionMsg.h"
-#include "Messages/StateMessage.h"
-#include "SystemServices/Logger.h"
-#include "SystemServices/Timer.h"
-#include "Math/Utility.h"
 
-#define STATE_INITIAL_SLEEP 2000
 
-SailControlNode::SailControlNode(MessageBus& msgBus, DBHandler& dbhandler, double loopTime)
-    :ActiveNode(NodeID::SailControlNode,msgBus),m_MaxSailAngle(90),m_MinSailAngle(10),
-    m_ApparentWindDir(0),m_db(dbhandler),m_LoopTime(loopTime)
+#define DATA_OUT_OF_RANGE -2000
+const int INITIAL_SLEEP = 2000; // milliseconds
+const float NO_COMMAND = -1000;
+
+
+///----------------------------------------------------------------------------------
+SailControlNode::SailControlNode(MessageBus& msgBus, DBHandler& dbhandler)
+    :ActiveNode(NodeID::SailControlNode,msgBus),m_db(dbhandler), m_Running(0),
+    m_LoopTime(0.5), m_MaxSailAngle(90), m_MinSailAngle(10),
+    m_ApparentWindDir(DATA_OUT_OF_RANGE)
 {
-    msgBus.registerNode( *this, MessageType::WindData);
+    msgBus.registerNode( *this, MessageType::WindState);
     msgBus.registerNode( *this, MessageType::LocalNavigation);
     msgBus.registerNode( *this, MessageType::ServerConfigsReceived);
 }
 
 ///----------------------------------------------------------------------------------
-SailControlNode::~SailControlNode()
-{
-
-}
+SailControlNode::~SailControlNode(){}
 
 ///----------------------------------------------------------------------------------
-bool SailControlNode::init(){ return true;}
+bool SailControlNode::init()
+{
+    updateConfigsFromDB();
+    return true;
+}
 
 ///----------------------------------------------------------------------------------
 void SailControlNode::start()
@@ -60,6 +60,22 @@ void SailControlNode::stop()
 }
 
 ///----------------------------------------------------------------------------------
+void SailControlNode::processMessage( const Message* msg)
+{
+    switch( msg->messageType() )
+    {
+    case MessageType::WindState:
+        processWindStateMessage(static_cast< const WindStateMsg*>(msg));
+        break;
+    case MessageType::ServerConfigsReceived:
+        updateConfigsFromDB();
+        break;
+    default:
+        return;
+    }
+}
+
+///----------------------------------------------------------------------------------
 void SailControlNode::updateConfigsFromDB()
 {
     m_LoopTime = m_db.retrieveCellAsDouble("config_sail_control","1","loop_time");
@@ -68,54 +84,52 @@ void SailControlNode::updateConfigsFromDB()
 }
 
 ///----------------------------------------------------------------------------------
-void SailControlNode::processMessage( const Message* msg)
+void SailControlNode::processWindStateMessage(const WindStateMsg* msg)
 {
-    switch( msg->messageType() )
+    std::lock_guard<std::mutex> lock_guard(m_lock);
+
+    m_ApparentWindDir = msg->apparentWindDirection();
+}
+
+///----------------------------------------------------------------------------------
+float SailControlNode::restrictSailAngle(float val)
+{
+    if( val > m_MaxSailAngle)        { return m_MaxSailAngle; }
+    else if ( val < m_MinSailAngle) { return m_MinSailAngle; }
+    return val;
+}
+
+///----------------------------------------------------------------------------------
+float SailControlNode::calculateSailAngleLinear()
+{
+    std::lock_guard<std::mutex> lock_guard(m_lock);
+
+    if(m_ApparentWindDir != DATA_OUT_OF_RANGE)
     {
-        case MessageType::WindData:
-        processWindDataMessage(static_cast< const WindDataMsg*>(msg));
-        break;
-        case MessageType::LocalNavigation:
-        processLocalNavigationMessage(static_cast< const LocalNavigationMsg*>(msg));
-        break;
-        case MessageType::ServerConfigsReceived:
-        updateConfigsFromDB();
-        break;
-        default:
-        return;
+        // Equation from book "Robotic Sailing 2015", page 141
+        return (m_MaxSailAngle-m_MinSailAngle)*std::fabs(Utility::limitAngleRange180(m_ApparentWindDir))/180 + m_MinSailAngle; //!!! on some pc abs only ouptut an int (ubuntu 14.04 gcc 4.9.3)
+    }
+    else
+    {
+        return NO_COMMAND;
     }
 }
 
 ///----------------------------------------------------------------------------------
-void SailControlNode::processWindDataMessage(const WindDataMsg* msg)
+float SailControlNode::calculateSailAngleCardioid()
 {
-    m_ApparentWindDir = msg->windDirection();
-}
+    std::lock_guard<std::mutex> lock_guard(m_lock);
 
-///----------------------------------------------------------------------------------
-void SailControlNode::processLocalNavigationMessage(const LocalNavigationMsg* msg)
-{
-    //std::lock_guard<std_mutex> lock_guard(m_lock);
-    //m_NavigationState = msg->navigationState();
+    if(m_ApparentWindDir != DATA_OUT_OF_RANGE)
+    {
+        float sailAngle = 90*(-cos(Utility::degreeToRadian(m_ApparentWindDir))+1)/2;
+        return restrictSailAngle(sailAngle);
+    }
+    else
+    {
+        return NO_COMMAND;
+    }
 }
-
-//*----------------------------------------------------------------------------------
-double SailControlNode::calculateSailAngle()
-{
-    // Equation from book "Robotic Sailing 2015 ", page 141
-    // Also the reaction could be configure by the frequence of the thread.
-    return -Utility::sgn(m_ApparentWindDir)*(((m_MinSailAngle-m_MaxSailAngle)*std::abs(m_ApparentWindDir)/180)+m_MaxSailAngle);
-}
-//*///----------------------------------------------------------------------------------
-
-/*----------------------------------------------------------------------------------
-double SailControlNode::calculateSailAngle()
-{
-    // Equation from book "Robotic Sailing 2012 ", page 109
-    // Also the reaction could be configure by the frequence of the thread.
-    return (m_MaxSailAngle-m_MinSailAngle)*((cos(Utility::degreeToRadian(m_ApparentWindDir))+1)/2 + 1);
-}
-//*///----------------------------------------------------------------------------------
 
 ///----------------------------------------------------------------------------------
 void SailControlNode::SailControlNodeThreadFunc(ActiveNode* nodePtr)
@@ -124,15 +138,20 @@ void SailControlNode::SailControlNodeThreadFunc(ActiveNode* nodePtr)
 
     // An initial sleep, its purpose is to ensure that most if not all the sensor data arrives
     // at the start before we send out the state message.
-    std::this_thread::sleep_for(std::chrono::milliseconds(STATE_INITIAL_SLEEP));
+    std::this_thread::sleep_for(std::chrono::milliseconds(INITIAL_SLEEP));
+
     Timer timer;
     timer.start();
 
     while(node->m_Running.load() == true)
     {
-        // TODO : Modify Actuator Message for adapt to this Node
-        MessagePtr actuatorMessage = std::make_unique<ActuatorPositionMsg>(0,node->calculateSailAngle());
-        node->m_MsgBus.sendMessage(std::move(actuatorMessage));
+        //float sailAngle = node->calculateSailAngleLinear();
+        float sailAngle = node->calculateSailAngleCardioid();
+        if(sailAngle != NO_COMMAND)
+        {
+            MessagePtr sailCommandMsg = std::make_unique<SailCommandMsg>(sailAngle);
+            node->m_MsgBus.sendMessage(std::move(sailCommandMsg));
+        }
         timer.sleepUntil(node->m_LoopTime);
         timer.reset();
     }
