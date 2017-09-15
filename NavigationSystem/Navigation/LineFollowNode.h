@@ -4,7 +4,7 @@
 * 		LineFollowNode.h
 *
 * Purpose:
-*		This class computes the actuator positions of the boat in order to follow
+*		This class computes the actuator positions of the boat in order to follow the
 *    line given by the waypoints.
 *
 * Developer Notes:
@@ -24,6 +24,7 @@
 #include <algorithm>
 #include <cmath>
 #include <chrono>
+#include <atomic>
 
 #include "DataBase/DBHandler.h"
 #include "Math/CourseMath.h"
@@ -34,13 +35,7 @@
 #include "Messages/WindStateMsg.h"
 #include "Messages/WaypointDataMsg.h"
 #include "Messages/LocalNavigationMsg.h"
-#include "Messages/ServerConfigsReceivedMsg.h"
-#include "SystemServices/SysClock.h"
 #include "SystemServices/Timer.h"
-
-#include "waypointrouting/RudderCommand.h"
-
-#include <atomic>
 
 
 class LineFollowNode : public ActiveNode {
@@ -57,10 +52,9 @@ public:
 
 private:
 
-/*
-	const double NORM_RUDDER_COMMAND = 0.5166; // getCommand() take a value between -1 and 1 so we need to normalize the command correspond to 29.6 degree
-	const double NORM_SAIL_COMMAND = 0.6958;
-*/
+    ///----------------------------------------------------------------------------------
+    /// Updates the values of the parameters from the database.
+    ///----------------------------------------------------------------------------------
 	void updateConfigsFromDB();
 
     ///----------------------------------------------------------------------------------
@@ -79,17 +73,17 @@ private:
 	void processWaypointMessage(WaypointDataMsg* waypMsg);
 
 	///----------------------------------------------------------------------------------
-    /// Calculate the angle of the line to be followed. in north east down reference frame.
+    /// Calculates the angle of the line to be followed. in north east down reference frame.
     ///----------------------------------------------------------------------------------
 	double calculateAngleOfDesiredTrajectory();
 
 	///----------------------------------------------------------------------------------
-    /// Calculate the course to steer by using the line follow algorithm described in the papers.
+    /// Calculates the course to steer by using the line follow algorithm described in the papers.
     ///----------------------------------------------------------------------------------
 	double calculateTargetCourse();
 
 	///----------------------------------------------------------------------------------
-    /// Return true if the desired tack of the vessel is starboard (wind blowing from the right side )
+    /// Returns true if the desired tack of the vessel is starboard (wind blowing from the right side )
     ///----------------------------------------------------------------------------------
 	bool getTargetTackStarboard(double targetCourse);
 
@@ -104,12 +98,12 @@ private:
     ///----------------------------------------------------------------------------------
 	static void LineFollowNodeThreadFunc(ActiveNode* nodePtr);
 
-    double  m_LoopTime;             // second
 	DBHandler& m_db;
-
     std::mutex m_lock;
 	std::atomic<bool> m_Running;
 
+    double  m_LoopTime;             // seconds
+    
 	std::vector<float> m_TwdBuffer; // True wind direction buffer. angles in degree [0, 360[ in vessel reference frame (clockwise)
 
 	// Vecteur field parameters

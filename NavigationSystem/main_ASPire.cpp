@@ -199,7 +199,7 @@ int main(int argc, char *argv[])
 	initialiseNode(waypoint, "Waypoint", NodeImportance::CRITICAL);
 
  	initialiseNode(wingSailControlNode, "Wing Sail Controller", NodeImportance::CRITICAL);
- 	initialiseNode(courseRegulatorNode, "course regulator", NodeImportance::CRITICAL);
+ 	initialiseNode(courseRegulatorNode, "Course Regulator", NodeImportance::CRITICAL);
 
 	#if LOCAL_NAVIGATION_MODULE == 1
 		initialiseNode( lnm, "Local Navigation Module",	NodeImportance::CRITICAL );
@@ -226,12 +226,13 @@ int main(int argc, char *argv[])
 
 	stateEstimationNode.start();
 
+	wingSailControlNode.start();
+	courseRegulatorNode.start();
+
 	#if SIMULATION == 1
 		simulation.start();
 	#else
-	  // Comment out this line if not running on the pi
-	  // otherwise program will crash.
-	  auto future = canService.start();
+	  	auto future = canService.start();
 		compass.start();
 		gpsd.start();
 		windSensor.start();
@@ -245,13 +246,11 @@ int main(int argc, char *argv[])
 		sailingLogic.start();
 	#endif
 
-	wingSailControlNode.start();
-	courseRegulatorNode.start();
-	//-------------------------------------------------------------------------------
-
 	// Begins running the message bus
+	//-------------------------------------------------------------------------------
 	Logger::info("Message bus started!");
 	messageBus.run();
+
 
 	Logger::shutdown();
 	exit(0);
