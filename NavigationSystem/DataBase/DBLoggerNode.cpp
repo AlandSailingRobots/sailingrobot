@@ -4,7 +4,6 @@
 #include "Messages/GPSDataMsg.h"
 #include "Messages/WindDataMsg.h"
 #include "Messages/WindStateMsg.h"
-#include "Messages/ActuatorPositionMsg.h"
 #include "Messages/CourseDataMsg.h"
 #include "Messages/LocalNavigationMsg.h"
 #include "Messages/WaypointDataMsg.h"
@@ -103,15 +102,6 @@ void DBLoggerNode::processMessage(const Message* msg) {
             item.m_ph = marineSensorMsg->ph();
         }
         break;
-
-
-        // case MessageType::ActuatorPosition:
-        // {
-        //     const ActuatorPositionMsg* actuatorPositionMsg = static_cast<const ActuatorPositionMsg*>(msg);
-        //     item.m_rudder = actuatorPositionMsg->rudderPosition();
-        //     item.m_sail = actuatorPositionMsg->sailPosition();
-        // }
-        // break;
 
         // case MessageType::WaypointData:
         // {

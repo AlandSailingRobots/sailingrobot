@@ -28,7 +28,6 @@ enum class MessageType {
 	ServerWaypointsReceived,
 	LocalConfigChange,
 	LocalWaypointChange,
-	ActuatorPosition,
 	ArduinoData,
 	VesselState,
 	WaypointData,
@@ -38,13 +37,10 @@ enum class MessageType {
 	ExternalControl,
 	RequestCourse,
 	StateMessage,
-	DesiredCourse,
 	WindState,
 	LocalNavigation,
-	ActuatorControlASPire,
 	ASPireActuatorFeedback,
 	MarineSensorData,
-	SolarData,
 	AISData,
 	WingSailCommand,
 	RudderCommand,
@@ -71,8 +67,6 @@ inline std::string msgToString(MessageType msgType)
 		return "LocalConfigChange";
 		case MessageType::LocalWaypointChange:
 		return "LocalWaypointChange";
-		case MessageType::ActuatorPosition:
-		return "ActuatorPosition";
 		case MessageType::ArduinoData:
 		return "ArduinoData";
 		case MessageType::VesselState:
@@ -91,22 +85,16 @@ inline std::string msgToString(MessageType msgType)
 		return "RequestCourse";
 		case MessageType::StateMessage:
 		return "StateMessage";
-		case MessageType::DesiredCourse:
-		return "DesiredCourse";
 		case MessageType::WindState:
 		return "WindState";
 		case MessageType::LocalNavigation:
 		return "LocalNavigation";
-		case MessageType::ActuatorControlASPire:
-		return "ActuatorControlASPire";
 		case MessageType::ASPireActuatorFeedback:
 		return "ASPireActuatorFeedback";
 		case MessageType::MarineSensorData:
 		return "MarineSensorData";
 		case MessageType::AISData:
 		return "AISData";
-		case MessageType::SolarData:
-		return "SolarData";
 		case MessageType::WingSailCommand:
 		return "WingSailCommand";
 		case MessageType::RudderCommand:

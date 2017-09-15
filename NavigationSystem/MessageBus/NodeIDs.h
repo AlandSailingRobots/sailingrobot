@@ -34,19 +34,14 @@ enum class NodeID {
 	xBeeSync,
 	SailingLogic,
 	ColorDetection,
-	CollisionAvoidanceBehaviour,
 	Lidar,
 	Simulator,
 	LocalNavigationModule,
-	LowLevelController,
 	StateEstimation,
-	MessagePrinter,
 	WindStateNode,
-	LowLevelControllerNodeASPire,
 	StateMessageListener,
 	MessageVerifier,
 	ActuatorNodeASPire,
-	LowLevelControllerNodeJanet,
 	DBLoggerNode,
 	CANFeedbackReceiver,
 	CourseRegulatorNode,
@@ -92,32 +87,22 @@ inline std::string nodeToString(NodeID id)
 		return "xBeeSync";
 		case NodeID::ColorDetection:
 		return "ColorDetection";
-		case NodeID::CollisionAvoidanceBehaviour:
-		return "CollisionAvoidanceBehaviour";
 		case NodeID::Lidar:
 		return "Lidar";
 		case NodeID::Simulator:
 		return "Simulator";
 		case NodeID::LocalNavigationModule:
 		return "Local Navigation Module";
-		case NodeID::LowLevelController:
-		return "Low Level Controller";
 		case NodeID::StateEstimation:
 		return "StateEstimation";
-		case NodeID::MessagePrinter:
-		return "MessagePrinter";
 		case NodeID::WindStateNode:
 		return "WindStateNode";
-		case NodeID::LowLevelControllerNodeASPire:
-		return "LowLevelControllerNodeASPire";
 		case NodeID::StateMessageListener:
 		return "StateMessageListener";
 		case NodeID::MessageVerifier:
 		return "MessageVerifier";
 		case NodeID::ActuatorNodeASPire:
 		return "ActuatorNodeASPire";
-		case NodeID::LowLevelControllerNodeJanet:
-		return "LowLevelControllerJanet";
 		case NodeID::DBLoggerNode:
 		return "DBLoggerNode";
 		case NodeID::CANFeedbackReceiver:
