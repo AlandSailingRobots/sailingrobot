@@ -61,21 +61,19 @@ CameraProcessingNode::CameraProcessingNode(MessageBus& msgBus, CollidableMgr* co
   }
 
   void CameraProcessingNode::start() {
-    m_capture.open(CAMERA_DEVICE_ID); // Opens the camera handle
-    if (m_capture.isOpened() == false) //  To check if object was associated to webcam successfully
-    {
-        Logger::error("Webcam not available");
-        return;
-    }
-    else
-    {
-        // Start main thread
-        runThread(CameraProcessingThreadFunc);
-    }
+      // Start main thread
+    runThread(CameraProcessingThreadFunc);
   }
   
   bool CameraProcessingNode::init()
   {
+      m_capture.open(CAMERA_DEVICE_ID); // Opens the camera handle
+      if (m_capture.isOpened() == false) //  To check if object was associated to webcam successfully
+      {
+          Logger::error("Webcam not available");
+          return false;
+      }
+      
       return true;
   }
   
@@ -163,6 +161,7 @@ CameraProcessingNode::CameraProcessingNode(MessageBus& msgBus, CollidableMgr* co
          * Find green circle indicating camera recalibration
          *-----------------------------------------------------------------
          */
+#ifndef WEBCAM
         // Find green pixels
         inRange(hsvImg, Scalar(45, 100, 100), Scalar(75, 255, 255), hsvImg);
 
@@ -182,6 +181,7 @@ CameraProcessingNode::CameraProcessingNode(MessageBus& msgBus, CollidableMgr* co
             t.reset();
             continue;
         }
+#endif
         
         /*
          *-----------------------------------------------------------------
