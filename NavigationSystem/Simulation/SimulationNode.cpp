@@ -4,8 +4,9 @@
  *      SimulationNode.cpp
  *
  * Purpose:
- *      Discuss with simulation via TCP, create message for the program from the
- *    data from simulation and send the command data to the simulation.
+ *      Discuss with the simulator via TCP.
+ *      Create sensor messages from simulation data and publish them on the message bus.
+ *      Listen to actuators command messages and send the command datas to the simulator.
  *
  * Developer Notes:
  *
@@ -14,62 +15,35 @@
 
 #include "SimulationNode.h"
 
-// For std::this_thread
-#include <chrono>
-#include <thread>
-#include <memory>
-#include <stdlib.h>
-#include <sys/types.h>
-#include <netdb.h>
-#include <fcntl.h>
-#include <strings.h> //bzero strerror
-#include <cerrno>
-#include <cstring>
-#include <unistd.h>
-#include <stdlib.h>
-#include "SystemServices/Timer.h"
-#include "SystemServices/Logger.h"
-#include "SystemServices/SysClock.h"
-#include "Network/TCPServer.h"
-#include "Math/CourseMath.h"
-#include "Math/Utility.h"
-
-
-#define BASE_SLEEP_MS 200
-#define COUNT_COMPASSDATA_MSG 1
-#define COUNT_GPSDATA_MSG 1
-#define COUNT_WINDDATA_MSG 1
-
 #define SERVER_PORT 6900
 
 
-
-SimulationNode::SimulationNode(MessageBus& msgBus, DBHandler& dbhandler, bool boatType)
+SimulationNode::SimulationNode(MessageBus& msgBus, bool boatType)
 	: ActiveNode(NodeID::Simulator, msgBus),
         m_RudderCommand(0), m_SailCommand(0), m_TailCommand(0),
 		m_CompassHeading(0), m_GPSLat(0), m_GPSLon(0), m_GPSSpeed(0),
 		m_GPSCourse(0), m_WindDir(0), m_WindSpeed(0), m_nextDeclination(0),
-		collidableMgr(NULL), m_db(dbhandler), m_boatType(boatType)
+		collidableMgr(NULL), m_boatType(boatType)
 {
+    msgBus.registerNode(*this, MessageType::SailCommand);    
     msgBus.registerNode(*this, MessageType::WingSailCommand);
     msgBus.registerNode(*this, MessageType::RudderCommand);
     msgBus.registerNode(*this, MessageType::WaypointData);
     msgBus.registerNode(*this, MessageType::ServerConfigsReceived);
-    msgBus.registerNode(*this, MessageType::ActuatorPosition);
 }
 
-SimulationNode::SimulationNode(MessageBus& msgBus, DBHandler& dbhandler, bool boatType, CollidableMgr* collidableMgr)
+SimulationNode::SimulationNode(MessageBus& msgBus, bool boatType, CollidableMgr* collidableMgr)
 	: ActiveNode(NodeID::Simulator, msgBus),
         m_RudderCommand(0), m_SailCommand(0), m_TailCommand(0),
 		m_CompassHeading(0), m_GPSLat(0), m_GPSLon(0), m_GPSSpeed(0),
 		m_GPSCourse(0), m_WindDir(0), m_WindSpeed(0), m_nextDeclination(0),
-		collidableMgr(collidableMgr), m_db(dbhandler),m_boatType(boatType)
+		collidableMgr(collidableMgr), m_boatType(boatType)
 {
+    msgBus.registerNode(*this, MessageType::SailCommand);
     msgBus.registerNode(*this, MessageType::WingSailCommand);
     msgBus.registerNode(*this, MessageType::RudderCommand);
     msgBus.registerNode(*this, MessageType::WaypointData);
     msgBus.registerNode(*this, MessageType::ServerConfigsReceived);
-    msgBus.registerNode(*this, MessageType::ActuatorPosition);
 }
 
 void SimulationNode::start()
@@ -102,16 +76,14 @@ bool SimulationNode::init()
     return success;
 }
 
-void SimulationNode::updateConfigsFromDB(){}
-
 void SimulationNode::processMessage(const Message* msg)
 {
     MessageType type = msg->messageType();
 
     switch(type)
     {
-    case MessageType::ActuatorPosition:
-        processActuatorPositionMessage((ActuatorPositionMsg*)msg);
+    case MessageType::SailCommand:
+        processSailCommandMessage((SailCommandMsg*)msg);
         break;
     case MessageType::WingSailCommand:
         processWingSailCommandMessage((WingSailCommandMsg*)msg);
@@ -130,12 +102,11 @@ void SimulationNode::processMessage(const Message* msg)
     }
 }
 
-void SimulationNode::processActuatorPositionMessage(ActuatorPositionMsg* msg)
+void SimulationNode::processSailCommandMessage(SailCommandMsg* msg)
 {
-    m_RudderCommand = msg->rudderPosition();
-    m_SailCommand = msg->sailPosition();
-    // std::cout << "rudder : " << m_RudderCommand << " sail : " << m_SailCommand << std::endl;
+    m_SailCommand = msg->maxSailAngle();
 }
+
 void SimulationNode::processWingSailCommandMessage(WingSailCommandMsg* msg)
 {
     m_TailCommand = msg->tailAngle();
@@ -240,13 +211,6 @@ void SimulationNode::processWingBoatData( TCPPacket_t& packet )
 
         m_WindDir = Utility::limitAngleRange(180 - boatData->windDir); // [0, 360] clockwize, where the wind come from
         m_WindSpeed = boatData->windSpeed;
-        // std::cout <<"heading " << m_CompassHeading << std::endl;
-        // std::cout <<"lat " << m_GPSLat << std::endl;
-        // std::cout <<"long " << m_GPSLon << std::endl;
-        // std::cout <<"speed " << m_GPSSpeed << std::endl;
-        // std::cout <<"course " << m_GPSCourse << std::endl;
-        // std::cout <<"windSpeed " << m_WindSpeed << std::endl;
-        // std::cout <<"WindDir " << m_WindDir << std::endl;
 
         // Send messages
         createCompassMessage();
@@ -295,7 +259,7 @@ void SimulationNode::sendActuatorDataWing( int socketFD)
 
 void SimulationNode::sendActuatorDataSail( int socketFD)
 {   
-    actuatorDataSail.rudderCommand = m_RudderCommand;
+    actuatorDataSail.rudderCommand = - Utility::degreeToRadian(m_RudderCommand);
     actuatorDataSail.sailCommand   = Utility::degreeToRadian(m_SailCommand);
     
     server.sendData( socketFD, &actuatorDataSail, sizeof(ActuatorDataSailPacket_t) );       
@@ -357,6 +321,7 @@ void SimulationNode::SimulationThreadFunc(ActiveNode* nodePtr)
         // Reset our packet, better safe than sorry
         packet.socketFD = 0;
         packet.length = 0;
+        
         if (node->m_boatType == 0){
             node->sendActuatorDataSail( simulatorFD);
         }

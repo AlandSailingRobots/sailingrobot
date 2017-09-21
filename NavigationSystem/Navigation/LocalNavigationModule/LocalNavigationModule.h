@@ -59,9 +59,14 @@ public:
 private:
     ///----------------------------------------------------------------------------------
  	/// Starts a ballot, asking every registered voter to vote. Once that is done it
-    /// the final result is generated and a desired course message is created.
+    /// the final result is generated and a Local Navigation message is created.
  	///----------------------------------------------------------------------------------
     void startBallot();
+
+    ///----------------------------------------------------------------------------------
+    /// Returns true if the desired tack of the vessel is starboard (wind blowing from the right side )
+    ///----------------------------------------------------------------------------------
+    bool getTargetTackStarboard(double targetCourse);
 
     ///----------------------------------------------------------------------------------
 	/// Update values from the database as the loop time of the thread and others parameters
@@ -78,4 +83,5 @@ private:
     ASRArbiter arbiter;
     double m_LoopTime;
     DBHandler& m_db;
+    double m_trueWindDir;
 };

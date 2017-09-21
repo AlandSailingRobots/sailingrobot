@@ -29,12 +29,10 @@ WindStateNode::WindStateNode(MessageBus& msgBus)
 WindStateNode::~WindStateNode(){}
 
 
-
 bool WindStateNode::init()
 {
     return true;
 }
-
 
 void WindStateNode::processMessage(const Message* message)
 {
@@ -57,14 +55,12 @@ void WindStateNode::processVesselStateMessage(const StateMessage* msg)
     m_vesselHeading = msg->heading();
     m_vesselSpeed   = msg->speed();
     m_vesselCourse  = msg->course();
-    // std::cout << "m_vesselHeading: " << m_vesselHeading <<std::endl;
 }
 
 void WindStateNode::processWindMessage(const WindDataMsg* msg)
 {
     m_apparentWindSpeed     = msg->windSpeed();
     m_apparentWindDirection = msg->windDirection();
-    //std::cout << "m_apparentWindDirection in wind state: " << m_apparentWindDirection <<std::endl;
 }
 
 void WindStateNode::sendMessage()
@@ -72,10 +68,6 @@ void WindStateNode::sendMessage()
     MessagePtr windState = std::make_unique<WindStateMsg>(m_trueWindSpeed, m_trueWindDirection,
         m_apparentWindSpeed, m_apparentWindDirection);
     m_MsgBus.sendMessage(std::move(windState));
-    // std::cout << "m_trueWindSpeed: " << m_trueWindSpeed <<std::endl;
-    // std::cout << "m_trueWindDirection: " << m_trueWindDirection <<std::endl;
-    // std::cout << "m_apparentWindSpeed: " << m_apparentWindSpeed <<std::endl;
-    // std::cout << "m_apparentWindDirection: " << m_apparentWindDirection <<std::endl;
 }
 
 void WindStateNode::calculateTrueWind()

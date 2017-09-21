@@ -4,8 +4,9 @@
  *      SimulationNode.h
  *
  * Purpose:
- *      Discuss with simulation via TCP, create message for the program from the
- *    data from simulation and send the command data to the simulation.
+ *      Discuss with the simulator via TCP.
+ *      Create sensor messages from simulation data and publish them on the message bus.
+ *      Listen to actuators command messages and send the command datas to the simulator.
  *
  * Developer Notes:
  *
@@ -14,44 +15,50 @@
 
 #pragma once
 
-
+#include <chrono>
+#include <thread>
+#include <memory>
+#include <stdlib.h>
+#include <sys/types.h>
+#include <netdb.h>
+#include <fcntl.h>
+#include <strings.h>
+#include <cerrno>
+#include <cstring>
+#include <unistd.h>
+#include <stdlib.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
+#include <cmath>
 
-#include "DataBase/DBHandler.h"
+#include "Math/CourseMath.h"
+#include "Math/Utility.h"
 #include "MessageBus/ActiveNode.h"
-#include "Messages/CompassDataMsg.h"
-#include "Messages/GPSDataMsg.h"
-#include "Messages/WindDataMsg.h"
-#include "Messages/ActuatorPositionMsg.h"
-#include "Messages/ASPireActuatorFeedbackMsg.h"
+#include "Messages/SailCommandMsg.h"
 #include "Messages/WingSailCommandMsg.h"
 #include "Messages/RudderCommandMsg.h"
 #include "Messages/WaypointDataMsg.h"
-
+#include "Messages/CompassDataMsg.h"
+#include "Messages/GPSDataMsg.h"
+#include "Messages/WindDataMsg.h"
+#include "SystemServices/Logger.h"
+#include "SystemServices/SysClock.h"
 #include "Network/TCPServer.h"
 #include "WorldState/CollidableMgr/CollidableMgr.h"
 
 
+
 enum SimulatorPacket : unsigned char {
-    SailBoatData = 0,
-    WingBoatData =1,
-    AISData = 2,
-    CameraData = 3,
-    WingBoatCmd = 4,
-    SailBoatCmd = 5,
-    WaypointData = 6
-};
+    SailBoatData = 0, WingBoatData, AISData, CameraData, WingBoatCmd, SailBoatCmd, WaypointData};
+
 
 struct SailBoatDataPacket_t {
     float latitude;
     float longitude;
     float speed;
     int16_t course;
-
     int16_t windDir;
     float windSpeed;
-
     int16_t heading;
 } __attribute__((packed));
 
@@ -60,10 +67,8 @@ struct WingBoatDataPacket_t {
     float longitude;
     float speed;
     int16_t course;
-
     int16_t windDir;
     float windSpeed;
-
     int16_t heading;
 } __attribute__((packed));
 
@@ -83,14 +88,14 @@ struct VisualContactPacket_t {
     float longitude;
 } __attribute__((packed));
 
+
 struct ActuatorDataWingPacket_t {
     unsigned char simulatorPacket = WingBoatCmd;
     float rudderCommand;
     float tailCommand;
 }__attribute__((packed));
 
-struct ActuatorDataSailPacket_t
-{
+struct ActuatorDataSailPacket_t {
     unsigned char simulatorPacket = SailBoatCmd;
     float rudderCommand;
     float sailCommand;
@@ -114,8 +119,8 @@ struct WaypointPacket_t {
 
 class SimulationNode : public ActiveNode {
 public:
-	SimulationNode(MessageBus& msgBus, DBHandler& dbhandler, bool boatType);
-    SimulationNode(MessageBus& msgBus, DBHandler& dbhandler, bool boatType, CollidableMgr* collidableMgr);
+	SimulationNode(MessageBus& msgBus, bool boatType);
+    SimulationNode(MessageBus& msgBus, bool boatType, CollidableMgr* collidableMgr);
 
     ///----------------------------------------------------------------------------------
     /// Initialize the TCP communication
@@ -127,34 +132,29 @@ public:
     ///----------------------------------------------------------------------------------
     void start();
 
-
-
     void processMessage(const Message* msg);
 
+private:
+
     ///----------------------------------------------------------------------------------
-    /// Stores compass data from a ActuatorPositionMsg.
+    /// Stores sail command data from a SailCommandMsg.
     ///----------------------------------------------------------------------------------
-    void processActuatorPositionMessage(ActuatorPositionMsg* msg);
+    void processSailCommandMessage(SailCommandMsg* msg);
 
     ///----------------------------------------------------------------------------------
     /// Stores wing sail command data from a WingSailCommandMsg.
     ///----------------------------------------------------------------------------------
     void processWingSailCommandMessage(WingSailCommandMsg* msg);
 
-
+    ///----------------------------------------------------------------------------------
+    /// Stores waypoints data from a WaypointDataMsg.
+    ///----------------------------------------------------------------------------------
     void processWaypointMessage(WaypointDataMsg* msg);
 
     ///----------------------------------------------------------------------------------
     /// Stores rudder command data from a RudderCommandMsg.
     ///----------------------------------------------------------------------------------
     void processRudderCommandMessage(RudderCommandMsg* msg);
-
-private:
-
-    ///----------------------------------------------------------------------------------
-    /// Update values from the database as the loop time of the thread and others parameters
-    ///----------------------------------------------------------------------------------
-    void updateConfigsFromDB();
 
     ///----------------------------------------------------------------------------------
     /// Process a conventionnal sail boat data message
@@ -165,11 +165,6 @@ private:
     /// Process a wing sail data message
     ///----------------------------------------------------------------------------------
     void processWingBoatData( TCPPacket_t& packet );
-
-    ///----------------------------------------------------------------------------------
-    /// Communicate with the simulation receive sensor data and send actuator data
-    ///----------------------------------------------------------------------------------
-    static void SimulationThreadFunc(ActiveNode* nodePtr);
 
     ///----------------------------------------------------------------------------------
     /// Process a AIS contact data message
@@ -199,7 +194,7 @@ private:
     ///----------------------------------------------------------------------------------
     /// Communicate with the simulation receive sensor data and send actuator data
     ///----------------------------------------------------------------------------------
-    //static void SimulationThreadFunc(void* nodePtr);
+    static void SimulationThreadFunc(ActiveNode* nodePtr);
 
     void createCompassMessage();
     void createGPSMessage();
@@ -221,7 +216,6 @@ private:
 
     TCPServer server;
     CollidableMgr* collidableMgr;
-    DBHandler& m_db;
 
     bool m_boatType;
 

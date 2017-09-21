@@ -34,7 +34,6 @@ public:
     WindStateNode(MessageBus& msgBus);
     ~WindStateNode();
 
-
     bool init();
     void processMessage(const Message* message);
 

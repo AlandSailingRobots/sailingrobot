@@ -87,8 +87,7 @@ DATABASE_SRC				= DataBase/DBHandler.cpp DataBase/DBLogger.cpp DataBase/DBLogger
 
 HTTP_SYNC_SRC        		= HTTPSync/HTTPSyncNode.cpp
 
-LOW_LEVEL_CONTROLLERS 		= LowLevelControllers/LowLevelController.cpp \
-								LowLevelControllers/CourseRegulatorNode.cpp LowLevelControllers/SailControlNode.cpp \
+LOW_LEVEL_CONTROLLERS 		= LowLevelControllers/CourseRegulatorNode.cpp LowLevelControllers/SailControlNode.cpp \
 								LowLevelControllers/WingsailControlNode.cpp
 
 MATH_SRC             		= Math/CourseCalculation.cpp Math/CourseMath.cpp Math/Utility.cpp
@@ -110,8 +109,7 @@ export CORE_SRC 			= $(DATABASE_SRC) $(HTTP_SYNC_SRC) $(LOW_LEVEL_CONTROLLERS) $
 								$(WORLD_STATE_SRC)
 
 # Local navigation
-export LINE_FOLLOW_SRC      = Navigation/LineFollowNode.cpp waypointrouting/RudderCommand.cpp \
-                            	waypointrouting/Commands.cpp waypointrouting/SailCommand.cpp
+export LINE_FOLLOW_SRC      = Navigation/LineFollowNode.cpp
 
 export LNM_SRC              = $(LNM_DIR)/ASRCourseBallot.cpp $(LNM_DIR)/ASRArbiter.cpp \
                             	$(LNM_DIR)/LocalNavigationModule.cpp \

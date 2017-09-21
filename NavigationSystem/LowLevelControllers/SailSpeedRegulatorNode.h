@@ -1,18 +1,15 @@
 /****************************************************************************************
  *
  * File:
- * 		SailControlNode.h
+ *      SailSpeedRegulatorNode.h
  *
  * Purpose:
- *      Calculates the desired sail angle.
+ *      Calculates the desired sail angle in order to regulate the speed.
  *      It sends a SailComandMsg corresponding to the command angle of the sail.
  *
  * Developer Notes:
- *      Two functions have been developed to calculate the desired sail angle :
- *          - calculateSailAngleLinear(),
- *          - calculateSailAngleCardioid().
- *      You can choose the one you want to use by commenting/uncommenting lines 
- *      in SailControlNodeThreadFunc(). 
+ *      This node has not been tested and will probably not work in reality because the speed 
+ *      regulator is base on the simulator behaviour which is a rough representation of the reality.
  *
  ***************************************************************************************/
 #pragma once
@@ -30,14 +27,15 @@
 #include "MessageBus/ActiveNode.h"
 #include "MessageBus/MessageBus.h"
 #include "Messages/WindDataMsg.h"
+#include "Messages/StateMessage.h"
 #include "Messages/SailCommandMsg.h"
 #include "SystemServices/Timer.h"
 
 
-class SailControlNode : public ActiveNode {
+class SailSpeedRegulatorNode : public ActiveNode {
 public:
-    SailControlNode(MessageBus& msgBus, DBHandler& dbhandler);
-    ~SailControlNode();
+    SailSpeedRegulatorNode(MessageBus& msgBus, DBHandler& dbhandler);
+    ~SailSpeedRegulatorNode();
 
     bool init();
     void start();
@@ -57,10 +55,17 @@ private:
     void processWindStateMessage(const WindStateMsg* msg);
 
     ///----------------------------------------------------------------------------------
+    /// Stores vessel speed and course datas from a StateMessage.
+    ///----------------------------------------------------------------------------------
+    void processStateMessage( const StateMessage* msg);
+
+    ///----------------------------------------------------------------------------------
     /// Limits the command sail angle between m_MaxSailAngle and m_MinSailAngle.
     ///----------------------------------------------------------------------------------
     float restrictSailAngle(float val);
 
+    float speedRegulator(float val);
+    
     ///----------------------------------------------------------------------------------
     /// Calculate the sail angle according to a linear relation to the apparent wind direction.
     ///----------------------------------------------------------------------------------
@@ -72,9 +77,9 @@ private:
     float calculateSailAngleCardioid();
 
     ///----------------------------------------------------------------------------------
-    /// Starts the SailControlNode's thread that pumps out SailCommandMsg.
+    /// Starts the SailSpeedRegulatorNode's thread that pumps out SailCommandMsg.
     ///----------------------------------------------------------------------------------
-    static void SailControlNodeThreadFunc(ActiveNode* nodePtr);
+    static void SailSpeedRegulatorNodeThreadFunc(ActiveNode* nodePtr);
 
     DBHandler &m_db;
     std::mutex m_lock;
@@ -85,5 +90,8 @@ private:
     double  m_MinSailAngle;         // degrees
 
     double  m_ApparentWindDir;      // degrees [0, 360[ in North-East reference frame (clockwise)
+    float   m_VesselSpeed;          // m/s
 
+    float   m_old_diff_v;           // m/s
+    float   m_int_diff_v;
 };

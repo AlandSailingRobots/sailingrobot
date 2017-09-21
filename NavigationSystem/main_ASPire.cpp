@@ -144,13 +144,13 @@ int main(int argc, char *argv[])
 	StateEstimationNode stateEstimationNode(messageBus, dbHandler);
 	WindStateNode windStateNode(messageBus);
 	WaypointMgrNode waypoint(messageBus, dbHandler);
+	CollidableMgr collidableMgr;
 
 	WingsailControlNode wingSailControlNode(messageBus, dbHandler);
 	CourseRegulatorNode courseRegulatorNode(messageBus, dbHandler);
 
   	#if LOCAL_NAVIGATION_MODULE == 1
 		LocalNavigationModule lnm	( messageBus, dbHandler );
-		CollidableMgr collidableMgr;
 
 		const int16_t MAX_VOTES = dbHandler.retrieveCellAsInt("config_voter_system","1","max_vote");
 		WaypointVoter waypointVoter( MAX_VOTES, dbHandler.retrieveCellAsDouble("config_voter_system","1","waypoint_voter_weight")); // weight = 1
@@ -169,11 +169,7 @@ int main(int argc, char *argv[])
   	#endif
 
 	#if SIMULATION == 1
-	  	#if LOCAL_NAVIGATION_MODULE == 1
-	  		SimulationNode simulation(messageBus, dbHandler, 1,&collidableMgr);
-	  	#else
-			SimulationNode simulation(messageBus, dbHandler, 1);
-	  	#endif
+  		SimulationNode simulation(messageBus, 1, &collidableMgr);
   	#else
 		CANService canService;
 
@@ -199,7 +195,7 @@ int main(int argc, char *argv[])
 	initialiseNode(waypoint, "Waypoint", NodeImportance::CRITICAL);
 
  	initialiseNode(wingSailControlNode, "Wing Sail Controller", NodeImportance::CRITICAL);
- 	initialiseNode(courseRegulatorNode, "course regulator", NodeImportance::CRITICAL);
+ 	initialiseNode(courseRegulatorNode, "Course Regulator", NodeImportance::CRITICAL);
 
 	#if LOCAL_NAVIGATION_MODULE == 1
 		initialiseNode( lnm, "Local Navigation Module",	NodeImportance::CRITICAL );
@@ -225,13 +221,15 @@ int main(int argc, char *argv[])
 	dbLoggerNode.start();
 
 	stateEstimationNode.start();
+	collidableMgr.startGC();
+
+	wingSailControlNode.start();
+	courseRegulatorNode.start();
 
 	#if SIMULATION == 1
 		simulation.start();
 	#else
-	  // Comment out this line if not running on the pi
-	  // otherwise program will crash.
-	  auto future = canService.start();
+	  	auto future = canService.start();
 		compass.start();
 		gpsd.start();
 		windSensor.start();
@@ -240,18 +238,15 @@ int main(int argc, char *argv[])
 
 	#if LOCAL_NAVIGATION_MODULE == 1
 		lnm.start();
-		collidableMgr.startGC();
 	#else
 		sailingLogic.start();
 	#endif
 
-	wingSailControlNode.start();
-	courseRegulatorNode.start();
-	//-------------------------------------------------------------------------------
-
 	// Begins running the message bus
+	//-------------------------------------------------------------------------------
 	Logger::info("Message bus started!");
 	messageBus.run();
+
 
 	Logger::shutdown();
 	exit(0);

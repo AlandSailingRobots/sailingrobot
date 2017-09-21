@@ -41,21 +41,16 @@ public:
     ~StateEstimationNode();
 
     bool init();
-
-    ///----------------------------------------------------------------------------------
-    /// Starts the StateEstimationNode's thread that pumps out VesselStateMsg.
-    ///----------------------------------------------------------------------------------
     void start();
-
     void stop();
-
     void processMessage(const Message* msg);
-
-
 
 private:
 
-    const int STATE_INITIAL_SLEEP = 2000;  //in milliseconds
+    ///----------------------------------------------------------------------------------
+    /// Updates the values of the parameters from the database.
+    ///----------------------------------------------------------------------------------
+    void updateConfigsFromDB();
 
     ///----------------------------------------------------------------------------------
     /// Stores compass data from a CompassDataMsg.
@@ -71,12 +66,6 @@ private:
     /// Stores the next declination from a WaypointDataMsg.
     ///----------------------------------------------------------------------------------
     void processWaypointMessage(const WaypointDataMsg* msg );
-
-    ///----------------------------------------------------------------------------------
-    /// Update values from the database as the loop time pf the thread
-    /// and others parameters
-    ///----------------------------------------------------------------------------------
-    void updateConfigsFromDB();
 
     ///----------------------------------------------------------------------------------
     /// Estimates the vessel state from the sensor datas.
@@ -101,6 +90,10 @@ private:
     static void StateEstimationNodeThreadFunc(ActiveNode* nodePtr);
 
 
+    DBHandler& m_dbHandler;
+    std::mutex m_lock;
+    std::atomic<bool> m_Running;
+
     double  m_LoopTime;             // second
 
     float   m_CompassHeading;       // degree [0, 360[ in North-East reference frame (clockwise)
@@ -109,7 +102,7 @@ private:
     double  m_GPSLon;
     double  m_GPSSpeed;             // m/s
     double  m_GPSCourse;            // degree [0, 360[ in North-East reference frame (clockwise)
-    float   m_WaypointDeclination;  // degree [??]
+    float   m_WaypointDeclination;  // degree
 
     double  m_speed_1;              // m/s
     double  m_speed_2;              // m/s
@@ -119,9 +112,5 @@ private:
     double  m_VesselLon;
     float   m_VesselSpeed;          // m/s
     float   m_VesselCourse;         // degree [0, 360[ in North-East reference frame (clockwise)
-
-    std::mutex        m_lock;
-    std::atomic<bool> m_Running;
-    DBHandler&        m_dbHandler;
 
 };
