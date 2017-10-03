@@ -20,7 +20,7 @@
 
 
 struct VisualCollidable_t {
-    uint32_t id;
+    uint16_t n;
     uint16_t bearing;
     int lastUpdated;
 };

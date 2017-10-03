@@ -125,7 +125,7 @@ void CollidableMgr::addAISContact( uint32_t mmsi, float length, float beam )
 }
 
 ///----------------------------------------------------------------------------------
-void CollidableMgr::addVisualContact( uint32_t id, uint16_t bearing )
+void CollidableMgr::addVisualContact( uint16_t n, uint16_t bearing )
 {
     Logger::info("addVisualContact. bearing = %s", std::to_string(bearing));
     if( !this->ownVisualLock )
@@ -133,28 +133,13 @@ void CollidableMgr::addVisualContact( uint32_t id, uint16_t bearing )
         this->visualListMutex.lock();
         this->ownVisualLock = true;
     }
-
-   // Check if the contact already exists, and if so update it
-    bool contactExists = false;
-    for( uint16_t i = 0; i < this->visualContacts.size() && !contactExists; i++ )
-    {
-        if( this->visualContacts[i].id == id)
-        {
-            this->visualContacts[i].bearing = bearing;
-            this->visualContacts[i].lastUpdated = SysClock::unixTime();
-            contactExists = true;
-        }
-    }
-
-    if(!contactExists)
-    {
-        VisualCollidable_t visualContact;
-        visualContact.id = id;
-        visualContact.bearing = bearing;
-        visualContact.lastUpdated = SysClock::unixTime();
-
-        this->visualContacts.push_back(visualContact);
-    }
+    
+    // add obstacle
+    VisualCollidable_t visualContact;
+    visualContact.n = n; // white space count for the given bearing (where black space is an obstacle)
+    visualContact.bearing = bearing;
+    visualContact.lastUpdated = SysClock::unixTime();
+    this->visualContacts.push_back(visualContact);
 
     this->visualListMutex.unlock();
     this->ownVisualLock = false;
