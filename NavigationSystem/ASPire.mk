@@ -11,7 +11,7 @@
 # Files
 ###############################################################################
 
-LIBS += $(shell pkg-config --cflags --libs opencv)
+LIBS += -lopencv_core -lopencv_video -lopencv_videoio -lopencv_imgproc -lopencv_highgui -lopencv_objdetect -lopencv_imgcodecs -lopencv_tracking -lopencv_features2d
 
 # Source files
 SRC						= main_ASPire.cpp $(CORE_SRC) $(COLLIDABLE_MGR_SRC)
