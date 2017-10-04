@@ -56,7 +56,7 @@ CameraProcessingNode::CameraProcessingNode(MessageBus& msgBus, CollidableMgr* co
   void CameraProcessingNode::addObstacleToCollidableMgr() {
     for (unsigned int i = 0; i < obstacle_list.size(); i++) 
     {
-      this->collidableMgr->addVisualContact(obstacle_list[i].getId(), obstacle_list[i].getHeading());
+     // this->collidableMgr->addVisualContact(obstacle_list[i].getId(), obstacle_list[i].getHeading());
     }
   }
 

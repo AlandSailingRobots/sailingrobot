@@ -46,6 +46,7 @@ DBHandler dbHandler("../asr.db");
 MessageBus msgBus;
 CollidableMgr cMgr;
 vector<Obstacle> obstaclelist;
+bool recordVid = true;
 
 void messageLoop() {
     msgBus.run();
@@ -67,7 +68,21 @@ int main()
       Logger::error("Webcam not available");
       return -1;
   } 
+  
+  double fWidth = m_capture.get(CV_CAP_PROP_FRAME_WIDTH); //get the width of frames of the video
+  double fHeight = m_capture.get(CV_CAP_PROP_FRAME_HEIGHT); //get the height of frames of the videotracker->init(frame, bbox);
+  Size frameSize(static_cast<int>(fWidth), static_cast<int>(fHeight));
+  VideoWriter outputVideo ("video.avi", CV_FOURCC('D','I','V','X'), 20, frameSize, true);
 
+  if (!outputVideo.isOpened())
+  {
+    Logger::error("Could not open the output video for write");
+    recordVid = false;
+  }
+    
+    if(recordVid == false)
+        remove("video.avi");
+    
       Mat imgOriginal; // Input raw image
       Mat hsvImg; // HSV converted image
       Mat threshImg; // Filtered HSV image
@@ -104,8 +119,6 @@ int main()
       Point2f center(imgOriginal.cols/2.0, imgOriginal.rows/2.0);
     
       // frame size
-      double fWidth = m_capture.get(CV_CAP_PROP_FRAME_WIDTH); //get the width of frames of the video
-      //double fHeight = m_capture.get(CV_CAP_PROP_FRAME_HEIGHT); //get the height of frames of the videotracker->init(frame, bbox);
       float cameraAngleApertureXPerPixel = CAMERA_APERTURE_X/fWidth;
       //float cameraAngleApertureYPerPixel = CAMERA_APERTURE_Y/fHeight;
       
@@ -232,5 +245,8 @@ int main()
         
         // Small delay
         waitKey(20);
+        
+        if(recordVid)
+            outputVideo.write(imgOriginal);
       }
   }
