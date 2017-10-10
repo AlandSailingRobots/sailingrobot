@@ -12,18 +12,18 @@
 *
 ***************************************************************************************/
 #include "CameraProcessingNode.h"
+#include <vector>
 
 using namespace std;
 using namespace cv;
+using namespace chrono_literals;
 
-/* @todo set those parameters from db */
+/** @todo set those parameters from db */
 #define CAMERA_DEVICE_ID 0 // 0 = default webcam
 #define DETECTOR_LOOP_TIME 250 // in ms (250 * 20 ms = 5s)
 #define MAX_COMPASS_FRAME_TIMEFRAME 10 // in ms
 #define CAMERA_APERTURE_X 50
 #define CAMERA_APERTURE_Y 50
-
-vector<Obstacle> obstacle_list;
  
 CameraProcessingNode::CameraProcessingNode(MessageBus& msgBus, CollidableMgr* collidableMgr)
   : ActiveNode(NodeID::CameraProcessingNode, msgBus), m_LoopTime(0.5), collidableMgr(collidableMgr) 
@@ -53,13 +53,6 @@ CameraProcessingNode::CameraProcessingNode(MessageBus& msgBus, CollidableMgr* co
       m_compass_data.tmsp = SysClock::unixTime(); /** @todo Messages should have an internal timestamp, received time not reliable due to possible glitches in message processing */
   }
 
-  void CameraProcessingNode::addObstacleToCollidableMgr() {
-    for (unsigned int i = 0; i < obstacle_list.size(); i++) 
-    {
-     // this->collidableMgr->addVisualContact(obstacle_list[i].getId(), obstacle_list[i].getHeading());
-    }
-  }
-
   void CameraProcessingNode::start() {
       // Start main thread
     runThread(CameraProcessingThreadFunc);
@@ -81,30 +74,18 @@ CameraProcessingNode::CameraProcessingNode(MessageBus& msgBus, CollidableMgr* co
   {
       Mat imgOriginal; // Input raw image
       Mat hsvImg; // HSV converted image
-      Mat threshImg; // Filtered HSV image
-      
-      // Blob detection
-      SimpleBlobDetector::Params params;
-      // Change thresholds
-      params.minThreshold = 10;
-      params.maxThreshold = 200;
-      // Filter by Area
-      params.filterByArea = true;
-      params.minArea = 300;
-      // Filter by Circularity
-      params.filterByCircularity = true;
-      params.minCircularity = 0.3;
-      // Filter by Color
-      params.filterByColor = true;
-      params.blobColor = 255;
-      
-      // Set up detector with params
-      Ptr<SimpleBlobDetector> detector = SimpleBlobDetector::create(params);
+      // Image containers
+      Mat frameGrayScale, roi, dst, cdst;
 
-      vector<KeyPoint> blobs;
+      // Noise removal kernel for the filters
+      Mat kernel_ero = getStructuringElement(MORPH_RECT, Size(2,2));
+
+      // Save detected lines
+      std::vector<Vec4i> lines;
+      std::vector<Point> locations;   // output, locations of non-zero pixels
       
       // For green dot detection
-      vector<Vec3f> circles;
+      std::vector<Vec3f> circles;
 
       // Tilt correction
       Mat rot;
@@ -116,9 +97,9 @@ CameraProcessingNode::CameraProcessingNode(MessageBus& msgBus, CollidableMgr* co
     
       // frame size
       double fWidth = m_capture.get(CV_CAP_PROP_FRAME_WIDTH); //get the width of frames of the video
-      //double fHeight = m_capture.get(CV_CAP_PROP_FRAME_HEIGHT); //get the height of frames of the videotracker->init(frame, bbox);
-      float cameraAngleApertureXPerPixel = CAMERA_APERTURE_X/fWidth;
-      //float cameraAngleApertureYPerPixel = CAMERA_APERTURE_Y/fHeight;
+      double fHeight = m_capture.get(CV_CAP_PROP_FRAME_HEIGHT); //get the height of frames of the video
+     // float cameraAngleApertureXPerPixel = CAMERA_APERTURE_X/fWidth;
+     // float cameraAngleApertureYPerPixel = CAMERA_APERTURE_Y/fHeight;
       
       for(int frame_n = 0; frame_n < DETECTOR_LOOP_TIME && m_capture.isOpened(); frame_n++) 
       {
@@ -161,7 +142,6 @@ CameraProcessingNode::CameraProcessingNode(MessageBus& msgBus, CollidableMgr* co
          * Find green circle indicating camera recalibration
          *-----------------------------------------------------------------
          */
-#ifndef WEBCAM
         // Find green pixels
         inRange(hsvImg, Scalar(45, 100, 100), Scalar(75, 255, 255), hsvImg);
 
@@ -175,76 +155,130 @@ CameraProcessingNode::CameraProcessingNode(MessageBus& msgBus, CollidableMgr* co
         {
             // A green circle has been detected, he thermal camera is recalibrating and frames may be unreliable and corrupted, sleep thread
             Logger::info("Camera is recalibrating, thread will sleep for 3 seconds");
-            Timer t;
-            t.start();
-            t.sleepUntil(3);
-            t.reset();
+            std::this_thread::sleep_for(3s); 
             continue;
         }
-#endif
         
         /*
          *-----------------------------------------------------------------
          * Denoising
          *-----------------------------------------------------------------
          */
-        // Apply filters
-        GaussianBlur(threshImg, threshImg, Size(3, 3), 0);
-        medianBlur(threshImg, threshImg, 3);
-        dilate(threshImg, threshImg, 0);
-        erode(threshImg, threshImg, 0);
+        /** @todo Tune noise elimination filters parameters */
+        //Convert image to grayscale
+        cvtColor( imgOriginal, frameGrayScale, CV_BGR2GRAY );
+
+        // Apply a Gaussian Filter to clear out general noise
+        GaussianBlur( frameGrayScale, frameGrayScale, Size(7, 7), 2.0, 2.0 );
+
+        // Remove spot noise
+        medianBlur(frameGrayScale, frameGrayScale, 3);
+        
+        // Remove small objects
+        erode( frameGrayScale, frameGrayScale, kernel_ero );
+        dilate( frameGrayScale, frameGrayScale, kernel_ero );
         
         /*
          *-----------------------------------------------------------------
-         * Find blobs
+         * Find the horizon and set up the ROI (region of interest)
+         * to the image surface beneath
+         *-----------------------------------------------------------------
+        */
+        Canny(frameGrayScale, dst, 20, 50, 3);
+        cvtColor(dst, cdst, COLOR_GRAY2BGR);
+
+        HoughLinesP(dst, lines, 1, CV_PI/180, 50, 50, 10 );
+        double theta1, theta2, hyp;
+
+        // Horizon
+        Vec4i max_l;
+        double max_dist = -1.0;
+
+        for( size_t i = 0; i < lines.size(); i++ )
+        {
+            Vec4i l = lines[i];
+            theta1 = (l[3]-l[1]);
+            theta2 = (l[2]-l[0]);
+            hyp = hypot(theta1,theta2);
+
+            Point p1, p2;
+            p1=Point(l[0], l[1]);
+            p2=Point(l[2], l[3]);
+
+            //calculate angle in degrees
+            float angle = atan2(p1.y - p2.y, p1.x - p2.x)*180/CV_PI;
+
+            // +/- 45 deg max inclination and min 1/3 of the frame width size (tilt correction may not always work)
+            if(angle < 135 || angle > 225 || hyp < fWidth/3)
+            {
+                lines.erase(lines.begin() + i);
+                continue;
+            }
+
+            // select the greatest line only
+            if (max_dist < hyp) 
+            {
+                max_l = l;
+                max_dist = hyp;
+            }
+        }
+        
+         /*
+         *-----------------------------------------------------------------
+         * Define ROI (Region of Interest)
          *-----------------------------------------------------------------
          */
-        // Init detector
-        detector->detect( threshImg, blobs );
+        Rect rect(Point(0, max_l[1]), Point(fWidth,fHeight));
         
-        // Adds a starting object to the list
-        if(blobs.size() > 0 && obstacle_list.empty()) 
+        if( rect.area() > 0 )
         {
-            float heading = blobs[0].pt.x * cameraAngleApertureXPerPixel;
-            Obstacle obs(frame_n, blobs[0].pt.x, blobs[0].pt.y, blobs[0].size, heading); // center coords and diameter
-            obstacle_list.push_back(obs);
+            roi = dst(rect);
+        }
+        // if the horizon was not found
+        else
+        {
+            roi = dst;
         }
         
-        bool obstacle_present;        
-        
-        // Populate list of objects     
-        for (unsigned int i = 0; i < blobs.size(); i++) 
-        {     
-            obstacle_present = false;
-            
-            for (unsigned int j = 0; j < obstacle_list.size(); j++) 
+        /*
+         *-----------------------------------------------------------------
+         * Colour the frame in B/W according to lines detected
+         *-----------------------------------------------------------------
+         */
+        for (int j = roi.cols-1; j>=0; j--) 
+        {
+            bool white = true;
+            for (int i = roi.rows-1; i>=0; i--) 
             {
-                // If new detection, add to the list
-                if( obstacle_list[j].compare(blobs[i].pt.x, blobs[i].pt.y) )
-                {
-                    obstacle_present = true;
-                }
-            }
-            
-            if(!obstacle_present)
-            {
-                // Create new obstacle
-                float heading = blobs[i].pt.x * cameraAngleApertureXPerPixel;
-                Obstacle obs(frame_n, blobs[i].pt.x, blobs[i].pt.y, blobs[i].size, heading); // center coords and diameter
-                obstacle_list.push_back(obs);
+                 if (roi.at<unsigned char>(i,j) > 0)
+                     white = false;
+                 
+                 if(white)
+                     roi.at<unsigned char>(i,j)=255;
+                 else
+                     roi.at<unsigned char>(i,j)=0;
             }
         }
         
-        // Empty vectors
-        blobs.clear();
-        obstacle_list.clear();
+        /*
+         *-----------------------------------------------------------------
+         * Colour the frame in B/W according to lines detected
+         *-----------------------------------------------------------------
+         */
+        for (int col = roi.cols-1; col>=0; col--) 
+        {
+            int row = roi.rows-1;
+            do{
+                row--;
+            }while(roi.at<unsigned char>(row,col) != 255);
+            
+           // float bearing = col*webcamAngleApertureXPerPixel m_compass_data.heading;
+            
+           // collidableMgr->addVisualObstacle(row, bearing);
+        }
         
-        // Small delay
-        waitKey(20);
+        waitKey(10);
       }
-      
-      // Empty obstacle list array
-      obstacle_list.clear();
   }
 
   void CameraProcessingNode::CameraProcessingThreadFunc(ActiveNode* nodePtr) {
@@ -254,12 +288,30 @@ CameraProcessingNode::CameraProcessingNode(MessageBus& msgBus, CollidableMgr* co
     timer.start();
 
     while(true) {
-      node->detectObstacles();
       node->m_lock.lock();
-      node->addObstacleToCollidableMgr();
+      node->detectObstacles();
       node->m_lock.unlock();
       timer.sleepUntil(node->m_LoopTime);
       timer.reset();
     }
   }
   
+  /** 
+   *  @todo implement this function 
+   * 
+   *  Example use:
+   *                // Load camera calibration data
+   *                Mat frame, distCoeffs;
+   *                std::string filename = "calibration.xml";
+   *                applyCameraCorrection(filename, frame, distCoeffs);
+   * 
+   */
+  void applyCameraCorrection(std::string filename, Mat& cameraMatrix2, Mat& distCoeffs2)
+  {
+    FileStorage fs2(filename, FileStorage::READ);
+
+    fs2["camera_matrix"] >> cameraMatrix2;
+    fs2["distortion_coefficients"] >> distCoeffs2;
+
+    fs2.release();
+  }

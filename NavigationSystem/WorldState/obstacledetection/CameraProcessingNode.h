@@ -15,7 +15,6 @@
 #pragma once
 
 #include <mutex>
-#include <vector>
 #include <chrono>
 #include <thread>
 
@@ -38,8 +37,6 @@
 #include "WorldState/CollidableMgr/CollidableMgr.h"
 #include "SystemServices/Logger.h"
 #include "SystemServices/Timer.h"
-
-#include "Obstacle.hpp"
 
 class CameraProcessingNode : public ActiveNode {
 public:
@@ -77,6 +74,11 @@ public:
   * Initialisation function
   */
   bool init();
+  
+  /*
+   * Get the camera calibration data and correct the images retrieved
+   */
+  void applyCameraCorrection(std::string, cv::Mat&, cv::Mat&);
 
 private:
     struct Compass
@@ -85,10 +87,6 @@ private:
         float heading;
         int tmsp; 
     } m_compass_data;
-  /*
-  * Sends the data to the collidable manager
-  */
-  void addObstacleToCollidableMgr();
 
   /*
   * The function that thread works on

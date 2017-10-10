@@ -1,16 +1,16 @@
 /****************************************************************************************
-*
-* File:
-* 		ObstacleDetectionTest.cpp
-*
-* Purpose:
-*		Integration test for obstacle detection with the camera.
-*
-*
-* Developer Notes:
-*
-*
-***************************************************************************************/
+ * 
+ * File:
+ * 		ObstacleDetectionTest.cpp
+ *
+ * Purpose:
+ *		Integration test for obstacle detection with the camera.
+ *
+ *
+ * Developer Notes:
+ *
+ *
+ ***************************************************************************************/
 #include <opencv2/core.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/videoio.hpp>
@@ -31,7 +31,6 @@
 #include "MessageBus/ActiveNode.h"
 #include "SystemServices/Logger.h"
 #include "WorldState/CollidableMgr/CollidableMgr.h"
-#include "WorldState/obstacledetection/Obstacle.hpp"
 
 using namespace std;
 using namespace cv;
@@ -45,8 +44,12 @@ using namespace cv;
 DBHandler dbHandler("../asr.db");
 MessageBus msgBus;
 CollidableMgr cMgr;
-vector<Obstacle> obstaclelist;
-bool recordVid = true;
+struct Compass
+{
+    float roll;
+    float heading;
+    int tmsp; 
+} m_compass_data;
 
 void messageLoop() {
     msgBus.run();
@@ -54,88 +57,72 @@ void messageLoop() {
 
 int main() 
 {
-  Logger::init("ObstacleDetectionTest.log");
-
-  cMgr.startGC();
-
-  std::thread thr(messageLoop);
-  thr.detach();
-  std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    Logger::init("ObstacleDetectionTest.log");
     
-  VideoCapture m_capture(0); // Opens the camera handle
-  if (m_capture.isOpened() == false) //  To check if object was associated to webcam successfully
-  {
-      Logger::error("Webcam not available");
-      return -1;
-  } 
-  
-  double fWidth = m_capture.get(CV_CAP_PROP_FRAME_WIDTH); //get the width of frames of the video
-  double fHeight = m_capture.get(CV_CAP_PROP_FRAME_HEIGHT); //get the height of frames of the videotracker->init(frame, bbox);
-  Size frameSize(static_cast<int>(fWidth), static_cast<int>(fHeight));
-  VideoWriter outputVideo ("video.avi", CV_FOURCC('D','I','V','X'), 20, frameSize, true);
-
-  if (!outputVideo.isOpened())
-  {
-    Logger::error("Could not open the output video for write");
-    recordVid = false;
-  }
+    cMgr.startGC();
     
-    if(recordVid == false)
-        remove("video.avi");
+    std::thread thr(messageLoop);
+    thr.detach();
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     
-      Mat imgOriginal; // Input raw image
-      Mat hsvImg; // HSV converted image
-      Mat threshImg; // Filtered HSV image
-      
-      // Blob detection
-      SimpleBlobDetector::Params params;
-      // Change thresholds
-      params.minThreshold = 10;
-      params.maxThreshold = 200;
-      // Filter by Area
-      params.filterByArea = true;
-      params.minArea = 300;
-      // Filter by Circularity
-      params.filterByCircularity = true;
-      params.minCircularity = 0.3;
-      // Filter by Color
-      params.filterByColor = true;
-      params.blobColor = 255;
-      
-      // Set up detector with params
-      Ptr<SimpleBlobDetector> detector = SimpleBlobDetector::create(params);
-
-      vector<KeyPoint> blobs;
-      
-      // For green dot detection
-      vector<Vec3f> circles;
-
-      // Tilt correction
-      Mat rot;
-      Rect imageBox;
-      
-      // Set up frame size
-      m_capture >> imgOriginal;
-      Point2f center(imgOriginal.cols/2.0, imgOriginal.rows/2.0);
+    VideoCapture m_capture(0); // Opens the camera handle
+    if (m_capture.isOpened() == false) //  To check if object was associated to webcam successfully
+    {
+        Logger::error("Webcam not available");
+        return -1;
+    } 
     
-      // frame size
-      float cameraAngleApertureXPerPixel = CAMERA_APERTURE_X/fWidth;
-      //float cameraAngleApertureYPerPixel = CAMERA_APERTURE_Y/fHeight;
-      
-      for(int frame_n = 0; frame_n < DETECTOR_LOOP_TIME && m_capture.isOpened(); frame_n++) 
-      {
+    Mat imgOriginal; // Input raw image
+    Mat hsvImg; // HSV converted image
+    // Image containers
+    Mat frameGrayScale, roi, dst, cdst;
+    
+    // Noise removal kernel for the filters
+    Mat kernel_ero = getStructuringElement(MORPH_RECT, Size(2,2));
+    
+    // Save detected lines
+    std::vector<Vec4i> lines;
+    std::vector<Point> locations;   // output, locations of non-zero pixels
+    
+    // For green dot detection
+    std::vector<Vec3f> circles;
+    
+    // Tilt correction
+    Mat rot;
+    Rect imageBox;
+    
+    // Set up frame size
+    m_capture >> imgOriginal;
+    Point2f center(imgOriginal.cols/2.0, imgOriginal.rows/2.0);
+    
+    // frame size
+    double fWidth = m_capture.get(CV_CAP_PROP_FRAME_WIDTH); //get the width of frames of the video
+    double fHeight = m_capture.get(CV_CAP_PROP_FRAME_HEIGHT); //get the height of frames of the video
+    // float cameraAngleApertureXPerPixel = CAMERA_APERTURE_X/fWidth;
+    // float cameraAngleApertureYPerPixel = CAMERA_APERTURE_Y/fHeight;
+    
+    // Create windows
+    std::string find_lines_window = "Found Lines";
+    namedWindow(find_lines_window, WINDOW_AUTOSIZE);
+    std::string roi_window = "Region of Interest";
+    namedWindow(roi_window, WINDOW_AUTOSIZE);
+    std::string side_fill_window = "Side Fill";
+    namedWindow(side_fill_window, WINDOW_AUTOSIZE);
+    
+    for(;;) 
+    {
         m_capture >> imgOriginal;
-
+        
         if (imgOriginal.empty()) { // if frame read unsuccessfully
             Logger::error("video input frame not readable");
-            break;
+            break;;
         }
-          
+        
         /*
-         *-----------------------------------------------------------------
+         * -----------------------------------------------------------------
          * Correct tilted image
          *-----------------------------------------------------------------
-         *
+         */
         // Check if compass data is up to date
         if(SysClock::unixTime() - m_compass_data.tmsp < MAX_COMPASS_FRAME_TIMEFRAME)
         {            
@@ -149,9 +136,9 @@ int main()
             // Perform rotation
             warpAffine(imgOriginal, imgOriginal, rot, imageBox.size());
         }
-        */
+        
         /*
-         *-----------------------------------------------------------------
+         * -----------------------------------------------------------------
          * Convert image to HSV color space
          *-----------------------------------------------------------------
          */
@@ -159,94 +146,162 @@ int main()
         cvtColor(imgOriginal, hsvImg, CV_BGR2HSV); 
         
         /* 
-         *-----------------------------------------------------------------
+         * -----------------------------------------------------------------
          * Find green circle indicating camera recalibration
          *-----------------------------------------------------------------
          */
-#define WEBCAM
-#ifndef WEBCAM
         // Find green pixels
         inRange(hsvImg, Scalar(45, 100, 100), Scalar(75, 255, 255), hsvImg);
-
+        
         // Avoid false positives with a general blur
         GaussianBlur(hsvImg, hsvImg, Size(9, 9), 2, 2);
-
+        
         // Find circles
         HoughCircles(hsvImg, circles, CV_HOUGH_GRADIENT, 1, hsvImg.rows/8, 85, 15, 0, 0);
-
+        
         if(circles.size() != 0) 
         {
             // A green circle has been detected, he thermal camera is recalibrating and frames may be unreliable and corrupted, sleep thread
             Logger::info("Camera is recalibrating, thread will sleep for 3 seconds");
-            Timer t;
-            t.start();
-            t.sleepUntil(3);
-            t.reset();
+            std::this_thread::sleep_for(3s); 
             continue;
         }
-#endif
         
         /*
-         *-----------------------------------------------------------------
+         * -----------------------------------------------------------------
          * Denoising
          *-----------------------------------------------------------------
          */
-        // Apply filters
-        GaussianBlur(threshImg, threshImg, Size(3, 3), 0);
-        medianBlur(threshImg, threshImg, 3);
-        dilate(threshImg, threshImg, 0);
-        erode(threshImg, threshImg, 0);
+        /** @todo Tune noise elimination filters parameters */
+        //Convert image to grayscale
+        cvtColor( imgOriginal, frameGrayScale, CV_BGR2GRAY );
+        
+        // Apply a Gaussian Filter to clear out general noise
+        GaussianBlur( frameGrayScale, frameGrayScale, Size(7, 7), 2.0, 2.0 );
+        
+        // Remove spot noise
+        medianBlur(frameGrayScale, frameGrayScale, 3);
+        
+        // Remove small objects
+        erode( frameGrayScale, frameGrayScale, kernel_ero );
+        dilate( frameGrayScale, frameGrayScale, kernel_ero );
         
         /*
-         *-----------------------------------------------------------------
-         * Find blobs
+         * -----------------------------------------------------------------
+         * Find the horizon and set up the ROI (region of interest)
+         * to the image surface beneath
          *-----------------------------------------------------------------
          */
-        // Init detector
-        detector->detect( threshImg, blobs );
+        Canny(frameGrayScale, dst, 20, 50, 3);
+        cvtColor(dst, cdst, COLOR_GRAY2BGR);
         
-        // Adds a starting object to the list
-        if(blobs.size() > 0 && obstaclelist.empty()) 
+        HoughLinesP(dst, lines, 1, CV_PI/180, 50, 50, 10 );
+        double theta1, theta2, hyp;
+        
+        // Horizon
+        Vec4i max_l;
+        double max_dist = -1.0;
+        
+        for( size_t i = 0; i < lines.size(); i++ )
         {
-            float heading = blobs[0].pt.x * cameraAngleApertureXPerPixel;
-            Obstacle obs(frame_n, blobs[0].pt.x, blobs[0].pt.y, blobs[0].size, heading); // center coords and diameter
-            obstaclelist.push_back(obs);
-        }
-        
-        bool obstacle_present;        
-        
-        // Populate list of objects     
-        for (unsigned int i = 0; i < blobs.size(); i++) 
-        {     
-            obstacle_present = false;
+            Vec4i l = lines[i];
+            theta1 = (l[3]-l[1]);
+            theta2 = (l[2]-l[0]);
+            hyp = hypot(theta1,theta2);
             
-            for (unsigned int j = 0; j < obstaclelist.size(); j++) 
+            Point p1, p2;
+            p1=Point(l[0], l[1]);
+            p2=Point(l[2], l[3]);
+            
+            //calculate angle in degrees
+            float angle = atan2(p1.y - p2.y, p1.x - p2.x)*180/CV_PI;
+            
+            // +/- 45 deg max inclination and min 1/3 of the frame width size (tilt correction may not always work)
+            if(angle < 135 || angle > 225 || hyp < fWidth/3)
             {
-                // If new detection, add to the list
-                if( obstaclelist[j].compare(blobs[i].pt.x, blobs[i].pt.y) )
-                {
-                    obstacle_present = true;
-                }
+                lines.erase(lines.begin() + i);
+                continue;
             }
             
-            if(!obstacle_present)
+            // select the greatest line only
+            if (max_dist < hyp) 
             {
-                // Create new obstacle
-                float heading = blobs[i].pt.x * cameraAngleApertureXPerPixel;
-                Obstacle obs(frame_n, blobs[i].pt.x, blobs[i].pt.y, blobs[i].size, heading); // center coords and diameter
-                obstaclelist.push_back(obs);
-                Logger::info("new obstacle found");
+                max_l = l;
+                max_dist = hyp;
             }
         }
         
-        // Empty vectors
-        blobs.clear();
-        obstaclelist.clear();
+        // show lines found
+        line( cdst, Point(max_l[0], max_l[1]), Point(max_l[2], max_l[3]), Scalar(255,0,0), 3, LINE_AA);
+        imshow( find_lines_window , cdst );
+        waitKey(30);
         
-        // Small delay
-        waitKey(20);
+        /*
+         * -----------------------------------------------------------------
+         * Define ROI (Region of Interest)
+         *-----------------------------------------------------------------
+         */
+        Rect rect(Point(0, max_l[1]), Point(fWidth,fHeight));
         
-        if(recordVid)
-            outputVideo.write(imgOriginal);
-      }
-  }
+        if( rect.area() > 0 )
+        {
+            roi = dst(rect);
+        }
+        // if the horizon was not found
+        else
+        {
+            roi = dst;
+        }
+    
+        imshow( roi_window, roi );
+        waitKey(30);
+        
+        /*
+         * -----------------------------------------------------------------
+         * Colour the frame in B/W according to lines detected
+         *-----------------------------------------------------------------
+         */
+        for (int j = roi.cols-1; j>=0; j--) 
+        {
+            bool white = true;
+            for (int i = roi.rows-1; i>=0; i--) 
+            {
+                if (roi.at<unsigned char>(i,j) > 0)
+                    white = false;
+                
+                if(white)
+                    roi.at<unsigned char>(i,j)=255;
+                else
+                    roi.at<unsigned char>(i,j)=0;
+            }
+        }
+        
+        imshow( side_fill_window, roi );
+        waitKey(30);
+        
+        /*
+         * -----------------------------------------------------------------
+         * Colour the frame in B/W according to lines detected
+         *-----------------------------------------------------------------
+         */
+        for (int col = roi.cols-1; col>=0; col--) 
+        {
+            int row = roi.rows-1;
+            do{
+                row--;
+            }while(roi.at<unsigned char>(row,col) != 255);
+            
+            // float bearing = col*webcamAngleApertureXPerPixel m_compass_data.heading;
+            
+            // collidableMgr->addVisualObstacle(row, bearing);
+        }
+        
+        imshow( roi_window, roi );
+        waitKey(30);
+        
+    }
+    
+    Logger::error("exited loop");
+    
+    return 0;
+}
