@@ -17,30 +17,33 @@
 using namespace std;
 using namespace cv;
 using namespace chrono_literals;
-
-/** @todo set those parameters from db */
-#define CAMERA_DEVICE_ID 0 // 0 = default webcam
-#define DETECTOR_LOOP_TIME 250 // in ms (250 * 20 ms = 5s)
-#define MAX_COMPASS_FRAME_TIMEFRAME 10 // in ms
-#define CAMERA_APERTURE_X 50
-#define CAMERA_APERTURE_Y 50
  
-CameraProcessingNode::CameraProcessingNode(MessageBus& msgBus, CollidableMgr* collidableMgr)
-  : ActiveNode(NodeID::CameraProcessingNode, msgBus), m_LoopTime(0.5), collidableMgr(collidableMgr) 
+CameraProcessingNode::CameraProcessingNode(MessageBus& msgBus, DBHandler& dbhandler, CollidableMgr* collidableMgr)
+  : ActiveNode(NodeID::CameraProcessingNode, msgBus), m_LoopTime(1), m_DetectorLoopTime(250), m_TiltTimeDiffMax(10), m_db(dbhandler), collidableMgr(collidableMgr)
   {
     msgBus.registerNode(*this, MessageType::CompassData);
+    msgBus.registerNode(*this, MessageType::ServerConfigsReceived);
   }
 
   CameraProcessingNode::~CameraProcessingNode() {
       
   }
 
+  void CameraProcessingNode::updateConfigsFromDB(){
+      m_LoopTime = m_db.retrieveCellAsDouble("config_camera_processing","1","loop_time");
+      m_DetectorLoopTime = m_db.retrieveCellAsInt("config_camera_processing","250","detector_loop_time");
+      m_TiltTimeDiffMax = m_db.retrieveCellAsInt("config_camera_processing","10","tilt_time_max_difference"); /** @todo find a better name */
+  }
+  
   void CameraProcessingNode::processMessage(const Message* msg) {
     MessageType type = msg->messageType();
     switch (type) {
         // Set internal roll and heading values to the ones coming from compass
         case MessageType::CompassData :
             processCompassMessage((CompassDataMsg*) msg);
+            break;
+        case MessageType::ServerConfigsReceived :
+            updateConfigsFromDB();
             break;
         default:
             return;
@@ -101,7 +104,7 @@ CameraProcessingNode::CameraProcessingNode(MessageBus& msgBus, CollidableMgr* co
      // float cameraAngleApertureXPerPixel = CAMERA_APERTURE_X/fWidth;
      // float cameraAngleApertureYPerPixel = CAMERA_APERTURE_Y/fHeight;
       
-      for(int frame_n = 0; frame_n < DETECTOR_LOOP_TIME && m_capture.isOpened(); frame_n++) 
+      for(int frame_n = 0; frame_n < m_DetectorLoopTime && m_capture.isOpened(); frame_n++) 
       {
         m_capture >> imgOriginal;
 
@@ -116,7 +119,7 @@ CameraProcessingNode::CameraProcessingNode(MessageBus& msgBus, CollidableMgr* co
          *-----------------------------------------------------------------
          */
         // Check if compass data is up to date
-        if(SysClock::unixTime() - m_compass_data.tmsp < MAX_COMPASS_FRAME_TIMEFRAME)
+        if(SysClock::unixTime() - m_compass_data.tmsp < m_TiltTimeDiffMax)
         {            
             // Create the rotation matrix
             rot = getRotationMatrix2D(center, m_compass_data.roll, 1.0);

@@ -220,6 +220,17 @@ CREATE TABLE config_ais_processing (id INTEGER PRIMARY KEY AUTOINCREMENT,
 );
 
 -- -----------------------------------------------------
+-- Table for the Camera Processing active node config
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS "config_camera_processing";
+CREATE TABLE config_camera_processing (id INTEGER PRIMARY KEY AUTOINCREMENT,
+	loop_time                  DOUBLE,
+	detector_loop_time         INTEGER,
+	tilt_time_max_difference   INTEGER
+);
+
+
+-- -----------------------------------------------------
 -- Table communication CAN arduino config
 -- -----------------------------------------------------
 DROP TABLE IF EXISTS "config_can_arduino";

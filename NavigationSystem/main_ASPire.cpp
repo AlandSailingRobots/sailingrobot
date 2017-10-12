@@ -186,7 +186,7 @@ int main(int argc, char *argv[])
 
 	  	int miniWaitTime = 20; 	// Periode (in seconds) during witch the measuements are performed.
 	  	MarineSensorNode marineSensors(messageBus, miniWaitTime);
-	  	CameraProcessingNode cameraProcessingNode(messageBus, &collidableMgr); /** @todo normalise pointer/reference mess up (choose either byref or normal byval */
+	  	CameraProcessingNode cameraProcessingNode(messageBus, dbHandler, &collidableMgr);
 	#endif
 
 

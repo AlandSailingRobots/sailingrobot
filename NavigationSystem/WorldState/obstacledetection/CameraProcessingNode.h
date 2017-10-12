@@ -31,6 +31,7 @@
 #include "Messages/CompassDataMsg.h"
 #include "Messages/StateMessage.h"
 #include "MessageBus/Message.h"
+#include "DataBase/DBHandler.h"
 #include "MessageBus/ActiveNode.h"
 #include "MessageBus/MessageTypes.h"
 #include "MessageBus/MessageBus.h"
@@ -43,7 +44,7 @@ public:
   /*
   * Constructor, gets a pointer to messagebus and canservice
   */
-  CameraProcessingNode(MessageBus& msgBus, CollidableMgr* collidableMgr);
+  CameraProcessingNode(MessageBus& msgBus, DBHandler& dbhandler, CollidableMgr* collidableMgr);
   
   /*
    *  Empty destructor
@@ -85,9 +86,14 @@ private:
     {
         float roll;
         float heading;
-        int tmsp; 
+        unsigned int tmsp; 
     } m_compass_data;
 
+ /*
+  * Update values from the database as the loop time of the thread and others parameters
+  */
+  void updateConfigsFromDB();
+  
   /*
   * The function that thread works on
   */
@@ -96,9 +102,15 @@ private:
   /*
   * Private variables
   */
-  //Compass m_compass_data;
-  double m_LoopTime;
+  double m_LoopTime; // in s
+  int m_DetectorLoopTime; // in ms
+  unsigned int m_TiltTimeDiffMax; // in ms (the max misalignment time between a frame and the tilt value from the compass)
   std::mutex m_lock;
+  DBHandler& m_db;
   CollidableMgr* collidableMgr;
   cv::VideoCapture m_capture;
+  
+  const int CAMERA_DEVICE_ID = 0; // default webcam
+  const int CAMERA_APERTURE_X = 50;
+  const int CAMERA_APERTURE_Y = 50;
 };

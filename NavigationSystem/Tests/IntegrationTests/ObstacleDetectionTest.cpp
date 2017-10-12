@@ -115,7 +115,7 @@ int main()
         
         if (imgOriginal.empty()) { // if frame read unsuccessfully
             Logger::error("video input frame not readable");
-            break;;
+            break;
         }
         
         /*
