@@ -15,7 +15,7 @@
 #include "AISProcessing.h"
 
 AISProcessing::AISProcessing(MessageBus& msgBus, DBHandler& dbhandler, CollidableMgr* collidableMgr)
-  : ActiveNode(NodeID::AISProcessing, msgBus), m_LoopTime(0.5), m_Radius(300e6), m_MMSI(230082790), m_db(dbhandler), collidableMgr(collidableMgr) {
+  : ActiveNode(NodeID::AISProcessing, msgBus), m_LoopTime(0.5), m_Radius(300e6), m_MMSI(230082790), m_collidableMgr(collidableMgr), m_db(dbhandler) {
     msgBus.registerNode(*this, MessageType::AISData);
     msgBus.registerNode(*this, MessageType::ServerConfigsReceived);
     updateConfigsFromDB();
@@ -79,10 +79,10 @@ AISProcessing::AISProcessing(MessageBus& msgBus, DBHandler& dbhandler, Collidabl
     */
     std::vector<int> indexToRemove;
     for (auto vessel: m_Vessels) {
-      this->collidableMgr->addAISContact(vessel.MMSI, vessel.latitude, vessel.longitude, vessel.SOG, vessel.COG);
+      this->m_collidableMgr->addAISContact(vessel.MMSI, vessel.latitude, vessel.longitude, vessel.SOG, vessel.COG);
       for (uint32_t i = 0; i<m_InfoList.size();i++) {
         if (vessel.MMSI == m_InfoList[i].MMSI) {
-          this->collidableMgr->addAISContact(m_InfoList[i].MMSI, m_InfoList[i].length, m_InfoList[i].beam);
+          this->m_collidableMgr->addAISContact(m_InfoList[i].MMSI, m_InfoList[i].length, m_InfoList[i].beam);
           indexToRemove.push_back(i);
         }
       }

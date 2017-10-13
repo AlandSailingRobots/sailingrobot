@@ -111,6 +111,6 @@ private:
   cv::VideoCapture m_capture;
   
   const int CAMERA_DEVICE_ID = 0; // default webcam
-  const int CAMERA_APERTURE_X = 50;
-  const int CAMERA_APERTURE_Y = 50;
+  const int CAMERA_APERTURE_X = 320;
+  const int CAMERA_APERTURE_Y = 240;
 };

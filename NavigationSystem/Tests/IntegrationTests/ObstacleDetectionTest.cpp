@@ -38,8 +38,6 @@ using namespace cv;
 #define CAMERA_DEVICE_ID 0 // 0 = default webcam
 #define DETECTOR_LOOP_TIME 250 // in ms (250 * 20 ms = 5s)
 #define MAX_COMPASS_FRAME_TIMEFRAME 10 // in ms
-#define CAMERA_APERTURE_X 50
-#define CAMERA_APERTURE_Y 50
 
 DBHandler dbHandler("../asr.db");
 MessageBus msgBus;
@@ -50,6 +48,7 @@ struct Compass
     float heading;
     int tmsp; 
 } m_compass_data;
+int CAMERA_APERTURE_X = 320, CAMERA_APERTURE_Y = 240;
 
 void messageLoop() {
     msgBus.run();
@@ -71,6 +70,10 @@ int main()
         Logger::error("Webcam not available");
         return -1;
     } 
+    
+    // Set frame size
+    m_capture.set(CV_CAP_PROP_FRAME_WIDTH, CAMERA_APERTURE_X);
+    m_capture.set(CV_CAP_PROP_FRAME_HEIGHT, CAMERA_APERTURE_Y);
     
     Mat imgOriginal; // Input raw image
     Mat hsvImg; // HSV converted image

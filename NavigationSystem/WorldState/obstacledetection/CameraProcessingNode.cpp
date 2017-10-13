@@ -70,6 +70,10 @@ CameraProcessingNode::CameraProcessingNode(MessageBus& msgBus, DBHandler& dbhand
           return false;
       }
       
+      // Set frame size
+      m_capture.set(CV_CAP_PROP_FRAME_WIDTH, CAMERA_APERTURE_X);
+      m_capture.set(CV_CAP_PROP_FRAME_HEIGHT, CAMERA_APERTURE_Y);
+      
       return true;
   }
   

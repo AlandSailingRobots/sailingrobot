@@ -85,6 +85,6 @@ private:
   int m_Radius;
   uint32_t m_MMSI;
   std::mutex m_lock;
-  CollidableMgr* collidableMgr;
+  CollidableMgr* m_collidableMgr;
   DBHandler& m_db;
 };
