@@ -44,10 +44,11 @@ MessageBus msgBus;
 CollidableMgr cMgr;
 struct Compass
 {
-    float roll;
-    float heading;
-    int tmsp; 
+    float roll = 0;
+    float heading = 0;
+    int tmsp = 0; 
 } m_compass_data;
+
 int CAMERA_APERTURE_X = 320, CAMERA_APERTURE_Y = 240;
 
 void messageLoop() {
