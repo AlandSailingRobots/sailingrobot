@@ -22,15 +22,16 @@
 #include <opencv2/video.hpp>
 
 #include <vector>
+#include <thread>
 
 #include "SystemServices/SysClock.h"
 #include "SystemServices/Timer.h"
-#include "DataBase/DBHandler.h"
-#include "MessageBus/MessageTypes.h"
-#include "MessageBus/MessageBus.h"
-#include "MessageBus/ActiveNode.h"
+//#include "DataBase/DBHandler.h"
+//#include "MessageBus/MessageTypes.h"
+//#include "MessageBus/MessageBus.h"
+//#include "MessageBus/ActiveNode.h"
 #include "SystemServices/Logger.h"
-#include "WorldState/CollidableMgr/CollidableMgr.h"
+//#include "WorldState/CollidableMgr/CollidableMgr.h"
 
 using namespace std;
 using namespace cv;
@@ -39,9 +40,9 @@ using namespace cv;
 #define DETECTOR_LOOP_TIME 250 // in ms (250 * 20 ms = 5s)
 #define MAX_COMPASS_FRAME_TIMEFRAME 10 // in ms
 
-DBHandler dbHandler("../asr.db");
-MessageBus msgBus;
-CollidableMgr cMgr;
+//DBHandler dbHandler("../asr.db");
+//MessageBus msgBus;
+//CollidableMgr cMgr;
 struct Compass
 {
     float roll = 0;
@@ -51,19 +52,19 @@ struct Compass
 
 int CAMERA_APERTURE_X = 320, CAMERA_APERTURE_Y = 240;
 
-void messageLoop() {
-    msgBus.run();
-}
+//void messageLoop() {
+//    msgBus.run();
+//}
 
 int main() 
 {
     Logger::init("ObstacleDetectionTest.log");
     
-    cMgr.startGC();
+//    cMgr.startGC();
     
-    std::thread thr(messageLoop);
-    thr.detach();
-    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+//    std::thread thr(messageLoop);
+//    thr.detach();
+//    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     
     VideoCapture m_capture(0); // Opens the camera handle
     if (m_capture.isOpened() == false) //  To check if object was associated to webcam successfully
@@ -106,12 +107,12 @@ int main()
     // float cameraAngleApertureYPerPixel = CAMERA_APERTURE_Y/fHeight;
     
     // Create windows
-    std::string find_lines_window = "Found Lines";
-    namedWindow(find_lines_window, WINDOW_AUTOSIZE);
-    std::string roi_window = "Region of Interest";
-    namedWindow(roi_window, WINDOW_AUTOSIZE);
-    std::string side_fill_window = "Side Fill";
-    namedWindow(side_fill_window, WINDOW_AUTOSIZE);
+ //   std::string find_lines_window = "Found Lines";
+ //   namedWindow(find_lines_window, WINDOW_AUTOSIZE);
+ //   std::string roi_window = "Region of Interest";
+ //   namedWindow(roi_window, WINDOW_AUTOSIZE);
+ //   std::string side_fill_window = "Side Fill";
+ //   namedWindow(side_fill_window, WINDOW_AUTOSIZE);
     
     for(;;) 
     {
@@ -237,8 +238,9 @@ int main()
         
         // show lines found
         line( cdst, Point(max_l[0], max_l[1]), Point(max_l[2], max_l[3]), Scalar(255,0,0), 3, LINE_AA);
-        imshow( find_lines_window , cdst );
-        waitKey(30);
+//        imshow( find_lines_window , cdst );
+        imwrite("findLinesImg.jpg", cdst);
+//        waitKey(30);
         
         /*
          * -----------------------------------------------------------------
@@ -257,8 +259,9 @@ int main()
             roi = dst;
         }
     
-        imshow( roi_window, roi );
-        waitKey(30);
+//        imshow( roi_window, roi );
+       imwrite("roiImg1.jpg", roi);
+//        waitKey(30);
         
         /*
          * -----------------------------------------------------------------
@@ -280,8 +283,9 @@ int main()
             }
         }
         
-        imshow( side_fill_window, roi );
-        waitKey(30);
+//        imshow( side_fill_window, roi );
+//        waitKey(30);
+        imwrite("sideFillImg.jpg", roi);
         
         /*
          * -----------------------------------------------------------------
@@ -300,8 +304,9 @@ int main()
             // collidableMgr->addVisualObstacle(row, bearing);
         }
         
-        imshow( roi_window, roi );
-        waitKey(30);
+//        imshow( roi_window, roi );
+//        waitKey(30);
+        imwrite("roiImg2.jpg", roi);
         
     }
     
