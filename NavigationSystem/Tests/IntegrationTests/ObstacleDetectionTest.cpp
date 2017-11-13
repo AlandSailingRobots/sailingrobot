@@ -40,10 +40,11 @@ using namespace cv;
 #define DETECTOR_LOOP_TIME 250 // in ms (250 * 20 ms = 5s)
 #define MAX_COMPASS_FRAME_TIMEFRAME 10 // in ms
 
-const int lowFrameX = 0; //65;
-const int widthFrame = 640;  //505;
-const int lowFrameY = 0;  //97;
-const int heightFrame = 480;  //447;
+// these are retrieved by trial and error, to get the roi containing the thermal imager data
+const int lowFrameX = 29; 
+const int widthFrame = 257;
+const int lowFrameY = 30; 
+const int heightFrame = 195;
 
 //DBHandler dbHandler("../asr.db");
 //MessageBus msgBus;
@@ -105,9 +106,11 @@ int main()
     // Set up frame size
     m_capture >> imgFullSize;
     Rect thermalImagerArea(lowFrameX, lowFrameY, widthFrame, heightFrame);
-    imgOriginal = imgFullSize(thermalImagerArea);
+    imgOriginal = imgFullSize(thermalImagerArea).clone();
     Point2f center(imgOriginal.cols/2.0, imgOriginal.rows/2.0);
 
+std::cerr << "full size: " << imgFullSize.cols << ", " << imgFullSize.rows << std::endl;
+std::cerr << "roi: " << imgOriginal.cols << ", " << imgOriginal.rows << std::endl;
     // frame size
 //    double fWidth = m_capture.get(CV_CAP_PROP_FRAME_WIDTH); //get the width of frames of the video
 //    double fHeight = m_capture.get(CV_CAP_PROP_FRAME_HEIGHT); //get the height of frames of the video
@@ -124,12 +127,13 @@ int main()
 
     for(;;)
     {
-        m_capture >> imgOriginal;
+        m_capture >> imgFullSize;
 
-        if (imgOriginal.empty()) { // if frame read unsuccessfully
+        if (imgFullSize.empty()) { // if frame read unsuccessfully
             Logger::error("video input frame not readable");
             break;
         }
+	imgOriginal = imgFullSize(thermalImagerArea).clone();
 
         /*
          * -----------------------------------------------------------------
