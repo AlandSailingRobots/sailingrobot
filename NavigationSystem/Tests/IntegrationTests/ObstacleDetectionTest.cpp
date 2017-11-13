@@ -41,9 +41,9 @@ using namespace cv;
 #define MAX_COMPASS_FRAME_TIMEFRAME 10 // in ms
 
 const int lowFrameX = 0; //65;
-const int highFrameX = 640;  //505;
+const int widthFrame = 640;  //505;
 const int lowFrameY = 0;  //97;
-const int highFrameY = 480;  //447;
+const int heightFrame = 480;  //447;
 
 //DBHandler dbHandler("../asr.db");
 //MessageBus msgBus;
@@ -104,8 +104,8 @@ int main()
 
     // Set up frame size
     m_capture >> imgFullSize;
-    Rect thermalImagerArea(lowFrameX, lowFrameY, widthFrameX, heightFrameY);
-    imgOriginal = roi(Rect, imgFullSize);
+    Rect thermalImagerArea(lowFrameX, lowFrameY, widthFrame, heightFrame);
+    imgOriginal = imgFullSize(thermalImagerArea);
     Point2f center(imgOriginal.cols/2.0, imgOriginal.rows/2.0);
 
     // frame size
@@ -230,7 +230,7 @@ int main()
             float angle = atan2(p1.y - p2.y, p1.x - p2.x)*180/CV_PI;
 
             // +/- 45 deg max inclination and min 1/3 of the frame width size (tilt correction may not always work)
-            if(angle < 135 || angle > 225 || hyp < fWidth/3)
+            if(angle < 135 || angle > 225 || hyp < widthFrame/3.0)
             {
                 lines.erase(lines.begin() + i);
                 continue;
@@ -255,7 +255,7 @@ int main()
          * Define ROI (Region of Interest)
          *-----------------------------------------------------------------
          */
-        Rect rect(Point(0, max_l[1]), Point(fWidth,fHeight));
+        Rect rect(Point(0, max_l[1]), Point(widthFrame,heightFrame));
 
         if( rect.area() > 0 )
         {
