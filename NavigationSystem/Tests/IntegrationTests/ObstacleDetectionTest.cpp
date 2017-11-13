@@ -157,6 +157,7 @@ int main()
          */
         // Convert Original Image to HSV Thresh Image
         cvtColor(imgOriginal, hsvImg, CV_BGR2HSV);
+        imwrite("imageHSV.jpg", hsvImg);
 
         /*
          * -----------------------------------------------------------------
