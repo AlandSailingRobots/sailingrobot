@@ -56,8 +56,6 @@ struct Compass
     int tmsp = 0;
 } m_compass_data;
 
-//int CAMERA_APERTURE_X = 320, CAMERA_APERTURE_Y = 240;
-
 //void messageLoop() {
 //    msgBus.run();
 //}
@@ -75,13 +73,9 @@ int main()
     VideoCapture m_capture(0); // Opens the camera handle
     if (m_capture.isOpened() == false) //  To check if object was associated to webcam successfully
     {
-        Logger::error("Webcam not available");
+        Logger::error("Camera not available");
         return -1;
     }
-
-    // Set frame size - this appears not to work
-    //m_capture.set(CV_CAP_PROP_FRAME_WIDTH, CAMERA_APERTURE_X);
-    //m_capture.set(CV_CAP_PROP_FRAME_HEIGHT, CAMERA_APERTURE_Y);
 
     Mat imgFullSize; // Input raw image
     Mat imgOriginal; // Input raw image
@@ -109,22 +103,6 @@ int main()
     imgOriginal = imgFullSize(thermalImagerArea).clone();
     Point2f center(imgOriginal.cols/2.0, imgOriginal.rows/2.0);
 
-std::cerr << "full size: " << imgFullSize.cols << ", " << imgFullSize.rows << std::endl;
-std::cerr << "roi: " << imgOriginal.cols << ", " << imgOriginal.rows << std::endl;
-    // frame size
-//    double fWidth = m_capture.get(CV_CAP_PROP_FRAME_WIDTH); //get the width of frames of the video
-//    double fHeight = m_capture.get(CV_CAP_PROP_FRAME_HEIGHT); //get the height of frames of the video
-    // float cameraAngleApertureXPerPixel = CAMERA_APERTURE_X/fWidth;
-    // float cameraAngleApertureYPerPixel = CAMERA_APERTURE_Y/fHeight;
-
-    // Create windows
- //   std::string find_lines_window = "Found Lines";
- //   namedWindow(find_lines_window, WINDOW_AUTOSIZE);
- //   std::string roi_window = "Region of Interest";
- //   namedWindow(roi_window, WINDOW_AUTOSIZE);
- //   std::string side_fill_window = "Side Fill";
- //   namedWindow(side_fill_window, WINDOW_AUTOSIZE);
-
     for(;;)
     {
         m_capture >> imgFullSize;
@@ -133,7 +111,7 @@ std::cerr << "roi: " << imgOriginal.cols << ", " << imgOriginal.rows << std::end
             Logger::error("video input frame not readable");
             break;
         }
-	imgOriginal = imgFullSize(thermalImagerArea).clone();
+        imgOriginal = imgFullSize(thermalImagerArea).clone();
 
         /*
          * -----------------------------------------------------------------
@@ -161,6 +139,7 @@ std::cerr << "roi: " << imgOriginal.cols << ", " << imgOriginal.rows << std::end
          */
         // Convert Original Image to HSV Thresh Image
         cvtColor(imgOriginal, hsvImg, CV_BGR2HSV);
+        // Save temporary result for debugging purpose
         imwrite("imageHSV.jpg", hsvImg);
 
         /*
@@ -237,7 +216,7 @@ std::cerr << "roi: " << imgOriginal.cols << ", " << imgOriginal.rows << std::end
             // +/- 45 deg max inclination and min 1/3 of the frame width size (tilt correction may not always work)
             if(angle < 135 || angle > 225 || hyp < widthFrame/3.0)
             {
-                lines.erase(lines.begin() + i);
+                // Skip this line
                 continue;
             }
 
@@ -251,16 +230,15 @@ std::cerr << "roi: " << imgOriginal.cols << ", " << imgOriginal.rows << std::end
 
         // show lines found
         line( cdst, Point(max_l[0], max_l[1]), Point(max_l[2], max_l[3]), Scalar(255,0,0), 3, LINE_AA);
-//        imshow( find_lines_window , cdst );
+        // Save intermediary result for debugging purposes
         imwrite("findLinesImg.jpg", cdst);
-//        waitKey(30);
 
         /*
          * -----------------------------------------------------------------
          * Define ROI (Region of Interest)
          *-----------------------------------------------------------------
          */
-        Rect rect(Point(0, max_l[1]), Point(widthFrame,heightFrame));
+        Rect rect(Point(0, min(max_l[1], max_l[3])), Point(widthFrame,heightFrame));
 
         if( rect.area() > 0 )
         {
@@ -271,10 +249,8 @@ std::cerr << "roi: " << imgOriginal.cols << ", " << imgOriginal.rows << std::end
         {
             roi = dst;
         }
-
-//        imshow( roi_window, roi );
-       imwrite("roiImg1.jpg", roi);
-//        waitKey(30);
+        // Save intermediary result for debugging purposes
+        imwrite("roiImg1.jpg", roi);
 
         /*
          * -----------------------------------------------------------------
@@ -295,9 +271,7 @@ std::cerr << "roi: " << imgOriginal.cols << ", " << imgOriginal.rows << std::end
                     roi.at<unsigned char>(i,j)=0;
             }
         }
-
-//        imshow( side_fill_window, roi );
-//        waitKey(30);
+        // Save intermediary result for debugging purposes
         imwrite("sideFillImg.jpg", roi);
 
         /*
@@ -317,8 +291,6 @@ std::cerr << "roi: " << imgOriginal.cols << ", " << imgOriginal.rows << std::end
             // collidableMgr->addVisualObstacle(row, bearing);
         }
 
-//        imshow( roi_window, roi );
-//        waitKey(30);
         imwrite("roiImg2.jpg", roi);
 
     }
