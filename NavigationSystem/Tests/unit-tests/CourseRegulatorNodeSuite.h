@@ -15,11 +15,10 @@
 
 #include "LowLevelControllers/CourseRegulatorNode.h"
 #include "../cxxtest/cxxtest/TestSuite.h"
-#include "Messages/ActuatorPositionMsg.h"
 #include "../../MessageBus/MessageBus.h"
 #include "TestMocks/MessageLogger.h"
 #include "Messages/StateMessage.h"
-#include "Messages/DesiredCourseMsg.h"
+#include "Messages/LocalNavigationMsg.h"
 #include "Math/Utility.h"
 #include "DataBase/DBHandler.h"
 #include "SystemServices/Timer.h"
@@ -31,6 +30,8 @@
 #include <iostream>
 
 #define COURSE_REGULATORNODE_TEST_COUNT 7
+
+const float NO_COMMAND = -1000; 
 
 class CourseRegulatorNodeSuite : public CxxTest::TestSuite
 {
@@ -143,8 +144,9 @@ public:
 
         double desiredcourse = 15;
         // Test listening desired course Message
-        MessagePtr desiredCourseData = std::make_unique<DesiredCourseMsg>(desiredcourse);
-        msgBus().sendMessage(std::move(desiredCourseData));
+        MessagePtr localNavigationData = 
+        std::make_unique<LocalNavigationMsg>(desiredcourse, NO_COMMAND, false, false);
+        msgBus().sendMessage(std::move(localNavigationData));
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
         // Precision ?
@@ -170,8 +172,9 @@ public:
 
         double desiredcourse = 250;
         // Test listening desired course Message
-        MessagePtr desiredCourseData = std::make_unique<DesiredCourseMsg>(desiredcourse);
-        msgBus().sendMessage(std::move(desiredCourseData));
+        MessagePtr localNavigationData = 
+        std::make_unique<LocalNavigationMsg>(desiredcourse, NO_COMMAND, false, false);
+        msgBus().sendMessage(std::move(localNavigationData));
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
         // Precision ?
@@ -195,8 +198,9 @@ public:
 
         double desiredcourse = 343;
         // Test listening desired course Message
-        MessagePtr desiredCourseData = std::make_unique<DesiredCourseMsg>(desiredcourse);
-        msgBus().sendMessage(std::move(desiredCourseData));
+        MessagePtr localNavigationData = 
+        std::make_unique<LocalNavigationMsg>(desiredcourse, NO_COMMAND, false, false);
+        msgBus().sendMessage(std::move(localNavigationData));
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
         // Precision ?
@@ -221,8 +225,9 @@ public:
 
         double desiredcourse = 200;
         // Test listening desired course Message
-        MessagePtr desiredCourseData = std::make_unique<DesiredCourseMsg>(desiredcourse);
-        msgBus().sendMessage(std::move(desiredCourseData));
+        MessagePtr localNavigationData = 
+        std::make_unique<LocalNavigationMsg>(desiredcourse, NO_COMMAND, false, false);
+        msgBus().sendMessage(std::move(localNavigationData));
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
         // Precision ?
@@ -260,8 +265,9 @@ public:
         msgBus().sendMessage(std::move(stateData));
         std::this_thread::sleep_for(std::chrono::milliseconds(700));
 
-        MessagePtr desiredCourseData = std::make_unique<DesiredCourseMsg>(desiredcourse);
-        msgBus().sendMessage(std::move(desiredCourseData));
+        MessagePtr localNavigationData = 
+        std::make_unique<LocalNavigationMsg>(desiredcourse, NO_COMMAND, false, false);
+        msgBus().sendMessage(std::move(localNavigationData));
         std::this_thread::sleep_for(std::chrono::milliseconds(700));
 
         double diffHeading = Utility::limitAngleRange(heading)-Utility::limitAngleRange(desiredcourse);

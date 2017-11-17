@@ -47,7 +47,6 @@
 #include <thread>
 
 //I think these are needed
-#define WAIT_FOR_MESSAGE		300
 #define HTTP_TEST_COUNT			6
 
 class HTTPSyncSuite : public CxxTest::TestSuite {
@@ -60,6 +59,7 @@ public:
     DBLoggerNode* dbloggernode;
 	MockNode* mockNode;
 	bool nodeRegistered = false;
+    const int WAIT_FOR_MESSAGE = 300;
 
 	//Timer timer;
 
@@ -198,7 +198,7 @@ public:
 		/* NOTE : Marc : Don't know gow to check it because there is no periodic value to check the frequence
 
 		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-		dbhandler->changeOneValue("httpsync_config","1","2","delay");
+		dbhandler->changeOneValue("httpsync_config","1","2","delay");*/
 		/*MessagePtr serverConfig = std::make_unique<ServerConfigsReceivedMsg>();
 		mockNode->m_MessageReceived = false;
         msgBus().sendMessage(std::move(serverConfig));

@@ -31,10 +31,13 @@ UNIT_TEST_SRCS 		= MessageCoreSuite.h MessageSuite.h UtilitySuite.h HTTPSyncSuit
 						AISProcSuite.h CanNodesSuite.h
 					  	# ASRArbiterSuite.h // NOTE - Maël: This unit test suite is the source of a building error.
 
+
 HARDWARE_TEST_SRCS	= HardwareXbeeSuite.h HardwareCompassSuite.h HardwareCV7Suite.h HardwareGPSDSuite.h \
-						MaestroControllerSuite.h ActuatorSailNodeSuite.h ActuatorRudderNodeSuite.h \
+						MaestroControllerSuite.h  \
 						CANServiceSuite.h ActuatorNodeASPireSuite.h CANArduinoNodeSuite.h \
 						I2CControllerSuite.h HardwareWiringPiSuite.h
+						# ActuatorSailNodeSuite.h and ActuatorRudderNodeSuite.h linking to non-compiling
+						# ActuatorNode
 
 TEST_MOCK_SRCS 		= MockNode.h
 

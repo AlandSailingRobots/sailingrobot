@@ -37,7 +37,6 @@
 #include <chrono>
 #include <thread>
 
-#define WAIT_FOR_MESSAGE		300
 #define MESSAGE_CORE_TESTCOUNT  6
 
 
@@ -47,6 +46,7 @@ public:
 	std::thread* thr;
 	bool registered;
     int testcount = 0;
+    const int WAIT_FOR_MESSAGE = 300;
 
 	// Cheeky method for declaring and initialising a static in a header file
 	static MessageBus& msgBus()

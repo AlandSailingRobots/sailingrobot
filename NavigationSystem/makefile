@@ -139,11 +139,12 @@ export HW_NODES_ALL_SRC		= Hardwares/HMC6343Node.cpp Hardwares/GPSDNode.cpp
 export HW_NODES_ASPIRE_SRC 	= Hardwares/ActuatorNodeASPire.cpp Hardwares/CANAISNode.cpp Hardwares/CANSolarTrackerNode.cpp\
                             	Hardwares/CANWindsensorNode.cpp Hardwares/CANArduinoNode.cpp Hardwares/MarineSensorNode.cpp
 
-export HW_NODES_JANET_SRC 	= Hardwares/ActuatorNode.cpp Hardwares/CV7Node.cpp Hardwares/ArduinoNode.cpp
+# ActuatorNode for Janet not compiling, uses removed ActuatorPositionMsg
+export HW_NODES_JANET_SRC 	= Hardwares/CV7Node.cpp Hardwares/ArduinoNode.cpp
 
-# XBee network
+# XBee network, XbeeSyncNode not compiling, uses removed ActuatorPositionMsg
 export XBEE_NETWORK_SRC     = Network/DataLink.cpp Network/LinuxSerialDataLink.cpp Network/XbeePacketNetwork.cpp \
-                            	Xbee/Xbee.cpp Xbee/XbeeSyncNode.cpp
+                            	Xbee/Xbee.cpp
 
 
 ###############################################################################

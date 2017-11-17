@@ -40,7 +40,6 @@
 #include <thread>
 #include <math.h>
 
-#define WAIT_FOR_MESSAGE		500
 #define LINEFOLLOW_TEST_COUNT   2
 
 class LineFollowSuite : public CxxTest::TestSuite {
@@ -53,6 +52,7 @@ public:
 
   int testCount = 0;
   DBHandler* dbHandler;
+  const int WAIT_FOR_MESSAGE = 500;
 
   // Cheeky method for declaring and initialising a static in a header file
   static MessageBus& msgBus()

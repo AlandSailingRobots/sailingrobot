@@ -15,8 +15,7 @@
 
 #include "LowLevelControllers/SailControlNode.h"
 #include "../cxxtest/cxxtest/TestSuite.h"
-#include "Messages/ActuatorPositionMsg.h"
-#include "../../MessageBus/MessageBus.h"
+#include "MessageBus/MessageBus.h"
 #include "TestMocks/MessageLogger.h"
 #include "Messages/WindDataMsg.h"
 #include "Messages/StateMessage.h"
@@ -75,7 +74,7 @@ public:
         Logger::DisableLogging();
 
 
-        sControlNode = new SailControlNode(msgBus(), *dbHandler, .5);
+        sControlNode = new SailControlNode(msgBus(), *dbHandler);
         sControlNode->start();
 
         std::this_thread::sleep_for(std::chrono::milliseconds(2600));

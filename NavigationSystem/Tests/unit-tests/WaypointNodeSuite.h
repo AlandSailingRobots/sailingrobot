@@ -33,8 +33,8 @@
 #include <chrono>
 #include <thread>
 
-#define WAIT_FOR_MESSAGE		500
 #define WAYPOINT_TEST_COUNT     5
+
 
  class WaypointNodeSuite : public CxxTest::TestSuite {
     public:
@@ -44,6 +44,8 @@
     std::thread* thr;
     int testCount = 0;
 	DBHandler* dbHandler;
+    const int WAIT_FOR_MESSAGE = 500;
+
 
         	// Cheeky method for declaring and initialising a static in a header file
 	static MessageBus& msgBus()

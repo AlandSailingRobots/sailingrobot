@@ -14,7 +14,6 @@
 
 #pragma once
 
-//TODO - Jordan: Improve include paths so they aren't sooo long
 #include "MessageBus/Node.h"
 #include "Messages/GPSDataMsg.h"
 #include "Messages/WindDataMsg.h"
@@ -22,8 +21,6 @@
 #include "Messages/CompassDataMsg.h"
 #include "Messages/WaypointDataMsg.h"
 #include "Messages/StateMessage.h"
-#include "Messages/ActuatorPositionMsg.h"
-#include "Messages/DesiredCourseMsg.h"
 #include "Messages/LocalNavigationMsg.h"
 
 
@@ -41,10 +38,7 @@ public:
 		&& msgBus.registerNode(*this, MessageType::CompassData)
 		&& msgBus.registerNode(*this, MessageType::WaypointData)
 		&& msgBus.registerNode(*this, MessageType::StateMessage)
-		//&& msgBus.registerNode(*this, MessageType::NavigationControl)
 		&& msgBus.registerNode(*this, MessageType::ServerConfigsReceived)
-		&& msgBus.registerNode(*this, MessageType::DesiredCourse)
-		&& msgBus.registerNode(*this, MessageType::ActuatorPosition)
 		&& msgBus.registerNode(*this, MessageType::LocalNavigation))
 		{
 			registered = true;
@@ -134,14 +128,6 @@ public:
 				m_StateMsgCourse = stateMsg->course();
 			}
 			break;
-			case MessageType::ActuatorPosition:
-			{
-				m_MessageReceived = true;
-				ActuatorPositionMsg* actuatorMsg = (ActuatorPositionMsg*)message;
-				m_rudderPosition = actuatorMsg->rudderPosition();
-				m_sailPosition = actuatorMsg->sailPosition();
-			}
-			break;
 			case MessageType::LocalNavigation:
 			{
 				m_MessageReceived = true;
@@ -157,14 +143,10 @@ public:
 				m_MessageReceived = true;
 			}
 			break;
-			case MessageType::DesiredCourse:
-			{
-				m_MessageReceived = true;
-				DesiredCourseMsg* desiredCourseMsg = (DesiredCourseMsg*)message;
-				m_DesiredCourse = desiredCourseMsg->desiredCourse();
-			}
-			break;
 			default:
+			{
+				throw std::logic_error("Unknown message type in MockNode");
+			}
 			return;
 		}
 	}
