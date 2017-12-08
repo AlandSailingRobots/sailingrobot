@@ -6,6 +6,7 @@
 * Purpose:
 *   Tests the messagetypes, SolarDataMsg and AISDataMsg, works as intended
 *   Sending and receiving the messages, serialising and deserialising the messages
+* This test doesn't really test much yet.
 *
 ***************************************************************************************/
 #pragma once
@@ -14,73 +15,62 @@
 #include "Hardwares/CANSolarTrackerNode.h"
 #include "../cxxtest/cxxtest/TestSuite.h"
 #include "Messages/StateMessage.h"
-#include "../../MessageBus/MessageBus.h"
+#include "MessageBus/MessageBus.h"
 #include "TestMocks/MessageLogger.h"
 #include "Messages/CompassDataMsg.h"
 #include "Messages/GPSDataMsg.h"
 #include "TestMocks/MockCANReceiver.h"
+#include "MessageBusTestHelper.h"
 
-// For std::this_thread
 #include <chrono>
-#include <thread>
 
-#define CAN_TEST_COUNT 4
+#define CAN_TEST_COUNT 2
 
 class CanNodesSuite : public CxxTest::TestSuite {
 public:
 
   CANAISNode* aisNode;
   DBHandler* dbhandler;
-  CANSolarTrackerNode* solarNode;
+  CANSolarTrackerNode* solarNode = 0;
   MockNode* mockNode;
 
   bool mockNodeRegistered = false;
 
   CANService* canService;
 
+  MessageBus messageBus;
+  std::unique_ptr<MessageBusTestHelper> messageBusHelper;
+
   int testCount;
-
-  std::thread* thr;
-
-  static MessageBus& msgBus(){
-    static MessageBus* mbus = new MessageBus();
-    return *mbus;
-  }
-
-  static void runMessageLoop() {
-    msgBus().run();
-  }
 
   void setUp() {
     canService = new CANService();
-    mockNode = new MockNode(msgBus(), mockNodeRegistered);
 
     if (solarNode == 0) {
+      mockNode = new MockNode(messageBus, mockNodeRegistered);
       Logger::DisableLogging();
 
       dbhandler = new DBHandler("../asr.db");
-      aisNode = new CANAISNode(msgBus(),*dbhandler, *canService);
-      // solarNode = new CANSolarTrackerNode(msgBus(), *canService, 100);
+      aisNode = new CANAISNode(messageBus,*dbhandler, *canService);
+      solarNode = new CANSolarTrackerNode(messageBus, *dbhandler, *canService, 100);
 
       // aisNode->start();
       // solarNode->start();
       // windsensorNode->start();
 
       std::this_thread::sleep_for(std::chrono::milliseconds(200));
-
-      thr = new std::thread(runMessageLoop);
+      messageBusHelper.reset(new MessageBusTestHelper(messageBus));
     }
     testCount++;
   }
 
   void tearDown() {
     if (testCount == CAN_TEST_COUNT) {
-      thr->detach();
-      delete thr;
       delete aisNode;
       delete solarNode;
+      messageBusHelper.reset();
+      delete mockNode;
     }
-    delete mockNode;
     delete canService;
   }
 
@@ -118,7 +108,7 @@ public:
 
 
     MessagePtr mockAISMsg = std::make_unique<AISDataMsg>(AISList, AISInfo, 60.1, 19.1);
-    msgBus().sendMessage(std::move(mockAISMsg));
+    messageBus.sendMessage(std::move(mockAISMsg));
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
     TS_ASSERT(mockNode->m_MessageReceived);
   }

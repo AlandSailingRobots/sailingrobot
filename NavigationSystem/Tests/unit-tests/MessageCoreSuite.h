@@ -27,15 +27,15 @@
 
  #pragma once
 
-#include "../cxxtest/cxxtest/TestSuite.h"
+#include "Tests/cxxtest/cxxtest/TestSuite.h"
 #include "TestMocks/MockNode.h"
 #include "MessageBus/MessageBus.h"
 #include "SystemServices/Logger.h"
+#include "MessageBusTestHelper.h" 
 #include <stdint.h>
 
 // For std::this_thread
 #include <chrono>
-#include <thread>
 
 #define MESSAGE_CORE_TESTCOUNT  6
 
@@ -47,8 +47,11 @@ public:
 	bool registered;
     int testcount = 0;
     const int WAIT_FOR_MESSAGE = 300;
+    MessageBus messageBus;
+    std::unique_ptr<MessageBusTestHelper> messageBusHelper;
 
 	// Cheeky method for declaring and initialising a static in a header file
+	/*
 	static MessageBus& msgBus()
 	{
 		static MessageBus* mbus = new MessageBus();
@@ -59,7 +62,7 @@ public:
 	{
 		msgBus().run();
 	}
-
+*/
 	void setUp()
 	{
 		// Only want to setup them up once in this test, only going to delete them when the program closes and the OS destroys
@@ -68,9 +71,11 @@ public:
 		{
 			Logger::DisableLogging();
 			registered = false;
-			node = new MockNode(msgBus(), registered);
-			thr = new std::thread(runMessageLoop);
-		}
+			node = new MockNode(messageBus, registered);
+			/*
+			thr = new std::thread(runMessageLoop);*/
+            messageBusHelper.reset(new MessageBusTestHelper(messageBus));
+ 		}
         testcount++;
 		std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_FOR_MESSAGE));
 	}
@@ -78,9 +83,11 @@ public:
 	void tearDown()
 	{
         if(testcount == MESSAGE_CORE_TESTCOUNT){
+            messageBusHelper.reset();
+            /*
             msgBus().stop();
             thr->join();
-            delete thr;
+            delete thr;*/
             delete node;
         }
 	}
@@ -94,7 +101,7 @@ public:
 	void test_FailedNodeRegisterAfterStart()
 	{
 		bool didRegister = false;
-		MockNode nodeTwo(msgBus(), didRegister);
+		MockNode nodeTwo(messageBus, didRegister);
 
 		TS_ASSERT(!didRegister);
 	}
@@ -105,9 +112,9 @@ public:
 		MessagePtr windData = std::make_unique<WindDataMsg>(0,0,0);
 		MessagePtr bluffData = std::make_unique<WindDataMsg>(0,0,0);
 		TS_TRACE("POINT A");
-		msgBus().sendMessage(std::move(bluffData));
+		messageBus.sendMessage(std::move(bluffData));
 		TS_TRACE("POINT B");
-		msgBus().sendMessage(std::move(windData));
+		messageBus.sendMessage(std::move(windData));
 
 		// Wait for the message to go through
 		std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_FOR_MESSAGE));
@@ -124,7 +131,7 @@ public:
 
 		MessagePtr windData = std::make_unique<WindDataMsg>(NodeID::MessageLogger, NodeID::None, 0, 0, 0);
 
-		msgBus().sendMessage(std::move(windData));
+		messageBus.sendMessage(std::move(windData));
 
 		// Wait for the message to go through
 		std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_FOR_MESSAGE));
@@ -139,7 +146,7 @@ public:
 	{
 		MessagePtr windData = std::make_unique<WindDataMsg>(NodeID::Compass, NodeID::None, 0, 0, 0);
 
-		msgBus().sendMessage(std::move(windData));
+		messageBus.sendMessage(std::move(windData));
 
 		// Wait for the message to go through
 		std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_FOR_MESSAGE));
@@ -154,7 +161,7 @@ public:
 	{
 		MessagePtr windData = std::make_unique<WindDataMsg>(WindDataMsg(NodeID::MessageLogger, NodeID::None, 120, 90, 60));
 
-		msgBus().sendMessage(std::move(windData));
+		messageBus.sendMessage(std::move(windData));
 	// Wait for the message to go through
 		std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_FOR_MESSAGE));
 

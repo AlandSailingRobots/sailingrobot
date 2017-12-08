@@ -28,7 +28,7 @@ UNIT_TEST_SRCS 		= MessageCoreSuite.h MessageSuite.h UtilitySuite.h HTTPSyncSuit
 					  	CourseRegulatorSuite.h CANMessageSuite.h DBLoggerNodeSuite.h \
 					  	LowLevelControllerNodeJanetSuite.h LowLevelControllersFunctionsTestSuite.h \
 					  	ASRCourseBallotSuite.h CourseRegulatorNodeSuite.h SailControlNodeSuite.h \
-						AISProcSuite.h CanNodesSuite.h
+						AISProcSuite.h CanNodesSuite.h MessageBusTestHelper.h
 					  	# ASRArbiterSuite.h // NOTE - Maël: This unit test suite is the source of a building error.
 
 

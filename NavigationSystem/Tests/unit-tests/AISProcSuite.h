@@ -14,53 +14,46 @@
 #include "../cxxtest/cxxtest/TestSuite.h"
 #include "Messages/StateMessage.h"
 #include "DataBase/DBHandler.h"
-#include "../../MessageBus/MessageBus.h"
+#include "MessageBus/MessageBus.h"
 #include "TestMocks/MessageLogger.h"
 #include "WorldState/CollidableMgr/CollidableMgr.h"
+#include "MessageBusTestHelper.h" 
 
 #define AISPROC_TEST_COUNT 2
 
 class AISProcSuite : public CxxTest::TestSuite {
 public:
-  AISProcessing* aisProc;
+  AISProcessing* aisProc = 0;
   DBHandler* dbhandler;
   CollidableMgr cMgr;
   MockNode* mockNode;
   bool mockNodeRegistered = false;
+  MessageBus messageBus;
+  std::unique_ptr<MessageBusTestHelper> messageBusHelper;
 
   int testCount;
 
-  std::thread* thr;
-
-  static MessageBus& msgBus(){
-    static MessageBus* mbus = new MessageBus();
-    return *mbus;
-  }
-
-  static void runMessageLoop() {
-    msgBus().run();
-  }
-
   void setUp() {
-    mockNode = new MockNode(msgBus(), mockNodeRegistered);
     if (aisProc == 0) {
+      mockNode = new MockNode(messageBus, mockNodeRegistered);
       dbhandler = new DBHandler("../asr.db");
-      aisProc = new AISProcessing(msgBus(), *dbhandler, &cMgr);
+      aisProc = new AISProcessing(messageBus, *dbhandler, &cMgr);
 
       aisProc->start();
 
       std::this_thread::sleep_for(std::chrono::milliseconds(200));
-
-      thr = new std::thread(runMessageLoop);
+      messageBusHelper.reset(new MessageBusTestHelper(messageBus));
     }
     testCount++;
   }
 
   void tearDown() {
     if (testCount == AISPROC_TEST_COUNT) {
-      // delete aisProc;
+      aisProc->stop();
+      messageBusHelper.reset();
+      delete mockNode;
+      delete aisProc;
     }
-    delete mockNode;
   }
 
   void test_ReceiveMessage(){
@@ -92,7 +85,7 @@ public:
     AISInfo.push_back(i1);
 
     MessagePtr mockAISMsg = std::make_unique<AISDataMsg>(AISList, AISInfo, 60.1, 19.1);
-    msgBus().sendMessage(std::move(mockAISMsg));
+    messageBus.sendMessage(std::move(mockAISMsg));
 
     std::this_thread::sleep_for(std::chrono::milliseconds(300));
     TS_ASSERT(mockNode->m_MessageReceived);
@@ -127,7 +120,7 @@ public:
     AISInfo.push_back(i1);
 
     MessagePtr mockAISMsg = std::make_unique<AISDataMsg>(AISList, AISInfo, 60.1, 19.1);
-    msgBus().sendMessage(std::move(mockAISMsg));
+    messageBus.sendMessage(std::move(mockAISMsg));
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
     cMgr.getAISContacts();
