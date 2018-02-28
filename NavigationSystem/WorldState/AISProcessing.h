@@ -52,6 +52,11 @@ public:
   */
   void start();
 
+  /*
+  * Stops the worker thread
+  */
+  void stop();
+
 private:
 
   /*
@@ -87,4 +92,6 @@ private:
   std::mutex m_lock;
   CollidableMgr* collidableMgr;
   DBHandler& m_db;
+  std::atomic<bool> m_running;
+
 };

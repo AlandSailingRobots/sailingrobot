@@ -47,7 +47,6 @@
 #include <thread>
 
 //I think these are needed
-#define WAIT_FOR_MESSAGE		300
 #define HTTP_TEST_COUNT			6
 
 class HTTPSyncSuite : public CxxTest::TestSuite {
@@ -60,6 +59,7 @@ public:
     DBLoggerNode* dbloggernode;
 	MockNode* mockNode;
 	bool nodeRegistered = false;
+    const int WAIT_FOR_MESSAGE = 300;
 
 	//Timer timer;
 
@@ -122,7 +122,8 @@ public:
     }
 
     void test_HTTPSyncValidURL(){
-
+        TS_SKIP("Outdated test that needs to be updated");
+/*
         std::string url1 = "http://www.sailingrobots.com/testdata/sync/";
         std::string url2 = "http://localhost/Remote-sailing-robots/sync/";
         std::string urlOrigin = dbhandler->retrieveCell("config_httpsync", "1", "srv_addr");
@@ -130,7 +131,7 @@ public:
         bool validCheck = (urlOrigin == url1 || urlOrigin == url2);
 
         TS_ASSERT(validCheck);
-
+*/
     }
 
     void test_HTTPSyncWaypoints(){
@@ -160,7 +161,8 @@ public:
     }
 
     void test_HTTPSyncConfigs(){
-
+        TS_SKIP("Outdated test that needs to be updated");
+/*
         std::string configString = dbhandler->getConfigs();
         TS_ASSERT(httpsync->pushConfigs());
         std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_FOR_MESSAGE));
@@ -171,11 +173,12 @@ public:
         std::string newConfigString = dbhandler->getConfigs();
 
         TS_ASSERT_EQUALS(configString.compare(newConfigString),0);
-
+*/
     }
 
     void test_HTTPSyncPushDataLogs(){
-
+        TS_SKIP("Outdated test that needs to be updated");
+/*
 		MessagePtr compassDatalogs = std::make_unique<CompassDataMsg>(3,2,1);
         msgBus().sendMessage(std::move(compassDatalogs));
         std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_FOR_MESSAGE));
@@ -191,23 +194,8 @@ public:
 		TS_ASSERT(httpsync->pushDatalogs());
 		std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_FOR_MESSAGE));
 		currentLogs = dbhandler->getLogs(true);
-        TS_ASSERT_EQUALS(currentLogs.compare(emptyJson),0); //Logs are cleared on a successful push*/
+        TS_ASSERT_EQUALS(currentLogs.compare(emptyJson),0); //Logs are cleared on a successful push
+        */
 	}
 
-	void test_HTTPSyncUpdateDelay(){
-		/* NOTE : Marc : Don't know gow to check it because there is no periodic value to check the frequence
-
-		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-		dbhandler->changeOneValue("httpsync_config","1","2","delay");
-		/*MessagePtr serverConfig = std::make_unique<ServerConfigsReceivedMsg>();
-		mockNode->m_MessageReceived = false;
-        msgBus().sendMessage(std::move(serverConfig));
-        std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_FOR_MESSAGE));
-        while(not mockNode->m_MessageReceived);
-        timer.start();
-        mockNode->m_MessageReceived = false;
-        while(not mockNode->m_MessageReceived);
-        timer.stop();
-        TS_ASSERT_DELTA(timer.timePassed(), 2, 1e-1);
-	*/}
 };

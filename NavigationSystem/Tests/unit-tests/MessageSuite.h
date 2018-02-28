@@ -25,7 +25,6 @@
 #include "Messages/WindDataMsg.h"
 #include "Messages/DataRequestMsg.h"
 #include "Messages/WaypointDataMsg.h"
-#include "Messages/ActuatorPositionMsg.h"
 #include "Messages/ArduinoDataMsg.h"
 #include "Messages/VesselStateMsg.h"
 #include "Messages/CourseDataMsg.h"
@@ -34,7 +33,7 @@
 #include "Messages/LocalConfigChangeMsg.h"
 #include "Messages/LocalWaypointChangeMsg.h"
 #include "Messages/StateMessage.h"
- #include "Messages/AISDataMsg.h"
+#include "Messages/AISDataMsg.h"
 
 
 class MessageSuite : public CxxTest::TestSuite {
@@ -166,26 +165,6 @@ public:
 		TS_ASSERT_DELTA(msgTwo.prevLatitude(), 60.1, 1e-7);
 		TS_ASSERT_EQUALS(msgTwo.prevDeclination(), 6);
 		TS_ASSERT_EQUALS(msgTwo.prevRadius(), 15);
-	}
-
-	void test_ActuatorPositionMsg()
-	{
-		ActuatorPositionMsg msg(5507, 4765);
-
-		TS_ASSERT_EQUALS(msg.messageType(), MessageType::ActuatorPosition);
-		TS_ASSERT_EQUALS(msg.rudderPosition(), 5507);
-		TS_ASSERT_EQUALS(msg.sailPosition(), 4765);
-
-		MessageSerialiser serialiser;
-		msg.Serialise(serialiser);
-
-		MessageDeserialiser deserialiser(serialiser.data(), serialiser.size());
-		ActuatorPositionMsg msgTwo(deserialiser);
-
-		TS_ASSERT(msgTwo.isValid());
-		TS_ASSERT_EQUALS(msgTwo.messageType(), MessageType::ActuatorPosition);
-		TS_ASSERT_EQUALS(msgTwo.rudderPosition(), 5507);
-		TS_ASSERT_EQUALS(msgTwo.sailPosition(), 4765);
 	}
 
 	void test_ArduinoDataMsg()

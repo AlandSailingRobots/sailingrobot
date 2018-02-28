@@ -5,10 +5,10 @@
 #include "SystemServices/Logger.h"
 #include "MessageBus/MessageBus.h"
 #include "DataBase/DBLoggerNode.h"
+#include "MessageBusTestHelper.h"
 #include "../cxxtest/cxxtest/TestSuite.h"
 
 #include <iostream>
-#include <thread>
 #include <chrono>
 #include <future>
 
@@ -21,33 +21,20 @@ class DBLoggerNodeSuite : public CxxTest::TestSuite {
 
     DBHandler* dbHandler;
     DBLoggerNode* dbLoggerNode;
-    std::thread* thr;
-
-    static MessageBus& msgBus(){
-   	 	static MessageBus* mbus = new MessageBus();
-    	return *mbus;
-  	}
-
-    static void runMessageLoop()
- 	{
-    	msgBus().run();
-  	}
+    MessageBus messageBus;
+    std::unique_ptr<MessageBusTestHelper> messageBusHelper;
 
     void setUp() {
         if(dbLoggerNode == 0) {
             dbHandler = new DBHandler("../asr.db");
-            dbLoggerNode = new DBLoggerNode(msgBus(), *dbHandler, DBLOGGERNODE_QUEUE_SIZE);
-            thr = new std::thread(runMessageLoop);
+            dbLoggerNode = new DBLoggerNode(messageBus, *dbHandler, DBLOGGERNODE_QUEUE_SIZE);
+            messageBusHelper.reset(new MessageBusTestHelper(messageBus));
         }
     }
 
     void tearDown() {
         dbLoggerNode->stop();
-        msgBus().stop();
-        thr->join();
-        delete thr;
-        delete dbLoggerNode;
-        delete dbHandler;
+        messageBusHelper.reset();
     }
 
     void test_LoggingToDB() {

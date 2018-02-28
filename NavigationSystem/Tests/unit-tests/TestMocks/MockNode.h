@@ -14,7 +14,8 @@
 
 #pragma once
 
-//TODO - Jordan: Improve include paths so they aren't sooo long
+#include <atomic>
+
 #include "MessageBus/Node.h"
 #include "Messages/GPSDataMsg.h"
 #include "Messages/WindDataMsg.h"
@@ -22,8 +23,6 @@
 #include "Messages/CompassDataMsg.h"
 #include "Messages/WaypointDataMsg.h"
 #include "Messages/StateMessage.h"
-#include "Messages/ActuatorPositionMsg.h"
-#include "Messages/DesiredCourseMsg.h"
 #include "Messages/LocalNavigationMsg.h"
 
 
@@ -41,11 +40,9 @@ public:
 		&& msgBus.registerNode(*this, MessageType::CompassData)
 		&& msgBus.registerNode(*this, MessageType::WaypointData)
 		&& msgBus.registerNode(*this, MessageType::StateMessage)
-		//&& msgBus.registerNode(*this, MessageType::NavigationControl)
 		&& msgBus.registerNode(*this, MessageType::ServerConfigsReceived)
-		&& msgBus.registerNode(*this, MessageType::DesiredCourse)
-		&& msgBus.registerNode(*this, MessageType::ActuatorPosition)
-		&& msgBus.registerNode(*this, MessageType::LocalNavigation))
+		&& msgBus.registerNode(*this, MessageType::LocalNavigation)
+		&& msgBus.registerNode(*this, MessageType::AISData))
 		{
 			registered = true;
 		}
@@ -59,13 +56,14 @@ public:
 	void processMessage(const Message* message)
 	{
 		MessageType type = message->messageType();
+		//std::cerr << "MockNode processMessage" << std::endl;
 
 		switch(type)
 		{
 			case MessageType::GPSData:
 			{
 				m_MessageReceived = true;
-				GPSDataMsg* gpsMsg = (GPSDataMsg*)message;
+				const GPSDataMsg* gpsMsg = static_cast<const GPSDataMsg*>(message);
 				m_HasFix = gpsMsg->hasFix();
 				m_Online = gpsMsg->gpsOnline();
 				m_Lat = gpsMsg->latitude();
@@ -80,7 +78,7 @@ public:
 			case MessageType::WindData:
 			{
 				m_MessageReceived = true;
-				WindDataMsg* windMsg = (WindDataMsg*)message;
+				const WindDataMsg* windMsg = static_cast<const WindDataMsg*>(message);
 				m_WindDir = windMsg->windDirection();
 				m_WindSpeed = windMsg->windSpeed();
 				m_WindTemp = windMsg->windTemp();
@@ -89,7 +87,7 @@ public:
 			case MessageType::WindState:
 			{
 				m_MessageReceived = true;
-				WindStateMsg* windState = (WindStateMsg*)message;
+				const WindStateMsg* windState = static_cast<const WindStateMsg*>(message);
 				m_trueWindDir = windState->trueWindSpeed();
 				m_trueWindSpeed = windState->trueWindDirection();
 				m_apparentWindSpeed = windState->apparentWindSpeed();
@@ -99,7 +97,7 @@ public:
 			case MessageType::CompassData:
 			{
 				m_MessageReceived = true;
-				CompassDataMsg* compassData = (CompassDataMsg*)message;
+				const CompassDataMsg* compassData = static_cast<const CompassDataMsg*>(message);
 				m_compassHeading = compassData->heading();
 				m_compassPitch = compassData->pitch();
 				m_compassRoll = compassData->roll();
@@ -108,7 +106,7 @@ public:
 			case MessageType::WaypointData:
 			{
 				m_MessageReceived = true;
-				WaypointDataMsg* waypointData = (WaypointDataMsg*)message;
+				const WaypointDataMsg* waypointData = static_cast<const WaypointDataMsg*>(message);
 				m_waypointNextId = waypointData->nextId();
 				m_waypointNextLongitude = waypointData->nextLongitude();
 				m_waypointNextLatitude = waypointData->nextLatitude();
@@ -126,7 +124,7 @@ public:
 			case MessageType::StateMessage:
 			{
 				m_MessageReceived = true;
-				StateMessage* stateMsg = (StateMessage*)message;
+				const StateMessage* stateMsg = static_cast<const StateMessage*>(message);
 				m_StateMsgHeading = stateMsg->heading();
 				m_StateMsgLat = stateMsg->latitude();
 				m_StateMsgLon = stateMsg->longitude();
@@ -134,18 +132,10 @@ public:
 				m_StateMsgCourse = stateMsg->course();
 			}
 			break;
-			case MessageType::ActuatorPosition:
-			{
-				m_MessageReceived = true;
-				ActuatorPositionMsg* actuatorMsg = (ActuatorPositionMsg*)message;
-				m_rudderPosition = actuatorMsg->rudderPosition();
-				m_sailPosition = actuatorMsg->sailPosition();
-			}
-			break;
 			case MessageType::LocalNavigation:
 			{
 				m_MessageReceived = true;
-				LocalNavigationMsg* localNavigationMsg = (LocalNavigationMsg*)message;
+				const LocalNavigationMsg* localNavigationMsg = static_cast<const LocalNavigationMsg*>(message);
 				m_TargetCourse = localNavigationMsg->targetCourse();
 				m_TargetSpeed = localNavigationMsg->targetSpeed();
 				m_BeatingState = localNavigationMsg->beatingMode();
@@ -157,19 +147,24 @@ public:
 				m_MessageReceived = true;
 			}
 			break;
-			case MessageType::DesiredCourse:
+			case MessageType::AISData:
 			{
 				m_MessageReceived = true;
-				DesiredCourseMsg* desiredCourseMsg = (DesiredCourseMsg*)message;
-				m_DesiredCourse = desiredCourseMsg->desiredCourse();
 			}
 			break;
 			default:
+			{
+				throw std::logic_error("Unknown message type in MockNode");
+			}
 			return;
 		}
 	}
 
-	bool 	m_MessageReceived;
+	void clearMessageReceived(){
+		m_MessageReceived = false;
+	}
+
+	std::atomic<bool> 	m_MessageReceived;
 
 	  //GPSData variables
 //=========================

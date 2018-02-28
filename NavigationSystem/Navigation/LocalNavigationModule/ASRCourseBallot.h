@@ -57,7 +57,7 @@ public:
  	///----------------------------------------------------------------------------------
     const int16_t* ptr() const;
 
-    const int16_t maxVotes() { return MAX_VOTES; }
+    int16_t maxVotes() const { return MAX_VOTES; };
 
     ///----------------------------------------------------------------------------------
  	/// The course resolution controls the number of courses that the boat will examine.

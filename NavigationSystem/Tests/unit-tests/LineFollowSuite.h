@@ -33,67 +33,54 @@
 #include "Messages/WindStateMsg.h"
 #include "Messages/StateMessage.h"
 #include "Math/Utility.h"
+#include "MessageBusTestHelper.h" 
 
 
-// For std::this_thread
 #include <chrono>
-#include <thread>
 #include <math.h>
 
-#define WAIT_FOR_MESSAGE		500
 #define LINEFOLLOW_TEST_COUNT   2
+
 
 class LineFollowSuite : public CxxTest::TestSuite {
 public:
   LineFollowNode* lineFollow;
-  std::thread* thr;
 
   MockNode* mockNode;
   bool nodeRegistered = false;
 
   int testCount = 0;
   DBHandler* dbHandler;
-
-  // Cheeky method for declaring and initialising a static in a header file
-  static MessageBus& msgBus()
-  {
-    static MessageBus* mbus = new MessageBus();
-    return *mbus;
-  }
-
-  static void runMessageLoop()
-  {
-    msgBus().run();
-  }
+  const int WAIT_FOR_MESSAGE = 500;
+  MessageBus messageBus;
+  std::unique_ptr<MessageBusTestHelper> messageBusHelper;
 
   void setUp()
   {
     // Only want to setup them up once in this test, only going to delete them when the program closes and the OS destroys
     // the process's memory
-    mockNode = new MockNode(msgBus(), nodeRegistered);
     if(lineFollow == 0)
     {
+      mockNode = new MockNode(messageBus, nodeRegistered);
+      dbHandler = new DBHandler("../asr.db");
       Logger::DisableLogging();
-      lineFollow = new LineFollowNode(msgBus(), *dbHandler);
+      lineFollow = new LineFollowNode(messageBus, *dbHandler);
       lineFollow -> start();
-
+      messageBusHelper.reset(new MessageBusTestHelper(messageBus));
       std::this_thread::sleep_for(std::chrono::milliseconds(2500));
-      thr = new std::thread(runMessageLoop);
     }
     testCount++;
   }
 
   void tearDown()
   {
-    delete mockNode;
     if(testCount == LINEFOLLOW_TEST_COUNT)
     {
       lineFollow->stop();
-      msgBus().stop();
-      thr->join();
-      delete thr;
+      messageBusHelper.reset();
       delete lineFollow;
       delete dbHandler;
+      delete mockNode;
     }
   }
 
@@ -108,10 +95,9 @@ public:
      //WindState no register in the mocknode
     MessagePtr msg = std::make_unique<WindStateMsg>(170, 30, 0, 200);
     MessagePtr sMsg = std::make_unique<StateMessage>(170, 30, 10, 200, 50);
-
-    msgBus().sendMessage(std::move(msg));
+    messageBus.sendMessage(std::move(msg));
     std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_FOR_MESSAGE));
-    msgBus().sendMessage(std::move(sMsg));
+    messageBus.sendMessage(std::move(sMsg));
     std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_FOR_MESSAGE));
     TS_TRACE("END OF LINEFOLLOW");
     TS_ASSERT(mockNode->m_MessageReceived);
