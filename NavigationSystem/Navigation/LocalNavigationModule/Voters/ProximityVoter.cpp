@@ -34,7 +34,7 @@ const ASRCourseBallot& ProximityVoter::vote( const BoatState_t& boatState )
     courseBallot.clear();
 
     CollidableList<AISCollidable_t> aisContacts = collidableMgr.getAISContacts();
-    CollidableList<VisualCollidable_t> visualContacts = collidableMgr.getVisualContacts();
+//    CollidableList<VisualCollidable_t> visualContacts = collidableMgr.getVisualContacts();
 
     float currClosest = 2016; // Default high value
     static float lifeTimeClosest = 2016;

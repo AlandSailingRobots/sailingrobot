@@ -236,6 +236,7 @@ void SimulationNode::processAISContact( TCPPacket_t& packet )
 ///--------------------------------------------------------------------------------------
 void SimulationNode::processVisualContact( TCPPacket_t& packet )
 {
+#if 0 //TODO update for visual field   
     if( this->collidableMgr != NULL )
     {
         // The first byte is the packet type, lets skip that
@@ -246,6 +247,7 @@ void SimulationNode::processVisualContact( TCPPacket_t& packet )
 
         this->collidableMgr->addVisualContact(data->id, bearing);
     }
+#endif    
 }
 
 ///--------------------------------------------------------------------------------------

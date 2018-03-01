@@ -17,12 +17,14 @@
 
 
 #include <stdint.h>
+#include <map> 
 
 
-struct VisualCollidable_t {
-    uint32_t id;
-    uint16_t bearing;
-    int lastUpdated;
+struct VisualField_t {
+    std::map<int16_t, uint16_t> bearingToRelativeFreeDistance;
+    int16_t visibleFieldLowBearingLimit;
+    int16_t visibleFieldHighBearingLimit;
+    unsigned long lastUpdated;
 };
 
 struct AISCollidable_t {
@@ -31,7 +33,7 @@ struct AISCollidable_t {
     double latitude;
     double longitude;
     float speed;
-    int lastUpdated;
+    unsigned long lastUpdated;
     float length;
     float beam;
 };
