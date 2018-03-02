@@ -35,9 +35,6 @@ const unsigned int VisualFieldTimeOut = 120;
 CollidableMgr::CollidableMgr()
     :ownAISLock(false)
 {
-    m_visualField.visibleFieldLowBearingLimit = 0;
-    m_visualField.visibleFieldHighBearingLimit = 0;
-
 }
 
 ///----------------------------------------------------------------------------------
@@ -128,14 +125,11 @@ void CollidableMgr::addAISContact( uint32_t mmsi, float length, float beam )
 }
 
 ///----------------------------------------------------------------------------------
-void CollidableMgr::addVisualField( std::map<int16_t, uint16_t> bearingToRelativeFreeDistance, 
-        int16_t visibleFieldLowBearingLimit = -24, int16_t visibleFieldHighBearingLimit = 24 )
+void CollidableMgr::addVisualField( std::map<int16_t, uint16_t> bearingToRelativeObstacleDistance)
 {
  
     std::lock_guard<std::mutex> guard(m_visualMutex);
-    m_visualField.bearingToRelativeFreeDistance = bearingToRelativeFreeDistance;
-    m_visualField.visibleFieldLowBearingLimit = visibleFieldLowBearingLimit;
-    m_visualField.visibleFieldHighBearingLimit = visibleFieldHighBearingLimit;
+    m_visualField.bearingToRelativeObstacleDistance = bearingToRelativeObstacleDistance;
     m_visualField.lastUpdated = SysClock::unixTime();
 }
 
@@ -154,13 +148,11 @@ VisualField_t CollidableMgr::getVisualField()
 
 void CollidableMgr::removeOldVisualField(){
     std::lock_guard<std::mutex> guard(m_visualMutex);
-    if (m_visualField.bearingToRelativeFreeDistance.empty()){
+    if (m_visualField.bearingToRelativeObstacleDistance.empty()){
         return;
     }
     if (m_visualField.lastUpdated + VisualFieldTimeOut < SysClock::unixTime()){
-        m_visualField.bearingToRelativeFreeDistance.clear();
-        m_visualField.visibleFieldLowBearingLimit = 0;
-        m_visualField.visibleFieldHighBearingLimit = 0;
+        m_visualField.bearingToRelativeObstacleDistance.clear();
     }
    
 }
