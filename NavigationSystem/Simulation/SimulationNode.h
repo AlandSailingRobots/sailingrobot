@@ -73,7 +73,7 @@ struct WingBoatDataPacket_t {
 } __attribute__((packed));
 
 struct AISContactPacket_t {
-  uint32_t mmsi;
+  uint16_t mmsi;
   float latitude;
   float longitude;
   float speed;
@@ -82,10 +82,8 @@ struct AISContactPacket_t {
   float beam;
 } __attribute__((packed));
 
-struct VisualContactPacket_t {
-    uint32_t id;
-    float latitude;
-    float longitude;
+struct VisualFieldPacket_t {
+    uint16_t relativeObstacleDistances[24];
 } __attribute__((packed));
 
 
@@ -174,7 +172,7 @@ private:
     ///----------------------------------------------------------------------------------
     /// Process a visual contact data message
     ///----------------------------------------------------------------------------------
-    void processVisualContact( TCPPacket_t& packet );
+    void processVisualField( TCPPacket_t& packet );
 
     ///----------------------------------------------------------------------------------
     /// Send our actuators data for a wing sail-equipped boat

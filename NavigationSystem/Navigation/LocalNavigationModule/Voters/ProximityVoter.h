@@ -40,8 +40,8 @@ private:
 	void visualAvoidance();
     void avoidOutsideVisualField( int16_t visibleFieldLowBearingLimit, 
     	int16_t visibleFieldHighBearingLimit);
-	void bearingAvoidanceSingleDir(uint16_t bearing, int16_t voteAdjust);
-    void bearingAvoidanceSmoothed( uint16_t bearing, uint16_t relativeObstacleDistance );
+	void bearingAvoidanceSingleDir(int16_t bearing, int16_t voteAdjust);
+    void bearingAvoidanceSmoothed( int16_t bearing, uint16_t relativeObstacleDistance );
 
     float aisAvoidance( const BoatState_t& boatState, AISCollidable_t& collidable );
    CollidableMgr& collidableMgr;

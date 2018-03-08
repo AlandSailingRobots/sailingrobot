@@ -78,14 +78,33 @@ const ASRCourseBallot& ProximityVoter::vote( const BoatState_t& boatState )
 void ProximityVoter::visualAvoidance(){
     VisualField_t visualField = collidableMgr.getVisualField();
     if (visualField.bearingToRelativeObstacleDistance.empty()){
+        Logger::info("visualAvoidance, no visual field");
         return;
     }
+    Logger::info("visualAvoidance, field exists");
     auto lowLimit = visualField.bearingToRelativeObstacleDistance.begin()->first; 
     auto highLimit = visualField.bearingToRelativeObstacleDistance.rbegin()->first; 
     avoidOutsideVisualField(lowLimit, highLimit);
+    uint16_t minObstacleDist = 100;
+    int16_t minObstacleDistBearing = 0;
+    uint16_t maxObstacleDist = 0;
+    int16_t maxObstacleDistBearing = 0;
     for(auto it : visualField.bearingToRelativeObstacleDistance ){
         bearingAvoidanceSmoothed(it.first, it.second);
+        if (it.second < minObstacleDist){
+            minObstacleDist = it.second;
+            minObstacleDistBearing = it.first;
+        }
+        if (it.second > maxObstacleDist){
+            maxObstacleDist = it.second;
+            maxObstacleDistBearing = it.first;
+        }
     }
+    Logger::info("Min obstacle distance: ", std::to_string(minObstacleDist));
+    Logger::info("Min obstacle dist bearing: ", std::to_string(minObstacleDistBearing));
+    Logger::info("Max obstacle distance: ", std::to_string(maxObstacleDist));
+    Logger::info("Max obstacle dist bearing: ", std::to_string(maxObstacleDistBearing));
+
 }
 
 
@@ -102,17 +121,17 @@ void ProximityVoter::avoidOutsideVisualField( int16_t visibleFieldLowBearingLimi
     }
 }
 
-void ProximityVoter::bearingAvoidanceSingleDir(uint16_t bearing, int16_t voteAdjust){
+void ProximityVoter::bearingAvoidanceSingleDir(int16_t bearing, int16_t voteAdjust){
     const auto awayWeight = 0.5;
    // Towards the target, reduce votes
     courseBallot.add(bearing, -voteAdjust);
-    // Away from the target, increase votes
-    courseBallot.add(bearing + 180, voteAdjust * awayWeight);
+    // Starboard of the target, increase votes
+    courseBallot.add(bearing + 90, voteAdjust * awayWeight);
 }
 
 
 ///----------------------------------------------------------------------------------
-void ProximityVoter::bearingAvoidanceSmoothed( uint16_t bearing, uint16_t relativeFreeDistance )
+void ProximityVoter::bearingAvoidanceSmoothed( int16_t bearing, uint16_t relativeFreeDistance )
 {
     const uint16_t avoidanceBearingRange = 10;
     const double avoidanceNormalization = avoidanceBearingRange;

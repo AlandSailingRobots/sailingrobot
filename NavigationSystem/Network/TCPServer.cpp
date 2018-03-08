@@ -254,6 +254,12 @@ int TCPServer::readPacket( TCPPacket_t& packet, uint32_t timeout )
 
                         return 1;
                     }
+                    else{
+                        std::string lengthString = std::to_string(length);
+                        std::string bytesReadString = std::to_string(bytesRead);
+                        Logger::info("invalid packet, length: ", lengthString);
+                        Logger::info("invalid packet, bytes read: ", bytesReadString);
+                    }
                 }
             }
 
@@ -263,7 +269,6 @@ int TCPServer::readPacket( TCPPacket_t& packet, uint32_t timeout )
             }
         }
     }
-
     return 0;
 }
 
