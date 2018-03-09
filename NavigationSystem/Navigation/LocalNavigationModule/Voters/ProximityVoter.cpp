@@ -100,10 +100,10 @@ void ProximityVoter::visualAvoidance(){
             maxObstacleDistBearing = it.first;
         }
     }
-    Logger::info("Min obstacle distance: ", std::to_string(minObstacleDist));
-    Logger::info("Min obstacle dist bearing: ", std::to_string(minObstacleDistBearing));
-    Logger::info("Max obstacle distance: ", std::to_string(maxObstacleDist));
-    Logger::info("Max obstacle dist bearing: ", std::to_string(maxObstacleDistBearing));
+    Logger::info("Min obstacle distance: %d", minObstacleDist);
+    Logger::info("Min obstacle dist bearing: %d", minObstacleDistBearing);
+    Logger::info("Max obstacle distance: %d", maxObstacleDist);
+    Logger::info("Max obstacle dist bearing: %d", maxObstacleDistBearing);
 
 }
 
@@ -111,7 +111,7 @@ void ProximityVoter::visualAvoidance(){
 void ProximityVoter::avoidOutsideVisualField( int16_t visibleFieldLowBearingLimit, 
         int16_t visibleFieldHighBearingLimit)
 {
-    const auto outsideAvoidanceFactor = 0.5;
+    const auto outsideAvoidanceFactor = 0.2;
     auto vote = courseBallot.maxVotes();
     // less votes for courses where we don't see
     for (auto i = Utility::wrapAngle(visibleFieldHighBearingLimit);
@@ -122,7 +122,7 @@ void ProximityVoter::avoidOutsideVisualField( int16_t visibleFieldLowBearingLimi
 }
 
 void ProximityVoter::bearingAvoidanceSingleDir(int16_t bearing, int16_t voteAdjust){
-    const auto awayWeight = 0.5;
+    const auto awayWeight = 1.0;
    // Towards the target, reduce votes
     courseBallot.add(bearing, -voteAdjust);
     // Starboard of the target, increase votes
@@ -136,7 +136,7 @@ void ProximityVoter::bearingAvoidanceSmoothed( int16_t bearing, uint16_t relativ
     const uint16_t avoidanceBearingRange = 10;
     const double avoidanceNormalization = avoidanceBearingRange;
     int16_t vote = courseBallot.maxVotes();
-    auto normalizedVoteAdjust = 2.0*(100 - relativeFreeDistance)/(100.0 * avoidanceBearingRange);
+    auto normalizedVoteAdjust = 3.0*(100 - relativeFreeDistance)/(100.0 * avoidanceBearingRange);
 
     bearingAvoidanceSingleDir(bearing, vote * normalizedVoteAdjust);
     for(uint16_t j = 1; j < avoidanceBearingRange; j++)
