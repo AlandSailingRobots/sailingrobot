@@ -84,6 +84,7 @@ struct AISContactPacket_t {
 
 struct VisualFieldPacket_t {
     uint16_t relativeObstacleDistances[24];
+    int16_t heading;
 } __attribute__((packed));
 
 

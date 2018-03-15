@@ -240,12 +240,14 @@ void SimulationNode::processVisualField( TCPPacket_t& packet )
     {
         // The first byte is the packet type, lets skip that
         uint8_t* ptr = packet.data + 1;
-        VisualFieldPacket_t* data = (VisualFieldPacket_t*)ptr;
+        VisualFieldPacket_t* data = reinterpret_cast<VisualFieldPacket_t*>(ptr);
         std::map<int16_t, uint16_t> bearingToRelativeObstacleDistance;
         for (int i = 0; i<24; ++i){
-            bearingToRelativeObstacleDistance[i-12] = data->relativeObstacleDistances[i];
+            bearingToRelativeObstacleDistance[12 - i] = data->relativeObstacleDistances[i];
         }
-        this->collidableMgr->addVisualField(bearingToRelativeObstacleDistance);
+        Logger::info("retrieving heading: %d", Utility::wrapAngle(90 - data->heading));
+
+        this->collidableMgr->addVisualField(bearingToRelativeObstacleDistance, Utility::wrapAngle(90 - data->heading));
     }    
 }
 

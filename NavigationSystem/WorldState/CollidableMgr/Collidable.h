@@ -23,10 +23,12 @@
 // Describes the visual field
 // a map containing a key for each bearing degree of the field of view and a value between 
 // 0 and 100, where 0 means an obstacle close at this bearing and 100 means no visible obstacle
+// bearings are absolute bearings 
 struct VisualField_t {
     std::map<int16_t, uint16_t> bearingToRelativeObstacleDistance;
-    unsigned long lastUpdated;
-    // TBD, do we need the heading here
+    std::map<int16_t, unsigned long> bearingToLastUpdated;
+    int16_t visualFieldLowBearing;
+    int16_t visualFieldHighBearing;
 };
 
 struct AISCollidable_t {

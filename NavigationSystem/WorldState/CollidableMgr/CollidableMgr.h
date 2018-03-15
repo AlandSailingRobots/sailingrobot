@@ -37,7 +37,7 @@ public:
     void addAISContact(uint32_t mmsi, double lat, double lon, float speed, float course);
     void addAISContact(uint32_t mmsi, float length, float beam);
     // replaces the visual field
-    void addVisualField(std::map<int16_t, uint16_t> bearingToRelativeObstacleDistance);
+    void addVisualField(std::map<int16_t, uint16_t> relBearingToRelObstacleDistance, int16_t heading);
 
     CollidableList<AISCollidable_t> getAISContacts();
     VisualField_t getVisualField();

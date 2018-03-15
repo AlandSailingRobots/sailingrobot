@@ -37,7 +37,7 @@ public:
     const ASRCourseBallot& vote( const BoatState_t& boatState );
 
 private:
-	void visualAvoidance(uint16_t heading);
+	void visualAvoidance();
     void avoidOutsideVisualField( int16_t visibleFieldLowBearingLimit, 
     	int16_t visibleFieldHighBearingLimit);
     void bearingAvoidanceSmoothed( int16_t bearing, uint16_t relativeObstacleDistance );

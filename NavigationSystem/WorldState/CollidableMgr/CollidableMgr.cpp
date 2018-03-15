@@ -23,6 +23,7 @@
 #include "CollidableMgr.h"
 #include "SystemServices/SysClock.h"
 #include "SystemServices/Logger.h"
+#include "Math/Utility.h"
 #include <chrono>
 
 
@@ -30,7 +31,9 @@
 #define NOT_AVAILABLE               -2000
 #define LOOP_TIME                   1000
 
-const unsigned int VisualFieldTimeOut = 120;
+const unsigned int visualFieldFadeOutStart = 10;   
+const unsigned int visualFieldTimeOut = 30; 
+const int fadeOut = 2;  
 ///----------------------------------------------------------------------------------
 CollidableMgr::CollidableMgr()
     :ownAISLock(false)
@@ -125,12 +128,26 @@ void CollidableMgr::addAISContact( uint32_t mmsi, float length, float beam )
 }
 
 ///----------------------------------------------------------------------------------
-void CollidableMgr::addVisualField( std::map<int16_t, uint16_t> bearingToRelativeObstacleDistance)
+void CollidableMgr::addVisualField( std::map<int16_t, uint16_t> relBearingToRelObstacleDistance, int16_t heading)
 {
  
     std::lock_guard<std::mutex> guard(m_visualMutex);
-    m_visualField.bearingToRelativeObstacleDistance = bearingToRelativeObstacleDistance;
-    m_visualField.lastUpdated = SysClock::unixTime();
+    auto updateTime = SysClock::unixTime();
+    int lowBearing = 0;
+    int highBearing = 0;
+    for (auto it : relBearingToRelObstacleDistance){
+        auto absBearing = Utility::limitAngleRange(it.first + heading); 
+        m_visualField.bearingToRelativeObstacleDistance[absBearing] = it.second;
+        m_visualField.bearingToLastUpdated[absBearing] = updateTime;
+        if (it.first < lowBearing){
+            lowBearing = it.first;
+        }
+        if (it.first > highBearing){
+            highBearing = it.first;
+        }
+    }
+    m_visualField.visualFieldLowBearing = lowBearing + heading;
+    m_visualField.visualFieldHighBearing = highBearing + heading;
 }
 
 ///----------------------------------------------------------------------------------
@@ -151,9 +168,23 @@ void CollidableMgr::removeOldVisualField(){
     if (m_visualField.bearingToRelativeObstacleDistance.empty()){
         return;
     }
-    if (m_visualField.lastUpdated + VisualFieldTimeOut < SysClock::unixTime()){
-        m_visualField.bearingToRelativeObstacleDistance.clear();
+    std::vector<int16_t> eraseBearings;
+    for (auto it : m_visualField.bearingToLastUpdated){
+        if (it.second + visualFieldTimeOut < SysClock::unixTime()){
+            eraseBearings.push_back(it.first);
+        }
+        else if (it.second + visualFieldFadeOutStart < SysClock::unixTime()){
+            if (m_visualField.bearingToRelativeObstacleDistance[it.first] < 100){
+                m_visualField.bearingToRelativeObstacleDistance[it.first] = 
+                    std::min(m_visualField.bearingToRelativeObstacleDistance[it.first] + fadeOut, 100);
+            }
+        }
     }
+    for (auto it :eraseBearings){
+        Logger::info("erasing field for bearing: %d", it);
+        m_visualField.bearingToRelativeObstacleDistance.erase(it);
+        m_visualField.bearingToLastUpdated.erase(it);
+    } 
    
 }
 
