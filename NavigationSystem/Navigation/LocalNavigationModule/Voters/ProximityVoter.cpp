@@ -56,14 +56,34 @@ const ASRCourseBallot& ProximityVoter::vote( const BoatState_t& boatState )
         }
     }
 
-    visualAvoidance();
+    visualAvoidance(boatState.heading);
+
+    auto maxVote = -courseBallot.maxVotes();
+    auto minVote = courseBallot.maxVotes();
+    auto maxBearing = 0;
+    auto minBearing = 0; 
+    for (int i=0; i<360; ++i){
+        auto vote = courseBallot.get(i);
+        if (vote > maxVote){
+            maxVote = vote;
+            maxBearing = i;
+        }
+        if (vote < minVote){
+            minVote = vote;
+            minBearing = i;
+        }
+    }
+    Logger::info("Max vote: %d Min vote: %d", maxVote, minVote);
+    Logger::info("Max bearing: %d Min bearing: %d", maxBearing, minBearing);
+
  
-    Logger::info("Lifetime Closest: %f Closest: %f", lifeTimeClosest, currClosest);
+    //Logger::info("Lifetime Closest: %f Closest: %f", lifeTimeClosest, currClosest);
 
     // Need to take tacking into account, otherwise a upwind course might be chosen
     std::vector<float> trueWindBuffer;
     uint16_t twd = Utility::getTrueWindDirection(boatState.windDir, boatState.windSpeed,
                 boatState.speed, boatState.heading, trueWindBuffer, 1);
+    Logger::info("True wind dir: %d", twd);
 
     // Set 0 to courses into the no go zone.
     for( int i = 0; i < 45; i+= ASRCourseBallot::COURSE_RESOLUTION )
@@ -75,59 +95,42 @@ const ASRCourseBallot& ProximityVoter::vote( const BoatState_t& boatState )
     return courseBallot;
 }
 
-void ProximityVoter::visualAvoidance(){
+void ProximityVoter::visualAvoidance(uint16_t heading){
     VisualField_t visualField = collidableMgr.getVisualField();
     if (visualField.bearingToRelativeObstacleDistance.empty()){
-        Logger::info("visualAvoidance, no visual field");
         return;
     }
-    Logger::info("visualAvoidance, field exists");
-    auto lowLimit = visualField.bearingToRelativeObstacleDistance.begin()->first; 
-    auto highLimit = visualField.bearingToRelativeObstacleDistance.rbegin()->first; 
+    auto lowLimit = visualField.bearingToRelativeObstacleDistance.begin()->first + heading; 
+    auto highLimit = visualField.bearingToRelativeObstacleDistance.rbegin()->first + heading; 
     avoidOutsideVisualField(lowLimit, highLimit);
-    uint16_t minObstacleDist = 100;
-    int16_t minObstacleDistBearing = 0;
-    uint16_t maxObstacleDist = 0;
-    int16_t maxObstacleDistBearing = 0;
     for(auto it : visualField.bearingToRelativeObstacleDistance ){
-        bearingAvoidanceSmoothed(it.first, it.second);
-        if (it.second < minObstacleDist){
-            minObstacleDist = it.second;
-            minObstacleDistBearing = it.first;
-        }
-        if (it.second > maxObstacleDist){
-            maxObstacleDist = it.second;
-            maxObstacleDistBearing = it.first;
-        }
-    }
-    Logger::info("Min obstacle distance: %d", minObstacleDist);
-    Logger::info("Min obstacle dist bearing: %d", minObstacleDistBearing);
-    Logger::info("Max obstacle distance: %d", maxObstacleDist);
-    Logger::info("Max obstacle dist bearing: %d", maxObstacleDistBearing);
-
+        bearingAvoidanceSmoothed(it.first + heading, it.second);
+        bearingPreferenceSmoothed(it.first + heading, it.second);
+   }
 }
 
 
 void ProximityVoter::avoidOutsideVisualField( int16_t visibleFieldLowBearingLimit, 
         int16_t visibleFieldHighBearingLimit)
 {
-    const auto outsideAvoidanceFactor = 0.2;
+    const auto outsideAvoidanceFactor = 0.5;
     auto vote = courseBallot.maxVotes();
     // less votes for courses where we don't see
-    for (auto i = Utility::wrapAngle(visibleFieldHighBearingLimit);
-        i<Utility::wrapAngle(visibleFieldLowBearingLimit); ++i)
+    Logger::info("less votes from %d to %d", visibleFieldHighBearingLimit, 
+        visibleFieldLowBearingLimit + 360);
+    for (auto i = visibleFieldHighBearingLimit; i<visibleFieldLowBearingLimit + 360; ++i)
     {
         courseBallot.add(i, -vote*outsideAvoidanceFactor);
     }
 }
 
-void ProximityVoter::bearingAvoidanceSingleDir(int16_t bearing, int16_t voteAdjust){
-    const auto awayWeight = 1.0;
+//void ProximityVoter::bearingAvoidanceSingleDir(int16_t bearing, int16_t voteAdjust){
+//    const auto awayWeight = 1.0;
    // Towards the target, reduce votes
-    courseBallot.add(bearing, -voteAdjust);
+//    courseBallot.add(bearing, voteAdjust);
     // Starboard of the target, increase votes
-    courseBallot.add(bearing + 90, voteAdjust * awayWeight);
-}
+//    courseBallot.add(bearing + 90, voteAdjust * awayWeight);
+//}
 
 
 ///----------------------------------------------------------------------------------
@@ -135,15 +138,38 @@ void ProximityVoter::bearingAvoidanceSmoothed( int16_t bearing, uint16_t relativ
 {
     const uint16_t avoidanceBearingRange = 10;
     const double avoidanceNormalization = avoidanceBearingRange;
-    int16_t vote = courseBallot.maxVotes();
-    auto normalizedVoteAdjust = 3.0*(100 - relativeFreeDistance)/(100.0 * avoidanceBearingRange);
+    const double vote = courseBallot.maxVotes();
+    auto normalizedVoteAdjust = 2.0*(100.0 - relativeFreeDistance)/(100.0 * avoidanceNormalization);
 
-    bearingAvoidanceSingleDir(bearing, vote * normalizedVoteAdjust);
+    if (relativeFreeDistance < 100){
+        Logger::info("Decreasing votes around bearing %d with %f", bearing, vote*normalizedVoteAdjust);
+    }
+    courseBallot.add(bearing, -vote * normalizedVoteAdjust);
     for(uint16_t j = 1; j < avoidanceBearingRange; j++)
     {
-        auto distanceFactor = (avoidanceBearingRange - j)/avoidanceNormalization;
-        bearingAvoidanceSingleDir(bearing+j, vote * normalizedVoteAdjust * distanceFactor);        
-        bearingAvoidanceSingleDir(bearing-j, vote * normalizedVoteAdjust * distanceFactor);        
+        double voteAdjust = vote * normalizedVoteAdjust * (avoidanceNormalization - j)/avoidanceNormalization;
+        courseBallot.add(bearing+j, -voteAdjust);        
+        courseBallot.add(bearing-j, -voteAdjust);        
+    }
+}
+
+void ProximityVoter::bearingPreferenceSmoothed( int16_t bearing, uint16_t relativeFreeDistance )
+{
+    const uint16_t giveWayAngle = 160;
+    const uint16_t preferenceBearingRange = 100;
+    const double preferenceNormalization = preferenceBearingRange;
+    const double vote = courseBallot.maxVotes();
+    auto normalizedVoteAdjust = 2.0*(100.0 - relativeFreeDistance)/(100.0 * preferenceNormalization);
+
+    if (relativeFreeDistance < 100){
+        Logger::info("Increasing votes around bearing %d with %f", bearing + giveWayAngle, vote*normalizedVoteAdjust);        
+    }
+    courseBallot.add(bearing + giveWayAngle, vote * normalizedVoteAdjust);
+    for(uint16_t j = 1; j < preferenceBearingRange; j++)
+    {
+        double voteAdjust =  vote * normalizedVoteAdjust * (preferenceNormalization - j)/preferenceNormalization;
+        courseBallot.add(bearing + giveWayAngle + j, voteAdjust);        
+        courseBallot.add(bearing + giveWayAngle - j, voteAdjust);        
     }
 }
 

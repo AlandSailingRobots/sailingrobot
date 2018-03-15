@@ -37,11 +37,11 @@ public:
     const ASRCourseBallot& vote( const BoatState_t& boatState );
 
 private:
-	void visualAvoidance();
+	void visualAvoidance(uint16_t heading);
     void avoidOutsideVisualField( int16_t visibleFieldLowBearingLimit, 
     	int16_t visibleFieldHighBearingLimit);
-	void bearingAvoidanceSingleDir(int16_t bearing, int16_t voteAdjust);
     void bearingAvoidanceSmoothed( int16_t bearing, uint16_t relativeObstacleDistance );
+    void bearingPreferenceSmoothed( int16_t bearing, uint16_t relativeObstacleDistance );
 
     float aisAvoidance( const BoatState_t& boatState, AISCollidable_t& collidable );
    CollidableMgr& collidableMgr;
