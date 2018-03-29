@@ -27,14 +27,15 @@ MarineSensorNode::MarineSensorNode(MessageBus& msgBus, int miniWaitTime)
 	m_ph = DATA_OUT_OF_RANGE;
 	m_conductivety = DATA_OUT_OF_RANGE;
 	m_temp = DATA_OUT_OF_RANGE;
-	
+  m_salinity = DATA_OUT_OF_RANGE;
+
 	msgBus.registerNode(*this, MessageType::DataRequest);
-	
+
 }
 
 MarineSensorNode::~MarineSensorNode()
 {
-	
+
 }
 
 
@@ -103,20 +104,20 @@ void  MarineSensorNode::processMessage(const Message* msg)
 
 	MessageType type = msg->messageType();
 	if (type == MessageType::DataRequest){
-		
+
 		m_timer.sleepUntil(m_miniWaitTime);
 		m_timer.reset();
 		if (readData(m_temp, m_conductivety, m_ph)){
-			m_salidety = Utility::calculateSalidety (m_temp, m_conductivety);
-			MessagePtr marineSensorDataMsg = std::make_unique<MarineSensorDataMsg>(m_temp, m_conductivety, m_ph, m_salidety);
+			m_salinity = Utility::calculateSalinity (m_temp, m_conductivety);
+			MessagePtr marineSensorDataMsg = std::make_unique<MarineSensorDataMsg>(m_temp, m_conductivety, m_ph, m_salinity);
 			m_MsgBus.sendMessage(std::move(marineSensorDataMsg));
-			
+
 		}
-		
-		
+
+
 	}
-	
-	
+
+
 }
 
 
@@ -124,8 +125,8 @@ void  MarineSensorNode::processMessage(const Message* msg)
 
 bool MarineSensorNode::readData(float& temperature, float& conductivity, float& ph)
 {
-	
-	
+
+
 	if(m_Initialised)
 	{
 		m_I2C_TEMP.beginTransmission();
@@ -139,7 +140,7 @@ bool MarineSensorNode::readData(float& temperature, float& conductivity, float& 
 		m_I2C_PH.beginTransmission();
 		std::string PH = m_I2C_PH.ASQUERY("R");
 		m_I2C_PH.endTransmission();
-		
+
 		if(!TEMP.empty())
 		{
 			temperature = strtof(TEMP.c_str(), NULL);	//convert response to float
@@ -172,7 +173,3 @@ bool MarineSensorNode::readData(float& temperature, float& conductivity, float& 
 		return(false);
 	}
 }
-
-
-
-

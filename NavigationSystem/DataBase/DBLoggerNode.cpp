@@ -31,17 +31,17 @@ DBLoggerNode::DBLoggerNode(MessageBus& msgBus, DBHandler& db,int queueSize)
     // msgBus.registerNode(*this, MessageType::ActuatorPosition);
     msgBus.registerNode(*this, MessageType::ASPireActuatorFeedback);
     msgBus.registerNode(*this, MessageType::MarineSensorData);
-    
+
     msgBus.registerNode(*this, MessageType::StateMessage);
     msgBus.registerNode(*this, MessageType::WindState);
 
     msgBus.registerNode(*this, MessageType::WaypointData);
     msgBus.registerNode(*this, MessageType::CourseData);
     msgBus.registerNode(*this, MessageType::LocalNavigation);
-    
+
     msgBus.registerNode(*this, MessageType::ServerConfigsReceived);
-    
-    
+
+
 }
 
 void DBLoggerNode::processMessage(const Message* msg) {
@@ -100,6 +100,7 @@ void DBLoggerNode::processMessage(const Message* msg) {
             item.m_temperature = marineSensorMsg->temperature();
             item.m_conductivity = marineSensorMsg->conductivity();
             item.m_ph = marineSensorMsg->ph();
+            item.m_salinity = marineSensorMsg->salidety();
         }
         break;
 

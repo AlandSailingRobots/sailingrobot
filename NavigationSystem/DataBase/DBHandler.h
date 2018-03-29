@@ -43,6 +43,7 @@ struct LogItem {
 		float   m_temperature;//dataLogs_marine_sensors
 		float   m_conductivity;
 		float   m_ph;
+    float   m_salinity;
 		double	m_vesselHeading;//dataLogs_vessel_state
 		double	m_vesselLat;
 		double	m_vesselLon;

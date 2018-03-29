@@ -63,6 +63,7 @@ private:
      (float)    DATA_OUT_OF_RANGE,  // m_temperature;
      (float)    DATA_OUT_OF_RANGE,  // m_conductivity;
      (float)    DATA_OUT_OF_RANGE,  // m_ph;
+     (float)    DATA_OUT_OF_RANGE,  // m_salinity;
      (double)   DATA_OUT_OF_RANGE,  // m_vesselHeading;
      (double)   DATA_OUT_OF_RANGE,  // m_vesselLat;
      (double)   DATA_OUT_OF_RANGE,  // m_vesselLon;
