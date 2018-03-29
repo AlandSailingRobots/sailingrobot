@@ -100,7 +100,7 @@ void DBLoggerNode::processMessage(const Message* msg) {
             item.m_temperature = marineSensorMsg->temperature();
             item.m_conductivity = marineSensorMsg->conductivity();
             item.m_ph = marineSensorMsg->ph();
-            item.m_salinity = marineSensorMsg->salidety();
+            item.m_salinity = marineSensorMsg->salinity();
         }
         break;
 
