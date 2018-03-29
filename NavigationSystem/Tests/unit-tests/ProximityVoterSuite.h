@@ -40,29 +40,7 @@
 			}
 			for (uint16_t i=bearingHighLimit; i<360 + bearingLowLimit; ++i){
 				TS_ASSERT_LESS_THAN(ballot.get(i), 0);
-				// This depends on config that may change
-//				TS_ASSERT_EQUALS(ballot.get(i), -50);
 			}
-		}
-		void testBearingAvoidanceSingleDir(){
-			CollidableMgr collidableManager;
-			ProximityVoter proximityVoter(maxVotes, weight, collidableManager);
-			int testBearing = 37;
-			auto voteAdjust = 70;
-			proximityVoter.bearingAvoidanceSingleDir(testBearing, voteAdjust);
-			const ASRCourseBallot& ballot = proximityVoter.courseBallot; 
-			for (uint16_t i=0; i<testBearing; ++i){
-				TS_ASSERT_EQUALS(ballot.get(i), 0);
-			}
-			TS_ASSERT_EQUALS(ballot.get(testBearing), -voteAdjust);
-			for (uint16_t i=testBearing + 1; i<testBearing + 90; ++i){
-				TS_ASSERT_EQUALS(ballot.get(i), 0);
-			}
-			TS_ASSERT_LESS_THAN(0, ballot.get(testBearing+ 90));
-			for (uint16_t i=testBearing + 91; i<360; ++i){
-				TS_ASSERT_EQUALS(ballot.get(i), 0);
-			}	
-
 		}
 		void testBearingAvoidanceSmoothed(){
 			CollidableMgr collidableManager;
@@ -87,11 +65,24 @@
 				compareVote = ballot.get(i);
 			}
 			for (uint16_t i=testBearing + avoidanceBearingRange; 
+				i<360; ++i){
+				TS_ASSERT_EQUALS(ballot.get(i), 0);
+			}
+		}
+		void testBearingPreferendeSmoothed(){
+			CollidableMgr collidableManager;
+			ProximityVoter proximityVoter(maxVotes, weight, collidableManager);
+			int testBearing = 37;
+    		const uint16_t avoidanceBearingRange = 10;  // copied from ProximityVoter
+			auto relativeObstacleDistance = 2;  // This must be a small number for the strict less than checks to pass
+			proximityVoter.bearingPreferenceSmoothed(testBearing, relativeObstacleDistance);
+			const ASRCourseBallot& ballot = proximityVoter.courseBallot; 
+			for (uint16_t i=0; 
 				i<testBearing + 90 - avoidanceBearingRange; ++i){
 				TS_ASSERT_EQUALS(ballot.get(i), 0);
 			}
 			TS_ASSERT_LESS_THAN(0, ballot.get(testBearing+ 90));
-			compareVote = ballot.get(testBearing);
+			auto compareVote = 0;
 			for (uint16_t i=testBearing + 90 - avoidanceBearingRange + 1; i<testBearing + 90 + 1; ++i){
 				TS_ASSERT_LESS_THAN(compareVote, ballot.get(i));
 				compareVote = ballot.get(i);
@@ -99,25 +90,34 @@
 			for (uint16_t i=testBearing + 90 + 1; i < testBearing + 90 + avoidanceBearingRange; ++i){
 				TS_ASSERT_LESS_THAN(ballot.get(i), compareVote);
 				compareVote = ballot.get(i);
-			}	
-			for (uint16_t i=testBearing + 90 + avoidanceBearingRange; i < 360; ++i){
+			}
+
+			for (uint16_t i=testBearing + 90 + avoidanceBearingRange; i < testBearing + 270 - avoidanceBearingRange; ++i){
 				TS_ASSERT_EQUALS(ballot.get(i), 0);
 			}	
+			for (uint16_t i=0; 
+				i<testBearing + 90 - avoidanceBearingRange; ++i){
+				TS_ASSERT_EQUALS(ballot.get(i), 0);
+			}
 		}
  		void testVisualAvoidance(){
  			CollidableMgr collidableManager;
 			ProximityVoter proximityVoter(maxVotes, weight, collidableManager);
 			std::map<int16_t, uint16_t> bearingToRelativeObstacleDistance;
-			for (int i=-15; i<-10; ++i){
+			int visualRangeMin = -15;
+			int visualRangeMax = 15;
+			int obstacleRangeMin = -10;
+			int obstacleRangeMax = 0;
+			for (int i=visualRangeMin; i<obstacleRangeMin; ++i){
 				bearingToRelativeObstacleDistance[i] = 100;
 			}
-			for (int i=-10; i<0; ++i){
+			for (int i=obstacleRangeMin; i<obstacleRangeMax; ++i){
 				bearingToRelativeObstacleDistance[i] = 25;
 			}
-			for (int i=0; i<15; ++i){
+			for (int i=obstacleRangeMax; i<visualRangeMax; ++i){
 				bearingToRelativeObstacleDistance[i] = 100;
 			}
-			collidableManager.addVisualField(bearingToRelativeObstacleDistance);
+			collidableManager.addVisualField(bearingToRelativeObstacleDistance, 0);
 			proximityVoter.visualAvoidance();
 			const ASRCourseBallot& ballot = proximityVoter.courseBallot;
 			int minBearing = 0;
@@ -135,19 +135,26 @@
 					minBearing = i;
 				}
 			}
-			TS_ASSERT_LESS_THAN(90 - 11, maxBearing);
-			TS_ASSERT_LESS_THAN(maxBearing, 90 - 0);
-			TS_ASSERT_LESS_THAN(360 - 11, minBearing); 
-			TS_ASSERT_LESS_THAN(minBearing, 360 - 0); 
+			TS_ASSERT_LESS_THAN(90 + obstacleRangeMin - 1, maxBearing);
+			TS_ASSERT_LESS_THAN(maxBearing, 90 + obstacleRangeMax);
+			TS_ASSERT_LESS_THAN(360 + obstacleRangeMin - 1, minBearing); 
+			TS_ASSERT_LESS_THAN(minBearing, 360 + obstacleRangeMax); 
 			TS_ASSERT_LESS_THAN(0, maxVote);
 			TS_ASSERT_LESS_THAN(minVote, -ballot.maxVotes()* 0.9)
-			for (int i=-15; i<-10; ++i){
-				bearingToRelativeObstacleDistance[i] = 25;
-			}
-			for (int i=-10; i<15; ++i){
+
+			obstacleRangeMin = -15;
+			obstacleRangeMax = -10;
+			for (int i=visualRangeMin; i<obstacleRangeMin; ++i){
 				bearingToRelativeObstacleDistance[i] = 100;
 			}
-			collidableManager.addVisualField(bearingToRelativeObstacleDistance);
+			for (int i=obstacleRangeMin; i<obstacleRangeMax; ++i){
+				bearingToRelativeObstacleDistance[i] = 25;
+			}
+			for (int i=obstacleRangeMax; i<visualRangeMax; ++i){
+				bearingToRelativeObstacleDistance[i] = 100;
+			}
+
+			collidableManager.addVisualField(bearingToRelativeObstacleDistance, 0);
 			proximityVoter.visualAvoidance();
 			minBearing = 0;
 			maxBearing = 0;
@@ -164,10 +171,8 @@
 					minBearing = i;
 				}
 			}
-			TS_ASSERT_LESS_THAN(maxBearing, 90 - 10);
-			TS_ASSERT_LESS_THAN(90 - 15, maxBearing);
-//			TS_ASSERT_LESS_THAN(minBearing, 360 - 10); 
-//			TS_ASSERT_LESS_THAN(360 - 15, minBearing); 
+			TS_ASSERT_LESS_THAN(maxBearing, 90 + obstacleRangeMax);
+			TS_ASSERT_LESS_THAN(90 + obstacleRangeMin - 1, maxBearing);
 			TS_ASSERT_LESS_THAN(minVote, -ballot.maxVotes()* 0.9)
 		}
 
