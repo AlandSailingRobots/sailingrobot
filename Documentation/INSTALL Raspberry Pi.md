@@ -1,6 +1,6 @@
 ﻿Raspberry Pi system installation guide
 ======================================
-**Draft:** 2018-03-29 /KH
+**Draft:** 2018-04-29 /EB,KH
 
 Resources:
   * https://archlinuxarm.org/platforms/armv8/broadcom/raspberry-pi-3
@@ -72,8 +72,43 @@ This document should follow the syntax and formatting conventions of upstream Ar
 
 (Create mountpoint, mount sqf-image or uncompress tar archive, dd or use pv from file to device)
 
-To be continued...
+1. Create a mountpoint for accessing the contents of the backup archive and mount the SquashFS-archive
 
+    ```console
+    $ mkdir backupmnt
+    ```
+
+2. Mount archive contents in the directory, enter directory and list contents
+
+    ```console
+    # mount sdcard-backup-1234-56-87.sqf backupmnt
+    # cd backupmnt
+    # ls -lah
+    ```
+
+3. Insert SD card in card reader and make sure you know its device name
+
+    * **NOTE:** If you use the wrong devicename below you might try to overwrite the harddrive in your workstation so be careful and check the devicename!
+
+    ```console
+    $ dmesg | tail -n 50
+    ```
+
+    * Below, instead of *sdx*, use the real devicename you got in the previous step
+
+4. Clone the raw dd-image from the archive to the physcial SD card using *pv* (pipeviewer)
+
+    ```console
+    # pv sdcard.dd > /dev/sdx
+    ```
+
+5. Sync and eject SD card to ensure everything is written to it before removal
+
+    ```console
+    # sync
+    # eject /dev/sdx
+    ``
+    
 
 ## Setting up the SD card boot media using a workstation
 **Note:** Replace sdx in the following instructions with the device name for the SD card as it appears on your computer.
@@ -109,7 +144,6 @@ To be continued...
     # mount /dev/sdx2 root
     ```
 
-5. Download and extract the root filesystem (as root, not via sudo): (<kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>F5</kbd> login as root/root)
 
     ```console
     # cd /home/sailbot
@@ -155,11 +189,11 @@ To be continued...
     # loadkeys sv
     ```
 
-10. Edit the file *boot/cmdline.txt*
+10. Edit the file */boot/cmdline.txt*
 
-  * **See also:** [Issues regarding UART on the Rpi3 workaround](https://www.raspberrypi.org/forums/viewtopic.php?p=947968#p947968). Save a copy of *cmdline.txt* just in case.
+  * Save a copy of *cmdline.txt* just in case
     ```console
-    # cp cmdline.txt cmdline2.txt
+    # cp /boot/cmdline.txt /boot/cmdline.bak
     # nano /boot/cmdline.txt
     ```
 
@@ -174,15 +208,11 @@ To be continued...
 
 11. Edit the file *boot/config.txt*
 
-    Uncomment `#core_freq=250`, `device_tree_param=i2c_arm=on`, `device_tree_param=spi=on`, `device_tree_param=i2s=on` (search in nano with <kbd>Ctrl</kbd>+<kbd>w</kbd>) and add `enable_uart=1` at the end
-        
     ```console
     # nano /boot/config.txt
     ```
     The file should beyond possible default values also include the following:
     ```
-    core_freq=250
-    enable_uart=1
     device_tree_param=i2c_arm=on
     device_tree_param=spi=on
     device_tree_param=i2s=on
@@ -207,25 +237,6 @@ To be continued...
     ```console
     # echo sailbot > /etc/hostname
     ```
-
-14. Stop and disable ttyS0 and gpsd
-
-    **Edit:** This can not even be done at this point and is part of a later UART fix, also the services will probably already be disabled by default. Ignore this step?
-
-    ```console
-    # systemctl stop serial-getty@ttyS0.service
-    # systemctl disable serial-getty@ttyS0.service
-    # systemctl stop gpsd.socket
-    # systemctl disable gpsd.socket
-    ```
-
-
-15. Reboot the system for settings to take effect
-
-    ```console
-    # reboot
-    ```
-    **Edit:** There is really no specific reason to reboot the system yet
 
 
 ## Installing software on the Raspberry Pi
@@ -283,23 +294,14 @@ To be continued...
         
     ```console
     # cd /root
-    # git clone https://github.com/pophaax/raspi
+    # git clone https://github.com/AlandSailingRobots/sailingrobot.git
     ```
-
-
-
-24. Enter the *raspi/Pishell* directory and type `./pishell.sh` to start Pishell and select install
-
-    ```console
-    # cd /raspi/Pishell
-    # ./pishell.sh
-    ```
-
 
 25. Extras:
         
-  * if your makefiles fail: `export SAILINGROBOTS_HOME=~/sailingrobot`
+  * if your makefiles fail: `export SAILINGROBOTS_HOME=$HOME/sailingrobot`
   * if you get timeouts, edit the file */etc/resolv.conf* and add options
-`timeout:1`, to make it permanent, add it to */etc/resolv.conf.head* aswell
-  * change date with date --set “26 Apr 2016 15:33 EET”
+5. Download and extract the root filesystem (as root, not via sudo): (<kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>F5</kbd> login as root/root)
 
+    ```console
+    # cd /home/sailbot
