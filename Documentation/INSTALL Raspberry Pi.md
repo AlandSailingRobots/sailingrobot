@@ -1,6 +1,5 @@
 ﻿Raspberry Pi system installation guide
 ======================================
-**Draft:** 2018-04-29 /EB,KH
 
 Resources:
   * https://archlinuxarm.org/platforms/armv8/broadcom/raspberry-pi-3
@@ -17,27 +16,26 @@ This document should follow the syntax and formatting conventions of upstream Ar
     $ cd sdcard-backup
     ```
 
-2. Dump the whole SD card to a file
+2. Dump the whole SD card to a file together with SHA-256 integrity checksum using *pv* and *tee*
 
-    ```console
-    # dd if=/dev/sdx of=sdcard.dd
-    ```
-
-    You can include other data here as well as all files in this directory will be included in the archive. For example `fdisk -l /dev/sdx > fdisk-l.txt` or you could edit a note in a textfile.
-
-
-3. Generate a checksum for verifying integrity
-
-    ```console
-    $ sha256sum sdcard.dd > sdcard.dd.sha256
-    ```
-
-    **Note:** If you want to output progress and create checksum on-the-fly using `pv` and `tee` (depending on that you have them installed)
+    (If you need to install the commands on your workstation, use `sudo pacman -S pv tee`)
 
     ```console
     # pv /dev/sdx | tee sdcard.dd | sha256sum > sdcard.dd.sha256
     # sed -i 's/-$/sdcard.dd/' sdcard.dd.sha256
     ```
+    OR
+
+      * If you can not install *pv* and *tee* the same result can be acheived using *dd* but without any indication of progress)
+
+
+        ```console
+        # dd if=/dev/sdx of=sdcard.dd
+        # sha256sum sdcard.dd > sdcard.dd.sha256
+        ```
+
+    You can include other data besides the image in the backup archive by adding files in this directory, they will then be included in the archive. For example `fdisk -l /dev/sdx > fdisk-l.txt` or you could edit a note in a textfile.
+
 
 4. Compress the archive
 
@@ -49,17 +47,19 @@ This document should follow the syntax and formatting conventions of upstream Ar
 
     2. Compress the whole directory along with content created in previous steps
 
-        **Example 1**: as a mountable [SquashFS-container](https://en.wikipedia.org/wiki/SquashFS) (mksquashfs can be installed on Arch Linux workstations using `pacman -S squashfs-tools`)
+        This will create a mountable [SquashFS-container](https://en.wikipedia.org/wiki/SquashFS) (mksquashfs can be installed on Arch Linux workstations using `pacman -S squashfs-tools`)
 
         ```console
         # mksquashfs sdcard-backup sdcard-backup-$(date +%F).sqf -comp xz
         ```
 
-        **Example 2**: as a bzip2-compressed tar-file
-    
-        ```console
-        # tar cvjf sdcard-backup-$(date +%F).tar.bz2 sdcard-backup 
-        ```
+        OR
+
+          * create a bzip2-compressed tar-file
+
+          ```console
+          # tar cvjf sdcard-backup-$(date +%F).tar.bz2 sdcard-backup 
+          ```
 
 5. Clean up by deleting the backup directory
 
@@ -69,8 +69,6 @@ This document should follow the syntax and formatting conventions of upstream Ar
 
 
 ## Cloning a previously made backup to SD cards using a workstation
-
-(Create mountpoint, mount sqf-image or uncompress tar archive, dd or use pv from file to device)
 
 1. Create a mountpoint for accessing the contents of the backup archive and mount the SquashFS-archive
 
@@ -91,7 +89,8 @@ This document should follow the syntax and formatting conventions of upstream Ar
     * **NOTE:** If you use the wrong devicename below you might try to overwrite the harddrive in your workstation so be careful and check the devicename!
 
     ```console
-    $ dmesg | tail -n 50
+    # lsblk
+    # dmesg | tail -n 50
     ```
 
     * Below, instead of *sdx*, use the real devicename you got in the previous step
@@ -107,7 +106,15 @@ This document should follow the syntax and formatting conventions of upstream Ar
     ```console
     # sync
     # eject /dev/sdx
-    ``
+    ```
+
+6. Clean up
+
+    ```console
+    # cd ..
+    # umount backupmount
+    # rmdir backupmount
+    ```
     
 
 ## Setting up the SD card boot media using a workstation
