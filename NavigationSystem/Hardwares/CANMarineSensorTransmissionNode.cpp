@@ -1,71 +1,55 @@
-//
-// Created by dkarlsso on 3/29/18.
-//
+
 
 #include "CANMarineSensorTransmissionNode.h"
-#include "../MessageBus/NodeIDs.h"
-#include "../MessageBus/Message.h"
-#include "../MessageBus/MessageTypes.h"
-#include "../SystemServices/Timer.h"
-#include "../MessageBus/MessageBus.h"
-#include "../Messages/MarineSensorDataRequestMsg.h"
-
 
 #include "MessageBus/NodeIDs.h"
-#include "MessageBus/Message.h"
 #include "MessageBus/MessageTypes.h"
+#include "Messages/DataCollectionStartMsg.h"
 #include "SystemServices/Timer.h"
-#include "MessageBus/MessageBus.h"
-#include "Messages/MarineSensorDataRequestMsg.h"
 
-CANMarineSensorTransmissionNode::CANMarineSensorTransmissionNode(MessageBus &msgBus, DBHandler &dbhandler,
-                                                                 CANService &canService) : ActiveNode(NodeID::MarineSensor, msgBus),
-                                                                                           m_CANService(canService), m_LoopTime(0.5) {
+
+CANMarineSensorTransmissionNode::CANMarineSensorTransmissionNode(MessageBus &msgBus, CANService &canService)
+                                                                : Node(NodeID::MarineSensorCANTransmission, msgBus),
+                                                                 m_CANService(canService), m_arduinoSensorLoopTime(0),
+                                                                 m_takeContinousSensorReadings(false) {
     msgBus.registerNode(*this, MessageType::DataRequest);
+    msgBus.registerNode(*this, MessageType::DataCollectionStart);
+    msgBus.registerNode(*this, MessageType::DataCollectionStop);
 }
 
 CANMarineSensorTransmissionNode::~CANMarineSensorTransmissionNode() {}
 
 void CANMarineSensorTransmissionNode::processMessage(const Message* message) {
-    if(message->messageType() == MessageType::DataRequest){
-        //MessagePtr marineSensorRequest = std::make_unique<MarineSensorDataRequestMsg>();
-        //m_MsgBus.sendMessage(std::move(marineSensorRequest));
-        CanMsg marineSensorRequest;
-        marineSensorRequest.id = 710;
-        marineSensorRequest.header.ide = 0;
-        marineSensorRequest.header.length = 7;
-        
-        //Should be loop time here and boolean flag?
 
-        for (auto& data : marineSensorRequest.data) {
-            data = 0;
-        }
-        m_CANService.sendCANMessage(marineSensorRequest);
+    if(message->messageType() == MessageType::DataCollectionStop) {
+        m_takeContinousSensorReadings = false;
     }
-}
-
-void CANMarineSensorTransmissionNode::start() {
-    runThread(CANMarineSensorTransmissionNode::CANSensorNodeThreadFunc);
-}
-
-
-/*
- * Should this be used at all??
- */
-void CANMarineSensorTransmissionNode::CANSensorNodeThreadFunc(ActiveNode *nodePtr) {
-    CANMarineSensorTransmissionNode* node = dynamic_cast<CANMarineSensorTransmissionNode*> (nodePtr);
-    Timer timer;
-    timer.start();
-    while(true) {
-
-        /*
-         * Im assuming there should be a function here sending out data requests on a set interval.
-         * Set interval is changed in database.
-         * Also should have a flag to read values when hitting set checkpoint
-         */
-
-
-        timer.sleepUntil(node->m_LoopTime);
-        timer.reset();
+    else if(message->messageType() == MessageType::DataCollectionStart) {
+        auto dataCollectionStartMsg = static_cast<const DataCollectionStartMsg*>(message);
+        m_arduinoSensorLoopTime = dataCollectionStartMsg->getSensorReadingInterval();
+        m_takeContinousSensorReadings = true;
     }
+
+    /**
+     * Last case is MessageType::DataRequest, but in all these cases a CAN Message should be sent to arduino
+     */
+    CanMsg marineSensorRequest;
+    fillCanMsg(marineSensorRequest);
+    m_CANService.sendCANMessage(marineSensorRequest);
 }
+
+void CANMarineSensorTransmissionNode::fillCanMsg(CanMsg &message) {
+    message.id = 710;
+    message.header.ide = 0;
+    message.header.length = 7;
+
+    for (auto& data : message.data) {
+        data = 0;
+    }
+    message.data[0] = static_cast<uint8_t>(m_takeContinousSensorReadings);
+    message.data[1] = static_cast<uint8_t >(m_arduinoSensorLoopTime & 0xff);
+    message.data[2] = static_cast<uint8_t >(m_arduinoSensorLoopTime >> 8);
+    message.data[3] = static_cast<uint8_t >(m_arduinoSensorLoopTime >> 16);
+    message.data[4] = static_cast<uint8_t >(m_arduinoSensorLoopTime >> 24);
+}
+

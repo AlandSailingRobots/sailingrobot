@@ -1,32 +1,43 @@
-//
-// Created by dkarlsso on 3/29/18.
-//
+/****************************************************************************************
+*
+* File:
+* 		CANMarineSensorTransmissionNode.h
+*
+* Purpose:
+*		 Reads DataRequestMsg, DataCollectionStartMsg and DataCollectionStopMsg and send reading requests
+*		 on the CAN Bus to the Arduino along with properties.
+*		 IE. Informs Ardunio to read Marine Sensors and if they should be read on a continous interval.
+*
+* Developer Notes:
+*
+*
+*
+***************************************************************************************/
 
-#ifndef SAILINGROBOT_CANMARINESENSORTRANSMISSIONNODE_H
-#define SAILINGROBOT_CANMARINESENSORTRANSMISSIONNODE_H
 
 
-#include "../MessageBus/ActiveNode.h"
-#include "../DataBase/DBHandler.h"
-#include "CAN_Services/CANService.h"
-#include "../MessageBus/Message.h"
 
-class CANMarineSensorTransmissionNode : public ActiveNode {
+#pragma once
+
+#include "MessageBus/Message.h"
+#include "MessageBus/MessageBus.h"
+#include "MessageBus/Node.h"
+#include "Hardwares/CAN_Services/CANService.h"
+#include "Hardwares/CAN_Services/N2kMsg.h"
+
+class CANMarineSensorTransmissionNode : public Node {
 public:
-    CANMarineSensorTransmissionNode(MessageBus& msgBus, DBHandler& dbhandler, CANService& canService);
+    CANMarineSensorTransmissionNode(MessageBus& msgBus, CANService& canService);
     ~CANMarineSensorTransmissionNode();
 
     void processMessage(const Message *message);
 
-    void start();
-
 private:
-    static void CANSensorNodeThreadFunc(ActiveNode* nodePtr);
+    void fillCanMsg(CanMsg& message);
 
     CANService& m_CANService;
     std::mutex m_lock;
-    double m_LoopTime;
+    int m_arduinoSensorLoopTime;
+    bool m_takeContinousSensorReadings;
 };
 
-
-#endif //SAILINGROBOT_CANMARINESENSORTRANSMISSIONNODE_H
