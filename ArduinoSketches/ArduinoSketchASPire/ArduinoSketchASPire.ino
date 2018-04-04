@@ -44,7 +44,11 @@ const int RUDDER_FEEDBACK_PIN = A6;
 const int WINGSAIL_FEEDBACK_PIN = A4;
 const int RADIO_CONTROLL_OFF_PIN = A8;
 
+const int SENSOR_TEMPERATURE_INTERVAL_MIN = -5;
+const int SENSOR_TEMPERATURE_INTERVAL_MAX = 40;
 
+const int SENSOR_PH_INTERVAL_MIN = 0;
+const int SENSOR_PH_INTERVAL_MAX = 14;
 
 /* On boards with a hardware serial port available for use, use
 that port to communicate with the Maestro. For other boards,
@@ -65,6 +69,10 @@ MicroMaestro maestro(maestroSerial);
 
 CanbusClass Canbus;
 
+
+bool readSensorDataContinously = false;
+bool readSensorDataOnce = false;
+int readSensorDataInterval = 0;
 
 
 
@@ -93,8 +101,6 @@ void loop()
   checkCanbusFor (400); 
  
 }
-
-
 
 float mapInterval(float val, float fromMin, float fromMax, float toMin, float toMax) {
   return (val - fromMin) / (fromMax - fromMin) * (toMax - toMin) + toMin;
@@ -139,9 +145,37 @@ void sendArduinoData (){
     arduinoData.data[5] = 0;
     arduinoData.data[6] = 0;
     
-    Canbus.SendMessage(&arduinoData);   
-
+    Canbus.SendMessage(&arduinoData);
 }
+
+void handleMarineSensors() {
+  
+}
+
+void sendMarineSensorData (){
+  CanMsg marineSensorData;
+  marineSensorData.id = 711;
+  marineSensorData.header.ide = 0;
+  marineSensorData.header.length = 7;
+
+  uint16_t phValue = mapInterval(getPHValue(), SENSOR_PH_INTERVAL_MIN, SENSOR_PH_INTERVAL_MAX, 0, INT16_SIZE);
+  uint32_t conductivety = getConductivety();
+  uint16_t temperature = mapInterval(getTemperature(), SENSOR_TEMPERATURE_INTERVAL_MIN, SENSOR_TEMPERATURE_INTERVAL_MAX, 0, INT16_SIZE);
+
+  marineSensorData.data[0] = (phValue & 0xff);
+  marineSensorData.data[1] = (phValue >> 8);
+
+  marineSensorData.data[2] = (conductivety & 0xff);
+  marineSensorData.data[3] = (conductivety >> 8);
+  marineSensorData.data[4] = (conductivety >> 16);
+  marineSensorData.data[5] = (conductivety >> 24);
+
+  marineSensorData.data[6] = (temperature & 0xff);
+  marineSensorData.data[7] = (temperature >> 8);
+
+  Canbus.SendMessage(&marineSensorData);
+}
+
 void checkCanbusFor (int timeMs){
   int startTime= millis();
   int timer = 0;
@@ -204,23 +238,47 @@ int isRadioControllerUsed (){
     return  INT16_SIZE/2;
   }
 }
-   
+
+float getPHValue() {
+  // Mocked implementation
+  // Range between 0 - 14
+  return 5;
+}
+
+float getConductivety() {
+  // Mocked implementation
+  // Range between 5 - 200 000
+  return 100000;
+}
+
+float getTemperature() {
+  // Mocked implementation
+  // Range between -5 - 40
+  return 10.5;
+}
 
 void processCANMessage (CanMsg& msg){
     
-        if(msg.id == 700) {
-          uint16_t rawCanData = (msg.data[1]<<8 | msg.data[0]);
-          double rudderAngel = mapInterval (rawCanData, 0, INT16_SIZE, -MAX_RUDDER_ANGLE, MAX_RUDDER_ANGLE);
-          //Serial.print("Received rudder angle: "); Serial.println(rudderAngel);
-          rawCanData = (msg.data[3]<<8 | msg.data[2]);
-          double wingsailAngle = mapInterval (rawCanData, 0, INT16_SIZE, -MAX_WINGSAIL_ANGLE, MAX_WINGSAIL_ANGLE);
-          //Serial.print("Received wingsail angle: "); Serial.println(wingsailAngle);
-          
-          moveRudder(rudderAngel);
-          
-          moveWingsail(wingsailAngle);      
-             
-      }
+  if(msg.id == 700) {
+    uint16_t rawCanData = (msg.data[1]<<8 | msg.data[0]);
+    double rudderAngel = mapInterval (rawCanData, 0, INT16_SIZE, -MAX_RUDDER_ANGLE, MAX_RUDDER_ANGLE);
+    //Serial.print("Received rudder angle: "); Serial.println(rudderAngel);
+    rawCanData = (msg.data[3]<<8 | msg.data[2]);
+    double wingsailAngle = mapInterval (rawCanData, 0, INT16_SIZE, -MAX_WINGSAIL_ANGLE, MAX_WINGSAIL_ANGLE);
+    //Serial.print("Received wingsail angle: "); Serial.println(wingsailAngle);
+
+    moveRudder(rudderAngel);
+
+    moveWingsail(wingsailAngle);
+  }
+  else if(msg.id == 710) {
+    readSensorDataOnce = true;
+    readSensorDataContinously = msg.data[0];
+    // TODO Check if this is accurate
+    readSensorDataInterval = (msg.data[3]<<24 | msg.data[2]<<16 | msg.data[1]<<8 | msg.data[0]);
+
+  }
+
 }
 
 void moveRudder(double angleToSet) {
