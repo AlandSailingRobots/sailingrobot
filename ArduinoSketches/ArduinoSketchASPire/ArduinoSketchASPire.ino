@@ -30,7 +30,9 @@ const int MAX_RUDDER_ANGLE = 30;
 //range is 26
 const int MAX_WINGSAIL_ANGLE = 13;
 
-const double INT16_SIZE = 65535;
+const int INT16_SIZE = 65535;
+const long int INT32_SIZE = 4294967295;
+
 
 const int RUDDER_MIN_FEEDBACK = 278;
 const int RUDDER_MAX_FEEDBACK = 358;
@@ -49,6 +51,9 @@ const int SENSOR_TEMPERATURE_INTERVAL_MAX = 40;
 
 const int SENSOR_PH_INTERVAL_MIN = 0;
 const int SENSOR_PH_INTERVAL_MAX = 14;
+
+const int SENSOR_CONDUCTIVETY_INTERVAL_MIN = 5;
+const long int SENSOR_CONDUCTIVETY_INTERVAL_MAX = 200000;
 
 /* On boards with a hardware serial port available for use, use
 that port to communicate with the Maestro. For other boards,
@@ -71,7 +76,7 @@ CanbusClass Canbus;
 
 unsigned long lastReadingTimeInSeconds = 0;
 
-int sensorReadingIntervalInSeconds = -1;
+long int sensorReadingIntervalInSeconds = -1;
 
 void setup()
 {
@@ -161,7 +166,7 @@ void sendMarineSensorData (){
   marineSensorData.header.length = 7;
 
   uint16_t phValue = mapInterval(getPHValue(), SENSOR_PH_INTERVAL_MIN, SENSOR_PH_INTERVAL_MAX, 0, INT16_SIZE);
-  uint32_t conductivety = getConductivety();
+  uint32_t conductivety = mapInterval(getConductivety(), SENSOR_CONDUCTIVETY_INTERVAL_MIN, SENSOR_CONDUCTIVETY_INTERVAL_MAX, 0, INT32_SIZE);
   uint16_t temperature = mapInterval(getTemperature(), SENSOR_TEMPERATURE_INTERVAL_MIN, SENSOR_TEMPERATURE_INTERVAL_MAX, 0, INT16_SIZE);
 
   marineSensorData.data[0] = (phValue & 0xff);
@@ -244,13 +249,13 @@ int isRadioControllerUsed (){
 float getPHValue() {
   // Mocked implementation
   // Range between 0 - 14
-  return 5;
+  return 5.2;
 }
 
 float getConductivety() {
   // Mocked implementation
   // Range between 5 - 200 000
-  return 100000;
+  return 100000.2;
 }
 
 float getTemperature() {
@@ -279,7 +284,7 @@ void processCANMessage (CanMsg& msg){
     lastReadingTimeInSeconds = millis()/1000;
 
     if(msg.data[0]) {
-      sensorReadingIntervalInSeconds = (msg.data[3]<<24 | msg.data[2]<<16 | msg.data[1]<<8 | msg.data[0]);
+      sensorReadingIntervalInSeconds = ((long int)msg.data[4]<<24 | (long int)msg.data[3]<<16 | msg.data[2]<<8 | msg.data[1]);
     }
     else {
       sensorReadingIntervalInSeconds = -1;
