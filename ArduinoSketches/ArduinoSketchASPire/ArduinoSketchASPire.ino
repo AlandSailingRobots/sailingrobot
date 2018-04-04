@@ -69,12 +69,9 @@ MicroMaestro maestro(maestroSerial);
 
 CanbusClass Canbus;
 
+unsigned long lastReadingTimeInSeconds = 0;
 
-bool readSensorDataContinously = false;
-bool readSensorDataOnce = false;
-int readSensorDataInterval = 0;
-
-
+int sensorReadingIntervalInSeconds = -1;
 
 void setup()
 {
@@ -148,8 +145,13 @@ void sendArduinoData (){
     Canbus.SendMessage(&arduinoData);
 }
 
-void handleMarineSensors() {
-  
+void handleSensorReadingTimer() {
+    unsigned long timeNowInSeconds = millis()/1000;
+
+    if(sensorReadingIntervalInSeconds != -1 && lastReadingTimeInSeconds + sensorReadingIntervalInSeconds < timeNowInSeconds) {
+        lastReadingTimeInSeconds = timeNowInSeconds;
+        sendArduinoData();
+    }
 }
 
 void sendMarineSensorData (){
@@ -257,6 +259,7 @@ float getTemperature() {
   return 10.5;
 }
 
+
 void processCANMessage (CanMsg& msg){
     
   if(msg.id == 700) {
@@ -272,13 +275,16 @@ void processCANMessage (CanMsg& msg){
     moveWingsail(wingsailAngle);
   }
   else if(msg.id == 710) {
-    readSensorDataOnce = true;
-    readSensorDataContinously = msg.data[0];
-    // TODO Check if this is accurate
-    readSensorDataInterval = (msg.data[3]<<24 | msg.data[2]<<16 | msg.data[1]<<8 | msg.data[0]);
+    sendMarineSensorData();
+    lastReadingTimeInSeconds = millis()/1000;
 
+    if(msg.data[0]) {
+      sensorReadingIntervalInSeconds = (msg.data[3]<<24 | msg.data[2]<<16 | msg.data[1]<<8 | msg.data[0]);
+    }
+    else {
+      sensorReadingIntervalInSeconds = -1;
+    }
   }
-
 }
 
 void moveRudder(double angleToSet) {
