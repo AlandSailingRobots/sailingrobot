@@ -5,10 +5,34 @@
  *
  */
 
-
+#include <Wire.h>
 #include <SoftwareSerial.h>
+
 #include <Canbus.h>
 #include <MsgParsing.h>
+
+#define I2C_ADDRESS_PH 99
+#define I2C_ADDRESS_TEMPERATURE 102
+#define I2C_ADDRESS_CONDUCTIVETY 100
+
+enum {
+    SENSOR_PH,
+    SENSOR_TEMPERATURE,
+    SENSOR_CONDUCTIVETY
+};
+
+const int I2C_ADRESSES[] = {I2C_ADDRESS_PH,
+                            I2C_ADDRESS_TEMPERATURE,
+                            I2C_ADDRESS_CONDUCTIVETY};
+
+const int SENSOR_READ_TIME[] = {
+        900,    // Time for PH sensor to read
+        600,    // Time for Temperature sensor to read
+        600     // Time for Conductivety sensor to read
+};
+
+
+const int SENSOR_INPUT_SIZE = 20;
 
 const int INT16_SIZE = 65535;
 const long int INT32_SIZE = 4294967295;
@@ -31,7 +55,7 @@ long int sensorReadingIntervalInSeconds = -1;
 void setup()
 {
     Serial.begin(9600);
-
+    Wire.begin();
     if(Canbus.Init(0)) {
         Serial.println("CAN bus initialized.");
     }
@@ -127,4 +151,42 @@ void processCANMessage (CanMsg& msg){
             sensorReadingIntervalInSeconds = -1;
         }
     }
+}
+
+
+float readSensor(int I2CAdressEnum, char* command) {
+    Wire.beginTransmission(I2C_ADRESSES[I2CAdressEnum]);
+    Wire.write(command);
+    Wire.endTransmission();
+
+    delay(SENSOR_READ_TIME[I2CAdressEnum]);
+
+    Wire.requestFrom(I2C_ADRESSES[I2CAdressEnum], SENSOR_INPUT_SIZE, 1);
+
+    byte responseCode = Wire.read();
+
+    if(responseCode == 1) {
+        Serial.println("Read was successful");
+    }
+    else {
+        char response[50];
+        sprintf(response, "Read was unsuccessful. Adress: %d, Code:%d", I2C_ADRESSES[I2CAdressEnum], responseCode);
+        Serial.println(response);
+    }
+
+
+    char sensor_input[SENSOR_INPUT_SIZE]={};
+
+    for (int i=0;Wire.available();i++) {
+        sensor_input[i] = Wire.read();
+        if (sensor_input[i] == 0) {
+            Wire.endTransmission();
+            break;
+        }
+    }
+
+    Serial.print("Read data raw: ");
+    Serial.println(sensor_input);
+
+    return atof(sensor_input);
 }
