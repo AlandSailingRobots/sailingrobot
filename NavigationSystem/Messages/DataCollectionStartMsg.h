@@ -17,8 +17,11 @@
 
 class DataCollectionStartMsg : public Message {
 public:
-    DataCollectionStartMsg(NodeID destinationID, NodeID sourceID, int sensorReadingInterval)
-            :Message(MessageType::DataCollectionStart, sourceID, destinationID), m_sensorReadingInterval(sensorReadingInterval) { }
+    DataCollectionStartMsg(NodeID sourceID, NodeID destinationID, int sensorReadingInterval)
+            :Message(MessageType::DataCollectionStart, sourceID, destinationID), m_sensorReadingInterval(sensorReadingInterval)
+    {
+
+    }
 
     DataCollectionStartMsg(int sensorReadingInterval)
             :Message(MessageType::DataCollectionStart, NodeID::None, NodeID::None), m_sensorReadingInterval(sensorReadingInterval)
@@ -34,7 +37,10 @@ public:
         }
     }
 
-    virtual ~DataCollectionStartMsg() { }
+    virtual ~DataCollectionStartMsg()
+    {
+
+    }
 
     ///----------------------------------------------------------------------------------
     /// Serialises the message into a MessageSerialiser

@@ -23,14 +23,25 @@
 class DataRequestMsg : public Message {
 public:
 	DataRequestMsg(NodeID destinationID, NodeID sourceID)
-		:Message(MessageType::DataRequest, sourceID, destinationID) { }
+		:Message(MessageType::DataRequest, sourceID, destinationID)
+	{
+
+	}
 
 	DataRequestMsg(NodeID destinationID)
-		:Message(MessageType::DataRequest, NodeID::None, destinationID) { }
+		:Message(MessageType::DataRequest, NodeID::None, destinationID)
+	{
+
+	}
 
 	DataRequestMsg(MessageDeserialiser deserialiser)
 		:Message(deserialiser)
-	{ }
+	{
 
-	virtual ~DataRequestMsg() { }
+	}
+
+	virtual ~DataRequestMsg()
+	{
+
+	}
 };

@@ -17,11 +17,17 @@
 
 class DataCollectionStopMsg : public Message {
 public:
-    DataCollectionStopMsg(NodeID destinationID, NodeID sourceID)
-            :Message(MessageType::DataCollectionStop, sourceID, destinationID) { }
+    DataCollectionStopMsg(NodeID sourceID, NodeID destinationID)
+            :Message(MessageType::DataCollectionStop, sourceID, destinationID)
+    {
+
+    }
 
     DataCollectionStopMsg(NodeID destinationID)
-            :Message(MessageType::DataCollectionStop, NodeID::None, destinationID) { }
+            :Message(MessageType::DataCollectionStop, NodeID::None, destinationID)
+    {
+
+    }
 
     DataCollectionStopMsg(MessageDeserialiser deserialiser)
             :Message(deserialiser)
