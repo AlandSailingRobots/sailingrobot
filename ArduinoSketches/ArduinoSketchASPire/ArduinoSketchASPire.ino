@@ -100,8 +100,8 @@ void loop()
   sendArduinoData ();
   checkCanbusFor (50);
   sendFeedback ();
-  checkCanbusFor (400); 
- 
+  checkCanbusFor (400);
+  handleSensorReadingTimer();
 }
 
 float mapInterval(float val, float fromMin, float fromMax, float toMin, float toMax) {
