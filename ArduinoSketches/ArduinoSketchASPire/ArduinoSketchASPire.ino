@@ -30,9 +30,7 @@ const int MAX_RUDDER_ANGLE = 30;
 //range is 26
 const int MAX_WINGSAIL_ANGLE = 13;
 
-const int INT16_SIZE = 65535;
-const long int INT32_SIZE = 4294967295;
-
+const double INT16_SIZE = 65535;
 
 const int RUDDER_MIN_FEEDBACK = 278;
 const int RUDDER_MAX_FEEDBACK = 358;
@@ -46,14 +44,7 @@ const int RUDDER_FEEDBACK_PIN = A6;
 const int WINGSAIL_FEEDBACK_PIN = A4;
 const int RADIO_CONTROLL_OFF_PIN = A8;
 
-const int SENSOR_TEMPERATURE_INTERVAL_MIN = -5;
-const int SENSOR_TEMPERATURE_INTERVAL_MAX = 40;
 
-const int SENSOR_PH_INTERVAL_MIN = 0;
-const int SENSOR_PH_INTERVAL_MAX = 14;
-
-const int SENSOR_CONDUCTIVETY_INTERVAL_MIN = 5;
-const long int SENSOR_CONDUCTIVETY_INTERVAL_MAX = 200000;
 
 /* On boards with a hardware serial port available for use, use
 that port to communicate with the Maestro. For other boards,
@@ -74,13 +65,12 @@ MicroMaestro maestro(maestroSerial);
 
 CanbusClass Canbus;
 
-unsigned long lastReadingTimeInSeconds = 0;
 
-long int sensorReadingIntervalInSeconds = -1;
+
 
 void setup()
 {
-  
+
   pinMode(RUDDER_FEEDBACK_PIN, INPUT);
   pinMode(WINGSAIL_FEEDBACK_PIN, INPUT);
   pinMode (RADIO_CONTROLL_OFF_PIN, INPUT);
@@ -91,8 +81,8 @@ void setup()
   if(Canbus.Init(0)) {
     Serial.println("CAN bus initialized.");
   }
- 
-  Serial.println("SETUP COMPLETE");  
+
+  Serial.println("SETUP COMPLETE");
 }
 
 void loop()
@@ -101,8 +91,10 @@ void loop()
   checkCanbusFor (50);
   sendFeedback ();
   checkCanbusFor (400);
-  handleSensorReadingTimer();
+
 }
+
+
 
 float mapInterval(float val, float fromMin, float fromMax, float toMin, float toMax) {
   return (val - fromMin) / (fromMax - fromMin) * (toMax - toMin) + toMin;
@@ -112,15 +104,15 @@ void sendFeedback (){
  CanMsg feedbackMsg;
  uint16_t rudderAngle16;
  uint16_t wingsailAngle16;
- 
-      
+
+
       rudderAngle16 = getRudderFeedback ();
       wingsailAngle16 = getWingsailFeedback();
 
       feedbackMsg.id = 701;
       feedbackMsg.header.ide = 0;
-      feedbackMsg.header.length = 7;  
-      
+      feedbackMsg.header.length = 7;
+
       feedbackMsg.data[0] = (rudderAngle16 & 0xff);
       feedbackMsg.data[1] = (rudderAngle16 >> 8);
       feedbackMsg.data[2] = (wingsailAngle16 & 0xff);
@@ -128,9 +120,9 @@ void sendFeedback (){
       feedbackMsg.data[4] = 0;
       feedbackMsg.data[5] = 0;
       feedbackMsg.data[6] = 0;
-      
+
       Canbus.SendMessage(&feedbackMsg);
-      
+
 }
 
 void sendArduinoData (){
@@ -146,50 +138,17 @@ void sendArduinoData (){
     arduinoData.data[4] = 0;
     arduinoData.data[5] = 0;
     arduinoData.data[6] = 0;
-    
+
     Canbus.SendMessage(&arduinoData);
+
 }
-
-void handleSensorReadingTimer() {
-    unsigned long timeNowInSeconds = millis()/1000;
-
-    if(sensorReadingIntervalInSeconds != -1 && lastReadingTimeInSeconds + sensorReadingIntervalInSeconds < timeNowInSeconds) {
-        lastReadingTimeInSeconds = timeNowInSeconds;
-        sendArduinoData();
-    }
-}
-
-void sendMarineSensorData (){
-  CanMsg marineSensorData;
-  marineSensorData.id = 711;
-  marineSensorData.header.ide = 0;
-  marineSensorData.header.length = 7;
-
-  uint16_t phValue = mapInterval(getPHValue(), SENSOR_PH_INTERVAL_MIN, SENSOR_PH_INTERVAL_MAX, 0, INT16_SIZE);
-  uint32_t conductivety = mapInterval(getConductivety(), SENSOR_CONDUCTIVETY_INTERVAL_MIN, SENSOR_CONDUCTIVETY_INTERVAL_MAX, 0, INT32_SIZE);
-  uint16_t temperature = mapInterval(getTemperature(), SENSOR_TEMPERATURE_INTERVAL_MIN, SENSOR_TEMPERATURE_INTERVAL_MAX, 0, INT16_SIZE);
-
-  marineSensorData.data[0] = (phValue & 0xff);
-  marineSensorData.data[1] = (phValue >> 8);
-
-  marineSensorData.data[2] = (conductivety & 0xff);
-  marineSensorData.data[3] = (conductivety >> 8);
-  marineSensorData.data[4] = (conductivety >> 16);
-  marineSensorData.data[5] = (conductivety >> 24);
-
-  marineSensorData.data[6] = (temperature & 0xff);
-  marineSensorData.data[7] = (temperature >> 8);
-
-  Canbus.SendMessage(&marineSensorData);
-}
-
 void checkCanbusFor (int timeMs){
   int startTime= millis();
   int timer = 0;
   while (timer < timeMs){
     if (Canbus.CheckForMessages()) {
-    
-    
+
+
     CanMsg msg;
     Canbus.GetMessage(&msg);
     processCANMessage (msg);
@@ -207,7 +166,7 @@ uint16_t getRudderFeedback() {
   float b2 = -1.8473;
   float angle;
   if (feedback < -c){
-    
+
     angle = b1* sqrt (-(feedback+c));
   } else {
     angle = b2* sqrt (feedback+c);
@@ -215,7 +174,7 @@ uint16_t getRudderFeedback() {
 
   uint16_t canbusAngle = mapInterval (angle, -MAX_RUDDER_ANGLE, MAX_RUDDER_ANGLE, 0, INT16_SIZE);
   return canbusAngle;
-  
+
 }
 
 float getWingsailFeedback() {
@@ -227,17 +186,17 @@ float getWingsailFeedback() {
   float b2 = -0.6455;
   float angle;
   if (feedback < -c){
-    
+
     angle = b1* sqrt (-(feedback+c));
   } else {
     angle = b2* sqrt (feedback+c);
   }
   uint16_t canbusAngle = mapInterval (angle, -MAX_WINGSAIL_ANGLE, MAX_WINGSAIL_ANGLE, 0, INT16_SIZE);
-  return canbusAngle; 
+  return canbusAngle;
 }
 
 int isRadioControllerUsed (){
-  
+
   if (analogRead (RADIO_CONTROLL_OFF_PIN) > 250) { //Value comes from the multiplexer indicator led
     return 0;
   }
@@ -246,50 +205,22 @@ int isRadioControllerUsed (){
   }
 }
 
-float getPHValue() {
-  // Mocked implementation
-  // Range between 0 - 14
-  return 5.2;
-}
-
-float getConductivety() {
-  // Mocked implementation
-  // Range between 5 - 200 000
-  return 100000.2;
-}
-
-float getTemperature() {
-  // Mocked implementation
-  // Range between -5 - 40
-  return 10.5;
-}
-
 
 void processCANMessage (CanMsg& msg){
-    
-  if(msg.id == 700) {
-    uint16_t rawCanData = (msg.data[1]<<8 | msg.data[0]);
-    double rudderAngel = mapInterval (rawCanData, 0, INT16_SIZE, -MAX_RUDDER_ANGLE, MAX_RUDDER_ANGLE);
-    //Serial.print("Received rudder angle: "); Serial.println(rudderAngel);
-    rawCanData = (msg.data[3]<<8 | msg.data[2]);
-    double wingsailAngle = mapInterval (rawCanData, 0, INT16_SIZE, -MAX_WINGSAIL_ANGLE, MAX_WINGSAIL_ANGLE);
-    //Serial.print("Received wingsail angle: "); Serial.println(wingsailAngle);
 
-    moveRudder(rudderAngel);
+        if(msg.id == 700) {
+          uint16_t rawCanData = (msg.data[1]<<8 | msg.data[0]);
+          double rudderAngel = mapInterval (rawCanData, 0, INT16_SIZE, -MAX_RUDDER_ANGLE, MAX_RUDDER_ANGLE);
+          //Serial.print("Received rudder angle: "); Serial.println(rudderAngel);
+          rawCanData = (msg.data[3]<<8 | msg.data[2]);
+          double wingsailAngle = mapInterval (rawCanData, 0, INT16_SIZE, -MAX_WINGSAIL_ANGLE, MAX_WINGSAIL_ANGLE);
+          //Serial.print("Received wingsail angle: "); Serial.println(wingsailAngle);
 
-    moveWingsail(wingsailAngle);
-  }
-  else if(msg.id == 710) {
-    sendMarineSensorData();
-    lastReadingTimeInSeconds = millis()/1000;
+          moveRudder(rudderAngel);
 
-    if(msg.data[0]) {
-      sensorReadingIntervalInSeconds = ((long int)msg.data[4]<<24 | (long int)msg.data[3]<<16 | msg.data[2]<<8 | msg.data[1]);
-    }
-    else {
-      sensorReadingIntervalInSeconds = -1;
-    }
-  }
+          moveWingsail(wingsailAngle);
+
+      }
 }
 
 void moveRudder(double angleToSet) {
