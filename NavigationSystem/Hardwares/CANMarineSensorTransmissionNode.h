@@ -36,7 +36,6 @@ private:
     void fillCanMsg(CanMsg& message);
 
     CANService& m_CANService;
-    std::mutex m_lock;
     int m_arduinoSensorLoopTime;
     bool m_takeContinousSensorReadings;
 };
