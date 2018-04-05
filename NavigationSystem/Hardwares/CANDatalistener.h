@@ -1,19 +1,33 @@
+/****************************************************************************************
+*
+* File:
+* 		CANDatalitener.h
+*
+* Purpose:
+*		Recive sensorvalues from CANMarineSensorTransmissionNode,
+*       calculte salinity and do a MarineSensorDataMsg
+*
+* Developer Notes:
+*
+*
+*
+***************************************************************************************/
+
+//	virtual void processFrame(CanMsg& msg) = 0;
+// + look at CANArduinoNode for how to make the constructor (same folder)
+
 #pragma once
 
-class CANService;
+#include "MessageBus/MessageBus.h"
+#include "Hardwares/CAN_Services/CANService.h"
+#include "Hardwares/CAN_Services/CANFrameReceiver.h"
 
-#include "N2kMsg.h"
-
-#include <stdint.h>
-#include <vector>
-/*
-class CANDatalistner
-{
-
+class CANDatalistener : public CANFrameReceiver {
 public:
-	CANDatalistner(CANService& service, std::vector<uint32_t> IDs);
-	CANDatalistner(CANService& service, uint32_t ID);
+    CANDatalistener(MessageBus& messageBus, CANService& canService); //from CANArduinoNode,
+    
+  virtual void processFrame(CanMsg& msg);
 
-	virtual void processFrame(CanMsg& msg) = 0;
+private:
+    MessageBus& m_msgBus;
 };
-*/

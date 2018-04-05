@@ -138,7 +138,7 @@ export HW_NODES_ALL_SRC		= Hardwares/HMC6343Node.cpp Hardwares/GPSDNode.cpp
 
 export HW_NODES_ASPIRE_SRC 	= Hardwares/ActuatorNodeASPire.cpp Hardwares/CANAISNode.cpp Hardwares/CANSolarTrackerNode.cpp\
                             	Hardwares/CANWindsensorNode.cpp Hardwares/CANArduinoNode.cpp Hardwares/MarineSensorNode.cpp\
-                            	Hardwares/CANMarineSensorTransmissionNode.cpp
+                            	Hardwares/CANMarineSensorTransmissionNode.cpp Hardwares/CANDatalistener.cpp
 
 # ActuatorNode for Janet not compiling, uses removed ActuatorPositionMsg
 export HW_NODES_JANET_SRC 	= Hardwares/CV7Node.cpp Hardwares/ArduinoNode.cpp
@@ -175,10 +175,10 @@ unit_tests: $(BUILD_DIR)
 integration_tests_ASPire: $(BUILD_DIR)
 	$(MAKE) -f integration_tests_ASPire.mk
 	$(MAKE) -f ais_integration_test.mk
-	
+
 ## Builid the test for the marine sensors
 marine_sensor_test: $(BUILD_DIR)
-	$(MAKE) -f marine_sensor_test.mk	
+	$(MAKE) -f marine_sensor_test.mk
 
 ## Build HTTPSync Test
 HTTPSync_test: $(BUILD_DIR)
