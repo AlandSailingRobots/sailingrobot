@@ -151,10 +151,12 @@ This document should follow the syntax and formatting conventions of upstream Ar
     # mount /dev/sdx2 root
     ```
 
+5. Download and extract the root filesystem (as root, not via sudo, password is "root"):
 
     ```console
     # cd /home/sailbot
     # wget http://archlinuxarm.org/os/ArchLinuxARM-rpi-2-latest.tar.gz
+	# su
     # bsdtar -xpf ArchLinuxARM-rpi-2-latest.tar.gz -C root
     # sync
     ```
@@ -308,7 +310,6 @@ This document should follow the syntax and formatting conventions of upstream Ar
         
   * if your makefiles fail: `export SAILINGROBOTS_HOME=$HOME/sailingrobot`
   * if you get timeouts, edit the file */etc/resolv.conf* and add options
-5. Download and extract the root filesystem (as root, not via sudo): (<kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>F5</kbd> login as root/root)
+  * (console login as root: <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>F5</kbd> login as root/root)
 
-    ```console
-    # cd /home/sailbot
+
