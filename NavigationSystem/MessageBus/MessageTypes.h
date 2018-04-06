@@ -45,8 +45,8 @@ enum class MessageType {
 	WingSailCommand,
 	RudderCommand,
 	SailCommand,
-    DataCollectionStart,
-    DataCollectionStop
+	DataCollectionStart,
+	DataCollectionStop
 };
 
 inline std::string msgToString(MessageType msgType)
@@ -103,10 +103,10 @@ inline std::string msgToString(MessageType msgType)
 		return "RudderCommand";
 		case MessageType::SailCommand:
 		return "SailCommand";
-        case MessageType::DataCollectionStart:
-            return "DataCollectionStart";
-        case MessageType::DataCollectionStop:
-            return "DataCollectionStop";
-	}
+		case MessageType::DataCollectionStart:
+		return "DataCollectionStart";
+		case MessageType::DataCollectionStop:
+		return "DataCollectionStop";
+  }
 	return "";
 }
