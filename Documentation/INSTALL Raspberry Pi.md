@@ -184,6 +184,12 @@ This document should follow the syntax and formatting conventions of upstream Ar
     * username: **root**
     * default password: **root**
 
+10. Generate locale and configure default as by https://wiki.archlinux.org/index.php/locale
+
+    * Edit */etc/locale.gen*
+    * Run `locale-gen`
+	* Check desired locale (for example en_US.UTF-8) exists in output of `locale -a`
+	* Edit */etc/locale.conf*
 
 16. Change keyboard layout to scandinavian, check date and change if needed
 
@@ -303,7 +309,7 @@ This document should follow the syntax and formatting conventions of upstream Ar
         
     ```console
     # cd /root
-    # git clone https://github.com/AlandSailingRobots/sailingrobot.git
+    # git clone --recursive https://github.com/AlandSailingRobots/sailingrobot.git
     ```
 
 25. Extras:
