@@ -78,18 +78,36 @@ This document should follow the syntax and formatting conventions of upstream Ar
     * username: **root**
     * default password: **root**
 
+    *Note:* It is also possible to do theese steps remotely by connecting to the Raspberry over [ssh](https://en.wikipedia.org/wiki/Secure_Shell) by obtaining the IP-adress of the Raspberry (for example by using `ifconfig`)
+
+      If the Raspberry has the adress 192.168.4.112 and you wish to connect from a workstation:
+
+      ```console
+      $ ssh alarm@192.168.4.112
+      alarm@192.168.4.112's password: # "alarm"
+      Welcome to Arch Linux ARM
+      
+           Website: http://archlinuxarm.org
+             Forum: http://archlinuxarm.org/forum
+               IRC: #archlinux-arm on irc.Freenode.net
+      Last login: Tue Mar 27 12:38:10 2018 from 192.168.4.191
+      [alarm@sailbot ~]$ su
+      Password: # "root"
+      [root@sailbot alarm]# 
+      ```
+
 10. Generate locale and configure default as by https://wiki.archlinux.org/index.php/locale
 
-    * Edit the file */etc/locale.gen* and uncomment desired locale(s) (for example en_US@UTF-8)
-    * Run `locale-gen`
-	* Check that desired locale(s) exists in output of `locale -a`
-	* Edit */etc/locale.conf* and change `LANG=C` to:
+    1. Edit the file */etc/locale.gen* and uncomment desired locale(s) (for example en_US@UTF-8)
+    2. Run `locale-gen`
+	3. Check that desired locale(s) exists in output of `locale -a`
+	4. Edit */etc/locale.conf* and change `LANG=C` to:
 
         ```sh
         LANG=en_US.UTF-8
         ```
 
-16. Change keyboard layout to scandinavian, check date and change if needed
+11. Change keyboard layout to scandinavian, check date and change if needed
 
     ```console
     # localectl set-keymap sv-latin1
@@ -102,15 +120,15 @@ This document should follow the syntax and formatting conventions of upstream Ar
     # loadkeys sv
     ```
 
-10. Edit the file */boot/cmdline.txt*
+12. Edit the file */boot/cmdline.txt*
 
-  * Save a copy of *cmdline.txt* just in case
+    1. Save a copy of *cmdline.txt* just in case
     ```console
     # cp /boot/cmdline.txt /boot/cmdline.bak
     # nano /boot/cmdline.txt
     ```
 
-* Add the following content to the line (while still keeping all content on a single line):
+    2. Add the following content to the line (while still keeping all content on a single line):
 
     ```
     dwc_otg.lpm_enable=0 fsck.repair=yes
@@ -119,7 +137,7 @@ This document should follow the syntax and formatting conventions of upstream Ar
     **Edit**: Previously the following were (perhaps wrongly) stated here: `console=tty1 root=/dev/mmcblk0p2 rootfstype=ext4 elevator=deadline fsck.repair=yes rw rootwait fsck.repair=yesfsck.repair=yes`
 
 
-11. Edit the file *boot/config.txt*
+13. Edit the file *boot/config.txt*
 
     ```console
     # nano /boot/config.txt
@@ -132,7 +150,7 @@ This document should follow the syntax and formatting conventions of upstream Ar
     ```
         
 
-12. Edit the file /etc/modules-load.d/raspberrypi.conf and add the lines i2c-bcm2708 and i2c-dev
+14. Edit the file /etc/modules-load.d/raspberrypi.conf and add the lines `i2c-bcm2708` and `i2c-dev`
 
 
     ```console
@@ -145,16 +163,17 @@ This document should follow the syntax and formatting conventions of upstream Ar
     ```
 
 
-13. To change hostname (standard name is alarmpi)
+15. To change hostname (standard name is alarmpi)
 
     ```console
     # echo sailbot > /etc/hostname
+    # hostname sailbot
     ```
 
 
-## Installing software on the Raspberry Pi
+## Install software on the Raspberry Pi
 
-17. Synchronize system package database and install updates using pacman
+16. Synchronize system package database and install updates using pacman
 
 
     ```console
@@ -164,13 +183,13 @@ This document should follow the syntax and formatting conventions of upstream Ar
     (if you get timeouts, edit the file */etc/resolv.conf* using `nano /etc/resolv.conf` and add `options timeout:1`)
 
 
-18. Install basic packages.
+17. Install basic packages.
         
     ```console
     # pacman -S gcc make git sudo wget
     ```
 
-19. Install i²c (intra-board communication)
+18. Install i²c (intra-board communication)
 
 
     ```console
@@ -178,14 +197,24 @@ This document should follow the syntax and formatting conventions of upstream Ar
     ```
    
 
-20. Install gpsd (GPS daemon and library)
+19. Install and configure gpsd (GPS daemon and library)
 
 
+    1. Install
     ```console
     # pacman -S gpsd
     ```
+	2. Edit */etc/gpsd* and change `DEVICES=""`to:
+    ```sh
+    DEVICES="/dev/gps0"
+    ```
+    3. (Re)start gpsd
+    ```console
+    # systemctl restart gpsd
+    ```
+    *Note:* If you have the GPS connected you can test it using `cgps -s`
 
-21. install wiringPi (**Note:** Use a custom build from our gitrepo instead?)
+20. install wiringPi (**Note:** Use a custom build from our gitrepo instead?)
         
     ```console
     # git clone git://git.drogon.net/wiringPi
@@ -194,28 +223,53 @@ This document should follow the syntax and formatting conventions of upstream Ar
     # cd ..
     ```
 
-
-22. Install the boost libraries
-
+21. Install the boost libraries
 
     ```console
     # pacman -S boost boost-libs
     ```
 
-
-23. Install the sailingrobot repositories in */root*
+22. Install the sailingrobot repositories in */root*
         
     ```console
     # cd /root
     # git clone --recursive https://github.com/AlandSailingRobots/sailingrobot.git
     ```
 
+23. Configure automatic time sync using GPS and [NTP](https://en.wikipedia.org/wiki/Network_Time_Protocol)
+
+    1. Install the ntp client and daemon
+    ```console
+    # pacman -S ntp
+    # ntpdate -v -u pool.ntp.org
+    ```
+    * **Note:** ntp seems to be blocked in current network
+
+    2. Configure gpsd as a timesource by editing */etc/ntp.conf* (from the guide [Using ntpd with GPS](https://wiki.archlinux.org/index.php/Network_Time_Protocol_daemon#Using_ntpd_with_GPS))
+    ```sh
+    #=========================================================
+    #  GPSD native ntpd driver
+    #=========================================================
+    # This driver exists from at least ntp version 4.2.8
+    # Details at
+    #   https://www.eecis.udel.edu/~mills/ntp/html/drivers/driver46.html
+    server 127.127.46.0 
+    fudge 127.127.46.0 time1 0.0 time2 0.0 refid GPS
+    ```
+
+    3. Enable autostart of the ntpd service
+    ```console
+    # systemctl enable ntpd
+    # systemctl start ntpd
+    ```
+
+    4. List ntp peer status by running `ntpq -p`
+
 24. Follow the *SD-card backup and restore guide* on how to create a backup of the newly installed and configured system
 
-Extras:
+
+*Extras:*
         
   * if your makefiles fail: `export SAILINGROBOTS_HOME=$HOME/sailingrobot`
   * if you get timeouts, edit the file */etc/resolv.conf* and add options
   * (console login as root: <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>F5</kbd> login as root/root)
-
-

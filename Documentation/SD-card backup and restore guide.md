@@ -72,7 +72,7 @@ Backups are currently stored as raw disk images inside compressed [SquashFS-cont
 2. Mount archive contents in the directory, enter directory and list contents
 
     ```console
-    # mount sdcard-backup-1234-56-87.sqf backupmnt
+    # mount sdcard-backup-1234-56-78.sqf backupmnt
     # cd backupmnt
     # ls -lah
     ```
