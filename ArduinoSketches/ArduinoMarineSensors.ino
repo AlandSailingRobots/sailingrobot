@@ -12,39 +12,60 @@
 #include <MsgParsing.h>
 
 #define I2C_ADDRESS_PH 99
-#define I2C_ADDRESS_TEMPERATURE 102
 #define I2C_ADDRESS_CONDUCTIVETY 100
+#define I2C_ADDRESS_TEMPERATURE 102
 
 enum {
     SENSOR_PH,
-    SENSOR_TEMPERATURE,
-    SENSOR_CONDUCTIVETY
+    SENSOR_CONDUCTIVETY,
+    SENSOR_TEMPERATURE
 };
 
+const char* SENSOR_COMMAND_SLEEP = "Sleep";
+
+const char* SENSOR_COMMAND_READ = "R";
+
 const int I2C_ADRESSES[] = {I2C_ADDRESS_PH,
-                            I2C_ADDRESS_TEMPERATURE,
-                            I2C_ADDRESS_CONDUCTIVETY};
+                            I2C_ADDRESS_CONDUCTIVETY,
+                            I2C_ADDRESS_TEMPERATURE};
+
+const int SENSOR_ERROR_CODES[] = {1,
+                                  2,
+                                  254,
+                                  255};
 
 const int SENSOR_READ_TIME[] = {
         900,    // Time for PH sensor to read
-        600,    // Time for Temperature sensor to read
-        600     // Time for Conductivety sensor to read
+        600,     // Time for Conductivety sensor to read
+        600    // Time for Temperature sensor to read
 };
-
 
 const int SENSOR_INPUT_SIZE = 20;
 
+const int INT8_SIZE = 255;
 const int INT16_SIZE = 65535;
 const long int INT32_SIZE = 4294967295;
 
-const int SENSOR_TEMPERATURE_INTERVAL_MIN = -5;
-const int SENSOR_TEMPERATURE_INTERVAL_MAX = 40;
 
 const int SENSOR_PH_INTERVAL_MIN = 0;
 const int SENSOR_PH_INTERVAL_MAX = 14;
 
+const int PH_PROBABLE_INTERVAL_MIN = 5;
+const int PH_PROBABLE_INTERVAL_MAX = 8;
+
 const int SENSOR_CONDUCTIVETY_INTERVAL_MIN = 5;
 const long int SENSOR_CONDUCTIVETY_INTERVAL_MAX = 200000;
+
+const int CONDUCTIVETY_PROBABLE_INTERVAL_MIN = 4000; // This should give about 0.2% salinity in high temperatures
+const int CONDUCTIVETY_PROBABLE_INTERVAL_MAX = 16000; // This should give about 0.85% salinity in high temperatures
+
+const int SENSOR_TEMPERATURE_INTERVAL_MIN = -5;
+const int SENSOR_TEMPERATURE_INTERVAL_MAX = 40;
+
+const int TEMPERATURE_PROBABLE_INTERVAL_MIN = 0;
+const int TEMPERATURE_PROBABLE_INTERVAL_MAX = 30;
+
+const int SENSOR_READING_TRIES = 5;
 
 CanbusClass Canbus;
 
@@ -88,12 +109,22 @@ void sendMarineSensorData (){
     marineSensorData.header.ide = 0;
     marineSensorData.header.length = 7;
 
-    uint16_t phValue = mapInterval(getPHValue(), SENSOR_PH_INTERVAL_MIN, SENSOR_PH_INTERVAL_MAX, 0, INT16_SIZE);
-    uint32_t conductivety = mapInterval(getConductivety(), SENSOR_CONDUCTIVETY_INTERVAL_MIN, SENSOR_CONDUCTIVETY_INTERVAL_MAX, 0, INT32_SIZE);
-    uint16_t temperature = mapInterval(getTemperature(), SENSOR_TEMPERATURE_INTERVAL_MIN, SENSOR_TEMPERATURE_INTERVAL_MAX, 0, INT16_SIZE);
 
-    marineSensorData.data[0] = (phValue & 0xff);
-    marineSensorData.data[1] = (phValue >> 8);
+    uint8_t phResponseCode = 0;
+    uint8_t conductivetyResponseCode = 0;
+    uint8_t temperatureResponseCode = 0;
+
+    uint8_t phValue = mapInterval(getPHValue(phResponseCode), SENSOR_PH_INTERVAL_MIN, SENSOR_PH_INTERVAL_MAX, 0, INT8_SIZE);
+
+    uint32_t conductivety = mapInterval(getConductivety(conductivetyResponseCode),
+                                        SENSOR_CONDUCTIVETY_INTERVAL_MIN, SENSOR_CONDUCTIVETY_INTERVAL_MAX, 0, INT32_SIZE);
+
+    uint16_t temperature = mapInterval(getTemperature(temperatureResponseCode),
+                                       SENSOR_TEMPERATURE_INTERVAL_MIN, SENSOR_TEMPERATURE_INTERVAL_MAX, 0, INT16_SIZE);
+
+    marineSensorData.data[0] = createErrorMessage(phResponseCode, conductivetyResponseCode, temperatureResponseCode);
+
+    marineSensorData.data[1] = phValue;
 
     marineSensorData.data[2] = (conductivety & 0xff);
     marineSensorData.data[3] = (conductivety >> 8);
@@ -119,22 +150,30 @@ void checkCanbusFor (int timeMs){
     }
 }
 
-float getPHValue() {
-    // Mocked implementation
-    // Range between 0 - 14
-    return 5.2;
+float getPHValue(uint8_t& responseStatusCode) {
+
+    float value = readSensorWithProbableInterval(SENSOR_PH, responseStatusCode,
+                                                 PH_PROBABLE_INTERVAL_MIN, PH_PROBABLE_INTERVAL_MAX);
+
+    sendCommandToSensor(SENSOR_PH,SENSOR_COMMAND_SLEEP);
+    return value;
 }
 
-float getConductivety() {
-    // Mocked implementation
-    // Range between 5 - 200 000
-    return 100000.2;
+float getConductivety(uint8_t& responseStatusCode) {
+
+    float value = readSensorWithProbableInterval(SENSOR_CONDUCTIVETY, responseStatusCode,
+                                                 CONDUCTIVETY_PROBABLE_INTERVAL_MIN, CONDUCTIVETY_PROBABLE_INTERVAL_MAX);
+
+    sendCommandToSensor(SENSOR_CONDUCTIVETY,SENSOR_COMMAND_SLEEP);
+    return value;
 }
 
-float getTemperature() {
-    // Mocked implementation
-    // Range between -5 - 40
-    return 10.5;
+float getTemperature(uint8_t& responseStatusCode) {
+
+    float value = readSensorWithProbableInterval(SENSOR_TEMPERATURE, responseStatusCode,
+                                                 TEMPERATURE_PROBABLE_INTERVAL_MIN, TEMPERATURE_PROBABLE_INTERVAL_MAX);
+    sendCommandToSensor(SENSOR_TEMPERATURE,SENSOR_COMMAND_SLEEP);
+    return value;
 }
 
 
@@ -153,27 +192,23 @@ void processCANMessage (CanMsg& msg){
     }
 }
 
-
-float readSensor(int I2CAdressEnum, char* command) {
+void sendCommandToSensor(int I2CAdressEnum, const char* command) {
     Wire.beginTransmission(I2C_ADRESSES[I2CAdressEnum]);
     Wire.write(command);
     Wire.endTransmission();
+}
+
+float readSensor(int I2CAdressEnum, uint8_t& responseStatusCode) {
+    sendCommandToSensor(I2CAdressEnum,SENSOR_COMMAND_READ);
 
     delay(SENSOR_READ_TIME[I2CAdressEnum]);
 
     Wire.requestFrom(I2C_ADRESSES[I2CAdressEnum], SENSOR_INPUT_SIZE, 1);
+    responseStatusCode = Wire.read();
 
-    byte responseCode = Wire.read();
-
-    if(responseCode == 1) {
-        Serial.println("Read was successful");
+    if(responseStatusCode != 1) {
+        return 0;
     }
-    else {
-        char response[50];
-        sprintf(response, "Read was unsuccessful. Adress: %d, Code:%d", I2C_ADRESSES[I2CAdressEnum], responseCode);
-        Serial.println(response);
-    }
-
 
     char sensor_input[SENSOR_INPUT_SIZE]={};
 
@@ -189,4 +224,36 @@ float readSensor(int I2CAdressEnum, char* command) {
     Serial.println(sensor_input);
 
     return atof(sensor_input);
+}
+
+float readSensorWithProbableInterval(int I2CAdressEnum, uint8_t& responseStatusCode, int probableIntervalMin, int probableIntervalMax) {
+    float value = readSensor(I2CAdressEnum, responseStatusCode);
+    int i=0;
+    while( (value > probableIntervalMax || value < probableIntervalMin) && i < SENSOR_READING_TRIES) {
+        value = readSensor(I2CAdressEnum, responseStatusCode);
+        i++;
+    }
+    return value;
+}
+
+void setErrorCode(uint8_t& errorMsg, int errorCode, int I2CAdressEnum) {
+    int bitOffset = I2CAdressEnum*2;
+    int i=0;
+
+    for (auto sensorError : SENSOR_ERROR_CODES) {
+        if (sensorError == errorCode) {
+            bitWrite(errorMsg, bitOffset, bitRead(i,0));
+            bitWrite(errorMsg, bitOffset+1, bitRead(i,1));
+            break;
+        }
+        i++;
+    }
+}
+
+uint8_t createErrorMessage(uint8_t phError, uint8_t conductivetyError, uint8_t temperatureError) {
+    uint8_t errorMsg;
+    setErrorCode(errorMsg, phError, SENSOR_PH);
+    setErrorCode(errorMsg, conductivetyError, SENSOR_CONDUCTIVETY);
+    setErrorCode(errorMsg, temperatureError, SENSOR_TEMPERATURE);
+    return errorMsg;
 }
