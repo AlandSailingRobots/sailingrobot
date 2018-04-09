@@ -7,115 +7,9 @@ Resources:
 
 This document should follow the syntax and formatting conventions of upstream Arch Linux documentation referenced above.
 
-## Backing up SD cards using a workstation
+**Before formatting or overwriting SD-cards it is highly recommended to make backups.**
 
-1. Create a directory where you would like to save your image (which will be included in the compressed archive in a later step)
-
-    ```console
-    $ mkdir sdcard-backup
-    $ cd sdcard-backup
-    ```
-
-2. Dump the whole SD card to a file together with SHA-256 integrity checksum using *pv* and *tee*
-
-    (If you need to install the commands on your workstation, use `sudo pacman -S pv tee`)
-
-    ```console
-    # pv /dev/sdx | tee sdcard.dd | sha256sum > sdcard.dd.sha256
-    # sed -i 's/-$/sdcard.dd/' sdcard.dd.sha256
-    ```
-    OR
-
-      * If you can not install *pv* and *tee* the same result can be acheived using *dd* but without any indication of progress)
-
-
-        ```console
-        # dd if=/dev/sdx of=sdcard.dd
-        # sha256sum sdcard.dd > sdcard.dd.sha256
-        ```
-
-    You can include other data besides the image in the backup archive by adding files in this directory, they will then be included in the archive. For example `fdisk -l /dev/sdx > fdisk-l.txt` or you could edit a note in a textfile.
-
-
-4. Compress the archive
-
-    1. Exit the working directory where the raw backup output resides
-
-        ```console
-        # cd ..
-        ```
-
-    2. Compress the whole directory along with content created in previous steps
-
-        This will create a mountable [SquashFS-container](https://en.wikipedia.org/wiki/SquashFS) (mksquashfs can be installed on Arch Linux workstations using `pacman -S squashfs-tools`)
-
-        ```console
-        # mksquashfs sdcard-backup sdcard-backup-$(date +%F).sqf -comp xz
-        ```
-
-        OR
-
-          * create a bzip2-compressed tar-file
-
-          ```console
-          # tar cvjf sdcard-backup-$(date +%F).tar.bz2 sdcard-backup 
-          ```
-
-5. Clean up by deleting the backup directory
-
-    ```console
-    # rm -rf sdcard-backup
-    ```
-
-
-## Cloning a previously made backup to SD cards using a workstation
-
-1. Create a mountpoint for accessing the contents of the backup archive and mount the SquashFS-archive
-
-    ```console
-    $ mkdir backupmnt
-    ```
-
-2. Mount archive contents in the directory, enter directory and list contents
-
-    ```console
-    # mount sdcard-backup-1234-56-87.sqf backupmnt
-    # cd backupmnt
-    # ls -lah
-    ```
-
-3. Insert SD card in card reader and make sure you know its device name
-
-    * **NOTE:** If you use the wrong devicename below you might try to overwrite the harddrive in your workstation so be careful and check the devicename!
-
-    ```console
-    # lsblk
-    # dmesg | tail -n 50
-    ```
-
-    * Below, instead of *sdx*, use the real devicename you got in the previous step
-
-4. Clone the raw dd-image from the archive to the physcial SD card using *pv* (pipeviewer)
-
-    ```console
-    # pv sdcard.dd > /dev/sdx
-    ```
-
-5. Sync and eject SD card to ensure everything is written to it before removal
-
-    ```console
-    # sync
-    # eject /dev/sdx
-    ```
-
-6. Clean up
-
-    ```console
-    # cd ..
-    # umount backupmount
-    # rmdir backupmount
-    ```
-    
+  * See *SD-card backup and restore guide* for detailed instructions on backing up data
 
 ## Setting up the SD card boot media using a workstation
 **Note:** Replace sdx in the following instructions with the device name for the SD card as it appears on your computer.
@@ -186,10 +80,14 @@ This document should follow the syntax and formatting conventions of upstream Ar
 
 10. Generate locale and configure default as by https://wiki.archlinux.org/index.php/locale
 
-    * Edit */etc/locale.gen*
+    * Edit the file */etc/locale.gen* and uncomment desired locale(s) (for example en_US@UTF-8)
     * Run `locale-gen`
-	* Check desired locale (for example en_US.UTF-8) exists in output of `locale -a`
-	* Edit */etc/locale.conf*
+	* Check that desired locale(s) exists in output of `locale -a`
+	* Edit */etc/locale.conf* and change `LANG=C` to:
+
+        ```sh
+        LANG=en_US.UTF-8
+        ```
 
 16. Change keyboard layout to scandinavian, check date and change if needed
 
@@ -312,7 +210,9 @@ This document should follow the syntax and formatting conventions of upstream Ar
     # git clone --recursive https://github.com/AlandSailingRobots/sailingrobot.git
     ```
 
-25. Extras:
+24. Follow the *SD-card backup and restore guide* on how to create a backup of the newly installed and configured system
+
+Extras:
         
   * if your makefiles fail: `export SAILINGROBOTS_HOME=$HOME/sailingrobot`
   * if you get timeouts, edit the file */etc/resolv.conf* and add options
