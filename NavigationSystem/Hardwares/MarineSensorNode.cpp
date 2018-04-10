@@ -117,7 +117,6 @@ void  MarineSensorNode::processMessage(const Message* msg)
 
 	}
 
-
 }
 
 

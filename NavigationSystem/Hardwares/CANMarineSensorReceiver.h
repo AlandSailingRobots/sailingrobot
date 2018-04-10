@@ -1,7 +1,7 @@
 /****************************************************************************************
 *
 * File:
-* 		CANDatalitener.h
+* 		CANMarineSensorReciver.h
 *
 * Purpose:
 *		Recive sensorvalues from CANMarineSensorTransmissionNode,
