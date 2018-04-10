@@ -57,6 +57,8 @@ private:
     int     m_nextDeclination;	// units : degrees
     int     m_nextRadius;		// units : meters
     int     m_nextStayTime;		// units : seconds
+	double	m_nextTimeInterval;	// units : seconds
+	bool	m_nextMeasureAtCheckpoint; // units : true or false
 
     int     m_prevId;
     double  m_prevLongitude;	// units : North(+) or South(-) [0-90]

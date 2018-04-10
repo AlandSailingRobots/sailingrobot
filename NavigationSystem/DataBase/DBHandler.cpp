@@ -1041,6 +1041,7 @@ std::vector<std::string> DBHandler::getColumnInfo(std::string info, std::string 
 }
 
 bool DBHandler::getWaypointValues(int& nextId, double& nextLongitude, double& nextLatitude, int& nextDeclination, int& nextRadius, int& nextStayTime,
+						double& nextTimeInterval, bool& nextMeasureAtCheckpoint,
                         int& prevId, double& prevLongitude, double& prevLatitude, int& prevDeclination, int& prevRadius, bool& foundPrev)
 {
 	int rows, columns, rows2, columns2;

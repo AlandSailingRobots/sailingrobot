@@ -154,6 +154,7 @@ public:
 	void deleteRow(std::string table, std::string id);
 
 	bool getWaypointValues(int& nextId, double& nextLongitude, double& nextLatitude, int& nextDeclination, int& nextRadius, int& nextStayTime,
+						double& nextTimeInterval, bool& nextMeasureAtCheckpoint,
                         int& prevId, double& prevLongitude, double& prevLatitude, int& prevDeclination, int& prevRadius, bool& foundPrev);
 
 	bool insert(std::string table, std::string fields, std::string values);
