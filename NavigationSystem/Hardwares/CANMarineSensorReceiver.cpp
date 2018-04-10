@@ -46,18 +46,17 @@ void CANDatalistener::processFrame (CanMsg& msg) {
 
     //provided that msg frameID is 711 nothing else
 
-    uint16_t rawErrorMessage = (msg.data[1] << 4 | msg.data[0]);
-    float   ErrorMessage  = Utility::mapInterval (rawErrorMessage,ARD_MIN_ERROR,ARD_MAX_ERROR,MIN_ERROR,MAX_ERROR); //extract from CanMsg and convert
-   
+    uint8_t rawErrorMessage = (msg.data[1] << 4 | msg.data[0]);
+    
     Logger logError;
     logError.init("CANMarineSensorReceiver");
  
-    switch(static_cast<int>(ErrorMessage)) {
+    switch(rawErrorMessage) {
     case SUCCESS :{
-            uint16_t rawPh = (msg.data[1] << 4 | msg.data[0]);
+            uint8_t rawPh = (msg.data[1] << 4 | msg.data[0]);
             float   ph  = Utility::mapInterval (rawPh,ARD_MIN_PH,ARD_MAX_PH,MIN_PH,MAX_PH); //extract from CanMsg and convert
 
-            uint16_t rawCon = (msg.data[5] << 24 | msg.data[4] << 16 | msg.data[3] << 8 | msg.data[2] );
+            uint32_t rawCon = (msg.data[5] << 24 | msg.data[4] << 16 | msg.data[3] << 8 | msg.data[2] );
             float   conductivety = Utility::mapInterval (rawCon,ARD_MIN_CON,ARD_MAX_CON,MIN_CON,MAX_CON); //extract from CanMsg and convert
 
             uint16_t rawTemp = (msg.data[7] << 8 | msg.data[6]);
