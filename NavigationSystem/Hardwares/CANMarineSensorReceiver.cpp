@@ -26,6 +26,13 @@ const float MIN_ERROR = -5;
 const int ARD_MAX_ERROR = 65535;
 const float MAX_ERROR = 40;
 
+#define SUCCESS 0
+#define SYNTAX_ERROR 1
+#define NOT_READY 2
+#define NO_DATA_TO_SEND 3
+
+
+
 CANDatalistener::CANDatalistener(MessageBus& messageBus, CANService& canService) :
 CANFrameReceiver(canService, 711), m_msgBus(messageBus)
 {
@@ -44,9 +51,41 @@ void CANDatalistener::processFrame (CanMsg& msg) {
    
     Logger logError;
     logError.init("CANMarineSensorReceiver");
+ 
+    switch(static_cast<int>(ErrorMessage)) {
+    case SUCCESS :{
+            uint16_t rawPh = (msg.data[1] << 4 | msg.data[0]);
+            float   ph  = Utility::mapInterval (rawPh,ARD_MIN_PH,ARD_MAX_PH,MIN_PH,MAX_PH); //extract from CanMsg and convert
+
+            uint16_t rawCon = (msg.data[5] << 24 | msg.data[4] << 16 | msg.data[3] << 8 | msg.data[2] );
+            float   conductivety = Utility::mapInterval (rawCon,ARD_MIN_CON,ARD_MAX_CON,MIN_CON,MAX_CON); //extract from CanMsg and convert
+
+            uint16_t rawTemp = (msg.data[7] << 8 | msg.data[6]);
+            float   temp = Utility::mapInterval (rawTemp,ARD_MIN_TEMP,ARD_MIN_TEMP,MIN_TEMP,MAX_TEMP); //extract from CanMsg and convert
+
+            float   salinity = Utility::calculateSalinity (temp, conductivety);
+            MessagePtr marineSensorDataMsg = std::make_unique<MarineSensorDataMsg>(temp, conductivety, ph, salinity);
+            m_msgBus.sendMessage(std::move(marineSensorDataMsg));
+             break;}       // and exits the switch
+    case SYNTAX_ERROR : 
+        logError.warning("Syntax Error in CANMarineSensorReceiver");
+             break;
+
+    case NOT_READY : 
+        logError.warning("CANMarineSensorReceiver is not ready ");
+             break;
+
+    case NO_DATA_TO_SEND : 
+        logError.warning("Was not able to read CanMsg ErrorMessage 0 to 3 from CANMarineSensorReceiver ");
+             break;
+             
+    default:            
+        logError.warning("Was not able to read CanMsg ErrorMessage 0 to 3 from CANMarineSensorReceiver ");
+}
 
 
-    if(static_cast<int>(ErrorMessage)==0){
+
+    /*if(static_cast<int>(ErrorMessage)==0){
             uint16_t rawPh = (msg.data[1] << 4 | msg.data[0]);
             float   ph  = Utility::mapInterval (rawPh,ARD_MIN_PH,ARD_MAX_PH,MIN_PH,MAX_PH); //extract from CanMsg and convert
 
@@ -72,5 +111,5 @@ void CANDatalistener::processFrame (CanMsg& msg) {
     else{
         logError.warning("Was not able to read CanMsg ErrorMessage 0 to 3 from CANMarineSensorReceiver ");
     }
-           
+        */   
 }
