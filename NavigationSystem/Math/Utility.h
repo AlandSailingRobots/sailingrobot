@@ -84,10 +84,10 @@ public:
 	static void calculateVelocity( const uint16_t course, const double speed, double& vX, double& vY );
 
 	/*
-	 * Use formula to calculate salidety from marine sensor data
+	 * Use formula to calculate salinity from marine sensor data
 	 * http://www.chemiasoft.com/chemd/salinity_calculator
 	 */
-	static float calculateSalidety (const float temperature, const  float conductivety);
+	static float calculateSalinity (const float temperature, const  float conductivety);
 
 };
 

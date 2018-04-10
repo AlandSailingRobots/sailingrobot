@@ -242,8 +242,9 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs)
 		  marineSensorsValues << std::setprecision(10)
   			  << log.m_temperature << ", "
   			  << log.m_conductivity << ", "
-			  << log.m_ph << ",'"
-			  << log.m_timestamp_str.c_str();
+			  	<< log.m_ph << ", "
+          << log.m_salinity << ",'"
+			  	<< log.m_timestamp_str.c_str();
 
 	      ss << "INSERT INTO " << "dataLogs_marine_sensors" << " VALUES(NULL, " << marineSensorsValues.str() << "'); \n";
 

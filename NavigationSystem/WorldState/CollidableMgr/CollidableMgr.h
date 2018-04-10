@@ -36,20 +36,22 @@ public:
 
     void addAISContact(uint32_t mmsi, double lat, double lon, float speed, float course);
     void addAISContact(uint32_t mmsi, float length, float beam);
-    void addVisualContact(uint32_t id, uint16_t bearing);
+    // replaces the visual field
+    void addVisualField(std::map<int16_t, uint16_t> relBearingToRelObstacleDistance, int16_t heading);
 
     CollidableList<AISCollidable_t> getAISContacts();
-    CollidableList<VisualCollidable_t> getVisualContacts();
+    VisualField_t getVisualField();
 
-    void removeOldContacts();
+    void removeOldVisualField();
+
+    void removeOldAISContacts();
 private:
     static void ContactGC(CollidableMgr* ptr);
 
     std::vector<AISCollidable_t> aisContacts;
-    std::vector<VisualCollidable_t> visualContacts;
+    VisualField_t m_visualField;
     std::mutex aisListMutex;
-    std::mutex visualListMutex;
+    std::mutex m_visualMutex;
     bool ownAISLock;
-    bool ownVisualLock;
     std::thread* m_Thread;
 };

@@ -16,11 +16,15 @@
 #pragma once
 
 
-#include "../ASRVoter.h"
+#include "Navigation/LocalNavigationModule/ASRVoter.h"
 #include "WorldState/CollidableMgr/CollidableMgr.h"
 
 
+class ProximityVoterSuite; //forward declaration;
+
 class ProximityVoter : public ASRVoter {
+	friend ProximityVoterSuite;  // test class friend to allow for testing of private functions
+
 public:
     ///----------------------------------------------------------------------------------
  	/// Constructs the proximity voter.
@@ -32,9 +36,13 @@ public:
  	///----------------------------------------------------------------------------------
     const ASRCourseBallot& vote( const BoatState_t& boatState );
 
-    void bearingAvoidance( const BoatState_t& boatState, uint16_t bearing );
+private:
+	void visualAvoidance();
+    void avoidOutsideVisualField( int16_t visibleFieldLowBearingLimit, 
+    	int16_t visibleFieldHighBearingLimit);
+    void bearingAvoidanceSmoothed( int16_t bearing, uint16_t relativeObstacleDistance );
+    void bearingPreferenceSmoothed( int16_t bearing, uint16_t relativeObstacleDistance );
 
     float aisAvoidance( const BoatState_t& boatState, AISCollidable_t& collidable );
-private:
-    CollidableMgr& collidableMgr;
+   CollidableMgr& collidableMgr;
 };
