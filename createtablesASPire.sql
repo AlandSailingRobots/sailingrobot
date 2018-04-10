@@ -95,7 +95,8 @@ CREATE TABLE dataLogs_marine_sensors (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   temperature 	 DOUBLE,
   conductivity	 DOUBLE,
-  ph			 DOUBLE,
+  ph						 DOUBLE,
+  salinity		 	 DOUBLE,
   t_timestamp	 TIMESTAMP
 );
 
