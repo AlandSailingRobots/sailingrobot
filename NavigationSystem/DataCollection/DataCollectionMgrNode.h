@@ -40,6 +40,5 @@ private:
 
 	int		m_timeInterval;
 	bool	m_measureAtCheckpoint;
-	bool	m_isCheckpoint
 
 };
