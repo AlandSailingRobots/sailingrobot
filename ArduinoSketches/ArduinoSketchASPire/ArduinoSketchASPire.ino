@@ -12,6 +12,8 @@
 #include <Canbus.h>
 #include <MsgParsing.h>
 
+#define CHIP_SELECT_PIN 49
+
 //Values are taken so the maestro output match the behavior of the radio controller in the motor controllers 
 const int RUDDER_MAESTRO_MAX_TARGET = 1900;
 const int RUDDER_MAESTRO_MIN_TARGET = 1150;
@@ -78,7 +80,7 @@ void setup()
   maestroSerial.begin(9600);
   Serial.begin(9600);
 
-  if(Canbus.Init(0)) {
+  if(Canbus.Init(CHIP_SELECT_PIN)) {
     Serial.println("CAN bus initialized.");
   }
 

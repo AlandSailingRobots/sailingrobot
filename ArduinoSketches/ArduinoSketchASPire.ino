@@ -2,6 +2,8 @@
 #include <PololuMaestro.h>
 #include <Canbus.h>
 
+#define CHIP_SELECT_PIN 49
+
 const int MAESTRO_MAX_TARGET = 1900;
 const int MAESTRO_MIN_TARGET = 500;
 
@@ -55,7 +57,7 @@ void setup()
   maestroSerial.begin(9600);
   Serial.begin(9600);
 
-  if(Canbus.Init(0)) {
+  if(Canbus.Init(CHIP_SELECT_PIN)) {
     Serial.println("CAN bus initialized.");
   }
  

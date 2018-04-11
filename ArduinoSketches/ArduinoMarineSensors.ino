@@ -15,6 +15,8 @@
 #define I2C_ADDRESS_CONDUCTIVETY 100
 #define I2C_ADDRESS_TEMPERATURE 102
 
+#define CHIP_SELECT_PIN 49
+
 enum {
     SENSOR_PH,
     SENSOR_CONDUCTIVETY,
@@ -77,7 +79,7 @@ void setup()
 {
     Serial.begin(9600);
     Wire.begin();
-    if(Canbus.Init(0)) {
+    if(Canbus.Init(CHIP_SELECT_PIN)) {
         Serial.println("CAN bus initialized.");
     }
 

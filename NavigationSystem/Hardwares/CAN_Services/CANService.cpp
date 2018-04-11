@@ -1,5 +1,5 @@
 #include "CANService.h"
-#include "global.h"
+#include "../../../ArduinoSketches/libraries/Canbus/global_defs.h"
 
 #include <fstream>
 #include <iostream>
