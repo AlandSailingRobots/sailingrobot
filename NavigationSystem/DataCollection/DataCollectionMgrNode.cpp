@@ -13,20 +13,17 @@ void DataCollectionMgrNode::processMessage(const Message* msg) {
 	MessageType type = msg->messageType();
 
 	if(type == MessageType::WayPointDataMsg) {
-        if (readData(m_timeInterval, m_measureAtCheckpoint)) {
 
-		}
 	}
     else if(type == MessageType::LocalConfigChangeMsg) {
-
+		readConfig();
     }
 
-    // send DataCollectionStartMsg, DataCollectionStopMsg and DataRequestMsg
-    // CANMarineSensorTransmissionNode
 }
 
-bool DataCollectionMgrNode::readData(int& timeInterval, bool& measureAtCheckpoint) {
-	if(m_db.getWaypointValues())
+bool DataCollectionMgrNode::readConfig() {
+	m_timeInterval = m_db.retrieveCellAsInt("config_marine_sensors","1","time_interval");
+	m_measureAtCheckpoint = m_db.retrieveCellAsInt("config_marine_sensors","1","measure_at_checkpoint");
 }
 
 void DataCollectionMgr::sendMessage(int interval) {

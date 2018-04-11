@@ -31,7 +31,7 @@ public:
 	///----------------------------------------------------------------------------------
 	/// Read the data.
 	///----------------------------------------------------------------------------------
-	bool readData(int& timeInterval, bool& measureAtCheckpoint);
+	bool readConfig(int& timeInterval, bool& measureAtCheckpoint);
 
 private:
 
