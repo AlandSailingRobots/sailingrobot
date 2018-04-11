@@ -38,10 +38,10 @@ void DataCollectionMgr::sendIntervalMessage() {
 		MessagePtr msg = std::make_unique<DataCollectionStartMsg>(m_timeInterval);
 	}
 
-    m_MsgBus.sendMessage(std::move(msg));
+    node->m_MsgBus.sendMessage(std::move(msg));
 }
 
 void DataCollectionMgr::sendRequestMessage() {
 	MessagePtr msg = std::make_unique<DataRequestMsg>(m_timeInterval);
-	m_MsgBus.sendMessage(std::move(msg));
+	node->m_MsgBus.sendMessage(std::move(msg));
 }
