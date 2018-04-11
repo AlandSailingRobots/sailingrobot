@@ -53,7 +53,8 @@ enum class NodeID {
 	CANAIS,
 	AISProcessing,
 	MarineSensor,
-    MarineSensorCANTransmission
+    MarineSensorCANTransmission,
+	DataCollectionMgr
 };
 
 inline std::string nodeToString(NodeID id)
