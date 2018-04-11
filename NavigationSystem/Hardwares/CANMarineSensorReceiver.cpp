@@ -77,6 +77,6 @@ void CANDatalistener::processFrame (CanMsg& msg) {
              
     default:            
         logError.warning("Was not able to read CanMsg ErrorMessage 0 to 3 from CANMarineSensorReceiver ");
-    }*/
+    */}
           
 }
