@@ -124,6 +124,34 @@ Start everything up (it might be overkill to enable all services at startup but 
 
 (if you downloaded as raw text without compression do `mysql -v -u root < localhost.sql` instead)
 
+## Clone website repository and configure it as webserver root
+
+The following assumes you download to your home directory on the workstation. In this case this is */home/sailbot* and cloning the repo will create */home/sailbot/SailingRobotsWebsite*. We also need to change home directory permission so that the webserver have permissions to access the folder.
+
+1. Clone repository and alter home directory permissions
+
+    ```console
+    $ cd /home/sailbot
+    $ git clone https://github.com/AlandSailingRobots/SailingRobotsWebsite.git
+    $ chmod og+x /home/sailbot
+    ```
+
+2. Configure server to use repo directory as web rootdir in *httpd.conf* by changing the following lines:
+
+    */etc/httpd/conf/httpd.conf*
+    ```
+    ...
+    DocumentRoot "/home/sailbot/SailingRobotsWebsite"
+	<Directory "/home/sailbot/SailingRobotsWebsite">
+    ...
+
+    ```
+
+3. Restart the webserver
+
+    ```console
+    # systemctl restart httpd
+    ```
 
 ## References:
   * https://wiki.archlinux.org/index.php/Apache_HTTP_Server
