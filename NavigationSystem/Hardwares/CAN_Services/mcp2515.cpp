@@ -2,7 +2,7 @@
 #include <iostream>
 #include <unistd.h>
 
-#include "../../../ArduinoSketches/libraries/Canbus/global_defs.h"
+#include "../../../ArduinoSketches/libraries/common/global_defs.h"
 #include "mcp2515.h"
 #include "mcp2515_defs.h"
 
