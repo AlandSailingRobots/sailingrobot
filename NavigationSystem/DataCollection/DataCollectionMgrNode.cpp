@@ -1,6 +1,7 @@
 
 
-DataCollectionMgrNode::DataCollectionMgrNode(MessageBus &msgBus) : Node(NodeID::DataCollectionMgr, msgBus) {
+DataCollectionMgrNode::DataCollectionMgrNode(MessageBus &msgBus, DBHandler& db) :
+										Node(NodeID::DataCollectionMgr, msgBus), m_db(db) {
 
     msgBus.registerNode(*this, MessageType::WayPointDataMsg);
     msgBus.registerNode(*this, MessageType::LocalConfigChangeMsg);
@@ -25,10 +26,10 @@ void DataCollectionMgrNode::processMessage(const Message* msg) {
 }
 
 bool DataCollectionMgrNode::readData(int& timeInterval, bool& measureAtCheckpoint) {
-
+	if(m_db.getWaypointValues())
 }
 
-void DataCollectionMgr::sendStartMessage(int interval) {
+void DataCollectionMgr::sendMessage(int interval) {
 	MessagePtr msg = std::make_unique<DataCollectionStartMsg>(interval);
     m_MsgBus.sendMessage(std::move(msg));
 }

@@ -21,7 +21,7 @@
 class DataCollectionMgrNode : public Node {
 public:
 
-	DataCollectionMgrNode(MessageBus& msgBus);
+	DataCollectionMgrNode(MessageBus& msgBus, DBHandler& db);
 
 	///----------------------------------------------------------------------------------
 	/// Process the message.
@@ -35,11 +35,11 @@ public:
 
 private:
 
-	void sendStartMessage();
-	void sendStopMessage();
-	void sendRequestMsg();
+	void sendMessage();
 
 	int		m_timeInterval;
 	bool	m_measureAtCheckpoint;
+	bool	m_isCheckpoint
+	DBHandler &m_db;
 
 };
