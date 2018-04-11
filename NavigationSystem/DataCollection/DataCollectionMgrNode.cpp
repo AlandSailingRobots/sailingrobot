@@ -1,6 +1,6 @@
 
 
-DataCollectionMgrNode::DataCollectionMgrNode(MessageBus &msgBus, DBHandler& db) :
+DataCollectionMgrNode::DataCollectionMgrNode(MessageBus &msgBus) :
 										Node(NodeID::DataCollectionMgr, msgBus), m_db(db) {
 
     msgBus.registerNode(*this, MessageType::WayPointDataMsg);
@@ -13,10 +13,14 @@ void DataCollectionMgrNode::processMessage(const Message* msg) {
 	MessageType type = msg->messageType();
 
 	if(type == MessageType::WayPointDataMsg) {
-
+		WayPointDataMsg * waypoint = dynamic_cast<WayPointDataMsg*>(&msg);
+		if(m_measureAtCheckpoint && waypoint.isCheckpoint()) {
+			sendRequestMessage();
+		}
 	}
     else if(type == MessageType::LocalConfigChangeMsg) {
 		readConfig();
+		sendIntervalMessage();
     }
 
 }
@@ -26,7 +30,18 @@ bool DataCollectionMgrNode::readConfig() {
 	m_measureAtCheckpoint = m_db.retrieveCellAsInt("config_marine_sensors","1","measure_at_checkpoint");
 }
 
-void DataCollectionMgr::sendMessage(int interval) {
-	MessagePtr msg = std::make_unique<DataCollectionStartMsg>(interval);
+void DataCollectionMgr::sendIntervalMessage() {
+	if(m_timeInterval == 0) {
+		MessagePtr msg = std::make_unique<DataCollectionStopMsg>();
+	}
+	else {
+		MessagePtr msg = std::make_unique<DataCollectionStartMsg>(m_timeInterval);
+	}
+
     m_MsgBus.sendMessage(std::move(msg));
+}
+
+void DataCollectionMgr::sendRequestMessage() {
+	MessagePtr msg = std::make_unique<DataRequestMsg>(m_timeInterval);
+	m_MsgBus.sendMessage(std::move(msg));
 }

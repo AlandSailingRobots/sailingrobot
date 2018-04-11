@@ -21,7 +21,7 @@
 class DataCollectionMgrNode : public Node {
 public:
 
-	DataCollectionMgrNode(MessageBus& msgBus, DBHandler& db);
+	DataCollectionMgrNode(MessageBus& msgBus);
 
 	///----------------------------------------------------------------------------------
 	/// Process the message.
@@ -29,17 +29,17 @@ public:
 	void processMessage(const Message* msg);
 
 	///----------------------------------------------------------------------------------
-	/// Read the data.
+	/// Read the new config data.
 	///----------------------------------------------------------------------------------
 	bool readConfig(int& timeInterval, bool& measureAtCheckpoint);
 
 private:
 
-	void sendMessage();
+	void sendIntervalMessage();
+	void sendRequestMessage();
 
 	int		m_timeInterval;
 	bool	m_measureAtCheckpoint;
 	bool	m_isCheckpoint
-	DBHandler &m_db;
 
 };
