@@ -19,7 +19,7 @@
 class WaypointDataMsg : public Message {
 public:
 	WaypointDataMsg(NodeID destinationID, NodeID sourceID, int nextId, double nextLongitude, double nextLatitude, int nextDeclination, int nextRadius,
-                        int nextStayTime, double timeInterval, bool measureAtCheckpoint, int prevId, double prevLongitude, double prevLatitude, int prevDeclination, int prevRadius)
+                        int nextStayTime, int timeInterval, bool measureAtCheckpoint, int prevId, double prevLongitude, double prevLatitude, int prevDeclination, int prevRadius)
 		:Message(MessageType::WaypointData, sourceID, destinationID), m_nextId(nextId), m_nextLongitude(nextLongitude), m_nextLatitude(nextLatitude),
                          m_nextDeclination(nextDeclination), m_nextRadius(nextRadius), m_nextStayTime(nextStayTime),
 						 m_timeInterval(timeInterval), m_measureAtCheckpoint(measureAtCheckpoint), m_prevId(prevId),
@@ -27,7 +27,7 @@ public:
 	{ }
 
 	WaypointDataMsg(int nextId, double nextLongitude, double nextLatitude, int nextDeclination, int nextRadius, int nextStayTime,
-						double timeInterval, bool measureAtCheckpoint,
+						int timeInterval, bool measureAtCheckpoint,
                         int prevId, double prevLongitude, double prevLatitude, int prevDeclination, int prevRadius)
 		:Message(MessageType::WaypointData, NodeID::None, NodeID::None), m_nextId(nextId), m_nextLongitude(nextLongitude), m_nextLatitude(nextLatitude),
                          m_nextDeclination(nextDeclination), m_nextRadius(nextRadius), m_nextStayTime(nextStayTime),
@@ -66,7 +66,7 @@ public:
     int     nextDeclination()   	const { return m_nextDeclination; }
     int     nextRadius()        	const { return m_nextRadius; }
     int     stayTime()          	const { return m_nextStayTime; }
-	double	timeInterval()			const { return m_timeInterval; }
+	int		timeInterval()			const { return m_timeInterval; }
 	bool	measureAtCheckpoint()	const { return m_measureAtCheckpoint; }
 
     int     prevId()            const { return m_prevId; }
@@ -106,7 +106,7 @@ private:
     int     m_nextDeclination;	// units : degrees
     int     m_nextRadius;		// units : meters
     int     m_nextStayTime;		// units : seconds
-	double	m_timeInterval;	// units : seconds
+	int		m_timeInterval;		// units : seconds
 	bool	m_measureAtCheckpoint;	// units : true or false
 
     int     m_prevId;
