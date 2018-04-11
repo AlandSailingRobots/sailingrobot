@@ -17,11 +17,12 @@
 #pragma once
 
 #include "MessageBus/MessageBus.h"
+#include "DataBase/DBHandler.h"
 
 class DataCollectionMgrNode : public Node {
 public:
 
-	DataCollectionMgrNode(MessageBus& msgBus);
+	DataCollectionMgrNode(MessageBus& msgBus, DBHandler& db);
 
 	///----------------------------------------------------------------------------------
 	/// Process the message.
@@ -31,7 +32,7 @@ public:
 	///----------------------------------------------------------------------------------
 	/// Read the new config data.
 	///----------------------------------------------------------------------------------
-	bool readConfig(int& timeInterval, bool& measureAtCheckpoint);
+	void readConfig();
 
 private:
 
@@ -40,5 +41,6 @@ private:
 
 	int		m_timeInterval;
 	bool	m_measureAtCheckpoint;
+	DBHandler& m_db;
 
 };
