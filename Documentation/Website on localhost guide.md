@@ -1,8 +1,10 @@
 Website on localhost guide
 ==========================
 The goal of this document is to describe the installation of all needed services to run the database on an Arch Linux workstation.
+It tries to follow standards as '#' indicating command to be run as root, '$' can be run as user.
 
 ## Installation and first time setup
+
 Install and enable apache, mysql (mariadb), PHP and phpMyAdmin
 
 1. Install
@@ -15,9 +17,11 @@ Install and enable apache, mysql (mariadb), PHP and phpMyAdmin
     # mysql_install_db --user=mysql --basedir=/usr --datadir=/var/lib/mysql
     ```
 
-* **Note:** The default database credentials are root without password
+   * **Note:** The default database credentials are root without password
 
 3. Edit */etc/php/php.ini*:
+
+    The following lines might already exist within *php.ini* and you need to make sure the options are set only once by searching for the options and comment/uncomment where needed.
     ```sh
     ...
     date.timezone = Europe/Mariehamn
@@ -29,6 +33,7 @@ Install and enable apache, mysql (mariadb), PHP and phpMyAdmin
     ```
 
 4. Create */etc/httpd/conf/extra/php-fpm.conf*
+
     ```html
     DirectoryIndex index.php index.html
     <FilesMatch \.php$>
@@ -37,6 +42,7 @@ Install and enable apache, mysql (mariadb), PHP and phpMyAdmin
     ```
 
 5. Create */etc/httpd/conf/extra/phpmyadmin.conf*
+
     ```html
     Alias /phpmyadmin "/usr/share/webapps/phpMyAdmin"
     <Directory "/usr/share/webapps/phpMyAdmin">
@@ -49,7 +55,9 @@ Install and enable apache, mysql (mariadb), PHP and phpMyAdmin
 
 6. Permit empty passwords in phpMyAdmin by editing */etc/webapps/phpmyadmin/config.inc.php*
     ```php
+    ...
     $cfg['Servers'][$i]['AllowNoPassword'] = true;
+    ...
     ```
 
 7. Include the previous configs in */etc/httpd/conf/httpd.conf*
@@ -75,6 +83,8 @@ Start everything up (it might be overkill to enable all services at startup but 
   ```
 
 ## Magically obtain the project database ...
+
+Work in progess..
 
 ## References:
   * https://wiki.archlinux.org/index.php/Apache_HTTP_Server
