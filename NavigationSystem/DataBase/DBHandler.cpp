@@ -1077,8 +1077,7 @@ bool DBHandler::getWaypointValues(int& nextId, double& nextLongitude, double& ne
     nextDeclination = retrieveCellAsInt("current_Mission", results[1], "declination");
     nextRadius = retrieveCellAsInt("current_Mission", results[1], "radius");
 	nextStayTime = retrieveCellAsInt("current_Mission", results[1], "stay_time");
-
-	// Hämta ut checkpoint här
+	isCheckpoint = retrieveCellAsInt("current_Mission", results[1], "is_checkpoint");
 
 	if(foundPrev) //Set values to next waypoint if harvested waypoint found
 	{
