@@ -105,18 +105,29 @@ Start everything up (it might be overkill to enable all services at startup but 
 
   * *Export* -> *Custom*
   * Deselect all database named ithaax_wrdp\*
+  * Optional: Select gzip as *Compression* under *Output* for quicker download
   * Under object creation options check:
     * Add CREATE DATABASE / USE statement
     * Add DROP TABLE / VIEW / PROCEDURE / FUNCTION / EVENT / TRIGGER statement
-  * Press *Go* and save the SQL-file
+  * Press *Go* and save the SQL-file on your computer
 
 
 ## Import downloaded database to local server
+
+1. Import the database using mysql on the commmandline
+
+  ```console
+  $ zcat localhost.sql.gz | mysql -v -u root
+  ```
+
+  *Note:* The `mysql -v` option produces lots of verbose output in your terminal. If you want it to stay quiet omit the option.
+
+(if you downloaded as raw text without compression do `mysql -v -u root < localhost.sql` instead)
+
 
 ## References:
   * https://wiki.archlinux.org/index.php/Apache_HTTP_Server
   * https://wiki.archlinux.org/index.php/MySQL
   * https://wiki.archlinux.org/index.php/PHP
   * https://wiki.archlinux.org/index.php/phpMyAdmin
-  * Download DB from HostGator
 
