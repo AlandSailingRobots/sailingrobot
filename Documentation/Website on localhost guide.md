@@ -19,9 +19,11 @@ Install and enable apache, mysql (mariadb), PHP and phpMyAdmin
 
    * **Note:** The default database credentials are root without password
 
-3. Edit */etc/php/php.ini*:
+3. Edit the PHP configuration file *php.ini*:
 
-    The following lines might already exist within *php.ini* and you need to make sure the options are set only once by searching for the options and comment/uncomment where needed.
+    The following lines might already exist and you need to make sure the options are set only once by searching for the options and comment/uncomment where needed.
+
+    */etc/php/php.ini*
     ```sh
     ...
     date.timezone = Europe/Mariehamn
@@ -32,8 +34,9 @@ Install and enable apache, mysql (mariadb), PHP and phpMyAdmin
     ...
     ```
 
-4. Create */etc/httpd/conf/extra/php-fpm.conf*
+4. Create the httpd configuration file *php-fpm.conf*
 
+    */etc/httpd/conf/extra/php-fpm.conf*
     ```html
     DirectoryIndex index.php index.html
     <FilesMatch \.php$>
@@ -41,8 +44,9 @@ Install and enable apache, mysql (mariadb), PHP and phpMyAdmin
     </FilesMatch>
     ```
 
-5. Create */etc/httpd/conf/extra/phpmyadmin.conf*
+5. Create the httpd config file *phpmyadmin.conf*
 
+    */etc/httpd/conf/extra/phpmyadmin.conf*
     ```html
     Alias /phpmyadmin "/usr/share/webapps/phpMyAdmin"
     <Directory "/usr/share/webapps/phpMyAdmin">
@@ -53,14 +57,18 @@ Install and enable apache, mysql (mariadb), PHP and phpMyAdmin
     </Directory>
     ```
 
-6. Permit empty passwords in phpMyAdmin by editing */etc/webapps/phpmyadmin/config.inc.php*
+6. Permit empty passwords in phpMyAdmin by editing the file *config.inc.php*
+
+    */etc/webapps/phpmyadmin/config.inc.php*
     ```php
     ...
     $cfg['Servers'][$i]['AllowNoPassword'] = true;
     ...
     ```
 
-7. Include the previous configs in */etc/httpd/conf/httpd.conf*
+7. Edit the webserver configuration *httpd.conf*
+
+    */etc/httpd/conf/httpd.conf*
     ```sh
     ...
     # Load modules for proxy
@@ -82,9 +90,28 @@ Start everything up (it might be overkill to enable all services at startup but 
   # systemctl start httpd mariadb php-fpm
   ```
 
-## Magically obtain the project database ...
+*Note:* If you really want to enable automatic startup on boot for the above services: `systemctl start httpd mariadb php-fpm`
 
-Work in progess..
+
+## Download the project database
+
+1. Log in at HostGator https://gator3083.hostgator.com:2083/
+
+2. Go to *Databases* and click *phpMyAdmin*
+
+    ![HostGator DB panel](cpanel-databases-myphpadmin.jpg)
+
+3. Export database
+
+  * *Export* -> *Custom*
+  * Deselect all database named ithaax_wrdp\*
+  * Under object creation options check:
+    * Add CREATE DATABASE / USE statement
+    * Add DROP TABLE / VIEW / PROCEDURE / FUNCTION / EVENT / TRIGGER statement
+  * Press *Go* and save the SQL-file
+
+
+## Import downloaded database to local server
 
 ## References:
   * https://wiki.archlinux.org/index.php/Apache_HTTP_Server
