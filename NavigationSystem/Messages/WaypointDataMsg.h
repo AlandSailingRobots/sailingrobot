@@ -45,7 +45,7 @@ public:
 			!deserialiser.readInt(m_nextDeclination) ||
 			!deserialiser.readInt(m_nextRadius) ||
 			!deserialiser.readInt(m_nextStayTime) ||
-			!deserialiser.readDouble(m_timeInterval) ||
+			!deserialiser.readInt(m_timeInterval) ||
 			!deserialiser.readBool(m_measureAtCheckpoint) ||
 			!deserialiser.readInt(m_prevId) ||
 			!deserialiser.readDouble(m_prevLongitude) ||
