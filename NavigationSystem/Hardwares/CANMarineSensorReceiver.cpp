@@ -84,7 +84,7 @@ void CANDatalistener::processFrame (CanMsg& msg) {
 
 
 
-    if(static_cast<int>(ErrorMessage)==SUCCESS){
+    if(static_cast<int>(rawErrorMessage)==SUCCESS){
             uint16_t rawPh = (msg.data[1]);
             float   ph  = Utility::mapInterval (rawPh,ARD_MIN_PH,ARD_MAX_PH,MIN_PH,MAX_PH); //extract from CanMsg and convert
 
