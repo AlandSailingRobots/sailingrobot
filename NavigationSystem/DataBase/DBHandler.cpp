@@ -1041,8 +1041,8 @@ std::vector<std::string> DBHandler::getColumnInfo(std::string info, std::string 
 }
 
 bool DBHandler::getWaypointValues(int& nextId, double& nextLongitude, double& nextLatitude, int& nextDeclination, int& nextRadius, int& nextStayTime,
-						int& timeInterval, bool& measureAtCheckpoint,
-                        int& prevId, double& prevLongitude, double& prevLatitude, int& prevDeclination, int& prevRadius, bool& foundPrev)
+						bool& isCheckpoint, int& prevId, double& prevLongitude, double& prevLatitude,
+						int& prevDeclination, int& prevRadius, bool& foundPrev)
 {
 	int rows, columns, rows2, columns2;
     std::vector<std::string> results;
@@ -1078,6 +1078,7 @@ bool DBHandler::getWaypointValues(int& nextId, double& nextLongitude, double& ne
     nextRadius = retrieveCellAsInt("current_Mission", results[1], "radius");
 	nextStayTime = retrieveCellAsInt("current_Mission", results[1], "stay_time");
 
+	// Hämta ut checkpoint här
 
 	if(foundPrev) //Set values to next waypoint if harvested waypoint found
 	{

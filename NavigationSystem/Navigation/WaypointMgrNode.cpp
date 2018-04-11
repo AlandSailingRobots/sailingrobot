@@ -106,8 +106,8 @@ void WaypointMgrNode::sendMessage()
     bool foundPrev = false;
 
     if(m_db.getWaypointValues(m_nextId, m_nextLongitude, m_nextLatitude, m_nextDeclination, m_nextRadius, m_nextStayTime,
-                        m_timeInterval, m_measureAtCheckpoint,
-                        m_prevId, m_prevLongitude, m_prevLatitude, m_prevDeclination, m_prevRadius, foundPrev))
+                        m_isCheckpoint, m_prevId, m_prevLongitude, m_prevLatitude, m_prevDeclination,
+                        m_prevRadius, foundPrev))
     {
         if( !foundPrev )
         {
@@ -115,9 +115,9 @@ void WaypointMgrNode::sendMessage()
             m_prevLongitude = m_vesselLongitude;
         }
 
-        MessagePtr msg = std::make_unique<WaypointDataMsg>(m_nextId, m_nextLongitude, m_nextLatitude, m_nextDeclination, m_nextRadius, m_nextStayTime,
-                        m_timeInterval, m_measureAtCheckpoint,
-                        m_prevId, m_prevLongitude, m_prevLatitude, m_prevDeclination, m_prevRadius);
+        MessagePtr msg = std::make_unique<WaypointDataMsg>(m_nextId, m_nextLongitude, m_nextLatitude,
+                        m_nextDeclination, m_nextRadius, m_nextStayTime,
+                        m_isCheckpoint, m_prevId, m_prevLongitude, m_prevLatitude, m_prevDeclination, m_prevRadius);
         m_MsgBus.sendMessage(std::move(msg));
         // std::cout << "send WaypointDataMsg. Next id:  " << m_nextId << std::endl;
 

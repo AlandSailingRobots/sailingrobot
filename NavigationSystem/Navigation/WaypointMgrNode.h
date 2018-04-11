@@ -58,8 +58,7 @@ private:
     int     m_nextRadius;		// units : meters
     int     m_nextStayTime;		// units : seconds
 
-	int		m_timeInterval;		// units : seconds
-	bool	m_measureAtCheckpoint; // units : true or false
+	bool	m_isCheckpoint; 	// units : true or false
 
     int     m_prevId;
     double  m_prevLongitude;	// units : North(+) or South(-) [0-90]
