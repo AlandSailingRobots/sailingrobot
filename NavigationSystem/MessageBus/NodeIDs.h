@@ -128,7 +128,9 @@ inline std::string nodeToString(NodeID id)
 		case NodeID::MarineSensor:
 		return "MarineSensor";
         case NodeID::MarineSensorCANTransmission:
-            return "MarineSensorCANTransmission";
+        return "MarineSensorCANTransmission";
+		case NodeID::DataCollectionMgr:
+        return "DataCollectionMgr";
 	}
 	return "";
 }
