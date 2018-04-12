@@ -85,7 +85,6 @@ bool MCP2515_Init(int chipSelectPin)
     ReadWrite[4] = 0x41;										//CNF1
 
     ReadWrite[5] = (1<<RX1IE)|(1<<RX0IE);		// activate interrupts
-    //wiringPiSPIDataRW(CHANNEL, ReadWrite, 6);
     ReadWriteSPI(ReadWrite, 6);
     // test if we could read back the value => is the chip accessible?
 
@@ -102,7 +101,6 @@ bool MCP2515_Init(int chipSelectPin)
 
     // turn off filters => receive any message
     MCP2515_Write(RXB0CTRL, (1<<RXM1) | (1<<RXM0) | (1<<BUKT));			//no filters, rollover from buffer 0 to 1
-//	MCP2515_Write(RXB0CTRL, (1<<RXM1) | (1<<RXM0));
     MCP2515_Write(RXB1CTRL, (1<<RXM1) | (1<<RXM0));
 
     // reset device to normal mode
@@ -278,7 +276,6 @@ void MCP2515_OutputInfo()
     uint8_t T1C = MCP2515_Read(TXB1CTRL);
     uint8_t T2C = MCP2515_Read(TXB2CTRL);
 
-    //uint8_t INTE = MCP2515_Read(CANINTE);
     uint8_t INTF = MCP2515_Read(CANINTF);
 
     uint8_t EF = MCP2515_Read(EFLG);

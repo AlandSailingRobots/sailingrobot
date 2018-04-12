@@ -101,46 +101,7 @@ void CanbusClass::SetMasksAndActivateFilters(uint32_t Mask1, uint32_t Mask2, boo
 void CanbusClass::SetFilter(int FilterIndex, uint32_t Filter)
 {
 	uint8_t FSIDH, FSIDL, FEID8, FEID0;
-	switch(FilterIndex)
-	{
-		case 0:
-			FSIDH = RXF0SIDH;
-			FSIDL = RXF0SIDL;
-			FEID8 = RXF0EID8;
-			FEID0 = RXF0EID0;
-			break;
-		case 1:
-			FSIDH = RXF1SIDH;
-			FSIDL = RXF1SIDL;
-			FEID8 = RXF1EID8;
-			FEID0 = RXF1EID0;
-			break;
-		case 2:
-			FSIDH = RXF2SIDH;
-			FSIDL = RXF2SIDL;
-			FEID8 = RXF2EID8;
-			FEID0 = RXF2EID0;
-			break;
-		case 3:
-			FSIDH = RXF3SIDH;
-			FSIDL = RXF3SIDL;
-			FEID8 = RXF3EID8;
-			FEID0 = RXF3EID0;
-			break;
-		case 4:
-			FSIDH = RXF4SIDH;
-			FSIDL = RXF4SIDL;
-			FEID8 = RXF4EID8;
-			FEID0 = RXF4EID0;
-			break;
-		case 5:
-			FSIDH = RXF5SIDH;
-			FSIDL = RXF5SIDL;
-			FEID8 = RXF5EID8;
-			FEID0 = RXF5EID0;
-			break;
-
-	}
+	setFilterFromIndex(FilterIndex, FSIDH, FSIDL, FEID8, FEID0);
 
 	SetConfigMode();
 	MCP2515_Write(FSIDH, Filter>>21);
@@ -154,45 +115,7 @@ void CanbusClass::SetFilter(int FilterIndex, uint32_t Filter)
 void CanbusClass::SetFilterAndMask(int ReceiveBuffer, int FilterIndex, uint32_t Filter, uint32_t Mask)
 {
 	uint8_t FSIDH, FSIDL, FEID8, FEID0, MSIDH, MSIDL, MEID8, MEID0;
-	switch(FilterIndex)
-	{
-		case 0:
-			FSIDH = RXF0SIDH;
-			FSIDL = RXF0SIDL;
-			FEID8 = RXF0EID8;
-			FEID0 = RXF0EID0;
-			break;
-		case 1:
-			FSIDH = RXF1SIDH;
-			FSIDL = RXF1SIDL;
-			FEID8 = RXF1EID8;
-			FEID0 = RXF1EID0;
-			break;
-		case 2:
-			FSIDH = RXF2SIDH;
-			FSIDL = RXF2SIDL;
-			FEID8 = RXF2EID8;
-			FEID0 = RXF2EID0;
-			break;
-		case 3:
-			FSIDH = RXF3SIDH;
-			FSIDL = RXF3SIDL;
-			FEID8 = RXF3EID8;
-			FEID0 = RXF3EID0;
-			break;
-		case 4:
-			FSIDH = RXF4SIDH;
-			FSIDL = RXF4SIDL;
-			FEID8 = RXF4EID8;
-			FEID0 = RXF4EID0;
-			break;
-		case 5:
-			FSIDH = RXF5SIDH;
-			FSIDL = RXF5SIDL;
-			FEID8 = RXF5EID8;
-			FEID0 = RXF5EID0;
-			break;
-	}
+	setFilterFromIndex(FilterIndex, FSIDH, FSIDL, FEID8, FEID0);
 	if(ReceiveBuffer == 0)
 	{
 		MSIDH = RXM0SIDH;
@@ -225,4 +148,46 @@ void CanbusClass::SetFilterAndMask(int ReceiveBuffer, int FilterIndex, uint32_t 
 	MCP2515_Write(FEID0, Filter);
 
 	SetNormalMode();
+}
+
+void CanbusClass::setFilterFromIndex(int filterIndex, uint8_t& FSIDH, uint8_t& FSIDL, uint8_t& FEID8, uint8_t& FEID0) {
+	switch(filterIndex)
+	{
+		case 0:
+			FSIDH = RXF0SIDH;
+			FSIDL = RXF0SIDL;
+			FEID8 = RXF0EID8;
+			FEID0 = RXF0EID0;
+			break;
+		case 1:
+			FSIDH = RXF1SIDH;
+			FSIDL = RXF1SIDL;
+			FEID8 = RXF1EID8;
+			FEID0 = RXF1EID0;
+			break;
+		case 2:
+			FSIDH = RXF2SIDH;
+			FSIDL = RXF2SIDL;
+			FEID8 = RXF2EID8;
+			FEID0 = RXF2EID0;
+			break;
+		case 3:
+			FSIDH = RXF3SIDH;
+			FSIDL = RXF3SIDL;
+			FEID8 = RXF3EID8;
+			FEID0 = RXF3EID0;
+			break;
+		case 4:
+			FSIDH = RXF4SIDH;
+			FSIDL = RXF4SIDL;
+			FEID8 = RXF4EID8;
+			FEID0 = RXF4EID0;
+			break;
+		case 5:
+			FSIDH = RXF5SIDH;
+			FSIDL = RXF5SIDL;
+			FEID8 = RXF5EID8;
+			FEID0 = RXF5EID0;
+			break;
+	}
 }

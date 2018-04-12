@@ -6,13 +6,11 @@
 #include "mcp2515.h"
 #include "MsgParsing.h"
 
-
-//typedef std::tuple<uint32_t,uint8_t> IDsID;
-
-
-
 class CanbusClass
 {
+private:
+	void setFilterFromIndex(int filterIndex, uint8_t& FSIDH, uint8_t& FSIDL, uint8_t& FEID8, uint8_t& FEID0);
+
 public:
 	CanbusClass() {};
 	bool Init(int chipSelectPin);

@@ -265,8 +265,6 @@ void ParsePGN130311(N2kMsg &NMsg, uint8_t &SID, uint8_t &TemperatureInstance,	//
     HumidityInstance = NMsg.Data[1] >> 6;
     uint16_t tmp = NMsg.Data[2] | ((uint16_t)NMsg.Data[3]<<8);
     Temperature = tmp*0.01;
-    //tmp = NMsg.Data[4] | ((uint16_t)NMsg.Data[5]<<8);
-    //Humidity = tmp*0.004;
     Humidity = 0;
     tmp = NMsg.Data[6] | ((uint16_t)NMsg.Data[7]<<8);
     AtmosphericPressure = tmp;		//hPa
