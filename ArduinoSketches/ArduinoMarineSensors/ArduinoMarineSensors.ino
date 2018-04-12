@@ -37,10 +37,15 @@ const int SENSOR_ERROR_CODES[] = {1,
                                   254,
                                   255};
 
+const int RESPONSE_STATUS_SUCCESS = 1;
+const int RESPONSE_STATUS_SYNTAX_ERROR = 2;
+const int RESPONSE_STATUS_NOT_READY = 254;
+const int RESPONSE_STATUS_NO_DATA = 255;
+
 const int SENSOR_ERROR_CODE[3][5] = {
-        {ERROR_SENSOR_PH_SYNTAX},
-        {},
-        {}
+        {ERROR_SENSOR_PH_SYNTAX,ERROR_SENSOR_PH_NOT_READY,ERROR_SENSOR_PH_NO_DATA},
+        {ERROR_SENSOR_CONDUCTIVETY_SYNTAX,ERROR_SENSOR_CONDUCTIVETY_NOT_READY,ERROR_SENSOR_CONDUCTIVETY_NO_DATA},
+        {ERROR_SENSOR_TEMPERATURE_SYNTAX,ERROR_SENSOR_TEMPERATURE_NOT_READY,ERROR_SENSOR_TEMPERATURE_NO_DATA}
 };
 
 const int SENSOR_READ_TIME[] = {
@@ -131,7 +136,7 @@ void sendMarineSensorData (){
     uint16_t temperature = mapInterval(getTemperature(temperatureResponseCode),
                                        SENSOR_TEMPERATURE_INTERVAL_MIN, SENSOR_TEMPERATURE_INTERVAL_MAX, 0, INT16_SIZE);
 
-    marineSensorData.data[0] = createErrorMessage(phResponseCode, conductivetyResponseCode, temperatureResponseCode);
+    marineSensorData.data[0] = getErrorCode(phResponseCode, conductivetyResponseCode, temperatureResponseCode);
 
     marineSensorData.data[1] = phValue;
 
@@ -245,24 +250,30 @@ float readSensorWithProbableInterval(int I2CAdressEnum, uint8_t& responseStatusC
     return value;
 }
 
-void setErrorCode(uint8_t& errorMsg, int errorCode, int I2CAdressEnum) {
-    int bitOffset = I2CAdressEnum*2;
-    int i=0;
-
-    for (auto sensorError : SENSOR_ERROR_CODES) {
-        if (sensorError == errorCode) {
-            bitWrite(errorMsg, bitOffset, bitRead(i,0));
-            bitWrite(errorMsg, bitOffset+1, bitRead(i,1));
-            break;
-        }
-        i++;
+int getErrorCode(uint8_t phError, uint8_t conductivetyError, uint8_t temperatureError) {
+    switch (phError) {
+        case RESPONSE_STATUS_NO_DATA:
+            return ERROR_SENSOR_PH_NO_DATA;
+        case RESPONSE_STATUS_NOT_READY:
+            return ERROR_SENSOR_PH_NOT_READY;
+        case RESPONSE_STATUS_SYNTAX_ERROR:
+            return ERROR_SENSOR_PH_SYNTAX;
     }
-}
-
-uint8_t createErrorMessage(uint8_t phError, uint8_t conductivetyError, uint8_t temperatureError) {
-    uint8_t errorMsg;
-    setErrorCode(errorMsg, phError, SENSOR_PH);
-    setErrorCode(errorMsg, conductivetyError, SENSOR_CONDUCTIVETY);
-    setErrorCode(errorMsg, temperatureError, SENSOR_TEMPERATURE);
-    return errorMsg;
+    switch (conductivetyError) {
+        case RESPONSE_STATUS_NO_DATA:
+            return ERROR_SENSOR_CONDUCTIVETY_NO_DATA;
+        case RESPONSE_STATUS_NOT_READY:
+            return ERROR_SENSOR_CONDUCTIVETY_NOT_READY;
+        case RESPONSE_STATUS_SYNTAX_ERROR:
+            return ERROR_SENSOR_CONDUCTIVETY_SYNTAX;
+    }
+    switch (temperatureError) {
+        case RESPONSE_STATUS_NO_DATA:
+            return ERROR_SENSOR_TEMPERATURE_NO_DATA;
+        case RESPONSE_STATUS_NOT_READY:
+            return ERROR_SENSOR_TEMPERATURE_NOT_READY;
+        case RESPONSE_STATUS_SYNTAX_ERROR:
+            return ERROR_SENSOR_TEMPERATURE_SYNTAX;
+    }
+    return NO_ERRORS;
 }
