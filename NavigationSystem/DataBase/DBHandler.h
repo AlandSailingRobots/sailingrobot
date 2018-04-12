@@ -43,6 +43,7 @@ struct LogItem {
 		float   m_temperature;//dataLogs_marine_sensors
 		float   m_conductivity;
 		float   m_ph;
+    float   m_salinity;
 		double	m_vesselHeading;//dataLogs_vessel_state
 		double	m_vesselLat;
 		double	m_vesselLon;
@@ -152,8 +153,10 @@ public:
 
 	void deleteRow(std::string table, std::string id);
 
-	bool getWaypointValues(int& nextId, double& nextLongitude, double& nextLatitude, int& nextDeclination, int& nextRadius, int& nextStayTime,
-                        int& prevId, double& prevLongitude, double& prevLatitude, int& prevDeclination, int& prevRadius, bool& foundPrev);
+	bool getWaypointValues(int& nextId, double& nextLongitude, double& nextLatitude, int& nextDeclination,
+						int& nextRadius, int& nextStayTime,
+						bool& isCheckpoint, int& prevId, double& prevLongitude,
+						double& prevLatitude, int& prevDeclination, int& prevRadius, bool& foundPrev);
 
 	bool insert(std::string table, std::string fields, std::string values);
 

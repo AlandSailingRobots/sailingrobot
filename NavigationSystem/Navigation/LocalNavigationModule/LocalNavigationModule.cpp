@@ -41,6 +41,18 @@ LocalNavigationModule::LocalNavigationModule( MessageBus& msgBus,DBHandler& dbha
     :ActiveNode(NodeID::LocalNavigationModule, msgBus), m_LoopTime(0.5), m_db(dbhandler), 
     m_trueWindDir(DATA_OUT_OF_RANGE)
 {
+    boatState.currWaypointLat = 0;
+    boatState.currWaypointLon = 0;
+    boatState.lastWaypointLat = 0;
+    boatState.lastWaypointLon = 0;
+    boatState.radius = 10;
+    boatState.waypointBearing = 0;
+    boatState.heading = 0;
+    boatState.lat = 0;
+    boatState.lon = 0;
+    boatState.windDir = 0;
+    boatState.windSpeed = 0;
+    boatState.speed = 0;
     msgBus.registerNode( *this, MessageType::StateMessage );
     msgBus.registerNode( *this, MessageType::WindState );
     msgBus.registerNode( *this, MessageType::WaypointData );
@@ -102,6 +114,9 @@ void LocalNavigationModule::processMessage( const Message* msg )
             boatState.radius = waypoint->nextRadius();
             double distance = CourseMath::calculateDTW( boatState.lon, boatState.lat, boatState.currWaypointLon, boatState.currWaypointLat );
             Logger::info( "New Waypoint! Lat: %f Lon: %f Distance: %f", boatState.currWaypointLat, boatState.currWaypointLon, distance );
+            Logger::info( "Boat state: Lat: %f Lon: %f Heading: %f", boatState.lat, boatState.lon, boatState.heading );
+
+
 
             // Delibrate dropdown after a new waypoint, we want to start a new ballot
             // and get a new heading

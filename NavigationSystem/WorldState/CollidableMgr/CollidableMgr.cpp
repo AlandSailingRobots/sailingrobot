@@ -23,18 +23,21 @@
 #include "CollidableMgr.h"
 #include "SystemServices/SysClock.h"
 #include "SystemServices/Logger.h"
+#include "Math/Utility.h"
 #include <chrono>
 
 
 #define AIS_CONTACT_TIME_OUT        600        // 10 Minutes
-#define VISUAL_CONTACT_TIME_OUT     120
 #define NOT_AVAILABLE               -2000
 #define LOOP_TIME                   1000
+
+const unsigned int visualFieldFadeOutStart = 10;   
+const unsigned int visualFieldTimeOut = 30; 
+const int fadeOut = 2;  
 ///----------------------------------------------------------------------------------
 CollidableMgr::CollidableMgr()
-    :ownAISLock(false), ownVisualLock(false)
+    :ownAISLock(false)
 {
-
 }
 
 ///----------------------------------------------------------------------------------
@@ -125,38 +128,26 @@ void CollidableMgr::addAISContact( uint32_t mmsi, float length, float beam )
 }
 
 ///----------------------------------------------------------------------------------
-void CollidableMgr::addVisualContact( uint32_t id, uint16_t bearing )
+void CollidableMgr::addVisualField( std::map<int16_t, uint16_t> relBearingToRelObstacleDistance, int16_t heading)
 {
-    if( !this->ownVisualLock )
-    {
-        this->visualListMutex.lock();
-        this->ownVisualLock = true;
-    }
-
-   // Check if the contact already exists, and if so update it
-    bool contactExists = false;
-    for( uint16_t i = 0; i < this->visualContacts.size() && !contactExists; i++ )
-    {
-        if( this->visualContacts[i].id == id)
-        {
-            this->visualContacts[i].bearing = bearing;
-            this->visualContacts[i].lastUpdated = SysClock::unixTime();
-            contactExists = true;
+ 
+    std::lock_guard<std::mutex> guard(m_visualMutex);
+    auto updateTime = SysClock::unixTime();
+    int lowBearing = 0;
+    int highBearing = 0;
+    for (auto it : relBearingToRelObstacleDistance){
+        auto absBearing = Utility::limitAngleRange(it.first + heading); 
+        m_visualField.bearingToRelativeObstacleDistance[absBearing] = it.second;
+        m_visualField.bearingToLastUpdated[absBearing] = updateTime;
+        if (it.first < lowBearing){
+            lowBearing = it.first;
+        }
+        if (it.first > highBearing){
+            highBearing = it.first;
         }
     }
-
-    if(!contactExists)
-    {
-        VisualCollidable_t visualContact;
-        visualContact.id = id;
-        visualContact.bearing = bearing;
-        visualContact.lastUpdated = SysClock::unixTime();
-
-        this->visualContacts.push_back(visualContact);
-    }
-
-    this->visualListMutex.unlock();
-    this->ownVisualLock = false;
+    m_visualField.visualFieldLowBearing = lowBearing + heading;
+    m_visualField.visualFieldHighBearing = highBearing + heading;
 }
 
 ///----------------------------------------------------------------------------------
@@ -166,45 +157,48 @@ CollidableList<AISCollidable_t> CollidableMgr::getAISContacts()
 }
 
 ///----------------------------------------------------------------------------------
-CollidableList<VisualCollidable_t> CollidableMgr::getVisualContacts()
+VisualField_t CollidableMgr::getVisualField()
 {
-    return CollidableList<VisualCollidable_t>(&this->visualListMutex, &visualContacts);
+    std::lock_guard<std::mutex> guard(m_visualMutex);
+    return m_visualField;
+}
+
+void CollidableMgr::removeOldVisualField(){
+    std::lock_guard<std::mutex> guard(m_visualMutex);
+    if (m_visualField.bearingToRelativeObstacleDistance.empty()){
+        return;
+    }
+    std::vector<int16_t> eraseBearings;
+    for (auto it : m_visualField.bearingToLastUpdated){
+        if (it.second + visualFieldTimeOut < SysClock::unixTime()){
+            eraseBearings.push_back(it.first);
+        }
+        else if (it.second + visualFieldFadeOutStart < SysClock::unixTime()){
+            if (m_visualField.bearingToRelativeObstacleDistance[it.first] < 100){
+                m_visualField.bearingToRelativeObstacleDistance[it.first] = 
+                    std::min(m_visualField.bearingToRelativeObstacleDistance[it.first] + fadeOut, 100);
+            }
+        }
+    }
+    for (auto it :eraseBearings){
+        Logger::info("erasing field for bearing: %d", it);
+        m_visualField.bearingToRelativeObstacleDistance.erase(it);
+        m_visualField.bearingToLastUpdated.erase(it);
+    } 
+   
 }
 
 ///----------------------------------------------------------------------------------
-void CollidableMgr::removeOldContacts()
+void CollidableMgr::removeOldAISContacts()
 {
-    if( !this->ownVisualLock )
-    {
-        this->visualListMutex.lock();
-        this->ownVisualLock = true;
-    }
-
-    int timeNow = SysClock::unixTime();
-
-
-    for (auto it = this->visualContacts.cbegin(); it != this->visualContacts.cend();)
-    {
-        if ( (*it).lastUpdated + VISUAL_CONTACT_TIME_OUT < timeNow )
-        {
-            it = visualContacts.erase(it);
-        }
-        else
-        {
-            ++it;
-        }
-    }
-
-    this->visualListMutex.unlock();
-    this->ownVisualLock = false;
-
+ 
     if( !this->ownAISLock )
     {
         this->aisListMutex.lock();
         this->ownAISLock = true;
     }
 
-    timeNow = SysClock::unixTime();
+    auto timeNow = SysClock::unixTime();
 
 
     for (auto it = this->aisContacts.cbegin(); it != this->aisContacts.cend();)
@@ -229,6 +223,7 @@ void CollidableMgr::ContactGC(CollidableMgr* ptr)
     while(true)
     {
         std::this_thread::sleep_for(std::chrono::milliseconds(LOOP_TIME));
-        ptr->removeOldContacts();
+        ptr->removeOldAISContacts();
+        ptr->removeOldVisualField();
     }
 }

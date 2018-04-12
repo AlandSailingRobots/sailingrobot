@@ -19,12 +19,12 @@
 class MarineSensorDataMsg : public Message
 {
 public:
-	MarineSensorDataMsg(NodeID destinationID, NodeID sourceID, float temperature, float conductivity, float ph, float salidety)
-		:Message(MessageType::MarineSensorData, sourceID, destinationID), m_temperature(temperature), m_conductivity(conductivity), m_ph(ph), m_salidety (salidety)
+	MarineSensorDataMsg(NodeID destinationID, NodeID sourceID, float temperature, float conductivity, float ph, float salinity)
+		:Message(MessageType::MarineSensorData, sourceID, destinationID), m_temperature(temperature), m_conductivity(conductivity), m_ph(ph), m_salinity (salinity)
 	{ }
 
-	MarineSensorDataMsg(float temperature, float conductivity, float ph , float salidety)
-		:Message(MessageType::MarineSensorData, NodeID::None, NodeID::None), m_temperature(temperature), m_conductivity(conductivity), m_ph(ph), m_salidety(salidety)
+	MarineSensorDataMsg(float temperature, float conductivity, float ph , float salinity)
+		:Message(MessageType::MarineSensorData, NodeID::None, NodeID::None), m_temperature(temperature), m_conductivity(conductivity), m_ph(ph), m_salinity(salinity)
 	{ }
 
 	MarineSensorDataMsg(MessageDeserialiser& deserialiser)
@@ -33,7 +33,7 @@ public:
 		if(	!deserialiser.readFloat(m_temperature) ||
 			!deserialiser.readFloat(m_conductivity) ||
 			!deserialiser.readFloat(m_ph)||
-			!deserialiser.readFloat(m_salidety))
+			!deserialiser.readFloat(m_salinity))
 		{
 			m_valid = false;
 		}
@@ -44,7 +44,7 @@ public:
 	float temperature() const { return m_temperature; }
 	float conductivity() const { return m_conductivity; }
 	float ph() const { return m_ph; }
-	float salidety() const {return m_salidety; }
+	float salinity() const {return m_salinity; }
 
 	///----------------------------------------------------------------------------------
 	/// Serialises the message into a MessageSerialiser
@@ -56,12 +56,12 @@ public:
 		serialiser.serialise(m_temperature);
 		serialiser.serialise(m_conductivity);
 		serialiser.serialise(m_ph);
-		serialiser.serialise(m_salidety);
+		serialiser.serialise(m_salinity);
 	}
 
 private:
 	float m_temperature;
 	float m_conductivity;
 	float m_ph;
-	float m_salidety;
+	float m_salinity;
 };

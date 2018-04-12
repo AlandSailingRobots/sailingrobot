@@ -95,7 +95,8 @@ CREATE TABLE dataLogs_marine_sensors (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   temperature 	 DOUBLE,
   conductivity	 DOUBLE,
-  ph			 DOUBLE,
+  ph						 DOUBLE,
+  salinity		 	 DOUBLE,
   t_timestamp	 TIMESTAMP
 );
 
@@ -293,6 +294,17 @@ CREATE TABLE config_line_follow (
   close_hauled_angle DOUBLE,
   broad_reach_angle DOUBLE,
   tacking_distance DOUBLE
+);
+
+-- -----------------------------------------------------
+-- Table MarineSensors config
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS "config_marine_sensors";
+CREATE TABLE config_marine_sensors (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  loop_time DOUBLE,
+  time_interval INTEGER,
+  measure_at_checkpoint BOOLEAN
 );
 
 

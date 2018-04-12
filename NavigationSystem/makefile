@@ -104,7 +104,9 @@ SYSTEM_SERVICES_SRC  		= SystemServices/Logger.cpp SystemServices/SysClock.cpp S
 WORLD_STATE_SRC				= WorldState/VesselStateNode.cpp WorldState/StateEstimationNode.cpp \
 								WorldState/WindStateNode.cpp
 
-export CORE_SRC 			= $(DATABASE_SRC) $(HTTP_SYNC_SRC) $(LOW_LEVEL_CONTROLLERS) $(MATH_SRC) \
+DATA_COLLECTION_SRC			= DataCollection/DataCollectionMgrNode.cpp
+
+export CORE_SRC 			= $(DATA_COLLECTION_SRC) $(DATABASE_SRC) $(HTTP_SYNC_SRC) $(LOW_LEVEL_CONTROLLERS) $(MATH_SRC) \
 								$(MESSAGE_BUS_SRC) $(NETWORK_SRC) $(NAVIGATION_SRC) $(SYSTEM_SERVICES_SRC) \
 								$(WORLD_STATE_SRC)
 
@@ -137,7 +139,8 @@ export HW_SERVICES_JANET_SRC = Hardwares/MaestroController/MaestroController.cpp
 export HW_NODES_ALL_SRC		= Hardwares/HMC6343Node.cpp Hardwares/GPSDNode.cpp
 
 export HW_NODES_ASPIRE_SRC 	= Hardwares/ActuatorNodeASPire.cpp Hardwares/CANAISNode.cpp Hardwares/CANSolarTrackerNode.cpp\
-                            	Hardwares/CANWindsensorNode.cpp Hardwares/CANArduinoNode.cpp Hardwares/MarineSensorNode.cpp
+                            	Hardwares/CANWindsensorNode.cpp Hardwares/CANArduinoNode.cpp Hardwares/MarineSensorNode.cpp\
+                            	Hardwares/CANMarineSensorTransmissionNode.cpp
 
 # ActuatorNode for Janet not compiling, uses removed ActuatorPositionMsg
 export HW_NODES_JANET_SRC 	= Hardwares/CV7Node.cpp Hardwares/ArduinoNode.cpp
@@ -174,10 +177,10 @@ unit_tests: $(BUILD_DIR)
 integration_tests_ASPire: $(BUILD_DIR)
 	$(MAKE) -f integration_tests_ASPire.mk
 	$(MAKE) -f ais_integration_test.mk
-	
+
 ## Builid the test for the marine sensors
 marine_sensor_test: $(BUILD_DIR)
-	$(MAKE) -f marine_sensor_test.mk	
+	$(MAKE) -f marine_sensor_test.mk
 
 ## Build HTTPSync Test
 HTTPSync_test: $(BUILD_DIR)

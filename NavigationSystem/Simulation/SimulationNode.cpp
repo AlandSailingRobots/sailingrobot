@@ -234,18 +234,21 @@ void SimulationNode::processAISContact( TCPPacket_t& packet )
 }
 
 ///--------------------------------------------------------------------------------------
-void SimulationNode::processVisualContact( TCPPacket_t& packet )
-{
+void SimulationNode::processVisualField( TCPPacket_t& packet )
+{    
     if( this->collidableMgr != NULL )
     {
         // The first byte is the packet type, lets skip that
         uint8_t* ptr = packet.data + 1;
-        VisualContactPacket_t* data = (VisualContactPacket_t*)ptr;
+        VisualFieldPacket_t* data = reinterpret_cast<VisualFieldPacket_t*>(ptr);
+        std::map<int16_t, uint16_t> bearingToRelativeObstacleDistance;
+        for (int i = 0; i<24; ++i){
+            bearingToRelativeObstacleDistance[12 - i] = data->relativeObstacleDistances[i];
+        }
+        Logger::info("retrieving heading: %d", Utility::wrapAngle(90 - data->heading));
 
-        uint16_t bearing = CourseMath::calculateBTW(m_GPSLon, m_GPSLat, data->longitude, data->latitude);
-
-        this->collidableMgr->addVisualContact(data->id, bearing);
-    }
+        this->collidableMgr->addVisualField(bearingToRelativeObstacleDistance, Utility::wrapAngle(90 - data->heading));
+    }    
 }
 
 ///--------------------------------------------------------------------------------------
@@ -311,11 +314,13 @@ void SimulationNode::SimulationThreadFunc(ActiveNode* nodePtr)
                 break;
 
             case SimulatorPacket::CameraData:
-                node->processVisualContact( packet );
+                //Logger::info("CameraData from simulator");
+                node->processVisualField( packet );
                 break;
 
             // unknown or deformed packet
             default:
+
                 continue;
         }
         // Reset our packet, better safe than sorry
