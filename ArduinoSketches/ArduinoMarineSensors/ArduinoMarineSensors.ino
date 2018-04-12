@@ -10,6 +10,7 @@
 
 #include <Canbus.h>
 #include <MsgParsing.h>
+#include <canbus_error_defs.h>
 
 #define I2C_ADDRESS_PH 99
 #define I2C_ADDRESS_CONDUCTIVETY 100
@@ -35,6 +36,12 @@ const int SENSOR_ERROR_CODES[] = {1,
                                   2,
                                   254,
                                   255};
+
+const int SENSOR_ERROR_CODE[3][5] = {
+        {ERROR_SENSOR_PH_SYNTAX},
+        {},
+        {}
+};
 
 const int SENSOR_READ_TIME[] = {
         900,    // Time for PH sensor to read
