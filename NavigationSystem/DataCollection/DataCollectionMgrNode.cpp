@@ -38,10 +38,10 @@ void DataCollectionMgrNode::readConfig() {
 void DataCollectionMgrNode::sendIntervalMessage() {
 	MessagePtr msg;
 	if(m_timeInterval == 0) {
-		MessagePtr msg = std::make_unique<DataCollectionStopMsg>();
+		msg = std::make_unique<DataCollectionStopMsg>();
 	}
 	else {
-		MessagePtr msg = std::make_unique<DataCollectionStartMsg>(m_timeInterval);
+		msg = std::make_unique<DataCollectionStartMsg>(m_timeInterval);
 	}
 
     m_MsgBus.sendMessage(std::move(msg));
