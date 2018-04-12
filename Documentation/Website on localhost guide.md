@@ -27,10 +27,23 @@ Install and enable apache, mysql (mariadb), PHP and phpMyAdmin
     ```sh
     ...
     date.timezone = Europe/Mariehamn
+    ...
     display_errors = On
+    ...
     extension=bz2
     extension=mysqli
     extension=pdo_mysql
+    ...
+    ```
+
+    If you want to upload big files (like the whole database as SQL in plaintext in phpMyAdmin) you also need to make sure the upload limits are large enough
+
+    */etc/php/php.ini*
+    ```
+    ...
+    upload_max_filesize = 200M
+    ...
+    post_max_size = 200M
     ...
     ```
 
@@ -114,11 +127,12 @@ Start everything up (it might be overkill to enable all services at startup but 
 
 ## Import downloaded database to local server
 
-1. Import the database using mysql on the commmandline
+1. Import the database using mysql as database user root on the commmandline. You need to be in the same directory or give the full path the SQL-file you downloaded in the previous step.
 
-  ```console
-  $ zcat localhost.sql.gz | mysql -v -u root
-  ```
+    ```console
+    $ cd ~/Downloads # where you saved localhost.sql.gz
+    $ zcat localhost.sql.gz | mysql -v -u root
+    ```
 
   *Note:* The `mysql -v` option produces lots of verbose output in your terminal. If you want it to stay quiet omit the option.
 
