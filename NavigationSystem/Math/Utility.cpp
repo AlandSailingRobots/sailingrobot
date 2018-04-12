@@ -82,12 +82,16 @@ float Utility::mean(std::vector<float> values)
 	return sum / values.size();
 }
 
-/*To map
-*[A, B] --> [a, b]
-*
-*use this formula
-*(val - A)*(b-a)/(B-A) + a
-*/
+/*
+ * To map
+ * [A, B] --> [a, b]
+ *
+ * use this formula
+ * (val - A)*(b-a)/(B-A) + a
+ *
+ * Note: This function has to be kept identical to the corresponding Arduino-function
+ *       (also, it has no bracketing but is essentially a linear projection)
+ */
 
 float Utility::mapInterval(float val, float fromMin, float fromMax, float toMin, float toMax) {
   return (val - fromMin) / (fromMax - fromMin) * (toMax - toMin) + toMin;
