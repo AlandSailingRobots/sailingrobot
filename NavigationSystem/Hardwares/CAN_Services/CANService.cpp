@@ -1,5 +1,5 @@
 #include "CANService.h"
-#include "../../../ArduinoSketches/libraries/common/global_defs.h"
+#include "can_rpi_defs.h"
 
 #include <fstream>
 #include <iostream>
@@ -61,7 +61,6 @@ std::future<void> CANService::start()
   wiringPiSetup();
   int SPISpeed = 1000000;
 
-	//pinMode(MCP2515_INT, INPUT);					//set the interrupt pin to input
 	if(wiringPiSPISetup(CHANNEL, SPISpeed) == -1)	//channel, SPI speed
 	{
 		std::cout << "Could not setup wiring pi" << std::endl;

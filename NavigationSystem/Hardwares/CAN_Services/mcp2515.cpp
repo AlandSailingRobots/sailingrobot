@@ -2,7 +2,7 @@
 #include <iostream>
 #include <unistd.h>
 
-#include "../../../ArduinoSketches/libraries/common/global_defs.h"
+#include "can_rpi_defs.h"
 #include "mcp2515.h"
 #include "mcp2515_defs.h"
 
