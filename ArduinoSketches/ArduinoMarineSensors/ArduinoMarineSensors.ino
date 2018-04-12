@@ -11,6 +11,7 @@
 #include <Canbus.h>
 #include <MsgParsing.h>
 #include <canbus_error_defs.h>
+#include <CanMessageHandler.h>
 
 #define I2C_ADDRESS_PH 99
 #define I2C_ADDRESS_CONDUCTIVETY 100
@@ -118,35 +119,22 @@ void handleSensorReadingTimer() {
 }
 
 void sendMarineSensorData (){
-    CanMsg marineSensorData;
-    marineSensorData.id = 711;
-    marineSensorData.header.ide = 0;
-    marineSensorData.header.length = 7;
 
+    CanMessageHandler messageHandler(711);
 
-    uint8_t phResponseCode = 0;
-    uint8_t conductivetyResponseCode = 0;
-    uint8_t temperatureResponseCode = 0;
+    uint8_t phResponseCode, conductivetyResponseCode, temperatureResponseCode;
 
-    uint8_t phValue = mapInterval(getPHValue(phResponseCode), SENSOR_PH_INTERVAL_MIN, SENSOR_PH_INTERVAL_MAX, 0, INT8_SIZE);
+    messageHandler.encodeMappedMessage(1, getPHValue(phResponseCode),
+                                       SENSOR_PH_INTERVAL_MIN, SENSOR_PH_INTERVAL_MAX);
 
-    uint32_t conductivety = mapInterval(getConductivety(conductivetyResponseCode),
-                                        SENSOR_CONDUCTIVETY_INTERVAL_MIN, SENSOR_CONDUCTIVETY_INTERVAL_MAX, 0, INT32_SIZE);
+    messageHandler.encodeMappedMessage(4, getConductivety(conductivetyResponseCode),
+                                       SENSOR_CONDUCTIVETY_INTERVAL_MIN, SENSOR_CONDUCTIVETY_INTERVAL_MAX);
 
-    uint16_t temperature = mapInterval(getTemperature(temperatureResponseCode),
-                                       SENSOR_TEMPERATURE_INTERVAL_MIN, SENSOR_TEMPERATURE_INTERVAL_MAX, 0, INT16_SIZE);
+    messageHandler.encodeMappedMessage(2, getTemperature(temperatureResponseCode) ,
+                                       SENSOR_TEMPERATURE_INTERVAL_MIN, SENSOR_TEMPERATURE_INTERVAL_MAX);
+    messageHandler.setErrorMessage(getErrorCode(phResponseCode, conductivetyResponseCode, temperatureResponseCode));
 
-    marineSensorData.data[0] = getErrorCode(phResponseCode, conductivetyResponseCode, temperatureResponseCode);
-
-    marineSensorData.data[1] = phValue;
-
-    marineSensorData.data[2] = (conductivety & 0xff);
-    marineSensorData.data[3] = (conductivety >> 8);
-    marineSensorData.data[4] = (conductivety >> 16);
-    marineSensorData.data[5] = (conductivety >> 24);
-
-    marineSensorData.data[6] = (temperature & 0xff);
-    marineSensorData.data[7] = (temperature >> 8);
+    CanMsg marineSensorData = messageHandler.getMessage();
 
     Canbus.SendMessage(&marineSensorData);
 }
