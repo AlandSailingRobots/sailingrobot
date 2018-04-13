@@ -1,6 +1,19 @@
+/****************************************************************************************
+*
+* File:
+* 		canbus_error_defs.h
+*
+* Purpose:
+*		 The purpose of this definitions is a unified use of error codes
+ *		 between Arduino and RPI.
+*
+* Developer Notes:
+*
+***************************************************************************************/
 
 #ifndef CANBUS_ERROR_DEFS_H
 #define CANBUS_ERROR_DEFS_H
+
 
 #define NO_ERRORS 0
 
