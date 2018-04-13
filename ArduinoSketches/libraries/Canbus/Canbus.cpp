@@ -17,6 +17,7 @@ uint8_t CanbusClass::CheckForMessages()			//returns address of messge if there i
 bool CanbusClass::Init(int chipSelectPin)
 {
 	SPI.begin();
+	pinMode(chipSelectPin, OUTPUT);
 	return MCP2515_Init(chipSelectPin);
 }
 

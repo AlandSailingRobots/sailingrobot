@@ -17,7 +17,7 @@ void inline ReadWriteSPI(uint8_t *ReadWrite, uint8_t Bytes)
 void MCP2515_SendByte(uint8_t Data)
 {
     uint8_t ReadWrite = Data;
-    ReadWriteSPI(ReadWrite, 1);
+    ReadWriteSPI(&ReadWrite, 1);
 }
 
 uint8_t MCP2515_Read(uint8_t Address)
@@ -73,7 +73,7 @@ bool MCP2515_Init(int chipSelectPin)
     // reset MCP2515 by software reset.
     // After this it is in configuration mode.
     MCP2515_SendByte(SPI_RESET);
-    delay(10);
+    delay(0.01);
 
     // load CNF1..3 Register
     uint8_t ReadWrite[6];
@@ -259,7 +259,7 @@ uint8_t MCP2515_SendMessage(CanMsg *message, uint8_t MsgAddress)			//returns whi
 
     ReadWriteSPI(ReadWrite, 6+Length);
 
-    delay(10);
+    delay(0.01);
 
     // send message
     Address &= 0x0f;
