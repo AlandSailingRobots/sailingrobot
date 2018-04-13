@@ -16,7 +16,6 @@ public:
 	static std::vector<float> fixAngles(std::vector<float> v);
 	static float getMedianValue(std::vector<float> v);
 	static float mean(std::vector<float> values);
-	static float mapInterval (float val, float fromMin, float fromMax, float toMin, float toMax);
 	static float meanOfAngles(std::vector<float> anglesInDegrees);
     static int sgn(double value);
 	// static int16_t pi(double pGain, double iGain, uint16_t heading, uint16_t desiredHeading);

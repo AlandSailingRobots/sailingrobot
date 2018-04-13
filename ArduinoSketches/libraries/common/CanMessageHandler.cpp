@@ -51,8 +51,8 @@ unsigned long int CanMessageHandler::getData(int lengthInBytes) {
 double CanMessageHandler::getMappedData(int lengthInBytes, long int minValue, long int maxValue) {
 
     unsigned long int data = getData(lengthInBytes);
-    auto possibilitiesDataCanHold = Utility::calcSizeOfBytes(lengthInBytes)-1;
-    return Utility::mapInterval(data, 0, possibilitiesDataCanHold, minValue, maxValue);
+    auto possibilitiesDataCanHold = CanUtility::calcSizeOfBytes(lengthInBytes)-1;
+    return CanUtility::mapInterval(data, 0, possibilitiesDataCanHold, minValue, maxValue);
 }
 
 void CanMessageHandler::setErrorMessage(uint8_t errorMessage) {

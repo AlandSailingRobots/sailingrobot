@@ -21,7 +21,7 @@
 #include <stdint.h>
 
 #include "MsgParsing.h"
-#include "Utility.h"
+#include "CanUtility.h"
 
 class CanMessageHandler {
 private:
@@ -136,9 +136,9 @@ public:
      */
     template<class T>
     bool encodeMappedMessage(int lengthInBytes, T data, long int minValue, long int maxValue) {
-        auto possibilitiesDataCanHold = Utility::calcSizeOfBytes(lengthInBytes)-1;
+        auto possibilitiesDataCanHold = CanUtility::calcSizeOfBytes(lengthInBytes)-1;
         auto mappedData = static_cast<uint64_t>(
-                Utility::mapInterval(data, minValue, maxValue, 0, possibilitiesDataCanHold));
+                CanUtility::mapInterval(data, minValue, maxValue, 0, possibilitiesDataCanHold));
 
         encodeMessage(lengthInBytes, mappedData);
         return true;

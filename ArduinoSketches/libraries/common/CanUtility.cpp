@@ -3,13 +3,13 @@
 //
 
 
-#include "Utility.h"
+#include "CanUtility.h"
 
-double Utility::mapInterval(double val, double fromMin, double fromMax, double toMin, double toMax) {
+double CanUtility::mapInterval(double val, double fromMin, double fromMax, double toMin, double toMax) {
     return (val - fromMin) / (fromMax - fromMin) * (toMax - toMin) + toMin;
 }
 
-uint64_t Utility::calcSizeOfBytes(int noOfBytes) {
+uint64_t CanUtility::calcSizeOfBytes(int noOfBytes) {
 
     const int NO_OF_BITS_PER_BYTE = 8;
 
