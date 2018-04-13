@@ -105,10 +105,6 @@ void loop()
     handleSensorReadingTimer();
 }
 
-float mapInterval(float val, float fromMin, float fromMax, float toMin, float toMax) {
-    return (val - fromMin) / (fromMax - fromMin) * (toMax - toMin) + toMin;
-}
-
 void handleSensorReadingTimer() {
     unsigned long timeNowInSeconds = millis()/1000;
 

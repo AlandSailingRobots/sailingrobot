@@ -11,6 +11,7 @@
 #include <PololuMaestro.h>
 #include <Canbus.h>
 #include <MsgParsing.h>
+#include <CanUtility.h>
 
 #define CHIP_SELECT_PIN 49
 
@@ -96,12 +97,6 @@ void loop()
 
 }
 
-
-
-float mapInterval(float val, float fromMin, float fromMax, float toMin, float toMax) {
-  return (val - fromMin) / (fromMax - fromMin) * (toMax - toMin) + toMin;
-}
-
 void sendFeedback (){
  CanMsg feedbackMsg;
  uint16_t rudderAngle16;
@@ -174,7 +169,7 @@ uint16_t getRudderFeedback() {
     angle = b2* sqrt (feedback+c);
   }
 
-  uint16_t canbusAngle = mapInterval (angle, -MAX_RUDDER_ANGLE, MAX_RUDDER_ANGLE, 0, INT16_SIZE);
+  uint16_t canbusAngle = CanUtility::mapInterval (angle, -MAX_RUDDER_ANGLE, MAX_RUDDER_ANGLE, 0, INT16_SIZE);
   return canbusAngle;
 
 }
@@ -193,7 +188,7 @@ float getWingsailFeedback() {
   } else {
     angle = b2* sqrt (feedback+c);
   }
-  uint16_t canbusAngle = mapInterval (angle, -MAX_WINGSAIL_ANGLE, MAX_WINGSAIL_ANGLE, 0, INT16_SIZE);
+  uint16_t canbusAngle = CanUtility::mapInterval (angle, -MAX_WINGSAIL_ANGLE, MAX_WINGSAIL_ANGLE, 0, INT16_SIZE);
   return canbusAngle;
 }
 
@@ -212,10 +207,10 @@ void processCANMessage (CanMsg& msg){
 
         if(msg.id == 700) {
           uint16_t rawCanData = (msg.data[1]<<8 | msg.data[0]);
-          double rudderAngel = mapInterval (rawCanData, 0, INT16_SIZE, -MAX_RUDDER_ANGLE, MAX_RUDDER_ANGLE);
+          double rudderAngel = CanUtility::mapInterval (rawCanData, 0, INT16_SIZE, -MAX_RUDDER_ANGLE, MAX_RUDDER_ANGLE);
           //Serial.print("Received rudder angle: "); Serial.println(rudderAngel);
           rawCanData = (msg.data[3]<<8 | msg.data[2]);
-          double wingsailAngle = mapInterval (rawCanData, 0, INT16_SIZE, -MAX_WINGSAIL_ANGLE, MAX_WINGSAIL_ANGLE);
+          double wingsailAngle = CanUtility::mapInterval (rawCanData, 0, INT16_SIZE, -MAX_WINGSAIL_ANGLE, MAX_WINGSAIL_ANGLE);
           //Serial.print("Received wingsail angle: "); Serial.println(wingsailAngle);
 
           moveRudder(rudderAngel);
@@ -226,7 +221,7 @@ void processCANMessage (CanMsg& msg){
 }
 
 void moveRudder(double angleToSet) {
-  float target = mapInterval(angleToSet, -MAX_RUDDER_ANGLE, MAX_RUDDER_ANGLE, 
+  float target = CanUtility::mapInterval(angleToSet, -MAX_RUDDER_ANGLE, MAX_RUDDER_ANGLE,
                       RUDDER_MAESTRO_MIN_TARGET, RUDDER_MAESTRO_MAX_TARGET);
   
   maestro.setTarget(RUDDER_MAESTRO_CHANNEL, target*MAESTRO_SIGNAL_MULTIPLIER);
@@ -234,7 +229,7 @@ void moveRudder(double angleToSet) {
 }
 
 void moveWingsail(double angleToSet) {
-  float target = mapInterval(angleToSet, -MAX_WINGSAIL_ANGLE, MAX_WINGSAIL_ANGLE,
+  float target = CanUtility::mapInterval(angleToSet, -MAX_WINGSAIL_ANGLE, MAX_WINGSAIL_ANGLE,
                   WINGSAIL_MAESTRO_MIN_TARGET, WINGSAIL_MAESTRO_MAX_TARGET);
   maestro.setTarget(WINGSAIL_MAESTRO_CHANNEL, target*MAESTRO_SIGNAL_MULTIPLIER);  
   maestro.getErrors(); //Used to clear any errors on the maestro inorder for it not to lock up

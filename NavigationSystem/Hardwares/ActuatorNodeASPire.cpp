@@ -12,6 +12,7 @@
 *
 ***************************************************************************************/
 
+#include <CanUtility.h>
 #include "Hardwares/ActuatorNodeASPire.h"
 
 
@@ -53,8 +54,8 @@ void ActuatorNodeASPire::processMessage(const Message* message)
 
 void ActuatorNodeASPire::sendCommandMessage()
 {
-	uint16_t rudderAngle16 = Utility::mapInterval (m_rudderAngle, -MAX_RUDDER_ANGLE, MAX_RUDDER_ANGLE, 0 , INT16_SIZE);
-	uint16_t wingsailAngle16 = Utility::mapInterval (m_wingsailAngle, -MAX_WINGSAIL_ANGLE, MAX_WINGSAIL_ANGLE, 0 , INT16_SIZE);
+	uint16_t rudderAngle16 = CanUtility::mapInterval (m_rudderAngle, -MAX_RUDDER_ANGLE, MAX_RUDDER_ANGLE, 0 , INT16_SIZE);
+	uint16_t wingsailAngle16 = CanUtility::mapInterval (m_wingsailAngle, -MAX_WINGSAIL_ANGLE, MAX_WINGSAIL_ANGLE, 0 , INT16_SIZE);
 	
 	CanMsg Cmsg;
 	Cmsg.id = 700;

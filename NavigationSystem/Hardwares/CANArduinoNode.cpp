@@ -12,6 +12,7 @@
 *
 ***************************************************************************************/
 
+#include <CanUtility.h>
 #include "CANArduinoNode.h"
 #include "MessageBus/MessageTypes.h"
 
@@ -55,10 +56,10 @@ void CANArduinoNode::processFrame (CanMsg& msg) {
 
 	if (msg.id == 701) {
 		rawData = (msg.data[1] << 8 | msg.data[0]);
-		m_RudderFeedback = Utility::mapInterval (rawData, 0, INT16_SIZE, -MAX_RUDDER_ANGLE, MAX_RUDDER_ANGLE);
+		m_RudderFeedback = CanUtility::mapInterval (rawData, 0, INT16_SIZE, -MAX_RUDDER_ANGLE, MAX_RUDDER_ANGLE);
 
 		rawData = (msg.data[3] << 8 | msg.data[2]);
-		m_WingsailFeedback = Utility::mapInterval (rawData, 0, INT16_SIZE, -MAX_WINGSAIL_ANGLE, MAX_WINGSAIL_ANGLE);
+		m_WingsailFeedback = CanUtility::mapInterval (rawData, 0, INT16_SIZE, -MAX_WINGSAIL_ANGLE, MAX_WINGSAIL_ANGLE);
 
 		m_WindvaneSelfSteerAngle = (msg.data[5] << 8 | msg.data[4]);
 		m_WindvaneActuatorPos = msg.data[7];
