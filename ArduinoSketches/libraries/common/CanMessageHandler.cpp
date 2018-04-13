@@ -1,4 +1,19 @@
-
+/****************************************************************************************
+*
+* File:
+* 		CanMessageHandler.cpp
+*
+* Purpose:
+*		 The purpose of this class is a unified use of CanMsg handling
+ *		 from both Arduino and RPI
+ *
+ *		 NOTE:
+ *		 There is only 7 bytes of data that can be encoded by using this class,
+ *		 because the last byte of the CanMsg is reserved for an error message.
+*
+* Developer Notes:
+*
+***************************************************************************************/
 
 
 #include "canbus_error_defs.h"
