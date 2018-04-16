@@ -24,17 +24,6 @@
   "loop_time": 0.5
 },
 
-"config_httpsync": {
-  "loop_time": 0.5,
-  "remove_logs": 0,
-  "push_only_latest_logs": 1,
-  "boat_id": "BOAT02",
-  "boat_pwd": "PWD02",
-  "srv_addr": "http://www.sailingrobots.ax/janet/sync/",
-  "configs_updated": "0",
-  "route_updated":"0"
-},
-
 "config_line_follow": {
   "loop_time": 0.5,
   "close_hauled_angle": 45,
