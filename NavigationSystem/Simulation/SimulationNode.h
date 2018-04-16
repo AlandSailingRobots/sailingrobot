@@ -108,6 +108,7 @@ struct WaypointPacket_t {
   int nextDeclination;
   int nextRadius;
   int nextStayTime;
+  bool isCheckpoint;
   int prevId;
   double prevLongitude;
   double prevLatitude;
@@ -202,7 +203,7 @@ private:
     float   m_RudderCommand;
     float   m_SailCommand;
     float   m_TailCommand;
-    
+
     int     m_CompassHeading;
     double  m_GPSLat;
     double  m_GPSLon;

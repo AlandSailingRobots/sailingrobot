@@ -25,7 +25,7 @@ SimulationNode::SimulationNode(MessageBus& msgBus, bool boatType)
 		m_GPSCourse(0), m_WindDir(0), m_WindSpeed(0), m_nextDeclination(0),
 		collidableMgr(NULL), m_boatType(boatType)
 {
-    msgBus.registerNode(*this, MessageType::SailCommand);    
+    msgBus.registerNode(*this, MessageType::SailCommand);
     msgBus.registerNode(*this, MessageType::WingSailCommand);
     msgBus.registerNode(*this, MessageType::RudderCommand);
     msgBus.registerNode(*this, MessageType::WaypointData);
@@ -125,6 +125,7 @@ void SimulationNode::processWaypointMessage(WaypointDataMsg* msg)
 	waypoint.nextDeclination = msg->nextDeclination();
 	waypoint.nextRadius = msg->nextRadius();
 	waypoint.nextStayTime = msg->stayTime();
+	waypoint.isCheckpoint = msg->isCheckpoint();
 	waypoint.prevId = msg->prevId();
 	waypoint.prevLongitude = msg->prevLongitude();
 	waypoint.prevLatitude = msg->prevLatitude();
@@ -175,7 +176,7 @@ void SimulationNode::processSailBoatData( TCPPacket_t& packet )
         {
             m_GPSCourse = Utility::limitAngleRange(90 - boatData->course + 180); // [0, 360] north east down
         }
-        
+
         m_WindDir = Utility::limitAngleRange( 180 - boatData->windDir); // [0, 360] clockwize, where the wind come from
         m_WindSpeed = boatData->windSpeed;
 
@@ -235,7 +236,7 @@ void SimulationNode::processAISContact( TCPPacket_t& packet )
 
 ///--------------------------------------------------------------------------------------
 void SimulationNode::processVisualField( TCPPacket_t& packet )
-{    
+{
     if( this->collidableMgr != NULL )
     {
         // The first byte is the packet type, lets skip that
@@ -248,7 +249,7 @@ void SimulationNode::processVisualField( TCPPacket_t& packet )
         Logger::info("retrieving heading: %d", Utility::wrapAngle(90 - data->heading));
 
         this->collidableMgr->addVisualField(bearingToRelativeObstacleDistance, Utility::wrapAngle(90 - data->heading));
-    }    
+    }
 }
 
 ///--------------------------------------------------------------------------------------
@@ -261,11 +262,11 @@ void SimulationNode::sendActuatorDataWing( int socketFD)
 }
 
 void SimulationNode::sendActuatorDataSail( int socketFD)
-{   
+{
     actuatorDataSail.rudderCommand = - Utility::degreeToRadian(m_RudderCommand);
     actuatorDataSail.sailCommand   = Utility::degreeToRadian(m_SailCommand);
-    
-    server.sendData( socketFD, &actuatorDataSail, sizeof(ActuatorDataSailPacket_t) );       
+
+    server.sendData( socketFD, &actuatorDataSail, sizeof(ActuatorDataSailPacket_t) );
 }
 
 ///--------------------------------------------------------------------------------------
@@ -326,14 +327,14 @@ void SimulationNode::SimulationThreadFunc(ActiveNode* nodePtr)
         // Reset our packet, better safe than sorry
         packet.socketFD = 0;
         packet.length = 0;
-        
+
         if (node->m_boatType == 0){
             node->sendActuatorDataSail( simulatorFD);
         }
         else if (node->m_boatType ==1){
             node->sendActuatorDataWing ( simulatorFD );
         }
-        
+
         //
         node->sendWaypoint( simulatorFD );
     }
