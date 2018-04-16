@@ -23,6 +23,9 @@ public:
     DataCollectionStopMsg(NodeID destinationID)
             :Message(MessageType::DataCollectionStop, NodeID::None, destinationID) { }
 
+    DataCollectionStopMsg()
+        	:Message(MessageType::DataCollectionStop, NodeID::None, NodeID::None) { }
+
     DataCollectionStopMsg(MessageDeserialiser deserialiser)
             :Message(deserialiser)
     { }

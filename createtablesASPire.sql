@@ -296,6 +296,17 @@ CREATE TABLE config_line_follow (
   tacking_distance DOUBLE
 );
 
+-- -----------------------------------------------------
+-- Table MarineSensors config
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS "config_marine_sensors";
+CREATE TABLE config_marine_sensors (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  loop_time DOUBLE,
+  time_interval INTEGER,
+  measure_at_checkpoint BOOLEAN
+);
+
 
 -- -----------------------------------------------------
 -- Table Solar Tracker config

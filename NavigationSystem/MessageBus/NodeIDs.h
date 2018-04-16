@@ -53,7 +53,8 @@ enum class NodeID {
 	CANAIS,
 	AISProcessing,
 	MarineSensor,
-    MarineSensorCANTransmission
+    MarineSensorCANTransmission,
+	DataCollectionMgr
 };
 
 inline std::string nodeToString(NodeID id)
@@ -127,7 +128,9 @@ inline std::string nodeToString(NodeID id)
 		case NodeID::MarineSensor:
 		return "MarineSensor";
         case NodeID::MarineSensorCANTransmission:
-            return "MarineSensorCANTransmission";
+        return "MarineSensorCANTransmission";
+		case NodeID::DataCollectionMgr:
+        return "DataCollectionMgr";
 	}
 	return "";
 }

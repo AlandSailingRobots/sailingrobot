@@ -104,7 +104,9 @@ SYSTEM_SERVICES_SRC  		= SystemServices/Logger.cpp SystemServices/SysClock.cpp S
 WORLD_STATE_SRC				= WorldState/VesselStateNode.cpp WorldState/StateEstimationNode.cpp \
 								WorldState/WindStateNode.cpp
 
-export CORE_SRC 			= $(DATABASE_SRC) $(HTTP_SYNC_SRC) $(LOW_LEVEL_CONTROLLERS) $(MATH_SRC) \
+DATA_COLLECTION_SRC			= DataCollection/DataCollectionMgrNode.cpp
+
+export CORE_SRC 			= $(DATA_COLLECTION_SRC) $(DATABASE_SRC) $(HTTP_SYNC_SRC) $(LOW_LEVEL_CONTROLLERS) $(MATH_SRC) \
 								$(MESSAGE_BUS_SRC) $(NETWORK_SRC) $(NAVIGATION_SRC) $(SYSTEM_SERVICES_SRC) \
 								$(WORLD_STATE_SRC)
 
@@ -175,10 +177,10 @@ unit_tests: $(BUILD_DIR)
 integration_tests_ASPire: $(BUILD_DIR)
 	$(MAKE) -f integration_tests_ASPire.mk
 	$(MAKE) -f ais_integration_test.mk
-	
+
 ## Builid the test for the marine sensors
 marine_sensor_test: $(BUILD_DIR)
-	$(MAKE) -f marine_sensor_test.mk	
+	$(MAKE) -f marine_sensor_test.mk
 
 ## Build HTTPSync Test
 HTTPSync_test: $(BUILD_DIR)
