@@ -11,6 +11,7 @@
 #include <Canbus.h>
 #include <MsgParsing.h>
 #include <canbus_error_defs.h>
+#include <canbus_id_defs.h>
 #include <CanMessageHandler.h>
 
 #define I2C_ADDRESS_PH 99
@@ -116,7 +117,7 @@ void handleSensorReadingTimer() {
 
 void sendMarineSensorData (){
 
-    CanMessageHandler messageHandler(711);
+    CanMessageHandler messageHandler(MSG_ID_MARINE_SENSOR_DATA);
 
     uint8_t phResponseCode, conductivetyResponseCode, temperatureResponseCode;
 

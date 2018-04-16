@@ -30,6 +30,7 @@ public:
     CANMarineSensorTransmissionNode(MessageBus& msgBus, CANService& canService);
     ~CANMarineSensorTransmissionNode();
 
+    bool init();
     void processMessage(const Message *message);
 
 private:

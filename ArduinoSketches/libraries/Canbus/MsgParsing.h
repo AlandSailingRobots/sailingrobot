@@ -2,27 +2,7 @@
 #define msgparsing__h
 
 #include <stdint.h>
-
-struct CanMsg
-{
-	uint32_t id;
-	struct
-	{
-		//uint8_t rtr;		//Always zero in J1939
-		uint8_t ide;
-		uint8_t length;
-	} header;
-	uint8_t data[8];
-};
-struct N2kMsg
-{
-	uint32_t PGN;
-	uint8_t Priority;
-	uint8_t Source;
-	uint8_t Destination;
-	int DataLen;
-	uint8_t Data[223];
-};
+#include "../../../NavigationSystem/Hardwares/CAN_Services/N2kMsg.h"
 
 //General
 void IdToN2kMsg(N2kMsg &NMsg, uint32_t &id);

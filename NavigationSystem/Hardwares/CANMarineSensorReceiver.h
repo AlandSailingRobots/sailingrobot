@@ -22,9 +22,9 @@
 #include "Hardwares/CAN_Services/CANService.h"
 #include "Hardwares/CAN_Services/CANFrameReceiver.h"
 
-class CANDatalistener : public CANFrameReceiver {
+class CANMarineSensorReceiver : public CANFrameReceiver {
 public:
-    CANDatalistener(MessageBus& messageBus, CANService& canService); //from CANArduinoNode,
+    CANMarineSensorReceiver(MessageBus& messageBus, CANService& canService); //from CANArduinoNode,
     
   virtual void processFrame(CanMsg& msg);
 

@@ -149,6 +149,11 @@ export HW_NODES_JANET_SRC 	= Hardwares/CV7Node.cpp Hardwares/ArduinoNode.cpp
 export XBEE_NETWORK_SRC     = Network/DataLink.cpp Network/LinuxSerialDataLink.cpp Network/XbeePacketNetwork.cpp \
                             	Xbee/Xbee.cpp
 
+# Common sources
+export COMMON_SRC           = /home/dkarlsso/sailingrobot/ArduinoSketches/libraries/common/CanMessageHandler.cpp \
+                              /home/dkarlsso/sailingrobot/ArduinoSketches/libraries/common/CanUtility.cpp
+
+
 
 ###############################################################################
 # Rules

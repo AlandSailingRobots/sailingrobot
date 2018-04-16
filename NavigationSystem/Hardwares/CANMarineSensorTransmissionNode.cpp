@@ -19,6 +19,11 @@ CANMarineSensorTransmissionNode::CANMarineSensorTransmissionNode(MessageBus &msg
 
 CANMarineSensorTransmissionNode::~CANMarineSensorTransmissionNode() {}
 
+
+bool CANMarineSensorTransmissionNode::init() {
+    return true;
+}
+
 void CANMarineSensorTransmissionNode::processMessage(const Message* message) {
 
     if(message->messageType() == MessageType::DataCollectionStop) {
