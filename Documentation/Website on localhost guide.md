@@ -84,6 +84,8 @@ Install and enable apache, mysql (mariadb), PHP and phpMyAdmin
     */etc/httpd/conf/httpd.conf*
     ```sh
     ...
+    ServerName localhost
+    ...
     # Load modules for proxy
     LoadModule proxy_module modules/mod_proxy.so
     LoadModule proxy_fcgi_module modules/mod_proxy_fcgi.so
