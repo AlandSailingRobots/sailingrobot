@@ -5,7 +5,7 @@
 
 #include "CanUtility.h"
 
-double CanUtility::mapInterval(double val, double fromMin, double fromMax, double toMin, double toMax) {
+float CanUtility::mapInterval(float val, float fromMin, float fromMax, float toMin, float toMax) {
     return (val - fromMin) / (fromMax - fromMin) * (toMax - toMin) + toMin;
 }
 

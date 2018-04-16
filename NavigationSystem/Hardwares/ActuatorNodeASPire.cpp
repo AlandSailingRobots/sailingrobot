@@ -11,9 +11,8 @@
 *			700
 *
 ***************************************************************************************/
-
-#include <CanUtility.h>
-#include "Hardwares/ActuatorNodeASPire.h"
+#include "ActuatorNodeASPire.h"
+#include "../../ArduinoSketches/libraries/common/CanUtility.h"
 
 
 ActuatorNodeASPire::ActuatorNodeASPire(MessageBus& msgBus, CANService& CANService)
