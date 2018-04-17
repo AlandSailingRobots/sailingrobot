@@ -97,6 +97,9 @@ void SimulationNode::processMessage(const Message* msg)
     case MessageType::ServerConfigsReceived:
 		updateConfigsFromDB();
 	    break;
+	case MessageType::MarineSensorData:
+
+		break;
     default:
         return;
     }
@@ -133,6 +136,14 @@ void SimulationNode::processWaypointMessage(WaypointDataMsg* msg)
 	waypoint.prevRadius = msg->prevRadius();
 
     m_nextDeclination = msg->nextDeclination();
+}
+
+void SimulationNode::processMarineSensorDataMessage(MarineSensorDataMsg* msg)
+{
+	marineSensorData.temperature = msg->temperature();
+	marineSensorData.conductivity = msg->conductivity();
+	marineSensorData.ph = msg->ph();
+	marineSensorData.salinity = msg->salinity();
 }
 
 void SimulationNode::createCompassMessage()

@@ -40,6 +40,7 @@
 #include "Messages/WaypointDataMsg.h"
 #include "Messages/CompassDataMsg.h"
 #include "Messages/GPSDataMsg.h"
+#include "Messages/MarineSensorDataMsg.h"
 #include "Messages/WindDataMsg.h"
 #include "SystemServices/Logger.h"
 #include "SystemServices/SysClock.h"
@@ -49,7 +50,7 @@
 
 
 enum SimulatorPacket : unsigned char {
-    SailBoatData = 0, WingBoatData, AISData, CameraData, WingBoatCmd, SailBoatCmd, WaypointData};
+    SailBoatData = 0, WingBoatData, AISData, CameraData, WingBoatCmd, SailBoatCmd, WaypointData, MarineSensorData};
 
 
 struct SailBoatDataPacket_t {
@@ -165,6 +166,11 @@ private:
     void processRudderCommandMessage(RudderCommandMsg* msg);
 
     ///----------------------------------------------------------------------------------
+    /// Stores marine sensor data from a MarineSensorDataMsg.
+    ///----------------------------------------------------------------------------------
+    void processMarineSensorDataMessage(MarineSensorDataMsg* msg);
+
+    ///----------------------------------------------------------------------------------
     /// Process a conventionnal sail boat data message
     ///----------------------------------------------------------------------------------
     void processSailBoatData( TCPPacket_t& packet );
@@ -230,6 +236,7 @@ private:
     ActuatorDataWingPacket_t actuatorDataWing;
     ActuatorDataSailPacket_t actuatorDataSail;
     WaypointPacket_t waypoint;
+    MarineSensorDataPacket_t marineSensorData;
 
     std::mutex m_lock;
 };
