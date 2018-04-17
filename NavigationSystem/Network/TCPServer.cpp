@@ -4,10 +4,10 @@
  * 		TCPServer.cpp
  *
  * Purpose:
- *		
+ *
  *
  * License:
- *      This file is subject to the terms and conditions defined in the file 
+ *      This file is subject to the terms and conditions defined in the file
  *      'LICENSE.txt', which is part of this source code package.
  *
  ***************************************************************************************/
@@ -55,17 +55,17 @@ int TCPServer::start( int port )
 
     serverSocket = socket( AF_INET, SOCK_STREAM, 0 );
 
-    if( serverSocket < 0 ) 
-    { 
-        Logger::error( "Failed to create the server socket!" ); 
-        return ERROR; 
+    if( serverSocket < 0 )
+    {
+        Logger::error( "Failed to create the server socket!" );
+        return ERROR;
     }
 
     rc = setsockopt( serverSocket, SOL_SOCKET, SO_REUSEADDR, (char*)&optionOn, sizeof(optionOn) );
 
     if( rc < 0 )
     {
-        Logger::error( "Failed to change the server socket options!" ); 
+        Logger::error( "Failed to change the server socket options!" );
         close( serverSocket );
         serverSocket = -1;
         return ERROR;
@@ -73,16 +73,16 @@ int TCPServer::start( int port )
 
     // Make the socket nonblocking, so we don't block when listening for new clients
     rc = fcntl( serverSocket, F_SETFL, fcntl(serverSocket, F_GETFL, 0) | O_NONBLOCK );
-    
-    if( rc < 0 ) 
-    { 
-        Logger::error( "Failed to make the server socket non-blocking!" ); 
+
+    if( rc < 0 )
+    {
+        Logger::error( "Failed to make the server socket non-blocking!" );
         close( serverSocket );
         serverSocket = -1;
-        return ERROR; 
+        return ERROR;
     }
 
-        // Bind the socket 
+        // Bind the socket
     memset( &serverAddr, 0, sizeof(serverAddr) );
     serverAddr.sin_family = AF_INET;
     serverAddr.sin_addr.s_addr = htonl( INADDR_ANY );
@@ -98,7 +98,7 @@ int TCPServer::start( int port )
         return ERROR;
     }
 
-    // Make the socket listen for incoming connections 
+    // Make the socket listen for incoming connections
     rc = listen( serverSocket, 32 );
 
     if( rc < 0 )
@@ -170,7 +170,7 @@ void TCPServer::acceptConnections()
 
         eventCount = select( highestFD + 1, &tmp, NULL, NULL, &timeout );
 
-        if(eventCount == -1) 
+        if(eventCount == -1)
         {
             Logger::error( "Failed to process server socket events!" );
         }
@@ -184,7 +184,7 @@ void TCPServer::acceptConnections()
             do {
                 clientFD = accept( serverSocket, NULL, NULL );
                 rc = setupClient( clientFD );
-                
+
             } while( rc <= 0 );
         }
     }
@@ -255,10 +255,8 @@ int TCPServer::readPacket( TCPPacket_t& packet, uint32_t timeout )
                         return 1;
                     }
                     else{
-                        std::string lengthString = std::to_string(length);
-                        std::string bytesReadString = std::to_string(bytesRead);
-                        Logger::info("invalid packet, length: ", lengthString);
-                        Logger::info("invalid packet, bytes read: ", bytesReadString);
+                        Logger::info("invalid packet, length: %i", length);
+                        Logger::info("invalid packet, bytes read: %i", bytesRead);
                     }
                 }
             }
