@@ -98,7 +98,7 @@ void SimulationNode::processMessage(const Message* msg)
 		updateConfigsFromDB();
 	    break;
 	case MessageType::MarineSensorData:
-
+		processMarineSensorDataMessage((MarineSensorDataMsg) *msg);
 		break;
     default:
         return;
@@ -160,8 +160,14 @@ void SimulationNode::createGPSMessage()
 
 void SimulationNode::createWindMessage()
 {
-    MessagePtr windData = std::make_unique<WindDataMsg>( WindDataMsg(m_WindDir, m_WindSpeed, 21) );
+    MessagePtr windData = std::make_unique<WindDataMsg>( WindDataMsg(m_WindDir, m_WindSpeed, 20) );
     m_MsgBus.sendMessage( std::move(windData) );
+}
+
+void SimulationNode::createMarineSensorMessage()
+{
+    MessagePtr marineSensorData = std::make_unique<MarineSensorDataMsg>( MarineSensorDataMsg(20, 0.75, 5, 1.454) );
+    m_MsgBus.sendMessage( std::move(marineSensorData) );
 }
 
 
@@ -195,6 +201,7 @@ void SimulationNode::processSailBoatData( TCPPacket_t& packet )
         createCompassMessage();
         createGPSMessage();
         createWindMessage();
+		createMarineSensorMessage();
     }
 }
 
@@ -284,6 +291,12 @@ void SimulationNode::sendActuatorDataSail( int socketFD)
 void SimulationNode::sendWaypoint( int socketFD )
 {
 	server.sendData( socketFD, &waypoint, sizeof(WaypointPacket_t) );
+}
+
+///--------------------------------------------------------------------------------------
+void SimulationNode::sendMarineSensor( int socketFD )
+{
+	server.sendData( socketFD, &marineSensorData, sizeof(MarineSensorDataPacket_t) );
 }
 
 ///--------------------------------------------------------------------------------------

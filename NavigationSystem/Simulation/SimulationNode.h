@@ -206,6 +206,11 @@ private:
     void sendWaypoint( int socketFD );
 
     ///----------------------------------------------------------------------------------
+    /// Sends the marine sensor data.
+    ///----------------------------------------------------------------------------------
+    void sendMarineSensor( int socketFD );
+
+    ///----------------------------------------------------------------------------------
     /// Communicate with the simulation receive sensor data and send actuator data
     ///----------------------------------------------------------------------------------
     static void SimulationThreadFunc(ActiveNode* nodePtr);
@@ -213,6 +218,7 @@ private:
     void createCompassMessage();
     void createGPSMessage();
     void createWindMessage();
+    void createMarineSensorMessage()
 
     float   m_RudderCommand;
     float   m_SailCommand;
