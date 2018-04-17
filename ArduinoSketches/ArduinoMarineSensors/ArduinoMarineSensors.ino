@@ -57,11 +57,6 @@ const int SENSOR_READ_TIME[] = {
 
 const int SENSOR_INPUT_SIZE = 20;
 
-const int INT8_SIZE = 255;
-const int INT16_SIZE = 65535;
-const long int INT32_SIZE = 4294967295;
-
-
 const int SENSOR_PH_INTERVAL_MIN = 0;
 const int SENSOR_PH_INTERVAL_MAX = 14;
 

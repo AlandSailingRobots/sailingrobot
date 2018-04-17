@@ -20,7 +20,7 @@ public:
     * Note: This function has to be kept identical to the corresponding Arduino-function
     *       (also, it has no bracketing but is essentially a linear projection)
     */
-    static float mapInterval(float val, float fromMin, float fromMax, float toMin, float toMax);
+    static double mapInterval(double val, double fromMin, double fromMax, double toMin, double toMax);
 
     /**
      * Calculates maxvalue of a no of bytes.
