@@ -237,6 +237,7 @@ void SimulationNode::processWingBoatData( TCPPacket_t& packet )
         createCompassMessage();
         createGPSMessage();
         createWindMessage();
+		createMarineSensorMessage();
     }
 }
 
@@ -344,6 +345,10 @@ void SimulationNode::SimulationThreadFunc(ActiveNode* nodePtr)
                 //Logger::info("CameraData from simulator");
                 node->processVisualField( packet );
                 break;
+
+			case SimulatorPacket::MarineSensorData:
+	            node->processSailBoatData( packet );
+	            break;
 
             // unknown or deformed packet
             default:
