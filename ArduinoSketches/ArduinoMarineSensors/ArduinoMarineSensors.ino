@@ -32,21 +32,10 @@ const int I2C_ADRESSES[] = {I2C_ADDRESS_PH,
                             I2C_ADDRESS_CONDUCTIVETY,
                             I2C_ADDRESS_TEMPERATURE};
 
-const int SENSOR_ERROR_CODES[] = {1,
-                                  2,
-                                  254,
-                                  255};
-
 const int RESPONSE_STATUS_SUCCESS = 1;
 const int RESPONSE_STATUS_SYNTAX_ERROR = 2;
 const int RESPONSE_STATUS_NOT_READY = 254;
 const int RESPONSE_STATUS_NO_DATA = 255;
-
-const int SENSOR_ERROR_CODE[3][5] = {
-        {ERROR_SENSOR_PH_SYNTAX,ERROR_SENSOR_PH_NOT_READY,ERROR_SENSOR_PH_NO_DATA},
-        {ERROR_SENSOR_CONDUCTIVETY_SYNTAX,ERROR_SENSOR_CONDUCTIVETY_NOT_READY,ERROR_SENSOR_CONDUCTIVETY_NO_DATA},
-        {ERROR_SENSOR_TEMPERATURE_SYNTAX,ERROR_SENSOR_TEMPERATURE_NOT_READY,ERROR_SENSOR_TEMPERATURE_NO_DATA}
-};
 
 const int SENSOR_READ_TIME[] = {
         900,    // Time for PH sensor to read
@@ -162,12 +151,17 @@ float getTemperature(uint8_t& responseStatusCode) {
 
 void processCANMessage (CanMsg& msg){
 
-    if (msg.id == 710) {
+    CanMessageHandler messageHandler(msg);
+
+    if (messageHandler.getMessageId() == MSG_ID_MARINE_SENSOR_REQUEST) {
         sendMarineSensorData();
         lastReadingTimeInSeconds = millis()/1000;
 
-        if(msg.data[0]) {
-            sensorReadingIntervalInSeconds = ((long int)msg.data[4]<<24 | (long int)msg.data[3]<<16 | msg.data[2]<<8 | msg.data[1]);
+
+        bool takeContinousReadings = messageHandler.getData(REQUEST_CONTINOUS_READINGS_DATASIZE);
+
+        if(takeContinousReadings) {
+            sensorReadingIntervalInSeconds = messageHandler.getData(REQUEST_READING_TIME_DATASIZE);
         }
         else {
             sensorReadingIntervalInSeconds = -1;

@@ -19,21 +19,23 @@ void CANMarineSensorReceiver::processFrame (CanMsg& msg) {
 
     CanMessageHandler handler(msg);
 
-    double ph = handler.getMappedData(SENSOR_PH_DATASIZE,
-                                     SENSOR_PH_INTERVAL_MIN, SENSOR_PH_INTERVAL_MAX);
+    if(handler.getMessageId() == MSG_ID_MARINE_SENSOR_DATA) {
+        double ph = handler.getMappedData(SENSOR_PH_DATASIZE,
+                                          SENSOR_PH_INTERVAL_MIN, SENSOR_PH_INTERVAL_MAX);
 
-    double conductivety = handler.getMappedData(SENSOR_CONDUCTIVETY_DATASIZE,
-                                               SENSOR_CONDUCTIVETY_INTERVAL_MIN, SENSOR_CONDUCTIVETY_INTERVAL_MAX);
+        double conductivety = handler.getMappedData(SENSOR_CONDUCTIVETY_DATASIZE,
+                                                    SENSOR_CONDUCTIVETY_INTERVAL_MIN, SENSOR_CONDUCTIVETY_INTERVAL_MAX);
 
-    double temp = handler.getMappedData(SENSOR_TEMPERATURE_DATASIZE,
-                                       SENSOR_TEMPERATURE_INTERVAL_MIN, SENSOR_TEMPERATURE_INTERVAL_MAX);
-    float salinity = Utility::calculateSalinity (temp, conductivety);
+        double temp = handler.getMappedData(SENSOR_TEMPERATURE_DATASIZE,
+                                            SENSOR_TEMPERATURE_INTERVAL_MIN, SENSOR_TEMPERATURE_INTERVAL_MAX);
+        float salinity = Utility::calculateSalinity (temp, conductivety);
 
-    MessagePtr marineSensorDataMsg = std::make_unique<MarineSensorDataMsg>(static_cast<float>(temp), static_cast<float>(conductivety), static_cast<float>(ph), salinity);
-    m_msgBus.sendMessage(std::move(marineSensorDataMsg));
+        MessagePtr marineSensorDataMsg = std::make_unique<MarineSensorDataMsg>(static_cast<float>(temp), static_cast<float>(conductivety), static_cast<float>(ph), salinity);
+        m_msgBus.sendMessage(std::move(marineSensorDataMsg));
 
 
-    if(handler.getError() > 0) {
-        Logger::error("Error from marine sensors, error code: %d", handler.getError());
+        if(handler.getErrorMessage() > 0) {
+            Logger::error("Error from marine sensors, error code: %d", handler.getErrorMessage());
+        }
     }
 }
