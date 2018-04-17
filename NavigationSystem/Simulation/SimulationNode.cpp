@@ -162,13 +162,18 @@ void SimulationNode::createGPSMessage()
 
 void SimulationNode::createWindMessage()
 {
-    MessagePtr windData = std::make_unique<WindDataMsg>( WindDataMsg(m_WindDir, m_WindSpeed, 20) );
+    MessagePtr windData = std::make_unique<WindDataMsg>( WindDataMsg(m_WindDir, m_WindSpeed, 21) );
     m_MsgBus.sendMessage( std::move(windData) );
 }
 
 void SimulationNode::createMarineSensorMessage()
 {
-    MessagePtr marineSensorData = std::make_unique<MarineSensorDataMsg>( MarineSensorDataMsg(20, 0.75, 5, 1.454) );
+	float temperature = rand() % 45 - 5;
+	float conductivity = rand() % 200000 + 5;
+	float ph = rand() % 15;
+	float salinity = Utility::calculateSalinity(temperature, conductivity);
+    MessagePtr marineSensorData = std::make_unique<MarineSensorDataMsg>(
+		MarineSensorDataMsg(temperature, conductivity, ph, salinity) );
     m_MsgBus.sendMessage( std::move(marineSensorData) );
 }
 
