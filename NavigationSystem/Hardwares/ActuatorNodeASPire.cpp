@@ -12,7 +12,7 @@
 *
 ***************************************************************************************/
 #include "ActuatorNodeASPire.h"
-#include "CanBusCommon/CanUtility.h"
+#include "CAN_Services/CanBusCommon/CanUtility.h"
 
 
 ActuatorNodeASPire::ActuatorNodeASPire(MessageBus& msgBus, CANService& CANService)

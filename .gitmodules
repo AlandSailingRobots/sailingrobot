@@ -7,6 +7,6 @@
 [submodule "ArduinoSketches/libraries/CanBusCommon"]
 	path = ArduinoSketches/libraries/CanBusCommon
 	url = https://github.com/AlandSailingRobots/CanBusCommon.git
-[submodule "NavigationSystem/Hardwares/CanBusCommon"]
-	path = NavigationSystem/Hardwares/CanBusCommon
+[submodule "NavigationSystem/Hardwares/CAN_Services/CanBusCommon"]
+	path = NavigationSystem/Hardwares/CAN_Services/CanBusCommon
 	url = https://github.com/AlandSailingRobots/CanBusCommon.git

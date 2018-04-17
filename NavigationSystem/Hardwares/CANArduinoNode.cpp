@@ -13,7 +13,7 @@
 ***************************************************************************************/
 
 #include "CANArduinoNode.h"
-#include "CanBusCommon/CanUtility.h"
+#include "CAN_Services/CanBusCommon/CanUtility.h"
 #include "MessageBus/MessageTypes.h"
 
 const int DATA_OUT_OF_RANGE = -2000;

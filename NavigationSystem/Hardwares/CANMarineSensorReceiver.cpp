@@ -4,9 +4,8 @@
 #include "Math/Utility.h"
 #include "Messages/MarineSensorDataMsg.h"
 #include "SystemServices/Logger.h"
-#include "CanBusCommon/canbus_id_defs.h"
-#include "CanBusCommon/CanMessageHandler.h"
-#include "CanBusCommon/canbus_datamappings_defs.h"
+#include "CAN_Services/CanBusCommon/canbus_defs.h"
+#include "CAN_Services/CanBusCommon/CanMessageHandler.h"
 
 
 
@@ -34,10 +33,7 @@ void CANMarineSensorReceiver::processFrame (CanMsg& msg) {
     m_msgBus.sendMessage(std::move(marineSensorDataMsg));
 
 
-
     if(handler.getError() > 0) {
         Logger::error("Error from marine sensors, error code: %d", handler.getError());
     }
-
-
 }

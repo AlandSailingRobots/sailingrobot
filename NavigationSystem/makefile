@@ -150,7 +150,7 @@ export XBEE_NETWORK_SRC     = Network/DataLink.cpp Network/LinuxSerialDataLink.c
                             	Xbee/Xbee.cpp
 
 # CanbusCommon files
-export CANBUS_COMMON_SRC     = Hardwares/CanBusCommon/CanUtility.cpp Hardwares/CanBusCommon/CanMessageHandler.cpp
+export CANBUS_COMMON_SRC     = Hardwares/CAN_Services/CanBusCommon/CanUtility.cpp Hardwares/CAN_Services/CanBusCommon/CanMessageHandler.cpp
 
 
 ###############################################################################
