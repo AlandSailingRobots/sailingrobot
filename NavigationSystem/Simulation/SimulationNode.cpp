@@ -29,6 +29,7 @@ SimulationNode::SimulationNode(MessageBus& msgBus, bool boatType)
     msgBus.registerNode(*this, MessageType::WingSailCommand);
     msgBus.registerNode(*this, MessageType::RudderCommand);
     msgBus.registerNode(*this, MessageType::WaypointData);
+	msgBus.registerNode(*this, MessageType::MarineSensorData);
     msgBus.registerNode(*this, MessageType::ServerConfigsReceived);
 }
 
@@ -43,6 +44,7 @@ SimulationNode::SimulationNode(MessageBus& msgBus, bool boatType, CollidableMgr*
     msgBus.registerNode(*this, MessageType::WingSailCommand);
     msgBus.registerNode(*this, MessageType::RudderCommand);
     msgBus.registerNode(*this, MessageType::WaypointData);
+	msgBus.registerNode(*this, MessageType::MarineSensorData);
     msgBus.registerNode(*this, MessageType::ServerConfigsReceived);
 }
 
@@ -98,7 +100,7 @@ void SimulationNode::processMessage(const Message* msg)
 		updateConfigsFromDB();
 	    break;
 	case MessageType::MarineSensorData:
-		processMarineSensorDataMessage((MarineSensorDataMsg) *msg);
+		processMarineSensorDataMessage((MarineSensorDataMsg*) msg);
 		break;
     default:
         return;
@@ -361,5 +363,6 @@ void SimulationNode::SimulationThreadFunc(ActiveNode* nodePtr)
 
         //
         node->sendWaypoint( simulatorFD );
+		node->sendMarineSensor( simulatorFD );
     }
 }
