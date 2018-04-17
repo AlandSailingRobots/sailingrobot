@@ -116,6 +116,14 @@ struct WaypointPacket_t {
   int prevRadius;
 }__attribute__((packed));
 
+struct MarineSensorDataPacket_t {
+  unsigned char simulatorPacket = MarineSensorData;
+  float temperature;
+  float conductivity;
+  float ph;
+  float salinity;
+}__attribute__((packed));
+
 
 class SimulationNode : public ActiveNode {
 public:
