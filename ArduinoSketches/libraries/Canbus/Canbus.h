@@ -5,9 +5,7 @@
 
 #include "mcp2515.h"
 #include "MsgParsing.h"
-#include "canbus_error_defs.h"
-#include "canbus_global_defs.h"
-#include "canbus_id_defs.h"
+#include "CanBusCommon/canbus_defs.h"
 
 class CanbusClass
 {

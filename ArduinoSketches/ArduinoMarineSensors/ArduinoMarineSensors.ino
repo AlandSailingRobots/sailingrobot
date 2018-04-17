@@ -10,8 +10,6 @@
 
 #include <Canbus.h>
 #include <MsgParsing.h>
-#include <canbus_error_defs.h>
-#include <canbus_id_defs.h>
 #include <CanMessageHandler.h>
 
 #define I2C_ADDRESS_PH 99
@@ -58,20 +56,11 @@ const int SENSOR_READ_TIME[] = {
 
 const int SENSOR_INPUT_SIZE = 20;
 
-const int SENSOR_PH_INTERVAL_MIN = 0;
-const int SENSOR_PH_INTERVAL_MAX = 14;
-
 const int PH_PROBABLE_INTERVAL_MIN = 5;
 const int PH_PROBABLE_INTERVAL_MAX = 8;
 
-const int SENSOR_CONDUCTIVETY_INTERVAL_MIN = 5;
-const long int SENSOR_CONDUCTIVETY_INTERVAL_MAX = 200000;
-
 const int CONDUCTIVETY_PROBABLE_INTERVAL_MIN = 2000;
 const int CONDUCTIVETY_PROBABLE_INTERVAL_MAX = 17000;
-
-const int SENSOR_TEMPERATURE_INTERVAL_MIN = -5;
-const int SENSOR_TEMPERATURE_INTERVAL_MAX = 40;
 
 const int TEMPERATURE_PROBABLE_INTERVAL_MIN = -2;
 const int TEMPERATURE_PROBABLE_INTERVAL_MAX = 35;
@@ -116,13 +105,13 @@ void sendMarineSensorData (){
 
     uint8_t phResponseCode, conductivetyResponseCode, temperatureResponseCode;
 
-    messageHandler.encodeMappedMessage(1, getPHValue(phResponseCode),
+    messageHandler.encodeMappedMessage(SENSOR_PH_DATASIZE, getPHValue(phResponseCode),
                                        SENSOR_PH_INTERVAL_MIN, SENSOR_PH_INTERVAL_MAX);
 
-    messageHandler.encodeMappedMessage(4, getConductivety(conductivetyResponseCode),
+    messageHandler.encodeMappedMessage(SENSOR_CONDUCTIVETY_DATASIZE, getConductivety(conductivetyResponseCode),
                                        SENSOR_CONDUCTIVETY_INTERVAL_MIN, SENSOR_CONDUCTIVETY_INTERVAL_MAX);
 
-    messageHandler.encodeMappedMessage(2, getTemperature(temperatureResponseCode) ,
+    messageHandler.encodeMappedMessage(SENSOR_TEMPERATURE_DATASIZE, getTemperature(temperatureResponseCode) ,
                                        SENSOR_TEMPERATURE_INTERVAL_MIN, SENSOR_TEMPERATURE_INTERVAL_MAX);
     messageHandler.setErrorMessage(getErrorCode(phResponseCode, conductivetyResponseCode, temperatureResponseCode));
 

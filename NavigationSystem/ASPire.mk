@@ -12,7 +12,7 @@
 ###############################################################################
 
 # Source files
-SRC						= main_ASPire.cpp $(CORE_SRC) $(COLLIDABLE_MGR_SRC)
+SRC						= main_ASPire.cpp $(CORE_SRC) $(COLLIDABLE_MGR_SRC) $(CANBUS_COMMON_SRC)
 
 ifeq ($(USE_LNM),1)
 SRC 					+= $(LNM_SRC)
@@ -30,10 +30,6 @@ endif
 
 # Object files
 OBJECTS = $(addprefix $(BUILD_DIR)/, $(SRC:.cpp=.o))
-
-
-
-OBJECTS += $(COMMON_SRC:.cpp=.o)
 
 ###############################################################################
 # Rules

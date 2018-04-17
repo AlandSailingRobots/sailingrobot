@@ -90,7 +90,7 @@ HTTP_SYNC_SRC        		= HTTPSync/HTTPSyncNode.cpp
 LOW_LEVEL_CONTROLLERS 		= LowLevelControllers/CourseRegulatorNode.cpp LowLevelControllers/SailControlNode.cpp \
 								LowLevelControllers/WingsailControlNode.cpp
 
-MATH_SRC             		= Math/CourseCalculation.cpp Math/CourseMath.cpp Math/Utility.cpp ../ArduinoSketches/libraries/common/CanUtility.cpp
+MATH_SRC             		= Math/CourseCalculation.cpp Math/CourseMath.cpp Math/Utility.cpp
 
 MESSAGE_BUS_SRC      		= MessageBus/MessageBus.cpp MessageBus/ActiveNode.cpp \
                             	MessageBus/MessageSerialiser.cpp MessageBus/MessageDeserialiser.cpp
@@ -149,10 +149,8 @@ export HW_NODES_JANET_SRC 	= Hardwares/CV7Node.cpp Hardwares/ArduinoNode.cpp
 export XBEE_NETWORK_SRC     = Network/DataLink.cpp Network/LinuxSerialDataLink.cpp Network/XbeePacketNetwork.cpp \
                             	Xbee/Xbee.cpp
 
-# Common sources
-export COMMON_SRC           = /home/dkarlsso/sailingrobot/ArduinoSketches/libraries/common/CanMessageHandler.cpp \
-                              /home/dkarlsso/sailingrobot/ArduinoSketches/libraries/common/CanUtility.cpp
-
+# CanbusCommon files
+export CANBUS_COMMON_SRC     = Hardwares/CanBusCommon/CanUtility.cpp Hardwares/CanBusCommon/CanMessageHandler.cpp
 
 
 ###############################################################################
