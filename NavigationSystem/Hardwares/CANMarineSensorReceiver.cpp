@@ -4,18 +4,10 @@
 #include "Math/Utility.h"
 #include "Messages/MarineSensorDataMsg.h"
 #include "SystemServices/Logger.h"
-#include "../ArduinoSketches/libraries/common/canbus_id_defs.h"
-#include "../ArduinoSketches/libraries/common/CanMessageHandler.h"
+#include "CanBusCommon/canbus_id_defs.h"
+#include "CanBusCommon/CanMessageHandler.h"
+#include "CanBusCommon/canbus_datamappings_defs.h"
 
-
-const int PH_INTERVAL_MIN = 0;
-const int PH_INTERVAL_MAX = 14;
-
-const int CONDUCTIVETY_INTERVAL_MIN = 5;
-const int CONDUCTIVETY_INTERVAL_MAX = 200000;
-
-const int TEMPERATURE_INTERVAL_MIN = -5;
-const int TEMPERATURE_INTERVAL_MAX = 40;
 
 
 CANMarineSensorReceiver::CANMarineSensorReceiver(MessageBus& messageBus, CANService& canService) :
@@ -28,12 +20,17 @@ void CANMarineSensorReceiver::processFrame (CanMsg& msg) {
 
     CanMessageHandler handler(msg);
 
-    float ph = handler.getMappedData(1,PH_INTERVAL_MIN,PH_INTERVAL_MAX);
-    float conductivety = handler.getMappedData(4,CONDUCTIVETY_INTERVAL_MIN,CONDUCTIVETY_INTERVAL_MAX);
-    float temp = handler.getMappedData(2,TEMPERATURE_INTERVAL_MIN,TEMPERATURE_INTERVAL_MAX);
+    double ph = handler.getMappedData(SENSOR_PH_DATASIZE,
+                                     SENSOR_PH_INTERVAL_MIN, SENSOR_PH_INTERVAL_MAX);
+
+    double conductivety = handler.getMappedData(SENSOR_CONDUCTIVETY_DATASIZE,
+                                               SENSOR_CONDUCTIVETY_INTERVAL_MIN, SENSOR_CONDUCTIVETY_INTERVAL_MAX);
+
+    double temp = handler.getMappedData(SENSOR_TEMPERATURE_DATASIZE,
+                                       SENSOR_TEMPERATURE_INTERVAL_MIN, SENSOR_TEMPERATURE_INTERVAL_MAX);
     float salinity = Utility::calculateSalinity (temp, conductivety);
 
-    MessagePtr marineSensorDataMsg = std::make_unique<MarineSensorDataMsg>(temp, conductivety, ph, salinity);
+    MessagePtr marineSensorDataMsg = std::make_unique<MarineSensorDataMsg>(static_cast<float>(temp), static_cast<float>(conductivety), static_cast<float>(ph), salinity);
     m_msgBus.sendMessage(std::move(marineSensorDataMsg));
 
 

@@ -2,7 +2,7 @@
 #include <SPI.h>
 
 
-void IdToN2kMsg(N2kMsg &NMsg, uint32_t &id)
+void IdToN2kMsg(N2kMsgArd &NMsg, uint32_t &id)
 {
     uint8_t Prio = (id>> 26)& 0x07;
     uint8_t DP = (id >> 24) & 1;
@@ -26,7 +26,7 @@ void IdToN2kMsg(N2kMsg &NMsg, uint32_t &id)
     }
 }
 
-void N2kMsgToId(N2kMsg &NMsg, uint32_t &id)
+void N2kMsgToId(N2kMsgArd &NMsg, uint32_t &id)
 {
     uint32_t Prio = NMsg.Priority;
     uint32_t DP = (NMsg.PGN >> 16) & 0x01;
@@ -49,7 +49,7 @@ void PrintMsg(CanMsg &Msg)
 {
     if(Msg.header.ide)
     {
-        N2kMsg NMsg;
+        N2kMsgArd NMsg;
         IdToN2kMsg(NMsg, Msg.id);
         Serial.print(Msg.id,HEX);
         Serial.print(" ");
@@ -70,7 +70,7 @@ void PrintMsg(CanMsg &Msg)
         Serial.println("Message not extended format");
     }
 }
-void PrintNMEAMsg(N2kMsg &NMsg)
+void PrintNMEAMsg(N2kMsgArd &NMsg)
 {
     Serial.print(NMsg.PGN);
     Serial.print(" Priority: ");	Serial.print((int)NMsg.Priority);
@@ -194,18 +194,18 @@ void PrintNMEAMsg(N2kMsg &NMsg)
         Serial.println("###Not implemented###");
     }
 }
-void ParsePGN59392(N2kMsg &NMsg, uint8_t &Controll, uint8_t &GroupFunction, uint32_t &PGN)		//ISO Acknowledgement
+void ParsePGN59392(N2kMsgArd &NMsg, uint8_t &Controll, uint8_t &GroupFunction, uint32_t &PGN)		//ISO Acknowledgement
 {
     Controll = NMsg.Data[0];
     GroupFunction = NMsg.Data[1];
     PGN = NMsg.Data[5] | ((uint16_t)NMsg.Data[6]<<8) | ((uint32_t)NMsg.Data[7]<<16);
 }
-void ParsePGN59904(N2kMsg &NMsg, uint32_t &PGN)													//ISO Request
+void ParsePGN59904(N2kMsgArd &NMsg, uint32_t &PGN)													//ISO Request
 {
     PGN = NMsg.Data[0] | ((uint16_t)NMsg.Data[1]<<8) | ((uint32_t)NMsg.Data[2]<<16);
 
 }
-void ParsePGN60928(N2kMsg &NMsg, uint32_t &UniqueNumber,				//ISO Address Claim
+void ParsePGN60928(N2kMsgArd &NMsg, uint32_t &UniqueNumber,				//ISO Address Claim
                    uint16_t &ManufacturerCode,
                    uint8_t &DeviceInstance,
                    uint8_t &DeviceFunction,
@@ -223,7 +223,7 @@ void ParsePGN60928(N2kMsg &NMsg, uint32_t &UniqueNumber,				//ISO Address Claim
     IndustryCode = (NMsg.Data[7]>>4)&0x07;
     SystemInstance = NMsg.Data[7] & 0x0f;
 }
-void ParsePGN126996(N2kMsg &NMsg, uint16_t &NMEA2000Version,			//Product Information
+void ParsePGN126996(N2kMsgArd &NMsg, uint16_t &NMEA2000Version,			//Product Information
                     uint16_t &ProductCode,
                     uint8_t (&ModelID)[32],
                     uint8_t (&SoftwareVersionCode)[32],
@@ -245,7 +245,7 @@ void ParsePGN126996(N2kMsg &NMsg, uint16_t &NMEA2000Version,			//Product Informa
     LoadEquivalency = NMsg.Data[133];
 }
 
-void ParsePGN130306(N2kMsg &NMsg, uint8_t &SID, float &WindSpeed,				//WindData
+void ParsePGN130306(N2kMsgArd &NMsg, uint8_t &SID, float &WindSpeed,				//WindData
                     float &WindAngle, uint8_t &Reference)
 {
     SID = NMsg.Data[0];
@@ -256,7 +256,7 @@ void ParsePGN130306(N2kMsg &NMsg, uint8_t &SID, float &WindSpeed,				//WindData
     Reference = NMsg.Data[5] & 0x07;
 }
 
-void ParsePGN130311(N2kMsg &NMsg, uint8_t &SID, uint8_t &TemperatureInstance,	//Environmental Parameters
+void ParsePGN130311(N2kMsgArd &NMsg, uint8_t &SID, uint8_t &TemperatureInstance,	//Environmental Parameters
                     uint8_t &HumidityInstance, float &Temperature,
                     float &Humidity, float &AtmosphericPressure)
 {
@@ -269,7 +269,7 @@ void ParsePGN130311(N2kMsg &NMsg, uint8_t &SID, uint8_t &TemperatureInstance,	//
     tmp = NMsg.Data[6] | ((uint16_t)NMsg.Data[7]<<8);
     AtmosphericPressure = tmp;		//hPa
 }
-void ParsePGN130312(N2kMsg &NMsg, uint8_t &SID, uint8_t &TemperatureInstance,	//Temperature
+void ParsePGN130312(N2kMsgArd &NMsg, uint8_t &SID, uint8_t &TemperatureInstance,	//Temperature
                     uint8_t &TemperatureSource, float &ActualTemperature,
                     float &SetTemperature)
 {
@@ -282,7 +282,7 @@ void ParsePGN130312(N2kMsg &NMsg, uint8_t &SID, uint8_t &TemperatureInstance,	//
     SetTemperature = tmp*0.01;
 }
 
-void ParsePGN130314(N2kMsg &NMsg, uint8_t &SID, uint8_t &PressureInstance,		//ActualPressure
+void ParsePGN130314(N2kMsgArd &NMsg, uint8_t &SID, uint8_t &PressureInstance,		//ActualPressure
                     uint8_t &PressureSource, double &Pressure)
 {
     SID = NMsg.Data[0];

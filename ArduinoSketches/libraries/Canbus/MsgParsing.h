@@ -2,20 +2,20 @@
 #define msgparsing__h
 
 #include <stdint.h>
-#include "../../../NavigationSystem/Hardwares/CAN_Services/N2kMsg.h"
+#include <canbus_defs.h>
 
 //General
-void IdToN2kMsg(N2kMsg &NMsg, uint32_t &id);
-void N2kMsgToId(N2kMsg &NMsg, uint32_t &id);
+void IdToN2kMsg(N2kMsgArd &NMsg, uint32_t &id);
+void N2kMsgToId(N2kMsgArd &NMsg, uint32_t &id);
 
 void PrintMsg(CanMsg &Msg);
-void PrintNMEAMsg(N2kMsg &NMsg);
+void PrintNMEAMsg(N2kMsgArd &NMsg);
 
-void ParsePGN59392(N2kMsg &Msg, uint8_t &Controll, uint8_t &GroupFunction, uint32_t &PGN);		//ISO Acknowledgement
+void ParsePGN59392(N2kMsgArd &Msg, uint8_t &Controll, uint8_t &GroupFunction, uint32_t &PGN);		//ISO Acknowledgement
 
-void ParsePGN59904(N2kMsg &Msg, uint32_t &PGN);													//ISO Request
+void ParsePGN59904(N2kMsgArd &Msg, uint32_t &PGN);													//ISO Request
 
-void ParsePGN60928(N2kMsg &Msg, uint32_t &UniqueNumber,											//ISO Address Claim
+void ParsePGN60928(N2kMsgArd &Msg, uint32_t &UniqueNumber,											//ISO Address Claim
 				   uint16_t &ManufacturerCode,
 				   uint8_t &DeviceInstance,
 				   uint8_t &DeviceFunction,
@@ -24,9 +24,9 @@ void ParsePGN60928(N2kMsg &Msg, uint32_t &UniqueNumber,											//ISO Address 
 				   uint8_t &IndustryCode,
 				   bool &ArbitraryAddressCapable);
 
-void ParsePGN126464(N2kMsg &Msg, uint8_t &FunctionCode, uint32_t &PGN);	//PGN List (Transmit and Receive)
+void ParsePGN126464(N2kMsgArd &Msg, uint8_t &FunctionCode, uint32_t &PGN);	//PGN List (Transmit and Receive)
 
-void ParsePGN126996(N2kMsg &Msg, uint16_t &NMEA2000Version,			//Product Information
+void ParsePGN126996(N2kMsgArd &Msg, uint16_t &NMEA2000Version,			//Product Information
 					uint16_t &ProductCode,
 					uint8_t (&ModelID)[32],
 					uint8_t (&SoftwareVersionCode)[32],
@@ -36,18 +36,18 @@ void ParsePGN126996(N2kMsg &Msg, uint16_t &NMEA2000Version,			//Product Informat
 					uint8_t &LoadEquivalency);
 
 //Windsensor
-void ParsePGN130306(N2kMsg &Msg, uint8_t &SID, float &WindSpeed,				//WindData
+void ParsePGN130306(N2kMsgArd &Msg, uint8_t &SID, float &WindSpeed,				//WindData
 					float &WindAngle, uint8_t &Reference);
 
-void ParsePGN130311(N2kMsg &Msg, uint8_t &SID, uint8_t &TemperatureInstance,	//Environmental Parameters
+void ParsePGN130311(N2kMsgArd &Msg, uint8_t &SID, uint8_t &TemperatureInstance,	//Environmental Parameters
 					uint8_t &HumidityInstance, float &Temperature,
 					float &Humidity, float &AtmosphericPressure);
 
-void ParsePGN130312(N2kMsg &Msg, uint8_t &SID, uint8_t &TemperatureInstance,	//Temperature
+void ParsePGN130312(N2kMsgArd &Msg, uint8_t &SID, uint8_t &TemperatureInstance,	//Temperature
 					uint8_t &TemperatureSource, float &ActualTemperature,
 					float &SetTemperature);
 
-void ParsePGN130314(N2kMsg &Msg, uint8_t &SID, uint8_t &PressureInstance,		//ActualPressure
+void ParsePGN130314(N2kMsgArd &Msg, uint8_t &SID, uint8_t &PressureInstance,		//ActualPressure
 					uint8_t &PressureSource, double &Pressure);
 
 #endif

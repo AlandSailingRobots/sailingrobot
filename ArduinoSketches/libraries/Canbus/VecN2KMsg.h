@@ -8,10 +8,10 @@
 class VecN2kMsg					//circular buffer
 {
 public:
-    bool PushBack(N2kMsg NMsg);
-    bool PopFront(N2kMsg NMsg);
+    bool PushBack(N2kMsgArd NMsg);
+    bool PopFront(N2kMsgArd NMsg);
 
-    N2kMsg Data[100];
+    N2kMsgArd Data[100];
     int Num = 0;
     int In = 0;
     int Out = 0;

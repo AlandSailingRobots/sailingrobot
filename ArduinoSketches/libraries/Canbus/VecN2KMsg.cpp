@@ -2,7 +2,7 @@
 #include "VecN2KMsg.h"
 
 bool
-VecN2kMsg::PushBack(N2kMsg NMsg)
+VecN2kMsg::PushBack(N2kMsgArd NMsg)
 {
     if(Num != 100)
     {
@@ -16,7 +16,7 @@ VecN2kMsg::PushBack(N2kMsg NMsg)
         return false;
 }
 bool
-VecN2kMsg::PopFront(N2kMsg NMsg)
+VecN2kMsg::PopFront(N2kMsgArd NMsg)
 {
     if(Num != 0)
     {
