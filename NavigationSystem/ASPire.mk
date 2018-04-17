@@ -12,7 +12,7 @@
 ###############################################################################
 
 # Source files
-SRC						= main_ASPire.cpp $(CORE_SRC) $(COLLIDABLE_MGR_SRC)
+SRC						= main_ASPire.cpp $(CORE_SRC) $(COLLIDABLE_MGR_SRC) $(CANBUS_COMMON)
 
 ifeq ($(USE_LNM),1)
 SRC 					+= $(LNM_SRC)

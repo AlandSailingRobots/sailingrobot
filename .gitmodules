@@ -4,3 +4,9 @@
 [submodule "NavigationSystem/Libs/json"]
 	path = NavigationSystem/Libs/json
 	url = https://github.com/nlohmann/json.git
+[submodule "ArduinoSketches/libraries/Canbus/CanBusCommon"]
+	path = ArduinoSketches/libraries/Canbus/CanBusCommon
+	url = https://github.com/AlandSailingRobots/CanBusCommon.git
+[submodule "NavigationSystem/Hardwares/CanBusCommon"]
+	path = NavigationSystem/Hardwares/CanBusCommon
+	url = https://github.com/AlandSailingRobots/CanBusCommon.git
