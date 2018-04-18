@@ -60,7 +60,7 @@ CanbusClass Canbus;
 
 unsigned long lastReadingTimeInSeconds = 0;
 
-long int sensorReadingIntervalInSeconds = -1;
+long int sensorReadingIntervalInSeconds = 15;
 
 void setup()
 {
@@ -106,7 +106,10 @@ void sendMarineSensorData (){
 
     CanMsg marineSensorData = messageHandler.getMessage();
 
-    Canbus.SendMessage(&marineSensorData);
+    Serial.print(" Message ");
+    Serial.println(marineSensorData.id);
+
+    Serial.println(Canbus.SendMessage(&marineSensorData));
 }
 
 void checkCanbusFor (int timeMs){
@@ -128,6 +131,7 @@ float getPHValue(uint8_t& responseStatusCode) {
                                                  PH_PROBABLE_INTERVAL_MIN, PH_PROBABLE_INTERVAL_MAX);
 
     sendCommandToSensor(SENSOR_PH,SENSOR_COMMAND_SLEEP);
+    
     return value;
 }
 
@@ -135,8 +139,12 @@ float getConductivety(uint8_t& responseStatusCode) {
 
     float value = readSensorWithProbableInterval(SENSOR_CONDUCTIVETY, responseStatusCode,
                                                  CONDUCTIVETY_PROBABLE_INTERVAL_MIN, CONDUCTIVETY_PROBABLE_INTERVAL_MAX);
-
     sendCommandToSensor(SENSOR_CONDUCTIVETY,SENSOR_COMMAND_SLEEP);
+
+    Serial.print("Conductivety is ");
+Serial.println(value);
+    Serial.print(" Error is ");
+Serial.println(responseStatusCode);
     return value;
 }
 
@@ -144,7 +152,13 @@ float getTemperature(uint8_t& responseStatusCode) {
 
     float value = readSensorWithProbableInterval(SENSOR_TEMPERATURE, responseStatusCode,
                                                  TEMPERATURE_PROBABLE_INTERVAL_MIN, TEMPERATURE_PROBABLE_INTERVAL_MAX);
+                                     
     sendCommandToSensor(SENSOR_TEMPERATURE,SENSOR_COMMAND_SLEEP);
+
+
+Serial.print("Temperature is ");
+Serial.println(value);
+    
     return value;
 }
 
@@ -170,6 +184,7 @@ void processCANMessage (CanMsg& msg){
 }
 
 void sendCommandToSensor(int I2CAdressEnum, const char* command) {
+    delay(50);
     Wire.beginTransmission(I2C_ADRESSES[I2CAdressEnum]);
     Wire.write(command);
     Wire.endTransmission();
