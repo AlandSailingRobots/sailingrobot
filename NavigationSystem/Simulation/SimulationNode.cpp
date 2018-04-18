@@ -169,17 +169,15 @@ void SimulationNode::createWindMessage() {
 void SimulationNode::createMarineSensorMessage(WaypointDataMsg* msg) {
     int id = msg->nextId();
 
-    /*
-    float temperature = rand() % 45 - 5;
-    float conductivity = rand() % 200000 + 5;
-    float ph = rand() % 15;*/
+    // float idAsDecimal = id / pow(10, (floor(log10(id)) + 1));
+    float IdlastDigitsAsDecimal = id / 10000.0;
+    IdlastDigitsAsDecimal -= (int)IdlastDigitsAsDecimal;
 
-    double temperature = id;
-    float conductivity = id;
-    float ph = id;
-    float salinity = id;
+    double temperature = 20 + IdlastDigitsAsDecimal;
+    float conductivity = 1 + IdlastDigitsAsDecimal;
+    float ph = 7 + IdlastDigitsAsDecimal;
 
-    // float salinity = Utility::calculateSalinity(temperature, conductivity);
+    float salinity = Utility::calculateSalinity(temperature, conductivity);
 
     MessagePtr marineSensorData = std::make_unique<MarineSensorDataMsg>(
         MarineSensorDataMsg(temperature, conductivity, ph, salinity));
