@@ -109,7 +109,7 @@ struct WaypointPacket_t {
   int nextDeclination;
   int nextRadius;
   int nextStayTime;
-  bool isCheckpoint;
+  //bool isCheckpoint;
   int prevId;
   double prevLongitude;
   double prevLatitude;

@@ -130,12 +130,12 @@ void SimulationNode::processWaypointMessage(WaypointDataMsg* msg)
 	waypoint.nextDeclination = msg->nextDeclination();
 	waypoint.nextRadius = msg->nextRadius();
 	waypoint.nextStayTime = msg->stayTime();
-	waypoint.isCheckpoint = msg->isCheckpoint();
+	//waypoint.isCheckpoint = msg->isCheckpoint();
 	waypoint.prevId = msg->prevId();
 	waypoint.prevLongitude = msg->prevLongitude();
 	waypoint.prevLatitude = msg->prevLatitude();
 	waypoint.prevDeclination = msg->prevDeclination();
-	waypoint.prevRadius = msg->prevRadius();
+	waypoint.prevRadius = msg->prevRadius();   
 
     m_nextDeclination = msg->nextDeclination();
 }
@@ -370,9 +370,8 @@ void SimulationNode::SimulationThreadFunc(ActiveNode* nodePtr)
         else if (node->m_boatType ==1){
             node->sendActuatorDataWing ( simulatorFD );
         }
-
-        //
+    
         node->sendWaypoint( simulatorFD );
-		node->sendMarineSensor( simulatorFD );
+		//node->sendMarineSensor( simulatorFD );
     }
 }
