@@ -95,13 +95,11 @@ void SimulationNode::processMessage(const Message* msg)
         break;
     case MessageType::WaypointData:
         processWaypointMessage((WaypointDataMsg*) msg);
+		createMarineSensorMessage((WaypointDataMsg*) msg);
         break;
     case MessageType::ServerConfigsReceived:
 		updateConfigsFromDB();
 	    break;
-	case MessageType::MarineSensorData:
-		processMarineSensorDataMessage((MarineSensorDataMsg*) msg);
-		break;
     default:
         return;
     }
@@ -166,14 +164,26 @@ void SimulationNode::createWindMessage()
     m_MsgBus.sendMessage( std::move(windData) );
 }
 
-void SimulationNode::createMarineSensorMessage()
+void SimulationNode::createMarineSensorMessage(WaypointDataMsg* msg)
 {
+	int id = msg->nextId();
+
+	/*
 	float temperature = rand() % 45 - 5;
 	float conductivity = rand() % 200000 + 5;
-	float ph = rand() % 15;
-	float salinity = Utility::calculateSalinity(temperature, conductivity);
+	float ph = rand() % 15;*/
+
+	double temperature = id;
+	float conductivity = id;
+	float ph = id;
+	float salinity = id;
+
+
+	//float salinity = Utility::calculateSalinity(temperature, conductivity);
+
     MessagePtr marineSensorData = std::make_unique<MarineSensorDataMsg>(
 		MarineSensorDataMsg(temperature, conductivity, ph, salinity) );
+
     m_MsgBus.sendMessage( std::move(marineSensorData) );
 }
 
@@ -208,7 +218,6 @@ void SimulationNode::processSailBoatData( TCPPacket_t& packet )
         createCompassMessage();
         createGPSMessage();
         createWindMessage();
-		createMarineSensorMessage();
     }
 }
 
@@ -242,7 +251,6 @@ void SimulationNode::processWingBoatData( TCPPacket_t& packet )
         createCompassMessage();
         createGPSMessage();
         createWindMessage();
-		createMarineSensorMessage();
     }
 }
 
@@ -335,19 +343,16 @@ void SimulationNode::SimulationThreadFunc(ActiveNode* nodePtr)
 
             case SimulatorPacket::SailBoatData:
                 node->processSailBoatData( packet );
-                //std::cout<<"SailBoatData"<< std::endl;
                 break;
 
             case SimulatorPacket::WingBoatData:
                 node->processWingBoatData( packet );
-                //std::cout<<"WingBoatData"<< std::endl;
                 break;
             case SimulatorPacket::AISData:
                 node->processAISContact( packet );
                 break;
 
             case SimulatorPacket::CameraData:
-                //Logger::info("CameraData from simulator");
                 node->processVisualField( packet );
                 break;
 

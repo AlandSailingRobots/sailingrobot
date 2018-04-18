@@ -218,7 +218,7 @@ private:
     void createCompassMessage();
     void createGPSMessage();
     void createWindMessage();
-    void createMarineSensorMessage();
+    void createMarineSensorMessage(WaypointDataMsg* msg);
 
     float   m_RudderCommand;
     float   m_SailCommand;
