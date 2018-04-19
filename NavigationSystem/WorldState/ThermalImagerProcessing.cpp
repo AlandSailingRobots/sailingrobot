@@ -50,12 +50,14 @@ ThermalImagerProcessing::ThermalImagerProcessing(MessageBus& msgBus, DBHandler& 
     }
   }
 
-  void AISProcessing::processAISMessage(AISDataMsg* msg) {
-    std::vector<AISVessel> list = msg->vesselList();
+  void ThermalImagerProcessing::processThermalImagerMessage(ThermalImagerDataMsg* msg) {
+    /*std::vector<AISVessel> list = msg->vesselList();
     std::vector<AISVesselInfo> tmp_info = msg->vesselInfoList();
     double dist;
     m_latitude = msg->posLat();
-    m_longitude = msg->posLon();
+    m_longitude = msg->posLon();*/
+    m_frame = msg->frame();
+    // Include the Tests/IntegrationTest/FreeSpaceDectionTest things here? 
     for (auto vessel: list) {
       dist = CourseMath::calculateDTW(m_latitude, m_longitude, vessel.latitude, vessel.longitude);
       if (dist < m_Radius && vessel.MMSI != m_MMSI) {
@@ -72,7 +74,7 @@ ThermalImagerProcessing::ThermalImagerProcessing(MessageBus& msgBus, DBHandler& 
     }
   }
 
-  void AISProcessing::addAISDataToCollidableMgr() {
+  void ThermalImagerProcessing::addThermalImagerDataToCollidableMgr() {
     /*
     * First loop sends the position report to collidable manager
     * And the second sends the static report
@@ -80,6 +82,7 @@ ThermalImagerProcessing::ThermalImagerProcessing(MessageBus& msgBus, DBHandler& 
     std::vector<int> indexToRemove;
     for (auto vessel: m_Vessels) {
       this->collidableMgr->addAISContact(vessel.MMSI, vessel.latitude, vessel.longitude, vessel.SOG, vessel.COG);
+      this->collidableMgr->addVisualField(); // something to do with this function
       for (uint32_t i = 0; i<m_InfoList.size();i++) {
         if (vessel.MMSI == m_InfoList[i].MMSI) {
           this->collidableMgr->addAISContact(m_InfoList[i].MMSI, m_InfoList[i].length, m_InfoList[i].beam);
@@ -94,25 +97,25 @@ ThermalImagerProcessing::ThermalImagerProcessing(MessageBus& msgBus, DBHandler& 
     m_Vessels.clear();
   }
 
-  void AISProcessing::start() {
+  void ThermalImagerProcessing::start() {
     m_running = true;
     runThread(AISProcessingThreadFunc);
   }
 
-  void AISProcessing::stop() {
+  void ThermalImagerProcessing::stop() {
     m_running = false;
     stopThread(this);
   }
 
-  void AISProcessing::AISProcessingThreadFunc(ActiveNode* nodePtr) {
-    AISProcessing* node = dynamic_cast<AISProcessing*> (nodePtr);
+  void ThermalImagerProcessing::ThermalImagerProcessingThreadFunc(ActiveNode* nodePtr) {
+    ThermalImagerProcessing* node = dynamic_cast<ThermalImagerProcessing*> (nodePtr);
 
     Timer timer;
     timer.start();
 
     while(node->m_running) {
       node->m_lock.lock();
-      node->addAISDataToCollidableMgr();
+      node->addThermalImagerDataToCollidableMgr();
       node->m_lock.unlock();
       timer.sleepUntil(node->m_LoopTime);
       timer.reset();
