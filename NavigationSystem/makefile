@@ -140,7 +140,7 @@ export HW_NODES_ALL_SRC		= Hardwares/HMC6343Node.cpp Hardwares/GPSDNode.cpp
 
 export HW_NODES_ASPIRE_SRC 	= Hardwares/ActuatorNodeASPire.cpp Hardwares/CANAISNode.cpp Hardwares/CANSolarTrackerNode.cpp\
                             	Hardwares/CANWindsensorNode.cpp Hardwares/CANArduinoNode.cpp Hardwares/MarineSensorNode.cpp\
-                            	Hardwares/CANMarineSensorTransmissionNode.cpp
+                            	Hardwares/CANMarineSensorTransmissionNode.cpp Hardwares/CANMarineSensorReceiver.cpp
 
 # ActuatorNode for Janet not compiling, uses removed ActuatorPositionMsg
 export HW_NODES_JANET_SRC 	= Hardwares/CV7Node.cpp Hardwares/ArduinoNode.cpp
