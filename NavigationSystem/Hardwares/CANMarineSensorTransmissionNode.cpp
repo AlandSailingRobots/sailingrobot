@@ -22,11 +22,6 @@ CANMarineSensorTransmissionNode::~CANMarineSensorTransmissionNode() {}
 
 
 bool CANMarineSensorTransmissionNode::init() {
-
-    // TODO: Remove this. Only used to initialize reading during tomorrows tests
-    std::cout << "CANMarineSensorTransmissionNode: REMOVE ME";
-    m_MsgBus.sendMessage(std::move(std::make_unique<DataCollectionStartMsg>(60)));
-
     return true;
 }
 

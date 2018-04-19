@@ -106,10 +106,7 @@ void sendMarineSensorData (){
 
     CanMsg marineSensorData = messageHandler.getMessage();
 
-    Serial.print(" Message ");
-    Serial.println(marineSensorData.id);
-
-    Serial.println(Canbus.SendMessage(&marineSensorData));
+    Canbus.SendMessage(&marineSensorData);
 }
 
 void checkCanbusFor (int timeMs){
@@ -141,10 +138,6 @@ float getConductivety(uint8_t& responseStatusCode) {
                                                  CONDUCTIVETY_PROBABLE_INTERVAL_MIN, CONDUCTIVETY_PROBABLE_INTERVAL_MAX);
     sendCommandToSensor(SENSOR_CONDUCTIVETY,SENSOR_COMMAND_SLEEP);
 
-    Serial.print("Conductivety is ");
-Serial.println(value);
-    Serial.print(" Error is ");
-Serial.println(responseStatusCode);
     return value;
 }
 
@@ -155,10 +148,6 @@ float getTemperature(uint8_t& responseStatusCode) {
                                      
     sendCommandToSensor(SENSOR_TEMPERATURE,SENSOR_COMMAND_SLEEP);
 
-
-Serial.print("Temperature is ");
-Serial.println(value);
-    
     return value;
 }
 
@@ -211,9 +200,6 @@ float readSensor(int I2CAdressEnum, uint8_t& responseStatusCode) {
             break;
         }
     }
-
-    Serial.print("Read data raw: ");
-    Serial.println(sensor_input);
 
     return atof(sensor_input);
 }
