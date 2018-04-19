@@ -34,7 +34,7 @@
   #include "Hardwares/CANWindsensorNode.h"
   #include "Hardwares/ActuatorNodeASPire.h"
   #include "Hardwares/CANArduinoNode.h"
-  #include "Hardwares/MarineSensorNode.h"
+
 #include "Hardwares/CANMarineSensorReceiver.h"
 #include "Hardwares/CANMarineSensorTransmissionNode.h"
 
