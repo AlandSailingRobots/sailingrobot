@@ -10,6 +10,7 @@
 #include <PololuMaestro.h>
 #include <Canbus.h>
 #include <MsgParsing.h>
+#include <CanUtility.h>
 
 const int RUDDER_MAESTRO_MAX_TARGET = 1900;
 const int RUDDER_MAESTRO_MIN_TARGET = 1150;
@@ -122,7 +123,7 @@ void loop() {
 void moveWingsail(int angle) {
  
 
-  float target = mapInterval(angle, -MAX_WINGSAIL_ANGLE, MAX_WINGSAIL_ANGLE,
+  float target = CanUtility::mapInterval(angle, -MAX_WINGSAIL_ANGLE, MAX_WINGSAIL_ANGLE,
                   WINGSAIL_MAESTRO_MIN_TARGET, WINGSAIL_MAESTRO_MAX_TARGET);
 
   maestro.setTarget(WINGSAIL_MAESTRO_CHANNEL, target*4);
@@ -131,16 +132,11 @@ void moveWingsail(int angle) {
 
 void moveRudder(int angle) {
 
-  float target = mapInterval(angle, -MAX_RUDDER_ANGLE, MAX_RUDDER_ANGLE, 
+  float target = CanUtility::mapInterval(angle, -MAX_RUDDER_ANGLE, MAX_RUDDER_ANGLE,
                       RUDDER_MAESTRO_MIN_TARGET, RUDDER_MAESTRO_MAX_TARGET);
   
   maestro.setTarget(RUDDER_MAESTRO_CHANNEL, target*4);
   
-}
-
-
-float mapInterval(float val, float fromMin, float fromMax, float toMin, float toMax) {
-  return (val - fromMin) / (fromMax - fromMin) * (toMax - toMin) + toMin;
 }
 
 //The test loop is used to get all relevant data, the meny isteps is inorder to get a symetric data vector around zero 

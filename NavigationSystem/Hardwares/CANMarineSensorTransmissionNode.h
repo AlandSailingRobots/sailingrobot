@@ -30,11 +30,10 @@ public:
     CANMarineSensorTransmissionNode(MessageBus& msgBus, CANService& canService);
     ~CANMarineSensorTransmissionNode();
 
+    bool init();
     void processMessage(const Message *message);
 
 private:
-    void fillCanMsg(CanMsg& message);
-
     CANService& m_CANService;
     std::mutex m_lock;
     int m_arduinoSensorLoopTime;
