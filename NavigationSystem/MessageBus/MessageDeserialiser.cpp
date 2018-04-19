@@ -135,6 +135,18 @@ bool MessageDeserialiser::readBool(bool& data)
 	return false;
 }
 
+bool MessageDeserialiser::readMat(cv2::Mat& data)
+{
+	if(m_index + sizeof(data) <= m_size)
+	{
+		data = m_data[m_index];
+		m_index++;
+		return true;
+	}
+
+	return false;
+}
+
 bool MessageDeserialiser::readMessageType(MessageType& data)
 {
 	if(m_index + sizeof(data) <= m_size)

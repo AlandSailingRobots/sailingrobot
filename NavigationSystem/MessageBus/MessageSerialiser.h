@@ -36,6 +36,7 @@ public:
 	void serialise(int data);
 	void serialise(float data);
 	void serialise(double data);
+	void serialise(cv2::Mat data);
 	void serialise(bool data);
 	void serialise(MessageType data);
 	void serialise(NodeID data);

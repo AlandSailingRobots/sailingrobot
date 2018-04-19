@@ -58,6 +58,12 @@ void MessageSerialiser::serialise(double data)
 	serialise(ptr, sizeof(data));
 }
 
+void MessageSerialiser::serialise(cv2::Mat data)
+{
+	uint8_t* ptr = (uint8_t*)&data;
+	serialise(ptr, sizeof(data));
+}
+
 void MessageSerialiser::serialise(bool data)
 {
 	serialise((uint8_t)data);

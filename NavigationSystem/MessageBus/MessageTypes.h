@@ -46,7 +46,8 @@ enum class MessageType {
 	RudderCommand,
 	SailCommand,
     DataCollectionStart,
-    DataCollectionStop
+    DataCollectionStop,
+    ThermalImagerData
 };
 
 inline std::string msgToString(MessageType msgType)
@@ -104,9 +105,11 @@ inline std::string msgToString(MessageType msgType)
 		case MessageType::SailCommand:
 		return "SailCommand";
         case MessageType::DataCollectionStart:
-            return "DataCollectionStart";
+        return "DataCollectionStart";
         case MessageType::DataCollectionStop:
-            return "DataCollectionStop";
+        return "DataCollectionStop";
+        case MessageType::ThermalImagerData:
+        return "ThermalImagerData";
 	}
 	return "";
 }
