@@ -107,7 +107,7 @@ DATA_COLLECTION_SRC			= DataCollection/DataCollectionMgrNode.cpp
 
 export CORE_SRC 			= $(DATA_COLLECTION_SRC) $(DATABASE_SRC) $(HTTP_SYNC_SRC) $(LOW_LEVEL_CONTROLLERS) $(MATH_SRC) \
 								$(MESSAGE_BUS_SRC) $(NETWORK_SRC) $(NAVIGATION_SRC) $(SYSTEM_SERVICES_SRC) \
-								$(WORLD_STATE_SRC)
+								$(WORLD_STATE_SRC) $(CANBUS_COMMON_SRC)
 
 # Local navigation
 export LINE_FOLLOW_SRC      = Navigation/LineFollowNode.cpp
