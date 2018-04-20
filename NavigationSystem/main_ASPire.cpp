@@ -9,6 +9,8 @@
 #include "Navigation/WaypointMgrNode.h"
 #include "WorldState/StateEstimationNode.h"
 #include "WorldState/WindStateNode.h"
+#include "WorldState/CameraProcessingUtility.h"
+#include "WorldState/AISProcessing.h"
 #include "WorldState/CollidableMgr/CollidableMgr.h"
 
 #include "LowLevelControllers/WingsailControlNode.h"
@@ -149,6 +151,9 @@ int main(int argc, char *argv[])
 	WingsailControlNode wingSailControlNode(messageBus, dbHandler);
 	CourseRegulatorNode courseRegulatorNode(messageBus, dbHandler);
 
+	CameraProcessingUtility cameraProcessingUtility(messageBus, dbHandler, &collidableMgr);
+	AISProcessing aisProcessing(messageBus, dbHandler, &collidableMgr);
+
   	#if LOCAL_NAVIGATION_MODULE == 1
 		LocalNavigationModule lnm	( messageBus, dbHandler );
 
@@ -179,7 +184,7 @@ int main(int argc, char *argv[])
 	  	ActuatorNodeASPire actuators(messageBus, canService);
 	  	CANArduinoNode actuatorFeedback(messageBus, dbHandler, canService);
 
-	  	int miniWaitTime = 20; 	// Periode (in seconds) during witch the measuements are performed.
+	  	int miniWaitTime = 20; 	// Periode (in seconds) during which the measurements are performed.
 	  	MarineSensorNode marineSensors(messageBus, miniWaitTime);
 	#endif
 
@@ -214,6 +219,8 @@ int main(int argc, char *argv[])
 		initialiseNode(marineSensors, "Marine Sensors", NodeImportance::NOT_CRITICAL);
 	#endif
 
+	initialiseNode(cameraProcessingUtility, "Camera Processing", NodeImportance::NOT_CRITICAL);
+
 	// Start active nodes
 	//-------------------------------------------------------------------------------
 
@@ -225,6 +232,8 @@ int main(int argc, char *argv[])
 
 	wingSailControlNode.start();
 	courseRegulatorNode.start();
+
+	cameraProcessingUtility.start();
 
 	#if SIMULATION == 1
 		simulation.start();

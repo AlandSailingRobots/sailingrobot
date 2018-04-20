@@ -27,13 +27,13 @@
 
 #include "SystemServices/SysClock.h"
 #include "SystemServices/Timer.h"
-//#include "DataBase/DBHandler.h"
+#include "DataBase/DBHandler.h"
 //#include "MessageBus/MessageTypes.h"
 //#include "MessageBus/MessageBus.h"
 //#include "MessageBus/ActiveNode.h"
 #include "SystemServices/Logger.h"
-//#include "WorldState/CollidableMgr/CollidableMgr.h"
- #include "CameraProcessingUtility.h"
+#include "WorldState/CollidableMgr/CollidableMgr.h"
+#include "CameraProcessingUtility.h"
 
 using namespace std;
 using namespace cv;
@@ -81,8 +81,10 @@ Mat dilateReconstruction(Mat imgReference, Mat imgMarker, Mat kernel)
 }
 
 
-CameraProcessingUtility::CameraProcessingUtility(int cameraDeviceID, int detectorLoopTime, int maxCompassFrameTimerate)
-  :  m_cameraDeviceID(CAMERA_DEVICE_ID), m_detectorLoopTime(DETECTOR_LOOP_TIME), m_maxCompassFrameTimeframe(MAX_COMPASS_FRAME_TIMEFRAME) {
+CameraProcessingUtility::CameraProcessingUtility(MessageBus& msgBus, DBHandler& dbhandler, CollidableMgr* collidableMgr)
+  : ActiveNode(NodeID::CameraProcessingUtility, msgBus), m_cameraDeviceID(CAMERA_DEVICE_ID),
+    m_detectorLoopTime(DETECTOR_LOOP_TIME), m_maxCompassFrameTimeframe(MAX_COMPASS_FRAME_TIMEFRAME),
+    collidableMgr(collidableMgr), m_db(dbhandler), m_running(false) {
 		// these are retrieved by trial and error, to get the roi containing the thermal imager data
         // might be useful to put them as parameters in the constructor
         Logger::init("FreeSpaceDetectionTest.log");
@@ -93,6 +95,7 @@ CameraProcessingUtility::~CameraProcessingUtility() {}
 
 // Could upgrade to choose between video or single image
 // could rename this function as init maybe?, or just remove it and put the acquisition within the processing function
+// Should not be used for now, might be deleted 
 void CameraProcessingUtility::videoAcquisition(int m_cameraDeviceID) {
     VideoCapture m_capture(m_cameraDeviceID); // Opens the camera handle
     if (m_capture.isOpened() == false) //  To check if object was associated to webcam successfully
@@ -105,16 +108,59 @@ void CameraProcessingUtility::videoAcquisition(int m_cameraDeviceID) {
 
 }
 
+bool CameraProcessingUtility::init() {
+    VideoCapture m_capture(m_cameraDeviceID); // Opens the camera handle
+    if (m_capture.isOpened() == false) //  To check if object was associated to webcam successfully
+    {
+        Logger::error("Node: CameraProcessingUtility - Camera not available");
+        // skipping return for single frame test
+        exit(EXIT_FAILURE);
+    }
+    return true;
+}
+
+void CameraProcessingUtility::start() {
+    m_running = true;
+    runThread(CameraProcessingUtilityThreadFunc);
+}
+
+void CameraProcessingUtility::stop() {
+    m_running = false;
+    stopThread(this);
+}
+
+void CameraProcessingUtility::CameraProcessingUtilityThreadFunc(ActiveNode* nodePtr) {
+    CameraProcessingUtility* node = dynamic_cast<CameraProcessingUtility*> (nodePtr);
+
+    Timer timer;
+    timer.start();
+
+    while(node->m_running) {
+      node->freeSpaceProcessing();
+      node->computeRelDistances();
+      node->addCameraDataToCollidableMgr();
+      cout << "--- Camera Processing thread running ---" << endl;
+      timer.sleepUntil(0.5);
+      timer.reset();
+    }
+}
+
+void CameraProcessingUtility::addCameraDataToCollidableMgr() {
+    // float bearing = col*webcamAngleApertureXPerPixel m_compass_data.heading;
+    int16_t bearing = 0; // for tests
+    collidableMgr->addVisualField(m_relBearingToRelObstacleDistance, bearing);
+}
+
 Mat CameraProcessingUtility::getRoi() {
     return m_freeSpaceFrame;
 }
 
-map<int16_t, int16_t> CameraProcessingUtility::getRelDistances() {
+map<int16_t, uint16_t> CameraProcessingUtility::getRelDistances() {
     return m_relBearingToRelObstacleDistance;
 }
 
-int CameraProcessingUtility::freeSpaceProcessing(int cameraDeviceID) {
-
+int CameraProcessingUtility::freeSpaceProcessing() {
+    /*
     VideoCapture m_capture(cameraDeviceID); // Opens the camera handle
     if (m_capture.isOpened() == false) //  To check if object was associated to webcam successfully
     {
@@ -122,6 +168,7 @@ int CameraProcessingUtility::freeSpaceProcessing(int cameraDeviceID) {
         // skipping return for single frame test
         exit(EXIT_FAILURE);
     }
+    */
     m_capture >> m_imgFullSize;
     Mat imgOriginal; // Input raw image
     Mat hsvImg; // HSV converted image
@@ -471,16 +518,19 @@ int CameraProcessingUtility::computeRelDistances() {
     }
     // not really optimized to reloop over the cols, but that's a first shot
     int pixsPerSegment = n_cols/NUMBER_OF_SEGMENTS;
-    int tmp_sum=0;
+    uint16_t tmp_sum=0;
     for (int i=0; i<NUMBER_OF_SEGMENTS; i++)
     {
         for (int j=0; j<pixsPerSegment; j++)
         {
             tmp_sum += n_whitePixelsVect[i*pixsPerSegment+j];
         }
-        m_relBearingToRelObstacleDistance.insert(pair<int16_t ,int16_t>(i-NUMBER_OF_SEGMENTS/2, tmp_sum));
+        m_relBearingToRelObstacleDistance.insert(pair<int16_t ,uint16_t>(i-NUMBER_OF_SEGMENTS/2, tmp_sum));
         tmp_sum = 0;
     }
     return EXIT_SUCCESS;
 }
 
+void CameraProcessingUtility::processMessage(const Message* msg) {
+  // Useless atm
+}

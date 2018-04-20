@@ -11,6 +11,8 @@
  *
  *
  ***************************************************************************************/
+#pragma once
+
 #include <opencv2/core.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/videoio.hpp>
@@ -23,40 +25,47 @@
 
 #include <vector>
 #include <thread>
+#include <mutex>
 #include <map>
 
 #include "SystemServices/SysClock.h"
 #include "SystemServices/Timer.h"
-//#include "DataBase/DBHandler.h"
-//#include "MessageBus/MessageTypes.h"
-//#include "MessageBus/MessageBus.h"
-//#include "MessageBus/ActiveNode.h"
+#include "DataBase/DBHandler.h"
+#include "MessageBus/MessageTypes.h"
+#include "MessageBus/MessageBus.h"
+#include "MessageBus/ActiveNode.h"
 #include "SystemServices/Logger.h"
-//#include "WorldState/CollidableMgr/CollidableMgr.h"
+#include "WorldState/CollidableMgr/CollidableMgr.h"
 
-using namespace std;
-using namespace cv;
+//using namespace std;
+//using namespace cv;
 
-class CameraProcessingUtility {
+class CameraProcessingUtility : public ActiveNode {
 public:
-    CameraProcessingUtility(int cameraDeviceID, int detectorLoopTime, int maxCompassFrameTimerate);
+    CameraProcessingUtility(MessageBus& msgBus, DBHandler& dbhandler, CollidableMgr* collidableMgr);
     ~CameraProcessingUtility();
 
     void videoAcquisition(int cameraDeviceID);
+    bool init();
+    void start();
+    void stop();
 
-    Mat getRoi();
+    cv::Mat getRoi();
 
-    std::map<int16_t, int16_t> getRelDistances();
+    std::map<int16_t, uint16_t> getRelDistances();
     
-    //void processMessage(const Message* msg);
+    void processMessage(const Message* msg);
 
 private:
-    int freeSpaceProcessing(int cameraDeviceID);
+    int freeSpaceProcessing();
     int computeRelDistances();
+    void addCameraDataToCollidableMgr();
+    static void CameraProcessingUtilityThreadFunc(ActiveNode* nodePtr);
 
-    Mat m_imgFullSize;
-    Mat m_freeSpaceFrame;
-    std::map<int16_t, int16_t> m_relBearingToRelObstacleDistance;
+    cv::VideoCapture m_capture;
+    cv::Mat m_imgFullSize;
+    cv::Mat m_freeSpaceFrame;
+    std::map<int16_t, uint16_t> m_relBearingToRelObstacleDistance;
     /*
     const int lowFrameX;
     const int widthFrame;
@@ -66,5 +75,8 @@ private:
     int m_cameraDeviceID;
     const int m_detectorLoopTime;
     const int m_maxCompassFrameTimeframe;
+    CollidableMgr* collidableMgr;
+    DBHandler& m_db;
+    std::atomic<bool> m_running;
 
 };
