@@ -26,13 +26,16 @@ TOOLCHAIN = 0
 export USE_SIM = 0
 export USE_LNM = 0
 
+## Temporary plced opencv libs
+OPENCV = `pkg-config opencv --cflags --libs`
 
 ###############################################################################
 # Tools
 ###############################################################################
 
 export CPPFLAGS             = -g -Wall -pedantic -Werror -std=gnu++14 -Wno-psabi
-export LIBS                 = -lsqlite3 -lgps -lrt -lcurl -lpthread -lwiringPi -lncurses
+export LIBS                 = -lsqlite3 -lgps -lrt -lcurl -lpthread -lwiringPi -lncurses \
+								$(OPENCV)
 
 ifeq ($(TOOLCHAIN),1)
     export CC               = arm-linux-gnueabihf-gcc
@@ -73,7 +76,8 @@ export UNIT_TEST_HW_EXEC 	= unit-tests-hardware.run
 export INTEGRATION_TEST_EXEC_ASPIRE = integration-tests-ASPire.run
 export HTTP_SYNC_TEST_EXEC	= HTTPSync-test.run
 export AIS_TEST_EXEC		= ais-integration-tests.run
-export MARINE_SENSOR_TEST_EXCE = marine-sensor-test.run
+export MARINE_SENSOR_TEST_EXEC = marine-sensor-test.run
+#export FREE_SPACE_DETECTION = free-space-detection.run
 
 export OBJECT_FILE          = $(BUILD_DIR)/objects.tmp
 
@@ -102,7 +106,7 @@ NAVIGATION_SRC				= Navigation/WaypointMgrNode.cpp
 SYSTEM_SERVICES_SRC  		= SystemServices/Logger.cpp SystemServices/SysClock.cpp SystemServices/Timer.cpp
 
 WORLD_STATE_SRC				= WorldState/VesselStateNode.cpp WorldState/StateEstimationNode.cpp \
-								WorldState/WindStateNode.cpp
+								WorldState/WindStateNode.cpp WorldState/CameraProcessingUtility.cpp
 
 DATA_COLLECTION_SRC			= DataCollection/DataCollectionMgrNode.cpp
 
@@ -120,7 +124,8 @@ export LNM_SRC              = $(LNM_DIR)/ASRCourseBallot.cpp $(LNM_DIR)/ASRArbit
 								$(LNM_DIR)/Voters/ProximityVoter.cpp
 
 # Obstacles detection
-export COLLIDABLE_MGR_SRC	= WorldState/CollidableMgr/CollidableMgr.cpp WorldState/AISProcessing.cpp
+export COLLIDABLE_MGR_SRC	= WorldState/CollidableMgr/CollidableMgr.cpp WorldState/AISProcessing.cpp \
+								#Worldstate/CameraProcessingUtility.cpp
 
 # Simulator
 export SIMULATOR_SRC        = Simulation/SimulationNode.cpp
@@ -141,6 +146,8 @@ export HW_NODES_ALL_SRC		= Hardwares/HMC6343Node.cpp Hardwares/GPSDNode.cpp
 export HW_NODES_ASPIRE_SRC 	= Hardwares/ActuatorNodeASPire.cpp Hardwares/CANAISNode.cpp Hardwares/CANSolarTrackerNode.cpp\
                             	Hardwares/CANWindsensorNode.cpp Hardwares/CANArduinoNode.cpp Hardwares/MarineSensorNode.cpp\
                             	Hardwares/CANMarineSensorTransmissionNode.cpp
+
+# export HW_NODES_CAMERA	= WorldState/obstacledetection/CameraProcessingNode.cpp
 
 # ActuatorNode for Janet not compiling, uses removed ActuatorPositionMsg
 export HW_NODES_JANET_SRC 	= Hardwares/CV7Node.cpp Hardwares/ArduinoNode.cpp
@@ -178,7 +185,7 @@ integration_tests_ASPire: $(BUILD_DIR)
 	$(MAKE) -f integration_tests_ASPire.mk
 	$(MAKE) -f ais_integration_test.mk
 
-## Builid the test for the marine sensors
+## Build the test for the marine sensors
 marine_sensor_test: $(BUILD_DIR)
 	$(MAKE) -f marine_sensor_test.mk
 
@@ -201,7 +208,7 @@ clean:
 	-@rm $(INTEGRATION_TEST_EXEC_ASPIRE)
 	-@rm $(INTEGRATION_TEST_EXEC_ASPIRE)
 	-@rm $(AIS_TEST_EXEC)
-	-@rm $(MARINE_SENSOR_TEST_EXCE)
+	-@rm $(MARINE_SENSOR_TEST_EXEC)
 	-@$(MAKE) -C Tests clean
 	@echo DONE
 

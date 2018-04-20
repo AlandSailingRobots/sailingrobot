@@ -14,6 +14,15 @@
 
 #include "MessageBus/MessageSerialiser.h"
 #include "SystemServices/Logger.h"
+#include <opencv2/core.hpp>
+#include <opencv2/imgcodecs.hpp>
+#include <opencv2/videoio.hpp>
+#include <opencv2/highgui.hpp>
+#include <opencv2/imgproc.hpp>
+#include <opencv2/photo.hpp>
+#include <opencv2/videostab.hpp>
+#include <opencv2/tracking.hpp>
+#include <opencv2/video.hpp>
 
 
 void MessageSerialiser::serialise(uint8_t data)
@@ -58,7 +67,7 @@ void MessageSerialiser::serialise(double data)
 	serialise(ptr, sizeof(data));
 }
 
-void MessageSerialiser::serialise(cv2::Mat data)
+void MessageSerialiser::serialise(cv::Mat data)
 {
 	uint8_t* ptr = (uint8_t*)&data;
 	serialise(ptr, sizeof(data));

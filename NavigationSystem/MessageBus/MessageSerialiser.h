@@ -19,6 +19,7 @@
 #include <string>
 #include "MessageBus/NodeIDs.h"
 #include "MessageBus/MessageTypes.h"
+#include <opencv2/core.hpp>
 
 #define MAX_MESSAGE_SIZE 	256
 
@@ -36,7 +37,7 @@ public:
 	void serialise(int data);
 	void serialise(float data);
 	void serialise(double data);
-	void serialise(cv2::Mat data);
+	void serialise(cv::Mat data);
 	void serialise(bool data);
 	void serialise(MessageType data);
 	void serialise(NodeID data);

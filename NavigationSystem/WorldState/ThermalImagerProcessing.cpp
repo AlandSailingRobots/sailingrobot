@@ -50,29 +50,6 @@ ThermalImagerProcessing::ThermalImagerProcessing(MessageBus& msgBus, DBHandler& 
     }
   }
 
-  void ThermalImagerProcessing::processThermalImagerMessage(ThermalImagerDataMsg* msg) {
-    /*std::vector<AISVessel> list = msg->vesselList();
-    std::vector<AISVesselInfo> tmp_info = msg->vesselInfoList();
-    double dist;
-    m_latitude = msg->posLat();
-    m_longitude = msg->posLon();*/
-    m_frame = msg->frame();
-    // Include the Tests/IntegrationTest/FreeSpaceDectionTest things here? 
-    for (auto vessel: list) {
-      dist = CourseMath::calculateDTW(m_latitude, m_longitude, vessel.latitude, vessel.longitude);
-      if (dist < m_Radius && vessel.MMSI != m_MMSI) {
-        m_Vessels.push_back(vessel);
-      }
-    }
-    for (auto tmp: tmp_info) {
-      for (auto info: m_InfoList) {
-        if (tmp.MMSI == info.MMSI) {
-          break;
-        }
-        m_InfoList.push_back(tmp);
-      }
-    }
-  }
 
   void ThermalImagerProcessing::addThermalImagerDataToCollidableMgr() {
     /*
@@ -99,7 +76,7 @@ ThermalImagerProcessing::ThermalImagerProcessing(MessageBus& msgBus, DBHandler& 
 
   void ThermalImagerProcessing::start() {
     m_running = true;
-    runThread(AISProcessingThreadFunc);
+    runThread(ThermalImagerProcessingThreadFunc);
   }
 
   void ThermalImagerProcessing::stop() {
