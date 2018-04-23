@@ -98,13 +98,10 @@ public:
 		m_SensorValues["GPS Online"] = DATA_OUT_OF_RANGE;
 		m_SensorValues["AIS Longitude"] = DATA_OUT_OF_RANGE;
 		m_SensorValues["AIS Latitude"] = DATA_OUT_OF_RANGE;
-
         m_SensorValues["Marine PH"] = DATA_OUT_OF_RANGE;
         m_SensorValues["Marine Conductivety"] = DATA_OUT_OF_RANGE;
         m_SensorValues["Marine Salinity"] = DATA_OUT_OF_RANGE;
         m_SensorValues["Marine Temperature"] = DATA_OUT_OF_RANGE;
-
-
 
 		m_Win = newwin(6+2*m_SensorValues.size(),60,1,2);
 
@@ -348,25 +345,23 @@ int main() {
 
 	// Comment out this line if not running on the pi
 	// otherwise program will crash.
-	//auto future = canService.start();
+	auto future = canService.start();
 
 
 	SensorDataReceiver sensorReceiver(msgBus);
-
-
 	CANWindsensorNode windSensor(msgBus, dbHandler, canService);
 	HMC6343Node compass(msgBus, dbHandler);
 	compass.init ();
+
+
 
 	CANArduinoNode arduino (msgBus, dbHandler, canService);
 	ActuatorNodeASPire actuators (msgBus, canService);
 	GPSDNode gps (msgBus, dbHandler);
 	gps.init();
 	CANAISNode ais (msgBus, dbHandler, canService);
-
     CANMarineSensorTransmissionNode marineSensorTransmissionNode(msgBus,canService);
     marineSensorTransmissionNode.init();
-
 
 	ais.start();
 	gps.start();

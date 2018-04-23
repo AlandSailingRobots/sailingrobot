@@ -183,8 +183,6 @@ integration_tests_ASPire: $(BUILD_DIR)
 	$(MAKE) -f marine_sensor_integration_test.mk
 
 
-
-
 ## Build HTTPSync Test
 HTTPSync_test: $(BUILD_DIR)
 	$(MAKE) -f HTTP_sync_test.mk
