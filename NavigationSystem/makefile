@@ -178,12 +178,11 @@ unit_tests: $(BUILD_DIR)
 
 ## Build the integration tests for ASPire
 integration_tests_ASPire: $(BUILD_DIR)
-    $(MAKE) -f marine_sensor_integration_test.mk
 	$(MAKE) -f integration_tests_ASPire.mk
 	$(MAKE) -f ais_integration_test.mk
+	$(MAKE) -f marine_sensor_integration_test.mk
 
-marine_sensor_integration_test: $(BUILD_DIR)
-    $(MAKE) -f marine_sensor_integration_test.mk
+
 
 
 ## Build HTTPSync Test

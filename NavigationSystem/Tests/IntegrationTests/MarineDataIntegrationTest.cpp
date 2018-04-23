@@ -1,35 +1,74 @@
-#include <string>
-#include <CourseRegulatorNode.h>
-#include <WingsailControlNode.h>
-#include <CollidableMgr/CollidableMgr.h>
-#include <WaypointMgrNode.h>
-#include <WindStateNode.h>
-#include <StateEstimationNode.h>
-#include <HTTPSyncNode.h>
-#include <DBLoggerNode.h>
-#include <Logger.h>
-#include <CAN_Services/CANService.h>
-#include <GPSDNode.h>
-#include <CANMarineSensorReceiver.h>
-#include <CANMarineSensorTransmissionNode.h>
-#include <DBHandler.h>
-#include <MessageBus.h>
+#include <ncurses.h>
+#include <unordered_map>
+#include <thread>
+#include <sstream>
+
+
 #include "DataBase/DBHandler.h"
 #include "DataBase/DBLoggerNode.h"
 #include "HTTPSync/HTTPSyncNode.h"
-#include "MessageBus/MessageBus.h"
-#include "Messages/DataRequestMsg.h"
+
+#include "Hardwares/CAN_Services/CANService.h"
+#include "Hardwares/CAN_Services/N2kMsg.h"
+#include "Hardwares/CAN_Services/CanBusCommon/canbus_defs.h"
+#include "Hardwares/CAN_Services/CanBusCommon/CanMessageHandler.h"
+#include "Hardwares/CAN_Services/CANService.h"
+#include "Hardwares/GPSDNode.h"
+#include "Hardwares/CANMarineSensorTransmissionNode.h"
+
 #include "SystemServices/Logger.h"
 
+#include "MessageBus/MessageTypes.h"
+#include "MessageBus/MessageBus.h"
+#include "MessageBus/NodeIDs.h"
+
+#include "Messages/DataRequestMsg.h"
+#include "Messages/MarineSensorDataMsg.h"
+
+#include "Math/Utility.h"
 
 
+class MarineSensorReciever : public CANFrameReceiver {
 
-#include "Hardwares/GPSDNode.h"
-#include "Hardwares/CAN_Services/CANService.h"
-#include "Hardwares/CANArduinoNode.h"
+public:
+    MarineSensorReciever(MessageBus& messageBus, CANService& canService) :
+            CANFrameReceiver(canService, MSG_ID_MARINE_SENSOR_DATA), m_msgBus(messageBus)
+    {
+    }
 
-#include "Hardwares/CANMarineSensorReceiver.h"
-#include "Hardwares/CANMarineSensorTransmissionNode.h"
+    void processFrame (CanMsg& msg) {
+        Logger::info("Recieved marine sensor readings from CanBus");
+
+        CanMessageHandler handler(msg);
+
+        if(handler.getMessageId() == MSG_ID_MARINE_SENSOR_DATA) {
+            double ph = handler.getMappedData(SENSOR_PH_DATASIZE,
+                                              SENSOR_PH_INTERVAL_MIN, SENSOR_PH_INTERVAL_MAX);
+
+            double conductivety = handler.getMappedData(SENSOR_CONDUCTIVETY_DATASIZE,
+                                                        SENSOR_CONDUCTIVETY_INTERVAL_MIN, SENSOR_CONDUCTIVETY_INTERVAL_MAX);
+
+            double temp = handler.getMappedData(SENSOR_TEMPERATURE_DATASIZE,
+                                                SENSOR_TEMPERATURE_INTERVAL_MIN, SENSOR_TEMPERATURE_INTERVAL_MAX);
+            float salinity = Utility::calculateSalinity (temp, conductivety);
+
+            MessagePtr marineSensorDataMsg = std::make_unique<MarineSensorDataMsg>(static_cast<float>(temp), static_cast<float>(conductivety), static_cast<float>(ph), salinity);
+            m_msgBus.sendMessage(std::move(marineSensorDataMsg));
+
+
+            Logger::info(" Marine sensor data: \n PH: %lf \n Conductivety: %lf \n Temperature: %lf \n Error ID: %d",ph,conductivety,temp,handler.getErrorMessage());
+
+
+            if(handler.getErrorMessage() > 0) {
+                Logger::error("Error from marine sensors, error code: %d", handler.getErrorMessage());
+            }
+        }
+    }
+
+private:
+    MessageBus& m_msgBus;
+
+};
 
 
 
@@ -130,12 +169,10 @@ int main(int argc, char *argv[])
 
 
 
-
-
 	CANService canService;
 
 	GPSDNode gpsd(messageBus, dbHandler);
-	CANMarineSensorReceiver canMarineSensorReciver(messageBus, canService);
+    MarineSensorReciever canMarineSensorReciver(messageBus, canService);
 	CANMarineSensorTransmissionNode canMarineSensorTransmissionNode(messageBus, canService);
 
 
@@ -155,9 +192,15 @@ int main(int argc, char *argv[])
 	httpsync.start();
 	dbLoggerNode.start();
 
-
     auto future = canService.start();
     gpsd.start();
+
+    /*
+     * Send a data request message.
+     * Response is logged as info
+     */
+    MessagePtr msg = std::make_unique<DataRequestMsg>();
+    messageBus.sendMessage(std::move(msg));
 
 
 	// Begins running the message bus

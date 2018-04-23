@@ -29,6 +29,9 @@
 #include "Messages/CompassDataMsg.h"
 #include "Messages/GPSDataMsg.h"
 #include "Messages/AISDataMsg.h"
+#include "Messages/MarineSensorDataMsg.h"
+#include "Messages/DataRequestMsg.h"
+
 
 #include "MessageBus/MessageTypes.h"
 #include "MessageBus/MessageBus.h"
@@ -41,6 +44,7 @@
 #include "Hardwares/HMC6343Node.h"
 #include "Hardwares/GPSDNode.h"
 #include "Hardwares/CANAISNode.h"
+#include "Hardwares/CANMarineSensorTransmissionNode.h"
 
 #include <ncurses.h>
 #include <unordered_map>
@@ -94,6 +98,13 @@ public:
 		m_SensorValues["GPS Online"] = DATA_OUT_OF_RANGE;
 		m_SensorValues["AIS Longitude"] = DATA_OUT_OF_RANGE;
 		m_SensorValues["AIS Latitude"] = DATA_OUT_OF_RANGE;
+
+        m_SensorValues["Marine PH"] = DATA_OUT_OF_RANGE;
+        m_SensorValues["Marine Conductivety"] = DATA_OUT_OF_RANGE;
+        m_SensorValues["Marine Salinity"] = DATA_OUT_OF_RANGE;
+        m_SensorValues["Marine Temperature"] = DATA_OUT_OF_RANGE;
+
+
 
 		m_Win = newwin(6+2*m_SensorValues.size(),60,1,2);
 
@@ -163,6 +174,16 @@ public:
 					m_SensorValues["AIS Longitude"] = aisdata->posLon();
 				}
 				break;
+
+            case MessageType::MarineSensorData:
+            {
+                const MarineSensorDataMsg* marineSensorDataMsg= dynamic_cast<const MarineSensorDataMsg*>(message);
+				m_SensorValues["Marine PH"] = marineSensorDataMsg->ph();
+				m_SensorValues["Marine Conductivety"] = marineSensorDataMsg->conductivity();
+				m_SensorValues["Marine Salinity"] = marineSensorDataMsg->salinity();
+				m_SensorValues["Marine Temperature"] = marineSensorDataMsg->temperature();
+            }
+                break;
 
 				default:
 				break;
@@ -286,6 +307,23 @@ void sendActuatorCommands() {
 	lastSentValues = menuValues;
 }
 
+void sendMarineSensorRequest() {
+
+    bool sendMarineDataRequest;
+
+    try {
+        sendMarineDataRequest = stoi(menuValues["M Sensor Request"]);
+    } catch(std::invalid_argument ex) {
+        std::cout << std::endl << "Marine sensor request only works with integers." << std::endl << std::endl;
+        return;
+    }
+
+    if(sendMarineDataRequest) {
+        MessagePtr dataRequestMsg = std::make_unique<DataRequestMsg>();
+        msgBus.sendMessage(std::move(dataRequestMsg));
+    }
+}
+
 int main() {
 
 	// Initialize Ncurses
@@ -310,21 +348,25 @@ int main() {
 
 	// Comment out this line if not running on the pi
 	// otherwise program will crash.
-	auto future = canService.start();
+	//auto future = canService.start();
 
 
 	SensorDataReceiver sensorReceiver(msgBus);
+
+
 	CANWindsensorNode windSensor(msgBus, dbHandler, canService);
 	HMC6343Node compass(msgBus, dbHandler);
 	compass.init ();
-
-
 
 	CANArduinoNode arduino (msgBus, dbHandler, canService);
 	ActuatorNodeASPire actuators (msgBus, canService);
 	GPSDNode gps (msgBus, dbHandler);
 	gps.init();
 	CANAISNode ais (msgBus, dbHandler, canService);
+
+    CANMarineSensorTransmissionNode marineSensorTransmissionNode(msgBus,canService);
+    marineSensorTransmissionNode.init();
+
 
 	ais.start();
 	gps.start();
@@ -340,12 +382,14 @@ int main() {
 
 	menuValues["Rudder Angle"] = "";
 	menuValues["Wingsail Angle"] = "";
+    menuValues["M Sensor Request"] = "";
    // menuValues["Windvane Angle"] = "";
 
 	lastSentValues = menuValues;
 
 	lastSentValues["Rudder Angle"] = "0";
 	lastSentValues["Wingsail Angle"] = "0";
+    lastSentValues["M Sensor Request"] = "0";
 	//lastSentValues["Windvane Angle"] = "0";
 
 	menuIter highlighted = menuValues.begin();
@@ -388,6 +432,7 @@ int main() {
 					break;
 				case ENTER:
 					sendActuatorCommands();
+                    sendMarineSensorRequest();
 					for(auto& it : menuValues) {
 						it.second = "";
 					}
