@@ -100,17 +100,39 @@ Currently we use the Chromium code style formatting with a maximum line length o
 
     -   <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>A</kbd>
 
-# Work in progress:
+# Notes on formatting of other languages
 
-## HTML and CSS, Javascript
+## HTML and CSS, Javascript, JSON
+
+Install _[js-beautify](https://aur.archlinux.org/packages/js-beautify/)_ from the AUR. The package includes _html-beautify_, _css-beautify_. It might be worth mentioning you also have _tidy_ for HTML/XHTML/HTML, _fixjson_ for relaxed JSON5 and _eslint_ for Javascript.
 
 ## PHP
 
--   PSR-2 (work in progress)
+To use PSR2 code formatting install _[php-codesniffer](https://aur.archlinux.org/packages/php-codesniffer/) to get _phpcb_, PHP Code Beautifier. Dennis vill att du använder PSR2 med `phpcbf --standard=PSR2`.
+
+## Shell scripts
+
+Install _[shfmt](https://aur.archlinux.org/packages/shfmt/)_ from AUR and _[shellcheck](https://www.archlinux.org/packages/community/x86_64/shellcheck/)_ from regular repositories (`pacman -S shellcheck`). Try to follow POSIX standards and avoid relying on Bash where possible.
 
 ## Markdown
 
--   Remarkable (work in progress)
+Here we install _remark_ globally using npm. Installing it for the current user only does not seem possible. Reference: https://github.com/remarkjs/remark
+
+```console
+# npm install -g remark-cli
+```
+
+## Perl
+
+Not sure this is even used in the project but look for _perltidy_.
+
+## Python code style formatting using autopep8
+
+```console
+# pacman -S autopep8
+```
+
+Plugins exists for Atom, Sublime and others and the executable can be used as a text filter in Kate or run straight off the commandline. Alternative formatters exists such as _yapf_. 
 
 ## Notes regarding vim
 
