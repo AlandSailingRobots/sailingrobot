@@ -18,7 +18,6 @@
 #include <stdint.h>
 #include "MessageBus/MessageTypes.h"
 #include "MessageBus/NodeIDs.h"
-#include <opencv2/core.hpp>
 
 
 class MessageDeserialiser {
@@ -33,7 +32,6 @@ public:
 	bool readFloat(float& data);
 	bool readDouble(double& data);
 	bool readBool(bool& data);
-	bool readMat(cv::Mat& data);
 	bool readMessageType(MessageType& data);
 	bool readNodeID(NodeID& data);
 

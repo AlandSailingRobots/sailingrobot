@@ -77,7 +77,6 @@ export INTEGRATION_TEST_EXEC_ASPIRE = integration-tests-ASPire.run
 export HTTP_SYNC_TEST_EXEC	= HTTPSync-test.run
 export AIS_TEST_EXEC		= ais-integration-tests.run
 export MARINE_SENSOR_TEST_EXEC = marine-sensor-test.run
-#export FREE_SPACE_DETECTION = free-space-detection.run
 
 export OBJECT_FILE          = $(BUILD_DIR)/objects.tmp
 
@@ -125,7 +124,7 @@ export LNM_SRC              = $(LNM_DIR)/ASRCourseBallot.cpp $(LNM_DIR)/ASRArbit
 
 # Obstacles detection
 export COLLIDABLE_MGR_SRC	= WorldState/CollidableMgr/CollidableMgr.cpp WorldState/AISProcessing.cpp \
-								#Worldstate/CameraProcessingUtility.cpp
+							
 
 # Simulator
 export SIMULATOR_SRC        = Simulation/SimulationNode.cpp
@@ -147,7 +146,6 @@ export HW_NODES_ASPIRE_SRC 	= Hardwares/ActuatorNodeASPire.cpp Hardwares/CANAISN
                             	Hardwares/CANWindsensorNode.cpp Hardwares/CANArduinoNode.cpp Hardwares/MarineSensorNode.cpp\
                             	Hardwares/CANMarineSensorTransmissionNode.cpp
 
-# export HW_NODES_CAMERA	= WorldState/obstacledetection/CameraProcessingNode.cpp
 
 # ActuatorNode for Janet not compiling, uses removed ActuatorPositionMsg
 export HW_NODES_JANET_SRC 	= Hardwares/CV7Node.cpp Hardwares/ArduinoNode.cpp

@@ -14,15 +14,6 @@
 
 #include "MessageBus/MessageDeserialiser.h"
 #include <cstring>
-#include <opencv2/core.hpp>
-#include <opencv2/imgcodecs.hpp>
-#include <opencv2/videoio.hpp>
-#include <opencv2/highgui.hpp>
-#include <opencv2/imgproc.hpp>
-#include <opencv2/photo.hpp>
-#include <opencv2/videostab.hpp>
-#include <opencv2/tracking.hpp>
-#include <opencv2/video.hpp>
 
 
 MessageDeserialiser::MessageDeserialiser(uint8_t* data, uint8_t size)
@@ -133,18 +124,6 @@ bool MessageDeserialiser::readDouble(double& data)
 }
 
 bool MessageDeserialiser::readBool(bool& data)
-{
-	if(m_index + sizeof(data) <= m_size)
-	{
-		data = m_data[m_index];
-		m_index++;
-		return true;
-	}
-
-	return false;
-}
-
-bool MessageDeserialiser::readMat(cv::Mat& data)
 {
 	if(m_index + sizeof(data) <= m_size)
 	{

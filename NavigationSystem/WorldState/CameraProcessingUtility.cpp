@@ -4,13 +4,15 @@
  * 		CameraProcessingUtility.cpp
  *
  * Purpose:
- *		Utility functions for image acquisition and processing
+ *		Utility functions for image acquisition and processing.
+ *      While running, this thread can be restarted with 'ESC', or
+ *      shut down with 'q'.
  *
  *
  * Developer Notes:
  *      In case of lag when the program is running, pressing ESC will restart the
- *      thread. Changing the value of "waitKey()" can do the job if lags occur
- *      too many times.
+ *      thread and help a bit. Changing the value of "waitKey()" can do the job 
+ *      if lags occur too many times.
  * 
  *
  ***************************************************************************************/
@@ -145,19 +147,18 @@ void CameraProcessingUtility::CameraProcessingUtilityThreadFunc(ActiveNode* node
 
     Timer timer;
     timer.start();
-    Logger::info("Entering CameraProcessingUtilityThreadFunc loop"); //debugging
+    Logger::info("Entering CameraProcessingUtilityThreadFunc loop");
 
     while(node->m_running) {
       node->freeSpaceProcessing();
       node->computeRelDistances();
       node->addCameraDataToCollidableMgr();
-      Logger::info("Camera Processing thread running");
+      //Logger::info("Camera Processing thread running");
       timer.sleepUntil(1.0); //need more than 0.5 because of some lags, in case 
                              //the thread is restarted
       timer.reset();
     }
-    Logger::info("Exiting CameraProcessingUtilityThreadFunc loop"); //debugging
-    //cout << "mrunning state " << node->m_running << endl; //debugging
+    Logger::info("Exiting CameraProcessingUtilityThreadFunc loop");
 }
 
 void CameraProcessingUtility::addCameraDataToCollidableMgr() {
@@ -175,15 +176,7 @@ map<int16_t, uint16_t> CameraProcessingUtility::getRelDistances() {
 }
 
 int CameraProcessingUtility::freeSpaceProcessing() {
-    /*
-    VideoCapture m_capture(cameraDeviceID); // Opens the camera handle
-    if (m_capture.isOpened() == false) //  To check if object was associated to webcam successfully
-    {
-        Logger::error("Camera not available");
-        // skipping return for single frame test
-        exit(EXIT_FAILURE);
-    }
-    */
+
     char c; // input for video display
 
     namedWindow( "Display window", WINDOW_NORMAL );// Create a window for display.
@@ -195,15 +188,9 @@ int CameraProcessingUtility::freeSpaceProcessing() {
     resizeWindow( "Display distance", widthFrame - lowFrameX, heightFrame - lowFrameY );
     
 
-    //Logger::info("freeSpaceProcessing function start"); // debugging purpose
-
-    //if (m_capture.empty())
-    //{
-     //   Logger::info("Warning -- cv::mat m_capture is empty");
-    //}
     VideoCapture m_capture(m_cameraDeviceID); // reopens the camera handle as the init seems not ok atm
     m_capture >> m_imgFullSize;
-    //Logger::info("Frame acquired from video instance"); debugging purpose
+
     if (m_imgFullSize.empty())
     {
         Logger::info("Warning, frame is empty");
@@ -229,21 +216,16 @@ int CameraProcessingUtility::freeSpaceProcessing() {
     Mat rot;
     Rect imageBox;
 
-
     // Set up frame size
-    // skipped for single frame test
-    //m_capture >> imgFullSize;
     Rect thermalImagerArea(lowFrameX, lowFrameY, widthFrame, heightFrame);
     Logger::info("Variables init done");
     imgOriginal = m_imgFullSize(thermalImagerArea).clone();
     Logger::info("Frame part cloned");
     Point2f center(imgOriginal.cols/2.0, imgOriginal.rows/2.0);
 
-    //cout << "debug point: before for" << endl;
-    //Logger::info("Debug point (for loop)"); debugging purpose
     for(;;)
     {
-        m_capture >> m_imgFullSize; //skipped single frame test
+        m_capture >> m_imgFullSize;
 
         if (m_imgFullSize.empty()) { // if frame read unsuccessfully
             Logger::error("video input frame not readable");
@@ -252,7 +234,6 @@ int CameraProcessingUtility::freeSpaceProcessing() {
         imgOriginal = m_imgFullSize(thermalImagerArea).clone();
         imshow( "Display window", imgOriginal );
         
-
 
         /*
          * -----------------------------------------------------------------
@@ -280,8 +261,6 @@ int CameraProcessingUtility::freeSpaceProcessing() {
          */
         // Convert Original Image to HSV Thresh Image
         cvtColor(imgOriginal, hsvImg, CV_BGR2HSV);
-        // Save temporary result for debugging purpose
-        //imwrite("imageHSV.jpg", hsvImg);
 
         /*
          * -----------------------------------------------------------------
@@ -305,8 +284,6 @@ int CameraProcessingUtility::freeSpaceProcessing() {
             continue;
         }
 
-        //Logger::info("Debug point, starting denoising steps"); debugging purpose
-
         /*
          * -----------------------------------------------------------------
          * Denoising
@@ -326,11 +303,9 @@ int CameraProcessingUtility::freeSpaceProcessing() {
         // Might have kind of a little impact most of the time because of the gaussian blur, but still a good security for outliers.
         medianBlur(frameGrayScale, frameGrayScale, 3);
 
-        // Remove small objects
+        // Remove small objects, prioritizing horizontal ones
         Mat erodedFrame;
         erode( frameGrayScale, erodedFrame, kernel_ero );
-        // Test dilatereconstruct instead of dilate
-        //dilate( frameGrayScale, frameGrayScale, kernel_ero );
         frameGrayScale = dilateReconstruction(erodedFrame, frameGrayScale, kernel_ero);
 
         /*
@@ -340,98 +315,11 @@ int CameraProcessingUtility::freeSpaceProcessing() {
          *-----------------------------------------------------------------
          */
 
-        // Attempt with Canny or Laplacian operator
+        // Using Canny filter for edges detection
         
         Canny(frameGrayScale, dst, 16, 42, 3);
-        //cout << "debug step: before edge detection" << endl;
-        //cout << "what is this: " << CV_64F << endl;
-        //Laplacian(frameGrayScale, dst, 16);
-        //cout << "debug step: after edge detection" << endl;
         cvtColor(dst, cdst, COLOR_GRAY2BGR);
         
-
-        // Attempt with Threshold+DistTransform+Watershed
-        /*
-        // Create binary image from source image
-        Mat bw = frameGrayScale.clone();
-        Mat src = frameGrayScale.clone();
-        threshold(bw, bw, 40, 255, CV_THRESH_BINARY | CV_THRESH_OTSU);
-        // Save intermediary result for debugging purposes
-        imwrite("binImg.jpg", bw);
-        // Perform the distance transform algorithm
-        Mat dist;
-        distanceTransform(bw, dist, CV_DIST_L2, 3);
-        // Normalize the distance image for range = {0.0, 1.0}
-        // so we can visualize and threshold it
-        normalize(dist, dist, 0, 1., NORM_MINMAX);
-        // Save intermediary result for debugging purposes
-        imwrite("distTransfImg.jpg", dist);
-        // Threshold to obtain the peaks
-        // This will be the markers for the foreground objects
-        threshold(dist, dist, .4, 1., CV_THRESH_BINARY);
-        // Dilate a bit the dist image
-        Mat kernel1 = Mat::ones(3, 3, CV_8UC1);
-        dilate(dist, dist, kernel1);
-        imwrite("peaks.jpg", dist);
-        // Create the CV_8U version of the distance image
-        // It is needed for findContours()
-        Mat dist_8u;
-        dist.convertTo(dist_8u, CV_8U);
-        // Find total markers
-        vector<vector<Point> > contours;
-        findContours(dist_8u, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
-        // Create the marker image for the watershed algorithm
-        Mat markers = Mat::zeros(dist.size(), CV_32SC1);
-        // Draw the foreground markers
-        for (size_t i = 0; i < contours.size(); i++)
-            drawContours(markers, contours, static_cast<int>(i), Scalar::all(static_cast<int>(i)+1), -1);
-        // Draw the background marker
-        circle(markers, Point(5,5), 3, CV_RGB(255,255,255), -1);
-        imwrite("markers.jpg", markers*10000);
-
-        // Perform the watershed algorithm
-        cout << "reached watershed step" << endl;
-        watershed(src, markers);
-        Mat mark = Mat::zeros(markers.size(), CV_8UC1);
-        markers.convertTo(mark, CV_8UC1);
-        bitwise_not(mark, mark);
-    //    imshow("Markers_v2", mark); // uncomment this if you want to see how the mark
-                                      // image looks like at that point
-        // Generate random colors
-        vector<Vec3b> colors;
-        for (size_t i = 0; i < contours.size(); i++)
-        {
-            int b = theRNG().uniform(0, 255);
-            int g = theRNG().uniform(0, 255);
-            int r = theRNG().uniform(0, 255);
-            colors.push_back(Vec3b((uchar)b, (uchar)g, (uchar)r));
-        }
-        // Create the result image
-        Mat dst = Mat::zeros(markers.size(), CV_8UC3);
-        // Fill labeled objects with random colors
-        for (int i = 0; i < markers.rows; i++)
-        {
-            for (int j = 0; j < markers.cols; j++)
-            {
-                int index = markers.at<int>(i,j);
-                if (index > 0 && index <= static_cast<int>(contours.size()))
-                    dst.at<Vec3b>(i,j) = colors[index-1];
-                else
-                    dst.at<Vec3b>(i,j) = Vec3b(0,0,0);
-            }
-        }
-        // Visualize the final image
-        imwrite("watershedResult.jpg", dst);
-
-        */
-
-
-
-
-
-
-
-        //cout << "debug step: before HoughLines" << endl;
         HoughLinesP(dst, lines, 1, CV_PI/180, 50, 50, 10 );
         double theta1, theta2, hyp;
 
@@ -470,8 +358,6 @@ int CameraProcessingUtility::freeSpaceProcessing() {
 
         // show lines found
         line( cdst, Point(max_l[0], max_l[1]), Point(max_l[2], max_l[3]), Scalar(255,0,0), 3, LINE_AA);
-        // Save intermediary result for debugging purposes
-        //imwrite("findLinesImg.jpg", cdst);
 
         /*
          * -----------------------------------------------------------------
@@ -489,8 +375,7 @@ int CameraProcessingUtility::freeSpaceProcessing() {
         {
             roi = dst;
         }
-        // Save intermediary result for debugging purposes
-        //imwrite("roiImg1.jpg", roi);
+
         imshow( "Display roi", roi );
 
         /*
@@ -512,8 +397,6 @@ int CameraProcessingUtility::freeSpaceProcessing() {
                     roi.at<unsigned char>(i,j)=0;
             }
         }
-        // Save intermediary result for debugging purposes
-        //imwrite("sideFillImg.jpg", roi);
 
         // This image is what we want
         m_freeSpaceFrame = roi.clone();
@@ -534,8 +417,6 @@ int CameraProcessingUtility::freeSpaceProcessing() {
 
             // collidableMgr->addVisualObstacle(row, bearing);
         }
-
-        //imwrite("roiImg2.jpg", roi);
         
 
         imshow( "Display distance", m_freeSpaceFrame );
@@ -550,7 +431,6 @@ int CameraProcessingUtility::freeSpaceProcessing() {
         else if(c==113) //q=113
         {
           Logger::info("Warning, killing camera processing thread");
-          //stop(); // cant stop from this thread, thread.join will fail
           m_running = false;
           m_capture.release();
           destroyAllWindows();
@@ -562,21 +442,17 @@ int CameraProcessingUtility::freeSpaceProcessing() {
                     // need to increase the pause to smooth it a little
         }
 
-        //break; //single frame test
     }
 
     Logger::info("Exited loop, in CameraUtility/freeSpaceProcessing");
 
-    //exit(EXIT_FAILURE);  //Debug prupose,make the whole program stops
-                           // when triggered, not a good idea
     return EXIT_FAILURE;
 }
 
 int CameraProcessingUtility::computeRelDistances() {
     int16_t n_cols = m_freeSpaceFrame.cols;
     int16_t n_rows = m_freeSpaceFrame.rows;
-    //int n_whitePixels = 0;
-    //int16_t n_whitePixelsVect[n_cols] = {0};
+
     vector<int16_t> n_whitePixelsVect(n_cols);
     for (int i=0; i < n_cols; i++)
     {

@@ -37,8 +37,6 @@
 #include "SystemServices/Logger.h"
 #include "WorldState/CollidableMgr/CollidableMgr.h"
 
-//using namespace std;
-//using namespace cv;
 
 class CameraProcessingUtility : public ActiveNode {
 public:
@@ -66,12 +64,7 @@ private:
     cv::Mat m_imgFullSize;
     cv::Mat m_freeSpaceFrame;
     std::map<int16_t, uint16_t> m_relBearingToRelObstacleDistance;
-    /*
-    const int lowFrameX;
-    const int widthFrame;
-    const int lowFrameY;
-    const int heightFrame;
-    */
+
     int m_cameraDeviceID;
     const int m_detectorLoopTime;
     const int m_maxCompassFrameTimeframe;
