@@ -22,7 +22,8 @@
 
 #include <atomic>
 
-size_t write_to_string(void* ptr, size_t size, size_t count, void* stream) {
+// The callbacks CANNOT be non-static class member functions
+static size_t write_to_string(void* ptr, size_t size, size_t count, void* stream) {
     ((std::string*)stream)->append((char*)ptr, 0, size * count);
     return size * count;
 }
@@ -161,6 +162,7 @@ bool HTTPSyncNode::pushConfigs() {
 
 std::string HTTPSyncNode::getData(std::string call) {
     std::string response;
+
     if (performCURLCall("", call, response)) {
         return response;
     } else {
@@ -170,19 +172,23 @@ std::string HTTPSyncNode::getData(std::string call) {
 
 bool HTTPSyncNode::checkIfNewConfigs() {
     std::string result = getData("checkIfNewConfigs");
-    if (std::stoi(result))
-        return true;
 
+    if (result.length()) {
+        if (std::stoi(result)) {
+            return true;
+        }
+    }
     return false;
 }
 
 bool HTTPSyncNode::checkIfNewWaypoints() {
     std::string result = getData("checkIfNewWaypoints");
 
-    if (std::stoi(result)) {
-        return true;
+    if (result.length()) {
+        if (std::stoi(result)) {
+            return true;
+        }
     }
-
     return false;
 }
 
@@ -242,35 +248,39 @@ bool HTTPSyncNode::performCURLCall(std::string data, std::string call, std::stri
 
     curl = curl_easy_init();
     if (curl) {
+        // https://curl.haxx.se/libcurl/c/threadsafe.html
+        curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1L);
+
         // Send data through curl with POST
-        curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1L);   // https://curl.haxx.se/libcurl/c/threadsafe.html
         curl_easy_setopt(curl, CURLOPT_URL, m_serverURL.c_str());
         curl_easy_setopt(curl, CURLOPT_POSTFIELDS, serverCall.c_str());
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_to_string);
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response);
-        /* Perform the request, res will get the return code */
+
+        /* Perform the request, m_res will get the return code */
         m_res = curl_easy_perform(curl);
+
         /* Check for errors */
         // std::cout << "/* Reponse serveur : " << response << "\n*/" << "\n\n\n\n";
-        if (m_res != CURLE_OK) {
+        if (m_res == CURLE_OK) {
+            if (m_reportedConnectError) {
+                m_reportedConnectError = false;
+                Logger::info("Connection to server re-established");
+            }
+        } else {
             if (!m_reportedConnectError) {
                 Logger::error("%s Error: %s", __PRETTY_FUNCTION__, curl_easy_strerror(m_res));
-            }
-            if (m_res == CURLE_COULDNT_CONNECT && m_reportedConnectError) {
-                curl_easy_cleanup(curl);
-                return false;
-            } else if (m_res == CURLE_COULDNT_CONNECT) {
                 m_reportedConnectError = true;
             }
             curl_easy_cleanup(curl);
             return false;
-        } else {
-            m_reportedConnectError = false;
         }
         curl_easy_cleanup(curl);
     } else {
         fprintf(stderr, "CURL IS FALSE");
+        return false;
     }
 
+    // All is well
     return true;
 }
