@@ -1,7 +1,7 @@
 /****************************************************************************************
  *
  * File:
- * 		ActuatorNode.h
+ * 		ActuatorNodeJanet.h
  *
  * Purpose:
  *		Controls an actuator on the vessel.
@@ -16,9 +16,9 @@
 #include "MessageBus/Node.h"
 #include "DataBase/DBHandler.h"
 
-class ActuatorNode : public Node {
+class ActuatorNodeJanet : public Node {
 public:
-	ActuatorNode(MessageBus& msgBus, DBHandler& dbhandler, NodeID id, int channel, int speed, int acceleration);
+	ActuatorNodeJanet(MessageBus& msgBus, DBHandler& dbhandler, NodeID id, int channel, int speed, int acceleration);
 
 	///----------------------------------------------------------------------------------
  	/// Setups the actuator.

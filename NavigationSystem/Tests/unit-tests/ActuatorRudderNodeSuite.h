@@ -21,7 +21,7 @@
 
  #include "../cxxtest/cxxtest/TestSuite.h"
  #include "TestMocks/MessageLogger.h"
- #include "Hardwares/ActuatorNode.h"
+ #include "Hardwares/ActuatorNodeJanet.h"
  #include "Hardwares/MaestroController/MaestroController.h"
 
 // For std::this_thread
@@ -33,7 +33,7 @@
 
  class ActuatorRudderNodeSuite : public CxxTest::TestSuite {
     public:
-    ActuatorNode* rudder;
+    ActuatorNodeJanet* rudder;
     DBHandler* dbhandler;
     MessageLogger* logger;
     std::thread* thr;
@@ -61,7 +61,7 @@
 			logger = new MessageLogger(msgBus());
             dbhandler = new DBHandler("../asr.db");
             int channel = 3, speed = 0, acceleration = 0;
-			rudder = new ActuatorNode(msgBus(), *dbhandler, NodeID::RudderActuator, channel, speed, acceleration);
+			rudder = new ActuatorNodeJanet(msgBus(), *dbhandler, NodeID::RudderActuator, channel, speed, acceleration);
             thr = new std::thread(runMessageLoop);
 		}
 		testCount++;

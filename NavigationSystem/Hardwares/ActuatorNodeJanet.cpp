@@ -1,7 +1,7 @@
 /****************************************************************************************
  *
  * File:
- * 		ActuatorNode.cpp
+ * 		ActuatorNodeJanet.cpp
  *
  * Purpose:
  *		Controls an actuator on the vessel.
@@ -11,20 +11,20 @@
  *
  ***************************************************************************************/
 
-#include "Hardwares/ActuatorNode.h"
+#include "Hardwares/ActuatorNodeJanet.h"
 #include "Messages/ActuatorPositionMsg.h"
 #include "Hardwares/MaestroController/MaestroController.h"
 #include "SystemServices/Logger.h"
 
 
-ActuatorNode::ActuatorNode(MessageBus& msgBus, DBHandler& dbhandler, NodeID id, int channel, int speed, int acceleration)
+ActuatorNodeJanet::ActuatorNodeJanet(MessageBus& msgBus, DBHandler& dbhandler, NodeID id, int channel, int speed, int acceleration)
 	:Node(id, msgBus), m_Channel(channel), m_Speed(speed), m_Acceleration(acceleration), m_db(dbhandler)
 {
   msgBus.registerNode(*this,MessageType::ActuatorPosition);
   msgBus.registerNode(*this,MessageType::ServerConfigsReceived);
 }
 
-bool ActuatorNode::init()
+bool ActuatorNodeJanet::init()
 {
 	if( MaestroController::writeCommand(MaestroCommands::SetSpeed, m_Channel, m_Speed) &&
 		MaestroController::writeCommand(MaestroCommands::SetAcceleration, m_Channel, m_Acceleration) )
@@ -39,7 +39,7 @@ bool ActuatorNode::init()
 
 }
 
-void ActuatorNode::processMessage(const Message* message)
+void ActuatorNodeJanet::processMessage(const Message* message)
 {
 	if(message->messageType() == MessageType::ActuatorPosition)
 	{
