@@ -8,6 +8,9 @@
  *
  *
  * Developer Notes:
+ *      In case of lag when the program is running, pressing ESC will restart the
+ *      thread. Changing the value of "waitKey()" can do the job if lags occur
+ *      too many times.
  * 
  *
  ***************************************************************************************/
@@ -44,10 +47,15 @@ using namespace cv;
 #define NUMBER_OF_SEGMENTS 24 // make it close to an approximation of 1 degree
                               // per cols as the camera has a range from -12 to 12
 
-const int lowFrameX = 68; //29
-const int widthFrame = 585; //257
-const int lowFrameY = 98; //30
-const int heightFrame = 381;  //195
+
+// Next values have to be selected by failings and retry, in comments are the values that should
+// work for : regular webcam(output format should be documented) | 
+// registered frame from the thermal camera | thermal camera video input
+
+const int lowFrameX = 0; //68 //29
+const int widthFrame = 640; // 585; //257
+const int lowFrameY = 0; //98; //30
+const int heightFrame = 480; //381; //195
 
 
 //DBHandler dbHandler("../asr.db");
@@ -116,6 +124,7 @@ bool CameraProcessingUtility::init() {
         // skipping return for single frame test
         exit(EXIT_FAILURE);
     }
+    Logger::info("Video capture initialized");
     return true;
 }
 
@@ -126,6 +135,8 @@ void CameraProcessingUtility::start() {
 
 void CameraProcessingUtility::stop() {
     m_running = false;
+    m_capture.release();
+    destroyAllWindows();
     stopThread(this);
 }
 
@@ -134,15 +145,19 @@ void CameraProcessingUtility::CameraProcessingUtilityThreadFunc(ActiveNode* node
 
     Timer timer;
     timer.start();
+    Logger::info("Entering CameraProcessingUtilityThreadFunc loop"); //debugging
 
     while(node->m_running) {
       node->freeSpaceProcessing();
       node->computeRelDistances();
       node->addCameraDataToCollidableMgr();
-      cout << "--- Camera Processing thread running ---" << endl;
-      timer.sleepUntil(0.5);
+      Logger::info("Camera Processing thread running");
+      timer.sleepUntil(1.0); //need more than 0.5 because of some lags, in case 
+                             //the thread is restarted
       timer.reset();
     }
+    Logger::info("Exiting CameraProcessingUtilityThreadFunc loop"); //debugging
+    //cout << "mrunning state " << node->m_running << endl; //debugging
 }
 
 void CameraProcessingUtility::addCameraDataToCollidableMgr() {
@@ -169,7 +184,30 @@ int CameraProcessingUtility::freeSpaceProcessing() {
         exit(EXIT_FAILURE);
     }
     */
+    char c; // input for video display
+
+    namedWindow( "Display window", WINDOW_NORMAL );// Create a window for display.
+    namedWindow( "Display roi", WINDOW_NORMAL );
+    namedWindow( "Display distance", WINDOW_NORMAL );
+
+    resizeWindow( "Display window", widthFrame - lowFrameX, heightFrame - lowFrameY );
+    resizeWindow( "Display roi", widthFrame - lowFrameX, heightFrame - lowFrameY );
+    resizeWindow( "Display distance", widthFrame - lowFrameX, heightFrame - lowFrameY );
+    
+
+    //Logger::info("freeSpaceProcessing function start"); // debugging purpose
+
+    //if (m_capture.empty())
+    //{
+     //   Logger::info("Warning -- cv::mat m_capture is empty");
+    //}
+    VideoCapture m_capture(m_cameraDeviceID); // reopens the camera handle as the init seems not ok atm
     m_capture >> m_imgFullSize;
+    //Logger::info("Frame acquired from video instance"); debugging purpose
+    if (m_imgFullSize.empty())
+    {
+        Logger::info("Warning, frame is empty");
+    }
     Mat imgOriginal; // Input raw image
     Mat hsvImg; // HSV converted image
     // Image containers
@@ -191,23 +229,30 @@ int CameraProcessingUtility::freeSpaceProcessing() {
     Mat rot;
     Rect imageBox;
 
+
     // Set up frame size
     // skipped for single frame test
     //m_capture >> imgFullSize;
     Rect thermalImagerArea(lowFrameX, lowFrameY, widthFrame, heightFrame);
+    Logger::info("Variables init done");
     imgOriginal = m_imgFullSize(thermalImagerArea).clone();
+    Logger::info("Frame part cloned");
     Point2f center(imgOriginal.cols/2.0, imgOriginal.rows/2.0);
 
-    cout << "debug point: before for" << endl;
+    //cout << "debug point: before for" << endl;
+    //Logger::info("Debug point (for loop)"); debugging purpose
     for(;;)
     {
-        //m_capture >> imgFullSize; skipped single frame test
+        m_capture >> m_imgFullSize; //skipped single frame test
 
         if (m_imgFullSize.empty()) { // if frame read unsuccessfully
             Logger::error("video input frame not readable");
             break;
         }
         imgOriginal = m_imgFullSize(thermalImagerArea).clone();
+        imshow( "Display window", imgOriginal );
+        
+
 
         /*
          * -----------------------------------------------------------------
@@ -260,6 +305,8 @@ int CameraProcessingUtility::freeSpaceProcessing() {
             continue;
         }
 
+        //Logger::info("Debug point, starting denoising steps"); debugging purpose
+
         /*
          * -----------------------------------------------------------------
          * Denoising
@@ -276,7 +323,7 @@ int CameraProcessingUtility::freeSpaceProcessing() {
         GaussianBlur( frameGrayScale, frameGrayScale, Size(5, 5), 4.0, 4.0 );
 
         // Remove spot noise
-        // Have kind of a little impact most of the time because of the gaussian blur, but still a good security for outliers.
+        // Might have kind of a little impact most of the time because of the gaussian blur, but still a good security for outliers.
         medianBlur(frameGrayScale, frameGrayScale, 3);
 
         // Remove small objects
@@ -444,6 +491,7 @@ int CameraProcessingUtility::freeSpaceProcessing() {
         }
         // Save intermediary result for debugging purposes
         //imwrite("roiImg1.jpg", roi);
+        imshow( "Display roi", roi );
 
         /*
          * -----------------------------------------------------------------
@@ -488,13 +536,40 @@ int CameraProcessingUtility::freeSpaceProcessing() {
         }
 
         //imwrite("roiImg2.jpg", roi);
+        
+
+        imshow( "Display distance", m_freeSpaceFrame );
+
+        c=(char)waitKey(100); // pause of 100ms
+        // Press ESC tor restart the thread, or Q to kill it.
+        if(c==27) //ESC=27
+        {
+          Logger::info("ESC display window, restarting the thread");
+          break;
+        }
+        else if(c==113) //q=113
+        {
+          Logger::info("Warning, killing camera processing thread");
+          //stop(); // cant stop from this thread, thread.join will fail
+          m_running = false;
+          m_capture.release();
+          destroyAllWindows();
+          break;
+        }
+        else
+        {
+        waitKey(25); // process is kind of heavy depending on the current frame
+                    // need to increase the pause to smooth it a little
+        }
 
         //break; //single frame test
     }
 
-    Logger::error("Exited loop, in CameraUtility/freeSpaceProcessing \t\t[ERROR]");
+    Logger::info("Exited loop, in CameraUtility/freeSpaceProcessing");
 
-    exit(EXIT_FAILURE);
+    //exit(EXIT_FAILURE);  //Debug prupose,make the whole program stops
+                           // when triggered, not a good idea
+    return EXIT_FAILURE;
 }
 
 int CameraProcessingUtility::computeRelDistances() {
@@ -512,6 +587,7 @@ int CameraProcessingUtility::computeRelDistances() {
                 n_whitePixelsVect.at(i)++;
                 // might have to check there if the roi resulting from the processing
                 // always keep the white pixels under the black ones, just to be sure
+                // the result is coherent
             }
         }
 
@@ -532,5 +608,5 @@ int CameraProcessingUtility::computeRelDistances() {
 }
 
 void CameraProcessingUtility::processMessage(const Message* msg) {
-  // Useless atm
+  // Useless atm, but needed for compiling.
 }
