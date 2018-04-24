@@ -15,6 +15,8 @@
 #include "CANArduinoNode.h"
 #include "CAN_Services/CanBusCommon/CanUtility.h"
 #include "MessageBus/MessageTypes.h"
+#include "../../ArduinoSketches/libraries/CanBusCommon/CanMessageHandler.h"
+#include "CAN_Services/CanBusCommon/canbus_defs.h"
 
 const int DATA_OUT_OF_RANGE = -2000;
 
@@ -52,17 +54,24 @@ void CANArduinoNode::processMessage (const Message* message){
 }
 
 void CANArduinoNode::processFrame (CanMsg& msg) {
+
+
+	CanMessageHandler messageHandler(msg);
+
+
 	uint16_t rawData;
 
-	if (msg.id == 701) {
-		rawData = (msg.data[1] << 8 | msg.data[0]);
-		m_RudderFeedback = CanUtility::mapInterval (rawData, 0, INT16_SIZE, -MAX_RUDDER_ANGLE, MAX_RUDDER_ANGLE);
+	if (messageHandler.getMessageId() == MSG_ID_AU_FEEDBACK) {
+		m_RudderFeedback = static_cast<float>(messageHandler.getMappedData(
+				RUDDER_ANGLE_DATASIZE, -MAX_RUDDER_ANGLE, MAX_RUDDER_ANGLE));
 
-		rawData = (msg.data[3] << 8 | msg.data[2]);
-		m_WingsailFeedback = CanUtility::mapInterval (rawData, 0, INT16_SIZE, -MAX_WINGSAIL_ANGLE, MAX_WINGSAIL_ANGLE);
+		m_WingsailFeedback = static_cast<float>(messageHandler.getMappedData(
+				WINGSAIL_ANGLE_DATASIZE, -MAX_WINGSAIL_ANGLE, MAX_WINGSAIL_ANGLE));
 
-		m_WindvaneSelfSteerAngle = (msg.data[5] << 8 | msg.data[4]);
-		m_WindvaneActuatorPos = msg.data[7];
+		m_WindvaneSelfSteerAngle = static_cast<float>(messageHandler.getMappedData(
+				WINDVANE_SELFSTEERING_DATASIZE, WINDVANE_SELFSTEERING_ANGLE_MIN, WINDVANE_SELFSTEERING_ANGLE_MAX));
+
+		m_WindvaneActuatorPos = messageHandler.getData(WINDVANE_ACTUATOR_POSITION_DATASIZE);
 	}
 	else if (msg.id == 702) {
 		rawData = (msg.data[1] << 8 | msg.data[0]);

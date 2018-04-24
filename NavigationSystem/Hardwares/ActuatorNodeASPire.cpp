@@ -13,6 +13,7 @@
 ***************************************************************************************/
 #include "ActuatorNodeASPire.h"
 #include "CAN_Services/CanBusCommon/CanUtility.h"
+#include "../../ArduinoSketches/libraries/CanBusCommon/CanMessageHandler.h"
 
 
 ActuatorNodeASPire::ActuatorNodeASPire(MessageBus& msgBus, CANService& CANService)
@@ -53,23 +54,13 @@ void ActuatorNodeASPire::processMessage(const Message* message)
 
 void ActuatorNodeASPire::sendCommandMessage()
 {
-	uint16_t rudderAngle16 = CanUtility::mapInterval (m_rudderAngle, -MAX_RUDDER_ANGLE, MAX_RUDDER_ANGLE, 0 , INT16_SIZE);
-	uint16_t wingsailAngle16 = CanUtility::mapInterval (m_wingsailAngle, -MAX_WINGSAIL_ANGLE, MAX_WINGSAIL_ANGLE, 0 , INT16_SIZE);
-	
-	CanMsg Cmsg;
-	Cmsg.id = 700;
-	Cmsg.header.ide = 0;
-	Cmsg.header.length = 8;
+	CanMessageHandler messageHandler(MSG_ID_AU_CONTROL);
 
-	(Cmsg.data[0] = rudderAngle16 & 0xff);
-	(Cmsg.data[1] = rudderAngle16 >> 8);
-	(Cmsg.data[2] = wingsailAngle16 & 0xff);
-	(Cmsg.data[3] = wingsailAngle16 >> 8);
-	(Cmsg.data[4] = 0);
-	(Cmsg.data[5] = 0);
-	(Cmsg.data[6] = m_windvaneSelfSteeringOn);
-	(Cmsg.data[7] = 0);
+	messageHandler.encodeMappedMessage(RUDDER_ANGLE_DATASIZE, m_rudderAngle, MIN_RUDDER_ANGLE, MAX_RUDDER_ANGLE);
+	messageHandler.encodeMappedMessage(WINGSAIL_ANGLE_DATASIZE, m_wingsailAngle, MIN_WINGSAIL_ANGLE, MAX_WINGSAIL_ANGLE);
+	messageHandler.encodeMessage(WINDVANE_SELFSTEERING_ON_DATASIZE, m_windvaneSelfSteeringOn);
 
+	CanMsg Cmsg = messageHandler.getMessage();
 	m_CANService->sendCANMessage(Cmsg);
 }
 
