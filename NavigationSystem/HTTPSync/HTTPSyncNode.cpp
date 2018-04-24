@@ -141,7 +141,6 @@ bool HTTPSyncNode::pushDatalogs() {
     } else if (!m_reportedConnectError) {
         Logger::warning("%s Could not push logs to server:", __PRETTY_FUNCTION__);
     }
-
     return false;
 }
 
@@ -173,7 +172,7 @@ bool HTTPSyncNode::pushConfigs() {
 }
 
 std::string HTTPSyncNode::getData(std::string call) {
-    std::string response;
+    std::string response = "";
 
     if (performCURLCall("", call, response)) {
         return response;
@@ -182,15 +181,20 @@ std::string HTTPSyncNode::getData(std::string call) {
     }
 }
 
-
 bool HTTPSyncNode::checkIfNewConfigs() {
     std::string result = getData("checkIfNewConfigs");
-    return httpsyncnode_safe_stoi(result);
+    if (result.length()) {
+        return httpsyncnode_safe_stoi(result);
+    }
+    return false;
 }
 
 bool HTTPSyncNode::checkIfNewWaypoints() {
     std::string result = getData("checkIfNewWaypoints");
-    return httpsyncnode_safe_stoi(result);
+    if (result.length()) {
+        return httpsyncnode_safe_stoi(result);
+    }
+    return false;
 }
 
 bool HTTPSyncNode::getConfigsFromServer() {
@@ -239,11 +243,12 @@ bool HTTPSyncNode::performCURLCall(std::string data, std::string call, std::stri
     std::string serverCall = "";
 
     // std::cout << "/* Request : " << call << " */" << '\n';
-    if (data != "")
+    if (data != "") {
         serverCall = "serv=" + call + "&id=" + m_shipID + "&gen=aspire" + "&pwd=" + m_shipPWD +
                      "&data=" + data;
-    else
+    } else {
         serverCall = "serv=" + call + "&id=" + m_shipID + "&gen=aspire" + "&pwd=" + m_shipPWD;
+    }
     // example: serv=getAllConfigs&id=BOATID&pwd=BOATPW
     // std::cout << "/* Server call : " << serverCall.substr(0, 150) << " */" << '\n';
 
@@ -252,36 +257,45 @@ bool HTTPSyncNode::performCURLCall(std::string data, std::string call, std::stri
         // https://curl.haxx.se/libcurl/c/threadsafe.html
         curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1L);
 
+        // Fail on errors
+        curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1L);
+
+        // Human readable error message buffer
+        char errbuf[CURL_ERROR_SIZE];
+        curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, errbuf);
+        errbuf[0] = 0;  // empty before request
+
         // Send data through curl with POST
         curl_easy_setopt(curl, CURLOPT_URL, m_serverURL.c_str());
         curl_easy_setopt(curl, CURLOPT_POSTFIELDS, serverCall.c_str());
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_to_string);
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response);
 
-        /* Perform the request, m_res will get the return code */
+        // Perform the request, m_res will get the return code
         m_res = curl_easy_perform(curl);
+        curl_easy_cleanup(curl);
 
-        /* Check for errors */
+        // Check for errors
         // std::cout << "/* Reponse serveur : " << response << "\n*/" << "\n\n\n\n";
         if (m_res == CURLE_OK) {
             if (m_reportedConnectError) {
                 m_reportedConnectError = false;
                 Logger::info("Connection to server re-established");
             }
+            return true;  // All is well
         } else {
             if (!m_reportedConnectError) {
-                Logger::error("%s Error: %s", __PRETTY_FUNCTION__, curl_easy_strerror(m_res));
+                if (strlen(errbuf)) {
+                    Logger::error("Connection error: %s", errbuf);
+                } else {
+                    Logger::error("Connection error: %s", curl_easy_strerror(m_res));
+                }
                 m_reportedConnectError = true;
             }
-            curl_easy_cleanup(curl);
-            return false;
         }
-        curl_easy_cleanup(curl);
     } else {
-        fprintf(stderr, "CURL IS FALSE");
-        return false;
+        // fprintf(stderr, "CURL IS FALSE");
+        Logger::error("%s ERROR: problems with curllib, curl is false!", __PRETTY_FUNCTION__);
     }
-
-    // All is well
-    return true;
+    return false;
 }
