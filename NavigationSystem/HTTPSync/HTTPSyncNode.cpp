@@ -170,26 +170,27 @@ std::string HTTPSyncNode::getData(std::string call) {
     }
 }
 
+// TEMPORARY CODE
+int safe_stoi(const std::string& str, std::size_t* pos = 0, int base = 10) {
+    int retvalue = 0;
+    try {
+        retvalue = std::stoi(str, pos, base);
+    } catch (std::invalid_argument& e) {
+        Logger::error("%s stoi(): invalid argument", __PRETTY_FUNCTION__);
+    } catch (std::out_of_range& e) {
+        Logger::error("%s stoi(): value out of range", __PRETTY_FUNCTION__);
+    }
+    return retvalue;
+}
+
 bool HTTPSyncNode::checkIfNewConfigs() {
     std::string result = getData("checkIfNewConfigs");
-
-    if (result.length()) {
-        if (std::stoi(result)) {
-            return true;
-        }
-    }
-    return false;
+    return safe_stoi(result);
 }
 
 bool HTTPSyncNode::checkIfNewWaypoints() {
     std::string result = getData("checkIfNewWaypoints");
-
-    if (result.length()) {
-        if (std::stoi(result)) {
-            return true;
-        }
-    }
-    return false;
+    return safe_stoi(result);
 }
 
 bool HTTPSyncNode::getConfigsFromServer() {

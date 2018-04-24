@@ -278,7 +278,7 @@ void DBHandler::insertMessageLog(std::string gps_time, std::string type, std::st
     // std::stringstream sstm;
     // sstm << "INSERT INTO messages VALUES(NULL"
     //<< ", '" << gps_time << "', '" << type << "', '" << msg << "', " << (m_latestDataLogId) // Not
-    //use in DataBase
+    // use in DataBase
     //<< ");";
     // queryTable(sstm.str());
 }
@@ -415,7 +415,7 @@ bool DBHandler::updateWaypoints(std::string waypoints) {
     std::string DBPrinter = "";
     std::string tempValue = "";
     int valuesLimit = 11;  //"Dirty" fix for limiting the amount of values requested from server
-                           //waypoint entries (amount of fields n = valuesLimit + 1)
+                           // waypoint entries (amount of fields n = valuesLimit + 1)
     int limitCounter;
 
     if (not queryTable("DELETE FROM current_Mission;")) {
@@ -737,7 +737,7 @@ int DBHandler::getTable(sqlite3* db,
     while ((resultcode = sqlite3_step(statement)) == SQLITE_ROW) {
         for (int i = 0; i < columns; i++) {
             if (results[i] != "dflt_value")  //[es] Not a perfect solution. Needed for pragma sql
-                                             //statements as it is always null
+                                             // statements as it is always null
             {
                 // Get the value in the column
                 if (!sqlite3_column_text(statement, i)) {
@@ -971,6 +971,19 @@ std::vector<std::string> DBHandler::getColumnInfo(std::string info, std::string 
     return types;
 }
 
+// TEMPORARY CODE
+int safe_stoi(const std::string& str, std::size_t* pos = 0, int base = 10) {
+    int retvalue = 0;
+    try {
+        retvalue = std::stoi(str, pos, base);
+    } catch (std::invalid_argument& e) {
+        Logger::error("%s stoi(): invalid argument", __PRETTY_FUNCTION__);
+    } catch (std::out_of_range& e) {
+        Logger::error("%s stoi(): value out of range", __PRETTY_FUNCTION__);
+    }
+    return retvalue;
+}
+
 bool DBHandler::getWaypointValues(int& nextId,
                                   double& nextLongitude,
                                   double& nextLatitude,
@@ -1008,9 +1021,7 @@ bool DBHandler::getWaypointValues(int& nextId,
     }
 
     // Set values to next waypoint
-    if (results[1].length()) {
-        nextId = stoi(results[1]);
-    }
+    nextId = safe_stoi(results[1]);
 
     nextLongitude = atof(retrieveCell("current_Mission", results[1], "longitude").c_str());
     nextLatitude = atof(retrieveCell("current_Mission", results[1], "latitude").c_str());
@@ -1021,9 +1032,7 @@ bool DBHandler::getWaypointValues(int& nextId,
 
     if (foundPrev)  // Set values to next waypoint if harvested waypoint found
     {
-        if (results[1].length()) {
-            prevId = stoi(results[1]);
-        }
+        prevId = safe_stoi(results[1]);
 
         prevLongitude = atof(retrieveCell("current_Mission", results2[1], "longitude").c_str());
         prevLatitude = atof(retrieveCell("current_Mission", results2[1], "latitude").c_str());
