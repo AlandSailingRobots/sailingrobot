@@ -10,11 +10,13 @@
 #include "Hardwares/CAN_Services/CANService.h"
 #include "Hardwares/CAN_Services/CANFrameReceiver.h"
 #include "Hardwares/CAN_Services/N2kMsg.h"
+#include "Hardwares/CAN_Services/CanBusCommon/CanMessageHandler.h"
 #include "../cxxtest/cxxtest/TestSuite.h"
 
 #include <thread>
 #include <chrono>
 #include <iostream>
+#include <CanMessageHandler.h>
 
 #define WAIT_FOR_MSG 1000
 
@@ -39,16 +41,15 @@ public:
       auto fut = service->start();
       service->SetLoopBackMode();
 
-      CanMsg Cmsg;
-      Cmsg.id = 700;
-      Cmsg.header.ide = 0;
-      for(int i=0; i<8; i++)
+      CanMessageHandler messageHandler(MSG_ID_AU_CONTROL);
+      for(int i=0; i<6; i++)
       {
-        Cmsg.data[i] = i;
+        messageHandler.encodeMessage(1,i);
       }
-      Cmsg.header.length = sizeof(Cmsg.data) / sizeof(Cmsg.data[0]);
 
-      service->sendCANMessage(Cmsg);
+      CanMsg Cmsg = messageHandler.getMessage();
+
+      service->sendCANMessage(&Cmsg);
       bool missed = service->checkMissedMessages();
 
       std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_FOR_MSG));

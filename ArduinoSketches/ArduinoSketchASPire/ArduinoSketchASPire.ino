@@ -13,7 +13,6 @@
 #include <MsgParsing.h>
 #include <CanUtility.h>
 #include <CanMessageHandler.h>
-#include "../libraries/CanBusCommon/CanMessageHandler.h"
 
 #define CHIP_SELECT_PIN 49
 
@@ -27,8 +26,6 @@ const int WINGSAIL_MAESTRO_MIN_TARGET = 1110;
 // Maestro Configurations
 const int MAESTRO_SIGNAL_MULTIPLIER = 4;
 
-const double INT16_SIZE = 65535;
-
 const int RUDDER_MIN_FEEDBACK = 278;
 const int RUDDER_MAX_FEEDBACK = 358;
 const int WINGSAIL_MIN_FEEDBACK =  360;
@@ -40,7 +37,6 @@ const int WINGSAIL_MAESTRO_CHANNEL = 2;
 const int RUDDER_FEEDBACK_PIN = A6;
 const int WINGSAIL_FEEDBACK_PIN = A4;
 const int RADIO_CONTROLL_OFF_PIN = A8;
-
 
 
 /* On boards with a hardware serial port available for use, use
@@ -94,8 +90,8 @@ void loop()
 void sendFeedback (){
   CanMessageHandler messageHandler(MSG_ID_AU_FEEDBACK);
 
-  messageHandler.encodeMappedMessage(RUDDER_ANGLE_DATASIZE, getRudderFeedback(),-MAX_RUDDER_ANGLE,MAX_RUDDER_ANGLE);
-  messageHandler.encodeMappedMessage(WINGSAIL_ANGLE_DATASIZE, getWingsailFeedback(), -MAX_WINGSAIL_ANGLE, MAX_WINGSAIL_ANGLE);
+  messageHandler.encodeMappedMessage(RUDDER_ANGLE_DATASIZE, getRudderFeedback(),MIN_RUDDER_ANGLE,MAX_RUDDER_ANGLE);
+  messageHandler.encodeMappedMessage(WINGSAIL_ANGLE_DATASIZE, getWingsailFeedback(), MIN_WINGSAIL_ANGLE, MAX_WINGSAIL_ANGLE);
 
   CanMsg feedbackMsg = messageHandler.getMessage();
 
@@ -103,21 +99,11 @@ void sendFeedback (){
 }
 
 void sendArduinoData (){
-  CanMsg arduinoData;
-    arduinoData.id = 702;
-    arduinoData.header.ide = 0;
-    arduinoData.header.length = 7;
-    uint16_t RCon16 = (uint16_t) isRadioControllerUsed ();
-    arduinoData.data[0] = (RCon16 & 0xff);
-    arduinoData.data[1] = (RCon16 >> 8);
-    arduinoData.data[2] = 0;
-    arduinoData.data[3] = 0;
-    arduinoData.data[4] = 0;
-    arduinoData.data[5] = 0;
-    arduinoData.data[6] = 0;
+  CanMessageHandler messageHandler(MSG_ID_RC_STATUS);
+  messageHandler.encodeMessage(RADIOCONTROLLER_ON_DATASIZE, isRadioControllerUsed());
 
-    Canbus.SendMessage(&arduinoData);
-
+  CanMsg arduinoData = messageHandler.getMessage();
+  Canbus.SendMessage(&arduinoData);
 }
 void checkCanbusFor (int timeMs){
   int startTime= millis();
@@ -170,13 +156,13 @@ float getWingsailFeedback() {
   return angle;
 }
 
-int isRadioControllerUsed (){
+bool isRadioControllerUsed (){
 
   if (analogRead (RADIO_CONTROLL_OFF_PIN) > 250) { //Value comes from the multiplexer indicator led
-    return 0;
+    return false;
   }
   else {
-    return  INT16_SIZE/2;
+    return true;
   }
 }
 

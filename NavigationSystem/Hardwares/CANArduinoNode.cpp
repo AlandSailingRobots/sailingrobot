@@ -15,8 +15,7 @@
 #include "CANArduinoNode.h"
 #include "CAN_Services/CanBusCommon/CanUtility.h"
 #include "MessageBus/MessageTypes.h"
-#include "../../ArduinoSketches/libraries/CanBusCommon/CanMessageHandler.h"
-#include "CAN_Services/CanBusCommon/canbus_defs.h"
+#include "CAN_Services/CanBusCommon/CanMessageHandler.h"
 
 const int DATA_OUT_OF_RANGE = -2000;
 
@@ -55,11 +54,7 @@ void CANArduinoNode::processMessage (const Message* message){
 
 void CANArduinoNode::processFrame (CanMsg& msg) {
 
-
 	CanMessageHandler messageHandler(msg);
-
-
-	uint16_t rawData;
 
 	if (messageHandler.getMessageId() == MSG_ID_AU_FEEDBACK) {
 		m_RudderFeedback = static_cast<float>(messageHandler.getMappedData(
@@ -73,13 +68,8 @@ void CANArduinoNode::processFrame (CanMsg& msg) {
 
 		m_WindvaneActuatorPos = messageHandler.getData(WINDVANE_ACTUATOR_POSITION_DATASIZE);
 	}
-	else if (msg.id == 702) {
-		rawData = (msg.data[1] << 8 | msg.data[0]);
-		if (rawData > 0){
-			m_Radio_Controller_On = true;
-		} else {
-			m_Radio_Controller_On = false;
-		}
+	else if (messageHandler.getMessageId() == MSG_ID_RC_STATUS) {
+		m_Radio_Controller_On = messageHandler.getData(RADIOCONTROLLER_ON_DATASIZE);
 	}
 }
 
