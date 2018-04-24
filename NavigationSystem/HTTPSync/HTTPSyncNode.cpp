@@ -22,6 +22,19 @@
 
 #include <atomic>
 
+// TEMPORARY CODE
+int httpsyncnode_safe_stoi(const std::string& str, std::size_t* pos = 0, int base = 10) {
+    int retvalue = 0;
+    try {
+        retvalue = std::stoi(str, pos, base);
+    } catch (std::invalid_argument& e) {
+        Logger::error("%s stoi(): invalid argument", __PRETTY_FUNCTION__);
+    } catch (std::out_of_range& e) {
+        Logger::error("%s stoi(): value out of range", __PRETTY_FUNCTION__);
+    }
+    return retvalue;
+}
+
 // The callbacks CANNOT be non-static class member functions
 static size_t write_to_string(void* ptr, size_t size, size_t count, void* stream) {
     ((std::string*)stream)->append((char*)ptr, 0, size * count);
@@ -40,7 +53,6 @@ HTTPSyncNode::HTTPSyncNode(MessageBus& msgBus, DBHandler* dbhandler)
 
 bool HTTPSyncNode::init() {
     m_initialised = false;
-
     m_reportedConnectError = false;
 
     m_serverURL = m_dbHandler->retrieveCell("config_httpsync", "1", "srv_addr");
@@ -170,27 +182,15 @@ std::string HTTPSyncNode::getData(std::string call) {
     }
 }
 
-// TEMPORARY CODE
-int safe_stoi(const std::string& str, std::size_t* pos = 0, int base = 10) {
-    int retvalue = 0;
-    try {
-        retvalue = std::stoi(str, pos, base);
-    } catch (std::invalid_argument& e) {
-        Logger::error("%s stoi(): invalid argument", __PRETTY_FUNCTION__);
-    } catch (std::out_of_range& e) {
-        Logger::error("%s stoi(): value out of range", __PRETTY_FUNCTION__);
-    }
-    return retvalue;
-}
 
 bool HTTPSyncNode::checkIfNewConfigs() {
     std::string result = getData("checkIfNewConfigs");
-    return safe_stoi(result);
+    return httpsyncnode_safe_stoi(result);
 }
 
 bool HTTPSyncNode::checkIfNewWaypoints() {
     std::string result = getData("checkIfNewWaypoints");
-    return safe_stoi(result);
+    return httpsyncnode_safe_stoi(result);
 }
 
 bool HTTPSyncNode::getConfigsFromServer() {

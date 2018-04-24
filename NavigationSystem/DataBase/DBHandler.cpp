@@ -6,6 +6,19 @@
 #include <thread>
 #include "SystemServices/Timer.h"
 
+// TEMPORARY CODE
+int dbhandler_safe_stoi(const std::string& str, std::size_t* pos = 0, int base = 10) {
+    int retvalue = 0;
+    try {
+        retvalue = std::stoi(str, pos, base);
+    } catch (std::invalid_argument& e) {
+        Logger::error("%s stoi(): invalid argument", __PRETTY_FUNCTION__);
+    } catch (std::out_of_range& e) {
+        Logger::error("%s stoi(): value out of range", __PRETTY_FUNCTION__);
+    }
+    return retvalue;
+}
+
 std::mutex DBHandler::m_databaseLock;
 
 DBHandler::DBHandler(std::string filePath) : m_filePath(filePath) {
@@ -272,6 +285,7 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
 
     closeDatabase(db);
 }
+
 // TODO -Oliver: make private
 void DBHandler::insertMessageLog(std::string gps_time, std::string type, std::string msg) {
     // std::string result;
@@ -971,18 +985,6 @@ std::vector<std::string> DBHandler::getColumnInfo(std::string info, std::string 
     return types;
 }
 
-// TEMPORARY CODE
-int safe_stoi(const std::string& str, std::size_t* pos = 0, int base = 10) {
-    int retvalue = 0;
-    try {
-        retvalue = std::stoi(str, pos, base);
-    } catch (std::invalid_argument& e) {
-        Logger::error("%s stoi(): invalid argument", __PRETTY_FUNCTION__);
-    } catch (std::out_of_range& e) {
-        Logger::error("%s stoi(): value out of range", __PRETTY_FUNCTION__);
-    }
-    return retvalue;
-}
 
 bool DBHandler::getWaypointValues(int& nextId,
                                   double& nextLongitude,
@@ -1021,7 +1023,7 @@ bool DBHandler::getWaypointValues(int& nextId,
     }
 
     // Set values to next waypoint
-    nextId = safe_stoi(results[1]);
+    nextId = dbhandler_safe_stoi(results[1]);
 
     nextLongitude = atof(retrieveCell("current_Mission", results[1], "longitude").c_str());
     nextLatitude = atof(retrieveCell("current_Mission", results[1], "latitude").c_str());
@@ -1032,7 +1034,7 @@ bool DBHandler::getWaypointValues(int& nextId,
 
     if (foundPrev)  // Set values to next waypoint if harvested waypoint found
     {
-        prevId = safe_stoi(results[1]);
+        prevId = dbhandler_safe_stoi(results[1]);
 
         prevLongitude = atof(retrieveCell("current_Mission", results2[1], "longitude").c_str());
         prevLatitude = atof(retrieveCell("current_Mission", results2[1], "latitude").c_str());
