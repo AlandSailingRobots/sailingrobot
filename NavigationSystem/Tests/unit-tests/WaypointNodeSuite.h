@@ -94,8 +94,6 @@ class WaypointNodeSuite : public CxxTest::TestSuite {
     }
 
     void test_WaypointNodeCloseWaypoint() {
-        TS_SKIP("Outdated test to be updated");
-
         double gpsLat = 60.107240;
         double gpsLon = 19.921311;
 
@@ -105,7 +103,7 @@ class WaypointNodeSuite : public CxxTest::TestSuite {
         std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_FOR_MESSAGE));
 
         bool proofWaypointReached =
-            dbHandler->retrieveCellAsInt("current_mission", "harvested", "1");
+            dbHandler->retrieveCellAsInt("current_mission", "1", "harvested"); //waypoint is not reached?
         TS_ASSERT_EQUALS(proofWaypointReached, true);
 
         TS_ASSERT(mockNode->m_MessageReceived);
