@@ -113,6 +113,7 @@ public:
 				m_waypointNextDeclination = waypointData->nextDeclination();
 				m_waypointNextRadius = waypointData->nextRadius();
 				m_waypointStayTime = waypointData->stayTime();
+				m_isCheckpoint = waypointData->isCheckpoint();
 				m_waypointPrevId = waypointData->prevId();
 				m_waypointPrevLongitude = waypointData->prevLongitude();
 				m_waypointPrevLatitude = waypointData->prevLatitude();
@@ -206,6 +207,7 @@ public:
 	int 	m_waypointNextDeclination;
 	int 	m_waypointNextRadius;
 	int 	m_waypointStayTime;
+	bool	m_isCheckpoint;
 	int 	m_waypointPrevId;
 	double 	m_waypointPrevLongitude;
 	double 	m_waypointPrevLatitude;
