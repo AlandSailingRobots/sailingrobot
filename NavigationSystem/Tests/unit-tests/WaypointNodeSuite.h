@@ -8,9 +8,9 @@
  *      correctly
  *
  * Developer Notes:
- *  - ./insertPredefinedWaypoints.sh  needs to be run first.
+ *  - ./update_waypoints.py Mission/ASS.json needs to be run before testing.
  *
- *							12.4.17 JM
+ *
  *
  *	Functions that have tests:		Functions that does not have tests:
  *
@@ -85,54 +85,27 @@
         TS_ASSERT(waypoint->init());
         TS_ASSERT(nodeRegistered);
 
-        // These tests suppose the db is set up in a specific manner beforehand
-/*        
         std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_FOR_MESSAGE));
         TS_ASSERT(mockNode->m_MessageReceived);
         TS_ASSERT_EQUALS(mockNode->m_waypointNextId,1);
-        TS_ASSERT_DELTA(mockNode->m_waypointNextLongitude,19.53291333,1e-8);
-        TS_ASSERT_DELTA(mockNode->m_waypointNextLatitude,60.22654833,1e-8);
+        TS_ASSERT_DELTA(mockNode->m_waypointNextLongitude,19.922311,1e-8);
+        TS_ASSERT_DELTA(mockNode->m_waypointNextLatitude,60.107240,1e-8);
         TS_ASSERT_EQUALS(mockNode->m_waypointNextDeclination,6);
-        TS_ASSERT_EQUALS(mockNode->m_waypointNextRadius,15);
+        TS_ASSERT_EQUALS(mockNode->m_waypointNextRadius,20);
         TS_ASSERT_EQUALS(mockNode->m_waypointStayTime,0);
         TS_ASSERT_EQUALS(mockNode->m_waypointPrevId,0);
         TS_ASSERT_DELTA(mockNode->m_waypointPrevLongitude,0,1e-3);
         TS_ASSERT_DELTA(mockNode->m_waypointPrevLatitude,0,1e-4);
         TS_ASSERT_EQUALS(mockNode->m_waypointPrevDeclination,0);
         TS_ASSERT_EQUALS(mockNode->m_waypointPrevRadius,0);
-*/        
-    }
-
-
-
-    void test_WaypointNodeGpsMsg()
-    {
-        TS_SKIP("Outdated test to be updated");
-    /*    
-        // Work if the waypoints correspond to the value on the DB
-        std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_FOR_MESSAGE));
-        TS_ASSERT(mockNode->m_MessageReceived);
-        TS_ASSERT_EQUALS(mockNode->m_waypointNextId,1);
-        TS_ASSERT_DELTA(mockNode->m_waypointNextLongitude,19.53291333,1e-8);
-        TS_ASSERT_DELTA(mockNode->m_waypointNextLatitude,60.22654833,1e-8);
-        TS_ASSERT_EQUALS(mockNode->m_waypointNextDeclination,6);
-        TS_ASSERT_EQUALS(mockNode->m_waypointNextRadius,15);
-        TS_ASSERT_EQUALS(mockNode->m_waypointStayTime,0);
-        TS_ASSERT_EQUALS(mockNode->m_waypointPrevId,0);
-        TS_ASSERT_DELTA(mockNode->m_waypointPrevLongitude,0,1e-3);
-        TS_ASSERT_DELTA(mockNode->m_waypointPrevLatitude,0,1e-4);
-        TS_ASSERT_EQUALS(mockNode->m_waypointPrevDeclination,0);
-        TS_ASSERT_EQUALS(mockNode->m_waypointPrevRadius,0);
-        */
     }
 
     void test_WaypointNodeCloseWaypoint(){
         TS_SKIP("Outdated test to be updated");
-    /*    
+    /*
         double gpsLat = 60.22650000;
         double gpsLon = 19.53290000;
 
-        // Work if the waypoints correspond to the value on the DB
         MessagePtr gpsData = std::make_unique<GPSDataMsg>(true,true,gpsLat,gpsLon,12.12,1.7,273,2,GPSMode::LatLonOk);
         msgBus().sendMessage(std::move(gpsData));
         std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_FOR_MESSAGE));
@@ -196,7 +169,7 @@
 
     void test_WaypointNodeReachOutWaypointDuringStaytime(){
         TS_SKIP("Outdated test to be updated");
-    /*    
+    /*
         double gpsLat = 60.20231833;
         double gpsLon = 19.487045;
 

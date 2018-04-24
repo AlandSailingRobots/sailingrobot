@@ -131,7 +131,7 @@ public:
 
 	void test_WaypointDataMsg()
 	{
-		WaypointDataMsg msg(2, 19.81, 60.2, 0, 6, 15,  1, 19.82, 60.1, 6, 15);
+		WaypointDataMsg msg(2, 19.81, 60.2, 0, 6, 15, true, 1, 19.82, 60.1, 6, 15);
 
 		TS_ASSERT_EQUALS(msg.messageType(), MessageType::WaypointData);
 		TS_ASSERT_EQUALS(msg.nextId(), 2);
@@ -140,6 +140,7 @@ public:
 		TS_ASSERT_EQUALS(msg.nextDeclination(), 0);
 		TS_ASSERT_EQUALS(msg.nextRadius(), 6);
 		TS_ASSERT_EQUALS(msg.stayTime(), 15);
+		TS_ASSERT_EQUALS(msg.isCheckpoint(), true);
 		TS_ASSERT_EQUALS(msg.prevId(), 1);
 		TS_ASSERT_DELTA(msg.prevLongitude(), 19.82, 1e-7);
 		TS_ASSERT_DELTA(msg.prevLatitude(), 60.1, 1e-7);

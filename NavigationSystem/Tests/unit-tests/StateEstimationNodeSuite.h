@@ -47,7 +47,7 @@ public:
 
     int testCount = 0;
 
- 
+
   // ----------------
   // Setup the objects to test
   // ----------------
@@ -61,7 +61,7 @@ public:
         sEstimationNode.reset(new StateEstimationNode(messageBus,*dbhandler));
         sEstimationNode->start();
         std::this_thread::sleep_for(std::chrono::milliseconds(2600));
-        messageBusHelper.reset(new MessageBusTestHelper(messageBus)); 
+        messageBusHelper.reset(new MessageBusTestHelper(messageBus));
      }
     testCount++;
   }
@@ -135,7 +135,7 @@ public:
 
         int nextDeclination = 10;
         // TODO : Check the constructor because the variables seems not appropriate.
-        MessagePtr wayPointMsgData = std::make_unique<WaypointDataMsg>(2, 19.81, 60.2, nextDeclination, 6, 15,  1, 19.82, 60.1, 6, 15);
+        MessagePtr wayPointMsgData = std::make_unique<WaypointDataMsg>(2, 19.81, 60.2, nextDeclination, 6, 15, true, 1, 19.82, 60.1, 6, 15);
         messageBus.sendMessage(std::move(wayPointMsgData));
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
         TS_SKIP("Skipping failing test, needs update");
@@ -183,7 +183,7 @@ public:
     void test_StateEstStateMsgSpeedAndDeclZero()
     {
         int nextDeclination = 0;
-        MessagePtr wayPointMsgData = std::make_unique<WaypointDataMsg>(2, 19.81, 60.2, nextDeclination, 6, 15,  1, 19.82, 60.1, 6, 15);
+        MessagePtr wayPointMsgData = std::make_unique<WaypointDataMsg>(2, 19.81, 60.2, nextDeclination, 6, 15, true, 1, 19.82, 60.1, 6, 15);
         messageBus.sendMessage(std::move(wayPointMsgData));
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
@@ -223,7 +223,7 @@ public:
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
         int nextDeclination = 10;
-        MessagePtr wayPointMsgData = std::make_unique<WaypointDataMsg>(2, 19.81, 60.2, nextDeclination, 6, 15,  1, 19.82, 60.1, 6, 15);
+        MessagePtr wayPointMsgData = std::make_unique<WaypointDataMsg>(2, 19.81, 60.2, nextDeclination, 6, 15, true, 1, 19.82, 60.1, 6, 15);
         messageBus.sendMessage(std::move(wayPointMsgData));
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
@@ -253,7 +253,7 @@ public:
 
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
         int nextDeclination = 10;
-        MessagePtr wayPointMsgData = std::make_unique<WaypointDataMsg>(2, 19.81, 60.2, nextDeclination, 6, 15,  1, 19.82, 60.1, 6, 15);
+        MessagePtr wayPointMsgData = std::make_unique<WaypointDataMsg>(2, 19.81, 60.2, nextDeclination, 6, 15, true, 1, 19.82, 60.1, 6, 15);
         messageBus.sendMessage(std::move(wayPointMsgData));
 
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -276,7 +276,7 @@ public:
     // ----------------
     void test_StateEstimationUpdateFrequency(){
         TS_SKIP("Failing test (hanging) skipped");
-/*        
+/*
         Timer timer;
 
         dbhandler->changeOneValue("config_vessel_state","1","0.7","loop_time");
