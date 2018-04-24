@@ -14,14 +14,10 @@
 #pragma once
 
 #include <opencv2/core.hpp>
-#include <opencv2/imgcodecs.hpp>
 #include <opencv2/videoio.hpp>
-#include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
-#include <opencv2/photo.hpp>
-#include <opencv2/videostab.hpp>
-#include <opencv2/tracking.hpp>
-#include <opencv2/video.hpp>
+#include <opencv2/imgcodecs.hpp>
+
 
 #include <vector>
 #include <thread>

@@ -27,7 +27,9 @@ export USE_SIM = 0
 export USE_LNM = 0
 
 ## Temporary plced opencv libs
-OPENCV = `pkg-config opencv --cflags --libs`
+#OPENCV = `pkg-config opencv --cflags --libs`
+OPENCV = -lopencv_core -lopencv_videoio -lopencv_imgproc  
+#OPENCV = -L{/usr/local/lib} -lopencv_core -lopencv_videoio -lopencv_imgproc  
 
 ###############################################################################
 # Tools
@@ -61,7 +63,7 @@ export SRC_DIR				= ./
 export BUILD_DIR        	= build
 export EXEC_DIR         	= ./
 
-export INC_DIR         	 	= -I./ -I./Libs -I./Libs/json/include
+export INC_DIR         	 	= -I./ -I./Libs -I./Libs/json/include   
 
 LNM_DIR                 	= Navigation/LocalNavigationModule
 

@@ -48,10 +48,10 @@ using namespace cv;
 // work for : regular webcam(output format should be documented) | 
 // registered frame from the thermal camera | thermal camera video input
 
-const int lowFrameX = 280; //0; //68 //29
-const int widthFrame = 725;//640; // 585; //257
-const int lowFrameY = 100;//0; //98; //30
-const int heightFrame = 500;//480; //381; //195
+const int lowFrameX = 0; //280; //0; //68 //29
+const int widthFrame = 300; //725;//640; // 585; //257
+const int lowFrameY = 0; //100;//0; //98; //30
+const int heightFrame = 200; //200; //500;//480; //381; //195
 
 char c; // input for video display
 
@@ -109,8 +109,8 @@ CameraProcessingUtility::~CameraProcessingUtility() {}
 
 
 bool CameraProcessingUtility::init() {
-    //VideoCapture capture(m_cameraDeviceID); // Opens the camera handle
-    VideoCapture capture("/home/sailbot/Documents/untitled.mp4"); // For testing from video
+    VideoCapture capture(0); // Opens the camera handle
+  //  VideoCapture capture("/home/sailbot/Documents/untitled.mp4"); // For testing from video
     this->m_capture = capture;
     if (this->m_capture.isOpened() == false) //  To check if object was associated to webcam successfully
     {
@@ -130,11 +130,11 @@ void CameraProcessingUtility::start() {
 void CameraProcessingUtility::stop() {
     m_running = false;
     m_capture.release();
-    if (WITH_GUI)
+ /*   if (WITH_GUI)
     {
       destroyAllWindows();
     }
-    stopThread(this);
+ */   stopThread(this);
 }
 
 void CameraProcessingUtility::CameraProcessingUtilityThreadFunc(ActiveNode* nodePtr) {
@@ -146,7 +146,7 @@ void CameraProcessingUtility::CameraProcessingUtilityThreadFunc(ActiveNode* node
     
     std::chrono::duration<double> elapsed_seconds;
 
-    if (WITH_GUI)
+ /*  if (WITH_GUI)
     {
     namedWindow( "Display window", WINDOW_NORMAL );// Create a window for display.
     namedWindow( "Display roi", WINDOW_NORMAL );
@@ -156,14 +156,14 @@ void CameraProcessingUtility::CameraProcessingUtilityThreadFunc(ActiveNode* node
     resizeWindow( "Display roi", widthFrame - lowFrameX, heightFrame - lowFrameY );
     resizeWindow( "Display distance", widthFrame - lowFrameX, heightFrame - lowFrameY );
     }
-
+*/
     while(node->m_running) {
 
       auto start = std::chrono::system_clock::now();
       node->freeSpaceProcessing();
       auto end = std::chrono::system_clock::now();
       elapsed_seconds = end-start;
-      //cout << "-------------------------- Image Processing Took: " << elapsed_seconds.count() << " Seconds" << endl;
+      cout << "-------------------------- Image Processing Took: " << elapsed_seconds.count() << " Seconds" << endl;
 
       node->computeRelDistances();
       node->addCameraDataToCollidableMgr();
@@ -235,11 +235,11 @@ void CameraProcessingUtility::freeSpaceProcessing() {
 
     imgOriginal = m_imgFullSize(thermalImagerArea).clone();
 
-    if (WITH_GUI)
+ /*   if (WITH_GUI)
     {
       imshow( "Display window", imgOriginal );
     }
-    
+  */  
 
     /*
      * -----------------------------------------------------------------
@@ -354,11 +354,11 @@ void CameraProcessingUtility::freeSpaceProcessing() {
 
 
     roi=dst;
-    if (WITH_GUI)
+   /* if (WITH_GUI)
     {
       imshow( "Display roi", cdst );
     }
-    //imshow( "Display roi", cdst );
+ */   //imshow( "Display roi", cdst );
 
     /*
      * -----------------------------------------------------------------
@@ -385,7 +385,7 @@ void CameraProcessingUtility::freeSpaceProcessing() {
     this->m_freeSpaceFrame = m_freeSpaceFrame; 
     //cout << to_string(this->m_freeSpaceFrame.type) << endl;
     
-    if (WITH_GUI)
+  /*  if (WITH_GUI)
     {
         imshow( "Display distance", m_freeSpaceFrame );
     
@@ -411,8 +411,8 @@ void CameraProcessingUtility::freeSpaceProcessing() {
     }
     else
     {
-        usleep(1000000);
-    }
+   */     usleep(100000);
+   // }
 
 }
 
