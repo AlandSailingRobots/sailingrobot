@@ -14,7 +14,6 @@
 
 #include <thread>
 #include <chrono>
-#include <CanMessageHandler.h>
 
 #define CAN_FR_TESTCOUNT 1
 
@@ -71,7 +70,7 @@ public:
         messageHandler.encodeMessage(WINDVANE_SELFSTEERING_DATASIZE, windvaneSteerAngle);
 
         CanMsg Cmsg = messageHandler.getMessage();
-        canService().sendCANMessage(&Cmsg);
+        canService().sendCANMessage(Cmsg);
 
         ASPireActuatorFeedbackMsg otherMsg(wingsailFeedback, rudderFeedback, windvaneSteerAngle, 0, 0);
 

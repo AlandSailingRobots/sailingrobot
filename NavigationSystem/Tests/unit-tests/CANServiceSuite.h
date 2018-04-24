@@ -16,7 +16,6 @@
 #include <thread>
 #include <chrono>
 #include <iostream>
-#include <CanMessageHandler.h>
 
 #define WAIT_FOR_MSG 1000
 
@@ -49,7 +48,7 @@ public:
 
       CanMsg Cmsg = messageHandler.getMessage();
 
-      service->sendCANMessage(&Cmsg);
+      service->sendCANMessage(Cmsg);
       bool missed = service->checkMissedMessages();
 
       std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_FOR_MSG));
