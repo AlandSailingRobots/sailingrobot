@@ -66,8 +66,6 @@ class WindStateNodeSuite : public CxxTest::TestSuite {
     }
 
     void test_verifyCorrectMsgData() {
-        TS_SKIP("Test skipped for now, we need correct values to test with");
-        /*
         messageBus.sendMessage(std::make_unique<WindDataMsg>(windDirection, windSpeed, windTemp));
         messageBus.sendMessage(std::make_unique<StateMessage>(vesselHeading, vesselLat, vesselLon,
                                                               vesselSpeed, vesselCourse));
@@ -77,13 +75,12 @@ class WindStateNodeSuite : public CxxTest::TestSuite {
 
         float apparentWindSpeed = 4;
         float apparentWindDirection = 10;
-
         float trueWindSpeed = 1;
-        float trueWindDirection = 0;
+        float trueWindDirection = 360;
 
         WindStateMsg windStateMsg(trueWindSpeed, trueWindDirection, apparentWindSpeed,
                                   apparentWindDirection);
 
-        TS_ASSERT(verifier->verifyWindStateMsg(&windStateMsg));*/
+        TS_ASSERT(verifier->verifyWindStateMsg(&windStateMsg));
     }
 };
