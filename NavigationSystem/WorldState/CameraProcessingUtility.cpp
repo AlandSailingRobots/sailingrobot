@@ -54,10 +54,10 @@ using namespace cv;
 // work for : regular webcam(output format should be documented) | 
 // registered frame from the thermal camera | thermal camera video input
 
-const int lowFrameX = 0; //68 //29
-const int widthFrame = 640; // 585; //257
-const int lowFrameY = 0; //98; //30
-const int heightFrame = 480; //381; //195
+const int lowFrameX = 280; //0; //68 //29
+const int widthFrame = 725;//640; // 585; //257
+const int lowFrameY = 100;//0; //98; //30
+const int heightFrame = 500;//480; //381; //195
 
 
 //DBHandler dbHandler("../asr.db");
@@ -178,17 +178,30 @@ map<int16_t, uint16_t> CameraProcessingUtility::getRelDistances() {
 int CameraProcessingUtility::freeSpaceProcessing() {
 
     char c; // input for video display
+    int spatialRad = 20;  // mean shift parameters
+    int colorRad = 15; 
+    int maxPyrLevel = 2;
+    Mat meanshiftBaseFrame;
 
     namedWindow( "Display window", WINDOW_NORMAL );// Create a window for display.
     namedWindow( "Display roi", WINDOW_NORMAL );
     namedWindow( "Display distance", WINDOW_NORMAL );
+    namedWindow( "Display before meanshift", WINDOW_NORMAL );
+    namedWindow( "Display after meanshift", WINDOW_NORMAL );
 
     resizeWindow( "Display window", widthFrame - lowFrameX, heightFrame - lowFrameY );
     resizeWindow( "Display roi", widthFrame - lowFrameX, heightFrame - lowFrameY );
     resizeWindow( "Display distance", widthFrame - lowFrameX, heightFrame - lowFrameY );
+    resizeWindow( "Display before meanshift", widthFrame - lowFrameX, heightFrame - lowFrameY );
+    resizeWindow( "Display after meanshift", widthFrame - lowFrameX, heightFrame - lowFrameY );
+
+    createTrackbar( "spatialRad", "Display after meanshift", &spatialRad, 80);
+    createTrackbar( "colorRad", "Display after meanshift", &colorRad, 60);
+    createTrackbar( "maxPyrLevel", "Display after meanshift", &maxPyrLevel, 5);
     
 
-    VideoCapture m_capture(m_cameraDeviceID); // reopens the camera handle as the init seems not ok atm
+    //VideoCapture m_capture(m_cameraDeviceID); // reopens the camera handle as the init seems not ok atm
+    VideoCapture m_capture("/home/sailbot/Documents/untitled.mp4"); // Load a video file for testing
     m_capture >> m_imgFullSize;
 
     if (m_imgFullSize.empty())
@@ -199,6 +212,7 @@ int CameraProcessingUtility::freeSpaceProcessing() {
     Mat hsvImg; // HSV converted image
     // Image containers
     Mat frameGrayScale, roi, dst, cdst;
+    Mat erodedFrame;
 
     // Noise removal kernel for the filters
     // Using a vertical filter helps removing the waves during the open by reconstruction step
@@ -304,7 +318,6 @@ int CameraProcessingUtility::freeSpaceProcessing() {
         medianBlur(frameGrayScale, frameGrayScale, 3);
 
         // Remove small objects, prioritizing horizontal ones
-        Mat erodedFrame;
         erode( frameGrayScale, erodedFrame, kernel_ero );
         frameGrayScale = dilateReconstruction(erodedFrame, frameGrayScale, kernel_ero);
 
@@ -314,6 +327,20 @@ int CameraProcessingUtility::freeSpaceProcessing() {
          * to the image surface beneath
          *-----------------------------------------------------------------
          */
+
+
+        // Add meanshift clustering for testing
+        meanshiftBaseFrame = imgOriginal.clone();
+        //GaussianBlur( meanshiftBaseFrame, meanshiftBaseFrame, Size(5, 5), 4.0, 4.0 );
+        //medianBlur(meanshiftBaseFrame, meanshiftBaseFrame, 3);
+        //imshow( "Display before meanshift", meanshiftBaseFrame );
+        pyrMeanShiftFiltering( meanshiftBaseFrame, meanshiftBaseFrame, spatialRad, colorRad, maxPyrLevel );
+        //imshow( "Display after meanshift", meanshiftBaseFrame );
+        frameGrayScale = meanshiftBaseFrame.clone();
+        cvtColor(frameGrayScale, frameGrayScale, COLOR_RGB2GRAY);
+
+        erode( frameGrayScale, erodedFrame, kernel_ero );
+        frameGrayScale = dilateReconstruction(erodedFrame, frameGrayScale, kernel_ero);
 
         // Using Canny filter for edges detection
         
@@ -421,7 +448,7 @@ int CameraProcessingUtility::freeSpaceProcessing() {
 
         imshow( "Display distance", m_freeSpaceFrame );
 
-        c=(char)waitKey(100); // pause of 100ms
+        c=(char)waitKey(25); // pause of 100ms
         // Press ESC tor restart the thread, or Q to kill it.
         if(c==27) //ESC=27
         {
