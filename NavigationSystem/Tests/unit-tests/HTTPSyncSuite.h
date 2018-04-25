@@ -7,14 +7,11 @@
  *
  *
  * Developer Notes:
- *  - Still copypasting
  *  - Database "asr.db" needs to be created and initialized before testing. Run:
  *      - ./installdb.sh  -  Server address needs to be
- *"http://www.sailingrobots.com/testdata/sync/" or "http://localhost/Remote-sailing-robots/sync/"
- *      - ./insertPredefinedWaypoints.sh  -  Choose a waypoint that works
+ *    http://sailingrobots.ax/aspire/sync/ or http://localhost/sync/
  *
- *
- *                          11.4.17 JM
+ *  Mission needs to be Unit_tests.json
  *
  *  Functions that have tests:      Functions that does not have tests:
  *
@@ -47,7 +44,6 @@
 #include <chrono>
 #include <thread>
 
-// I think these are needed
 #define HTTP_TEST_COUNT 6
 
 class HTTPSyncSuite : public CxxTest::TestSuite {
@@ -153,26 +149,21 @@ class HTTPSyncSuite : public CxxTest::TestSuite {
     }
 
     void test_HTTPSyncPushDataLogs() {
-        TS_SKIP("Outdated test that needs to be updated");
-        /*
-                MessagePtr compassDatalogs = std::make_unique<CompassDataMsg>(3,2,1);
-                msgBus().sendMessage(std::move(compassDatalogs));
-                std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_FOR_MESSAGE));
-                std::string currentLogs = dbhandler->getLogs(true);
-                std::string emptyJson = "null";
-                TS_ASSERT_DIFFERS(currentLogs.compare(emptyJson),0); //Logs are cleared on a
-           successful push
+        MessagePtr compassDatalogs = std::make_unique<CompassDataMsg>(3, 2, 1);
+        msgBus().sendMessage(std::move(compassDatalogs));
+        std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_FOR_MESSAGE));
+        std::string currentLogs = dbhandler->getLogs(true);
+        std::string emptyJson = "null";
+        TS_ASSERT_DIFFERS(currentLogs.compare(emptyJson), 0);
 
-                dbhandler->changeOneValue("config_httpsync","1","1","remove_logs");
-                MessagePtr serverConfig = std::make_unique<ServerConfigsReceivedMsg>();
-                msgBus().sendMessage(std::move(serverConfig));
-                std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+        dbhandler->changeOneValue("config_httpsync", "1", "1", "remove_logs");
+        MessagePtr serverConfig = std::make_unique<ServerConfigsReceivedMsg>();
+        msgBus().sendMessage(std::move(serverConfig));
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
-                TS_ASSERT(httpsync->pushDatalogs());
-                std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_FOR_MESSAGE));
-                currentLogs = dbhandler->getLogs(true);
-                TS_ASSERT_EQUALS(currentLogs.compare(emptyJson),0); //Logs are cleared on a
-           successful push
-                */
+        TS_ASSERT(httpsync->pushDatalogs());
+        std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_FOR_MESSAGE));
+        currentLogs = dbhandler->getLogs(true);
+        TS_ASSERT_EQUALS(currentLogs.compare(emptyJson), 0);
     }
 };

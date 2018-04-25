@@ -20,13 +20,12 @@
 #include "Messages/WindDataMsg.h"
 #include "Messages/StateMessage.h"
 #include "Math/Utility.h"
-#include "MessageBusTestHelper.h" 
+#include "MessageBusTestHelper.h"
 
 #include <chrono>
 #include <math.h>
 
 #define SAIL_CONTROLNODE_TEST_COUNT   4
-
 
 class SailControlNodeSuite : public CxxTest::TestSuite
 {
@@ -45,9 +44,6 @@ public:
 
   int testCount = 0;
 
-  // ----------------
-  // Setup the objects to test
-  // ----------------
   void setUp()
   {
     // Test Node for message
@@ -69,9 +65,6 @@ public:
     testCount++;
   }
 
-  // ----------------
-  // End of test when all test have been successfull
-  // ----------------
   void tearDown()
   {
     if(testCount == SAIL_CONTROLNODE_TEST_COUNT)
@@ -158,7 +151,7 @@ public:
     TS_ASSERT_EQUALS(mockNode->m_WindDir,appWindDirection);
     TS_ASSERT_EQUALS(mockNode->m_WindSpeed,appWindSpeed);
     TS_ASSERT_EQUALS(mockNode->m_WindTemp,appWindTemp);
-    
+
     TS_SKIP("SailControlNode and test needs update");
 
     //Check if there is the same result by the processing next to the Compass data has been received
@@ -192,7 +185,7 @@ public:
 
       TS_ASSERT_DELTA(timer.timePassed(), 0.70, 1e-2);
       TS_SKIP("SailControlNode and test needs update");
-      
+
 
       double appWindDirection = 180;
       double appWindSpeed = 10;

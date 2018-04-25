@@ -20,7 +20,7 @@
 },
 
 "3": {
-  "is_checkpoint": 0,
+  "is_checkpoint": 1,
   "latitude": 60.103818,
   "longitude": 19.921925,
   "declination": 6,

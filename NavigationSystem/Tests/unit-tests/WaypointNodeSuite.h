@@ -32,7 +32,7 @@
 
 #include <chrono>
 
-#define WAYPOINT_TEST_COUNT 5
+#define WAYPOINT_TEST_COUNT 4
 
 class WaypointNodeSuite : public CxxTest::TestSuite {
    public:
@@ -102,8 +102,8 @@ class WaypointNodeSuite : public CxxTest::TestSuite {
         messageBus.sendMessage(std::move(gpsData));
         std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_FOR_MESSAGE));
 
-        bool proofWaypointReached =
-            dbHandler->retrieveCellAsInt("current_mission", "1", "harvested"); //waypoint is not reached?
+        bool proofWaypointReached = dbHandler->retrieveCellAsInt(
+            "current_mission", "1", "harvested");
         TS_ASSERT_EQUALS(proofWaypointReached, true);
 
         TS_ASSERT(mockNode->m_MessageReceived);
@@ -121,44 +121,41 @@ class WaypointNodeSuite : public CxxTest::TestSuite {
     }
 
     void test_WaypointNodeReachWaypointStaytime() {
-        TS_SKIP("Outdated test to be updated");
-        /*
-        double gpsLat = 60.21526667;
-        double gpsLon = 19.51169000;
-        int stayTime = 2; //current staytime of the waypoint
+        double gpsLat = 60.105700;
+        double gpsLon = 19.922311;
+        int stayTime = 3;
 
-        // Work if the waypoints correspond to the value on the DB
-        MessagePtr gpsData =
-        std::make_unique<GPSDataMsg>(true,true,gpsLat,gpsLon,12.12,1.7,273,2,GPSMode::LatLonOk);
-        msgBus().sendMessage(std::move(gpsData));
+        MessagePtr gpsData = std::make_unique<GPSDataMsg>(true, true, gpsLat, gpsLon, 12.12, 1.7,
+                                                          273, 2, GPSMode::LatLonOk);
+        messageBus.sendMessage(std::move(gpsData));
         std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_FOR_MESSAGE));
 
         mockNode->m_MessageReceived = false;
-        std::this_thread::sleep_for(std::chrono::seconds(stayTime/2));
+        std::this_thread::sleep_for(std::chrono::seconds(stayTime / 2));
         TS_ASSERT(not mockNode->m_MessageReceived);
-        std::this_thread::sleep_for(std::chrono::seconds(stayTime/2));
+        std::this_thread::sleep_for(std::chrono::seconds(stayTime / 2));
 
-        MessagePtr nextGpsData =
-        std::make_unique<GPSDataMsg>(true,true,gpsLat,gpsLon,12.12,1.7,273,2,GPSMode::LatLonOk);
-        msgBus().sendMessage(std::move(nextGpsData));
+        MessagePtr nextGpsData = std::make_unique<GPSDataMsg>(true, true, gpsLat, gpsLon, 12.12,
+                                                              1.7, 273, 2, GPSMode::LatLonOk);
+        messageBus.sendMessage(std::move(nextGpsData));
         std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_FOR_MESSAGE));
 
-        bool proofWaypointReached = dbHandler->retrieveCellAsInt("current_mission","harvested","2");
-        TS_ASSERT_EQUALS(proofWaypointReached,true);
+        bool proofWaypointReached =
+            dbHandler->retrieveCellAsInt("current_mission", "2", "harvested");
+        TS_ASSERT_EQUALS(proofWaypointReached, true);
 
         TS_ASSERT(mockNode->m_MessageReceived);
-        TS_ASSERT_EQUALS(mockNode->m_waypointNextId,3);
-        TS_ASSERT_DELTA(mockNode->m_waypointNextLongitude,19.487045,1e-8);
-        TS_ASSERT_DELTA(mockNode->m_waypointNextLatitude,60.20231833,1e-8);
-        TS_ASSERT_EQUALS(mockNode->m_waypointNextDeclination,6);
-        TS_ASSERT_EQUALS(mockNode->m_waypointNextRadius,15);
-        TS_ASSERT_EQUALS(mockNode->m_waypointStayTime,3);
-        TS_ASSERT_EQUALS(mockNode->m_waypointPrevId,3); //not normal
-        TS_ASSERT_DELTA(mockNode->m_waypointPrevLongitude,gpsLon,1e-3);
-        TS_ASSERT_DELTA(mockNode->m_waypointPrevLatitude,gpsLat,1e-4);
-        TS_ASSERT_EQUALS(mockNode->m_waypointPrevDeclination,6);
-        TS_ASSERT_EQUALS(mockNode->m_waypointPrevRadius,15);
-        */
+        TS_ASSERT_EQUALS(mockNode->m_waypointNextId, 3);
+        TS_ASSERT_DELTA(mockNode->m_waypointNextLongitude, 19.921925, 1e-8);
+        TS_ASSERT_DELTA(mockNode->m_waypointNextLatitude, 60.103818, 1e-8);
+        TS_ASSERT_EQUALS(mockNode->m_waypointNextDeclination, 6);
+        TS_ASSERT_EQUALS(mockNode->m_waypointNextRadius, 10);
+        TS_ASSERT_EQUALS(mockNode->m_waypointStayTime, 0);
+        TS_ASSERT_EQUALS(mockNode->m_waypointPrevId, 2);
+        TS_ASSERT_DELTA(mockNode->m_waypointPrevLongitude, gpsLon, 1e-3);
+        TS_ASSERT_DELTA(mockNode->m_waypointPrevLatitude, gpsLat, 1e-4);
+        TS_ASSERT_EQUALS(mockNode->m_waypointPrevDeclination, 6);
+        TS_ASSERT_EQUALS(mockNode->m_waypointPrevRadius, 12);
     }
 
     void test_WaypointNodeReachOutWaypointDuringStaytime() {
@@ -175,19 +172,19 @@ class WaypointNodeSuite : public CxxTest::TestSuite {
             // Work if the waypoints correspond to the value on the DB
             MessagePtr gpsData =
            std::make_unique<GPSDataMsg>(true,true,gpsLat,gpsLon,12.12,1.7,273,2,GPSMode::LatLonOk);
-            msgBus().sendMessage(std::move(gpsData));
+            messageBus.sendMessage(std::move(gpsData));
             std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_FOR_MESSAGE));
             std::this_thread::sleep_for(std::chrono::seconds(stayTime/3));
 
             MessagePtr nextGpsData =
            std::make_unique<GPSDataMsg>(true,true,movedGpsLat,movedGpsLon,12.12,1.7,273,2,GPSMode::LatLonOk);
-            msgBus().sendMessage(std::move(nextGpsData));
+            messageBus.sendMessage(std::move(nextGpsData));
             std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_FOR_MESSAGE));
             std::this_thread::sleep_for(std::chrono::seconds(stayTime/3));
 
             MessagePtr lastGpsData =
            std::make_unique<GPSDataMsg>(true,true,gpsLat,gpsLon,12.12,1.7,273,2,GPSMode::LatLonOk);
-            msgBus().sendMessage(std::move(lastGpsData));
+            messageBus..sendMessage(std::move(lastGpsData));
             std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_FOR_MESSAGE));
             std::this_thread::sleep_for(std::chrono::seconds(stayTime/3));
 
