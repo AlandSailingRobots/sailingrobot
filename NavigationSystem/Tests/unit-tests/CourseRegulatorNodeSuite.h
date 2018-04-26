@@ -22,7 +22,7 @@
 #include "Math/Utility.h"
 #include "DataBase/DBHandler.h"
 #include "SystemServices/Timer.h"
-#include "MessageBusTestHelper.h" 
+#include "MessageBusTestHelper.h"
 
 
 #include <chrono>
@@ -30,7 +30,7 @@
 
 #define COURSE_REGULATORNODE_TEST_COUNT 7
 
-const float NO_COMMAND = -1000; 
+const float NO_COMMAND = -1000;
 
 class CourseRegulatorNodeSuite : public CxxTest::TestSuite
 {
@@ -125,15 +125,14 @@ public:
         // Check if the message has been received by the object of simulation and without modification without desired_heading
         TS_ASSERT_EQUALS(mockNode->m_StateMsgHeading,heading);
         TS_ASSERT_EQUALS(mockNode->m_StateMsgSpeed,speed);
-        TS_SKIP("Skipping failing test, needs update");
-        /*
+
         TS_ASSERT_DELTA(mockNode->m_rudderPosition, 0, 1e-7); //Heading_error_value : 370
         // TODO: See how to find when the value is not good and interpreted it otherwise the utility::limitedAnglerange change 370
 
         
         double desiredcourse = 15;
         // Test listening desired course Message
-        MessagePtr localNavigationData = 
+        MessagePtr localNavigationData =
         std::make_unique<LocalNavigationMsg>(desiredcourse, NO_COMMAND, false, false);
         messageBus.sendMessage(std::move(localNavigationData));
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -142,7 +141,7 @@ public:
         double diffHeading = Utility::limitAngleRange(heading)-Utility::limitAngleRange(desiredcourse);
         int rudderAngle = Utility::sgn(speed)*sin(Utility::degreeToRadian(diffHeading))*MaxRudAng;
         double courseRegulatorRudderAngle = mockNode->m_rudderPosition;
-        TS_ASSERT_EQUALS(courseRegulatorRudderAngle,rudderAngle);*/
+        TS_ASSERT_EQUALS(courseRegulatorRudderAngle,rudderAngle);
         //Test if not calculate false value without the desired heading (includ Desired_heading = 0)
         // Check after if the value is correct
     }
@@ -163,7 +162,7 @@ public:
 
         double desiredcourse = 250;
         // Test listening desired course Message
-        MessagePtr localNavigationData = 
+        MessagePtr localNavigationData =
         std::make_unique<LocalNavigationMsg>(desiredcourse, NO_COMMAND, false, false);
         messageBus.sendMessage(std::move(localNavigationData));
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -191,7 +190,7 @@ public:
 
         double desiredcourse = 343;
         // Test listening desired course Message
-        MessagePtr localNavigationData = 
+        MessagePtr localNavigationData =
         std::make_unique<LocalNavigationMsg>(desiredcourse, NO_COMMAND, false, false);
         messageBus.sendMessage(std::move(localNavigationData));
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -220,7 +219,7 @@ public:
 
         double desiredcourse = 200;
         // Test listening desired course Message
-        MessagePtr localNavigationData = 
+        MessagePtr localNavigationData =
         std::make_unique<LocalNavigationMsg>(desiredcourse, NO_COMMAND, false, false);
         messageBus.sendMessage(std::move(localNavigationData));
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -262,7 +261,7 @@ public:
         messageBus.sendMessage(std::move(stateData));
         std::this_thread::sleep_for(std::chrono::milliseconds(700));
 
-        MessagePtr localNavigationData = 
+        MessagePtr localNavigationData =
         std::make_unique<LocalNavigationMsg>(desiredcourse, NO_COMMAND, false, false);
         messageBus.sendMessage(std::move(localNavigationData));
         std::this_thread::sleep_for(std::chrono::milliseconds(700));
