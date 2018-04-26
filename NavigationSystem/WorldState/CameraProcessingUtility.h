@@ -55,7 +55,7 @@ public:
     void processMessage(const Message* msg);
 
 private:
-    int freeSpaceProcessing();
+    void freeSpaceProcessing();
     int computeRelDistances();
     void addCameraDataToCollidableMgr();
     static void CameraProcessingUtilityThreadFunc(ActiveNode* nodePtr);

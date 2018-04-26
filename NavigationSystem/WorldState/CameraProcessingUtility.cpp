@@ -40,6 +40,8 @@
 #include "WorldState/CollidableMgr/CollidableMgr.h"
 #include "CameraProcessingUtility.h"
 
+#include <chrono> // testing execution speed
+
 using namespace std;
 using namespace cv;
 
@@ -58,6 +60,20 @@ const int lowFrameX = 280; //0; //68 //29
 const int widthFrame = 725;//640; // 585; //257
 const int lowFrameY = 100;//0; //98; //30
 const int heightFrame = 500;//480; //381; //195
+
+char c; // input for video display
+// Mean shift parameters
+// With params at (10,25,2) we keep the horizon line, boat detection, clear waves
+// and maintain an acceptable processing speed. More details can be kept by changing
+// the values but the best way to do it increase greatly the processing time. 
+// Note that boat tracks and reflection on the water are sometimes detected.
+int spatialRad = 12; // Influence details on edge, and slow down the processing
+                     // dramatically if set > 10
+int colorRad = 25;   // Mainly influence the details on edge, at 10 some waves are kept
+                     // and at 25 there is no waves, but less edges on the horizon.
+int maxPyrLevel = 2; 
+Mat meanshiftBaseFrame;
+
 
 
 //DBHandler dbHandler("../asr.db");
@@ -119,8 +135,10 @@ void CameraProcessingUtility::videoAcquisition(int m_cameraDeviceID) {
 }
 
 bool CameraProcessingUtility::init() {
-    VideoCapture m_capture(m_cameraDeviceID); // Opens the camera handle
-    if (m_capture.isOpened() == false) //  To check if object was associated to webcam successfully
+    //VideoCapture m_capture(m_cameraDeviceID); // Opens the camera handle
+    VideoCapture capture("/home/sailbot/Documents/untitled.mp4"); 
+    this->m_capture = capture;
+    if (this->m_capture.isOpened() == false) //  To check if object was associated to webcam successfully
     {
         Logger::error("Node: CameraProcessingUtility - Camera not available");
         // skipping return for single frame test
@@ -148,13 +166,35 @@ void CameraProcessingUtility::CameraProcessingUtilityThreadFunc(ActiveNode* node
     Timer timer;
     timer.start();
     Logger::info("Entering CameraProcessingUtilityThreadFunc loop");
+    //auto start, end; // chrono values
+    std::chrono::duration<double> elapsed_seconds;
+    //std::String time_log;
+    //VideoCapture m_capture("/home/sailbot/Documents/untitled.mp4"); // Load a video file for testing
+    namedWindow( "Display window", WINDOW_NORMAL );// Create a window for display.
+    namedWindow( "Display roi", WINDOW_NORMAL );
+    namedWindow( "Display distance", WINDOW_NORMAL );
+    //namedWindow( "Display before meanshift", WINDOW_NORMAL );
+    //namedWindow( "Display after meanshift", WINDOW_NORMAL );
+
+    resizeWindow( "Display window", widthFrame - lowFrameX, heightFrame - lowFrameY );
+    resizeWindow( "Display roi", widthFrame - lowFrameX, heightFrame - lowFrameY );
+    resizeWindow( "Display distance", widthFrame - lowFrameX, heightFrame - lowFrameY );
+    //resizeWindow( "Display before meanshift", widthFrame - lowFrameX, heightFrame - lowFrameY );
+    //resizeWindow( "Display after meanshift", widthFrame - lowFrameX, heightFrame - lowFrameY );
 
     while(node->m_running) {
+      //time_log = "";
+      auto start = std::chrono::system_clock::now();
       node->freeSpaceProcessing();
+      auto end = std::chrono::system_clock::now();
+      elapsed_seconds = end-start;
+      cout << "-------------------------- Processing took: " << elapsed_seconds.count() << " seconds" << endl;
+      //Logger::info("Processing took: " , elapsed_seconds.count() , " seconds");
+
       node->computeRelDistances();
       node->addCameraDataToCollidableMgr();
       //Logger::info("Camera Processing thread running");
-      timer.sleepUntil(1.0); //need more than 0.5 because of some lags, in case 
+      timer.sleepUntil(0.1); //need more than 0.5 because of some lags, in case 
                              //the thread is restarted
       timer.reset();
     }
@@ -175,34 +215,28 @@ map<int16_t, uint16_t> CameraProcessingUtility::getRelDistances() {
     return m_relBearingToRelObstacleDistance;
 }
 
-int CameraProcessingUtility::freeSpaceProcessing() {
-
-    char c; // input for video display
-    int spatialRad = 20;  // mean shift parameters
-    int colorRad = 15; 
-    int maxPyrLevel = 2;
-    Mat meanshiftBaseFrame;
-
-    namedWindow( "Display window", WINDOW_NORMAL );// Create a window for display.
+void CameraProcessingUtility::freeSpaceProcessing() {
+    
+/*    namedWindow( "Display window", WINDOW_NORMAL );// Create a window for display.
     namedWindow( "Display roi", WINDOW_NORMAL );
     namedWindow( "Display distance", WINDOW_NORMAL );
-    namedWindow( "Display before meanshift", WINDOW_NORMAL );
-    namedWindow( "Display after meanshift", WINDOW_NORMAL );
+    //namedWindow( "Display before meanshift", WINDOW_NORMAL );
+    //namedWindow( "Display after meanshift", WINDOW_NORMAL );
 
     resizeWindow( "Display window", widthFrame - lowFrameX, heightFrame - lowFrameY );
     resizeWindow( "Display roi", widthFrame - lowFrameX, heightFrame - lowFrameY );
     resizeWindow( "Display distance", widthFrame - lowFrameX, heightFrame - lowFrameY );
-    resizeWindow( "Display before meanshift", widthFrame - lowFrameX, heightFrame - lowFrameY );
-    resizeWindow( "Display after meanshift", widthFrame - lowFrameX, heightFrame - lowFrameY );
+    //resizeWindow( "Display before meanshift", widthFrame - lowFrameX, heightFrame - lowFrameY );
+    //resizeWindow( "Display after meanshift", widthFrame - lowFrameX, heightFrame - lowFrameY );
+*/
+    //createTrackbar( "spatialRad", "Display after meanshift", &spatialRad, 80);
+    //createTrackbar( "colorRad", "Display after meanshift", &colorRad, 60);
+    //createTrackbar( "maxPyrLevel", "Display after meanshift", &maxPyrLevel, 5);
 
-    createTrackbar( "spatialRad", "Display after meanshift", &spatialRad, 80);
-    createTrackbar( "colorRad", "Display after meanshift", &colorRad, 60);
-    createTrackbar( "maxPyrLevel", "Display after meanshift", &maxPyrLevel, 5);
-    
 
     //VideoCapture m_capture(m_cameraDeviceID); // reopens the camera handle as the init seems not ok atm
-    VideoCapture m_capture("/home/sailbot/Documents/untitled.mp4"); // Load a video file for testing
-    m_capture >> m_imgFullSize;
+    
+    this->m_capture >> m_imgFullSize;
 
     if (m_imgFullSize.empty())
     {
@@ -232,18 +266,18 @@ int CameraProcessingUtility::freeSpaceProcessing() {
 
     // Set up frame size
     Rect thermalImagerArea(lowFrameX, lowFrameY, widthFrame, heightFrame);
-    Logger::info("Variables init done");
+    //Logger::info("Variables init done");
     imgOriginal = m_imgFullSize(thermalImagerArea).clone();
-    Logger::info("Frame part cloned");
+    //Logger::info("Frame part cloned");
     Point2f center(imgOriginal.cols/2.0, imgOriginal.rows/2.0);
 
-    for(;;)
-    {
-        m_capture >> m_imgFullSize;
+    //for(;;)
+    //{
+        //m_capture >> m_imgFullSize;
 
         if (m_imgFullSize.empty()) { // if frame read unsuccessfully
             Logger::error("video input frame not readable");
-            break;
+            //break;
         }
         imgOriginal = m_imgFullSize(thermalImagerArea).clone();
         imshow( "Display window", imgOriginal );
@@ -295,7 +329,7 @@ int CameraProcessingUtility::freeSpaceProcessing() {
             // A green circle has been detected, he thermal camera is recalibrating and frames may be unreliable and corrupted, sleep thread
             Logger::info("Camera is recalibrating, thread will sleep for 3 seconds");
             std::this_thread::sleep_for(3s);
-            continue;
+            //continue;
         }
 
         /*
@@ -305,7 +339,7 @@ int CameraProcessingUtility::freeSpaceProcessing() {
          */
         /** @todo Tune noise elimination filters parameters */
         //Convert image to grayscale
-        cvtColor( imgOriginal, frameGrayScale, CV_BGR2GRAY );
+/*        cvtColor( imgOriginal, frameGrayScale, CV_BGR2GRAY );
 
         // Apply a Gaussian Filter to clear out general noise
         // It's possible to lower the size of the filter as the open by reconstruction with a vertical kernel deletes the remaining waves
@@ -320,7 +354,7 @@ int CameraProcessingUtility::freeSpaceProcessing() {
         // Remove small objects, prioritizing horizontal ones
         erode( frameGrayScale, erodedFrame, kernel_ero );
         frameGrayScale = dilateReconstruction(erodedFrame, frameGrayScale, kernel_ero);
-
+*/
         /*
          * -----------------------------------------------------------------
          * Find the horizon and set up the ROI (region of interest)
@@ -372,7 +406,7 @@ int CameraProcessingUtility::freeSpaceProcessing() {
             if(angle < 135 || angle > 225 || hyp < widthFrame/3.0)
             {
                 // Skip this line
-                continue;
+                //continue;
             }
 
             // select the greatest line only
@@ -383,7 +417,7 @@ int CameraProcessingUtility::freeSpaceProcessing() {
             }
         }
 
-        // show lines found
+        // show lines found (appears blue on the image)
         line( cdst, Point(max_l[0], max_l[1]), Point(max_l[2], max_l[3]), Scalar(255,0,0), 3, LINE_AA);
 
         /*
@@ -391,6 +425,8 @@ int CameraProcessingUtility::freeSpaceProcessing() {
          * Define ROI (Region of Interest)
          *-----------------------------------------------------------------
          */
+        // Skip next block, leads to unstable frame size for visualization
+        /*
         Rect rect(Point(0, min(max_l[1], max_l[3])), Point(widthFrame,heightFrame));
 
         if( rect.area() > 0 )
@@ -402,8 +438,10 @@ int CameraProcessingUtility::freeSpaceProcessing() {
         {
             roi = dst;
         }
+        */roi=dst;
 
         imshow( "Display roi", roi );
+        //imshow( "Display roi", cdst );
 
         /*
          * -----------------------------------------------------------------
@@ -425,14 +463,12 @@ int CameraProcessingUtility::freeSpaceProcessing() {
             }
         }
 
-        // This image is what we want
-        m_freeSpaceFrame = roi.clone();
-
         /*
          * -----------------------------------------------------------------
          * Colour the frame in B/W according to lines detected
          *-----------------------------------------------------------------
          */
+         /*
         for (int col = roi.cols-1; col>=0; col--)
         {
             int row = roi.rows-1;
@@ -443,17 +479,21 @@ int CameraProcessingUtility::freeSpaceProcessing() {
             // float bearing = col*webcamAngleApertureXPerPixel m_compass_data.heading;
 
             // collidableMgr->addVisualObstacle(row, bearing);
-        }
+        }*/
+
+        // This image is what we want
+        m_freeSpaceFrame = roi.clone();
         
 
         imshow( "Display distance", m_freeSpaceFrame );
+        this->m_freeSpaceFrame = m_freeSpaceFrame; 
 
-        c=(char)waitKey(25); // pause of 100ms
+        c=(char)waitKey(20); // pause of 100ms
         // Press ESC tor restart the thread, or Q to kill it.
         if(c==27) //ESC=27
         {
           Logger::info("ESC display window, restarting the thread");
-          break;
+          //break;
         }
         else if(c==113) //q=113
         {
@@ -461,31 +501,31 @@ int CameraProcessingUtility::freeSpaceProcessing() {
           m_running = false;
           m_capture.release();
           destroyAllWindows();
-          break;
+          //break;
         }
         else
         {
-        waitKey(25); // process is kind of heavy depending on the current frame
+        //waitKey(1); // process is kind of heavy depending on the current frame
                     // need to increase the pause to smooth it a little
         }
 
-    }
+    //}
 
-    Logger::info("Exited loop, in CameraUtility/freeSpaceProcessing");
+    //Logger::info("Exited loop, in CameraUtility/freeSpaceProcessing");
 
-    return EXIT_FAILURE;
+    //return EXIT_FAILURE;
 }
 
 int CameraProcessingUtility::computeRelDistances() {
-    int16_t n_cols = m_freeSpaceFrame.cols;
-    int16_t n_rows = m_freeSpaceFrame.rows;
+    int16_t n_cols = this->m_freeSpaceFrame.cols;
+    int16_t n_rows = this->m_freeSpaceFrame.rows;
 
     vector<int16_t> n_whitePixelsVect(n_cols);
     for (int i=0; i < n_cols; i++)
     {
         for (int j=0; j < n_rows; j++)
         {
-            if (m_freeSpaceFrame.at<unsigned char>(i,j) > 127) // pixels are black or white so we choose an arbitrary value
+            if (this->m_freeSpaceFrame.at<unsigned char>(i,j) > 127) // pixels are black or white so we choose an arbitrary value
             {
                 n_whitePixelsVect.at(i)++;
                 // might have to check there if the roi resulting from the processing
@@ -504,7 +544,7 @@ int CameraProcessingUtility::computeRelDistances() {
         {
             tmp_sum += n_whitePixelsVect[i*pixsPerSegment+j];
         }
-        m_relBearingToRelObstacleDistance.insert(pair<int16_t ,uint16_t>(i-NUMBER_OF_SEGMENTS/2, tmp_sum));
+        this->m_relBearingToRelObstacleDistance.insert(pair<int16_t ,uint16_t>(i-NUMBER_OF_SEGMENTS/2, tmp_sum));
         tmp_sum = 0;
     }
     return EXIT_SUCCESS;
