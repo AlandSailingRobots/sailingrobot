@@ -23,13 +23,12 @@
 #include "Messages/VesselStateMsg.h"
 #include "Network/XbeePacketNetwork.h"
 #include "Network/LinuxSerialDataLink.h"
-asdasdasdasdasd
+
 
 class XbeeSyncNode : public ActiveNode {
 public:
 	XbeeSyncNode(MessageBus& msgBus, DBHandler& db);
-	//virtual ~XbeeSyncNode() {}
-	//virtual ~XbeeSyncNode() = 0;
+	virtual ~XbeeSyncNode() {}
 
 	///----------------------------------------------------------------------------------
 	/// Gets all settings from database and initializes xbee object
