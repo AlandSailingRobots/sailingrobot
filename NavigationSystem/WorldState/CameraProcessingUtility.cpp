@@ -61,7 +61,10 @@ const int lowFrameY = 100;//0; //98; //30
 const int heightFrame = 500;//480; //381; //195
 
 char c; // input for video display
-// Mean shift parameters
+/*********************************************
+ * Mean shift parameters
+ *********************************************
+ */
 // With params at (10,25,2) we keep the horizon line, boat detection, clear waves
 // and maintain an acceptable processing speed. More details can be kept by changing
 // the values but the best way to do it increase greatly the processing time. 
