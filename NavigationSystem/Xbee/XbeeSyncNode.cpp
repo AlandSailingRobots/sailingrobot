@@ -18,7 +18,7 @@
 #include <cstring>
 
 #include "Messages/ExternalControlMsg.h"
-#include "Messages/ActuatorPositionMsg.h"
+#include "Messages/JanetActuatorFeedbackMsg.h"
 
 #include "SystemServices/Timer.h"
 
@@ -36,6 +36,10 @@ XbeeSyncNode::XbeeSyncNode(MessageBus& msgBus, DBHandler& db) :
 	msgBus.registerNode(*this, MessageType::ServerConfigsReceived);
 	m_node = this;
 }
+
+/*XbeeSyncNode::~XbeeSyncNode() { // Must be define because the destructor has been declared virtual
+
+} */
 
 bool XbeeSyncNode::init()
 {

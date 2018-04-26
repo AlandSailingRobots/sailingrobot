@@ -132,7 +132,7 @@ export CAN_SERVICES_SRC 	= Hardwares/CAN_Services/CANPGNReceiver.cpp Hardwares/C
 							   	Hardwares/CAN_Services/mcp2515.cpp Hardwares/CAN_Services/MsgFunctions.cpp \
 							   	Hardwares/CAN_Services/CANFrameReceiver.cpp
 
-export HW_SERVICES_JANET_SRC = Hardwares/MaestroController/MaestroController.cpp
+export HW_SERVICES_JANET_SRC = Hardwares/MaestroController/MaestroController.cpp Hardwares/ActuatorNodeJanet.cpp
 
 # Hardware nodes
 export HW_NODES_ALL_SRC		= Hardwares/HMC6343Node.cpp Hardwares/GPSDNode.cpp

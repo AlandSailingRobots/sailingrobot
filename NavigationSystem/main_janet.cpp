@@ -32,7 +32,7 @@
   #include "Hardwares/CV7Node.h"
   #include "Hardwares/HMC6343Node.h"
   #include "Hardwares/GPSDNode.h"
-  #include "Hardwares/ActuatorNodeJanet.h" // NOTE - Maël: It will change (to ActuatorNodeJanet.h)
+  #include "Hardwares/ActuatorNodeJanet.h"
   #include "Hardwares/MaestroController/MaestroController.h"
   #include "Xbee/Xbee.h"
   #include "Xbee/XbeeSyncNode.h"
@@ -182,12 +182,12 @@ int main(int argc, char *argv[])
 		int channel = 3;
 		int speed = 0;
 		int acceleration = 0;
-		ActuatorNodeJanet sail(messageBus, NodeID::SailActuator, channel, speed, acceleration);
+		ActuatorNodeJanet sail(messageBus, dbHandler, NodeID::SailActuator, channel, speed, acceleration);
 
 		channel = 4;
 		speed = 0;
 		acceleration = 0;
-		ActuatorNodeJanet rudder(messageBus, NodeID::RudderActuator, channel, speed, acceleration);
+		ActuatorNodeJanet rudder(messageBus, dbHandler, NodeID::RudderActuator, channel, speed, acceleration);
 
 		MaestroController::init(dbHandler.retrieveCell("config_maestro_controller", "1", "port"));
 
