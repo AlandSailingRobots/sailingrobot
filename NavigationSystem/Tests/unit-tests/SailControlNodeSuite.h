@@ -114,15 +114,13 @@ class SailControlNodeSuite : public CxxTest::TestSuite {
         TS_ASSERT_EQUALS(mockNode->m_WindDir, appWindDirection);
         TS_ASSERT_EQUALS(mockNode->m_WindSpeed, appWindSpeed);
         TS_ASSERT_EQUALS(mockNode->m_WindTemp, appWindTemp);
-        TS_SKIP("SailControlNode and test needs update");
 
-        // Check if there is the same result by the processing next to the Compass data has been
-        // received
-        /*
+        // Check to see if the angle is the same when processing as when receiving compass data
         int sailAngle =
-        -Utility::sgn(appWindDirection)*(((MinSailAngle-MaxSailAngle)*std::abs(appWindDirection)/180)+MaxSailAngle);
+            -Utility::sgn(appWindDirection) *
+            (((MinSailAngle - MaxSailAngle) * std::abs(appWindDirection) / 180) + MaxSailAngle);
         double sailControlNodeSailAngle = mockNode->m_sailPosition;
-        TS_ASSERT_EQUALS(sailControlNodeSailAngle,sailAngle);*/
+        TS_ASSERT_EQUALS(sailControlNodeSailAngle, sailAngle);
     }
 
     // ----------------
@@ -143,15 +141,13 @@ class SailControlNodeSuite : public CxxTest::TestSuite {
         TS_ASSERT_EQUALS(mockNode->m_WindSpeed, appWindSpeed);
         TS_ASSERT_EQUALS(mockNode->m_WindTemp, appWindTemp);
 
-        TS_SKIP("SailControlNode and test needs update");
+        // Check to see if the angle is the same when processing as when receiving compass data
 
-        // Check if there is the same result by the processing next to the Compass data has been
-        // received
-        /*
         int sailAngle =
-        -Utility::sgn(appWindDirection)*(((MinSailAngle-MaxSailAngle)*std::abs(appWindDirection)/180)+MaxSailAngle);
+            -Utility::sgn(appWindDirection) *
+            (((MinSailAngle - MaxSailAngle) * std::abs(appWindDirection) / 180) + MaxSailAngle);
         double sailControlNodeSailAngle = mockNode->m_sailPosition;
-        TS_ASSERT_EQUALS(sailControlNodeSailAngle,sailAngle);*/
+        TS_ASSERT_EQUALS(sailControlNodeSailAngle, sailAngle);
     }
 
     // ----------------
