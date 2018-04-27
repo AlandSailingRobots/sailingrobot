@@ -146,7 +146,7 @@ export HW_NODES_JANET_SRC 	= Hardwares/CV7Node.cpp Hardwares/ArduinoNode.cpp
 
 # XBee network, XbeeSyncNode not compiling, uses removed ActuatorPositionMsg
 export XBEE_NETWORK_SRC     = Network/DataLink.cpp Network/LinuxSerialDataLink.cpp Network/XbeePacketNetwork.cpp \
-                            	Xbee/Xbee.cpp
+                            	Xbee/Xbee.cpp Xbee/XbeeSyncNode.cpp
 
 # CanbusCommon files
 export CANBUS_COMMON_SRC     = Hardwares/CAN_Services/CanBusCommon/CanUtility.cpp Hardwares/CAN_Services/CanBusCommon/CanMessageHandler.cpp

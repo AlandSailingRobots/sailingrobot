@@ -19,13 +19,23 @@ public:
     m_WindvaneSelfSteeringAngle(windvaneAngle), m_WindvaneActuatorPosition(windvaneActuatorPos), m_RadioControllerOn(radioControllerOn)
     {  }
 
+    JanetActuatorFeedbackMsg(MessageDeserialiser deserialiser)
+            :Message(deserialiser)
+    {
+        if( !deserialiser.readDouble(m_RudderFeedback) ||
+            !deserialiser.readDouble(m_WingsailFeedback))
+        {
+            m_valid = false;
+        }
+    }
+
     virtual ~JanetActuatorFeedbackMsg() { }
 
     double wingsailFeedback() const          { return m_WingsailFeedback; }
     double rudderFeedback() const            { return m_RudderFeedback; }
     double windvaneSelfSteeringAngle() const { return m_WindvaneSelfSteeringAngle; }
     double windvaneActuatorPosition()  const { return m_WindvaneActuatorPosition; }
-	bool radioControllerOn() 				   const { return m_RadioControllerOn; }
+	bool radioControllerOn() 	       const { return m_RadioControllerOn; }
 
 private:
     double m_WingsailFeedback;          // degree in wing sail reference frame (clockwise from top view)
