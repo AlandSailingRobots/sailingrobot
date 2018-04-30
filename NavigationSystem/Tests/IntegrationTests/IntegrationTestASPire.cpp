@@ -93,9 +93,16 @@ public:
 		m_SensorValues["GPS Latitude"] = DATA_OUT_OF_RANGE;
 		m_SensorValues["GPS Online"] = DATA_OUT_OF_RANGE;
 		m_SensorValues["AIS Longitude"] = DATA_OUT_OF_RANGE;
-		m_SensorValues["AIS Latitude"] = DATA_OUT_OF_RANGE;
+		m_SensorValues["AIS Latitude"] = DATA_OUT_OF_RANGE;	
 
-		m_Win = newwin(6+2*m_SensorValues.size(),60,1,2);
+		int begin_y = 1;	
+		int begin_x = 2;
+		int ncols = 60;
+		int start_lines = 6 + m_SensorValues.size();
+
+		//m_Win = newwin(6+2*m_SensorValues.size(),60,1,2);
+		
+		m_Win = newwin(start_lines, ncols, begin_y, begin_x);
 
 		box(m_Win,0,0);
 		keypad(m_Win, FALSE);
@@ -184,7 +191,7 @@ public:
 			wmove(m_Win, pos, 10);
 			wprintw(m_Win, "%s : ", it.first.c_str());
 			wmove(m_Win, pos, 35);
-			if(it.second == -2000) {
+			if(it.second == DATA_OUT_OF_RANGE) {
 				wprintw(m_Win, "%s", "Data not available.");
 			} else if (it.second == ON) {
 				wprintw(m_Win, "%s", "On");
@@ -310,13 +317,13 @@ int main() {
 
 	// Comment out this line if not running on the pi
 	// otherwise program will crash.
-	auto future = canService.start();
+	//auto future = canService.start();
 
 
 	SensorDataReceiver sensorReceiver(msgBus);
 	CANWindsensorNode windSensor(msgBus, dbHandler, canService);
 	HMC6343Node compass(msgBus, dbHandler);
-	compass.init ();
+	//compass.init ();
 
 
 
@@ -326,11 +333,11 @@ int main() {
 	gps.init();
 	CANAISNode ais (msgBus, dbHandler, canService);
 
-	ais.start();
-	gps.start();
-	windSensor.start();
-	arduino.start ();
-	compass.start ();
+	//ais.start();
+	//gps.start();
+	//windSensor.start();
+	//arduino.start ();
+	//compass.start ();
 
 	std::thread thr(messageLoop);
 	thr.detach();
