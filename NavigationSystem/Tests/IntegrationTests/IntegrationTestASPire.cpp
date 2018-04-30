@@ -217,6 +217,7 @@ private:
 
 	WINDOW* m_Win;
 
+
 };
 
 
@@ -225,6 +226,38 @@ MessageBus msgBus;
 
 void messageLoop() {
 	msgBus.run();
+}
+
+WINDOW* inputWindow(int size, int logger_size){
+	int begin_x = 2;
+	int begin_y = size + logger_size + 8;
+	int ncols = 60;
+	int nr_of_lines = 9;
+
+	WINDOW* inputWin  = newwin(nr_of_lines, ncols, begin_y, begin_x);
+
+	return inputWin;
+}
+
+int loggerWindow(int size) {
+	int begin_x = 2;
+	int begin_y = size + 8;
+	int ncols = 60;
+	int nr_of_lines = 7;
+
+	WINDOW* log_Win = newwin(nr_of_lines, ncols, begin_y, begin_x);
+
+	wclear(log_Win);
+	box(log_Win, 0,0);
+
+	wmove(log_Win, 2, 20);
+
+	wprintw(log_Win, "LOGGER");
+
+	wrefresh(log_Win);
+
+	return nr_of_lines;
+		
 }
 
 std::string FloatToString (float number) {
@@ -359,14 +392,11 @@ int main() {
 
 	SensorData values = sensorReceiver.getValues();	
 
-	int begin_x = 2;
-	int begin_y = values.size() + 8;
-	int ncols = 60;
-	int nr_of_lines = 9;
+	int logger_size = loggerWindow(values.size());	
 
-	//WINDOW* inputWin  = newwin(8+2*menuValues.size(),60, 2*values.size() + 10,2);	
+	WINDOW* inputWin = inputWindow(values.size(), logger_size);
 
-	WINDOW* inputWin  = newwin(nr_of_lines, ncols, begin_y, begin_x);
+
 	keypad(inputWin, TRUE);
 	cbreak();
 
