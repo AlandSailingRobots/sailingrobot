@@ -98,11 +98,11 @@ public:
 		int begin_y = 1;	
 		int begin_x = 2;
 		int ncols = 60;
-		int start_lines = 6 + m_SensorValues.size();
+		int nr_of_lines = 6 + m_SensorValues.size();
 
 		//m_Win = newwin(6+2*m_SensorValues.size(),60,1,2);
 		
-		m_Win = newwin(start_lines, ncols, begin_y, begin_x);
+		m_Win = newwin(nr_of_lines, ncols, begin_y, begin_x);
 
 		box(m_Win,0,0);
 		keypad(m_Win, FALSE);
@@ -357,8 +357,16 @@ int main() {
 
 	menuIter highlighted = menuValues.begin();
 
-	SensorData values = sensorReceiver.getValues();
-	WINDOW* inputWin  = newwin(8+2*menuValues.size(),60, 2*values.size() + 10,2);
+	SensorData values = sensorReceiver.getValues();	
+
+	int begin_x = 2;
+	int begin_y = values.size() + 8;
+	int ncols = 60;
+	int nr_of_lines = 9;
+
+	//WINDOW* inputWin  = newwin(8+2*menuValues.size(),60, 2*values.size() + 10,2);	
+
+	WINDOW* inputWin  = newwin(nr_of_lines, ncols, begin_y, begin_x);
 	keypad(inputWin, TRUE);
 	cbreak();
 
