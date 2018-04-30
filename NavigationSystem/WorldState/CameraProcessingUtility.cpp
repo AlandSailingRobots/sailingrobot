@@ -18,15 +18,6 @@
  *        (deleting the "imshow" functions can decrease by 0,15s, on the desk computer)
  *
  ***************************************************************************************/
-#include <opencv2/core.hpp>
-#include <opencv2/imgcodecs.hpp>
-#include <opencv2/videoio.hpp>
-#include <opencv2/highgui.hpp>
-#include <opencv2/imgproc.hpp>
-#include <opencv2/photo.hpp>
-#include <opencv2/videostab.hpp>
-#include <opencv2/tracking.hpp>
-#include <opencv2/video.hpp>
 
 #include <vector>
 #include <thread>
@@ -118,7 +109,7 @@ CameraProcessingUtility::~CameraProcessingUtility() {}
 // could rename this function as init maybe?, or just remove it and put the acquisition within the processing function
 // Should not be used at the moment, might be deleted 
 void CameraProcessingUtility::videoAcquisition(int m_cameraDeviceID) {
-    VideoCapture m_capture(m_cameraDeviceID); // Opens the camera handle
+    //VideoCapture m_capture(m_cameraDeviceID); // Opens the camera handle
     if (m_capture.isOpened() == false) //  To check if object was associated to webcam successfully
     {
         Logger::error("Camera not available");
@@ -130,7 +121,7 @@ void CameraProcessingUtility::videoAcquisition(int m_cameraDeviceID) {
 }
 
 bool CameraProcessingUtility::init() {
-    //VideoCapture m_capture(m_cameraDeviceID); // Opens the camera handle
+    //VideoCapture capture(m_cameraDeviceID); // Opens the camera handle
     VideoCapture capture("/home/sailbot/Documents/untitled.mp4"); // For testing from video
     this->m_capture = capture;
     if (this->m_capture.isOpened() == false) //  To check if object was associated to webcam successfully
@@ -179,7 +170,7 @@ void CameraProcessingUtility::CameraProcessingUtilityThreadFunc(ActiveNode* node
       node->freeSpaceProcessing();
       auto end = std::chrono::system_clock::now();
       elapsed_seconds = end-start;
-      cout << "-------------------------- Image Processing Took: " << elapsed_seconds.count() << " Seconds" << endl;
+      //cout << "-------------------------- Image Processing Took: " << elapsed_seconds.count() << " Seconds" << endl;
 
       node->computeRelDistances();
       node->addCameraDataToCollidableMgr();
@@ -194,6 +185,7 @@ void CameraProcessingUtility::addCameraDataToCollidableMgr() {
     // float bearing = col*webcamAngleApertureXPerPixel m_compass_data.heading;
     int16_t bearing = 0; // Need to include compass in the process
     collidableMgr->addVisualField(m_relBearingToRelObstacleDistance, bearing);
+    Logger::info("Camera data added to CollidableMgr");
 }
 
 Mat CameraProcessingUtility::getRoi() {
