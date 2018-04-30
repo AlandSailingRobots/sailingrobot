@@ -95,12 +95,14 @@ public:
 		m_SensorValues["AIS Longitude"] = DATA_OUT_OF_RANGE;
 		m_SensorValues["AIS Latitude"] = DATA_OUT_OF_RANGE;	
 
+		sensorWindow();
+	}
+
+	void sensorWindow(){
 		int begin_y = 1;	
 		int begin_x = 2;
 		int ncols = 60;
 		int nr_of_lines = 6 + m_SensorValues.size();
-
-		//m_Win = newwin(6+2*m_SensorValues.size(),60,1,2);
 		
 		m_Win = newwin(nr_of_lines, ncols, begin_y, begin_x);
 
