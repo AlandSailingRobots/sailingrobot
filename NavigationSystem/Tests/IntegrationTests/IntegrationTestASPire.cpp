@@ -396,7 +396,6 @@ int main() {
 
 	WINDOW* inputWin = inputWindow(values.size(), logger_size);
 
-
 	keypad(inputWin, TRUE);
 	cbreak();
 
