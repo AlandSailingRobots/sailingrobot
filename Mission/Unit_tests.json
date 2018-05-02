@@ -1,6 +1,6 @@
 {
 "1": {
-  "is_checkpoint": 1,
+  "is_checkpoint": 0,
   "latitude": 60.107240,
   "longitude": 19.921311,
   "declination": 6,
@@ -15,7 +15,7 @@
   "longitude": 19.922311,
   "declination": 6,
   "radius": 12,
-  "stay_time": 3,
+  "stay_time": 4,
   "harvested": 0
 },
 
@@ -25,7 +25,7 @@
   "longitude": 19.921925,
   "declination": 6,
   "radius": 10,
-  "stay_time": 0,
+  "stay_time": 4,
   "harvested": 0
 },
 
