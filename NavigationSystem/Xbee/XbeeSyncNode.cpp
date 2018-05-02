@@ -18,7 +18,7 @@
 #include <cstring>
 
 #include "Messages/ExternalControlMsg.h"
-#include "Messages/ActuatorPositionMsg.h"
+#include "Messages/JanetActuatorFeedbackMsg.h"
 
 #include "SystemServices/Timer.h"
 
@@ -113,9 +113,9 @@ void XbeeSyncNode::incomingMessage(uint8_t* data, uint8_t size)
 
 	switch(msg.messageType())
 	{
-		case MessageType::ActuatorPosition:
+		case MessageType::JanetActuatorFeedback:
 			{
-				MessagePtr actuatorControl = std::make_unique<ActuatorPositionMsg>(deserialiser);
+				MessagePtr actuatorControl = std::make_unique<JanetActuatorFeedbackMsg>(deserialiser);
 				m_node->m_MsgBus.sendMessage(std::move(actuatorControl));
 				Logger::info("Actuator received");
 			}
