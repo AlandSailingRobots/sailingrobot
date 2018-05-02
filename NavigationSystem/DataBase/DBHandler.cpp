@@ -1034,7 +1034,7 @@ bool DBHandler::getWaypointValues(int& nextId,
 
     if (foundPrev)  // Set values to next waypoint if harvested waypoint found
     {
-        prevId = dbhandler_safe_stoi(results[1]);
+        prevId = dbhandler_safe_stoi(results2[1]);
 
         prevLongitude = atof(retrieveCell("current_Mission", results2[1], "longitude").c_str());
         prevLatitude = atof(retrieveCell("current_Mission", results2[1], "latitude").c_str());

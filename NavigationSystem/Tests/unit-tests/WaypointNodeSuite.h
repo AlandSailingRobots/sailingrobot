@@ -94,12 +94,16 @@ class WaypointNodeSuite : public CxxTest::TestSuite {
     }
 
     void test_WaypointNodeCloseWaypoint() {
-        double gpsLat = 60.107240;
-        double gpsLon = 19.921311;
+        double lat = 60.107240;
+        double lon = 19.921311;
 
-        MessagePtr gpsData = std::make_unique<GPSDataMsg>(true, true, gpsLat, gpsLon, 12.12, 1.7,
-                                                          273, 2, GPSMode::LatLonOk);
-        messageBus.sendMessage(std::move(gpsData));
+        //MessagePtr gpsData = std::make_unique<GPSDataMsg>(true, true, gpsLat, gpsLon, 12.12, 1.7,
+        //                                                  273, 2, GPSMode::LatLonOk);
+
+
+        MessagePtr stateMsg = std::make_unique<StateMessage>(0, lat, lon, 1, 1);
+        messageBus.sendMessage(std::move(stateMsg));
+
         std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_FOR_MESSAGE));
 
         bool proofWaypointReached = dbHandler->retrieveCellAsInt(
@@ -114,8 +118,8 @@ class WaypointNodeSuite : public CxxTest::TestSuite {
         TS_ASSERT_EQUALS(mockNode->m_waypointNextRadius, 12);
         TS_ASSERT_EQUALS(mockNode->m_waypointStayTime, 3);
         TS_ASSERT_EQUALS(mockNode->m_waypointPrevId, 1);
-        TS_ASSERT_DELTA(mockNode->m_waypointPrevLongitude, gpsLon, 1e-3);
-        TS_ASSERT_DELTA(mockNode->m_waypointPrevLatitude, gpsLat, 1e-4);
+        TS_ASSERT_DELTA(mockNode->m_waypointPrevLongitude, lon, 1e-3);
+        TS_ASSERT_DELTA(mockNode->m_waypointPrevLatitude, lat, 1e-4);
         TS_ASSERT_EQUALS(mockNode->m_waypointPrevDeclination, 6);
         TS_ASSERT_EQUALS(mockNode->m_waypointPrevRadius, 20);
     }
