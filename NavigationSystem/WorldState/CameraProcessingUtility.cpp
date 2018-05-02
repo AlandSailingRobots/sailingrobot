@@ -54,6 +54,7 @@ const int lowFrameY = 100;//0; //98; //30
 const int heightFrame = 500;//480; //381; //195
 
 char c; // input for video display
+
 /*********************************************
  * Mean shift parameters
  *********************************************
@@ -380,12 +381,13 @@ void CameraProcessingUtility::freeSpaceProcessing() {
     // This image is what we want
     m_freeSpaceFrame = roi.clone();
     this->m_freeSpaceFrame = m_freeSpaceFrame; 
+    //cout << to_string(this->m_freeSpaceFrame.type) << endl;
     
     if (WITH_GUI)
     {
         imshow( "Display distance", m_freeSpaceFrame );
     
-        c=(char)waitKey(20); // pause of 20ms
+        c=(char)waitKey(200); // pause of 20ms
         // Press ESC tor restart the thread, or Q to kill it.
         if(c==27) //ESC=27
         {

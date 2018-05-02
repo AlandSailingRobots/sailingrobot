@@ -13,7 +13,7 @@
  *
  ***************************************************************************************/
 #include <opencv2/core.hpp>
-#include <opencv2/imgcodecs.hpp>
+#include <opencv2/imgcodecs.hpp> 
 #include <opencv2/videoio.hpp>
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
@@ -27,12 +27,7 @@
 
 #include "SystemServices/SysClock.h"
 #include "SystemServices/Timer.h"
-//#include "DataBase/DBHandler.h"
-//#include "MessageBus/MessageTypes.h"
-//#include "MessageBus/MessageBus.h"
-//#include "MessageBus/ActiveNode.h"
 #include "SystemServices/Logger.h"
-//#include "WorldState/CollidableMgr/CollidableMgr.h"
 
 using namespace std;
 using namespace cv;
@@ -47,9 +42,21 @@ const int widthFrame = 585; //257
 const int lowFrameY = 98; //30
 const int heightFrame = 381;  //195
 
-//DBHandler dbHandler("../asr.db");
-//MessageBus msgBus;
-//CollidableMgr cMgr;
+/*********************************************
+ * Mean shift parameters
+ *********************************************
+ */
+// With params at (10,25,2) we keep the horizon line, boat detection, clear waves
+// and maintain an acceptable processing speed. More details can be kept by changing
+// the values but the best way to do it increase greatly the processing time. 
+// Note that boat tracks and reflection on the water are sometimes detected.
+int spatialRad = 12; // Influence details on edge, and slow down the processing
+                     // dramatically if set > 12
+int colorRad = 25;   // Mainly influence the details on edge, at 10 some waves are kept
+                     // and at 25 there is no waves, but less edges on the horizon.
+int maxPyrLevel = 2; 
+Mat meanshiftBaseFrame;
+
 struct Compass
 {
     float roll = 0;
@@ -57,9 +64,6 @@ struct Compass
     int tmsp = 0;
 } m_compass_data;
 
-//void messageLoop() {
-//    msgBus.run();
-//}
 
 Mat dilateReconstruction(Mat imgReference, Mat imgMarker, Mat kernel)
 {
@@ -79,30 +83,16 @@ int main()
 {
     Logger::init("FreeSpaceDetectionTest.log");
 
-//    cMgr.startGC();
-
-//    std::thread thr(messageLoop);
-//    thr.detach();
-//    std::this_thread::sleep_for(std::chrono::milliseconds(200));
 
     VideoCapture m_capture(0); // Opens the camera handle
     if (m_capture.isOpened() == false) //  To check if object was associated to webcam successfully
     {
         Logger::error("Camera not available");
         // skipping return for single frame test
-        //return -1;
+        return -1;
     }
 
     Mat imgFullSize; // Input raw image
-
-    // Input single frame for tuning purpose
-    String filename("scene00376.png");
-    imgFullSize = imread(filename, IMREAD_COLOR);
-    if(imgFullSize.empty()){
-        cout << "Path incorrect or filename wrong, image not read!" << endl;
-    return -1;
-    }
-    cout << "frame loaded" << endl;
 
     Mat imgOriginal; // Input raw image
     Mat hsvImg; // HSV converted image
@@ -125,16 +115,15 @@ int main()
 
     // Set up frame size
     // skipped for single frame test
-    //m_capture >> imgFullSize;
+    m_capture >> imgFullSize;
     Rect thermalImagerArea(lowFrameX, lowFrameY, widthFrame, heightFrame);
     imgOriginal = imgFullSize(thermalImagerArea).clone();
     Point2f center(imgOriginal.cols/2.0, imgOriginal.rows/2.0);
 
 
-    cout << "debug point: before for" << endl;
     for(;;)
     {
-        //m_capture >> imgFullSize; skipped single frame test
+        m_capture >> imgFullSize; 
 
         if (imgFullSize.empty()) { // if frame read unsuccessfully
             Logger::error("video input frame not readable");
@@ -199,7 +188,8 @@ int main()
          *-----------------------------------------------------------------
          */
         /** @todo Tune noise elimination filters parameters */
-        //Convert image to grayscale
+
+        /*//Convert image to grayscale
         cvtColor( imgOriginal, frameGrayScale, CV_BGR2GRAY );
 
         // Apply a Gaussian Filter to clear out general noise
@@ -207,12 +197,14 @@ int main()
 
         // Remove spot noise
         medianBlur(frameGrayScale, frameGrayScale, 3);
+        */
+        pyrMeanShiftFiltering( imgOriginal, frameGrayScale, spatialRad, colorRad, maxPyrLevel );
+
+        cvtColor(frameGrayScale, frameGrayScale, COLOR_RGB2GRAY); 
 
         // Remove small objects
         Mat erodedFrame;
         erode( frameGrayScale, erodedFrame, kernel_ero );
-        // Test dilatereconstruct instead of dilate
-        //dilate( frameGrayScale, frameGrayScale, kernel_ero );
         frameGrayScale = dilateReconstruction(erodedFrame, frameGrayScale, kernel_ero);
 
         /*
@@ -225,95 +217,10 @@ int main()
         // Attempt with Canny or Laplacian operator
         
         Canny(frameGrayScale, dst, 16, 42, 3);
-        cout << "debug step: before edge detection" << endl;
-        cout << "what is this: " << CV_64F << endl;
-        //Laplacian(frameGrayScale, dst, 16);
-        cout << "debug step: after edge detection" << endl;
+
         cvtColor(dst, cdst, COLOR_GRAY2BGR);
         
 
-        // Attempt with Threshold+DistTransform+Watershed
-        /*
-        // Create binary image from source image
-        Mat bw = frameGrayScale.clone();
-        Mat src = frameGrayScale.clone();
-        threshold(bw, bw, 40, 255, CV_THRESH_BINARY | CV_THRESH_OTSU);
-        // Save intermediary result for debugging purposes
-        imwrite("binImg.jpg", bw);
-        // Perform the distance transform algorithm
-        Mat dist;
-        distanceTransform(bw, dist, CV_DIST_L2, 3);
-        // Normalize the distance image for range = {0.0, 1.0}
-        // so we can visualize and threshold it
-        normalize(dist, dist, 0, 1., NORM_MINMAX);
-        // Save intermediary result for debugging purposes
-        imwrite("distTransfImg.jpg", dist);
-        // Threshold to obtain the peaks
-        // This will be the markers for the foreground objects
-        threshold(dist, dist, .4, 1., CV_THRESH_BINARY);
-        // Dilate a bit the dist image
-        Mat kernel1 = Mat::ones(3, 3, CV_8UC1);
-        dilate(dist, dist, kernel1);
-        imwrite("peaks.jpg", dist);
-        // Create the CV_8U version of the distance image
-        // It is needed for findContours()
-        Mat dist_8u;
-        dist.convertTo(dist_8u, CV_8U);
-        // Find total markers
-        vector<vector<Point> > contours;
-        findContours(dist_8u, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
-        // Create the marker image for the watershed algorithm
-        Mat markers = Mat::zeros(dist.size(), CV_32SC1);
-        // Draw the foreground markers
-        for (size_t i = 0; i < contours.size(); i++)
-            drawContours(markers, contours, static_cast<int>(i), Scalar::all(static_cast<int>(i)+1), -1);
-        // Draw the background marker
-        circle(markers, Point(5,5), 3, CV_RGB(255,255,255), -1);
-        imwrite("markers.jpg", markers*10000);
-
-        // Perform the watershed algorithm
-        cout << "reached watershed step" << endl;
-        watershed(src, markers);
-        Mat mark = Mat::zeros(markers.size(), CV_8UC1);
-        markers.convertTo(mark, CV_8UC1);
-        bitwise_not(mark, mark);
-    //    imshow("Markers_v2", mark); // uncomment this if you want to see how the mark
-                                      // image looks like at that point
-        // Generate random colors
-        vector<Vec3b> colors;
-        for (size_t i = 0; i < contours.size(); i++)
-        {
-            int b = theRNG().uniform(0, 255);
-            int g = theRNG().uniform(0, 255);
-            int r = theRNG().uniform(0, 255);
-            colors.push_back(Vec3b((uchar)b, (uchar)g, (uchar)r));
-        }
-        // Create the result image
-        Mat dst = Mat::zeros(markers.size(), CV_8UC3);
-        // Fill labeled objects with random colors
-        for (int i = 0; i < markers.rows; i++)
-        {
-            for (int j = 0; j < markers.cols; j++)
-            {
-                int index = markers.at<int>(i,j);
-                if (index > 0 && index <= static_cast<int>(contours.size()))
-                    dst.at<Vec3b>(i,j) = colors[index-1];
-                else
-                    dst.at<Vec3b>(i,j) = Vec3b(0,0,0);
-            }
-        }
-        // Visualize the final image
-        imwrite("watershedResult.jpg", dst);
-
-        */
-
-
-
-
-
-
-
-        cout << "debug step: before HoughLines" << endl;
         HoughLinesP(dst, lines, 1, CV_PI/180, 50, 50, 10 );
         double theta1, theta2, hyp;
 
@@ -415,7 +322,6 @@ int main()
 
         imwrite("roiImg2.jpg", roi);
 
-        break; //single frame test
     }
 
     Logger::error("exited loop");
