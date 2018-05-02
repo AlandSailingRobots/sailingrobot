@@ -43,7 +43,7 @@ public:
     MessageBus messageBus;
     std::unique_ptr<MessageBusTestHelper> messageBusHelper;
 
-    double MaxRudAng = 30;
+    double MaxRudAng = 20;
     int testCount = 0;
 
 
@@ -122,14 +122,10 @@ public:
         messageBus.sendMessage(std::move(stateData));
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
-        // Check if the message has been received by the object of simulation and without modification without desired_heading
         TS_ASSERT_EQUALS(mockNode->m_StateMsgHeading,heading);
         TS_ASSERT_EQUALS(mockNode->m_StateMsgSpeed,speed);
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
-        TS_ASSERT_DELTA(mockNode->m_rudderPosition, 0, 1e-7); //Heading_error_value : 370
-        // TODO: See how to find when the value is not good and interpreted it otherwise the utility::limitedAnglerange change 370
-
-        
         double desiredcourse = 15;
         // Test listening desired course Message
         MessagePtr localNavigationData =
@@ -137,13 +133,13 @@ public:
         messageBus.sendMessage(std::move(localNavigationData));
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
-        // Precision ?
-        double diffHeading = Utility::limitAngleRange(heading)-Utility::limitAngleRange(desiredcourse);
-        int rudderAngle = Utility::sgn(speed)*sin(Utility::degreeToRadian(diffHeading))*MaxRudAng;
-        double courseRegulatorRudderAngle = mockNode->m_rudderPosition;
-        TS_ASSERT_EQUALS(courseRegulatorRudderAngle,rudderAngle);
-        //Test if not calculate false value without the desired heading (includ Desired_heading = 0)
-        // Check after if the value is correct
+        // Calculate the expected rudder angle
+        double course = mockNode->m_StateMsgCourse;
+        double diffHeading = Utility::degreeToRadian(course - desiredcourse);
+        int rudderAngle = sin(diffHeading)*MaxRudAng;
+
+        double courseRegulatorRudderAngle = mockNode->m_rudderAngle;
+        TS_ASSERT_DELTA(courseRegulatorRudderAngle, rudderAngle, 5e-1);
     }
 
     // ----------------
@@ -269,7 +265,7 @@ public:
         double diffHeading = Utility::limitAngleRange(heading)-Utility::limitAngleRange(desiredcourse);
         int rudderAngle = Utility::sgn(speed)*sin(Utility::degreeToRadian(diffHeading))*MaxRudAng;
         std::this_thread::sleep_for(std::chrono::milliseconds(700));
-        double courseRegulatorRudderAngle = mockNode->m_rudderPosition;
+        double courseRegulatorRudderAngle = mockNode->m_rudderAngle;
         TS_ASSERT_DELTA(courseRegulatorRudderAngle, rudderAngle, 1e-7);
         dbHandler->changeOneValue("config_course_regulator","1","0.5","loop_time");
         dbHandler->changeOneValue("config_course_regulator","1","30.0","max_rudder_angle");

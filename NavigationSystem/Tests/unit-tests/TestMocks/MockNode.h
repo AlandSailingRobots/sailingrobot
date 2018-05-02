@@ -19,6 +19,7 @@
 #include "Messages/CompassDataMsg.h"
 #include "Messages/GPSDataMsg.h"
 #include "Messages/LocalNavigationMsg.h"
+#include "Messages/RudderCommandMsg.h"
 #include "Messages/StateMessage.h"
 #include "Messages/WaypointDataMsg.h"
 #include "Messages/WindDataMsg.h"
@@ -43,7 +44,8 @@ class MockNode : public Node {
             msgBus.registerNode(*this, MessageType::StateMessage) &&
             msgBus.registerNode(*this, MessageType::ServerConfigsReceived) &&
             msgBus.registerNode(*this, MessageType::LocalNavigation) &&
-            msgBus.registerNode(*this, MessageType::AISData)) {
+            msgBus.registerNode(*this, MessageType::AISData) &&
+            msgBus.registerNode(*this, MessageType::RudderCommand)) {
             registered = true;
         }
     }
@@ -133,6 +135,12 @@ class MockNode : public Node {
             case MessageType::AISData: {
                 m_MessageReceived = true;
             } break;
+            case MessageType::RudderCommand: {
+                m_MessageReceived = true;
+                const RudderCommandMsg* rudderCommandMsg =
+                    static_cast<const RudderCommandMsg*>(message);
+                m_rudderAngle = rudderCommandMsg->rudderAngle();
+            } break;
             default: { throw std::logic_error("Unknown message type in MockNode"); }
                 return;
         }
@@ -197,16 +205,9 @@ class MockNode : public Node {
     double m_StateMsgSpeed;
     double m_StateMsgCourse;
 
-    // ActuatorPosition variables
+    // RudderCommand variables
     //=========================
-    int m_rudderPosition;
-    int m_sailPosition;
-
-    // ActuatorPosition variables
-    //=========================
-    int16_t m_DesiredCourse;
-
-    // NavigationControlMsg variables
+    float m_rudderAngle;
 
     // LocalNavigationMsg variables
     //=========================
