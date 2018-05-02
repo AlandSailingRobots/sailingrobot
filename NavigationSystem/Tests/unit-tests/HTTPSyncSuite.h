@@ -152,6 +152,7 @@ class HTTPSyncSuite : public CxxTest::TestSuite {
         MessagePtr compassDatalogs = std::make_unique<CompassDataMsg>(3, 2, 1);
         msgBus().sendMessage(std::move(compassDatalogs));
         std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_FOR_MESSAGE));
+
         std::string currentLogs = dbhandler->getLogs(true);
         std::string emptyJson = "null";
         TS_ASSERT_DIFFERS(currentLogs.compare(emptyJson), 0);
