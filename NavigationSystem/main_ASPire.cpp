@@ -36,7 +36,10 @@
   #include "Hardwares/CANWindsensorNode.h"
   #include "Hardwares/ActuatorNodeASPire.h"
   #include "Hardwares/CANArduinoNode.h"
-  #include "Hardwares/MarineSensorNode.h"
+
+#include "Hardwares/CANMarineSensorReceiver.h"
+#include "Hardwares/CANMarineSensorTransmissionNode.h"
+
 #endif
 
 
@@ -184,8 +187,12 @@ int main(int argc, char *argv[])
 	  	ActuatorNodeASPire actuators(messageBus, canService);
 	  	CANArduinoNode actuatorFeedback(messageBus, dbHandler, canService);
 
-	  	int miniWaitTime = 20; 	// Periode (in seconds) during which the measurements are performed.
-	  	MarineSensorNode marineSensors(messageBus, miniWaitTime);
+
+		CANMarineSensorReceiver canMarineSensorReciver(messageBus, canService);
+
+		CANMarineSensorTransmissionNode canMarineSensorTransmissionNode(messageBus, canService);
+
+
 	#endif
 */
 
@@ -216,7 +223,7 @@ int main(int argc, char *argv[])
 		initialiseNode(windSensor, "Wind Sensor", NodeImportance::CRITICAL);
 		initialiseNode(actuators, "Actuators", NodeImportance::CRITICAL);
 		initialiseNode(actuatorFeedback, "Actuator Feedback", NodeImportance::NOT_CRITICAL);
-		initialiseNode(marineSensors, "Marine Sensors", NodeImportance::NOT_CRITICAL);
+		initialiseNode(canMarineSensorTransmissionNode, "Marine Sensors", NodeImportance::NOT_CRITICAL);
 	#endif
 */
 	initialiseNode(cameraProcessingUtility, "Camera Processing", NodeImportance::NOT_CRITICAL);

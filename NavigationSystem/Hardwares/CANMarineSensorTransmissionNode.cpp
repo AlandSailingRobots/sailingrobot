@@ -6,7 +6,8 @@
 #include "MessageBus/MessageTypes.h"
 #include "Messages/DataCollectionStartMsg.h"
 #include "SystemServices/Timer.h"
-
+#include "CAN_Services/CanBusCommon/CanMessageHandler.h"
+#include "CAN_Services/CanBusCommon/canbus_defs.h"
 
 CANMarineSensorTransmissionNode::CANMarineSensorTransmissionNode(MessageBus &msgBus, CANService &canService)
                                                                 : Node(NodeID::MarineSensorCANTransmission, msgBus),
@@ -18,6 +19,11 @@ CANMarineSensorTransmissionNode::CANMarineSensorTransmissionNode(MessageBus &msg
 }
 
 CANMarineSensorTransmissionNode::~CANMarineSensorTransmissionNode() {}
+
+
+bool CANMarineSensorTransmissionNode::init() {
+    return true;
+}
 
 void CANMarineSensorTransmissionNode::processMessage(const Message* message) {
 
@@ -33,23 +39,11 @@ void CANMarineSensorTransmissionNode::processMessage(const Message* message) {
     /**
      * Last case is MessageType::DataRequest, but in all these cases a CAN Message should be sent to arduino
      */
-    CanMsg marineSensorRequest;
-    fillCanMsg(marineSensorRequest);
+
+    CanMessageHandler messageHandler(MSG_ID_MARINE_SENSOR_REQUEST);
+    messageHandler.encodeMessage(REQUEST_CONTINOUS_READINGS_DATASIZE,m_takeContinousSensorReadings);
+    messageHandler.encodeMessage(REQUEST_READING_TIME_DATASIZE,m_arduinoSensorLoopTime);
+
+    CanMsg marineSensorRequest = messageHandler.getMessage();
     m_CANService.sendCANMessage(marineSensorRequest);
 }
-
-void CANMarineSensorTransmissionNode::fillCanMsg(CanMsg &message) {
-    message.id = 710;
-    message.header.ide = 0;
-    message.header.length = 7;
-
-    for (auto& data : message.data) {
-        data = 0;
-    }
-    message.data[0] = static_cast<uint8_t>(m_takeContinousSensorReadings);
-    message.data[1] = static_cast<uint8_t >(m_arduinoSensorLoopTime & 0xff);
-    message.data[2] = static_cast<uint8_t >(m_arduinoSensorLoopTime >> 8);
-    message.data[3] = static_cast<uint8_t >(m_arduinoSensorLoopTime >> 16);
-    message.data[4] = static_cast<uint8_t >(m_arduinoSensorLoopTime >> 24);
-}
-
