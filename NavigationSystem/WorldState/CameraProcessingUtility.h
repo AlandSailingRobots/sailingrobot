@@ -43,7 +43,6 @@ public:
     CameraProcessingUtility(MessageBus& msgBus, DBHandler& dbhandler, CollidableMgr* collidableMgr);
     ~CameraProcessingUtility();
 
-    void videoAcquisition(int cameraDeviceID);
     bool init();
     void start();
     void stop();

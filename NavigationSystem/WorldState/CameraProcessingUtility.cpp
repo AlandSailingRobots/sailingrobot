@@ -22,6 +22,7 @@
 #include <vector>
 #include <thread>
 #include <map>
+#include <unistd.h>
 
 #include "SystemServices/SysClock.h"
 #include "SystemServices/Timer.h"
@@ -35,6 +36,7 @@
 using namespace std;
 using namespace cv;
 
+#define WITH_GUI 1 // disable with 0
 #define CAMERA_DEVICE_ID 0 // 0 = default webcam
 #define DETECTOR_LOOP_TIME 250 // in ms (250 * 20 ms = 5s)
 #define MAX_COMPASS_FRAME_TIMEFRAME 10 // in ms
@@ -105,21 +107,6 @@ CameraProcessingUtility::CameraProcessingUtility(MessageBus& msgBus, DBHandler& 
 CameraProcessingUtility::~CameraProcessingUtility() {}
 
 
-// Could upgrade to choose between video or single image
-// could rename this function as init maybe?, or just remove it and put the acquisition within the processing function
-// Should not be used at the moment, might be deleted 
-void CameraProcessingUtility::videoAcquisition(int m_cameraDeviceID) {
-    //VideoCapture m_capture(m_cameraDeviceID); // Opens the camera handle
-    if (m_capture.isOpened() == false) //  To check if object was associated to webcam successfully
-    {
-        Logger::error("Camera not available");
-        // skipping return for single frame test
-        exit(EXIT_FAILURE);
-    }
-    m_capture >> m_imgFullSize;
-
-}
-
 bool CameraProcessingUtility::init() {
     //VideoCapture capture(m_cameraDeviceID); // Opens the camera handle
     VideoCapture capture("/home/sailbot/Documents/untitled.mp4"); // For testing from video
@@ -142,7 +129,10 @@ void CameraProcessingUtility::start() {
 void CameraProcessingUtility::stop() {
     m_running = false;
     m_capture.release();
-    destroyAllWindows();
+    if (WITH_GUI)
+    {
+      destroyAllWindows();
+    }
     stopThread(this);
 }
 
@@ -151,10 +141,12 @@ void CameraProcessingUtility::CameraProcessingUtilityThreadFunc(ActiveNode* node
 
     Timer timer;
     timer.start();
-    Logger::info("Entering CameraProcessingUtilityThreadFunc loop");
+    //Logger::info("Entering CameraProcessingUtilityThreadFunc loop");
     
     std::chrono::duration<double> elapsed_seconds;
 
+    if (WITH_GUI)
+    {
     namedWindow( "Display window", WINDOW_NORMAL );// Create a window for display.
     namedWindow( "Display roi", WINDOW_NORMAL );
     namedWindow( "Display distance", WINDOW_NORMAL );
@@ -162,7 +154,7 @@ void CameraProcessingUtility::CameraProcessingUtilityThreadFunc(ActiveNode* node
     resizeWindow( "Display window", widthFrame - lowFrameX, heightFrame - lowFrameY );
     resizeWindow( "Display roi", widthFrame - lowFrameX, heightFrame - lowFrameY );
     resizeWindow( "Display distance", widthFrame - lowFrameX, heightFrame - lowFrameY );
-    
+    }
 
     while(node->m_running) {
 
@@ -178,14 +170,14 @@ void CameraProcessingUtility::CameraProcessingUtilityThreadFunc(ActiveNode* node
       timer.sleepUntil(0.25); // pause when thread is restarted
       timer.reset();
     }
-    Logger::info("Exiting CameraProcessingUtilityThreadFunc loop");
+    //Logger::info("Exiting CameraProcessingUtilityThreadFunc loop");
 }
 
 void CameraProcessingUtility::addCameraDataToCollidableMgr() {
     // float bearing = col*webcamAngleApertureXPerPixel m_compass_data.heading;
     int16_t bearing = 0; // Need to include compass in the process
     collidableMgr->addVisualField(m_relBearingToRelObstacleDistance, bearing);
-    Logger::info("Camera data added to CollidableMgr");
+    //Logger::info("Camera data added to CollidableMgr");
 }
 
 Mat CameraProcessingUtility::getRoi() {
@@ -235,11 +227,16 @@ void CameraProcessingUtility::freeSpaceProcessing() {
     // Main processing part
 
     if (m_imgFullSize.empty()) { // if frame read unsuccessfully
-        Logger::error("video input frame not readable");
+        Logger::error("Video input frame not readable");
         //break;
     }
+
     imgOriginal = m_imgFullSize(thermalImagerArea).clone();
-    imshow( "Display window", imgOriginal );
+
+    if (WITH_GUI)
+    {
+      imshow( "Display window", imgOriginal );
+    }
     
 
     /*
@@ -354,7 +351,10 @@ void CameraProcessingUtility::freeSpaceProcessing() {
 
 
     roi=dst;
-    imshow( "Display roi", roi );
+    if (WITH_GUI)
+    {
+      imshow( "Display roi", roi );
+    }
     //imshow( "Display roi", cdst );
 
     /*
@@ -379,29 +379,35 @@ void CameraProcessingUtility::freeSpaceProcessing() {
 
     // This image is what we want
     m_freeSpaceFrame = roi.clone();
-    
-
-    imshow( "Display distance", m_freeSpaceFrame );
     this->m_freeSpaceFrame = m_freeSpaceFrame; 
-
-    c=(char)waitKey(20); // pause of 20ms
-    // Press ESC tor restart the thread, or Q to kill it.
-    if(c==27) //ESC=27
+    
+    if (WITH_GUI)
     {
-      Logger::info("ESC display window, restarting the thread");
-      //break;
-    }
-    else if(c==113) //q=113
-    {
-      Logger::info("Warning, killing camera processing thread");
-      m_running = false;
-      m_capture.release();
-      destroyAllWindows();
+        imshow( "Display distance", m_freeSpaceFrame );
+    
+        c=(char)waitKey(20); // pause of 20ms
+        // Press ESC tor restart the thread, or Q to kill it.
+        if(c==27) //ESC=27
+        {
+          Logger::info("ESC display window, restarting the thread");
+          //break;
+        }
+        else if(c==113) //q=113
+        {
+          Logger::info("Warning, killing camera processing thread");
+          m_running = false;
+          m_capture.release();
+          destroyAllWindows();
+        }
+        else
+        {
+        //waitKey(1); // process is kind of heavy depending on the current frame
+                    // might need to increase the pause to smooth it a little
+        }
     }
     else
     {
-    //waitKey(1); // process is kind of heavy depending on the current frame
-                // might need to increase the pause to smooth it a little
+        usleep(1000000);
     }
 
 }

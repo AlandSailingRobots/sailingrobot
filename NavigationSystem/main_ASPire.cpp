@@ -176,7 +176,8 @@ int main(int argc, char *argv[])
 		LineFollowNode sailingLogic(messageBus, dbHandler);
   	#endif
 
-/*	#if SIMULATION == 1
+
+	#if SIMULATION == 1
   		SimulationNode simulation(messageBus, 1, &collidableMgr);
   	#else
 		CANService canService;
@@ -194,7 +195,7 @@ int main(int argc, char *argv[])
 
 
 	#endif
-*/
+
 
 	// Initialise nodes
 	//-------------------------------------------------------------------------------
@@ -215,7 +216,8 @@ int main(int argc, char *argv[])
 		initialiseNode(sailingLogic, "LineFollow", NodeImportance::CRITICAL);
 	#endif
 
-/*	#if SIMULATION == 1
+
+	#if SIMULATION == 1
 		initialiseNode(simulation,"Simulation",NodeImportance::CRITICAL);
 	#else
 		initialiseNode(compass, "Compass", NodeImportance::CRITICAL);
@@ -225,7 +227,7 @@ int main(int argc, char *argv[])
 		initialiseNode(actuatorFeedback, "Actuator Feedback", NodeImportance::NOT_CRITICAL);
 		initialiseNode(canMarineSensorTransmissionNode, "Marine Sensors", NodeImportance::NOT_CRITICAL);
 	#endif
-*/
+
 	initialiseNode(cameraProcessingUtility, "Camera Processing", NodeImportance::NOT_CRITICAL);
 
 	// Start active nodes
@@ -242,7 +244,7 @@ int main(int argc, char *argv[])
 
 	cameraProcessingUtility.start();
 
-/*	#if SIMULATION == 1
+	#if SIMULATION == 1
 		simulation.start();
 	#else
 	  	auto future = canService.start();
@@ -251,7 +253,7 @@ int main(int argc, char *argv[])
 		windSensor.start();
 		actuatorFeedback.start();
 	#endif
-*/
+
 	#if LOCAL_NAVIGATION_MODULE == 1
 		lnm.start();
 	#else
