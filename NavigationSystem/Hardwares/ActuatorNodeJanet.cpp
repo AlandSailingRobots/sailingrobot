@@ -12,13 +12,12 @@
  ***************************************************************************************/
 
 #include "Hardwares/ActuatorNodeJanet.h"
-//#include "Messages/ActuatorPositionMsg.h"
 #include "Messages/JanetActuatorFeedbackMsg.h"
 #include "Hardwares/MaestroController/MaestroController.h"
 #include "SystemServices/Logger.h"
 
 
-ActuatorNodeJanet::ActuatorNodeJanet(MessageBus& msgBus, DBHandler& dbhandler, NodeID id, int channel, int speed, int acceleration)
+ActuatorNodeJanet::ActuatorNodeJanet(MessageBus& msgBus, NodeID id, int channel, int speed, int acceleration)
 	:Node(id, msgBus), m_Channel(channel), m_Speed(speed), m_Acceleration(acceleration), m_db(dbhandler)
 {
   msgBus.registerNode(*this,MessageType::JanetActuatorFeedback);

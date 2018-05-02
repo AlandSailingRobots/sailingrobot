@@ -37,8 +37,6 @@ XbeeSyncNode::XbeeSyncNode(MessageBus& msgBus, DBHandler& db) :
 	m_node = this;
 }
 
-//XbeeSyncNode::~XbeeSyncNode() {}
-
 bool XbeeSyncNode::init()
 {
 	m_initialised = false;

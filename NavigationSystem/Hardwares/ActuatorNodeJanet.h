@@ -18,7 +18,7 @@
 
 class ActuatorNodeJanet : public Node {
 public:
-	ActuatorNodeJanet(MessageBus& msgBus, DBHandler& dbhandler, NodeID id, int channel, int speed, int acceleration);
+	ActuatorNodeJanet(MessageBus& msgBus, NodeID id, int channel, int speed, int acceleration);
 
 	///----------------------------------------------------------------------------------
  	/// Setups the actuator.
@@ -36,5 +36,4 @@ private:
 	int m_Channel;
 	int m_Speed;
 	int m_Acceleration;
-	DBHandler& m_db;
 };
