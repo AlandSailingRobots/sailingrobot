@@ -132,7 +132,7 @@ export CAN_SERVICES_SRC 	= Hardwares/CAN_Services/CANPGNReceiver.cpp Hardwares/C
 							   	Hardwares/CAN_Services/mcp2515.cpp Hardwares/CAN_Services/MsgFunctions.cpp \
 							   	Hardwares/CAN_Services/CANFrameReceiver.cpp
 
-export HW_SERVICES_JANET_SRC = Hardwares/MaestroController/MaestroController.cpp
+export HW_SERVICES_JANET_SRC = Hardwares/MaestroController/MaestroController.cpp Hardwares/ActuatorNodeJanet.cpp
 
 # Hardware nodes
 export HW_NODES_ALL_SRC		= Hardwares/HMC6343Node.cpp Hardwares/GPSDNode.cpp
@@ -146,7 +146,7 @@ export HW_NODES_JANET_SRC 	= Hardwares/CV7Node.cpp Hardwares/ArduinoNode.cpp
 
 # XBee network, XbeeSyncNode not compiling, uses removed ActuatorPositionMsg
 export XBEE_NETWORK_SRC     = Network/DataLink.cpp Network/LinuxSerialDataLink.cpp Network/XbeePacketNetwork.cpp \
-                            	Xbee/Xbee.cpp
+                            	Xbee/Xbee.cpp Xbee/XbeeSyncNode.cpp
 
 # CanbusCommon files
 export CANBUS_COMMON_SRC     = Hardwares/CAN_Services/CanBusCommon/CanUtility.cpp Hardwares/CAN_Services/CanBusCommon/CanMessageHandler.cpp
