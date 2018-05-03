@@ -5,10 +5,10 @@
 *
 * Purpose:
 		 Global Integrationtest for the ASPire
-*		 Monitor the values from the CAN-bus and able to sen comands to the actuators
+*		 Monitor the values from the CAN-bus and able to send commands to the actuators
 *
 * Developer Notes:
-		 Currently monetriring windsensor, actuator feedbacka and if the radio controller is in manual mode.
+		 Currently monetoring windsensor, actuator feedback and if the radio controller is in manual mode.
 		 It is a interface between the messagebus and the CAN-bus that can be monitored.
 *
 *
@@ -230,9 +230,9 @@ void messageLoop() {
 	msgBus.run();
 }
 
-WINDOW* inputWindow(int size, int logger_size){
+WINDOW* inputWindow(int sensor_size, int logger_size){
 	int begin_x = 2;
-	int begin_y = size + logger_size + 8;
+	int begin_y = sensor_size + logger_size + 7;
 	int ncols = 60;
 	int nr_of_lines = 9;
 
@@ -243,9 +243,10 @@ WINDOW* inputWindow(int size, int logger_size){
 
 int loggerWindow(int size) {
 	int begin_x = 2;
-	int begin_y = size + 8;
+	int begin_y = size + 7;
 	int ncols = 60;
-	int nr_of_lines = 7;
+	int nr_of_lines = 9;
+	int pos = 3;
 
 	WINDOW* log_Win = newwin(nr_of_lines, ncols, begin_y, begin_x);
 
@@ -255,6 +256,20 @@ int loggerWindow(int size) {
 	wmove(log_Win, 2, 20);
 
 	wprintw(log_Win, "LOGGER");
+
+	for(int i = 0; i < 4; i++) {
+			wmove(log_Win, pos, 10);
+			wprintw(log_Win, "LOGGER %i : ", i);
+			wmove(log_Win, pos, 35);			
+			pos+=1;
+		}
+
+
+
+
+
+
+
 
 	wrefresh(log_Win);
 
