@@ -311,7 +311,7 @@ void CameraProcessingUtility::freeSpaceProcessing() {
     Canny(frameGrayScale, dst, 16, 42, 3);
     cvtColor(dst, cdst, COLOR_GRAY2BGR);
     
-    HoughLinesP(dst, lines, 1, CV_PI/180, 50, 50, 10 );
+    HoughLinesP(dst, lines, 5, CV_PI/180, 10, 10, 50 ); //50,50,10
     double theta1, theta2, hyp;
 
     // Horizon
@@ -354,7 +354,7 @@ void CameraProcessingUtility::freeSpaceProcessing() {
     roi=dst;
     if (WITH_GUI)
     {
-      imshow( "Display roi", roi );
+      imshow( "Display roi", cdst );
     }
     //imshow( "Display roi", cdst );
 
@@ -423,7 +423,8 @@ int CameraProcessingUtility::computeRelDistances() {
     {
         for (int j=0; j < n_rows; j++)
         {
-            if (this->m_freeSpaceFrame.at<unsigned char>(i,j) > 127) // pixels are black or white so we choose an arbitrary value
+            // Notice that in Opencv, it's Point(col,row) but Mat(row,col)
+            if (this->m_freeSpaceFrame.at<unsigned char>(j,i) > 127) // pixels are black or white so we choose an arbitrary value
             {
                 n_whitePixelsVect.at(i)++;
                 // might have to check there if the roi resulting from the processing
