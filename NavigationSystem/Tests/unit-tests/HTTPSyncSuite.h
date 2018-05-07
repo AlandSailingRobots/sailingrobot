@@ -163,8 +163,5 @@ class HTTPSyncSuite : public CxxTest::TestSuite {
         std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
         TS_ASSERT(httpsync->pushDatalogs());
-        std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_FOR_MESSAGE));
-        currentLogs = dbhandler->getLogs(true);
-        TS_ASSERT_EQUALS(currentLogs.compare(emptyJson), 0);
     }
 };
