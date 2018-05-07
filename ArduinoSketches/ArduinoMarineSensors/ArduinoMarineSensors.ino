@@ -161,11 +161,11 @@ void processCANMessage (CanMsg& msg){
         sendMarineSensorData();
         lastReadingTimeInSeconds = millis()/1000;
 
-
-        bool takeContinousReadings = messageHandler.getData(REQUEST_CONTINOUS_READINGS_DATASIZE);
+        bool takeContinousReadings;
+        messageHandler.getData(&takeContinousReadings, REQUEST_CONTINOUS_READINGS_DATASIZE);
 
         if(takeContinousReadings) {
-            sensorReadingIntervalInSeconds = messageHandler.getData(REQUEST_READING_TIME_DATASIZE);
+            messageHandler.getData(&sensorReadingIntervalInSeconds, REQUEST_READING_TIME_DATASIZE);
         }
         else {
             sensorReadingIntervalInSeconds = -1;

@@ -57,19 +57,20 @@ void CANArduinoNode::processFrame (CanMsg& msg) {
 	CanMessageHandler messageHandler(msg);
 
 	if (messageHandler.getMessageId() == MSG_ID_AU_FEEDBACK) {
-		m_RudderFeedback = static_cast<float>(messageHandler.getMappedData(
-				RUDDER_ANGLE_DATASIZE, -MAX_RUDDER_ANGLE, MAX_RUDDER_ANGLE));
+		messageHandler.getMappedData(&m_RudderFeedback,
+				RUDDER_ANGLE_DATASIZE, -MAX_RUDDER_ANGLE, MAX_RUDDER_ANGLE);
 
-		m_WingsailFeedback = static_cast<float>(messageHandler.getMappedData(
-				WINGSAIL_ANGLE_DATASIZE, -MAX_WINGSAIL_ANGLE, MAX_WINGSAIL_ANGLE));
+		messageHandler.getMappedData(&m_WingsailFeedback,
+				WINGSAIL_ANGLE_DATASIZE, -MAX_WINGSAIL_ANGLE, MAX_WINGSAIL_ANGLE);
 
-		m_WindvaneSelfSteerAngle = static_cast<float>(messageHandler.getMappedData(
-				WINDVANE_SELFSTEERING_DATASIZE, WINDVANE_SELFSTEERING_ANGLE_MIN, WINDVANE_SELFSTEERING_ANGLE_MAX));
 
-		m_WindvaneActuatorPos = messageHandler.getData(WINDVANE_ACTUATOR_POSITION_DATASIZE);
+		messageHandler.getMappedData(&m_WindvaneSelfSteerAngle,
+				WINDVANE_SELFSTEERING_DATASIZE, WINDVANE_SELFSTEERING_ANGLE_MIN, WINDVANE_SELFSTEERING_ANGLE_MAX);
+
+		messageHandler.getData(&m_WindvaneActuatorPos, WINDVANE_ACTUATOR_POSITION_DATASIZE);
 	}
 	else if (messageHandler.getMessageId() == MSG_ID_RC_STATUS) {
-		m_Radio_Controller_On = messageHandler.getData(RADIOCONTROLLER_ON_DATASIZE);
+		messageHandler.getData(&m_Radio_Controller_On, RADIOCONTROLLER_ON_DATASIZE);
 	}
 }
 

@@ -171,9 +171,11 @@ void processCANMessage (CanMsg& msg){
   CanMessageHandler messageHandler(msg);
 
   if(messageHandler.getMessageId() == MSG_ID_AU_CONTROL) {
-    double rudderAngel = messageHandler.getMappedData(RUDDER_ANGLE_DATASIZE, MIN_RUDDER_ANGLE, MAX_RUDDER_ANGLE);
+    double rudderAngel;
+    messageHandler.getMappedData(&rudderAngel, RUDDER_ANGLE_DATASIZE, MIN_RUDDER_ANGLE, MAX_RUDDER_ANGLE);
 
-    double wingsailAngle = messageHandler.getMappedData(WINGSAIL_ANGLE_DATASIZE, MIN_WINGSAIL_ANGLE, MAX_WINGSAIL_ANGLE);
+    double wingsailAngle;
+    messageHandler.getMappedData(&wingsailAngle, WINGSAIL_ANGLE_DATASIZE, MIN_WINGSAIL_ANGLE, MAX_WINGSAIL_ANGLE);
 
     moveRudder(rudderAngel);
 

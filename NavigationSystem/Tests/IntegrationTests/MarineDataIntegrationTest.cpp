@@ -42,13 +42,16 @@ public:
         CanMessageHandler handler(msg);
 
         if(handler.getMessageId() == MSG_ID_MARINE_SENSOR_DATA) {
-            double ph = handler.getMappedData(SENSOR_PH_DATASIZE,
+            double ph;
+			double conductivety;
+			double temp;
+            handler.getMappedData(&ph, SENSOR_PH_DATASIZE,
                                               SENSOR_PH_INTERVAL_MIN, SENSOR_PH_INTERVAL_MAX);
 
-            double conductivety = handler.getMappedData(SENSOR_CONDUCTIVETY_DATASIZE,
+            handler.getMappedData(&conductivety, SENSOR_CONDUCTIVETY_DATASIZE,
                                                         SENSOR_CONDUCTIVETY_INTERVAL_MIN, SENSOR_CONDUCTIVETY_INTERVAL_MAX);
 
-            double temp = handler.getMappedData(SENSOR_TEMPERATURE_DATASIZE,
+            handler.getMappedData(&temp, SENSOR_TEMPERATURE_DATASIZE,
                                                 SENSOR_TEMPERATURE_INTERVAL_MIN, SENSOR_TEMPERATURE_INTERVAL_MAX);
             float salinity = Utility::calculateSalinity (temp, conductivety);
 
