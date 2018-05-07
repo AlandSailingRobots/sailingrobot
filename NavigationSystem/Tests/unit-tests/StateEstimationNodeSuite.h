@@ -27,7 +27,7 @@
 
 #include <chrono>
 
-#define STATE_ESTIMATIONODE_TEST_COUNT 8
+#define STATE_ESTIMATIONODE_TEST_COUNT 9
 
 class StateEstimationNodeSuite : public CxxTest::TestSuite {
    public:
@@ -125,9 +125,6 @@ class StateEstimationNodeSuite : public CxxTest::TestSuite {
 
         messageBus.sendMessage(std::move(wayPointDataMsg));
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
-
-        TS_ASSERT_DELTA(mockNode->m_StateMsgHeading, 0, 1e-7);  // Check if Heading of the state
-        // message is null because we must wait for data from the compass message
 
         int heading = 100;
         MessagePtr compassData = std::make_unique<CompassDataMsg>(heading, 80, 60);
@@ -261,44 +258,25 @@ class StateEstimationNodeSuite : public CxxTest::TestSuite {
     // Test for update frequency
     // ----------------
     void test_StateEstimationUpdateFrequency() {
-        TS_SKIP("Failing test (hanging) skipped");
-        /*
-                Timer timer;
+        Timer timer;
 
-                dbhandler->changeOneValue("config_vessel_state","1","0.7","loop_time");
-                MessagePtr serverConfig = std::make_unique<ServerConfigsReceivedMsg>();
-                messageBus.sendMessage(std::move(serverConfig));
-                std::this_thread::sleep_for(std::chrono::milliseconds(500));
-                TS_ASSERT(mockNode->m_MessageReceived);
+        dbhandler->changeOneValue("config_vessel_state","1","0.7","loop_time");
+        MessagePtr serverConfig = std::make_unique<ServerConfigsReceivedMsg>();
+        messageBus.sendMessage(std::move(serverConfig));
 
-                mockNode->m_MessageReceived = false;
-                while(not mockNode->m_MessageReceived);   //Hanging here
-                timer.start();
-                mockNode->m_MessageReceived = false;
-                while(not mockNode->m_MessageReceived);
-                timer.stop();
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+        TS_ASSERT(mockNode->m_MessageReceived);
 
-                TS_ASSERT_DELTA(timer.timePassed(), 0.70, 1e-2);
+        mockNode->m_MessageReceived = false;
+        while(not mockNode->m_MessageReceived);
 
-         double heading = 10;
-         double speed = 1;
-         MaxRudAng = 20.0;
-         double desiredcourse = 15;
+        timer.start();
+        mockNode->m_MessageReceived = false;
+        while(not mockNode->m_MessageReceived);
+        timer.stop();
 
-         MessagePtr stateData = std::make_unique<StateMessage>(heading,60.09726,19.93481,speed,0);
-         msgBus().sendMessage(std::move(stateData));
-         std::this_thread::sleep_for(std::chrono::milliseconds(700));
+        TS_ASSERT_DELTA(timer.timePassed(), 0.70, 1e-2);
 
-         MessagePtr desiredCourseData = std::make_unique<DesiredCourseMsg>(desiredcourse);
-         msgBus().sendMessage(std::move(desiredCourseData));
-         std::this_thread::sleep_for(std::chrono::milliseconds(700));
-
-         double diffHeading =
-         Utility::limitAngleRange(heading)-Utility::limitAngleRange(desiredcourse); int
-         rudderAngle = Utility::sgn(speed)*sin(Utility::degreeToRadian(diffHeading))*MaxRudAng;
-        std::this_thread::sleep_for(std::chrono::milliseconds(700));
-         double courseRegulatorRudderAngle = mockNode->m_rudderPosition;
-         TS_ASSERT_DELTA(courseRegulatorRudderAngle, rudderAngle, 1e-7);
-        dbhandler->changeOneValue("config_vessel_state", "1", "0.5", "loop_time"); */
+        dbhandler->changeOneValue("config_vessel_state", "1", "0.5", "loop_time");
     }
 };
