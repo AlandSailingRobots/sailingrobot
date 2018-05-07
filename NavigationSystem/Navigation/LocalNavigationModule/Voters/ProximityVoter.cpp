@@ -126,10 +126,10 @@ void ProximityVoter::avoidOutsideVisualField( int16_t visibleFieldLowBearingLimi
 ///----------------------------------------------------------------------------------
 void ProximityVoter::bearingAvoidanceSmoothed( int16_t bearing, uint16_t relativeFreeDistance )
 {
-    const uint16_t avoidanceBearingRange = 10;
+    const uint16_t avoidanceBearingRange = 20;
     const double avoidanceNormalization = avoidanceBearingRange;
     const double vote = courseBallot.maxVotes();
-    const double normalizeFactor = 3.0;
+    const double normalizeFactor = 4.0;
     auto normalizedVoteAdjust = normalizeFactor*(100.0 - relativeFreeDistance)/(100.0 * avoidanceNormalization);
 
     if (relativeFreeDistance < 100){
@@ -152,7 +152,7 @@ void ProximityVoter::bearingPreferenceSmoothed( int16_t bearing, uint16_t relati
     const double preferenceNormalization = preferenceBearingRange;
     const double portAvoidanceFactor = 0.5;
     const double vote = courseBallot.maxVotes();
-    const double normalizeFactor = 3.0;
+    const double normalizeFactor = 8.0;
     auto normalizedVoteAdjustStarboard = normalizeFactor * (100.0 - relativeFreeDistance)/(100.0 * preferenceNormalization);
     auto normalizedVoteAdjustPort = portAvoidanceFactor * normalizeFactor * (100.0 - relativeFreeDistance)/(100.0 * preferenceNormalization);
 
