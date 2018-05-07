@@ -148,7 +148,7 @@ void ProximityVoter::bearingPreferenceSmoothed( int16_t bearing, uint16_t relati
 {
     const int16_t giveWayAngleStarboard = 90;
     const int16_t giveWayAnglePort = -90;   
-    const uint16_t preferenceBearingRange = 10;
+    const uint16_t preferenceBearingRange = 20;
     const double preferenceNormalization = preferenceBearingRange;
     const double portAvoidanceFactor = 0.5;
     const double vote = courseBallot.maxVotes();
