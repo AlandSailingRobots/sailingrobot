@@ -129,7 +129,8 @@ void ProximityVoter::bearingAvoidanceSmoothed( int16_t bearing, uint16_t relativ
     const uint16_t avoidanceBearingRange = 10;
     const double avoidanceNormalization = avoidanceBearingRange;
     const double vote = courseBallot.maxVotes();
-    auto normalizedVoteAdjust = 3.0*(100.0 - relativeFreeDistance)/(100.0 * avoidanceNormalization);
+    const double normalizeFactor = 3.0;
+    auto normalizedVoteAdjust = normalizeFactor*(100.0 - relativeFreeDistance)/(100.0 * avoidanceNormalization);
 
     if (relativeFreeDistance < 100){
         Logger::info("Decreasing votes around bearing %d with %f", bearing, vote*normalizedVoteAdjust);
@@ -151,8 +152,9 @@ void ProximityVoter::bearingPreferenceSmoothed( int16_t bearing, uint16_t relati
     const double preferenceNormalization = preferenceBearingRange;
     const double portAvoidanceFactor = 0.5;
     const double vote = courseBallot.maxVotes();
-    auto normalizedVoteAdjustStarboard = 3.0*(100.0 - relativeFreeDistance)/(100.0 * preferenceNormalization);
-    auto normalizedVoteAdjustPort = portAvoidanceFactor * 3.0*(100.0 - relativeFreeDistance)/(100.0 * preferenceNormalization);
+    const double normalizeFactor = 3.0;
+    auto normalizedVoteAdjustStarboard = normalizeFactor * (100.0 - relativeFreeDistance)/(100.0 * preferenceNormalization);
+    auto normalizedVoteAdjustPort = portAvoidanceFactor * normalizeFactor * (100.0 - relativeFreeDistance)/(100.0 * preferenceNormalization);
 
     if (relativeFreeDistance < 100){
         Logger::info("Increasing votes around bearing %d with %f", bearing + giveWayAngleStarboard, vote*normalizedVoteAdjustStarboard);        
