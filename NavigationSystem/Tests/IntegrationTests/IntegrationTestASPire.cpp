@@ -112,7 +112,7 @@ public:
 	void sensorWindow(){
 		int begin_y = 1;	
 		int begin_x = 2;
-		int ncols = 60;
+		int ncols = 70;
 		int nr_of_lines = 6 + m_SensorValues.size();
 		
 		m_Win = newwin(nr_of_lines, ncols, begin_y, begin_x);
@@ -196,7 +196,7 @@ public:
 		wclear(m_Win);
 		box(m_Win, 0, 0);
 
-		wmove(m_Win, 2,20);
+		wmove(m_Win, 2,25);
 		wprintw(m_Win, "SENSOR READINGS");
 		wmove(m_Win, 2, 10);
 		int pos = 4;
@@ -244,7 +244,7 @@ void messageLoop() {
 WINDOW* inputWindow(int sensor_size, int logger_size){
 	int begin_x = 2;
 	int begin_y = sensor_size + logger_size + 7;
-	int ncols = 60;
+	int ncols = 70;
 	int nr_of_lines = 9;
 
 	WINDOW* inputWin  = newwin(nr_of_lines, ncols, begin_y, begin_x);
@@ -284,14 +284,12 @@ std::string getLoggedData(){
 
 
 
-
-
 int loggerWindow(int size) {
 	int begin_x = 2;
 	int begin_y = size + 7;
 	int ncols = 70;
-	int nr_of_lines = 9;
-	int pos = 3;
+	int nr_of_lines = 12;
+	int pos = 4;
 
 	std::string logString = getLoggedData();
 
@@ -300,11 +298,11 @@ int loggerWindow(int size) {
 	wclear(log_Win);
 	box(log_Win, 0,0);
 
-	wmove(log_Win, 2, 20);
+	wmove(log_Win, 2, 25);
 
 	wprintw(log_Win, "LOGGER");
 
-	for(int i = 0; i < 4; i++) {
+	for(int i = 0; i < 6; i++) {
 			wmove(log_Win, pos, 2);
 			wprintw(log_Win, " %s\n", logString.c_str());			
 			wmove(log_Win, pos, 35);			
@@ -333,7 +331,7 @@ void printInputMenu(WINDOW* win, menuIter highlightedItem) {
 	wclear(win);
 	box(win, 0,0);
 
-	wmove(win, 2, 20);
+	wmove(win, 2, 25);
 	wprintw(win, "ACTUATOR COMMANDS");
 	int pos = 4;
 	for(auto it : menuValues) {
