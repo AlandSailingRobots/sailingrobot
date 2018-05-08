@@ -56,6 +56,8 @@ struct LogItem {
     float m_windDir;  // dataLogs_windsensor
     float m_windSpeed;
     float m_windTemp;
+    double m_currentSensorMeasurement; // dataLogs_current_sensors
+    std::string m_sensor_name
     std::string m_timestamp_str;
 };
 
