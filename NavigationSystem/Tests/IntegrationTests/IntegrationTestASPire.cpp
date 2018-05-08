@@ -49,6 +49,17 @@
 #include <cctype>
 #include <sstream>
 
+
+#include <iostream>
+#include <fstream>
+#include <ostream>
+#include <sstream>
+#include <string>
+
+#include <regex>
+
+
+
 #define BACKSPACE 8
 #define ENTER 10
 #define TAB 9
@@ -241,12 +252,48 @@ WINDOW* inputWindow(int sensor_size, int logger_size){
 	return inputWin;
 }
 
+
+std::string getLoggedData(){
+
+	std::ifstream logFile;
+
+	std::string newString;
+
+	std::smatch match;
+
+	std::regex expression("\\[(.*?)\\]\\s*\\<(.*?)\\>\\s*(.*)");
+
+	logFile.open("/home/sailbot/PoP2018/sailingrobot/logs/073124-integrationTest.log");
+
+	if(!logFile){
+		Logger::error("Open logfile\t\t[FAILED]");
+	} else {
+		Logger::info("Open logfile\t\t[OK]");
+	}
+
+	getline(logFile, newString, '\n');
+	logFile.close();
+
+	if(regex_search(newString, match, expression)){
+	} else {
+		Logger::error("Regex\t\t[FAILED]");	
+	}
+
+	return match[3].str().c_str();
+}
+
+
+
+
+
 int loggerWindow(int size) {
 	int begin_x = 2;
 	int begin_y = size + 7;
-	int ncols = 60;
+	int ncols = 70;
 	int nr_of_lines = 9;
 	int pos = 3;
+
+	std::string logString = getLoggedData();
 
 	WINDOW* log_Win = newwin(nr_of_lines, ncols, begin_y, begin_x);
 
@@ -258,17 +305,11 @@ int loggerWindow(int size) {
 	wprintw(log_Win, "LOGGER");
 
 	for(int i = 0; i < 4; i++) {
-			wmove(log_Win, pos, 10);
-			wprintw(log_Win, "LOGGER %i : ", i);
+			wmove(log_Win, pos, 2);
+			wprintw(log_Win, " %s\n", logString.c_str());			
 			wmove(log_Win, pos, 35);			
 			pos+=1;
 		}
-
-
-
-
-
-
 
 
 	wrefresh(log_Win);
@@ -364,6 +405,8 @@ int main() {
 		Logger::shutdown();
 		exit(1);
 	}
+
+
 
 	// Comment out this line if not running on the pi
 	// otherwise program will crash.
