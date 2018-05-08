@@ -117,6 +117,7 @@ void DBLoggerNode::processMessage(const Message* msg) {
             item.m_current = currentSensorMsg->getCurrent();
             item.m_voltage = currentSensorMsg->getVoltage();
             item.m_element = currentSensorMsg->getSensedElement();
+            item.m_element_str = currentSensorMsg->getSensedElementStr();
         }
         break;
 

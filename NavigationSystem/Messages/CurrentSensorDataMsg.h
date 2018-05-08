@@ -60,7 +60,7 @@ virtual void Serialise(MessageSerialiser& serialiser) const
 uint16_t getCurrent() const { return m_current; }
 uint16_t getVoltage() const { return m_voltage; }
 SensedElement getSensedElement() const { return m_element; }
-std::string getSensedElementStr()
+std::string getSensedElementStr () const
 {
     std::string elem;
 
