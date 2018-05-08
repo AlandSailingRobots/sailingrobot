@@ -60,10 +60,12 @@ CREATE TABLE dataLogs_course_calculation (
 -- -----------------------------------------------------
 DROP TABLE IF EXISTS "dataLogs_current_sensors";
 CREATE TABLE dataLogs_current_sensors (
-	id	INTEGER PRIMARY KEY AUTOINCREMENT,
-	measurement	DOUBLE,
-	sensor_name	TEXT,
-	t_timestamp	TIMESTAMP
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  current   	FLOAT,
+  voltage       FLOAT,
+  element 	    INT,
+  element_str   VARCHAR(50),
+  t_timestamp	TIMESTAMP
 );
 
 -- -----------------------------------------------------
