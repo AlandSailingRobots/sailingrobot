@@ -26,11 +26,6 @@ struct LogItem {
     double m_courseToSteer;
     bool m_tack;
     bool m_goingStarboard;
-    double m_currentActuatorUnit;  // dataLogs_current_sensors
-    double m_currentNavigationUnit;
-    double m_currentWindVaneAngle;
-    double m_currentWindVaneClutch;
-    double m_currentSailboatDrive;
     bool m_gpsHasFix;  // dataLogs_gps
     bool m_gpsOnline;
     double m_gpsLat;

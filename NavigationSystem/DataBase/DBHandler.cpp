@@ -198,7 +198,7 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
            << " VALUES(NULL, " << courseCalculationValues.str() << "'); \n";
 
         currentSensorsValues << std::setprecision(10) << log.m_currentSensorMeasurement << ", '"
-                             << log.m_sensor_name.c_str() << ",'" << log.m_timestamp_str.c_str();
+                             << log.m_sensor_name.c_str() << "' ,'" << log.m_timestamp_str.c_str();
 
         ss << "INSERT INTO "
            << "dataLogs_current_sensors"

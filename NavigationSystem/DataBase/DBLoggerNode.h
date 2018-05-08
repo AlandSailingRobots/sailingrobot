@@ -46,11 +46,6 @@ private:
      (double)   DATA_OUT_OF_RANGE,  // m_courseToSteer;
      (bool)     false,              // m_tack;
      (bool)     false,              // m_goingStarboard;
-     (double)   DATA_OUT_OF_RANGE,  // m_currentActuatorUnit;
-     (double)   DATA_OUT_OF_RANGE,  // m_currentNavigationUnit;
-     (double)   DATA_OUT_OF_RANGE,  // m_currentWindVaneAngle;
-     (double)   DATA_OUT_OF_RANGE,  // m_currentWindVaneClutch;
-     (double)   DATA_OUT_OF_RANGE,  // m_currentSailboatDrive;
      (bool)     false,              // m_gpsHasFix;
      (bool)     false,              // m_gpsOnline;
      (double)   DATA_OUT_OF_RANGE,  // m_gpsLat;
@@ -76,6 +71,8 @@ private:
      (float)    DATA_OUT_OF_RANGE,  // m_windSpeed;
      (float)    DATA_OUT_OF_RANGE,  // m_windDir;
      (float)    DATA_OUT_OF_RANGE,  // m_windTemp;
+     (double)   DATA_OUT_OF_RANGE,  // m_currentSensorMeasurement
+     (std::string) "sensor_name",   //m_sensor_name
      (std::string) "initialized"    // m_timestamp_str;
     };
 
