@@ -26,13 +26,16 @@ TOOLCHAIN = 0
 export USE_SIM = 0
 export USE_LNM = 0
 
+## Temporary plced opencv libs
+OPENCV = `pkg-config opencv --cflags --libs`
 
 ###############################################################################
 # Tools
 ###############################################################################
 
 export CPPFLAGS             = -g -Wall -pedantic -Werror -std=gnu++14 -Wno-psabi
-export LIBS                 = -lsqlite3 -lgps -lrt -lcurl -lpthread -lwiringPi -lncurses
+export LIBS                 = -lsqlite3 -lgps -lrt -lcurl -lpthread -lwiringPi -lncurses \
+								$(OPENCV)
 
 ifeq ($(TOOLCHAIN),1)
     export CC               = arm-linux-gnueabihf-gcc
@@ -101,7 +104,7 @@ NAVIGATION_SRC				= Navigation/WaypointMgrNode.cpp
 SYSTEM_SERVICES_SRC  		= SystemServices/Logger.cpp SystemServices/SysClock.cpp SystemServices/Timer.cpp
 
 WORLD_STATE_SRC				= WorldState/VesselStateNode.cpp WorldState/StateEstimationNode.cpp \
-								WorldState/WindStateNode.cpp
+								WorldState/WindStateNode.cpp WorldState/CameraProcessingUtility.cpp
 
 DATA_COLLECTION_SRC			= DataCollection/DataCollectionMgrNode.cpp
 
@@ -119,7 +122,8 @@ export LNM_SRC              = $(LNM_DIR)/ASRCourseBallot.cpp $(LNM_DIR)/ASRArbit
 								$(LNM_DIR)/Voters/ProximityVoter.cpp
 
 # Obstacles detection
-export COLLIDABLE_MGR_SRC	= WorldState/CollidableMgr/CollidableMgr.cpp WorldState/AISProcessing.cpp
+export COLLIDABLE_MGR_SRC	= WorldState/CollidableMgr/CollidableMgr.cpp WorldState/AISProcessing.cpp \
+							
 
 # Simulator
 export SIMULATOR_SRC        = Simulation/SimulationNode.cpp
@@ -140,6 +144,7 @@ export HW_NODES_ALL_SRC		= Hardwares/HMC6343Node.cpp Hardwares/GPSDNode.cpp
 export HW_NODES_ASPIRE_SRC 	= Hardwares/ActuatorNodeASPire.cpp Hardwares/CANAISNode.cpp Hardwares/CANSolarTrackerNode.cpp\
                             	Hardwares/CANWindsensorNode.cpp Hardwares/CANArduinoNode.cpp \
                             	Hardwares/CANMarineSensorTransmissionNode.cpp Hardwares/CANMarineSensorReceiver.cpp
+
 
 # ActuatorNode for Janet not compiling, uses removed ActuatorPositionMsg
 export HW_NODES_JANET_SRC 	= Hardwares/CV7Node.cpp Hardwares/ArduinoNode.cpp
@@ -179,8 +184,6 @@ unit_tests: $(BUILD_DIR)
 integration_tests_ASPire: $(BUILD_DIR)
 	$(MAKE) -f integration_tests_ASPire.mk
 	$(MAKE) -f ais_integration_test.mk
-
-
 
 ## Build HTTPSync Test
 HTTPSync_test: $(BUILD_DIR)
