@@ -12,6 +12,7 @@
 #include <Canbus.h>
 #include <MsgParsing.h>
 #include <CanUtility.h>
+#include <CanMessageHandler.h>
 
 #define CHIP_SELECT_PIN 49
 
@@ -25,16 +26,6 @@ const int WINGSAIL_MAESTRO_MIN_TARGET = 1110;
 // Maestro Configurations
 const int MAESTRO_SIGNAL_MULTIPLIER = 4;
 
-// Rudder should go from -30 to +30 degrees
-// which gives an effective range of 60.
-const int MAX_RUDDER_ANGLE = 30;
-
-//Windsail should go from -13 to 13 degrees
-//range is 26
-const int MAX_WINGSAIL_ANGLE = 13;
-
-const double INT16_SIZE = 65535;
-
 const int RUDDER_MIN_FEEDBACK = 278;
 const int RUDDER_MAX_FEEDBACK = 358;
 const int WINGSAIL_MIN_FEEDBACK =  360;
@@ -46,7 +37,6 @@ const int WINGSAIL_MAESTRO_CHANNEL = 2;
 const int RUDDER_FEEDBACK_PIN = A6;
 const int WINGSAIL_FEEDBACK_PIN = A4;
 const int RADIO_CONTROLL_OFF_PIN = A8;
-
 
 
 /* On boards with a hardware serial port available for use, use
@@ -98,46 +88,22 @@ void loop()
 }
 
 void sendFeedback (){
- CanMsg feedbackMsg;
- uint16_t rudderAngle16;
- uint16_t wingsailAngle16;
+  CanMessageHandler messageHandler(MSG_ID_AU_FEEDBACK);
 
+  messageHandler.encodeMappedMessage(RUDDER_ANGLE_DATASIZE, getRudderFeedback(),MIN_RUDDER_ANGLE,MAX_RUDDER_ANGLE);
+  messageHandler.encodeMappedMessage(WINGSAIL_ANGLE_DATASIZE, getWingsailFeedback(), MIN_WINGSAIL_ANGLE, MAX_WINGSAIL_ANGLE);
 
-      rudderAngle16 = getRudderFeedback ();
-      wingsailAngle16 = getWingsailFeedback();
+  CanMsg feedbackMsg = messageHandler.getMessage();
 
-      feedbackMsg.id = 701;
-      feedbackMsg.header.ide = 0;
-      feedbackMsg.header.length = 7;
-
-      feedbackMsg.data[0] = (rudderAngle16 & 0xff);
-      feedbackMsg.data[1] = (rudderAngle16 >> 8);
-      feedbackMsg.data[2] = (wingsailAngle16 & 0xff);
-      feedbackMsg.data[3] = (wingsailAngle16 >> 8);
-      feedbackMsg.data[4] = 0;
-      feedbackMsg.data[5] = 0;
-      feedbackMsg.data[6] = 0;
-
-      Canbus.SendMessage(&feedbackMsg);
-
+  Canbus.SendMessage(&feedbackMsg);
 }
 
 void sendArduinoData (){
-  CanMsg arduinoData;
-    arduinoData.id = 702;
-    arduinoData.header.ide = 0;
-    arduinoData.header.length = 7;
-    uint16_t RCon16 = (uint16_t) isRadioControllerUsed ();
-    arduinoData.data[0] = (RCon16 & 0xff);
-    arduinoData.data[1] = (RCon16 >> 8);
-    arduinoData.data[2] = 0;
-    arduinoData.data[3] = 0;
-    arduinoData.data[4] = 0;
-    arduinoData.data[5] = 0;
-    arduinoData.data[6] = 0;
+  CanMessageHandler messageHandler(MSG_ID_RC_STATUS);
+  messageHandler.encodeMessage(RADIOCONTROLLER_ON_DATASIZE, isRadioControllerUsed());
 
-    Canbus.SendMessage(&arduinoData);
-
+  CanMsg arduinoData = messageHandler.getMessage();
+  Canbus.SendMessage(&arduinoData);
 }
 void checkCanbusFor (int timeMs){
   int startTime= millis();
@@ -154,7 +120,7 @@ void checkCanbusFor (int timeMs){
   }
 }
 
-uint16_t getRudderFeedback() {
+float getRudderFeedback() {
   int feedback = analogRead(RUDDER_FEEDBACK_PIN);
 
 //Variabales c, b1 and b2 come from formula to map to a squareroot function. Reference in Hardware documatation
@@ -169,9 +135,7 @@ uint16_t getRudderFeedback() {
     angle = b2* sqrt (feedback+c);
   }
 
-  uint16_t canbusAngle = CanUtility::mapInterval (angle, -MAX_RUDDER_ANGLE, MAX_RUDDER_ANGLE, 0, INT16_SIZE);
-  return canbusAngle;
-
+  return angle;
 }
 
 float getWingsailFeedback() {
@@ -188,36 +152,35 @@ float getWingsailFeedback() {
   } else {
     angle = b2* sqrt (feedback+c);
   }
-  uint16_t canbusAngle = CanUtility::mapInterval (angle, -MAX_WINGSAIL_ANGLE, MAX_WINGSAIL_ANGLE, 0, INT16_SIZE);
-  return canbusAngle;
+
+  return angle;
 }
 
-int isRadioControllerUsed (){
+bool isRadioControllerUsed (){
 
   if (analogRead (RADIO_CONTROLL_OFF_PIN) > 250) { //Value comes from the multiplexer indicator led
-    return 0;
+    return false;
   }
   else {
-    return  INT16_SIZE/2;
+    return true;
   }
 }
 
 
 void processCANMessage (CanMsg& msg){
+  CanMessageHandler messageHandler(msg);
 
-        if(msg.id == 700) {
-          uint16_t rawCanData = (msg.data[1]<<8 | msg.data[0]);
-          double rudderAngel = CanUtility::mapInterval (rawCanData, 0, INT16_SIZE, -MAX_RUDDER_ANGLE, MAX_RUDDER_ANGLE);
-          //Serial.print("Received rudder angle: "); Serial.println(rudderAngel);
-          rawCanData = (msg.data[3]<<8 | msg.data[2]);
-          double wingsailAngle = CanUtility::mapInterval (rawCanData, 0, INT16_SIZE, -MAX_WINGSAIL_ANGLE, MAX_WINGSAIL_ANGLE);
-          //Serial.print("Received wingsail angle: "); Serial.println(wingsailAngle);
+  if(messageHandler.getMessageId() == MSG_ID_AU_CONTROL) {
+    double rudderAngel;
+    messageHandler.getMappedData(&rudderAngel, RUDDER_ANGLE_DATASIZE, MIN_RUDDER_ANGLE, MAX_RUDDER_ANGLE);
 
-          moveRudder(rudderAngel);
+    double wingsailAngle;
+    messageHandler.getMappedData(&wingsailAngle, WINGSAIL_ANGLE_DATASIZE, MIN_WINGSAIL_ANGLE, MAX_WINGSAIL_ANGLE);
 
-          moveWingsail(wingsailAngle);
+    moveRudder(rudderAngel);
 
-      }
+    moveWingsail(wingsailAngle);
+  }
 }
 
 void moveRudder(double angleToSet) {
