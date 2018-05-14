@@ -18,7 +18,7 @@
 
 
 ActuatorNodeJanet::ActuatorNodeJanet(MessageBus& msgBus, NodeID id, int channel, int speed, int acceleration)
-	:Node(id, msgBus), m_Channel(channel), m_Speed(speed), m_Acceleration(acceleration), m_db(dbhandler)
+	:Node(id, msgBus), m_Channel(channel), m_Speed(speed), m_Acceleration(acceleration)
 {
   msgBus.registerNode(*this,MessageType::JanetActuatorFeedback);
   msgBus.registerNode(*this,MessageType::ServerConfigsReceived);
