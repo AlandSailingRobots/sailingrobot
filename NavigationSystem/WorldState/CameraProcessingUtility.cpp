@@ -16,7 +16,7 @@
  *    
  * TO DO: Add compass correction. Decrease computation time for the Raspberry
  *        (deleting the "imshow" functions can decrease by 0,15s, on the desk computer)
- *
+ *        Delete the includes and put it all in the corresponding .h file.
  ***************************************************************************************/
 
 #include <vector>
@@ -177,6 +177,7 @@ void CameraProcessingUtility::CameraProcessingUtilityThreadFunc(ActiveNode* node
 void CameraProcessingUtility::addCameraDataToCollidableMgr() {
     // float bearing = col*webcamAngleApertureXPerPixel m_compass_data.heading;
     int16_t bearing = 0; // Need to include compass in the process
+    bearing = (int16_t)m_compass_data.heading;
     collidableMgr->addVisualField(m_relBearingToRelObstacleDistance, bearing);
     //Logger::info("Camera data added to CollidableMgr");
 }
@@ -311,7 +312,8 @@ void CameraProcessingUtility::freeSpaceProcessing() {
     Canny(frameGrayScale, dst, 16, 42, 3);
     cvtColor(dst, cdst, COLOR_GRAY2BGR);
     
-    HoughLinesP(dst, lines, 5, CV_PI/180, 10, 10, 50 ); //50,50,10
+    // Detecting lines for horizon detection
+    HoughLinesP(dst, lines, 2, 2*CV_PI/180, 10, 40, 25 ); //50,50,10|10,10,50
     double theta1, theta2, hyp;
 
     // Horizon
@@ -449,6 +451,22 @@ int CameraProcessingUtility::computeRelDistances() {
     return EXIT_SUCCESS;
 }
 
-void CameraProcessingUtility::processMessage(const Message* msg) {
-  // Useless atm, but needed for compiling.
+void CameraProcessingUtility::processMessage(const Message* msg) 
+{
+    MessageType type = msg->messageType();
+    switch(type)
+    {
+    case MessageType::CompassData:
+        processCompassMessage(static_cast<const CompassDataMsg*>(msg));
+        break;
+    default:
+        return;
+    }
+}
+
+void CameraProcessingUtility::processCompassMessage(const CompassDataMsg* msg)
+{
+    std::lock_guard<std::mutex> lock_guard(m_lock);
+    m_compass_data.heading = msg->heading();
+    m_compass_data.roll = msg->roll();
 }

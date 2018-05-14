@@ -8,7 +8,7 @@
  *
  *
  * Developer Notes:
- *
+ *      Need to delete all the unneccessary include here
  *
  ***************************************************************************************/
 #pragma once
@@ -31,6 +31,7 @@
 #include "SystemServices/SysClock.h"
 #include "SystemServices/Timer.h"
 #include "DataBase/DBHandler.h"
+#include "Messages/CompassDataMsg.h"
 #include "MessageBus/MessageTypes.h"
 #include "MessageBus/MessageBus.h"
 #include "MessageBus/ActiveNode.h"
@@ -58,6 +59,7 @@ private:
     int computeRelDistances();
     void addCameraDataToCollidableMgr();
     static void CameraProcessingUtilityThreadFunc(ActiveNode* nodePtr);
+    void processCompassMessage(const CompassDataMsg* msg);
 
     cv::VideoCapture m_capture;
     cv::Mat m_imgFullSize;
@@ -70,5 +72,6 @@ private:
     CollidableMgr* collidableMgr;
     DBHandler& m_db;
     std::atomic<bool> m_running;
+    std::mutex m_lock;
 
 };
