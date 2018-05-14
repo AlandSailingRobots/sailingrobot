@@ -28,7 +28,7 @@
 class XbeeSyncNode : public ActiveNode {
 public:
 	XbeeSyncNode(MessageBus& msgBus, DBHandler& db);
-	virtual ~XbeeSyncNode(){}
+	virtual ~XbeeSyncNode() {}
 
 	///----------------------------------------------------------------------------------
 	/// Gets all settings from database and initializes xbee object
