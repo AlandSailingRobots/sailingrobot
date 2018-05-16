@@ -398,7 +398,7 @@ void DBHandler::updateConfigs(std::string configs) {
 
     std::vector<std::string> tables;
 
-    for (auto i : Json::iterator_wrapper(js)) {
+    for (auto i : js.items()) {
         tables.push_back(i.key());  // For each table key
     }
 
@@ -424,17 +424,17 @@ bool DBHandler::updateWaypoints(std::string waypoints) {
         Logger::error("%s, Error: failed to delete waypoints", __PRETTY_FUNCTION__);
     }
 
-    for (auto i : Json::iterator_wrapper(js)) {
+    for (auto i : js.items()) {
         // m_logger.info(i.value().dump());
 
-        for (auto y : Json::iterator_wrapper(i.value())) {
+        for (auto y : i.value().items()) {
             limitCounter = valuesLimit;
             DBPrinter =
                 "INSERT INTO current_Mission "
                 "(declination,harvested,id,id_mission,is_checkpoint,latitude,longitude,name,radius,"
                 "rankInMission,stay_time) VALUES (";
 
-            for (auto z : Json::iterator_wrapper(y.value())) {
+            for (auto z : y.value().items()) {
                 // Each individual value
                 tempValue = z.value().dump();
                 tempValue = tempValue.substr(1, tempValue.size() - 2);
@@ -1021,7 +1021,7 @@ bool DBHandler::getWaypointValues(int& nextId,
 
     if (foundPrev)  // Set values to next waypoint if harvested waypoint found
     {
-        prevId = dbhandler_safe_stoi(results2[1]);
+        prevId = safe_stoi(results2[1]);
 
         prevLongitude = atof(retrieveCell("current_Mission", results2[1], "longitude").c_str());
         prevLatitude = atof(retrieveCell("current_Mission", results2[1], "latitude").c_str());

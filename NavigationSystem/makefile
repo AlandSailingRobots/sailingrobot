@@ -58,7 +58,7 @@ export SRC_DIR				= ./
 export BUILD_DIR        	= build
 export EXEC_DIR         	= ./
 
-export INC_DIR         	 	= -I./ -I./Libs
+export INC_DIR         	 	= -I./ -I./Libs -I./Libs/json/include
 
 LNM_DIR                 	= Navigation/LocalNavigationModule
 
