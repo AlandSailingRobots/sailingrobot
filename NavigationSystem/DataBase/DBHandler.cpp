@@ -5,6 +5,7 @@
 #include <string>
 #include <thread>
 #include "SystemServices/Timer.h"
+#include "SystemServices/Wrapper.h"
 
 // TEMPORARY CODE
 int dbhandler_safe_stoi(const std::string& str, std::size_t* pos = 0, int base = 10) {
