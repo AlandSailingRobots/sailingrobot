@@ -14,7 +14,7 @@
 
 TESTGEN_FLAGS = --error-printer --have-eh
 TEST_GEN = python cxxtest/bin/cxxtestgen
-CXX = g++ -c -Wall -W -I./unit-tests -I./cxxtest -I../ -std=c++14
+CXX = g++ -c -Wall -W -I./unit-tests -I./cxxtest -I../ -I../Libs/json/include -std=c++14
 
 
 #############################################################################################
