@@ -215,11 +215,11 @@ bool Logger::createLogFiles(const char* filename)
 
 	if(filename == 0)
 	{
-		snprintf(fileName, 256, "%s%s-%s", FILE_PATH, SysClock::hh_mm_ss().c_str(), DEFAULT_LOG_NAME);
+		snprintf(fileName, 256, "%s%04i-%02i.%02i-%s-%s", FILE_PATH, SysClock::year(), SysClock::month(), SysClock::day(), SysClock::hh_mm_ss().c_str(),  DEFAULT_LOG_NAME);	//changed
 	}
 	else
 	{
-		snprintf(fileName, 256, "%s%s-%s", FILE_PATH, SysClock::hh_mm_ss().c_str(), filename);
+		snprintf(fileName, 256, "%s%04i-%02i.%02i-%s-%s", FILE_PATH, SysClock::year(), SysClock::month(), SysClock::day(), SysClock::hh_mm_ss().c_str(), filename);	//changed
 	}
 
 	mkdir(FILE_PATH, S_IRWXU | S_IRWXG | S_IRWXO);
@@ -227,7 +227,7 @@ bool Logger::createLogFiles(const char* filename)
 
 	#ifdef ENABLE_WRSC_LOGGING
 		char wrscFileName[256];
-		snprintf(wrscFileName, 256, "%s%s-%s", FILE_PATH, SysClock::hh_mm_ss().c_str(), DEFAULT_LOG_NAME_WRSC);
+		snprintf(wrscFileName, 256, "%s%04i-%02i.%02i-%s-%s", FILE_PATH, SysClock::year(), SysClock::month(), SysClock::day(), SysClock::hh_mm_ss().c_str(), DEFAULT_LOG_NAME_WRSC);		//changed
 		m_LogFileWRSC.open(wrscFileName, std::ios::out | std::ios::trunc);
 
 		if(m_LogFile.is_open() && m_LogFileWRSC.is_open())

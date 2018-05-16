@@ -57,6 +57,17 @@
 #include <string>
 
 #include <regex>
+#include <vector>
+
+#include <time.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <dirent.h>
+#include <cstring>
+#include <stdio.h>
+#include <stdlib.h>
+#include <algorithm> 
+
 
 
 
@@ -215,12 +226,10 @@ public:
 			}
 			pos+=1;
 		}
-
 		wrefresh(m_Win);
 	}
-
 	SensorData getValues() {
-		return m_SensorValues;
+	return m_SensorValues;
 	}
 
 private:
@@ -252,46 +261,77 @@ WINDOW* inputWindow(int sensor_size, int logger_size){
 	return inputWin;
 }
 
+std::string getLogName() {
+	
+	std::vector<std::string> log_names;
+	std::string dirPath = "/home/sailbot/PoP2018/sailingrobot/logs/";
 
-std::string getLoggedData(){
+	DIR           *d;
+	struct dirent *dir;
 
-	std::ifstream logFile;
+	d = opendir(dirPath.c_str()); //set path to directory
+	if (d)
+	{
+	  while ((dir = readdir(d)) != NULL)
+	  {	      
+	    if( strcmp( dir->d_name, "." ) == 0 || strcmp( dir->d_name, ".." ) == 0 ) //exclude "." and ".."
+	    {
+	        continue;
+	    }      
 
-	std::string newString;
-
-	std::smatch match;
-
-	std::regex expression("\\[(.*?)\\]\\s*\\<(.*?)\\>\\s*(.*)");
-
-	logFile.open("/home/sailbot/PoP2018/sailingrobot/logs/073124-integrationTest.log");
-
-	if(!logFile){
-		Logger::error("Open logfile\t\t[FAILED]");
-	} else {
-		Logger::info("Open logfile\t\t[OK]");
+	    log_names.push_back(dir->d_name);	      
+	  }
+	  closedir(d);
 	}
 
-	getline(logFile, newString, '\n');
-	logFile.close();
-
-	if(regex_search(newString, match, expression)){
-	} else {
-		Logger::error("Regex\t\t[FAILED]");	
-	}
-
-	return match[3].str().c_str();
+	std::sort(log_names.rbegin(), log_names.rend());	// Reverse sorting so that the newest log will come first
+	
+	return log_names[0].c_str();
 }
 
 
+
+std::vector<std::string> getLoggedData(){
+
+	std::ifstream logFile;
+	std::string newString;
+	std::smatch match;
+	std::vector<std::string> buffer;
+
+	std::regex expression("\\[(.*?)\\]\\s*\\<(.*?)\\>\\s*(.*)");
+
+	std::string test_name = getLogName();
+
+	logFile.open("/home/sailbot/PoP2018/sailingrobot/logs/" + getLogName());
+
+	if(!logFile){
+		Logger::error("Open logfile\t\t[FAILED]");
+	} 	
+
+	while(!getline(logFile, newString, '\n').eof()){
+		if(buffer.size() >= 7){
+			buffer.erase(buffer.begin());
+		}
+
+		regex_search(newString, match, expression);
+		
+		buffer.push_back(match[3].str());
+	}
+	logFile.close();
+
+	return buffer;
+}
 
 int loggerWindow(int size) {
 	int begin_x = 2;
 	int begin_y = size + 7;
 	int ncols = 70;
-	int nr_of_lines = 12;
+	int log_size = 7;
+	int nr_of_lines = log_size + 6;
 	int pos = 4;
-
-	std::string logString = getLoggedData();
+	
+	std::string logString;
+	std::vector<std::string> buffer = getLoggedData();
 
 	WINDOW* log_Win = newwin(nr_of_lines, ncols, begin_y, begin_x);
 
@@ -302,9 +342,10 @@ int loggerWindow(int size) {
 
 	wprintw(log_Win, "LOGGER");
 
-	for(int i = 0; i < 6; i++) {
-			wmove(log_Win, pos, 2);
-			wprintw(log_Win, " %s\n", logString.c_str());			
+	for(int i = 0; i < log_size; i++) {
+			wmove(log_Win, pos, 2);	
+			wprintw(log_Win, "-> %s\n", buffer[i].c_str());	
+
 			wmove(log_Win, pos, 35);			
 			pos+=1;
 		}
@@ -474,6 +515,7 @@ int main() {
 		}else {
 			switch(c) {
 				case KEY_DOWN:
+		Logger::error("KEY DOWN\t\t[FAILED]");
 					if(highlighted != --menuValues.end()) {
 						highlighted++;
 					}
@@ -490,7 +532,7 @@ int main() {
 					break;
 				case ENTER:
 					sendActuatorCommands();
-					for(auto& it : menuValues) {
+					for(auto& it : menuValues) {						
 						it.second = "";
 					}
 					break;
@@ -503,6 +545,7 @@ int main() {
 			}
 		}
 		printInputMenu(inputWin, highlighted);
+		loggerWindow(values.size());
 	}
 	endwin();
 }
