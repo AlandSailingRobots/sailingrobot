@@ -23,10 +23,10 @@
 #include "Math/Utility.h"
 
 
-class MarineSensorReciever : public CANFrameReceiver {
+class MarineSensorReceiver : public CANFrameReceiver {
 
 public:
-    MarineSensorReciever(MessageBus& messageBus, CANService& canService) :
+    MarineSensorReceiver(MessageBus& messageBus, CANService& canService) :
             CANFrameReceiver(canService, MSG_ID_MARINE_SENSOR_DATA), m_msgBus(messageBus)
     {
     }
@@ -148,7 +148,7 @@ int main(int argc, char *argv[])
 
 	CANService canService;
 
-    MarineSensorReciever canMarineSensorReciver(messageBus, canService);
+    MarineSensorReceiver canMarineSensorReceiver(messageBus, canService);
 	CANMarineSensorTransmissionNode canMarineSensorTransmissionNode(messageBus, canService);
 
 
