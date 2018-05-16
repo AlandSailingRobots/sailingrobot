@@ -7,18 +7,6 @@
 #include "SystemServices/Timer.h"
 #include "SystemServices/Wrapper.h"
 
-// TEMPORARY CODE
-int dbhandler_safe_stoi(const std::string& str, std::size_t* pos = 0, int base = 10) {
-    int retvalue = 0;
-    try {
-        retvalue = std::stoi(str, pos, base);
-    } catch (std::invalid_argument& e) {
-        Logger::error("%s stoi(): invalid argument (%s)", __PRETTY_FUNCTION__, str);
-    } catch (std::out_of_range& e) {
-        Logger::error("%s stoi(): value out of range (%s)", __PRETTY_FUNCTION__, str);
-    }
-    return retvalue;
-}
 
 std::mutex DBHandler::m_databaseLock;
 
@@ -1024,7 +1012,7 @@ bool DBHandler::getWaypointValues(int& nextId,
     }
 
     // Set values to next waypoint
-    nextId = dbhandler_safe_stoi(results[1]);
+    nextId = safe_stoi(results[1]);
 
     nextLongitude = atof(retrieveCell("current_Mission", results[1], "longitude").c_str());
     nextLatitude = atof(retrieveCell("current_Mission", results[1], "latitude").c_str());
