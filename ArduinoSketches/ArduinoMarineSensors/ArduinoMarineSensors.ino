@@ -32,6 +32,7 @@ const int I2C_ADRESSES[] = {I2C_ADDRESS_PH,
                             I2C_ADDRESS_CONDUCTIVETY,
                             I2C_ADDRESS_TEMPERATURE};
 
+const int RESPONSE_STATUS_NOT_CONNECTED = 0;
 const int RESPONSE_STATUS_SUCCESS = 1;
 const int RESPONSE_STATUS_SYNTAX_ERROR = 2;
 const int RESPONSE_STATUS_NOT_READY = 254;
@@ -160,11 +161,11 @@ void processCANMessage (CanMsg& msg){
         sendMarineSensorData();
         lastReadingTimeInSeconds = millis()/1000;
 
-
-        bool takeContinousReadings = messageHandler.getData(REQUEST_CONTINOUS_READINGS_DATASIZE);
+        bool takeContinousReadings;
+        messageHandler.getData(&takeContinousReadings, REQUEST_CONTINOUS_READINGS_DATASIZE);
 
         if(takeContinousReadings) {
-            sensorReadingIntervalInSeconds = messageHandler.getData(REQUEST_READING_TIME_DATASIZE);
+            messageHandler.getData(&sensorReadingIntervalInSeconds, REQUEST_READING_TIME_DATASIZE);
         }
         else {
             sensorReadingIntervalInSeconds = -1;
@@ -216,6 +217,8 @@ float readSensorWithProbableInterval(int I2CAdressEnum, uint8_t& responseStatusC
 
 int getErrorCode(uint8_t phError, uint8_t conductivetyError, uint8_t temperatureError) {
     switch (phError) {
+        case RESPONSE_STATUS_NOT_CONNECTED:
+            return ERROR_SENSOR_PH_NO_CONNECTION;
         case RESPONSE_STATUS_NO_DATA:
             return ERROR_SENSOR_PH_NO_DATA;
         case RESPONSE_STATUS_NOT_READY:
@@ -224,6 +227,8 @@ int getErrorCode(uint8_t phError, uint8_t conductivetyError, uint8_t temperature
             return ERROR_SENSOR_PH_SYNTAX;
     }
     switch (conductivetyError) {
+        case RESPONSE_STATUS_NOT_CONNECTED:
+            return ERROR_SENSOR_CONDUCTIVETY_NO_CONNECTION;
         case RESPONSE_STATUS_NO_DATA:
             return ERROR_SENSOR_CONDUCTIVETY_NO_DATA;
         case RESPONSE_STATUS_NOT_READY:
@@ -232,6 +237,8 @@ int getErrorCode(uint8_t phError, uint8_t conductivetyError, uint8_t temperature
             return ERROR_SENSOR_CONDUCTIVETY_SYNTAX;
     }
     switch (temperatureError) {
+        case RESPONSE_STATUS_NOT_CONNECTED:
+            return ERROR_SENSOR_TEMPERATURE_NO_CONNECTION;
         case RESPONSE_STATUS_NO_DATA:
             return ERROR_SENSOR_TEMPERATURE_NO_DATA;
         case RESPONSE_STATUS_NOT_READY:

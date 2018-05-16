@@ -58,7 +58,7 @@ export SRC_DIR				= ./
 export BUILD_DIR        	= build
 export EXEC_DIR         	= ./
 
-export INC_DIR         	 	= -I./ -I./Libs
+export INC_DIR         	 	= -I./ -I./Libs -I./Libs/json/include
 
 LNM_DIR                 	= Navigation/LocalNavigationModule
 
@@ -71,6 +71,7 @@ export EXECUTABLE           = sr
 export UNIT_TEST_EXEC 		= unit-tests.run
 export UNIT_TEST_HW_EXEC 	= unit-tests-hardware.run
 export INTEGRATION_TEST_EXEC_ASPIRE = integration-tests-ASPire.run
+export MARINE_SENSOR_INTEGRATION_TEST_EXEC = marine_sensor-integration-tests.run
 export HTTP_SYNC_TEST_EXEC	= HTTPSync-test.run
 export AIS_TEST_EXEC		= ais-integration-tests.run
 
@@ -179,7 +180,7 @@ unit_tests: $(BUILD_DIR)
 integration_tests_ASPire: $(BUILD_DIR)
 	$(MAKE) -f integration_tests_ASPire.mk
 	$(MAKE) -f ais_integration_test.mk
-
+	$(MAKE) -f marine_sensor_integration_test.mk
 
 
 ## Build HTTPSync Test

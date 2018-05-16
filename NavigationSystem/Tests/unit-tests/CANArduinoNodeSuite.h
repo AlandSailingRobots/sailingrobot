@@ -2,6 +2,7 @@
 
 #include "Hardwares/CAN_Services/N2kMsg.h"
 #include "Hardwares/CAN_Services/CANService.h"
+#include "Hardwares/CAN_Services/CanBusCommon/CanMessageHandler.h"
 
 #include "DataBase/DBHandler.h"
 #include "Hardwares/CANArduinoNode.h"
@@ -62,19 +63,13 @@ public:
         uint16_t rudderFeedback = 21 * ratio;
         uint16_t wingsailFeedback = 13 * ratio;
         uint16_t windvaneSteerAngle = 2 * ratio;
-        CanMsg Cmsg;
-        Cmsg.id = 701;
-        Cmsg.header.ide = 0;
-        Cmsg.header.length = 7;
 
-        (Cmsg.data[0] = rudderFeedback & 0xff);
-        (Cmsg.data[1] = rudderFeedback >> 8);
-        (Cmsg.data[2] = wingsailFeedback & 0xff);
-        (Cmsg.data[3] = wingsailFeedback >> 8);
-        (Cmsg.data[4] = windvaneSteerAngle & 0xff);
-        (Cmsg.data[5] = windvaneSteerAngle >> 8);
-        (Cmsg.data[6] = 0);
+        CanMessageHandler messageHandler(MSG_ID_AU_FEEDBACK);
+        messageHandler.encodeMessage(RUDDER_ANGLE_DATASIZE, rudderFeedback);
+        messageHandler.encodeMessage(WINGSAIL_ANGLE_DATASIZE, wingsailFeedback);
+        messageHandler.encodeMessage(WINDVANE_SELFSTEERING_DATASIZE, windvaneSteerAngle);
 
+        CanMsg Cmsg = messageHandler.getMessage();
         canService().sendCANMessage(Cmsg);
 
         ASPireActuatorFeedbackMsg otherMsg(wingsailFeedback, rudderFeedback, windvaneSteerAngle, 0, 0);

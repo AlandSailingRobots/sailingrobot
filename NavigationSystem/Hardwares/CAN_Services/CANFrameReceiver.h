@@ -15,4 +15,6 @@ public:
 	CANFrameReceiver(CANService& service, uint32_t ID);
 
 	virtual void processFrame(CanMsg& msg) = 0;
+
+	void processFrameAndLogErrors(CanMsg& msg);
 };
