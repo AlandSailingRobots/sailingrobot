@@ -86,6 +86,8 @@ mode. It is a interface between the messagebus and the CAN-bus that can be monit
 #define ON -3000
 #define OFF -4000
 
+#define FILE_PATH "../logs/"
+
 typedef std::unordered_map<std::string, float> SensorData;
 
 /*
@@ -246,7 +248,7 @@ WINDOW* inputWindow(int sensor_size, int logger_size) {
 
 std::string getLogName() {
     std::vector<std::string> log_names;
-    std::string dirPath = "/home/sailbot/PoP2018/sailingrobot/logs/";
+    std::string dirPath = FILE_PATH;
 
     DIR* d;
     struct dirent* dir;
@@ -281,7 +283,7 @@ std::vector<std::string> getLoggedData() {
 
     std::string test_name = getLogName();
 
-    logFile.open("/home/sailbot/PoP2018/sailingrobot/logs/" + getLogName());
+    logFile.open(FILE_PATH + getLogName());
 
     if (!logFile) {
         Logger::error("Open logfile\t\t[FAILED]");
