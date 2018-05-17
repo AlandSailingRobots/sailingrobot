@@ -4,88 +4,91 @@
 #include "CourseMath.h"
 
 class CourseCalculation {
+   private:
+    /* Has to tack */
+    bool m_tack;
 
-private:
+    /* Did we tack last iteration? */
+    bool m_previousIterationTack;
 
-	/* Has to tack */
-	bool m_tack;
+    /* Check for the boat's direction*/
+    bool m_goingStarboard;
 
-	/* Did we tack last iteration? */
-	bool m_previousIterationTack;
+    /* Course to steer */
+    double m_courseToSteer;
 
-	/* Check for the boat's direction*/
-	bool m_goingStarboard;
+    /* Bearing to waypoint */
+    double m_bearingToWaypoint;
 
-	/* Course to steer */
-	double m_courseToSteer;
+    /* Distance to waypoint */
+    double m_distanceToWaypoint;
 
-	/* Bearing to waypoint */
-	double m_bearingToWaypoint;
+    /* True wind direction */
+    double m_trueWindDirection;
 
-	/* Distance to waypoint */
-	double m_distanceToWaypoint;
+    /* Angle around true wind direction in which the boat has to tack */
+    double m_tackAngle;
 
-	/* True wind direction */
-	double m_trueWindDirection;
+    /* Angle around true wind direction in which the boat will be turning side when tacking */
+    double m_sectorAngle;
 
-	/* Angle around true wind direction in which the boat has to tack */
-	double m_tackAngle;
+    /* Calculates if the boat has to tack, which it needs if bearing to waypoint is close to true
+     * wind direction */
+    void calculateTack();
 
-	/* Angle around true wind direction in which the boat will be turning side when tacking */
-	double m_sectorAngle;
+    /*	returns the distance from waypoint to the tacksector where bearing to waypoint
+        intersects with tacksector */
+    double distanceFromWaypointToTackSector(double waypointRadius) const;
 
-	/* Calculates if the boat has to tack, which it needs if bearing to waypoint is close to true wind direction */
-	void calculateTack();
+    bool continueDirection(double waypointRadius) const;
 
-	/*	returns the distance from waypoint to the tacksector where bearing to waypoint
-		intersects with tacksector */
-	double distanceFromWaypointToTackSector(double waypointRadius) const;
-	
-	bool continueDirection(double waypointRadius) const;
+    void determineTackDirection();
 
-	void determineTackDirection();
-	
-	double calculateTackCTS() const;
+    double calculateTackCTS() const;
 
-public:
+   public:
+    /* Constructor */
+    CourseCalculation();
 
-	/* Constructor */
-	CourseCalculation();
+    /* Destructor */
+    ~CourseCalculation();
 
-	/* Destructor */
-	~CourseCalculation();
+    /* Calculates course to steer which is the direction the boat is supposed to sail */
+    double calculateCourseToSteer(double gpsLon,
+                                  double gpsLat,
+                                  double waypLon,
+                                  double waypLat,
+                                  int radius,
+                                  double trueWindDirection);
 
-	/* Calculates course to steer which is the direction the boat is supposed to sail */
-	double calculateCourseToSteer(double gpsLon, double gpsLat, double waypLon, double waypLat, int radius, double trueWindDirection);
+    /* Sets true wind direction */
+    void setTrueWindDirection(double degrees);
 
-	/* Sets true wind direction */
-	void setTrueWindDirection(double degrees);
+    /* Sets bearing to waypoint */
+    void setBearingToWaypoint(double degrees);
 
-	/* Sets bearing to waypoint */
-	void setBearingToWaypoint(double degrees);
+    /* Sets TACK_ANGLE */
+    void setTackAngle(double degrees);
 
-	/* Sets TACK_ANGLE */
-	void setTackAngle(double degrees);
+    /* Sets SECTOR_ANGLE */
+    void setSectorAngle(double degrees);
 
-	/* Sets SECTOR_ANGLE */
-	void setSectorAngle(double degrees);
+    /* Gets the distance to waypoint */
+    double getDTW();
 
-	/* Gets the distance to waypoint */
-	double getDTW();
+    /* Gets course to steer */
+    double getCTS();
 
-	/* Gets course to steer */
-	double getCTS();
+    /* Gets bearing to waypoint */
+    double getBTW();
 
-	/* Gets bearing to waypoint */
-	double getBTW();
+    /* Gets true wind direction */
+    double getTWD();
 
-	/* Gets true wind direction */
-	double getTWD();
+    /* Gets wheter the boat has to tack */
+    bool getTack();
 
-	/* Gets wheter the boat has to tack */
-	bool getTack();
-
-	bool getGoingStarboard();
+    bool getGoingStarboard();
 };
 
 #endif

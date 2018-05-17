@@ -3,30 +3,25 @@
 
 #include "Hardwares/ActuatorNodeASPire.h"
 
-#include "MessageBus/MessageBus.h"
-#include "MessageBus/Message.h"
-#include "Messages/RudderCommandMsg.h"
 #include "Hardwares/CAN_Services/CANService.h"
+#include "MessageBus/Message.h"
+#include "MessageBus/MessageBus.h"
+#include "Messages/RudderCommandMsg.h"
 
 #include "../cxxtest/cxxtest/TestSuite.h"
 #include "TestMocks/MockCANReceiver.h"
 
-#include <thread>
 #include <chrono>
+#include <thread>
 
 class ActuatorNodeASPireSuite : public CxxTest::TestSuite {
-public:
+   public:
+    static MessageBus& msgBus() {
+        static MessageBus* mbus = new MessageBus();
+        return *mbus;
+    }
 
-    static MessageBus& msgBus()
-	{
-		static MessageBus* mbus = new MessageBus();
-		return *mbus;
-	}
-
-	static void runMessageLoop()
-	{
-		msgBus().run();
-	}
+    static void runMessageLoop() { msgBus().run(); }
 
     void setUp() {}
     void tearDown() {}
@@ -37,7 +32,7 @@ public:
         ActuatorNodeASPire node(msgBus(), CANService);
         MessagePtr msg = std::make_unique<RudderCommandMsg>(20);
         // Listen to PGN 700
-        std::vector<uint32_t> PGNs = { 700 };
+        std::vector<uint32_t> PGNs = {700};
         MockCANReceiver mockReceiver(CANService, PGNs);
         std::thread t1(runMessageLoop);
         t1.detach();
@@ -53,5 +48,4 @@ public:
         CANService.stop();
         fu.get();
     }
-
 };

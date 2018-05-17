@@ -260,7 +260,7 @@ class StateEstimationNodeSuite : public CxxTest::TestSuite {
     void test_StateEstimationUpdateFrequency() {
         Timer timer;
 
-        dbhandler->changeOneValue("config_vessel_state","1","0.7","loop_time");
+        dbhandler->changeOneValue("config_vessel_state", "1", "0.7", "loop_time");
         MessagePtr serverConfig = std::make_unique<ServerConfigsReceivedMsg>();
         messageBus.sendMessage(std::move(serverConfig));
 
@@ -268,11 +268,13 @@ class StateEstimationNodeSuite : public CxxTest::TestSuite {
         TS_ASSERT(mockNode->m_MessageReceived);
 
         mockNode->m_MessageReceived = false;
-        while(not mockNode->m_MessageReceived);
+        while (not mockNode->m_MessageReceived)
+            ;
 
         timer.start();
         mockNode->m_MessageReceived = false;
-        while(not mockNode->m_MessageReceived);
+        while (not mockNode->m_MessageReceived)
+            ;
         timer.stop();
 
         TS_ASSERT_DELTA(timer.timePassed(), 0.70, 1e-2);

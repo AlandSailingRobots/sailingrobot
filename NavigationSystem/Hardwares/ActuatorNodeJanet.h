@@ -13,27 +13,27 @@
 
 #pragma once
 
-#include "MessageBus/Node.h"
 #include "DataBase/DBHandler.h"
+#include "MessageBus/Node.h"
 
 class ActuatorNodeJanet : public Node {
-public:
-	ActuatorNodeJanet(MessageBus& msgBus, NodeID id, int channel, int speed, int acceleration);
+   public:
+    ActuatorNodeJanet(MessageBus& msgBus, NodeID id, int channel, int speed, int acceleration);
 
-	///----------------------------------------------------------------------------------
- 	/// Setups the actuator.
- 	///
- 	///----------------------------------------------------------------------------------
-	virtual bool init();
+    ///----------------------------------------------------------------------------------
+    /// Setups the actuator.
+    ///
+    ///----------------------------------------------------------------------------------
+    virtual bool init();
 
-	///----------------------------------------------------------------------------------
- 	/// Processes ActuatorPositionMsgs
- 	///
- 	///----------------------------------------------------------------------------------
-	virtual void processMessage(const Message* message);
+    ///----------------------------------------------------------------------------------
+    /// Processes ActuatorPositionMsgs
+    ///
+    ///----------------------------------------------------------------------------------
+    virtual void processMessage(const Message* message);
 
-private:
-	int m_Channel;
-	int m_Speed;
-	int m_Acceleration;
+   private:
+    int m_Channel;
+    int m_Speed;
+    int m_Acceleration;
 };

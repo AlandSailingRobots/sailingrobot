@@ -14,39 +14,34 @@
 
 #include "MessageBus/Message.h"
 
-
 struct ObstacleData {
-       double minDistanceToObstacle;
-       double maxDistanceToObstacle; // -1 = infinite
-       double LeftBoundheadingRelativeToBoat;
-       double RightBoundheadingRelativeToBoat;
-       double angularCenterPositionX;
-       double angularCenterPositionY;
-   };
-
-
+    double minDistanceToObstacle;
+    double maxDistanceToObstacle;  // -1 = infinite
+    double LeftBoundheadingRelativeToBoat;
+    double RightBoundheadingRelativeToBoat;
+    double angularCenterPositionX;
+    double angularCenterPositionY;
+};
 
 class ObstacleVectorMsg : public Message {
-public:
-	ObstacleVectorMsg(	NodeID destinationID, NodeID sourceID,std::vector<ObstacleData> obstacles )
+   public:
+    ObstacleVectorMsg(NodeID destinationID, NodeID sourceID, std::vector<ObstacleData> obstacles)
 
-		:Message(MessageType::ObstacleVector, sourceID, destinationID),m_obstacles(obstacles)
-	{ }
+        : Message(MessageType::ObstacleVector, sourceID, destinationID), m_obstacles(obstacles) {}
 
-    ObstacleVectorMsg(NodeID sourceID,std::vector<ObstacleData> obstacles)
+    ObstacleVectorMsg(NodeID sourceID, std::vector<ObstacleData> obstacles)
 
-		:Message(MessageType::ObstacleVector,sourceID, NodeID::None), m_obstacles(obstacles)
-	{ }
+        : Message(MessageType::ObstacleVector, sourceID, NodeID::None), m_obstacles(obstacles) {}
 
-	ObstacleVectorMsg(std::vector<ObstacleData> obstacles)
+    ObstacleVectorMsg(std::vector<ObstacleData> obstacles)
 
-		:Message(MessageType::ObstacleVector, NodeID::None, NodeID::None), m_obstacles(obstacles)
-	{ }
+        : Message(MessageType::ObstacleVector, NodeID::None, NodeID::None),
+          m_obstacles(obstacles) {}
 
-	virtual ~ObstacleVectorMsg() { }
+    virtual ~ObstacleVectorMsg() {}
 
-	std::vector<ObstacleData> obstacles() { return m_obstacles; }
+    std::vector<ObstacleData> obstacles() { return m_obstacles; }
 
-private:
-	std::vector<ObstacleData> m_obstacles;
+   private:
+    std::vector<ObstacleData> m_obstacles;
 };

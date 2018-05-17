@@ -33,70 +33,74 @@
 #ifndef EIGEN_LLT_MKL_H
 #define EIGEN_LLT_MKL_H
 
-#include "Eigen/src/Core/util/MKL_support.h"
 #include <iostream>
+#include "Eigen/src/Core/util/MKL_support.h"
 
-namespace Eigen { 
+namespace Eigen {
 
 namespace internal {
 
-template<typename Scalar> struct mkl_llt;
+template <typename Scalar>
+struct mkl_llt;
 
-#define EIGEN_MKL_LLT(EIGTYPE, MKLTYPE, MKLPREFIX) \
-template<> struct mkl_llt<EIGTYPE> \
-{ \
-  template<typename MatrixType> \
-  static inline typename MatrixType::Index potrf(MatrixType& m, char uplo) \
-  { \
-    lapack_int matrix_order; \
-    lapack_int size, lda, info, StorageOrder; \
-    EIGTYPE* a; \
-    eigen_assert(m.rows()==m.cols()); \
-    /* Set up parameters for ?potrf */ \
-    size = m.rows(); \
-    StorageOrder = MatrixType::Flags&RowMajorBit?RowMajor:ColMajor; \
-    matrix_order = StorageOrder==RowMajor ? LAPACK_ROW_MAJOR : LAPACK_COL_MAJOR; \
-    a = &(m.coeffRef(0,0)); \
-    lda = m.outerStride(); \
-\
-    info = LAPACKE_##MKLPREFIX##potrf( matrix_order, uplo, size, (MKLTYPE*)a, lda ); \
-    info = (info==0) ? -1 : info>0 ? info-1 : size; \
-    return info; \
-  } \
-}; \
-template<> struct llt_inplace<EIGTYPE, Lower> \
-{ \
-  template<typename MatrixType> \
-  static typename MatrixType::Index blocked(MatrixType& m) \
-  { \
-    return mkl_llt<EIGTYPE>::potrf(m, 'L'); \
-  } \
-  template<typename MatrixType, typename VectorType> \
-  static typename MatrixType::Index rankUpdate(MatrixType& mat, const VectorType& vec, const typename MatrixType::RealScalar& sigma) \
-  { return Eigen::internal::llt_rank_update_lower(mat, vec, sigma); } \
-}; \
-template<> struct llt_inplace<EIGTYPE, Upper> \
-{ \
-  template<typename MatrixType> \
-  static typename MatrixType::Index blocked(MatrixType& m) \
-  { \
-    return mkl_llt<EIGTYPE>::potrf(m, 'U'); \
-  } \
-  template<typename MatrixType, typename VectorType> \
-  static typename MatrixType::Index rankUpdate(MatrixType& mat, const VectorType& vec, const typename MatrixType::RealScalar& sigma) \
-  { \
-    Transpose<MatrixType> matt(mat); \
-    return llt_inplace<EIGTYPE, Lower>::rankUpdate(matt, vec.conjugate(), sigma); \
-  } \
-};
+#define EIGEN_MKL_LLT(EIGTYPE, MKLTYPE, MKLPREFIX)                                         \
+    template <>                                                                            \
+    struct mkl_llt<EIGTYPE> {                                                              \
+        template <typename MatrixType>                                                     \
+        static inline typename MatrixType::Index potrf(MatrixType& m, char uplo) {         \
+            lapack_int matrix_order;                                                       \
+            lapack_int size, lda, info, StorageOrder;                                      \
+            EIGTYPE* a;                                                                    \
+            eigen_assert(m.rows() == m.cols());                                            \
+            /* Set up parameters for ?potrf */                                             \
+            size = m.rows();                                                               \
+            StorageOrder = MatrixType::Flags & RowMajorBit ? RowMajor : ColMajor;          \
+            matrix_order = StorageOrder == RowMajor ? LAPACK_ROW_MAJOR : LAPACK_COL_MAJOR; \
+            a = &(m.coeffRef(0, 0));                                                       \
+            lda = m.outerStride();                                                         \
+                                                                                           \
+            info = LAPACKE_##MKLPREFIX##potrf(matrix_order, uplo, size, (MKLTYPE*)a, lda); \
+            info = (info == 0) ? -1 : info > 0 ? info - 1 : size;                          \
+            return info;                                                                   \
+        }                                                                                  \
+    };                                                                                     \
+    template <>                                                                            \
+    struct llt_inplace<EIGTYPE, Lower> {                                                   \
+        template <typename MatrixType>                                                     \
+        static typename MatrixType::Index blocked(MatrixType& m) {                         \
+            return mkl_llt<EIGTYPE>::potrf(m, 'L');                                        \
+        }                                                                                  \
+        template <typename MatrixType, typename VectorType>                                \
+        static typename MatrixType::Index rankUpdate(                                      \
+            MatrixType& mat,                                                               \
+            const VectorType& vec,                                                         \
+            const typename MatrixType::RealScalar& sigma) {                                \
+            return Eigen::internal::llt_rank_update_lower(mat, vec, sigma);                \
+        }                                                                                  \
+    };                                                                                     \
+    template <>                                                                            \
+    struct llt_inplace<EIGTYPE, Upper> {                                                   \
+        template <typename MatrixType>                                                     \
+        static typename MatrixType::Index blocked(MatrixType& m) {                         \
+            return mkl_llt<EIGTYPE>::potrf(m, 'U');                                        \
+        }                                                                                  \
+        template <typename MatrixType, typename VectorType>                                \
+        static typename MatrixType::Index rankUpdate(                                      \
+            MatrixType& mat,                                                               \
+            const VectorType& vec,                                                         \
+            const typename MatrixType::RealScalar& sigma) {                                \
+            Transpose<MatrixType> matt(mat);                                               \
+            return llt_inplace<EIGTYPE, Lower>::rankUpdate(matt, vec.conjugate(), sigma);  \
+        }                                                                                  \
+    };
 
 EIGEN_MKL_LLT(double, double, d)
 EIGEN_MKL_LLT(float, float, s)
 EIGEN_MKL_LLT(dcomplex, MKL_Complex16, z)
 EIGEN_MKL_LLT(scomplex, MKL_Complex8, c)
 
-} // end namespace internal
+}  // end namespace internal
 
-} // end namespace Eigen
+}  // end namespace Eigen
 
-#endif // EIGEN_LLT_MKL_H
+#endif  // EIGEN_LLT_MKL_H

@@ -11,21 +11,14 @@
 
 #include "MessageBus/Message.h"
 
-
 class LocalConfigChangeMsg : public Message {
-public:
-	LocalConfigChangeMsg(NodeID destinationID, NodeID sourceID)
-		:Message(MessageType::LocalConfigChange, sourceID, destinationID)
-	{ }
+   public:
+    LocalConfigChangeMsg(NodeID destinationID, NodeID sourceID)
+        : Message(MessageType::LocalConfigChange, sourceID, destinationID) {}
 
-	LocalConfigChangeMsg()
-		:Message(MessageType::LocalConfigChange, NodeID::None, NodeID::None)
-	{ }
+    LocalConfigChangeMsg() : Message(MessageType::LocalConfigChange, NodeID::None, NodeID::None) {}
 
-	LocalConfigChangeMsg(MessageDeserialiser deserialiser)
-		:Message(deserialiser)
-	{ }
+    LocalConfigChangeMsg(MessageDeserialiser deserialiser) : Message(deserialiser) {}
 
-	virtual ~LocalConfigChangeMsg() { }
-
+    virtual ~LocalConfigChangeMsg() {}
 };

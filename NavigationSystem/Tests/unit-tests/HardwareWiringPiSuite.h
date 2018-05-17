@@ -5,7 +5,7 @@
  * 		HardwareWiringPiSuite.h
  *
  * Purpose:
- *		
+ *
  *
  * Developer Notes:
  *
@@ -30,91 +30,82 @@
 
 #pragma once
 
+#include <stdint.h>
 #include <unistd.h>
 #include <cstdlib>
-#include <stdint.h>
 #include <iostream>
-#include "Libs/wiringPi/wiringPi/wiringPiI2C.h"
 #include "../cxxtest/cxxtest/TestSuite.h"
+#include "Libs/wiringPi/wiringPi/wiringPiI2C.h"
 // For std::this_thread
 #include <chrono>
 #include <thread>
 
 class HardwareWiringPiSuite : public CxxTest::TestSuite {
-public:
-	int testCount = 0;
-	int deviceAddress;
-	int deviceFD;
-	
-	void setUp()
-	{
+   public:
+    int testCount = 0;
+    int deviceAddress;
+    int deviceFD;
 
-		deviceAddress = 0x07;
-		deviceFD = wiringPiI2CSetup(deviceAddress);
-		testCount++;
-	}
+    void setUp() {
+        deviceAddress = 0x07;
+        deviceFD = wiringPiI2CSetup(deviceAddress);
+        testCount++;
+    }
 
-	void tearDown()
-	{
-	}
-	
-	
-	
-	void test_wiringPiReadBlock()
-	{
-		std::cout << "\nstart read block...\n";
-		uint8_t block[12];
-		uint8_t size = 9;
-		int val;
-		int readBlockRet = wiringPiI2CReadBlock(deviceFD, (char*)block, 0);
-		
-		std::cout << "Return Val: " << readBlockRet << "\n";
+    void tearDown() {}
 
-		TS_ASSERT(readBlockRet != -1);
+    void test_wiringPiReadBlock() {
+        std::cout << "\nstart read block...\n";
+        uint8_t block[12];
+        uint8_t size = 9;
+        int val;
+        int readBlockRet = wiringPiI2CReadBlock(deviceFD, (char*)block, 0);
 
-		for (int i = 0; i < size; i++)
-		{
-			val = block[i];
-			std::cout << "Val " << i << ": " << val << "\n";
-		}
-	}
+        std::cout << "Return Val: " << readBlockRet << "\n";
 
-	// void test_wiringPiWriteBlock()
-	// {
-	// 	std::cout << "\nstart read block...\n";
-	// 	uint8_t block[12];
-	// 	uint8_t size = 9;
-	// 	int command = 20;
+        TS_ASSERT(readBlockRet != -1);
 
-	// 	std::cout << "\ncommand =: " << command << "\n";	
-	// 	for (int i = 0; i < size; i++)
-	// 	{
-	// 		block[i]=i;
-	// 		std::cout << "Val " << i << ": " << i << "\n";
-	// 	}
+        for (int i = 0; i < size; i++) {
+            val = block[i];
+            std::cout << "Val " << i << ": " << val << "\n";
+        }
+    }
 
-	// 	int writeBlockRet = wiringPiI2CWriteBlock(deviceFD, command, (char*)block, size);
-	// 	std::cout << "Return Val: " << writeBlockRet << "\n";
+    // void test_wiringPiWriteBlock()
+    // {
+    // 	std::cout << "\nstart read block...\n";
+    // 	uint8_t block[12];
+    // 	uint8_t size = 9;
+    // 	int command = 20;
 
-	// }
+    // 	std::cout << "\ncommand =: " << command << "\n";
+    // 	for (int i = 0; i < size; i++)
+    // 	{
+    // 		block[i]=i;
+    // 		std::cout << "Val " << i << ": " << i << "\n";
+    // 	}
 
-	// void test_wiringPiWriteI2CBlock()
-	// {
-	// 	std::cout << "\nstart read block...\n";
-	// 	uint8_t block[12];
-	// 	uint8_t size = 9;
-	// 	int command = 20;
+    // 	int writeBlockRet = wiringPiI2CWriteBlock(deviceFD, command, (char*)block, size);
+    // 	std::cout << "Return Val: " << writeBlockRet << "\n";
 
-	// 	std::cout << "\ncommand =: " << command << "\n";	
-	// 	for (int i = 0; i < size; i++)
-	// 	{
-	// 		block[i]=i;
-	// 		std::cout << "Val " << i << ": " << i << "\n";
-	// 	}
+    // }
 
-	// 	int writeBlockRet = wiringPiI2CWriteI2CBlock(deviceFD, command, (char*)block, size);
-	// 	std::cout << "Return Val: " << writeBlockRet << "\n";
+    // void test_wiringPiWriteI2CBlock()
+    // {
+    // 	std::cout << "\nstart read block...\n";
+    // 	uint8_t block[12];
+    // 	uint8_t size = 9;
+    // 	int command = 20;
 
-	// }
+    // 	std::cout << "\ncommand =: " << command << "\n";
+    // 	for (int i = 0; i < size; i++)
+    // 	{
+    // 		block[i]=i;
+    // 		std::cout << "Val " << i << ": " << i << "\n";
+    // 	}
 
+    // 	int writeBlockRet = wiringPiI2CWriteI2CBlock(deviceFD, command, (char*)block, size);
+    // 	std::cout << "Return Val: " << writeBlockRet << "\n";
+
+    // }
 };

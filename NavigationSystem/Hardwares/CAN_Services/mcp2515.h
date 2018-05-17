@@ -1,11 +1,11 @@
-#ifndef	MCP2515_H
-#define	MCP2515_H
+#ifndef MCP2515_H
+#define MCP2515_H
 
 #include <stdint.h>
 #include <wiringPi.h>
 #include <wiringPiSPI.h>
-#include "mcp2515_defs.h"
 #include "N2kMsg.h"
+#include "mcp2515_defs.h"
 
 // ----------------------------------------------------------------------------
 
@@ -33,10 +33,10 @@ uint8_t MCP2515_CheckMessage();
 
 uint8_t MCP2515_CheckFreeBuffer();
 
-bool MCP2515_GetMessage(CanMsg *message, uint8_t MsgAddress);
+bool MCP2515_GetMessage(CanMsg* message, uint8_t MsgAddress);
 
-uint8_t MCP2515_SendMessage(CanMsg *message, uint8_t MsgAddress);
+uint8_t MCP2515_SendMessage(CanMsg* message, uint8_t MsgAddress);
 
 void MCP2515_OutputInfo();
 
-#endif	// MCP2515_H
+#endif  // MCP2515_H

@@ -22,18 +22,17 @@
  ***********************************************************************
  */
 
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 // Main generic function
 
-int maxDetectRead (const int pin, unsigned char buffer [4]) ;
+int maxDetectRead(const int pin, unsigned char buffer[4]);
 
 // Individual sensors
 
-int readRHT03 (const int pin, int *temp, int *rh) ;
+int readRHT03(const int pin, int* temp, int* rh);
 
 #ifdef __cplusplus
 }

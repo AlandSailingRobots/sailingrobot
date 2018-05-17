@@ -158,7 +158,7 @@ class CourseRegulatorNodeSuite : public CxxTest::TestSuite {
         // Calculate the expected rudder angle
         double course = mockNode->m_StateMsgCourse;
         double diffHeading = Utility::degreeToRadian(course - desiredcourse);
-        double rudderAngle = Utility::sgn(sin(diffHeading))*MaxRudAng;
+        double rudderAngle = Utility::sgn(sin(diffHeading)) * MaxRudAng;
 
         TS_ASSERT_DELTA(mockNode->m_rudderAngle, rudderAngle, 5e-1);
     }
@@ -172,25 +172,26 @@ class CourseRegulatorNodeSuite : public CxxTest::TestSuite {
         double desiredcourse = 343;
 
         // Test listening State Message
-        MessagePtr stateData = std::make_unique<StateMessage>(heading,60.09726,19.93481,speed,0);
+        MessagePtr stateData =
+            std::make_unique<StateMessage>(heading, 60.09726, 19.93481, speed, 0);
         messageBus.sendMessage(std::move(stateData));
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
         // Test listening desired course Message
         MessagePtr localNavigationData =
-        std::make_unique<LocalNavigationMsg>(desiredcourse, NO_COMMAND, false, false);
+            std::make_unique<LocalNavigationMsg>(desiredcourse, NO_COMMAND, false, false);
         messageBus.sendMessage(std::move(localNavigationData));
         std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
-        //double diffHeading = Utility::limitAngleRange(heading)-Utility::limitAngleRange(desiredcourse);
-        //int rudderAngle = Utility::sgn(speed)*sin(Utility::degreeToRadian(diffHeading))*MaxRudAng;
+        // double diffHeading =
+        // Utility::limitAngleRange(heading)-Utility::limitAngleRange(desiredcourse); int rudderAngle
+        // = Utility::sgn(speed)*sin(Utility::degreeToRadian(diffHeading))*MaxRudAng;
 
         double course = mockNode->m_StateMsgCourse;
         double diffHeading = Utility::degreeToRadian(course - desiredcourse);
         double rudderAngle = sin(diffHeading) * MaxRudAng;
 
         TS_ASSERT_DELTA(mockNode->m_rudderAngle, rudderAngle, 5e-1);
-
     }
 
     // ----------------
@@ -202,19 +203,20 @@ class CourseRegulatorNodeSuite : public CxxTest::TestSuite {
         double desiredcourse = 200;
 
         // Test listening State Message
-        MessagePtr stateData = std::make_unique<StateMessage>(heading,60.09726,19.93481,speed,0);
+        MessagePtr stateData =
+            std::make_unique<StateMessage>(heading, 60.09726, 19.93481, speed, 0);
         messageBus.sendMessage(std::move(stateData));
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
         // Test listening desired course Message
         MessagePtr localNavigationData =
-        std::make_unique<LocalNavigationMsg>(desiredcourse, NO_COMMAND, false, false);
+            std::make_unique<LocalNavigationMsg>(desiredcourse, NO_COMMAND, false, false);
         messageBus.sendMessage(std::move(localNavigationData));
         std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
         double course = mockNode->m_StateMsgCourse;
         double diffHeading = Utility::degreeToRadian(course - desiredcourse);
-        double rudderAngle = Utility::sgn(sin(diffHeading))*MaxRudAng;
+        double rudderAngle = Utility::sgn(sin(diffHeading)) * MaxRudAng;
 
         TS_ASSERT_DELTA(mockNode->m_rudderAngle, rudderAngle, 5e-1);
     }
@@ -230,11 +232,13 @@ class CourseRegulatorNodeSuite : public CxxTest::TestSuite {
         TS_ASSERT(mockNode->m_MessageReceived);
 
         mockNode->m_MessageReceived = false;
-        while(not mockNode->m_MessageReceived);
+        while (not mockNode->m_MessageReceived)
+            ;
 
         timer.start();
         mockNode->m_MessageReceived = false;
-        while(not mockNode->m_MessageReceived);
+        while (not mockNode->m_MessageReceived)
+            ;
         timer.stop();
 
         TS_ASSERT_DELTA(timer.timePassed(), 0.70, 1e-2);

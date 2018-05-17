@@ -26,24 +26,24 @@
 
 #ifndef EIGEN_NO_STATIC_ASSERT
 
-  #if __has_feature(cxx_static_assert) || (defined(__cplusplus) && __cplusplus >= 201103L) || (EIGEN_COMP_MSVC >= 1600)
+#if __has_feature(cxx_static_assert) || (defined(__cplusplus) && __cplusplus >= 201103L) || \
+    (EIGEN_COMP_MSVC >= 1600)
 
-    // if native static_assert is enabled, let's use it
-    #define EIGEN_STATIC_ASSERT(X,MSG) static_assert(X,#MSG);
+// if native static_assert is enabled, let's use it
+#define EIGEN_STATIC_ASSERT(X, MSG) static_assert(X, #MSG);
 
-  #else // not CXX0X
+#else  // not CXX0X
 
-    namespace Eigen {
+namespace Eigen {
 
-    namespace internal {
+namespace internal {
 
-    template<bool condition>
-    struct static_assertion {};
+template <bool condition>
+struct static_assertion {};
 
-    template<>
-    struct static_assertion<true>
-    {
-      enum {
+template <>
+struct static_assertion<true> {
+    enum {
         YOU_TRIED_CALLING_A_VECTOR_METHOD_ON_A_MATRIX,
         YOU_MIXED_VECTORS_OF_DIFFERENT_SIZES,
         YOU_MIXED_MATRICES_OF_DIFFERENT_SIZES,
@@ -93,116 +93,108 @@
         OBJECT_ALLOCATED_ON_STACK_IS_TOO_BIG,
         IMPLICIT_CONVERSION_TO_SCALAR_IS_FOR_INNER_PRODUCT_ONLY,
         STORAGE_LAYOUT_DOES_NOT_MATCH
-      };
     };
+};
 
-    } // end namespace internal
+}  // end namespace internal
 
-    } // end namespace Eigen
+}  // end namespace Eigen
 
-    // Specialized implementation for MSVC to avoid "conditional
-    // expression is constant" warnings.  This implementation doesn't
-    // appear to work under GCC, hence the multiple implementations.
-    #ifdef _MSC_VER
+// Specialized implementation for MSVC to avoid "conditional
+// expression is constant" warnings.  This implementation doesn't
+// appear to work under GCC, hence the multiple implementations.
+#ifdef _MSC_VER
 
-      #define EIGEN_STATIC_ASSERT(CONDITION,MSG) \
-        {Eigen::internal::static_assertion<bool(CONDITION)>::MSG;}
+#define EIGEN_STATIC_ASSERT(CONDITION, MSG) \
+    { Eigen::internal::static_assertion<bool(CONDITION)>::MSG; }
 
-    #else
+#else
 
-      #define EIGEN_STATIC_ASSERT(CONDITION,MSG) \
-        if (Eigen::internal::static_assertion<bool(CONDITION)>::MSG) {}
+#define EIGEN_STATIC_ASSERT(CONDITION, MSG)                        \
+    if (Eigen::internal::static_assertion<bool(CONDITION)>::MSG) { \
+    }
 
-    #endif
+#endif
 
-  #endif // not CXX0X
+#endif  // not CXX0X
 
-#else // EIGEN_NO_STATIC_ASSERT
+#else  // EIGEN_NO_STATIC_ASSERT
 
-  #define EIGEN_STATIC_ASSERT(CONDITION,MSG) eigen_assert((CONDITION) && #MSG);
+#define EIGEN_STATIC_ASSERT(CONDITION, MSG) eigen_assert((CONDITION) && #MSG);
 
-#endif // EIGEN_NO_STATIC_ASSERT
-
+#endif  // EIGEN_NO_STATIC_ASSERT
 
 // static assertion failing if the type \a TYPE is not a vector type
 #define EIGEN_STATIC_ASSERT_VECTOR_ONLY(TYPE) \
-  EIGEN_STATIC_ASSERT(TYPE::IsVectorAtCompileTime, \
-                      YOU_TRIED_CALLING_A_VECTOR_METHOD_ON_A_MATRIX)
+    EIGEN_STATIC_ASSERT(TYPE::IsVectorAtCompileTime, YOU_TRIED_CALLING_A_VECTOR_METHOD_ON_A_MATRIX)
 
 // static assertion failing if the type \a TYPE is not fixed-size
-#define EIGEN_STATIC_ASSERT_FIXED_SIZE(TYPE) \
-  EIGEN_STATIC_ASSERT(TYPE::SizeAtCompileTime!=Eigen::Dynamic, \
-                      YOU_CALLED_A_FIXED_SIZE_METHOD_ON_A_DYNAMIC_SIZE_MATRIX_OR_VECTOR)
+#define EIGEN_STATIC_ASSERT_FIXED_SIZE(TYPE)                       \
+    EIGEN_STATIC_ASSERT(TYPE::SizeAtCompileTime != Eigen::Dynamic, \
+                        YOU_CALLED_A_FIXED_SIZE_METHOD_ON_A_DYNAMIC_SIZE_MATRIX_OR_VECTOR)
 
 // static assertion failing if the type \a TYPE is not dynamic-size
-#define EIGEN_STATIC_ASSERT_DYNAMIC_SIZE(TYPE) \
-  EIGEN_STATIC_ASSERT(TYPE::SizeAtCompileTime==Eigen::Dynamic, \
-                      YOU_CALLED_A_DYNAMIC_SIZE_METHOD_ON_A_FIXED_SIZE_MATRIX_OR_VECTOR)
+#define EIGEN_STATIC_ASSERT_DYNAMIC_SIZE(TYPE)                     \
+    EIGEN_STATIC_ASSERT(TYPE::SizeAtCompileTime == Eigen::Dynamic, \
+                        YOU_CALLED_A_DYNAMIC_SIZE_METHOD_ON_A_FIXED_SIZE_MATRIX_OR_VECTOR)
 
 // static assertion failing if the type \a TYPE is not a vector type of the given size
-#define EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(TYPE, SIZE) \
-  EIGEN_STATIC_ASSERT(TYPE::IsVectorAtCompileTime && TYPE::SizeAtCompileTime==SIZE, \
-                      THIS_METHOD_IS_ONLY_FOR_VECTORS_OF_A_SPECIFIC_SIZE)
+#define EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(TYPE, SIZE)                           \
+    EIGEN_STATIC_ASSERT(TYPE::IsVectorAtCompileTime&& TYPE::SizeAtCompileTime == SIZE, \
+                        THIS_METHOD_IS_ONLY_FOR_VECTORS_OF_A_SPECIFIC_SIZE)
 
 // static assertion failing if the type \a TYPE is not a vector type of the given size
-#define EIGEN_STATIC_ASSERT_MATRIX_SPECIFIC_SIZE(TYPE, ROWS, COLS) \
-  EIGEN_STATIC_ASSERT(TYPE::RowsAtCompileTime==ROWS && TYPE::ColsAtCompileTime==COLS, \
-                      THIS_METHOD_IS_ONLY_FOR_MATRICES_OF_A_SPECIFIC_SIZE)
+#define EIGEN_STATIC_ASSERT_MATRIX_SPECIFIC_SIZE(TYPE, ROWS, COLS)                          \
+    EIGEN_STATIC_ASSERT(TYPE::RowsAtCompileTime == ROWS && TYPE::ColsAtCompileTime == COLS, \
+                        THIS_METHOD_IS_ONLY_FOR_MATRICES_OF_A_SPECIFIC_SIZE)
 
-// static assertion failing if the two vector expression types are not compatible (same fixed-size or dynamic size)
-#define EIGEN_STATIC_ASSERT_SAME_VECTOR_SIZE(TYPE0,TYPE1) \
-  EIGEN_STATIC_ASSERT( \
-      (int(TYPE0::SizeAtCompileTime)==Eigen::Dynamic \
-    || int(TYPE1::SizeAtCompileTime)==Eigen::Dynamic \
-    || int(TYPE0::SizeAtCompileTime)==int(TYPE1::SizeAtCompileTime)),\
-    YOU_MIXED_VECTORS_OF_DIFFERENT_SIZES)
+// static assertion failing if the two vector expression types are not compatible (same fixed-size
+// or dynamic size)
+#define EIGEN_STATIC_ASSERT_SAME_VECTOR_SIZE(TYPE0, TYPE1)                                \
+    EIGEN_STATIC_ASSERT((int(TYPE0::SizeAtCompileTime) == Eigen::Dynamic ||               \
+                         int(TYPE1::SizeAtCompileTime) == Eigen::Dynamic ||               \
+                         int(TYPE0::SizeAtCompileTime) == int(TYPE1::SizeAtCompileTime)), \
+                        YOU_MIXED_VECTORS_OF_DIFFERENT_SIZES)
 
-#define EIGEN_PREDICATE_SAME_MATRIX_SIZE(TYPE0,TYPE1) \
-     ( \
-        (int(TYPE0::SizeAtCompileTime)==0 && int(TYPE1::SizeAtCompileTime)==0) \
-    || (\
-          (int(TYPE0::RowsAtCompileTime)==Eigen::Dynamic \
-        || int(TYPE1::RowsAtCompileTime)==Eigen::Dynamic \
-        || int(TYPE0::RowsAtCompileTime)==int(TYPE1::RowsAtCompileTime)) \
-      &&  (int(TYPE0::ColsAtCompileTime)==Eigen::Dynamic \
-        || int(TYPE1::ColsAtCompileTime)==Eigen::Dynamic \
-        || int(TYPE0::ColsAtCompileTime)==int(TYPE1::ColsAtCompileTime))\
-       ) \
-     )
+#define EIGEN_PREDICATE_SAME_MATRIX_SIZE(TYPE0, TYPE1)                             \
+    ((int(TYPE0::SizeAtCompileTime) == 0 && int(TYPE1::SizeAtCompileTime) == 0) || \
+     ((int(TYPE0::RowsAtCompileTime) == Eigen::Dynamic ||                          \
+       int(TYPE1::RowsAtCompileTime) == Eigen::Dynamic ||                          \
+       int(TYPE0::RowsAtCompileTime) == int(TYPE1::RowsAtCompileTime)) &&          \
+      (int(TYPE0::ColsAtCompileTime) == Eigen::Dynamic ||                          \
+       int(TYPE1::ColsAtCompileTime) == Eigen::Dynamic ||                          \
+       int(TYPE0::ColsAtCompileTime) == int(TYPE1::ColsAtCompileTime))))
 
 #ifdef EIGEN2_SUPPORT
-  #define EIGEN_STATIC_ASSERT_NON_INTEGER(TYPE) \
-    eigen_assert(!NumTraits<Scalar>::IsInteger);
+#define EIGEN_STATIC_ASSERT_NON_INTEGER(TYPE) eigen_assert(!NumTraits<Scalar>::IsInteger);
 #else
-  #define EIGEN_STATIC_ASSERT_NON_INTEGER(TYPE) \
+#define EIGEN_STATIC_ASSERT_NON_INTEGER(TYPE) \
     EIGEN_STATIC_ASSERT(!NumTraits<TYPE>::IsInteger, THIS_FUNCTION_IS_NOT_FOR_INTEGER_NUMERIC_TYPES)
 #endif
 
+// static assertion failing if it is guaranteed at compile-time that the two matrix expression types
+// have different sizes
+#define EIGEN_STATIC_ASSERT_SAME_MATRIX_SIZE(TYPE0, TYPE1)              \
+    EIGEN_STATIC_ASSERT(EIGEN_PREDICATE_SAME_MATRIX_SIZE(TYPE0, TYPE1), \
+                        YOU_MIXED_MATRICES_OF_DIFFERENT_SIZES)
 
-// static assertion failing if it is guaranteed at compile-time that the two matrix expression types have different sizes
-#define EIGEN_STATIC_ASSERT_SAME_MATRIX_SIZE(TYPE0,TYPE1) \
-  EIGEN_STATIC_ASSERT( \
-     EIGEN_PREDICATE_SAME_MATRIX_SIZE(TYPE0,TYPE1),\
-    YOU_MIXED_MATRICES_OF_DIFFERENT_SIZES)
+#define EIGEN_STATIC_ASSERT_SIZE_1x1(TYPE)                                                        \
+    EIGEN_STATIC_ASSERT((TYPE::RowsAtCompileTime == 1 || TYPE::RowsAtCompileTime == Dynamic) &&   \
+                            (TYPE::ColsAtCompileTime == 1 || TYPE::ColsAtCompileTime == Dynamic), \
+                        THIS_METHOD_IS_ONLY_FOR_1x1_EXPRESSIONS)
 
-#define EIGEN_STATIC_ASSERT_SIZE_1x1(TYPE) \
-      EIGEN_STATIC_ASSERT((TYPE::RowsAtCompileTime == 1 || TYPE::RowsAtCompileTime == Dynamic) && \
-                          (TYPE::ColsAtCompileTime == 1 || TYPE::ColsAtCompileTime == Dynamic), \
-                          THIS_METHOD_IS_ONLY_FOR_1x1_EXPRESSIONS)
+#define EIGEN_STATIC_ASSERT_LVALUE(Derived)                  \
+    EIGEN_STATIC_ASSERT(internal::is_lvalue<Derived>::value, \
+                        THIS_EXPRESSION_IS_NOT_A_LVALUE__IT_IS_READ_ONLY)
 
-#define EIGEN_STATIC_ASSERT_LVALUE(Derived) \
-      EIGEN_STATIC_ASSERT(internal::is_lvalue<Derived>::value, \
-                          THIS_EXPRESSION_IS_NOT_A_LVALUE__IT_IS_READ_ONLY)
+#define EIGEN_STATIC_ASSERT_ARRAYXPR(Derived)                                              \
+    EIGEN_STATIC_ASSERT(                                                                   \
+        (internal::is_same<typename internal::traits<Derived>::XprKind, ArrayXpr>::value), \
+        THIS_METHOD_IS_ONLY_FOR_ARRAYS_NOT_MATRICES)
 
-#define EIGEN_STATIC_ASSERT_ARRAYXPR(Derived) \
-      EIGEN_STATIC_ASSERT((internal::is_same<typename internal::traits<Derived>::XprKind, ArrayXpr>::value), \
-                          THIS_METHOD_IS_ONLY_FOR_ARRAYS_NOT_MATRICES)
+#define EIGEN_STATIC_ASSERT_SAME_XPR_KIND(Derived1, Derived2)                                     \
+    EIGEN_STATIC_ASSERT((internal::is_same<typename internal::traits<Derived1>::XprKind,          \
+                                           typename internal::traits<Derived2>::XprKind>::value), \
+                        YOU_CANNOT_MIX_ARRAYS_AND_MATRICES)
 
-#define EIGEN_STATIC_ASSERT_SAME_XPR_KIND(Derived1, Derived2) \
-      EIGEN_STATIC_ASSERT((internal::is_same<typename internal::traits<Derived1>::XprKind, \
-                                             typename internal::traits<Derived2>::XprKind \
-                                            >::value), \
-                          YOU_CANNOT_MIX_ARRAYS_AND_MATRICES)
-
-
-#endif // EIGEN_STATIC_ASSERT_H
+#endif  // EIGEN_STATIC_ASSERT_H

@@ -13,45 +13,37 @@
 
 #pragma once
 
-
 #include "MessageBus/Message.h"
 
-
 class ExternalControlMsg : public Message {
-public:
-	ExternalControlMsg(NodeID destinationID, NodeID sourceID, bool externalControlActive)
-		:Message(MessageType::ExternalControl, sourceID, destinationID), m_externalControlActive(externalControlActive)
-	{ }
+   public:
+    ExternalControlMsg(NodeID destinationID, NodeID sourceID, bool externalControlActive)
+        : Message(MessageType::ExternalControl, sourceID, destinationID),
+          m_externalControlActive(externalControlActive) {}
 
-	ExternalControlMsg(bool externalControlActive)
-		:Message(MessageType::ExternalControl, NodeID::None, NodeID::None), m_externalControlActive(externalControlActive)
-	{ }
+    ExternalControlMsg(bool externalControlActive)
+        : Message(MessageType::ExternalControl, NodeID::None, NodeID::None),
+          m_externalControlActive(externalControlActive) {}
 
-	ExternalControlMsg(MessageDeserialiser deserialiser)
-	:Message(deserialiser)
-	{
-		if(	!deserialiser.readBool(m_externalControlActive))
-		{
-			m_valid = false;
-		}
-	}
+    ExternalControlMsg(MessageDeserialiser deserialiser) : Message(deserialiser) {
+        if (!deserialiser.readBool(m_externalControlActive)) {
+            m_valid = false;
+        }
+    }
 
-	virtual ~ExternalControlMsg() { }
+    virtual ~ExternalControlMsg() {}
 
-
-    bool     externalControlActive()            { return m_externalControlActive; }
+    bool externalControlActive() { return m_externalControlActive; }
 
     ///----------------------------------------------------------------------------------
-	/// Serialises the message into a MessageSerialiser
-	///----------------------------------------------------------------------------------
-	virtual void Serialise(MessageSerialiser& serialiser) const
-	{
-		Message::Serialise(serialiser);
+    /// Serialises the message into a MessageSerialiser
+    ///----------------------------------------------------------------------------------
+    virtual void Serialise(MessageSerialiser& serialiser) const {
+        Message::Serialise(serialiser);
 
-		serialiser.serialise(m_externalControlActive);
-	}
+        serialiser.serialise(m_externalControlActive);
+    }
 
-private:
-
+   private:
     bool m_externalControlActive;
 };

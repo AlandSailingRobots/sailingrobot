@@ -36,36 +36,37 @@
 
 #include "../Core/util/MKL_support.h"
 
-namespace Eigen { 
+namespace Eigen {
 
-  namespace internal {
+namespace internal {
 
-    /** \internal Specialization for the data types supported by MKL */
+/** \internal Specialization for the data types supported by MKL */
 
-#define EIGEN_MKL_QR_NOPIV(EIGTYPE, MKLTYPE, MKLPREFIX) \
-template<typename MatrixQR, typename HCoeffs> \
-struct householder_qr_inplace_blocked<MatrixQR, HCoeffs, EIGTYPE, true> \
-{ \
-  static void run(MatrixQR& mat, HCoeffs& hCoeffs, \
-      typename MatrixQR::Index = 32, \
-      typename MatrixQR::Scalar* = 0) \
-  { \
-    lapack_int m = (lapack_int) mat.rows(); \
-    lapack_int n = (lapack_int) mat.cols(); \
-    lapack_int lda = (lapack_int) mat.outerStride(); \
-    lapack_int matrix_order = (MatrixQR::IsRowMajor) ? LAPACK_ROW_MAJOR : LAPACK_COL_MAJOR; \
-    LAPACKE_##MKLPREFIX##geqrf( matrix_order, m, n, (MKLTYPE*)mat.data(), lda, (MKLTYPE*)hCoeffs.data()); \
-    hCoeffs.adjointInPlace(); \
-  } \
-};
+#define EIGEN_MKL_QR_NOPIV(EIGTYPE, MKLTYPE, MKLPREFIX)                               \
+    template <typename MatrixQR, typename HCoeffs>                                    \
+    struct householder_qr_inplace_blocked<MatrixQR, HCoeffs, EIGTYPE, true> {         \
+        static void run(MatrixQR& mat,                                                \
+                        HCoeffs& hCoeffs,                                             \
+                        typename MatrixQR::Index = 32,                                \
+                        typename MatrixQR::Scalar* = 0) {                             \
+            lapack_int m = (lapack_int)mat.rows();                                    \
+            lapack_int n = (lapack_int)mat.cols();                                    \
+            lapack_int lda = (lapack_int)mat.outerStride();                           \
+            lapack_int matrix_order =                                                 \
+                (MatrixQR::IsRowMajor) ? LAPACK_ROW_MAJOR : LAPACK_COL_MAJOR;         \
+            LAPACKE_##MKLPREFIX##geqrf(matrix_order, m, n, (MKLTYPE*)mat.data(), lda, \
+                                       (MKLTYPE*)hCoeffs.data());                     \
+            hCoeffs.adjointInPlace();                                                 \
+        }                                                                             \
+    };
 
 EIGEN_MKL_QR_NOPIV(double, double, d)
 EIGEN_MKL_QR_NOPIV(float, float, s)
 EIGEN_MKL_QR_NOPIV(dcomplex, MKL_Complex16, z)
 EIGEN_MKL_QR_NOPIV(scomplex, MKL_Complex8, c)
 
-} // end namespace internal
+}  // end namespace internal
 
-} // end namespace Eigen
+}  // end namespace Eigen
 
-#endif // EIGEN_QR_MKL_H
+#endif  // EIGEN_QR_MKL_H

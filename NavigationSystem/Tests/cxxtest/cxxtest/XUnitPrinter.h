@@ -16,33 +16,26 @@
 // XUnitPrinter combines an ErrorPrinter with an XML formatter.
 //
 
-#include <cxxtest/TeeListener.h>
 #include <cxxtest/ErrorPrinter.h>
+#include <cxxtest/TeeListener.h>
 #include <cxxtest/XmlPrinter.h>
 
-namespace CxxTest
-{
-class XUnitPrinter : public TeeListener
-{
-public:
-
+namespace CxxTest {
+class XUnitPrinter : public TeeListener {
+   public:
     XmlPrinter xml_printer;
     ErrorPrinter error_printer;
 
-    XUnitPrinter(CXXTEST_STD(ostream) &o = CXXTEST_STD(cout))
-        : xml_printer(o)
-    {
+    XUnitPrinter(CXXTEST_STD(ostream) & o = CXXTEST_STD(cout)) : xml_printer(o) {
         setFirst(error_printer);
         setSecond(xml_printer);
     }
 
-    int run()
-    {
+    int run() {
         TestRunner::runAllTests(*this);
         return tracker().failedTests();
     }
 };
-}
+}  // namespace CxxTest
 
-#endif //__CXXTEST__XUNIT_PRINTER_H
-
+#endif  //__CXXTEST__XUNIT_PRINTER_H

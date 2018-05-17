@@ -33,86 +33,94 @@
 #ifndef EIGEN_GENERAL_MATRIX_MATRIX_MKL_H
 #define EIGEN_GENERAL_MATRIX_MATRIX_MKL_H
 
-namespace Eigen { 
+namespace Eigen {
 
 namespace internal {
 
 /**********************************************************************
-* This file implements general matrix-matrix multiplication using BLAS
-* gemm function via partial specialization of
-* general_matrix_matrix_product::run(..) method for float, double,
-* std::complex<float> and std::complex<double> types
-**********************************************************************/
+ * This file implements general matrix-matrix multiplication using BLAS
+ * gemm function via partial specialization of
+ * general_matrix_matrix_product::run(..) method for float, double,
+ * std::complex<float> and std::complex<double> types
+ **********************************************************************/
 
 // gemm specialization
 
-#define GEMM_SPECIALIZATION(EIGTYPE, EIGPREFIX, MKLTYPE, MKLPREFIX) \
-template< \
-  typename Index, \
-  int LhsStorageOrder, bool ConjugateLhs, \
-  int RhsStorageOrder, bool ConjugateRhs> \
-struct general_matrix_matrix_product<Index,EIGTYPE,LhsStorageOrder,ConjugateLhs,EIGTYPE,RhsStorageOrder,ConjugateRhs,ColMajor> \
-{ \
-static void run(Index rows, Index cols, Index depth, \
-  const EIGTYPE* _lhs, Index lhsStride, \
-  const EIGTYPE* _rhs, Index rhsStride, \
-  EIGTYPE* res, Index resStride, \
-  EIGTYPE alpha, \
-  level3_blocking<EIGTYPE, EIGTYPE>& /*blocking*/, \
-  GemmParallelInfo<Index>* /*info = 0*/) \
-{ \
-  using std::conj; \
-\
-  char transa, transb; \
-  MKL_INT m, n, k, lda, ldb, ldc; \
-  const EIGTYPE *a, *b; \
-  MKLTYPE alpha_, beta_; \
-  MatrixX##EIGPREFIX a_tmp, b_tmp; \
-  EIGTYPE myone(1);\
-\
-/* Set transpose options */ \
-  transa = (LhsStorageOrder==RowMajor) ? ((ConjugateLhs) ? 'C' : 'T') : 'N'; \
-  transb = (RhsStorageOrder==RowMajor) ? ((ConjugateRhs) ? 'C' : 'T') : 'N'; \
-\
-/* Set m, n, k */ \
-  m = (MKL_INT)rows;  \
-  n = (MKL_INT)cols;  \
-  k = (MKL_INT)depth; \
-\
-/* Set alpha_ & beta_ */ \
-  assign_scalar_eig2mkl(alpha_, alpha); \
-  assign_scalar_eig2mkl(beta_, myone); \
-\
-/* Set lda, ldb, ldc */ \
-  lda = (MKL_INT)lhsStride; \
-  ldb = (MKL_INT)rhsStride; \
-  ldc = (MKL_INT)resStride; \
-\
-/* Set a, b, c */ \
-  if ((LhsStorageOrder==ColMajor) && (ConjugateLhs)) { \
-    Map<const MatrixX##EIGPREFIX, 0, OuterStride<> > lhs(_lhs,m,k,OuterStride<>(lhsStride)); \
-    a_tmp = lhs.conjugate(); \
-    a = a_tmp.data(); \
-    lda = a_tmp.outerStride(); \
-  } else a = _lhs; \
-\
-  if ((RhsStorageOrder==ColMajor) && (ConjugateRhs)) { \
-    Map<const MatrixX##EIGPREFIX, 0, OuterStride<> > rhs(_rhs,k,n,OuterStride<>(rhsStride)); \
-    b_tmp = rhs.conjugate(); \
-    b = b_tmp.data(); \
-    ldb = b_tmp.outerStride(); \
-  } else b = _rhs; \
-\
-  MKLPREFIX##gemm(&transa, &transb, &m, &n, &k, &alpha_, (const MKLTYPE*)a, &lda, (const MKLTYPE*)b, &ldb, &beta_, (MKLTYPE*)res, &ldc); \
-}};
+#define GEMM_SPECIALIZATION(EIGTYPE, EIGPREFIX, MKLTYPE, MKLPREFIX)                              \
+    template <typename Index, int LhsStorageOrder, bool ConjugateLhs, int RhsStorageOrder,       \
+              bool ConjugateRhs>                                                                 \
+    struct general_matrix_matrix_product<Index, EIGTYPE, LhsStorageOrder, ConjugateLhs, EIGTYPE, \
+                                         RhsStorageOrder, ConjugateRhs, ColMajor> {              \
+        static void run(Index rows,                                                              \
+                        Index cols,                                                              \
+                        Index depth,                                                             \
+                        const EIGTYPE* _lhs,                                                     \
+                        Index lhsStride,                                                         \
+                        const EIGTYPE* _rhs,                                                     \
+                        Index rhsStride,                                                         \
+                        EIGTYPE* res,                                                            \
+                        Index resStride,                                                         \
+                        EIGTYPE alpha,                                                           \
+                        level3_blocking<EIGTYPE, EIGTYPE>& /*blocking*/,                         \
+                        GemmParallelInfo<Index>* /*info = 0*/) {                                 \
+            using std::conj;                                                                     \
+                                                                                                 \
+            char transa, transb;                                                                 \
+            MKL_INT m, n, k, lda, ldb, ldc;                                                      \
+            const EIGTYPE *a, *b;                                                                \
+            MKLTYPE alpha_, beta_;                                                               \
+            MatrixX##EIGPREFIX a_tmp, b_tmp;                                                     \
+            EIGTYPE myone(1);                                                                    \
+                                                                                                 \
+            /* Set transpose options */                                                          \
+            transa = (LhsStorageOrder == RowMajor) ? ((ConjugateLhs) ? 'C' : 'T') : 'N';         \
+            transb = (RhsStorageOrder == RowMajor) ? ((ConjugateRhs) ? 'C' : 'T') : 'N';         \
+                                                                                                 \
+            /* Set m, n, k */                                                                    \
+            m = (MKL_INT)rows;                                                                   \
+            n = (MKL_INT)cols;                                                                   \
+            k = (MKL_INT)depth;                                                                  \
+                                                                                                 \
+            /* Set alpha_ & beta_ */                                                             \
+            assign_scalar_eig2mkl(alpha_, alpha);                                                \
+            assign_scalar_eig2mkl(beta_, myone);                                                 \
+                                                                                                 \
+            /* Set lda, ldb, ldc */                                                              \
+            lda = (MKL_INT)lhsStride;                                                            \
+            ldb = (MKL_INT)rhsStride;                                                            \
+            ldc = (MKL_INT)resStride;                                                            \
+                                                                                                 \
+            /* Set a, b, c */                                                                    \
+            if ((LhsStorageOrder == ColMajor) && (ConjugateLhs)) {                               \
+                Map<const MatrixX##EIGPREFIX, 0, OuterStride<>> lhs(_lhs, m, k,                  \
+                                                                    OuterStride<>(lhsStride));   \
+                a_tmp = lhs.conjugate();                                                         \
+                a = a_tmp.data();                                                                \
+                lda = a_tmp.outerStride();                                                       \
+            } else                                                                               \
+                a = _lhs;                                                                        \
+                                                                                                 \
+            if ((RhsStorageOrder == ColMajor) && (ConjugateRhs)) {                               \
+                Map<const MatrixX##EIGPREFIX, 0, OuterStride<>> rhs(_rhs, k, n,                  \
+                                                                    OuterStride<>(rhsStride));   \
+                b_tmp = rhs.conjugate();                                                         \
+                b = b_tmp.data();                                                                \
+                ldb = b_tmp.outerStride();                                                       \
+            } else                                                                               \
+                b = _rhs;                                                                        \
+                                                                                                 \
+            MKLPREFIX##gemm(&transa, &transb, &m, &n, &k, &alpha_, (const MKLTYPE*)a, &lda,      \
+                            (const MKLTYPE*)b, &ldb, &beta_, (MKLTYPE*)res, &ldc);               \
+        }                                                                                        \
+    };
 
-GEMM_SPECIALIZATION(double,   d,  double,        d)
-GEMM_SPECIALIZATION(float,    f,  float,         s)
+GEMM_SPECIALIZATION(double, d, double, d)
+GEMM_SPECIALIZATION(float, f, float, s)
 GEMM_SPECIALIZATION(dcomplex, cd, MKL_Complex16, z)
-GEMM_SPECIALIZATION(scomplex, cf, MKL_Complex8,  c)
+GEMM_SPECIALIZATION(scomplex, cf, MKL_Complex8, c)
 
-} // end namespase internal
+}  // namespace internal
 
-} // end namespace Eigen
+}  // end namespace Eigen
 
-#endif // EIGEN_GENERAL_MATRIX_MATRIX_MKL_H
+#endif  // EIGEN_GENERAL_MATRIX_MATRIX_MKL_H

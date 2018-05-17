@@ -10,7 +10,7 @@
 #ifndef EIGEN2_LEASTSQUARES_H
 #define EIGEN2_LEASTSQUARES_H
 
-namespace Eigen { 
+namespace Eigen {
 
 /** \ingroup LeastSquares_Module
   *
@@ -81,89 +81,84 @@ namespace Eigen {
   *
   * \sa fitHyperplane()
   */
-template<typename VectorType>
-void linearRegression(int numPoints,
-                      VectorType **points,
-                      VectorType *result,
-                      int funcOfOthers )
-{
-  typedef typename VectorType::Scalar Scalar;
-  typedef Hyperplane<Scalar, VectorType::SizeAtCompileTime> HyperplaneType;
-  const int size = points[0]->size();
-  result->resize(size);
-  HyperplaneType h(size);
-  fitHyperplane(numPoints, points, &h);
-  for(int i = 0; i < funcOfOthers; i++)
-    result->coeffRef(i) = - h.coeffs()[i] / h.coeffs()[funcOfOthers];
-  for(int i = funcOfOthers; i < size; i++)
-    result->coeffRef(i) = - h.coeffs()[i+1] / h.coeffs()[funcOfOthers];
+template <typename VectorType>
+void linearRegression(int numPoints, VectorType** points, VectorType* result, int funcOfOthers) {
+    typedef typename VectorType::Scalar Scalar;
+    typedef Hyperplane<Scalar, VectorType::SizeAtCompileTime> HyperplaneType;
+    const int size = points[0]->size();
+    result->resize(size);
+    HyperplaneType h(size);
+    fitHyperplane(numPoints, points, &h);
+    for (int i = 0; i < funcOfOthers; i++)
+        result->coeffRef(i) = -h.coeffs()[i] / h.coeffs()[funcOfOthers];
+    for (int i = funcOfOthers; i < size; i++)
+        result->coeffRef(i) = -h.coeffs()[i + 1] / h.coeffs()[funcOfOthers];
 }
 
 /** \ingroup LeastSquares_Module
-  *
-  * \leastsquares_module
-  *
-  * This function is quite similar to linearRegression(), so we refer to the
-  * documentation of this function and only list here the differences.
-  *
-  * The main difference from linearRegression() is that this function doesn't
-  * take a \a funcOfOthers argument. Instead, it finds a general equation
-  * of the form
-  * \f[ r_0 x_0 + \cdots + r_{n-1}x_{n-1} + r_n = 0, \f]
-  * where \f$n=Size\f$, \f$r_i=retCoefficients[i]\f$, and we denote by
-  * \f$x_0,\ldots,x_{n-1}\f$ the n coordinates in the n-dimensional space.
-  *
-  * Thus, the vector \a retCoefficients has size \f$n+1\f$, which is another
-  * difference from linearRegression().
-  *
-  * In practice, this function performs an hyper-plane fit in a total least square sense
-  * via the following steps:
-  *  1 - center the data to the mean
-  *  2 - compute the covariance matrix
-  *  3 - pick the eigenvector corresponding to the smallest eigenvalue of the covariance matrix
-  * The ratio of the smallest eigenvalue and the second one gives us a hint about the relevance
-  * of the solution. This value is optionally returned in \a soundness.
-  *
-  * \sa linearRegression()
-  */
-template<typename VectorType, typename HyperplaneType>
+ *
+ * \leastsquares_module
+ *
+ * This function is quite similar to linearRegression(), so we refer to the
+ * documentation of this function and only list here the differences.
+ *
+ * The main difference from linearRegression() is that this function doesn't
+ * take a \a funcOfOthers argument. Instead, it finds a general equation
+ * of the form
+ * \f[ r_0 x_0 + \cdots + r_{n-1}x_{n-1} + r_n = 0, \f]
+ * where \f$n=Size\f$, \f$r_i=retCoefficients[i]\f$, and we denote by
+ * \f$x_0,\ldots,x_{n-1}\f$ the n coordinates in the n-dimensional space.
+ *
+ * Thus, the vector \a retCoefficients has size \f$n+1\f$, which is another
+ * difference from linearRegression().
+ *
+ * In practice, this function performs an hyper-plane fit in a total least square sense
+ * via the following steps:
+ *  1 - center the data to the mean
+ *  2 - compute the covariance matrix
+ *  3 - pick the eigenvector corresponding to the smallest eigenvalue of the covariance matrix
+ * The ratio of the smallest eigenvalue and the second one gives us a hint about the relevance
+ * of the solution. This value is optionally returned in \a soundness.
+ *
+ * \sa linearRegression()
+ */
+template <typename VectorType, typename HyperplaneType>
 void fitHyperplane(int numPoints,
-                   VectorType **points,
-                   HyperplaneType *result,
-                   typename NumTraits<typename VectorType::Scalar>::Real* soundness = 0)
-{
-  typedef typename VectorType::Scalar Scalar;
-  typedef Matrix<Scalar,VectorType::SizeAtCompileTime,VectorType::SizeAtCompileTime> CovMatrixType;
-  EIGEN_STATIC_ASSERT_VECTOR_ONLY(VectorType)
-  ei_assert(numPoints >= 1);
-  int size = points[0]->size();
-  ei_assert(size+1 == result->coeffs().size());
+                   VectorType** points,
+                   HyperplaneType* result,
+                   typename NumTraits<typename VectorType::Scalar>::Real* soundness = 0) {
+    typedef typename VectorType::Scalar Scalar;
+    typedef Matrix<Scalar, VectorType::SizeAtCompileTime, VectorType::SizeAtCompileTime>
+        CovMatrixType;
+    EIGEN_STATIC_ASSERT_VECTOR_ONLY(VectorType)
+    ei_assert(numPoints >= 1);
+    int size = points[0]->size();
+    ei_assert(size + 1 == result->coeffs().size());
 
-  // compute the mean of the data
-  VectorType mean = VectorType::Zero(size);
-  for(int i = 0; i < numPoints; ++i)
-    mean += *(points[i]);
-  mean /= numPoints;
+    // compute the mean of the data
+    VectorType mean = VectorType::Zero(size);
+    for (int i = 0; i < numPoints; ++i)
+        mean += *(points[i]);
+    mean /= numPoints;
 
-  // compute the covariance matrix
-  CovMatrixType covMat = CovMatrixType::Zero(size, size);
-  for(int i = 0; i < numPoints; ++i)
-  {
-    VectorType diff = (*(points[i]) - mean).conjugate();
-    covMat += diff * diff.adjoint();
-  }
+    // compute the covariance matrix
+    CovMatrixType covMat = CovMatrixType::Zero(size, size);
+    for (int i = 0; i < numPoints; ++i) {
+        VectorType diff = (*(points[i]) - mean).conjugate();
+        covMat += diff * diff.adjoint();
+    }
 
-  // now we just have to pick the eigen vector with smallest eigen value
-  SelfAdjointEigenSolver<CovMatrixType> eig(covMat);
-  result->normal() = eig.eigenvectors().col(0);
-  if (soundness)
-    *soundness = eig.eigenvalues().coeff(0)/eig.eigenvalues().coeff(1);
+    // now we just have to pick the eigen vector with smallest eigen value
+    SelfAdjointEigenSolver<CovMatrixType> eig(covMat);
+    result->normal() = eig.eigenvectors().col(0);
+    if (soundness)
+        *soundness = eig.eigenvalues().coeff(0) / eig.eigenvalues().coeff(1);
 
-  // let's compute the constant coefficient such that the
-  // plane pass trough the mean point:
-  result->offset() = - (result->normal().cwise()* mean).sum();
+    // let's compute the constant coefficient such that the
+    // plane pass trough the mean point:
+    result->offset() = -(result->normal().cwise() * mean).sum();
 }
 
-} // end namespace Eigen
+}  // end namespace Eigen
 
-#endif // EIGEN2_LEASTSQUARES_H
+#endif  // EIGEN2_LEASTSQUARES_H

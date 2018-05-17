@@ -17,24 +17,19 @@
 // just returns true iff all tests passed.
 //
 
-#include <cxxtest/TestRunner.h>
 #include <cxxtest/TestListener.h>
+#include <cxxtest/TestRunner.h>
 
-namespace CxxTest
-{
-class YesNoRunner : public TestListener
-{
-public:
-    YesNoRunner()
-    {
-    }
+namespace CxxTest {
+class YesNoRunner : public TestListener {
+   public:
+    YesNoRunner() {}
 
-    int run()
-    {
+    int run() {
         TestRunner::runAllTests(*this);
         return tracker().failedTests();
     }
 };
-}
+}  // namespace CxxTest
 
-#endif // __cxxtest__YesNoRunner_h__
+#endif  // __cxxtest__YesNoRunner_h__
