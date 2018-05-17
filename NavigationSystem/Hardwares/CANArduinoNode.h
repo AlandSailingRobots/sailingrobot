@@ -48,10 +48,6 @@ private:
 	///----------------------------------------------------------------------------------
 	void updateConfigsFromDB();
 
-	const float MAX_RUDDER_ANGLE = 30;
-	const float MAX_WINGSAIL_ANGLE = 13;
-	const float INT16_SIZE = 65535;
-
 	float m_RudderFeedback;			//NOTE : degree [-MAX_RUDDER_ANGLE ; MAX_RUDDER_ANGLE]
 	float m_WingsailFeedback;			//NOTE : degree [-MAX_WINGSAIL_ANGLE ; MAX_WINGSAIL_ANGLE]
 	float m_WindvaneSelfSteerAngle;		//NOTE : degree

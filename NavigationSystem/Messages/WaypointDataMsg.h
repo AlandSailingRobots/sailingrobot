@@ -85,6 +85,7 @@ public:
 		serialiser.serialise(m_nextDeclination);
 		serialiser.serialise(m_nextRadius);
 		serialiser.serialise(m_nextStayTime);
+		serialiser.serialise(m_isCheckpoint);
 		serialiser.serialise(m_prevId);
 		serialiser.serialise(m_prevLongitude);
 		serialiser.serialise(m_prevLatitude);

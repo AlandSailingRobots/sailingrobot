@@ -11,8 +11,8 @@
  *      Two functions have been developed to calculate the desired sail angle :
  *          - calculateSailAngleLinear(),
  *          - calculateSailAngleCardioid().
- *      You can choose the one you want to use by commenting/uncommenting lines 
- *      in SailControlNodeThreadFunc(). 
+ *      You can choose the one you want to use by commenting/uncommenting lines
+ *      in SailControlNodeThreadFunc().
  *
  ***************************************************************************************/
 
