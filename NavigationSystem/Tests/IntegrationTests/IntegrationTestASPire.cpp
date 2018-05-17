@@ -54,17 +54,6 @@ mode. It is a interface between the messagebus and the CAN-bus that can be monit
 #include <sys/types.h>
 #include <algorithm>
 
-#include <fstream>
-#include <iostream>
-#include <ostream>
-#include <sstream>
-#include <string>
-#include <cstring>
-#include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
-
-
 #define BACKSPACE 8
 #define ENTER 10
 #define TAB 9
@@ -117,7 +106,7 @@ class SensorDataReceiver : public Node {
     void sensorWindow() {
         int begin_y = 1;
         int begin_x = 2;
-        int ncols = 70;
+        int ncols = 80;
         int nr_of_lines = 6 + m_SensorValues.size();
 
         m_Win = newwin(nr_of_lines, ncols, begin_y, begin_x);
@@ -226,7 +215,7 @@ void messageLoop() {
 WINDOW* inputWindow(int sensor_size, int logger_size) {
     int begin_x = 2;
     int begin_y = sensor_size + logger_size + 7;
-    int ncols = 70;
+    int ncols = 80;
     int nr_of_lines = 9;
 
     WINDOW* inputWin = newwin(nr_of_lines, ncols, begin_y, begin_x);
@@ -294,7 +283,7 @@ std::vector<std::string> getLoggedData() {
 int loggerWindow(int size) {
     int begin_x = 2;
     int begin_y = size + 7;
-    int ncols = 70;
+    int ncols = 80;
     int log_size = 7;
     int nr_of_lines = log_size + 6;
     int pos = 4;
