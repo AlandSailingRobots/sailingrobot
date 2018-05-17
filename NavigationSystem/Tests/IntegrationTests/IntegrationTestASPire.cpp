@@ -470,7 +470,6 @@ int main() {
         } else {
             switch (c) {
                 case KEY_DOWN:
-                    Logger::error("KEY DOWN\t\t[FAILED]");
                     if (highlighted != --menuValues.end()) {
                         highlighted++;
                     }
