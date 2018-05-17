@@ -54,15 +54,15 @@ mode. It is a interface between the messagebus and the CAN-bus that can be monit
 #include <sys/types.h>
 #include <algorithm>
 
-//#include <fstream>
-//#include <iostream>
-//#include <ostream>
-//#include <sstream>
-//#include <string>
-//#include <cstring>
-//#include <stdio.h>
-//#include <stdlib.h>
-//#include <time.h>
+#include <fstream>
+#include <iostream>
+#include <ostream>
+#include <sstream>
+#include <string>
+#include <cstring>
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 
 
 #define BACKSPACE 8
