@@ -28,7 +28,6 @@
 
 #define MAX_LOG_SIZE	256*2
 #define MAX_MSG_BUFFER 100
-#define TEMP 530
 
 // Uncomment for a WRSC2017 position log file
 // #define ENABLE_WRSC_LOGGING
