@@ -8,25 +8,24 @@
 #endif
 
 #if EIGEN2_SUPPORT_STAGE < STAGE20_RESOLVE_API_CONFLICTS
-#include "RotationBase.h"
-#include "Rotation2D.h"
-#include "Quaternion.h"
-#include "AngleAxis.h"
-#include "Transform.h"
-#include "Translation.h"
-#include "Scaling.h"
 #include "AlignedBox.h"
+#include "AngleAxis.h"
 #include "Hyperplane.h"
 #include "ParametrizedLine.h"
+#include "Quaternion.h"
+#include "Rotation2D.h"
+#include "RotationBase.h"
+#include "Scaling.h"
+#include "Transform.h"
+#include "Translation.h"
 #endif
-
 
 #define RotationBase eigen2_RotationBase
 #define Rotation2D eigen2_Rotation2D
 #define Rotation2Df eigen2_Rotation2Df
 #define Rotation2Dd eigen2_Rotation2Dd
 
-#define Quaternion  eigen2_Quaternion
+#define Quaternion eigen2_Quaternion
 #define Quaternionf eigen2_Quaternionf
 #define Quaterniond eigen2_Quaterniond
 
@@ -34,7 +33,7 @@
 #define AngleAxisf eigen2_AngleAxisf
 #define AngleAxisd eigen2_AngleAxisd
 
-#define Transform   eigen2_Transform
+#define Transform eigen2_Transform
 #define Transform2f eigen2_Transform2f
 #define Transform2d eigen2_Transform2d
 #define Transform3f eigen2_Transform3f
@@ -61,16 +60,16 @@
 #define ei_quaternion_assign_impl eigen2_ei_quaternion_assign_impl
 #define ei_transform_product_impl eigen2_ei_transform_product_impl
 
-#include "RotationBase.h"
-#include "Rotation2D.h"
-#include "Quaternion.h"
-#include "AngleAxis.h"
-#include "Transform.h"
-#include "Translation.h"
-#include "Scaling.h"
 #include "AlignedBox.h"
+#include "AngleAxis.h"
 #include "Hyperplane.h"
 #include "ParametrizedLine.h"
+#include "Quaternion.h"
+#include "Rotation2D.h"
+#include "RotationBase.h"
+#include "Scaling.h"
+#include "Transform.h"
+#include "Translation.h"
 
 #undef ei_toRotationMatrix
 #undef ei_quaternion_assign_impl
@@ -112,4 +111,4 @@
 #undef Hyperplane
 #undef ParametrizedLine
 
-#endif // EIGEN2_GEOMETRY_MODULE_H
+#endif  // EIGEN2_GEOMETRY_MODULE_H

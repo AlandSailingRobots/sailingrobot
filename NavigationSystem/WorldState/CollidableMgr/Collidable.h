@@ -12,18 +12,15 @@
  *
  ***************************************************************************************/
 
-
 #pragma once
 
-
 #include <stdint.h>
-#include <map> 
-
+#include <map>
 
 // Describes the visual field
-// a map containing a key for each bearing degree of the field of view and a value between 
+// a map containing a key for each bearing degree of the field of view and a value between
 // 0 and 100, where 0 means an obstacle close at this bearing and 100 means no visible obstacle
-// bearings are absolute bearings 
+// bearings are absolute bearings
 struct VisualField_t {
     std::map<int16_t, uint16_t> bearingToRelativeObstacleDistance;
     std::map<int16_t, unsigned long> bearingToLastUpdated;

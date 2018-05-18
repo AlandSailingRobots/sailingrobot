@@ -21,22 +21,21 @@
  ***********************************************************************
  */
 
-#define	MCP3422_SR_240	0
-#define	MCP3422_SR_60	1
-#define	MCP3422_SR_15	2
-#define	MCP3422_SR_3_75	3
+#define MCP3422_SR_240 0
+#define MCP3422_SR_60 1
+#define MCP3422_SR_15 2
+#define MCP3422_SR_3_75 3
 
-#define	MCP3422_GAIN_1	0
-#define	MCP3422_GAIN_2	1
-#define	MCP3422_GAIN_4	2
-#define	MCP3422_GAIN_8	3
-
+#define MCP3422_GAIN_1 0
+#define MCP3422_GAIN_2 1
+#define MCP3422_GAIN_4 2
+#define MCP3422_GAIN_8 3
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-extern int mcp3422Setup (int pinBase, int i2cAddress, int sampleRate, int gain) ;
+extern int mcp3422Setup(int pinBase, int i2cAddress, int sampleRate, int gain);
 
 #ifdef __cplusplus
 }

@@ -12,71 +12,69 @@
  *
  ***************************************************************************************/
 
-
 #pragma once
 
-
-#include "MessageBus/ActiveNode.h"
-#include "DataBase/DBHandler.h"
-#include "BoatState.h"
-#include "ASRVoter.h"
-#include "ASRArbiter.h"
 #include <vector>
-
+#include "ASRArbiter.h"
+#include "ASRVoter.h"
+#include "BoatState.h"
+#include "DataBase/DBHandler.h"
+#include "MessageBus/ActiveNode.h"
 
 class LocalNavigationModule : public ActiveNode {
-public:
+   public:
     ///----------------------------------------------------------------------------------
- 	/// Constructs the LocalNavigationModule
- 	///----------------------------------------------------------------------------------
-    LocalNavigationModule( MessageBus& msgBus, DBHandler& dbhandler);
+    /// Constructs the LocalNavigationModule
+    ///----------------------------------------------------------------------------------
+    LocalNavigationModule(MessageBus& msgBus, DBHandler& dbhandler);
 
     ///----------------------------------------------------------------------------------
- 	/// Does nothing
- 	///----------------------------------------------------------------------------------
+    /// Does nothing
+    ///----------------------------------------------------------------------------------
     bool init();
 
     ///----------------------------------------------------------------------------------
- 	/// Starts the quick hack wakeup thread
- 	///----------------------------------------------------------------------------------
+    /// Starts the quick hack wakeup thread
+    ///----------------------------------------------------------------------------------
     void start();
 
     ///----------------------------------------------------------------------------------
- 	/// Processes the following messages:
+    /// Processes the following messages:
     ///     * GPS Data Messages
     ///     * Compass Messages
     ///     * Wind Messages
     ///     * New Waypoint Messages
     ///     * Course Request Message
- 	///----------------------------------------------------------------------------------
-    void processMessage( const Message* msg );
+    ///----------------------------------------------------------------------------------
+    void processMessage(const Message* msg);
 
     ///----------------------------------------------------------------------------------
- 	/// Registers a voter, this voter will then be asked to vote when a ballot is held.
- 	///----------------------------------------------------------------------------------
-    void registerVoter( ASRVoter* voter );
-
-private:
+    /// Registers a voter, this voter will then be asked to vote when a ballot is held.
     ///----------------------------------------------------------------------------------
- 	/// Starts a ballot, asking every registered voter to vote. Once that is done it
+    void registerVoter(ASRVoter* voter);
+
+   private:
+    ///----------------------------------------------------------------------------------
+    /// Starts a ballot, asking every registered voter to vote. Once that is done it
     /// the final result is generated and a Local Navigation message is created.
- 	///----------------------------------------------------------------------------------
+    ///----------------------------------------------------------------------------------
     void startBallot();
 
     ///----------------------------------------------------------------------------------
-    /// Returns true if the desired tack of the vessel is starboard (wind blowing from the right side )
+    /// Returns true if the desired tack of the vessel is starboard (wind blowing from the right
+    /// side )
     ///----------------------------------------------------------------------------------
     bool getTargetTackStarboard(double targetCourse);
 
     ///----------------------------------------------------------------------------------
-	/// Update values from the database as the loop time of the thread and others parameters
-	///----------------------------------------------------------------------------------
+    /// Update values from the database as the loop time of the thread and others parameters
+    ///----------------------------------------------------------------------------------
     void updateConfigsFromDB();
 
     ///----------------------------------------------------------------------------------
- 	/// Just a little hack for waking up the navigation module for now
- 	///----------------------------------------------------------------------------------
-    static void WakeupThreadFunc( ActiveNode* nodePtr );
+    /// Just a little hack for waking up the navigation module for now
+    ///----------------------------------------------------------------------------------
+    static void WakeupThreadFunc(ActiveNode* nodePtr);
 
     std::vector<ASRVoter*> voters;
     BoatState_t boatState;

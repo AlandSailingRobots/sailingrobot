@@ -11,31 +11,30 @@
  *      Two functions have been developed to calculate the desired sail angle :
  *          - calculateSailAngleLinear(),
  *          - calculateSailAngleCardioid().
- *      You can choose the one you want to use by commenting/uncommenting lines 
- *      in SailControlNodeThreadFunc(). 
+ *      You can choose the one you want to use by commenting/uncommenting lines
+ *      in SailControlNodeThreadFunc().
  *
  ***************************************************************************************/
 #pragma once
 
-#include <thread>
 #include <math.h>
-#include <mutex>
-#include <chrono>
-#include <vector>
 #include <stdint.h>
 #include <atomic>
+#include <chrono>
+#include <mutex>
+#include <thread>
+#include <vector>
 
 #include "DataBase/DBHandler.h"
 #include "Math/Utility.h"
 #include "MessageBus/ActiveNode.h"
 #include "MessageBus/MessageBus.h"
-#include "Messages/WindDataMsg.h"
 #include "Messages/SailCommandMsg.h"
+#include "Messages/WindDataMsg.h"
 #include "SystemServices/Timer.h"
 
-
 class SailControlNode : public ActiveNode {
-public:
+   public:
     SailControlNode(MessageBus& msgBus, DBHandler& dbhandler);
     ~SailControlNode();
 
@@ -44,8 +43,7 @@ public:
     void stop();
     void processMessage(const Message* message);
 
-private:
-
+   private:
     ///----------------------------------------------------------------------------------
     /// Updates the values of the parameters from the database.
     ///----------------------------------------------------------------------------------
@@ -76,14 +74,13 @@ private:
     ///----------------------------------------------------------------------------------
     static void SailControlNodeThreadFunc(ActiveNode* nodePtr);
 
-    DBHandler &m_db;
+    DBHandler& m_db;
     std::mutex m_lock;
     std::atomic<bool> m_Running;
 
-    double  m_LoopTime;             // seconds
-    double  m_MaxSailAngle;         // degrees
-    double  m_MinSailAngle;         // degrees
+    double m_LoopTime;      // seconds
+    double m_MaxSailAngle;  // degrees
+    double m_MinSailAngle;  // degrees
 
-    double  m_ApparentWindDir;      // degrees [0, 360[ in North-East reference frame (clockwise)
-
+    double m_ApparentWindDir;  // degrees [0, 360[ in North-East reference frame (clockwise)
 };

@@ -23,19 +23,19 @@ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
 ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.*/
-#include "SystemServices/Logger.h"
-#include <wiringPiI2C.h>
 #include <stdbool.h>
-#include <stdio.h>      /* printf, fgets */
-#include <stdlib.h>     /* atoi */
-#include <unistd.h>
 #include <stdint.h>
+#include <stdio.h>  /* printf, fgets */
+#include <stdlib.h> /* atoi */
+#include <unistd.h>
+#include <wiringPiI2C.h>
+#include "SystemServices/Logger.h"
 
 #define LIDAR_LITE_ADRS 0x62
 
 #define MEASURE_VAL 0x04
 #define MEASURE_REG 0x00
-#define STATUS_REG  0x47
+#define STATUS_REG 0x47
 #define DISTANCE_REG_HI 0x0f
 #define DISTANCE_REG_LO 0x10
 #define VERSION_REG 0x41
@@ -43,20 +43,20 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.*/
 #define ERROR_READ -1
 
 // Status Bits
-#define STAT_BUSY               0x01
-#define STAT_REF_OVER           0x02
-#define STAT_SIG_OVER           0x04
-#define STAT_PIN                0x08
-#define STAT_SECOND_PEAK        0x10
-#define STAT_TIME               0x20
-#define STAT_INVALID            0x40
-#define STAT_EYE                0x80
+#define STAT_BUSY 0x01
+#define STAT_REF_OVER 0x02
+#define STAT_SIG_OVER 0x04
+#define STAT_PIN 0x08
+#define STAT_SECOND_PEAK 0x10
+#define STAT_TIME 0x20
+#define STAT_INVALID 0x40
+#define STAT_EYE 0x80
 
 int lidar_init(bool);
 int lidar_read(int);
-unsigned char  _read_byte(int, int);
-unsigned char  _read_byteNZ(int, int);
-unsigned char  _read_byte_raw(int, int, bool);
-unsigned char lidar_version(int) ;
+unsigned char _read_byte(int, int);
+unsigned char _read_byteNZ(int, int);
+unsigned char _read_byte_raw(int, int, bool);
+unsigned char lidar_version(int);
 unsigned char lidar_status(int);
 void lidar_status_print(unsigned char status);

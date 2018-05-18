@@ -7,14 +7,12 @@ class CANService;
 #include <stdint.h>
 #include <vector>
 
-class CANFrameReceiver
-{
+class CANFrameReceiver {
+   public:
+    CANFrameReceiver(CANService& service, std::vector<uint32_t> IDs);
+    CANFrameReceiver(CANService& service, uint32_t ID);
 
-public:
-	CANFrameReceiver(CANService& service, std::vector<uint32_t> IDs);
-	CANFrameReceiver(CANService& service, uint32_t ID);
+    virtual void processFrame(CanMsg& msg) = 0;
 
-	virtual void processFrame(CanMsg& msg) = 0;
-
-	void processFrameAndLogErrors(CanMsg& msg);
+    void processFrameAndLogErrors(CanMsg& msg);
 };

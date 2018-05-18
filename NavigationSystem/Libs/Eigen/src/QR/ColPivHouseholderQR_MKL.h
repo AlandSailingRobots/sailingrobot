@@ -36,63 +36,67 @@
 
 #include "Eigen/src/Core/util/MKL_support.h"
 
-namespace Eigen { 
+namespace Eigen {
 
 /** \internal Specialization for the data types supported by MKL */
 
-#define EIGEN_MKL_QR_COLPIV(EIGTYPE, MKLTYPE, MKLPREFIX, EIGCOLROW, MKLCOLROW) \
-template<> inline \
-ColPivHouseholderQR<Matrix<EIGTYPE, Dynamic, Dynamic, EIGCOLROW, Dynamic, Dynamic> >& \
-ColPivHouseholderQR<Matrix<EIGTYPE, Dynamic, Dynamic, EIGCOLROW, Dynamic, Dynamic> >::compute( \
-              const Matrix<EIGTYPE, Dynamic, Dynamic, EIGCOLROW, Dynamic, Dynamic>& matrix) \
-\
-{ \
-  using std::abs; \
-  typedef Matrix<EIGTYPE, Dynamic, Dynamic, EIGCOLROW, Dynamic, Dynamic> MatrixType; \
-  typedef MatrixType::RealScalar RealScalar; \
-  Index rows = matrix.rows();\
-  Index cols = matrix.cols();\
-  Index size = matrix.diagonalSize();\
-\
-  m_qr = matrix;\
-  m_hCoeffs.resize(size);\
-\
-  m_colsTranspositions.resize(cols);\
-  /*Index number_of_transpositions = 0;*/ \
-\
-  m_nonzero_pivots = 0; \
-  m_maxpivot = RealScalar(0);\
-  m_colsPermutation.resize(cols); \
-  m_colsPermutation.indices().setZero(); \
-\
-  lapack_int lda = m_qr.outerStride(), i; \
-  lapack_int matrix_order = MKLCOLROW; \
-  LAPACKE_##MKLPREFIX##geqp3( matrix_order, rows, cols, (MKLTYPE*)m_qr.data(), lda, (lapack_int*)m_colsPermutation.indices().data(), (MKLTYPE*)m_hCoeffs.data()); \
-  m_isInitialized = true; \
-  m_maxpivot=m_qr.diagonal().cwiseAbs().maxCoeff(); \
-  m_hCoeffs.adjointInPlace(); \
-  RealScalar premultiplied_threshold = abs(m_maxpivot) * threshold(); \
-  lapack_int *perm = m_colsPermutation.indices().data(); \
-  for(i=0;i<size;i++) { \
-    m_nonzero_pivots += (abs(m_qr.coeff(i,i)) > premultiplied_threshold);\
-  } \
-  for(i=0;i<cols;i++) perm[i]--;\
-\
-  /*m_det_pq = (number_of_transpositions%2) ? -1 : 1;  // TODO: It's not needed now; fix upon availability in Eigen */ \
-\
-  return *this; \
-}
+#define EIGEN_MKL_QR_COLPIV(EIGTYPE, MKLTYPE, MKLPREFIX, EIGCOLROW, MKLCOLROW)                    \
+    template <>                                                                                   \
+    inline ColPivHouseholderQR<Matrix<EIGTYPE, Dynamic, Dynamic, EIGCOLROW, Dynamic, Dynamic>>&   \
+    ColPivHouseholderQR<Matrix<EIGTYPE, Dynamic, Dynamic, EIGCOLROW, Dynamic, Dynamic>>::compute( \
+        const Matrix<EIGTYPE, Dynamic, Dynamic, EIGCOLROW, Dynamic, Dynamic>& matrix)             \
+                                                                                                  \
+    {                                                                                             \
+        using std::abs;                                                                           \
+        typedef Matrix<EIGTYPE, Dynamic, Dynamic, EIGCOLROW, Dynamic, Dynamic> MatrixType;        \
+        typedef MatrixType::RealScalar RealScalar;                                                \
+        Index rows = matrix.rows();                                                               \
+        Index cols = matrix.cols();                                                               \
+        Index size = matrix.diagonalSize();                                                       \
+                                                                                                  \
+        m_qr = matrix;                                                                            \
+        m_hCoeffs.resize(size);                                                                   \
+                                                                                                  \
+        m_colsTranspositions.resize(cols);                                                        \
+        /*Index number_of_transpositions = 0;*/                                                   \
+                                                                                                  \
+        m_nonzero_pivots = 0;                                                                     \
+        m_maxpivot = RealScalar(0);                                                               \
+        m_colsPermutation.resize(cols);                                                           \
+        m_colsPermutation.indices().setZero();                                                    \
+                                                                                                  \
+        lapack_int lda = m_qr.outerStride(), i;                                                   \
+        lapack_int matrix_order = MKLCOLROW;                                                      \
+        LAPACKE_##MKLPREFIX##geqp3(matrix_order, rows, cols, (MKLTYPE*)m_qr.data(), lda,          \
+                                   (lapack_int*)m_colsPermutation.indices().data(),               \
+                                   (MKLTYPE*)m_hCoeffs.data());                                   \
+        m_isInitialized = true;                                                                   \
+        m_maxpivot = m_qr.diagonal().cwiseAbs().maxCoeff();                                       \
+        m_hCoeffs.adjointInPlace();                                                               \
+        RealScalar premultiplied_threshold = abs(m_maxpivot) * threshold();                       \
+        lapack_int* perm = m_colsPermutation.indices().data();                                    \
+        for (i = 0; i < size; i++) {                                                              \
+            m_nonzero_pivots += (abs(m_qr.coeff(i, i)) > premultiplied_threshold);                \
+        }                                                                                         \
+        for (i = 0; i < cols; i++)                                                                \
+            perm[i]--;                                                                            \
+                                                                                                  \
+        /*m_det_pq = (number_of_transpositions%2) ? -1 : 1;  // TODO: It's not needed now; fix    \
+         * upon availability in Eigen */                                                          \
+                                                                                                  \
+        return *this;                                                                             \
+    }
 
-EIGEN_MKL_QR_COLPIV(double,   double,        d, ColMajor, LAPACK_COL_MAJOR)
-EIGEN_MKL_QR_COLPIV(float,    float,         s, ColMajor, LAPACK_COL_MAJOR)
+EIGEN_MKL_QR_COLPIV(double, double, d, ColMajor, LAPACK_COL_MAJOR)
+EIGEN_MKL_QR_COLPIV(float, float, s, ColMajor, LAPACK_COL_MAJOR)
 EIGEN_MKL_QR_COLPIV(dcomplex, MKL_Complex16, z, ColMajor, LAPACK_COL_MAJOR)
-EIGEN_MKL_QR_COLPIV(scomplex, MKL_Complex8,  c, ColMajor, LAPACK_COL_MAJOR)
+EIGEN_MKL_QR_COLPIV(scomplex, MKL_Complex8, c, ColMajor, LAPACK_COL_MAJOR)
 
-EIGEN_MKL_QR_COLPIV(double,   double,        d, RowMajor, LAPACK_ROW_MAJOR)
-EIGEN_MKL_QR_COLPIV(float,    float,         s, RowMajor, LAPACK_ROW_MAJOR)
+EIGEN_MKL_QR_COLPIV(double, double, d, RowMajor, LAPACK_ROW_MAJOR)
+EIGEN_MKL_QR_COLPIV(float, float, s, RowMajor, LAPACK_ROW_MAJOR)
 EIGEN_MKL_QR_COLPIV(dcomplex, MKL_Complex16, z, RowMajor, LAPACK_ROW_MAJOR)
-EIGEN_MKL_QR_COLPIV(scomplex, MKL_Complex8,  c, RowMajor, LAPACK_ROW_MAJOR)
+EIGEN_MKL_QR_COLPIV(scomplex, MKL_Complex8, c, RowMajor, LAPACK_ROW_MAJOR)
 
-} // end namespace Eigen
+}  // end namespace Eigen
 
-#endif // EIGEN_COLPIVOTINGHOUSEHOLDERQR_MKL_H
+#endif  // EIGEN_COLPIVOTINGHOUSEHOLDERQR_MKL_H

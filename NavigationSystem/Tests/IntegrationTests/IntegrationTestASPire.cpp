@@ -4,54 +4,52 @@
 * 		IntegrationTestASPire.cpp
 *
 * Purpose:
-		 Global Integrationtest for the ASPire
-*		 Monitor the values from the CAN-bus and able to sen comands to the actuators
+         Global Integrationtest for the ASPire
+*		 Monitor the values from the CAN-bus and able to send commands to the actuators
 *
 * Developer Notes:
-		 Currently monetriring windsensor, actuator feedbacka and if the radio controller is in manual mode.
-		 It is a interface between the messagebus and the CAN-bus that can be monitored.
+         Currently monetoring windsensor, actuator feedback and if the radio controller is in manual
+mode. It is a interface between the messagebus and the CAN-bus that can be monitored.
 *
 *
 *
 ***************************************************************************************/
 
-
-
 #include "Hardwares/CAN_Services/CANService.h"
 #include "Hardwares/CAN_Services/N2kMsg.h"
-#include "SystemServices/Timer.h"
 #include "SystemServices/Logger.h"
+#include "SystemServices/Timer.h"
 
+#include "Messages/AISDataMsg.h"
 #include "Messages/ASPireActuatorFeedbackMsg.h"
-#include "Messages/RudderCommandMsg.h"
-#include "Messages/WingSailCommandMsg.h"
-#include "Messages/WindDataMsg.h"
 #include "Messages/CompassDataMsg.h"
 #include "Messages/GPSDataMsg.h"
 #include "Messages/AISDataMsg.h"
 #include "Messages/MarineSensorDataMsg.h"
 #include "Messages/DataRequestMsg.h"
 
-
-#include "MessageBus/MessageTypes.h"
-#include "MessageBus/MessageBus.h"
 #include "MessageBus/ActiveNode.h"
+#include "MessageBus/MessageBus.h"
+#include "MessageBus/MessageTypes.h"
 #include "MessageBus/NodeIDs.h"
 
-#include "Hardwares/CANWindsensorNode.h"
-#include "Hardwares/CANArduinoNode.h"
 #include "Hardwares/ActuatorNodeASPire.h"
-#include "Hardwares/HMC6343Node.h"
-#include "Hardwares/GPSDNode.h"
 #include "Hardwares/CANAISNode.h"
 #include "Hardwares/CANMarineSensorTransmissionNode.h"
 
 #include <ncurses.h>
-#include <unordered_map>
-#include <thread>
-#include <chrono>
 #include <cctype>
+#include <chrono>
 #include <sstream>
+#include <thread>
+#include <unordered_map>
+
+#include <regex>
+#include <vector>
+#include <dirent.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <algorithm>
 
 #define BACKSPACE 8
 #define ENTER 10
@@ -63,14 +61,16 @@
 #define ON -3000
 #define OFF -4000
 
+#define FILE_PATH "../logs/"
+
 typedef std::unordered_map<std::string, float> SensorData;
 
 /*
-	To add new sensors, the sensors should probably send out their data
-	on the message bus. Then do the following:
-		* Register for the new message
-		* Process it and store its data
-		* Add the new member fields to the print function.
+    To add new sensors, the sensors should probably send out their data
+    on the message bus. Then do the following:
+        * Register for the new message
+        * Process it and store its data
+        * Add the new member fields to the print function.
 */
 
 class SensorDataReceiver : public Node {
@@ -230,78 +230,178 @@ private:
 
 };
 
-
 CANService canService;
 MessageBus msgBus;
 
 void messageLoop() {
-	msgBus.run();
+    msgBus.run();
 }
 
-std::string FloatToString (float number) {
-	std::ostringstream buff;
-	buff<<number;
-	return buff.str();
+WINDOW* inputWindow(int sensor_size, int logger_size) {
+    int begin_x = 2;
+    int begin_y = sensor_size + logger_size + 7;
+    int ncols = 80;
+    int nr_of_lines = 9;
+
+    WINDOW* inputWin = newwin(nr_of_lines, ncols, begin_y, begin_x);
+
+    return inputWin;
 }
 
+std::string getLogName() {
+    std::vector<std::string> log_names;
+    std::string dirPath = FILE_PATH;
+
+    DIR* d;
+    struct dirent* dir;
+
+    d = opendir(dirPath.c_str());  // set path to directory
+    if (d) {
+        while ((dir = readdir(d)) != NULL) {
+            if (strcmp(dir->d_name, ".") == 0 ||
+                strcmp(dir->d_name, "..") == 0)  // exclude "." and ".."
+            {
+                continue;
+            }
+
+            log_names.push_back(dir->d_name);
+        }
+        closedir(d);
+    }
+
+    std::sort(log_names.rbegin(),
+              log_names.rend());  // Reverse sorting so that the newest log will come first
+
+    return log_names[0].c_str();
+}
+
+std::vector<std::string> getLoggedData() {
+    std::ifstream logFile;
+    std::string newString;
+    std::smatch match;
+    std::vector<std::string> buffer;
+
+    std::regex expression("\\[(.*?)\\]\\s*\\<(.*?)\\>\\s*(.*)");
+
+    std::string test_name = getLogName();
+
+    logFile.open(FILE_PATH + getLogName());
+
+    if (!logFile) {
+        Logger::error("Open logfile\t\t[FAILED]");
+    }
+
+    while (!getline(logFile, newString, '\n').eof()) {
+        if (buffer.size() >= 7) {
+            buffer.erase(buffer.begin());
+        }
+
+        regex_search(newString, match, expression);
+
+        buffer.push_back(match[3].str());
+    }
+    logFile.close();
+
+    return buffer;
+}
+
+int loggerWindow(int size) {
+    int begin_x = 2;
+    int begin_y = size + 7;
+    int ncols = 80;
+    int log_size = 7;
+    int nr_of_lines = log_size + 6;
+    int pos = 4;
+
+    std::string logString;
+    std::vector<std::string> buffer = getLoggedData();
+
+    WINDOW* log_Win = newwin(nr_of_lines, ncols, begin_y, begin_x);
+
+    wclear(log_Win);
+    box(log_Win, 0, 0);
+
+    wmove(log_Win, 2, 25);
+
+    wprintw(log_Win, "LOGGER");
+
+    for (int i = 0; i < log_size; i++) {
+        wmove(log_Win, pos, 2);
+        wprintw(log_Win, "-> %s\n", buffer[i].c_str());
+
+        wmove(log_Win, pos, 35);
+        pos += 1;
+    }
+
+    wrefresh(log_Win);
+
+    return nr_of_lines;
+}
+
+std::string FloatToString(float number) {
+    std::ostringstream buff;
+    buff << number;
+    return buff.str();
+}
 
 std::map<std::string, std::string> menuValues;
 std::map<std::string, std::string> lastSentValues;
 typedef std::map<std::string, std::string>::iterator menuIter;
 
 void printInputMenu(WINDOW* win, menuIter highlightedItem) {
-	wclear(win);
-	box(win, 0,0);
+    wclear(win);
+    box(win, 0, 0);
 
-	wmove(win, 2, 20);
-	wprintw(win, "ACTUATOR COMMANDS");
-	int pos = 4;
-	for(auto it : menuValues) {
-		if(it == *highlightedItem) {
-			wattron(win, A_REVERSE);
-			mvwprintw(win, pos, 5, "%s", it.first.c_str());
-			wattroff(win, A_REVERSE);
-			wprintw(win, "\t :");
-		} else {
-			mvwprintw(win, pos, 5, "%s", it.first.c_str());
-			wprintw(win, "\t :");
-		}
-		mvwprintw(win, pos, 30, "%s", it.second.c_str());
-		pos+=1;
-	}
+    wmove(win, 2, 25);
+    wprintw(win, "ACTUATOR COMMANDS");
+    int pos = 4;
+    for (auto it : menuValues) {
+        if (it == *highlightedItem) {
+            wattron(win, A_REVERSE);
+            mvwprintw(win, pos, 5, "%s", it.first.c_str());
+            wattroff(win, A_REVERSE);
+            wprintw(win, "\t :");
+        } else {
+            mvwprintw(win, pos, 5, "%s", it.first.c_str());
+            wprintw(win, "\t :");
+        }
+        mvwprintw(win, pos, 30, "%s", it.second.c_str());
+        pos += 1;
+    }
 
-	mvwprintw(win, pos, 20, "PRESS ENTER TO SEND");
-	wrefresh(win);
-
+    mvwprintw(win, pos, 20, "PRESS ENTER TO SEND");
+    wrefresh(win);
 }
 
 void sendActuatorCommands() {
+    int rudderAngle16;
+    int wingsailAngle16;
+    // int windvaneAngle16; //For when the windvane is implemented
 
-	int rudderAngle16;
-	int wingsailAngle16;
-	//int windvaneAngle16; //For when the windvane is implemented
+    for (auto& it : menuValues) {
+        if (it.second.empty()) {
+            it.second = lastSentValues[it.first];
+        }
+    }
 
-	for(auto& it : menuValues) {
-		if(it.second.empty()) {
-			it.second = lastSentValues[it.first];
-		}
-	}
+    try {
+        rudderAngle16 = stoi(menuValues["Rudder Angle"]);
+        wingsailAngle16 = stoi(menuValues["Wingsail Angle"]);
+        // windvaneAngle16 = stoi(menuValues["Windvane Angle"]); //For when the windvane is
+        // implemented
+    } catch (std::invalid_argument &ex) {
+        std::cout << std::endl
+                  << "Actuator commands only works with integers." << std::endl
+                  << std::endl;
+        return;
+    }
 
-	try {
-		rudderAngle16 = stoi(menuValues["Rudder Angle"]);
-		wingsailAngle16 = stoi(menuValues["Wingsail Angle"]);
-		//windvaneAngle16 = stoi(menuValues["Windvane Angle"]); //For when the windvane is implemented
-	} catch(std::invalid_argument ex) {
-		std::cout << std::endl << "Actuator commands only works with integers." << std::endl << std::endl;
-		return;
-	}
+    MessagePtr rudderMsg = std::make_unique<RudderCommandMsg>(rudderAngle16);
+    msgBus.sendMessage(std::move(rudderMsg));
+    MessagePtr wingSailMsg = std::make_unique<WingSailCommandMsg>(wingsailAngle16);
+    msgBus.sendMessage(std::move(wingSailMsg));
 
-	MessagePtr rudderMsg = std::make_unique<RudderCommandMsg>(rudderAngle16);
-	msgBus.sendMessage(std::move(rudderMsg));
-	MessagePtr wingSailMsg = std::make_unique<WingSailCommandMsg>(wingsailAngle16);
-	msgBus.sendMessage(std::move(wingSailMsg));
-
-	lastSentValues = menuValues;
+    lastSentValues = menuValues;
 }
 
 void sendMarineSensorRequest() {

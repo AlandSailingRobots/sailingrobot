@@ -22,23 +22,23 @@
  ***********************************************************************
  */
 
-#define	MAX_NES_JOYSTICKS	8
+#define MAX_NES_JOYSTICKS 8
 
-#define	NES_RIGHT	0x01
-#define	NES_LEFT	0x02
-#define	NES_DOWN	0x04
-#define	NES_UP		0x08
-#define	NES_START	0x10
-#define	NES_SELECT	0x20
-#define	NES_B		0x40
-#define	NES_A		0x80
+#define NES_RIGHT 0x01
+#define NES_LEFT 0x02
+#define NES_DOWN 0x04
+#define NES_UP 0x08
+#define NES_START 0x10
+#define NES_SELECT 0x20
+#define NES_B 0x40
+#define NES_A 0x80
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-extern int          setupNesJoystick (int dPin, int cPin, int lPin) ;
-extern unsigned int  readNesJoystick (int joystick) ;
+extern int setupNesJoystick(int dPin, int cPin, int lPin);
+extern unsigned int readNesJoystick(int joystick);
 
 #ifdef __cplusplus
 }

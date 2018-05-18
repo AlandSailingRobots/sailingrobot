@@ -26,23 +26,23 @@
 
 // MCP23016 Registers
 
-#define	MCP23016_GP0		0x00
-#define	MCP23016_GP1		0x01
-#define	MCP23016_OLAT0		0x02
-#define	MCP23016_OLAT1		0x03
-#define	MCP23016_IPOL0		0x04
-#define	MCP23016_IPOL1		0x05
-#define	MCP23016_IODIR0		0x06
-#define	MCP23016_IODIR1		0x07
-#define	MCP23016_INTCAP0	0x08
-#define	MCP23016_INTCAP1	0x09
-#define	MCP23016_IOCON0		0x0A
-#define	MCP23016_IOCON1		0x0B
+#define MCP23016_GP0 0x00
+#define MCP23016_GP1 0x01
+#define MCP23016_OLAT0 0x02
+#define MCP23016_OLAT1 0x03
+#define MCP23016_IPOL0 0x04
+#define MCP23016_IPOL1 0x05
+#define MCP23016_IODIR0 0x06
+#define MCP23016_IODIR1 0x07
+#define MCP23016_INTCAP0 0x08
+#define MCP23016_INTCAP1 0x09
+#define MCP23016_IOCON0 0x0A
+#define MCP23016_IOCON1 0x0B
 
 // Bits in the IOCON register
 
-#define	IOCON_IARES	0x01
+#define IOCON_IARES 0x01
 
 // Default initialisation mode
 
-#define	IOCON_INIT	0
+#define IOCON_INIT 0

@@ -15,50 +15,50 @@
 
 #include "MessageBus/Message.h"
 
-
 class WindDataMsg : public Message {
-public:
-	WindDataMsg(NodeID destinationID, NodeID sourceID, float windDir, float windSpeed, float windTemp)
-		:Message(MessageType::WindData, sourceID, destinationID),
-		m_WindDir(windDir), m_WindSpeed(windSpeed), m_WindTemp(windTemp)
-	{ }
+   public:
+    WindDataMsg(NodeID destinationID,
+                NodeID sourceID,
+                float windDir,
+                float windSpeed,
+                float windTemp)
+        : Message(MessageType::WindData, sourceID, destinationID),
+          m_WindDir(windDir),
+          m_WindSpeed(windSpeed),
+          m_WindTemp(windTemp) {}
 
-	WindDataMsg(float windDir, float windSpeed, float windTemp)
-		:Message(MessageType::WindData, NodeID::None, NodeID::None),
-		m_WindDir(windDir), m_WindSpeed(windSpeed), m_WindTemp(windTemp)
-	{ }
+    WindDataMsg(float windDir, float windSpeed, float windTemp)
+        : Message(MessageType::WindData, NodeID::None, NodeID::None),
+          m_WindDir(windDir),
+          m_WindSpeed(windSpeed),
+          m_WindTemp(windTemp) {}
 
-	WindDataMsg(MessageDeserialiser deserialiser)
-		:Message(deserialiser)
-	{
-		if(	!deserialiser.readFloat(m_WindDir) ||
-			!deserialiser.readFloat(m_WindSpeed) ||
-			!deserialiser.readFloat(m_WindTemp))
-		{
-			m_valid = false;
-		}
-	}
+    WindDataMsg(MessageDeserialiser deserialiser) : Message(deserialiser) {
+        if (!deserialiser.readFloat(m_WindDir) || !deserialiser.readFloat(m_WindSpeed) ||
+            !deserialiser.readFloat(m_WindTemp)) {
+            m_valid = false;
+        }
+    }
 
-	virtual ~WindDataMsg() { }
+    virtual ~WindDataMsg() {}
 
-	float windDirection() const { return m_WindDir; }
-	float windSpeed() const { return m_WindSpeed; }
-	float windTemp() const { return m_WindTemp; }
+    float windDirection() const { return m_WindDir; }
+    float windSpeed() const { return m_WindSpeed; }
+    float windTemp() const { return m_WindTemp; }
 
-	///----------------------------------------------------------------------------------
-	/// Serialises the message into a MessageSerialiser
-	///----------------------------------------------------------------------------------
-	virtual void Serialise(MessageSerialiser& serialiser) const
-	{
-		Message::Serialise(serialiser);
+    ///----------------------------------------------------------------------------------
+    /// Serialises the message into a MessageSerialiser
+    ///----------------------------------------------------------------------------------
+    virtual void Serialise(MessageSerialiser& serialiser) const {
+        Message::Serialise(serialiser);
 
-		serialiser.serialise(m_WindDir);
-		serialiser.serialise(m_WindSpeed);
-		serialiser.serialise(m_WindTemp);
-	}
+        serialiser.serialise(m_WindDir);
+        serialiser.serialise(m_WindSpeed);
+        serialiser.serialise(m_WindTemp);
+    }
 
-private:
-	float 	m_WindDir;		// degree [0, 360[ in vessel reference frame (clockwise)
-	float 	m_WindSpeed;	// m/s
-	float	m_WindTemp;		// degree Celsius
+   private:
+    float m_WindDir;    // degree [0, 360[ in vessel reference frame (clockwise)
+    float m_WindSpeed;  // m/s
+    float m_WindTemp;   // degree Celsius
 };

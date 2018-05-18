@@ -32,13 +32,13 @@ extern "C" {
 
 // Old routines
 
-extern void gertboardAnalogWrite (const int chan, const int value) ;
-extern int  gertboardAnalogRead  (const int chan) ;
-extern int  gertboardSPISetup    (void) ;
+extern void gertboardAnalogWrite(const int chan, const int value);
+extern int gertboardAnalogRead(const int chan);
+extern int gertboardSPISetup(void);
 
 // New
 
-extern int  gertboardAnalogSetup (const int pinBase) ;
+extern int gertboardAnalogSetup(const int pinBase);
 
 #ifdef __cplusplus
 }

@@ -15,37 +15,38 @@
 
 #pragma once
 #include "MessageBus/ActiveNode.h"
-#include "lidarLite/lidarLite.h"
 #include "Messages/LidarMsg.h"
+#include "lidarLite/lidarLite.h"
 
 class LidarLiteNode : public ActiveNode {
-public:
-    LidarLiteNode(MessageBus& msgBus,int delay,bool debug);//delay in msat least 2ms or too much timeout
-    LidarLiteNode(MessageBus& msgBus,int delay);
+   public:
+    LidarLiteNode(MessageBus& msgBus,
+                  int delay,
+                  bool debug);  // delay in msat least 2ms or too much timeout
+    LidarLiteNode(MessageBus& msgBus, int delay);
 
-	///----------------------------------------------------------------------------------
-	/// Initialises the connection with the lidar
-	///
-	///----------------------------------------------------------------------------------
-	bool init();
+    ///----------------------------------------------------------------------------------
+    /// Initialises the connection with the lidar
+    ///
+    ///----------------------------------------------------------------------------------
+    bool init();
 
-	///----------------------------------------------------------------------------------
-	/// Processes DataRequest messages.
-	///
-	///----------------------------------------------------------------------------------
-	void processMessage(const Message* msgPtr);
+    ///----------------------------------------------------------------------------------
+    /// Processes DataRequest messages.
+    ///
+    ///----------------------------------------------------------------------------------
+    void processMessage(const Message* msgPtr);
 
-	///----------------------------------------------------------------------------------
- 	/// This function starts the  colorDetectionNode thread
- 	///
- 	///----------------------------------------------------------------------------------
-	void start();
-private:
+    ///----------------------------------------------------------------------------------
+    /// This function starts the  colorDetectionNode thread
+    ///
+    ///----------------------------------------------------------------------------------
+    void start();
 
-	static void LidarThreadFunc(void* nodePtr);
-    int 	m_delay;           //units : milliseconds
-    int		m_fd;
-    bool 	m_debug;
-    bool 	m_Initialised;
-
+   private:
+    static void LidarThreadFunc(void* nodePtr);
+    int m_delay;  // units : milliseconds
+    int m_fd;
+    bool m_debug;
+    bool m_Initialised;
 };

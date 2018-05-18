@@ -30,35 +30,27 @@
 
 #include <cxxtest/Gui.h>
 
-#include <windows.h>
 #include <commctrl.h>
+#include <windows.h>
 
-namespace CxxTest
-{
-class Win32Gui : public GuiListener
-{
-public:
-    void enterGui(int &argc, char **argv)
-    {
-        parseCommandLine(argc, argv);
-    }
+namespace CxxTest {
+class Win32Gui : public GuiListener {
+   public:
+    void enterGui(int& argc, char** argv) { parseCommandLine(argc, argv); }
 
-    void enterWorld(const WorldDescription &wd)
-    {
+    void enterWorld(const WorldDescription& wd) {
         getTotalTests(wd);
         _testsDone = 0;
         startGuiThread();
     }
 
-    void guiEnterSuite(const char *suiteName)
-    {
+    void guiEnterSuite(const char* suiteName) {
         showSuiteName(suiteName);
         reset(_suiteStart);
     }
 
-    void guiEnterTest(const char *suiteName, const char *testName)
-    {
-        ++ _testsDone;
+    void guiEnterTest(const char* suiteName, const char* testName) {
+        ++_testsDone;
         setTestCaption(suiteName, testName);
         showTestName(testName);
         showTestsDone();
@@ -66,17 +58,14 @@ public:
         reset(_testStart);
     }
 
-    void yellowBar()
-    {
+    void yellowBar() {
         setColor(255, 255, 0);
         setIcon(IDI_WARNING);
         getTotalTests();
     }
 
-    void redBar()
-    {
-        if (_startMinimized)
-        {
+    void redBar() {
+        if (_startMinimized) {
             showMainWindow(SW_SHOWNORMAL);
         }
         setColor(255, 0, 0);
@@ -84,18 +73,16 @@ public:
         getTotalTests();
     }
 
-    void leaveGui()
-    {
-        if (keep())
-        {
+    void leaveGui() {
+        if (keep()) {
             showSummary();
             WaitForSingleObject(_gui, INFINITE);
         }
         DestroyWindow(_mainWindow);
     }
 
-private:
-    const char *_title;
+   private:
+    const char* _title;
     bool _startMinimized, _keep;
     HANDLE _gui;
     WNDCLASSEX _windowClass;
@@ -103,69 +90,58 @@ private:
     HANDLE _canStartTests;
     unsigned _numTotalTests, _testsDone;
     char _strTotalTests[WorldDescription::MAX_STRLEN_TOTAL_TESTS];
-    enum
-    {
-        STATUS_SUITE_NAME, STATUS_SUITE_TIME,
-        STATUS_TEST_NAME, STATUS_TEST_TIME,
-        STATUS_TESTS_DONE, STATUS_WORLD_TIME,
+    enum {
+        STATUS_SUITE_NAME,
+        STATUS_SUITE_TIME,
+        STATUS_TEST_NAME,
+        STATUS_TEST_TIME,
+        STATUS_TESTS_DONE,
+        STATUS_WORLD_TIME,
         STATUS_TOTAL_PARTS
     };
     int _statusWidths[STATUS_TOTAL_PARTS];
     unsigned _statusOffsets[STATUS_TOTAL_PARTS];
     unsigned _statusTotal;
-    char _statusTestsDone[sizeof("1000000000 of  (100%)") + WorldDescription::MAX_STRLEN_TOTAL_TESTS];
+    char _statusTestsDone[sizeof("1000000000 of  (100%)") +
+                          WorldDescription::MAX_STRLEN_TOTAL_TESTS];
     DWORD _worldStart, _suiteStart, _testStart;
     char _timeString[sizeof("00:00:00")];
 
-    void parseCommandLine(int argc, char **argv)
-    {
+    void parseCommandLine(int argc, char** argv) {
         _startMinimized = _keep = false;
         _title = argv[0];
 
-        for (int i = 1; i < argc; ++ i)
-        {
-            if (!lstrcmpA(argv[i], "-minimized"))
-            {
+        for (int i = 1; i < argc; ++i) {
+            if (!lstrcmpA(argv[i], "-minimized")) {
                 _startMinimized = true;
-            }
-            else if (!lstrcmpA(argv[i], "-keep"))
-            {
+            } else if (!lstrcmpA(argv[i], "-keep")) {
                 _keep = true;
-            }
-            else if (!lstrcmpA(argv[i], "-title") && (i + 1 < argc))
-            {
+            } else if (!lstrcmpA(argv[i], "-title") && (i + 1 < argc)) {
                 _title = argv[++i];
             }
         }
     }
 
-    void getTotalTests()
-    {
-        getTotalTests(tracker().world());
-    }
+    void getTotalTests() { getTotalTests(tracker().world()); }
 
-    void getTotalTests(const WorldDescription &wd)
-    {
+    void getTotalTests(const WorldDescription& wd) {
         _numTotalTests = wd.numTotalTests();
         wd.strTotalTests(_strTotalTests);
     }
 
-    void startGuiThread()
-    {
+    void startGuiThread() {
         _canStartTests = CreateEvent(NULL, TRUE, FALSE, NULL);
         DWORD threadId;
         _gui = CreateThread(NULL, 0, &(Win32Gui::guiThread), (LPVOID)this, 0, &threadId);
         WaitForSingleObject(_canStartTests, INFINITE);
     }
 
-    static DWORD WINAPI guiThread(LPVOID parameter)
-    {
-        ((Win32Gui *)parameter)->gui();
+    static DWORD WINAPI guiThread(LPVOID parameter) {
+        ((Win32Gui*)parameter)->gui();
         return 0;
     }
 
-    void gui()
-    {
+    void gui() {
         registerWindowClass();
         createMainWindow();
         initCommonControls();
@@ -179,8 +155,7 @@ private:
         messageLoop();
     }
 
-    void registerWindowClass()
-    {
+    void registerWindowClass() {
         _windowClass.cbSize = sizeof(_windowClass);
         _windowClass.style = CS_HREDRAW | CS_VREDRAW;
         _windowClass.lpfnWndProc = &(Win32Gui::windowProcedure);
@@ -197,47 +172,50 @@ private:
         RegisterClassEx(&_windowClass);
     }
 
-    void createMainWindow()
-    {
+    void createMainWindow() {
         _mainWindow = createWindow(_windowClass.lpszClassName, WS_OVERLAPPEDWINDOW);
     }
 
-    void initCommonControls()
-    {
+    void initCommonControls() {
         HMODULE dll = LoadLibraryA("comctl32.dll");
-        if (!dll) { return; }
+        if (!dll) {
+            return;
+        }
 
-        typedef void (WINAPI * FUNC)(void);
+        typedef void(WINAPI * FUNC)(void);
         FUNC func = (FUNC)GetProcAddress(dll, "InitCommonControls");
-        if (!func) { return; }
+        if (!func) {
+            return;
+        }
         func();
     }
 
-    void createProgressBar()
-    {
-        _progressBar = createWindow(PROGRESS_CLASS, WS_CHILD | WS_VISIBLE | PBS_SMOOTH, _mainWindow);
+    void createProgressBar() {
+        _progressBar =
+            createWindow(PROGRESS_CLASS, WS_CHILD | WS_VISIBLE | PBS_SMOOTH, _mainWindow);
 
 #ifdef PBM_SETRANGE32
         progressBarMessage(PBM_SETRANGE32, 0, _numTotalTests);
-#else // No PBM_SETRANGE32, use PBM_SETRANGE
+#else   // No PBM_SETRANGE32, use PBM_SETRANGE
         progressBarMessage(PBM_SETRANGE, 0, MAKELPARAM(0, (WORD)_numTotalTests));
-#endif // PBM_SETRANGE32
+#endif  // PBM_SETRANGE32
         progressBarMessage(PBM_SETPOS, 0);
         progressBarMessage(PBM_SETSTEP, 1);
         greenBar();
         UpdateWindow(_progressBar);
     }
 
-    void createStatusBar()
-    {
+    void createStatusBar() {
         _statusBar = createWindow(STATUSCLASSNAME, WS_CHILD | WS_VISIBLE, _mainWindow);
         setRatios(4, 1, 3, 1, 3, 1);
     }
 
-    void setRatios(unsigned suiteNameRatio, unsigned suiteTimeRatio,
-                   unsigned testNameRatio, unsigned testTimeRatio,
-                   unsigned testsDoneRatio, unsigned worldTimeRatio)
-    {
+    void setRatios(unsigned suiteNameRatio,
+                   unsigned suiteTimeRatio,
+                   unsigned testNameRatio,
+                   unsigned testTimeRatio,
+                   unsigned testsDoneRatio,
+                   unsigned worldTimeRatio) {
         _statusTotal = 0;
         _statusOffsets[STATUS_SUITE_NAME] = (_statusTotal += suiteNameRatio);
         _statusOffsets[STATUS_SUITE_TIME] = (_statusTotal += suiteTimeRatio);
@@ -247,19 +225,16 @@ private:
         _statusOffsets[STATUS_WORLD_TIME] = (_statusTotal += worldTimeRatio);
     }
 
-    HWND createWindow(LPCTSTR className, DWORD style, HWND parent = (HWND)NULL)
-    {
-        return CreateWindow(className, NULL, style, 0, 0, 0, 0, parent,
-                            (HMENU)NULL, (HINSTANCE)NULL, (LPVOID)this);
+    HWND createWindow(LPCTSTR className, DWORD style, HWND parent = (HWND)NULL) {
+        return CreateWindow(className, NULL, style, 0, 0, 0, 0, parent, (HMENU)NULL,
+                            (HINSTANCE)NULL, (LPVOID)this);
     }
 
-    void progressBarMessage(UINT message, WPARAM wParam = 0, LPARAM lParam = 0)
-    {
+    void progressBarMessage(UINT message, WPARAM wParam = 0, LPARAM lParam = 0) {
         SendMessage(_progressBar, message, wParam, lParam);
     }
 
-    void centerMainWindow()
-    {
+    void centerMainWindow() {
         RECT screen;
         getScreenArea(screen);
 
@@ -272,115 +247,97 @@ private:
         LONG windowWidth = (screenWidth * 4) / 5;
         LONG windowHeight = screenHeight / 10;
         LONG minimumHeight = 2 * (GetSystemMetrics(SM_CYCAPTION) + GetSystemMetrics(SM_CYFRAME));
-        if (windowHeight < minimumHeight)
-        {
+        if (windowHeight < minimumHeight) {
             windowHeight = minimumHeight;
         }
 
-        SetWindowPos(_mainWindow, HWND_TOP,
-                     xCenter - (windowWidth / 2), yCenter - (windowHeight / 2),
-                     windowWidth, windowHeight, 0);
+        SetWindowPos(_mainWindow, HWND_TOP, xCenter - (windowWidth / 2),
+                     yCenter - (windowHeight / 2), windowWidth, windowHeight, 0);
     }
 
-    void getScreenArea(RECT &area)
-    {
-        if (!getScreenAreaWithoutTaskbar(area))
-        {
+    void getScreenArea(RECT& area) {
+        if (!getScreenAreaWithoutTaskbar(area)) {
             getWholeScreenArea(area);
         }
     }
 
-    bool getScreenAreaWithoutTaskbar(RECT &area)
-    {
+    bool getScreenAreaWithoutTaskbar(RECT& area) {
         return (SystemParametersInfo(SPI_GETWORKAREA, sizeof(RECT), &area, 0) != 0);
     }
 
-    void getWholeScreenArea(RECT &area)
-    {
+    void getWholeScreenArea(RECT& area) {
         area.left = area.top = 0;
         area.right = GetSystemMetrics(SM_CXSCREEN);
         area.bottom = GetSystemMetrics(SM_CYSCREEN);
     }
 
-    void showMainWindow()
-    {
+    void showMainWindow() {
         showMainWindow(_startMinimized ? SW_MINIMIZE : SW_SHOWNORMAL);
         UpdateWindow(_mainWindow);
     }
 
-    void showMainWindow(int mode)
-    {
-        ShowWindow(_mainWindow, mode);
-    }
+    void showMainWindow(int mode) { ShowWindow(_mainWindow, mode); }
 
     enum { TIMER_ID = 1, TIMER_DELAY = 1000 };
 
-    void startTimer()
-    {
+    void startTimer() {
         reset(_worldStart);
         reset(_suiteStart);
         reset(_testStart);
         SetTimer(_mainWindow, TIMER_ID, TIMER_DELAY, 0);
     }
 
-    void reset(DWORD &tick)
-    {
-        tick = GetTickCount();
-    }
+    void reset(DWORD& tick) { tick = GetTickCount(); }
 
-    void startTests()
-    {
-        SetEvent(_canStartTests);
-    }
+    void startTests() { SetEvent(_canStartTests); }
 
-    void messageLoop()
-    {
+    void messageLoop() {
         MSG message;
-        while (BOOL haveMessage = GetMessage(&message, NULL, 0, 0))
-        {
-            if (haveMessage != -1)
-            {
+        while (BOOL haveMessage = GetMessage(&message, NULL, 0, 0)) {
+            if (haveMessage != -1) {
                 DispatchMessage(&message);
             }
         }
     }
 
-    static LRESULT CALLBACK windowProcedure(HWND window, UINT message, WPARAM wParam, LPARAM lParam)
-    {
-        if (message == WM_CREATE)
-        {
+    static LRESULT CALLBACK windowProcedure(HWND window,
+                                            UINT message,
+                                            WPARAM wParam,
+                                            LPARAM lParam) {
+        if (message == WM_CREATE) {
             setUp(window, (LPCREATESTRUCT)lParam);
         }
 
-        Win32Gui *that = (Win32Gui *)GetWindowLong(window, GWL_USERDATA);
+        Win32Gui* that = (Win32Gui*)GetWindowLong(window, GWL_USERDATA);
         return that->handle(window, message, wParam, lParam);
     }
 
-    static void setUp(HWND window, LPCREATESTRUCT create)
-    {
+    static void setUp(HWND window, LPCREATESTRUCT create) {
         SetWindowLong(window, GWL_USERDATA, (LONG)create->lpCreateParams);
     }
 
-    LRESULT handle(HWND window, UINT message, WPARAM wParam, LPARAM lParam)
-    {
-        switch (message)
-        {
-        case WM_SIZE: resizeControls(); break;
+    LRESULT handle(HWND window, UINT message, WPARAM wParam, LPARAM lParam) {
+        switch (message) {
+            case WM_SIZE:
+                resizeControls();
+                break;
 
-        case WM_TIMER: updateTime(); break;
+            case WM_TIMER:
+                updateTime();
+                break;
 
-        case WM_CLOSE:
-        case WM_DESTROY:
-        case WM_QUIT:
-            ExitProcess(tracker().failedTests());
+            case WM_CLOSE:
+            case WM_DESTROY:
+            case WM_QUIT:
+                ExitProcess(tracker().failedTests());
 
-        default: return DefWindowProc(window, message, wParam, lParam);
+            default:
+                return DefWindowProc(window, message, wParam, lParam);
         }
         return 0;
     }
 
-    void resizeControls()
-    {
+    void resizeControls() {
         RECT r;
         GetClientRect(_mainWindow, &r);
         LONG width = r.right - r.left;
@@ -396,58 +353,48 @@ private:
         setStatusParts(width - resizeGripWidth);
     }
 
-    void setStatusParts(LONG width)
-    {
-        for (unsigned i = 0; i < STATUS_TOTAL_PARTS; ++ i)
-        {
+    void setStatusParts(LONG width) {
+        for (unsigned i = 0; i < STATUS_TOTAL_PARTS; ++i) {
             _statusWidths[i] = (width * _statusOffsets[i]) / _statusTotal;
         }
 
         statusBarMessage(SB_SETPARTS, STATUS_TOTAL_PARTS, _statusWidths);
     }
 
-    void statusBarMessage(UINT message, WPARAM wParam = 0, const void *lParam = 0)
-    {
+    void statusBarMessage(UINT message, WPARAM wParam = 0, const void* lParam = 0) {
         SendMessage(_statusBar, message, wParam, (LPARAM)lParam);
     }
 
-    void greenBar()
-    {
+    void greenBar() {
         setColor(0, 255, 0);
         setIcon(IDI_INFORMATION);
     }
 
 #ifdef PBM_SETBARCOLOR
-    void setColor(BYTE red, BYTE green, BYTE blue)
-    {
+    void setColor(BYTE red, BYTE green, BYTE blue) {
         progressBarMessage(PBM_SETBARCOLOR, 0, RGB(red, green, blue));
     }
-#else // !PBM_SETBARCOLOR
-    void setColor(BYTE, BYTE, BYTE)
-    {
-    }
-#endif // PBM_SETBARCOLOR
+#else   // !PBM_SETBARCOLOR
+    void setColor(BYTE, BYTE, BYTE) {}
+#endif  // PBM_SETBARCOLOR
 
-    void setIcon(LPCTSTR icon)
-    {
+    void setIcon(LPCTSTR icon) {
         SendMessage(_mainWindow, WM_SETICON, ICON_BIG, (LPARAM)loadStandardIcon(icon));
     }
 
-    HICON loadStandardIcon(LPCTSTR icon)
-    {
-        return LoadIcon((HINSTANCE)NULL, icon);
-    }
+    HICON loadStandardIcon(LPCTSTR icon) { return LoadIcon((HINSTANCE)NULL, icon); }
 
-    void setTestCaption(const char *suiteName, const char *testName)
-    {
+    void setTestCaption(const char* suiteName, const char* testName) {
         setCaption(suiteName, "::", testName, "()");
     }
 
-    void setCaption(const char *a = "", const char *b = "", const char *c = "", const char *d = "")
-    {
-        unsigned length = lstrlenA(_title) + sizeof(" - ") +
-                          lstrlenA(a) + lstrlenA(b) + lstrlenA(c) + lstrlenA(d);
-        char *name = allocate(length);
+    void setCaption(const char* a = "",
+                    const char* b = "",
+                    const char* c = "",
+                    const char* d = "") {
+        unsigned length = lstrlenA(_title) + sizeof(" - ") + lstrlenA(a) + lstrlenA(b) +
+                          lstrlenA(c) + lstrlenA(d);
+        char* name = allocate(length);
         lstrcpyA(name, _title);
         lstrcatA(name, " - ");
         lstrcatA(name, a);
@@ -458,115 +405,83 @@ private:
         deallocate(name);
     }
 
-    void showSuiteName(const char *suiteName)
-    {
-        setStatusPart(STATUS_SUITE_NAME, suiteName);
-    }
+    void showSuiteName(const char* suiteName) { setStatusPart(STATUS_SUITE_NAME, suiteName); }
 
-    void showTestName(const char *testName)
-    {
-        setStatusPart(STATUS_TEST_NAME, testName);
-    }
+    void showTestName(const char* testName) { setStatusPart(STATUS_TEST_NAME, testName); }
 
-    void showTestsDone()
-    {
-        wsprintfA(_statusTestsDone, "%u of %s (%u%%)",
-                  _testsDone, _strTotalTests,
+    void showTestsDone() {
+        wsprintfA(_statusTestsDone, "%u of %s (%u%%)", _testsDone, _strTotalTests,
                   (_testsDone * 100) / _numTotalTests);
         setStatusPart(STATUS_TESTS_DONE, _statusTestsDone);
     }
 
-    void updateTime()
-    {
+    void updateTime() {
         setStatusTime(STATUS_WORLD_TIME, _worldStart);
         setStatusTime(STATUS_SUITE_TIME, _suiteStart);
         setStatusTime(STATUS_TEST_TIME, _testStart);
     }
 
-    void setStatusTime(unsigned part, DWORD start)
-    {
+    void setStatusTime(unsigned part, DWORD start) {
         unsigned total = (GetTickCount() - start) / 1000;
         unsigned hours = total / 3600;
         unsigned minutes = (total / 60) % 60;
         unsigned seconds = total % 60;
 
-        if (hours)
-        {
+        if (hours) {
             wsprintfA(_timeString, "%u:%02u:%02u", hours, minutes, seconds);
-        }
-        else
-        {
+        } else {
             wsprintfA(_timeString, "%02u:%02u", minutes, seconds);
         }
 
         setStatusPart(part, _timeString);
     }
 
-    bool keep()
-    {
-        if (!_keep)
-        {
+    bool keep() {
+        if (!_keep) {
             return false;
         }
-        if (!_startMinimized)
-        {
+        if (!_startMinimized) {
             return true;
         }
         return (_mainWindow == GetForegroundWindow());
     }
 
-    void showSummary()
-    {
+    void showSummary() {
         stopTimer();
         setSummaryStatusBar();
         setSummaryCaption();
     }
 
-    void setStatusPart(unsigned part, const char *text)
-    {
+    void setStatusPart(unsigned part, const char* text) {
         statusBarMessage(SB_SETTEXTA, part, text);
     }
 
-    void stopTimer()
-    {
+    void stopTimer() {
         KillTimer(_mainWindow, TIMER_ID);
         setStatusTime(STATUS_WORLD_TIME, _worldStart);
     }
 
-    void setSummaryStatusBar()
-    {
+    void setSummaryStatusBar() {
         setRatios(0, 0, 0, 0, 1, 1);
         resizeControls();
 
-        const char *tests = (_numTotalTests == 1) ? "test" : "tests";
-        if (tracker().failedTests())
-        {
-            wsprintfA(_statusTestsDone, "Failed %u of %s %s",
-                      tracker().failedTests(), _strTotalTests, tests);
-        }
-        else
-        {
+        const char* tests = (_numTotalTests == 1) ? "test" : "tests";
+        if (tracker().failedTests()) {
+            wsprintfA(_statusTestsDone, "Failed %u of %s %s", tracker().failedTests(),
+                      _strTotalTests, tests);
+        } else {
             wsprintfA(_statusTestsDone, "%s %s passed", _strTotalTests, tests);
         }
 
         setStatusPart(STATUS_TESTS_DONE, _statusTestsDone);
     }
 
-    void setSummaryCaption()
-    {
-        setCaption(_statusTestsDone);
-    }
+    void setSummaryCaption() { setCaption(_statusTestsDone); }
 
-    char *allocate(unsigned length)
-    {
-        return (char *)HeapAlloc(GetProcessHeap(), 0, length);
-    }
+    char* allocate(unsigned length) { return (char*)HeapAlloc(GetProcessHeap(), 0, length); }
 
-    void deallocate(char *data)
-    {
-        HeapFree(GetProcessHeap(), 0, data);
-    }
+    void deallocate(char* data) { HeapFree(GetProcessHeap(), 0, data); }
 };
-}
+}  // namespace CxxTest
 
-#endif // __cxxtest__Win32Gui_h__
+#endif  // __cxxtest__Win32Gui_h__

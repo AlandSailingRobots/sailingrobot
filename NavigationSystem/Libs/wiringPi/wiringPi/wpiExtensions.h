@@ -22,5 +22,4 @@
  ***********************************************************************
  */
 
-
-extern int loadWPiExtension (char *progName, char *extensionData, int verbose) ;
+extern int loadWPiExtension(char* progName, char* extensionData, int verbose);
