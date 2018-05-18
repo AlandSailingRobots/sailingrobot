@@ -100,7 +100,7 @@ struct perfvalues {
     Index panel_size;  // a panel consists of at most <panel_size> consecutive columns
     Index relax;       // To control degree of relaxing supernodes. If the number of nodes (columns)
                        // in a subtree of the elimination tree is less than relax, this subtree is
-                  // considered as one supernode regardless of the row structures of those columns
+    // considered as one supernode regardless of the row structures of those columns
     Index maxsuper;    // The maximum size for a supernode in complete LU
     Index rowblk;      // The minimum row dimension for 2-D blocking to be used;
     Index colblk;      // The minimum column dimension for 2-D blocking to be used;

@@ -29,8 +29,8 @@ struct traits<kernel_retval_base<DecompositionType>> {
                    MatrixType::Options,
                    MatrixType::MaxColsAtCompileTime,  // see explanation for 2nd template parameter
                    MatrixType::MaxColsAtCompileTime   // the kernel is a subspace of the domain
-                                                     // space, whose dimension is the number of
-                                                     // columns of the original matrix
+                                                      // space, whose dimension is the number of
+                                                      // columns of the original matrix
                    >
         ReturnType;
 };
