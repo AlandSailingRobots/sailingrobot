@@ -24,9 +24,16 @@ mode. It is a interface between the messagebus and the CAN-bus that can be monit
 #include "Messages/ASPireActuatorFeedbackMsg.h"
 #include "Messages/CompassDataMsg.h"
 #include "Messages/GPSDataMsg.h"
-#include "Messages/AISDataMsg.h"
-#include "Messages/MarineSensorDataMsg.h"
 #include "Messages/DataRequestMsg.h"
+
+
+
+
+
+#include "Messages/RudderCommandMsg.h"
+#include "Messages/WindDataMsg.h"
+#include "Messages/WingSailCommandMsg.h"
+
 
 #include "MessageBus/ActiveNode.h"
 #include "MessageBus/MessageBus.h"
@@ -35,7 +42,14 @@ mode. It is a interface between the messagebus and the CAN-bus that can be monit
 
 #include "Hardwares/ActuatorNodeASPire.h"
 #include "Hardwares/CANAISNode.h"
-#include "Hardwares/CANMarineSensorTransmissionNode.h"
+
+
+
+#include "Hardwares/CANArduinoNode.h"
+#include "Hardwares/CANWindsensorNode.h"
+#include "Hardwares/GPSDNode.h"
+#include "Hardwares/HMC6343Node.h"
+
 
 #include <ncurses.h>
 #include <cctype>
@@ -74,160 +88,133 @@ typedef std::unordered_map<std::string, float> SensorData;
 */
 
 class SensorDataReceiver : public Node {
-public:
-	SensorDataReceiver(MessageBus& msgBus) :
-	Node(NodeID::None, msgBus)
-	{
-		msgBus.registerNode(*this, MessageType::WindData);
-		msgBus.registerNode(*this, MessageType::ASPireActuatorFeedback);
-		msgBus.registerNode(*this, MessageType::CompassData);
-		msgBus.registerNode(*this, MessageType::GPSData);
-		msgBus.registerNode(*this, MessageType::AISData);
 
-		m_SensorValues["Rudder Angle"] = DATA_OUT_OF_RANGE;
-		m_SensorValues["Wingsail Angle"] = DATA_OUT_OF_RANGE;
-		m_SensorValues["Wind Speed"] = DATA_OUT_OF_RANGE;
-		m_SensorValues["Wind Direction"] = DATA_OUT_OF_RANGE;
-		m_SensorValues["Wind Temperature"] = DATA_OUT_OF_RANGE;
-		m_SensorValues["RC Mode"] = DATA_OUT_OF_RANGE;
-		m_SensorValues["Heading"] = DATA_OUT_OF_RANGE;
-    	m_SensorValues["Roll"] = DATA_OUT_OF_RANGE;
-    	m_SensorValues["Pitch"] = DATA_OUT_OF_RANGE;
-		m_SensorValues["GPS Longitude"] = DATA_OUT_OF_RANGE;
-		m_SensorValues["GPS Latitude"] = DATA_OUT_OF_RANGE;
-		m_SensorValues["GPS Online"] = DATA_OUT_OF_RANGE;
-		m_SensorValues["AIS Longitude"] = DATA_OUT_OF_RANGE;
-		m_SensorValues["AIS Latitude"] = DATA_OUT_OF_RANGE;
-        m_SensorValues["Marine PH"] = DATA_OUT_OF_RANGE;
-        m_SensorValues["Marine Conductivety"] = DATA_OUT_OF_RANGE;
-        m_SensorValues["Marine Salinity"] = DATA_OUT_OF_RANGE;
-        m_SensorValues["Marine Temperature"] = DATA_OUT_OF_RANGE;
+   public:
+    SensorDataReceiver(MessageBus& msgBus) : Node(NodeID::None, msgBus) {
+        msgBus.registerNode(*this, MessageType::WindData);
+        msgBus.registerNode(*this, MessageType::ASPireActuatorFeedback);
+        msgBus.registerNode(*this, MessageType::CompassData);
+        msgBus.registerNode(*this, MessageType::GPSData);
+        msgBus.registerNode(*this, MessageType::AISData);
 
-		m_Win = newwin(6+2*m_SensorValues.size(),60,1,2);
+        m_SensorValues["Rudder Angle"] = DATA_OUT_OF_RANGE;
+        m_SensorValues["Wingsail Angle"] = DATA_OUT_OF_RANGE;
+        m_SensorValues["Wind Speed"] = DATA_OUT_OF_RANGE;
+        m_SensorValues["Wind Direction"] = DATA_OUT_OF_RANGE;
+        m_SensorValues["Wind Temperature"] = DATA_OUT_OF_RANGE;
+        m_SensorValues["RC Mode"] = DATA_OUT_OF_RANGE;
+        m_SensorValues["Heading"] = DATA_OUT_OF_RANGE;
+        m_SensorValues["Roll"] = DATA_OUT_OF_RANGE;
+        m_SensorValues["Pitch"] = DATA_OUT_OF_RANGE;
+        m_SensorValues["GPS Longitude"] = DATA_OUT_OF_RANGE;
+        m_SensorValues["GPS Latitude"] = DATA_OUT_OF_RANGE;
+        m_SensorValues["GPS Online"] = DATA_OUT_OF_RANGE;
+        m_SensorValues["AIS Longitude"] = DATA_OUT_OF_RANGE;
+        m_SensorValues["AIS Latitude"] = DATA_OUT_OF_RANGE;
 
-		box(m_Win,0,0);
-		keypad(m_Win, FALSE);
-		wrefresh(m_Win);
-	}
+        sensorWindow();
+    }
 
-	bool init() { return true; }
+    void sensorWindow() {
+        int begin_y = 1;
+        int begin_x = 2;
+        int ncols = 70;
+        int nr_of_lines = 6 + m_SensorValues.size();
 
+        m_Win = newwin(nr_of_lines, ncols, begin_y, begin_x);
 
-	void processMessage(const Message* message) {
-		MessageType type = message->messageType();
-		switch (type){
+        box(m_Win, 0, 0);
+        keypad(m_Win, FALSE);
+        wrefresh(m_Win);
+    }
 
-			case MessageType::ASPireActuatorFeedback:
-				{
-				const ASPireActuatorFeedbackMsg* actmsg = dynamic_cast<const ASPireActuatorFeedbackMsg*>(message);
-				m_SensorValues["Rudder Angle"] = actmsg->rudderFeedback();
-				m_SensorValues["Wingsail Angle"] = actmsg->wingsailFeedback();
-				if (actmsg->radioControllerOn()){
-					m_SensorValues["RC Mode"] = ON;
-				} else {
-					m_SensorValues["RC Mode"] = OFF;
-				}
-				}
-				break;
+    bool init() { return true; }
 
-			case MessageType::WindData:
-				{
-				const WindDataMsg* windmsg = dynamic_cast<const WindDataMsg*>(message);
-				m_SensorValues["Wind Speed"] = windmsg->windSpeed();
-				m_SensorValues["Wind Direction"] = windmsg->windDirection();
-				m_SensorValues["Wind Temperature"] = windmsg->windTemp();
-				}
-				break;
+    void processMessage(const Message* message) {
+        MessageType type = message->messageType();
+        switch (type) {
+            case MessageType::ASPireActuatorFeedback: {
+                const ASPireActuatorFeedbackMsg* actmsg =
+                    dynamic_cast<const ASPireActuatorFeedbackMsg*>(message);
+                m_SensorValues["Rudder Angle"] = actmsg->rudderFeedback();
+                m_SensorValues["Wingsail Angle"] = actmsg->wingsailFeedback();
+                if (actmsg->radioControllerOn()) {
+                    m_SensorValues["RC Mode"] = ON;
+                } else {
+                    m_SensorValues["RC Mode"] = OFF;
+                }
+            } break;
 
+            case MessageType::WindData: {
+                const WindDataMsg* windmsg = dynamic_cast<const WindDataMsg*>(message);
+                m_SensorValues["Wind Speed"] = windmsg->windSpeed();
+                m_SensorValues["Wind Direction"] = windmsg->windDirection();
+                m_SensorValues["Wind Temperature"] = windmsg->windTemp();
+            } break;
 
-			case MessageType::CompassData:
-				{
-				const CompassDataMsg* compassmsg = dynamic_cast<const CompassDataMsg*>(message);
-		        m_SensorValues["Heading"] = compassmsg->heading();
-		        m_SensorValues["Pitch"] = compassmsg->pitch();
-		        m_SensorValues["Roll"] = compassmsg->roll();
-				}
-				break;
+            case MessageType::CompassData: {
+                const CompassDataMsg* compassmsg = dynamic_cast<const CompassDataMsg*>(message);
+                m_SensorValues["Heading"] = compassmsg->heading();
+                m_SensorValues["Pitch"] = compassmsg->pitch();
+                m_SensorValues["Roll"] = compassmsg->roll();
+            } break;
 
-			case MessageType::GPSData:
-				{
-				const GPSDataMsg* gpsdata = dynamic_cast<const GPSDataMsg*>(message);
-				m_SensorValues["GPS Latitude"] = gpsdata->latitude();
-				m_SensorValues["GPS Longitude"]	= gpsdata->longitude();
+            case MessageType::GPSData: {
+                const GPSDataMsg* gpsdata = dynamic_cast<const GPSDataMsg*>(message);
+                m_SensorValues["GPS Latitude"] = gpsdata->latitude();
+                m_SensorValues["GPS Longitude"] = gpsdata->longitude();
 
-				if (gpsdata->gpsOnline()){
-					m_SensorValues["GPS Online"] = ON;
-				}else{
-					m_SensorValues["GPS Online"] = OFF;
-				}
+                if (gpsdata->gpsOnline()) {
+                    m_SensorValues["GPS Online"] = ON;
+                } else {
+                    m_SensorValues["GPS Online"] = OFF;
+                }
 
-				}
-				break;
+            } break;
 
-			case MessageType::AISData:
-				{
-					const AISDataMsg* aisdata = dynamic_cast<const AISDataMsg*>(message);
-					m_SensorValues["AIS Latitude"] = aisdata->posLat();
-					m_SensorValues["AIS Longitude"] = aisdata->posLon();
-				}
-				break;
+            case MessageType::AISData: {
+                const AISDataMsg* aisdata = dynamic_cast<const AISDataMsg*>(message);
+                m_SensorValues["AIS Latitude"] = aisdata->posLat();
+                m_SensorValues["AIS Longitude"] = aisdata->posLon();
+            } break;
 
-            case MessageType::MarineSensorData:
-            {
-                const MarineSensorDataMsg* marineSensorDataMsg= dynamic_cast<const MarineSensorDataMsg*>(message);
-				m_SensorValues["Marine PH"] = marineSensorDataMsg->ph();
-				m_SensorValues["Marine Conductivety"] = marineSensorDataMsg->conductivity();
-				m_SensorValues["Marine Salinity"] = marineSensorDataMsg->salinity();
-				m_SensorValues["Marine Temperature"] = marineSensorDataMsg->temperature();
-            }
+            default:
                 break;
+        }
+        printSensorData();
+    }
 
-				default:
-				break;
+    void printSensorData() {
+        wclear(m_Win);
+        box(m_Win, 0, 0);
 
-				}
-		printSensorData();
-	}
+        wmove(m_Win, 2, 25);
+        wprintw(m_Win, "SENSOR READINGS");
+        wmove(m_Win, 2, 10);
+        int pos = 4;
+        for (auto it : m_SensorValues) {
+            wmove(m_Win, pos, 10);
+            wprintw(m_Win, "%s : ", it.first.c_str());
+            wmove(m_Win, pos, 35);
+            if (it.second == DATA_OUT_OF_RANGE) {
+                wprintw(m_Win, "%s", "Data not available.");
+            } else if (it.second == ON) {
+                wprintw(m_Win, "%s", "On");
+            } else if (it.second == OFF) {
+                wprintw(m_Win, "%s", "Off");
+            } else {
+                wprintw(m_Win, "%f", it.second);
+            }
+            pos += 1;
+        }
+        wrefresh(m_Win);
+    }
+    SensorData getValues() { return m_SensorValues; }
 
-	void printSensorData() {
+   private:
+    SensorData m_SensorValues;
 
-		wclear(m_Win);
-		box(m_Win, 0, 0);
-
-		wmove(m_Win, 2,20);
-		wprintw(m_Win, "SENSOR READINGS");
-		wmove(m_Win, 2, 10);
-		int pos = 4;
-		for(auto it : m_SensorValues) {
-			wmove(m_Win, pos, 10);
-			wprintw(m_Win, "%s : ", it.first.c_str());
-			wmove(m_Win, pos, 35);
-			if(it.second == -2000) {
-				wprintw(m_Win, "%s", "Data not available.");
-			} else if (it.second == ON) {
-				wprintw(m_Win, "%s", "On");
-			} else if (it.second == OFF) {
-				wprintw(m_Win, "%s", "Off");
-			} else {
-				wprintw(m_Win, "%f", it.second);
-			}
-			pos+=1;
-		}
-
-		wrefresh(m_Win);
-	}
-
-	SensorData getValues() {
-		return m_SensorValues;
-	}
-
-private:
-
-
-	SensorData m_SensorValues;
-
-	WINDOW* m_Win;
-
+    WINDOW* m_Win;
 };
 
 CANService canService;
@@ -410,7 +397,7 @@ void sendMarineSensorRequest() {
 
     try {
         sendMarineDataRequest = stoi(menuValues["M Sensor Request"]);
-    } catch(std::invalid_argument ex) {
+    } catch(std::invalid_argument &ex) {
         std::cout << std::endl << "Marine sensor request only works with integers." << std::endl << std::endl;
         return;
     }
@@ -422,125 +409,117 @@ void sendMarineSensorRequest() {
 }
 
 int main() {
+    // Initialize Ncurses
+    initscr();
+    Logger::init("integrationTest.log");
 
-	// Initialize Ncurses
-	initscr();
-	Logger::init("integrationTest.log");
+    // Database Path
+    std::string db_path = "../asr.db";
+    // Declare DBHandler and MessageBus
+    DBHandler dbHandler(db_path);
+    // Initialise DBHandler
+    if (dbHandler.initialise()) {
+        Logger::info("Database Handler init\t\t[OK]");
+    } else {
+        Logger::error("Database Handler init\t\t[FAILED]");
+        Logger::shutdown();
+        exit(1);
+    }
 
-	// Database Path
-	std::string db_path = "../asr.db";
-	// Declare DBHandler and MessageBus
-	DBHandler dbHandler(db_path);
-	// Initialise DBHandler
-	if(dbHandler.initialise())
-	{
-		Logger::info("Database Handler init\t\t[OK]");
-	}
-	else
-	{
-		Logger::error("Database Handler init\t\t[FAILED]");
-		Logger::shutdown();
-		exit(1);
-	}
+    // Comment out this line if not running on the pi
+    // otherwise program will crash.
+    auto future = canService.start();
 
-	// Comment out this line if not running on the pi
-	// otherwise program will crash.
-	auto future = canService.start();
+    SensorDataReceiver sensorReceiver(msgBus);
+    CANWindsensorNode windSensor(msgBus, dbHandler, canService);
+    HMC6343Node compass(msgBus, dbHandler);
+    compass.init ();
 
+    CANArduinoNode arduino(msgBus, dbHandler, canService);
+    ActuatorNodeASPire actuators(msgBus, canService);
+    GPSDNode gps(msgBus, dbHandler);
+    gps.init();
+    CANAISNode ais(msgBus, dbHandler, canService);
 
-	SensorDataReceiver sensorReceiver(msgBus);
-	CANWindsensorNode windSensor(msgBus, dbHandler, canService);
-	HMC6343Node compass(msgBus, dbHandler);
-	compass.init ();
+    ais.start();
+    gps.start();
+    windSensor.start();
+    arduino.start ();
+    compass.start ();
 
+    std::thread thr(messageLoop);
+    thr.detach();
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
 
+    sensorReceiver.printSensorData();
 
-	CANArduinoNode arduino (msgBus, dbHandler, canService);
-	ActuatorNodeASPire actuators (msgBus, canService);
-	GPSDNode gps (msgBus, dbHandler);
-	gps.init();
-	CANAISNode ais (msgBus, dbHandler, canService);
-    CANMarineSensorTransmissionNode marineSensorTransmissionNode(msgBus,canService);
-    marineSensorTransmissionNode.init();
+    menuValues["Rudder Angle"] = "";
+    menuValues["Wingsail Angle"] = "";
+    // menuValues["Windvane Angle"] = "";
 
-	ais.start();
-	gps.start();
-	windSensor.start();
-	arduino.start ();
-	compass.start ();
+    lastSentValues = menuValues;
 
-	std::thread thr(messageLoop);
-	thr.detach();
-	std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    lastSentValues["Rudder Angle"] = "0";
+    lastSentValues["Wingsail Angle"] = "0";
+    // lastSentValues["Windvane Angle"] = "0";
 
-	sensorReceiver.printSensorData();
+    menuIter highlighted = menuValues.begin();
 
-	menuValues["Rudder Angle"] = "";
-	menuValues["Wingsail Angle"] = "";
-    menuValues["M Sensor Request"] = "";
-   // menuValues["Windvane Angle"] = "";
+    SensorData values = sensorReceiver.getValues();
 
-	lastSentValues = menuValues;
+    int logger_size = loggerWindow(values.size());
 
-	lastSentValues["Rudder Angle"] = "0";
-	lastSentValues["Wingsail Angle"] = "0";
-    lastSentValues["M Sensor Request"] = "0";
-	//lastSentValues["Windvane Angle"] = "0";
+    WINDOW* inputWin = inputWindow(values.size(), logger_size);
 
-	menuIter highlighted = menuValues.begin();
+    keypad(inputWin, TRUE);
+    cbreak();
 
-	SensorData values = sensorReceiver.getValues();
-	WINDOW* inputWin  = newwin(8+2*menuValues.size(),60, 2*values.size() + 10,2);
-	keypad(inputWin, TRUE);
-	cbreak();
+    printInputMenu(inputWin, highlighted);
+    while (1) {
+        int c = wgetch(inputWin);
 
-	printInputMenu(inputWin, highlighted);
-	while(1) {
-
-		int c = wgetch(inputWin);
-
-		if(isdigit(c)) {
-			c -= 48;
-			if(highlighted->second.size() <= LONGEST_INPUT) {
-				highlighted->second += std::to_string(c);
-			}
-		} else if (c == '-'){
-				if(highlighted->second.size() <= LONGEST_INPUT) {
-					highlighted->second += c;
-				}
-		}else {
-			switch(c) {
-				case KEY_DOWN:
-					if(highlighted != --menuValues.end()) {
-						highlighted++;
-					}
-					break;
-				case KEY_UP:
-					if(highlighted != menuValues.begin()) {
-						--highlighted;
-					}
-					break;
-				case KEY_BACKSPACE:
-					if(!highlighted->second.empty()) {
-						highlighted->second.pop_back();
-					}
-					break;
-				case ENTER:
-					sendActuatorCommands();
-                    sendMarineSensorRequest();
-					for(auto& it : menuValues) {
-						it.second = "";
-					}
-					break;
-				case TAB:
-					if(highlighted == --menuValues.end()) {
-						highlighted = menuValues.begin();
-					} else {
-						++highlighted;
-					}
-			}
-		}
-		printInputMenu(inputWin, highlighted);
-	}
-	endwin();
+        if (isdigit(c)) {
+            c -= 48;
+            if (highlighted->second.size() <= LONGEST_INPUT) {
+                highlighted->second += std::to_string(c);
+            }
+        } else if (c == '-') {
+            if (highlighted->second.size() <= LONGEST_INPUT) {
+                highlighted->second += c;
+            }
+        } else {
+            switch (c) {
+                case KEY_DOWN:
+                    if (highlighted != --menuValues.end()) {
+                        highlighted++;
+                    }
+                    break;
+                case KEY_UP:
+                    if (highlighted != menuValues.begin()) {
+                        --highlighted;
+                    }
+                    break;
+                case KEY_BACKSPACE:
+                    if (!highlighted->second.empty()) {
+                        highlighted->second.pop_back();
+                    }
+                    break;
+                case ENTER:
+                    sendActuatorCommands();
+                    for (auto& it : menuValues) {
+                        it.second = "";
+                    }
+                    break;
+                case TAB:
+                    if (highlighted == --menuValues.end()) {
+                        highlighted = menuValues.begin();
+                    } else {
+                        ++highlighted;
+                    }
+            }
+        }
+        printInputMenu(inputWin, highlighted);
+        loggerWindow(values.size());
+    }
+    endwin();
 }
