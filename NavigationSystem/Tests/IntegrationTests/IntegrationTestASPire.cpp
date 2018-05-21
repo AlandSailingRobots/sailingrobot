@@ -24,7 +24,7 @@ mode. It is a interface between the messagebus and the CAN-bus that can be monit
 #include "Messages/ASPireActuatorFeedbackMsg.h"
 #include "Messages/CompassDataMsg.h"
 #include "Messages/GPSDataMsg.h"
-
+#include "Messages/DataRequestMsg.h"
 
 
 
@@ -408,7 +408,7 @@ void sendMarineSensorRequest() {
 
     try {
         sendMarineDataRequest = stoi(menuValues["M Sensor Request"]);
-    } catch(std::invalid_argument ex) {
+    } catch(std::invalid_argument &ex) {
         std::cout << std::endl << "Marine sensor request only works with integers." << std::endl << std::endl;
         return;
     }
@@ -439,12 +439,12 @@ int main() {
 
     // Comment out this line if not running on the pi
     // otherwise program will crash.
-    // auto future = canService.start();
+    auto future = canService.start();
 
     SensorDataReceiver sensorReceiver(msgBus);
     CANWindsensorNode windSensor(msgBus, dbHandler, canService);
     HMC6343Node compass(msgBus, dbHandler);
-    // compass.init ();
+    compass.init ();
 
     CANArduinoNode arduino(msgBus, dbHandler, canService);
     ActuatorNodeASPire actuators(msgBus, canService);
@@ -452,11 +452,11 @@ int main() {
     gps.init();
     CANAISNode ais(msgBus, dbHandler, canService);
 
-    // ais.start();
-    // gps.start();
-    // windSensor.start();
-    // arduino.start ();
-    // compass.start ();
+    ais.start();
+    gps.start();
+    windSensor.start();
+    arduino.start ();
+    compass.start ();
 
     std::thread thr(messageLoop);
     thr.detach();
