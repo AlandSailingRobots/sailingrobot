@@ -9,7 +9,7 @@ Updating date: 22.05.2018
 
 This chapter starts with an overview of the coding workflow used in the Åland Sailing Robots project and then provides some examples that are in the context of this project. The used coding workflow is based on the feature branch and gitflow workflows. They are presented here: https://www.atlassian.com/git/tutorials/comparing-workflows/gitflow-workflow 
 
-    ![Coding-Workflow](Media/1coding-workflow.png)
+![Coding-Workflow](Media/1coding-workflow.png)
 
 **1.1 Overview**
 
@@ -48,17 +48,17 @@ Mary is working on a new waypoint manager and ben is working on a new system log
 # git commit
 ```
 
-    ![Master-Develop-Branches](Media/4master-develop-branches.png)
+![Master-Develop-Branches](Media/4master-develop-branches.png)
 
 **->** Ben creates a new branch for his feature using the same commands Mary did and then makes a single code commit.
 
-    ![Master-Develop-Subbranch](Media/5master-develop-subbranch.png)
+![Master-Develop-Subbranch](Media/5master-develop-subbranch.png)
 
 **->** Mary decides she is happy with her code  – the code is clean and commented, it compiles and all unit-tests pass. She needs to file a pull request on GitHub for code reviewing.
 
-    ```
-    # git push origin waypoint_manager			// Push her branch to the remote repository
-    ```
+```
+# git push origin waypoint_manager			// Push her branch to the remote repository
+```
 
 Create a pull request into GitHub
 
@@ -66,43 +66,43 @@ Create a pull request into GitHub
 
 **->** Once the pull request is accepted, mary will merge the remote develop branch into the waypoint_manager branch.
 
-    ```
-    # git checkout develop 						// Switches to the develop branch
-    # git pull origin develop 					// Pull the latest version of the develop branch
-    # git checkout waypoint_manager				// Switches back to the feature branch
-    # git merge develope 						// Merge develop into waypoint_manager
-    ```
+```
+# git checkout develop 						// Switches to the develop branch
+# git pull origin develop 					// Pull the latest version of the develop branch
+# git checkout waypoint_manager				// Switches back to the feature branch
+# git merge develope 						// Merge develop into waypoint_manager
+```
 
 This is good practice to first merge the develop branch into the feature branch. Any merge conflicts will come up here and should be fixed before merging the code back into develop.
 The unit-tests are run again at this stage and all have to pass before going to the next step.
 Changes from the merge with develop are pushed to the remote branch:
 
-    ```
-    # git push origin waypoint_manager			// Push merge changes to remote feature branch
-    ```
+```
+# git push origin waypoint_manager			// Push merge changes to remote feature branch
+```
 
-    ![Merge](Media/6merge.png)
+![Merge](Media/6merge.png)
 
 
 **->** At this point Mary’s branch (waypoint_manager) has her code in it and any other code that was put in the develop branch after she created her branch. She will now merge her branch into develop. As nothing else has been put in her branch since the merging, it shouldn’t have any merge conflicts.
 
-    ```
-    # git checkout develop 						// Switches her working branch into develop branch
-    # git merge waypoint_manager				// Merge waypoint_manager branch into develop
-    # git push origin develope 					// Push the updated develop
-    # git branch -d waypoint_manager			// Delete the local feature branch
-    # git push origin --delete waypoint_manager	// Delete the remote feature branch
-    ```
+```
+# git checkout develop 						// Switches her working branch into develop branch
+# git merge waypoint_manager				// Merge waypoint_manager branch into develop
+# git push origin develope 					// Push the updated develop
+# git branch -d waypoint_manager			// Delete the local feature branch
+# git push origin --delete waypoint_manager	// Delete the remote feature branch
+```
 
-    ![Merge-2](Media/7merge2.png)
+![Merge-2](Media/7merge2.png)
 
 **->** Ben makes one more commit and then decides his code is ready for the boat. So he adds his commit, pushes his code to the remote repository and creates a pull request. After it has been accepted, he can merge the develop branch into his branch so he will have all the code Mary has written.
 
-    ![Merge-Conflict](Media/8mergeconflict.png)
+![Merge-Conflict](Media/8mergeconflict.png)
 
 **->** Mary and Ben edited similar lines of code so when Ben merged the develop branch into his branch he had some merge conflicts. After fixing them and make sure that all unit-tests pass, he merges his feature branch (system_logger) back into develop.
 
-    ![Merge-to-Master](Media/9merge-to-master.png)
+![Merge-to-Master](Media/9merge-to-master.png)
 
 **->** At this point both of the new features are in the develop branch. We want to test those new feature on the boat. A field_test branch is created from the develop branch and will run the code during the tests on the sea. 
 
@@ -118,10 +118,10 @@ The most common way of using git with GitHub is to have a remote repository host
 
 Configure user information for all local repositories :
 
-    ```
-    # git config --global user.name <name>
-    # git config --global user.email <email address>
-    ```
+```
+# git config --global user.name <name>
+# git config --global user.email <email address>
+```
 
 Git uses a username to associate commits with an identity. The Git username is not the same as your GitHub username.
 
@@ -129,51 +129,51 @@ Git uses a username to associate commits with an identity. The Git username is n
 
 Initialize a new local repository :
 
-    ```
-    # git init [repository_name
-    ```
+```
+# git init [repository_name
+```
 
 Connect local repository to remote repository :
 
-    ```
-    # git remote add origin https://github.com/username/new_repo
-    ```
+```
+# git remote add origin https://github.com/username/new_repo
+```
 
 Clone an existing repository :
 	
-    ```
-    # git clone [url]				// ex: git clone https://github.com/AlandSailingRobots/    sailingrobot.git
-    ```
+```
+# git clone [url]				// ex: git clone https://github.com/AlandSailingRobots/    sailingrobot.git
+```
 
 **Saving changes locally**
 
 Developing a project revolves around the basic edit/stage/commit pattern. First, you edit your files in the working directory. When you’re ready to save a copy of the current state of the project, you stage changes with git add. After you’re happy with the staged snapshot, you commit it to the project history with git commit. A commit should be done after having : adding a new piece of data or function; fixing one or more bugs; refactoring code or data...
 
-    ![Commit](Media/10commit.png)
+![Commit](Media/10commit.png)
 
 Save code changes is simple, first it is good to see what code has actually changed since the last commit. Display the state of the working directory and the staging area :
 
-    ```
-    # git status					// List which files are staged, unstaged and untracked by git
-    ```
+```
+# git status					// List which files are staged, unstaged and untracked by git
+```
 
 Add changes to the staging area (Index):
 
-    ```
-    # git add <path of file>		// Stage all changes in <file> for the next commit
-    ```
+```
+# git add <path of file>		// Stage all changes in <file> for the next commit
+```
 
 Remove <file> from the staging area, but leave the working directory unchanged :
 
-    ```
-    # git reset <path of file>
-    ```
+```
+# git reset <path of file>
+```
 
 Commit the staged snapshot :
 
-    ```
-    # git commit -m “type a message about what you committed in these quotes”
-    ```
+```
+# git commit -m “type a message about what you committed in these quotes”
+```
 
 **Syncing with the remote repository**
 
@@ -181,15 +181,15 @@ The commands presented below let you manage connections with other repositories,
 
 To update local repository with all remote changes :
 
-    ```
-    # git pull 						// = fetch + merge
-    ```
+```
+# git pull 						// = fetch + merge
+```
 
 To upload all the git commits in your branch to remote repository (origin) :
 
-    ```
-    # git push origin <branch_name>
-    ```
+```
+# git push origin <branch_name>
+```
 
 **git Branches**
 
@@ -197,28 +197,28 @@ A branch is a space in which the work done will not modify the file in the other
 
 To switch the working branch :
 
-    ```
-    # git checkout <name of branch>
-    ```
+```
+# git checkout <name of branch>
+```
 
 To create a new branch :
 
-    ```
-    # git checkout -b <name of branch>
-    ```
+```
+# git checkout -b <name of branch>
+```
 
 To delete branch :
 
-    ```
-    # git branch -d <branch_name>					// local deletion
-    # git push origin --delete <branch_name>		// remote deletion
-    ```
+```
+# git branch -d <branch_name>					// local deletion
+# git push origin --delete <branch_name>		// remote deletion
+```
 
 To merge one branch into another branch you need to checkout the branch you want the code to be merged into then run the following command:
 
-    ```
-    # git merge <name of the branch you wish to merge into the working branch>
-    ```
+```
+# git merge <name of the branch you wish to merge into the working branch>
+```
 
 If no conflicts appear, the branches can be merged automatically. Otherwise, conflicts must be resolved by hand.
 
@@ -231,26 +231,26 @@ To create a pull request, simply log into GitHub and go to the code repository. 
 
 **Restore**
 
-    ```
-    # git checkout --<filename>						// replace working copy with latest commit
-    ```
+```
+# git checkout --<filename>						// replace working copy with latest commit
+```
 
 **Inspecting the project history**
 
 Follow, inspect and compare the evolution of project files :
 
-    ```
-    # git log --graph --online --decorate			// get a nice overview of the project history
-    # git log --follow <filename>
-    # git diff <source_branch> <target_branch>		// view changes between 2 branches
-    ```
+```
+# git log --graph --online --decorate			// get a nice overview of the project history
+# git log --follow <filename>
+# git diff <source_branch> <target_branch>		// view changes between 2 branches
+```
 
 **Tagging**
 
-    ```    
-    # git tag -a <tag> -m “tag message”				// Create tag on the last commit
-    # git push --tags								// Push tags to remote repository
-        ``` 
+```    
+# git tag -a <tag> -m “tag message”				// Create tag on the last commit
+# git push --tags								// Push tags to remote repository
+``` 
 
 **Submodule**
 
@@ -258,10 +258,10 @@ A submodule allows you to keep another Git repository in a subdirectory of your 
 
 Inspects, updates and manages submodules :
 
-    ```
-    # git submodule init 				// initialises all the submodules (Only need to do this once)
-    # git submodule updates 			// Updates the submodule to the latest version
-    ```
+```
+# git submodule init 				// initialises all the submodules (Only need to do this once)
+# git submodule updates 			// Updates the submodule to the latest version
+```
 
 To know the good practice to deal with submodules : https://delicious-insights.com/en/posts/mastering-git-submodules/
 
@@ -275,7 +275,7 @@ Git sees every file in your working copy as one of three things:
 Ignored files are usually build artifacts and machine generated files that can be derived from your repository source or should otherwise not be committed. 
 Ignored files are tracked in a special file named .gitignore that is checked in at the root of your repository. There is no explicit git ignore command: instead the .gitignore file must be edited and committed by hand when you have new files that you wish to ignore.
 
-    ![Overview](Media/11overview.png)
+![Overview](Media/11overview.png)
 
 **Links:**
 
