@@ -3,12 +3,10 @@ set -e
 
 # check $0 in pwd
 if [ ! -e "$(pwd)/$(basename "$0")" ]; then
-    printf 'Spooky, I do not exist in %s ...\n' "$(pwd)"
+    printf 'Refusing to run outside of %s ...\n' "$(pwd)"
     exit 1
 fi
 case "$1" in
-    init)
-        ;;
     update)
         git pull &&
             git submodule sync --recursive &&
