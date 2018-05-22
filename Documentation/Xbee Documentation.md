@@ -16,7 +16,7 @@ The xBeeSync can also be configured to send xml-encoded data to a computer runni
 The xBeeSync can be configured in a couple of different ways. To start off, the database table xbee_config contains all the configuration options.
 
 
-| id   | send(bool) | recive(bool) | send_logs(bool) | loop_time(double) |                                   |
+| id   | send(bool) | recive(bool) | send_logs(bool) | loop_time(double) |
 |------|------------|--------------|-----------------|-------------------|
 | 1    | 0          | 0            | 0               | 400.0             |
 
