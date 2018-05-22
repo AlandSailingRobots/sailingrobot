@@ -63,21 +63,7 @@ Backups are currently stored as raw disk images inside compressed [SquashFS-cont
 
 ## Cloning a previously made backup to SD cards using a workstation
 
-1. Create a mountpoint for accessing the contents of the backup archive and mount the SquashFS-archive
-
-    ```console
-    $ mkdir backupmnt
-    ```
-
-2. Mount archive contents in the directory, enter directory and list contents
-
-    ```console
-    # mount sdcard-backup-1234-56-78.sqf backupmnt
-    # cd backupmnt
-    # ls -lah
-    ```
-
-3. Insert SD card in card reader and make sure you know its device name
+1. Insert SD card in card reader and make sure you know its device name
 
     * **NOTE:** If you use the wrong devicename below you might try to overwrite the harddrive in your workstation so be careful and check the devicename!
 
@@ -87,6 +73,20 @@ Backups are currently stored as raw disk images inside compressed [SquashFS-cont
     ```
 
     * Below, instead of *sdx*, use the real devicename you got in the previous step
+
+2. Create a mountpoint for accessing the contents of the backup archive and mount the SquashFS-archive
+
+    ```console
+    $ mkdir backupmnt
+    ```
+
+3. Mount archive contents in the directory, enter directory and list contents
+
+    ```console
+    # mount sdcard-backup-1234-56-78.sqf backupmnt
+    # cd backupmnt
+    # ls -lah
+    ```
 
 4. Clone the raw dd-image from the archive to the physcial SD card using *pv* (pipeviewer)
 
