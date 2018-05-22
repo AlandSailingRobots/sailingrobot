@@ -113,7 +113,7 @@ If you for any reason need the clang-formatter to leave a code block untouched y
 ```cpp
 // clang-format off
 
-std::cout << (   "This line will be left alone\n" );
+std::cout <<    "This line will be left alone\n";
 
 // clang-format on
 ```
