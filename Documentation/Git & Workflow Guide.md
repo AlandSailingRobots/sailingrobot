@@ -1,7 +1,7 @@
 Git & Workflow Guide
 ====================
 
-Creation date: Summer 2016
+Creation date: Summer 2016.
 Updating date: 22.05.2018
 
 ## I. Coding Workflow
@@ -23,38 +23,38 @@ Archive branches can also be found. They correspond to old unused code that we w
 In this example we will look at two features - WaypointManager and SystemLogger - being developed by two separate people - Mary and Ben. 
 Mary is working on a new waypoint manager and ben is working on a new system logger. Both of them may touch similar code areas to ensure their features work correctly. If they were working on the same code branch this could lead to a lot of code merge conflicts when they commit code. So to avoid this problem they use the Gitflow workflow. 
 
--> They start with a stable branch called master and development branch called develop. At the start the development branch is identical to the stable branch.
+**->** They start with a stable branch called master and development branch called develop. At the start the development branch is identical to the stable branch.
 
--> Mary begins work on her assigned feature and creates a new branch based on the branch called master. She uses the following command:
+**->** Mary begins work on her assigned feature and creates a new branch based on the branch called master. She uses the following command:
 
-	```console
+	```
     # git checkout develop**     				// switches her working branch to develop
     # git checkout -b waypoint_manager 			// creates a new branch called waypoint_manager, based on her current working branch which is the branch develop.
 	```
 
--> Mary makes two code commits on her branch using the commands git add and  git commit. See “II. Git introduction & common commands” for more informations on those commands.
+**->** Mary makes two code commits on her branch using the commands git add and  git commit. See “II. Git introduction & common commands” for more informations on those commands.
 
-	```console
+	```
 	# git status
 	# git add <some-file>
 	# git commit
 	```
 
--> Ben creates a new branch for his feature using the same commands Mary did and then makes a single code commit.
+**->** Ben creates a new branch for his feature using the same commands Mary did and then makes a single code commit.
 
--> Mary decides she is happy with her code  – the code is clean and commented, it compiles and all unit-tests pass. She needs to file a pull request on GitHub for code reviewing.
+**->** Mary decides she is happy with her code  – the code is clean and commented, it compiles and all unit-tests pass. She needs to file a pull request on GitHub for code reviewing.
 
-	```console
+	```
 	# git push origin waypoint_manager 			// Push her branch to the remote repository
 	```
 
 Create a pull request into GitHub
 
--> Ben gets the pull request and takes a look at Mary’s-feature. He decides he wants to make a few changes before integrating it into the official project, and he and Mary have some back-and-forth via the pull request.
+**->** Ben gets the pull request and takes a look at Mary’s-feature. He decides he wants to make a few changes before integrating it into the official project, and he and Mary have some back-and-forth via the pull request.
 
--> Once the pull request is accepted, mary will merge the remote develop branch into the waypoint_manager branch.
+**->** Once the pull request is accepted, mary will merge the remote develop branch into the waypoint_manager branch.
 
-	```console
+	```
 	# git checkout develop 						// Switches to the develop branch
 	# git pull origin develop 					// Pull the latest version of the develop branch
 	# git checkout waypoint_manager				// Switches back to the feature branch
@@ -65,14 +65,14 @@ This is good practice to first merge the develop branch into the feature branch.
 The unit-tests are run again at this stage and all have to pass before going to the next step.
 Changes from the merge with develop are pushed to the remote branch:
 
-	```console
+	```
 	# git push origin waypoint_manager			// Push merge changes to remote feature branch
 	```
 
 
--> At this point Mary’s branch (waypoint_manager) has her code in it and any other code that was put in the develop branch after she created her branch. She will now merge her branch into develop. As nothing else has been put in her branch since the merging, it shouldn’t have any merge conflicts.
+**->** At this point Mary’s branch (waypoint_manager) has her code in it and any other code that was put in the develop branch after she created her branch. She will now merge her branch into develop. As nothing else has been put in her branch since the merging, it shouldn’t have any merge conflicts.
 
-	```console
+	```
 	# git checkout develope 					// Switches her working branch into develop branch
 	# git merge waypoint_manager				// Merge waypoint_manager branch into develop
 	# git push origin develope 					// Push the updated develop
@@ -80,13 +80,13 @@ Changes from the merge with develop are pushed to the remote branch:
 	# git push origin --delete waypoint_manager // Delete the remote feature branch
 	```
 
--> Ben makes one more commit and then decides his code is ready for the boat. So he adds his commit, pushes his code to the remote repository and creates a pull request. After it has been accepted, he can merge the develop branch into his branch so he will have all the code Mary has written.
+**->** Ben makes one more commit and then decides his code is ready for the boat. So he adds his commit, pushes his code to the remote repository and creates a pull request. After it has been accepted, he can merge the develop branch into his branch so he will have all the code Mary has written.
 
--> Mary and Ben edited similar lines of code so when Ben merged the develop branch into his branch he had some merge conflicts. After fixing them and make sure that all unit-tests pass, he merges his feature branch (system_logger) back into develop.
+**->** Mary and Ben edited similar lines of code so when Ben merged the develop branch into his branch he had some merge conflicts. After fixing them and make sure that all unit-tests pass, he merges his feature branch (system_logger) back into develop.
 
--> At this point both of the new features are in the develop branch. We want to test those new feature on the boat. A field_test branch is created from the develop branch and will run the code during the tests on the sea. 
+**->** At this point both of the new features are in the develop branch. We want to test those new feature on the boat. A field_test branch is created from the develop branch and will run the code during the tests on the sea. 
 
--> After some testing on the boat and some bug fix, these two new features are seen as working and complete so the field_test branch is merged into the stable branch, master. A tag with a version number is add to the merge commit of the master branch. The field_test branch is also merged back into develop to take into account the changes made to fix the bugs.
+**->** After some testing on the boat and some bug fix, these two new features are seen as working and complete so the field_test branch is merged into the stable branch, master. A tag with a version number is add to the merge commit of the master branch. The field_test branch is also merged back into develop to take into account the changes made to fix the bugs.
 
 ## II. Git introduction & common commands
 
@@ -98,7 +98,7 @@ The most common way of using git with GitHub is to have a remote repository host
 
 Configure user information for all local repositories :
 
-	```console
+	```
 	# git config --global user.name <name>
 	# git config --global user.email <email address>
 	```
@@ -109,19 +109,19 @@ Git uses a username to associate commits with an identity. The Git username is n
 
 Initialize a new local repository :
 
-	```console
+	```
 	# git init [repository_name
 	```
 
 Connect local repository to remote repository :
 
-	```console
+	```
 	# git remote add origin https://github.com/username/new_repo
 	```
 
 Clone an existing repository :
 	
-	```console
+	```
 	# git clone [url]								// ex: git clone https://github.com/AlandSailingRobots/sailingrobot.git
 	```
 
@@ -131,25 +131,25 @@ Developing a project revolves around the basic edit/stage/commit pattern. First,
 
 Save code changes is simple, first it is good to see what code has actually changed since the last commit. Display the state of the working directory and the staging area :
 
-	```console
+	```
 	# git status									// List which files are staged, unstaged and untracked by git
 	```
 
 Add changes to the staging area (Index):
 
-	```console
+	```
 	# git add <path of file>        				// Stage all changes in <file> for the next commit
 	```
 
 Remove <file> from the staging area, but leave the working directory unchanged :
 
-	```console
+	```
 	# git reset <path of file>
 	```
 
 Commit the staged snapshot :
 
-	```console
+	```
 	# git commit -m “type a message about what you committed in these quotes”
 	```
 
@@ -159,13 +159,13 @@ The commands presented below let you manage connections with other repositories,
 
 To update local repository with all remote changes :
 
-	```console
+	```
 	# git pull 										// = fetch + merge
 	```
 
 To upload all the git commits in your branch to remote repository (origin) :
 
-	```console
+	```
 	# git push origin <branch_name>
 	```
 
@@ -175,26 +175,26 @@ A branch is a space in which the work done will not modify the file in the other
 
 To switch the working branch :
 
-	```console
+	```
 	# git checkout <name of branch>
 	```
 
 To create a new branch :
 
-	```console
+	```
 	# git checkout -b <name of branch>
 	```
 
 To delete branch :
 
-	```console
+	```
 	# git branch -d <branch_name>            		// local deletion
     # git push origin --delete <branch_name>        // remote deletion
 	```
 
 To merge one branch into another branch you need to checkout the branch you want the code to be merged into then run the following command:
 
-	```console
+	```
 	# git merge <name of the branch you wish to merge into the working branch>
 	```
 
@@ -209,7 +209,7 @@ To create a pull request, simply log into GitHub and go to the code repository. 
 
 **Restore**
 
-	```console
+	```
 	# git checkout --<filename>    					// replace working copy with latest commit
 	```
 
@@ -217,7 +217,7 @@ To create a pull request, simply log into GitHub and go to the code repository. 
 
 Follow, inspect and compare the evolution of project files :
 
-	```console 
+	```
 	# git log --graph --online --decorate    		// get a nice overview of the project history
 	# git log --follow <filename>
 	# git diff <source_branch> <target_branch>      // view changes between 2 branches
@@ -225,7 +225,7 @@ Follow, inspect and compare the evolution of project files :
 
 **Tagging**
 
-	```console
+	```
 	# git tag -a <tag> -m “tag message”    			// Create tag on the last commit
     # git push --tags            					// Push tags to remote repository
     ``` 
@@ -236,7 +236,7 @@ A submodule allows you to keep another Git repository in a subdirectory of your 
 
 Inspects, updates and manages submodules :
 
-	```console
+	```
 	# git submodule init     						// initialises all the submodules (Only need to do this once)
 	# git submodule update    						// Updates the submodule to the latest version
 	```
