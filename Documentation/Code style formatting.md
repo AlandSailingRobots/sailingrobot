@@ -33,7 +33,13 @@ Currently we use the Chromium code style formatting with a maximum line length o
 3.  Test formatting using CLI (command line interface)
 
     ```console
-    # clang-format -i <SOURCEFILENAME> # Note this changes the file inplace!
+    $ clang-format -i <SOURCEFILENAME> # Note this changes the file inplace!
+    ```
+
+    You can also format all headers and C++ sources recursively using the commandline (but you might want to make sure you are in the right directory and being very careful)
+
+    ```console
+    $ find . -iname '*.cpp' -or -iname '*.h' -exec clang-format --verbose -i {} \+
     ```
 
 4.  Configure your editor
