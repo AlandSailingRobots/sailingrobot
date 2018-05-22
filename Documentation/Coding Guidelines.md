@@ -79,11 +79,11 @@ Use const and constexpr wherever suitable.
 Strive for small classes with one clear purpose.
 
 Decide on special member functions. The compiler will implicitly generate:
-⋅⋅* A public default constructor that takes no arguments, unless a constructor is defined
-⋅⋅* A public copy constructor, under certain circumstances
-⋅⋅* A public copy assignment operator, under certain circumstances
-⋅⋅* A public move constructor, under certain circumstances
-⋅⋅* A public move assignment operator, under certain circumstances
+  * A public default constructor that takes no arguments, unless a constructor is defined.
+  * A public copy constructor, under certain circumstances.
+  * A public copy assignment operator, under certain circumstances.
+  * A public move constructor, under certain circumstances.
+  * A public move assignment operator, under certain circumstances.
 Make a decision if these are ok in the generated versions, add comments about it or specify them as “=default”. Disable with “=delete” or implement own versions for the class if needed.
 
 Use the keyword “explicit” for constructors callable with one argument, to avoid unintentional type conversions.
@@ -129,12 +129,12 @@ int limitAngleRangeDegrees(int angle){
 When changing code, it is easy to forget to edit the comments, and we are left with confusing comments instead of clarifying. If there is no good way turn the comment into self-explanatory code, write the comment!
 
 Some comments are necessary and beneficial, for example:
-⋅⋅* The intent of a class, what does it represent? Is it an abstract interface, a concrete implementation?
-⋅⋅* The reason for selected special member functions.
-⋅⋅* Limits on input data.
-⋅⋅* Error handling, such as exceptions or return error codes.
-⋅⋅* Transfer of ownership
-⋅⋅* If you needed to do a work-around for some reason, or if you don’t quite understand why that code was apparently needed to get something to work, add a comment. This helps the next person reading the code.
+  * The intent of a class, what does it represent? Is it an abstract interface, a concrete implementation?
+  * The reason for selected special member functions.
+  * Limits on input data.
+  * Error handling, such as exceptions or return error codes.
+  * Transfer of ownership
+  * If you needed to do a work-around for some reason, or if you don’t quite understand why that code was apparently needed to get something to work, add a comment. This helps the next person reading the code.
 ⋅⋅* Reference some article/ document that describes the used algorithm, or describe it briefly.
 
 ### Namespaces
