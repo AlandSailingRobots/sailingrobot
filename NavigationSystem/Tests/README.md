@@ -1,7 +1,7 @@
 Tests
 =======
 
-##CANAIS Test
+## CANAIS Test
 
 Integration test for the AIS, tests if we can receive and read the messages from the AIS.
 
@@ -13,9 +13,9 @@ $ make integration_test_ASPire
 $ ./ais-integration-test.run
 ```
 
-##CV7Integration Test
+## CV7Integration Test
 
-##HTTP Sync Test
+## HTTP Sync Test
 
 Test for HTTPSync, test if it's able to connect to the server and database.
 
@@ -27,7 +27,7 @@ $ make integration_test_ASPire
 $ ./HTTPSync-test.run
 ```
 
-##Integration Test
+## Integration Test
 
 Global Integrationtest for the ASPire.
 Monitor the values from the CAN-bus and able to send commands to the actuators.
@@ -42,10 +42,10 @@ $ make integration_test_ASPire
 $ ./integration-tests-ASPire.run
 ```
 
-##Logger Integration Test
+## Logger Integration Test
 
-##Marine Data integration test
+## Marine Data integration test
 
-##XBee Integration test
+## XBee Integration test
 
-##XBee Sync Integration Test
+## XBee Sync Integration Test
