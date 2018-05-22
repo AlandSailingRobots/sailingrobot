@@ -47,9 +47,23 @@ output() {
         fi
         printf '\n'
     done
+
+    SRPID=$(pidof sr)
+    LOGS=""
+    if [ -n "$SRPID" ]; then
+        for pid in $SRPID; do
+            printf '=== sr PID %s open files ===\n' "$pid"
+            ls "/proc/$pid/fd"
+            LOGS="$(ls "/proc/$pid/fd/*.log") "
+        done
+        if [ -n "$LOGS" ]; then
+            printf 'Possible log files: %s\n' "$LOGS"
+        fi
+        # TODO: analyse logs by grep:ing "init" and "error"
+    fi
 }
 
-if [ "$1" == "monitor" ]; then
+if [ "$1" = "monitor" ]; then
     while true; do
         clear
         output
