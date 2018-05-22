@@ -8,7 +8,7 @@ Updating date: 22.05.2018
 
 This chapter starts with an overview of the coding workflow used in the Åland Sailing Robots project and then provides some examples that are in the context of this project. The used coding workflow is based on the feature branch and gitflow workflows. They are presented here: https://www.atlassian.com/git/tutorials/comparing-workflows/gitflow-workflow 
 
-    ![Coding-Workflow](/Media/1.coding-workflow.png)
+    ![Coding-Workflow](Media/1.coding-workflow.png)
 
 **1.1 Overview**
 
@@ -27,7 +27,7 @@ Mary is working on a new waypoint manager and ben is working on a new system log
 
 **->** They start with a stable branch called master and development branch called develop. At the start the development branch is identical to the stable branch.
 
-	![Master-Develop](/Media/2.master-develop.png)
+	![Master-Develop](Media/2.master-develop.png)
 
 **->** Mary begins work on her assigned feature and creates a new branch based on the branch called master. She uses the following command:
 
@@ -36,7 +36,7 @@ Mary is working on a new waypoint manager and ben is working on a new system log
     # git checkout -b waypoint_manager 			// creates a new branch called     waypoint_manager,     based on her current working branch which is the branch develop.
     ```
 
-	![Master-Develop-Branch](/Media/3.master-develop-branch.png)
+	![Master-Develop-Branch](Media/3.master-develop-branch.png)
 
 
 **->** Mary makes two code commits on her branch using the commands git add and  git commit. See “II. Git introduction & common commands” for more informations on those commands.
@@ -47,11 +47,11 @@ Mary is working on a new waypoint manager and ben is working on a new system log
     # git commit
     ```
 
-    ![Master-Develop-Branches](/Media/4.master-develop-branches.png)
+    ![Master-Develop-Branches](Media/4.master-develop-branches.png)
 
 **->** Ben creates a new branch for his feature using the same commands Mary did and then makes a single code commit.
 
-    ![Master-Develop-Subbranch](/Media/5.master-develop-subbranch.png)
+    ![Master-Develop-Subbranch](Media/5.master-develop-subbranch.png)
 
 **->** Mary decides she is happy with her code  – the code is clean and commented, it compiles and all unit-tests pass. She needs to file a pull request on GitHub for code reviewing.
 
@@ -80,7 +80,7 @@ Changes from the merge with develop are pushed to the remote branch:
     # git push origin waypoint_manager			// Push merge changes to remote feature branch
     ```
 
-    ![Merge](/Media/6.merge.png)
+    ![Merge](Media/6.merge.png)
 
 
 **->** At this point Mary’s branch (waypoint_manager) has her code in it and any other code that was put in the develop branch after she created her branch. She will now merge her branch into develop. As nothing else has been put in her branch since the merging, it shouldn’t have any merge conflicts.
@@ -93,15 +93,15 @@ Changes from the merge with develop are pushed to the remote branch:
     # git push origin --delete waypoint_manager	// Delete the remote feature branch
     ```
 
-    ![Merge-2](/Media/7.merge2.png)
+    ![Merge-2](Media/7.merge2.png)
 
 **->** Ben makes one more commit and then decides his code is ready for the boat. So he adds his commit, pushes his code to the remote repository and creates a pull request. After it has been accepted, he can merge the develop branch into his branch so he will have all the code Mary has written.
 
-    ![Merge-Conflict](/Media/8.mergeconflict.png)
+    ![Merge-Conflict](Media/8.mergeconflict.png)
 
 **->** Mary and Ben edited similar lines of code so when Ben merged the develop branch into his branch he had some merge conflicts. After fixing them and make sure that all unit-tests pass, he merges his feature branch (system_logger) back into develop.
 
-    ![Merge-to-Master](/Media/9.merge-to-master.png)
+    ![Merge-to-Master](Media/9.merge-to-master.png)
 
 **->** At this point both of the new features are in the develop branch. We want to test those new feature on the boat. A field_test branch is created from the develop branch and will run the code during the tests on the sea. 
 
@@ -148,7 +148,7 @@ Clone an existing repository :
 
 Developing a project revolves around the basic edit/stage/commit pattern. First, you edit your files in the working directory. When you’re ready to save a copy of the current state of the project, you stage changes with git add. After you’re happy with the staged snapshot, you commit it to the project history with git commit. A commit should be done after having : adding a new piece of data or function; fixing one or more bugs; refactoring code or data...
 
-    ![Commit](/Media/10.commit.png)
+    ![Commit](Media/10.commit.png)
 
 Save code changes is simple, first it is good to see what code has actually changed since the last commit. Display the state of the working directory and the staging area :
 
@@ -274,7 +274,7 @@ Git sees every file in your working copy as one of three things:
 Ignored files are usually build artifacts and machine generated files that can be derived from your repository source or should otherwise not be committed. 
 Ignored files are tracked in a special file named .gitignore that is checked in at the root of your repository. There is no explicit git ignore command: instead the .gitignore file must be edited and committed by hand when you have new files that you wish to ignore.
 
-    ![Overview](/Media/11.overview.png)
+    ![Overview](Media/11.overview.png)
 
 **Links:**
 

@@ -114,7 +114,7 @@ Start everything up (it might be overkill to enable all services at startup but 
 
 2. Go to *Databases* and click *phpMyAdmin*
 
-    ![HostGator DB panel](/Media/cpanel-databases-myphpadmin.jpg)
+    ![HostGator DB panel](Media/cpanel-databases-myphpadmin.jpg)
 
 3. Export database
 
