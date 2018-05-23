@@ -59,8 +59,13 @@ output() {
         if [ -n "$LOGS" ]; then
             printf 'Possible log files: %s\n' "$LOGS"
         fi
-        # TODO: analyse logs by grep:ing "init" and "error"
     fi
+
+    for log in $LOGS; do
+        printf '=== Log %s init messages and errors ===\n' "$log"
+        grep init < "$log"
+        grep error < "$log"
+    done
 }
 
 if [ "$1" = "monitor" ]; then
