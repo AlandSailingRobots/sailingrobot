@@ -28,7 +28,7 @@ Git uses a username to associate commits with an identity. The Git username is n
 $ git clone https://github.com/AlandSailingRobots/sailingrobot.git
 ```
 
-**Setting up a new git repository**
+**Setting up a new git repository (if you're starting on a new project)**
 
 Initialize a new local repository :
 
