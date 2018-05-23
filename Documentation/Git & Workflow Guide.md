@@ -3,15 +3,53 @@ Git & Workflow Guide
 
 Creation date: Summer 2016.
 
-Updating date: 22.05.2018
+Updating date: 23.05.2018
 
-## I. Coding Workflow
+## I. Git introduction 
+
+Git is a version control system for tracking changes in computer files and coordinating work on those files among multiple people.
+GitHub is an online work tool that allows you to share changes made by several people on a given project.
+The most common way of using git with GitHub is to have a remote repository hosted on GitHub and local copies of this repository on each developer computer. That allows developer to work off-line and return its changes later to the online project.
+
+**Setting up a git environment**
+
+Configure user information for all local repositories :
+
+```
+$ git config --global user.name <name>
+$ git config --global user.email <email address>
+```
+
+Git uses a username to associate commits with an identity. The Git username is not the same as your GitHub username.
+
+**Cloning the SailingRobots project**
+
+```
+$ git clone https://github.com/AlandSailingRobots/sailingrobot.git
+```
+
+**Setting up a new git repository**
+
+Initialize a new local repository :
+
+```
+$ git init <repository_name>
+```
+
+Connect local repository to remote repository :
+
+```
+$ git remote add origin https://github.com/username/new_repo
+```
+
+
+## II. Coding Workflow
 
 This chapter starts with an overview of the coding workflow used in the Åland Sailing Robots project and then provides some examples that are in the context of this project. The used coding workflow is based on the feature branch and gitflow workflows. They are presented [here](https://www.atlassian.com/git/tutorials/comparing-workflows/gitflow-workflow) 
 
 ![Coding-Workflow](Media/1coding-workflow.png)
 
-**1.1 Overview**
+1. **Overview**
 
 A repository has two main branches - master and develop - and other branches known as feature branches. The master branch contains tested code that works and have been tested on the boat. Any bugs in it should be minor. The develop branch contains code that compiles and have been tested land side but needs to be tested on the boat in the water.
 
@@ -21,7 +59,7 @@ Feature branches are used to develop new features/topics or to fix bugs. Each ne
 
 Archive branches can also be found. They correspond to old unused code that we want to keep as a base for future developments.
 
-**1.2 Examples**
+2. **Examples**
 
 In this example we will look at two features - WaypointManager and SystemLogger - being developed by two separate people - Mary and Ben. 
 Mary is working on a new waypoint manager and ben is working on a new system logger. Both of them may touch similar code areas to ensure their features work correctly. If they were working on the same code branch this could lead to a lot of code merge conflicts when they commit code. So to avoid this problem they use the Gitflow workflow. 
@@ -33,7 +71,7 @@ Mary is working on a new waypoint manager and ben is working on a new system log
 **->** Mary begins work on her assigned feature and creates a new branch based on the branch called master. She uses the following command:
 
 ```
-$ git checkout develop**                // switches her working branch to develop
+$ git checkout develop                  // switches her working branch to develop
 $ git checkout -b waypoint_manager      // creates a new branch called waypoint_manager,     based on her current working branch which is the branch develop.
 ```
 
@@ -70,7 +108,7 @@ Create a pull request into GitHub
 $ git checkout develop                      // Switches to the develop branch
 $ git pull origin develop                   // Pull the latest version of the develop branch
 $ git checkout waypoint_manager             // Switches back to the feature branch
-$ git merge develope                        // Merge develop into waypoint_manager
+$ git merge develop                        // Merge develop into waypoint_manager
 ```
 
 This is good practice to first merge the develop branch into the feature branch. Any merge conflicts will come up here and should be fixed before merging the code back into develop.
@@ -89,7 +127,7 @@ $ git push origin waypoint_manager          // Push merge changes to remote feat
 ```
 $ git checkout develop                      // Switches her working branch into develop branch
 $ git merge waypoint_manager                // Merge waypoint_manager branch into develop
-$ git push origin develope                  // Push the updated develop
+$ git push origin develop                  // Push the updated develop
 $ git branch -d waypoint_manager            // Delete the local feature branch
 $ git push origin --delete waypoint_manager // Delete the remote feature branch
 ```
@@ -108,42 +146,7 @@ $ git push origin --delete waypoint_manager // Delete the remote feature branch
 
 **->** After some testing on the boat and some bug fix, these two new features are seen as working and complete so the field_test branch is merged into the stable branch, master. A tag with a version number is add to the merge commit of the master branch. The field_test branch is also merged back into develop to take into account the changes made to fix the bugs.
 
-## II. Git introduction & common commands
-
-Git is a version control system for tracking changes in computer files and coordinating work on those files among multiple people.
-GitHub is an online work tool that allows you to share changes made by several people on a given project.
-The most common way of using git with GitHub is to have a remote repository hosted on GitHub and local copies of this repository on each developer computer. That allows developer to work off-line and return its changes later to the online project.
-
-**Setting up a git environment**
-
-Configure user information for all local repositories :
-
-```
-$ git config --global user.name <name>
-$ git config --global user.email <email address>
-```
-
-Git uses a username to associate commits with an identity. The Git username is not the same as your GitHub username.
-
-**Setting up a git repository**
-
-Initialize a new local repository :
-
-```
-$ git init [repository_name
-```
-
-Connect local repository to remote repository :
-
-```
-$ git remote add origin https://github.com/username/new_repo
-```
-
-Clone an existing repository :
-	
-```
-$ git clone [url]        // ex: git clone https://github.com/AlandSailingRobots/    sailingrobot.git
-```
+## III. Common Git commands
 
 **Saving changes locally**
 
@@ -154,7 +157,7 @@ Developing a project revolves around the basic edit/stage/commit pattern. First,
 Save code changes is simple, first it is good to see what code has actually changed since the last commit. Display the state of the working directory and the staging area :
 
 ```
-$ git status             // List which files are staged, unstaged and untracked by git
+$ git status              // List which files are staged, unstaged and untracked by git
 ```
 
 Add changes to the staging area (Index):
@@ -175,6 +178,14 @@ Commit the staged snapshot :
 $ git commit -m “type a message about what you committed in these quotes”
 ```
 
+**Cloning an existing repository**
+
+This command clones an existing repository :
+    
+```
+$ git clone [url]         // ex: git clone https://github.com/AlandSailingRobots/sailingrobot.git
+```
+
 **Syncing with the remote repository**
 
 The commands presented below let you manage connections with other repositories, publish local history by "pushing" branches to other repositories, and see what others have contributed by "pulling" branches into your local repository.
@@ -182,7 +193,7 @@ The commands presented below let you manage connections with other repositories,
 To update local repository with all remote changes :
 
 ```
-$ git pull          // = fetch + merge
+$ git pull               // = fetch + merge
 ```
 
 To upload all the git commits in your branch to remote repository (origin) :
@@ -230,7 +241,7 @@ To create a pull request, simply log into GitHub and go to the code repository. 
 **Restore**
 
 ```
-$ git checkout --<filename>	              // replace working copy with latest commit
+$ git checkout --<filename>               // replace working copy with latest commit
 ```
 
 **Inspecting the project history**
@@ -273,7 +284,6 @@ Git sees every file in your working copy as one of three things:
 Ignored files are usually build artifacts and machine generated files that can be derived from your repository source or should otherwise not be committed. 
 Ignored files are tracked in a special file named .gitignore that is checked in at the root of your repository. There is no explicit git ignore command: instead the .gitignore file must be edited and committed by hand when you have new files that you wish to ignore.
 
-![Overview](Media/11overview.png)
 
 **Links:**
 
