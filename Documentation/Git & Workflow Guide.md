@@ -7,7 +7,7 @@ Updating date: 22.05.2018
 
 ## I. Coding Workflow
 
-This chapter starts with an overview of the coding workflow used in the Åland Sailing Robots project and then provides some examples that are in the context of this project. The used coding workflow is based on the feature branch and gitflow workflows. They are presented here: https://www.atlassian.com/git/tutorials/comparing-workflows/gitflow-workflow 
+This chapter starts with an overview of the coding workflow used in the Åland Sailing Robots project and then provides some examples that are in the context of this project. The used coding workflow is based on the feature branch and gitflow workflows. They are presented [here](https://www.atlassian.com/git/tutorials/comparing-workflows/gitflow-workflow) 
 
 ![Coding-Workflow](Media/1coding-workflow.png)
 
@@ -261,7 +261,7 @@ $ git submodule init             // initialises all the submodules (Only need to
 $ git submodule updates          // Updates the submodule to the latest version
 ```
 
-To know the good practice to deal with submodules : https://delicious-insights.com/en/posts/mastering-git-submodules/
+To know the good practice to deal with submodules : [Mastering git submodules](https://delicious-insights.com/en/posts/mastering-git-submodules/)
 
 **Gitignore**
 
@@ -277,10 +277,10 @@ Ignored files are tracked in a special file named .gitignore that is checked in 
 
 **Links:**
 
-https://www.atlassian.com/git/tutorials/atlassian-git-cheatsheet
+[Git Cheatsheet](https://www.atlassian.com/git/tutorials/atlassian-git-cheatsheet)
 
-https://www.atlassian.com/git/tutorials/setting-up-a-repository
+[Setting up a repository](https://www.atlassian.com/git/tutorials/setting-up-a-repository)
 
-https://git-scm.com/about/branching-and-merging
+[Branching and merging](https://git-scm.com/about/branching-and-merging)
 
 
