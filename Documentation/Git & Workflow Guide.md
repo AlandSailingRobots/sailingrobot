@@ -28,6 +28,14 @@ Git uses a username to associate commits with an identity. The Git username is n
 $ git clone https://github.com/AlandSailingRobots/sailingrobot.git
 ```
 
+Or if you have already cloned it, use:
+
+```
+$ cd sailingrobot  
+$ ./codebase.sh update                   // A script for updating the three submodules 
+$ ./codebase.sh status                   // Check if it's been correctly updated
+```
+
 **Setting up a new git repository (if you're starting on a new project)**
 
 Initialize a new local repository :

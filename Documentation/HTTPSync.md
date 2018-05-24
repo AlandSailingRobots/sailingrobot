@@ -13,9 +13,9 @@ URL to push locally towards a computer in the webteam : 10.168.4.103/Remote-sail
 
 Server database table : 
 
-|id   |boat_id |boat_pwd |srv_addr                                    |
-|-----|--------|---------|--------------------------------------------|
-|1    |???     |****     |http://www.sailingrobots.com/testdata/sync/ |
+|id   |boat_id |boat_pwd                        |srv_addr                                    |
+|-----|--------|--------------------------------|--------------------------------------------|
+|1    |ASPire  |Can be found in logininfoPoP    |http://www.sailingrobots.com/testdata/sync/ |
 
 The table should look something like this to work properly, this setup pushes data towards the live page. The end slash is important due to the 
 
