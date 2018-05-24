@@ -114,9 +114,9 @@ Create a pull request into GitHub
 
 ```
 $ git checkout develop                      // Switches to the develop branch
-$ git pull origin develop                   // Pull the latest version of the develop branch
+$ ./codebase.sh update                      // Pull the latest version of the develop branch
 $ git checkout waypoint_manager             // Switches back to the feature branch
-$ git merge develop                        // Merge develop into waypoint_manager
+$ git merge develop                         // Merge develop into waypoint_manager
 ```
 
 This is good practice to first merge the develop branch into the feature branch. Any merge conflicts will come up here and should be fixed before merging the code back into develop.
@@ -135,7 +135,7 @@ $ git push origin waypoint_manager          // Push merge changes to remote feat
 ```
 $ git checkout develop                      // Switches her working branch into develop branch
 $ git merge waypoint_manager                // Merge waypoint_manager branch into develop
-$ git push origin develop                  // Push the updated develop
+$ git push origin develop                   // Push the updated develop
 $ git branch -d waypoint_manager            // Delete the local feature branch
 $ git push origin --delete waypoint_manager // Delete the remote feature branch
 ```
