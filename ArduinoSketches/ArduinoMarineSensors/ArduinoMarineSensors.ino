@@ -104,13 +104,13 @@ Serial.println("Check encode status");
     Serial.println(messageHandler.encodeMappedMessage(SENSOR_TEMPERATURE_DATASIZE, getTemperature(temperatureResponseCode) ,
                                        SENSOR_TEMPERATURE_INTERVAL_MIN, SENSOR_TEMPERATURE_INTERVAL_MAX));
     messageHandler.setErrorMessage(getErrorCode(phResponseCode, conductivetyResponseCode, temperatureResponseCode));
-Serial.print("ERROR CODE: ");
-Serial.println(messageHandler.getErrorMessage());
+//Serial.print("ERROR CODE: ");
+//Serial.println(messageHandler.getErrorMessage());
     CanMsg marineSensorData = messageHandler.getMessage();
-Serial.print("Interval check: ");
-Serial.println(SENSOR_CONDUCTIVETY_INTERVAL_MIN);
+//Serial.print("Interval check: ");
+//Serial.println(SENSOR_CONDUCTIVETY_INTERVAL_MIN);
     Canbus.SendMessage(&marineSensorData);
-    Serial.println("Message sent");
+ /*   Serial.println("Message sent");
     Serial.println(getPHValue(phResponseCode));
     Serial.println(getConductivety(conductivetyResponseCode));
     Serial.println(getTemperature(temperatureResponseCode));
@@ -124,7 +124,7 @@ Serial.println(SENSOR_CONDUCTIVETY_INTERVAL_MIN);
     Serial.println(conductivety);
     Serial.println(messageHandler.getMappedData(&temp, SENSOR_TEMPERATURE_DATASIZE, SENSOR_TEMPERATURE_INTERVAL_MIN, SENSOR_TEMPERATURE_INTERVAL_MAX));
     Serial.println(temp);
-
+*/
 }
 
 void checkCanbusFor (int timeMs){
