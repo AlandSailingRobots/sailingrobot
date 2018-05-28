@@ -2,14 +2,14 @@
 CHECK_DEVICES="/dev/gps0"
 
 # syntax systemdservice(:processname) (psname not needed if it equals servicename)
-CHECK_SERVICES="ntpd gpsd sr"
+CHECK_SERVICES="ntpd gpsd asr:sr"
 
 output() {
     printf '=== System time: ===\n'
     date
 
     printf '\n=== Severe errors since last boot ===\n'
-    journalctl -p err -b
+    journalctl --priority err --boot --lines=10
 
     printf '\n=== Checking devices ===\n'
     for dev in $CHECK_DEVICES; do
@@ -32,7 +32,7 @@ output() {
         psname=$(printf '%s' "$serv" | cut -d ':' -f 2)
         pid=$(pidof "$psname")
         printf '%s: ' "$service"
-        if systemctl is-active --quiet "$service"; then
+        if systemctl is-active "$service" --quiet; then
             if [ -n "$pid" ]; then
                 printf 'OK (PID %s)' "$pid"
             else
