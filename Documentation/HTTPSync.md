@@ -5,12 +5,6 @@ The sync reads boat id and password from the database table “server”. Also s
 
 ![HTTP Sync](Media/HTTPSYNC.png)
 
-URL to push towards hostgator (live page) : http://www.sailingrobots.com/testdata/sync/
-
-URL to push locally towards a computer in the webteam : 10.168.4.103/Remote-sailing-robots/sync/ (Mostly for testing)
-
-(Replace IP with whatever computer you want to push towards)
-
 Server database table : 
 
 |id   |boat_id |boat_pwd                        |srv_addr                                    |
