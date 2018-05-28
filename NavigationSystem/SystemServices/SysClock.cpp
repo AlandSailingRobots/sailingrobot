@@ -62,7 +62,7 @@ std::string SysClock::timeStampStr()
 	unsigned long seconds = unixTime();
 
 	time_t unix_time = (time_t)seconds;
-	strftime(buff, sizeof(buff), "%F %T", gmtime(&unix_time));
+	strftime(buff, sizeof(buff), "%F_%T", gmtime(&unix_time));
 
 	return std::string(buff);
 }
