@@ -26,7 +26,7 @@
 extern "C" {
 #endif
 
-extern int mcp23s08Setup (const int pinBase, const int spiPort, const int devId) ;
+extern int mcp23s08Setup(const int pinBase, const int spiPort, const int devId);
 
 #ifdef __cplusplus
 }

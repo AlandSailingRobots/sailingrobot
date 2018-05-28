@@ -16,19 +16,17 @@
 #include "MessageBus/Message.h"
 
 class DataCollectionStopMsg : public Message {
-public:
+   public:
     DataCollectionStopMsg(NodeID destinationID, NodeID sourceID)
-            :Message(MessageType::DataCollectionStop, sourceID, destinationID) { }
+        : Message(MessageType::DataCollectionStop, sourceID, destinationID) {}
 
     DataCollectionStopMsg(NodeID destinationID)
-            :Message(MessageType::DataCollectionStop, NodeID::None, destinationID) { }
+        : Message(MessageType::DataCollectionStop, NodeID::None, destinationID) {}
 
     DataCollectionStopMsg()
-        	:Message(MessageType::DataCollectionStop, NodeID::None, NodeID::None) { }
+        : Message(MessageType::DataCollectionStop, NodeID::None, NodeID::None) {}
 
-    DataCollectionStopMsg(MessageDeserialiser deserialiser)
-            :Message(deserialiser)
-    { }
+    DataCollectionStopMsg(MessageDeserialiser deserialiser) : Message(deserialiser) {}
 
-    virtual ~DataCollectionStopMsg() { }
+    virtual ~DataCollectionStopMsg() {}
 };

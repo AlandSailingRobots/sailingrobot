@@ -25,7 +25,7 @@
 extern "C" {
 #endif
 
-extern int  piFaceSetup (const int pinBase) ;
+extern int piFaceSetup(const int pinBase);
 
 #ifdef __cplusplus
 }

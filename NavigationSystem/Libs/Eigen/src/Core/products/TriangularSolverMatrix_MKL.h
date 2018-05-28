@@ -38,118 +38,128 @@ namespace Eigen {
 namespace internal {
 
 // implements LeftSide op(triangular)^-1 * general
-#define EIGEN_MKL_TRSM_L(EIGTYPE, MKLTYPE, MKLPREFIX) \
-template <typename Index, int Mode, bool Conjugate, int TriStorageOrder> \
-struct triangular_solve_matrix<EIGTYPE,Index,OnTheLeft,Mode,Conjugate,TriStorageOrder,ColMajor> \
-{ \
-  enum { \
-    IsLower = (Mode&Lower) == Lower, \
-    IsUnitDiag  = (Mode&UnitDiag) ? 1 : 0, \
-    IsZeroDiag  = (Mode&ZeroDiag) ? 1 : 0, \
-    conjA = ((TriStorageOrder==ColMajor) && Conjugate) ? 1 : 0 \
-  }; \
-  static void run( \
-      Index size, Index otherSize, \
-      const EIGTYPE* _tri, Index triStride, \
-      EIGTYPE* _other, Index otherStride, level3_blocking<EIGTYPE,EIGTYPE>& /*blocking*/) \
-  { \
-   MKL_INT m = size, n = otherSize, lda, ldb; \
-   char side = 'L', uplo, diag='N', transa; \
-   /* Set alpha_ */ \
-   MKLTYPE alpha; \
-   EIGTYPE myone(1); \
-   assign_scalar_eig2mkl(alpha, myone); \
-   ldb = otherStride;\
-\
-   const EIGTYPE *a; \
-/* Set trans */ \
-   transa = (TriStorageOrder==RowMajor) ? ((Conjugate) ? 'C' : 'T') : 'N'; \
-/* Set uplo */ \
-   uplo = IsLower ? 'L' : 'U'; \
-   if (TriStorageOrder==RowMajor) uplo = (uplo == 'L') ? 'U' : 'L'; \
-/* Set a, lda */ \
-   typedef Matrix<EIGTYPE, Dynamic, Dynamic, TriStorageOrder> MatrixTri; \
-   Map<const MatrixTri, 0, OuterStride<> > tri(_tri,size,size,OuterStride<>(triStride)); \
-   MatrixTri a_tmp; \
-\
-   if (conjA) { \
-     a_tmp = tri.conjugate(); \
-     a = a_tmp.data(); \
-     lda = a_tmp.outerStride(); \
-   } else { \
-     a = _tri; \
-     lda = triStride; \
-   } \
-   if (IsUnitDiag) diag='U'; \
-/* call ?trsm*/ \
-   MKLPREFIX##trsm(&side, &uplo, &transa, &diag, &m, &n, &alpha, (const MKLTYPE*)a, &lda, (MKLTYPE*)_other, &ldb); \
- } \
-};
+#define EIGEN_MKL_TRSM_L(EIGTYPE, MKLTYPE, MKLPREFIX)                                              \
+    template <typename Index, int Mode, bool Conjugate, int TriStorageOrder>                       \
+    struct triangular_solve_matrix<EIGTYPE, Index, OnTheLeft, Mode, Conjugate, TriStorageOrder,    \
+                                   ColMajor> {                                                     \
+        enum {                                                                                     \
+            IsLower = (Mode & Lower) == Lower,                                                     \
+            IsUnitDiag = (Mode & UnitDiag) ? 1 : 0,                                                \
+            IsZeroDiag = (Mode & ZeroDiag) ? 1 : 0,                                                \
+            conjA = ((TriStorageOrder == ColMajor) && Conjugate) ? 1 : 0                           \
+        };                                                                                         \
+        static void run(Index size,                                                                \
+                        Index otherSize,                                                           \
+                        const EIGTYPE* _tri,                                                       \
+                        Index triStride,                                                           \
+                        EIGTYPE* _other,                                                           \
+                        Index otherStride,                                                         \
+                        level3_blocking<EIGTYPE, EIGTYPE>& /*blocking*/) {                         \
+            MKL_INT m = size, n = otherSize, lda, ldb;                                             \
+            char side = 'L', uplo, diag = 'N', transa;                                             \
+            /* Set alpha_ */                                                                       \
+            MKLTYPE alpha;                                                                         \
+            EIGTYPE myone(1);                                                                      \
+            assign_scalar_eig2mkl(alpha, myone);                                                   \
+            ldb = otherStride;                                                                     \
+                                                                                                   \
+            const EIGTYPE* a;                                                                      \
+            /* Set trans */                                                                        \
+            transa = (TriStorageOrder == RowMajor) ? ((Conjugate) ? 'C' : 'T') : 'N';              \
+            /* Set uplo */                                                                         \
+            uplo = IsLower ? 'L' : 'U';                                                            \
+            if (TriStorageOrder == RowMajor)                                                       \
+                uplo = (uplo == 'L') ? 'U' : 'L';                                                  \
+            /* Set a, lda */                                                                       \
+            typedef Matrix<EIGTYPE, Dynamic, Dynamic, TriStorageOrder> MatrixTri;                  \
+            Map<const MatrixTri, 0, OuterStride<>> tri(_tri, size, size,                           \
+                                                       OuterStride<>(triStride));                  \
+            MatrixTri a_tmp;                                                                       \
+                                                                                                   \
+            if (conjA) {                                                                           \
+                a_tmp = tri.conjugate();                                                           \
+                a = a_tmp.data();                                                                  \
+                lda = a_tmp.outerStride();                                                         \
+            } else {                                                                               \
+                a = _tri;                                                                          \
+                lda = triStride;                                                                   \
+            }                                                                                      \
+            if (IsUnitDiag)                                                                        \
+                diag = 'U';                                                                        \
+            /* call ?trsm*/                                                                        \
+            MKLPREFIX##trsm(&side, &uplo, &transa, &diag, &m, &n, &alpha, (const MKLTYPE*)a, &lda, \
+                            (MKLTYPE*)_other, &ldb);                                               \
+        }                                                                                          \
+    };
 
 EIGEN_MKL_TRSM_L(double, double, d)
 EIGEN_MKL_TRSM_L(dcomplex, MKL_Complex16, z)
 EIGEN_MKL_TRSM_L(float, float, s)
 EIGEN_MKL_TRSM_L(scomplex, MKL_Complex8, c)
 
-
 // implements RightSide general * op(triangular)^-1
-#define EIGEN_MKL_TRSM_R(EIGTYPE, MKLTYPE, MKLPREFIX) \
-template <typename Index, int Mode, bool Conjugate, int TriStorageOrder> \
-struct triangular_solve_matrix<EIGTYPE,Index,OnTheRight,Mode,Conjugate,TriStorageOrder,ColMajor> \
-{ \
-  enum { \
-    IsLower = (Mode&Lower) == Lower, \
-    IsUnitDiag  = (Mode&UnitDiag) ? 1 : 0, \
-    IsZeroDiag  = (Mode&ZeroDiag) ? 1 : 0, \
-    conjA = ((TriStorageOrder==ColMajor) && Conjugate) ? 1 : 0 \
-  }; \
-  static void run( \
-      Index size, Index otherSize, \
-      const EIGTYPE* _tri, Index triStride, \
-      EIGTYPE* _other, Index otherStride, level3_blocking<EIGTYPE,EIGTYPE>& /*blocking*/) \
-  { \
-   MKL_INT m = otherSize, n = size, lda, ldb; \
-   char side = 'R', uplo, diag='N', transa; \
-   /* Set alpha_ */ \
-   MKLTYPE alpha; \
-   EIGTYPE myone(1); \
-   assign_scalar_eig2mkl(alpha, myone); \
-   ldb = otherStride;\
-\
-   const EIGTYPE *a; \
-/* Set trans */ \
-   transa = (TriStorageOrder==RowMajor) ? ((Conjugate) ? 'C' : 'T') : 'N'; \
-/* Set uplo */ \
-   uplo = IsLower ? 'L' : 'U'; \
-   if (TriStorageOrder==RowMajor) uplo = (uplo == 'L') ? 'U' : 'L'; \
-/* Set a, lda */ \
-   typedef Matrix<EIGTYPE, Dynamic, Dynamic, TriStorageOrder> MatrixTri; \
-   Map<const MatrixTri, 0, OuterStride<> > tri(_tri,size,size,OuterStride<>(triStride)); \
-   MatrixTri a_tmp; \
-\
-   if (conjA) { \
-     a_tmp = tri.conjugate(); \
-     a = a_tmp.data(); \
-     lda = a_tmp.outerStride(); \
-   } else { \
-     a = _tri; \
-     lda = triStride; \
-   } \
-   if (IsUnitDiag) diag='U'; \
-/* call ?trsm*/ \
-   MKLPREFIX##trsm(&side, &uplo, &transa, &diag, &m, &n, &alpha, (const MKLTYPE*)a, &lda, (MKLTYPE*)_other, &ldb); \
-   /*std::cout << "TRMS_L specialization!\n";*/ \
- } \
-};
+#define EIGEN_MKL_TRSM_R(EIGTYPE, MKLTYPE, MKLPREFIX)                                              \
+    template <typename Index, int Mode, bool Conjugate, int TriStorageOrder>                       \
+    struct triangular_solve_matrix<EIGTYPE, Index, OnTheRight, Mode, Conjugate, TriStorageOrder,   \
+                                   ColMajor> {                                                     \
+        enum {                                                                                     \
+            IsLower = (Mode & Lower) == Lower,                                                     \
+            IsUnitDiag = (Mode & UnitDiag) ? 1 : 0,                                                \
+            IsZeroDiag = (Mode & ZeroDiag) ? 1 : 0,                                                \
+            conjA = ((TriStorageOrder == ColMajor) && Conjugate) ? 1 : 0                           \
+        };                                                                                         \
+        static void run(Index size,                                                                \
+                        Index otherSize,                                                           \
+                        const EIGTYPE* _tri,                                                       \
+                        Index triStride,                                                           \
+                        EIGTYPE* _other,                                                           \
+                        Index otherStride,                                                         \
+                        level3_blocking<EIGTYPE, EIGTYPE>& /*blocking*/) {                         \
+            MKL_INT m = otherSize, n = size, lda, ldb;                                             \
+            char side = 'R', uplo, diag = 'N', transa;                                             \
+            /* Set alpha_ */                                                                       \
+            MKLTYPE alpha;                                                                         \
+            EIGTYPE myone(1);                                                                      \
+            assign_scalar_eig2mkl(alpha, myone);                                                   \
+            ldb = otherStride;                                                                     \
+                                                                                                   \
+            const EIGTYPE* a;                                                                      \
+            /* Set trans */                                                                        \
+            transa = (TriStorageOrder == RowMajor) ? ((Conjugate) ? 'C' : 'T') : 'N';              \
+            /* Set uplo */                                                                         \
+            uplo = IsLower ? 'L' : 'U';                                                            \
+            if (TriStorageOrder == RowMajor)                                                       \
+                uplo = (uplo == 'L') ? 'U' : 'L';                                                  \
+            /* Set a, lda */                                                                       \
+            typedef Matrix<EIGTYPE, Dynamic, Dynamic, TriStorageOrder> MatrixTri;                  \
+            Map<const MatrixTri, 0, OuterStride<>> tri(_tri, size, size,                           \
+                                                       OuterStride<>(triStride));                  \
+            MatrixTri a_tmp;                                                                       \
+                                                                                                   \
+            if (conjA) {                                                                           \
+                a_tmp = tri.conjugate();                                                           \
+                a = a_tmp.data();                                                                  \
+                lda = a_tmp.outerStride();                                                         \
+            } else {                                                                               \
+                a = _tri;                                                                          \
+                lda = triStride;                                                                   \
+            }                                                                                      \
+            if (IsUnitDiag)                                                                        \
+                diag = 'U';                                                                        \
+            /* call ?trsm*/                                                                        \
+            MKLPREFIX##trsm(&side, &uplo, &transa, &diag, &m, &n, &alpha, (const MKLTYPE*)a, &lda, \
+                            (MKLTYPE*)_other, &ldb);                                               \
+            /*std::cout << "TRMS_L specialization!\n";*/                                           \
+        }                                                                                          \
+    };
 
 EIGEN_MKL_TRSM_R(double, double, d)
 EIGEN_MKL_TRSM_R(dcomplex, MKL_Complex16, z)
 EIGEN_MKL_TRSM_R(float, float, s)
 EIGEN_MKL_TRSM_R(scomplex, MKL_Complex8, c)
 
+}  // end namespace internal
 
-} // end namespace internal
+}  // end namespace Eigen
 
-} // end namespace Eigen
-
-#endif // EIGEN_TRIANGULAR_SOLVER_MATRIX_MKL_H
+#endif  // EIGEN_TRIANGULAR_SOLVER_MATRIX_MKL_H

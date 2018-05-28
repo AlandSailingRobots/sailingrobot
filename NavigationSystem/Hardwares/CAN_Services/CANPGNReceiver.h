@@ -7,12 +7,10 @@ class CANService;
 #include <stdint.h>
 #include <vector>
 
-class CANPGNReceiver
-{
+class CANPGNReceiver {
+   public:
+    CANPGNReceiver(CANService& service, std::vector<uint32_t> PGNs);
+    CANPGNReceiver(CANService& service, uint32_t PGN);
 
-public:
-	CANPGNReceiver(CANService& service, std::vector<uint32_t> PGNs);
-	CANPGNReceiver(CANService& service, uint32_t PGN);
-
-	virtual void processPGN(N2kMsg& msg) = 0;
+    virtual void processPGN(N2kMsg& msg) = 0;
 };

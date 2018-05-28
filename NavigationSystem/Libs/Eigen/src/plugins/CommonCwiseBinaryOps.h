@@ -11,36 +11,36 @@
 // This file is a base class plugin containing common coefficient wise functions.
 
 /** \returns an expression of the difference of \c *this and \a other
-  *
-  * \note If you want to substract a given scalar from all coefficients, see Cwise::operator-().
-  *
-  * \sa class CwiseBinaryOp, operator-=()
-  */
-EIGEN_MAKE_CWISE_BINARY_OP(operator-,internal::scalar_difference_op)
+ *
+ * \note If you want to substract a given scalar from all coefficients, see Cwise::operator-().
+ *
+ * \sa class CwiseBinaryOp, operator-=()
+ */
+EIGEN_MAKE_CWISE_BINARY_OP(operator-, internal::scalar_difference_op)
 
 /** \returns an expression of the sum of \c *this and \a other
-  *
-  * \note If you want to add a given scalar to all coefficients, see Cwise::operator+().
-  *
-  * \sa class CwiseBinaryOp, operator+=()
-  */
-EIGEN_MAKE_CWISE_BINARY_OP(operator+,internal::scalar_sum_op)
+ *
+ * \note If you want to add a given scalar to all coefficients, see Cwise::operator+().
+ *
+ * \sa class CwiseBinaryOp, operator+=()
+ */
+EIGEN_MAKE_CWISE_BINARY_OP(operator+, internal::scalar_sum_op)
 
 /** \returns an expression of a custom coefficient-wise operator \a func of *this and \a other
-  *
-  * The template parameter \a CustomBinaryOp is the type of the functor
-  * of the custom operator (see class CwiseBinaryOp for an example)
-  *
-  * Here is an example illustrating the use of custom functors:
-  * \include class_CwiseBinaryOp.cpp
-  * Output: \verbinclude class_CwiseBinaryOp.out
-  *
-  * \sa class CwiseBinaryOp, operator+(), operator-(), cwiseProduct()
-  */
-template<typename CustomBinaryOp, typename OtherDerived>
+ *
+ * The template parameter \a CustomBinaryOp is the type of the functor
+ * of the custom operator (see class CwiseBinaryOp for an example)
+ *
+ * Here is an example illustrating the use of custom functors:
+ * \include class_CwiseBinaryOp.cpp
+ * Output: \verbinclude class_CwiseBinaryOp.out
+ *
+ * \sa class CwiseBinaryOp, operator+(), operator-(), cwiseProduct()
+ */
+template <typename CustomBinaryOp, typename OtherDerived>
 EIGEN_STRONG_INLINE const CwiseBinaryOp<CustomBinaryOp, const Derived, const OtherDerived>
-binaryExpr(const EIGEN_CURRENT_STORAGE_BASE_CLASS<OtherDerived> &other, const CustomBinaryOp& func = CustomBinaryOp()) const
-{
-  return CwiseBinaryOp<CustomBinaryOp, const Derived, const OtherDerived>(derived(), other.derived(), func);
+binaryExpr(const EIGEN_CURRENT_STORAGE_BASE_CLASS<OtherDerived>& other,
+           const CustomBinaryOp& func = CustomBinaryOp()) const {
+    return CwiseBinaryOp<CustomBinaryOp, const Derived, const OtherDerived>(derived(),
+                                                                            other.derived(), func);
 }
-

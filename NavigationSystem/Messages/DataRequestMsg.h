@@ -19,21 +19,17 @@
 
 #include "MessageBus/Message.h"
 
-
 class DataRequestMsg : public Message {
-public:
-	DataRequestMsg(NodeID destinationID, NodeID sourceID)
-		:Message(MessageType::DataRequest, sourceID, destinationID) { }
+   public:
+    DataRequestMsg(NodeID destinationID, NodeID sourceID)
+        : Message(MessageType::DataRequest, sourceID, destinationID) {}
 
-	DataRequestMsg(NodeID destinationID)
-		:Message(MessageType::DataRequest, NodeID::None, destinationID) { }
+    DataRequestMsg(NodeID destinationID)
+        : Message(MessageType::DataRequest, NodeID::None, destinationID) {}
 
-	DataRequestMsg()
-		:Message(MessageType::DataRequest, NodeID::None, NodeID::None) { }
+    DataRequestMsg() : Message(MessageType::DataRequest, NodeID::None, NodeID::None) {}
 
-	DataRequestMsg(MessageDeserialiser deserialiser)
-		:Message(deserialiser)
-	{ }
+    DataRequestMsg(MessageDeserialiser deserialiser) : Message(deserialiser) {}
 
-	virtual ~DataRequestMsg() { }
+    virtual ~DataRequestMsg() {}
 };

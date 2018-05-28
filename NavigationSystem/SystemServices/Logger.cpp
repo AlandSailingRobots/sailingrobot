@@ -122,15 +122,15 @@ void Logger::info(std::string message, ...)
     vsnprintf(logBuffer, MAX_LOG_SIZE, message.c_str(), args);
     va_end(args);
 
-    char buff[256];
+    char buff[MAX_LOG_SIZE];	
 		int millis = SysClock::millis();
 
-		if (millis<10)
-      snprintf(buff, 256, "[%s:00%d] <info>\t %s\n", SysClock::timeStampStr().c_str(),millis, logBuffer);
-	  else if(millis<100)
-      snprintf(buff, 256, "[%s:0%d] <info>\t %s\n", SysClock::timeStampStr().c_str(),millis, logBuffer);
+	if (millis<10) {
+      snprintf(buff, MAX_LOG_SIZE+20, "[%s:00%d] <info>\t %s\n", SysClock::timeStampStr().c_str(),millis, logBuffer);	
+	}else if(millis<100)
+      snprintf(buff, MAX_LOG_SIZE+20, "[%s:0%d] <info>\t %s\n", SysClock::timeStampStr().c_str(),millis, logBuffer);	
 		else
-      snprintf(buff, 256, "[%s:%d] <info>\t %s\n", SysClock::timeStampStr().c_str(),millis, logBuffer);
+      snprintf(buff, MAX_LOG_SIZE+20, "[%s:%d] <info>\t %s\n", SysClock::timeStampStr().c_str(),millis, logBuffer);		
 
     printf("%s", buff);
     log(buff);
@@ -150,7 +150,8 @@ void Logger::error(std::string message, ...)
 
     char buff[256];
 
-    snprintf(buff, 256, "[%s:%d] <error>\t %s\n", SysClock::timeStampStr().c_str(), SysClock::millis(), logBuffer);
+    
+    snprintf(buff, MAX_LOG_SIZE+20, "[%s:%d] <error>\t %s\n", SysClock::timeStampStr().c_str(), SysClock::millis(), logBuffer);	
 
     printf("%s", buff);
     log(buff);
@@ -166,11 +167,12 @@ void Logger::warning(std::string message, ...)
 	// Put together the formatted string
 	va_start(args, message);
     vsnprintf(logBuffer, MAX_LOG_SIZE, message.c_str(), args);
-    va_end(args);
+    va_end(args);    
 
     char buff[256];
 
-    snprintf(buff, 256, "[%s:%d] <warning>\t %s\n", SysClock::timeStampStr().c_str(), SysClock::millis(), logBuffer);
+    snprintf(buff, MAX_LOG_SIZE+20, "[%s:%d] <warning>\t %s\n", SysClock::timeStampStr().c_str(), SysClock::millis(), logBuffer);
+
 
     printf("%s", buff);
     log(buff);
@@ -215,11 +217,13 @@ bool Logger::createLogFiles(const char* filename)
 
 	if(filename == 0)
 	{
-		snprintf(fileName, 256, "%s%s-%s", FILE_PATH, SysClock::hh_mm_ss().c_str(), DEFAULT_LOG_NAME);
+		snprintf(fileName, 256, "%s%s-%s", FILE_PATH, SysClock::timeStampStr().c_str(), DEFAULT_LOG_NAME);
+
 	}
 	else
-	{
-		snprintf(fileName, 256, "%s%s-%s", FILE_PATH, SysClock::hh_mm_ss().c_str(), filename);
+	{	
+		snprintf(fileName, 256, "%s%s-%s", FILE_PATH, SysClock::timeStampStr().c_str(), filename);
+
 	}
 
 	mkdir(FILE_PATH, S_IRWXU | S_IRWXG | S_IRWXO);
@@ -227,7 +231,7 @@ bool Logger::createLogFiles(const char* filename)
 
 	#ifdef ENABLE_WRSC_LOGGING
 		char wrscFileName[256];
-		snprintf(wrscFileName, 256, "%s%s-%s", FILE_PATH, SysClock::hh_mm_ss().c_str(), DEFAULT_LOG_NAME_WRSC);
+		snprintf(wrscFileName, 256, "%s%s-%s", FILE_PATH, SysClock::timeStampStr().c_str(), DEFAULT_LOG_NAME_WRSC);		
 		m_LogFileWRSC.open(wrscFileName, std::ios::out | std::ios::trunc);
 
 		if(m_LogFile.is_open() && m_LogFileWRSC.is_open())

@@ -11,33 +11,31 @@
  *      Two functions have been developed to calculate the desired tail angle :
  *          - calculateTailAngle(),
  *          - simpleCalculateTailAngle().
- *      You can choose the one you want to use by commenting/uncommenting lines 
- *      in WingsailControlNodeThreadFunc().   
+ *      You can choose the one you want to use by commenting/uncommenting lines
+ *      in WingsailControlNodeThreadFunc().
  *
  ***************************************************************************************/
 #pragma once
 
-#include <thread>
 #include <math.h>
-#include <mutex>
-#include <chrono>
-#include <vector>
 #include <stdint.h>
+#include <chrono>
+#include <mutex>
+#include <thread>
+#include <vector>
 
 #include "DataBase/DBHandler.h"
 #include "Math/Utility.h"
 #include "MessageBus/ActiveNode.h"
 #include "MessageBus/MessageBus.h"
-#include "Messages/WindStateMsg.h"
-#include "Messages/StateMessage.h"
 #include "Messages/LocalNavigationMsg.h"
+#include "Messages/StateMessage.h"
+#include "Messages/WindStateMsg.h"
 #include "Messages/WingSailCommandMsg.h"
 #include "SystemServices/Timer.h"
 
-
 class WingsailControlNode : public ActiveNode {
-public:
-
+   public:
     WingsailControlNode(MessageBus& msgBus, DBHandler& dbhandler);
     ~WingsailControlNode();
 
@@ -45,8 +43,7 @@ public:
     void start();
     void processMessage(const Message* message);
 
-private:
-
+   private:
     ///----------------------------------------------------------------------------------
     /// Updates the values of the parameters from the database.
     ///----------------------------------------------------------------------------------
@@ -69,13 +66,14 @@ private:
 
     ///----------------------------------------------------------------------------------
     /// Calculates the angle to give to the tail to have maximum force toward boat heading.
-    /// The parameters used by this function have been calculated by CFD simulation. It is 
+    /// The parameters used by this function have been calculated by CFD simulation. It is
     /// possible that the values of these parameters do not describe the real wing sail behaviour.
     ///----------------------------------------------------------------------------------
     float calculateTailAngle();
 
     ///----------------------------------------------------------------------------------
-    /// Sets the tail command angle to +/- m_MaxCommandAngle in function of the desired tack of the vessel.
+    /// Sets the tail command angle to +/- m_MaxCommandAngle in function of the desired tack of the
+    /// vessel.
     ///----------------------------------------------------------------------------------
     float simpleCalculateTailAngle();
 
@@ -84,15 +82,13 @@ private:
     ///----------------------------------------------------------------------------------
     static void WingsailControlNodeThreadFunc(ActiveNode* nodePtr);
 
-
-    DBHandler &m_db;
+    DBHandler& m_db;
     std::mutex m_lock;
 
-    double  m_LoopTime;             // seconds
-    double  m_MaxCommandAngle;      // degrees
+    double m_LoopTime;         // seconds
+    double m_MaxCommandAngle;  // degrees
 
-    double  m_ApparentWindDir;      // degrees [0, 360[ in North-East reference frame (clockwise)
-    float   m_TargetCourse;         // degree [0, 360[ in North-East reference frame (clockwise)
-    bool    m_TargetTackStarboard;  // True if the desired tack of the vessel is starboard.
-
+    double m_ApparentWindDir;    // degrees [0, 360[ in North-East reference frame (clockwise)
+    float m_TargetCourse;        // degree [0, 360[ in North-East reference frame (clockwise)
+    bool m_TargetTackStarboard;  // True if the desired tack of the vessel is starboard.
 };

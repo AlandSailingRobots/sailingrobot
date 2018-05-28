@@ -14,39 +14,34 @@
 
 #include "MessageBus/Message.h"
 
-
 class DataCollectionStartMsg : public Message {
-public:
+   public:
     DataCollectionStartMsg(NodeID destinationID, NodeID sourceID, int sensorReadingInterval)
-            :Message(MessageType::DataCollectionStart, sourceID, destinationID), m_sensorReadingInterval(sensorReadingInterval) { }
+        : Message(MessageType::DataCollectionStart, sourceID, destinationID),
+          m_sensorReadingInterval(sensorReadingInterval) {}
 
     DataCollectionStartMsg(int sensorReadingInterval)
-            :Message(MessageType::DataCollectionStart, NodeID::None, NodeID::None), m_sensorReadingInterval(sensorReadingInterval)
-    {
+        : Message(MessageType::DataCollectionStart, NodeID::None, NodeID::None),
+          m_sensorReadingInterval(sensorReadingInterval) {}
 
-    }
-
-    DataCollectionStartMsg(MessageDeserialiser deserialiser) : Message(deserialiser)
-    {
-        if(	!deserialiser.readInt(m_sensorReadingInterval))
-        {
+    DataCollectionStartMsg(MessageDeserialiser deserialiser) : Message(deserialiser) {
+        if (!deserialiser.readInt(m_sensorReadingInterval)) {
             m_valid = false;
         }
     }
 
-    virtual ~DataCollectionStartMsg() { }
+    virtual ~DataCollectionStartMsg() {}
 
     ///----------------------------------------------------------------------------------
     /// Serialises the message into a MessageSerialiser
     ///----------------------------------------------------------------------------------
-    virtual void Serialise(MessageSerialiser& serialiser) const
-    {
+    virtual void Serialise(MessageSerialiser& serialiser) const {
         Message::Serialise(serialiser);
         serialiser.serialise(m_sensorReadingInterval);
     }
 
     int getSensorReadingInterval() const { return m_sensorReadingInterval; }
 
-private:
+   private:
     int m_sensorReadingInterval;
 };

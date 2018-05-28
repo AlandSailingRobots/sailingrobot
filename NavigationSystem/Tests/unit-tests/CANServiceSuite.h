@@ -5,105 +5,89 @@
 ////////////////////////////////////////////////////////
 #pragma once
 
+#include "../cxxtest/cxxtest/TestSuite.h"
+#include "Hardwares/CAN_Services/CANFrameReceiver.h"
+#include "Hardwares/CAN_Services/CANService.h"
+#include "Hardwares/CAN_Services/CanBusCommon/CanMessageHandler.h"
+#include "Hardwares/CAN_Services/N2kMsg.h"
 #include "SystemServices/Logger.h"
 #include "TestMocks/MockCANReceiver.h"
-#include "Hardwares/CAN_Services/CANService.h"
-#include "Hardwares/CAN_Services/CANFrameReceiver.h"
-#include "Hardwares/CAN_Services/N2kMsg.h"
-#include "../cxxtest/cxxtest/TestSuite.h"
 
-#include <thread>
 #include <chrono>
 #include <iostream>
+#include <thread>
 
 #define WAIT_FOR_MSG 1000
 
-class CANServiceSuite : public CxxTest::TestSuite
-{
-public:
-  CANServiceSuite() {
-    wiringPiSetup();
-  }
-  void setUp() {
-    service = new CANService();
-  }
-  void tearDown()
-  {
-    delete service;
-  }
+class CANServiceSuite : public CxxTest::TestSuite {
+   public:
+    CANServiceSuite() { wiringPiSetup(); }
+    void setUp() { service = new CANService(); }
+    void tearDown() { delete service; }
 
-  void test_SendAndMissedMessages()
-  {
-      std::vector<uint32_t> a = {700};
-      MockCANReceiver receiver (*service, a );
-      auto fut = service->start();
-      service->SetLoopBackMode();
+    void test_SendAndMissedMessages() {
+        std::vector<uint32_t> a = {700};
+        MockCANReceiver receiver(*service, a);
+        auto fut = service->start();
+        service->SetLoopBackMode();
 
-      CanMsg Cmsg;
-      Cmsg.id = 700;
-      Cmsg.header.ide = 0;
-      for(int i=0; i<8; i++)
-      {
-        Cmsg.data[i] = i;
-      }
-      Cmsg.header.length = sizeof(Cmsg.data) / sizeof(Cmsg.data[0]);
+        CanMessageHandler messageHandler(MSG_ID_AU_CONTROL);
+        for (int i = 0; i < 6; i++) {
+            messageHandler.encodeMessage(1, i);
+        }
 
-      service->sendCANMessage(Cmsg);
-      bool missed = service->checkMissedMessages();
+        CanMsg Cmsg = messageHandler.getMessage();
 
-      std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_FOR_MSG));
-      service->SetNormalMode();
+        service->sendCANMessage(Cmsg);
+        bool missed = service->checkMissedMessages();
 
-      CanMsg Cmsg2;
-      N2kMsg Nmsg;
+        std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_FOR_MSG));
+        service->SetNormalMode();
 
-      Nmsg.PGN = 59904;
-      Nmsg.Priority = 6;
-      Nmsg.Source = 1;
-      Nmsg.Destination = 255;
-      Nmsg.DataLen = 3;
-      Nmsg.Data.resize(Nmsg.DataLen);
-      Nmsg.Data[0] = 20;
-      Nmsg.Data[1] = 240;
-      Nmsg.Data[2] = 1;
+        CanMsg Cmsg2;
+        N2kMsg Nmsg;
 
-      N2kMsgToCanMsg(Nmsg, Cmsg2);
+        Nmsg.PGN = 59904;
+        Nmsg.Priority = 6;
+        Nmsg.Source = 1;
+        Nmsg.Destination = 255;
+        Nmsg.DataLen = 3;
+        Nmsg.Data.resize(Nmsg.DataLen);
+        Nmsg.Data[0] = 20;
+        Nmsg.Data[1] = 240;
+        Nmsg.Data[2] = 1;
 
-      service->sendCANMessage(Cmsg2);
+        N2kMsgToCanMsg(Nmsg, Cmsg2);
 
-      std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_FOR_MSG));
+        service->sendCANMessage(Cmsg2);
 
-      bool missed2 = service->checkMissedMessages();
+        std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_FOR_MSG));
 
-      service->stop();
-      fut.get();
+        bool missed2 = service->checkMissedMessages();
 
-      TS_ASSERT(receiver.message_received());
-      TS_ASSERT(!missed);
-      TS_ASSERT(missed2);
+        service->stop();
+        fut.get();
 
-      if (Logger::init())
-      {
-		    Logger::info("Built on %s at %s", __DATE__, __TIME__);
-		    Logger::info("Logger init\t\t[OK]");
-	    }
-	    else
-      {
-		    Logger::error("Logger init\t\t[FAILED]");
-	    }
+        TS_ASSERT(receiver.message_received());
+        TS_ASSERT(!missed);
+        TS_ASSERT(missed2);
 
-      if(missed2)
-      {
-        Logger::error("Missed messages from the CAN-Bus");
-      }
-      else
-      {
-        Logger::info("No missed messages from the CAN-Bus");
-      }
+        if (Logger::init()) {
+            Logger::info("Built on %s at %s", __DATE__, __TIME__);
+            Logger::info("Logger init\t\t[OK]");
+        } else {
+            Logger::error("Logger init\t\t[FAILED]");
+        }
 
-      Logger::shutdown();
-  }
+        if (missed2) {
+            Logger::error("Missed messages from the CAN-Bus");
+        } else {
+            Logger::info("No missed messages from the CAN-Bus");
+        }
 
-private:
-  CANService* service;
+        Logger::shutdown();
+    }
+
+   private:
+    CANService* service;
 };

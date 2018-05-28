@@ -26,7 +26,7 @@
 extern "C" {
 #endif
 
-extern int sn3218Setup (int pinBase) ;
+extern int sn3218Setup(int pinBase);
 
 #ifdef __cplusplus
 }

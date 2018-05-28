@@ -21,19 +21,19 @@
  ***********************************************************************
  */
 
-extern void lcd128x64setOrigin         (int x, int y) ;
-extern void lcd128x64setOrientation    (int orientation) ;
-extern void lcd128x64orientCoordinates (int *x, int *y) ;
-extern void lcd128x64getScreenSize     (int *x, int *y) ;
-extern void lcd128x64point             (int  x, int  y, int colour) ;
-extern void lcd128x64line              (int x0, int y0, int x1, int y1, int colour) ;
-extern void lcd128x64lineTo            (int  x, int  y, int colour) ;
-extern void lcd128x64rectangle         (int x1, int y1, int x2, int y2, int colour, int filled) ;
-extern void lcd128x64circle            (int  x, int  y, int  r, int colour, int filled) ;
-extern void lcd128x64ellipse           (int cx, int cy, int xRadius, int yRadius, int colour, int filled) ;
-extern void lcd128x64putchar           (int  x, int  y, int c, int bgCol, int fgCol) ;
-extern void lcd128x64puts              (int  x, int  y, const char *str, int bgCol, int fgCol) ;
-extern void lcd128x64update            (void) ;
-extern void lcd128x64clear             (int colour) ;
+extern void lcd128x64setOrigin(int x, int y);
+extern void lcd128x64setOrientation(int orientation);
+extern void lcd128x64orientCoordinates(int* x, int* y);
+extern void lcd128x64getScreenSize(int* x, int* y);
+extern void lcd128x64point(int x, int y, int colour);
+extern void lcd128x64line(int x0, int y0, int x1, int y1, int colour);
+extern void lcd128x64lineTo(int x, int y, int colour);
+extern void lcd128x64rectangle(int x1, int y1, int x2, int y2, int colour, int filled);
+extern void lcd128x64circle(int x, int y, int r, int colour, int filled);
+extern void lcd128x64ellipse(int cx, int cy, int xRadius, int yRadius, int colour, int filled);
+extern void lcd128x64putchar(int x, int y, int c, int bgCol, int fgCol);
+extern void lcd128x64puts(int x, int y, const char* str, int bgCol, int fgCol);
+extern void lcd128x64update(void);
+extern void lcd128x64clear(int colour);
 
-extern int  lcd128x64setup             (void) ;
+extern int lcd128x64setup(void);

@@ -14,19 +14,16 @@
  *
  ***************************************************************************************/
 
-
 #pragma once
 
-
+#include <stdint.h>
+#include <mutex>
+#include <thread>
 #include "Collidable.h"
 #include "CollidableList.h"
-#include <mutex>
-#include <stdint.h>
-#include <thread>
-
 
 class CollidableMgr {
-public:
+   public:
     CollidableMgr();
 
     ///----------------------------------------------------------------------------------
@@ -37,7 +34,8 @@ public:
     void addAISContact(uint32_t mmsi, double lat, double lon, float speed, float course);
     void addAISContact(uint32_t mmsi, float length, float beam);
     // replaces the visual field
-    void addVisualField(std::map<int16_t, uint16_t> relBearingToRelObstacleDistance, int16_t heading);
+    void addVisualField(std::map<int16_t, uint16_t> relBearingToRelObstacleDistance,
+                        int16_t heading);
 
     CollidableList<AISCollidable_t> getAISContacts();
     VisualField_t getVisualField();
@@ -45,7 +43,8 @@ public:
     void removeOldVisualField();
 
     void removeOldAISContacts();
-private:
+
+   private:
     static void ContactGC(CollidableMgr* ptr);
 
     std::vector<AISCollidable_t> aisContacts;

@@ -12,43 +12,39 @@
  *
  ***************************************************************************************/
 
-
 #pragma once
 
-
-#include "DBHandler.h"
-#include <iostream>
-#include <vector>
-#include <thread>
-#include <mutex>
 #include <atomic>
 #include <condition_variable>
+#include <iostream>
+#include <mutex>
+#include <thread>
+#include <vector>
+#include "DBHandler.h"
 
 class DBLogger {
-public:
+   public:
+    DBLogger(unsigned int LogBufferSize, DBHandler& dbHandler);
+    ~DBLogger();
 
+    void startWorkerThread();
 
-	DBLogger(unsigned int LogBufferSize, DBHandler& dbHandler);
-	~DBLogger();
+    void log(LogItem& item);
 
-	void startWorkerThread();
+    unsigned int bufferSize() { return m_bufferSize; }
 
-	void log(LogItem& item);
+   private:
+    template <typename FloatOrDouble>
+    FloatOrDouble setValue(FloatOrDouble value);
 
-	unsigned int bufferSize() { return m_bufferSize; }
-private:
+    static void workerThread(DBLogger* ptr);
 
-	template<typename FloatOrDouble>
-	FloatOrDouble setValue(FloatOrDouble value);
-
-	static void workerThread(DBLogger* ptr);
-
-	std::thread* 			m_thread;
-	std::atomic<bool>		m_working;
-	std::mutex				m_mutex;
-	std::condition_variable m_cv;
-	DBHandler& 				m_dbHandler;
-	unsigned int 			m_bufferSize;
-	std::vector<LogItem>* 	m_logBufferFront;
-	std::vector<LogItem>* 	m_logBufferBack;
+    std::thread* m_thread;
+    std::atomic<bool> m_working;
+    std::mutex m_mutex;
+    std::condition_variable m_cv;
+    DBHandler& m_dbHandler;
+    unsigned int m_bufferSize;
+    std::vector<LogItem>* m_logBufferFront;
+    std::vector<LogItem>* m_logBufferBack;
 };

@@ -14,7 +14,7 @@
 
 TESTGEN_FLAGS = --error-printer --have-eh
 TEST_GEN = python cxxtest/bin/cxxtestgen
-CXX = g++ -c -Wall -W -I./unit-tests -I./cxxtest -I../ -std=c++14
+CXX = g++ -c -Wall -W -I./unit-tests -I./cxxtest -I../ -I../Libs/json/include -std=c++14
 
 
 #############################################################################################
@@ -28,7 +28,8 @@ UNIT_TEST_SRCS 		= MessageCoreSuite.h MessageSuite.h UtilitySuite.h HTTPSyncSuit
 					  	CourseRegulatorSuite.h CANMessageSuite.h DBLoggerNodeSuite.h \
 					  	LowLevelControllerNodeJanetSuite.h LowLevelControllersFunctionsTestSuite.h \
 					  	ASRCourseBallotSuite.h CourseRegulatorNodeSuite.h SailControlNodeSuite.h \
-						AISProcSuite.h CanNodesSuite.h MessageBusTestHelper.h ProximityVoterSuite.h
+						AISProcSuite.h CanNodesSuite.h MessageBusTestHelper.h ProximityVoterSuite.h \
+						CanMessageHandlerSuite.h
 					  	# ASRArbiterSuite.h // NOTE - Maël: This unit test suite is the source of a building error.
 
 
