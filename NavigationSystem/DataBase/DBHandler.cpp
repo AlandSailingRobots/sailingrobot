@@ -524,10 +524,10 @@ std::string DBHandler::getLogs(bool onlyLatest) {
                 getDataAsJson("*", table, table, "", js, true);
             }
         }
-
     } catch (const char* error) {
         Logger::error("%s, Error: %s", __PRETTY_FUNCTION__, error);
     }
+    Logger::warning("%s DEBUG js=\"%s\"", __PRETTY_FUNCTION__, js.dump());
     return js.dump();
 }
 
