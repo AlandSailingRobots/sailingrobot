@@ -131,6 +131,16 @@
 
 "14": {
   "is_checkpoint": 0,
+  "latitude": 60.099167,
+  "longitude": 19.921667,
+  "declination": 6,
+  "radius": 15,
+  "stay_time": 0,
+  "harvested": 0
+},
+
+"15": {
+  "is_checkpoint": 0,
   "latitude": 60.106667,
   "longitude": 19.922500,
   "declination": 6,
