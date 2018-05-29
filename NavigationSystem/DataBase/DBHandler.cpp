@@ -75,6 +75,7 @@ void DBHandler::getDataAsJson(std::string select,
             js[key] = jsonEntry;
         }
     }
+    Logger::warning("%s DEBUG js=\"%s\"", __PRETTY_FUNCTION__, js.dump());
 
     values.clear();
     columnNames.clear();
@@ -527,7 +528,6 @@ std::string DBHandler::getLogs(bool onlyLatest) {
     } catch (const char* error) {
         Logger::error("%s, Error: %s", __PRETTY_FUNCTION__, error);
     }
-    Logger::warning("%s DEBUG js=\"%s\"", __PRETTY_FUNCTION__, js.dump());
     return js.dump();
 }
 
