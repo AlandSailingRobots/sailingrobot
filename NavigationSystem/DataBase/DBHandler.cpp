@@ -35,7 +35,7 @@ void DBHandler::getDataAsJson(std::string select,
                               std::string key,
                               std::string id,
                               Json& js,
-                              bool useArray = true) {
+                              bool useArray) {
     int rows = 0, columns = 0;
     std::vector<std::string> values;
     std::vector<std::string> columnNames;

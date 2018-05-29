@@ -128,7 +128,7 @@ bool HTTPSyncNode::pushDatalogs() {
                 m_dbHandler->clearLogs();
             }
             return true;
-        } else if (!m_reportedConnectError) {
+        } else /* if (!m_reportedConnectError) */ {
             Logger::warning("%s Could not push logs to server", __PRETTY_FUNCTION__);
         }
     } else {
@@ -139,18 +139,12 @@ bool HTTPSyncNode::pushDatalogs() {
 
 bool HTTPSyncNode::pushWaypoints() {
     std::string waypointsData = m_dbHandler->getWaypoints();
-    if (waypointsData.size() > 0) {
-        std::string response = "";
-        Logger::warning(
-                "%s performCURLCall(%s,%s,...)",
-                __PRETTY_FUNCTION__,
-                waypointsData,
-                "pushWaypoints"
-        );
+    if (waypointsData.length()) {
+        std::string response;
         if (performCURLCall(waypointsData, "pushWaypoints", response)) {
             Logger::info("Waypoints pushed to server");
             return true;
-        } else if (!m_reportedConnectError) {
+        } else /* if (!m_reportedConnectError) */ {
             Logger::warning("%s Failed to push waypoints to server", __PRETTY_FUNCTION__);
         }
     }
@@ -161,17 +155,11 @@ bool HTTPSyncNode::pushConfigs() {
     std::string response = "";
     std::string data = m_dbHandler->getConfigs();
 
-    Logger::warning(
-            "%s performCURLCall(%s,%s,...)",
-            __PRETTY_FUNCTION__,
-            data,
-            "pushConfigs"
-    );
     if (performCURLCall(data, "pushConfigs", response)) {
         Logger::info("Configs pushed to server");
         return true;
-    } else if (!m_reportedConnectError) {
-        Logger::warning("%s Error: ", __PRETTY_FUNCTION__);
+    } else /* if (!m_reportedConnectError) */ {
+        Logger::warning("%s Failed to push configs to server", __PRETTY_FUNCTION__);
     }
 
     return false;
@@ -217,7 +205,7 @@ bool HTTPSyncNode::getConfigsFromServer() {
             m_MsgBus.sendMessage(std::move(newServerConfigs));
             Logger::info("Configuration retrieved from remote server");
             return true;
-        } else if (!m_reportedConnectError) {
+        } else /* if (!m_reportedConnectError) */ {
             Logger::error("%s Error: %s", __PRETTY_FUNCTION__);
         }
     }
@@ -238,7 +226,7 @@ bool HTTPSyncNode::getWaypointsFromServer() {
                 return true;
             }
 
-        } else if (!m_reportedConnectError) {
+        } else /* if (!m_reportedConnectError) */ {
             Logger::warning("%s Could not fetch any new waypoints", __PRETTY_FUNCTION__);
         }
     }
@@ -299,11 +287,11 @@ bool HTTPSyncNode::performCURLCall(std::string data, std::string call, std::stri
                 }
                 m_reportedConnectError = true;
             }
-            std::cerr << std::endl << "CONNECTION ERROR DEBUG "
-                << std::endl << " call=\"" << call << "\""
-                << std::endl << " data=\"" << data << "\""
-                << std::endl << " URL=\"" << serverCall.c_str() << "\""
-                << std::endl << std::endl;
+//            std::cerr << std::endl << "CONNECTION ERROR DEBUG "
+//                << std::endl << " call=\"" << call << "\""
+//                << std::endl << " data=\"" << data << "\""
+//                << std::endl << " URL=\"" << serverCall.c_str() << "\""
+//                << std::endl << std::endl;
         }
     } else {
         // fprintf(stderr, "CURL IS FALSE");
