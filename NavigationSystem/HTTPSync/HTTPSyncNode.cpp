@@ -122,12 +122,6 @@ bool HTTPSyncNode::pushDatalogs() {
 
     std::string data = m_dbHandler->getLogs(m_pushOnlyLatestLogs);
     if (data.length()) {
-        Logger::warning(
-                "%s performCURLCall(%s,%s,...)",
-                __PRETTY_FUNCTION__,
-                data,
-                "pushAllLogs"
-        );
         if (performCURLCall(data, "pushAllLogs", response)) {
             // remove logs after push
             if (m_removeLogs) {
@@ -255,17 +249,10 @@ bool HTTPSyncNode::performCURLCall(std::string data, std::string call, std::stri
     std::string serverCall = "";
 
 
-    Logger::warning(
-            "%s DEBUG call=\"%s\" data=\"%s\" response=\"%s\"",
-            __PRETTY_FUNCTION__,
-            call,
-            data,
-            response
-    );
     // std::cout << "/* Request : " << call << " */" << '\n';
-    if (data != "") {
+    if (data.length() && (data != "null")) {
         serverCall = "serv=" + call + "&id=" + m_shipID + "&gen=aspire" + "&pwd=" + m_shipPWD +
-                     "&data=" + data;
+                     "&data=" + curl_easy_escape(curl, data.c_str(), 0);
     } else {
         serverCall = "serv=" + call + "&id=" + m_shipID + "&gen=aspire" + "&pwd=" + m_shipPWD;
     }
@@ -312,6 +299,11 @@ bool HTTPSyncNode::performCURLCall(std::string data, std::string call, std::stri
                 }
                 m_reportedConnectError = true;
             }
+            std::cerr << std::endl << "CONNECTION ERROR DEBUG "
+                << std::endl << " call=\"" << call << "\""
+                << std::endl << " data=\"" << data << "\""
+                << std::endl << " URL=\"" << serverCall.c_str() << "\""
+                << std::endl << std::endl;
         }
     } else {
         // fprintf(stderr, "CURL IS FALSE");

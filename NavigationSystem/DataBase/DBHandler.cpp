@@ -35,29 +35,31 @@ void DBHandler::getDataAsJson(std::string select,
                               std::string key,
                               std::string id,
                               Json& js,
-                              bool useArray) {
-    Logger::warning("%s DEBUG js=\"%s\"", __PRETTY_FUNCTION__, js.dump());
+                              bool useArray = true) {
     int rows = 0, columns = 0;
     std::vector<std::string> values;
     std::vector<std::string> columnNames;
     std::vector<std::string> results;
 
     try {
-        if (id == "")
-            results = retrieveFromTable("SELECT " + select + " FROM " + table + ";", rows, columns);
-        else
+        if (id.length()) {
             results = retrieveFromTable(
-                "SELECT " + select + " FROM " + table + " WHERE ID = " + id + ";", rows, columns);
+                "SELECT " + select + " FROM " + table + " WHERE ID = " + id + ";", rows, columns
+            );
+        } else {
+            results = retrieveFromTable("SELECT " + select + " FROM " + table + ";", rows, columns);
+        }
     } catch (const char* error) {
         Logger::error("%s, %s table: %s Error: %s", __PRETTY_FUNCTION__, select.c_str(),
                       table.c_str(), error);
     }
 
     for (int i = 0; i < columns * (rows + 1); ++i) {
-        if (i < columns)
+        if (i < columns) {
             columnNames.push_back(results[i]);
-        else
+        } else {
             values.push_back(results[i]);
+	}
     }
 
     Json jsonEntry;
@@ -66,7 +68,6 @@ void DBHandler::getDataAsJson(std::string select,
             int index = j + (columns * i);
             jsonEntry[columnNames.at(j)] = values.at(index);
         }
-
         if (useArray) {
             if (!js[key].is_array()) {
                 js[key] = Json::array({});
@@ -76,7 +77,6 @@ void DBHandler::getDataAsJson(std::string select,
             js[key] = jsonEntry;
         }
     }
-    Logger::warning("%s DEBUG js=\"%s\"", __PRETTY_FUNCTION__, js.dump());
 
     values.clear();
     columnNames.clear();
@@ -517,7 +517,6 @@ std::string DBHandler::getLogs(bool onlyLatest) {
 
     try {
         // insert all data in these tables as json array
-
         for (auto table : datalogTables) {
             if (onlyLatest) {
                 // Gets the log entry with the highest id
@@ -866,8 +865,8 @@ std::vector<std::string> DBHandler::retrieveFromTable(std::string sqlSELECT,
         } while (resultcode == SQLITE_BUSY);
 
         if (resultcode == SQLITE_EMPTY) {
-            std::vector<std::string> s;
             closeDatabase(db);
+            std::vector<std::string> s;
             return s;
         }
 
@@ -902,7 +901,7 @@ std::vector<std::string> DBHandler::retrieveFromTable(std::string sqlSELECT,
         } while (resultcode == SQLITE_BUSY);
 
         if (resultcode == SQLITE_EMPTY) {
-            std::vector<std::string> s;
+            std::vector<std::string> s = { "HELLO" };
             return s;
         }
 
