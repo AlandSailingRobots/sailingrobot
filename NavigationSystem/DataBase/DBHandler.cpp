@@ -36,6 +36,7 @@ void DBHandler::getDataAsJson(std::string select,
                               std::string id,
                               Json& js,
                               bool useArray) {
+    Logger::warning("%s DEBUG js=\"%s\"", __PRETTY_FUNCTION__, js.dump());
     int rows = 0, columns = 0;
     std::vector<std::string> values;
     std::vector<std::string> columnNames;
@@ -520,9 +521,9 @@ std::string DBHandler::getLogs(bool onlyLatest) {
         for (auto table : datalogTables) {
             if (onlyLatest) {
                 // Gets the log entry with the highest id
-                getDataAsJson("*", table + " ORDER BY id DESC LIMIT 1", table, "", js, true);
+                getDataAsJson("*", table + " ORDER BY id DESC LIMIT 1", table, "", (Json&) js, true);
             } else {
-                getDataAsJson("*", table, table, "", js, true);
+                getDataAsJson("*", table, table, "", (Json&) js, true);
             }
         }
     } catch (const char* error) {
