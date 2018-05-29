@@ -122,6 +122,12 @@ bool HTTPSyncNode::pushDatalogs() {
 
     std::string data = m_dbHandler->getLogs(m_pushOnlyLatestLogs);
     if (data.length()) {
+        Logger::warning(
+                "%s performCURLCall(%s,%s,...)",
+                __PRETTY_FUNCTION__,
+                data,
+                "pushAllLogs"
+        );
         if (performCURLCall(data, "pushAllLogs", response)) {
             // remove logs after push
             if (m_removeLogs) {
@@ -140,7 +146,13 @@ bool HTTPSyncNode::pushDatalogs() {
 bool HTTPSyncNode::pushWaypoints() {
     std::string waypointsData = m_dbHandler->getWaypoints();
     if (waypointsData.size() > 0) {
-        std::string response;
+        std::string response = "";
+        Logger::warning(
+                "%s performCURLCall(%s,%s,...)",
+                __PRETTY_FUNCTION__,
+                waypointsData,
+                "pushWaypoints"
+        );
         if (performCURLCall(waypointsData, "pushWaypoints", response)) {
             Logger::info("Waypoints pushed to server");
             return true;
@@ -152,9 +164,16 @@ bool HTTPSyncNode::pushWaypoints() {
 }
 
 bool HTTPSyncNode::pushConfigs() {
-    std::string response;
+    std::string response = "";
+    std::string data = m_dbHandler->getConfigs();
 
-    if (performCURLCall(m_dbHandler->getConfigs(), "pushConfigs", response)) {
+    Logger::warning(
+            "%s performCURLCall(%s,%s,...)",
+            __PRETTY_FUNCTION__,
+            data,
+            "pushConfigs"
+    );
+    if (performCURLCall(data, "pushConfigs", response)) {
         Logger::info("Configs pushed to server");
         return true;
     } else if (!m_reportedConnectError) {
