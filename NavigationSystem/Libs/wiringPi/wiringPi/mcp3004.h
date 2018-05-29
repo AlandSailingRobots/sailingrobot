@@ -26,7 +26,7 @@
 extern "C" {
 #endif
 
-extern int mcp3004Setup (int pinBase, int spiChannel) ;
+extern int mcp3004Setup(int pinBase, int spiChannel);
 
 #ifdef __cplusplus
 }

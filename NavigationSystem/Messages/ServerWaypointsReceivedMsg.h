@@ -11,21 +11,15 @@
 
 #include "MessageBus/Message.h"
 
-
 class ServerWaypointsReceivedMsg : public Message {
-public:
-	ServerWaypointsReceivedMsg(NodeID destinationID, NodeID sourceID)
-		:Message(MessageType::ServerWaypointsReceived, sourceID, destinationID)
-	{ }
+   public:
+    ServerWaypointsReceivedMsg(NodeID destinationID, NodeID sourceID)
+        : Message(MessageType::ServerWaypointsReceived, sourceID, destinationID) {}
 
-	ServerWaypointsReceivedMsg()
-		:Message(MessageType::ServerWaypointsReceived, NodeID::None, NodeID::None)
-	{ }
+    ServerWaypointsReceivedMsg()
+        : Message(MessageType::ServerWaypointsReceived, NodeID::None, NodeID::None) {}
 
-	ServerWaypointsReceivedMsg(MessageDeserialiser deserialiser)
-		:Message(deserialiser)
-	{ }
+    ServerWaypointsReceivedMsg(MessageDeserialiser deserialiser) : Message(deserialiser) {}
 
-	virtual ~ServerWaypointsReceivedMsg() { }
-
+    virtual ~ServerWaypointsReceivedMsg() {}
 };

@@ -26,7 +26,7 @@
 extern "C" {
 #endif
 
-extern int max5322Setup (int pinBase, int spiChannel) ;
+extern int max5322Setup(int pinBase, int spiChannel);
 
 #ifdef __cplusplus
 }

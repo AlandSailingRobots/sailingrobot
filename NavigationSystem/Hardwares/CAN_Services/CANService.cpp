@@ -113,7 +113,7 @@ void CANService::run()
         if(receiverIt != m_RegisteredFrameReceivers.end())
         { // Iterator is a pair, of which the second element is the actual receiver.
           CANFrameReceiver* receiver = receiverIt->second;
-          receiver->processFrame(Cmsg);
+          receiver->processFrameAndLogErrors(Cmsg);
         }
       }
       else

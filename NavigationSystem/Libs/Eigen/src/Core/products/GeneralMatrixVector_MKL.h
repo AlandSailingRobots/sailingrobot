@@ -33,99 +33,127 @@
 #ifndef EIGEN_GENERAL_MATRIX_VECTOR_MKL_H
 #define EIGEN_GENERAL_MATRIX_VECTOR_MKL_H
 
-namespace Eigen { 
+namespace Eigen {
 
 namespace internal {
 
 /**********************************************************************
-* This file implements general matrix-vector multiplication using BLAS
-* gemv function via partial specialization of
-* general_matrix_vector_product::run(..) method for float, double,
-* std::complex<float> and std::complex<double> types
-**********************************************************************/
+ * This file implements general matrix-vector multiplication using BLAS
+ * gemv function via partial specialization of
+ * general_matrix_vector_product::run(..) method for float, double,
+ * std::complex<float> and std::complex<double> types
+ **********************************************************************/
 
 // gemv specialization
 
-template<typename Index, typename LhsScalar, int LhsStorageOrder, bool ConjugateLhs, typename RhsScalar, bool ConjugateRhs>
-struct general_matrix_vector_product_gemv :
-  general_matrix_vector_product<Index,LhsScalar,LhsStorageOrder,ConjugateLhs,RhsScalar,ConjugateRhs,BuiltIn> {};
+template <typename Index,
+          typename LhsScalar,
+          int LhsStorageOrder,
+          bool ConjugateLhs,
+          typename RhsScalar,
+          bool ConjugateRhs>
+struct general_matrix_vector_product_gemv : general_matrix_vector_product<Index,
+                                                                          LhsScalar,
+                                                                          LhsStorageOrder,
+                                                                          ConjugateLhs,
+                                                                          RhsScalar,
+                                                                          ConjugateRhs,
+                                                                          BuiltIn> {};
 
-#define EIGEN_MKL_GEMV_SPECIALIZE(Scalar) \
-template<typename Index, bool ConjugateLhs, bool ConjugateRhs> \
-struct general_matrix_vector_product<Index,Scalar,ColMajor,ConjugateLhs,Scalar,ConjugateRhs,Specialized> { \
-static void run( \
-  Index rows, Index cols, \
-  const Scalar* lhs, Index lhsStride, \
-  const Scalar* rhs, Index rhsIncr, \
-  Scalar* res, Index resIncr, Scalar alpha) \
-{ \
-  if (ConjugateLhs) { \
-    general_matrix_vector_product<Index,Scalar,ColMajor,ConjugateLhs,Scalar,ConjugateRhs,BuiltIn>::run( \
-      rows, cols, lhs, lhsStride, rhs, rhsIncr, res, resIncr, alpha); \
-  } else { \
-    general_matrix_vector_product_gemv<Index,Scalar,ColMajor,ConjugateLhs,Scalar,ConjugateRhs>::run( \
-      rows, cols, lhs, lhsStride, rhs, rhsIncr, res, resIncr, alpha); \
-  } \
-} \
-}; \
-template<typename Index, bool ConjugateLhs, bool ConjugateRhs> \
-struct general_matrix_vector_product<Index,Scalar,RowMajor,ConjugateLhs,Scalar,ConjugateRhs,Specialized> { \
-static void run( \
-  Index rows, Index cols, \
-  const Scalar* lhs, Index lhsStride, \
-  const Scalar* rhs, Index rhsIncr, \
-  Scalar* res, Index resIncr, Scalar alpha) \
-{ \
-    general_matrix_vector_product_gemv<Index,Scalar,RowMajor,ConjugateLhs,Scalar,ConjugateRhs>::run( \
-      rows, cols, lhs, lhsStride, rhs, rhsIncr, res, resIncr, alpha); \
-} \
-}; \
+#define EIGEN_MKL_GEMV_SPECIALIZE(Scalar)                                                          \
+    template <typename Index, bool ConjugateLhs, bool ConjugateRhs>                                \
+    struct general_matrix_vector_product<Index, Scalar, ColMajor, ConjugateLhs, Scalar,            \
+                                         ConjugateRhs, Specialized> {                              \
+        static void run(Index rows,                                                                \
+                        Index cols,                                                                \
+                        const Scalar* lhs,                                                         \
+                        Index lhsStride,                                                           \
+                        const Scalar* rhs,                                                         \
+                        Index rhsIncr,                                                             \
+                        Scalar* res,                                                               \
+                        Index resIncr,                                                             \
+                        Scalar alpha) {                                                            \
+            if (ConjugateLhs) {                                                                    \
+                general_matrix_vector_product<Index, Scalar, ColMajor, ConjugateLhs, Scalar,       \
+                                              ConjugateRhs, BuiltIn>::run(rows, cols, lhs,         \
+                                                                          lhsStride, rhs, rhsIncr, \
+                                                                          res, resIncr, alpha);    \
+            } else {                                                                               \
+                general_matrix_vector_product_gemv<Index, Scalar, ColMajor, ConjugateLhs, Scalar,  \
+                                                   ConjugateRhs>::run(rows, cols, lhs, lhsStride,  \
+                                                                      rhs, rhsIncr, res, resIncr,  \
+                                                                      alpha);                      \
+            }                                                                                      \
+        }                                                                                          \
+    };                                                                                             \
+    template <typename Index, bool ConjugateLhs, bool ConjugateRhs>                                \
+    struct general_matrix_vector_product<Index, Scalar, RowMajor, ConjugateLhs, Scalar,            \
+                                         ConjugateRhs, Specialized> {                              \
+        static void run(Index rows,                                                                \
+                        Index cols,                                                                \
+                        const Scalar* lhs,                                                         \
+                        Index lhsStride,                                                           \
+                        const Scalar* rhs,                                                         \
+                        Index rhsIncr,                                                             \
+                        Scalar* res,                                                               \
+                        Index resIncr,                                                             \
+                        Scalar alpha) {                                                            \
+            general_matrix_vector_product_gemv<Index, Scalar, RowMajor, ConjugateLhs, Scalar,      \
+                                               ConjugateRhs>::run(rows, cols, lhs, lhsStride, rhs, \
+                                                                  rhsIncr, res, resIncr, alpha);   \
+        }                                                                                          \
+    };
 
 EIGEN_MKL_GEMV_SPECIALIZE(double)
 EIGEN_MKL_GEMV_SPECIALIZE(float)
 EIGEN_MKL_GEMV_SPECIALIZE(dcomplex)
 EIGEN_MKL_GEMV_SPECIALIZE(scomplex)
 
-#define EIGEN_MKL_GEMV_SPECIALIZATION(EIGTYPE,MKLTYPE,MKLPREFIX) \
-template<typename Index, int LhsStorageOrder, bool ConjugateLhs, bool ConjugateRhs> \
-struct general_matrix_vector_product_gemv<Index,EIGTYPE,LhsStorageOrder,ConjugateLhs,EIGTYPE,ConjugateRhs> \
-{ \
-typedef Matrix<EIGTYPE,Dynamic,1,ColMajor> GEMVVector;\
-\
-static void run( \
-  Index rows, Index cols, \
-  const EIGTYPE* lhs, Index lhsStride, \
-  const EIGTYPE* rhs, Index rhsIncr, \
-  EIGTYPE* res, Index resIncr, EIGTYPE alpha) \
-{ \
-  MKL_INT m=rows, n=cols, lda=lhsStride, incx=rhsIncr, incy=resIncr; \
-  MKLTYPE alpha_, beta_; \
-  const EIGTYPE *x_ptr, myone(1); \
-  char trans=(LhsStorageOrder==ColMajor) ? 'N' : (ConjugateLhs) ? 'C' : 'T'; \
-  if (LhsStorageOrder==RowMajor) { \
-    m=cols; \
-    n=rows; \
-  }\
-  assign_scalar_eig2mkl(alpha_, alpha); \
-  assign_scalar_eig2mkl(beta_, myone); \
-  GEMVVector x_tmp; \
-  if (ConjugateRhs) { \
-    Map<const GEMVVector, 0, InnerStride<> > map_x(rhs,cols,1,InnerStride<>(incx)); \
-    x_tmp=map_x.conjugate(); \
-    x_ptr=x_tmp.data(); \
-    incx=1; \
-  } else x_ptr=rhs; \
-  MKLPREFIX##gemv(&trans, &m, &n, &alpha_, (const MKLTYPE*)lhs, &lda, (const MKLTYPE*)x_ptr, &incx, &beta_, (MKLTYPE*)res, &incy); \
-}\
-};
+#define EIGEN_MKL_GEMV_SPECIALIZATION(EIGTYPE, MKLTYPE, MKLPREFIX)                                \
+    template <typename Index, int LhsStorageOrder, bool ConjugateLhs, bool ConjugateRhs>          \
+    struct general_matrix_vector_product_gemv<Index, EIGTYPE, LhsStorageOrder, ConjugateLhs,      \
+                                              EIGTYPE, ConjugateRhs> {                            \
+        typedef Matrix<EIGTYPE, Dynamic, 1, ColMajor> GEMVVector;                                 \
+                                                                                                  \
+        static void run(Index rows,                                                               \
+                        Index cols,                                                               \
+                        const EIGTYPE* lhs,                                                       \
+                        Index lhsStride,                                                          \
+                        const EIGTYPE* rhs,                                                       \
+                        Index rhsIncr,                                                            \
+                        EIGTYPE* res,                                                             \
+                        Index resIncr,                                                            \
+                        EIGTYPE alpha) {                                                          \
+            MKL_INT m = rows, n = cols, lda = lhsStride, incx = rhsIncr, incy = resIncr;          \
+            MKLTYPE alpha_, beta_;                                                                \
+            const EIGTYPE *x_ptr, myone(1);                                                       \
+            char trans = (LhsStorageOrder == ColMajor) ? 'N' : (ConjugateLhs) ? 'C' : 'T';        \
+            if (LhsStorageOrder == RowMajor) {                                                    \
+                m = cols;                                                                         \
+                n = rows;                                                                         \
+            }                                                                                     \
+            assign_scalar_eig2mkl(alpha_, alpha);                                                 \
+            assign_scalar_eig2mkl(beta_, myone);                                                  \
+            GEMVVector x_tmp;                                                                     \
+            if (ConjugateRhs) {                                                                   \
+                Map<const GEMVVector, 0, InnerStride<>> map_x(rhs, cols, 1, InnerStride<>(incx)); \
+                x_tmp = map_x.conjugate();                                                        \
+                x_ptr = x_tmp.data();                                                             \
+                incx = 1;                                                                         \
+            } else                                                                                \
+                x_ptr = rhs;                                                                      \
+            MKLPREFIX##gemv(&trans, &m, &n, &alpha_, (const MKLTYPE*)lhs, &lda,                   \
+                            (const MKLTYPE*)x_ptr, &incx, &beta_, (MKLTYPE*)res, &incy);          \
+        }                                                                                         \
+    };
 
-EIGEN_MKL_GEMV_SPECIALIZATION(double,   double,        d)
-EIGEN_MKL_GEMV_SPECIALIZATION(float,    float,         s)
+EIGEN_MKL_GEMV_SPECIALIZATION(double, double, d)
+EIGEN_MKL_GEMV_SPECIALIZATION(float, float, s)
 EIGEN_MKL_GEMV_SPECIALIZATION(dcomplex, MKL_Complex16, z)
-EIGEN_MKL_GEMV_SPECIALIZATION(scomplex, MKL_Complex8,  c)
+EIGEN_MKL_GEMV_SPECIALIZATION(scomplex, MKL_Complex8, c)
 
-} // end namespase internal
+}  // namespace internal
 
-} // end namespace Eigen
+}  // end namespace Eigen
 
-#endif // EIGEN_GENERAL_MATRIX_VECTOR_MKL_H
+#endif  // EIGEN_GENERAL_MATRIX_VECTOR_MKL_H

@@ -33,114 +33,150 @@
 #ifndef EIGEN_GENERAL_MATRIX_MATRIX_TRIANGULAR_MKL_H
 #define EIGEN_GENERAL_MATRIX_MATRIX_TRIANGULAR_MKL_H
 
-namespace Eigen { 
+namespace Eigen {
 
 namespace internal {
 
-template <typename Index, typename Scalar, int AStorageOrder, bool ConjugateA, int ResStorageOrder, int  UpLo>
-struct general_matrix_matrix_rankupdate :
-       general_matrix_matrix_triangular_product<
-         Index,Scalar,AStorageOrder,ConjugateA,Scalar,AStorageOrder,ConjugateA,ResStorageOrder,UpLo,BuiltIn> {};
-
+template <typename Index,
+          typename Scalar,
+          int AStorageOrder,
+          bool ConjugateA,
+          int ResStorageOrder,
+          int UpLo>
+struct general_matrix_matrix_rankupdate : general_matrix_matrix_triangular_product<Index,
+                                                                                   Scalar,
+                                                                                   AStorageOrder,
+                                                                                   ConjugateA,
+                                                                                   Scalar,
+                                                                                   AStorageOrder,
+                                                                                   ConjugateA,
+                                                                                   ResStorageOrder,
+                                                                                   UpLo,
+                                                                                   BuiltIn> {};
 
 // try to go to BLAS specialization
-#define EIGEN_MKL_RANKUPDATE_SPECIALIZE(Scalar) \
-template <typename Index, int LhsStorageOrder, bool ConjugateLhs, \
-                          int RhsStorageOrder, bool ConjugateRhs, int  UpLo> \
-struct general_matrix_matrix_triangular_product<Index,Scalar,LhsStorageOrder,ConjugateLhs, \
-               Scalar,RhsStorageOrder,ConjugateRhs,ColMajor,UpLo,Specialized> { \
-  static EIGEN_STRONG_INLINE void run(Index size, Index depth,const Scalar* lhs, Index lhsStride, \
-                          const Scalar* rhs, Index rhsStride, Scalar* res, Index resStride, Scalar alpha) \
-  { \
-    if (lhs==rhs) { \
-      general_matrix_matrix_rankupdate<Index,Scalar,LhsStorageOrder,ConjugateLhs,ColMajor,UpLo> \
-      ::run(size,depth,lhs,lhsStride,rhs,rhsStride,res,resStride,alpha); \
-    } else { \
-      general_matrix_matrix_triangular_product<Index, \
-        Scalar, LhsStorageOrder, ConjugateLhs, \
-        Scalar, RhsStorageOrder, ConjugateRhs, \
-        ColMajor, UpLo, BuiltIn> \
-      ::run(size,depth,lhs,lhsStride,rhs,rhsStride,res,resStride,alpha); \
-    } \
-  } \
-};
+#define EIGEN_MKL_RANKUPDATE_SPECIALIZE(Scalar)                                                    \
+    template <typename Index, int LhsStorageOrder, bool ConjugateLhs, int RhsStorageOrder,         \
+              bool ConjugateRhs, int UpLo>                                                         \
+    struct general_matrix_matrix_triangular_product<Index, Scalar, LhsStorageOrder, ConjugateLhs,  \
+                                                    Scalar, RhsStorageOrder, ConjugateRhs,         \
+                                                    ColMajor, UpLo, Specialized> {                 \
+        static EIGEN_STRONG_INLINE void run(Index size,                                            \
+                                            Index depth,                                           \
+                                            const Scalar* lhs,                                     \
+                                            Index lhsStride,                                       \
+                                            const Scalar* rhs,                                     \
+                                            Index rhsStride,                                       \
+                                            Scalar* res,                                           \
+                                            Index resStride,                                       \
+                                            Scalar alpha) {                                        \
+            if (lhs == rhs) {                                                                      \
+                general_matrix_matrix_rankupdate<Index, Scalar, LhsStorageOrder, ConjugateLhs,     \
+                                                 ColMajor, UpLo>::run(size, depth, lhs, lhsStride, \
+                                                                      rhs, rhsStride, res,         \
+                                                                      resStride, alpha);           \
+            } else {                                                                               \
+                general_matrix_matrix_triangular_product<                                          \
+                    Index, Scalar, LhsStorageOrder, ConjugateLhs, Scalar, RhsStorageOrder,         \
+                    ConjugateRhs, ColMajor, UpLo, BuiltIn>::run(size, depth, lhs, lhsStride, rhs,  \
+                                                                rhsStride, res, resStride, alpha); \
+            }                                                                                      \
+        }                                                                                          \
+    };
 
 EIGEN_MKL_RANKUPDATE_SPECIALIZE(double)
-//EIGEN_MKL_RANKUPDATE_SPECIALIZE(dcomplex)
+// EIGEN_MKL_RANKUPDATE_SPECIALIZE(dcomplex)
 EIGEN_MKL_RANKUPDATE_SPECIALIZE(float)
-//EIGEN_MKL_RANKUPDATE_SPECIALIZE(scomplex)
+// EIGEN_MKL_RANKUPDATE_SPECIALIZE(scomplex)
 
 // SYRK for float/double
-#define EIGEN_MKL_RANKUPDATE_R(EIGTYPE, MKLTYPE, MKLFUNC) \
-template <typename Index, int AStorageOrder, bool ConjugateA, int  UpLo> \
-struct general_matrix_matrix_rankupdate<Index,EIGTYPE,AStorageOrder,ConjugateA,ColMajor,UpLo> { \
-  enum { \
-    IsLower = (UpLo&Lower) == Lower, \
-    LowUp = IsLower ? Lower : Upper, \
-    conjA = ((AStorageOrder==ColMajor) && ConjugateA) ? 1 : 0 \
-  }; \
-  static EIGEN_STRONG_INLINE void run(Index size, Index depth,const EIGTYPE* lhs, Index lhsStride, \
-                          const EIGTYPE* rhs, Index rhsStride, EIGTYPE* res, Index resStride, EIGTYPE alpha) \
-  { \
-  /* typedef Matrix<EIGTYPE, Dynamic, Dynamic, RhsStorageOrder> MatrixRhs;*/ \
-\
-   MKL_INT lda=lhsStride, ldc=resStride, n=size, k=depth; \
-   char uplo=(IsLower) ? 'L' : 'U', trans=(AStorageOrder==RowMajor) ? 'T':'N'; \
-   MKLTYPE alpha_, beta_; \
-\
-/* Set alpha_ & beta_ */ \
-   assign_scalar_eig2mkl<MKLTYPE, EIGTYPE>(alpha_, alpha); \
-   assign_scalar_eig2mkl<MKLTYPE, EIGTYPE>(beta_, EIGTYPE(1)); \
-   MKLFUNC(&uplo, &trans, &n, &k, &alpha_, lhs, &lda, &beta_, res, &ldc); \
-  } \
-};
+#define EIGEN_MKL_RANKUPDATE_R(EIGTYPE, MKLTYPE, MKLFUNC)                                        \
+    template <typename Index, int AStorageOrder, bool ConjugateA, int UpLo>                      \
+    struct general_matrix_matrix_rankupdate<Index, EIGTYPE, AStorageOrder, ConjugateA, ColMajor, \
+                                            UpLo> {                                              \
+        enum {                                                                                   \
+            IsLower = (UpLo & Lower) == Lower,                                                   \
+            LowUp = IsLower ? Lower : Upper,                                                     \
+            conjA = ((AStorageOrder == ColMajor) && ConjugateA) ? 1 : 0                          \
+        };                                                                                       \
+        static EIGEN_STRONG_INLINE void run(Index size,                                          \
+                                            Index depth,                                         \
+                                            const EIGTYPE* lhs,                                  \
+                                            Index lhsStride,                                     \
+                                            const EIGTYPE* rhs,                                  \
+                                            Index rhsStride,                                     \
+                                            EIGTYPE* res,                                        \
+                                            Index resStride,                                     \
+                                            EIGTYPE alpha) {                                     \
+            /* typedef Matrix<EIGTYPE, Dynamic, Dynamic, RhsStorageOrder> MatrixRhs;*/           \
+                                                                                                 \
+            MKL_INT lda = lhsStride, ldc = resStride, n = size, k = depth;                       \
+            char uplo = (IsLower) ? 'L' : 'U', trans = (AStorageOrder == RowMajor) ? 'T' : 'N';  \
+            MKLTYPE alpha_, beta_;                                                               \
+                                                                                                 \
+            /* Set alpha_ & beta_ */                                                             \
+            assign_scalar_eig2mkl<MKLTYPE, EIGTYPE>(alpha_, alpha);                              \
+            assign_scalar_eig2mkl<MKLTYPE, EIGTYPE>(beta_, EIGTYPE(1));                          \
+            MKLFUNC(&uplo, &trans, &n, &k, &alpha_, lhs, &lda, &beta_, res, &ldc);               \
+        }                                                                                        \
+    };
 
 // HERK for complex data
-#define EIGEN_MKL_RANKUPDATE_C(EIGTYPE, MKLTYPE, RTYPE, MKLFUNC) \
-template <typename Index, int AStorageOrder, bool ConjugateA, int  UpLo> \
-struct general_matrix_matrix_rankupdate<Index,EIGTYPE,AStorageOrder,ConjugateA,ColMajor,UpLo> { \
-  enum { \
-    IsLower = (UpLo&Lower) == Lower, \
-    LowUp = IsLower ? Lower : Upper, \
-    conjA = (((AStorageOrder==ColMajor) && ConjugateA) || ((AStorageOrder==RowMajor) && !ConjugateA)) ? 1 : 0 \
-  }; \
-  static EIGEN_STRONG_INLINE void run(Index size, Index depth,const EIGTYPE* lhs, Index lhsStride, \
-                          const EIGTYPE* rhs, Index rhsStride, EIGTYPE* res, Index resStride, EIGTYPE alpha) \
-  { \
-   typedef Matrix<EIGTYPE, Dynamic, Dynamic, AStorageOrder> MatrixType; \
-\
-   MKL_INT lda=lhsStride, ldc=resStride, n=size, k=depth; \
-   char uplo=(IsLower) ? 'L' : 'U', trans=(AStorageOrder==RowMajor) ? 'C':'N'; \
-   RTYPE alpha_, beta_; \
-   const EIGTYPE* a_ptr; \
-\
-/* Set alpha_ & beta_ */ \
-/*   assign_scalar_eig2mkl<MKLTYPE, EIGTYPE>(alpha_, alpha); */\
-/*   assign_scalar_eig2mkl<MKLTYPE, EIGTYPE>(beta_, EIGTYPE(1));*/ \
-   alpha_ = alpha.real(); \
-   beta_ = 1.0; \
-/* Copy with conjugation in some cases*/ \
-   MatrixType a; \
-   if (conjA) { \
-     Map<const MatrixType, 0, OuterStride<> > mapA(lhs,n,k,OuterStride<>(lhsStride)); \
-     a = mapA.conjugate(); \
-     lda = a.outerStride(); \
-     a_ptr = a.data(); \
-   } else a_ptr=lhs; \
-   MKLFUNC(&uplo, &trans, &n, &k, &alpha_, (MKLTYPE*)a_ptr, &lda, &beta_, (MKLTYPE*)res, &ldc); \
-  } \
-};
-
+#define EIGEN_MKL_RANKUPDATE_C(EIGTYPE, MKLTYPE, RTYPE, MKLFUNC)                                   \
+    template <typename Index, int AStorageOrder, bool ConjugateA, int UpLo>                        \
+    struct general_matrix_matrix_rankupdate<Index, EIGTYPE, AStorageOrder, ConjugateA, ColMajor,   \
+                                            UpLo> {                                                \
+        enum {                                                                                     \
+            IsLower = (UpLo & Lower) == Lower,                                                     \
+            LowUp = IsLower ? Lower : Upper,                                                       \
+            conjA = (((AStorageOrder == ColMajor) && ConjugateA) ||                                \
+                     ((AStorageOrder == RowMajor) && !ConjugateA))                                 \
+                        ? 1                                                                        \
+                        : 0                                                                        \
+        };                                                                                         \
+        static EIGEN_STRONG_INLINE void run(Index size,                                            \
+                                            Index depth,                                           \
+                                            const EIGTYPE* lhs,                                    \
+                                            Index lhsStride,                                       \
+                                            const EIGTYPE* rhs,                                    \
+                                            Index rhsStride,                                       \
+                                            EIGTYPE* res,                                          \
+                                            Index resStride,                                       \
+                                            EIGTYPE alpha) {                                       \
+            typedef Matrix<EIGTYPE, Dynamic, Dynamic, AStorageOrder> MatrixType;                   \
+                                                                                                   \
+            MKL_INT lda = lhsStride, ldc = resStride, n = size, k = depth;                         \
+            char uplo = (IsLower) ? 'L' : 'U', trans = (AStorageOrder == RowMajor) ? 'C' : 'N';    \
+            RTYPE alpha_, beta_;                                                                   \
+            const EIGTYPE* a_ptr;                                                                  \
+                                                                                                   \
+            /* Set alpha_ & beta_ */                                                               \
+            /*   assign_scalar_eig2mkl<MKLTYPE, EIGTYPE>(alpha_, alpha); */                        \
+            /*   assign_scalar_eig2mkl<MKLTYPE, EIGTYPE>(beta_, EIGTYPE(1));*/                     \
+            alpha_ = alpha.real();                                                                 \
+            beta_ = 1.0;                                                                           \
+            /* Copy with conjugation in some cases*/                                               \
+            MatrixType a;                                                                          \
+            if (conjA) {                                                                           \
+                Map<const MatrixType, 0, OuterStride<>> mapA(lhs, n, k, OuterStride<>(lhsStride)); \
+                a = mapA.conjugate();                                                              \
+                lda = a.outerStride();                                                             \
+                a_ptr = a.data();                                                                  \
+            } else                                                                                 \
+                a_ptr = lhs;                                                                       \
+            MKLFUNC(&uplo, &trans, &n, &k, &alpha_, (MKLTYPE*)a_ptr, &lda, &beta_, (MKLTYPE*)res,  \
+                    &ldc);                                                                         \
+        }                                                                                          \
+    };
 
 EIGEN_MKL_RANKUPDATE_R(double, double, dsyrk)
-EIGEN_MKL_RANKUPDATE_R(float,  float,  ssyrk)
+EIGEN_MKL_RANKUPDATE_R(float, float, ssyrk)
 
-//EIGEN_MKL_RANKUPDATE_C(dcomplex, MKL_Complex16, double, zherk)
-//EIGEN_MKL_RANKUPDATE_C(scomplex, MKL_Complex8,  double, cherk)
+// EIGEN_MKL_RANKUPDATE_C(dcomplex, MKL_Complex16, double, zherk)
+// EIGEN_MKL_RANKUPDATE_C(scomplex, MKL_Complex8,  double, cherk)
 
+}  // end namespace internal
 
-} // end namespace internal
+}  // end namespace Eigen
 
-} // end namespace Eigen
-
-#endif // EIGEN_GENERAL_MATRIX_MATRIX_TRIANGULAR_MKL_H
+#endif  // EIGEN_GENERAL_MATRIX_MATRIX_TRIANGULAR_MKL_H

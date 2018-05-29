@@ -33,6 +33,7 @@ void SysClock::setTime(unsigned long unixTime)
 	m_LastClockTime = GET_UNIX_TIME();
 }
 
+// NOTE: Review time!
 unsigned long SysClock::unixTime()
 {
 	if(m_LastUpdated != NEVER_UPDATED)
@@ -61,7 +62,7 @@ std::string SysClock::timeStampStr()
 	unsigned long seconds = unixTime();
 
 	time_t unix_time = (time_t)seconds;
-	strftime(buff, sizeof(buff), "%F %T", gmtime(&unix_time));
+	strftime(buff, sizeof(buff), "%F_%T", gmtime(&unix_time));
 
 	return std::string(buff);
 }
@@ -123,7 +124,7 @@ int SysClock::year()
 {
 	time_t unix_time = (time_t)unixTime();
 	tm* time = gmtime(&unix_time); // Statically allocated struct, DO NOT DELETE!
-	return 1990 + time->tm_year;
+	return 1900 + time->tm_year;		
 }
 
  unsigned int SysClock::lastUpdated()

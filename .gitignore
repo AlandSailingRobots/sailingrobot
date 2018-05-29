@@ -26,3 +26,7 @@ NavigationSystem/Tests/runner.cpp
 NavigationSystem/Tests/runner.o
 NavigationSystem/Tests/runnerHardware.cpp
 NavigationSystem/Tests/runnerHardware.o
+
+
+#IDE Files
+.idea/

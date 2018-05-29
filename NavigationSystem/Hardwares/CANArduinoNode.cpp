@@ -15,6 +15,7 @@
 #include "CANArduinoNode.h"
 #include "CAN_Services/CanBusCommon/CanUtility.h"
 #include "MessageBus/MessageTypes.h"
+#include "CAN_Services/CanBusCommon/CanMessageHandler.h"
 
 const int DATA_OUT_OF_RANGE = -2000;
 
@@ -52,25 +53,24 @@ void CANArduinoNode::processMessage (const Message* message){
 }
 
 void CANArduinoNode::processFrame (CanMsg& msg) {
-	uint16_t rawData;
 
-	if (msg.id == 701) {
-		rawData = (msg.data[1] << 8 | msg.data[0]);
-		m_RudderFeedback = CanUtility::mapInterval (rawData, 0, INT16_SIZE, -MAX_RUDDER_ANGLE, MAX_RUDDER_ANGLE);
+	CanMessageHandler messageHandler(msg);
 
-		rawData = (msg.data[3] << 8 | msg.data[2]);
-		m_WingsailFeedback = CanUtility::mapInterval (rawData, 0, INT16_SIZE, -MAX_WINGSAIL_ANGLE, MAX_WINGSAIL_ANGLE);
+	if (messageHandler.getMessageId() == MSG_ID_AU_FEEDBACK) {
+		messageHandler.getMappedData(&m_RudderFeedback,
+				RUDDER_ANGLE_DATASIZE, -MAX_RUDDER_ANGLE, MAX_RUDDER_ANGLE);
 
-		m_WindvaneSelfSteerAngle = (msg.data[5] << 8 | msg.data[4]);
-		m_WindvaneActuatorPos = msg.data[7];
+		messageHandler.getMappedData(&m_WingsailFeedback,
+				WINGSAIL_ANGLE_DATASIZE, -MAX_WINGSAIL_ANGLE, MAX_WINGSAIL_ANGLE);
+
+
+		messageHandler.getMappedData(&m_WindvaneSelfSteerAngle,
+				WINDVANE_SELFSTEERING_DATASIZE, WINDVANE_SELFSTEERING_ANGLE_MIN, WINDVANE_SELFSTEERING_ANGLE_MAX);
+
+		messageHandler.getData(&m_WindvaneActuatorPos, WINDVANE_ACTUATOR_POSITION_DATASIZE);
 	}
-	else if (msg.id == 702) {
-		rawData = (msg.data[1] << 8 | msg.data[0]);
-		if (rawData > 0){
-			m_Radio_Controller_On = true;
-		} else {
-			m_Radio_Controller_On = false;
-		}
+	else if (messageHandler.getMessageId() == MSG_ID_RC_STATUS) {
+		messageHandler.getData(&m_Radio_Controller_On, RADIOCONTROLLER_ON_DATASIZE);
 	}
 }
 

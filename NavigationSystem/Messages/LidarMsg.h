@@ -14,48 +14,39 @@
 
 #include "MessageBus/Message.h"
 
-
 class LidarMsg : public Message {
-public:
-	LidarMsg(	NodeID destinationID, NodeID sourceID,int distance )
+   public:
+    LidarMsg(NodeID destinationID, NodeID sourceID, int distance)
 
-		:Message(MessageType::LidarData, sourceID, destinationID),m_distance(distance)
-	{ }
+        : Message(MessageType::LidarData, sourceID, destinationID), m_distance(distance) {}
 
     LidarMsg(NodeID sourceID, int distance)
 
-		:Message(MessageType::LidarData,sourceID, NodeID::None), m_distance(distance)
-	{ }
+        : Message(MessageType::LidarData, sourceID, NodeID::None), m_distance(distance) {}
 
-	LidarMsg(int distance)
+    LidarMsg(int distance)
 
-		:Message(MessageType::LidarData, NodeID::None, NodeID::None), m_distance(distance)
-	{ }
+        : Message(MessageType::LidarData, NodeID::None, NodeID::None), m_distance(distance) {}
 
-	LidarMsg(MessageDeserialiser deserialiser)
-		:Message(deserialiser)
-	{
-		if(!deserialiser.readInt(m_distance))
-		{
-			m_valid = false;
-		}
-	}
+    LidarMsg(MessageDeserialiser deserialiser) : Message(deserialiser) {
+        if (!deserialiser.readInt(m_distance)) {
+            m_valid = false;
+        }
+    }
 
-	virtual ~LidarMsg() { }
+    virtual ~LidarMsg() {}
 
-	///----------------------------------------------------------------------------------
-	/// Serialises the message into a MessageSerialiser
-	///----------------------------------------------------------------------------------
-	virtual void Serialise(MessageSerialiser& serialiser) const
-	{
-		Message::Serialise(serialiser);
+    ///----------------------------------------------------------------------------------
+    /// Serialises the message into a MessageSerialiser
+    ///----------------------------------------------------------------------------------
+    virtual void Serialise(MessageSerialiser& serialiser) const {
+        Message::Serialise(serialiser);
 
-		serialiser.serialise(m_distance);
-	}
+        serialiser.serialise(m_distance);
+    }
 
+    int distance() { return m_distance; }
 
-	int distance() { return m_distance; }
-
-private:
-	int	m_distance;
+   private:
+    int m_distance;
 };

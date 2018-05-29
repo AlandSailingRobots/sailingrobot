@@ -2,12 +2,11 @@
 #ifndef VECN2KMSG_H
 #define VECN2KMSG_H
 
-
 #include "MsgParsing.h"
 
-class VecN2kMsg					//circular buffer
+class VecN2kMsg  // circular buffer
 {
-public:
+   public:
     bool PushBack(N2kMsgArd NMsg);
     bool PopFront(N2kMsgArd NMsg);
 

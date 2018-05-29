@@ -10,7 +10,7 @@
 #include "Messages/WindStateMsg.h"
 #include "SystemServices/Logger.h"
 
-#include "Libs/json/src/json.hpp"
+#include "Libs/json/include/nlohmann/json.hpp"
 using Json = nlohmann::json;
 
 struct LogItem {

@@ -22,23 +22,21 @@
  ***********************************************************************
  */
 
-
-#define	PIGLOW_RED	0
-#define	PIGLOW_ORANGE	1
-#define	PIGLOW_YELLOW	2
-#define	PIGLOW_GREEN	3
-#define	PIGLOW_BLUE	4
-#define	PIGLOW_WHITE	5
-
+#define PIGLOW_RED 0
+#define PIGLOW_ORANGE 1
+#define PIGLOW_YELLOW 2
+#define PIGLOW_GREEN 3
+#define PIGLOW_BLUE 4
+#define PIGLOW_WHITE 5
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-extern void piGlow1     (const int leg,  const int ring, const int intensity) ;
-extern void piGlowLeg   (const int leg,  const int intensity) ;
-extern void piGlowRing  (const int ring, const int intensity) ;
-extern void piGlowSetup (int clear) ;
+extern void piGlow1(const int leg, const int ring, const int intensity);
+extern void piGlowLeg(const int leg, const int intensity);
+extern void piGlowRing(const int ring, const int intensity);
+extern void piGlowSetup(int clear);
 
 #ifdef __cplusplus
 }

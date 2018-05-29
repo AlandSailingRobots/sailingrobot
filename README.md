@@ -44,25 +44,25 @@ or if you have already cloned it, use:
 ```shell
 $ cd sailingrobot  
 $ git submodule init # Initialises all the submodules (Only need to be done once)  
-$ git submodule update # Updates the submodule to the latest version 
+$ git submodule update # Updates the submodule to the latest version
 ```
 Install the wiringPi library:
-```shell 
+```shell
 $ cd NavigationSystem/Libs/wiringPi
 $ ./build #Install wiringPi as a dynamic library
 $ cd ../../..
 ```
 Install the database:
-```shell 
+```shell
 $ ./installdb.sh
 ```
 
 ### Build Instructions
 
 To build the Control system in *NavigationSystem*, type:
-```shell 
+```shell
 $ make [target] [ext variable 1] [ext variable 2]
-``` 
+```
 Targets:
 * `all`: Default, same as make ASPire
 * `ASPire`: Build the control system for ASPire
@@ -113,6 +113,32 @@ $ ./NavigationSystem/sr
 ```
 
 #### Run Tests
+
+###### Unit tests
+
+Complete installation before proceeding with the setup.
+
+
+Update waypoints.
+
+```shell
+$ ./update_waypoints.py Mission/Unit_tests.json
+```
+
+
+Compile
+
+```shell
+$ make unit_tests
+```
+
+
+Run unit tests
+```shell
+$ ./unit-tests.run
+```
+
+Drink coffee :coffee:
 
 ## License
 GNU GPL v2  

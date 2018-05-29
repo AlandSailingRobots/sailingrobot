@@ -1,12 +1,11 @@
 #pragma once
 
-#include "Hardwares/CAN_Services/N2kMsg.h"
-#include "../cxxtest/cxxtest/TestSuite.h"
 #include <iostream>
+#include "../cxxtest/cxxtest/TestSuite.h"
+#include "Hardwares/CAN_Services/N2kMsg.h"
 
 class CANMessageSuite : public CxxTest::TestSuite {
-    public:
-
+   public:
     void setUp() {}
     void tearDown() {}
 
@@ -15,7 +14,7 @@ class CANMessageSuite : public CxxTest::TestSuite {
         CanMsg Cmsg;
 
         Nmsg.PGN = 130311;
-        std::vector<uint8_t> data = {1,2,3,4,5,6,7,8};
+        std::vector<uint8_t> data = {1, 2, 3, 4, 5, 6, 7, 8};
         Nmsg.Data = data;
         Nmsg.DataLen = Nmsg.Data.size();
 
@@ -25,10 +24,8 @@ class CANMessageSuite : public CxxTest::TestSuite {
 
         TS_ASSERT_EQUALS(Nmsg.PGN, Nmsg2.PGN);
 
-        for(int i=0; i<8; i++) {
+        for (int i = 0; i < 8; i++) {
             TS_ASSERT_EQUALS(Nmsg.Data[i], Nmsg2.Data[i]);
         }
-        
-        
     }
 };
