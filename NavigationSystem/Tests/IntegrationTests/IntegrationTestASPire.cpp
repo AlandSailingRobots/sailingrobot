@@ -445,7 +445,7 @@ int main() {
 
 	// Comment out this line if not running on the pi
 	// otherwise program will crash.
-	auto future = canService.start();
+	//auto future = canService.start();
 
 
 	SensorDataReceiver sensorReceiver(msgBus);
@@ -463,11 +463,11 @@ int main() {
     CANMarineSensorTransmissionNode marineSensorTransmissionNode(msgBus,canService);
     marineSensorTransmissionNode.init();
 
-	ais.start();
-	gps.start();
-	windSensor.start();
-	arduino.start ();
-	compass.start ();
+	//ais.start();
+	//gps.start();
+	//windSensor.start();
+	//arduino.start ();
+	//compass.start ();
 
 	std::thread thr(messageLoop);
 	thr.detach();
