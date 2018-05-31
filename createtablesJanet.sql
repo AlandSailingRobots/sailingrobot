@@ -55,15 +55,14 @@ CREATE TABLE dataLogs_course_calculation (
 );
 
 -- -----------------------------------------------------
--- Table dataLogs_actuator_feedback
+-- Table dataLogs_current_sensors
 -- -----------------------------------------------------
 DROP TABLE IF EXISTS "dataLogs_current_sensors";
 CREATE TABLE dataLogs_current_sensors (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  actuator_unit   	DOUBLE,
-  navigation_unit 	DOUBLE,
-  sailboat_drive 	DOUBLE,
-  t_timestamp		TIMESTAMP
+	id	INTEGER PRIMARY KEY AUTOINCREMENT,
+	measurement DOUBLE,
+	sensor_name	TEXT,
+	t_timestamp	TIMESTAMP
 );
 
 -- -----------------------------------------------------
