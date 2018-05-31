@@ -4,12 +4,14 @@ CHECK_DEVICES="/dev/gps0"
 # syntax systemdservice(:processname) (psname not needed if it equals servicename)
 CHECK_SERVICES="ntpd gpsd asr:sr"
 
+LOGLINES=10
+
 output() {
     printf '=== System time: ===\n'
     date
 
     printf '\n=== Severe errors since last boot ===\n'
-    journalctl --priority err --boot --lines=10
+    journalctl --priority err --boot --lines=$LOGLINES
 
     printf '\n=== Checking devices ===\n'
     for dev in $CHECK_DEVICES; do
@@ -52,9 +54,7 @@ output() {
     LOGS=""
     if [ -n "$SRPID" ]; then
         for pid in $SRPID; do
-            printf '=== sr PID %s open files ===\n' "$pid"
-            ls "/proc/$pid/fd"
-            LOGS="$(ls "/proc/$pid/fd/*.log") "
+            LOGS="$(find /proc/$SRPID/fd -type l -exec ls -la {} \+ | grep log | sed 's/^.*-> //') $LOGS"
         done
         if [ -n "$LOGS" ]; then
             printf 'Possible log files: %s\n' "$LOGS"
@@ -62,9 +62,9 @@ output() {
     fi
 
     for log in $LOGS; do
-        printf '=== Log %s init messages and errors ===\n' "$log"
-        grep init < "$log"
-        grep error < "$log"
+        printf '=== %s last inits and errors/warnings in %s ===\n' "$LOGLINES" "$log"
+        grep init < "$log" | tail -n $LOGLINES
+        grep -e error -e warning < "$log" | tail -n $LOGLINES
     done
 }
 
