@@ -11,6 +11,7 @@
 #include "Messages/ASPireActuatorFeedbackMsg.h"
 #include "Messages/MarineSensorDataMsg.h"
 #include "Messages/CourseDataMsg.h"
+#include "Messages/CurrentSensorDataMsg.h"
 #include "SystemServices/Timer.h"
 #include "SystemServices/SysClock.h"
 
@@ -28,7 +29,8 @@ DBLoggerNode::DBLoggerNode(MessageBus& msgBus, DBHandler& db,int queueSize)
     msgBus.registerNode(*this, MessageType::CompassData);
     msgBus.registerNode(*this, MessageType::GPSData);
     msgBus.registerNode(*this, MessageType::WindData);
-    // msgBus.registerNode(*this, MessageType::ActuatorPosition);
+    msgBus.registerNode(*this, MessageType::CurrentSensorData);
+
     msgBus.registerNode(*this, MessageType::ASPireActuatorFeedback);
     msgBus.registerNode(*this, MessageType::MarineSensorData);
 
@@ -109,6 +111,15 @@ void DBLoggerNode::processMessage(const Message* msg) {
         //     WaypointDataMsg* waypMsg = (WaypointDataMsg*)msg;
         //     item.m_waypointId = waypMsg->nextId();
         // }
+        case MessageType::CurrentSensorData:
+        {
+            const CurrentSensorDataMsg* currentSensorMsg = static_cast<const CurrentSensorDataMsg*>(msg);
+            item.m_current = currentSensorMsg->getCurrent();
+            item.m_voltage = currentSensorMsg->getVoltage();
+            item.m_element = currentSensorMsg->getSensedElement();
+            item.m_element_str = currentSensorMsg->getSensedElementStr();
+        }
+        break;
 
         case MessageType::StateMessage:
         {
