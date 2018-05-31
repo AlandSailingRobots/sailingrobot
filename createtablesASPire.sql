@@ -56,17 +56,16 @@ CREATE TABLE dataLogs_course_calculation (
 );
 
 -- -----------------------------------------------------
--- Table dataLogs_actuator_feedback
+-- Table dataLogs_current_sensors
 -- -----------------------------------------------------
 DROP TABLE IF EXISTS "dataLogs_current_sensors";
 CREATE TABLE dataLogs_current_sensors (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
-  actuator_unit   	DOUBLE,
-  navigation_unit 	DOUBLE,
-  wind_vane_angle 	DOUBLE,
-  wind_vane_clutch 	DOUBLE,
-  sailboat_drive 	DOUBLE,
-  t_timestamp		TIMESTAMP
+  current   	FLOAT,
+  voltage       FLOAT,
+  element 	    INT,
+  element_str   VARCHAR(50),
+  t_timestamp	TIMESTAMP
 );
 
 -- -----------------------------------------------------
