@@ -1,5 +1,18 @@
 Backups are currently stored as raw disk images inside compressed [SquashFS-containers](https://en.wikipedia.org/wiki/SquashFS) uploaded to [Google Drive](https://drive.google.com).
 
+## Figure out what devcie the the SD card has in your system
+
+1. Insert SD card in card reader and make sure you know its device name
+
+    * **NOTE:** If you use the wrong devicename below you might try to overwrite the harddrive in your workstation so be careful and check the devicename!
+
+    ```console
+    # lsblk
+    # dmesg | tail -n 50
+    ```
+
+    * Below, instead of *sdx*, use the real devicename you got in the previous step
+
 ## Backing up SD cards using a workstation
 
 1. Create a directory where you would like to save your image (which will be included in the compressed archive in a later step)
@@ -77,31 +90,20 @@ Backups are currently stored as raw disk images inside compressed [SquashFS-cont
     # ls -lah
     ```
 
-3. Insert SD card in card reader and make sure you know its device name
-
-    * **NOTE:** If you use the wrong devicename below you might try to overwrite the harddrive in your workstation so be careful and check the devicename!
-
-    ```console
-    # lsblk
-    # dmesg | tail -n 50
-    ```
-
-    * Below, instead of *sdx*, use the real devicename you got in the previous step
-
-4. Clone the raw dd-image from the archive to the physcial SD card using *pv* (pipeviewer)
+3. Clone the raw dd-image from the archive to the physcial SD card using *pv* (pipeviewer)
 
     ```console
     # pv sdcard.dd > /dev/sdx
     ```
 
-5. Sync and eject SD card to ensure everything is written to it before removal
+4. Sync and eject SD card to ensure everything is written to it before removal
 
     ```console
     # sync
     # eject /dev/sdx
     ```
 
-6. Clean up
+5. Clean up
 
     ```console
     # cd ..
