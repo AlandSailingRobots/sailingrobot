@@ -33,7 +33,13 @@ Currently we use the Chromium code style formatting with a maximum line length o
 3.  Test formatting using CLI (command line interface)
 
     ```console
-    # clang-format -i <SOURCEFILENAME> # Note this changes the file inplace!
+    $ clang-format -i <SOURCEFILENAME> # Note this changes the file inplace!
+    ```
+
+    You can also format all headers and C++ sources recursively using the commandline (but you might want to make sure you are in the right directory and being very careful)
+
+    ```console
+    $ find . -iname '*.cpp' -or -iname '*.h' -exec clang-format --verbose -i {} \+
     ```
 
 4.  Configure your editor
@@ -99,6 +105,18 @@ Currently we use the Chromium code style formatting with a maximum line length o
     #### How to use clang-format plugin in Sublime
 
     -   <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>A</kbd>
+
+# Notes on excluding/hiding code from the formatter
+
+If you for any reason need the clang-formatter to leave a code block untouched you can wrap it inside a block starting with `// clang-format off` and ending with `// clang-format on` like so:
+
+```cpp
+// clang-format off
+
+std::cout <<    "This line will be left alone\n";
+
+// clang-format on
+```
 
 # Notes on formatting of other languages
 

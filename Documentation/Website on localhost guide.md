@@ -110,11 +110,11 @@ Start everything up (it might be overkill to enable all services at startup but 
 
 ## Download the project database
 
-1. Log in at HostGator https://gator3083.hostgator.com:2083/
+1. Log in at [HostGator](https://gator3083.hostgator.com:2083/)
 
 2. Go to *Databases* and click *phpMyAdmin*
 
-    ![HostGator DB panel](cpanel-databases-myphpadmin.jpg)
+    ![HostGator DB panel](Media/cpanel-databases-myphpadmin.jpg)
 
 3. Export database
 

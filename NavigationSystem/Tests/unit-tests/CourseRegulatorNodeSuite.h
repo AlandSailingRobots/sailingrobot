@@ -184,8 +184,8 @@ class CourseRegulatorNodeSuite : public CxxTest::TestSuite {
         std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
         // double diffHeading =
-        // Utility::limitAngleRange(heading)-Utility::limitAngleRange(desiredcourse); int rudderAngle
-        // = Utility::sgn(speed)*sin(Utility::degreeToRadian(diffHeading))*MaxRudAng;
+        // Utility::limitAngleRange(heading)-Utility::limitAngleRange(desiredcourse); int
+        // rudderAngle = Utility::sgn(speed)*sin(Utility::degreeToRadian(diffHeading))*MaxRudAng;
 
         double course = mockNode->m_StateMsgCourse;
         double diffHeading = Utility::degreeToRadian(course - desiredcourse);
