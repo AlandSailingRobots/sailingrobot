@@ -122,6 +122,25 @@ void HMC6343Node::processMessage(const Message* msg)
 	}
 }
 
+bool HMC6343Node::updateStatus(NodeStatusFlag* nodeStatus, int& status_time_out_counter, 
+                               float heading, float& old_heading, float pitch, 
+                               float& old_pitch, float roll, float& old_roll)
+{
+    if(heading == old_heading and pitch == old_pitch and roll == old_roll) {
+        status_time_out_counter += 1;
+    } else {
+        status_time_out_counter = 0;
+        old_heading = heading;
+        old_pitch = pitch;
+        old_roll = roll;
+        *nodeStatus = RUNNING;
+    }
+    if(status_time_out_counter >= 10) {
+        *nodeStatus = FROZEN;
+    }
+
+    return true;
+}
 
 bool HMC6343Node::readData(float& heading, float& pitch, float& roll)
 {
@@ -210,6 +229,9 @@ void HMC6343Node::HMC6343ThreadFunc(ActiveNode* nodePtr)
 	std::vector<float> headingData(node->m_HeadingBufferSize);
 	int headingIndex = 0;
 
+        int status_time_out_counter = 0;
+        float old_heading, old_pitch, old_roll;
+
 	Timer timer;
 	timer.start();
 	while(true)
@@ -252,5 +274,11 @@ void HMC6343Node::HMC6343ThreadFunc(ActiveNode* nodePtr)
 		// Controls how often we pump out messages
 		timer.sleepUntil(node->m_LoopTime);
 		timer.reset();
+
+                // Update and log status of the node
+                node->updateStatus(node->m_nodeStatus, status_time_out_counter, 
+                                   heading, old_heading, pitch, 
+                                   old_pitch, roll, old_roll);
+                std::cout << "Compass node status: " << node->nodeStatus() << std::endl;
 	}
 }

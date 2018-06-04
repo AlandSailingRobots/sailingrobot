@@ -44,6 +44,7 @@ class StateEstimationNode : public ActiveNode {
     void start();
     void stop();
     void processMessage(const Message* msg);
+    bool updateStatus(NodeStatusFlag* nodeStatus);
 
    private:
     ///----------------------------------------------------------------------------------

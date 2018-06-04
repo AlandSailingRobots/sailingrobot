@@ -64,6 +64,21 @@ void StateEstimationNode::updateConfigsFromDB()
     m_speed_2 = m_dbHandler.retrieveCellAsDouble("config_vessel_state","1","course_config_speed_2");
 }
 
+bool StateEstimationNode::updateStatus(NodeStatusFlag* nodeStatus)
+{
+    /*// Time out counter
+    int counter = 0;
+    // Stores values for checks
+    float tmp_CompassHeading = m_CompassHeading;
+    double tmp_GPSLat = m_GPSLat;
+    double tmp_GPSLon = m_GPSLon;
+    double tmp_GPSSpeed = m_GPSSpeed;            
+    double tmp_GPSCourse = m_GPSCourse;          
+    float tmp_WaypointDeclination = m_WaypointDeclination;*/
+
+   return true;
+}
+
 void StateEstimationNode::processMessage(const Message* msg)
 {
     MessageType type = msg->messageType();

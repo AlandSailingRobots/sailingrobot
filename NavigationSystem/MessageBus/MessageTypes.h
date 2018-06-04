@@ -103,15 +103,9 @@ inline std::string msgToString(MessageType msgType) {
         case MessageType::DataCollectionStart:
         return "DataCollectionStart";
         case MessageType::DataCollectionStop:
-<<<<<<< HEAD
         return "DataCollectionStop";
 		case MessageType::CurrentSensorData:
 		return "CurrentSensorData";
 	}
 	return "";
-=======
-            return "DataCollectionStop";
-    }
-    return "";
->>>>>>> develop
 }

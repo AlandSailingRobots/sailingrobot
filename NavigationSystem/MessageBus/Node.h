@@ -19,6 +19,15 @@ class MessageBus;
 #include "MessageBus/MessageBus.h"
 #include "MessageBus/NodeIDs.h"
 
+enum NodeStatusFlag
+{
+    FLAG_INIT_FAIL = 0 << 0,
+    RUNNING = 1 << 0, // binary 0001
+    IDLE = 1 << 1, // binary 0010
+    FROZEN = 1 << 2, // binary 0100
+    WAITING = 1 << 3, // binary 1000
+};
+
 class Node {
    public:
     Node(NodeID id, MessageBus& msgBus) : m_MsgBus(msgBus), m_NodeID(id) {}
@@ -48,10 +57,19 @@ class Node {
     ///----------------------------------------------------------------------------------
     virtual void updateConfigsFromDB(){};
 
+    ///----------------------------------------------------------------------------------
+    /// Check the status of the node.
+    /// Currently implemented for: HMC6343, 
+    ///----------------------------------------------------------------------------------
+    virtual bool updateStatus(NodeStatusFlag* nodeStatus) { return true; }
+
     NodeID nodeID() { return m_NodeID; }
+
+    NodeStatusFlag nodeStatus() { return m_nodeStatus; }
 
    protected:
     MessageBus& m_MsgBus;
+    NodeStatusFlag m_nodeStatus;
 
    private:
     NodeID m_NodeID;

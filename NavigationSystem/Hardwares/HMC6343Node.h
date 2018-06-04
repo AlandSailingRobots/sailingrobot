@@ -65,6 +65,13 @@ class HMC6343Node : public ActiveNode {
     ///----------------------------------------------------------------------------------
     bool readData(float& heading, float& pitch, float& roll);
 
+    ///----------------------------------------------------------------------------------
+    /// Check status of the node
+    ///----------------------------------------------------------------------------------
+    bool updateStatus(NodeStatusFlag* nodeStatus, int& status_time_out_counter, 
+                               float heading, float& old_heading, float pitch, 
+                               float& old_pitch, float roll, float& old_roll);
+
     void calibrate(int calibrationTime);
 
    protected:

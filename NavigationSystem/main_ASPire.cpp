@@ -52,7 +52,7 @@ enum class NodeImportance {
 ///
 /// @param node 			A pointer to the node to initialise
 /// @param nodeName 		A string name of the node, for logging purposes.
-/// @param importance 		Whether the node is a critcal node or not critical. If a
+/// @param importance 		Whether the node is a critical node or not. If a
 ///							critical node fails to initialise the program will
 ///							shutdown.
 ///
@@ -140,7 +140,7 @@ int main(int argc, char *argv[])
 	// Declare nodes
 	//-------------------------------------------------------------------------------
 
-	int dbLoggerQueueSize = 5; 			// how many messages to log to the databse at a time
+	int dbLoggerQueueSize = 5; 			// how many messages to log to the database at a time
 	DBLoggerNode dbLoggerNode(messageBus, dbHandler, dbLoggerQueueSize);
 	HTTPSyncNode httpsync(messageBus, &dbHandler);
 
