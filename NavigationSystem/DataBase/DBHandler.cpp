@@ -277,6 +277,7 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
 }
 
 // TODO -Oliver: make private
+// TODO: khampf: this function is only included in Tests/DB_tests and should be removed?
 void DBHandler::insertMessageLog(std::string gps_time, std::string type, std::string msg) {
     // std::string result;
     // std::stringstream sstm;
@@ -397,7 +398,9 @@ std::string DBHandler::retrieveCell(std::string table, std::string id, std::stri
 
 void DBHandler::updateConfigs(std::string configs) {
     Json js = Json::parse(configs);
-
+    if (js.empty()) {
+        Logger::error("%s No JSON in \"%s\"", __PRETTY_FUNCTION__, configs);
+    }
     std::vector<std::string> tables;
 
     for (auto i : js.items()) {
@@ -416,6 +419,9 @@ void DBHandler::updateConfigs(std::string configs) {
 
 bool DBHandler::updateWaypoints(std::string waypoints) {
     Json js = Json::parse(waypoints);
+    if (js.empty()) {
+        Logger::error("%s No JSON in \"%s\"", __PRETTY_FUNCTION__, waypoints);
+    }
     std::string DBPrinter = "";
     std::string tempValue = "";
     int valuesLimit = 11;  //"Dirty" fix for limiting the amount of values requested from server
