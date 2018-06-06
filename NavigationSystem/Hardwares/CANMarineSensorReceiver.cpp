@@ -15,7 +15,7 @@ CANFrameReceiver(canService, MSG_ID_MARINE_SENSOR_DATA), m_msgBus(messageBus)
 }
 
 void CANMarineSensorReceiver::processFrame (CanMsg& msg) {
-    Logger::info("Recieved marine sensor readings from CanBus");
+    Logger::info("Received marine sensor readings from CanBus");
 
     CanMessageHandler handler(msg);
 

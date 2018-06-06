@@ -1,10 +1,10 @@
 /****************************************************************************************
 *
 * File:
-* 		CurrentDataMsg.h
+* 		CurrentSensorDataMsg.h
 *
 * Purpose:
-*		A CurrentDataMsg contains information about the sensed current (and voltage)
+*		A CurrentSensorDataMsg contains information about the sensed current (and voltage)
 *      of a certain element (whole unit or single actuator)
 *
 * Developer Notes:
