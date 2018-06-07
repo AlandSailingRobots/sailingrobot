@@ -52,28 +52,21 @@ void CANCurrentSensorNode::processMessage (const Message* message){
 
 void CANCurrentSensorNode::processFrame (CanMsg& msg) {
         Logger::info("Received marine sensor readings from CanBus");
-
+    Float16Compressor fltCompressor;
 	CanMessageHandler messageHandler(msg);
+	uint16_t comp_current, comp_voltage;
 
 	if (messageHandler.getMessageId() == MSG_ID_CURRENT_SENSOR_DATA) {
                 // Use get data instead(int)? Parse data here or add the routine in another file?
-		messageHandler.getMappedData(&m_RudderFeedback,
-				RUDDER_ANGLE_DATASIZE, -MAX_RUDDER_ANGLE, MAX_RUDDER_ANGLE);
+		messageHandler.getData(&comp_current, CURRENT_SENSOR_CURRENT_DATASIZE);
+		messageHandler.getData(&comp_voltage, CURRENT_SENSOR_VOLTAGE_DATASIZE);
 
-		messageHandler.getMappedData(&m_WingsailFeedback,
-				WINGSAIL_ANGLE_DATASIZE, -MAX_WINGSAIL_ANGLE, MAX_WINGSAIL_ANGLE);
-
-
-		messageHandler.getMappedData(&m_WindvaneSelfSteerAngle,
-				WINDVANE_SELFSTEERING_DATASIZE, WINDVANE_SELFSTEERING_ANGLE_MIN, WINDVANE_SELFSTEERING_ANGLE_MAX);
-
-		messageHandler.getData(&m_WindvaneActuatorPos, WINDVANE_ACTUATOR_POSITION_DATASIZE);
 	}
-	else if (messageHandler.getMessageId() == MSG_ID_RC_STATUS) {
-		messageHandler.getData(&m_Radio_Controller_On, RADIOCONTROLLER_ON_DATASIZE);
-	}
-        MessagePtr currentSensorDataMsg = std::make_unique<CurrentSensorDataMsg>(static_cast<uint16_t>(current),
-                                                      static_cast<uint16_t>(voltage), static_cast<uint8_t>(element));
+    m_current = fltCompressor.decompress(comp_current);
+    m_voltage = fltCompressor.decompress(comp_voltage);
+    m_element = 1;                                                 // TO CHANGE FOR MULTI SENSOR READING
+    MessagePtr currentSensorDataMsg = std::make_unique<CurrentSensorDataMsg>(static_cast<float>(m_current),
+                                                static_cast<float>(m_voltage), static_cast<uint8_t>(m_element));
 }
 
 
@@ -92,12 +85,12 @@ void CANCurrentSensorNode::CANCurrentSensorNodeThreadFunc(ActiveNode* nodePtr) {
 
 		node->m_lock.lock();
                 // Don´t forget modifs here
-		if( not (node->m_RudderFeedback == DATA_OUT_OF_RANGE &&  node->m_WindvaneSelfSteerAngle == DATA_OUT_OF_RANGE &&
-				node->m_WingsailFeedback == DATA_OUT_OF_RANGE && node->m_WindvaneActuatorPos == DATA_OUT_OF_RANGE))
+		if( not (node->m_voltage == DATA_OUT_OF_RANGE &&  node->m_current == DATA_OUT_OF_RANGE &&
+				node->m_element == "undefined"))
 		{
-			MessagePtr feebackData = std::make_unique<ASPireActuatorFeedbackMsg>( node->m_WingsailFeedback, 
-				node->m_RudderFeedback, node->m_WindvaneSelfSteerAngle, node->m_WindvaneActuatorPos, node->m_Radio_Controller_On);
-			node->m_MsgBus.sendMessage(std::move(feebackData));
+			MessagePtr currentSensorData = std::make_unique<currentSensorDataMsg>( node->m_current, 
+				node->m_voltage, node->m_element);
+			node->m_MsgBus.sendMessage(std::move(currentSensorData));
 		}
 		node->m_lock.unlock();
 

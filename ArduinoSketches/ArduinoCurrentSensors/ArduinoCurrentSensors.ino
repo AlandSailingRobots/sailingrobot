@@ -13,22 +13,12 @@
 #include <CanMessageHandler.h>
 
 // Fill in with current sensors addresses
-#define I2C_ADDRESS_CUR_SENSOR_1 9997
-#define I2C_ADDRESS_CUR_SENSOR_2 9998
-#define I2C_ADDRESS_CUR_SENSOR_3 9999
+#define PIN_CUR_SENSOR_1 A1
+#define PIN_VOL_SENSOR_1 A2
+#define PIN_CUR_SENSOR_2 A3
+#define PIN_VOL_SENSOR_2 A4
 
 #define CHIP_SELECT_PIN 10
-
-enum {
-    CUR_SENSOR_1,
-    CUR_SENSOR_2,
-    CUR_SENSOR_3
-};
-
-
-const int I2C_ADRESSES[] = {I2C_ADDRESS_CUR_SENSOR_1,
-                            I2C_ADDRESS_CUR_SENSOR_2,
-                            I2C_ADDRESS_CUR_SENSOR_3};
 
 // Do we want response status?
 const int RESPONSE_STATUS_NOT_CONNECTED = 0;
@@ -47,7 +37,9 @@ const int SENSOR_READING_TRIES = 5;
 CanbusClass Canbus;
 unsigned long lastReadingTimeInSeconds = 0;
 
-long int sensorReadingIntervalInSeconds = 15;
+long int sensorReadingIntervalInSeconds = 1;
+
+Float16Compressor fltCompressor;
 
 void setup()
 {
@@ -58,6 +50,7 @@ void setup()
     }
 
     Serial.println("SETUP COMPLETE");
+    // Half precision float converter, IEEE754 standard
 }
 
 void loop()
@@ -72,7 +65,7 @@ void handleSensorReadingTimer() {
 
     if(sensorReadingIntervalInSeconds != -1 && lastReadingTimeInSeconds + sensorReadingIntervalInSeconds < timeNowInSeconds) {
         lastReadingTimeInSeconds = timeNowInSeconds;
-        sendMarineSensorData();
+        sendCurrentSensorData();
     }
 }
 
@@ -80,12 +73,12 @@ void sendCurrentSensorData (){
 
     CanMessageHandler messageHandler(MSG_ID_CURRENT_SENSOR_DATA);
 
-    uint8_t curResponseCode;
-Serial.println("Check encode status");
     // Create new encodeMessage func? -> trying encodeCSMessage
-    Serial.println(messageHandler.encodeCSMessage(SENSOR_PH_DATASIZE, getCurrentValue(curResponseCode)));
+    Serial.println(messageHandler.encodeMessage(CURRENT_SENSOR_CURRENT_DATASIZE, getCurrentValue()));
+    Serial.println(messageHandler.encodeMessage(CURRENT_SENSOR_VOLTAGE_DATASIZE, getVoltageValue()));
+    //Serial.println(messageHandler.encodeMessage(CURRENT_SENSOR_ELEMENT_DATASIZE, getElementValue()));
 
-    messageHandler.setErrorMessage(getErrorCode(curResponseCode));
+    //messageHandler.setErrorMessage(getErrorCode(curResponseCode));
     CanMsg currentSensorData = messageHandler.getMessage();
     Canbus.SendMessage(&currentSensorData);
 }
@@ -97,107 +90,25 @@ void checkCanbusFor (int timeMs){
         if (Canbus.CheckForMessages()) {
             CanMsg msg;
             Canbus.GetMessage(&msg);
-            processCANMessage (msg);
         }
         timer = millis() - startTime;
     }
 }
 
-float getCurrentValue(uint8_t& responseStatusCode) {
+uint16_t getCurrentValue() {
 
 // Put the analog read and everything here
-    float value = readCurrentSensor(CUR_SENSOR, responseStatusCode);
-
-    sendCommandToSensor(SENSOR_PH,SENSOR_COMMAND_SLEEP);
+    float value = 1.24353535368;
+    uint16_t output = fltCompressor.compress(value);
     
-    return value;
+    return output;
 }
 
-void processCANMessage (CanMsg& msg){
+uint16_t getVoltageValue() {
 
-    CanMessageHandler messageHandler(msg);
-
-    if (messageHandler.getMessageId() == MSG_ID_CURRENT_SENSOR_REQUEST) { // Do we want current sensor request
-        currentSensorData();
-        lastReadingTimeInSeconds = millis()/1000;
-
-        bool takeContinousReadings;
-        messageHandler.getData(&takeContinousReadings, REQUEST_CONTINOUS_READINGS_DATASIZE);
-
-        if(takeContinousReadings) {
-            messageHandler.getData(&sensorReadingIntervalInSeconds, REQUEST_READING_TIME_DATASIZE);
-        }
-        else {
-            sensorReadingIntervalInSeconds = -1;
-        }
-    }
-}
-
-float readSensor(int I2CAdressEnum, uint8_t& responseStatusCode) {
-    sendCommandToSensor(I2CAdressEnum,SENSOR_COMMAND_READ);
-
-    delay(SENSOR_READ_TIME[I2CAdressEnum]);
-
-    Wire.requestFrom(I2C_ADRESSES[I2CAdressEnum], SENSOR_INPUT_SIZE, 1);
-    responseStatusCode = Wire.read();
-
-    if(responseStatusCode != 1) {
-        return -1; //0
-    }
-
-    char sensor_input[SENSOR_INPUT_SIZE]={};
-
-    for (int i=0;Wire.available();i++) {
-        sensor_input[i] = Wire.read();
-        if (sensor_input[i] == 0) {
-            Wire.endTransmission();
-            break;
-        }
-    }
-
-    return atof(sensor_input);
-}
-
-float readSensorWithProbableInterval(int I2CAdressEnum, uint8_t& responseStatusCode, int probableIntervalMin, int probableIntervalMax) {
-    float value = readSensor(I2CAdressEnum, responseStatusCode);
-    int i=0;
-    while( (value > probableIntervalMax || value < probableIntervalMin) && i < SENSOR_READING_TRIES) {
-        value = readSensor(I2CAdressEnum, responseStatusCode);
-        i++;
-    }
-    return value;
-}
-
-int getErrorCode(uint8_t phError, uint8_t conductivetyError, uint8_t temperatureError) {
-    switch (phError) {
-        case RESPONSE_STATUS_NOT_CONNECTED:
-            return ERROR_SENSOR_PH_NO_CONNECTION;
-        case RESPONSE_STATUS_NO_DATA:
-            return ERROR_SENSOR_PH_NO_DATA;
-        case RESPONSE_STATUS_NOT_READY:
-            return ERROR_SENSOR_PH_NOT_READY;
-        case RESPONSE_STATUS_SYNTAX_ERROR:
-            return ERROR_SENSOR_PH_SYNTAX;
-    }
-    switch (conductivetyError) {
-        case RESPONSE_STATUS_NOT_CONNECTED:
-            return ERROR_SENSOR_CONDUCTIVETY_NO_CONNECTION;
-        case RESPONSE_STATUS_NO_DATA:
-            return ERROR_SENSOR_CONDUCTIVETY_NO_DATA;
-        case RESPONSE_STATUS_NOT_READY:
-            return ERROR_SENSOR_CONDUCTIVETY_NOT_READY;
-        case RESPONSE_STATUS_SYNTAX_ERROR:
-            return ERROR_SENSOR_CONDUCTIVETY_SYNTAX;
-    }
-    switch (temperatureError) {
-        case RESPONSE_STATUS_NOT_CONNECTED:
-            return ERROR_SENSOR_TEMPERATURE_NO_CONNECTION;
-        case RESPONSE_STATUS_NO_DATA:
-            return ERROR_SENSOR_TEMPERATURE_NO_DATA;
-        case RESPONSE_STATUS_NOT_READY:
-            return ERROR_SENSOR_TEMPERATURE_NOT_READY;
-        case RESPONSE_STATUS_SYNTAX_ERROR:
-            return ERROR_SENSOR_TEMPERATURE_SYNTAX;
-    }
-    return NO_ERRORS;
+// Put the analog read and everything here
+    float value = 15.1515151515;
+    uint16_t output = fltCompressor.compress(value);
+    
+    return output;
 }

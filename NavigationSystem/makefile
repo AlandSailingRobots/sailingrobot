@@ -74,6 +74,7 @@ export INTEGRATION_TEST_EXEC_ASPIRE = integration-tests-ASPire.run
 export MARINE_SENSOR_INTEGRATION_TEST_EXEC = marine_sensor-integration-tests.run
 export HTTP_SYNC_TEST_EXEC	= HTTPSync-test.run
 export AIS_TEST_EXEC		= ais-integration-tests.run
+export CURRENT_SENSOR_INTEGRATION_TEST_EXEC = current_sensor-integration-tests.run
 
 export OBJECT_FILE          = $(BUILD_DIR)/objects.tmp
 
@@ -181,6 +182,7 @@ integration_tests_ASPire: $(BUILD_DIR)
 	$(MAKE) -f integration_tests_ASPire.mk
 	$(MAKE) -f ais_integration_test.mk
 	$(MAKE) -f marine_sensor_integration_test.mk
+	$(MAKE) -f current_sensor_integration_test.mk
 
 
 ## Build HTTPSync Test

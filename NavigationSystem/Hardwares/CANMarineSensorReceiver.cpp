@@ -32,7 +32,8 @@ void CANMarineSensorReceiver::processFrame (CanMsg& msg) {
 
         float salinity = Utility::calculateSalinity (temp, conductivety);
 
-        MessagePtr marineSensorDataMsg = std::make_unique<MarineSensorDataMsg>(static_cast<float>(temp), static_cast<float>(conductivety), static_cast<float>(ph), salinity);
+        MessagePtr marineSensorDataMsg = std::make_unique<MarineSensorDataMsg>(static_cast<float>(temp), 
+                                     static_cast<float>(conductivety), static_cast<float>(ph), salinity);
         m_msgBus.sendMessage(std::move(marineSensorDataMsg));
 
 
