@@ -24,7 +24,7 @@ ActiveNode(NodeID::CANCurrentSensor, messageBus), CANFrameReceiver(canService, {
 {
         m_current = DATA_OUT_OF_RANGE;
         m_voltage = DATA_OUT_OF_RANGE;
-        m_element = "undefined";
+        //m_element = "undefined";
 	messageBus.registerNode(*this, MessageType::ServerConfigsReceived);
 
 }
@@ -64,9 +64,9 @@ void CANCurrentSensorNode::processFrame (CanMsg& msg) {
 	}
     m_current = fltCompressor.decompress(comp_current);
     m_voltage = fltCompressor.decompress(comp_voltage);
-    m_element = 1;                                                 // TO CHANGE FOR MULTI SENSOR READING
+    m_element = SAILDRIVE;                                                 // TO CHANGE FOR MULTI SENSOR READING
     MessagePtr currentSensorDataMsg = std::make_unique<CurrentSensorDataMsg>(static_cast<float>(m_current),
-                                                static_cast<float>(m_voltage), static_cast<uint8_t>(m_element));
+                                                static_cast<float>(m_voltage), static_cast<SensedElement>(m_element));
 }
 
 
@@ -85,10 +85,10 @@ void CANCurrentSensorNode::CANCurrentSensorNodeThreadFunc(ActiveNode* nodePtr) {
 
 		node->m_lock.lock();
                 // Don´t forget modifs here
-		if( not (node->m_voltage == DATA_OUT_OF_RANGE &&  node->m_current == DATA_OUT_OF_RANGE &&
-				node->m_element == "undefined"))
+		if( not (node->m_voltage == DATA_OUT_OF_RANGE &&  node->m_current == DATA_OUT_OF_RANGE))
+				// Skipped for now  && node->m_element == "undefined"))
 		{
-			MessagePtr currentSensorData = std::make_unique<currentSensorDataMsg>( node->m_current, 
+			MessagePtr currentSensorData = std::make_unique<CurrentSensorDataMsg>( node->m_current, 
 				node->m_voltage, node->m_element);
 			node->m_MsgBus.sendMessage(std::move(currentSensorData));
 		}
