@@ -56,7 +56,10 @@ void CANCurrentSensorNode::processFrame (CanMsg& msg) {
 	CanMessageHandler messageHandler(msg);
 	uint16_t comp_current, comp_voltage;
 
-	if (messageHandler.getMessageId() == MSG_ID_CURRENT_SENSOR_DATA) {
+	if (messageHandler.getMessageId() == MSG_ID_CURRENT_SENSOR_DATA ||
+		messageHandler.getMessageId() == MSG_ID_CURRENT_SENSOR_DATA_POWER_UNIT ||
+		messageHandler.getMessageId() == MSG_ID_CURRENT_SENSOR_DATA_BOX)
+	{
                 // Use get data instead(int)? Parse data here or add the routine in another file?
 		messageHandler.getData(&comp_current, CURRENT_SENSOR_CURRENT_DATASIZE);
 		messageHandler.getData(&comp_voltage, CURRENT_SENSOR_VOLTAGE_DATASIZE);
@@ -64,7 +67,7 @@ void CANCurrentSensorNode::processFrame (CanMsg& msg) {
 	}
     m_current = fltCompressor.decompress(comp_current);
     m_voltage = fltCompressor.decompress(comp_voltage);
-    m_element = SAILDRIVE;                                                 // TO CHANGE FOR MULTI SENSOR READING
+    m_element = msg.id - 720;        //TO TRY
     MessagePtr currentSensorDataMsg = std::make_unique<CurrentSensorDataMsg>(static_cast<float>(m_current),
                                                 static_cast<float>(m_voltage), static_cast<SensedElement>(m_element));
 }

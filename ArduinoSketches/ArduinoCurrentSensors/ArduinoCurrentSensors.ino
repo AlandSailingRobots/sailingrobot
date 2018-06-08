@@ -70,17 +70,35 @@ void handleSensorReadingTimer() {
 }
 
 void sendCurrentSensorData (){
+    // Modify this block before flashing the arduino depending
+    // on how many current sensors are plugged in
 
     CanMessageHandler messageHandler(MSG_ID_CURRENT_SENSOR_DATA);
+    CanMessageHandler messageHandlerPU(MSG_ID_CURRENT_SENSOR_DATA_POWER_UNIT);
+    //CanMessageHandler messageHandlerB(MSG_ID_CURRENT_SENSOR_DATA_BOX);
 
-    // Create new encodeMessage func? -> trying encodeCSMessage
-    Serial.println(messageHandler.encodeMessage(CURRENT_SENSOR_CURRENT_DATASIZE, getCurrentValue()));
+    // Create new encodeMessage func? -> trying encodeCSMessage / aborted for now
+    Serial.print("First sensor enconding: ")
+    Serial.print(messageHandler.encodeMessage(CURRENT_SENSOR_CURRENT_DATASIZE, getCurrentValue()));
     Serial.println(messageHandler.encodeMessage(CURRENT_SENSOR_VOLTAGE_DATASIZE, getVoltageValue()));
-    //Serial.println(messageHandler.encodeMessage(CURRENT_SENSOR_ELEMENT_DATASIZE, getElementValue()));
 
-    //messageHandler.setErrorMessage(getErrorCode(curResponseCode));
+    Serial.print("Second sensor enconding: ")
+    Serial.print(messageHandlerPU.encodeMessage(CURRENT_SENSOR_CURRENT_DATASIZE, getCurrentValuePU()));
+    Serial.println(messageHandlerPU.encodeMessage(CURRENT_SENSOR_VOLTAGE_DATASIZE, getVoltageValuePU()));
+
+    //Serial.print("Third sensor enconding: ")
+    //Serial.print(messageHandlerB.encodeMessage(CURRENT_SENSOR_CURRENT_DATASIZE, getCurrentValue()));
+    //Serial.println(messageHandlerB.encodeMessage(CURRENT_SENSOR_VOLTAGE_DATASIZE, getVoltageValue()));
+
+    // Send messages over Canbus
     CanMsg currentSensorData = messageHandler.getMessage();
     Canbus.SendMessage(&currentSensorData);
+
+    CanMsg currentSensorDataPU = messageHandlerPU.getMessage();
+    Canbus.SendMessage(&currentSensorDataPU);
+
+    //CanMsg currentSensorDataB = messageHandlerB.getMessage();
+    //Canbus.SendMessage(&currentSensorDataB);
 }
 
 void checkCanbusFor (int timeMs){
@@ -95,7 +113,7 @@ void checkCanbusFor (int timeMs){
     }
 }
 
-uint16_t getCurrentValue() {
+uint16_t getCurrentValue() { //need to add uint8_t sensor variable, to change the pin we read
 
 // Put the analog read and everything here
     float value = 1.24353535368;
@@ -104,10 +122,28 @@ uint16_t getCurrentValue() {
     return output;
 }
 
-uint16_t getVoltageValue() {
+uint16_t getVoltageValue() { //need to add uint8_t sensor variable, to change the pin we read
 
 // Put the analog read and everything here
     float value = 15.1515151515;
+    uint16_t output = fltCompressor.compress(value);
+    
+    return output;
+}
+
+uint16_t getCurrentValuePU() { //need to add uint8_t sensor variable, to change the pin we read
+
+// Put the analog read and everything here
+    float value = 2.96353535368;
+    uint16_t output = fltCompressor.compress(value);
+    
+    return output;
+}
+
+uint16_t getVoltageValuePU() { //need to add uint8_t sensor variable, to change the pin we read
+
+// Put the analog read and everything here
+    float value = 8.455151515;
     uint16_t output = fltCompressor.compress(value);
     
     return output;
