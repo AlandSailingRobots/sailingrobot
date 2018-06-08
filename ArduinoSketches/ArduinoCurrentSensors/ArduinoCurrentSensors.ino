@@ -74,7 +74,7 @@ void sendCurrentSensorData (){
     // on how many current sensors are plugged in
 
     CanMessageHandler messageHandler(MSG_ID_CURRENT_SENSOR_DATA);
-    CanMessageHandler messageHandlerPU(MSG_ID_CURRENT_SENSOR_DATA_POWER_UNIT);
+    //CanMessageHandler messageHandlerPU(MSG_ID_CURRENT_SENSOR_DATA_POWER_UNIT);
     //CanMessageHandler messageHandlerB(MSG_ID_CURRENT_SENSOR_DATA_BOX);
 
     // Create new encodeMessage func? -> trying encodeCSMessage / aborted for now
@@ -82,9 +82,9 @@ void sendCurrentSensorData (){
     Serial.print(messageHandler.encodeMessage(CURRENT_SENSOR_CURRENT_DATASIZE, getCurrentValue()));
     Serial.println(messageHandler.encodeMessage(CURRENT_SENSOR_VOLTAGE_DATASIZE, getVoltageValue()));
 
-    Serial.print("Second sensor enconding: ");
-    Serial.print(messageHandlerPU.encodeMessage(CURRENT_SENSOR_CURRENT_DATASIZE, getCurrentValuePU()));
-    Serial.println(messageHandlerPU.encodeMessage(CURRENT_SENSOR_VOLTAGE_DATASIZE, getVoltageValuePU()));
+    //Serial.print("Second sensor enconding: ");
+    //Serial.print(messageHandlerPU.encodeMessage(CURRENT_SENSOR_CURRENT_DATASIZE, getCurrentValuePU()));
+    //Serial.println(messageHandlerPU.encodeMessage(CURRENT_SENSOR_VOLTAGE_DATASIZE, getVoltageValuePU()));
 
     //Serial.print("Third sensor enconding: ")
     //Serial.print(messageHandlerB.encodeMessage(CURRENT_SENSOR_CURRENT_DATASIZE, getCurrentValue()));
@@ -94,8 +94,8 @@ void sendCurrentSensorData (){
     CanMsg currentSensorData = messageHandler.getMessage();
     Canbus.SendMessage(&currentSensorData);
 
-    CanMsg currentSensorDataPU = messageHandlerPU.getMessage();
-    Canbus.SendMessage(&currentSensorDataPU);
+    //CanMsg currentSensorDataPU = messageHandlerPU.getMessage();
+    //Canbus.SendMessage(&currentSensorDataPU);
 
     //CanMsg currentSensorDataB = messageHandlerB.getMessage();
     //Canbus.SendMessage(&currentSensorDataB);

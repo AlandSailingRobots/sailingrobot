@@ -20,7 +20,7 @@
 const float DATA_OUT_OF_RANGE = -2000; // as uint16_t, cannot use -2000.
 
 CANCurrentSensorNode::CANCurrentSensorNode(MessageBus& messageBus, DBHandler& dbhandler, CANService& canService) :
-ActiveNode(NodeID::CANCurrentSensor, messageBus), CANFrameReceiver(canService, {600}), m_LoopTime (0.5), m_db(dbhandler)
+ActiveNode(NodeID::CANCurrentSensor, messageBus), CANFrameReceiver(canService, MSG_ID_CURRENT_SENSOR_DATA), m_LoopTime (0.5), m_db(dbhandler)
 {
         m_current = DATA_OUT_OF_RANGE;
         m_voltage = DATA_OUT_OF_RANGE;
@@ -57,19 +57,22 @@ void CANCurrentSensorNode::processFrame (CanMsg& msg) {
 	uint16_t comp_current, comp_voltage;
 
 	if (messageHandler.getMessageId() == MSG_ID_CURRENT_SENSOR_DATA ||
-		messageHandler.getMessageId() == MSG_ID_CURRENT_SENSOR_DATA_POWER_UNIT ||
-		messageHandler.getMessageId() == MSG_ID_CURRENT_SENSOR_DATA_BOX)
-	{
-                // Use get data instead(int)? Parse data here or add the routine in another file?
-		messageHandler.getData(&comp_current, CURRENT_SENSOR_CURRENT_DATASIZE);
-		messageHandler.getData(&comp_voltage, CURRENT_SENSOR_VOLTAGE_DATASIZE);
+        messageHandler.getMessageId() == MSG_ID_CURRENT_SENSOR_DATA_POWER_UNIT ||
+        messageHandler.getMessageId() == MSG_ID_CURRENT_SENSOR_DATA_BOX)
+    {
+        // Use get data instead(int)? Parse data here or add the routine in another file?
+        messageHandler.getData(&comp_current, CURRENT_SENSOR_CURRENT_DATASIZE);
+        messageHandler.getData(&comp_voltage, CURRENT_SENSOR_VOLTAGE_DATASIZE);
 
-	}
-    m_current = fltCompressor.decompress(comp_current);
-    m_voltage = fltCompressor.decompress(comp_voltage);
-    m_element = msg.id - 720;        //TO TRY
-    MessagePtr currentSensorDataMsg = std::make_unique<CurrentSensorDataMsg>(static_cast<float>(m_current),
-                                                static_cast<float>(m_voltage), static_cast<SensedElement>(m_element));
+        m_current = fltCompressor.decompress(comp_current);
+        m_voltage = fltCompressor.decompress(comp_voltage);
+        
+        m_element = SAILDRIVE;        //TO TRY
+       // m_element = (SensedElement)((uint8_t)msg.id - (uint8_t)720);        //TO TRY
+        MessagePtr currentSensorDataMsg = std::make_unique<CurrentSensorDataMsg>(static_cast<float>(m_current),
+     		           static_cast<float>(m_voltage), static_cast<SensedElement>(m_element));
+//        m_msgBus.sendMessage(std::move(currentSensorDataMsg));
+    }
 }
 
 
