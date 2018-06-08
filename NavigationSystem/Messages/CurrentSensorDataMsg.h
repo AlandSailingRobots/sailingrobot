@@ -20,10 +20,10 @@ enum SensedElement : uint8_t { SAILDRIVE = 1, WINDVANE_SWITCH = 2, WINDVANE_ANGL
 
 class CurrentSensorDataMsg : public Message {
 public:
-    CurrentSensorDataMsg(NodeID destinationID, NodeID sourceID, uint16_t current, uint16_t voltage, SensedElement element)
+    CurrentSensorDataMsg(NodeID destinationID, NodeID sourceID, float current, float voltage, SensedElement element)
     :Message(MessageType::CurrentSensorData, sourceID, destinationID), m_current(current), m_voltage(voltage), m_element(element) { }
 
-    CurrentSensorDataMsg(uint16_t current, uint16_t voltage, SensedElement element)
+    CurrentSensorDataMsg(float current, float voltage, SensedElement element)
     :Message(MessageType::CurrentSensorData, NodeID::None, NodeID::None), m_current(current), m_voltage(voltage), m_element(element)
     {
 
@@ -33,8 +33,8 @@ public:
     :Message(deserialiser)
     {
         uint8_t element = 0;
-        if(	!deserialiser.readUint16_t(m_current) ||
-        !deserialiser.readUint16_t(m_voltage) ||
+        if(	!deserialiser.readFloat(m_current) ||
+        !deserialiser.readFloat(m_voltage) ||
         !deserialiser.readUint8_t(element)
     )
     {
@@ -57,8 +57,8 @@ virtual void Serialise(MessageSerialiser& serialiser) const
     serialiser.serialise((uint8_t)m_element);
 }
 
-uint16_t getCurrent() const { return m_current; }
-uint16_t getVoltage() const { return m_voltage; }
+float getCurrent() const { return m_current; }
+float getVoltage() const { return m_voltage; }
 SensedElement getSensedElement() const { return m_element; }
 std::string getSensedElementStr () const
 {
@@ -91,7 +91,7 @@ std::string getSensedElementStr () const
 }
 
 private:
-    uint16_t m_current;			// in mA
-    uint16_t m_voltage;			// in mV
+    float m_current;			// in mA
+    float m_voltage;			// in mV
     SensedElement m_element;    // the element measured
 };

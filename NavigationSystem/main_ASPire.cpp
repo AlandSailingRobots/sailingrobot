@@ -243,6 +243,7 @@ int main(int argc, char *argv[])
 		gpsd.start();
 		windSensor.start();
 		actuatorFeedback.start();
+		canCurrentSensorNode.start();
 	#endif
 
 	#if LOCAL_NAVIGATION_MODULE == 1

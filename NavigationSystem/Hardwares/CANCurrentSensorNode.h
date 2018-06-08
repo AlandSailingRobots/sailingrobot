@@ -43,8 +43,8 @@ class CANCurrentSensorNode : public ActiveNode, public CANFrameReceiver {
     ///----------------------------------------------------------------------------------
     void updateConfigsFromDB();
 
-    uint16_t m_current;			// in mA
-    uint16_t m_voltage;			// in mV
+    float m_current;			// in mA
+    float m_voltage;			// in mV
     SensedElement m_element;    // the element measured
     
     double m_LoopTime;            // in seconds (ex: 0.5 s)

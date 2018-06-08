@@ -17,7 +17,7 @@
 #include "MessageBus/MessageTypes.h"
 #include "CAN_Services/CanBusCommon/CanMessageHandler.h"
 
-const int DATA_OUT_OF_RANGE = -2000;
+const float DATA_OUT_OF_RANGE = -2000; // as uint16_t, cannot use -2000.
 
 CANCurrentSensorNode::CANCurrentSensorNode(MessageBus& messageBus, DBHandler& dbhandler, CANService& canService) :
 ActiveNode(NodeID::CANCurrentSensor, messageBus), CANFrameReceiver(canService, {600}), m_LoopTime (0.5), m_db(dbhandler)
@@ -51,7 +51,7 @@ void CANCurrentSensorNode::processMessage (const Message* message){
 }
 
 void CANCurrentSensorNode::processFrame (CanMsg& msg) {
-        Logger::info("Received marine sensor readings from CanBus");
+    Logger::info("Received current sensor readings from CanBus");
     Float16Compressor fltCompressor;
 	CanMessageHandler messageHandler(msg);
 	uint16_t comp_current, comp_voltage;

@@ -9,6 +9,7 @@
 #include <vector>
 #include "Messages/WindStateMsg.h"
 #include "SystemServices/Logger.h"
+#include "Messages/CurrentSensorDataMsg.h"
 
 #include "Libs/json/include/nlohmann/json.hpp"
 using Json = nlohmann::json;
