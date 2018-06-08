@@ -78,11 +78,11 @@ void sendCurrentSensorData (){
     //CanMessageHandler messageHandlerB(MSG_ID_CURRENT_SENSOR_DATA_BOX);
 
     // Create new encodeMessage func? -> trying encodeCSMessage / aborted for now
-    Serial.print("First sensor enconding: ")
+    Serial.print("First sensor enconding: ");
     Serial.print(messageHandler.encodeMessage(CURRENT_SENSOR_CURRENT_DATASIZE, getCurrentValue()));
     Serial.println(messageHandler.encodeMessage(CURRENT_SENSOR_VOLTAGE_DATASIZE, getVoltageValue()));
 
-    Serial.print("Second sensor enconding: ")
+    Serial.print("Second sensor enconding: ");
     Serial.print(messageHandlerPU.encodeMessage(CURRENT_SENSOR_CURRENT_DATASIZE, getCurrentValuePU()));
     Serial.println(messageHandlerPU.encodeMessage(CURRENT_SENSOR_VOLTAGE_DATASIZE, getVoltageValuePU()));
 
