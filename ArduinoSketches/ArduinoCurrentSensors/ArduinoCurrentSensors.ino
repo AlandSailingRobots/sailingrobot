@@ -116,7 +116,9 @@ void checkCanbusFor (int timeMs){
 uint16_t getCurrentValue() { //need to add uint8_t sensor variable, to change the pin we read
 
 // Put the analog read and everything here
-    float value = 1.24353535368;
+    float value = analogRead(PIN_CUR_SENSOR_1); //1.24353535368;
+    Serial.print("analogreadvalue: ");
+    Serial.println(value);
     uint16_t output = fltCompressor.compress(value);
     
     return output;
@@ -125,7 +127,7 @@ uint16_t getCurrentValue() { //need to add uint8_t sensor variable, to change th
 uint16_t getVoltageValue() { //need to add uint8_t sensor variable, to change the pin we read
 
 // Put the analog read and everything here
-    float value = 15.1515151515;
+    float value = analogRead(PIN_VOL_SENSOR_1);
     uint16_t output = fltCompressor.compress(value);
     
     return output;
@@ -134,7 +136,7 @@ uint16_t getVoltageValue() { //need to add uint8_t sensor variable, to change th
 uint16_t getCurrentValuePU() { //need to add uint8_t sensor variable, to change the pin we read
 
 // Put the analog read and everything here
-    float value = 2.96353535368;
+    float value = analogRead(PIN_CUR_SENSOR_2);
     uint16_t output = fltCompressor.compress(value);
     
     return output;
@@ -143,7 +145,7 @@ uint16_t getCurrentValuePU() { //need to add uint8_t sensor variable, to change 
 uint16_t getVoltageValuePU() { //need to add uint8_t sensor variable, to change the pin we read
 
 // Put the analog read and everything here
-    float value = 8.455151515;
+    float value = analogRead(PIN_VOL_SENSOR_2);
     uint16_t output = fltCompressor.compress(value);
     
     return output;
