@@ -253,8 +253,8 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
         // NEW FEATURE, CAREFUL WITH THE APOSTROPHE (added in dbloggernode.h for now, maybe add it in getelementstr)
         currentSensorsValues << std::setprecision(10) << log.m_current << ", "
                               << log.m_voltage << ", "
-                              << log.m_element << ", " //HERE (moved to the m_element_str)
-                              << log.m_element_str.c_str() << ", '" //AND HERE (moved to the m_element_str)
+                              << log.m_element << ", '" //HERE (moved to the m_element_str)
+                              << log.m_element_str.c_str() << "', '" //AND HERE (moved to the m_element_str)
                              << log.m_timestamp_str.c_str();
 
         ss << "INSERT INTO "
