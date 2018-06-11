@@ -266,7 +266,7 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
 
         //Logger::info("Current sensors database insert command: %s \n", ss);
         //std::cout << "Current sensors database insert command: " << currentSensorsValues.str() << std::endl;
-        std::cout << "Full insert command line: " << ss.str() << std::endl;
+        //std::cout << "Full insert command line: " << ss.str() << std::endl;
 
     }
 
