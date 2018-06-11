@@ -67,23 +67,23 @@ std::string getSensedElementStr () const
     switch(m_element)
     { // added "' '" to have proper sql string when using sal command lines in dbloggernode
         case SAILDRIVE:
-        elem = "'saildrive'";
+        elem = "saildrive";
         break;
 
         case WINDVANE_SWITCH:
-        elem = "'windvane switch'";
+        elem = "windvane switch";
         break;
 
         case WINDVANE_ANGLE:
-        elem = "'windvane angle'";
+        elem = "windvane angle";
         break;
 
         case ACTUATOR_UNIT:
-        elem = "'actuator unit'";
+        elem = "actuator unit";
         break;
 
         default:
-        elem = "'undefined'";
+        elem = "undefined";
         break;
     }
 
