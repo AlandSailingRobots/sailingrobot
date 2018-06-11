@@ -96,7 +96,7 @@ void CANCurrentSensorNode::CANCurrentSensorNodeThreadFunc(ActiveNode* nodePtr) {
 				// Skipped for now  && node->m_element == "undefined"))
 //		{
 			MessagePtr currentSensorData = std::make_unique<CurrentSensorDataMsg>( node->m_current, 
-				node->m_voltage, node->m_element, node->m_element);
+				node->m_voltage, node->m_element);
 			node->m_MsgBus.sendMessage(std::move(currentSensorData));
 //		}
 		node->m_lock.unlock();
