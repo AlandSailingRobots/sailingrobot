@@ -198,16 +198,7 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
            << "dataLogs_course_calculation"
            << " VALUES(NULL, " << courseCalculationValues.str() << "'); \n";
 
-        currentSensorsValues << std::setprecision(10) << log.m_current << ", "
-                 			  << log.m_voltage << ", "
-                 			  << log.m_element << ", "
-                 			  << log.m_element_str << ", "
-                             << log.m_timestamp_str.c_str();
-
-        ss << "INSERT INTO "
-           << "dataLogs_current_sensors"
-           << " VALUES(NULL, " << currentSensorsValues.str() << "'); \n";
-
+        
         gpsValues << std::setprecision(10) << log.m_gpsHasFix << ", " << log.m_gpsOnline << ",'"
                   << log.m_timestamp_str.c_str() << "', " << log.m_gpsLat << ", " << log.m_gpsLon
                   << ", " << log.m_gpsSpeed << ", " << log.m_gpsCourse << ", " << log.m_gpsSatellite
@@ -258,6 +249,22 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
         ss << "INSERT INTO "
            << "dataLogs_system"
            << " VALUES(NULL, " << systemValues.str() << "); \n";
+
+        // NEW FEATURE, CAREFUL WITH THE APOSTROPHE (added in dbloggernode.h for now, maybe add it in getelementstr)
+        currentSensorsValues << std::setprecision(10) << log.m_current << ", "
+                              << log.m_voltage << ", "
+                              << log.m_element << ", " //HERE (moved to the m_element_str)
+                              << log.m_element_str.c_str() << ", '" //AND HERE (moved to the m_element_str)
+                             << log.m_timestamp_str.c_str();
+
+        ss << "INSERT INTO "
+           << "dataLogs_current_sensors"
+           << " VALUES(NULL, " << currentSensorsValues.str() << "'); \n";
+
+        //Logger::info("Current sensors database insert command: %s \n", ss);
+        //std::cout << "Current sensors database insert command: " << currentSensorsValues.str() << std::endl;
+        //std::cout << "Full insert command line: " << ss.str() << std::endl;
+
     }
 
     if (queryTable(ss.str(), db)) {

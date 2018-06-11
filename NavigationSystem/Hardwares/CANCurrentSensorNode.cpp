@@ -70,7 +70,7 @@ void CANCurrentSensorNode::processFrame (CanMsg& msg) {
         //m_element = SAILDRIVE;        //TO TRY
         m_element = (SensedElement)((uint8_t)msg.id - (uint8_t)720);        //TO TRY
         MessagePtr currentSensorDataMsg = std::make_unique<CurrentSensorDataMsg>(static_cast<float>(m_current),
-     		           static_cast<float>(m_voltage), static_cast<SensedElement>(m_element));
+     		           static_cast<float>(m_voltage), static_cast<SensedElement>(m_element));//, static_cast<getSensedElementStrm_element.>);
 //        m_msgBus.sendMessage(std::move(currentSensorDataMsg));
         Logger::info("Current sensor data: Current: %lf , Voltage: %lf , Sensor: %d \n",m_current,m_voltage,m_element);
     }
@@ -96,7 +96,7 @@ void CANCurrentSensorNode::CANCurrentSensorNodeThreadFunc(ActiveNode* nodePtr) {
 				// Skipped for now  && node->m_element == "undefined"))
 //		{
 			MessagePtr currentSensorData = std::make_unique<CurrentSensorDataMsg>( node->m_current, 
-				node->m_voltage, node->m_element);
+				node->m_voltage, node->m_element, node->m_element);
 			node->m_MsgBus.sendMessage(std::move(currentSensorData));
 //		}
 		node->m_lock.unlock();

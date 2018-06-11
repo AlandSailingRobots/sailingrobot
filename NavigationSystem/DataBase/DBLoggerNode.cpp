@@ -52,6 +52,8 @@ void DBLoggerNode::processMessage(const Message* msg) {
 
     MessageType type = msg->messageType();
 
+    //Logger::info("DBLoggerNode Processing Message: %s", msgToString(type).c_str());
+
     switch(type)
     {
         case MessageType::ASPireActuatorFeedback:
@@ -118,6 +120,8 @@ void DBLoggerNode::processMessage(const Message* msg) {
             item.m_voltage = currentSensorMsg->getVoltage();
             item.m_element = currentSensorMsg->getSensedElement();
             item.m_element_str = currentSensorMsg->getSensedElementStr();
+            Logger::info("Item current sensor creation: %lf, %lf, %d, %s", item.m_current,
+                         item.m_voltage, item.m_element, item.m_element_str.c_str());
         }
         break;
 
