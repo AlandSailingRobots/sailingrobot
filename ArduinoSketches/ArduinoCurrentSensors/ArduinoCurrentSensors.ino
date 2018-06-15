@@ -13,10 +13,10 @@
 #include <CanMessageHandler.h>
 
 // Fill in with current sensors addresses
-#define PIN_CUR_SENSOR_1 A1
-#define PIN_VOL_SENSOR_1 A2
-#define PIN_CUR_SENSOR_2 A3
-#define PIN_VOL_SENSOR_2 A4
+#define PIN_CUR_SENSOR_1 A0 //solar panel current
+#define PIN_VOL_SENSOR_1 A2 //solar panel voltage
+#define PIN_VOL_SENSOR_2 A3 //battery voltage
+#define PIN_CUR_SENSOR_2 A1 //battery current 
 
 #define CHIP_SELECT_PIN 10
 
@@ -116,8 +116,8 @@ void checkCanbusFor (int timeMs){
 uint16_t getCurrentValue() { //need to add uint8_t sensor variable, to change the pin we read
 
 // Put the analog read and everything here
-    float value = analogRead(PIN_CUR_SENSOR_1); //1.24353535368;
-    Serial.print("analogreadvalue: ");
+    float value = analogRead(PIN_CUR_SENSOR_1)*0.0186; 
+    Serial.print("solar panel current: ");
     Serial.println(value);
     uint16_t output = fltCompressor.compress(value);
     
@@ -127,7 +127,9 @@ uint16_t getCurrentValue() { //need to add uint8_t sensor variable, to change th
 uint16_t getVoltageValue() { //need to add uint8_t sensor variable, to change the pin we read
 
 // Put the analog read and everything here
-    float value = analogRead(PIN_VOL_SENSOR_1);
+    float value = analogRead(PIN_VOL_SENSOR_1)*0.0258;
+    Serial.print("solar panel voltage: ");
+    Serial.println(value);
     uint16_t output = fltCompressor.compress(value);
     
     return output;
@@ -136,7 +138,7 @@ uint16_t getVoltageValue() { //need to add uint8_t sensor variable, to change th
 uint16_t getCurrentValuePU() { //need to add uint8_t sensor variable, to change the pin we read
 
 // Put the analog read and everything here
-    float value = analogRead(PIN_CUR_SENSOR_2);
+    float value = analogRead(PIN_CUR_SENSOR_2)*0.0186;
     uint16_t output = fltCompressor.compress(value);
     
     return output;
@@ -145,7 +147,7 @@ uint16_t getCurrentValuePU() { //need to add uint8_t sensor variable, to change 
 uint16_t getVoltageValuePU() { //need to add uint8_t sensor variable, to change the pin we read
 
 // Put the analog read and everything here
-    float value = analogRead(PIN_VOL_SENSOR_2);
+    float value = analogRead(PIN_VOL_SENSOR_2)*0.0258;
     uint16_t output = fltCompressor.compress(value);
     
     return output;
