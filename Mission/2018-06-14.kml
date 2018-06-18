@@ -1,0 +1,719 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+	<Document>
+		<open>0</open>
+		<ScreenOverlay>
+			<name>Navionics</name>
+			<Icon>
+				<href>https://social-sharing.navionics.io/images/fb_sharing/kmz_navionics_logo.png</href>
+			</Icon>
+			<overlayXY x="0" y="1" xunits="fraction" yunits="fraction" />
+			<screenXY x="0" y="1" xunits="fraction" yunits="fraction" />
+			<rotationXY yunits="fraction" xunits="fraction" y="0" x="0" />
+			<size yunits="fraction" xunits="fraction" y="0" x="0" />
+		</ScreenOverlay>
+		<Style id="MarkerStyle">
+			<IconStyle>
+				<Icon>
+					<href>https://social-sharing.navionics.io/images/fb_sharing/kmz_wp_icon.png</href>
+				</Icon>
+				<hotSpot x="0.5" y="0.5" xunits="fraction" yunits="fraction"/>
+			</IconStyle>
+		</Style>
+		<Style id="RouteStyle">
+			<LineStyle>
+				<width>6.0</width>
+				<color>ff2cdffb</color>
+			</LineStyle>
+		</Style>
+		<Placemark>
+			<styleUrl>#MarkerStyle</styleUrl>
+			<name>WP 1</name>
+			<description>
+				<![CDATA[
+				<div xmlns="http://www.opengis.net/kml/2.2" ALIGN=center>
+				
+		<table style="width: 200; margin: 8px 0" border="0">
+		<tr>
+			<td COLSPAN="2"><hr></td>
+		</tr>
+		<tr>
+			<td style="font-weight: bold;" COLSPAN="2" ALIGN=center>WP 1 to WP 2</td>
+		</tr>
+		<tr>
+			<td COLSPAN="2"><hr></td>
+		</tr>
+		<tr>
+			<td style="font-weight: bold; width: 130px;">Length:</td>
+			<td ALIGN=right>0.10 NM</td>
+		</tr>
+		<tr>
+			<td style="font-weight: bold; width: 130px;">Angle:</td>
+			<td ALIGN=right>234&deg;T</td>
+		</tr>
+		</table></div>]]>
+			</description>
+			<Point>
+				<coordinates>19.97055949143882,60.05356751987265,0
+</coordinates>
+			</Point>
+		</Placemark>
+		<Placemark>
+			<styleUrl>#MarkerStyle</styleUrl>
+			<name>WP 2</name>
+			<description>
+				<![CDATA[
+				<div xmlns="http://www.opengis.net/kml/2.2" ALIGN=center>
+				
+		<table style="width: 200; margin: 8px 0" border="0">
+		<tr>
+			<td COLSPAN="2"><hr></td>
+		</tr>
+		<tr>
+			<td style="font-weight: bold;" COLSPAN="2" ALIGN=center>WP 1 to WP 2</td>
+		</tr>
+		<tr>
+			<td COLSPAN="2"><hr></td>
+		</tr>
+		<tr>
+			<td style="font-weight: bold; width: 130px;">Length:</td>
+			<td ALIGN=right>0.10 NM</td>
+		</tr>
+		<tr>
+			<td style="font-weight: bold; width: 130px;">Angle:</td>
+			<td ALIGN=right>234&deg;T</td>
+		</tr>
+		<tr>
+			<td COLSPAN="2"><hr></td>
+		</tr>
+		<tr>
+			<td style="font-weight: bold;" COLSPAN="2" ALIGN=center>WP 2 to WP 3</td>
+		</tr>
+		<tr>
+			<td COLSPAN="2"><hr></td>
+		</tr>
+		<tr>
+			<td style="font-weight: bold; width: 130px;">Length:</td>
+			<td ALIGN=right>0.30 NM</td>
+		</tr>
+		<tr>
+			<td style="font-weight: bold; width: 130px;">Angle:</td>
+			<td ALIGN=right>227&deg;T</td>
+		</tr>
+		</table></div>]]>
+			</description>
+			<Point>
+				<coordinates>19.96829582600528,60.05275001991933,0
+</coordinates>
+			</Point>
+		</Placemark>
+		<Placemark>
+			<styleUrl>#MarkerStyle</styleUrl>
+			<name>WP 3</name>
+			<description>
+				<![CDATA[
+				<div xmlns="http://www.opengis.net/kml/2.2" ALIGN=center>
+				
+		<table style="width: 200; margin: 8px 0" border="0">
+		<tr>
+			<td COLSPAN="2"><hr></td>
+		</tr>
+		<tr>
+			<td style="font-weight: bold;" COLSPAN="2" ALIGN=center>WP 2 to WP 3</td>
+		</tr>
+		<tr>
+			<td COLSPAN="2"><hr></td>
+		</tr>
+		<tr>
+			<td style="font-weight: bold; width: 130px;">Length:</td>
+			<td ALIGN=right>0.30 NM</td>
+		</tr>
+		<tr>
+			<td style="font-weight: bold; width: 130px;">Angle:</td>
+			<td ALIGN=right>227&deg;T</td>
+		</tr>
+		<tr>
+			<td COLSPAN="2"><hr></td>
+		</tr>
+		<tr>
+			<td style="font-weight: bold;" COLSPAN="2" ALIGN=center>WP 3 to WP 4</td>
+		</tr>
+		<tr>
+			<td COLSPAN="2"><hr></td>
+		</tr>
+		<tr>
+			<td style="font-weight: bold; width: 130px;">Length:</td>
+			<td ALIGN=right>0.40 NM</td>
+		</tr>
+		<tr>
+			<td style="font-weight: bold; width: 130px;">Angle:</td>
+			<td ALIGN=right>237&deg;T</td>
+		</tr>
+		</table></div>]]>
+			</description>
+			<Point>
+				<coordinates>19.9619449868723,60.04974036702081,0
+</coordinates>
+			</Point>
+		</Placemark>
+		<Placemark>
+			<styleUrl>#MarkerStyle</styleUrl>
+			<name>WP 4</name>
+			<description>
+				<![CDATA[
+				<div xmlns="http://www.opengis.net/kml/2.2" ALIGN=center>
+				
+		<table style="width: 200; margin: 8px 0" border="0">
+		<tr>
+			<td COLSPAN="2"><hr></td>
+		</tr>
+		<tr>
+			<td style="font-weight: bold;" COLSPAN="2" ALIGN=center>WP 3 to WP 4</td>
+		</tr>
+		<tr>
+			<td COLSPAN="2"><hr></td>
+		</tr>
+		<tr>
+			<td style="font-weight: bold; width: 130px;">Length:</td>
+			<td ALIGN=right>0.40 NM</td>
+		</tr>
+		<tr>
+			<td style="font-weight: bold; width: 130px;">Angle:</td>
+			<td ALIGN=right>237&deg;T</td>
+		</tr>
+		<tr>
+			<td COLSPAN="2"><hr></td>
+		</tr>
+		<tr>
+			<td style="font-weight: bold;" COLSPAN="2" ALIGN=center>WP 4 to WP 5</td>
+		</tr>
+		<tr>
+			<td COLSPAN="2"><hr></td>
+		</tr>
+		<tr>
+			<td style="font-weight: bold; width: 130px;">Length:</td>
+			<td ALIGN=right>0.30 NM</td>
+		</tr>
+		<tr>
+			<td style="font-weight: bold; width: 130px;">Angle:</td>
+			<td ALIGN=right>238&deg;T</td>
+		</tr>
+		</table></div>]]>
+			</description>
+			<Point>
+				<coordinates>19.95146206004317,60.04639348939921,0
+</coordinates>
+			</Point>
+		</Placemark>
+		<Placemark>
+			<styleUrl>#MarkerStyle</styleUrl>
+			<name>WP 5</name>
+			<description>
+				<![CDATA[
+				<div xmlns="http://www.opengis.net/kml/2.2" ALIGN=center>
+				
+		<table style="width: 200; margin: 8px 0" border="0">
+		<tr>
+			<td COLSPAN="2"><hr></td>
+		</tr>
+		<tr>
+			<td style="font-weight: bold;" COLSPAN="2" ALIGN=center>WP 4 to WP 5</td>
+		</tr>
+		<tr>
+			<td COLSPAN="2"><hr></td>
+		</tr>
+		<tr>
+			<td style="font-weight: bold; width: 130px;">Length:</td>
+			<td ALIGN=right>0.30 NM</td>
+		</tr>
+		<tr>
+			<td style="font-weight: bold; width: 130px;">Angle:</td>
+			<td ALIGN=right>238&deg;T</td>
+		</tr>
+		<tr>
+			<td COLSPAN="2"><hr></td>
+		</tr>
+		<tr>
+			<td style="font-weight: bold;" COLSPAN="2" ALIGN=center>WP 5 to WP 6</td>
+		</tr>
+		<tr>
+			<td COLSPAN="2"><hr></td>
+		</tr>
+		<tr>
+			<td style="font-weight: bold; width: 130px;">Length:</td>
+			<td ALIGN=right>0.10 NM</td>
+		</tr>
+		<tr>
+			<td style="font-weight: bold; width: 130px;">Angle:</td>
+			<td ALIGN=right>237&deg;T</td>
+		</tr>
+		</table></div>]]>
+			</description>
+			<Point>
+				<coordinates>19.94173368835856,60.04336977573267,0
+</coordinates>
+			</Point>
+		</Placemark>
+		<Placemark>
+			<styleUrl>#MarkerStyle</styleUrl>
+			<name>WP 6</name>
+			<description>
+				<![CDATA[
+				<div xmlns="http://www.opengis.net/kml/2.2" ALIGN=center>
+				
+		<table style="width: 200; margin: 8px 0" border="0">
+		<tr>
+			<td COLSPAN="2"><hr></td>
+		</tr>
+		<tr>
+			<td style="font-weight: bold;" COLSPAN="2" ALIGN=center>WP 5 to WP 6</td>
+		</tr>
+		<tr>
+			<td COLSPAN="2"><hr></td>
+		</tr>
+		<tr>
+			<td style="font-weight: bold; width: 130px;">Length:</td>
+			<td ALIGN=right>0.10 NM</td>
+		</tr>
+		<tr>
+			<td style="font-weight: bold; width: 130px;">Angle:</td>
+			<td ALIGN=right>237&deg;T</td>
+		</tr>
+		<tr>
+			<td COLSPAN="2"><hr></td>
+		</tr>
+		<tr>
+			<td style="font-weight: bold;" COLSPAN="2" ALIGN=center>WP 6 to WP 7</td>
+		</tr>
+		<tr>
+			<td COLSPAN="2"><hr></td>
+		</tr>
+		<tr>
+			<td style="font-weight: bold; width: 130px;">Length:</td>
+			<td ALIGN=right>0.60 NM</td>
+		</tr>
+		<tr>
+			<td style="font-weight: bold; width: 130px;">Angle:</td>
+			<td ALIGN=right>339&deg;T</td>
+		</tr>
+		</table></div>]]>
+			</description>
+			<Point>
+				<coordinates>19.93905681415541,60.04249810386197,0
+</coordinates>
+			</Point>
+		</Placemark>
+		<Placemark>
+			<styleUrl>#MarkerStyle</styleUrl>
+			<name>WP 7</name>
+			<description>
+				<![CDATA[
+				<div xmlns="http://www.opengis.net/kml/2.2" ALIGN=center>
+				
+		<table style="width: 200; margin: 8px 0" border="0">
+		<tr>
+			<td COLSPAN="2"><hr></td>
+		</tr>
+		<tr>
+			<td style="font-weight: bold;" COLSPAN="2" ALIGN=center>WP 6 to WP 7</td>
+		</tr>
+		<tr>
+			<td COLSPAN="2"><hr></td>
+		</tr>
+		<tr>
+			<td style="font-weight: bold; width: 130px;">Length:</td>
+			<td ALIGN=right>0.60 NM</td>
+		</tr>
+		<tr>
+			<td style="font-weight: bold; width: 130px;">Angle:</td>
+			<td ALIGN=right>339&deg;T</td>
+		</tr>
+		<tr>
+			<td COLSPAN="2"><hr></td>
+		</tr>
+		<tr>
+			<td style="font-weight: bold;" COLSPAN="2" ALIGN=center>WP 7 to WP 8</td>
+		</tr>
+		<tr>
+			<td COLSPAN="2"><hr></td>
+		</tr>
+		<tr>
+			<td style="font-weight: bold; width: 130px;">Length:</td>
+			<td ALIGN=right>0.60 NM</td>
+		</tr>
+		<tr>
+			<td style="font-weight: bold; width: 130px;">Angle:</td>
+			<td ALIGN=right>345&deg;T</td>
+		</tr>
+		</table></div>]]>
+			</description>
+			<Point>
+				<coordinates>19.93197836827593,60.0517393462915,0
+</coordinates>
+			</Point>
+		</Placemark>
+		<Placemark>
+			<styleUrl>#MarkerStyle</styleUrl>
+			<name>WP 8</name>
+			<description>
+				<![CDATA[
+				<div xmlns="http://www.opengis.net/kml/2.2" ALIGN=center>
+				
+		<table style="width: 200; margin: 8px 0" border="0">
+		<tr>
+			<td COLSPAN="2"><hr></td>
+		</tr>
+		<tr>
+			<td style="font-weight: bold;" COLSPAN="2" ALIGN=center>WP 7 to WP 8</td>
+		</tr>
+		<tr>
+			<td COLSPAN="2"><hr></td>
+		</tr>
+		<tr>
+			<td style="font-weight: bold; width: 130px;">Length:</td>
+			<td ALIGN=right>0.60 NM</td>
+		</tr>
+		<tr>
+			<td style="font-weight: bold; width: 130px;">Angle:</td>
+			<td ALIGN=right>345&deg;T</td>
+		</tr>
+		<tr>
+			<td COLSPAN="2"><hr></td>
+		</tr>
+		<tr>
+			<td style="font-weight: bold;" COLSPAN="2" ALIGN=center>WP 8 to WP 9</td>
+		</tr>
+		<tr>
+			<td COLSPAN="2"><hr></td>
+		</tr>
+		<tr>
+			<td style="font-weight: bold; width: 130px;">Length:</td>
+			<td ALIGN=right>0.10 NM</td>
+		</tr>
+		<tr>
+			<td style="font-weight: bold; width: 130px;">Angle:</td>
+			<td ALIGN=right>356&deg;T</td>
+		</tr>
+		</table></div>]]>
+			</description>
+			<Point>
+				<coordinates>19.92679529305708,60.06130581243809,0
+</coordinates>
+			</Point>
+		</Placemark>
+		<Placemark>
+			<styleUrl>#MarkerStyle</styleUrl>
+			<name>WP 9</name>
+			<description>
+				<![CDATA[
+				<div xmlns="http://www.opengis.net/kml/2.2" ALIGN=center>
+				
+		<table style="width: 200; margin: 8px 0" border="0">
+		<tr>
+			<td COLSPAN="2"><hr></td>
+		</tr>
+		<tr>
+			<td style="font-weight: bold;" COLSPAN="2" ALIGN=center>WP 8 to WP 9</td>
+		</tr>
+		<tr>
+			<td COLSPAN="2"><hr></td>
+		</tr>
+		<tr>
+			<td style="font-weight: bold; width: 130px;">Length:</td>
+			<td ALIGN=right>0.10 NM</td>
+		</tr>
+		<tr>
+			<td style="font-weight: bold; width: 130px;">Angle:</td>
+			<td ALIGN=right>356&deg;T</td>
+		</tr>
+		<tr>
+			<td COLSPAN="2"><hr></td>
+		</tr>
+		<tr>
+			<td style="font-weight: bold;" COLSPAN="2" ALIGN=center>WP 9 to WP 10</td>
+		</tr>
+		<tr>
+			<td COLSPAN="2"><hr></td>
+		</tr>
+		<tr>
+			<td style="font-weight: bold; width: 130px;">Length:</td>
+			<td ALIGN=right>0.60 NM</td>
+		</tr>
+		<tr>
+			<td style="font-weight: bold; width: 130px;">Angle:</td>
+			<td ALIGN=right>3&deg;T</td>
+		</tr>
+		</table></div>]]>
+			</description>
+			<Point>
+				<coordinates>19.92652580907689,60.06342532884776,0
+</coordinates>
+			</Point>
+		</Placemark>
+		<Placemark>
+			<styleUrl>#MarkerStyle</styleUrl>
+			<name>WP 10</name>
+			<description>
+				<![CDATA[
+				<div xmlns="http://www.opengis.net/kml/2.2" ALIGN=center>
+				
+		<table style="width: 200; margin: 8px 0" border="0">
+		<tr>
+			<td COLSPAN="2"><hr></td>
+		</tr>
+		<tr>
+			<td style="font-weight: bold;" COLSPAN="2" ALIGN=center>WP 9 to WP 10</td>
+		</tr>
+		<tr>
+			<td COLSPAN="2"><hr></td>
+		</tr>
+		<tr>
+			<td style="font-weight: bold; width: 130px;">Length:</td>
+			<td ALIGN=right>0.60 NM</td>
+		</tr>
+		<tr>
+			<td style="font-weight: bold; width: 130px;">Angle:</td>
+			<td ALIGN=right>3&deg;T</td>
+		</tr>
+		<tr>
+			<td COLSPAN="2"><hr></td>
+		</tr>
+		<tr>
+			<td style="font-weight: bold;" COLSPAN="2" ALIGN=center>WP 10 to WP 11</td>
+		</tr>
+		<tr>
+			<td COLSPAN="2"><hr></td>
+		</tr>
+		<tr>
+			<td style="font-weight: bold; width: 130px;">Length:</td>
+			<td ALIGN=right>0.70 NM</td>
+		</tr>
+		<tr>
+			<td style="font-weight: bold; width: 130px;">Angle:</td>
+			<td ALIGN=right>3&deg;T</td>
+		</tr>
+		</table></div>]]>
+			</description>
+			<Point>
+				<coordinates>19.92765764179366,60.07329365064827,0
+</coordinates>
+			</Point>
+		</Placemark>
+		<Placemark>
+			<styleUrl>#MarkerStyle</styleUrl>
+			<name>WP 11</name>
+			<description>
+				<![CDATA[
+				<div xmlns="http://www.opengis.net/kml/2.2" ALIGN=center>
+				
+		<table style="width: 200; margin: 8px 0" border="0">
+		<tr>
+			<td COLSPAN="2"><hr></td>
+		</tr>
+		<tr>
+			<td style="font-weight: bold;" COLSPAN="2" ALIGN=center>WP 10 to WP 11</td>
+		</tr>
+		<tr>
+			<td COLSPAN="2"><hr></td>
+		</tr>
+		<tr>
+			<td style="font-weight: bold; width: 130px;">Length:</td>
+			<td ALIGN=right>0.70 NM</td>
+		</tr>
+		<tr>
+			<td style="font-weight: bold; width: 130px;">Angle:</td>
+			<td ALIGN=right>3&deg;T</td>
+		</tr>
+		<tr>
+			<td COLSPAN="2"><hr></td>
+		</tr>
+		<tr>
+			<td style="font-weight: bold;" COLSPAN="2" ALIGN=center>WP 11 to WP 12</td>
+		</tr>
+		<tr>
+			<td COLSPAN="2"><hr></td>
+		</tr>
+		<tr>
+			<td style="font-weight: bold; width: 130px;">Length:</td>
+			<td ALIGN=right>0.50 NM</td>
+		</tr>
+		<tr>
+			<td style="font-weight: bold; width: 130px;">Angle:</td>
+			<td ALIGN=right>348&deg;T</td>
+		</tr>
+		</table></div>]]>
+			</description>
+			<Point>
+				<coordinates>19.92885235410581,60.08434373198734,0
+</coordinates>
+			</Point>
+		</Placemark>
+		<Placemark>
+			<styleUrl>#MarkerStyle</styleUrl>
+			<name>WP 12</name>
+			<description>
+				<![CDATA[
+				<div xmlns="http://www.opengis.net/kml/2.2" ALIGN=center>
+				
+		<table style="width: 200; margin: 8px 0" border="0">
+		<tr>
+			<td COLSPAN="2"><hr></td>
+		</tr>
+		<tr>
+			<td style="font-weight: bold;" COLSPAN="2" ALIGN=center>WP 11 to WP 12</td>
+		</tr>
+		<tr>
+			<td COLSPAN="2"><hr></td>
+		</tr>
+		<tr>
+			<td style="font-weight: bold; width: 130px;">Length:</td>
+			<td ALIGN=right>0.50 NM</td>
+		</tr>
+		<tr>
+			<td style="font-weight: bold; width: 130px;">Angle:</td>
+			<td ALIGN=right>348&deg;T</td>
+		</tr>
+		<tr>
+			<td COLSPAN="2"><hr></td>
+		</tr>
+		<tr>
+			<td style="font-weight: bold;" COLSPAN="2" ALIGN=center>WP 12 to WP 13</td>
+		</tr>
+		<tr>
+			<td COLSPAN="2"><hr></td>
+		</tr>
+		<tr>
+			<td style="font-weight: bold; width: 130px;">Length:</td>
+			<td ALIGN=right>0.50 NM</td>
+		</tr>
+		<tr>
+			<td style="font-weight: bold; width: 130px;">Angle:</td>
+			<td ALIGN=right>346&deg;T</td>
+		</tr>
+		</table></div>]]>
+			</description>
+			<Point>
+				<coordinates>19.92554668394889,60.09242023820433,0
+</coordinates>
+			</Point>
+		</Placemark>
+		<Placemark>
+			<styleUrl>#MarkerStyle</styleUrl>
+			<name>WP 13</name>
+			<description>
+				<![CDATA[
+				<div xmlns="http://www.opengis.net/kml/2.2" ALIGN=center>
+				
+		<table style="width: 200; margin: 8px 0" border="0">
+		<tr>
+			<td COLSPAN="2"><hr></td>
+		</tr>
+		<tr>
+			<td style="font-weight: bold;" COLSPAN="2" ALIGN=center>WP 12 to WP 13</td>
+		</tr>
+		<tr>
+			<td COLSPAN="2"><hr></td>
+		</tr>
+		<tr>
+			<td style="font-weight: bold; width: 130px;">Length:</td>
+			<td ALIGN=right>0.50 NM</td>
+		</tr>
+		<tr>
+			<td style="font-weight: bold; width: 130px;">Angle:</td>
+			<td ALIGN=right>346&deg;T</td>
+		</tr>
+		<tr>
+			<td COLSPAN="2"><hr></td>
+		</tr>
+		<tr>
+			<td style="font-weight: bold;" COLSPAN="2" ALIGN=center>WP 13 to WP 14</td>
+		</tr>
+		<tr>
+			<td COLSPAN="2"><hr></td>
+		</tr>
+		<tr>
+			<td style="font-weight: bold; width: 130px;">Length:</td>
+			<td ALIGN=right>0.40 NM</td>
+		</tr>
+		<tr>
+			<td style="font-weight: bold; width: 130px;">Angle:</td>
+			<td ALIGN=right>1&deg;T</td>
+		</tr>
+		</table></div>]]>
+			</description>
+			<Point>
+				<coordinates>19.92159425223954,60.1002749788721,0
+</coordinates>
+			</Point>
+		</Placemark>
+		<Placemark>
+			<styleUrl>#MarkerStyle</styleUrl>
+			<name>WP 14</name>
+			<description>
+				<![CDATA[
+				<div xmlns="http://www.opengis.net/kml/2.2" ALIGN=center>
+				
+		<table style="width: 200; margin: 8px 0" border="0">
+		<tr>
+			<td COLSPAN="2"><hr></td>
+		</tr>
+		<tr>
+			<td style="font-weight: bold;" COLSPAN="2" ALIGN=center>WP 13 to WP 14</td>
+		</tr>
+		<tr>
+			<td COLSPAN="2"><hr></td>
+		</tr>
+		<tr>
+			<td style="font-weight: bold; width: 130px;">Length:</td>
+			<td ALIGN=right>0.40 NM</td>
+		</tr>
+		<tr>
+			<td style="font-weight: bold; width: 130px;">Angle:</td>
+			<td ALIGN=right>1&deg;T</td>
+		</tr>
+		</table></div>]]>
+			</description>
+			<Point>
+				<coordinates>19.9219266158151,60.1074282904681,0
+</coordinates>
+			</Point>
+		</Placemark>
+		<Placemark>
+			<styleUrl>#RouteStyle</styleUrl>
+			<name>Route</name>
+			<Snippet>View Info</Snippet>
+			<description>
+				<![CDATA[
+				<div xmlns="http://www.opengis.net/kml/2.2" style="font-size: 11px; min-height: 10px; min-width: 10px" ALIGN=center>
+				
+<table style="width: 200; margin: 8px 0" border="0">
+		<tr>
+			<td style="font-weight: bold; width: 130px;">Total Length:</td>
+			<td ALIGN=right>5.10 NM</td>
+		</tr>
+		<tr>
+	</table></div>]]>
+			</description>
+			<LineString>
+				<tesselate>1</tesselate>
+				<altitudeMode>clampToGround</altitudeMode>
+				<coordinates>				19.97055949143882,60.05356751987265,0
+19.96829582600528,60.05275001991933,0
+19.9619449868723,60.04974036702081,0
+19.95146206004317,60.04639348939921,0
+19.94173368835856,60.04336977573267,0
+19.93905681415541,60.04249810386197,0
+19.93197836827593,60.0517393462915,0
+19.92679529305708,60.06130581243809,0
+19.92652580907689,60.06342532884776,0
+19.92765764179366,60.07329365064827,0
+19.92885235410581,60.08434373198734,0
+19.92554668394889,60.09242023820433,0
+19.92159425223954,60.1002749788721,0
+19.9219266158151,60.1074282904681,0
+
+				</coordinates>
+			</LineString>
+		</Placemark>
+	</Document>
+</kml>

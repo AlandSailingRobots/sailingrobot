@@ -8,8 +8,8 @@ Created on Sat Jun  9 15:47:29 2018
 
 import xml.etree.ElementTree as ET
 import json
-kmlFileName = '1528547637715.kml'
-jsonFileName = 'EasternHarborToNorthBjorkor.json'
+kmlFileName = 'input.kml'
+jsonFileName = 'output.json'
 
 tree = ET.parse(kmlFileName)
 root = tree.getroot()
