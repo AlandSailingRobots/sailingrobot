@@ -15,7 +15,7 @@ CANFrameReceiver(canService, MSG_ID_MARINE_SENSOR_DATA), m_msgBus(messageBus)
 }
 
 void CANMarineSensorReceiver::processFrame (CanMsg& msg) {
-    Logger::info("Recieved marine sensor readings from CanBus");
+    Logger::info("Received marine sensor readings from CanBus");
 
     CanMessageHandler handler(msg);
 
@@ -32,7 +32,8 @@ void CANMarineSensorReceiver::processFrame (CanMsg& msg) {
 
         float salinity = Utility::calculateSalinity (temp, conductivety);
 
-        MessagePtr marineSensorDataMsg = std::make_unique<MarineSensorDataMsg>(static_cast<float>(temp), static_cast<float>(conductivety), static_cast<float>(ph), salinity);
+        MessagePtr marineSensorDataMsg = std::make_unique<MarineSensorDataMsg>(static_cast<float>(temp), 
+                                     static_cast<float>(conductivety), static_cast<float>(ph), salinity);
         m_msgBus.sendMessage(std::move(marineSensorDataMsg));
 
 

@@ -69,9 +69,9 @@ class DBLoggerNode : public ActiveNode {
      (float)    DATA_OUT_OF_RANGE,  // m_windSpeed;
      (float)    DATA_OUT_OF_RANGE,  // m_windDir;
      (float)    DATA_OUT_OF_RANGE,  // m_windTemp;
-     (uint16_t) DATA_OUT_OF_RANGE,  // m_current;
-     (uint16_t) DATA_OUT_OF_RANGE,  // m_voltage;
-     (uint8_t)  DATA_OUT_OF_RANGE,  // m_element;
+     (float)    DATA_OUT_OF_RANGE,  // m_current;
+     (float)    DATA_OUT_OF_RANGE,  // m_voltage;
+     (SensedElement)  DATA_OUT_OF_RANGE,  // m_element;
      (std::string) "unknown",       // m_element_str;
      (std::string) "initialized"    // m_timestamp_str;
 

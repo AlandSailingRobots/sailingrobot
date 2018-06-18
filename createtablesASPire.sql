@@ -63,7 +63,7 @@ CREATE TABLE dataLogs_current_sensors (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   current   	FLOAT,
   voltage       FLOAT,
-  element 	    INT,
+  element 	    INTEGER,
   element_str   VARCHAR(50),
   t_timestamp	TIMESTAMP
 );

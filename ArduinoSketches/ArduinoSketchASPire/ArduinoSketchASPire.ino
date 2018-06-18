@@ -173,13 +173,15 @@ void processCANMessage (CanMsg& msg){
   if(messageHandler.getMessageId() == MSG_ID_AU_CONTROL) {
     double rudderAngle;
     messageHandler.getMappedData(&rudderAngle, RUDDER_ANGLE_DATASIZE, MIN_RUDDER_ANGLE, MAX_RUDDER_ANGLE);
+    Serial.println(rudderAngle);
 
     double wingsailAngle;
-    messageHandler.getMappedData(&wingsailAngle, WINGSAIL_ANGLE_DATASIZE, MIN_WINGSAIL_ANGLE, MAX_WINGSAIL_ANGLE);
+    
+    Serial.println(messageHandler.getMappedData(&wingsailAngle, WINGSAIL_ANGLE_DATASIZE, MIN_WINGSAIL_ANGLE, MAX_WINGSAIL_ANGLE));
+    Serial.println(wingsailAngle);
+    moveRudder(-rudderAngle);
 
-    moveRudder(rudderAngle);
-
-    moveWingsail(wingsailAngle);
+    moveWingsail(-wingsailAngle);
   }
 }
 

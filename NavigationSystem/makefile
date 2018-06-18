@@ -74,6 +74,7 @@ export INTEGRATION_TEST_EXEC_ASPIRE = integration-tests-ASPire.run
 export MARINE_SENSOR_INTEGRATION_TEST_EXEC = marine_sensor-integration-tests.run
 export HTTP_SYNC_TEST_EXEC	= HTTPSync-test.run
 export AIS_TEST_EXEC		= ais-integration-tests.run
+export CURRENT_SENSOR_INTEGRATION_TEST_EXEC = current_sensor-integration-tests.run
 
 export OBJECT_FILE          = $(BUILD_DIR)/objects.tmp
 
@@ -140,7 +141,8 @@ export HW_NODES_ALL_SRC		= Hardwares/HMC6343Node.cpp Hardwares/GPSDNode.cpp
 
 export HW_NODES_ASPIRE_SRC 	= Hardwares/ActuatorNodeASPire.cpp Hardwares/CANAISNode.cpp Hardwares/CANSolarTrackerNode.cpp\
                             	Hardwares/CANWindsensorNode.cpp Hardwares/CANArduinoNode.cpp \
-                            	Hardwares/CANMarineSensorTransmissionNode.cpp Hardwares/CANMarineSensorReceiver.cpp
+                            	Hardwares/CANMarineSensorTransmissionNode.cpp Hardwares/CANMarineSensorReceiver.cpp \
+                            	Hardwares/CANCurrentSensorNode.cpp 
 
 # ActuatorNode for Janet not compiling, uses removed ActuatorPositionMsg
 export HW_NODES_JANET_SRC 	= Hardwares/CV7Node.cpp Hardwares/ArduinoNode.cpp
@@ -181,6 +183,7 @@ integration_tests_ASPire: $(BUILD_DIR)
 	$(MAKE) -f integration_tests_ASPire.mk
 	$(MAKE) -f ais_integration_test.mk
 	$(MAKE) -f marine_sensor_integration_test.mk
+	$(MAKE) -f current_sensor_integration_test.mk
 
 
 ## Build HTTPSync Test

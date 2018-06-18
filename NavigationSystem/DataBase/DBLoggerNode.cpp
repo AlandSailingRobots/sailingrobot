@@ -17,6 +17,8 @@
 
 #define STATE_INITIAL_SLEEP 100
 
+//Debug for alternating current sensors
+//int debug_count = 0;
 
 DBLoggerNode::DBLoggerNode(MessageBus& msgBus, DBHandler& db,int queueSize)
 :   ActiveNode(NodeID::DBLoggerNode, msgBus),
@@ -51,6 +53,9 @@ void DBLoggerNode::processMessage(const Message* msg) {
     std::lock_guard<std::mutex> lock(m_lock);
 
     MessageType type = msg->messageType();
+
+    //Logger::info("DBLoggerNode Processing Message: %s", msgToString(type).c_str());
+
 
     switch(type)
     {
@@ -117,7 +122,11 @@ void DBLoggerNode::processMessage(const Message* msg) {
             item.m_current = currentSensorMsg->getCurrent();
             item.m_voltage = currentSensorMsg->getVoltage();
             item.m_element = currentSensorMsg->getSensedElement();
+            //item.m_element = (SensedElement)(debug_count%2 + 1);
             item.m_element_str = currentSensorMsg->getSensedElementStr();
+            //debug_count++;
+            Logger::info("Item current sensor creation: %lf, %lf, %d, %s", item.m_current,
+                         item.m_voltage, item.m_element, item.m_element_str.c_str());
         }
         break;
 
