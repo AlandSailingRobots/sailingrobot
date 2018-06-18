@@ -9,9 +9,24 @@ sr
 *.db
 *.db-journal
 *.log
-
+logs/
 
 # Other
 *.vim
 *.tags
 *.gch
+gps.txt
+org.kde.konsole.desktop
+NavigationSystem/nohup.out
+
+# for unit tests
+NavigationSystem/Tests/cxxtest/python/python3/cxxtest/__pycache__/
+*.pyc
+NavigationSystem/Tests/runner.cpp
+NavigationSystem/Tests/runner.o
+NavigationSystem/Tests/runnerHardware.cpp
+NavigationSystem/Tests/runnerHardware.o
+
+
+#IDE Files
+.idea/

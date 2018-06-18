@@ -1,0 +1,77 @@
+{
+"config_arduino": {
+  "loop_time": 0.1
+},
+
+"config_compass": {
+  "loop_time":0.5,
+  "heading_buffer_size": 1
+},
+
+"config_course_regulator": {
+  "loop_time": 0.5,
+  "max_rudder_angle": 25.0,
+  "p_gain": 0.2,
+  "i_gain": 0.3,
+  "d_gain": 0.4
+},
+
+"config_dblogger": {
+  "loop_time": 1
+},
+
+"config_gps": {
+  "loop_time": 0.5
+},
+
+"config_line_follow": {
+  "loop_time": 0.5,
+  "close_hauled_angle": 45,
+  "broad_reach_angle": 10,
+  "tacking_distance": 15
+},
+
+"config_maestro_controller": {
+  "port": "/dev/ttyACM0"
+},
+
+"config_sail_control": {
+  "loop_time": 0.5,
+  "max_sail_angle": 85.0,
+  "min_sail_angle": 15.0
+},
+
+"config_simulator": {
+  "loop_time": 0.5
+},
+
+"config_vessel_state": {
+  "loop_time": 0.5,
+  "course_config_speed_1": 0,
+  "course_config_speed_2": 1
+},
+
+"config_voter_system": {
+  "loop_time": 0.5,
+  "max_vote": 25,
+  "waypoint_voter_weight": 1,
+  "wind_voter_weight": 1,
+  "channel_voter_weight": 1,
+  "midrange_voter_weight": 1,
+  "proximity_voter_weight": 2
+},
+
+"config_wind_sensor": {
+  "loop_time" : 0.5,
+  "port": "/dev/ttyS0",
+  "baud_rate": 4800
+},
+
+"config_xbee": {
+  "loop_time": 0.1,
+  "send": 1,
+  "receive": 1,
+  "send_logs": 0,
+  "push_only_latest_logs": 1
+}
+}

@@ -1,0 +1,21 @@
+{
+"1": {
+  "is_checkpoint": 0,
+  "latitude": 60.103605,
+  "longitude": 19.921601,
+  "declination": 6,
+  "radius": 20,
+  "stay_time": 0,
+  "harvested": 0
+},
+
+"2": {
+  "is_checkpoint": 0,
+  "latitude": 60.101808,
+  "longitude": 19.921478,
+  "declination": 6,
+  "radius": 20,
+  "stay_time": 0,
+  "harvested": 0
+}
+}
