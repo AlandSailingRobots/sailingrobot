@@ -7,55 +7,42 @@
 #include <sstream>
 #include <string>
 #include <vector>
-#include "Messages/CurrentSensorDataMsg.h"
-#include "Messages/WindStateMsg.h"
+#include "Messages/VesselStateMsg.h"
 #include "SystemServices/Logger.h"
-
-#include "Libs/json/include/nlohmann/json.hpp"
+#include "libs/json/src/json.hpp"
 using Json = nlohmann::json;
 
 struct LogItem {
-    double m_rudderPosition;  // dataLogs_actuator_feedback
-    double m_wingsailPosition;
-    bool m_radioControllerOn;
-    double m_windVaneAngle;
-    double m_compassHeading;  // dataLogs_compass
-    double m_compassPitch;
-    double m_compassRoll;
-    double m_distanceToWaypoint;  // dataLogs_course_calculation
-    double m_bearingToWaypoint;
-    double m_courseToSteer;
-    bool m_tack;
-    bool m_goingStarboard;
-    bool m_gpsHasFix;  // dataLogs_gps
+    int m_compassHeading;
+    int m_compassPitch;
+    int m_compassRoll;
+    bool m_gpsHasFix;
     bool m_gpsOnline;
     double m_gpsLat;
     double m_gpsLon;
     double m_gpsUnixTime;
     double m_gpsSpeed;
-    double m_gpsCourse;
+    double m_gpsHeading;
     int m_gpsSatellite;
-    bool m_routeStarted;
-    float m_temperature;  // dataLogs_marine_sensors
-    float m_conductivity;
-    float m_ph;
-    float m_salinity;
-    double m_vesselHeading;  // dataLogs_vessel_state
-    double m_vesselLat;
-    double m_vesselLon;
-    double m_vesselSpeed;
-    double m_vesselCourse;
-    double m_trueWindSpeed;  // dataLogs_wind_state
-    double m_trueWindDir;
-    double m_apparentWindSpeed;
-    double m_apparentWindDir;
-    float m_windDir;  // dataLogs_windsensor
+    float m_windDir;
     float m_windSpeed;
     float m_windTemp;
-    float m_current;  // dataLogs_current_sensors
-    float m_voltage;
-    SensedElement m_element;
-    std::string m_element_str;
+    int m_arduinoPressure;
+    int m_arduinoRudder;
+    int m_arduinoSheet;
+    int m_arduinoBattery;
+    double m_rudder;
+    double m_sail;
+    int m_sailServoPosition;
+    int m_rudderServoPosition;
+    double m_distanceToWaypoint;
+    double m_bearingToWaypoint;
+    double m_courseToSteer;
+    bool m_tack;
+    bool m_goingStarboard;
+    int m_waypointId;
+    double m_twd;
+    bool m_routeStarted;
     std::string m_timestamp_str;
 };
 
@@ -87,7 +74,7 @@ class DBHandler {
                        std::string table,
                        std::string key,
                        std::string id,
-                       Json& js,
+                       Json& json,
                        bool useArray);
 
     // gets the id column from a given table
@@ -128,7 +115,6 @@ class DBHandler {
 
     // updates table with json string (data)
     bool updateTableJson(std::string table, std::string data);
-    bool updateTableJsonObject(std::string table, Json data);
 
     // updates table using values given
     bool updateTable(std::string table, std::string column, std::string value, std::string id);
@@ -143,9 +129,6 @@ class DBHandler {
 
     // retrieve one value from a table as integer
     int retrieveCellAsInt(std::string table, std::string id, std::string column);
-
-    // retrieve one value from a table as double
-    double retrieveCellAsDouble(std::string table, std::string id, std::string column);
 
     // returns all logs in database as json; supply onlyLatest to get only the ones with the highest
     // id
@@ -169,13 +152,11 @@ class DBHandler {
                            int& nextDeclination,
                            int& nextRadius,
                            int& nextStayTime,
-                           bool& isCheckpoint,
                            int& prevId,
                            double& prevLongitude,
                            double& prevLatitude,
                            int& prevDeclination,
-                           int& prevRadius,
-                           bool& foundPrev);
+                           int& prevRadius);
 
     bool insert(std::string table, std::string fields, std::string values);
 
