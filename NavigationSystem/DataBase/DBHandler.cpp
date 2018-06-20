@@ -42,22 +42,28 @@ void DBHandler::getDataAsJson(std::string select,
     std::vector<std::string> results;
 
     try {
-        if (id == "")
+        if (id == "") {
             results = retrieveFromTable("SELECT " + select + " FROM " + table + ";", rows, columns);
-        else
+        } else {
             results = retrieveFromTable(
-                "SELECT " + select + " FROM " + table + " WHERE ID = " + id + ";", rows, columns);
+                    "SELECT " + select + " FROM " + table + " WHERE ID = " + id + ";", rows,
+                    columns);
+        }
     } catch (const char* error) {
-        Logger::error("%s, %s table: %s Error: %s", __PRETTY_FUNCTION__, select.c_str(),
-                      table.c_str(), error);
+        Logger::error(
+                "%s, %s table: %s Error: %s", __PRETTY_FUNCTION__,
+                select.c_str(),
+                table.c_str(),
+                error
+        );
     }
 
     for (int i = 0; i < columns * (rows + 1); ++i) {
-        if (i < columns)
+        if (i < columns) {
             columnNames.push_back(results[i]);
-        else
+        } else {
             values.push_back(results[i]);
-    }
+        }
 
     Json jsonEntry;
     for (int i = 0; i < rows; i++) {
