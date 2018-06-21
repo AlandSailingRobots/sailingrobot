@@ -41,14 +41,14 @@
         -:   36:
         8:   37:	if (m_rc) {
     #####:   38:		std::stringstream errorStream;
-    #####:   39:		errorStream << "DBHandler::openDatabase(), " << sqlite3_errmsg(m_db);
+    #####:   39:		errorStream << "DBHandler::connectDB(), " << sqlite3_errmsg(m_db);
         -:   40:
     #####:   41:		throw errorStream.str().c_str();
         -:   42:	}
         8:   43:}
         -:   44:
         -:   45:
-       10:   46:void DBHandler::closeDatabase(void) {
+       10:   46:void DBHandler::DBDisconnect(void) {
        10:   47:	sqlite3_close(m_db);
        10:   48:	m_db = NULL;
        10:   49:}

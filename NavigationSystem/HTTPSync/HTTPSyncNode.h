@@ -1,9 +1,10 @@
 
 #pragma once
 
-#include "DataBase/DBHandler.h"
-#include "MessageBus/ActiveNode.h"
-#include "SystemServices/Logger.h"
+#include "../DataBase/DBHandler.h"
+#include "../MessageBus/ActiveNode.h"
+#include "../MessageBus/Message.h"
+#include "../SystemServices/Logger.h"
 
 #include <curl/curl.h>
 #include <atomic>

@@ -1,5 +1,4 @@
-#ifndef __DBHANDLER_H__
-#define __DBHANDLER_H__  //__DATACOLLECT_H__
+#pragma once
 
 #include <sqlite3.h>
 #include <iostream>
@@ -7,11 +6,13 @@
 #include <sstream>
 #include <string>
 #include <vector>
-#include "Messages/CurrentSensorDataMsg.h"
-#include "Messages/WindStateMsg.h"
-#include "SystemServices/Logger.h"
 
-#include "Libs/json/include/nlohmann/json.hpp"
+#include "../Messages/CurrentSensorDataMsg.h"
+#include "../Messages/WindStateMsg.h"
+#include "../SystemServices/Logger.h"
+
+//#include <include/nlohmann/json.hpp>
+#include "../Libs/json/include/nlohmann/json.hpp"
 using Json = nlohmann::json;
 
 struct LogItem {
@@ -66,6 +67,7 @@ class DBHandler {
     std::string m_currentWaypointId = "";
     std::string m_filePath;
     static std::mutex m_databaseLock;
+    sqlite3 *m_DBHandle = NULL;
 
     // execute INSERT query and add new row into table
     bool queryTable(std::string sqlINSERT);
@@ -110,9 +112,8 @@ class DBHandler {
                  int& rows,
                  int& columns);
 
-    sqlite3* openDatabase();
-
-    void closeDatabase(sqlite3* connection);
+    sqlite3* DBConnect();
+    void DBDisconnect();
 
    public:
     DBHandler(std::string filePath);
@@ -193,5 +194,3 @@ class DBHandler {
 
     std::string getConfigs();
 };
-
-#endif

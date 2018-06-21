@@ -4,30 +4,28 @@
 #include <iomanip>
 #include <string>
 #include <thread>
-#include "SystemServices/Timer.h"
-#include "SystemServices/Wrapper.h"
+#include <utility>
+#include "../SystemServices/Logger.h"
+#include "../SystemServices/Timer.h"
+#include "../SystemServices/Wrapper.h"
 
 
 std::mutex DBHandler::m_databaseLock;
 
-DBHandler::DBHandler(std::string filePath) : m_filePath(filePath) {
+
+DBHandler::DBHandler(std::string filePath) : m_filePath(std::move(filePath)) {
     m_latestDataLogId = 0;
 }
 
-DBHandler::~DBHandler(void) {
+DBHandler::~DBHandler() {
     m_databaseLock.unlock();
 }
 
 bool DBHandler::initialise() {
-    sqlite3* connection = openDatabase();
-
-    if (connection != 0) {
-        closeDatabase(connection);
-        return true;
-    } else {
-        closeDatabase(connection);
-        return false;
-    }
+    // Basically just try opening the DB and close it afterwards
+    sqlite3* connection = DBConnect();
+    DBDisconnect();
+    return connection; // NULL would mean we got no connection
 }
 
 void DBHandler::getDataAsJson(std::string select,
@@ -64,6 +62,7 @@ void DBHandler::getDataAsJson(std::string select,
         } else {
             values.push_back(results[i]);
         }
+    }
 
     Json jsonEntry;
     for (int i = 0; i < rows; i++) {
@@ -111,11 +110,10 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
     int logNumber = 0;
     std::string tableId;
 
-    sqlite3* db = openDatabase();
+    sqlite3* db = DBConnect();
 
     if (db == NULL) {
-        Logger::error("%s Database is null!", __PRETTY_FUNCTION__);
-        closeDatabase(db);
+        Logger::error("%s Database is NULL!", __PRETTY_FUNCTION__);
         return;
     }
 
@@ -289,7 +287,7 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
                       ss.str().c_str());
     }
 
-    closeDatabase(db);
+    DBDisconnect();
 }
 
 // TODO -Oliver: make private
@@ -573,41 +571,6 @@ bool DBHandler::insert(std::string table, std::string fields, std::string values
     }
     return true;
 }
-// TODO - Oliver/Jordan - REMOVE this function if not needed
-// void DBHandler::insertScan(std::string waypoint_id, PositionModel position, float temperature,
-// std::string timestamp)
-//{
-//	//std::string waypoint_id = getMinIdFromTable("waypoints");
-//
-//	std::string i = "null", j = "null";
-//
-//
-//	i = retrieveCell("waypoint_index", waypoint_id, "i");
-//	j = retrieveCell("waypoint_index", waypoint_id, "j");
-//
-//	Logger::error("%s, Error: %s", __PRETTY_FUNCTION__);
-//
-//
-//	std::ostringstream fields;
-//	fields << "waypoint_id,"
-//		<< "time_UTC,"
-//		<< "latitude,"
-//		<< "longitude,"
-//		<< "air_temperature,"
-//		<< "i,"
-//		<< "j";
-//
-//	std::ostringstream values;
-//	values << waypoint_id << ",'"
-//		<< timestamp << "',"
-//		<< position.latitude << ","
-//		<< position.longitude << ","
-//		<< temperature << ","
-//		<< i << ","
-//		<< j;
-//
-//	insert("scanning_measurements", fields.str(), values.str());
-//}
 
 std::string DBHandler::getWaypoints() {  // NOTE : Marc : change this otherwise it doesn't work
     int rows = 0;
@@ -685,46 +648,48 @@ std::string DBHandler::getIdFromTable(std::string table, bool max, sqlite3* db) 
 // private helpers
 ////////////////////////////////////////////////////////////////////
 
-sqlite3* DBHandler::openDatabase() {
+sqlite3* DBHandler::DBConnect() {
     m_databaseLock.lock();
-    sqlite3* connection;
-    int resultcode = 0;
 
-    // check if file exists
-    FILE* db_file = fopen(m_filePath.c_str(), "r");
-    if (db_file == NULL) {
-        Logger::error("%s %s not found", __PRETTY_FUNCTION__, m_filePath.c_str());
-        m_databaseLock.unlock();
-        return NULL;
+    if (!m_DBHandle) {
+        int resultcode = 0;
+
+        // check if file exists
+        FILE *db_file = fopen(m_filePath.c_str(), "r");
+        if (db_file == NULL) {
+            Logger::error("%s %s not found", __PRETTY_FUNCTION__, m_filePath.c_str());
+            m_databaseLock.unlock();
+            return NULL;
+        }
+        fclose(db_file);
+
+        do {
+            resultcode = sqlite3_open(m_filePath.c_str(), &m_DBHandle);
+        } while (resultcode == SQLITE_BUSY);
+
+        if (resultcode) {
+            Logger::error("%s Failed to open the database Error %s", __PRETTY_FUNCTION__,
+                          sqlite3_errmsg(m_DBHandle));
+            m_databaseLock.unlock();
+            return 0;
+        }
+
+        // set a 10 millisecond timeout
+        sqlite3_busy_timeout(m_DBHandle, 10);
     }
-    fclose(db_file);
-
-    do {
-        resultcode = sqlite3_open(m_filePath.c_str(), &connection);
-    } while (resultcode == SQLITE_BUSY);
-
-    if (resultcode) {
-        Logger::error("%s Failed to open the database Error %s", __PRETTY_FUNCTION__,
-                      sqlite3_errmsg(connection));
-        m_databaseLock.unlock();
-        return 0;
-    }
-
-    // set a 10 millisecond timeout
-    sqlite3_busy_timeout(connection, 10);
-    return connection;
+    return m_DBHandle;
 }
 
-void DBHandler::closeDatabase(sqlite3* connection) {
-    if (connection != NULL) {
-        sqlite3_close(connection);
-        connection = NULL;
-        // ENsure it closes properly
+void DBHandler::DBDisconnect() {
+    if (m_DBHandle != NULL) {
+        sqlite3_close(m_DBHandle);
+        m_DBHandle = NULL;
+        // Ensure it closes properly (by sleeping a millisecond)?
         std::this_thread::sleep_for(std::chrono::milliseconds(1));
         m_databaseLock.unlock();
     } else {
         m_databaseLock.unlock();
-        throw "DBHandler::closeDatabase() : connection is already null";
+        throw "DBHandler::DBDisconnect() : connection is already null";
     }
 }
 
@@ -812,7 +777,7 @@ int DBHandler::insertLog(std::string table, std::string values, sqlite3* db) {
 }
 
 bool DBHandler::queryTable(std::string sqlINSERT) {
-    sqlite3* db = openDatabase();
+    sqlite3* db = DBConnect();
     m_error = NULL;
 
     if (db != NULL) {
@@ -830,15 +795,15 @@ bool DBHandler::queryTable(std::string sqlINSERT) {
             Logger::error("%s Error: %s", __PRETTY_FUNCTION__, sqlite3_errmsg(db));
 
             sqlite3_free(m_error);
-            closeDatabase(db);
+            DBDisconnect();
             return false;
         }
     } else {
         Logger::error("%s Error: no database found", __PRETTY_FUNCTION__);
-        closeDatabase(db);
+        DBDisconnect();
         return false;
     }
-    closeDatabase(db);
+    DBDisconnect();
     return true;
 }
 
@@ -874,7 +839,7 @@ bool DBHandler::queryTable(std::string sqlINSERT, sqlite3* db) {
 std::vector<std::string> DBHandler::retrieveFromTable(std::string sqlSELECT,
                                                       int& rows,
                                                       int& columns) {
-    sqlite3* db = openDatabase();
+    sqlite3* db = DBConnect();
     std::vector<std::string> results;
 
     if (db != NULL) {
@@ -889,21 +854,21 @@ std::vector<std::string> DBHandler::retrieveFromTable(std::string sqlSELECT,
 
         if (resultcode == SQLITE_EMPTY) {
             std::vector<std::string> s;
-            closeDatabase(db);
+            DBDisconnect();
             return s;
         }
 
         if (resultcode != SQLITE_OK) {
             Logger::error("%s SQL statement: %s Error: %s", __PRETTY_FUNCTION__, sqlSELECT.c_str(),
                           sqlite3_errstr(resultcode));
-            closeDatabase(db);
+            DBDisconnect();
             throw "retrieveFromTable";
         }
     } else {
-        closeDatabase(db);
+        DBDisconnect();
         throw "DBHandler::retrieveFromTable(), no db connection";
     }
-    closeDatabase(db);
+    DBDisconnect();
     return results;
 }
 
