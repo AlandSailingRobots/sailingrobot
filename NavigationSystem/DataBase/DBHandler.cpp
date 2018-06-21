@@ -1,4 +1,5 @@
 #include "DBHandler.h"
+#include "Logger.h"
 #include <cstdio>
 #include <cstdlib>
 #include <iomanip>
@@ -20,14 +21,8 @@ DBHandler::~DBHandler(void) {
 
 bool DBHandler::initialise() {
     sqlite3* connection = openDatabase();
-
-    if (connection != 0) {
-        closeDatabase(connection);
-        return true;
-    } else {
-        closeDatabase(connection);
-        return false;
-    }
+    closeDatabase(connection);
+    return connection;
 }
 
 void DBHandler::getDataAsJson(std::string select,
@@ -874,36 +869,34 @@ bool DBHandler::queryTable(std::string sqlINSERT, sqlite3* db) {
 std::vector<std::string> DBHandler::retrieveFromTable(std::string sqlSELECT,
                                                       int& rows,
                                                       int& columns) {
-    sqlite3* db = openDatabase();
+    sqlite3* db;
     std::vector<std::string> results;
 
+    db = openDatabase();
     if (db != NULL) {
-        int resultcode = 0;
+        int resultCode = 0;
 
         do {
             results = std::vector<std::string>();
-            // resultcode = sqlite3_get_table(db, sqlSELECT.c_str(), &results, &rows, &columns,
-            // &m_error);
-            resultcode = getTable(db, sqlSELECT, results, rows, columns);
-        } while (resultcode == SQLITE_BUSY);
+            resultCode = getTable(db, sqlSELECT, results, rows, columns);
+        } while (resultCode == SQLITE_BUSY);
 
-        if (resultcode == SQLITE_EMPTY) {
+        closeDatabase(db);
+
+        if (resultCode == SQLITE_EMPTY) {
+            // Umm ... no!
             std::vector<std::string> s;
-            closeDatabase(db);
             return s;
         }
 
-        if (resultcode != SQLITE_OK) {
+        if (resultCode != SQLITE_OK) {
             Logger::error("%s SQL statement: %s Error: %s", __PRETTY_FUNCTION__, sqlSELECT.c_str(),
-                          sqlite3_errstr(resultcode));
-            closeDatabase(db);
+                          sqlite3_errstr(resultCode));
             throw "retrieveFromTable";
         }
     } else {
-        closeDatabase(db);
         throw "DBHandler::retrieveFromTable(), no db connection";
     }
-    closeDatabase(db);
     return results;
 }
 
