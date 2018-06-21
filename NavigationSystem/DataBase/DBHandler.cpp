@@ -839,27 +839,37 @@ bool DBHandler::queryTable(std::string sqlINSERT, sqlite3* db) {
 std::vector<std::string> DBHandler::retrieveFromTable(std::string sqlSELECT,
                                                       int& rows,
                                                       int& columns) {
+<<<<<<< HEAD
     sqlite3* db = DBConnect();
+=======
+    sqlite3* db;
+>>>>>>> 1f7c6d16294141d99d0e8e6ec492e3044f2d64a6
     std::vector<std::string> results;
 
+    db = openDatabase();
     if (db != NULL) {
-        int resultcode = 0;
+        int resultCode = 0;
 
         do {
             results = std::vector<std::string>();
-            // resultcode = sqlite3_get_table(db, sqlSELECT.c_str(), &results, &rows, &columns,
-            // &m_error);
-            resultcode = getTable(db, sqlSELECT, results, rows, columns);
-        } while (resultcode == SQLITE_BUSY);
+            resultCode = getTable(db, sqlSELECT, results, rows, columns);
+        } while (resultCode == SQLITE_BUSY);
 
-        if (resultcode == SQLITE_EMPTY) {
+        closeDatabase(db);
+
+        if (resultCode == SQLITE_EMPTY) {
+            // Umm ... no!
             std::vector<std::string> s;
+<<<<<<< HEAD
             DBDisconnect();
+=======
+>>>>>>> 1f7c6d16294141d99d0e8e6ec492e3044f2d64a6
             return s;
         }
 
-        if (resultcode != SQLITE_OK) {
+        if (resultCode != SQLITE_OK) {
             Logger::error("%s SQL statement: %s Error: %s", __PRETTY_FUNCTION__, sqlSELECT.c_str(),
+<<<<<<< HEAD
                           sqlite3_errstr(resultcode));
             DBDisconnect();
             throw "retrieveFromTable";
@@ -869,6 +879,14 @@ std::vector<std::string> DBHandler::retrieveFromTable(std::string sqlSELECT,
         throw "DBHandler::retrieveFromTable(), no db connection";
     }
     DBDisconnect();
+=======
+                          sqlite3_errstr(resultCode));
+            throw "retrieveFromTable";
+        }
+    } else {
+        throw "DBHandler::retrieveFromTable(), no db connection";
+    }
+>>>>>>> 1f7c6d16294141d99d0e8e6ec492e3044f2d64a6
     return results;
 }
 
