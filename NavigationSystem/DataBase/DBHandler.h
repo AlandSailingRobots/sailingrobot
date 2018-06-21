@@ -179,12 +179,6 @@ class DBHandler {
                            bool& foundPrev);
 
     bool insert(std::string table, std::string fields, std::string values);
-
-    // inserts area scanning measurements into db
-    // TODO - remove here as well yeyeye
-    // void insertScan(std::string waypoint_id, PositionModel position, float temperature,
-    // std::string timestamp);
-
     bool changeOneValue(std::string table,
                         std::string id,
                         std::string newValue,
