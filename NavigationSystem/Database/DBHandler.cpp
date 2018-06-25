@@ -275,7 +275,7 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
 
     }
 
-    if (queryTable(ss.str(), db)) {
+    if (DBQuery(ss.str())) {
         tableId = getIdFromTable("dataLogs_system", true, db);
         if (tableId.size() > 0) {
             m_latestDataLogId = (int)strtol(tableId.c_str(), NULL, 10);
@@ -300,7 +300,7 @@ void DBHandler::insertMessageLog(std::string gps_time, std::string type, std::st
     //<< ", '" << gps_time << "', '" << type << "', '" << msg << "', " << (m_latestDataLogId) // Not
     // use in Database
     //<< ");";
-    // queryTable(sstm.str());
+    // DBQuery(sstm.str());
 }
 
 bool DBHandler::updateTableJson(std::string table, std::string data) {
@@ -331,7 +331,7 @@ bool DBHandler::updateTableJson(std::string table, std::string data) {
 
     std::string id = js["id"];
 
-    if (not queryTable("UPDATE " + table + " " + values + " WHERE ID = " + id + ";")) {
+    if (not DBQuery("UPDATE " + table + " " + values + " WHERE ID = " + id + ";")) {
         Logger::error("%s Error: ", __PRETTY_FUNCTION__);
         return false;
     }
@@ -367,7 +367,7 @@ bool DBHandler::updateTableJsonObject(std::string table, Json data) {
 
     std::string id = data["id"];
 
-    if (not queryTable("UPDATE " + table + " " + values + " WHERE ID = " + id + ";")) {
+    if (not DBQuery("UPDATE " + table + " " + values + " WHERE ID = " + id + ";")) {
         Logger::error("%s Error: ", __PRETTY_FUNCTION__);
         return false;
     }
@@ -378,8 +378,8 @@ bool DBHandler::updateTable(std::string table,
                             std::string column,
                             std::string value,
                             std::string id) {
-    if (not queryTable("UPDATE " + table + " SET " + column + " = " + value + " WHERE ID = " + id +
-                       ";")) {
+    if (not DBQuery("UPDATE " + table + " SET " + column + " = " + value + " WHERE ID = " + id +
+                    ";")) {
         Logger::error("%s Error updating table", __PRETTY_FUNCTION__);
         return false;
     }
@@ -443,7 +443,7 @@ bool DBHandler::updateWaypoints(std::string waypoints) {
                            // waypoint entries (amount of fields n = valuesLimit + 1)
     int limitCounter;
 
-    if (not queryTable("DELETE FROM current_Mission;")) {
+    if (not DBQuery("DELETE FROM current_Mission;")) {
         Logger::error("%s, Error: failed to delete waypoints", __PRETTY_FUNCTION__);
     }
 
@@ -474,7 +474,7 @@ bool DBHandler::updateWaypoints(std::string waypoints) {
             // DBPrinter = DBPrinter + "0);";
             DBPrinter = DBPrinter.substr(0, DBPrinter.size() - 1) + ");";
             std::cout << DBPrinter << "\n";
-            if (not queryTable(DBPrinter)) {
+            if (not DBQuery(DBPrinter)) {
                 Logger::error("%s, Error: failed to add waypoints", __PRETTY_FUNCTION__);
                 return false;
             }
@@ -486,7 +486,7 @@ bool DBHandler::updateWaypoints(std::string waypoints) {
         std::string updateHarvested = "UPDATE current_Mission SET harvested = 1 WHERE id < ";
         updateHarvested += m_currentWaypointId + ";";
 
-        if (not queryTable(updateHarvested)) {
+        if (not DBQuery(updateHarvested)) {
             Logger::error("%s, Error: failed to harvest waypoints", __PRETTY_FUNCTION__);
             return false;
         }
@@ -516,7 +516,7 @@ double DBHandler::retrieveCellAsDouble(std::string table, std::string id, std::s
 
 void DBHandler::clearTable(std::string table) {
     // If no table to delete, doesn't matter
-    queryTable("DELETE FROM " + table + ";");
+    DBQuery("DELETE FROM " + table + ";");
 }
 
 int DBHandler::getRows(std::string table) {
@@ -562,11 +562,11 @@ void DBHandler::clearLogs() {
 }
 
 void DBHandler::deleteRow(std::string table, std::string id) {
-    queryTable("DELETE FROM " + table + " WHERE id = " + id + ";");
+    DBQuery("DELETE FROM " + table + " WHERE id = " + id + ";");
 }
 
 bool DBHandler::insert(std::string table, std::string fields, std::string values) {
-    if (not queryTable("INSERT INTO " + table + "(" + fields + ") VALUES(" + values + ");")) {
+    if (not DBQuery("INSERT INTO " + table + "(" + fields + ") VALUES(" + values + ");")) {
         Logger::error("%s, Failed to insert into table", __PRETTY_FUNCTION__);
         return false;
     }
@@ -769,7 +769,7 @@ int DBHandler::insertLog(std::string table, std::string values, sqlite3* db) {
     std::stringstream ss;
     ss << "INSERT INTO " << table << " VALUES(NULL, " << values << ");";
 
-    if (queryTable(ss.str(), db)) {
+    if (DBQuery(ss.str())) {
         Timer time_;
         time_.start();
         std::string tableId = getIdFromTable(table, true, db);
@@ -786,7 +786,7 @@ int DBHandler::insertLog(std::string table, std::string values, sqlite3* db) {
     return 0;
 }
 
-bool DBHandler::queryTable(std::string sqlINSERT) {
+/*bool DBHandler::DBQuery(std::string SQLQuery) {
     sqlite3* db = DBConnect();
     m_error = NULL;
 
@@ -799,7 +799,7 @@ bool DBHandler::queryTable(std::string sqlINSERT) {
                 m_error = NULL;
             }
 
-            resultcode = sqlite3_exec(db, sqlINSERT.c_str(), NULL, NULL, &m_error);
+            resultcode = sqlite3_exec(db, SQLQuery.c_str(), NULL, NULL, &m_error);
         } while (resultcode == SQLITE_BUSY);
         if (m_error != NULL) {
             Logger::error("%s Error: %s", __PRETTY_FUNCTION__, sqlite3_errmsg(db));
@@ -815,9 +815,10 @@ bool DBHandler::queryTable(std::string sqlINSERT) {
     }
     DBDisconnect();
     return true;
-}
+}*/
 
-bool DBHandler::queryTable(std::string sqlINSERT, sqlite3* db) {
+bool DBHandler::DBQuery(std::string SQLQuery) {
+    sqlite3 *db = DBConnect();
     m_error = NULL;
 
     if (db != NULL) {
@@ -829,7 +830,7 @@ bool DBHandler::queryTable(std::string sqlINSERT, sqlite3* db) {
                 m_error = NULL;
             }
             sqlite3_exec(db, "BEGIN TRANSACTION", NULL, NULL, &m_error);
-            resultcode = sqlite3_exec(db, sqlINSERT.c_str(), NULL, NULL, &m_error);
+            resultcode = sqlite3_exec(db, SQLQuery.c_str(), NULL, NULL, &m_error);
             sqlite3_exec(db, "END TRANSACTION", NULL, NULL, &m_error);
         } while (resultcode == SQLITE_BUSY);
 
@@ -1055,8 +1056,8 @@ bool DBHandler::changeOneValue(std::string table,
                                std::string id,
                                std::string newValue,
                                std::string colName) {
-    if (not queryTable("UPDATE " + table + " SET " + colName + " = " + newValue +
-                       " WHERE id = " + id + ";")) {
+    if (not DBQuery("UPDATE " + table + " SET " + colName + " = " + newValue +
+                    " WHERE id = " + id + ";")) {
         Logger::error("Error %s", __PRETTY_FUNCTION__);
         return false;
     }

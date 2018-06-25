@@ -70,8 +70,8 @@ class DBHandler {
     sqlite3 *m_DBHandle = NULL;
 
     // execute INSERT query and add new row into table
-    bool queryTable(std::string sqlINSERT);
-    bool queryTable(std::string sqlINSERT, sqlite3* db);
+    bool DBQuery(std::string SQLQuery);
+    // bool DBQuery(std::string SQLQuery, sqlite3 *db);
 
     // retrieve data from given table/tables, return value is a C 2D char array
     // rows and columns also return values (through a reference) about rows and columns in the
