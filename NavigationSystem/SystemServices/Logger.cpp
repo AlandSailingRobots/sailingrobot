@@ -1,7 +1,7 @@
  /****************************************************************************************
  *
  * File:
- * 		SafeLogger.cpp
+ * 		Logger.cpp
  *
  * Purpose:
  *		Provides functions for logging data to file and console.
@@ -26,6 +26,16 @@ namespace attrs    = boost::log::attributes;
 namespace expr     = boost::log::expressions;
 
 bool Logger::m_DisableLogging = false;
+std::string Logger::m_filename = DEFAULT_LOG_NAME;
+
+bool Logger::init(const char* filename) {
+	if(filename==0) {
+		m_filename = DEFAULT_LOG_NAME;
+	} else {
+	    m_filename = filename;
+	}
+	return true;
+}
 
 //Defines a global logger initialization routine
 BOOST_LOG_GLOBAL_LOGGER_INIT(global_logger, logger_t)
@@ -41,7 +51,7 @@ BOOST_LOG_GLOBAL_LOGGER_INIT(global_logger, logger_t)
     logging::add_common_attributes();
 
     char fileName[256];
-    snprintf(fileName, 256, "../logs/%s%s-%s", FILE_PATH, SysClock::timeStampStr().c_str(), DEFAULT_LOG_NAME);
+    snprintf(fileName, 256, "../logs/%s%s-%s", FILE_PATH, SysClock::timeStampStr().c_str(), Logger::m_filename.c_str());
 
     // Log to file
     logging::add_file_log(

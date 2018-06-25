@@ -2,7 +2,7 @@
 /****************************************************************************************
  *
  * File:
- * 		SafeLogger.h
+ * 		Logger.h
  *
  * Purpose:
  *		Provides functions for logging data to file and console.
@@ -50,6 +50,7 @@ BOOST_LOG_GLOBAL_LOGGER(global_logger, logger_t)
 
 class Logger {
    public:
+    static std::string m_filename;
     /////////////////////////////////////////////////////////////////////////////////////
     /// Initialises the singleton logger system, returns false if it is unable to
     /// generate a log file.
@@ -58,6 +59,7 @@ class Logger {
     ///								provided then a default name is used.
     ///
     /////////////////////////////////////////////////////////////////////////////////////
+    static bool init(const char* filename = 0);
 
     /// SHOULD ONLY BE USED FOR UNIT TESTS!
     static void DisableLogging();
@@ -81,5 +83,6 @@ class Logger {
    private:
 
     static bool m_DisableLogging;
+
 
 };
