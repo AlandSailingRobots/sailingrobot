@@ -13,7 +13,7 @@
 
 #pragma once
 
-#include "DataBase/DBHandler.h"
+#include "Database/DBHandler.h"
 #include "MessageBus/Node.h"
 
 class ActuatorNode : public Node {

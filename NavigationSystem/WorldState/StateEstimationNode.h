@@ -31,7 +31,7 @@
 #include <stdint.h>
 #include <atomic>
 #include <mutex>
-#include "DataBase/DBHandler.h"
+#include "Database/DBHandler.h"
 #include "Math/CourseMath.h"
 #include "Math/Utility.h"
 

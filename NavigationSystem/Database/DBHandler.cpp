@@ -297,7 +297,7 @@ void DBHandler::insertMessageLog(std::string gps_time, std::string type, std::st
     // std::stringstream sstm;
     // sstm << "INSERT INTO messages VALUES(NULL"
     //<< ", '" << gps_time << "', '" << type << "', '" << msg << "', " << (m_latestDataLogId) // Not
-    // use in DataBase
+    // use in Database
     //<< ");";
     // queryTable(sstm.str());
 }

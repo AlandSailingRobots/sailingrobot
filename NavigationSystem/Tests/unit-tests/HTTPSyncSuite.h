@@ -29,8 +29,8 @@
 #include <stdint.h>
 #include <thread>
 #include "../cxxtest/cxxtest/TestSuite.h"
-#include "DataBase/DBHandler.h"
-#include "DataBase/DBLoggerNode.h"
+#include "Database/DBHandler.h"
+#include "Database/DBLoggerNode.h"
 #include "HTTPSync/HTTPSyncNode.h"
 #include "MessageBus/MessageBus.h"
 #include "Messages/CompassDataMsg.h"

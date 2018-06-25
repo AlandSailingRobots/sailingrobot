@@ -26,7 +26,7 @@
 #include <chrono>
 #include <cmath>
 
-#include "DataBase/DBHandler.h"
+#include "Database/DBHandler.h"
 #include "Math/CourseMath.h"
 #include "Math/Utility.h"
 #include "MessageBus/ActiveNode.h"

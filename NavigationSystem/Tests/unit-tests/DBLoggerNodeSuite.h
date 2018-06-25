@@ -2,7 +2,7 @@
 #pragma once
 
 #include "../cxxtest/cxxtest/TestSuite.h"
-#include "DataBase/DBLoggerNode.h"
+#include "Database/DBLoggerNode.h"
 #include "MessageBus/MessageBus.h"
 #include "MessageBusTestHelper.h"
 #include "SystemServices/Logger.h"

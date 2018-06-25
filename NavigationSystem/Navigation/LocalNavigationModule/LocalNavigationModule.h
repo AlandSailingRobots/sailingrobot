@@ -18,7 +18,7 @@
 #include "ASRArbiter.h"
 #include "ASRVoter.h"
 #include "BoatState.h"
-#include "DataBase/DBHandler.h"
+#include "Database/DBHandler.h"
 #include "MessageBus/ActiveNode.h"
 
 class LocalNavigationModule : public ActiveNode {

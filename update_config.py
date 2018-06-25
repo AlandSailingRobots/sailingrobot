@@ -50,7 +50,7 @@ for table in cfg:
     try:
         db.execute('SELECT count(*) FROM ' + str(table) + ';')
     except sqlite3.OperationalError:
-        sys.exit('Error to retrieve the tables.\nCheck if the selected file \''+filename+'\' correspond to the current DataBase configuration')
+        sys.exit('Error to retrieve the tables.\nCheck if the selected file \''+filename+'\' correspond to the current Database configuration')
     count = db.fetchone()[0]
     if count == 0:
         db.execute('INSERT INTO ' + str(table) + ' (' + keystr +

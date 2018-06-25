@@ -14,7 +14,7 @@
 
 #pragma once
 
-#include "DataBase/DBHandler.h"
+#include "Database/DBHandler.h"
 #include "Math/CourseMath.h"
 #include "MessageBus/ActiveNode.h"
 #include "MessageBus/Message.h"

@@ -20,7 +20,7 @@
 #include <thread>
 #include <vector>
 
-#include "DataBase/DBHandler.h"
+#include "Database/DBHandler.h"
 #include "Math/Utility.h"
 #include "MessageBus/ActiveNode.h"
 #include "MessageBus/MessageBus.h"

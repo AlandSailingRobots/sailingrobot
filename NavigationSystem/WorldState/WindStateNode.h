@@ -20,7 +20,7 @@
 #include <mutex>
 #include <vector>
 
-#include "DataBase/DBHandler.h"
+#include "Database/DBHandler.h"
 #include "Math/Utility.h"
 #include "MessageBus/MessageBus.h"
 #include "MessageBus/MessageTypes.h"

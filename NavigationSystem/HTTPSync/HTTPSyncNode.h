@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "../DataBase/DBHandler.h"
+#include "../Database/DBHandler.h"
 #include "../MessageBus/ActiveNode.h"
 #include "../MessageBus/Message.h"
 #include "../SystemServices/Logger.h"

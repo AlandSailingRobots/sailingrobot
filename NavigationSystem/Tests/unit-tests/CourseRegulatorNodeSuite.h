@@ -15,7 +15,7 @@
 
 #include "../../MessageBus/MessageBus.h"
 #include "../cxxtest/cxxtest/TestSuite.h"
-#include "DataBase/DBHandler.h"
+#include "Database/DBHandler.h"
 #include "LowLevelControllers/CourseRegulatorNode.h"
 #include "Math/Utility.h"
 #include "MessageBusTestHelper.h"

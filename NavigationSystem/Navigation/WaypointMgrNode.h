@@ -16,7 +16,7 @@
 #include <string>
 #include <vector>
 
-#include "DataBase/DBHandler.h"
+#include "Database/DBHandler.h"
 #include "Math/CourseMath.h"
 #include "Math/Utility.h"
 #include "MessageBus/Node.h"

@@ -11,7 +11,7 @@
  *
  ***************************************************************************************/
 #include "../cxxtest/cxxtest/TestSuite.h"
-#include "DataBase/DBHandler.h"
+#include "Database/DBHandler.h"
 #include "MessageBus/MessageBus.h"
 #include "MessageBusTestHelper.h"
 #include "Messages/StateMessage.h"

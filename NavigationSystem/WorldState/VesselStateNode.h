@@ -15,7 +15,7 @@
 #pragma once
 
 #include <stdint.h>
-#include "DataBase/DBHandler.h"
+#include "Database/DBHandler.h"
 #include "MessageBus/ActiveNode.h"
 #include "Messages/ArduinoDataMsg.h"
 #include "Messages/CompassDataMsg.h"

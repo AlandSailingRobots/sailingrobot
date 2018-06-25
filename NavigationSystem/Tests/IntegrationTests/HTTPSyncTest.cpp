@@ -1,6 +1,6 @@
 #include <string>
-#include "DataBase/DBHandler.h"
-#include "DataBase/DBLoggerNode.h"
+#include "Database/DBHandler.h"
+#include "Database/DBLoggerNode.h"
 #include "HTTPSync/HTTPSyncNode.h"
 #include "MessageBus/MessageBus.h"
 #include "Messages/DataRequestMsg.h"
