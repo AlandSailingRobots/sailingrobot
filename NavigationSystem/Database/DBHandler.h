@@ -114,6 +114,7 @@ class DBHandler {
 
     sqlite3* DBConnect();
     void DBDisconnect();
+    void DBClose();
 
    public:
     DBHandler(std::string filePath);

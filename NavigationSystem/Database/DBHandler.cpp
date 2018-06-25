@@ -18,6 +18,7 @@ DBHandler::DBHandler(std::string filePath) : m_filePath(std::move(filePath)) {
 }
 
 DBHandler::~DBHandler() {
+    DBClose();
     m_databaseLock.unlock();
 }
 
@@ -649,9 +650,11 @@ std::string DBHandler::getIdFromTable(std::string table, bool max, sqlite3* db) 
 ////////////////////////////////////////////////////////////////////
 
 sqlite3* DBHandler::DBConnect() {
-    m_databaseLock.lock();
+
 
     if (!m_DBHandle) {
+        m_databaseLock.lock();
+        Logger::info("%s Opening database %s", __PRETTY_FUNCTION__, m_filePath.c_str());
         int resultcode = 0;
 
         // check if file exists
@@ -676,13 +679,19 @@ sqlite3* DBHandler::DBConnect() {
 
         // set a 10 millisecond timeout
         sqlite3_busy_timeout(m_DBHandle, 10);
+        m_databaseLock.unlock();
     }
-    
+
     return m_DBHandle;
 }
 
 void DBHandler::DBDisconnect() {
+    // Logger::info("%s Database NOP disconnect", __PRETTY_FUNCTION__);
+}
+
+void DBHandler::DBClose() {
     if (m_DBHandle != NULL) {
+        Logger::info("%s closing Database", __PRETTY_FUNCTION__);
         sqlite3_close(m_DBHandle);
         m_DBHandle = NULL;
         // Ensure it closes properly (by sleeping a millisecond)?
