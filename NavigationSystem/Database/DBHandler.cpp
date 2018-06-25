@@ -79,38 +79,36 @@ void DBHandler::getDataAsJson(std::string select,
     columnNames.clear();
 }
 
-int DBHandler::prepareStmt(sqlite3* db, sqlite3_stmt* stmt, std::string sql) {
-    int resultCode;
-
-    resultCode = sqlite3_prepare_v2(db, sql.c_str(), sql.size(), &stmt, NULL);
-    if (resultCode != SQLITE_OK) {
-        Logger::error("%s statement prepare error: %s (on \"%s\")", sqlite3_errstr(resultCode),
-                      sql);
+int DBHandler::checkResultCode(const int resultCode) const {
+    if (!((resultCode == SQLITE_OK) || (resultCode == SQLITE_DONE))) {
+        Logger::error("SQLite result code: %s (%d)", sqlite3_errstr(resultCode), resultCode);
     }
     return resultCode;
 }
-
-int DBHandler::checkResultCode(int resultCode) {
-    if (resultCode != SQLITE_OK) {
-        Logger::error("SQLite result code: %s", sqlite3_errstr(resultCode));
-    }
-    return resultCode;
-}
-
 
 // Might be suitable for templates
-int DBHandler::bindParam(sqlite3_stmt* stmt, std::string name, int value) {
-    int resultCode = sqlite3_bind_int(stmt, sqlite3_bind_parameter_index(stmt, name.c_str()), value);
+int DBHandler::bindParam(sqlite3_stmt* stmt, int param, int value) {
+    int resultCode = sqlite3_bind_int(stmt, param, value);
     if (checkResultCode(resultCode)) {
-        Logger::error("%s parameter %s=%d", __PRETTY_FUNCTION__, name.c_str(), value);
+        Logger::error("%s parameter %s=%d", __PRETTY_FUNCTION__,
+                      sqlite3_bind_parameter_name(stmt, param), param, value);
     }
     return resultCode;
 }
 
-int DBHandler::bindParam(sqlite3_stmt* stmt, std::string name, double value) {
-    int resultCode = sqlite3_bind_double(stmt, sqlite3_bind_parameter_index(stmt, name.c_str()), value);
-    if (checkResultCode(resultCode)) {
-        Logger::error("%s parameter %s=%f", __PRETTY_FUNCTION__, name.c_str(), value);
+int DBHandler::bindParam(sqlite3_stmt* stmt, int param, double value) {
+    int resultCode = 0;
+
+    if (param) {
+        resultCode = sqlite3_bind_double(stmt, param, value);
+
+        if (checkResultCode(resultCode)) {
+            Logger::error("%s parameter %s (%d) =%f", __PRETTY_FUNCTION__,
+                          sqlite3_bind_parameter_name(stmt, param), param, value);
+        }
+    } else {
+        Logger::error("%s tried to bind null parameter!", __PRETTY_FUNCTION__);
+        return SQLITE_ERROR;
     }
     return resultCode;
 }
@@ -188,28 +186,39 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
                            << " VALUES(NULL, " << actuatorFeedbackValues.str() << "'); \n";
             */
 
-            sqlite3_exec(db, "BEGIN TRANSACTION", NULL, NULL, &m_error);
+            // TODO: "Syntax ok but nothing in the DB
+
+            sqlite3_exec(db, "BEGIN TRANSACTION;", NULL, NULL, &m_error);
             std::string sql;
             sqlite3_stmt* stmt = NULL;
             int resultCode;
 
-            if (prepareStmt(
-                    db, stmt,
-                    "INSERT INTO dataLogs_actuator_feedback VALUES(NULL,"
-                    ":rudder_position, :wingsail_position, :rc_on, :wind_vane_angle, :t_timestamp"
-                    ");") == SQLITE_OK) {
-                bindParam(stmt, ":rudder_position", log.m_rudderPosition);
-                bindParam(stmt, ":wingsail_position", log.m_wingsailPosition);
-                bindParam(stmt, ":rc_on", log.m_radioControllerOn);
-                bindParam(stmt, ":wind_vane_angle", log.m_windVaneAngle);
+            sql =
+                "INSERT INTO dataLogs_actuator_feedback(id, rudder_position, wingsail_position, rc_on, "
+                "wind_vane_angle, t_timestamp)"
+                "VALUES(NULL, :rudder_position, :wingsail_position, :rc_on, :wind_vane_angle, "
+                ":t_timestamp);";
 
+            resultCode = sqlite3_prepare_v2(db, sql.c_str(), (int)sql.size(), &stmt, NULL);
+            if (resultCode == SQLITE_OK) {
+                Logger::info("DEBUG: %d parameters : %s", sqlite3_bind_parameter_count(stmt),
+                             sql.c_str());
+                bindParam(stmt, sqlite3_bind_parameter_index(stmt, ":rudder_position"), log.m_rudderPosition);
+                bindParam(stmt, sqlite3_bind_parameter_index(stmt, ":wingsail_position"), log.m_wingsailPosition);
+                bindParam(stmt, sqlite3_bind_parameter_index(stmt, ":rc_on"), log.m_radioControllerOn);
+                bindParam(stmt, sqlite3_bind_parameter_index(stmt, ":wind_vane_angle"), log.m_windVaneAngle);
                 sqlite3_bind_text(stmt, sqlite3_bind_parameter_index(stmt, ":t_timestamp"),
-                                  log.m_timestamp_str.c_str(), log.m_timestamp_str.size(), // TODO: No _ in timestamp!
-                                  SQLITE_STATIC);
+                          log.m_timestamp_str.c_str(),
+                          log.m_timestamp_str.size(),  // TODO: No _ in timestamp!
+                          SQLITE_STATIC);
                 checkResultCode(sqlite3_step(stmt));
+                sqlite3_finalize(stmt);
+            } else {
+                Logger::error("%s statement prepare error: %s (on \"%s\")",
+                              __PRETTY_FUNCTION__, sqlite3_errstr(resultCode), sql);
             }
 
-            resultCode = sqlite3_exec(db, "END TRANSACTION", NULL, NULL, &m_error);
+            resultCode = sqlite3_exec(db, "COMMIT TRANSACTION;", NULL, NULL, &m_error);
             if (resultCode != SQLITE_OK) {
                 if (m_error != NULL) {
                     Logger::error("%s SQLITE commit error code  %s", __PRETTY_FUNCTION__,
