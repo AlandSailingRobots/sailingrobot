@@ -70,17 +70,13 @@ class DBHandler {
     sqlite3 *m_DBHandle = NULL;
 
     // execute INSERT query and add new row into table
-    bool DBQuery(std::string SQLQuery);
-    // bool DBQuery(std::string SQLQuery, sqlite3 *db);
+    bool DBTransaction(std::string SQLQuery);
+    // bool DBTransaction(std::string SQLQuery, sqlite3 *db);
 
     // retrieve data from given table/tables, return value is a C 2D char array
     // rows and columns also return values (through a reference) about rows and columns in the
     // result set
-    std::vector<std::string> retrieveFromTable(std::string sqlSELECT, int& rows, int& columns);
-    std::vector<std::string> retrieveFromTable(std::string sqlSELECT,
-                                               int& rows,
-                                               int& columns,
-                                               sqlite3* db);
+    std::vector<std::string> retrieveFromTable(std::string SQLSelect, int &rows, int &columns);
 
     // adds a table row into the json object as a array if array flag is true,
     // otherwise it adds the table row as a json object
@@ -103,11 +99,10 @@ class DBHandler {
     std::vector<std::string> getColumnInfo(std::string info, std::string table);
 
     // help function used in insertDataLog
-    int insertLog(std::string table, std::string values, sqlite3* db);
+    int insertLog(std::string table, std::string values);
 
     // own implementation of deprecated sqlite3_get_table()
-    int getTable(sqlite3* db,
-                 const std::string& sql,
+    int getTable(const std::string& sql,
                  std::vector<std::string>& results,
                  int& rows,
                  int& columns);
@@ -125,8 +120,6 @@ class DBHandler {
     int getRows(std::string table);
 
     void insertDataLogs(std::vector<LogItem>& logs);
-
-    void insertMessageLog(std::string gps_time, std::string type, std::string msg);
 
     // updates table with json string (data)
     bool updateTableJson(std::string table, std::string data);
@@ -160,8 +153,8 @@ class DBHandler {
     // get id from table returns either max or min id from table.
     // max = false -> min id
     // max = true -> max id
-    std::string getIdFromTable(std::string table, bool max);
-    std::string getIdFromTable(std::string table, bool max, sqlite3* db);
+    enum ID_MINMAX { MIN_ID = false, MAX_ID = true };
+    int getTableId(std::string table, ID_MINMAX = MAX_ID);
 
     void deleteRow(std::string table, std::string id);
 
@@ -188,4 +181,9 @@ class DBHandler {
     std::string getWaypoints();
 
     std::string getConfigs();
+
+    int prepareStmt(sqlite3* db, sqlite3_stmt* stmt, std::string sql);
+    int checkResultCode(int resultCode);
+    int bindParam(sqlite3_stmt *stmt, std::string name, int value);
+    int bindParam(sqlite3_stmt *stmt, std::string name, double value);
 };
