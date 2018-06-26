@@ -68,7 +68,7 @@ BOOST_LOG_GLOBAL_LOGGER_INIT(global_logger, logger_t)
 	        << std::setw(6) << std::setfill('0') // set size 6 for LineID number / fill with zeros on left side
 	        << expr::attr< unsigned int >("LineID")
 	        << "\t"
-	        << expr::format_date_time<boost::posix_time::ptime>("TimeStamp","[%Y-%m-%d_%H:%M:%S.%f]")
+	        << expr::format_date_time<boost::posix_time::ptime>("TimeStamp","[%Y-%m-%d %H:%M:%S.%f]")
 	        << "\t: <" << expr::attr<logging::trivial::severity_level>("Severity")
 	        << "> \t" << expr::smessage
 	    )                                
@@ -81,7 +81,7 @@ BOOST_LOG_GLOBAL_LOGGER_INIT(global_logger, logger_t)
         keywords::format = 
         (
                 expr::stream 
-                << expr::format_date_time<boost::posix_time::ptime>("TimeStamp","[%H:%M:%S.%f]")
+                << expr::format_date_time<boost::posix_time::ptime>("TimeStamp","[%Y-%m-%d %H:%M:%S.%f]")
 		        << "\t: <" << expr::attr<logging::trivial::severity_level>("Severity")
 		        << "> \t" << expr::smessage
         )
