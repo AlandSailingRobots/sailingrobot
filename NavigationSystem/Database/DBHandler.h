@@ -6,12 +6,10 @@
 #include <sstream>
 #include <string>
 #include <vector>
-
 #include "../Messages/CurrentSensorDataMsg.h"
 #include "../Messages/WindStateMsg.h"
 #include "../SystemServices/Logger.h"
 
-//#include <include/nlohmann/json.hpp>
 #include "../Libs/json/include/nlohmann/json.hpp"
 using Json = nlohmann::json;
 

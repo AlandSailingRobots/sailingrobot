@@ -20,13 +20,13 @@
 #include <mutex>
 #include <vector>
 
-#include "Database/DBHandler.h"
-#include "Math/Utility.h"
-#include "MessageBus/MessageBus.h"
-#include "MessageBus/MessageTypes.h"
-#include "Messages/StateMessage.h"
-#include "Messages/WindDataMsg.h"
-#include "Messages/WindStateMsg.h"
+#include "../Database/DBHandler.h"
+#include "../Math/Utility.h"
+#include "../MessageBus/MessageBus.h"
+#include "../MessageBus/MessageTypes.h"
+#include "../Messages/StateMessage.h"
+#include "../Messages/WindDataMsg.h"
+#include "../Messages/WindStateMsg.h"
 
 class WindStateNode : public Node {
    public:

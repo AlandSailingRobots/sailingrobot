@@ -15,15 +15,15 @@
  ***************************************************************************************/
 #pragma once
 
-#include "Database/DBHandler.h"
-#include "Hardwares/CAN_Services/CANFrameReceiver.h"
-#include "Hardwares/CAN_Services/CANService.h"
-#include "Hardwares/CAN_Services/N2kMsg.h"
-#include "MessageBus/ActiveNode.h"
-#include "MessageBus/Message.h"
-#include "MessageBus/MessageBus.h"
-#include "Messages/StateMessage.h"
-#include "SystemServices/Timer.h"
+#include "../Database/DBHandler.h"
+#include "../Hardwares/CAN_Services/CANFrameReceiver.h"
+#include "../Hardwares/CAN_Services/CANService.h"
+#include "../Hardwares/CAN_Services/N2kMsg.h"
+#include "../MessageBus/ActiveNode.h"
+#include "../MessageBus/Message.h"
+#include "../MessageBus/MessageBus.h"
+#include "../Messages/StateMessage.h"
+#include "../SystemServices/Timer.h"
 
 #include <time.h>
 #include <cstring>

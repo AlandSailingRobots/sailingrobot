@@ -15,14 +15,14 @@
 #pragma once
 
 #include <stdint.h>
-#include "Database/DBHandler.h"
-#include "MessageBus/ActiveNode.h"
-#include "Messages/ArduinoDataMsg.h"
-#include "Messages/CompassDataMsg.h"
-#include "Messages/GPSDataMsg.h"
-#include "Messages/WaypointDataMsg.h"
-#include "Messages/WindDataMsg.h"
-#include "Network/TCPServer.h"
+#include "../Database/DBHandler.h"
+#include "../MessageBus/ActiveNode.h"
+#include "../Messages/ArduinoDataMsg.h"
+#include "../Messages/CompassDataMsg.h"
+#include "../Messages/GPSDataMsg.h"
+#include "../Messages/WaypointDataMsg.h"
+#include "../Messages/WindDataMsg.h"
+#include "../Network/TCPServer.h"
 
 class VesselStateNode : public ActiveNode {
    public:

@@ -20,20 +20,20 @@
 
 #pragma once
 
-#include "MessageBus/ActiveNode.h"
-#include "Messages/CompassDataMsg.h"
-#include "Messages/GPSDataMsg.h"
-#include "Messages/StateMessage.h"
-#include "Messages/WaypointDataMsg.h"
-#include "SystemServices/Logger.h"
-#include "SystemServices/Timer.h"
+#include "../MessageBus/ActiveNode.h"
+#include "../Messages/CompassDataMsg.h"
+#include "../Messages/GPSDataMsg.h"
+#include "../Messages/StateMessage.h"
+#include "../Messages/WaypointDataMsg.h"
+#include "../SystemServices/Logger.h"
+#include "../SystemServices/Timer.h"
 
 #include <stdint.h>
 #include <atomic>
 #include <mutex>
-#include "Database/DBHandler.h"
-#include "Math/CourseMath.h"
-#include "Math/Utility.h"
+#include "../Database/DBHandler.h"
+#include "../Math/CourseMath.h"
+#include "../Math/Utility.h"
 
 class StateEstimationNode : public ActiveNode {
    public:

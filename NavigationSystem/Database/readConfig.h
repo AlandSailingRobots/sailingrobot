@@ -3,8 +3,8 @@
 #include <iostream>
 #include <string>
 
-#include "../Libs/json/src/json.hpp"
 #include "DBHandler.h"
+#include "json.hpp"
 
 using json = nlohmann::json;
 

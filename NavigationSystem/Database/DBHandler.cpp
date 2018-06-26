@@ -4,10 +4,9 @@
 #include <iomanip>
 #include <string>
 #include <thread>
-#include <utility>
-#include "../SystemServices/Logger.h"
 #include "../SystemServices/Timer.h"
 #include "../SystemServices/Wrapper.h"
+
 
 std::mutex DBHandler::m_databaseLock;
 
@@ -338,7 +337,19 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
         }
     }
 
-    DBDisconnect();
+    closeDatabase(db);
+}
+
+// TODO -Oliver: make private
+// TODO: khampf: this function is only included in Tests/DB_tests and should be removed?
+void DBHandler::insertMessageLog(std::string gps_time, std::string type, std::string msg) {
+    // std::string result;
+    // std::stringstream sstm;
+    // sstm << "INSERT INTO messages VALUES(NULL"
+    //<< ", '" << gps_time << "', '" << type << "', '" << msg << "', " << (m_latestDataLogId) // Not
+    // use in Database
+    //<< ");";
+    // queryTable(sstm.str());
 }
 
 bool DBHandler::updateTableJson(std::string table, std::string data) {

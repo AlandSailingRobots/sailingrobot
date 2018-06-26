@@ -19,9 +19,9 @@
 #pragma once
 
 #include "../../MessageBus/MessageBus.h"
+#include "../Hardwares/ArduinoI2CNode.h"
+#include "../SystemServices/Logger.h"
 #include "../cxxtest/cxxtest/TestSuite.h"
-#include "Hardwares/ArduinoI2CNode.h"
-#include "SystemServices/Logger.h"
 #include "TestMocks/MessageLogger.h"
 
 // For std::this_thread

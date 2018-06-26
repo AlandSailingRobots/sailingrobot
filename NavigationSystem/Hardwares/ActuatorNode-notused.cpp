@@ -11,10 +11,10 @@
  *
  ***************************************************************************************/
 
-#include "Hardwares/ActuatorNode.h"
-#include "Messages/ActuatorPositionMsg.h"
-#include "Hardwares/MaestroController/MaestroController.h"
-#include "SystemServices/Logger.h"
+#include "ActuatorNode-notused.h"
+#include "../Messages/ActuatorPositionMsg.h"
+#include "../Hardwares/MaestroController/MaestroController.h"
+#include "../SystemServices/Logger.h"
 
 
 ActuatorNode::ActuatorNode(MessageBus& msgBus, DBHandler& dbhandler, NodeID id, int channel, int speed, int acceleration)
