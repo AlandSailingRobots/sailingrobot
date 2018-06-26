@@ -337,19 +337,7 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
         }
     }
 
-    closeDatabase(db);
-}
-
-// TODO -Oliver: make private
-// TODO: khampf: this function is only included in Tests/DB_tests and should be removed?
-void DBHandler::insertMessageLog(std::string gps_time, std::string type, std::string msg) {
-    // std::string result;
-    // std::stringstream sstm;
-    // sstm << "INSERT INTO messages VALUES(NULL"
-    //<< ", '" << gps_time << "', '" << type << "', '" << msg << "', " << (m_latestDataLogId) // Not
-    // use in Database
-    //<< ");";
-    // queryTable(sstm.str());
+    DBDisconnect();
 }
 
 bool DBHandler::updateTableJson(std::string table, std::string data) {
