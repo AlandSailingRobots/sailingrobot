@@ -14,7 +14,7 @@
 
 
 #include "ASRCourseBallot.h"
-#include "Math/Utility.h"
+#include "../Math/Utility.h"
 
 
 #define CALCULATE_INDEX( index ) index / ASRCourseBallot::COURSE_RESOLUTION;

@@ -23,8 +23,8 @@
 
 #pragma once
 
+#include "../Navigation/LocalNavigationModule/ASRCourseBallot.h"
 #include "../cxxtest/cxxtest/TestSuite.h"
-#include "Navigation/LocalNavigationModule/ASRCourseBallot.h"
 
 class ASRCourseBallotSuite : public CxxTest::TestSuite {
    public:

@@ -12,12 +12,12 @@
  ***************************************************************************************/
 
 
-#include "Xbee.h"
-#include "SystemServices/Logger.h"
+#include "../Xbee.h"
+#include "../SystemServices/Logger.h"
 #include <wiringSerial.h>
 #include <thread>
 #include <cstring>
-#include "SystemServices/SysClock.h"
+#include "../SystemServices/SysClock.h"
 
 
 #define AT_COMMAND_MODE_WAIT	3000

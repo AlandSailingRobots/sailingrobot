@@ -8,7 +8,7 @@
 
 #pragma once
 
-#include "SystemServices/Logger.h"
+#include "../SystemServices/Logger.h"
 
 /* "Safe" stoi which does not throw exceptions on bad input values */
 static int safe_stoi(const std::string& str, std::size_t* pos = 0, int base = 10) {

@@ -19,11 +19,11 @@
  ***************************************************************************************/
 
 #include "HMC6343Node.h"
-#include "Messages/CompassDataMsg.h"
-#include "SystemServices/Logger.h"
+#include "../Messages/CompassDataMsg.h"
+#include "../SystemServices/Logger.h"
 #include "wiringPi.h"
-#include "Math/Utility.h"
-#include "SystemServices/Timer.h"
+#include "../Math/Utility.h"
+#include "../SystemServices/Timer.h"
 
 
 // For std::this_thread

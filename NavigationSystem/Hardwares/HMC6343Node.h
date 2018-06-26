@@ -20,9 +20,9 @@
 
 #pragma once
 
-#include "DataBase/DBHandler.h"
-#include "Hardwares/i2ccontroller/I2CController.h"
-#include "MessageBus/ActiveNode.h"
+#include "../Database/DBHandler.h"
+#include "../Hardwares/i2ccontroller/I2CController.h"
+#include "../MessageBus/ActiveNode.h"
 
 // Magic numbers correspond to the compass commands, see the datasheet for more info.
 enum class CompassOrientation {

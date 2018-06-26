@@ -14,8 +14,8 @@
  ***************************************************************************************/
 
 #pragma once
-#include "MessageBus/ActiveNode.h"
-#include "Messages/LidarMsg.h"
+#include "../MessageBus/ActiveNode.h"
+#include "../Messages/LidarMsg.h"
 #include "lidarLite/lidarLite.h"
 
 class LidarLiteNode : public ActiveNode {

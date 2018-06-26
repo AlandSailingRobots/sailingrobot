@@ -14,12 +14,12 @@
  ***************************************************************************************/
 
 #include "HTTPSyncNode.h"
-#include "Messages/LocalConfigChangeMsg.h"
-#include "Messages/LocalWaypointChangeMsg.h"
-#include "Messages/ServerConfigsReceivedMsg.h"
-#include "Messages/ServerWaypointsReceivedMsg.h"
-#include "SystemServices/Timer.h"
-#include "SystemServices/Wrapper.h"
+#include "../Messages/LocalConfigChangeMsg.h"
+#include "../Messages/LocalWaypointChangeMsg.h"
+#include "../Messages/ServerConfigsReceivedMsg.h"
+#include "../Messages/ServerWaypointsReceivedMsg.h"
+#include "../SystemServices/Timer.h"
+#include "../SystemServices/Wrapper.h"
 
 #include <atomic>
 

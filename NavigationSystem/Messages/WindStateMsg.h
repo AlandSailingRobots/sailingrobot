@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "MessageBus/Message.h"
+#include "../MessageBus/Message.h"
 
 class WindStateMsg : public Message {
    public:

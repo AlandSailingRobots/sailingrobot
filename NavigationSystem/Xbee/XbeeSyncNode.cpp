@@ -14,13 +14,13 @@
  ***************************************************************************************/
 
 
-#include "XbeeSyncNode.h"
+#include "../XbeeSyncNode.h"
 #include <cstring>
 
-#include "Messages/ExternalControlMsg.h"
-#include "Messages/ActuatorPositionMsg.h"
+#include "../Messages/ExternalControlMsg.h"
+#include "../Messages/ActuatorPositionMsg.h"
 
-#include "SystemServices/Timer.h"
+#include "../SystemServices/Timer.h"
 
 
 XbeeSyncNode* XbeeSyncNode::m_node = NULL;

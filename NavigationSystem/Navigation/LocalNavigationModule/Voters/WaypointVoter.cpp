@@ -15,8 +15,8 @@
 
 #include "WaypointVoter.h"
 #include "../ASRVoter.h"
-#include "Math/CourseMath.h"
-#include "SystemServices/Logger.h"
+#include "../Math/CourseMath.h"
+#include "../SystemServices/Logger.h"
 
 #include <iostream>
 

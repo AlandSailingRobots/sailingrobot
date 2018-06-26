@@ -13,7 +13,7 @@
 
 #pragma once
 
-#include "MessageBus/Message.h"
+#include "../MessageBus/Message.h"
 
 class CourseDataMsg : public Message {
    public:
