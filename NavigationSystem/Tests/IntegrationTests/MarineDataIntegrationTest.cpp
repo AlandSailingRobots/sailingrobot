@@ -100,7 +100,7 @@ void initialiseNode(Node& node, const char* nodeName, NodeImportance importance)
 		if(importance == NodeImportance::CRITICAL)
 		{
 			Logger::error("Critical node failed to initialise, shutting down");
-			Logger::shutdown();
+			//Logger::shutdown();
 			exit(1);
 		}
 	}
@@ -176,6 +176,6 @@ int main(int argc, char *argv[])
 	messageBus.run();
 
 
-	Logger::shutdown();
+	//Logger::shutdown();
 	exit(0);
 }
