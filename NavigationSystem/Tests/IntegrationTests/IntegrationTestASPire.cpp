@@ -422,7 +422,7 @@ int main() {
         Logger::info("Database Handler init\t\t[OK]");
     } else {
         Logger::error("Database Handler init\t\t[FAILED]");
-        Logger::shutdown();
+        //Logger::shutdown();
         exit(1);
     }
 
