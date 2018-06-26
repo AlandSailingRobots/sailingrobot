@@ -32,7 +32,7 @@
   #include "../Hardwares/CV7Node.h"
   #include "../Hardwares/HMC6343Node.h"
   #include "../Hardwares/GPSDNode.h"
-  #include "ActuatorNode-notused.h" // NOTE - Maël: It will change (to ActuatorNodeJanet.h)
+  #include "ActuatorNodeJanet.h" // NOTE - Maël: It will change (to ActuatorNodeJanet.h)
   #include "../Hardwares/MaestroController/MaestroController.h"
   #include "../Xbee/Xbee.h"
   #include "../Xbee/XbeeSyncNode.h"

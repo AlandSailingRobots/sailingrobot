@@ -13,7 +13,7 @@
  *
  ***************************************************************************************/
 
-#include "../SimulationNode.h"
+#include "SimulationNode.h"
 
 #define SERVER_PORT 6900
 
