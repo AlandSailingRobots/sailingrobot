@@ -183,6 +183,7 @@ class DBHandler {
     std::string getConfigs();
 
     int checkResultCode(const int resultCode) const;
+    int prepareStmt(sqlite3* db, std::string sql, sqlite3_stmt* stmt);
     int bindParam(sqlite3_stmt *stmt, int param, int value);
     int bindParam(sqlite3_stmt *stmt, int param, double value);
 };

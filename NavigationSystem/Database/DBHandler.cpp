@@ -86,6 +86,11 @@ int DBHandler::checkResultCode(const int resultCode) const {
     return resultCode;
 }
 
+int DBHandler::prepareStmt(sqlite3* db, std::string sql, sqlite3_stmt* stmt) {
+    int resultCode = sqlite3_prepare_v2(db, sql.c_str(), (int) sql.size(), &stmt, NULL);
+    return resultCode;
+}
+
 // Might be suitable for templates
 int DBHandler::bindParam(sqlite3_stmt* stmt, int param, int value) {
     int resultCode = sqlite3_bind_int(stmt, param, value);
@@ -199,10 +204,11 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
                 "VALUES(NULL, :rudder_position, :wingsail_position, :rc_on, :wind_vane_angle, "
                 ":t_timestamp);";
 
-            resultCode = sqlite3_prepare_v2(db, sql.c_str(), (int)sql.size(), &stmt, NULL);
+            // resultCode = sqlite3_prepare_v2(db, sql.c_str(), (int)sql.size(), &stmt, NULL);
+            resultCode = prepareStmt(db, sql, stmt);
             if (resultCode == SQLITE_OK) {
-                Logger::info("DEBUG: %d parameters : %s", sqlite3_bind_parameter_count(stmt),
-                             sql.c_str());
+                // Logger::info("DEBUG: %d parameters : %s", sqlite3_bind_parameter_count(stmt),
+                //             sql.c_str());
                 bindParam(stmt, sqlite3_bind_parameter_index(stmt, ":rudder_position"), log.m_rudderPosition);
                 bindParam(stmt, sqlite3_bind_parameter_index(stmt, ":wingsail_position"), log.m_wingsailPosition);
                 bindParam(stmt, sqlite3_bind_parameter_index(stmt, ":rc_on"), log.m_radioControllerOn);
@@ -212,13 +218,14 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
                           log.m_timestamp_str.size(),  // TODO: No _ in timestamp!
                           SQLITE_STATIC);
                 checkResultCode(sqlite3_step(stmt));
-                sqlite3_finalize(stmt);
+                checkResultCode(sqlite3_finalize(stmt));
             } else {
                 Logger::error("%s statement prepare error: %s (on \"%s\")",
                               __PRETTY_FUNCTION__, sqlite3_errstr(resultCode), sql);
             }
 
-            resultCode = sqlite3_exec(db, "COMMIT TRANSACTION;", NULL, NULL, &m_error);
+            resultCode = sqlite3_exec(db, "COMMIT;", NULL, NULL, &m_error);
+            // resultCode = sqlite3_exec(db, "END TRANSACTION;", NULL, NULL, &m_error);
             if (resultCode != SQLITE_OK) {
                 if (m_error != NULL) {
                     Logger::error("%s SQLITE commit error code  %s", __PRETTY_FUNCTION__,
@@ -629,6 +636,7 @@ std::string DBHandler::getWaypoints() {  // NOTE : Marc : change this otherwise 
 // max = false -> min id
 // max = true -> max id
 
+// TODO there is a segfault in here somewhere
 int DBHandler::getTableId(std::string table, ID_MINMAX minmax) {
     int rows, columns;
     std::vector<std::string> results;
