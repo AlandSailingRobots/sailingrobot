@@ -1,5 +1,5 @@
 #include "I2CController.h"
-#include "../SystemServices/Logger.h"
+#include "../../SystemServices/Logger.h"
 #include <unistd.h> // close
 
 #include <wiringPiI2C.h>

@@ -23,8 +23,6 @@
 
 #include <atomic>
 
-
-
 // The callbacks CANNOT be non-static class member functions
 static size_t write_to_string(void* ptr, size_t size, size_t count, void* stream) {
     ((std::string*)stream)->append((char*)ptr, 0, size * count);
