@@ -8,7 +8,7 @@
 #include <opencv2/objdetect/objdetect.hpp>
 #include <string>
 #include <vector>
-#include "Messages/ObstacleVectorMsg.h"
+#include "../Messages/ObstacleVectorMsg.h"
 #include "opencv2/features2d.hpp"
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc/imgproc.hpp"

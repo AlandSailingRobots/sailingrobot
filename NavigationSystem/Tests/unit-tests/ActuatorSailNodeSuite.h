@@ -20,9 +20,9 @@
 #pragma once
 
 #include "../../MessageBus/MessageBus.h"
+#include "ActuatorNode-notused.h"
+#include "../Hardwares/MaestroController/MaestroController.h"
 #include "../cxxtest/cxxtest/TestSuite.h"
-#include "Hardwares/ActuatorNode.h"
-#include "Hardwares/MaestroController/MaestroController.h"
 #include "TestMocks/MessageLogger.h"
 
 // For std::this_thread

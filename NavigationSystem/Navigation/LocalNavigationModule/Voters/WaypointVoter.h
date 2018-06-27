@@ -15,7 +15,7 @@
 #pragma once
 
 #include "../ASRVoter.h"
-#include "Math/CourseMath.h"
+#include "../Math/CourseMath.h"
 
 class WaypointVoter : public ASRVoter {
    public:

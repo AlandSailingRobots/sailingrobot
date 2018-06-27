@@ -24,10 +24,10 @@
 #include <mutex>
 #include <queue>
 #include <vector>
+#include "../SystemServices/Logger.h"
 #include "CANFrameReceiver.h"
 #include "CANPGNReceiver.h"
 #include "N2kMsg.h"
-#include "SystemServices/Logger.h"
 #include "mcp2515.h"
 
 struct FastPKGInfo {

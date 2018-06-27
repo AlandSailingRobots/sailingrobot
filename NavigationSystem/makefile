@@ -84,7 +84,7 @@ export OBJECT_FILE          = $(BUILD_DIR)/objects.tmp
 ###############################################################################
 
 # Core
-DATABASE_SRC				= DataBase/DBHandler.cpp DataBase/DBLogger.cpp DataBase/DBLoggerNode.cpp
+DATABASE_SRC				= Database/DBHandler.cpp Database/DBLogger.cpp Database/DBLoggerNode.cpp
 
 HTTP_SYNC_SRC        		= HTTPSync/HTTPSyncNode.cpp
 

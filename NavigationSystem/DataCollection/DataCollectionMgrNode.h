@@ -15,8 +15,8 @@
 
 #pragma once
 
-#include "DataBase/DBHandler.h"
-#include "MessageBus/MessageBus.h"
+#include "../Database/DBHandler.h"
+#include "../MessageBus/MessageBus.h"
 
 class DataCollectionMgrNode : public Node {
    public:

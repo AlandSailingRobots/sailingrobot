@@ -24,15 +24,15 @@
 #include <thread>
 #include <vector>
 
-#include "DataBase/DBHandler.h"
-#include "Math/Utility.h"
-#include "MessageBus/ActiveNode.h"
-#include "MessageBus/MessageBus.h"
-#include "Messages/LocalNavigationMsg.h"
-#include "Messages/StateMessage.h"
-#include "Messages/WindStateMsg.h"
-#include "Messages/WingSailCommandMsg.h"
-#include "SystemServices/Timer.h"
+#include "../Database/DBHandler.h"
+#include "../Math/Utility.h"
+#include "../MessageBus/ActiveNode.h"
+#include "../MessageBus/MessageBus.h"
+#include "../Messages/LocalNavigationMsg.h"
+#include "../Messages/StateMessage.h"
+#include "../Messages/WindStateMsg.h"
+#include "../Messages/WingSailCommandMsg.h"
+#include "../SystemServices/Timer.h"
 
 class WingsailControlNode : public ActiveNode {
    public:

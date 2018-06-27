@@ -4,8 +4,8 @@
 #include <iomanip>
 #include <string>
 #include <thread>
-#include "SystemServices/Timer.h"
-#include "SystemServices/Wrapper.h"
+#include "../SystemServices/Timer.h"
+#include "../SystemServices/Wrapper.h"
 
 
 std::mutex DBHandler::m_databaseLock;
@@ -293,7 +293,7 @@ void DBHandler::insertMessageLog(std::string gps_time, std::string type, std::st
     // std::stringstream sstm;
     // sstm << "INSERT INTO messages VALUES(NULL"
     //<< ", '" << gps_time << "', '" << type << "', '" << msg << "', " << (m_latestDataLogId) // Not
-    // use in DataBase
+    // use in Database
     //<< ");";
     // queryTable(sstm.str());
 }

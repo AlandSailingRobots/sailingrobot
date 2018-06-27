@@ -29,8 +29,8 @@
 #include <unistd.h>
 #include <cstdlib>
 #include <iostream>
+#include "../Hardwares/i2ccontroller/I2CController.h"
 #include "../cxxtest/cxxtest/TestSuite.h"
-#include "Hardwares/i2ccontroller/I2CController.h"
 // For std::this_thread
 #include <chrono>
 #include <thread>

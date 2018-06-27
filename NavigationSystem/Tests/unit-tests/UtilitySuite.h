@@ -34,9 +34,9 @@
 
 #include <stdint.h>  // uint8_t
 #include <stdlib.h>
+#include "../Math/Utility.h"
+#include "../SystemServices/Timer.h"
 #include "../cxxtest/cxxtest/TestSuite.h"
-#include "Math/Utility.h"
-#include "SystemServices/Timer.h"
 
 class UtilitySuite : public CxxTest::TestSuite {
    public:

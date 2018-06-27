@@ -1,8 +1,9 @@
-#include "DataCollectionMgrNode.h"
-#include "Messages/WaypointDataMsg.h"
-#include "Messages/DataCollectionStopMsg.h"
-#include "Messages/DataCollectionStartMsg.h"
-#include "Messages/DataRequestMsg.h"
+#include <memory>
+#include "../DataCollection/DataCollectionMgrNode.h"
+#include "../Messages/WaypointDataMsg.h"
+#include "../Messages/DataCollectionStopMsg.h"
+#include "../Messages/DataCollectionStartMsg.h"
+#include "../Messages/DataRequestMsg.h"
 
 DataCollectionMgrNode::DataCollectionMgrNode(MessageBus &msgBus, DBHandler& db) :
 										Node(NodeID::DataCollectionMgr, msgBus), m_db(db) {

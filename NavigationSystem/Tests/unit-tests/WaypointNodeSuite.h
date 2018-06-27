@@ -23,11 +23,11 @@
 
 #pragma once
 
+#include "../MessageBus/MessageBus.h"
+#include "../MessageBusTestHelper.h"
+#include "../Messages/GPSDataMsg.h"
+#include "../Navigation/WaypointMgrNode.h"
 #include "../cxxtest/cxxtest/TestSuite.h"
-#include "MessageBus/MessageBus.h"
-#include "MessageBusTestHelper.h"
-#include "Messages/GPSDataMsg.h"
-#include "Navigation/WaypointMgrNode.h"
 #include "TestMocks/MockNode.h"
 
 #include <chrono>

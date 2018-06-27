@@ -17,7 +17,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <termios.h>
-#include "SystemServices/Logger.h"
+#include "../SystemServices/Logger.h"
 
 
 std::mutex 	MaestroController::m_Mutex;

@@ -15,9 +15,9 @@
 
 class MessageBus;
 
-#include "MessageBus/Message.h"
-#include "MessageBus/MessageBus.h"
-#include "MessageBus/NodeIDs.h"
+#include "../MessageBus/Message.h"
+#include "../MessageBus/MessageBus.h"
+#include "../MessageBus/NodeIDs.h"
 
 class Node {
    public:
@@ -41,7 +41,7 @@ class Node {
     virtual void processMessage(const Message* message) = 0;
 
     ///----------------------------------------------------------------------------------
-    /// This function should get the last configuring values from the DataBase
+    /// This function should get the last configuring values from the Database
     /// That enables the user to change this values by the web interface
     /// which changes the behaviour of the Node and thus the sailing robot behaviour.
     ///

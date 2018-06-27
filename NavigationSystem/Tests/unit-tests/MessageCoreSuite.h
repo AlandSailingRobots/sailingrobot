@@ -27,11 +27,11 @@
 #pragma once
 
 #include <stdint.h>
-#include "MessageBus/MessageBus.h"
-#include "MessageBusTestHelper.h"
-#include "SystemServices/Logger.h"
+#include "../MessageBus/MessageBus.h"
+#include "../MessageBusTestHelper.h"
+#include "../SystemServices/Logger.h"
+#include "../Tests/cxxtest/cxxtest/TestSuite.h"
 #include "TestMocks/MockNode.h"
-#include "Tests/cxxtest/cxxtest/TestSuite.h"
 
 // For std::this_thread
 #include <chrono>

@@ -3,23 +3,23 @@
 #include <thread>
 #include <sstream>
 
-#include "Hardwares/CAN_Services/CANService.h"
-#include "Hardwares/CAN_Services/N2kMsg.h"
-#include "Hardwares/CAN_Services/CanBusCommon/canbus_defs.h"
-#include "Hardwares/CAN_Services/CanBusCommon/CanMessageHandler.h"
-#include "Hardwares/CAN_Services/CANService.h"
-#include "Hardwares/GPSDNode.h"
-#include "Hardwares/CANCurrentSensorNode.h"
+#include "../Hardwares/CAN_Services/CANService.h"
+#include "../Hardwares/CAN_Services/N2kMsg.h"
+#include "../Hardwares/CAN_Services/CanBusCommon/canbus_defs.h"
+#include "../Hardwares/CAN_Services/CanBusCommon/CanMessageHandler.h"
+#include "../Hardwares/CAN_Services/CANService.h"
+#include "../Hardwares/GPSDNode.h"
+#include "../Hardwares/CANCurrentSensorNode.h"
 
-#include "SystemServices/Logger.h"
+#include "../SystemServices/Logger.h"
 
-#include "MessageBus/MessageTypes.h"
-#include "MessageBus/MessageBus.h"
-#include "MessageBus/NodeIDs.h"
+#include "../MessageBus/MessageTypes.h"
+#include "../MessageBus/MessageBus.h"
+#include "../MessageBus/NodeIDs.h"
 
-#include "Messages/CurrentSensorDataMsg.h"
+#include "../Messages/CurrentSensorDataMsg.h"
 
-#include "Math/Utility.h"
+#include "../Math/Utility.h"
 
 
 
