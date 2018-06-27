@@ -45,11 +45,8 @@ enum class MessageType {
     SailCommand,
     DataCollectionStart,
     DataCollectionStop,
-<<<<<<< HEAD
-    ThermalImagerData
-=======
+    ThermalImagerData,
     CurrentSensorData
->>>>>>> develop
 };
 
 inline std::string msgToString(MessageType msgType) {
