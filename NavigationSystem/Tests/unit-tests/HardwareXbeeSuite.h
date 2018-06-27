@@ -28,9 +28,9 @@
 
 #include <stdint.h>
 #include <thread>
+#include "../SystemServices/Logger.h"
+#include "../Xbee/Xbee.h"
 #include "../cxxtest/cxxtest/TestSuite.h"
-#include "SystemServices/Logger.h"
-#include "Xbee/Xbee.h"
 
 // For std::this_thread
 #include <chrono>

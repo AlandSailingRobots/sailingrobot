@@ -54,7 +54,8 @@ enum class NodeID {
     AISProcessing,
     MarineSensorCANTransmission,
 	DataCollectionMgr,
-	CameraProcessingUtility
+	CameraProcessingUtility, 
+    CANCurrentSensor
 };
 
 inline std::string nodeToString(NodeID id) {
@@ -124,11 +125,13 @@ inline std::string nodeToString(NodeID id) {
         case NodeID::AISProcessing:
             return "AISProcessing";
         case NodeID::MarineSensorCANTransmission:
-        return "MarineSensorCANTransmission";
-		case NodeID::DataCollectionMgr:
-        return "DataCollectionMgr";
+            return "MarineSensorCANTransmission";
+	case NodeID::DataCollectionMgr:
+       	    return "DataCollectionMgr";
         case NodeID::CameraProcessingUtility:
-        return "CameraProcessingUtility";
-	}
-	return "";
+            return "CameraProcessingUtility";
+        case NodeID::CANCurrentSensor:
+            return "CANCurrentSensor";
+    }
+    return "";
 }

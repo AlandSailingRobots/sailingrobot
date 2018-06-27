@@ -14,14 +14,14 @@
 #pragma once
 
 #include "../../MessageBus/MessageBus.h"
+#include "../Database/DBHandler.h"
+#include "../LowLevelControllers/CourseRegulatorNode.h"
+#include "../Math/Utility.h"
+#include "../MessageBusTestHelper.h"
+#include "../Messages/LocalNavigationMsg.h"
+#include "../Messages/StateMessage.h"
+#include "../SystemServices/Timer.h"
 #include "../cxxtest/cxxtest/TestSuite.h"
-#include "DataBase/DBHandler.h"
-#include "LowLevelControllers/CourseRegulatorNode.h"
-#include "Math/Utility.h"
-#include "MessageBusTestHelper.h"
-#include "Messages/LocalNavigationMsg.h"
-#include "Messages/StateMessage.h"
-#include "SystemServices/Timer.h"
 #include "TestMocks/MessageLogger.h"
 
 #include <chrono>

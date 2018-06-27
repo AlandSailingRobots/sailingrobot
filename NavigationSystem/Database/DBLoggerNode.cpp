@@ -1,21 +1,24 @@
 #include "DBLoggerNode.h"
 
-#include "Messages/CompassDataMsg.h"
-#include "Messages/GPSDataMsg.h"
-#include "Messages/WindDataMsg.h"
-#include "Messages/WindStateMsg.h"
-#include "Messages/CourseDataMsg.h"
-#include "Messages/LocalNavigationMsg.h"
-#include "Messages/WaypointDataMsg.h"
-#include "Messages/StateMessage.h"
-#include "Messages/ASPireActuatorFeedbackMsg.h"
-#include "Messages/MarineSensorDataMsg.h"
-#include "Messages/CourseDataMsg.h"
-#include "SystemServices/Timer.h"
-#include "SystemServices/SysClock.h"
+#include "../Messages/CompassDataMsg.h"
+#include "../Messages/GPSDataMsg.h"
+#include "../Messages/WindDataMsg.h"
+#include "../Messages/WindStateMsg.h"
+#include "../Messages/CourseDataMsg.h"
+#include "../Messages/LocalNavigationMsg.h"
+#include "../Messages/WaypointDataMsg.h"
+#include "../Messages/StateMessage.h"
+#include "../Messages/ASPireActuatorFeedbackMsg.h"
+#include "../Messages/MarineSensorDataMsg.h"
+#include "../Messages/CourseDataMsg.h"
+#include "../Messages/CurrentSensorDataMsg.h"
+#include "../SystemServices/Timer.h"
+#include "../SystemServices/SysClock.h"
 
 #define STATE_INITIAL_SLEEP 100
 
+//Debug for alternating current sensors
+//int debug_count = 0;
 
 DBLoggerNode::DBLoggerNode(MessageBus& msgBus, DBHandler& db,int queueSize)
 :   ActiveNode(NodeID::DBLoggerNode, msgBus),
@@ -28,7 +31,8 @@ DBLoggerNode::DBLoggerNode(MessageBus& msgBus, DBHandler& db,int queueSize)
     msgBus.registerNode(*this, MessageType::CompassData);
     msgBus.registerNode(*this, MessageType::GPSData);
     msgBus.registerNode(*this, MessageType::WindData);
-    // msgBus.registerNode(*this, MessageType::ActuatorPosition);
+    msgBus.registerNode(*this, MessageType::CurrentSensorData);
+
     msgBus.registerNode(*this, MessageType::ASPireActuatorFeedback);
     msgBus.registerNode(*this, MessageType::MarineSensorData);
 
@@ -49,6 +53,9 @@ void DBLoggerNode::processMessage(const Message* msg) {
     std::lock_guard<std::mutex> lock(m_lock);
 
     MessageType type = msg->messageType();
+
+    //Logger::info("DBLoggerNode Processing Message: %s", msgToString(type).c_str());
+
 
     switch(type)
     {
@@ -109,6 +116,19 @@ void DBLoggerNode::processMessage(const Message* msg) {
         //     WaypointDataMsg* waypMsg = (WaypointDataMsg*)msg;
         //     item.m_waypointId = waypMsg->nextId();
         // }
+        case MessageType::CurrentSensorData:
+        {
+            const CurrentSensorDataMsg* currentSensorMsg = static_cast<const CurrentSensorDataMsg*>(msg);
+            item.m_current = currentSensorMsg->getCurrent();
+            item.m_voltage = currentSensorMsg->getVoltage();
+            item.m_element = currentSensorMsg->getSensedElement();
+            //item.m_element = (SensedElement)(debug_count%2 + 1);
+            item.m_element_str = currentSensorMsg->getSensedElementStr();
+            //debug_count++;
+            Logger::info("Item current sensor creation: %lf, %lf, %d, %s", item.m_current,
+                         item.m_voltage, item.m_element, item.m_element_str.c_str());
+        }
+        break;
 
         case MessageType::StateMessage:
         {

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Hardwares/CAN_Services/CanBusCommon/CanMessageHandler.h"
+#include "../Hardwares/CAN_Services/CanBusCommon/CanMessageHandler.h"
 
 #include "../cxxtest/cxxtest/TestSuite.h"
 

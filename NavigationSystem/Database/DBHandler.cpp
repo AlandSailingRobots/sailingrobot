@@ -4,8 +4,8 @@
 #include <iomanip>
 #include <string>
 #include <thread>
-#include "SystemServices/Timer.h"
-#include "SystemServices/Wrapper.h"
+#include "../SystemServices/Timer.h"
+#include "../SystemServices/Wrapper.h"
 
 
 std::mutex DBHandler::m_databaseLock;
@@ -198,24 +198,8 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
            << "dataLogs_course_calculation"
            << " VALUES(NULL, " << courseCalculationValues.str() << "'); \n";
 
-        currentSensorsValues << std::setprecision(10) << log.m_currentActuatorUnit << ", "
-                             << log.m_currentNavigationUnit << ", " << log.m_currentWindVaneAngle
-                             << ", " << log.m_currentWindVaneClutch << ", "
-                             << log.m_currentSailboatDrive << ",'" << log.m_timestamp_str.c_str();
-
-        ss << "INSERT INTO "
-           << "dataLogs_current_sensors"
-           << " VALUES(NULL, " << currentSensorsValues.str() << "'); \n";
-
-        gpsValues << std::setprecision(10) << log.m_gpsHasFix << ", " << log.m_gpsOnline << ",'"
-                  << log.m_timestamp_str.c_str() << "', " << log.m_gpsLat << ", " << log.m_gpsLon
-                  << ", " << log.m_gpsSpeed << ", " << log.m_gpsCourse << ", " << log.m_gpsSatellite
-                  << ", " << log.m_routeStarted << ",'" << log.m_timestamp_str.c_str();
-
-        ss << "INSERT INTO "
-           << "dataLogs_gps"
-           << " VALUES(NULL, " << gpsValues.str() << "'); \n";
-
+        
+        
         marineSensorsValues << std::setprecision(10) << log.m_temperature << ", "
                             << log.m_conductivity << ", " << log.m_ph << ", " << log.m_salinity
                             << ",'" << log.m_timestamp_str.c_str();
@@ -257,6 +241,33 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
         ss << "INSERT INTO "
            << "dataLogs_system"
            << " VALUES(NULL, " << systemValues.str() << "); \n";
+
+        // NEW FEATURE, CAREFUL WITH THE APOSTROPHE (added in dbloggernode.h for now, maybe add it in getelementstr)
+        currentSensorsValues << std::setprecision(10) << log.m_current << ", "
+                              << log.m_voltage << ", "
+                              << log.m_element << ", '" //HERE (moved to the m_element_str)
+                              << log.m_element_str.c_str() << "', '" //AND HERE (moved to the m_element_str)
+                             << log.m_timestamp_str.c_str();
+
+        ss << "INSERT INTO "
+           << "dataLogs_current_sensors"
+           << " VALUES(NULL, " << currentSensorsValues.str() << "'); \n";
+
+        
+
+        gpsValues << std::setprecision(10) << log.m_gpsHasFix << ", " << log.m_gpsOnline << ",'"
+                  << log.m_timestamp_str.c_str() << "', " << log.m_gpsLat << ", " << log.m_gpsLon
+                  << ", " << log.m_gpsSpeed << ", " << log.m_gpsCourse << ", " << log.m_gpsSatellite
+                  << ", " << log.m_routeStarted << ",'" << log.m_timestamp_str.c_str();
+
+        ss << "INSERT INTO "
+           << "dataLogs_gps"
+           << " VALUES(NULL, " << gpsValues.str() << "'); \n";
+
+        //Logger::info("Current sensors database insert command: %s \n", ss);
+        //std::cout << "Current sensors database insert command: " << currentSensorsValues.str() << std::endl;
+        //std::cout << "Full insert command line: " << ss.str() << std::endl;
+
     }
 
     if (queryTable(ss.str(), db)) {
@@ -276,12 +287,13 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
 }
 
 // TODO -Oliver: make private
+// TODO: khampf: this function is only included in Tests/DB_tests and should be removed?
 void DBHandler::insertMessageLog(std::string gps_time, std::string type, std::string msg) {
     // std::string result;
     // std::stringstream sstm;
     // sstm << "INSERT INTO messages VALUES(NULL"
     //<< ", '" << gps_time << "', '" << type << "', '" << msg << "', " << (m_latestDataLogId) // Not
-    // use in DataBase
+    // use in Database
     //<< ");";
     // queryTable(sstm.str());
 }
@@ -396,7 +408,9 @@ std::string DBHandler::retrieveCell(std::string table, std::string id, std::stri
 
 void DBHandler::updateConfigs(std::string configs) {
     Json js = Json::parse(configs);
-
+    if (js.empty()) {
+        Logger::error("%s No JSON in \"%s\"", __PRETTY_FUNCTION__, configs);
+    }
     std::vector<std::string> tables;
 
     for (auto i : js.items()) {
@@ -415,6 +429,9 @@ void DBHandler::updateConfigs(std::string configs) {
 
 bool DBHandler::updateWaypoints(std::string waypoints) {
     Json js = Json::parse(waypoints);
+    if (js.empty()) {
+        Logger::error("%s No JSON in \"%s\"", __PRETTY_FUNCTION__, waypoints);
+    }
     std::string DBPrinter = "";
     std::string tempValue = "";
     int valuesLimit = 11;  //"Dirty" fix for limiting the amount of values requested from server

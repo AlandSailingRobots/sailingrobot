@@ -13,7 +13,7 @@
 ***************************************************************************************/
 #include "ActuatorNodeASPire.h"
 #include "CAN_Services/CanBusCommon/CanUtility.h"
-#include "../../ArduinoSketches/libraries/CanBusCommon/CanMessageHandler.h"
+#include "../../../ArduinoSketches/libraries/CanBusCommon/CanMessageHandler.h"
 
 
 ActuatorNodeASPire::ActuatorNodeASPire(MessageBus& msgBus, CANService& CANService)
@@ -41,12 +41,12 @@ void ActuatorNodeASPire::processMessage(const Message* message)
 	if(type == MessageType::WingSailCommand)
 	{
     	const WingSailCommandMsg* actMsg = dynamic_cast<const WingSailCommandMsg*>(message);
-		  m_wingsailAngle = -actMsg->tailAngle();
+		  m_wingsailAngle = actMsg->tailAngle();
     }
     else if (type == MessageType::RudderCommand)
     {
     	const RudderCommandMsg* actMsg = dynamic_cast<const RudderCommandMsg*>(message);
-		m_rudderAngle = -actMsg->rudderAngle();
+		m_rudderAngle = actMsg->rudderAngle();
     }
 
     sendCommandMessage();

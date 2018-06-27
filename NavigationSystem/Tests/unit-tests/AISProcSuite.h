@@ -10,14 +10,14 @@
  *
  *
  ***************************************************************************************/
+#include "../Database/DBHandler.h"
+#include "../MessageBus/MessageBus.h"
+#include "../MessageBusTestHelper.h"
+#include "../Messages/StateMessage.h"
+#include "../WorldState/AISProcessing.h"
+#include "../WorldState/CollidableMgr/CollidableMgr.h"
 #include "../cxxtest/cxxtest/TestSuite.h"
-#include "DataBase/DBHandler.h"
-#include "MessageBus/MessageBus.h"
-#include "MessageBusTestHelper.h"
-#include "Messages/StateMessage.h"
 #include "TestMocks/MessageLogger.h"
-#include "WorldState/AISProcessing.h"
-#include "WorldState/CollidableMgr/CollidableMgr.h"
 
 #define AISPROC_TEST_COUNT 2
 

@@ -1,44 +1,46 @@
 #include <string>
-#include "DataBase/DBHandler.h"
-#include "DataBase/DBLoggerNode.h"
-#include "HTTPSync/HTTPSyncNode.h"
-#include "MessageBus/MessageBus.h"
-#include "Messages/DataRequestMsg.h"
-#include "SystemServices/Logger.h"
+#include "../Database/DBHandler.h"
+#include "../Database/DBLoggerNode.h"
+#include "../HTTPSync/HTTPSyncNode.h"
+#include "../MessageBus/MessageBus.h"
+#include "../Messages/DataRequestMsg.h"
+#include "../SystemServices/Logger.h"
 
-#include "Navigation/WaypointMgrNode.h"
-#include "WorldState/StateEstimationNode.h"
-#include "WorldState/WindStateNode.h"
-#include "WorldState/CameraProcessingUtility.h"
-#include "WorldState/AISProcessing.h"
-#include "WorldState/CollidableMgr/CollidableMgr.h"
+#include "../WorldState/CameraProcessingUtility.h"
+#include "../WorldState/AISProcessing.h"
+#include "../Navigation/WaypointMgrNode.h"
+#include "../WorldState/StateEstimationNode.h"
+#include "../WorldState/WindStateNode.h"
+#include "../WorldState/CollidableMgr/CollidableMgr.h"
 
-#include "LowLevelControllers/WingsailControlNode.h"
-#include "LowLevelControllers/CourseRegulatorNode.h"
+#include "../LowLevelControllers/WingsailControlNode.h"
+#include "../LowLevelControllers/CourseRegulatorNode.h"
 
 #if LOCAL_NAVIGATION_MODULE == 1
-  #include "Navigation/LocalNavigationModule/LocalNavigationModule.h"
-  #include "Navigation/LocalNavigationModule/Voters/WaypointVoter.h"
-  #include "Navigation/LocalNavigationModule/Voters/WindVoter.h"
-  #include "Navigation/LocalNavigationModule/Voters/ChannelVoter.h"
-  #include "Navigation/LocalNavigationModule/Voters/ProximityVoter.h"
-  #include "Navigation/LocalNavigationModule/Voters/MidRangeVoter.h"
+  #include "../Navigation/LocalNavigationModule/LocalNavigationModule.h"
+  #include "../Navigation/LocalNavigationModule/Voters/WaypointVoter.h"
+  #include "../Navigation/LocalNavigationModule/Voters/WindVoter.h"
+  #include "../Navigation/LocalNavigationModule/Voters/ChannelVoter.h"
+  #include "../Navigation/LocalNavigationModule/Voters/ProximityVoter.h"
+  #include "../Navigation/LocalNavigationModule/Voters/MidRangeVoter.h"
 #else
-  #include "Navigation/LineFollowNode.h"
+  #include "../Navigation/LineFollowNode.h"
 #endif
 
 #if SIMULATION == 1
-  #include "Simulation/SimulationNode.h"
+  #include "../Simulation/SimulationNode.h"
 #else
-  #include "Hardwares/HMC6343Node.h"
-  #include "Hardwares/GPSDNode.h"
-  #include "Hardwares/CAN_Services/CANService.h"
-  #include "Hardwares/CANWindsensorNode.h"
-  #include "Hardwares/ActuatorNodeASPire.h"
-  #include "Hardwares/CANArduinoNode.h"
+  #include "../Hardwares/HMC6343Node.h"
+  #include "../Hardwares/GPSDNode.h"
+  #include "../Hardwares/CAN_Services/CANService.h"
+  #include "../Hardwares/CANWindsensorNode.h"
+  #include "../Hardwares/ActuatorNodeASPire.h"
+  #include "../Hardwares/CANArduinoNode.h"
 
-#include "Hardwares/CANMarineSensorReceiver.h"
-#include "Hardwares/CANMarineSensorTransmissionNode.h"
+#include "../Hardwares/CANMarineSensorReceiver.h"
+#include "../Hardwares/CANMarineSensorTransmissionNode.h"
+
+#include "../Hardwares/CANCurrentSensorNode.h"
 
 #endif
 
@@ -192,6 +194,7 @@ int main(int argc, char *argv[])
 		CANMarineSensorReceiver canMarineSensorReciver(messageBus, canService);
 
 		CANMarineSensorTransmissionNode canMarineSensorTransmissionNode(messageBus, canService);
+		CANCurrentSensorNode canCurrentSensorNode(messageBus, dbHandler, canService);
 
 
 	#endif
@@ -226,6 +229,7 @@ int main(int argc, char *argv[])
 //		initialiseNode(actuators, "Actuators", NodeImportance::CRITICAL);
 		initialiseNode(actuatorFeedback, "Actuator Feedback", NodeImportance::NOT_CRITICAL);
 		initialiseNode(canMarineSensorTransmissionNode, "Marine Sensors", NodeImportance::NOT_CRITICAL);
+		initialiseNode(canCurrentSensorNode, "Current Sensors", NodeImportance::NOT_CRITICAL);
 	#endif
 
 	initialiseNode(cameraProcessingUtility, "Camera Processing", NodeImportance::NOT_CRITICAL);
@@ -252,6 +256,7 @@ int main(int argc, char *argv[])
 		gpsd.start();
 //		windSensor.start();
 		actuatorFeedback.start();
+		canCurrentSensorNode.start();
 	#endif
 
 	#if LOCAL_NAVIGATION_MODULE == 1
@@ -266,6 +271,6 @@ int main(int argc, char *argv[])
 	messageBus.run();
 
 
-	Logger::shutdown();
+//	Logger::shutdown();
 	exit(0);
 }

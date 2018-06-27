@@ -14,26 +14,14 @@
  ***************************************************************************************/
 
 #include "HTTPSyncNode.h"
-#include "Messages/LocalConfigChangeMsg.h"
-#include "Messages/LocalWaypointChangeMsg.h"
-#include "Messages/ServerConfigsReceivedMsg.h"
-#include "Messages/ServerWaypointsReceivedMsg.h"
-#include "SystemServices/Timer.h"
+#include "../Messages/LocalConfigChangeMsg.h"
+#include "../Messages/LocalWaypointChangeMsg.h"
+#include "../Messages/ServerConfigsReceivedMsg.h"
+#include "../Messages/ServerWaypointsReceivedMsg.h"
+#include "../SystemServices/Timer.h"
+#include "../SystemServices/Wrapper.h"
 
 #include <atomic>
-
-// TEMPORARY CODE
-int httpsyncnode_safe_stoi(const std::string& str, std::size_t* pos = 0, int base = 10) {
-    int retvalue = 0;
-    try {
-        retvalue = std::stoi(str, pos, base);
-    } catch (std::invalid_argument& e) {
-        Logger::error("%s stoi(): invalid argument (%s)", __PRETTY_FUNCTION__, str);
-    } catch (std::out_of_range& e) {
-        Logger::error("%s stoi(): value out of range (%s)", __PRETTY_FUNCTION__, str);
-    }
-    return retvalue;
-}
 
 // The callbacks CANNOT be non-static class member functions
 static size_t write_to_string(void* ptr, size_t size, size_t count, void* stream) {
@@ -184,7 +172,7 @@ std::string HTTPSyncNode::getData(std::string call) {
 bool HTTPSyncNode::checkIfNewConfigs() {
     std::string result = getData("checkIfNewConfigs");
     if (result.length()) {
-        return httpsyncnode_safe_stoi(result);
+        return safe_stoi(result);
     }
     return false;
 }
@@ -192,7 +180,7 @@ bool HTTPSyncNode::checkIfNewConfigs() {
 bool HTTPSyncNode::checkIfNewWaypoints() {
     std::string result = getData("checkIfNewWaypoints");
     if (result.length()) {
-        return httpsyncnode_safe_stoi(result);
+        return safe_stoi(result);
     }
     return false;
 }

@@ -13,7 +13,7 @@
 #pragma once
 
 #include <future>
-#include "MessageBus/MessageBus.h"
+#include "../MessageBus/MessageBus.h"
 
 // Starts the message bus as an asyncrounous
 class MessageBusTestHelper {

@@ -31,8 +31,8 @@
 #include <iostream>
 #include "sys/stat.h"
 
-#define DEFAULT_LOG_NAME "sailing-log.log"
-#define DEFAULT_LOG_NAME_WRSC "wrsc-log.log"
+#define DEFAULT_LOG_NAME "sailing.log"
+#define DEFAULT_LOG_NAME_WRSC "wrsc.log"
 #define FILE_PATH "../logs/"
 
 class Logger {

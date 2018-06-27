@@ -2,7 +2,7 @@
 #include <cstring>
 #include <cstdint>
 #include <unistd.h>
-#include "SystemServices/Logger.h"
+#include "../SystemServices/Logger.h"
 #include "AtlasScientific.h"
 
 int long_timeout = 1500000;         //the timeout needed to query readings and calibrations

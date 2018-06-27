@@ -16,11 +16,11 @@
 
 #pragma once
 
-#include "Hardwares/CAN_Services/CANService.h"
-#include "Hardwares/CAN_Services/N2kMsg.h"
-#include "MessageBus/Message.h"
-#include "MessageBus/MessageBus.h"
-#include "MessageBus/Node.h"
+#include "../Hardwares/CAN_Services/CANService.h"
+#include "../Hardwares/CAN_Services/N2kMsg.h"
+#include "../MessageBus/Message.h"
+#include "../MessageBus/MessageBus.h"
+#include "../MessageBus/Node.h"
 
 class CANMarineSensorTransmissionNode : public Node {
    public:

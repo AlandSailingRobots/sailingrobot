@@ -1,0 +1,128 @@
+{
+    "1": {
+        "is_checkpoint": 0,
+        "latitude": 60.05356751987265,
+        "longitude": 19.97055949143882,
+        "declination": 6,
+        "radius": 50,
+        "stay_time": 0,
+        "harvested": 0
+    },
+    "2": {
+        "is_checkpoint": 0,
+        "latitude": 60.05275001991933,
+        "longitude": 19.96829582600528,
+        "declination": 6,
+        "radius": 15,
+        "stay_time": 0,
+        "harvested": 0
+    },
+    "3": {
+        "is_checkpoint": 0,
+        "latitude": 60.04974036702081,
+        "longitude": 19.9619449868723,
+        "declination": 6,
+        "radius": 15,
+        "stay_time": 0,
+        "harvested": 0
+    },
+    "4": {
+        "is_checkpoint": 0,
+        "latitude": 60.04639348939921,
+        "longitude": 19.95146206004317,
+        "declination": 6,
+        "radius": 15,
+        "stay_time": 0,
+        "harvested": 0
+    },
+    "5": {
+        "is_checkpoint": 0,
+        "latitude": 60.04336977573267,
+        "longitude": 19.94173368835856,
+        "declination": 6,
+        "radius": 15,
+        "stay_time": 0,
+        "harvested": 0
+    },
+    "6": {
+        "is_checkpoint": 0,
+        "latitude": 60.04249810386197,
+        "longitude": 19.93905681415541,
+        "declination": 6,
+        "radius": 15,
+        "stay_time": 0,
+        "harvested": 0
+    },
+    "7": {
+        "is_checkpoint": 0,
+        "latitude": 60.0517393462915,
+        "longitude": 19.93197836827593,
+        "declination": 6,
+        "radius": 15,
+        "stay_time": 0,
+        "harvested": 0
+    },
+    "8": {
+        "is_checkpoint": 0,
+        "latitude": 60.06130581243809,
+        "longitude": 19.92679529305708,
+        "declination": 6,
+        "radius": 15,
+        "stay_time": 0,
+        "harvested": 0
+    },
+    "9": {
+        "is_checkpoint": 0,
+        "latitude": 60.06342532884776,
+        "longitude": 19.92652580907689,
+        "declination": 6,
+        "radius": 15,
+        "stay_time": 0,
+        "harvested": 0
+    },
+    "10": {
+        "is_checkpoint": 0,
+        "latitude": 60.07329365064827,
+        "longitude": 19.92765764179366,
+        "declination": 6,
+        "radius": 15,
+        "stay_time": 0,
+        "harvested": 0
+    },
+    "11": {
+        "is_checkpoint": 0,
+        "latitude": 60.08434373198734,
+        "longitude": 19.92885235410581,
+        "declination": 6,
+        "radius": 15,
+        "stay_time": 0,
+        "harvested": 0
+    },
+    "12": {
+        "is_checkpoint": 0,
+        "latitude": 60.09242023820433,
+        "longitude": 19.92554668394889,
+        "declination": 6,
+        "radius": 15,
+        "stay_time": 0,
+        "harvested": 0
+    },
+    "13": {
+        "is_checkpoint": 0,
+        "latitude": 60.1002749788721,
+        "longitude": 19.92159425223954,
+        "declination": 6,
+        "radius": 15,
+        "stay_time": 0,
+        "harvested": 0
+    },
+    "14": {
+        "is_checkpoint": 0,
+        "latitude": 60.1074282904681,
+        "longitude": 19.9219266158151,
+        "declination": 6,
+        "radius": 15,
+        "stay_time": 0,
+        "harvested": 0
+    }
+}
