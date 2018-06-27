@@ -2,15 +2,13 @@
 
 #include <sqlite3.h>
 #include <iostream>
-#include <mutex>
-#include <sstream>
 #include <string>
 #include <vector>
-#include "../Messages/CurrentSensorDataMsg.h"
-#include "../Messages/WindStateMsg.h"
-#include "../SystemServices/Logger.h"
+#include <mutex>
 
 #include "../Libs/json/include/nlohmann/json.hpp"
+#include "../Messages/CurrentSensorDataMsg.h"
+#include "../Messages/WindStateMsg.h"
 using Json = nlohmann::json;
 
 struct LogItem {
@@ -65,7 +63,7 @@ class DBHandler {
     std::string m_currentWaypointId = "";
     std::string m_filePath;
     static std::mutex m_databaseLock;
-    sqlite3 *m_DBHandle = NULL;
+    sqlite3* m_DBHandle = NULL;
 
     // execute INSERT query and add new row into table
     bool DBTransaction(std::string SQLQuery);
@@ -74,7 +72,7 @@ class DBHandler {
     // retrieve data from given table/tables, return value is a C 2D char array
     // rows and columns also return values (through a reference) about rows and columns in the
     // result set
-    std::vector<std::string> retrieveFromTable(std::string SQLSelect, int &rows, int &columns);
+    std::vector<std::string> retrieveFromTable(std::string SQLSelect, int& rows, int& columns);
 
     // adds a table row into the json object as a array if array flag is true,
     // otherwise it adds the table row as a json object
@@ -180,8 +178,11 @@ class DBHandler {
 
     std::string getConfigs();
 
-    int checkResultCode(const int resultCode) const;
-    int prepareStmt(sqlite3* db, std::string sql, sqlite3_stmt* stmt);
-    int bindParam(sqlite3_stmt *stmt, int param, int value);
-    int bindParam(sqlite3_stmt *stmt, int param, double value);
+    int checkRetCode(const int resultCode) const;
+
+    int paramNameIndex(sqlite3_stmt *stmt, const char *name);
+    int prepareStmt(sqlite3 *db, const std::string &sql, sqlite3_stmt **stmt);
+    int bindParam(sqlite3_stmt *stmt, const char *name, const int value);
+    int bindParam(sqlite3_stmt *stmt, const char *name, const double value);
+	int bindParam(sqlite3_stmt *stmt, const char *name, const std::string text);
 };

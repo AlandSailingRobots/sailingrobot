@@ -1,12 +1,14 @@
-#include "DBHandler.h"
 #include <cstdio>
 #include <cstdlib>
 #include <iomanip>
+#include <sstream>
 #include <string>
 #include <thread>
+
+#include "../SystemServices/Logger.h"
 #include "../SystemServices/Timer.h"
 #include "../SystemServices/Wrapper.h"
-
+#include "DBHandler.h"
 
 std::mutex DBHandler::m_databaseLock;
 
@@ -78,43 +80,52 @@ void DBHandler::getDataAsJson(std::string select,
     columnNames.clear();
 }
 
-int DBHandler::checkResultCode(const int resultCode) const {
+int DBHandler::checkRetCode(const int resultCode) const {
     if (!((resultCode == SQLITE_OK) || (resultCode == SQLITE_DONE))) {
         Logger::error("SQLite result code: %s (%d)", sqlite3_errstr(resultCode), resultCode);
     }
     return resultCode;
 }
 
-int DBHandler::prepareStmt(sqlite3* db, std::string sql, sqlite3_stmt* stmt) {
-    int resultCode = sqlite3_prepare_v2(db, sql.c_str(), (int) sql.size(), &stmt, NULL);
-    return resultCode;
+int DBHandler::paramNameIndex(sqlite3_stmt* stmt, const char* name) {
+    int paramIndex = sqlite3_bind_parameter_index(stmt, name);
+    if (!paramIndex)
+        Logger::error("SQLite null parameter index on \"%s\"!", name);
+    return paramIndex;
 }
 
-// Might be suitable for templates
-int DBHandler::bindParam(sqlite3_stmt* stmt, int param, int value) {
-    int resultCode = sqlite3_bind_int(stmt, param, value);
-    if (checkResultCode(resultCode)) {
-        Logger::error("%s parameter %s=%d", __PRETTY_FUNCTION__,
-                      sqlite3_bind_parameter_name(stmt, param), param, value);
+int DBHandler::prepareStmt(sqlite3* db, const std::string& sql, sqlite3_stmt** stmt) {
+    int resultCode = sqlite3_prepare_v2(db, sql.c_str(), (int)sql.size(), stmt, NULL);
+    if (resultCode != SQLITE_OK) {
+        Logger::error("%s SQL statement prepare error: %s on \"%s\"", __PRETTY_FUNCTION__,
+                      sqlite3_errstr(resultCode), sql.c_str());
     }
     return resultCode;
 }
 
-int DBHandler::bindParam(sqlite3_stmt* stmt, int param, double value) {
-    int resultCode = 0;
-
-    if (param) {
-        resultCode = sqlite3_bind_double(stmt, param, value);
-
-        if (checkResultCode(resultCode)) {
-            Logger::error("%s parameter %s (%d) =%f", __PRETTY_FUNCTION__,
-                          sqlite3_bind_parameter_name(stmt, param), param, value);
-        }
-    } else {
-        Logger::error("%s tried to bind null parameter!", __PRETTY_FUNCTION__);
-        return SQLITE_ERROR;
+int DBHandler::bindParam(sqlite3_stmt* stmt, const char* name, const int value) {
+    int paramIndex = paramNameIndex(stmt, name);
+    if (!paramIndex) {
+        return SQLITE_MISUSE;
     }
-    return resultCode;
+    return checkRetCode(sqlite3_bind_int(stmt, paramIndex, value));
+}
+
+int DBHandler::bindParam(sqlite3_stmt* stmt, const char* name, const double value) {
+    int paramIndex = paramNameIndex(stmt, name);
+    if (!paramIndex) {
+        return SQLITE_MISUSE;
+    }
+    return checkRetCode(sqlite3_bind_double(stmt, paramIndex, value));
+}
+
+int DBHandler::bindParam(sqlite3_stmt* stmt, const char* name, const std::string text) {
+    int paramIndex = paramNameIndex(stmt, name);
+    if (!paramIndex) {
+        return SQLITE_MISUSE;
+    }
+    return checkRetCode(
+        sqlite3_bind_text(stmt, paramIndex, text.c_str(), text.size(), SQLITE_STATIC));
 }
 
 void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
@@ -129,6 +140,7 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
     std::stringstream windsensorValues;
     std::stringstream systemValues;
     std::stringstream ss;
+
     int actuatorFeedbackId = 0;
     int compassModelId = 0;
     int courseCalculationId = 0;
@@ -175,74 +187,76 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
     for (auto log : logs) {
         logNumber++;
 
-        if (actuatorFeedbackId) {
-            /*
-                        actuatorFeedbackValues.str("");
-                        actuatorFeedbackValues << std::setprecision(10) << log.m_rudderPosition <<
-               ", "
-                                               << log.m_wingsailPosition << ", " <<
-               log.m_radioControllerOn
-                                               << ", " << log.m_windVaneAngle << ",'"
-                                               << log.m_timestamp_str.c_str();
+        std::string sql;
+        sqlite3_stmt* stmt = NULL;
+        int resultCode = 0;
 
-                        ss << "INSERT INTO "
-                           << "dataLogs_actuator_feedback"
-                           << " VALUES(NULL, " << actuatorFeedbackValues.str() << "'); \n";
-            */
+        int _actuatorFeedbackId = 0;
+        int _compassModelId = 0;
+        /* int _courseCalculationId = 0;
+        int _currentMissionId = 0;
+        int _currentSensorsId = 0;
+        int _gpsId = 0;
+        int _marineSensorsId = 0;
+        int _vesselStateId = 0;
+        int _windStateId = 0;
+        int _windsensorId = 0; */
 
-            // TODO: "Syntax ok but nothing in the DB
+        sqlite3_exec(db, "BEGIN TRANSACTION;", NULL, NULL, &m_error);
 
-            sqlite3_exec(db, "BEGIN TRANSACTION;", NULL, NULL, &m_error);
-            std::string sql;
-            sqlite3_stmt* stmt = NULL;
-            int resultCode;
+        if (actuatorFeedbackId) {  // clang-format off
+            if (prepareStmt(db, "INSERT INTO "
+                "dataLogs_actuator_feedback(rudder_position, wingsail_position, rc_on, wind_vane_angle, t_timestamp) "
+                "VALUES(:rudder_position, :wingsail_position, :rc_on, :wind_vane_angle, :t_timestamp);", &stmt
+            )) {  // clang-format on
+                bindParam(stmt, ":rudder_position", log.m_rudderPosition);
+                bindParam(stmt, ":wingsail_position", log.m_wingsailPosition);
+                bindParam(stmt, ":rc_on", log.m_radioControllerOn);
+                bindParam(stmt, ":wind_vane_angle", log.m_windVaneAngle);
+                bindParam(stmt, ":t_timestamp", log.m_timestamp_str);
 
-            sql =
-                "INSERT INTO dataLogs_actuator_feedback(id, rudder_position, wingsail_position, rc_on, "
-                "wind_vane_angle, t_timestamp)"
-                "VALUES(NULL, :rudder_position, :wingsail_position, :rc_on, :wind_vane_angle, "
-                ":t_timestamp);";
-
-            // resultCode = sqlite3_prepare_v2(db, sql.c_str(), (int)sql.size(), &stmt, NULL);
-            resultCode = prepareStmt(db, sql, stmt);
-            if (resultCode == SQLITE_OK) {
-                // Logger::info("DEBUG: %d parameters : %s", sqlite3_bind_parameter_count(stmt),
-                //             sql.c_str());
-                bindParam(stmt, sqlite3_bind_parameter_index(stmt, ":rudder_position"), log.m_rudderPosition);
-                bindParam(stmt, sqlite3_bind_parameter_index(stmt, ":wingsail_position"), log.m_wingsailPosition);
-                bindParam(stmt, sqlite3_bind_parameter_index(stmt, ":rc_on"), log.m_radioControllerOn);
-                bindParam(stmt, sqlite3_bind_parameter_index(stmt, ":wind_vane_angle"), log.m_windVaneAngle);
-                sqlite3_bind_text(stmt, sqlite3_bind_parameter_index(stmt, ":t_timestamp"),
-                          log.m_timestamp_str.c_str(),
-                          log.m_timestamp_str.size(),  // TODO: No _ in timestamp!
-                          SQLITE_STATIC);
-                checkResultCode(sqlite3_step(stmt));
-                checkResultCode(sqlite3_finalize(stmt));
-            } else {
-                Logger::error("%s statement prepare error: %s (on \"%s\")",
-                              __PRETTY_FUNCTION__, sqlite3_errstr(resultCode), sql);
-            }
-
-            resultCode = sqlite3_exec(db, "COMMIT;", NULL, NULL, &m_error);
-            // resultCode = sqlite3_exec(db, "END TRANSACTION;", NULL, NULL, &m_error);
-            if (resultCode != SQLITE_OK) {
-                if (m_error != NULL) {
-                    Logger::error("%s SQLITE commit error code  %s", __PRETTY_FUNCTION__,
-                                  sqlite3_errmsg(db));
-                    sqlite3_free(m_error);
-                    m_error = NULL;
+                if (checkRetCode(sqlite3_step(stmt)) == SQLITE_DONE) {
+                    _actuatorFeedbackId = actuatorFeedbackId + logNumber;
                 }
+                checkRetCode(sqlite3_finalize(stmt));
             }
         }
 
-        compassModelValues.str("");
-        compassModelValues << std::setprecision(10) << log.m_compassHeading << ", "
-                           << log.m_compassPitch << ", " << log.m_compassRoll << ",'"
-                           << log.m_timestamp_str.c_str();
+        if (compassModelId) {  // clang-format off
+            if (prepareStmt(db, "INSERT INTO "
+                "dataLogs_compass(heading, pitch, roll, t_timestamp) "
+                "VALUES(:heading, :pitch, :roll, :t_timestamp);", &stmt
+            )) {
+                bindParam(stmt, ":heading", log.m_compassHeading);
+                bindParam(stmt, ":pitch", log.m_compassPitch);
+                bindParam(stmt, ":roll", log.m_compassRoll);
+                bindParam(stmt, ":t_timestamp", log.m_timestamp_str);
 
-        ss << "INSERT INTO "
-           << "dataLogs_compass"
-           << " VALUES(NULL, " << compassModelValues.str() << "'); \n";
+                if (checkRetCode(sqlite3_step(stmt)) == SQLITE_DONE) {
+                    _compassModelId = compassModelId + logNumber;
+                }
+                checkRetCode(sqlite3_finalize(stmt));
+            }
+        }
+
+        do {
+            resultCode = sqlite3_exec(db, "COMMIT;", NULL, NULL, &m_error);
+        } while (resultCode == SQLITE_BUSY);
+
+        if (resultCode != SQLITE_OK) {
+            Logger::error("%s SQLite COMMIT error: %s (%d)", __PRETTY_FUNCTION__,
+                          sqlite3_errstr(resultCode), resultCode);
+            if (m_error != NULL) {
+                Logger::error("%s SQLite DB error: %s", __PRETTY_FUNCTION__, sqlite3_errmsg(db));
+
+                sqlite3_free(m_error);
+                m_error = NULL;
+            }
+            resultCode = sqlite3_exec(db, "ROLLBACK;", NULL, NULL, &m_error);
+            Logger::info("%s SQLite ROLLBACK returned %s (%d)", __PRETTY_FUNCTION__,
+                         sqlite3_errstr(resultCode), resultCode);
+        }
+
 
         courseCalculationValues.str("");
         courseCalculationValues << std::setprecision(10) << log.m_distanceToWaypoint << ", "
@@ -317,8 +331,8 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
         // std::endl; std::cout << "Full insert command line: " << ss.str() << std::endl;
 
         systemValues.str("");
-        systemValues << std::setprecision(10) << actuatorFeedbackId + logNumber << ", "
-                     << compassModelId + logNumber << ", " << courseCalculationId + logNumber
+        systemValues << std::setprecision(10) << _actuatorFeedbackId << ", "
+                     << _compassModelId << ", " << courseCalculationId + logNumber
                      << ", " << currentSensorsId + logNumber << ", " << gpsId + logNumber << ", "
                      << marineSensorsId + logNumber << ", " << vesselStateId + logNumber << ", "
                      << windStateId + logNumber << ", " << windsensorId + logNumber << ", "
@@ -634,8 +648,6 @@ std::string DBHandler::getWaypoints() {  // NOTE : Marc : change this otherwise 
 // get id from table returns either max or min id from table.
 // max = false -> min id
 // max = true -> max id
-
-// TODO there is a segfault in here somewhere
 int DBHandler::getTableId(std::string table, ID_MINMAX minmax) {
     int rows, columns;
     std::vector<std::string> results;
@@ -650,9 +662,9 @@ int DBHandler::getTableId(std::string table, ID_MINMAX minmax) {
         Logger::error("%s Error when determining min/max id from %s", __PRETTY_FUNCTION__, table);
         return 0;
     }
-    if (results.empty()) {
+    if (results.empty() || (results.size() < 2)) {
         Logger::warning("%s Empty result when determining min/max id from %s", __PRETTY_FUNCTION__,
-                        table);
+                        table.c_str());
         return 0;
     }
     return safe_stoi(results[1], NULL, 10);

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../Database/DBLogger.h"
+#include "DBLogger.h"
 #include "../MessageBus/ActiveNode.h"
 #include "../MessageBus/MessageBus.h"
 #include "../MessageBus/MessageTypes.h"

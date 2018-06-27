@@ -14,6 +14,7 @@
 #include "../Messages/CurrentSensorDataMsg.h"
 #include "../SystemServices/Timer.h"
 #include "../SystemServices/SysClock.h"
+#include "../SystemServices/Logger.h"
 
 #define STATE_INITIAL_SLEEP 100
 
