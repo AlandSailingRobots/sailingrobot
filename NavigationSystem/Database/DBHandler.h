@@ -185,4 +185,5 @@ class DBHandler {
     int bindParam(sqlite3_stmt *stmt, const char *name, const int value);
     int bindParam(sqlite3_stmt *stmt, const char *name, const double value);
 	int bindParam(sqlite3_stmt *stmt, const char *name, const std::string text);
+	int stepAndFinalize(sqlite3_stmt *stmt) const;
 };

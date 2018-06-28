@@ -128,6 +128,12 @@ int DBHandler::bindParam(sqlite3_stmt* stmt, const char* name, const std::string
         sqlite3_bind_text(stmt, paramIndex, text.c_str(), text.size(), SQLITE_STATIC));
 }
 
+int DBHandler::stepAndFinalize(sqlite3_stmt* stmt) const {
+    int retCode = checkRetCode(sqlite3_step(stmt));
+    checkRetCode(sqlite3_finalize(stmt));  // Only for logging possible error
+    return retCode;
+}
+
 void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
     std::stringstream actuatorFeedbackValues;
     std::stringstream compassModelValues;
@@ -191,19 +197,15 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
         sqlite3_stmt* stmt = NULL;
         int resultCode = 0;
 
-        int _actuatorFeedbackId = 0;
-        int _compassModelId = 0;
-        /* int _courseCalculationId = 0;
-        int _currentMissionId = 0;
+        // int _currentMissionId = 0;
+
+        /*
         int _currentSensorsId = 0;
-        int _gpsId = 0;
-        int _marineSensorsId = 0;
-        int _vesselStateId = 0;
-        int _windStateId = 0;
-        int _windsensorId = 0; */
+        int _gpsId = 0;  */
 
         sqlite3_exec(db, "BEGIN TRANSACTION;", NULL, NULL, &m_error);
 
+        int _actuatorFeedbackId = 0;
         if (actuatorFeedbackId) {  // clang-format off
             if (prepareStmt(db, "INSERT INTO "
                 "dataLogs_actuator_feedback(rudder_position, wingsail_position, rc_on, wind_vane_angle, t_timestamp) "
@@ -215,32 +217,117 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
                 bindParam(stmt, ":wind_vane_angle", log.m_windVaneAngle);
                 bindParam(stmt, ":t_timestamp", log.m_timestamp_str);
 
-                if (checkRetCode(sqlite3_step(stmt)) == SQLITE_DONE) {
+                if (stepAndFinalize(stmt) == SQLITE_DONE) {
                     _actuatorFeedbackId = actuatorFeedbackId + logNumber;
                 }
-                checkRetCode(sqlite3_finalize(stmt));
             }
         }
 
+        int _compassModelId = 0;
         if (compassModelId) {  // clang-format off
             if (prepareStmt(db, "INSERT INTO "
                 "dataLogs_compass(heading, pitch, roll, t_timestamp) "
                 "VALUES(:heading, :pitch, :roll, :t_timestamp);", &stmt
-            )) {
+            )) {  // clang-format on
                 bindParam(stmt, ":heading", log.m_compassHeading);
                 bindParam(stmt, ":pitch", log.m_compassPitch);
                 bindParam(stmt, ":roll", log.m_compassRoll);
                 bindParam(stmt, ":t_timestamp", log.m_timestamp_str);
 
-                if (checkRetCode(sqlite3_step(stmt)) == SQLITE_DONE) {
+                if (stepAndFinalize(stmt) == SQLITE_DONE) {
                     _compassModelId = compassModelId + logNumber;
                 }
-                checkRetCode(sqlite3_finalize(stmt));
             }
         }
 
-        do {
-            resultCode = sqlite3_exec(db, "COMMIT;", NULL, NULL, &m_error);
+        int _courseCalculationId = 0;
+        if (courseCalculationId) {  // clang-format off
+	        if (prepareStmt(db, "INSERT INTO "
+	            "dataLogs_course_calculation(distance_to_waypoint, course_to_steer, tack, going_starboard, t_timestamp) "
+	            "VALUES(:bearing_to_waypoint, :course_to_steer, :tack, :going_starboard, :t_timestamp);", &stmt
+	        )) {  // clang-format on
+                bindParam(stmt, ":distance_to_waypoint", log.m_distanceToWaypoint);
+                bindParam(stmt, ":bearing_to_waypoint", log.m_bearingToWaypoint);
+                bindParam(stmt, ":course_to_steer", log.m_courseToSteer);
+                bindParam(stmt, ":tack", log.m_tack);
+                bindParam(stmt, ":going_starboard", log.m_goingStarboard);
+                bindParam(stmt, ":t_timestamp", log.m_timestamp_str);
+            }
+            if (stepAndFinalize(stmt) == SQLITE_DONE) {
+                _courseCalculationId = courseCalculationId + logNumber;
+            }
+        }
+
+        int _marineSensorsId = 0;
+        if (marineSensorsId) {  // clang-format off
+	    	if (prepareStmt(db, "INSERT INTO "
+				"dataLogs_marine_sensors(temperature, conductivity, ph, salinity, t_timestamp) "
+	            "VALUES(:temperature, :conductivity, :ph, :salinity, :t_timestamp);", &stmt
+		    )) {  // clang-format on
+                bindParam(stmt, ":temperature", log.m_temperature);
+                bindParam(stmt, ":conductivity", log.m_conductivity);
+                bindParam(stmt, ":ph", log.m_ph);
+                bindParam(stmt, ":salinity", log.m_salinity);
+                bindParam(stmt, ":t_timestamp", log.m_timestamp_str);
+            }
+            if (stepAndFinalize(stmt) == SQLITE_DONE) {
+                _marineSensorsId = marineSensorsId + logNumber;
+            }
+        }
+
+        int _vesselStateId = 0;
+        if (vesselStateId) {  // clang-format off
+	    	if (prepareStmt(db, "INSERT INTO "
+	            "dataLogs_vessel_state(heading, latitude, longitude, speed, course, t_timestamp) "
+			    "VALUES(:heading, :latitude, :longitude, :speed, :course, :t_timestamp);", &stmt
+		    )) {  // clang-format on
+                bindParam(stmt, ":heading", log.m_vesselHeading);
+                bindParam(stmt, ":latitude", log.m_vesselLat);
+                bindParam(stmt, ":longitude", log.m_vesselLon);
+                bindParam(stmt, ":speed", log.m_vesselSpeed);
+                bindParam(stmt, ":course", log.m_vesselCourse);
+                bindParam(stmt, ":t_timestamp", log.m_timestamp_str);
+            }
+            if (stepAndFinalize(stmt) == SQLITE_DONE) {
+                _vesselStateId = vesselStateId + logNumber;
+            }
+        }
+
+        int _windStateId = 0;
+        if (windStateId) {  // clang-format off
+	    	if (prepareStmt(db, "INSERT INTO "
+	            "dataLogs_wind_state(true_wind_speed, true_wind_direction, apparent_wind_speed, apparent_wind_direction, t_timestamp) "
+			    "VALUES(:true_wind_speed, :true_wind_direction, :apparent_wind_speed, :apparent_wind_direction, :t_timestamp);", &stmt
+		    )) {  // clang-format on
+                bindParam(stmt, ":true_wind_speed", log.m_trueWindSpeed);
+                bindParam(stmt, ":true_wind_direction", log.m_trueWindDir);
+                bindParam(stmt, ":apparent_wind_speed", log.m_apparentWindSpeed);
+                bindParam(stmt, ":apparent_wind_direction", log.m_apparentWindDir);
+                bindParam(stmt, ":t_timestamp", log.m_timestamp_str);
+            }
+            if (stepAndFinalize(stmt) == SQLITE_DONE) {
+                _windStateId = windStateId + logNumber;
+            }
+        }
+
+	    int _windsensorId = 0;
+	    if (windsensorId) {  // clang-format off
+	    	if (prepareStmt(db, "INSERT INTO "
+	            "dataLogs_windsensor(direction, speed, temperature, t_timestamp) "
+			    "VALUES(:direction, :speed, :temperature, :t_timestamp);", &stmt
+		    )) {  // clang-format on
+			    bindParam(stmt, ":direction", log.m_windDir);
+			    bindParam(stmt, ":speed", log.m_windSpeed);
+			    bindParam(stmt, ":temperature", log.m_windTemp);
+			    bindParam(stmt, ":t_timestamp", log.m_timestamp_str);
+		    }
+		    if (stepAndFinalize(stmt) == SQLITE_DONE) {
+			    _windsensorId = windsensorId + logNumber;
+		    }
+	    }
+
+	    do {
+            resultCode = sqlite3_exec(db, "COMMIT TRANSACTION;", NULL, NULL, &m_error);
         } while (resultCode == SQLITE_BUSY);
 
         if (resultCode != SQLITE_OK) {
@@ -252,56 +339,12 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
                 sqlite3_free(m_error);
                 m_error = NULL;
             }
-            resultCode = sqlite3_exec(db, "ROLLBACK;", NULL, NULL, &m_error);
+            resultCode = sqlite3_exec(db, "ROLLBACK TRANSACTION;", NULL, NULL, &m_error);
             Logger::info("%s SQLite ROLLBACK returned %s (%d)", __PRETTY_FUNCTION__,
                          sqlite3_errstr(resultCode), resultCode);
         }
 
 
-        courseCalculationValues.str("");
-        courseCalculationValues << std::setprecision(10) << log.m_distanceToWaypoint << ", "
-                                << log.m_bearingToWaypoint << ", " << log.m_courseToSteer << ", "
-                                << log.m_tack << ", " << log.m_goingStarboard << ",'"
-                                << log.m_timestamp_str.c_str();
-
-        ss << "INSERT INTO "
-           << "dataLogs_course_calculation"
-           << " VALUES(NULL, " << courseCalculationValues.str() << "'); \n";
-
-        marineSensorsValues.str("");
-        marineSensorsValues << std::setprecision(10) << log.m_temperature << ", "
-                            << log.m_conductivity << ", " << log.m_ph << ", " << log.m_salinity
-                            << ",'" << log.m_timestamp_str.c_str();
-
-        ss << "INSERT INTO "
-           << "dataLogs_marine_sensors"
-           << " VALUES(NULL, " << marineSensorsValues.str() << "'); \n";
-
-        vesselStateValues.str("");
-        vesselStateValues << std::setprecision(10) << log.m_vesselHeading << ", " << log.m_vesselLat
-                          << ", " << log.m_vesselLon << ", " << log.m_vesselSpeed << ", "
-                          << log.m_vesselCourse << ",'" << log.m_timestamp_str.c_str();
-
-        ss << "INSERT INTO "
-           << "dataLogs_vessel_state"
-           << " VALUES(NULL, " << vesselStateValues.str() << "'); \n";
-
-        windStateValues.str("");
-        windStateValues << std::setprecision(10) << log.m_trueWindSpeed << ", " << log.m_trueWindDir
-                        << ", " << log.m_apparentWindSpeed << ", " << log.m_apparentWindDir << ",'"
-                        << log.m_timestamp_str.c_str();
-
-        ss << "INSERT INTO "
-           << "dataLogs_wind_state"
-           << " VALUES(NULL, " << windStateValues.str() << "'); \n";
-
-        windsensorValues.str("");
-        windsensorValues << std::setprecision(10) << log.m_windDir << ", " << log.m_windSpeed
-                         << ", " << log.m_windTemp << ",'" << log.m_timestamp_str.c_str();
-
-        ss << "INSERT INTO "
-           << "dataLogs_windsensor"
-           << " VALUES(NULL, " << windsensorValues.str() << "'); \n";
 
         // NEW FEATURE, CAREFUL WITH THE APOSTROPHE (added in dbloggernode.h for now, maybe add it
         // in getelementstr)
@@ -331,12 +374,11 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
         // std::endl; std::cout << "Full insert command line: " << ss.str() << std::endl;
 
         systemValues.str("");
-        systemValues << std::setprecision(10) << _actuatorFeedbackId << ", "
-                     << _compassModelId << ", " << courseCalculationId + logNumber
-                     << ", " << currentSensorsId + logNumber << ", " << gpsId + logNumber << ", "
-                     << marineSensorsId + logNumber << ", " << vesselStateId + logNumber << ", "
-                     << windStateId + logNumber << ", " << windsensorId + logNumber << ", "
-                     << currentMissionId;
+        systemValues << std::setprecision(10) << _actuatorFeedbackId << ", " << _compassModelId
+                     << ", " << _courseCalculationId << ", " << currentSensorsId + logNumber << ", "
+                     << gpsId + logNumber << ", " << _marineSensorsId << ", "
+                     << _vesselStateId << ", " << _windStateId << ", "
+                     << _windsensorId << ", " << currentMissionId;
 
         ss << "INSERT INTO "
            << "dataLogs_system"
