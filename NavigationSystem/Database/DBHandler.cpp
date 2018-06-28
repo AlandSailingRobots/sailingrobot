@@ -94,8 +94,8 @@ int DBHandler::paramNameIndex(sqlite3_stmt* stmt, const char* name) {
     return paramIndex;
 }
 
-int DBHandler::prepareStmt(sqlite3* db, const std::string& sql, sqlite3_stmt** stmt) {
-    int resultCode = sqlite3_prepare_v2(db, sql.c_str(), (int)sql.size(), stmt, NULL);
+int DBHandler::prepareStmtError(sqlite3 *db, const std::string &sql, sqlite3_stmt **stmt) {
+    int resultCode = checkRetCode(sqlite3_prepare_v2(db, sql.c_str(), (int)sql.size(), stmt, NULL));
     if (resultCode != SQLITE_OK) {
         Logger::error("%s SQL statement prepare error: %s on \"%s\"", __PRETTY_FUNCTION__,
                       sqlite3_errstr(resultCode), sql.c_str());
@@ -197,15 +197,11 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
         sqlite3_stmt* stmt = NULL;
         int resultCode = 0;
 
-        // int _currentMissionId = 0;
-
-        /*   */
-
         sqlite3_exec(db, "BEGIN TRANSACTION;", NULL, NULL, &m_error);
 
         int _actuatorFeedbackId = 0;
         if (actuatorFeedbackId) {  // clang-format off
-            if (prepareStmt(db, "INSERT INTO "
+            if (!prepareStmtError(db, "INSERT INTO "
                 "dataLogs_actuator_feedback(rudder_position, wingsail_position, rc_on, wind_vane_angle, t_timestamp) "
                 "VALUES(:rudder_position, :wingsail_position, :rc_on, :wind_vane_angle, :t_timestamp);", &stmt
             )) {  // clang-format on
@@ -223,7 +219,7 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
 
         int _compassModelId = 0;
         if (compassModelId) {  // clang-format off
-            if (prepareStmt(db, "INSERT INTO "
+            if (!prepareStmtError(db, "INSERT INTO "
                 "dataLogs_compass(heading, pitch, roll, t_timestamp) "
                 "VALUES(:heading, :pitch, :roll, :t_timestamp);", &stmt
             )) {  // clang-format on
@@ -240,9 +236,9 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
 
         int _courseCalculationId = 0;
         if (courseCalculationId) {  // clang-format off
-	        if (prepareStmt(db, "INSERT INTO "
+	        if (!prepareStmtError(db, "INSERT INTO "
 	            "dataLogs_course_calculation(distance_to_waypoint, course_to_steer, tack, going_starboard, t_timestamp) "
-	            "VALUES(:bearing_to_waypoint, :course_to_steer, :tack, :going_starboard, :t_timestamp);", &stmt
+	            "VALUES(:distance_to_waypoint, :bearing_to_waypoint, :course_to_steer, :tack, :going_starboard, :t_timestamp);", &stmt
 	        )) {  // clang-format on
                 bindParam(stmt, ":distance_to_waypoint", log.m_distanceToWaypoint);
                 bindParam(stmt, ":bearing_to_waypoint", log.m_bearingToWaypoint);
@@ -258,7 +254,7 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
 
         int _marineSensorsId = 0;
         if (marineSensorsId) {  // clang-format off
-	    	if (prepareStmt(db, "INSERT INTO "
+	    	if (!prepareStmtError(db, "INSERT INTO "
 				"dataLogs_marine_sensors(temperature, conductivity, ph, salinity, t_timestamp) "
 	            "VALUES(:temperature, :conductivity, :ph, :salinity, :t_timestamp);", &stmt
 		    )) {  // clang-format on
@@ -275,7 +271,7 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
 
         int _vesselStateId = 0;
         if (vesselStateId) {  // clang-format off
-	    	if (prepareStmt(db, "INSERT INTO "
+	    	if (!prepareStmtError(db, "INSERT INTO "
 	            "dataLogs_vessel_state(heading, latitude, longitude, speed, course, t_timestamp) "
 			    "VALUES(:heading, :latitude, :longitude, :speed, :course, :t_timestamp);", &stmt
 		    )) {  // clang-format on
@@ -293,7 +289,7 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
 
         int _windStateId = 0;
         if (windStateId) {  // clang-format off
-	    	if (prepareStmt(db, "INSERT INTO "
+	    	if (!prepareStmtError(db, "INSERT INTO "
 	            "dataLogs_wind_state(true_wind_speed, true_wind_direction, apparent_wind_speed, apparent_wind_direction, t_timestamp) "
 			    "VALUES(:true_wind_speed, :true_wind_direction, :apparent_wind_speed, :apparent_wind_direction, :t_timestamp);", &stmt
 		    )) {  // clang-format on
@@ -310,7 +306,7 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
 
 	    int _windsensorId = 0;
 	    if (windsensorId) {  // clang-format off
-	    	if (prepareStmt(db, "INSERT INTO "
+	    	if (!prepareStmtError(db, "INSERT INTO "
 	            "dataLogs_windsensor(direction, speed, temperature, t_timestamp) "
 			    "VALUES(:direction, :speed, :temperature, :t_timestamp);", &stmt
 		    )) {  // clang-format on
@@ -326,7 +322,7 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
 
 	    int _gpsId = 0;
 	    if (gpsId) {  // clang-format off
-	    	if (prepareStmt(db, "INSERT INTO "
+	    	if (!prepareStmtError(db, "INSERT INTO "
 	            "dataLogs_gps (has_fix, online, time, latitude, longitude, speed, course, satellites_used, route_started, t_timestamp) "
 			    "VALUES(:has_fix, :online, :time, :latitude, :longitude, :speed, :course, :satellites_used, :route_started, :t_timestamp);", &stmt
 		    )) {  // clang-format on
@@ -348,7 +344,7 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
 
 	    int _currentSensorsId = 0;
 	    if (currentSensorsId) {  // clang-format off
-	    	if (prepareStmt(db, "INSERT INTO "
+	    	if (!prepareStmtError(db, "INSERT INTO "
 	            "dataLogs_current_sensors(current, voltage, element, element_str, t_timestamp) "
 			    "VALUES(:current, :voltage, :element, :element_str, :t_timestamp);", &stmt
 		    )) {  // clang-format on
@@ -364,7 +360,7 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
 	    }
 
 	    // clang-format off
-	    if (prepareStmt(db, "INSERT INTO "
+	    if (!prepareStmtError(db, "INSERT INTO "
 			"dataLogs_system(actuator_feedback_id, compass_id, course_calculation_id, current_sensors_id, gps_id, marine_sensors_id, vessel_state_id, wind_state_id, windsensor_id, current_mission_id) "
             "VALUES(:actuator_feedback_id, :compass_id, :course_calculation_id, :current_sensors_id, :gps_id, :marine_sensors_id, :vessel_state_id, :wind_state_id, :windsensor_id, :current_mission_id);", &stmt
 	    )) {  // clang-format on

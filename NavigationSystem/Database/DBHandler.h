@@ -181,7 +181,7 @@ class DBHandler {
     int checkRetCode(const int resultCode) const;
 
     int paramNameIndex(sqlite3_stmt *stmt, const char *name);
-    int prepareStmt(sqlite3 *db, const std::string &sql, sqlite3_stmt **stmt);
+    int prepareStmtError(sqlite3 *db, const std::string &sql, sqlite3_stmt **stmt);
     int bindParam(sqlite3_stmt *stmt, const char *name, const int value);
     int bindParam(sqlite3_stmt *stmt, const char *name, const double value);
 	int bindParam(sqlite3_stmt *stmt, const char *name, const std::string text);
