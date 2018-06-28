@@ -199,9 +199,7 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
 
         // int _currentMissionId = 0;
 
-        /*
-        int _currentSensorsId = 0;
-        int _gpsId = 0;  */
+        /*   */
 
         sqlite3_exec(db, "BEGIN TRANSACTION;", NULL, NULL, &m_error);
 
@@ -326,6 +324,68 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
 		    }
 	    }
 
+	    int _gpsId = 0;
+	    if (gpsId) {  // clang-format off
+	    	if (prepareStmt(db, "INSERT INTO "
+	            "dataLogs_gps (has_fix, online, time, latitude, longitude, speed, course, satellites_used, route_started, t_timestamp) "
+			    "VALUES(:has_fix, :online, :time, :latitude, :longitude, :speed, :course, :satellites_used, :route_started, :t_timestamp);", &stmt
+		    )) {  // clang-format on
+			    bindParam(stmt, ":has_fix", log.m_gpsHasFix);
+			    bindParam(stmt, ":online", log.m_gpsOnline);
+			    bindParam(stmt, ":time", log.m_timestamp_str);  // TODO: This could be the GPS time instead
+			    bindParam(stmt, ":latitude", log.m_gpsLat);
+			    bindParam(stmt, ":longitude", log.m_gpsLon);
+			    bindParam(stmt, ":speed", log.m_gpsSpeed);
+			    bindParam(stmt, ":course", log.m_gpsCourse);
+			    bindParam(stmt, ":satellites_used", log.m_gpsSatellite);
+			    bindParam(stmt, ":route_started", log.m_routeStarted);
+			    bindParam(stmt, ":t_timestamp", log.m_timestamp_str);
+		    }
+		    if (stepAndFinalize(stmt) == SQLITE_DONE) {
+			    _gpsId = gpsId + logNumber;
+		    }
+	    }
+
+	    int _currentSensorsId = 0;
+	    if (currentSensorsId) {  // clang-format off
+	    	if (prepareStmt(db, "INSERT INTO "
+	            "dataLogs_current_sensors(current, voltage, element, element_str, t_timestamp) "
+			    "VALUES(:current, :voltage, :element, :element_str, :t_timestamp);", &stmt
+		    )) {  // clang-format on
+			    bindParam(stmt, ":current", log.m_current);
+			    bindParam(stmt, ":voltage", log.m_voltage);
+			    bindParam(stmt, ":element", log.m_element);
+			    bindParam(stmt, ":element_str", log.m_element_str);
+			    bindParam(stmt, ":t_timestamp", log.m_timestamp_str);
+		    }
+		    if (stepAndFinalize(stmt) == SQLITE_DONE) {
+			    _currentSensorsId = currentSensorsId + logNumber;
+		    }
+	    }
+
+	    // clang-format off
+	    if (prepareStmt(db, "INSERT INTO "
+			"dataLogs_system(actuator_feedback_id, compass_id, course_calculation_id, current_sensors_id, gps_id, marine_sensors_id, vessel_state_id, wind_state_id, windsensor_id, current_mission_id) "
+            "VALUES(:actuator_feedback_id, :compass_id, :course_calculation_id, :current_sensors_id, :gps_id, :marine_sensors_id, :vessel_state_id, :wind_state_id, :windsensor_id, :current_mission_id);", &stmt
+	    )) {  // clang-format on
+		    bindParam(stmt, ":actuator_feedback_id", _actuatorFeedbackId);
+		    bindParam(stmt, ":compass_id", _compassModelId);
+		    bindParam(stmt, ":course_calculation_id", _courseCalculationId);
+		    bindParam(stmt, ":current_sensors_id", _currentSensorsId);
+		    bindParam(stmt, ":gps_id", _gpsId);
+		    bindParam(stmt, ":marine_sensors_id", _marineSensorsId);
+		    bindParam(stmt, ":vessel_state_id", _vesselStateId);
+		    bindParam(stmt, ":wind_state_id", _windStateId);
+		    bindParam(stmt, ":windsensor_id", _windsensorId);
+		    bindParam(stmt, ":current_mission_id", currentMissionId);
+
+		    if (stepAndFinalize(stmt) == SQLITE_DONE) {
+			    m_latestDataLogId = getTableId("dataLogs_system");
+		    } else {
+			    m_latestDataLogId = 0;
+			    Logger::error("%s Error, failed to create system log index!", __PRETTY_FUNCTION__);
+		    }
+	    }
 	    do {
             resultCode = sqlite3_exec(db, "COMMIT TRANSACTION;", NULL, NULL, &m_error);
         } while (resultCode == SQLITE_BUSY);
@@ -343,56 +403,7 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
             Logger::info("%s SQLite ROLLBACK returned %s (%d)", __PRETTY_FUNCTION__,
                          sqlite3_errstr(resultCode), resultCode);
         }
-
-
-
-        // NEW FEATURE, CAREFUL WITH THE APOSTROPHE (added in dbloggernode.h for now, maybe add it
-        // in getelementstr)
-        currentSensorsValues.str("");
-        currentSensorsValues << std::setprecision(10) << log.m_current << ", " << log.m_voltage
-                             << ", " << log.m_element << ", '"  // HERE (moved to the m_element_str)
-                             << log.m_element_str.c_str()
-                             << "', '"  // AND HERE (moved to the m_element_str)
-                             << log.m_timestamp_str.c_str();
-
-        ss << "INSERT INTO "
-           << "dataLogs_current_sensors"
-           << " VALUES(NULL, " << currentSensorsValues.str() << "'); \n";
-
-        gpsValues.str("");
-        gpsValues << std::setprecision(10) << log.m_gpsHasFix << ", " << log.m_gpsOnline << ",'"
-                  << log.m_timestamp_str.c_str() << "', " << log.m_gpsLat << ", " << log.m_gpsLon
-                  << ", " << log.m_gpsSpeed << ", " << log.m_gpsCourse << ", " << log.m_gpsSatellite
-                  << ", " << log.m_routeStarted << ",'" << log.m_timestamp_str.c_str();
-
-        ss << "INSERT INTO "
-           << "dataLogs_gps"
-           << " VALUES(NULL, " << gpsValues.str() << "'); \n";
-
-        // Logger::info("Current sensors database insert command: %s \n", ss);
-        // std::cout << "Current sensors database insert command: " << currentSensorsValues.str() <<
-        // std::endl; std::cout << "Full insert command line: " << ss.str() << std::endl;
-
-        systemValues.str("");
-        systemValues << std::setprecision(10) << _actuatorFeedbackId << ", " << _compassModelId
-                     << ", " << _courseCalculationId << ", " << currentSensorsId + logNumber << ", "
-                     << gpsId + logNumber << ", " << _marineSensorsId << ", "
-                     << _vesselStateId << ", " << _windStateId << ", "
-                     << _windsensorId << ", " << currentMissionId;
-
-        ss << "INSERT INTO "
-           << "dataLogs_system"
-           << " VALUES(NULL, " << systemValues.str() << "); \n";
-
-        if (DBTransaction(ss.str())) {
-            m_latestDataLogId = getTableId("dataLogs_system");
-        } else {
-            m_latestDataLogId = 0;
-            Logger::error("%s Error, failed to insert log Request: %s", __PRETTY_FUNCTION__,
-                          ss.str().c_str());
-        }
     }
-
     DBDisconnect();
 }
 
