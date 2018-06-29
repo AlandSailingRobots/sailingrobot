@@ -43,9 +43,15 @@ bool HTTPSyncNode::init() {
     m_initialised = false;
     m_reportedConnectError = false;
 
+/*
     m_serverURL = m_dbHandler->retrieveCell("config_httpsync", "1", "srv_addr");
     m_shipID = m_dbHandler->retrieveCell("config_httpsync", "1", "boat_id");
     m_shipPWD = m_dbHandler->retrieveCell("config_httpsync", "1", "boat_pwd");
+*/
+	// TODO this should be a single query
+	m_serverURL = m_dbHandler->tableColumnValueText("config_httpsync", "srv_addr");
+	m_shipID = m_dbHandler->tableColumnValueText("config_httpsync", "boat_id");
+	m_shipPWD = m_dbHandler->tableColumnValueText("config_httpsync", "boat_pwd");
     updateConfigsFromDB();
 
     m_initialised = true;

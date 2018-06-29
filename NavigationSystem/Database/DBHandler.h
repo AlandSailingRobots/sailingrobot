@@ -169,10 +169,7 @@ class DBHandler {
                            bool& foundPrev);
 
     bool insert(std::string table, std::string fields, std::string values);
-    bool changeOneValue(std::string table,
-                        std::string id,
-                        std::string newValue,
-                        std::string colName);
+    bool changeOneValue(std::string table, std::string newValue, std::string colName, int id);
 
     std::string getWaypoints();
 
@@ -186,4 +183,9 @@ class DBHandler {
     int bindParam(sqlite3_stmt *stmt, const char *name, const double value);
 	int bindParam(sqlite3_stmt *stmt, const char *name, const std::string text);
 	int stepAndFinalize(sqlite3_stmt *stmt) const;
+
+	int queryTableColumnValue(sqlite3_stmt **stmt, const std::string &table, const std::string &column, const int id);
+	int         tableColumnValueInt(const std::string &table, const std::string &column, const int id = 1);
+	double      tableColumnValueDouble(const std::string &table, const std::string &column, const int id = 1);
+	std::string tableColumnValueText(const std::string &table, const std::string &column, const int id = 1);
 };
