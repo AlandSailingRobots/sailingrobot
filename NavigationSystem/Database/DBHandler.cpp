@@ -361,6 +361,7 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
     DBDisconnect();
 }
 
+// TODO: this is next up for a rewrite as it crashes. JSON should not be done here!
 void DBHandler::getDataAsJson(std::string select,
                               std::string table,
                               std::string key,
