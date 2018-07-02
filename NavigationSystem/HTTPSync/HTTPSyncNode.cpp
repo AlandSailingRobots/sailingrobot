@@ -179,7 +179,7 @@ bool HTTPSyncNode::checkIfNewConfigs() {
     std::string result = getData("checkIfNewConfigs");
 
     if (result.length()) {
-	    Json js = Json::parse(result);
+	    JSON js = JSON::parse(result);
 	    if (safe_stoi(js["configs_updated"])) {
 		    return true;
 	    }
@@ -191,7 +191,7 @@ bool HTTPSyncNode::checkIfNewWaypoints() {
     std::string result = getData("checkIfNewWaypoints");
 
     if (result.length()) {
-	    Json js = Json::parse(result);
+	    JSON js = JSON::parse(result);
 	    if (safe_stoi(js["route_updated"])) {
 	    	return true;
 	    }

@@ -9,7 +9,7 @@
 #include "../Libs/json/include/nlohmann/json.hpp"
 #include "../Messages/CurrentSensorDataMsg.h"
 #include "../Messages/WindStateMsg.h"
-using Json = nlohmann::json;
+using JSON = nlohmann::json;
 
 struct LogItem {
     double m_rudderPosition;  // dataLogs_actuator_feedback
@@ -81,7 +81,7 @@ class DBHandler {
                        std::string table,
                        std::string key,
                        std::string id,
-                       Json& js,
+                       JSON& js,
                        bool useArray);
 
     // gets the id column from a given table
@@ -119,7 +119,7 @@ class DBHandler {
 
     // updates table with json string (data)
     bool updateTableJson(std::string table, std::string data);
-    bool updateTableJsonObject(std::string table, Json data);
+    bool updateTableJsonObject(std::string table, JSON data);
 
     // updates table using values given
     bool updateTable(std::string table, std::string column, std::string value, std::string id);
@@ -174,8 +174,14 @@ class DBHandler {
     int bindParam(sqlite3_stmt *stmt, const char *name, const double value);
 	int bindParam(sqlite3_stmt *stmt, const char *name, const std::string text);
 	int stepAndFinalize(sqlite3_stmt *stmt) const;
+	int DbStmtSQLIntsDoublesStrings(sqlite3 *db,
+	                                sqlite3_stmt **stmt,
+	                                const std::string &sql,
+	                                const std::vector<std::tuple<const char *, int>> ints = {},
+	                                const std::vector<std::tuple<const char *, double>> doubles = {},
+	                                const std::vector<std::tuple<const char *, std::string>> strings = {});
 
-	int queryTableColumnValue(sqlite3_stmt **stmt, const std::string &table, const std::string &column, const int id);
+	int tableColumnInt(sqlite3_stmt **stmt, const std::string &selector, const std::string &from, const int id);
 
 	// retrieve one value from a table as integer
 	int         tableColumnInt(const std::string &table, const std::string &column, const int id = 1);
@@ -185,4 +191,7 @@ class DBHandler {
 
 	// retrieve one value from a table as string
 	std::string tableColumnText(const std::string &table, const std::string &column, const int id = 1);
+
+	// retreive rows from a table
+	std::vector<std::vector<std::string>> rowsAsText(const std::string &from);
 };
