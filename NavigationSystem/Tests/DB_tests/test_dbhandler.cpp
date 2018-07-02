@@ -95,7 +95,7 @@ TEST_CASE("DBhandler")
 
 	}
 
-	SECTION("retrieveCellAsInt function")
+	SECTION("tableColumnValueInt function")
 	{
 
 		DBHandler db("testdb.db");

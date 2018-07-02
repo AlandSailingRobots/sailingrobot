@@ -119,7 +119,7 @@ uint8_t &PressureSource, double &Pressure)
 }
 
 void CANWindsensorNode::updateConfigsFromDB() {
-    m_LoopTime = m_db.retrieveCellAsDouble("config_wind_sensor","1","loop_time");
+    m_LoopTime = m_db.tableColumnValueDouble("config_wind_sensor", "loop_time", "1");
 }
 
 void CANWindsensorNode::processMessage(const Message* message) {

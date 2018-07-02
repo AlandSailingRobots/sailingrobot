@@ -580,26 +580,6 @@ bool DBHandler::updateWaypoints(std::string waypoints) {
     return true;
 }
 
-int DBHandler::retrieveCellAsInt(std::string table, std::string id, std::string column) {
-    std::string data = retrieveCell(table, id, column);
-    if (data.size() > 0) {
-        return strtol(data.c_str(), NULL, 10);
-    } else {
-        Logger::error("%s, Error: No data in cell ", __PRETTY_FUNCTION__);
-        return 0;
-    }
-}
-
-double DBHandler::retrieveCellAsDouble(std::string table, std::string id, std::string column) {
-    std::string data = retrieveCell(table, id, column);
-    if (data.size() > 0) {
-        return strtod(data.c_str(), NULL);
-    } else {
-        Logger::error("%s, Error: No data in cell ", __PRETTY_FUNCTION__);
-        return 0;
-    }
-}
-
 void DBHandler::clearTable(std::string table) {
     // If no table to delete, doesn't matter
     DBTransaction("DELETE FROM " + table + ";");
@@ -1011,22 +991,19 @@ bool DBHandler::getWaypointValues(int& nextId,
 
     // Set values to next waypoint
     nextId = safe_stoi(results[1]);
-
     nextLongitude = atof(retrieveCell("current_Mission", results[1], "longitude").c_str());
     nextLatitude = atof(retrieveCell("current_Mission", results[1], "latitude").c_str());
-    nextDeclination = retrieveCellAsInt("current_Mission", results[1], "declination");
-    nextRadius = retrieveCellAsInt("current_Mission", results[1], "radius");
-    nextStayTime = retrieveCellAsInt("current_Mission", results[1], "stay_time");
-    isCheckpoint = retrieveCellAsInt("current_Mission", results[1], "is_checkpoint");
+    nextDeclination = tableColumnValueInt("current_Mission", "declination", safe_stoi(results[1]));
+    nextRadius = tableColumnValueInt("current_Mission", "radius", safe_stoi(results[1]));
+    nextStayTime = tableColumnValueInt("current_Mission", "stay_time", safe_stoi(results[1]));
+    isCheckpoint = tableColumnValueInt("current_Mission", "is_checkpoint", safe_stoi(results[1]));
 
-    if (foundPrev)  // Set values to next waypoint if harvested waypoint found
-    {
+    if (foundPrev) { // Set values to next waypoint if harvested waypoint found
         prevId = safe_stoi(results2[1]);
-
         prevLongitude = atof(retrieveCell("current_Mission", results2[1], "longitude").c_str());
         prevLatitude = atof(retrieveCell("current_Mission", results2[1], "latitude").c_str());
-        prevDeclination = retrieveCellAsInt("current_Mission", results2[1], "declination");
-        prevRadius = retrieveCellAsInt("current_Mission", results2[1], "radius");
+        prevDeclination = tableColumnValueInt("current_Mission", "declination", safe_stoi(results2[1]));
+        prevRadius = tableColumnValueInt("current_Mission", "radius", safe_stoi(results2[1]));
     }
 
     return true;
@@ -1151,3 +1128,26 @@ std::string DBHandler::retrieveCell(std::string table, std::string id, std::stri
 
     return results[1];
 }
+
+/*
+int DBHandler::tableColumnValueInt(std::string table, std::string column, int id) {
+	std::string data = retrieveCell(table, id, column);
+	if (data.size() > 0) {
+		return strtol(data.c_str(), NULL, 10);
+	} else {
+		Logger::error("%s, Error: No data in cell ", __PRETTY_FUNCTION__);
+		return 0;
+	}
+}
+*/
+
+/*
+double DBHandler::tableColumnValueDouble(std::string table, std::string column, std::string id) {
+	std::string data = retrieveCell(table, id, column);
+	if (data.size() > 0) {
+		return strtod(data.c_str(), NULL);
+	} else {
+		Logger::error("%s, Error: No data in cell ", __PRETTY_FUNCTION__);
+		return 0;
+	}
+}*/
