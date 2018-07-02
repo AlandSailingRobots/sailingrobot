@@ -27,9 +27,9 @@ AISProcessing::AISProcessing(MessageBus& msgBus, DBHandler& dbhandler, Collidabl
   }
 
   void AISProcessing::updateConfigsFromDB(){
-      m_LoopTime = m_db.tableColumnValueDouble("config_ais_processing", "loop_time");
-      m_Radius = m_db.tableColumnValueInt("config_ais_processing", "radius");
-      m_MMSI = m_db.tableColumnValueInt("config_ais_processing", "mmsi_aspire");
+      m_LoopTime = m_db.tableColumnDouble("config_ais_processing", "loop_time");
+      m_Radius = m_db.tableColumnInt("config_ais_processing", "radius");
+      m_MMSI = m_db.tableColumnInt("config_ais_processing", "mmsi_aspire");
   }
 
   bool AISProcessing::init() {

@@ -75,7 +75,7 @@ void LocalNavigationModule::start()
 
 ///----------------------------------------------------------------------------------
 void LocalNavigationModule::updateConfigsFromDB(){
-    m_LoopTime = m_db.tableColumnValueDouble("config_voter_system", "loop_time", "1");
+    m_LoopTime = m_db.tableColumnDouble("config_voter_system", "loop_time", "1");
 }
 
 ///----------------------------------------------------------------------------------

@@ -32,8 +32,8 @@ void DataCollectionMgrNode::processMessage(const Message* msg) {
 }
 
 void DataCollectionMgrNode::readConfig() {
-	m_timeInterval = m_db.tableColumnValueInt("config_marine_sensors", "time_interval");
-	m_measureAtCheckpoint = m_db.tableColumnValueInt("config_marine_sensors", "measure_at_checkpoint");
+	m_timeInterval = m_db.tableColumnInt("config_marine_sensors", "time_interval");
+	m_measureAtCheckpoint = m_db.tableColumnInt("config_marine_sensors", "measure_at_checkpoint");
 }
 
 void DataCollectionMgrNode::sendIntervalMessage() {

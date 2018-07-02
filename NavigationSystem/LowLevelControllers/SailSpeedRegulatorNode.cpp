@@ -87,9 +87,9 @@ void SailSpeedRegulatorNode::processMessage( const Message* msg)
 ///----------------------------------------------------------------------------------
 void SailSpeedRegulatorNode::updateConfigsFromDB()
 {
-    m_LoopTime = 0.5;//m_db.tableColumnValueDouble("config_sail_control","1","loop_time");
-    m_MaxSailAngle = m_db.tableColumnValueInt("config_sail_control", "max_sail_angle", "1");
-    m_MinSailAngle = m_db.tableColumnValueInt("config_sail_control", "min_sail_angle", "1");
+    m_LoopTime = 0.5;//m_db.tableColumnDouble("config_sail_control","1","loop_time");
+    m_MaxSailAngle = m_db.tableColumnInt("config_sail_control", "max_sail_angle", "1");
+    m_MinSailAngle = m_db.tableColumnInt("config_sail_control", "min_sail_angle", "1");
 }
 
 ///----------------------------------------------------------------------------------

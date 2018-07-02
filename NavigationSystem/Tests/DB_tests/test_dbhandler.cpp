@@ -30,7 +30,7 @@ TEST_CASE("DBhandler")
 	SECTION("Open a connection to a non existing database")
 	{
 		DBHandler db("doesnotexist");
-		// REQUIRE_THROWS(db.retrieveCell("mock", "1", "gps")); // No mock in DB
+		// REQUIRE_THROWS(db.tableColumnText("mock", "1", "gps")); // No mock in DB
 	}
 
 	SECTION("Delete query on a table that doesnt exist")
@@ -86,7 +86,7 @@ TEST_CASE("DBhandler")
 
 	}
 
-	SECTION("retrieveCell function")
+	SECTION("tableColumnText function")
 	{
 
 		DBHandler db("testdb.db");
@@ -95,7 +95,7 @@ TEST_CASE("DBhandler")
 
 	}
 
-	SECTION("tableColumnValueInt function")
+	SECTION("tableColumnInt function")
 	{
 
 		DBHandler db("testdb.db");

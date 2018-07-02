@@ -194,7 +194,7 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
         int _courseCalculationId = 0;
         if (courseCalculationId) {  // clang-format off
 	        if (!prepareStmtError(db, "INSERT INTO "
-	            "dataLogs_course_calculation(distance_to_waypoint, course_to_steer, tack, going_starboard, t_timestamp) "
+	            "dataLogs_course_calculation(distance_to_waypoint, bearing_to_waypoint, course_to_steer, tack, going_starboard, t_timestamp) "
 	            "VALUES(:distance_to_waypoint, :bearing_to_waypoint, :course_to_steer, :tack, :going_starboard, :t_timestamp);", &stmt
 	        )) {  // clang-format on
                 bindParam(stmt, ":distance_to_waypoint", log.m_distanceToWaypoint);
@@ -991,19 +991,19 @@ bool DBHandler::getWaypointValues(int& nextId,
 
     // Set values to next waypoint
     nextId = safe_stoi(results[1]);
-    nextLongitude = atof(retrieveCell("current_Mission", results[1], "longitude").c_str());
-    nextLatitude = atof(retrieveCell("current_Mission", results[1], "latitude").c_str());
-    nextDeclination = tableColumnValueInt("current_Mission", "declination", safe_stoi(results[1]));
-    nextRadius = tableColumnValueInt("current_Mission", "radius", safe_stoi(results[1]));
-    nextStayTime = tableColumnValueInt("current_Mission", "stay_time", safe_stoi(results[1]));
-    isCheckpoint = tableColumnValueInt("current_Mission", "is_checkpoint", safe_stoi(results[1]));
+    nextLongitude = tableColumnDouble("current_Mission", "longitude", safe_stoi(results[1]));
+    nextLatitude = tableColumnDouble("current_Mission", "latitude", safe_stoi(results[1]));
+    nextDeclination = tableColumnInt("current_Mission", "declination", safe_stoi(results[1]));
+    nextRadius = tableColumnInt("current_Mission", "radius", safe_stoi(results[1]));
+    nextStayTime = tableColumnInt("current_Mission", "stay_time", safe_stoi(results[1]));
+    isCheckpoint = tableColumnInt("current_Mission", "is_checkpoint", safe_stoi(results[1]));
 
     if (foundPrev) { // Set values to next waypoint if harvested waypoint found
         prevId = safe_stoi(results2[1]);
-        prevLongitude = atof(retrieveCell("current_Mission", results2[1], "longitude").c_str());
-        prevLatitude = atof(retrieveCell("current_Mission", results2[1], "latitude").c_str());
-        prevDeclination = tableColumnValueInt("current_Mission", "declination", safe_stoi(results2[1]));
-        prevRadius = tableColumnValueInt("current_Mission", "radius", safe_stoi(results2[1]));
+        prevLongitude = tableColumnDouble("current_Mission", "longitude", safe_stoi(results2[1]));
+        prevLatitude = tableColumnDouble("current_Mission", "latitude", safe_stoi(results2[1]));
+        prevDeclination = tableColumnInt("current_Mission", "declination", safe_stoi(results2[1]));
+        prevRadius = tableColumnInt("current_Mission", "radius", safe_stoi(results2[1]));
     }
 
     return true;
@@ -1067,27 +1067,27 @@ int DBHandler::queryTableColumnValue(sqlite3_stmt** stmt,
     return retCode;
 }
 
-int DBHandler::tableColumnValueInt(const std::string &table,
-                                   const std::string &column,
-                                   const int id) {
+int DBHandler::tableColumnInt(const std::string &table,
+                              const std::string &column,
+                              const int id) {
     sqlite3_stmt* stmt = NULL;
     queryTableColumnValue(&stmt, table, column, id);
     int retVal = sqlite3_column_int(stmt, 0);
     return retVal;
 }
 
-double DBHandler::tableColumnValueDouble(const std::string &table,
-                                         const std::string &column,
-                                         const int id) {
+double DBHandler::tableColumnDouble(const std::string &table,
+                                    const std::string &column,
+                                    const int id) {
     sqlite3_stmt* stmt = NULL;
     queryTableColumnValue(&stmt, table, column, id);
     double retVal = sqlite3_column_double(stmt, 0);
     return retVal;
 }
 
-std::string DBHandler::tableColumnValueText(const std::string &table,
-                                            const std::string &column,
-                                            const int id) {
+std::string DBHandler::tableColumnText(const std::string &table,
+                                       const std::string &column,
+                                       const int id) {
     sqlite3_stmt* stmt = NULL;
     std::string text;
 
@@ -1104,7 +1104,7 @@ std::string DBHandler::tableColumnValueText(const std::string &table,
     return text;
 }
 
-std::string DBHandler::retrieveCell(std::string table, std::string id, std::string column) {
+/*std::string DBHandler::tableColumnText(std::string table, std::string column, std::string id) {
     std::string query = "SELECT " + column + " FROM " + table + " WHERE id=" + id + ";";
 
     int rows, columns;
@@ -1127,11 +1127,11 @@ std::string DBHandler::retrieveCell(std::string table, std::string id, std::stri
     }
 
     return results[1];
-}
+}*/
 
 /*
-int DBHandler::tableColumnValueInt(std::string table, std::string column, int id) {
-	std::string data = retrieveCell(table, id, column);
+int DBHandler::tableColumnInt(std::string table, std::string column, int id) {
+	std::string data = tableColumnText(table, id, column);
 	if (data.size() > 0) {
 		return strtol(data.c_str(), NULL, 10);
 	} else {
@@ -1142,8 +1142,8 @@ int DBHandler::tableColumnValueInt(std::string table, std::string column, int id
 */
 
 /*
-double DBHandler::tableColumnValueDouble(std::string table, std::string column, std::string id) {
-	std::string data = retrieveCell(table, id, column);
+double DBHandler::tableColumnDouble(std::string table, std::string column, std::string id) {
+	std::string data = tableColumnText(table, id, column);
 	if (data.size() > 0) {
 		return strtod(data.c_str(), NULL);
 	} else {

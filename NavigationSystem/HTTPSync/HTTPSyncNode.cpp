@@ -46,12 +46,12 @@ bool HTTPSyncNode::init() {
     /*
         m_serverURL = m_dbHandler->retrieveCell("config_httpsync", "1", "srv_addr");
         m_shipID = m_dbHandler->retrieveCell("config_httpsync", "1", "boat_id");
-        m_shipPWD = m_dbHandler->retrieveCell("config_httpsync", "1", "boat_pwd");
+        m_shipPWD = m_dbHandler->tableColumnText("config_httpsync", "1", "boat_pwd");
     */
     // TODO this should be a single query
-    m_serverURL = m_dbHandler->tableColumnValueText("config_httpsync", "srv_addr");
-    m_shipID = m_dbHandler->tableColumnValueText("config_httpsync", "boat_id");
-    m_shipPWD = m_dbHandler->tableColumnValueText("config_httpsync", "boat_pwd");
+    m_serverURL = m_dbHandler->tableColumnText("config_httpsync", "srv_addr");
+    m_shipID = m_dbHandler->tableColumnText("config_httpsync", "boat_id");
+    m_shipPWD = m_dbHandler->tableColumnText("config_httpsync", "boat_pwd");
     updateConfigsFromDB();
 
     m_initialised = true;
@@ -74,10 +74,10 @@ void HTTPSyncNode::stop() {
 }
 
 void HTTPSyncNode::updateConfigsFromDB() {
-    m_removeLogs = m_dbHandler->tableColumnValueInt("config_httpsync", "remove_logs");
+    m_removeLogs = m_dbHandler->tableColumnInt("config_httpsync", "remove_logs");
     m_pushOnlyLatestLogs =
-        m_dbHandler->tableColumnValueInt("config_httpsync", "push_only_latest_logs");
-    m_LoopTime = m_dbHandler->tableColumnValueInt("config_httpsync", "loop_time");
+      m_dbHandler->tableColumnInt("config_httpsync", "push_only_latest_logs");
+    m_LoopTime = m_dbHandler->tableColumnInt("config_httpsync", "loop_time");
 }
 
 void HTTPSyncNode::processMessage(const Message* msgPtr) {

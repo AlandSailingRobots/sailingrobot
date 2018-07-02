@@ -189,7 +189,7 @@ int main(int argc, char *argv[])
 		acceleration = 0;
 		ActuatorNode rudder(messageBus, NodeID::RudderActuator, channel, speed, acceleration);
 
-		MaestroController::init(dbHandler.retrieveCell("config_maestro_controller", "1", "port"));
+		MaestroController::init(dbHandler.tableColumnText("config_maestro_controller", "port"));
 
 		XbeeSyncNode xbee(messageBus, dbHandler);
 	#endif

@@ -69,12 +69,12 @@ void LineFollowNode::stop()
 
 void LineFollowNode::updateConfigsFromDB()
 {
-    m_LoopTime = m_db.tableColumnValueDouble("config_line_follow", "loop_time");
+    m_LoopTime = m_db.tableColumnDouble("config_line_follow", "loop_time");
     m_CloseHauledAngle = Utility::degreeToRadian(
-      m_db.tableColumnValueDouble("config_line_follow", "close_hauled_angle"));
+      m_db.tableColumnDouble("config_line_follow", "close_hauled_angle"));
     m_BroadReachAngle = Utility::degreeToRadian(
-      m_db.tableColumnValueDouble("config_line_follow", "broad_reach_angle"));
-    m_TackingDistance = m_db.tableColumnValueDouble("config_line_follow", "tacking_distance");
+      m_db.tableColumnDouble("config_line_follow", "broad_reach_angle"));
+    m_TackingDistance = m_db.tableColumnDouble("config_line_follow", "tacking_distance");
 }
 
 void LineFollowNode::processMessage(const Message* msg)

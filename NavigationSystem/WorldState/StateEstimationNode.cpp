@@ -59,9 +59,9 @@ void StateEstimationNode::stop()
 
 void StateEstimationNode::updateConfigsFromDB()
 {
-    m_LoopTime = m_dbHandler.tableColumnValueDouble("config_vessel_state", "loop_time");
-    m_speed_1 = m_dbHandler.tableColumnValueDouble("config_vessel_state", "course_config_speed_1");
-    m_speed_2 = m_dbHandler.tableColumnValueDouble("config_vessel_state", "course_config_speed_2");
+    m_LoopTime = m_dbHandler.tableColumnDouble("config_vessel_state", "loop_time");
+    m_speed_1 = m_dbHandler.tableColumnDouble("config_vessel_state", "course_config_speed_1");
+    m_speed_2 = m_dbHandler.tableColumnDouble("config_vessel_state", "course_config_speed_2");
 }
 
 void StateEstimationNode::processMessage(const Message* msg)

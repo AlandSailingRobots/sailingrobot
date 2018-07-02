@@ -61,8 +61,8 @@ class HardwareCV7Suite : public CxxTest::TestSuite {
 
             Logger::DisableLogging();
             logger = new MessageLogger(msgBus());
-            // cv7 = new CV7Node(msgBus(), dbHandler.retrieveCell("windsensor_config", "1", "port"),
-            // dbHandler.tableColumnValueInt("windsensor_config", "1", "baud_rate")); // Not in the
+            // cv7 = new CV7Node(msgBus(), dbHandler.tableColumnText("windsensor_config", "1", "port"),
+            // dbHandler.tableColumnInt("windsensor_config", "1", "baud_rate")); // Not in the
             // database
             thr = new std::thread(runMessageLoop);
         }

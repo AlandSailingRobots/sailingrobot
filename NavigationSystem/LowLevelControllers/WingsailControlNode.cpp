@@ -74,8 +74,8 @@ void WingsailControlNode::processMessage( const Message* msg)
 ///----------------------------------------------------------------------------------
 void WingsailControlNode::updateConfigsFromDB()
 {
-    m_LoopTime = m_db.tableColumnValueDouble("config_wingsail_control", "loop_time");
-    m_MaxCommandAngle = m_db.tableColumnValueDouble("config_wingsail_control", "max_cmd_angle");
+    m_LoopTime = m_db.tableColumnDouble("config_wingsail_control", "loop_time");
+    m_MaxCommandAngle = m_db.tableColumnDouble("config_wingsail_control", "max_cmd_angle");
 }
 
 ///----------------------------------------------------------------------------------

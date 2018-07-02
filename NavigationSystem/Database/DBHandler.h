@@ -129,9 +129,6 @@ class DBHandler {
     void updateConfigs(std::string configs);
     bool updateWaypoints(std::string waypoints);
 
-    // retrieve one value from a table as string
-    std::string retrieveCell(std::string table, std::string id, std::string column);
-
     // returns all logs in database as json; supply onlyLatest to get only the ones with the highest
     // id
     std::string getLogs(bool onlyLatest);
@@ -181,9 +178,11 @@ class DBHandler {
 	int queryTableColumnValue(sqlite3_stmt **stmt, const std::string &table, const std::string &column, const int id);
 
 	// retrieve one value from a table as integer
-	int         tableColumnValueInt(const std::string &table, const std::string &column, const int id = 1);
+	int         tableColumnInt(const std::string &table, const std::string &column, const int id = 1);
 
 	// retrieve one value from a table as double
-	double      tableColumnValueDouble(const std::string &table, const std::string &column, const int id = 1);
-	std::string tableColumnValueText(const std::string &table, const std::string &column, const int id = 1);
+	double      tableColumnDouble(const std::string &table, const std::string &column, const int id = 1);
+
+	// retrieve one value from a table as string
+	std::string tableColumnText(const std::string &table, const std::string &column, const int id = 1);
 };
