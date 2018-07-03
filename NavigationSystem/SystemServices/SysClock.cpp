@@ -57,12 +57,12 @@ unsigned int SysClock::millis()
 
 std::string SysClock::timeStampStr()
 {
-	char buff[20]; // Just enough room, see function header
+	char buff[24]; // Just enough room, see function header yyyy-mm-dd hh:mm:ss.fff
 
 	unsigned long seconds = unixTime();
 
 	time_t unix_time = (time_t)seconds;
-	strftime(buff, sizeof(buff), "%F_%T", gmtime(&unix_time));
+	strftime(buff, sizeof(buff), "%F %T", gmtime(&unix_time));
 
 	return std::string(buff);
 }

@@ -82,7 +82,7 @@ int DBHandler::bindParam(sqlite3_stmt* stmt, const char* name, const std::string
         return SQLITE_MISUSE;
     }
     return checkRetCode(
-        sqlite3_bind_text(stmt, paramIndex, text.c_str(), text.size(), SQLITE_STATIC));
+        sqlite3_bind_text(stmt, paramIndex, text.c_str(), text.size(), SQLITE_TRANSIENT));
 }
 
 int DBHandler::stepAndFinalize(sqlite3_stmt* stmt) const {
@@ -92,28 +92,29 @@ int DBHandler::stepAndFinalize(sqlite3_stmt* stmt) const {
 }
 
 void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
-    std::stringstream actuatorFeedbackValues;
-    std::stringstream compassModelValues;
-    std::stringstream courseCalculationValues;
-    std::stringstream currentSensorsValues;
-    std::stringstream gpsValues;
-    std::stringstream marineSensorsValues;
-    std::stringstream vesselStateValues;
-    std::stringstream windStateValues;
-    std::stringstream windsensorValues;
-    std::stringstream systemValues;
-    std::stringstream ss;
+//    std::stringstream actuatorFeedbackValues;
+//    std::stringstream compassModelValues;
+//    std::stringstream courseCalculationValues;
+//    std::stringstream currentSensorsValues;
+//    std::stringstream gpsValues;
+//    std::stringstream marineSensorsValues;
+//    std::stringstream vesselStateValues;
+//    std::stringstream windStateValues;
+//    std::stringstream windsensorValues;
+//    std::stringstream systemValues;
+    // std::stringstream ss;
 
-    int actuatorFeedbackId = 0;
-    int compassModelId = 0;
-    int courseCalculationId = 0;
-    int currentMissionId = 0;
-    int currentSensorsId = 0;
-    int gpsId = 0;
-    int marineSensorsId = 0;
-    int vesselStateId = 0;
-    int windStateId = 0;
-    int windsensorId = 0;
+    int actuatorFeedbackId = -1;
+    int compassModelId = -1;
+    int courseCalculationId = -1;
+    int currentMissionId = -1;
+    int currentSensorsId = -1;
+    int gpsId = -1;
+    int marineSensorsId = -1;
+    int vesselStateId = -1;
+    int windStateId = -1;
+    int windsensorId = -1;
+
     int logNumber = 0;
     std::string tableId;
 
@@ -154,10 +155,10 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
         sqlite3_stmt* stmt = NULL;
         int resultCode = 0;
 
-        sqlite3_exec(db, "BEGIN TRANSACTION;", NULL, NULL, &m_error);
+        // sqlite3_exec(db, "BEGIN TRANSACTION;", NULL, NULL, &m_error);
 
         int _actuatorFeedbackId = 0;
-        if (actuatorFeedbackId) {  // clang-format off
+        if (actuatorFeedbackId >= 0) {  // clang-format off
             if (!prepareStmtError(db, "INSERT INTO "
                 "dataLogs_actuator_feedback(rudder_position, wingsail_position, rc_on, wind_vane_angle, t_timestamp) "
                 "VALUES(:rudder_position, :wingsail_position, :rc_on, :wind_vane_angle, :t_timestamp);", &stmt
@@ -175,7 +176,7 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
         }
 
         int _compassModelId = 0;
-        if (compassModelId) {  // clang-format off
+        if (compassModelId >= 0) {  // clang-format off
             if (!prepareStmtError(db, "INSERT INTO "
                 "dataLogs_compass(heading, pitch, roll, t_timestamp) "
                 "VALUES(:heading, :pitch, :roll, :t_timestamp);", &stmt
@@ -192,7 +193,7 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
         }
 
         int _courseCalculationId = 0;
-        if (courseCalculationId) {  // clang-format off
+        if (courseCalculationId >= 0) {  // clang-format off
 	        if (!prepareStmtError(db, "INSERT INTO "
 	            "dataLogs_course_calculation(distance_to_waypoint, bearing_to_waypoint, course_to_steer, tack, going_starboard, t_timestamp) "
 	            "VALUES(:distance_to_waypoint, :bearing_to_waypoint, :course_to_steer, :tack, :going_starboard, :t_timestamp);", &stmt
@@ -210,7 +211,7 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
         }
 
         int _marineSensorsId = 0;
-        if (marineSensorsId) {  // clang-format off
+        if (marineSensorsId >= 0) {  // clang-format off
 	    	if (!prepareStmtError(db, "INSERT INTO "
 				"dataLogs_marine_sensors(temperature, conductivity, ph, salinity, t_timestamp) "
 	            "VALUES(:temperature, :conductivity, :ph, :salinity, :t_timestamp);", &stmt
@@ -227,7 +228,7 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
         }
 
         int _vesselStateId = 0;
-        if (vesselStateId) {  // clang-format off
+        if (vesselStateId >= 0) {  // clang-format off
 	    	if (!prepareStmtError(db, "INSERT INTO "
 	            "dataLogs_vessel_state(heading, latitude, longitude, speed, course, t_timestamp) "
 			    "VALUES(:heading, :latitude, :longitude, :speed, :course, :t_timestamp);", &stmt
@@ -245,7 +246,7 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
         }
 
         int _windStateId = 0;
-        if (windStateId) {  // clang-format off
+        if (windStateId >= 0) {  // clang-format off
 	    	if (!prepareStmtError(db, "INSERT INTO "
 	            "dataLogs_wind_state(true_wind_speed, true_wind_direction, apparent_wind_speed, apparent_wind_direction, t_timestamp) "
 			    "VALUES(:true_wind_speed, :true_wind_direction, :apparent_wind_speed, :apparent_wind_direction, :t_timestamp);", &stmt
@@ -262,7 +263,7 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
         }
 
         int _windsensorId = 0;
-        if (windsensorId) {  // clang-format off
+        if (windsensorId >= 0) {  // clang-format off
 	    	if (!prepareStmtError(db, "INSERT INTO "
 	            "dataLogs_windsensor(direction, speed, temperature, t_timestamp) "
 			    "VALUES(:direction, :speed, :temperature, :t_timestamp);", &stmt
@@ -278,7 +279,7 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
         }
 
         int _gpsId = 0;
-        if (gpsId) {  // clang-format off
+        if (gpsId >= 0) {  // clang-format off
 	    	if (!prepareStmtError(db, "INSERT INTO "
 	            "dataLogs_gps (has_fix, online, time, latitude, longitude, speed, course, satellites_used, route_started, t_timestamp) "
 			    "VALUES(:has_fix, :online, :time, :latitude, :longitude, :speed, :course, :satellites_used, :route_started, :t_timestamp);", &stmt
@@ -301,7 +302,7 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
         }
 
         int _currentSensorsId = 0;
-        if (currentSensorsId) {  // clang-format off
+        if (currentSensorsId >= 0) {  // clang-format off
 	    	if (!prepareStmtError(db, "INSERT INTO "
 	            "dataLogs_current_sensors(current, voltage, element, element_str, t_timestamp) "
 			    "VALUES(:current, :voltage, :element, :element_str, :t_timestamp);", &stmt
@@ -340,9 +341,9 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
                 Logger::error("%s Error, failed to create system log index!", __PRETTY_FUNCTION__);
             }
         }
-        do {
-            resultCode = sqlite3_exec(db, "COMMIT TRANSACTION;", NULL, NULL, &m_error);
-        } while (resultCode == SQLITE_BUSY);
+        // do {
+        //    resultCode = sqlite3_exec(db, "END TRANSACTION;", NULL, NULL, &m_error);
+        //} while (resultCode == SQLITE_BUSY);
 
         if (resultCode != SQLITE_OK) {
             Logger::error("%s SQLite COMMIT error: %s (%d)", __PRETTY_FUNCTION__,
@@ -353,9 +354,9 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
                 sqlite3_free(m_error);
                 m_error = NULL;
             }
-            resultCode = sqlite3_exec(db, "ROLLBACK TRANSACTION;", NULL, NULL, &m_error);
-            Logger::info("%s SQLite ROLLBACK returned %s (%d)", __PRETTY_FUNCTION__,
-                         sqlite3_errstr(resultCode), resultCode);
+//            resultCode = sqlite3_exec(db, "ROLLBACK TRANSACTION;", NULL, NULL, &m_error);
+//            Logger::info("%s SQLite ROLLBACK returned %s (%d)", __PRETTY_FUNCTION__,
+//                         sqlite3_errstr(resultCode), resultCode);
         }
     }
     DBDisconnect();
@@ -608,25 +609,36 @@ std::string DBHandler::getWaypoints() {  // NOTE : Marc : change this otherwise 
 // max = false -> min id
 // max = true -> max id
 int DBHandler::getTableId(std::string table, ID_MINMAX minmax) {
-    int rows, columns;
-    std::vector<std::string> results;
+    // int rows, columns;
+	sqlite3* db = DBConnect();
+	sqlite3_stmt *stmt = NULL;
+	int resultCode;
+    int result = 0;
+    // std::vector<std::string> results;
+    std::string sql = "SELECT " +
+                      (minmax == MAX_ID ? std::string("MAX(id)") : std::string("MIN(id)")) +
+                      " FROM " + table + ";";
 
     try {
-        if (minmax == MAX_ID) {
-            results = retrieveFromTable("SELECT MAX(id) FROM " + table + ";", rows, columns);
-        } else {
-            results = retrieveFromTable("SELECT MIN(id) FROM " + table + ";", rows, columns);
-        }
+//        if (minmax == MAX_ID) {
+//            // results = retrieveFromTable("SELECT MAX(id) FROM " + table + ";", rows, columns);
+//        } else {
+//            // results = retrieveFromTable("SELECT MIN(id) FROM " + table + ";", rows, columns);
+//        }
+	    resultCode = checkRetCode(DbStmtSQLIntsDoublesStrings(db,&stmt,sql));
+	    if (resultCode == SQLITE_ROW) {
+		    result = sqlite3_column_int(stmt, 0);
+	    }
     } catch (const char* error) {
         Logger::error("%s Error when determining min/max id from %s", __PRETTY_FUNCTION__, table);
-        return 0;
     }
-    if (results.empty() || (results.size() < 2)) {
+/*    if (results.empty() || (results.size() < 2)) {
         Logger::warning("%s Empty result when determining min/max id from %s", __PRETTY_FUNCTION__,
                         table.c_str());
         return 0;
-    }
-    return safe_stoi(results[1], NULL, 10);
+    }*/
+    // return safe_stoi(results[1], NULL, 10);
+	return result;
 }
 
 /******************************************************************************
@@ -914,41 +926,44 @@ int DBHandler::tableColumnInt(sqlite3_stmt** stmt,
                               const std::string& selector,
                               const std::string& from,
                               const int id) {
-	sqlite3* db = DBConnect();
-	std::string sql = "SELECT " + selector + " FROM " + from  + " WHERE id = :id";
-	int retCode = -1;
-
-	DbStmtSQLIntsDoublesStrings(db, stmt, sql, {{ ":id", 1 }});
-
-	retCode = sqlite3_step(*stmt);
-	if (retCode != SQLITE_ROW) {
-		Logger::error("%s SQLite error: %s (%d) on \"%s\"", __PRETTY_FUNCTION__,
-              sqlite3_errstr(retCode), retCode, sql.c_str());
-	}
-
-	return retCode;
-}
-
-int DBHandler::DbStmtSQLIntsDoublesStrings(sqlite3 *db, sqlite3_stmt **stmt, const std::string &sql,
-                                           const std::vector<std::tuple<const char *, int>> ints,
-                                           const std::vector<std::tuple<const char *, double>> doubles,
-                                           const std::vector<std::tuple<const char *, std::string>> strings) {
-
+    sqlite3* db = DBConnect();
+    std::string sql = "SELECT " + selector + " FROM " + from + " WHERE id = :id";
     int retCode = -1;
 
-	if (!prepareStmtError(db, sql, stmt)) {
-		// TODO: theese could be pulled up into bindParams (template?)
-		for (auto tup : ints) {
-			bindParam(*stmt, std::get<0>(tup), std::get<1>(tup));
-		}
-		for (auto tup : doubles) {
-			bindParam(*stmt, std::get<0>(tup), std::get<1>(tup));
-		}
-		for (auto tup : strings) {
-			bindParam(*stmt, std::get<0>(tup), std::get<1>(tup));
-		}
-	}
-	return retCode;
+    DbStmtSQLIntsDoublesStrings(db, stmt, sql, {{":id", 1}});
+
+    retCode = sqlite3_step(*stmt);
+    if (retCode != SQLITE_ROW) {
+        Logger::error("%s SQLite error: %s (%d) on \"%s\"", __PRETTY_FUNCTION__,
+                      sqlite3_errstr(retCode), retCode, sql.c_str());
+    }
+
+    return retCode;
+}
+
+int DBHandler::DbStmtSQLIntsDoublesStrings(
+    sqlite3* db,
+    sqlite3_stmt** stmt,
+    const std::string& sql,
+    const std::vector<std::tuple<const char*, int>> ints,
+    const std::vector<std::tuple<const char*, double>> doubles,
+    const std::vector<std::tuple<const char*, std::string>> strings) {
+    int retCode = -1;
+
+	retCode = prepareStmtError(db, sql, stmt);
+    if (retCode == SQLITE_OK) {
+        // TODO: theese could be pulled up into bindParams (template?)
+        for (auto tup : ints) {
+            bindParam(*stmt, std::get<0>(tup), std::get<1>(tup));
+        }
+        for (auto tup : doubles) {
+            bindParam(*stmt, std::get<0>(tup), std::get<1>(tup));
+        }
+        for (auto tup : strings) {
+            bindParam(*stmt, std::get<0>(tup), std::get<1>(tup));
+        }
+    }
+    return retCode;
 }
 
 int DBHandler::tableColumnInt(const std::string& table, const std::string& column, const int id) {
@@ -1039,7 +1054,7 @@ double DBHandler::tableColumnDouble(std::string table, std::string column, std::
 
     // fetch all datatables starting with "dataLogs_"
     std::vector<std::string> datalogTables = getTableNames("dataLogs_%");
-	std::vector<std::vector<std::string>> rows = rowsAsText()
+    std::vector<std::vector<std::string>> rows = rowsAsText()
     try {
         // insert all data in these tables as json array
 
@@ -1060,48 +1075,46 @@ double DBHandler::tableColumnDouble(std::string table, std::string column, std::
 }*/
 
 std::string DBHandler::getLogs(bool onlyLatest) {
-	std::string result;
-	JSON js;
+    std::string result;
+    JSON js;
 
-	// fetch all datatables starting with "dataLogs_"
-	std::vector<std::string> datalogTables = getTableNames("dataLogs_%");
-	std::vector<std::tuple<std::string,std::vector<std::vector<std::string>>>> logs;
+    // fetch all datatables starting with "dataLogs_"
+    std::vector<std::string> datalogTables = getTableNames("dataLogs_%");
+    std::vector<std::tuple<std::string, std::vector<std::vector<std::string>>>> logs;
 
-	try {
-		// insert all data in these tables as json array
+    try {
+        // insert all data in these tables as json array
 
-		for (auto table : datalogTables) {
-			std::string sql = "SELECT * FROM " + table;
-			if (onlyLatest) { // Gets the log entry with the highest id
-				sql += " ORDER BY id DESC LIMIT 1";
-			}
-			std::vector<std::vector<std::string>> rows = rowsAsText(sql);
-			logs.push_back(std::make_tuple(table,rows));
-			// getDataAsJson("*", table, table, "", js, true);
-		}
+        for (auto table : datalogTables) {
+            std::string sql = "SELECT * FROM " + table;
+            if (onlyLatest) {  // Gets the log entry with the highest id
+                sql += " ORDER BY id DESC LIMIT 1";
+            }
+            std::vector<std::vector<std::string>> rows = rowsAsText(sql);
+            logs.push_back(std::make_tuple(table, rows));
+            // getDataAsJson("*", table, table, "", js, true);
+        }
 
-	} catch (const char* error) {
-		Logger::error("%s, Error gathering log data %s", __PRETTY_FUNCTION__, error);
-	}
+    } catch (const char* error) {
+        Logger::error("%s, Error gathering log data %s", __PRETTY_FUNCTION__, error);
+    }
 
-	try {
-		for (auto tup : logs) {
-			std::string table = std::get<0>(tup);
-			std::vector<std::vector<std::string>> rows = std::get<1>(tup);
+    try {
+        for (auto tup : logs) {
+            std::string table = std::get<0>(tup);
+            std::vector<std::vector<std::string>> rows = std::get<1>(tup);
 
-			int i = 0;
-			for (auto row : rows) {
-				js[table.c_str()][i++].push_back(row);
-				std::string dbg = js.dump();
-
-			}
-
-		}
-		result = js.dump();
-	} catch (const char* error) {
-		Logger::error("%s, Error JSON-encoding data %s", __PRETTY_FUNCTION__, error);
-	}
-	return result;
+            int i = 0;
+            for (auto row : rows) {
+                js[table.c_str()][i++].push_back(row);
+                std::string dbg = js.dump();
+            }
+        }
+        result = js.dump();
+    } catch (const char* error) {
+        Logger::error("%s, Error JSON-encoding data %s", __PRETTY_FUNCTION__, error);
+    }
+    return result;
 }
 
 // TODO: this is next up for a rewrite as it crashes. JSON should not be done here!
@@ -1238,31 +1251,39 @@ int DBHandler::getTable(const std::string& sql,
 }
 
 // TODO: some push could be emplace
-std::vector<std::vector<std::string>> DBHandler::rowsAsText(const std::string &sql) {
+// TODO: BUSY loop
+std::vector<std::vector<std::string>> DBHandler::rowsAsText(const std::string& sql) {
+    std::vector<std::vector<std::string>> rows;
+    sqlite3* db = DBConnect();
+    sqlite3_stmt* stmt = NULL;
+    int retCode = -1;
 
-	std::vector<std::vector<std::string>> rows;
-	sqlite3* db = DBConnect();
-	sqlite3_stmt* stmt = NULL;
-	int retCode = -1;
+    DbStmtSQLIntsDoublesStrings(db, &stmt, sql);
 
-	DbStmtSQLIntsDoublesStrings(db, &stmt, sql);
-
-	retCode = sqlite3_step(stmt);
-	if (not ((retCode == SQLITE_ROW) || (retCode == SQLITE_DONE))) {
-		Logger::error("%s SQLite error: %s (%d) on \"%s\"", __PRETTY_FUNCTION__,
-		              sqlite3_errstr(retCode), retCode, sql.c_str());
-	} else {
-		int columns = sqlite3_column_count(stmt);
-		std::vector<std::string> row;
-		while (retCode == SQLITE_ROW) {
-			for (int i = 0; i < columns; i++) {
-				char *strp = (char *) sqlite3_column_text(stmt, i);
-				row.push_back(std::string(strp));
-			}
-			rows.push_back(row);
-			retCode = sqlite3_step(stmt);
-			checkRetCode(retCode); // TODO inline above
-		}
-	}
-	return rows;
+    retCode = sqlite3_step(stmt);
+    if (not((retCode == SQLITE_ROW) || (retCode == SQLITE_DONE))) {
+        Logger::error("%s SQLite error: %s (%d) on \"%s\"", __PRETTY_FUNCTION__,
+                      sqlite3_errstr(retCode), retCode, sql.c_str());
+    } else {
+        int columns = sqlite3_column_count(stmt);
+        std::vector<std::string> row;
+        while (retCode == SQLITE_ROW) {
+            for (int i = 0; i < columns; i++) {
+                char* strp = (char*) sqlite3_column_text(stmt, i);
+                std::string retStr = std::string(strp);
+	            // TODO: Maybe disable this non-UTF-8 content check here? Enable again on JSON crashes.
+                for (char c : retStr) {
+                	if (!std::isprint(c)) {
+                		Logger::error("%s invalid UTF-8 character found in SQLITE DB TEXT: \"%s\"", __PRETTY_FUNCTION__, retStr.c_str());
+                		retStr = std::string();
+                	}
+                }
+	            row.push_back(retStr);
+            }
+            rows.push_back(row);
+            retCode = sqlite3_step(stmt);
+            checkRetCode(retCode);  // TODO inline above
+        }
+    }
+    return rows;
 }
