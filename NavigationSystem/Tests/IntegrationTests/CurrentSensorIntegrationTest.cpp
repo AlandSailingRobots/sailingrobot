@@ -44,8 +44,9 @@ public:
 	                // Use get data instead(int)? Parse data here or add the routine in another file?
 			//messageHandler.getData(&comp_current, CURRENT_SENSOR_CURRENT_DATASIZE);
 			//messageHandler.getData(&comp_voltage, CURRENT_SENSOR_VOLTAGE_DATASIZE);
+			messageHandler.canMsgToBitset();  // update bitset with m_message.data
 			messageHandler.getData(&comp_voltage, 0, 2);    // start byte 0, length 2 bytes
-			messageHandler.getData(&comp_voltage, 2, 2);    // I will add defines later for those values
+			messageHandler.getData(&comp_current, 2, 2);    // I will add defines later for those values
 			messageHandler.getData(&sensorID, 7*8 + 5, 3, false); // varInByte=false --> start and length value in bits
 
 		}
