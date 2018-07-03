@@ -77,11 +77,11 @@ void CourseRegulatorNode::processMessage( const Message* msg )
 ///----------------------------------------------------------------------------------
 void CourseRegulatorNode::updateConfigsFromDB()
 {
-    m_LoopTime = m_db.tableColumnDouble("config_course_regulator", "loop_time");
-    m_MaxRudderAngle = m_db.tableColumnInt("config_course_regulator", "max_rudder_angle");
-    m_pGain = m_db.tableColumnDouble("config_course_regulator", "p_gain");
-    m_iGain = m_db.tableColumnDouble("config_course_regulator", "i_gain");
-    m_dGain = m_db.tableColumnDouble("config_course_regulator", "d_gain");
+    m_LoopTime = m_db.selectFromAsDouble("loop_time", "config_course_regulator", 1);
+    m_MaxRudderAngle = m_db.selectFromAsInt("max_rudder_angle", "config_course_regulator", 1);
+    m_pGain = m_db.selectFromAsDouble("p_gain", "config_course_regulator", 1);
+    m_iGain = m_db.selectFromAsDouble("i_gain", "config_course_regulator", 1);
+    m_dGain = m_db.selectFromAsDouble("d_gain", "config_course_regulator", 1);
 }
 
 ///----------------------------------------------------------------------------------

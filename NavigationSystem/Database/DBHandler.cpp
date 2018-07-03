@@ -37,11 +37,11 @@ bool DBHandler::initialise() {
     return connection;  // NULL would mean we got no connection
 }
 
-int DBHandler::checkRetCode(const int resultCode) const {
-    if (!((resultCode == SQLITE_OK) || (resultCode == SQLITE_DONE))) {
-        Logger::error("SQLite result code: %s (%d)", sqlite3_errstr(resultCode), resultCode);
+int DBHandler::checkRetCode(const int retCode) const {
+    if (not ((retCode == SQLITE_OK) || (retCode == SQLITE_DONE) || (retCode == SQLITE_ROW))) {
+        Logger::error("SQLite result code: %s (%d)", sqlite3_errstr(retCode), retCode);
     }
-    return resultCode;
+    return retCode;
 }
 
 int DBHandler::paramNameIndex(sqlite3_stmt* stmt, const char* name) {
@@ -609,36 +609,15 @@ std::string DBHandler::getWaypoints() {  // NOTE : Marc : change this otherwise 
 // max = false -> min id
 // max = true -> max id
 int DBHandler::getTableId(std::string table, ID_MINMAX minmax) {
-    // int rows, columns;
-	sqlite3* db = DBConnect();
-	sqlite3_stmt *stmt = NULL;
-	int resultCode;
-    int result = 0;
     // std::vector<std::string> results;
-    std::string sql = "SELECT " +
-                      (minmax == MAX_ID ? std::string("MAX(id)") : std::string("MIN(id)")) +
-                      " FROM " + table + ";";
-
+    std::string selector = (minmax == MAX_ID ? "MAX(id)" : "MIN(id)");
+	int id = 0;
     try {
-//        if (minmax == MAX_ID) {
-//            // results = retrieveFromTable("SELECT MAX(id) FROM " + table + ";", rows, columns);
-//        } else {
-//            // results = retrieveFromTable("SELECT MIN(id) FROM " + table + ";", rows, columns);
-//        }
-	    resultCode = checkRetCode(DbStmtSQLIntsDoublesStrings(db,&stmt,sql));
-	    if (resultCode == SQLITE_ROW) {
-		    result = sqlite3_column_int(stmt, 0);
-	    }
+    	id = selectFromAsInt(selector, table);
     } catch (const char* error) {
         Logger::error("%s Error when determining min/max id from %s", __PRETTY_FUNCTION__, table);
     }
-/*    if (results.empty() || (results.size() < 2)) {
-        Logger::warning("%s Empty result when determining min/max id from %s", __PRETTY_FUNCTION__,
-                        table.c_str());
-        return 0;
-    }*/
-    // return safe_stoi(results[1], NULL, 10);
-	return result;
+	return id;
 }
 
 /******************************************************************************
@@ -846,19 +825,19 @@ bool DBHandler::getWaypointValues(int& nextId,
 
     // Set values to next waypoint
     nextId = safe_stoi(results[1]);
-    nextLongitude = tableColumnDouble("current_Mission", "longitude", safe_stoi(results[1]));
-    nextLatitude = tableColumnDouble("current_Mission", "latitude", safe_stoi(results[1]));
-    nextDeclination = tableColumnInt("current_Mission", "declination", safe_stoi(results[1]));
-    nextRadius = tableColumnInt("current_Mission", "radius", safe_stoi(results[1]));
-    nextStayTime = tableColumnInt("current_Mission", "stay_time", safe_stoi(results[1]));
-    isCheckpoint = tableColumnInt("current_Mission", "is_checkpoint", safe_stoi(results[1]));
+    nextLongitude = selectFromAsDouble("longitude", "current_Mission", safe_stoi(results[1]));
+    nextLatitude = selectFromAsDouble("latitude", "current_Mission", safe_stoi(results[1]));
+    nextDeclination = selectFromAsInt("declination", "current_Mission", safe_stoi(results[1]));
+    nextRadius = selectFromAsInt("radius", "current_Mission", safe_stoi(results[1]));
+    nextStayTime = selectFromAsInt("stay_time", "current_Mission", safe_stoi(results[1]));
+    isCheckpoint = selectFromAsInt("is_checkpoint", "current_Mission", safe_stoi(results[1]));
 
     if (foundPrev) {  // Set values to next waypoint if harvested waypoint found
         prevId = safe_stoi(results2[1]);
-        prevLongitude = tableColumnDouble("current_Mission", "longitude", safe_stoi(results2[1]));
-        prevLatitude = tableColumnDouble("current_Mission", "latitude", safe_stoi(results2[1]));
-        prevDeclination = tableColumnInt("current_Mission", "declination", safe_stoi(results2[1]));
-        prevRadius = tableColumnInt("current_Mission", "radius", safe_stoi(results2[1]));
+        prevLongitude = selectFromAsDouble("longitude", "current_Mission", safe_stoi(results2[1]));
+        prevLatitude = selectFromAsDouble("latitude", "current_Mission", safe_stoi(results2[1]));
+        prevDeclination = selectFromAsInt("declination", "current_Mission", safe_stoi(results2[1]));
+        prevRadius = selectFromAsInt("radius", "current_Mission", safe_stoi(results2[1]));
     }
 
     return true;
@@ -896,7 +875,7 @@ bool DBHandler::changeOneValue(std::string table,
 }
 
 /*
-int DBHandler::tableColumnInt(sqlite3_stmt** stmt,
+int DBHandler::stmtSelectFrom(sqlite3_stmt** stmt,
                               const std::string& selector,
                               const std::string& from,
                               const int id) {
@@ -922,86 +901,87 @@ int DBHandler::tableColumnInt(sqlite3_stmt** stmt,
 }
 */
 
-int DBHandler::tableColumnInt(sqlite3_stmt** stmt,
-                              const std::string& selector,
-                              const std::string& from,
+int DBHandler::stmtSelectFrom(sqlite3_stmt **stmt,
+                              const std::string &selector,
+                              const std::string &from,
                               const int id) {
     sqlite3* db = DBConnect();
-    std::string sql = "SELECT " + selector + " FROM " + from + " WHERE id = :id";
-    int retCode = -1;
+	int retCode = -1;
+    std::string sql = "SELECT " + selector + " FROM " + from;
 
-    DbStmtSQLIntsDoublesStrings(db, stmt, sql, {{":id", 1}});
+    if (id >= 0) {
+    	sql += " WHERE id = :id";
+	    stmtSQLIntsDoublesStrings(db, stmt, sql, {{":id", id}});
+    } else {
+	    stmtSQLIntsDoublesStrings(db, stmt, sql);
+    }
 
-    retCode = sqlite3_step(*stmt);
-    if (retCode != SQLITE_ROW) {
+    retCode = sqlite3_step(*stmt); // Maybe loop while SQLITE_BUSY?
+    if (not ((retCode == SQLITE_ROW) || retCode == SQLITE_DONE)) {
         Logger::error("%s SQLite error: %s (%d) on \"%s\"", __PRETTY_FUNCTION__,
                       sqlite3_errstr(retCode), retCode, sql.c_str());
     }
-
     return retCode;
 }
 
-int DBHandler::DbStmtSQLIntsDoublesStrings(
-    sqlite3* db,
-    sqlite3_stmt** stmt,
-    const std::string& sql,
-    const std::vector<std::tuple<const char*, int>> ints,
-    const std::vector<std::tuple<const char*, double>> doubles,
-    const std::vector<std::tuple<const char*, std::string>> strings) {
-    int retCode = -1;
-
-	retCode = prepareStmtError(db, sql, stmt);
-    if (retCode == SQLITE_OK) {
-        // TODO: theese could be pulled up into bindParams (template?)
-        for (auto tup : ints) {
-            bindParam(*stmt, std::get<0>(tup), std::get<1>(tup));
-        }
-        for (auto tup : doubles) {
-            bindParam(*stmt, std::get<0>(tup), std::get<1>(tup));
-        }
-        for (auto tup : strings) {
-            bindParam(*stmt, std::get<0>(tup), std::get<1>(tup));
-        }
-    }
-    return retCode;
-}
-
-int DBHandler::tableColumnInt(const std::string& table, const std::string& column, const int id) {
+int DBHandler::selectFromAsInt(const std::string &selector, const std::string &from, const int id) {
     sqlite3_stmt* stmt = NULL;
-    tableColumnInt(&stmt, column, table, id);
+	stmtSelectFrom(&stmt, selector, from, id);
     int retVal = sqlite3_column_int(stmt, 0);
+	sqlite3_finalize(stmt);
     return retVal;
 }
 
-double DBHandler::tableColumnDouble(const std::string& table,
-                                    const std::string& column,
-                                    const int id) {
+double DBHandler::selectFromAsDouble(const std::string &selector, const std::string &from, const int id) {
     sqlite3_stmt* stmt = NULL;
-    tableColumnInt(&stmt, column, table, id);
+	stmtSelectFrom(&stmt, selector, from, id);
     double retVal = sqlite3_column_double(stmt, 0);
+	sqlite3_finalize(stmt);
     return retVal;
 }
 
-std::string DBHandler::tableColumnText(const std::string& table,
-                                       const std::string& column,
-                                       const int id) {
+std::string DBHandler::selectFromAsText(const std::string &selector, const std::string &from, const int id) {
     sqlite3_stmt* stmt = NULL;
     std::string text;
 
-    if (tableColumnInt(&stmt, column, table, id) == SQLITE_ROW) {
-        int columns = sqlite3_column_count(stmt);
+    if (stmtSelectFrom(&stmt, selector, from, id) == SQLITE_ROW) {
+        // int columns = sqlite3_column_count(stmt);
         // if (sqlite3_column_count(stmt)) {
         const char* strp = (char*)sqlite3_column_text(stmt, 0);
         text = std::string(strp);
         //}
-        printf("%d\n", columns);
+        //printf("%d\n", columns);
     }
     sqlite3_finalize(stmt);
-
     return text;
 }
 
-/*std::string DBHandler::tableColumnText(std::string table, std::string column, std::string id) {
+int DBHandler::stmtSQLIntsDoublesStrings(
+  sqlite3 *db,
+  sqlite3_stmt **stmt,
+  const std::string &sql,
+  const std::vector<std::tuple<const char *, int>> ints,
+  const std::vector<std::tuple<const char *, double>> doubles,
+  const std::vector<std::tuple<const char *, std::string>> strings) {
+	int retCode = -1;
+
+	retCode = prepareStmtError(db, sql, stmt);
+	if (retCode == SQLITE_OK) {
+		// TODO: theese could be pulled up into bindParams (template?)
+		for (auto tup : ints) {
+			bindParam(*stmt, std::get<0>(tup), std::get<1>(tup));
+		}
+		for (auto tup : doubles) {
+			bindParam(*stmt, std::get<0>(tup), std::get<1>(tup));
+		}
+		for (auto tup : strings) {
+			bindParam(*stmt, std::get<0>(tup), std::get<1>(tup));
+		}
+	}
+	return retCode;
+}
+
+/*std::string DBHandler::selectFromAsText(std::string table, std::string column, std::string id) {
     std::string query = "SELECT " + column + " FROM " + table + " WHERE id=" + id + ";";
 
     int rows, columns;
@@ -1027,8 +1007,8 @@ std::string DBHandler::tableColumnText(const std::string& table,
 }*/
 
 /*
-int DBHandler::tableColumnInt(std::string table, std::string column, int id) {
-    std::string data = tableColumnText(table, id, column);
+int DBHandler::stmtSelectFrom(std::string table, std::string column, int id) {
+    std::string data = selectFromAsText(table, id, column);
     if (data.size() > 0) {
         return strtol(data.c_str(), NULL, 10);
     } else {
@@ -1039,8 +1019,8 @@ int DBHandler::tableColumnInt(std::string table, std::string column, int id) {
 */
 
 /*
-double DBHandler::tableColumnDouble(std::string table, std::string column, std::string id) {
-    std::string data = tableColumnText(table, id, column);
+double DBHandler::selectFromAsDouble(std::string table, std::string column, std::string id) {
+    std::string data = selectFromAsText(table, id, column);
     if (data.size() > 0) {
         return strtod(data.c_str(), NULL);
     } else {
@@ -1074,6 +1054,7 @@ double DBHandler::tableColumnDouble(std::string table, std::string column, std::
     return js.dump();
 }*/
 
+// TODO: Pass refs instead
 std::string DBHandler::getLogs(bool onlyLatest) {
     std::string result;
     JSON js;
@@ -1114,6 +1095,8 @@ std::string DBHandler::getLogs(bool onlyLatest) {
     } catch (const char* error) {
         Logger::error("%s, Error JSON-encoding data %s", __PRETTY_FUNCTION__, error);
     }
+    datalogTables.clear();
+    logs.clear();
     return result;
 }
 
@@ -1202,6 +1185,8 @@ int DBHandler::getTable(const std::string& sql,
         sqlite3_finalize(statement);
         return resultCode;
     }
+	// TODO: No step?!!!?!???!??
+
 
     // get the number of columns int the table called in the statement
     columns = sqlite3_column_count(statement);
@@ -1258,7 +1243,7 @@ std::vector<std::vector<std::string>> DBHandler::rowsAsText(const std::string& s
     sqlite3_stmt* stmt = NULL;
     int retCode = -1;
 
-    DbStmtSQLIntsDoublesStrings(db, &stmt, sql);
+	stmtSQLIntsDoublesStrings(db, &stmt, sql);
 
     retCode = sqlite3_step(stmt);
     if (not((retCode == SQLITE_ROW) || (retCode == SQLITE_DONE))) {
@@ -1285,5 +1270,6 @@ std::vector<std::vector<std::string>> DBHandler::rowsAsText(const std::string& s
             checkRetCode(retCode);  // TODO inline above
         }
     }
+    checkRetCode(sqlite3_finalize(stmt));
     return rows;
 }

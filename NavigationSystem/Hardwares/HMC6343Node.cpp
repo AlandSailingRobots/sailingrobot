@@ -110,8 +110,8 @@ void HMC6343Node::start()
 
 void HMC6343Node::updateConfigsFromDB()
 {
-	m_LoopTime = m_db.tableColumnDouble("config_compass", "loop_time", "1");
-	m_HeadingBufferSize = m_db.tableColumnInt("config_compass", "heading_buffer_size", "1");
+	m_LoopTime = m_db.selectFromAsDouble("loop_time", "config_compass", 1);
+	m_HeadingBufferSize = m_db.selectFromAsInt("heading_buffer_size", "config_compass", 1);
 }
 
 void HMC6343Node::processMessage(const Message* msg)

@@ -196,7 +196,7 @@ bool DBLoggerNode::init() {
 
 void DBLoggerNode::updateConfigsFromDB()
 {
-    m_loopTime = m_db.tableColumnDouble("config_dblogger", "loop_time");
+    m_loopTime = m_db.selectFromAsDouble("loop_time", "config_dblogger", 1);
 }
 
 void DBLoggerNode::DBLoggerNodeThreadFunc(ActiveNode* nodePtr) {

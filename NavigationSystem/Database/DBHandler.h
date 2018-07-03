@@ -2,9 +2,9 @@
 
 #include <sqlite3.h>
 #include <iostream>
+#include <mutex>
 #include <string>
 #include <vector>
-#include <mutex>
 
 #include "../Libs/json/include/nlohmann/json.hpp"
 #include "../Messages/CurrentSensorDataMsg.h"
@@ -166,32 +166,40 @@ class DBHandler {
 
     std::string getConfigs();
 
-    int checkRetCode(const int resultCode) const;
+    int checkRetCode(const int retCode) const;
 
-    int paramNameIndex(sqlite3_stmt *stmt, const char *name);
-    int prepareStmtError(sqlite3 *db, const std::string &sql, sqlite3_stmt **stmt);
-    int bindParam(sqlite3_stmt *stmt, const char *name, const int value);
-    int bindParam(sqlite3_stmt *stmt, const char *name, const double value);
-	int bindParam(sqlite3_stmt *stmt, const char *name, const std::string text);
-	int stepAndFinalize(sqlite3_stmt *stmt) const;
-	int DbStmtSQLIntsDoublesStrings(sqlite3 *db,
-	                                sqlite3_stmt **stmt,
-	                                const std::string &sql,
-	                                const std::vector<std::tuple<const char *, int>> ints = {},
-	                                const std::vector<std::tuple<const char *, double>> doubles = {},
-	                                const std::vector<std::tuple<const char *, std::string>> strings = {});
+    int paramNameIndex(sqlite3_stmt* stmt, const char* name);
+    int prepareStmtError(sqlite3* db, const std::string& sql, sqlite3_stmt** stmt);
+    int bindParam(sqlite3_stmt* stmt, const char* name, const int value);
+    int bindParam(sqlite3_stmt* stmt, const char* name, const double value);
+    int bindParam(sqlite3_stmt* stmt, const char* name, const std::string text);
+    int stepAndFinalize(sqlite3_stmt* stmt) const;
+    int stmtSQLIntsDoublesStrings(
+        sqlite3* db,
+        sqlite3_stmt** stmt,
+        const std::string& sql,
+        const std::vector<std::tuple<const char*, int>> ints = {},
+        const std::vector<std::tuple<const char*, double>> doubles = {},
+        const std::vector<std::tuple<const char*, std::string>> strings = {});
 
-	int tableColumnInt(sqlite3_stmt **stmt, const std::string &selector, const std::string &from, const int id);
+    int stmtSelectFrom(sqlite3_stmt** stmt,
+                       const std::string& selector,
+                       const std::string& from,
+                       const int id = -1);
 
-	// retrieve one value from a table as integer
-	int         tableColumnInt(const std::string &table, const std::string &column, const int id = 1);
+    // retrieve one value from a table as integer
+    int selectFromAsInt(const std::string& selector, const std::string& from, const int id = -1);
 
-	// retrieve one value from a table as double
-	double      tableColumnDouble(const std::string &table, const std::string &column, const int id = 1);
+    // retrieve one value from a table as double
+    double selectFromAsDouble(const std::string& selector,
+                              const std::string& from,
+                              const int id = -1);
 
-	// retrieve one value from a table as string
-	std::string tableColumnText(const std::string &table, const std::string &column, const int id = 1);
+    // retrieve one value from a table as string
+    std::string selectFromAsText(const std::string& selector,
+                                 const std::string& from,
+                                 const int id = -1);
 
-	// retreive rows from a table
-	std::vector<std::vector<std::string>> rowsAsText(const std::string &from);
+    // retreive rows from a table
+    std::vector<std::vector<std::string>> rowsAsText(const std::string& from);
 };

@@ -89,7 +89,7 @@ std::string SysClock::hh_mm_ss_ms()
 
 	time_t unix_time = (time_t)unixTime();
 	strftime(buff, sizeof(buff), "%H:%M:%S", gmtime(&unix_time));
-	snprintf(final, sizeof(final), "%s:%d", buff, millis());
+	snprintf(final, sizeof(final), "%s.%03d", buff, millis());
 
 	return std::string(final);
 }
@@ -101,7 +101,7 @@ std::string SysClock::hh_mm_ss_ms(TimeStamp timeStamp)
 
 	time_t unix_time = (time_t)timeStamp.unixTime;
 	strftime(buff, sizeof(buff), "%H:%M:%S", gmtime(&unix_time));
-	snprintf(final, sizeof(final), "%s:%d", buff, timeStamp.milliseconds);
+	snprintf(final, sizeof(final), "%s.%03d", buff, timeStamp.milliseconds);
 
 	return std::string(final);
 }
