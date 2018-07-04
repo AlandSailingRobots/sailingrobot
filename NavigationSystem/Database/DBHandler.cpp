@@ -1072,7 +1072,8 @@ std::string DBHandler::getLogs(bool onlyLatest) {
                 sql += " ORDER BY id DESC LIMIT 1";
             }
             std::vector<std::vector<std::string>> rows = rowsAsText(sql);
-            logs.push_back(std::make_tuple(table, rows));
+	        // "dataLogs_" is 9 chars, next is at index 9 (starting from 0)
+            logs.push_back(std::make_tuple(table.substr(9, std::string::npos), rows));
             // getDataAsJson("*", table, table, "", js, true);
         }
 
@@ -1081,17 +1082,18 @@ std::string DBHandler::getLogs(bool onlyLatest) {
     }
 
     try {
+    	int rowCnt = 0;
         for (auto tup : logs) {
             std::string table = std::get<0>(tup);
             std::vector<std::vector<std::string>> rows = std::get<1>(tup);
 
-            int i = 0;
             for (auto row : rows) {
-                js[table.c_str()][i++].push_back(row);
-                std::string dbg = js.dump();
+                js[table.c_str()].push_back(row);
+                rowCnt++;
             }
         }
-        result = js.dump();
+        // No rows will return an empty string
+        if (rowCnt) result = js.dump();
     } catch (const char* error) {
         Logger::error("%s, Error JSON-encoding data %s", __PRETTY_FUNCTION__, error);
     }

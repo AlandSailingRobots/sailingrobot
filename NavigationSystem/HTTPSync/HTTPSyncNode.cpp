@@ -124,16 +124,20 @@ void HTTPSyncNode::HTTPSyncThread(ActiveNode* nodePtr) {
 }
 
 bool HTTPSyncNode::pushDatalogs() {
-    std::string response = "";
-
-    if (performCURLCall(m_dbHandler->getLogs(m_pushOnlyLatestLogs), "pushAllLogs", response)) {
+	std::string response;
+    std::string logs = m_dbHandler->getLogs(m_pushOnlyLatestLogs);
+    if (!logs.size()) {
+	    Logger::warning("%s Not pushing empty logs to server", __PRETTY_FUNCTION__);
+    	return true;
+    }
+    if (performCURLCall(logs, "pushAllLogs", response)) {
         // remove logs after push
         if (m_removeLogs) {
             m_dbHandler->clearLogs();
         }
         return true;
     } else if (!m_reportedConnectError) {
-        Logger::warning("%s Could not push logs to server:", __PRETTY_FUNCTION__);
+        Logger::warning("%s Could not push logs to server", __PRETTY_FUNCTION__);
     }
     return false;
 }
