@@ -49,7 +49,7 @@ class SysClock {
 
     ///----------------------------------------------------------------------------------
     /// Returns a string representation of the current time in the format:
-    ///			yyyy-mm-dd hh:mm:ss
+    ///			yyyy-mm-dd hh:mm:ss.fff
     ///----------------------------------------------------------------------------------
     static std::string timeStampStr();
 
