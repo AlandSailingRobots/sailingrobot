@@ -44,15 +44,15 @@ public:
             handler.getMappedData(&conductivety,SENSOR_CONDUCTIVETY_START, SENSOR_CONDUCTIVETY_DATASIZE,
                                          SENSOR_CONDUCTIVETY_IN_BYTE, SENSOR_CONDUCTIVETY_INTERVAL_MIN, SENSOR_CONDUCTIVETY_INTERVAL_MAX);
 
-            handler.getMappedData(&temp, SENSOR_TEMPERATURE_START, SENSOR_TEMPERATURE_DATASIZE,
+            handler.getMappedData(&temperature, SENSOR_TEMPERATURE_START, SENSOR_TEMPERATURE_DATASIZE,
                                          SENSOR_TEMPERATURE_IN_BYTE, SENSOR_TEMPERATURE_INTERVAL_MIN, SENSOR_TEMPERATURE_INTERVAL_MAX);
-            float salinity = Utility::calculateSalinity (temp, conductivety);
+            float salinity = Utility::calculateSalinity (temperature, conductivety);
 
-            MessagePtr marineSensorDataMsg = std::make_unique<MarineSensorDataMsg>(static_cast<float>(temp), static_cast<float>(conductivety), static_cast<float>(ph), salinity);
+            MessagePtr marineSensorDataMsg = std::make_unique<MarineSensorDataMsg>(static_cast<float>(temperature), static_cast<float>(conductivety), static_cast<float>(ph), salinity);
             m_msgBus.sendMessage(std::move(marineSensorDataMsg));
 
 
-            Logger::info(" Marine sensor data: \n PH: %lf \n Conductivety: %lf \n Temperature: %lf \n Error ID: %d",ph,conductivety,temp,handler.getErrorMessage());
+            Logger::info(" Marine sensor data: \n PH: %lf \n Conductivety: %lf \n Temperature: %lf \n Error ID: %d",ph,conductivety,temperature,handler.getErrorMessage());
 
 
             if(handler.getErrorMessage() > 0) {
