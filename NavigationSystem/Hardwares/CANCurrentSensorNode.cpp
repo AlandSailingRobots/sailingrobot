@@ -55,23 +55,21 @@ void CANCurrentSensorNode::processFrame (CanMsg& msg) {
     Float16Compressor fltCompressor;
 	CanMessageHandler messageHandler(msg);
 	uint16_t comp_current, comp_voltage;
+	uint8_t  sensor_id, rol_num;
 
-	if (messageHandler.getMessageId() == MSG_ID_CURRENT_SENSOR_DATA ||
-        messageHandler.getMessageId() == MSG_ID_CURRENT_SENSOR_DATA_POWER_UNIT ||
-        messageHandler.getMessageId() == MSG_ID_CURRENT_SENSOR_DATA_BOX)
+	if (messageHandler.getMessageId() == MSG_ID_CURRENT_SENSOR_DATA)
     {
-        // Use get data instead(int)? Parse data here or add the routine in another file?
-        messageHandler.getData(&comp_current, CURRENT_SENSOR_CURRENT_DATASIZE);
-        messageHandler.getData(&comp_voltage, CURRENT_SENSOR_VOLTAGE_DATASIZE);
+        messageHandler.getData( &comp_current, CURRENT_SENSOR_CURRENT_START, CURRENT_SENSOR_CURRENT_DATASIZE, CURRENT_SENSOR_CURRENT_IN_BYTE);
+        messageHandler.getData( &comp_voltage, CURRENT_SENSOR_VOLTAGE_START, CURRENT_SENSOR_VOLTAGE_DATASIZE, CURRENT_SENSOR_VOLTAGE_IN_BYTE);
+        messageHandler.getData( &sensor_id,    CURRENT_SENSOR_ID_START,      CURRENT_SENSOR_ID_DATASIZE,      CURRENT_SENSOR_ID_IN_BYTE);
+        messageHandler.getData( &rol_num,      CURRENT_SENSOR_ROL_NUM_START, CURRENT_SENSOR_ROL_NUM_DATASIZE, CURRENT_SENSOR_ROL_NUM_IN_BYTE);
 
         m_current = fltCompressor.decompress(comp_current);
         m_voltage = fltCompressor.decompress(comp_voltage);
         
-        //m_element = SAILDRIVE;        //TO TRY
-        m_element = (SensedElement)((uint8_t)msg.id - (uint8_t)720);        //TO TRY
+        m_element = static_cast<SensedElement>(sensor_id);        //TO TRY
         MessagePtr currentSensorDataMsg = std::make_unique<CurrentSensorDataMsg>(static_cast<float>(m_current),
-     		           static_cast<float>(m_voltage), static_cast<SensedElement>(m_element));//, static_cast<getSensedElementStrm_element.>);
-//        m_msgBus.sendMessage(std::move(currentSensorDataMsg));
+     		           static_cast<float>(m_voltage), static_cast<SensedElement>(m_element));
         Logger::info("Current sensor data: Current: %lf , Voltage: %lf , Sensor: %d \n",m_current,m_voltage,m_element);
     }
 }
