@@ -20,7 +20,7 @@
 const float DATA_OUT_OF_RANGE = -2000; // as uint16_t, cannot use -2000.
 
 CANCurrentSensorNode::CANCurrentSensorNode(MessageBus& messageBus, DBHandler& dbhandler, CANService& canService) :
-ActiveNode(NodeID::CANCurrentSensor, messageBus), CANFrameReceiver(canService, {MSG_ID_CURRENT_SENSOR_DATA,MSG_ID_CURRENT_SENSOR_DATA_POWER_UNIT}), m_LoopTime (0.5), m_db(dbhandler)
+ActiveNode(NodeID::CANCurrentSensor, messageBus), CANFrameReceiver(canService, {MSG_ID_CURRENT_SENSOR_DATA}), m_LoopTime (0.5), m_db(dbhandler)
 {
         m_current = DATA_OUT_OF_RANGE;
         m_voltage = DATA_OUT_OF_RANGE;
@@ -55,7 +55,8 @@ void CANCurrentSensorNode::processFrame (CanMsg& msg) {
     Float16Compressor fltCompressor;
 	CanMessageHandler messageHandler(msg);
 	uint16_t comp_current, comp_voltage;
-	uint8_t  sensor_id, rol_num;
+	uint8_t  sensor_id, rol_num; 
+	// rol_num usage not implemented yet, used to check if node is actually reading new data
 
 	if (messageHandler.getMessageId() == MSG_ID_CURRENT_SENSOR_DATA)
     {
@@ -67,7 +68,7 @@ void CANCurrentSensorNode::processFrame (CanMsg& msg) {
         m_current = fltCompressor.decompress(comp_current);
         m_voltage = fltCompressor.decompress(comp_voltage);
         
-        m_element = static_cast<SensedElement>(sensor_id);        //TO TRY
+        m_element = static_cast<SensedElement>(sensor_id);       
         MessagePtr currentSensorDataMsg = std::make_unique<CurrentSensorDataMsg>(static_cast<float>(m_current),
      		           static_cast<float>(m_voltage), static_cast<SensedElement>(m_element));
         Logger::info("Current sensor data: Current: %lf , Voltage: %lf , Sensor: %d \n",m_current,m_voltage,m_element);
