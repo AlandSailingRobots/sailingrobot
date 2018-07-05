@@ -13,9 +13,9 @@
  ***************************************************************************************/
 
 #include "ArduinoNode.h"
-#include "Messages/ArduinoDataMsg.h"
-#include "SystemServices/Logger.h"
-#include "SystemServices/Timer.h"
+#include "../Messages/ArduinoDataMsg.h"
+#include "../SystemServices/Logger.h"
+#include "../SystemServices/Timer.h"
 
 
 // For std::this_thread

@@ -14,16 +14,14 @@
  ***************************************************************************************/
 
 #include "HTTPSyncNode.h"
-#include "Messages/LocalConfigChangeMsg.h"
-#include "Messages/LocalWaypointChangeMsg.h"
-#include "Messages/ServerConfigsReceivedMsg.h"
-#include "Messages/ServerWaypointsReceivedMsg.h"
-#include "SystemServices/Timer.h"
-#include "SystemServices/Wrapper.h"
+#include "../Messages/LocalConfigChangeMsg.h"
+#include "../Messages/LocalWaypointChangeMsg.h"
+#include "../Messages/ServerConfigsReceivedMsg.h"
+#include "../Messages/ServerWaypointsReceivedMsg.h"
+#include "../SystemServices/Timer.h"
+#include "../SystemServices/Wrapper.h"
 
 #include <atomic>
-
-
 
 // The callbacks CANNOT be non-static class member functions
 static size_t write_to_string(void* ptr, size_t size, size_t count, void* stream) {

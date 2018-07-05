@@ -12,15 +12,15 @@
 *
 ***************************************************************************************/
 
-#include "DataBase/DBHandler.h"
-#include "Hardwares/CANAISNode.h"
-#include "Messages/AISDataMsg.h"
-#include "MessageBus/MessageTypes.h"
-#include "MessageBus/MessageBus.h"
-#include "MessageBus/ActiveNode.h"
-#include "SystemServices/Logger.h"
-#include "WorldState/AISProcessing.h"
-#include "WorldState/CollidableMgr/CollidableMgr.h"
+#include "../Database/DBHandler.h"
+#include "../Hardwares/CANAISNode.h"
+#include "../Messages/AISDataMsg.h"
+#include "../MessageBus/MessageTypes.h"
+#include "../MessageBus/MessageBus.h"
+#include "../MessageBus/ActiveNode.h"
+#include "../SystemServices/Logger.h"
+#include "../WorldState/AISProcessing.h"
+#include "../WorldState/CollidableMgr/CollidableMgr.h"
 
 CANService canService;
 DBHandler dbHandler("../asr.db");

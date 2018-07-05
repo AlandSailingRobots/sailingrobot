@@ -7,11 +7,11 @@
 #include <sstream>
 #include <string>
 #include <vector>
-#include "Messages/WindStateMsg.h"
-#include "SystemServices/Logger.h"
-#include "Messages/CurrentSensorDataMsg.h"
+#include "../Messages/CurrentSensorDataMsg.h"
+#include "../Messages/WindStateMsg.h"
+#include "../SystemServices/Logger.h"
 
-#include "Libs/json/include/nlohmann/json.hpp"
+#include "../Libs/json/include/nlohmann/json.hpp"
 using Json = nlohmann::json;
 
 struct LogItem {
@@ -52,7 +52,7 @@ struct LogItem {
     float m_windDir;  // dataLogs_windsensor
     float m_windSpeed;
     float m_windTemp;
-    float m_current; //dataLogs_current_sensors
+    float m_current;  // dataLogs_current_sensors
     float m_voltage;
     SensedElement m_element;
     std::string m_element_str;

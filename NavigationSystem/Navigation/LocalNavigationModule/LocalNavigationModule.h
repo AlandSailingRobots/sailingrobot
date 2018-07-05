@@ -15,11 +15,11 @@
 #pragma once
 
 #include <vector>
+#include "../Database/DBHandler.h"
+#include "../MessageBus/ActiveNode.h"
 #include "ASRArbiter.h"
 #include "ASRVoter.h"
 #include "BoatState.h"
-#include "DataBase/DBHandler.h"
-#include "MessageBus/ActiveNode.h"
 
 class LocalNavigationModule : public ActiveNode {
    public:
