@@ -38,7 +38,7 @@ bool CANSolarTrackerNode::init() {
 }
 
 void CANSolarTrackerNode::updateConfigsFromDB(){
-	m_LoopTime = m_db.selectFromAsDouble("loop_time", "config_solar_tracker", "1");
+	m_LoopTime = m_db.selectFromIdAsDouble("loop_time", "config_solar_tracker", "1");
 }
 
 void CANSolarTrackerNode::processMessage (const Message* message) {

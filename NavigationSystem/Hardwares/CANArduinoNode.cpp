@@ -42,7 +42,7 @@ bool CANArduinoNode::init() {
 
 void CANArduinoNode::updateConfigsFromDB()
 {
-    m_LoopTime = m_db.selectFromAsDouble("loop_time", "config_can_arduino", "1");
+    m_LoopTime = m_db.selectFromIdAsDouble("loop_time", "config_can_arduino", "1");
 }
 
 void CANArduinoNode::processMessage (const Message* message){

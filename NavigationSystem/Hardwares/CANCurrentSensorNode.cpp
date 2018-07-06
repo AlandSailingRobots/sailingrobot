@@ -40,7 +40,7 @@ bool CANCurrentSensorNode::init() {
 
 void CANCurrentSensorNode::updateConfigsFromDB()
 {
-    //m_LoopTime = m_db.selectFromAsDouble("config_can_arduino", "loop_time", 1);
+    //m_LoopTime = m_db.selectFromIdAsDouble("config_can_arduino", "loop_time", 1);
 }
 
 void CANCurrentSensorNode::processMessage (const Message* message){

@@ -74,10 +74,10 @@ void HTTPSyncNode::stop() {
 }
 
 void HTTPSyncNode::updateConfigsFromDB() {
-    m_removeLogs = m_dbHandler->selectFromAsInt("remove_logs", "config_httpsync", 1);
+    m_removeLogs = m_dbHandler->selectFromIdAsInt("remove_logs", "config_httpsync", 1);
     m_pushOnlyLatestLogs =
-      m_dbHandler->selectFromAsInt("push_only_latest_logs", "config_httpsync", 1);
-    m_LoopTime = m_dbHandler->selectFromAsInt("loop_time", "config_httpsync", 1);
+      m_dbHandler->selectFromIdAsInt("push_only_latest_logs", "config_httpsync", 1);
+    m_LoopTime = m_dbHandler->selectFromIdAsInt("loop_time", "config_httpsync", 1);
 }
 
 void HTTPSyncNode::processMessage(const Message* msgPtr) {

@@ -166,40 +166,49 @@ class DBHandler {
 
     std::string getConfigs();
 
+
+
+	// Private SQLite wrapper functions
     int checkRetCode(const int retCode) const;
 
-    int paramNameIndex(sqlite3_stmt* stmt, const char* name);
-    int prepareStmtError(sqlite3* db, const std::string& sql, sqlite3_stmt** stmt);
-    int bindParam(sqlite3_stmt* stmt, const char* name, const int value);
-    int bindParam(sqlite3_stmt* stmt, const char* name, const double value);
-    int bindParam(sqlite3_stmt* stmt, const char* name, const std::string text);
-    int stepAndFinalize(sqlite3_stmt* stmt) const;
-    int stmtSQLIntsDoublesStrings(
-        sqlite3* db,
-        sqlite3_stmt** stmt,
-        const std::string& sql,
-        const std::vector<std::tuple<const char*, int>> ints = {},
-        const std::vector<std::tuple<const char*, double>> doubles = {},
-        const std::vector<std::tuple<const char*, std::string>> strings = {});
+    // For preparing
+    int prepareStmtError(sqlite3_stmt** stmt, const std::string& sql);
+	int prepareStmtSelectFromStatements(sqlite3_stmt** stmt,
+	                                               const std::string& expressions,
+	                                               const std::string& tables,
+	                                               const std::string& statements = NULL);
 
-    int stmtSelectFrom(sqlite3_stmt** stmt,
-                       const std::string& selector,
-                       const std::string& from,
-                       const int id = -1);
+	int prepareStmtSelectFromId(sqlite3_stmt** stmt,
+		const std::string& selector,
+		const std::string& from,
+		const int id);
 
-    // retrieve one value from a table as integer
-    int selectFromAsInt(const std::string& selector, const std::string& from, const int id = -1);
+	// For binding parameter values
+	int paramNameIndex(sqlite3_stmt* stmt, const char* name);
+	int bindParam(sqlite3_stmt* stmt, const char* name, const int value);
+	int bindParam(sqlite3_stmt* stmt, const char* name, const double value);
+	int bindParam(sqlite3_stmt* stmt, const char* name, const std::string& text);
+	int bindStmtIntsDoublesStrings(
+	  sqlite3_stmt** stmt,
+	  const std::vector<std::tuple<const char*, int>>& ints = {},
+	  const std::vector<std::tuple<const char*, double>>& doubles = {},
+	  const std::vector<std::tuple<const char*, std::string>>& strings = {});
 
-    // retrieve one value from a table as double
-    double selectFromAsDouble(const std::string& selector,
-                              const std::string& from,
-                              const int id = -1);
+	// Helpers
+	int prepareAndBindSelectFromId(sqlite3_stmt** stmt,
+		const std::string& selector,
+		const std::string& from,
+		const int id);
+    int stepAndFinalizeStmt(sqlite3_stmt *stmt) const;
 
-    // retrieve one value from a table as string
-    std::string selectFromAsText(const std::string& selector,
-                                 const std::string& from,
-                                 const int id = -1);
-
-    // retreive rows from a table
-    std::vector<std::vector<std::string>> rowsAsText(const std::string& from);
+	// Retreiving data from SELECT queries
+    int     selectFromIdAsInt(const std::string& selector, const std::string& from, const int id = -1);
+    double  selectFromIdAsDouble(const std::string& selector,
+                                const std::string& from,
+                                const int id = -1);
+    std::string selectFromIdAsText(
+        const std::string& selector,
+        const std::string& from,
+        const int id = -1);
+	std::vector<std::vector<std::string>> rowsAsText(sqlite3_stmt **stmt);
 };

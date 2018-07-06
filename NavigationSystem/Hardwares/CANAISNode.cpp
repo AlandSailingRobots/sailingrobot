@@ -42,7 +42,7 @@ void CANAISNode::processMessage(const Message* message) {
 }
 
 void CANAISNode::updateConfigsFromDB(){
-    m_LoopTime = m_db.selectFromAsDouble("loop_time", "config_ais", "1");
+    m_LoopTime = m_db.selectFromIdAsDouble("loop_time", "config_ais", "1");
 }
 
 void CANAISNode::processPGN(N2kMsg& nMsg) {
