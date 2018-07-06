@@ -37,15 +37,16 @@ public:
         CanMessageHandler handler(msg);
 
         if(handler.getMessageId() == MSG_ID_MARINE_SENSOR_DATA) {
+        	Float16Compressor fltCompressor;
             float ph, conductivety, temperature;
+            uint16_t comp_temperature;
             handler.getMappedData(&ph, SENSOR_PH_START, SENSOR_PH_DATASIZE,
                                        SENSOR_PH_IN_BYTE, SENSOR_PH_INTERVAL_MIN, SENSOR_PH_INTERVAL_MAX);
 
-            handler.getMappedData(&conductivety,SENSOR_CONDUCTIVETY_START, SENSOR_CONDUCTIVETY_DATASIZE,
-                                         SENSOR_CONDUCTIVETY_IN_BYTE, SENSOR_CONDUCTIVETY_INTERVAL_MIN, SENSOR_CONDUCTIVETY_INTERVAL_MAX);
+            handler.getData(&conductivety,SENSOR_CONDUCTIVETY_START, SENSOR_CONDUCTIVETY_DATASIZE, SENSOR_CONDUCTIVETY_IN_BYTE);
 
-            handler.getMappedData(&temperature, SENSOR_TEMPERATURE_START, SENSOR_TEMPERATURE_DATASIZE,
-                                         SENSOR_TEMPERATURE_IN_BYTE, SENSOR_TEMPERATURE_INTERVAL_MIN, SENSOR_TEMPERATURE_INTERVAL_MAX);
+            handler.getData(&comp_temperature, SENSOR_TEMPERATURE_START, SENSOR_TEMPERATURE_DATASIZE, SENSOR_TEMPERATURE_IN_BYTE);
+            temperature = fltCompressor.decompress(comp_temperature);
             float salinity = Utility::calculateSalinity (temperature, conductivety);
 
             MessagePtr marineSensorDataMsg = std::make_unique<MarineSensorDataMsg>(static_cast<float>(temperature), static_cast<float>(conductivety), static_cast<float>(ph), salinity);
