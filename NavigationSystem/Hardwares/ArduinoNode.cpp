@@ -36,7 +36,7 @@ ArduinoNode::ArduinoNode(MessageBus& msgBus,  DBHandler& dbhandler)
 
 void ArduinoNode::updateConfigsFromDB()
 {
-	m_LoopTime = m_db.selectFromIdAsDouble("loop_time", "config_arduino", "1");
+	m_LoopTime = m_db.getConfigsFrom(<#initializer#>, "loop_time", "config_arduino", "1");
 }
 
 bool ArduinoNode::init()

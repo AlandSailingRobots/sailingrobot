@@ -84,7 +84,7 @@ void CV7Node::start()
 
 void CV7Node::updateConfigsFromDB()
 {
-	m_LoopTime = m_db.selectFromIdAsDouble("loop_time", "config_wind_sensor", 1);
+	m_LoopTime = m_db.getConfigsFrom(<#initializer#>, "loop_time", "config_wind_sensor", 1);
 }
 
 void CV7Node::processMessage(const Message* message)

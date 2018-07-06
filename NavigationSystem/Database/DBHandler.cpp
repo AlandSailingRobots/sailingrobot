@@ -298,11 +298,12 @@ std::string DBHandler::getWaypoints() {  // NOTE : Marc : change this otherwise 
 // max = true -> max id
 // TODO: Rewrite to use generic
 int DBHandler::getTableId(std::string table, ID_MINMAX minmax) {
-    // std::vector<std::string> results;
-    std::string selector = (minmax == MAX_ID ? "MAX(id)" : "MIN(id)");
-    int id = 0;
-    try {
-        id = selectFromIdAsInt(selector, table);
+	sqlite3_stmt** stmt = NULL;
+	int id = 0;
+	try {
+	    prepareStmtSelectFromStatements(stmt, (minmax == MAX_ID ? "MAX(id)" : "MIN(id)"), table);
+		sqlite3_column_value(*stmt, 0, id);
+		sqlite3_finalize(*stmt);
     } catch (const char* error) {
         Logger::error("%s Error when determining min/max id from %s", __PRETTY_FUNCTION__, table);
     }
@@ -450,7 +451,7 @@ int DBHandler::prepareAndBindSelectFromId(sqlite3_stmt** stmt,
  * @param value		Value
  * @return
  */
-int DBHandler::bindParam(sqlite3_stmt* stmt, const char* name, const int value) {
+int DBHandler::bindParam(sqlite3_stmt* stmt, const char* name, const int& value) {
     int paramIndex = paramNameIndex(stmt, name);
     if (!paramIndex) {
         return SQLITE_MISUSE;
@@ -465,7 +466,7 @@ int DBHandler::bindParam(sqlite3_stmt* stmt, const char* name, const int value) 
  * @param value		Value
  * @return
  */
-int DBHandler::bindParam(sqlite3_stmt* stmt, const char* name, const double value) {
+int DBHandler::bindParam(sqlite3_stmt* stmt, const char* name, const double& value) {
     int paramIndex = paramNameIndex(stmt, name);
     if (!paramIndex) {
         return SQLITE_MISUSE;
@@ -534,22 +535,37 @@ int DBHandler::bindStmtIntsDoublesStrings(
     return firstErrorCode;
 }
 
-
-
+void sqlite3_column_value(sqlite3_stmt* stmt, int index, int& value) {
+	value = sqlite3_column_int(stmt, index);
+}
+void sqlite3_column_value(sqlite3_stmt* stmt, int index, double& value) {
+	value = sqlite3_column_double(stmt, index);
+}
+void sqlite3_column_value(sqlite3_stmt* stmt, int index, std::string& value) {
+	const char* strp = (char*)sqlite3_column_text(stmt, 0);
+	value = std::string(strp);
+}
 
 // int getConfigFrom("loop_time","config_blah");
 // double getConfigFrom("loop_time","config_blah");
 
 
-int DBHandler::selectFromAsInt(const std::string& selector, const std::string& from, const int id) {
+/*int DBHandler::selectFromAsInt(const std::string& selector, const std::string& from) {
 	sqlite3_stmt* stmt = NULL;
 
 	stmtSelectFrom(&stmt, selector, from, id);
 	int retVal = sqlite3_column_int(stmt, 0);
 	sqlite3_finalize(stmt);
 	return retVal;
-}
+}*/
 
+/*std::string DBHandler::getConfigFromAsText(const char* selector, const char* from) {
+	std::string retVal;
+	refSelectFrom(retVal, std::string(selector), std::string(from), "WHERE id = :id", {{":id", 1}});
+	return retVal;
+}*/
+
+/*
 int DBHandler::selectFromIdAsInt(const std::string& selector,
                                  const std::string& from,
                                  const int id) {
@@ -560,7 +576,7 @@ int DBHandler::selectFromIdAsInt(const std::string& selector,
 	return retVal;
 }
 
-double DBHandler::selectFromIdAsDouble(const std::string& selector,
+double DBHandler::getConfigsFrom(const std::string& selector,
                                        const std::string& from,
                                        const int id) {
 	sqlite3_stmt* stmt = NULL;
@@ -570,20 +586,18 @@ double DBHandler::selectFromIdAsDouble(const std::string& selector,
 	return retVal;
 }
 
-std::string DBHandler::selectFromIdAsText(const std::string& selector,
+std::string DBHandler::selectFromIdAsString(const std::string& selector,
                                         const std::string& from,
                                         const int id) {
 	sqlite3_stmt* stmt = NULL;
 	std::string text;
 
-	if (prepareAndBindSelectFromId(&stmt, selector, from, id) == SQLITE_ROW) {
-		const char* strp = (char*)sqlite3_column_text(stmt, 0);
-		text = std::string(strp);
-	}
+	prepareAndBindSelectFromId(&stmt, selector, from, id);
+	const char* strp = (char*)sqlite3_column_text(stmt, 0);
 	sqlite3_finalize(stmt);
-	return text;
+	return std::string(strp);
 }
-
+*/
 // TODO: some push could be emplace?
 // TODO: BUSY loop
 // TODO: refs instead of copies - rewrite using new
@@ -591,8 +605,8 @@ std::vector<std::vector<std::string>> DBHandler::rowsAsText(sqlite3_stmt** stmt)
     std::vector<std::vector<std::string>> rows;
     int retCode = sqlite3_step(*stmt);
     if (not((retCode == SQLITE_ROW) || (retCode == SQLITE_DONE))) {
-        Logger::error("%s SQLite error: %s (%d) on \"%s\"", __PRETTY_FUNCTION__,
-                      sqlite3_errstr(retCode), retCode, sql.c_str());
+        Logger::error("%s SQLite error: %s (%d)", __PRETTY_FUNCTION__,
+                      sqlite3_errstr(retCode));
     } else {
         int columns = sqlite3_column_count(*stmt);
         std::vector<std::string> row;
@@ -623,6 +637,38 @@ std::vector<std::vector<std::string>> DBHandler::rowsAsText(sqlite3_stmt** stmt)
 /*******************************************************************************
  * INSERT and UPDATE ops
  ******************************************************************************/
+
+// TODO: REMOVE COMMENTED OUT OLD CODE WHEN TESTED
+// TODO: another rewrite
+bool DBHandler::changeOneValue(std::string table,
+                               std::string newValue,
+                               std::string colName,
+                               int id) {
+	sqlite3_stmt* stmt = NULL;
+	std::string sql = "UPDATE " + table + " SET " + colName + " = :value";
+	if (id)
+		sql += " WHERE id = :id";
+
+	if (!prepareStmtError(&stmt, sql)) {
+		bindParam(stmt, ":value", newValue);
+		if (id) {
+			bindParam(stmt, ":id", id);
+		}
+		if (!stepAndFinalizeStmt(stmt)) {
+			Logger::error("%s Error on \"%s\"", __PRETTY_FUNCTION__, sql.c_str());
+			return false;
+		}
+	}
+
+	/*
+		if (not DBTransaction("UPDATE " + table + " SET " + colName + " = " + newValue +
+							  " WHERE id = " + id + ";")) {
+			Logger::error("Error %s", __PRETTY_FUNCTION__);
+			return false;
+		}
+	*/
+	return true;
+}
 
 /**
  * Inserts all current values in the DB. Uses overloaded bindParam instead of
@@ -1068,57 +1114,25 @@ bool DBHandler::getWaypointValues(int& nextId,
 
     // Set values to next waypoint
     nextId = safe_stoi(results[1]);
-    nextLongitude = selectFromIdAsDouble("longitude", "current_Mission", safe_stoi(results[1]));
-    nextLatitude = selectFromIdAsDouble("latitude", "current_Mission", safe_stoi(results[1]));
-    nextDeclination = selectFromIdAsInt("declination", "current_Mission", safe_stoi(results[1]));
-    nextRadius = selectFromIdAsInt("radius", "current_Mission", safe_stoi(results[1]));
-    nextStayTime = selectFromIdAsInt("stay_time", "current_Mission", safe_stoi(results[1]));
-    isCheckpoint = selectFromIdAsInt("is_checkpoint", "current_Mission", safe_stoi(results[1]));
+    selectFromId(nextLongitude, "longitude", "current_Mission", safe_stoi(results[1]));
+    selectFromId(nextLatitude, "latitude", "current_Mission", safe_stoi(results[1]));
+    selectFromId(nextDeclination, "declination", "current_Mission", safe_stoi(results[1]));
+    selectFromId(nextRadius, "radius", "current_Mission", safe_stoi(results[1]));
+    selectFromId(nextStayTime, "stay_time", "current_Mission", safe_stoi(results[1]));
+    selectFromId(isCheckpoint, "is_checkpoint", "current_Mission", safe_stoi(results[1]));
 
     if (foundPrev) {  // Set values to next waypoint if harvested waypoint found
         prevId = safe_stoi(results2[1]);
-        prevLongitude =
-            selectFromIdAsDouble("longitude", "current_Mission", safe_stoi(results2[1]));
-        prevLatitude = selectFromIdAsDouble("latitude", "current_Mission", safe_stoi(results2[1]));
-        prevDeclination =
-            selectFromIdAsInt("declination", "current_Mission", safe_stoi(results2[1]));
-        prevRadius = selectFromIdAsInt("radius", "current_Mission", safe_stoi(results2[1]));
+        selectFromId(prevLongitude, "longitude", "current_Mission", safe_stoi(results2[1]));
+        selectFromId(prevLatitude, "latitude", "current_Mission", safe_stoi(results2[1]));
+        selectFromId(prevDeclination, "declination", "current_Mission", safe_stoi(results2[1]));
+        selectFromId(prevRadius, "radius", "current_Mission", safe_stoi(results2[1]));
     }
 
     return true;
 }
 
-// TODO: Rewrite old
-bool DBHandler::changeOneValue(std::string table,
-                               std::string newValue,
-                               std::string colName,
-                               int id) {
-    sqlite3* db = DBConnect();
-    sqlite3_stmt* stmt = NULL;
-    std::string sql = "UPDATE " + table + " SET " + colName + " = :value";
-    if (id)
-        sql += " WHERE id = :id";
 
-    if (!prepareStmtError(db, sql, &stmt)) {
-        bindParam(stmt, ":value", newValue);
-        if (id) {
-            bindParam(stmt, ":id", id);
-        }
-        if (!stepAndFinalizeStmt(stmt)) {
-            Logger::error("%s Error on \"%s\"", __PRETTY_FUNCTION__, sql.c_str());
-            return false;
-        }
-    }
-    // TODO: REMOVE WHEN TESTED
-    /*
-        if (not DBTransaction("UPDATE " + table + " SET " + colName + " = " + newValue +
-                              " WHERE id = " + id + ";")) {
-            Logger::error("Error %s", __PRETTY_FUNCTION__);
-            return false;
-        }
-    */
-    return true;
-}
 
 /*
 int DBHandler::stmtSelectFrom(sqlite3_stmt** stmt,
@@ -1186,7 +1200,7 @@ int DBHandler::stmtSelectFrom(std::string table, std::string column, int id) {
 */
 
 /*
-double DBHandler::selectFromIdAsDouble(std::string table, std::string column, std::string id) {
+double DBHandler::getConfigsFrom(std::string table, std::string column, std::string id) {
     std::string data = selectFromAsText(table, id, column);
     if (data.size() > 0) {
         return strtod(data.c_str(), NULL);
@@ -1221,7 +1235,6 @@ double DBHandler::selectFromIdAsDouble(std::string table, std::string column, st
     return js.dump();
 }*/
 
-// TODO: Pass refs instead
 std::string DBHandler::getLogs(bool onlyLatest) {
 	sqlite3_stmt** stmt = NULL;
     std::string result;
@@ -1239,8 +1252,8 @@ std::string DBHandler::getLogs(bool onlyLatest) {
             prepareStmtSelectFromStatements(stmt, "*", table, (onlyLatest ? "ORDER BY id DESC LIMIT 1" : NULL));
             std::vector<std::vector<std::string>> rows = rowsAsText(stmt);
 
-            std::vector<std::string> names = rowsAsText(
-                "SELECT name FROM sqlite_master WHERE type='table' AND name LIKE " + table)[0];
+			prepareStmtSelectFromStatements(stmt, "name", "sqlite_master", "WHERE type='table' AND name LIKE " + table);
+            std::vector<std::string> names = rowsAsText(stmt)[0];
 
             // "dataLogs_" is 9 chars, next is at index 9 (starting from 0)
             logs.push_back(std::make_tuple(table.substr(9, std::string::npos), rows));

@@ -49,9 +49,9 @@ bool HTTPSyncNode::init() {
         m_shipPWD = m_dbHandler->selectFromAsText("config_httpsync", "1", "boat_pwd");
     */
     // TODO this should be a single query
-    m_serverURL = m_dbHandler->selectFromAsText("srv_addr", "config_httpsync", 1);
-    m_shipID = m_dbHandler->selectFromAsText("boat_id", "config_httpsync", 1);
-    m_shipPWD = m_dbHandler->selectFromAsText("boat_pwd", "config_httpsync", 1);
+    m_dbHandler->getConfigFrom(m_serverURL, "srv_addr", "config_httpsync");
+    m_dbHandler->getConfigFrom(m_shipID, "boat_id", "config_httpsync");
+    m_dbHandler->getConfigFrom(m_shipPWD, "boat_pwd", "config_httpsync");
     updateConfigsFromDB();
 
     m_initialised = true;
@@ -74,10 +74,9 @@ void HTTPSyncNode::stop() {
 }
 
 void HTTPSyncNode::updateConfigsFromDB() {
-    m_removeLogs = m_dbHandler->selectFromIdAsInt("remove_logs", "config_httpsync", 1);
-    m_pushOnlyLatestLogs =
-      m_dbHandler->selectFromIdAsInt("push_only_latest_logs", "config_httpsync", 1);
-    m_LoopTime = m_dbHandler->selectFromIdAsInt("loop_time", "config_httpsync", 1);
+    m_dbHandler->getConfigFrom(m_removeLogs, "remove_logs", "config_httpsync");
+    m_dbHandler->getConfigFrom(m_pushOnlyLatestLogs, "push_only_latest_logs", "config_httpsync");
+    m_dbHandler->getConfigFrom(m_LoopTime, "loop_time", "config_httpsync");
 }
 
 void HTTPSyncNode::processMessage(const Message* msgPtr) {

@@ -32,8 +32,8 @@ void DataCollectionMgrNode::processMessage(const Message* msg) {
 }
 
 void DataCollectionMgrNode::readConfig() {
-	m_timeInterval = m_db.selectFromIdAsInt("time_interval", "config_marine_sensors", 1);
-	m_measureAtCheckpoint = m_db.selectFromIdAsInt("measure_at_checkpoint", "config_marine_sensors", 1);
+	m_db.getConfigFrom(m_timeInterval, "time_interval", "config_marine_sensors");
+	m_db.getConfigFrom(m_measureAtCheckpoint, "measure_at_checkpoint", "config_marine_sensors");
 }
 
 void DataCollectionMgrNode::sendIntervalMessage() {
