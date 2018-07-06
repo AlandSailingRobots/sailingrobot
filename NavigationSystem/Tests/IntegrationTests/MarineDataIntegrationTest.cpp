@@ -40,8 +40,8 @@ public:
         	Float16Compressor fltCompressor;
             float ph, conductivety, temperature;
             uint16_t comp_temperature;
-            handler.getMappedData(&ph, SENSOR_PH_START, SENSOR_PH_DATASIZE,
-                                       SENSOR_PH_IN_BYTE, SENSOR_PH_INTERVAL_MIN, SENSOR_PH_INTERVAL_MAX);
+            handler.canMsgToBitset(); // update bitset with m_message.data
+            handler.getMappedData(&ph, SENSOR_PH_START, SENSOR_PH_DATASIZE, SENSOR_PH_IN_BYTE, SENSOR_PH_INTERVAL_MIN, SENSOR_PH_INTERVAL_MAX);
 
             handler.getData(&conductivety,SENSOR_CONDUCTIVETY_START, SENSOR_CONDUCTIVETY_DATASIZE, SENSOR_CONDUCTIVETY_IN_BYTE);
 

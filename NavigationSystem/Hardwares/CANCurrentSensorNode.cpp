@@ -60,6 +60,7 @@ void CANCurrentSensorNode::processFrame (CanMsg& msg) {
 
 	if (messageHandler.getMessageId() == MSG_ID_CURRENT_SENSOR_DATA)
     {
+    	messageHandler.canMsgToBitset(); // update bitset with m_message.data
         messageHandler.getData( &comp_current, CURRENT_SENSOR_CURRENT_START, CURRENT_SENSOR_CURRENT_DATASIZE, CURRENT_SENSOR_CURRENT_IN_BYTE);
         messageHandler.getData( &comp_voltage, CURRENT_SENSOR_VOLTAGE_START, CURRENT_SENSOR_VOLTAGE_DATASIZE, CURRENT_SENSOR_VOLTAGE_IN_BYTE);
         messageHandler.getData( &sensor_id,    CURRENT_SENSOR_ID_START,      CURRENT_SENSOR_ID_DATASIZE,      CURRENT_SENSOR_ID_IN_BYTE);
