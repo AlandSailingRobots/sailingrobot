@@ -170,11 +170,11 @@ class DBHandler {
     int checkRetCode(const int retCode) const;
 
     // For preparing
-    int prepareStmtError(sqlite3_stmt** stmt, std::string sql); // Ref here gave segfaults
-    int prepareStmtSelectFromStatements(sqlite3_stmt** stmt,
-                                        const std::string& expressions,
-                                        const std::string& tables,
-                                        const std::string& statements = NULL);
+    int prepareStmtError(sqlite3_stmt *&stmt, std::string sql); // Ref here gave segfaults
+    int prepareStmtSelectFromStatements(sqlite3_stmt *&stmt,
+                                        const std::string &expressions,
+                                        const std::string &tables,
+                                        const std::string &statements = NULL);
 
 /*    int prepareStmtSelectFromId(sqlite3_stmt** stmt,
                                 const std::string& selector,
@@ -182,22 +182,22 @@ class DBHandler {
                                 const int id);*/
 
     // For binding parameter values
-    int paramNameIndex(sqlite3_stmt* stmt, const char* name);
-    int bindParam(sqlite3_stmt* stmt, const char* name, const int& value);
-    int bindParam(sqlite3_stmt* stmt, const char* name, const double& value);
-    int bindParam(sqlite3_stmt* stmt, const char* name, const std::string& text);
+    int paramNameIndex(sqlite3_stmt *&stmt, const char *name);
+    int bindParam(sqlite3_stmt *&stmt, const char *name, const int &value);
+    int bindParam(sqlite3_stmt *&stmt, const char *name, const double &value);
+    int bindParam(sqlite3_stmt *&stmt, const char *name, const std::string &text);
     int bindStmtIntsDoublesStrings(
-        sqlite3_stmt** stmt,
-        const std::vector<std::tuple<const char*, int>>& ints = {},
-        const std::vector<std::tuple<const char*, double>>& doubles = {},
-        const std::vector<std::tuple<const char*, std::string>>& strings = {});
+      sqlite3_stmt *&stmt,
+      const std::vector<std::tuple<const char *, int>> &ints = {},
+      const std::vector<std::tuple<const char *, double>> &doubles = {},
+      const std::vector<std::tuple<const char *, std::string>> &strings = {});
 
     // Helpers
-    int prepareAndBindSelectFromId(sqlite3_stmt** stmt,
+    int prepareAndBindSelectFromId(sqlite3_stmt *&stmt,
                                    const std::string& selector,
                                    const std::string& from,
                                    const int id);
-    int stepAndFinalizeStmt(sqlite3_stmt* stmt) const;
+    int stepAndFinalizeStmt(sqlite3_stmt *&stmt) const;
 
     // Retreiving data from SELECT queries
 
@@ -205,13 +205,13 @@ class DBHandler {
 //    void sqlite3_column_value(sqlite3_stmt *stmt, int index, int &value);
 //    void sqlite3_column_value(sqlite3_stmt *stmt, int index, double &value);
 //    void sqlite3_column_value(sqlite3_stmt *stmt, int index, std::string &value);
-	void sqlite3_column_value(sqlite3_stmt* stmt, int index, int& value) {
+	void sqlite3_column_value(sqlite3_stmt *&stmt, int index, int &value) {
 		value = sqlite3_column_int(stmt, index);
 	}
-	void sqlite3_column_value(sqlite3_stmt* stmt, int index, double& value) {
+	void sqlite3_column_value(sqlite3_stmt *&stmt, int index, double &value) {
 		value = sqlite3_column_double(stmt, index);
 	}
-	void sqlite3_column_value(sqlite3_stmt* stmt, int index, std::string& value) {
+	void sqlite3_column_value(sqlite3_stmt *&stmt, int index, std::string &value) {
 		const char* strp = (char*)sqlite3_column_text(stmt, index);
 		value = std::string(strp);
 	}
@@ -242,13 +242,16 @@ class DBHandler {
 	                          const std::vector<std::tuple<const char *, double>> &doubles = {},
 	                          const std::vector<std::tuple<const char *, std::string>> &strings = {}) {
 		int retCode = SQLITE_OK;
-		sqlite3_stmt** stmt = NULL;
+		sqlite3_stmt* stmt = NULL;
 
 		retCode = prepareStmtSelectFromStatements(stmt, selector, from, statements);
 		if (!retCode) retCode = bindStmtIntsDoublesStrings(stmt, ints, doubles, strings);
-		if (!retCode) retCode = sqlite3_step(*stmt);
-		if (!retCode) sqlite3_column_value(*stmt, 0, ref);
-		if (*stmt != NULL) retCode = sqlite3_finalize(*stmt);
+		if (!retCode) retCode = sqlite3_step(stmt);
+		if (retCode == SQLITE_ROW) {
+			sqlite3_column_value(stmt, 0, ref);
+			retCode = SQLITE_OK;
+		}
+		if (stmt != NULL) retCode = sqlite3_finalize(stmt);
 		return retCode;
 	}
 
@@ -326,7 +329,7 @@ class DBHandler {
                                      const std::string& from,
                                      const int id);*/
 
-    std::vector<std::vector<std::string>> rowsAsText(sqlite3_stmt** stmt);
+    std::vector<std::vector<std::string>> rowsAsText(sqlite3_stmt *&stmt);
 
 
 
