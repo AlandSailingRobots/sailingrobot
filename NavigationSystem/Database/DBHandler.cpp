@@ -36,6 +36,8 @@ bool DBHandler::initialise() {
     return connection;  // NULL would mean we got no connection
 }
 
+
+
 /**
  * Checks and logs possible SQLire error codes
  * @param retCode
@@ -392,12 +394,12 @@ void DBHandler::DBClose() {
  * @param stmt
  * @return
  */
-int DBHandler::prepareStmtError(sqlite3_stmt** stmt, const std::string& sql) {
+int DBHandler::prepareStmtError(sqlite3_stmt** stmt, std::string sql) {
 	sqlite3* db = DBConnect();
 	int resultCode = checkRetCode(sqlite3_prepare_v2(db, sql.c_str(), (int)sql.size(), stmt, NULL));
 	if (resultCode != SQLITE_OK) {
-		Logger::error("%s SQL statement prepare error: %s on \"%s\"", __PRETTY_FUNCTION__,
-		              sqlite3_errstr(resultCode), sql.c_str());
+		Logger::error("%s: %s (%d) on \"%s\"", __PRETTY_FUNCTION__,
+		              sqlite3_errstr(resultCode), resultCode, sql.c_str());
 	}
 	return resultCode;
 }
@@ -420,11 +422,11 @@ int DBHandler::prepareStmtSelectFromStatements(sqlite3_stmt** stmt,
                                                const std::string& expressions,
                                                const std::string& tables,
                                                const std::string& statements) {
-	std::string sql = "SELECT " + tables + " FROM " + expressions;
+	std::string sql = "SELECT " + expressions + " FROM " + tables;
 	if (statements.length()) {
 		sql += " " + statements;
 	}
-	sql += ";";  // Not really needed but neat
+	// sql += ";";  // Not really needed but neat
 	return prepareStmtError(stmt, sql);
 }
 
@@ -533,17 +535,6 @@ int DBHandler::bindStmtIntsDoublesStrings(
             firstErrorCode = retCode;
     }
     return firstErrorCode;
-}
-
-void sqlite3_column_value(sqlite3_stmt* stmt, int index, int& value) {
-	value = sqlite3_column_int(stmt, index);
-}
-void sqlite3_column_value(sqlite3_stmt* stmt, int index, double& value) {
-	value = sqlite3_column_double(stmt, index);
-}
-void sqlite3_column_value(sqlite3_stmt* stmt, int index, std::string& value) {
-	const char* strp = (char*)sqlite3_column_text(stmt, 0);
-	value = std::string(strp);
 }
 
 // int getConfigFrom("loop_time","config_blah");
