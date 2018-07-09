@@ -304,7 +304,6 @@ int DBHandler::getTableId(const char *table, ID_MINMAX minmax) {
 	int id = 0;
 	std::string selector = ( minmax ? "MAX(id)" : "MIN(id)" );
 
-//	try {
 	retCode = prepareStmtSelectFromStatements(stmt, selector, table, "");
 	if (retCode == SQLITE_OK) retCode = sqlite3_step(stmt);
 	if (retCode == SQLITE_ROW) {
@@ -314,14 +313,9 @@ int DBHandler::getTableId(const char *table, ID_MINMAX minmax) {
 	if (retCode != SQLITE_OK) {
 		Logger::error("%s Error determining %s from %s", __PRETTY_FUNCTION__, selector.c_str(), table);
 	}
-//    } catch (const char* error) {
-//        Logger::error("%s Error when determining min/max id from %s", __PRETTY_FUNCTION__, table.c_str());
-//    }
 	if (stmt != NULL) sqlite3_finalize(stmt);
     return id;
 }
-
-// TODO: getTableColumnNames
 
 /******************************************************************************
  * private helpers
@@ -603,7 +597,7 @@ std::string DBHandler::selectFromIdAsString(const std::string& selector,
 // TODO: some push could be emplace?
 // TODO: BUSY loop
 // TODO: refs instead of copies - rewrite using new
-std::vector<std::vector<std::string>> DBHandler::rowsAsText(sqlite3_stmt *&stmt) {
+std::vector<std::vector<std::string>> DBHandler::rowsAsText(sqlite3_stmt *&stmt, bool prependColumnNames) {
     std::vector<std::vector<std::string>> rows;
     int retCode = sqlite3_step(stmt);
     if (not((retCode == SQLITE_ROW) || (retCode == SQLITE_DONE))) {
@@ -612,6 +606,13 @@ std::vector<std::vector<std::string>> DBHandler::rowsAsText(sqlite3_stmt *&stmt)
     } else {
         int columns = sqlite3_column_count(stmt);
         std::vector<std::string> row;
+        if (prependColumnNames) {
+	        for (int i = 0; i < columns; i++) {
+	        	row.push_back(std::string(sqlite3_column_name(stmt, i)));
+	        }
+	        rows.push_back(row);
+	        row.clear();
+        }
         while (retCode == SQLITE_ROW) {
             for (int i = 0; i < columns; i++) {
                 std::string retStr;
@@ -1250,14 +1251,17 @@ std::string DBHandler::getLogs(bool onlyLatest) {
         // insert all data in these tables as json array
 
         for (auto table : datalogTables) {
+
 	        // Gets the log entry with the highest id if flag is set
             prepareStmtSelectFromStatements(stmt, "*", table, (onlyLatest ? "ORDER BY id DESC LIMIT 1" : NULL));
-            std::vector<std::vector<std::string>> rows = rowsAsText(stmt);
+            std::vector<std::vector<std::string>> rows = rowsAsText(stmt, true);
+
+
             sqlite3_finalize(stmt);
 
-			//prepareStmtSelectFromStatements(stmt, "name", "sqlite_master", "WHERE type='table' AND name LIKE '" + table + "'");
-	        //std::vector<std::vector<std::string>> namerows = rowsAsText(stmt);
-			//sqlite3_finalize(stmt);
+	        // prepareStmtSelectFromStatements(stmt, "name", "sqlite_master", "WHERE type='table' AND name LIKE '" + table + "'");
+	        // std::vector<std::vector<std::string>> namerows = rowsAsText(stmt);
+	        // sqlite3_finalize(stmt);
 
             // "dataLogs_" is 9 chars, next is at index 9 (starting from 0)
             logs.push_back(std::make_tuple(table.substr(9, std::string::npos), rows));

@@ -329,7 +329,7 @@ class DBHandler {
                                      const std::string& from,
                                      const int id);*/
 
-    std::vector<std::vector<std::string>> rowsAsText(sqlite3_stmt *&stmt);
+	std::vector<std::vector<std::string>> rowsAsText(sqlite3_stmt *&stmt, bool prependColumnNames = false);
 
 
 
