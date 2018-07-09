@@ -141,7 +141,7 @@ class DBHandler {
     // max = false -> min id
     // max = true -> max id
     enum ID_MINMAX { MIN_ID = false, MAX_ID = true };
-    int getTableId(std::string table, ID_MINMAX = MAX_ID);
+    int getTableId(const char *table, ID_MINMAX = MAX_ID);
 
     void deleteRow(std::string table, std::string id);
 

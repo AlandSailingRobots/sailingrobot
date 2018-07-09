@@ -298,19 +298,30 @@ std::string DBHandler::getWaypoints() {  // NOTE : Marc : change this otherwise 
 // get id from table returns either max or min id from table.
 // max = false -> min id
 // max = true -> max id
-// TODO: Rewrite to use generic
-int DBHandler::getTableId(std::string table, ID_MINMAX minmax) {
+int DBHandler::getTableId(const char *table, ID_MINMAX minmax) {
+	int retCode = SQLITE_OK;
 	sqlite3_stmt* stmt = NULL;
 	int id = 0;
-	try {
-	    prepareStmtSelectFromStatements(stmt, (minmax == MAX_ID ? "MAX(id)" : "MIN(id)"), table);
+	std::string selector = ( minmax ? "MAX(id)" : "MIN(id)" );
+
+//	try {
+	retCode = prepareStmtSelectFromStatements(stmt, selector, table, "");
+	if (retCode == SQLITE_OK) retCode = sqlite3_step(stmt);
+	if (retCode == SQLITE_ROW) {
 		sqlite3_column_value(stmt, 0, id);
-		sqlite3_finalize(stmt);
-    } catch (const char* error) {
-        Logger::error("%s Error when determining min/max id from %s", __PRETTY_FUNCTION__, table);
-    }
+		retCode = SQLITE_OK;
+	}
+	if (retCode != SQLITE_OK) {
+		Logger::error("%s Error determining %s from %s", __PRETTY_FUNCTION__, selector.c_str(), table);
+	}
+//    } catch (const char* error) {
+//        Logger::error("%s Error when determining min/max id from %s", __PRETTY_FUNCTION__, table.c_str());
+//    }
+	if (stmt != NULL) sqlite3_finalize(stmt);
     return id;
 }
+
+// TODO: getTableColumnNames
 
 /******************************************************************************
  * private helpers
@@ -603,8 +614,8 @@ std::vector<std::vector<std::string>> DBHandler::rowsAsText(sqlite3_stmt *&stmt)
         std::vector<std::string> row;
         while (retCode == SQLITE_ROW) {
             for (int i = 0; i < columns; i++) {
-                char* strp = (char*)sqlite3_column_text(stmt, i);
-                std::string retStr = std::string(strp);
+                std::string retStr;
+	            sqlite3_column_value(stmt, i, retStr);
                 // TODO: Maybe disable this non-UTF-8 content check here? Enable again on JSON
                 // crashes.
                 for (char c : retStr) {
@@ -621,8 +632,8 @@ std::vector<std::vector<std::string>> DBHandler::rowsAsText(sqlite3_stmt *&stmt)
             checkRetCode(retCode);  // TODO inline above
         }
     }
-    checkRetCode(sqlite3_finalize(stmt));
-    return rows;
+    // checkRetCode(sqlite3_finalize(stmt));
+    return std::move(rows);
 }
 
 /*******************************************************************************
@@ -1242,9 +1253,11 @@ std::string DBHandler::getLogs(bool onlyLatest) {
 	        // Gets the log entry with the highest id if flag is set
             prepareStmtSelectFromStatements(stmt, "*", table, (onlyLatest ? "ORDER BY id DESC LIMIT 1" : NULL));
             std::vector<std::vector<std::string>> rows = rowsAsText(stmt);
+            sqlite3_finalize(stmt);
 
-			prepareStmtSelectFromStatements(stmt, "name", "sqlite_master", "WHERE type='table' AND name LIKE '" + table + "'");
-            std::vector<std::string> names = rowsAsText(stmt)[0];
+			//prepareStmtSelectFromStatements(stmt, "name", "sqlite_master", "WHERE type='table' AND name LIKE '" + table + "'");
+	        //std::vector<std::vector<std::string>> namerows = rowsAsText(stmt);
+			//sqlite3_finalize(stmt);
 
             // "dataLogs_" is 9 chars, next is at index 9 (starting from 0)
             logs.push_back(std::make_tuple(table.substr(9, std::string::npos), rows));
