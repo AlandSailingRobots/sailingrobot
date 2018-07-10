@@ -20,7 +20,7 @@
  *  pushWaypoints
  *  pushConfigs
  *  getWaypointsFromServer
- *  getConfigsFromServer
+ *  getConfigFromServer
  *
  ***************************************************************************************/
 

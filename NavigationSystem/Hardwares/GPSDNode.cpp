@@ -49,7 +49,7 @@ bool GPSDNode::init()
 
 void GPSDNode::updateConfigsFromDB()
 {
-	m_LoopTime = m_db.getConfigsFrom(<#initializer#>, "loop_time", "config_gps", 1);
+	m_db.getConfigFrom(m_LoopTime, "loop_time", "config_gps");
 }
 
 void GPSDNode::processMessage(const Message* msgPtr)
