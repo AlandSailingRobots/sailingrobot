@@ -10,7 +10,7 @@ bool readConfig::exists(json &cfg, const std::string &key){
 }
 
 void readConfig::waypointsInJson(json& wp, DBHandler db) {
-  wp = db.getWaypoints();
+  wp = db.getWayPointsAsJSON();
 }
 
 bool readConfig::updateConfiguration(const std::string& file, DBHandler db) {

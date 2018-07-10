@@ -129,7 +129,7 @@ class DBHandler {
     void updateConfigs(std::string configs);
     bool updateWaypoints(std::string waypoints);
 
-	std::string getTablesAsJSON(std::string like, std::string statement);
+	std::string getTablesAsJSON(std::string like, std::string statement = "");
     // returns all logs in database as json; supply onlyLatest to get only the ones with the highest
     // id
     std::string getLogsAsJSON(bool onlyLatest);
@@ -163,7 +163,7 @@ class DBHandler {
     bool insert(std::string table, std::string fields, std::string values);
     bool changeOneValue(std::string table, std::string newValue, std::string colName, int id);
 
-    std::string getWaypoints();
+    std::string getWayPointsAsJSON();
 
     std::string getConfigs();
 

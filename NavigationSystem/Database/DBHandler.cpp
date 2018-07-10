@@ -29,186 +29,6 @@ bool DBHandler::initialise() {
     return connection;  // NULL would mean we got no connection
 }
 
-// TODO: Rewrite old
-bool DBHandler::updateTableJson(std::string table, std::string data) {
-    std::vector<std::string> columns = getColumnInfo("name", table);
-
-    if (columns.size() <= 0) {
-        Logger::error("%s Error: no such table %s", __PRETTY_FUNCTION__, table.c_str());
-        return false;
-    }
-
-    JSON js = JSON::parse(data);
-
-    std::stringstream ss;
-
-    // start at i = 1 to skip the id
-    ss << "SET ";
-    int fixedSize = js.size();  // Size would sometimes change, added this variable
-    for (auto i = 1; i < fixedSize; i++) {
-        if (fixedSize > 1) {
-            ss << columns.at(i) << " = " << js[columns.at(i)]
-               << ",";  // This crashes if the local database has fewer fields than the web database
-                        // (field out of range)
-        }
-    }
-
-    std::string values = ss.str();
-    values = values.substr(0, values.size() - 1);
-
-    std::string id = js["id"];
-
-    if (not DBTransaction("UPDATE " + table + " " + values + " WHERE ID = " + id + ";")) {
-        Logger::error("%s Error: ", __PRETTY_FUNCTION__);
-        return false;
-    }
-    return true;
-}
-
-// TODO: Rewrite old
-bool DBHandler::updateTable(std::string table,
-                            std::string column,
-                            std::string value,
-                            std::string id) {
-    if (not DBTransaction("UPDATE " + table + " SET " + column + " = " + value +
-                          " WHERE ID = " + id + ";")) {
-        Logger::error("%s Error updating table", __PRETTY_FUNCTION__);
-        return false;
-    }
-    return true;
-}
-
-// TODO: Rewrite old
-void DBHandler::updateConfigs(std::string configs) {
-    JSON js = JSON::parse(configs);
-    if (js.empty()) {
-        Logger::error("%s No JSON in \"%s\"", __PRETTY_FUNCTION__, configs);
-    }
-    std::vector<std::string> tables;
-
-    for (auto i : js.items()) {
-        tables.push_back(i.key());  // For each table key
-    }
-
-    // tables = sailing_config config_buffer etc
-
-    for (auto table : tables) {  // for each table in there
-        if (js[table] != NULL) {
-            updateTableJson(table, js[table].dump());  // eg updatetablejson("sailing_config",
-                                                       // configs['sailing_config'] as json)
-        }
-    }
-}
-
-// TODO: Rewrite old
-bool DBHandler::updateWaypoints(std::string waypoints) {
-    JSON js = JSON::parse(waypoints);
-    if (js.empty()) {
-        Logger::error("%s No JSON in \"%s\"", __PRETTY_FUNCTION__, waypoints);
-    }
-    std::string DBPrinter = "";
-    std::string tempValue = "";
-    int valuesLimit = 11;  //"Dirty" fix for limiting the amount of values requested from server
-                           // waypoint entries (amount of fields n = valuesLimit + 1)
-    int limitCounter;
-
-    if (not DBTransaction("DELETE FROM current_Mission;")) {
-        Logger::error("%s, Error: failed to delete waypoints", __PRETTY_FUNCTION__);
-    }
-
-    for (auto i : js.items()) {
-        // m_logger.info(i.value().dump());
-
-        for (auto y : i.value().items()) {
-            limitCounter = valuesLimit;
-            DBPrinter =
-                "INSERT INTO current_Mission "
-                "(declination,harvested,id,id_mission,is_checkpoint,latitude,longitude,name,radius,"
-                "rankInMission,stay_time) VALUES (";
-
-            for (auto z : y.value().items()) {
-                // Each individual value
-                tempValue = z.value().dump();
-                tempValue = tempValue.substr(1, tempValue.size() - 2);
-                if (tempValue == "") {
-                    tempValue = "NULL";
-                }
-                if (limitCounter > 0) {
-                    limitCounter--;
-                    DBPrinter = DBPrinter + tempValue + ",";
-                }
-            }
-
-            // if (DBPrinter.size () > 0)  DBPrinter.resize (DBPrinter.size () - 1);
-            // DBPrinter = DBPrinter + "0);";
-            DBPrinter = DBPrinter.substr(0, DBPrinter.size() - 1) + ");";
-            std::cout << DBPrinter << "\n";
-            if (not DBTransaction(DBPrinter)) {
-                Logger::error("%s, Error: failed to add waypoints", __PRETTY_FUNCTION__);
-                return false;
-            }
-        }
-    }
-
-    // Make sure waypoints before the current waypoint are harvested
-    if (!m_currentWaypointId.empty()) {
-        std::string updateHarvested = "UPDATE current_Mission SET harvested = 1 WHERE id < ";
-        updateHarvested += m_currentWaypointId + ";";
-
-        if (not DBTransaction(updateHarvested)) {
-            Logger::error("%s, Error: failed to harvest waypoints", __PRETTY_FUNCTION__);
-            return false;
-        }
-    }
-    return true;
-}
-
-// This is basically a COUNT not using any values
-// TODO: Rewrite old, possibly kill
-int DBHandler::getRows(std::string table) {
-    int columns, rows;
-    try {
-        retrieveFromTable("SELECT * FROM " + table + ";", rows, columns);
-    } catch (const char* error) {
-        return 0;
-    }
-    return rows;
-}
-
-// TODO: review all usages of selectFrom function in other parts of the project
-
-// TODO: Rewrite old
-void DBHandler::clearLogs() {
-    std::vector<std::string> datalogTables = getTableNames("dataLogs_%");
-
-    for (auto table : datalogTables) {
-        clearTable(table);
-    }
-}
-
-// TODO: Rewrite old
-std::string DBHandler::getWaypoints() {  // NOTE : Marc : change this otherwise it doesn't work
-    int rows = 0;
-    JSON js;
-    std::string wp = "waypoint_";
-
-    rows = getRows("current_Mission");
-    // std::cout << "rows current mission " << rows << std::endl;
-    if (rows > 0) {
-        for (auto i = 1; i <= rows; ++i) {
-            // getDataAsJson("id,is_checkpoint,latitude,longitude,declination,radius,stay_time",
-            // "current_Mission", wp + std::to_string(i), std::to_string(i),json, true);
-            getDataAsJson("id,is_checkpoint,latitude,longitude,declination,radius,stay_time",
-                          "current_Mission", wp + std::to_string(i), std::to_string(i), js, true);
-        }
-        return js.dump();
-    } else {
-        Logger::warning("No waypoints in database");
-        return "";
-    }
-}
-
-
 /******************************************************************************
  * private helpers
  *****************************************************************************/
@@ -583,7 +403,7 @@ std::vector<std::string> DBHandler::getColumnInfo(std::string info, std::string 
 	return types;
 }
 
-// TODO: Rewrite old
+// TODO: Rewrite old - this is used by WaypointMgrNode
 bool DBHandler::getWaypointValues(int& nextId,
                                   double& nextLongitude,
                                   double& nextLatitude,
@@ -640,6 +460,13 @@ bool DBHandler::getWaypointValues(int& nextId,
 	return true;
 }
 
+/**
+ * Retreives a table as a vector of tuples tablename - vector of rows (with 0 being a header)
+ * converted to JSON
+ * @param like
+ * @param statement
+ * @return
+ */
 std::string DBHandler::getTablesAsJSON(std::string like, std::string statement) {
 	sqlite3_stmt* stmt = NULL;
 	std::string result;
@@ -657,7 +484,13 @@ std::string DBHandler::getTablesAsJSON(std::string like, std::string statement) 
 
 			if (rows.size()>1) {   // we want actual data, not only the headers
 				// "dataLogs_" is 9 chars, next is at index 9 (starting from 0). config_% Like minus one will work
-				tableContents.push_back(std::make_tuple(table.substr(like.length()-1, std::string::npos), rows));
+				// check of like is a single or has % in it?
+				int wildcards = 0;
+				for (auto c : like) {
+					if (c == '%') wildcards++;
+				}
+				std::string tableTitle = ( wildcards ? table.substr(like.length()-wildcards, std::string::npos) : table );
+				tableContents.push_back(std::make_tuple(tableTitle, rows));
 			} else {
 				Logger::warning("%s, Table %s empty", __PRETTY_FUNCTION__, table.c_str());
 			}
@@ -708,59 +541,14 @@ std::string DBHandler::getLogsAsJSON(bool onlyLatest) {
 }
 
 
-
-// Kill
-void DBHandler::getDataAsJson(std::string select,
-                              std::string table,
-                              std::string key,
-                              std::string id,
-                              JSON& js,
-                              bool useArray) {
-	int rows = 0, columns = 0;
-	std::vector<std::string> values;
-	std::vector<std::string> columnNames;
-	std::vector<std::string> results;
-
-	try {
-		if (id == "") {
-			results = retrieveFromTable("SELECT " + select + " FROM " + table + ";", rows, columns);
-		} else {
-			results = retrieveFromTable(
-			  "SELECT " + select + " FROM " + table + " WHERE ID = " + id + ";", rows, columns);
-		}
-	} catch (const char* error) {
-		Logger::error("%s, %s table: %s Error: %s", __PRETTY_FUNCTION__, select.c_str(),
-		              table.c_str(), error);
+std::string DBHandler::getWayPointsAsJSON() {
+	std::string result = getTablesAsJSON("current_Mission");
+	if (result.empty()) {
+		Logger::warning("No waypoints in database");
 	}
-
-	for (int i = 0; i < columns * (rows + 1); ++i) {
-		if (i < columns) {
-			columnNames.push_back(results[i]);
-		} else {
-			values.push_back(results[i]);
-		}
-	}
-
-	JSON jsonEntry;
-	for (int i = 0; i < rows; i++) {
-		for (unsigned int j = 0; j < columnNames.size(); j++) {
-			int index = j + (columns * i);
-			jsonEntry[columnNames.at(j)] = values.at(index);
-		}
-
-		if (useArray) {
-			if (!js[key].is_array()) {
-				js[key] = JSON::array({});
-			}
-			js[key].push_back(jsonEntry);
-		} else {
-			js[key] = jsonEntry;
-		}
-	}
-
-	values.clear();
-	columnNames.clear();
+	return result;
 }
+
 
 // TODO: Rewrite old
 std::vector<std::string> DBHandler::retrieveFromTable(std::string SQLSelect,
@@ -1190,6 +978,219 @@ void DBHandler::clearTable(std::string table) {
 	// If no table to delete, doesn't matter
 	DBTransaction("DELETE FROM " + table + ";");
 }
+
+/**
+ * Clears the contents of all datalogs
+ */
+void DBHandler::clearLogs() {
+	std::vector<std::string> datalogTables = getTableNames("dataLogs_%");
+	for (auto table : datalogTables) {
+		clearTable(table);
+	}
+}
+
+// TODO: Rewrite old
+bool DBHandler::updateTableJson(std::string table, std::string data) {
+	std::vector<std::string> columns = getColumnInfo("name", table);
+
+	if (columns.size() <= 0) {
+		Logger::error("%s Error: no such table %s", __PRETTY_FUNCTION__, table.c_str());
+		return false;
+	}
+
+	JSON js = JSON::parse(data);
+
+	std::stringstream ss;
+
+	// start at i = 1 to skip the id
+	ss << "SET ";
+	int fixedSize = js.size();  // Size would sometimes change, added this variable
+	for (auto i = 1; i < fixedSize; i++) {
+		if (fixedSize > 1) {
+			ss << columns.at(i) << " = " << js[columns.at(i)]
+			   << ",";  // This crashes if the local database has fewer fields than the web database
+			// (field out of range)
+		}
+	}
+
+	std::string values = ss.str();
+	values = values.substr(0, values.size() - 1);
+
+	std::string id = js["id"];
+
+	if (not DBTransaction("UPDATE " + table + " " + values + " WHERE ID = " + id + ";")) {
+		Logger::error("%s Error: ", __PRETTY_FUNCTION__);
+		return false;
+	}
+	return true;
+}
+
+// TODO: Rewrite old
+bool DBHandler::updateTable(std::string table,
+                            std::string column,
+                            std::string value,
+                            std::string id) {
+	if (not DBTransaction("UPDATE " + table + " SET " + column + " = " + value +
+	                      " WHERE ID = " + id + ";")) {
+		Logger::error("%s Error updating table", __PRETTY_FUNCTION__);
+		return false;
+	}
+	return true;
+}
+
+// TODO: Rewrite old
+void DBHandler::updateConfigs(std::string configs) {
+	JSON js = JSON::parse(configs);
+	if (js.empty()) {
+		Logger::error("%s No JSON in \"%s\"", __PRETTY_FUNCTION__, configs);
+	}
+	std::vector<std::string> tables;
+
+	for (auto i : js.items()) {
+		tables.push_back(i.key());  // For each table key
+	}
+
+	// tables = sailing_config config_buffer etc
+
+	for (auto table : tables) {  // for each table in there
+		if (js[table] != NULL) {
+			updateTableJson(table, js[table].dump());  // eg updatetablejson("sailing_config",
+			// configs['sailing_config'] as json)
+		}
+	}
+}
+
+// TODO: Rewrite old
+bool DBHandler::updateWaypoints(std::string waypoints) {
+	JSON js = JSON::parse(waypoints);
+	if (js.empty()) {
+		Logger::error("%s No JSON in \"%s\"", __PRETTY_FUNCTION__, waypoints);
+	}
+	std::string DBPrinter = "";
+	std::string tempValue = "";
+	int valuesLimit = 11;  //"Dirty" fix for limiting the amount of values requested from server
+	// waypoint entries (amount of fields n = valuesLimit + 1)
+	int limitCounter;
+
+	if (not DBTransaction("DELETE FROM current_Mission;")) {
+		Logger::error("%s, Error: failed to delete waypoints", __PRETTY_FUNCTION__);
+	}
+
+	for (auto i : js.items()) {
+		// m_logger.info(i.value().dump());
+
+		for (auto y : i.value().items()) {
+			limitCounter = valuesLimit;
+			DBPrinter =
+			  "INSERT INTO current_Mission "
+			  "(declination,harvested,id,id_mission,is_checkpoint,latitude,longitude,name,radius,"
+			  "rankInMission,stay_time) VALUES (";
+
+			for (auto z : y.value().items()) {
+				// Each individual value
+				tempValue = z.value().dump();
+				tempValue = tempValue.substr(1, tempValue.size() - 2);
+				if (tempValue == "") {
+					tempValue = "NULL";
+				}
+				if (limitCounter > 0) {
+					limitCounter--;
+					DBPrinter = DBPrinter + tempValue + ",";
+				}
+			}
+
+			// if (DBPrinter.size () > 0)  DBPrinter.resize (DBPrinter.size () - 1);
+			// DBPrinter = DBPrinter + "0);";
+			DBPrinter = DBPrinter.substr(0, DBPrinter.size() - 1) + ");";
+			std::cout << DBPrinter << "\n";
+			if (not DBTransaction(DBPrinter)) {
+				Logger::error("%s, Error: failed to add waypoints", __PRETTY_FUNCTION__);
+				return false;
+			}
+		}
+	}
+
+	// Make sure waypoints before the current waypoint are harvested
+	if (!m_currentWaypointId.empty()) {
+		std::string updateHarvested = "UPDATE current_Mission SET harvested = 1 WHERE id < ";
+		updateHarvested += m_currentWaypointId + ";";
+
+		if (not DBTransaction(updateHarvested)) {
+			Logger::error("%s, Error: failed to harvest waypoints", __PRETTY_FUNCTION__);
+			return false;
+		}
+	}
+	return true;
+}
+
+
+// NOTE : Marc : change this otherwise it doesn't work
+/*	int rows = 0;
+	JSON js;
+	std::string wp = "waypoint_";
+
+	rows = getRows("current_Mission");
+	// std::cout << "rows current mission " << rows << std::endl;
+	if (rows > 0) {
+		for (auto i = 1; i <= rows; ++i) {
+			// getDataAsJson("id,is_checkpoint,latitude,longitude,declination,radius,stay_time",
+			// "current_Mission", wp + std::to_string(i), std::to_string(i),json, true);
+			getDataAsJson("id,is_checkpoint,latitude,longitude,declination,radius,stay_time",
+			              "current_Mission", wp + std::to_string(i), std::to_string(i), js, true);
+		}
+		return js.dump();*/
+// Kill
+/*void DBHandler::getDataAsJson(std::string select,
+                              std::string table,
+                              std::string key,
+                              std::string id,
+                              JSON& js,
+                              bool useArray) {
+	int rows = 0, columns = 0;
+	std::vector<std::string> values;
+	std::vector<std::string> columnNames;
+	std::vector<std::string> results;
+
+	try {
+		if (id == "") {
+			results = retrieveFromTable("SELECT " + select + " FROM " + table + ";", rows, columns);
+		} else {
+			results = retrieveFromTable(
+			  "SELECT " + select + " FROM " + table + " WHERE ID = " + id + ";", rows, columns);
+		}
+	} catch (const char* error) {
+		Logger::error("%s, %s table: %s Error: %s", __PRETTY_FUNCTION__, select.c_str(),
+		              table.c_str(), error);
+	}
+
+	for (int i = 0; i < columns * (rows + 1); ++i) {
+		if (i < columns) {
+			columnNames.push_back(results[i]);
+		} else {
+			values.push_back(results[i]);
+		}
+	}
+
+	JSON jsonEntry;
+	for (int i = 0; i < rows; i++) {
+		for (unsigned int j = 0; j < columnNames.size(); j++) {
+			int index = j + (columns * i);
+			jsonEntry[columnNames.at(j)] = values.at(index);
+		}
+
+		if (useArray) {
+			if (!js[key].is_array()) {
+				js[key] = JSON::array({});
+			}
+			js[key].push_back(jsonEntry);
+		} else {
+			js[key] = jsonEntry;
+		}
+	}
+
+	values.clear();
+	columnNames.clear();
+}*/
 
 
 /*bool DBHandler::updateTableJsonObject(std::string table, JSON data) {

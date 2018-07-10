@@ -142,9 +142,10 @@ bool HTTPSyncNode::pushDatalogs() {
 }
 
 bool HTTPSyncNode::pushWaypoints() {
-    std::string waypointsData = m_dbHandler->getWaypoints();
+    std::string waypointsData = m_dbHandler->getWayPointsAsJSON();
     if (waypointsData.size() > 0) {
         std::string response;
+        // TODO: Check what happens with this upstreams!
         if (performCURLCall(waypointsData, "pushWaypoints", response)) {
             Logger::info("Waypoints pushed to server");
             return true;
@@ -225,7 +226,7 @@ bool HTTPSyncNode::getConfigsFromServer() {
 
 bool HTTPSyncNode::getWaypointsFromServer() {
     if (checkIfNewWaypoints()) {
-        std::string waypoints = getData("getWaypoints");
+        std::string waypoints = getData("getWayPointsAsJSON");
         if (waypoints.size() > 0) {
             if (m_dbHandler->updateWaypoints(waypoints)) {
                 // EVENT MESSAGE - REPLACES OLD CALLBACK, CLEAN OUT CALLBACK REMNANTS IN OTHER
