@@ -1,6 +1,6 @@
 
 
-std::string DBHandler::getLogs()
+std::string DBHandler::getLogsAsJSON()
 
 void DBHandler::removeLogs(std::string lines)
 

@@ -163,12 +163,6 @@ bool DBHandler::updateWaypoints(std::string waypoints) {
     return true;
 }
 
-// TODO: Rewrite old
-void DBHandler::clearTable(std::string table) {
-    // If no table to delete, doesn't matter
-    DBTransaction("DELETE FROM " + table + ";");
-}
-
 // This is basically a COUNT not using any values
 // TODO: Rewrite old, possibly kill
 int DBHandler::getRows(std::string table) {
@@ -182,23 +176,6 @@ int DBHandler::getRows(std::string table) {
 }
 
 // TODO: review all usages of selectFrom function in other parts of the project
-
-// TODO: Rewrite old
-std::string DBHandler::getConfigs() {
-    JSON js;
-
-    // Fetch all table names ending with "_config"
-    std::vector<std::string> configTables =
-        getTableNames("config_%");  // NOTE : Marc : Modify this point
-
-    // Query config tables and select all from config tables with id "1"
-    // This json structure does not use arrays
-    for (auto table : configTables) {
-        getDataAsJson("*", table, table, "1", js, false);
-    }
-
-    return js.dump();
-}
 
 // TODO: Rewrite old
 void DBHandler::clearLogs() {
@@ -231,30 +208,6 @@ std::string DBHandler::getWaypoints() {  // NOTE : Marc : change this otherwise 
     }
 }
 
-// get id from table returns either max or min id from table.
-// max = false -> min id
-// max = true -> max id
-int DBHandler::getTableId(const char* table, ID_MINMAX minmax) {
-    int retCode = SQLITE_OK;
-    sqlite3_stmt* stmt = NULL;
-    int id = 0;
-    std::string selector = (minmax ? "MAX(id)" : "MIN(id)");
-
-    retCode = prepareStmtSelectFromStatements(stmt, selector, table, "");
-    if (retCode == SQLITE_OK)
-        retCode = sqlite3_step(stmt);
-    if (retCode == SQLITE_ROW) {
-        sqlite3_column_value(stmt, 0, id);
-        retCode = SQLITE_OK;
-    }
-    if (retCode != SQLITE_OK) {
-        Logger::error("%s Error determining %s from %s", __PRETTY_FUNCTION__, selector.c_str(),
-                      table);
-    }
-    if (stmt != NULL)
-        sqlite3_finalize(stmt);
-    return id;
-}
 
 /******************************************************************************
  * private helpers
@@ -548,6 +501,7 @@ std::vector<std::vector<std::string>> DBHandler::getRowsAsText(sqlite3_stmt *&st
                 row.push_back(retStr);
             }
             rows.push_back(row);
+            row.clear();
             retCode = sqlite3_step(stmt);
             checkRetCode(retCode);  // TODO inline above
         }
@@ -556,23 +510,52 @@ std::vector<std::vector<std::string>> DBHandler::getRowsAsText(sqlite3_stmt *&st
     return std::move(rows);
 }
 
-// TODO: Rewrite old
+/**
+ * Matches DB table names
+ * @param like
+ * @return a vector of strings
+ */
 std::vector<std::string> DBHandler::getTableNames(std::string like) {
-	int rows, columns;
-	std::vector<std::string> results;
-	try {
-		results = retrieveFromTable(
-		  "SELECT name FROM sqlite_master WHERE type='table' AND name LIKE '" + like + "';", rows,
-		  columns);
-	} catch (const char* error) {
-	}
-
+	sqlite3_stmt* stmt = NULL;
+	std::vector<std::vector<std::string>> results;
 	std::vector<std::string> tableNames;
-	for (unsigned int i = 1; i < results.size(); i++) {
-		tableNames.push_back(results[i]);
+
+	prepareStmtSelectFromStatements(stmt, "name", "sqlite_master","WHERE type='table' AND name LIKE '" + like + "'");
+	results = getRowsAsText(stmt);
+	for (auto result : results) {
+		tableNames.push_back(result[0]);
 	}
 	return tableNames;
 }
+
+/**
+ * get id from table returns either max or min id from table
+ * @param table
+ * @param minmax
+ * @return
+ */
+int DBHandler::getTableId(const char* table, ID_MINMAX minmax) {
+	int retCode = SQLITE_OK;
+	sqlite3_stmt* stmt = NULL;
+	int id = 0;
+	std::string selector = (minmax ? "MAX(id)" : "MIN(id)");
+
+	retCode = prepareStmtSelectFromStatements(stmt, selector, table, "");
+	if (retCode == SQLITE_OK)
+		retCode = sqlite3_step(stmt);
+	if (retCode == SQLITE_ROW) {
+		sqlite3_column_value(stmt, 0, id);
+		retCode = SQLITE_OK;
+	}
+	if (retCode != SQLITE_OK) {
+		Logger::error("%s Error determining %s from %s", __PRETTY_FUNCTION__, selector.c_str(),
+		              table);
+	}
+	if (stmt != NULL)
+		sqlite3_finalize(stmt);
+	return id;
+}
+
 
 // TODO: Rewrite old
 std::vector<std::string> DBHandler::getColumnInfo(std::string info, std::string table) {
@@ -657,37 +640,36 @@ bool DBHandler::getWaypointValues(int& nextId,
 	return true;
 }
 
-std::string DBHandler::getLogs(bool onlyLatest) {
+std::string DBHandler::getTablesAsJSON(std::string like, std::string statement) {
 	sqlite3_stmt* stmt = NULL;
 	std::string result;
 	JSON js;
 
-	// fetch all datatables starting with "dataLogs_"
-	std::vector<std::string> datalogTables = getTableNames("dataLogs_%");
-	std::vector<std::tuple<std::string, std::vector<std::vector<std::string>>>> logs;
+	std::vector<std::string> tableNames = getTableNames(like);
+	std::vector<std::tuple<std::string, std::vector<std::vector<std::string>>>> tableContents;
 
 	try {
 		// insert all data in these tables as json array
-		for (auto table : datalogTables) {
-			// Gets the log entry with the highest id if flag is set
-			prepareStmtSelectFromStatements(stmt, "*", table,
-			                                (onlyLatest ? "ORDER BY id DESC LIMIT 1" : NULL));
+		for (auto table : tableNames) {
+			prepareStmtSelectFromStatements(stmt, "*", table, statement);
 			std::vector<std::vector<std::string>> rows = getRowsAsText(stmt, true);
-
 			sqlite3_finalize(stmt);
 
-			// "dataLogs_" is 9 chars, next is at index 9 (starting from 0)
-			logs.push_back(std::make_tuple(table.substr(9, std::string::npos), rows));
-			// getDataAsJson("*", table, table, "", js, true);
+			if (rows.size()>1) {   // we want actual data, not only the headers
+				// "dataLogs_" is 9 chars, next is at index 9 (starting from 0). config_% Like minus one will work
+				tableContents.push_back(std::make_tuple(table.substr(like.length()-1, std::string::npos), rows));
+			} else {
+				Logger::warning("%s, Table %s empty", __PRETTY_FUNCTION__, table.c_str());
+			}
 		}
 
 	} catch (const char* error) {
-		Logger::error("%s, Error gathering log data %s", __PRETTY_FUNCTION__, error);
+		Logger::error("%s, Error gathering data from %s: %s", __PRETTY_FUNCTION__, like, error);
 	}
 
 	try {
 		int rowCnt = 0;
-		for (auto tup : logs) {
+		for (auto tup : tableContents) {
 			std::string table = std::get<0>(tup);
 			std::vector<std::vector<std::string>> rows = std::get<1>(tup);
 
@@ -697,15 +679,35 @@ std::string DBHandler::getLogs(bool onlyLatest) {
 			}
 		}
 		// No rows will return an empty string
-		if (rowCnt)
+		if (rowCnt) {
 			result = js.dump();
+		}
 	} catch (const char* error) {
-		Logger::error("%s, Error JSON-encoding data %s", __PRETTY_FUNCTION__, error);
+		Logger::error("%s, Error JSON-encoding data from %s: %s", __PRETTY_FUNCTION__, like, error);
 	}
-	datalogTables.clear();
-	logs.clear();
+	tableNames.clear();
+	tableContents.clear();
 	return result;
 }
+
+/**
+ * Gets all configs as JSON
+ * @return
+ */
+std::string DBHandler::getConfigs() {
+	return getTablesAsJSON("config_%", "WHERE id = 1");
+}
+
+/**
+ * Gets all dataLogs as JSON
+ * @param onlyLatest
+ * @return
+ */
+std::string DBHandler::getLogsAsJSON(bool onlyLatest) {
+	return getTablesAsJSON("dataLogs_%", (onlyLatest ? "ORDER BY id DESC LIMIT 1" : NULL));
+}
+
+
 
 // Kill
 void DBHandler::getDataAsJson(std::string select,
@@ -1180,7 +1182,14 @@ bool DBHandler::DBTransaction(std::string SQLQuery) {
     return true;
 }
 
-
+/**
+ * Deletes all values from a table
+ * @param table name
+ */
+void DBHandler::clearTable(std::string table) {
+	// If no table to delete, doesn't matter
+	DBTransaction("DELETE FROM " + table + ";");
+}
 
 
 /*bool DBHandler::updateTableJsonObject(std::string table, JSON data) {
@@ -1378,7 +1387,7 @@ double DBHandler::getConfigsFrom(std::string table, std::string column, std::str
     }
 }*/
 
-/*std::string DBHandler::getLogs(bool onlyLatest) {
+/*std::string DBHandler::getLogsAsJSON(bool onlyLatest) {
     JSON js;
 
     // fetch all datatables starting with "dataLogs_"

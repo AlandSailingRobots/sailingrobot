@@ -124,7 +124,7 @@ void HTTPSyncNode::HTTPSyncThread(ActiveNode* nodePtr) {
 
 bool HTTPSyncNode::pushDatalogs() {
 	std::string response;
-    std::string logs = m_dbHandler->getLogs(m_pushOnlyLatestLogs);
+    std::string logs = m_dbHandler->getLogsAsJSON(m_pushOnlyLatestLogs);
     if (!logs.size()) {
 	    Logger::warning("%s Not pushing empty logs to server", __PRETTY_FUNCTION__);
     	return true;

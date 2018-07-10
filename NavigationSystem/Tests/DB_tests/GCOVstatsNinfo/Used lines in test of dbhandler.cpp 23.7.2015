@@ -201,7 +201,7 @@
     #####:  196:}
         -:  197:
         -:  198:
-    #####:  199:std::string DBHandler::getLogs() {
+    #####:  199:std::string DBHandler::getLogsAsJSON() {
         -:  200:
     #####:  201:	std::vector<std::string> logIds;
     #####:  202:	logIds = getTableIds("dataLogs");

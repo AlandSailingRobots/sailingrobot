@@ -129,9 +129,10 @@ class DBHandler {
     void updateConfigs(std::string configs);
     bool updateWaypoints(std::string waypoints);
 
+	std::string getTablesAsJSON(std::string like, std::string statement);
     // returns all logs in database as json; supply onlyLatest to get only the ones with the highest
     // id
-    std::string getLogs(bool onlyLatest);
+    std::string getLogsAsJSON(bool onlyLatest);
 
     void forceUnlock() { m_databaseLock.unlock(); }
 
@@ -205,14 +206,19 @@ class DBHandler {
     //    void sqlite3_column_value(sqlite3_stmt *stmt, int index, double &value);
     //    void sqlite3_column_value(sqlite3_stmt *stmt, int index, std::string &value);
     void sqlite3_column_value(sqlite3_stmt*& stmt, int index, int& value) {
+
         value = sqlite3_column_int(stmt, index);
     }
     void sqlite3_column_value(sqlite3_stmt*& stmt, int index, double& value) {
         value = sqlite3_column_double(stmt, index);
     }
     void sqlite3_column_value(sqlite3_stmt*& stmt, int index, std::string& value) {
-        const char* strp = (char*)sqlite3_column_text(stmt, index);
-        value = std::string(strp);
+	    if (sqlite3_column_type(stmt, index) == SQLITE_NULL) {
+		    value = std::string();
+	    } else {
+            const char* strp = (char*)sqlite3_column_text(stmt, index);
+            value = std::string(strp);
+        }
     }
 
     /*    template <typename T>   // TODO wrap
