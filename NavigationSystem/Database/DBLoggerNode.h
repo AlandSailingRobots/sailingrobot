@@ -1,9 +1,9 @@
 #pragma once
 
-#include "DBLogger.h"
 #include "../MessageBus/ActiveNode.h"
 #include "../MessageBus/MessageBus.h"
 #include "../MessageBus/MessageTypes.h"
+#include "DBLogger.h"
 
 #include <iostream>
 #include <mutex>

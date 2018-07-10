@@ -30,7 +30,7 @@ TEST_CASE("DBhandler")
 	SECTION("Open a connection to a non existing database")
 	{
 		DBHandler db("doesnotexist");
-		// REQUIRE_THROWS(db.selectFromAsText("mock", "gps", 1)); // No mock in DB
+		// REQUIRE_THROWS(db.getConfig(STOREDHERE, "mock", "gps")); // No mock in DB
 	}
 
 	SECTION("Delete query on a table that doesnt exist")
@@ -86,7 +86,7 @@ TEST_CASE("DBhandler")
 
 	}
 
-	SECTION("selectFromAsText function")
+	SECTION("getConfigFrom function")
 	{
 
 		DBHandler db("testdb.db");
@@ -95,8 +95,8 @@ TEST_CASE("DBhandler")
 
 	}
 
-	// NOT OK!
-	SECTION("selectFromAsText function")
+	// NOT OK! DBHandler has updated since this
+	SECTION("getConfig function")
 	{
 
 		DBHandler db("testdb.db");

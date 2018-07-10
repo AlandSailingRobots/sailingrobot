@@ -42,8 +42,8 @@ CV7Node::CV7Node(MessageBus& msgBus, DBHandler& dbhandler)
 {
 	msgBus.registerNode(*this, MessageType::DataRequest);
 	msgBus.registerNode(*this, MessageType::ServerConfigsReceived);
-	m_BaudRate = m_db.selectFromIdAsInt("baud_rate", "config_wind_sensor", 1);
-	m_PortName = m_db.selectFromAsText("port", "config_wind_sensor", 1);
+	m_db.getConfigFrom(m_BaudRate, "baud_rate", "config_wind_sensor");
+	m_db.getConfigFrom(m_PortName, "port", "config_wind_sensor");
 }
 
 CV7Node::~CV7Node()
@@ -84,7 +84,7 @@ void CV7Node::start()
 
 void CV7Node::updateConfigsFromDB()
 {
-	m_LoopTime = m_db.getConfigsFrom(<#initializer#>, "loop_time", "config_wind_sensor", 1);
+	m_db.getConfigFrom(m_LoopTime, "loop_time", "config_wind_sensor");
 }
 
 void CV7Node::processMessage(const Message* message)

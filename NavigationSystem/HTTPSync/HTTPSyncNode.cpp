@@ -46,7 +46,7 @@ bool HTTPSyncNode::init() {
     /*
         m_serverURL = m_dbHandler->retrieveCell("config_httpsync", "1", "srv_addr");
         m_shipID = m_dbHandler->retrieveCell("config_httpsync", "1", "boat_id");
-        m_shipPWD = m_dbHandler->selectFromAsText("config_httpsync", "1", "boat_pwd");
+        m_dbHandler->getConfig(m_shipPWD, "config_httpsync", "1", "boat_pwd");
     */
     // TODO this should be a single query
     m_dbHandler->getConfigFrom(m_serverURL, "srv_addr", "config_httpsync");

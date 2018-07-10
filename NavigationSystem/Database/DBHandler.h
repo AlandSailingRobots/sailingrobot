@@ -141,7 +141,7 @@ class DBHandler {
     // max = false -> min id
     // max = true -> max id
     enum ID_MINMAX { MIN_ID = false, MAX_ID = true };
-    int getTableId(const char *table, ID_MINMAX = MAX_ID);
+    int getTableId(const char* table, ID_MINMAX = MAX_ID);
 
     void deleteRow(std::string table, std::string id);
 
@@ -170,173 +170,163 @@ class DBHandler {
     int checkRetCode(const int retCode) const;
 
     // For preparing
-    int prepareStmtError(sqlite3_stmt *&stmt, std::string sql); // Ref here gave segfaults
-    int prepareStmtSelectFromStatements(sqlite3_stmt *&stmt,
-                                        const std::string &expressions,
-                                        const std::string &tables,
-                                        const std::string &statements = NULL);
+    int prepareStmtError(sqlite3_stmt*& stmt, std::string sql);  // Ref here gave segfaults
+    int prepareStmtSelectFromStatements(sqlite3_stmt*& stmt,
+                                        const std::string& expressions,
+                                        const std::string& tables,
+                                        const std::string& statements = NULL);
 
-/*    int prepareStmtSelectFromId(sqlite3_stmt** stmt,
-                                const std::string& selector,
-                                const std::string& from,
-                                const int id);*/
+    /*    int prepareStmtSelectFromId(sqlite3_stmt** stmt,
+                                    const std::string& selector,
+                                    const std::string& from,
+                                    const int id);*/
 
     // For binding parameter values
-    int paramNameIndex(sqlite3_stmt *&stmt, const char *name);
-    int bindParam(sqlite3_stmt *&stmt, const char *name, const int &value);
-    int bindParam(sqlite3_stmt *&stmt, const char *name, const double &value);
-    int bindParam(sqlite3_stmt *&stmt, const char *name, const std::string &text);
+    int paramNameIndex(sqlite3_stmt*& stmt, const char* name);
+    int bindParam(sqlite3_stmt*& stmt, const char* name, const int& value);
+    int bindParam(sqlite3_stmt*& stmt, const char* name, const double& value);
+    int bindParam(sqlite3_stmt*& stmt, const char* name, const std::string& text);
     int bindStmtIntsDoublesStrings(
-      sqlite3_stmt *&stmt,
-      const std::vector<std::tuple<const char *, int>> &ints = {},
-      const std::vector<std::tuple<const char *, double>> &doubles = {},
-      const std::vector<std::tuple<const char *, std::string>> &strings = {});
+        sqlite3_stmt*& stmt,
+        const std::vector<std::tuple<const char*, int>>& ints = {},
+        const std::vector<std::tuple<const char*, double>>& doubles = {},
+        const std::vector<std::tuple<const char*, std::string>>& strings = {});
 
     // Helpers
-    int prepareAndBindSelectFromId(sqlite3_stmt *&stmt,
+    int prepareAndBindSelectFromId(sqlite3_stmt*& stmt,
                                    const std::string& selector,
                                    const std::string& from,
                                    const int id);
-    int stepAndFinalizeStmt(sqlite3_stmt *&stmt) const;
+    int stepAndFinalizeStmt(sqlite3_stmt*& stmt) const;
 
     // Retreiving data from SELECT queries
 
-
-//    void sqlite3_column_value(sqlite3_stmt *stmt, int index, int &value);
-//    void sqlite3_column_value(sqlite3_stmt *stmt, int index, double &value);
-//    void sqlite3_column_value(sqlite3_stmt *stmt, int index, std::string &value);
-	void sqlite3_column_value(sqlite3_stmt *&stmt, int index, int &value) {
-		value = sqlite3_column_int(stmt, index);
-	}
-	void sqlite3_column_value(sqlite3_stmt *&stmt, int index, double &value) {
-		value = sqlite3_column_double(stmt, index);
-	}
-	void sqlite3_column_value(sqlite3_stmt *&stmt, int index, std::string &value) {
-		const char* strp = (char*)sqlite3_column_text(stmt, index);
-		value = std::string(strp);
-	}
-
-/*    template <typename T>   // TODO wrap
-    T selectFrom(const std::string& selector,
-                 const std::string& from,
-                 const std::string& statements = NULL,
-                 const std::vector<std::tuple<const char*, int>>& ints = {},
-                 const std::vector<std::tuple<const char*, double>>& doubles = {},
-                 const std::vector<std::tuple<const char*, std::string>>& strings = {}) {
-        sqlite3_stmt* stmt = NULL;
-        // TODO: Error checking (retVals)
-        prepareStmtSelectFromStatements(&stmt, selector, from, statements);
-        bindStmtIntsDoublesStrings(&stmt, ints, doubles, strings);
-        T retVal;
-        sqlite3_column_value(stmt, 0, &retVal);
-        sqlite3_finalize(stmt);
-        return retVal;
-    }*/
-
-	template <typename T>
-	int refSelectFromTemplate(T &ref,
-	                          const std::string &selector,
-	                          const std::string &from,
-	                          const std::string &statements = NULL,
-	                          const std::vector<std::tuple<const char *, int>> &ints = {},
-	                          const std::vector<std::tuple<const char *, double>> &doubles = {},
-	                          const std::vector<std::tuple<const char *, std::string>> &strings = {}) {
-		int retCode = SQLITE_OK;
-		sqlite3_stmt* stmt = NULL;
-
-		retCode = prepareStmtSelectFromStatements(stmt, selector, from, statements);
-		if (!retCode) retCode = bindStmtIntsDoublesStrings(stmt, ints, doubles, strings);
-		if (!retCode) retCode = sqlite3_step(stmt);
-		if (retCode == SQLITE_ROW) {
-			sqlite3_column_value(stmt, 0, ref);
-			retCode = SQLITE_OK;
-		}
-		if (stmt != NULL) retCode = sqlite3_finalize(stmt);
-		return retCode;
-	}
-
-	// Because I cannot get templates to work with strings
-	void selectFrom(
-	  int& value,
-	  const std::string& selector,
-	  const std::string& from,
-	  const std::string& statements = NULL,
-	  const std::vector<std::tuple<const char*, int>>& ints = {},
-	  const std::vector<std::tuple<const char*, double>>& doubles = {},
-	  const std::vector<std::tuple<const char*, std::string>>& strings = {}) {
-		refSelectFromTemplate(value, selector, from, statements, ints, doubles, strings);
-	}
-	void selectFrom(
-	  double& value,
-	  const std::string& selector,
-	  const std::string& from,
-	  const std::string& statements = NULL,
-	  const std::vector<std::tuple<const char*, int>>& ints = {},
-	  const std::vector<std::tuple<const char*, double>>& doubles = {},
-	  const std::vector<std::tuple<const char*, std::string>>& strings = {}) {
-		refSelectFromTemplate(value, selector, from, statements, ints, doubles, strings);
-	}
-	void selectFrom(
-	  std::string& value,
-	  const std::string& selector,
-	  const std::string& from,
-	  const std::string& statements = NULL,
-	  const std::vector<std::tuple<const char*, int>>& ints = {},
-	  const std::vector<std::tuple<const char*, double>>& doubles = {},
-	  const std::vector<std::tuple<const char*, std::string>>& strings = {}) {
-		refSelectFromTemplate(value, selector, from, statements, ints, doubles, strings);
-	}
-
-	// TODO: Below should probably be a template while the weird cases shuould be moved up into the overloads
-
-	void selectFromId(bool& value, const std::string& selector, const std::string& from, int id) {
-		int i;
-		selectFrom(i, selector, from, "WHERE id = :id", {{":id", id}});
-		value = ( i ? true : false );
-	}
-	void selectFromId(int& value, const std::string& selector, const std::string& from, int id) {
-    	selectFrom(value, selector, from, "WHERE id = :id", {{":id", id}});
+    //    void sqlite3_column_value(sqlite3_stmt *stmt, int index, int &value);
+    //    void sqlite3_column_value(sqlite3_stmt *stmt, int index, double &value);
+    //    void sqlite3_column_value(sqlite3_stmt *stmt, int index, std::string &value);
+    void sqlite3_column_value(sqlite3_stmt*& stmt, int index, int& value) {
+        value = sqlite3_column_int(stmt, index);
     }
-	void selectFromId(unsigned int& value, const std::string& selector, const std::string& from, int id) {
-		double d;
-		selectFrom(d, selector, from, "WHERE id = :id", {{":id", id}});
-		value = d; // TODO: double to unsigned int?
-	}
-	void selectFromId(float& value, const std::string& selector, const std::string& from, int id) {
-		double d;
-		selectFrom(d, selector, from, "WHERE id = :id", {{":id", id}});
-		value = d;  // TODO: double to float?
-	}
-	void selectFromId(double& value, const std::string& selector, const std::string& from, int id) {
-		selectFrom(value, selector, from, "WHERE id = :id", {{":id", id}});
-	}
-	void selectFromId(std::string& value, const std::string& selector, const std::string& from, int id) {
-		selectFrom(value, selector, from, "WHERE id = :id", {{":id", id}});
-	}
+    void sqlite3_column_value(sqlite3_stmt*& stmt, int index, double& value) {
+        value = sqlite3_column_double(stmt, index);
+    }
+    void sqlite3_column_value(sqlite3_stmt*& stmt, int index, std::string& value) {
+        const char* strp = (char*)sqlite3_column_text(stmt, index);
+        value = std::string(strp);
+    }
+
+    /*    template <typename T>   // TODO wrap
+        T selectFrom(const std::string& selector,
+                     const std::string& from,
+                     const std::string& statements = NULL,
+                     const std::vector<std::tuple<const char*, int>>& ints = {},
+                     const std::vector<std::tuple<const char*, double>>& doubles = {},
+                     const std::vector<std::tuple<const char*, std::string>>& strings = {}) {
+            sqlite3_stmt* stmt = NULL;
+            // TODO: Error checking (retVals)
+            prepareStmtSelectFromStatements(&stmt, selector, from, statements);
+            bindStmtIntsDoublesStrings(&stmt, ints, doubles, strings);
+            T retVal;
+            sqlite3_column_value(stmt, 0, &retVal);
+            sqlite3_finalize(stmt);
+            return retVal;
+        }*/
 
     template <typename T>
-	void getConfigFrom(T &retVal, const char *selector, const char *from) {
-		selectFromId(retVal, selector, from, 1);
-	}
+    int refSelectFromTemplate(
+        T& ref,
+        const std::string& selector,
+        const std::string& from,
+        const std::string& statements = NULL,
+        const std::vector<std::tuple<const char*, int>>& ints = {},
+        const std::vector<std::tuple<const char*, double>>& doubles = {},
+        const std::vector<std::tuple<const char*, std::string>>& strings = {}) {
+        int retCode = SQLITE_OK;
+        sqlite3_stmt* stmt = NULL;
 
-//	void configFrom(int& value, std::string& selector, std::string& from);
-//	void configFrom(double &value, const char* selector, const char* from);
-//	void configFrom(std::string& str, const char* selector, const char* from);
+        retCode = prepareStmtSelectFromStatements(stmt, selector, from, statements);
+        if (!retCode)
+            retCode = bindStmtIntsDoublesStrings(stmt, ints, doubles, strings);
+        if (!retCode)
+            retCode = sqlite3_step(stmt);
+        if (retCode == SQLITE_ROW) {
+            sqlite3_column_value(stmt, 0, ref);
+            retCode = SQLITE_OK;
+        }
+        if (stmt != NULL)
+            retCode = sqlite3_finalize(stmt);
+        return retCode;
+    }
 
-/*    int selectFromIdAsInt(const std::string& selector, const std::string& from, const int id);
-    double getConfigsFrom(const std::string& selector, const std::string& from, const int id);
-    std::string selectFromIdAsString(const std::string& selector,
-                                     const std::string& from,
-                                     const int id);*/
+    // Because I cannot get templates to work with strings
+    void selectFrom(int& value,
+                    const std::string& selector,
+                    const std::string& from,
+                    const std::string& statements = NULL,
+                    const std::vector<std::tuple<const char*, int>>& ints = {},
+                    const std::vector<std::tuple<const char*, double>>& doubles = {},
+                    const std::vector<std::tuple<const char*, std::string>>& strings = {}) {
+        refSelectFromTemplate(value, selector, from, statements, ints, doubles, strings);
+    }
+    void selectFrom(double& value,
+                    const std::string& selector,
+                    const std::string& from,
+                    const std::string& statements = NULL,
+                    const std::vector<std::tuple<const char*, int>>& ints = {},
+                    const std::vector<std::tuple<const char*, double>>& doubles = {},
+                    const std::vector<std::tuple<const char*, std::string>>& strings = {}) {
+        refSelectFromTemplate(value, selector, from, statements, ints, doubles, strings);
+    }
+    void selectFrom(std::string& value,
+                    const std::string& selector,
+                    const std::string& from,
+                    const std::string& statements = NULL,
+                    const std::vector<std::tuple<const char*, int>>& ints = {},
+                    const std::vector<std::tuple<const char*, double>>& doubles = {},
+                    const std::vector<std::tuple<const char*, std::string>>& strings = {}) {
+        refSelectFromTemplate(value, selector, from, statements, ints, doubles, strings);
+    }
 
-	std::vector<std::vector<std::string>> rowsAsText(sqlite3_stmt *&stmt, bool prependColumnNames = false);
+    // TODO: Below should probably be a template while the weird cases shuould be moved up into the
+    // overloads
 
+    void selectFromId(bool& value, const std::string& selector, const std::string& from, int id) {
+        int i;
+        selectFrom(i, selector, from, "WHERE id = :id", {{":id", id}});
+        value = (i ? true : false);
+    }
+    void selectFromId(int& value, const std::string& selector, const std::string& from, int id) {
+        selectFrom(value, selector, from, "WHERE id = :id", {{":id", id}});
+    }
+    void selectFromId(unsigned int& value,
+                      const std::string& selector,
+                      const std::string& from,
+                      int id) {
+        double d;
+        selectFrom(d, selector, from, "WHERE id = :id", {{":id", id}});
+        value = d;  // TODO: double to unsigned int?
+    }
+    void selectFromId(float& value, const std::string& selector, const std::string& from, int id) {
+        double d;
+        selectFrom(d, selector, from, "WHERE id = :id", {{":id", id}});
+        value = d;  // TODO: double to float?
+    }
+    void selectFromId(double& value, const std::string& selector, const std::string& from, int id) {
+        selectFrom(value, selector, from, "WHERE id = :id", {{":id", id}});
+    }
+    void selectFromId(std::string& value,
+                      const std::string& selector,
+                      const std::string& from,
+                      int id) {
+        selectFrom(value, selector, from, "WHERE id = :id", {{":id", id}});
+    }
 
+    template <typename T>
+    void getConfigFrom(T& retVal, const char* selector, const char* from) {
+        selectFromId(retVal, selector, from, 1);
+        selectFromId(retVal, selector, from, 1);
+    }
 
-
-
-    // FOR REFACTORING:
-
-
-
+    std::vector<std::vector<std::string>> getRowsAsText(sqlite3_stmt*& stmt,
+                                                        bool rowHeader = false);
 };

@@ -1,4 +1,4 @@
-#define BOOST_LOG_DYN_LINK 1 //needed for compiling
+#define BOOST_LOG_DYN_LINK 1  // needed for compiling
 /****************************************************************************************
  *
  * File:
@@ -15,7 +15,7 @@
  *        Stack Overflow topic:
  *          https://stackoverflow.com/questions/20086754/how-to-use-boost-log-from-multiple-files-with-gloa/22068278#22068278
  *          https://stackoverflow.com/questions/29785243/c-how-to-set-a-severity-filter-on-a-boost-global-logger
- *      
+ *
  *
  ***************************************************************************************/
 
@@ -23,30 +23,27 @@
 #include "SysClock.h"
 
 #include <boost/log/expressions.hpp>
-#include <boost/log/sources/logger.hpp>
-#include <boost/log/sources/severity_logger.hpp>
-#include <boost/log/sources/record_ostream.hpp>
 #include <boost/log/sources/global_logger_storage.hpp>
+#include <boost/log/sources/logger.hpp>
+#include <boost/log/sources/record_ostream.hpp>
+#include <boost/log/sources/severity_logger.hpp>
 #include <boost/log/support/date_time.hpp>
-#include <boost/log/utility/setup/file.hpp>
 #include <boost/log/trivial.hpp>
 #include <boost/log/utility/setup/common_attributes.hpp>
 #include <boost/log/utility/setup/console.hpp>
+#include <boost/log/utility/setup/file.hpp>
 #include <boost/move/utility_core.hpp>
-
 
 #define DEFAULT_LOG_NAME "sailing.log"
 #define DEFAULT_LOG_NAME_WRSC "wrsc.log"
-#define FILE_PATH "../logs/" 
-#define MAX_LOG_SIZE	256*2
+#define FILE_PATH "../logs/"
+#define MAX_LOG_SIZE 256 * 2
 
-
-//Narrow-char thread-safe logger, with severity level declared above
+// Narrow-char thread-safe logger, with severity level declared above
 typedef boost::log::sources::severity_logger_mt<boost::log::trivial::severity_level> logger_t;
 
-//declares a global logger with a custom initialization declared in cpp file
+// declares a global logger with a custom initialization declared in cpp file
 BOOST_LOG_GLOBAL_LOGGER(global_logger, logger_t)
-
 
 class Logger {
    public:
@@ -78,11 +75,8 @@ class Logger {
     static void error(std::string message, ...);
     static void fatal(std::string message, ...);
 
-	//static void logWRSC(double latitude, double longitude);
+    // static void logWRSC(double latitude, double longitude);
 
    private:
-
     static bool m_DisableLogging;
-
-
 };
