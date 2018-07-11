@@ -303,25 +303,25 @@ int DBHandler::bindStmtIntsDoublesStrings(
     return firstErrorCode;
 }
 
-int DBHandler::bindStmtIntsDoublesStrings(sqlite3_stmt *&stmt, const bindValues &values) {
+int DBHandler::bindValuesToStmt(const bindValues &values, sqlite3_stmt *&stmt) {
 
 	int firstErrorCode = SQLITE_OK;
 	int retCode;  // Uggly but works
 
 	// This could probably be optimized
-	for (auto pair : std::get<0>(values)) {
+	for (auto pair : values.ints) {
 		retCode = bindParam(stmt, pair.first, pair.second);
 		if ((firstErrorCode == SQLITE_OK) && (retCode != SQLITE_OK)) {
 			firstErrorCode = retCode;
 		}
 	}
-	for (auto pair : std::get<1>(values)) {
+	for (auto pair : values.doubles) {
 		retCode = bindParam(stmt, pair.first, pair.second);
 		if ((firstErrorCode == SQLITE_OK) && (retCode != SQLITE_OK)) {
 			firstErrorCode = retCode;
 		}
 	}
-	for (auto pair : std::get<2>(values)) {
+	for (auto pair : values.strings) {
 		retCode = bindParam(stmt, pair.first, pair.second);
 		if ((firstErrorCode == SQLITE_OK) && (retCode != SQLITE_OK)) {
 			firstErrorCode = retCode;
@@ -332,24 +332,24 @@ int DBHandler::bindStmtIntsDoublesStrings(sqlite3_stmt *&stmt, const bindValues 
 
 void DBHandler::addValue(bindValues &values, const char* name, int value) {
 	std::pair<const char*, int> pair = std::make_pair(name, value);
-	std::get<0>(values).emplace_back(pair);
+	values.ints.emplace_back(pair);
 }
 void DBHandler::addValue(bindValues &values, const char* name, double value) {
 	std::pair<const char*, double> pair = std::make_pair(name, value);
-	std::get<1>(values).emplace_back(pair);
+	values.doubles.emplace_back(pair);
 }
 void DBHandler::addValue(bindValues &values, const char* name, std::string &string) {
 	std::pair<const char*, std::string> pair = std::make_pair(name, string);
-	std::get<2>(values).emplace_back(pair);
+	values.strings.emplace_back(pair);
 }
 
 std::vector<std::string> DBHandler::valueNames(const bindValues &values) {
 	std::vector<std::string> names;
 
 	// This could probably be optimized
-	for (auto pair : std::get<0>(values)) names.emplace_back(pair.first);
-	for (auto pair : std::get<1>(values)) names.emplace_back(pair.first);
-	for (auto pair : std::get<2>(values)) names.emplace_back(pair.first);
+	for (auto pair : values.ints) names.emplace_back(pair.first);
+	for (auto pair : values.doubles) names.emplace_back(pair.first);
+	for (auto pair : values.strings) names.emplace_back(pair.first);
 	return std::move(names);
 }
 
@@ -357,9 +357,8 @@ std::vector<std::string> DBHandler::valueNames(const bindValues &values) {
  * Functions for retreiving data from SQLite DB
  ******************************************************************************/
 
-// TODO: some push could be emplace?
+
 // TODO: BUSY loop
-// TODO: refs instead of copies - rewrite using new
 /**
  * SELECT vector of rows as vectors of columns as strings
  * @param stmt
@@ -417,7 +416,12 @@ std::vector<std::string> DBHandler::getTableNames(std::string like) {
 	std::vector<std::vector<std::string>> results;
 	std::vector<std::string> tableNames;
 
-	prepareStmtSelectFromStatements(stmt, "name", "sqlite_master","WHERE type='table' AND name LIKE '" + like + "'");
+	// REMOVE THIS WHEN NEW CODE IS TESTED
+	// prepareStmtSelectFromStatements(stmt, "name", "sqlite_master","WHERE type='table' AND name LIKE '" + like + "'");
+
+	prepareStmtSelectFromStatements(stmt, "name", "sqlite_master","WHERE type='table' AND name LIKE :like");
+	bindParam(stmt, ":like", like);
+
 	results = getRowsAsText(stmt);
 	for (auto result : results) {
 		tableNames.push_back(result[0]);
@@ -455,14 +459,19 @@ int DBHandler::getTableId(const char* table, ID_MINMAX minmax) {
 
 
 // TODO: Rewrite old
+// Not sure if this is even needed
 std::vector<std::string> DBHandler::getColumnInfo(std::string info, std::string table) {
 	int rows = 0, columns = 0;
 	std::vector<std::string> results;
+	std::string sql = "PRAGMA table_info(" + table + ")";
 
-	std::string pragmaQuery = "PRAGMA table_info(" + table + ");";
+	sqlite3_stmt* stmt;
+	if (!prepareStmtError(stmt,sql)) {
+		std::vector<std::string> results2 = getRowsAsText(stmt)[0];
+	}
 
 	try {
-		results = retrieveFromTable(pragmaQuery, rows, columns);
+		results = retrieveFromTable(sql, rows, columns);
 	} catch (const char* error) {
 	}
 

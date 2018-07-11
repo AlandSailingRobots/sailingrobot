@@ -193,12 +193,11 @@ class DBHandler {
                                         const std::string& tables,
                                         const std::string& statements = nullptr);
 
-	// Experimental bindvalues - would actually work?
-    typedef std::tuple<
-		std::vector<std::pair<const char *, int>> &,
-		std::vector<std::pair<const char *, double>> &,
-		std::vector<std::pair<const char *, std::string>> &
-	> bindValues;
+	struct bindValues {
+		std::vector<std::pair<const char *, int>> ints;
+		std::vector<std::pair<const char *, double>> doubles;
+		std::vector<std::pair<const char *, std::string>> strings;
+	};
 
 	int prepareStmtInsert(sqlite3_stmt *&stmt, const std::string &table, std::string &columns, std::string &values);
 	int prepareStmtInsert(sqlite3_stmt *&stmt, const std::string &table, std::vector<std::string>& columns);
@@ -219,7 +218,7 @@ class DBHandler {
       const std::vector<std::pair<const char *, double>> &doubles = {},
       const std::vector<std::pair<const char *, std::string>> &strings = {});
 
-    int bindStmtIntsDoublesStrings(sqlite3_stmt *&stmt, const bindValues &values);
+    int bindValuesToStmt(const bindValues &values, sqlite3_stmt *&stmt);
 
 
 	void addValue(bindValues &values, const char* name, int value);
@@ -267,7 +266,7 @@ class DBHandler {
             sqlite3_stmt* stmt = NULL;
             // TODO: Error checking (retVals)
             prepareStmtSelectFromStatements(&stmt, selector, from, statements);
-            bindStmtIntsDoublesStrings(&stmt, ints, doubles, strings);
+            bindValuesToStmt(&stmt, ints, doubles, strings);
             T retVal;
             sqlite3_column_value(stmt, 0, &retVal);
             sqlite3_finalize(stmt);
@@ -312,7 +311,7 @@ class DBHandler {
 
 		retCode = prepareStmtSelectFromStatements(stmt, selector, from, statements);
 		if (!retCode)
-			retCode = bindStmtIntsDoublesStrings(stmt, values);
+			retCode = bindValuesToStmt(values, stmt);
 		if (!retCode)
 			retCode = sqlite3_step(stmt);
 		if (retCode == SQLITE_ROW) {
