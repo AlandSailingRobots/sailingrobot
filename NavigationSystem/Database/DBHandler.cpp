@@ -53,7 +53,7 @@ int DBHandler::checkRetCode(const int retCode) const {
 int DBHandler::stepAndFinalizeStmt(sqlite3_stmt*& stmt) const {
 	int retCode = checkRetCode(sqlite3_step(stmt));
 	checkRetCode(sqlite3_finalize(stmt));  // Only for logging possible error
-	return retCode;
+	return retCode; // Note that this is the retCode from sqlite3_step
 }
 
 /*******************************************************************************
@@ -150,6 +150,7 @@ int DBHandler::prepareStmtError(sqlite3_stmt*& stmt, std::string sql) {
  * LIMIT number_rows [ OFFSET offset_value ];
  */
 
+
 /**
  * Prepares an SQLite statement out of SQL parts as strings
  * @param stmt 			Statement pointer
@@ -169,18 +170,43 @@ int DBHandler::prepareStmtSelectFromStatements(sqlite3_stmt*& stmt,
     return prepareStmtError(stmt, sql);
 }
 
-/* Not in use
-int DBHandler::prepareAndBindSelectFromId(sqlite3_stmt*& stmt,
-                                          const std::string& selector,
-                                          const std::string& from,
-                                          const int id) {
-    int retCode;
-    retCode = prepareStmtSelectFromStatements(stmt, selector, from, "WHERE id = :id");
-    if (retCode == SQLITE_OK) {
-        retCode = bindStmtIntsDoublesStrings(stmt, {{":id", id}});
-    };
-    return retCode;
+/*int DBHandler::prepareStmtUpdate(sqlite3_stmt *&stmt, const std::string& tables, std::string& expressions, std::string& statements) {
+	std::string sql = "UPDATE " + tables + " SET " + expressions;
+	if (statements.length()) {
+		sql += " " + statements;
+	}
+	return prepareStmtError(stmt, sql);
 }*/
+
+int DBHandler::prepareStmtInsert(sqlite3_stmt *&stmt, const std::string &table, std::string &columns, std::string &values) {
+	std::string sql = "INSERT INTO " + table + "(" + columns + ") VALUES(" + values + ")";
+	// sql += ";";  // Not really needed but neat
+	return prepareStmtError(stmt, sql);
+}
+int DBHandler::prepareStmtInsert(sqlite3_stmt *&stmt, const std::string &table, std::vector<std::string>& columns) {
+	std::string columnString = joinStrings(columns, ",");
+	std::string valueString = joinStrings(prependStrings(columns, ":"), ",");
+	return prepareStmtInsert(stmt, table, columnString, valueString);
+}
+int DBHandler::prepareStmtInsert(sqlite3_stmt *&stmt, const std::string &table, bindValues &values) {
+	std::vector<std::string> names = valueNames(values);
+	return prepareStmtInsert(stmt, table, names);
+}
+
+int DBHandler::prepareStmtUpdate(sqlite3_stmt *&stmt, const std::string &table, std::string &columns, std::string &values) {
+	std::string sql = "UPDATE " + table + "(" + columns + ") VALUES(" + values + ")";
+	// sql += ";";  // Not really needed but neat
+	return prepareStmtError(stmt, sql);
+}
+int DBHandler::prepareStmtUpdate(sqlite3_stmt *&stmt, const std::string &table, std::vector<std::string> &columns) {
+	std::string columnString = joinStrings(columns, ",");
+	std::string valueString = joinStrings(prependStrings(columns, ":"), ",");
+	return prepareStmtUpdate(stmt, table, columnString, valueString);
+}
+int DBHandler::prepareStmtUpdate(sqlite3_stmt *&stmt, const std::string &table, bindValues &values) {
+	std::vector<std::string> names = valueNames(values);
+	return prepareStmtUpdate(stmt, table, names);
+}
 
 /*******************************************************************************
  * PDO Parameter binding
@@ -254,27 +280,77 @@ int DBHandler::paramNameIndex(sqlite3_stmt*& stmt, const char* name) {
  * @return 			SQLite error code ...
  */
 int DBHandler::bindStmtIntsDoublesStrings(
-    sqlite3_stmt*& stmt,
-    const std::vector<std::tuple<const char*, int>>& ints,
-    const std::vector<std::tuple<const char*, double>>& doubles,
-    const std::vector<std::tuple<const char*, std::string>>& strings) {
+  sqlite3_stmt *&stmt,
+  const std::vector<std::pair<const char *, int>> &ints,
+  const std::vector<std::pair<const char *, double>> &doubles,
+  const std::vector<std::pair<const char *, std::string>> &strings) {
     int firstErrorCode = SQLITE_OK;
     int retCode;  // Uggly but works
 
-    for (auto tup : ints) {
-        firstErrorCode = bindParam(stmt, std::get<0>(tup), std::get<1>(tup));
+    for (auto i : ints) {
+        firstErrorCode = bindParam(stmt, i.first, i.second);
     }
-    for (auto tup : doubles) {
-        retCode = bindParam(stmt, std::get<0>(tup), std::get<1>(tup));
+    for (auto d : doubles) {
+        retCode = bindParam(stmt, d.first, d.second);
         if (firstErrorCode == SQLITE_OK)
             firstErrorCode = retCode;
     }
-    for (auto tup : strings) {
-        retCode = bindParam(stmt, std::get<0>(tup), std::get<1>(tup));
+    for (auto s : strings) {
+        retCode = bindParam(stmt, s.first, s.second);
         if (firstErrorCode == SQLITE_OK)
             firstErrorCode = retCode;
     }
     return firstErrorCode;
+}
+
+int DBHandler::bindStmtIntsDoublesStrings(sqlite3_stmt *&stmt, const bindValues &values) {
+
+	int firstErrorCode = SQLITE_OK;
+	int retCode;  // Uggly but works
+
+	// This could probably be optimized
+	for (auto pair : std::get<0>(values)) {
+		retCode = bindParam(stmt, pair.first, pair.second);
+		if ((firstErrorCode == SQLITE_OK) && (retCode != SQLITE_OK)) {
+			firstErrorCode = retCode;
+		}
+	}
+	for (auto pair : std::get<1>(values)) {
+		retCode = bindParam(stmt, pair.first, pair.second);
+		if ((firstErrorCode == SQLITE_OK) && (retCode != SQLITE_OK)) {
+			firstErrorCode = retCode;
+		}
+	}
+	for (auto pair : std::get<2>(values)) {
+		retCode = bindParam(stmt, pair.first, pair.second);
+		if ((firstErrorCode == SQLITE_OK) && (retCode != SQLITE_OK)) {
+			firstErrorCode = retCode;
+		}
+	}
+	return firstErrorCode;
+}
+
+void DBHandler::addValue(bindValues &values, const char* name, int value) {
+	std::pair<const char*, int> pair = std::make_pair(name, value);
+	std::get<0>(values).emplace_back(pair);
+}
+void DBHandler::addValue(bindValues &values, const char* name, double value) {
+	std::pair<const char*, double> pair = std::make_pair(name, value);
+	std::get<1>(values).emplace_back(pair);
+}
+void DBHandler::addValue(bindValues &values, const char* name, std::string &string) {
+	std::pair<const char*, std::string> pair = std::make_pair(name, string);
+	std::get<2>(values).emplace_back(pair);
+}
+
+std::vector<std::string> DBHandler::valueNames(const bindValues &values) {
+	std::vector<std::string> names;
+
+	// This could probably be optimized
+	for (auto pair : std::get<0>(values)) names.emplace_back(pair.first);
+	for (auto pair : std::get<1>(values)) names.emplace_back(pair.first);
+	for (auto pair : std::get<2>(values)) names.emplace_back(pair.first);
+	return std::move(names);
 }
 
 /*******************************************************************************
@@ -989,25 +1065,6 @@ void DBHandler::clearLogs() {
 	}
 }
 
-int DBHandler::updateTableColumnWithId(std::string &table, std::string &column, int &id, int &value) {
-
-}
-
-
-// TODO: Rewrite old
-// Overload like getConfig
-bool DBHandler::updateTable(std::string table,
-                            std::string column,
-                            std::string value,
-                            std::string id) {
-	if (not DBTransaction("UPDATE " + table + " SET " + column + " = " + value +
-	                      " WHERE ID = " + id + ";")) {
-		Logger::error("%s Error updating table", __PRETTY_FUNCTION__);
-		return false;
-	}
-	return true;
-}
-
 // TODO: Rewrite old
 bool DBHandler::updateTableJson(std::string table, std::string data) {
 	std::vector<std::string> columns = getColumnInfo("name", table);
@@ -1129,6 +1186,62 @@ bool DBHandler::updateWaypoints(std::string waypoints) {
 	return true;
 }
 
+/*******************************************************************************
+ * Utility functions
+ ******************************************************************************/
+
+std::vector<std::string> DBHandler::prependStrings(std::vector<std::string> &strings, const char *const prefix) {
+	std::vector<std::string> result = strings;
+	for (auto item : result) {
+		item = prefix + item;
+	}
+	return std::move(result);
+}
+
+// Theese could be put in a separate util lib
+// From: https://stackoverflow.com/questions/5288396/c-ostream-out-manipulation/5289170#5289170
+// note: separator cannot contain null characters
+/***
+ * Joins a vector of strings into a combined string with glue as a separator character
+ * @param elements
+ * @param glue
+ * @return
+ */
+std::string DBHandler::joinStrings(const std::vector<std::string> &elements, const char *const glue) {
+	switch (elements.size()) {
+		case 0:
+			return "";
+		case 1:
+			return elements[0];
+		default:
+			std::ostringstream os;
+			std::copy(elements.begin(), elements.end()-1, std::ostream_iterator<std::string>(os, glue));
+			os << *elements.rbegin();
+			return os.str();
+	}
+}
+
+/***
+ * Splits a string into a vector on glue as separating character
+ * @param string
+ * @param glue
+ * @param result
+ */
+std::vector<std::string> DBHandler::splitStrings(const std::string &string, const char glue) {
+	std::vector<std::string> result;
+	std::string::const_iterator cur = string.begin();
+	std::string::const_iterator beg = string.begin();
+	while (cur < string.end()) {
+		if (*cur == glue) {
+			result.insert(result.end(), std::string(beg, cur));
+			beg = ++cur;
+		} else {
+			cur++;
+		}
+	}
+	result.insert(result.end(), std::string(beg, cur));
+	return std::move(result);
+}
 
 // NOTE : Marc : change this otherwise it doesn't work
 /*	int rows = 0;

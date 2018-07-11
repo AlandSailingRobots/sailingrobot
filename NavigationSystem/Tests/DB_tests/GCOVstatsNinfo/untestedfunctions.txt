@@ -12,6 +12,6 @@ SailingRobot::updateState():
 
 bool DBHandler::revChanged(std::string toCheck, std::string serverRevs)
 
-void DBHandler::updateTable(std::string table, std::string data)
+void DBHandler::updateTableColumnIdValue(std::string table, std::string data)
 
 

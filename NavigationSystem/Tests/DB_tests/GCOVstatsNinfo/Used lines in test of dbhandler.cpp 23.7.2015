@@ -142,7 +142,7 @@
     #####:  137:	while(decoder.hasNext()) {
         -:  138:
     #####:  139:		if (decoder.getSize() != columns.size()) {
-    #####:  140:			throw ("DBHandler::updateTable(), decoder and columns size mismatch for table: " + table).c_str();
+    #####:  140:			throw ("DBHandler::updateTableColumnIdValue(), decoder and columns size mismatch for table: " + table).c_str();
         -:  141:		}
         -:  142:
     #####:  143:		std::string values = "";

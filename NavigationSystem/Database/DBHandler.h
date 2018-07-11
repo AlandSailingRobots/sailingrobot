@@ -122,7 +122,22 @@ class DBHandler {
     bool updateTableJsonObject(std::string table, JSON data);
 
     // updates table using values given
-    bool updateTable(std::string table, std::string column, std::string value, std::string id);
+    //  bool updateTableColumnIdValue(std::string table, std::string column, int id, T value);
+    template <typename T>
+	bool updateTableColumnIdValue(const char *table, const char *column, int id, T value) {
+		sqlite3_stmt* stmt = nullptr;
+		std::string sql = "UPDATE " + std::string(table) + " SET " + std::string(column) + " = :value WHERE ID = :id";
+		if (!prepareStmtError(stmt, sql)) {
+			bindParam(stmt, ":value", value);
+			bindParam(stmt, ":id", id);
+			if (stepAndFinalizeStmt(stmt) == SQLITE_DONE) {
+				return true;
+			}
+		}
+		// Logger::error("%s Error updating table %s using \"%s\"", __PRETTY_FUNCTION__, table, sql.c_str());
+	    // Can not use logger in templates
+		return false;
+	}
 
     void clearTable(std::string table);
 
@@ -178,10 +193,20 @@ class DBHandler {
                                         const std::string& tables,
                                         const std::string& statements = nullptr);
 
-    /*    int prepareStmtSelectFromId(sqlite3_stmt** stmt,
-                                    const std::string& selector,
-                                    const std::string& from,
-                                    const int id);*/
+	// Experimental bindvalues - would actually work?
+    typedef std::tuple<
+		std::vector<std::pair<const char *, int>> &,
+		std::vector<std::pair<const char *, double>> &,
+		std::vector<std::pair<const char *, std::string>> &
+	> bindValues;
+
+	int prepareStmtInsert(sqlite3_stmt *&stmt, const std::string &table, std::string &columns, std::string &values);
+	int prepareStmtInsert(sqlite3_stmt *&stmt, const std::string &table, std::vector<std::string>& columns);
+	int prepareStmtInsert(sqlite3_stmt *&stmt, const std::string &table, bindValues &values);
+
+	int prepareStmtUpdate(sqlite3_stmt *&stmt, const std::string &table, std::string &columns, std::string &values);
+	int prepareStmtUpdate(sqlite3_stmt *&stmt, const std::string &table, std::vector<std::string>& columns);
+	int prepareStmtUpdate(sqlite3_stmt *&stmt, const std::string &table, bindValues &values);
 
     // For binding parameter values
     int paramNameIndex(sqlite3_stmt*& stmt, const char* name);
@@ -189,12 +214,21 @@ class DBHandler {
     int bindParam(sqlite3_stmt*& stmt, const char* name, const double& value);
     int bindParam(sqlite3_stmt*& stmt, const char* name, const std::string& text);
     int bindStmtIntsDoublesStrings(
-        sqlite3_stmt*& stmt,
-        const std::vector<std::tuple<const char*, int>>& ints = {},
-        const std::vector<std::tuple<const char*, double>>& doubles = {},
-        const std::vector<std::tuple<const char*, std::string>>& strings = {});
+      sqlite3_stmt *&stmt,
+      const std::vector<std::pair<const char *, int>> &ints = {},
+      const std::vector<std::pair<const char *, double>> &doubles = {},
+      const std::vector<std::pair<const char *, std::string>> &strings = {});
 
-    // Helpers
+    int bindStmtIntsDoublesStrings(sqlite3_stmt *&stmt, const bindValues &values);
+
+
+	void addValue(bindValues &values, const char* name, int value);
+	void addValue(bindValues &values, const char* name, double value);
+	void addValue(bindValues &values, const char* name, std::string &string);
+	std::vector<std::string> valueNames(const bindValues &values);
+
+
+
     /* Not in use
     int prepareAndBindSelectFromId(sqlite3_stmt*& stmt,
                                    const std::string& selector,
@@ -242,13 +276,13 @@ class DBHandler {
 
     template <typename T>
     int refSelectFromTemplate(
-        T& ref,
-        const std::string& selector,
-        const std::string& from,
-        const std::string& statements = nullptr,
-        const std::vector<std::tuple<const char*, int>>& ints = {},
-        const std::vector<std::tuple<const char*, double>>& doubles = {},
-        const std::vector<std::tuple<const char*, std::string>>& strings = {}) {
+      T &ref,
+      const std::string &selector,
+      const std::string &from,
+      const std::string &statements = nullptr,
+      const std::vector<std::pair<const char *, int>> &ints = {},
+      const std::vector<std::pair<const char *, double>> &doubles = {},
+      const std::vector<std::pair<const char *, std::string>> &strings = {}) {
         int retCode;
         sqlite3_stmt* stmt = nullptr;
 
@@ -266,36 +300,59 @@ class DBHandler {
         return retCode;
     }
 
+	template <typename T>
+	int refSelectFromTemplate(
+	  T &ref,
+	  const bindValues &values,
+	  const std::string &selector,
+	  const std::string &from,
+	  const std::string &statements = nullptr) {
+		int retCode;
+		sqlite3_stmt* stmt = nullptr;
+
+		retCode = prepareStmtSelectFromStatements(stmt, selector, from, statements);
+		if (!retCode)
+			retCode = bindStmtIntsDoublesStrings(stmt, values);
+		if (!retCode)
+			retCode = sqlite3_step(stmt);
+		if (retCode == SQLITE_ROW) {
+			sqlite3_column_value(stmt, 0, ref);
+			retCode = SQLITE_OK;
+		}
+		if (stmt != nullptr)
+			retCode = sqlite3_finalize(stmt);
+		return retCode;
+	}
     // Because I cannot get templates to work with strings
-    void selectFrom(int& value,
-                    const std::string& selector,
-                    const std::string& from,
-                    const std::string& statements = nullptr,
-                    const std::vector<std::tuple<const char*, int>>& ints = {},
-                    const std::vector<std::tuple<const char*, double>>& doubles = {},
-                    const std::vector<std::tuple<const char*, std::string>>& strings = {}) {
+    void selectFrom(int &value,
+                    const std::string &selector,
+                    const std::string &from,
+                    const std::string &statements = nullptr,
+                    const std::vector<std::pair<const char *, int>> &ints = {},
+                    const std::vector<std::pair<const char *, double>> &doubles = {},
+                    const std::vector<std::pair<const char *, std::string>> &strings = {}) {
         refSelectFromTemplate(value, selector, from, statements, ints, doubles, strings);
     }
     void selectFrom(double& value,
                     const std::string& selector,
                     const std::string& from,
                     const std::string& statements = nullptr,
-                    const std::vector<std::tuple<const char*, int>>& ints = {},
-                    const std::vector<std::tuple<const char*, double>>& doubles = {},
-                    const std::vector<std::tuple<const char*, std::string>>& strings = {}) {
+                    const std::vector<std::pair<const char*, int>>& ints = {},
+                    const std::vector<std::pair<const char*, double>>& doubles = {},
+                    const std::vector<std::pair<const char*, std::string>>& strings = {}) {
         refSelectFromTemplate(value, selector, from, statements, ints, doubles, strings);
     }
     void selectFrom(std::string& value,
                     const std::string& selector,
                     const std::string& from,
                     const std::string& statements = nullptr,
-                    const std::vector<std::tuple<const char*, int>>& ints = {},
-                    const std::vector<std::tuple<const char*, double>>& doubles = {},
-                    const std::vector<std::tuple<const char*, std::string>>& strings = {}) {
+                    const std::vector<std::pair<const char*, int>>& ints = {},
+                    const std::vector<std::pair<const char*, double>>& doubles = {},
+                    const std::vector<std::pair<const char*, std::string>>& strings = {}) {
         refSelectFromTemplate(value, selector, from, statements, ints, doubles, strings);
     }
 
-    // TODO: Below should probably be a template while the weird cases shuould be moved up into the
+    // TODO: Below should probably be a template while the weird cases should be moved up into the
     // overloads
 
     void selectFromId(bool& value, const std::string& selector, const std::string& from, int id) {
@@ -332,9 +389,13 @@ class DBHandler {
     template <typename T>
     void getConfigFrom(T& retVal, const char* selector, const char* from) {
         selectFromId(retVal, selector, from, 1);
-        selectFromId(retVal, selector, from, 1);
     }
 
     std::vector<std::vector<std::string>> getRowsAsText(sqlite3_stmt*& stmt,
                                                         bool rowHeader = false);
+
+    // Generic string utility functions
+    std::vector<std::string> prependStrings(std::vector<std::string> &strings, const char *const prefix);
+	std::string joinStrings(const std::vector<std::string> &elements, const char *const glue);
+	std::vector<std::string> splitStrings(const std::string &string, const char glue);
 };
