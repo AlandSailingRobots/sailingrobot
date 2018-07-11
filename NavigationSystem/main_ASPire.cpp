@@ -16,6 +16,7 @@
 
 #if LOCAL_NAVIGATION_MODULE == 1
   #include "../Navigation/LocalNavigationModule/LocalNavigationModule.h"
+  #include "../Navigation/LocalNavigationModule/Voters/CourseVoter.h"
   #include "../Navigation/LocalNavigationModule/Voters/WaypointVoter.h"
   #include "../Navigation/LocalNavigationModule/Voters/WindVoter.h"
   #include "../Navigation/LocalNavigationModule/Voters/ChannelVoter.h"
@@ -152,12 +153,14 @@ int main(int argc, char *argv[])
 		LocalNavigationModule lnm	( messageBus, dbHandler );
 
 		const int16_t MAX_VOTES = dbHandler.retrieveCellAsInt("config_voter_system","1","max_vote");
+		CourseVoter courseVoter( MAX_VOTES, dbHandler.retrieveCellAsDouble("config_voter_system","1","course_voter_weight"));
 		WaypointVoter waypointVoter( MAX_VOTES, dbHandler.retrieveCellAsDouble("config_voter_system","1","waypoint_voter_weight")); // weight = 1
 		WindVoter windVoter( MAX_VOTES, dbHandler.retrieveCellAsDouble("config_voter_system","1","wind_voter_weight")); // weight = 1
 		ChannelVoter channelVoter( MAX_VOTES, dbHandler.retrieveCellAsDouble("config_voter_system","1","channel_voter_weight")); // weight = 1
 		MidRangeVoter midRangeVoter( MAX_VOTES, dbHandler.retrieveCellAsDouble("config_voter_system","1","midrange_voter_weight"), collidableMgr );
 		ProximityVoter proximityVoter( MAX_VOTES, dbHandler.retrieveCellAsDouble("config_voter_system","1","proximity_voter_weight"), collidableMgr);
 
+		lnm.registerVoter( &courseVoter );
 		lnm.registerVoter( &waypointVoter );
 		lnm.registerVoter( &windVoter );
 		lnm.registerVoter( &channelVoter );

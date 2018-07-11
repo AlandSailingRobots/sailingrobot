@@ -85,11 +85,20 @@ const ASRCourseBallot& ProximityVoter::vote( const BoatState_t& boatState )
                 boatState.speed, boatState.heading, trueWindBuffer, 1);
     Logger::info("True wind dir: %d", twd);
 
+    /*
     // Set 0 to courses into the no go zone.
     for( int i = 0; i < 45; i+= ASRCourseBallot::COURSE_RESOLUTION )
     {
         courseBallot.set( twd + i, 0 );
         courseBallot.set( twd - i, 0 );
+    }
+    */
+
+    // Set a veto to courses into the no go zone.
+    for( int i = 0; i < 45; i+= ASRCourseBallot::COURSE_RESOLUTION )
+    {
+        courseBallot.setVeto( twd + i );
+        courseBallot.setVeto( twd - i );
     }
 
     return courseBallot;

@@ -153,6 +153,8 @@ void LocalNavigationModule::startBallot()
     {
         ASRVoter* voter = (*it);
         arbiter.castVote( voter->weight(), voter->vote( boatState ) );
+        //arbiter.castVeto( voter->vote( boatState ) ); // vetos done with castVote now
+        //voter->vote( boatState ).clear();
     }
 
     printf("[Voters] "); // Debug
