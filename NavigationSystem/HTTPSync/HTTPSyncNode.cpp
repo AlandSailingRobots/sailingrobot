@@ -43,11 +43,6 @@ bool HTTPSyncNode::init() {
     m_initialised = false;
     m_reportedConnectError = false;
 
-    /*
-        m_serverURL = m_dbHandler->retrieveCell("config_httpsync", "1", "srv_addr");
-        m_shipID = m_dbHandler->retrieveCell("config_httpsync", "1", "boat_id");
-        m_dbHandler->getConfig(m_shipPWD, "config_httpsync", "1", "boat_pwd");
-    */
     // TODO this should be a single query
     m_dbHandler->getConfigFrom(m_serverURL, "srv_addr", "config_httpsync");
     m_dbHandler->getConfigFrom(m_shipID, "boat_id", "config_httpsync");
@@ -250,10 +245,10 @@ bool HTTPSyncNode::performCURLCall(std::string data, std::string call, std::stri
 
     // std::cout << "/* Request : " << call << " */" << '\n';
     if (data != "") {
-        serverCall = "serv=" + call + "&id=" + m_shipID + "&gen=aspire" + "&pwd=" + m_shipPWD +
+        serverCall = "serv=" + call + "&id=" + m_shipID + "&pwd=" + m_shipPWD +
                      "&data=" + data;
     } else {
-        serverCall = "serv=" + call + "&id=" + m_shipID + "&gen=aspire" + "&pwd=" + m_shipPWD;
+        serverCall = "serv=" + call + "&id=" + m_shipID + "&pwd=" + m_shipPWD;
     }
     // example: serv=getAllConfigs&id=BOATID&pwd=BOATPW
     // std::cout << "/* Server call : " << serverCall.substr(0, 150) << " */" << '\n';

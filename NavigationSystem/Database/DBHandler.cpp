@@ -26,7 +26,7 @@ DBHandler::~DBHandler() {
 bool DBHandler::initialise() {
     sqlite3* connection = DBConnect();  // Basically just try to open the DB
     DBDisconnect();
-    return connection;  // NULL would mean we got no connection
+    return (connection != nullptr);  // NULL would mean we got no connection
 }
 
 /******************************************************************************
@@ -72,10 +72,10 @@ sqlite3* DBHandler::DBConnect() {
 
         // check if file exists
         FILE* db_file = fopen(m_filePath.c_str(), "r");
-        if (db_file == NULL) {
+        if (db_file == nullptr) {
             Logger::error("%s %s not found", __PRETTY_FUNCTION__, m_filePath.c_str());
             m_databaseLock.unlock();
-            return NULL;
+            return nullptr;
         }
         fclose(db_file);
 
@@ -87,7 +87,7 @@ sqlite3* DBHandler::DBConnect() {
             Logger::error("%s Failed to open the database Error %s", __PRETTY_FUNCTION__,
                           sqlite3_errmsg(m_DBHandle));
             m_databaseLock.unlock();
-            return 0;
+            return nullptr;
         }
 
         // set a 10 millisecond timeout
@@ -108,10 +108,10 @@ void DBHandler::DBDisconnect() {
  * Close the DB file if open
  */
 void DBHandler::DBClose() {
-    if (m_DBHandle != NULL) {
+    if (m_DBHandle != nullptr) {
         Logger::info("%s closing Database", __PRETTY_FUNCTION__);
         sqlite3_close(m_DBHandle);
-        m_DBHandle = NULL;
+        m_DBHandle = nullptr;
         // Ensure it closes properly (by sleeping a millisecond)?
         // std::this_thread::sleep_for(std::chrono::milliseconds(1));
         m_databaseLock.unlock();
@@ -135,7 +135,7 @@ void DBHandler::DBClose() {
 int DBHandler::prepareStmtError(sqlite3_stmt*& stmt, std::string sql) {
     sqlite3* db = DBConnect();
     int resultCode =
-        checkRetCode(sqlite3_prepare_v2(db, sql.c_str(), (int)sql.size(), &stmt, NULL));
+        checkRetCode(sqlite3_prepare_v2(db, sql.c_str(), (int)sql.size(), &stmt, nullptr));
     if (resultCode != SQLITE_OK) {
         Logger::error("%s: %s (%d) on \"%s\"", __PRETTY_FUNCTION__, sqlite3_errstr(resultCode),
                       resultCode, sql.c_str());
@@ -169,6 +169,7 @@ int DBHandler::prepareStmtSelectFromStatements(sqlite3_stmt*& stmt,
     return prepareStmtError(stmt, sql);
 }
 
+/* Not in use
 int DBHandler::prepareAndBindSelectFromId(sqlite3_stmt*& stmt,
                                           const std::string& selector,
                                           const std::string& from,
@@ -179,7 +180,7 @@ int DBHandler::prepareAndBindSelectFromId(sqlite3_stmt*& stmt,
         retCode = bindStmtIntsDoublesStrings(stmt, {{":id", id}});
     };
     return retCode;
-}
+}*/
 
 /*******************************************************************************
  * PDO Parameter binding
@@ -228,7 +229,7 @@ int DBHandler::bindParam(sqlite3_stmt*& stmt, const char* name, const std::strin
         return SQLITE_MISUSE;
     }
     return checkRetCode(
-        sqlite3_bind_text(stmt, paramIndex, text.c_str(), text.size(), SQLITE_TRANSIENT));
+        sqlite3_bind_text(stmt, paramIndex, text.c_str(), static_cast<int>(text.size()), SQLITE_TRANSIENT));
 }
 
 /**
@@ -300,7 +301,7 @@ std::vector<std::vector<std::string>> DBHandler::getRowsAsText(sqlite3_stmt *&st
         std::vector<std::string> row;
         if (rowHeader) {
             for (int i = 0; i < columns; i++) {
-                row.push_back(std::string(sqlite3_column_name(stmt, i)));
+                row.emplace_back(sqlite3_column_name(stmt, i));
             }
             rows.push_back(row);
             row.clear();
@@ -336,7 +337,7 @@ std::vector<std::vector<std::string>> DBHandler::getRowsAsText(sqlite3_stmt *&st
  * @return a vector of strings
  */
 std::vector<std::string> DBHandler::getTableNames(std::string like) {
-	sqlite3_stmt* stmt = NULL;
+	sqlite3_stmt* stmt = nullptr;
 	std::vector<std::vector<std::string>> results;
 	std::vector<std::string> tableNames;
 
@@ -355,8 +356,8 @@ std::vector<std::string> DBHandler::getTableNames(std::string like) {
  * @return
  */
 int DBHandler::getTableId(const char* table, ID_MINMAX minmax) {
-	int retCode = SQLITE_OK;
-	sqlite3_stmt* stmt = NULL;
+	int retCode;
+	sqlite3_stmt* stmt = nullptr;
 	int id = 0;
 	std::string selector = (minmax ? "MAX(id)" : "MIN(id)");
 
@@ -371,7 +372,7 @@ int DBHandler::getTableId(const char* table, ID_MINMAX minmax) {
 		Logger::error("%s Error determining %s from %s", __PRETTY_FUNCTION__, selector.c_str(),
 		              table);
 	}
-	if (stmt != NULL)
+	if (stmt != nullptr)
 		sqlite3_finalize(stmt);
 	return id;
 }
@@ -392,7 +393,7 @@ std::vector<std::string> DBHandler::getColumnInfo(std::string info, std::string 
 	std::vector<std::string> types;
 	int infoIndex = 0;
 	for (int i = 0; i < columns; i++) {
-		if (std::string(info).compare(results[i]) == 0) {
+		if (std::string(info) == results[i]) {
 			infoIndex = i;
 		}
 	}
@@ -468,7 +469,7 @@ bool DBHandler::getWaypointValues(int& nextId,
  * @return
  */
 std::string DBHandler::getTablesAsJSON(std::string like, std::string statement) {
-	sqlite3_stmt* stmt = NULL;
+	sqlite3_stmt* stmt = nullptr;
 	std::string result;
 	JSON js;
 
@@ -477,7 +478,7 @@ std::string DBHandler::getTablesAsJSON(std::string like, std::string statement) 
 
 	try {
 		// insert all data in these tables as json array
-		for (auto table : tableNames) {
+		for (const auto &table : tableNames) {
 			prepareStmtSelectFromStatements(stmt, "*", table, statement);
 			std::vector<std::vector<std::string>> rows = getRowsAsText(stmt, true);
 			sqlite3_finalize(stmt);
@@ -490,7 +491,7 @@ std::string DBHandler::getTablesAsJSON(std::string like, std::string statement) 
 					if (c == '%') wildcards++;
 				}
 				std::string tableTitle = ( wildcards ? table.substr(like.length()-wildcards, std::string::npos) : table );
-				tableContents.push_back(std::make_tuple(tableTitle, rows));
+				tableContents.emplace_back(tableTitle, rows);
 			} else {
 				Logger::warning("%s, Table %s empty", __PRETTY_FUNCTION__, table.c_str());
 			}
@@ -537,7 +538,7 @@ std::string DBHandler::getConfigs() {
  * @return
  */
 std::string DBHandler::getLogsAsJSON(bool onlyLatest) {
-	return getTablesAsJSON("dataLogs_%", (onlyLatest ? "ORDER BY id DESC LIMIT 1" : NULL));
+	return getTablesAsJSON("dataLogs_%", (onlyLatest ? "ORDER BY id DESC LIMIT 1" : nullptr));
 }
 
 
@@ -574,12 +575,12 @@ int DBHandler::getTable(const std::string& sql,
                         std::vector<std::string>& results,
                         int& rows,
                         int& columns) {
-	int resultCode = -1;
+	int resultCode;
 	sqlite3_stmt* statement;
 	sqlite3* db = DBConnect();
 
 	// prepare the statement sql code in byte form for query request
-	if ((resultCode = sqlite3_prepare_v2(db, sql.c_str(), sql.size(), &statement, NULL)) !=
+	if ((resultCode = sqlite3_prepare_v2(db, sql.c_str(), static_cast<int>(sql.size()), &statement, nullptr)) !=
 	    SQLITE_OK) {  // if not OK, return error
 		sqlite3_finalize(statement);
 		return resultCode;
@@ -665,7 +666,7 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
     sqlite3* db;
     db = DBConnect();
 
-    if (db == NULL) {
+    if (db == nullptr) {
         Logger::error("%s Database is NULL!", __PRETTY_FUNCTION__);
         return;
     }
@@ -691,7 +692,7 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
         logNumber++;
 
         std::string sql;
-        sqlite3_stmt* stmt = NULL;
+        sqlite3_stmt* stmt = nullptr;
         int retCode = 0;
 
         // sqlite3_exec(db, "BEGIN TRANSACTION;", NULL, NULL, &m_error);
@@ -825,8 +826,7 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
 		    )) {  // clang-format on
                 bindParam(stmt, ":has_fix", log.m_gpsHasFix);
                 bindParam(stmt, ":online", log.m_gpsOnline);
-                bindParam(stmt, ":time",
-                          log.m_timestamp_str);  // TODO: This could be the GPS time instead
+                bindParam(stmt, ":time", log.m_gpsUnixTime);
                 bindParam(stmt, ":latitude", log.m_gpsLat);
                 bindParam(stmt, ":longitude", log.m_gpsLon);
                 bindParam(stmt, ":speed", log.m_gpsSpeed);
@@ -888,11 +888,11 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
         if (retCode != SQLITE_OK) {
             Logger::error("%s SQLite COMMIT error: %s (%d)", __PRETTY_FUNCTION__,
                           sqlite3_errstr(retCode), retCode);
-            if (m_error != NULL) {
+            if (m_error != nullptr) {
                 Logger::error("%s SQLite DB error: %s", __PRETTY_FUNCTION__, sqlite3_errmsg(db));
 
                 sqlite3_free(m_error);
-                m_error = NULL;
+                m_error = nullptr;
             }
             //            retCode = sqlite3_exec(db, "ROLLBACK TRANSACTION;", NULL, NULL,
             //            &m_error); Logger::info("%s SQLite ROLLBACK returned %s (%d)",
@@ -909,7 +909,7 @@ bool DBHandler::changeOneValue(std::string table,
                                std::string newValue,
                                std::string colName,
                                int id) {
-	sqlite3_stmt* stmt = NULL;
+	sqlite3_stmt* stmt = nullptr;
 	std::string sql = "UPDATE " + table + " SET " + colName + " = :value";
 	if (id)
 		sql += " WHERE id = :id";
@@ -942,22 +942,22 @@ bool DBHandler::changeOneValue(std::string table,
  */
 bool DBHandler::DBTransaction(std::string SQLQuery) {
     sqlite3* db = DBConnect();
-    m_error = NULL;
+    m_error = nullptr;
 
-    if (db != NULL) {
+    if (db != nullptr) {
         int resultcode = 0;
 
         do {
-            if (m_error != NULL) {
+            if (m_error != nullptr) {
                 sqlite3_free(m_error);
-                m_error = NULL;
+                m_error = nullptr;
             }
-            sqlite3_exec(db, "BEGIN TRANSACTION", NULL, NULL, &m_error);
-            resultcode = sqlite3_exec(db, SQLQuery.c_str(), NULL, NULL, &m_error);
-            sqlite3_exec(db, "END TRANSACTION", NULL, NULL, &m_error);
+            sqlite3_exec(db, "BEGIN TRANSACTION", nullptr, nullptr, &m_error);
+            resultcode = sqlite3_exec(db, SQLQuery.c_str(), nullptr, nullptr, &m_error);
+            sqlite3_exec(db, "END TRANSACTION", nullptr, nullptr, &m_error);
         } while (resultcode == SQLITE_BUSY);
 
-        if (m_error != NULL) {
+        if (m_error != nullptr) {
             Logger::error("%s Error: %s", __PRETTY_FUNCTION__, sqlite3_errmsg(db));
 
             sqlite3_free(m_error);
@@ -984,16 +984,35 @@ void DBHandler::clearTable(std::string table) {
  */
 void DBHandler::clearLogs() {
 	std::vector<std::string> datalogTables = getTableNames("dataLogs_%");
-	for (auto table : datalogTables) {
+	for (const auto &table : datalogTables) {
 		clearTable(table);
 	}
+}
+
+int DBHandler::updateTableColumnWithId(std::string &table, std::string &column, int &id, int &value) {
+
+}
+
+
+// TODO: Rewrite old
+// Overload like getConfig
+bool DBHandler::updateTable(std::string table,
+                            std::string column,
+                            std::string value,
+                            std::string id) {
+	if (not DBTransaction("UPDATE " + table + " SET " + column + " = " + value +
+	                      " WHERE ID = " + id + ";")) {
+		Logger::error("%s Error updating table", __PRETTY_FUNCTION__);
+		return false;
+	}
+	return true;
 }
 
 // TODO: Rewrite old
 bool DBHandler::updateTableJson(std::string table, std::string data) {
 	std::vector<std::string> columns = getColumnInfo("name", table);
 
-	if (columns.size() <= 0) {
+	if (columns.empty()) {
 		Logger::error("%s Error: no such table %s", __PRETTY_FUNCTION__, table.c_str());
 		return false;
 	}
@@ -1004,8 +1023,8 @@ bool DBHandler::updateTableJson(std::string table, std::string data) {
 
 	// start at i = 1 to skip the id
 	ss << "SET ";
-	int fixedSize = js.size();  // Size would sometimes change, added this variable
-	for (auto i = 1; i < fixedSize; i++) {
+	int fixedSize = static_cast<int>(js.size());  // Size would sometimes change, added this variable
+	for (int i = 1; i < fixedSize; i++) {
 		if (fixedSize > 1) {
 			ss << columns.at(i) << " = " << js[columns.at(i)]
 			   << ",";  // This crashes if the local database has fewer fields than the web database
@@ -1020,19 +1039,6 @@ bool DBHandler::updateTableJson(std::string table, std::string data) {
 
 	if (not DBTransaction("UPDATE " + table + " " + values + " WHERE ID = " + id + ";")) {
 		Logger::error("%s Error: ", __PRETTY_FUNCTION__);
-		return false;
-	}
-	return true;
-}
-
-// TODO: Rewrite old
-bool DBHandler::updateTable(std::string table,
-                            std::string column,
-                            std::string value,
-                            std::string id) {
-	if (not DBTransaction("UPDATE " + table + " SET " + column + " = " + value +
-	                      " WHERE ID = " + id + ";")) {
-		Logger::error("%s Error updating table", __PRETTY_FUNCTION__);
 		return false;
 	}
 	return true;
@@ -1066,8 +1072,8 @@ bool DBHandler::updateWaypoints(std::string waypoints) {
 	if (js.empty()) {
 		Logger::error("%s No JSON in \"%s\"", __PRETTY_FUNCTION__, waypoints);
 	}
-	std::string DBPrinter = "";
-	std::string tempValue = "";
+	std::string DBPrinter;
+	std::string tempValue;
 	int valuesLimit = 11;  //"Dirty" fix for limiting the amount of values requested from server
 	// waypoint entries (amount of fields n = valuesLimit + 1)
 	int limitCounter;
@@ -1076,21 +1082,21 @@ bool DBHandler::updateWaypoints(std::string waypoints) {
 		Logger::error("%s, Error: failed to delete waypoints", __PRETTY_FUNCTION__);
 	}
 
-	for (auto i : js.items()) {
+	for (const auto &i : js.items()) {
 		// m_logger.info(i.value().dump());
 
-		for (auto y : i.value().items()) {
+		for (const auto &y : i.value().items()) {
 			limitCounter = valuesLimit;
 			DBPrinter =
 			  "INSERT INTO current_Mission "
 			  "(declination,harvested,id,id_mission,is_checkpoint,latitude,longitude,name,radius,"
 			  "rankInMission,stay_time) VALUES (";
 
-			for (auto z : y.value().items()) {
+			for (const auto &z : y.value().items()) {
 				// Each individual value
 				tempValue = z.value().dump();
 				tempValue = tempValue.substr(1, tempValue.size() - 2);
-				if (tempValue == "") {
+				if (tempValue.empty()) {
 					tempValue = "NULL";
 				}
 				if (limitCounter > 0) {

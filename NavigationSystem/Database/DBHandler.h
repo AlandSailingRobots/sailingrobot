@@ -144,7 +144,8 @@ class DBHandler {
     enum ID_MINMAX { MIN_ID = false, MAX_ID = true };
     int getTableId(const char* table, ID_MINMAX = MAX_ID);
 
-    void deleteRow(std::string table, std::string id);
+    // not implemented
+    // void deleteRow(std::string table, std::string id);
 
     bool getWaypointValues(int& nextId,
                            double& nextLongitude,
@@ -160,7 +161,7 @@ class DBHandler {
                            int& prevRadius,
                            bool& foundPrev);
 
-    bool insert(std::string table, std::string fields, std::string values);
+
     bool changeOneValue(std::string table, std::string newValue, std::string colName, int id);
 
     std::string getWayPointsAsJSON();
@@ -168,14 +169,14 @@ class DBHandler {
     std::string getConfigs();
 
     // Private SQLite wrapper functions
-    int checkRetCode(const int retCode) const;
+    int checkRetCode(int retCode) const;
 
     // For preparing
     int prepareStmtError(sqlite3_stmt*& stmt, std::string sql);  // Ref here gave segfaults
     int prepareStmtSelectFromStatements(sqlite3_stmt*& stmt,
                                         const std::string& expressions,
                                         const std::string& tables,
-                                        const std::string& statements = NULL);
+                                        const std::string& statements = nullptr);
 
     /*    int prepareStmtSelectFromId(sqlite3_stmt** stmt,
                                     const std::string& selector,
@@ -194,10 +195,11 @@ class DBHandler {
         const std::vector<std::tuple<const char*, std::string>>& strings = {});
 
     // Helpers
+    /* Not in use
     int prepareAndBindSelectFromId(sqlite3_stmt*& stmt,
                                    const std::string& selector,
                                    const std::string& from,
-                                   const int id);
+                                   const int id); */
     int stepAndFinalizeStmt(sqlite3_stmt*& stmt) const;
 
     // Retreiving data from SELECT queries
@@ -243,12 +245,12 @@ class DBHandler {
         T& ref,
         const std::string& selector,
         const std::string& from,
-        const std::string& statements = NULL,
+        const std::string& statements = nullptr,
         const std::vector<std::tuple<const char*, int>>& ints = {},
         const std::vector<std::tuple<const char*, double>>& doubles = {},
         const std::vector<std::tuple<const char*, std::string>>& strings = {}) {
-        int retCode = SQLITE_OK;
-        sqlite3_stmt* stmt = NULL;
+        int retCode;
+        sqlite3_stmt* stmt = nullptr;
 
         retCode = prepareStmtSelectFromStatements(stmt, selector, from, statements);
         if (!retCode)
@@ -259,7 +261,7 @@ class DBHandler {
             sqlite3_column_value(stmt, 0, ref);
             retCode = SQLITE_OK;
         }
-        if (stmt != NULL)
+        if (stmt != nullptr)
             retCode = sqlite3_finalize(stmt);
         return retCode;
     }
@@ -268,7 +270,7 @@ class DBHandler {
     void selectFrom(int& value,
                     const std::string& selector,
                     const std::string& from,
-                    const std::string& statements = NULL,
+                    const std::string& statements = nullptr,
                     const std::vector<std::tuple<const char*, int>>& ints = {},
                     const std::vector<std::tuple<const char*, double>>& doubles = {},
                     const std::vector<std::tuple<const char*, std::string>>& strings = {}) {
@@ -277,7 +279,7 @@ class DBHandler {
     void selectFrom(double& value,
                     const std::string& selector,
                     const std::string& from,
-                    const std::string& statements = NULL,
+                    const std::string& statements = nullptr,
                     const std::vector<std::tuple<const char*, int>>& ints = {},
                     const std::vector<std::tuple<const char*, double>>& doubles = {},
                     const std::vector<std::tuple<const char*, std::string>>& strings = {}) {
@@ -286,7 +288,7 @@ class DBHandler {
     void selectFrom(std::string& value,
                     const std::string& selector,
                     const std::string& from,
-                    const std::string& statements = NULL,
+                    const std::string& statements = nullptr,
                     const std::vector<std::tuple<const char*, int>>& ints = {},
                     const std::vector<std::tuple<const char*, double>>& doubles = {},
                     const std::vector<std::tuple<const char*, std::string>>& strings = {}) {
@@ -299,7 +301,7 @@ class DBHandler {
     void selectFromId(bool& value, const std::string& selector, const std::string& from, int id) {
         int i;
         selectFrom(i, selector, from, "WHERE id = :id", {{":id", id}});
-        value = (i ? true : false);
+        value = (i != 0);
     }
     void selectFromId(int& value, const std::string& selector, const std::string& from, int id) {
         selectFrom(value, selector, from, "WHERE id = :id", {{":id", id}});
@@ -310,12 +312,12 @@ class DBHandler {
                       int id) {
         double d;
         selectFrom(d, selector, from, "WHERE id = :id", {{":id", id}});
-        value = d;  // TODO: double to unsigned int?
+        value = static_cast<unsigned int>(d);  // TODO: double to unsigned int?
     }
     void selectFromId(float& value, const std::string& selector, const std::string& from, int id) {
         double d;
         selectFrom(d, selector, from, "WHERE id = :id", {{":id", id}});
-        value = d;  // TODO: double to float?
+        value = static_cast<float>(d);  // TODO: double to float?
     }
     void selectFromId(double& value, const std::string& selector, const std::string& from, int id) {
         selectFrom(value, selector, from, "WHERE id = :id", {{":id", id}});
