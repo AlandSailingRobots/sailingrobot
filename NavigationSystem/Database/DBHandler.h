@@ -199,13 +199,13 @@ class DBHandler {
 		std::vector<std::pair<const char *, std::string>> strings;
 	};
 
-	int prepareStmtInsert(sqlite3_stmt *&stmt, const std::string &table, std::string &columns, std::string &values);
-	int prepareStmtInsert(sqlite3_stmt *&stmt, const std::string &table, std::vector<std::string>& columns);
-	int prepareStmtInsert(sqlite3_stmt *&stmt, const std::string &table, bindValues &values);
+	int prepareStmtInsertError(sqlite3_stmt *&stmt, const std::string &table, std::string &columns, std::string &values);
+	int prepareStmtInsertError(sqlite3_stmt *&stmt, const std::string &table, std::vector<std::string> &columns);
+	int prepareStmtInsertError(sqlite3_stmt *&stmt, const std::string &table, bindValues &values);
 
-	int prepareStmtUpdate(sqlite3_stmt *&stmt, const std::string &table, std::string &columns, std::string &values);
-	int prepareStmtUpdate(sqlite3_stmt *&stmt, const std::string &table, std::vector<std::string>& columns);
-	int prepareStmtUpdate(sqlite3_stmt *&stmt, const std::string &table, bindValues &values);
+	int prepareStmtUpdateError(sqlite3_stmt *&stmt, const std::string &table, std::string &columns, std::string &values);
+	int prepareStmtUpdateError(sqlite3_stmt *&stmt, const std::string &table, std::vector<std::string> &columns);
+	int prepareStmtUpdateError(sqlite3_stmt *&stmt, const std::string &table, bindValues &values);
 
     // For binding parameter values
     int paramNameIndex(sqlite3_stmt*& stmt, const char* name);
@@ -394,7 +394,8 @@ class DBHandler {
                                                         bool rowHeader = false);
 
     // Generic string utility functions
-    std::vector<std::string> prependStrings(std::vector<std::string> &strings, const char *const prefix);
+    std::string prependString(const std::string &string, const char *const prefix);
+    std::vector<std::string> prependStrings(const std::vector<std::string> &strings, const char *const prefix);
 	std::string joinStrings(const std::vector<std::string> &elements, const char *const glue);
 	std::vector<std::string> splitStrings(const std::string &string, const char glue);
 };
