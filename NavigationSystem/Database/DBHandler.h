@@ -231,7 +231,8 @@ class DBHandler {
 		return updateTableIdColumnValues(table, id, values);
 	}
 
-
+	// TODO: A select of multiple values into bindValues struct would be nice
+	// No... a row and named column name index!
 
 
     /* Not in use
@@ -242,14 +243,17 @@ class DBHandler {
     int stepAndFinalizeStmt(sqlite3_stmt*& stmt) const;
 
     // Retreiving data from SELECT queries
+	// TODO: move out from headers
 
     //    void sqlite3_column_value(sqlite3_stmt *stmt, int index, int &value);
     //    void sqlite3_column_value(sqlite3_stmt *stmt, int index, double &value);
     //    void sqlite3_column_value(sqlite3_stmt *stmt, int index, std::string &value);
     void sqlite3_column_value(sqlite3_stmt*& stmt, int index, int& value) {
-
         value = sqlite3_column_int(stmt, index);
     }
+	void sqlite3_column_value(sqlite3_stmt*& stmt, int index, bool& value) {
+		value = (sqlite3_column_int(stmt, index) != 0);
+	}
     void sqlite3_column_value(sqlite3_stmt*& stmt, int index, double& value) {
         value = sqlite3_column_double(stmt, index);
     }
@@ -404,4 +408,5 @@ class DBHandler {
     std::vector<std::string> prependStrings(const std::vector<std::string> &strings, const char *const prefix);
 	std::string joinStrings(const std::vector<std::string> &elements, const char *const glue);
 	std::vector<std::string> splitStrings(const std::string &string, const char glue);
+	int stringsStringIndex(std::vector<std::string> haystack, std::string needle);
 };

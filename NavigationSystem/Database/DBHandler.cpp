@@ -7,7 +7,7 @@
 
 #include "../SystemServices/Logger.h"
 #include "../SystemServices/Timer.h"
-#include "../SystemServices/Wrapper.h"
+// #include "../SystemServices/Wrapper.h"
 #include "DBHandler.h"
 
 // TODO: reusable statements?
@@ -39,9 +39,10 @@ bool DBHandler::initialise() {
  * @return SQLite error code
  */
 int DBHandler::checkRetCode(const int retCode) const {
-    if (not((retCode == SQLITE_OK) || (retCode == SQLITE_DONE) || (retCode == SQLITE_ROW))) {
-        Logger::error("SQLite result code: %s (%d)", sqlite3_errstr(retCode), retCode);
+    if ((retCode == SQLITE_OK) || (retCode == SQLITE_DONE) || (retCode == SQLITE_ROW)) {
+    	return SQLITE_OK;
     }
+	Logger::error("SQLite result code: %s (%d)", sqlite3_errstr(retCode), retCode);
     return retCode;
 }
 
@@ -51,7 +52,8 @@ int DBHandler::checkRetCode(const int retCode) const {
  * @return SQLite error code
  */
 int DBHandler::stepAndFinalizeStmt(sqlite3_stmt*& stmt) const {
-    int retCode = checkRetCode(sqlite3_step(stmt));
+    int retCode = sqlite3_step(stmt);
+    checkRetCode(retCode);
     checkRetCode(sqlite3_finalize(stmt));  // Only for logging possible error
     return retCode;                        // Note that this is the retCode from sqlite3_step
 }
@@ -394,10 +396,8 @@ std::vector<std::vector<std::string>> DBHandler::getRowsAsText(sqlite3_stmt*& st
                                                                bool rowHeader) {
     std::vector<std::vector<std::string>> rows;
     int retCode = sqlite3_step(stmt);
-    if (not((retCode == SQLITE_ROW) || (retCode == SQLITE_DONE))) {
-        Logger::error("%s SQLite error: %s (%d)", __PRETTY_FUNCTION__, sqlite3_errstr(retCode));
-    } else {
-        int columns = sqlite3_column_count(stmt);
+    if (checkRetCode(retCode) == SQLITE_OK) {
+	    int columns = sqlite3_column_count(stmt);
         std::vector<std::string> row;
         if (rowHeader) {
             for (int i = 0; i < columns; i++) {
@@ -424,10 +424,10 @@ std::vector<std::vector<std::string>> DBHandler::getRowsAsText(sqlite3_stmt*& st
             rows.push_back(row);
             row.clear();
             retCode = sqlite3_step(stmt);
-            checkRetCode(retCode);  // TODO inline above
+            checkRetCode(retCode);
         }
     }
-    // checkRetCode(sqlite3_finalize(stmt));
+    checkRetCode(sqlite3_finalize(stmt));   // Danger, danger!
     return std::move(rows);
 }
 
@@ -440,14 +440,19 @@ std::vector<std::string> DBHandler::getTableNames(std::string like) {
     sqlite3_stmt* stmt = nullptr;
     std::vector<std::vector<std::string>> results;
     std::vector<std::string> tableNames;
+    int retCode;
 
-    prepareStmtSelectFromStatements(stmt, "name", "sqlite_master",
+    retCode = prepareStmtSelectFromStatements(stmt, "name", "sqlite_master",
                                     "WHERE type='table' AND name LIKE :like");
-    bindParam(stmt, ":like", like);
+    if (retCode == SQLITE_OK) {
+	    retCode = bindParam(stmt, ":like", like);
+	    if (retCode == SQLITE_OK) {
+		    results = getRowsAsText(stmt);
 
-    results = getRowsAsText(stmt);
-    for (auto result : results) {
-        tableNames.push_back(result[0]);
+		    for (auto result : results) {
+			    tableNames.push_back(result[0]);
+		    }
+	    }
     }
     return tableNames;
 }
@@ -533,57 +538,44 @@ bool DBHandler::getWaypointValues(int& nextId,
 		retCode = sqlite3_step(stmt);
 		if (retCode == SQLITE_ROW) {
 			sqlite3_column_value(stmt, 0, nextWayPointId);
+			sqlite3_finalize(stmt);
+
+			std::vector<std::string> columns = { "longitude", "latitude", "declination", "radius", "stay_time", "is_checkpoint" };
+			retCode = prepareStmtSelectFromStatements(stmt, joinStrings(columns, ","), "current_Mission", "WHERE id = :id");
+			if (retCode == SQLITE_OK) {
+				bindParam(stmt, ":id", nextWayPointId);
+				retCode = sqlite3_step(stmt);
+				if (retCode == SQLITE_ROW) {
+					sqlite3_column_value(stmt, stringsStringIndex(columns, "longitude"), nextLongitude);
+					sqlite3_column_value(stmt, stringsStringIndex(columns, "latitude"), nextLatitude);
+					sqlite3_column_value(stmt, stringsStringIndex(columns, "declination"), nextDeclination);
+					sqlite3_column_value(stmt, stringsStringIndex(columns, "radius"), nextRadius);
+					sqlite3_column_value(stmt, stringsStringIndex(columns, "stay_time"), nextStayTime);
+					sqlite3_column_value(stmt, stringsStringIndex(columns, "is_checkpoint"), isCheckpoint);
+					// selectFromId(nextLongitude, "longitude", "current_Mission", nextWayPointId);
+
+					selectFrom(prevWayPointId, "MAX(id)", "current_Mission", "WHERE id < :id", {{":id",nextWayPointId}});
+					if (prevWayPointId) {
+						sqlite3_reset(stmt);
+						bindParam(stmt, ":id", prevWayPointId);
+						retCode = sqlite3_step(stmt);
+						if (retCode == SQLITE_ROW) {
+							sqlite3_column_value(stmt, stringsStringIndex(columns, "longitude"), prevLongitude);
+							sqlite3_column_value(stmt, stringsStringIndex(columns, "latitude"), prevLatitude);
+							sqlite3_column_value(stmt, stringsStringIndex(columns, "declination"), prevDeclination);
+							sqlite3_column_value(stmt, stringsStringIndex(columns, "radius"), prevRadius);
+							sqlite3_column_value(stmt, stringsStringIndex(columns, "stay_time"), nextStayTime);
+							sqlite3_column_value(stmt, stringsStringIndex(columns, "is_checkpoint"), isCheckpoint);
+						}
+					}
+				}
+			}
 		}
-		prevWayPointId = ( nextWayPointId > 0 ? nextWayPointId-1 : 0 );
 	}
 
-	if (retCode != SQLITE_OK) {
-		Logger::error("%s Error: %s", __PRETTY_FUNCTION__, error);
-		return false;
-	}
-
-
-    int rows, columns, rows2, columns2;
-    std::vector<std::string> results;
-    std::vector<std::string> results2;
-    try {
-        results = retrieveFromTable("SELECT MIN(id) FROM current_Mission WHERE harvested = 0;",
-                                    rows, columns);
-        results2 = retrieveFromTable("SELECT MAX(id) FROM current_Mission WHERE harvested = 1;",
-                                     rows2, columns2);
-    } catch (const char* error) {
-        Logger::error("%s Error: %s", __PRETTY_FUNCTION__, error);
-        return false;
-    }
-
-    if (rows * columns < 1 || results[1] == "\0") {
-        return false;
-    }
-    // Do not give values to previous waypoint if no value found in database
-    foundPrev = true;
-    if (rows2 * columns2 < 1 || results2[1] == "\0") {
-        Logger::info("No previously harvested waypoint found, values set as 0");
-        foundPrev = false;
-    }
-
-    // Set values to next waypoint
-    nextId = safe_stoi(results[1]);
-    selectFromId(nextLongitude, "longitude", "current_Mission", safe_stoi(results[1]));
-    selectFromId(nextLatitude, "latitude", "current_Mission", safe_stoi(results[1]));
-    selectFromId(nextDeclination, "declination", "current_Mission", safe_stoi(results[1]));
-    selectFromId(nextRadius, "radius", "current_Mission", safe_stoi(results[1]));
-    selectFromId(nextStayTime, "stay_time", "current_Mission", safe_stoi(results[1]));
-    selectFromId(isCheckpoint, "is_checkpoint", "current_Mission", safe_stoi(results[1]));
-
-    if (foundPrev) {  // Set values to next waypoint if harvested waypoint found
-        prevId = safe_stoi(results2[1]);
-        selectFromId(prevLongitude, "longitude", "current_Mission", safe_stoi(results2[1]));
-        selectFromId(prevLatitude, "latitude", "current_Mission", safe_stoi(results2[1]));
-        selectFromId(prevDeclination, "declination", "current_Mission", safe_stoi(results2[1]));
-        selectFromId(prevRadius, "radius", "current_Mission", safe_stoi(results2[1]));
-    }
-
-    return true;
+	if (checkRetCode(retCode) == SQLITE_OK) return true;
+	Logger::error("%s Errors when retrieving way points from local database", __PRETTY_FUNCTION__);
+	return false;
 }
 
 /**
@@ -606,7 +598,6 @@ std::string DBHandler::getTablesAsJSON(std::string like, std::string statement) 
         for (const auto& table : tableNames) {
             prepareStmtSelectFromStatements(stmt, "*", table, statement);
             std::vector<std::vector<std::string>> rows = getRowsAsText(stmt, true);
-            sqlite3_finalize(stmt);
 
             if (rows.size() > 1) {  // we want actual data, not only the headers
                 // "dataLogs_" is 9 chars, next is at index 9 (starting from 0). config_% Like minus
@@ -849,7 +840,7 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
             if (!prepareStmtInsertError(stmt, "dataLogs_compass", values)) {
                 bindValuesToStmt(values, stmt);
                 if (stepAndFinalizeStmt(stmt) == SQLITE_DONE) {
-                    _actuatorFeedbackId = actuatorFeedbackId + logNumber;
+	                _compassModelId = compassModelId + logNumber;
                 }
             }
         }
@@ -857,13 +848,14 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
         int _courseCalculationId = 0;
         if (courseCalculationId) {
             bindValues values;
-            addValue(values, ":distance_to_waypoint", log.m_distanceToWaypoint);
-            addValue(values, ":bearing_to_waypoint", log.m_bearingToWaypoint);
-            addValue(values, ":course_to_steer", log.m_courseToSteer);
-            addValue(values, ":tack", log.m_tack);
-            addValue(values, ":going_starboard", log.m_goingStarboard);
-            addValue(values, ":t_timestamp", log.m_timestamp_str);
+            addValue(values, "distance_to_waypoint", log.m_distanceToWaypoint);
+            addValue(values, "bearing_to_waypoint", log.m_bearingToWaypoint);
+            addValue(values, "course_to_steer", log.m_courseToSteer);
+            addValue(values, "tack", log.m_tack);
+            addValue(values, "going_starboard", log.m_goingStarboard);
+            addValue(values, "t_timestamp", log.m_timestamp_str);
             if (!prepareStmtInsertError(stmt, "dataLogs_course_calculation", values)) {
+	            bindValuesToStmt(values, stmt);
                 if (stepAndFinalizeStmt(stmt) == SQLITE_DONE) {
                     _courseCalculationId = courseCalculationId + logNumber;
                 }
@@ -873,12 +865,13 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
         int _marineSensorsId = 0;
         if (marineSensorsId) {
             bindValues values;
-            addValue(values, ":temperature", log.m_temperature);
-            addValue(values, ":conductivity", log.m_conductivity);
-            addValue(values, ":ph", log.m_ph);
-            addValue(values, ":salinity", log.m_salinity);
-            addValue(values, ":t_timestamp", log.m_timestamp_str);
+            addValue(values, "temperature", log.m_temperature);
+            addValue(values, "conductivity", log.m_conductivity);
+            addValue(values, "ph", log.m_ph);
+            addValue(values, "salinity", log.m_salinity);
+            addValue(values, "t_timestamp", log.m_timestamp_str);
             if (!prepareStmtInsertError(stmt, "dataLogs_marine_sensors", values)) {
+	            bindValuesToStmt(values, stmt);
                 if (stepAndFinalizeStmt(stmt) == SQLITE_DONE) {
                     _marineSensorsId = marineSensorsId + logNumber;
                 }
@@ -888,13 +881,14 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
         int _vesselStateId = 0;
         if (vesselStateId) {
             bindValues values;
-            addValue(values, ":heading", log.m_vesselHeading);
-            addValue(values, ":latitude", log.m_vesselLat);
-            addValue(values, ":longitude", log.m_vesselLon);
-            addValue(values, ":speed", log.m_vesselSpeed);
-            addValue(values, ":course", log.m_vesselCourse);
-            addValue(values, ":t_timestamp", log.m_timestamp_str);
+            addValue(values, "heading", log.m_vesselHeading);
+            addValue(values, "latitude", log.m_vesselLat);
+            addValue(values, "longitude", log.m_vesselLon);
+            addValue(values, "speed", log.m_vesselSpeed);
+            addValue(values, "course", log.m_vesselCourse);
+            addValue(values, "t_timestamp", log.m_timestamp_str);
             if (!prepareStmtInsertError(stmt, "dataLogs_vessel_state", values)) {
+	            bindValuesToStmt(values, stmt);
                 if (stepAndFinalizeStmt(stmt) == SQLITE_DONE) {
                     _vesselStateId = vesselStateId + logNumber;
                 }
@@ -904,12 +898,13 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
         int _windStateId = 0;
         if (windStateId) {
             bindValues values;
-            addValue(values, ":true_wind_speed", log.m_trueWindSpeed);
-            addValue(values, ":true_wind_direction", log.m_trueWindDir);
-            addValue(values, ":apparent_wind_speed", log.m_apparentWindSpeed);
-            addValue(values, ":apparent_wind_direction", log.m_apparentWindDir);
-            addValue(values, ":t_timestamp", log.m_timestamp_str);
+            addValue(values, "true_wind_speed", log.m_trueWindSpeed);
+            addValue(values, "true_wind_direction", log.m_trueWindDir);
+            addValue(values, "apparent_wind_speed", log.m_apparentWindSpeed);
+            addValue(values, "apparent_wind_direction", log.m_apparentWindDir);
+            addValue(values, "t_timestamp", log.m_timestamp_str);
             if (!prepareStmtInsertError(stmt, "dataLogs_wind_state", values)) {
+	            bindValuesToStmt(values, stmt);
                 if (stepAndFinalizeStmt(stmt) == SQLITE_DONE) {
                     _windStateId = windStateId + logNumber;
                 }
@@ -919,11 +914,12 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
         int _windsensorId = 0;
         if (windsensorId) {
             bindValues values;
-            addValue(values, ":direction", log.m_windDir);
-            addValue(values, ":speed", log.m_windSpeed);
-            addValue(values, ":temperature", log.m_windTemp);
-            addValue(values, ":t_timestamp", log.m_timestamp_str);
+            addValue(values, "direction", log.m_windDir);
+            addValue(values, "speed", log.m_windSpeed);
+            addValue(values, "temperature", log.m_windTemp);
+            addValue(values, "t_timestamp", log.m_timestamp_str);
             if (!prepareStmtInsertError(stmt, "dataLogs_windsensor", values)) {
+	            bindValuesToStmt(values, stmt);
                 if (stepAndFinalizeStmt(stmt) == SQLITE_DONE) {
                     _windsensorId = windsensorId + logNumber;
                 }
@@ -933,17 +929,18 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
         int _gpsId = 0;
         if (gpsId) {
         	bindValues values;
-            addValue(values, ":has_fix", log.m_gpsHasFix);
-            addValue(values, ":online", log.m_gpsOnline);
-            addValue(values, ":time", log.m_gpsUnixTime);
-            addValue(values, ":latitude", log.m_gpsLat);
-            addValue(values, ":longitude", log.m_gpsLon);
-            addValue(values, ":speed", log.m_gpsSpeed);
-            addValue(values, ":course", log.m_gpsCourse);
-            addValue(values, ":satellites_used", log.m_gpsSatellite);
-            addValue(values, ":route_started", log.m_routeStarted);
-            addValue(values, ":t_timestamp", log.m_timestamp_str);
+            addValue(values, "has_fix", log.m_gpsHasFix);
+            addValue(values, "online", log.m_gpsOnline);
+            addValue(values, "time", log.m_gpsUnixTime);
+            addValue(values, "latitude", log.m_gpsLat);
+            addValue(values, "longitude", log.m_gpsLon);
+            addValue(values, "speed", log.m_gpsSpeed);
+            addValue(values, "course", log.m_gpsCourse);
+            addValue(values, "satellites_used", log.m_gpsSatellite);
+            addValue(values, "route_started", log.m_routeStarted);
+            addValue(values, "t_timestamp", log.m_timestamp_str);
             if (!prepareStmtInsertError(stmt, "dataLogs_gps", values)) {
+	            bindValuesToStmt(values, stmt);
 	            if (stepAndFinalizeStmt(stmt) == SQLITE_DONE) {
 	                _gpsId = gpsId + logNumber;
 	            }
@@ -953,13 +950,13 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
         int _currentSensorsId = 0;
         if (currentSensorsId) {
         	bindValues values;
-            addValue(values, ":current", log.m_current);
-            addValue(values, ":voltage", log.m_voltage);
-            addValue(values, ":element", log.m_element);
-            addValue(values, ":element_str", log.m_element_str);
-            addValue(values, ":t_timestamp", log.m_timestamp_str);
-
+            addValue(values, "current", log.m_current);
+            addValue(values, "voltage", log.m_voltage);
+            addValue(values, "element", log.m_element);
+            addValue(values, "element_str", log.m_element_str);
+            addValue(values, "t_timestamp", log.m_timestamp_str);
             if (!prepareStmtInsertError(stmt, "dataLogs_current_sensors", values)) {
+	            bindValuesToStmt(values, stmt);
 	            if (stepAndFinalizeStmt(stmt) == SQLITE_DONE) {
 	                _currentSensorsId = currentSensorsId + logNumber;
 	            }
@@ -967,17 +964,18 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
         }
 
         bindValues values;
-        addValue(values, ":actuator_feedback_id", _actuatorFeedbackId);
-        addValue(values, ":compass_id", _compassModelId);
-        addValue(values, ":course_calculation_id", _courseCalculationId);
-        addValue(values, ":current_sensors_id", _currentSensorsId);
-        addValue(values, ":gps_id", _gpsId);
-        addValue(values, ":marine_sensors_id", _marineSensorsId);
-        addValue(values, ":vessel_state_id", _vesselStateId);
-        addValue(values, ":wind_state_id", _windStateId);
-        addValue(values, ":windsensor_id", _windsensorId);
-        addValue(values, ":current_mission_id", currentMissionId);
+        addValue(values, "actuator_feedback_id", _actuatorFeedbackId);
+        addValue(values, "compass_id", _compassModelId);
+        addValue(values, "course_calculation_id", _courseCalculationId);
+        addValue(values, "current_sensors_id", _currentSensorsId);
+        addValue(values, "gps_id", _gpsId);
+        addValue(values, "marine_sensors_id", _marineSensorsId);
+        addValue(values, "vessel_state_id", _vesselStateId);
+        addValue(values, "wind_state_id", _windStateId);
+        addValue(values, "windsensor_id", _windsensorId);
+        addValue(values, "current_mission_id", currentMissionId);
         if (!prepareStmtInsertError(stmt, "dataLogs_system", values)) {
+	        bindValuesToStmt(values, stmt);
 	        if (stepAndFinalizeStmt(stmt) == SQLITE_DONE) {
 		        m_latestDataLogId = getTableId("dataLogs_system");
 	        } else {
@@ -1263,6 +1261,17 @@ std::vector<std::string> DBHandler::splitStrings(const std::string &string, cons
 	}
 	result.insert(result.end(), std::string(beg, cur));
 	return std::move(result);
+}
+
+int DBHandler::stringsStringIndex(std::vector<std::string> haystack, std::string needle) {
+	int i = 0;
+	for (auto string : haystack) {
+		if (string == needle) {
+			return i;
+		}
+		i++;
+	}
+	return -1;
 }
 
 // NOTE : Marc : change this otherwise it doesn't work
