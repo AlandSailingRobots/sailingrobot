@@ -131,7 +131,7 @@ TEST_CASE("DBhandler")
 
 	}
 
-	SECTION("changeOneValue function")
+	SECTION("updateTableIdColumnValue function")
 	{
 		DBHandler db("testdb.db");
 

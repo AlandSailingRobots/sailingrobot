@@ -416,7 +416,7 @@
         1:  411:}
         -:  412:
         -:  413:
-    #####:  414:void DBHandler::changeOneValue(std::string table, std::string id,std::string newValue, std::string colName){
+    #####:  414:void DBHandler::updateTableIdColumnValue(std::string table, std::string id,std::string newValue, std::string colName){
         -:  415:
     #####:  416:	DBTransaction("UPDATE " + table + " SET "+ colName + " = "+ newValue +" WHERE id = " + id +";");
         -:  417:

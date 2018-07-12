@@ -177,8 +177,6 @@ class DBHandler {
                            bool& foundPrev);
 
 
-    bool changeOneValue(std::string table, std::string newValue, std::string colName, int id);
-
     std::string getWayPointsAsJSON();
 
     std::string getConfigs();
@@ -192,39 +190,47 @@ class DBHandler {
                                         const std::string& expressions,
                                         const std::string& tables,
                                         const std::string& statements = nullptr);
+	int paramNameIndex(sqlite3_stmt*& stmt, const char* name);
 
+	// For binding parameter values
 	struct bindValues {
 		std::vector<std::pair<const char *, int>> ints;
 		std::vector<std::pair<const char *, double>> doubles;
 		std::vector<std::pair<const char *, std::string>> strings;
 	};
+	int bindValuesToStmt(const bindValues &values, sqlite3_stmt *&stmt);
+	void addValue(bindValues &values, const char* name, int value);
+	void addValue(bindValues &values, const char* name, double value);
+	void addValue(bindValues &values, const char* name, std::string &string);
+	std::vector<std::string> valueNames(const bindValues &values);	int bindParam(sqlite3_stmt*& stmt, const char* name, const int& value);
+	int bindParam(sqlite3_stmt*& stmt, const char* name, const double& value);
+	int bindParam(sqlite3_stmt*& stmt, const char* name, const std::string& text);
+	int bindStmtIntsDoublesStrings(
+	  sqlite3_stmt *&stmt,
+	  const std::vector<std::pair<const char *, int>> &ints = {},
+	  const std::vector<std::pair<const char *, double>> &doubles = {},
+	  const std::vector<std::pair<const char *, std::string>> &strings = {});
 
+	// INSERT
 	int prepareStmtInsertError(sqlite3_stmt *&stmt, const std::string &table, std::string &columns, std::string &values);
 	int prepareStmtInsertError(sqlite3_stmt *&stmt, const std::string &table, std::vector<std::string> &columns);
 	int prepareStmtInsertError(sqlite3_stmt *&stmt, const std::string &table, bindValues &values);
 
-	int prepareStmtUpdateError(sqlite3_stmt *&stmt, const std::string &table, std::string &columns, std::string &values);
-	int prepareStmtUpdateError(sqlite3_stmt *&stmt, const std::string &table, std::vector<std::string> &columns);
-	int prepareStmtUpdateError(sqlite3_stmt *&stmt, const std::string &table, bindValues &values);
+	// UPDATE
+	int prepareStmtUpdateError(sqlite3_stmt *&stmt, const std::string &table, int id, std::string &columns,
+		                           std::string &values);
+	int prepareStmtUpdateError(sqlite3_stmt *&stmt, const std::string &table, int id,
+		                           std::vector<std::string> &columns);
+	int prepareStmtUpdateError(sqlite3_stmt *&stmt, const std::string &table, int id, bindValues &values);
 
-    // For binding parameter values
-    int paramNameIndex(sqlite3_stmt*& stmt, const char* name);
-    int bindParam(sqlite3_stmt*& stmt, const char* name, const int& value);
-    int bindParam(sqlite3_stmt*& stmt, const char* name, const double& value);
-    int bindParam(sqlite3_stmt*& stmt, const char* name, const std::string& text);
-    int bindStmtIntsDoublesStrings(
-      sqlite3_stmt *&stmt,
-      const std::vector<std::pair<const char *, int>> &ints = {},
-      const std::vector<std::pair<const char *, double>> &doubles = {},
-      const std::vector<std::pair<const char *, std::string>> &strings = {});
+	bool updateTableIdColumnValues(const char *table, int id, bindValues& values);
+	template <typename T>
+	bool updateTableIdColumnValue(const char *table, int id, const char *colName, T newValue) {
+		bindValues values;
+		addValue(values, colName, newValue);
+		return updateTableIdColumnValues(table, id, values);
+	}
 
-    int bindValuesToStmt(const bindValues &values, sqlite3_stmt *&stmt);
-
-
-	void addValue(bindValues &values, const char* name, int value);
-	void addValue(bindValues &values, const char* name, double value);
-	void addValue(bindValues &values, const char* name, std::string &string);
-	std::vector<std::string> valueNames(const bindValues &values);
 
 
 
