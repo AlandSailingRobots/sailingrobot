@@ -137,10 +137,9 @@ bool HTTPSyncNode::pushDatalogs() {
 }
 
 bool HTTPSyncNode::pushWaypoints() {
+	std::string response;
     std::string waypointsData = m_dbHandler->getWayPointsAsJSON();
     if (waypointsData.size() > 0) {
-        std::string response;
-        // TODO: Check what happens with this upstreams!
         if (performCURLCall(waypointsData, "pushWaypoints", response)) {
             Logger::info("Waypoints pushed to server");
             return true;
@@ -201,7 +200,7 @@ bool HTTPSyncNode::checkIfNewWaypoints() {
 bool HTTPSyncNode::getConfigsFromServer() {
     if (checkIfNewConfigs()) {
         std::string configs = getData("getAllConfigs");
-        if (configs.size() > 0) {
+        if (!configs.empty()) {
             m_dbHandler->updateConfigs(configs);
             if (not m_dbHandler->updateTableColumnIdValue("state", "configs_updated", 1, 1)) {
                 Logger::error("%s Error updating state table", __PRETTY_FUNCTION__);
@@ -221,18 +220,16 @@ bool HTTPSyncNode::getConfigsFromServer() {
 
 bool HTTPSyncNode::getWaypointsFromServer() {
     if (checkIfNewWaypoints()) {
-        std::string waypoints = getData("getWayPointsAsJSON");
-        if (waypoints.size() > 0) {
+        std::string waypoints = getData("getWaypoints");
+        if (!waypoints.empty()) {
             if (m_dbHandler->updateWaypoints(waypoints)) {
                 // EVENT MESSAGE - REPLACES OLD CALLBACK, CLEAN OUT CALLBACK REMNANTS IN OTHER
                 // CLASSES
                 MessagePtr newServerWaypoints = std::make_unique<ServerWaypointsReceivedMsg>();
                 m_MsgBus.sendMessage(std::move(newServerWaypoints));
-
                 Logger::info("Waypoints retrieved from remote server");
                 return true;
             }
-
         } else if (!m_reportedConnectError) {
             Logger::warning("%s Could not fetch any new waypoints", __PRETTY_FUNCTION__);
         }
@@ -244,12 +241,10 @@ bool HTTPSyncNode::performCURLCall(std::string data, std::string call, std::stri
     std::string serverCall = "";
 
     // std::cout << "/* Request : " << call << " */" << '\n';
-    if (data != "") {
-        serverCall = "serv=" + call + "&id=" + m_shipID + "&pwd=" + m_shipPWD +
-                     "&data=" + data;
-    } else {
-        serverCall = "serv=" + call + "&id=" + m_shipID + "&pwd=" + m_shipPWD;
-    }
+	serverCall = "serv=" + call + "&id=" + m_shipID + "&pwd=" + m_shipPWD;
+	if (data.length()) {
+		serverCall += "&data=" + data;
+	}
     // example: serv=getAllConfigs&id=BOATID&pwd=BOATPW
     // std::cout << "/* Server call : " << serverCall.substr(0, 150) << " */" << '\n';
 

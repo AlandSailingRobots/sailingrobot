@@ -124,27 +124,28 @@ class DBHandler {
     // updates table using values given
     //  bool updateTableColumnIdValue(std::string table, std::string column, int id, T value);
     template <typename T>
-	bool updateTableColumnIdValue(const char *table, const char *column, int id, T value) {
-		sqlite3_stmt* stmt = nullptr;
-		std::string sql = "UPDATE " + std::string(table) + " SET " + std::string(column) + " = :value WHERE ID = :id";
-		if (!prepareStmtError(stmt, sql)) {
-			bindParam(stmt, ":value", value);
-			bindParam(stmt, ":id", id);
-			if (stepAndFinalizeStmt(stmt) == SQLITE_DONE) {
-				return true;
-			}
-		}
-		// Logger::error("%s Error updating table %s using \"%s\"", __PRETTY_FUNCTION__, table, sql.c_str());
-	    // Can not use logger in templates
-		return false;
-	}
+    bool updateTableColumnIdValue(const char* table, const char* column, int id, T value) {
+        sqlite3_stmt* stmt = nullptr;
+        std::string sql = "UPDATE " + std::string(table) + " SET " + std::string(column) +
+                          " = :value WHERE ID = :id";
+        if (!prepareStmtError(stmt, sql)) {
+            bindParam(stmt, ":value", value);
+            bindParam(stmt, ":id", id);
+            if (stepAndFinalizeStmt(stmt) == SQLITE_DONE) {
+                return true;
+            }
+        }
+        // Logger::error("%s Error updating table %s using \"%s\"", __PRETTY_FUNCTION__, table,
+        // sql.c_str()); Can not use logger in templates
+        return false;
+    }
 
     void clearTable(std::string table);
 
     void updateConfigs(std::string configs);
     bool updateWaypoints(std::string waypoints);
 
-	std::string getTablesAsJSON(std::string like, std::string statement = "");
+    std::string getTablesAsJSON(std::string like, std::string statement = "");
     // returns all logs in database as json; supply onlyLatest to get only the ones with the highest
     // id
     std::string getLogsAsJSON(bool onlyLatest);
@@ -176,7 +177,6 @@ class DBHandler {
                            int& prevRadius,
                            bool& foundPrev);
 
-
     std::string getWayPointsAsJSON();
 
     std::string getConfigs();
@@ -190,50 +190,54 @@ class DBHandler {
                                         const std::string& expressions,
                                         const std::string& tables,
                                         const std::string& statements = nullptr);
-	int paramNameIndex(sqlite3_stmt*& stmt, const char* name);
+    int paramNameIndex(sqlite3_stmt*& stmt, const char* name);
 
-	// For binding parameter values
-	struct bindValues {
-		std::vector<std::pair<const char *, int>> ints;
-		std::vector<std::pair<const char *, double>> doubles;
-		std::vector<std::pair<const char *, std::string>> strings;
-	};
-	int bindValuesToStmt(const bindValues &values, sqlite3_stmt *&stmt);
-	void addValue(bindValues &values, const char* name, int value);
-	void addValue(bindValues &values, const char* name, double value);
-	void addValue(bindValues &values, const char* name, std::string &string);
-	std::vector<std::string> valueNames(const bindValues &values);	int bindParam(sqlite3_stmt*& stmt, const char* name, const int& value);
-	int bindParam(sqlite3_stmt*& stmt, const char* name, const double& value);
-	int bindParam(sqlite3_stmt*& stmt, const char* name, const std::string& text);
-	int bindStmtIntsDoublesStrings(
-	  sqlite3_stmt *&stmt,
-	  const std::vector<std::pair<const char *, int>> &ints = {},
-	  const std::vector<std::pair<const char *, double>> &doubles = {},
-	  const std::vector<std::pair<const char *, std::string>> &strings = {});
+    // For binding parameter values
+    struct bindValues {
+        std::vector<std::pair<const char*, int>> ints;
+        std::vector<std::pair<const char*, double>> doubles;
+        std::vector<std::pair<const char*, std::string>> strings;
+    };
+    int bindValuesToStmt(const bindValues& values, sqlite3_stmt*& stmt);
+    void addValue(bindValues& values, const char* name, int value);
+    void addValue(bindValues& values, const char* name, double value);
+    void addValue(bindValues& values, const char* name, std::string& string);
+    std::vector<std::string> valueNames(const bindValues& values);
+    int bindParam(sqlite3_stmt*& stmt, const char* name, const int& value);
+    int bindParam(sqlite3_stmt*& stmt, const char* name, const double& value);
+    int bindParam(sqlite3_stmt*& stmt, const char* name, const std::string& text);
+    int bindStmtIntsDoublesStrings(
+        sqlite3_stmt*& stmt,
+        const std::vector<std::pair<const char*, int>>& ints = {},
+        const std::vector<std::pair<const char*, double>>& doubles = {},
+        const std::vector<std::pair<const char*, std::string>>& strings = {});
 
-	// INSERT
-	int prepareStmtInsertError(sqlite3_stmt *&stmt, const std::string &table, std::string &columns, std::string &values);
-	int prepareStmtInsertError(sqlite3_stmt *&stmt, const std::string &table, std::vector<std::string> &columns);
-	int prepareStmtInsertError(sqlite3_stmt *&stmt, const std::string &table, bindValues &values);
+    // INSERT
+    int prepareStmtInsertError(sqlite3_stmt*& stmt,
+                               const std::string& table,
+                               std::vector<std::string>& columns);
+    int prepareStmtInsertError(sqlite3_stmt*& stmt, const std::string& table, bindValues& values);
 
-	// UPDATE
-	int prepareStmtUpdateError(sqlite3_stmt *&stmt, const std::string &table, int id, std::string &columns,
-		                           std::string &values);
-	int prepareStmtUpdateError(sqlite3_stmt *&stmt, const std::string &table, int id,
-		                           std::vector<std::string> &columns);
-	int prepareStmtUpdateError(sqlite3_stmt *&stmt, const std::string &table, int id, bindValues &values);
+    // UPDATE
+    int prepareStmtUpdateError(sqlite3_stmt*& stmt,
+                               const std::string& table,
+                               int id,
+                               std::vector<std::string>& columns);
+    int prepareStmtUpdateError(sqlite3_stmt*& stmt,
+                               const std::string& table,
+                               int id,
+                               bindValues& values);
 
-	bool updateTableIdColumnValues(const char *table, int id, bindValues& values);
-	template <typename T>
-	bool updateTableIdColumnValue(const char *table, int id, const char *colName, T newValue) {
-		bindValues values;
-		addValue(values, colName, newValue);
-		return updateTableIdColumnValues(table, id, values);
-	}
+    bool updateTableIdColumnValues(const char* table, int id, bindValues& values);
+    template <typename T>
+    bool updateTableIdColumnValue(const char* table, int id, const char* colName, T newValue) {
+        bindValues values;
+        addValue(values, colName, newValue);
+        return updateTableIdColumnValues(table, id, values);
+    }
 
-	// TODO: A select of multiple values into bindValues struct would be nice
-	// No... a row and named column name index!
-
+    // TODO: A select of multiple values into bindValues struct would be nice
+    // No... a row and named column name index!
 
     /* Not in use
     int prepareAndBindSelectFromId(sqlite3_stmt*& stmt,
@@ -243,7 +247,7 @@ class DBHandler {
     int stepAndFinalizeStmt(sqlite3_stmt*& stmt) const;
 
     // Retreiving data from SELECT queries
-	// TODO: move out from headers
+    // TODO: move out from headers
 
     //    void sqlite3_column_value(sqlite3_stmt *stmt, int index, int &value);
     //    void sqlite3_column_value(sqlite3_stmt *stmt, int index, double &value);
@@ -251,16 +255,16 @@ class DBHandler {
     void sqlite3_column_value(sqlite3_stmt*& stmt, int index, int& value) {
         value = sqlite3_column_int(stmt, index);
     }
-	void sqlite3_column_value(sqlite3_stmt*& stmt, int index, bool& value) {
-		value = (sqlite3_column_int(stmt, index) != 0);
-	}
+    void sqlite3_column_value(sqlite3_stmt*& stmt, int index, bool& value) {
+        value = (sqlite3_column_int(stmt, index) != 0);
+    }
     void sqlite3_column_value(sqlite3_stmt*& stmt, int index, double& value) {
         value = sqlite3_column_double(stmt, index);
     }
     void sqlite3_column_value(sqlite3_stmt*& stmt, int index, std::string& value) {
-	    if (sqlite3_column_type(stmt, index) == SQLITE_NULL) {
-		    value = std::string();
-	    } else {
+        if (sqlite3_column_type(stmt, index) == SQLITE_NULL) {
+            value = std::string();
+        } else {
             const char* strp = (char*)sqlite3_column_text(stmt, index);
             value = std::string(strp);
         }
@@ -285,13 +289,13 @@ class DBHandler {
 
     template <typename T>
     int refSelectFromTemplate(
-      T &ref,
-      const std::string &selector,
-      const std::string &from,
-      const std::string &statements = nullptr,
-      const std::vector<std::pair<const char *, int>> &ints = {},
-      const std::vector<std::pair<const char *, double>> &doubles = {},
-      const std::vector<std::pair<const char *, std::string>> &strings = {}) {
+        T& ref,
+        const std::string& selector,
+        const std::string& from,
+        const std::string& statements = nullptr,
+        const std::vector<std::pair<const char*, int>>& ints = {},
+        const std::vector<std::pair<const char*, double>>& doubles = {},
+        const std::vector<std::pair<const char*, std::string>>& strings = {}) {
         int retCode;
         sqlite3_stmt* stmt = nullptr;
 
@@ -309,37 +313,36 @@ class DBHandler {
         return retCode;
     }
 
-	template <typename T>
-	int refSelectFromTemplate(
-	  T &ref,
-	  const bindValues &values,
-	  const std::string &selector,
-	  const std::string &from,
-	  const std::string &statements = nullptr) {
-		int retCode;
-		sqlite3_stmt* stmt = nullptr;
+    template <typename T>
+    int refSelectFromTemplate(T& ref,
+                              const bindValues& values,
+                              const std::string& selector,
+                              const std::string& from,
+                              const std::string& statements = nullptr) {
+        int retCode;
+        sqlite3_stmt* stmt = nullptr;
 
-		retCode = prepareStmtSelectFromStatements(stmt, selector, from, statements);
-		if (!retCode)
-			retCode = bindValuesToStmt(values, stmt);
-		if (!retCode)
-			retCode = sqlite3_step(stmt);
-		if (retCode == SQLITE_ROW) {
-			sqlite3_column_value(stmt, 0, ref);
-			retCode = SQLITE_OK;
-		}
-		if (stmt != nullptr)
-			retCode = sqlite3_finalize(stmt);
-		return retCode;
-	}
+        retCode = prepareStmtSelectFromStatements(stmt, selector, from, statements);
+        if (!retCode)
+            retCode = bindValuesToStmt(values, stmt);
+        if (!retCode)
+            retCode = sqlite3_step(stmt);
+        if (retCode == SQLITE_ROW) {
+            sqlite3_column_value(stmt, 0, ref);
+            retCode = SQLITE_OK;
+        }
+        if (stmt != nullptr)
+            retCode = sqlite3_finalize(stmt);
+        return retCode;
+    }
     // Because I cannot get templates to work with strings
-    void selectFrom(int &value,
-                    const std::string &selector,
-                    const std::string &from,
-                    const std::string &statements = nullptr,
-                    const std::vector<std::pair<const char *, int>> &ints = {},
-                    const std::vector<std::pair<const char *, double>> &doubles = {},
-                    const std::vector<std::pair<const char *, std::string>> &strings = {}) {
+    void selectFrom(int& value,
+                    const std::string& selector,
+                    const std::string& from,
+                    const std::string& statements = nullptr,
+                    const std::vector<std::pair<const char*, int>>& ints = {},
+                    const std::vector<std::pair<const char*, double>>& doubles = {},
+                    const std::vector<std::pair<const char*, std::string>>& strings = {}) {
         refSelectFromTemplate(value, selector, from, statements, ints, doubles, strings);
     }
     void selectFrom(double& value,
@@ -404,9 +407,10 @@ class DBHandler {
                                                         bool rowHeader = false);
 
     // Generic string utility functions
-    std::string prependString(const std::string &string, const char *const prefix);
-    std::vector<std::string> prependStrings(const std::vector<std::string> &strings, const char *const prefix);
-	std::string joinStrings(const std::vector<std::string> &elements, const char *const glue);
-	std::vector<std::string> splitStrings(const std::string &string, const char glue);
-	int indexOfStringInStrings(std::vector<std::string> haystack, std::string needle);
+    std::string prependString(const std::string& string, const char* const prefix);
+    std::vector<std::string> prependStrings(const std::vector<std::string>& strings,
+                                            const char* const prefix);
+    std::string joinStrings(const std::vector<std::string>& elements, const char* const glue);
+    std::vector<std::string> splitStrings(const std::string& string, const char glue);
+    int indexOfStringInStrings(std::vector<std::string> haystack, std::string needle);
 };
