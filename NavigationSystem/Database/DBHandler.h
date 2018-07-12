@@ -408,5 +408,5 @@ class DBHandler {
     std::vector<std::string> prependStrings(const std::vector<std::string> &strings, const char *const prefix);
 	std::string joinStrings(const std::vector<std::string> &elements, const char *const glue);
 	std::vector<std::string> splitStrings(const std::string &string, const char glue);
-	int stringsStringIndex(std::vector<std::string> haystack, std::string needle);
+	int indexOfStringInStrings(std::vector<std::string> haystack, std::string needle);
 };

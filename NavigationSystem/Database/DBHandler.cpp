@@ -546,12 +546,12 @@ bool DBHandler::getWaypointValues(int& nextId,
 				bindParam(stmt, ":id", nextWayPointId);
 				retCode = sqlite3_step(stmt);
 				if (retCode == SQLITE_ROW) {
-					sqlite3_column_value(stmt, stringsStringIndex(columns, "longitude"), nextLongitude);
-					sqlite3_column_value(stmt, stringsStringIndex(columns, "latitude"), nextLatitude);
-					sqlite3_column_value(stmt, stringsStringIndex(columns, "declination"), nextDeclination);
-					sqlite3_column_value(stmt, stringsStringIndex(columns, "radius"), nextRadius);
-					sqlite3_column_value(stmt, stringsStringIndex(columns, "stay_time"), nextStayTime);
-					sqlite3_column_value(stmt, stringsStringIndex(columns, "is_checkpoint"), isCheckpoint);
+					sqlite3_column_value(stmt, indexOfStringInStrings(columns, "longitude"), nextLongitude);
+					sqlite3_column_value(stmt, indexOfStringInStrings(columns, "latitude"), nextLatitude);
+					sqlite3_column_value(stmt, indexOfStringInStrings(columns, "declination"), nextDeclination);
+					sqlite3_column_value(stmt, indexOfStringInStrings(columns, "radius"), nextRadius);
+					sqlite3_column_value(stmt, indexOfStringInStrings(columns, "stay_time"), nextStayTime);
+					sqlite3_column_value(stmt, indexOfStringInStrings(columns, "is_checkpoint"), isCheckpoint);
 					// selectFromId(nextLongitude, "longitude", "current_Mission", nextWayPointId);
 
 					selectFrom(prevWayPointId, "MAX(id)", "current_Mission", "WHERE id < :id", {{":id",nextWayPointId}});
@@ -560,12 +560,12 @@ bool DBHandler::getWaypointValues(int& nextId,
 						bindParam(stmt, ":id", prevWayPointId);
 						retCode = sqlite3_step(stmt);
 						if (retCode == SQLITE_ROW) {
-							sqlite3_column_value(stmt, stringsStringIndex(columns, "longitude"), prevLongitude);
-							sqlite3_column_value(stmt, stringsStringIndex(columns, "latitude"), prevLatitude);
-							sqlite3_column_value(stmt, stringsStringIndex(columns, "declination"), prevDeclination);
-							sqlite3_column_value(stmt, stringsStringIndex(columns, "radius"), prevRadius);
-							sqlite3_column_value(stmt, stringsStringIndex(columns, "stay_time"), nextStayTime);
-							sqlite3_column_value(stmt, stringsStringIndex(columns, "is_checkpoint"), isCheckpoint);
+							sqlite3_column_value(stmt, indexOfStringInStrings(columns, "longitude"), prevLongitude);
+							sqlite3_column_value(stmt, indexOfStringInStrings(columns, "latitude"), prevLatitude);
+							sqlite3_column_value(stmt, indexOfStringInStrings(columns, "declination"), prevDeclination);
+							sqlite3_column_value(stmt, indexOfStringInStrings(columns, "radius"), prevRadius);
+							sqlite3_column_value(stmt, indexOfStringInStrings(columns, "stay_time"), nextStayTime);
+							sqlite3_column_value(stmt, indexOfStringInStrings(columns, "is_checkpoint"), isCheckpoint);
 						}
 					}
 				}
@@ -764,13 +764,14 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
     int actuatorFeedbackId;
     int compassModelId;
     int courseCalculationId;
-    int currentMissionId;
     int currentSensorsId;
     int gpsId;
     int marineSensorsId;
     int vesselStateId;
     int windStateId;
     int windsensorId;
+
+	int currentMissionId;   // this is not like the others
 
     int logNumber = 0;
     std::string tableId;
@@ -801,8 +802,8 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
     vesselStateId       = getTableId("dataLogs_vessel_state");
     windStateId         = getTableId("dataLogs_wind_state");
     windsensorId        = getTableId("dataLogs_windsensor");
-    // NOTE : Marc : To update the id of current_Mission in the DB
-    currentMissionId    = getTableId("current_Mission");
+
+    selectFrom(currentMissionId, "MIN(id)", "current_Mission", "WHERE harvested = 0");
     // clang-format on
 
     for (auto log : logs) {
@@ -1263,7 +1264,7 @@ std::vector<std::string> DBHandler::splitStrings(const std::string &string, cons
 	return std::move(result);
 }
 
-int DBHandler::stringsStringIndex(std::vector<std::string> haystack, std::string needle) {
+int DBHandler::indexOfStringInStrings(std::vector<std::string> haystack, std::string needle) {
 	int i = 0;
 	for (auto string : haystack) {
 		if (string == needle) {
