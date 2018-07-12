@@ -18,6 +18,7 @@
 
 #if LOCAL_NAVIGATION_MODULE == 1
   #include "../Navigation/LocalNavigationModule/LocalNavigationModule.h"
+  #include "../Navigation/LocalNavigationModule/Voters/CourseVoter.h"
   #include "../Navigation/LocalNavigationModule/Voters/WaypointVoter.h"
   #include "../Navigation/LocalNavigationModule/Voters/WindVoter.h"
   #include "../Navigation/LocalNavigationModule/Voters/ChannelVoter.h"
@@ -74,7 +75,7 @@ void initialiseNode(Node& node, const char* nodeName, NodeImportance importance)
 		if(importance == NodeImportance::CRITICAL)
 		{
 			Logger::error("Critical node failed to initialise, shutting down");
-			Logger::shutdown();
+			//Logger::shutdown();
 			exit(1);
 		}
 	}
@@ -111,22 +112,16 @@ int main(int argc, char *argv[])
 	DBHandler dbHandler(db_path);
 	MessageBus messageBus;
 
-	// Initialise logger
-	if (Logger::init())
-	{
-		Logger::info("Built on %s at %s", __DATE__, __TIME__);
-    	Logger::info("ASPire");
-	  	#if LOCAL_NAVIGATION_MODULE == 1
-			Logger::info( "Using Local Navigation Module" );
-	  	#else
-			Logger::info( "Using Line-follow" );
-	  	#endif
-		Logger::info("Logger init\t\t[OK]");
-	}
-	else
-	{
-		Logger::error("Logger init\t\t[FAILED]");
-	}
+	// Logger start
+	Logger::info("Built on %s at %s", __DATE__, __TIME__);
+	Logger::info("ASPire");
+  	#if LOCAL_NAVIGATION_MODULE == 1
+		Logger::info( "Using Local Navigation Module" );
+  	#else
+		Logger::info( "Using Line-follow" );
+  	#endif
+	Logger::info("Logger init\t\t[OK]");
+
 
 	// Initialise DBHandler
 	if(dbHandler.initialise())
@@ -136,7 +131,7 @@ int main(int argc, char *argv[])
 	else
 	{
 		Logger::error("Database Handler init\t\t[FAILED]");
-		Logger::shutdown();
+		//Logger::shutdown();
 		exit(1);
 	}
 
@@ -163,12 +158,14 @@ int main(int argc, char *argv[])
 		LocalNavigationModule lnm	( messageBus, dbHandler );
 
 		const int16_t MAX_VOTES = dbHandler.retrieveCellAsInt("config_voter_system","1","max_vote");
+		CourseVoter courseVoter( MAX_VOTES, dbHandler.retrieveCellAsDouble("config_voter_system","1","course_voter_weight"));
 		WaypointVoter waypointVoter( MAX_VOTES, dbHandler.retrieveCellAsDouble("config_voter_system","1","waypoint_voter_weight")); // weight = 1
 		WindVoter windVoter( MAX_VOTES, dbHandler.retrieveCellAsDouble("config_voter_system","1","wind_voter_weight")); // weight = 1
 		ChannelVoter channelVoter( MAX_VOTES, dbHandler.retrieveCellAsDouble("config_voter_system","1","channel_voter_weight")); // weight = 1
 		MidRangeVoter midRangeVoter( MAX_VOTES, dbHandler.retrieveCellAsDouble("config_voter_system","1","midrange_voter_weight"), collidableMgr );
 		ProximityVoter proximityVoter( MAX_VOTES, dbHandler.retrieveCellAsDouble("config_voter_system","1","proximity_voter_weight"), collidableMgr);
 
+		lnm.registerVoter( &courseVoter );
 		lnm.registerVoter( &waypointVoter );
 		lnm.registerVoter( &windVoter );
 		lnm.registerVoter( &channelVoter );
@@ -223,10 +220,10 @@ int main(int argc, char *argv[])
 	#if SIMULATION == 1
 		initialiseNode(simulation,"Simulation",NodeImportance::CRITICAL);
 	#else
-//		initialiseNode(compass, "Compass", NodeImportance::CRITICAL);
+		initialiseNode(compass, "Compass", NodeImportance::CRITICAL);
 		initialiseNode(gpsd, "GPSD", NodeImportance::CRITICAL);
-//		initialiseNode(windSensor, "Wind Sensor", NodeImportance::CRITICAL);
-//		initialiseNode(actuators, "Actuators", NodeImportance::CRITICAL);
+		initialiseNode(windSensor, "Wind Sensor", NodeImportance::CRITICAL);
+		initialiseNode(actuators, "Actuators", NodeImportance::CRITICAL);
 		initialiseNode(actuatorFeedback, "Actuator Feedback", NodeImportance::NOT_CRITICAL);
 		initialiseNode(canMarineSensorTransmissionNode, "Marine Sensors", NodeImportance::NOT_CRITICAL);
 		initialiseNode(canCurrentSensorNode, "Current Sensors", NodeImportance::NOT_CRITICAL);
@@ -252,9 +249,9 @@ int main(int argc, char *argv[])
 		simulation.start();
 	#else
 	  	auto future = canService.start();
-//		compass.start();
+		compass.start();
 		gpsd.start();
-//		windSensor.start();
+		windSensor.start();
 		actuatorFeedback.start();
 		canCurrentSensorNode.start();
 	#endif
@@ -271,6 +268,8 @@ int main(int argc, char *argv[])
 	messageBus.run();
 
 
-//	Logger::shutdown();
+
+	//Logger::shutdown();
+
 	exit(0);
 }

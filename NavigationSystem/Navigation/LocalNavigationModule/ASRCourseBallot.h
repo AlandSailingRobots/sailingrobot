@@ -35,6 +35,12 @@ class ASRCourseBallot {
     void set(uint16_t course, int16_t value);
 
     ///----------------------------------------------------------------------------------
+    /// Assigns a veto to a particular heading.
+    /// NOTE: Can only set a veto, no possibilities to unset one.
+    ///----------------------------------------------------------------------------------
+    void setVeto(uint16_t course);
+
+    ///----------------------------------------------------------------------------------
     /// Adds a vote to a particular heading.
     ///----------------------------------------------------------------------------------
     void add(uint16_t course, int16_t value);
@@ -49,6 +55,11 @@ class ASRCourseBallot {
     /// valid heading;
     ///----------------------------------------------------------------------------------
     int16_t get(uint16_t heading) const;
+
+    ///----------------------------------------------------------------------------------
+    /// Check if a veto is placed on a heading;
+    ///----------------------------------------------------------------------------------
+    bool getVeto(uint16_t heading) const;
 
     ///----------------------------------------------------------------------------------
     /// Returns a pointer to the underlying course data, this is an array that has
@@ -73,4 +84,5 @@ class ASRCourseBallot {
    private:
     const int16_t MAX_VOTES;
     int16_t courses[ELEMENT_COUNT];
+    bool veto[ELEMENT_COUNT];
 };

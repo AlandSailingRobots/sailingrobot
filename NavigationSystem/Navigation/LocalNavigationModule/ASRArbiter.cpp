@@ -30,6 +30,21 @@ void ASRArbiter::castVote( const int16_t weight, const ASRCourseBallot& ballot )
     for( uint16_t i = 0; i < 360; i+= ASRCourseBallot::COURSE_RESOLUTION )
     {
         courseBallot.add( i, ballot.get(i) * weight );
+
+        if(ballot.getVeto(i)){ 
+            courseBallot.setVeto(i);
+        }
+    }
+}
+
+///----------------------------------------------------------------------------------
+void ASRArbiter::castVeto( const ASRCourseBallot& ballot )
+{
+    for( uint16_t i = 0; i < 360; i+= ASRCourseBallot::COURSE_RESOLUTION )
+    {
+        if(ballot.getVeto(i)){ 
+            courseBallot.setVeto(i);
+        }
     }
 }
 
@@ -41,7 +56,7 @@ const uint16_t ASRArbiter::getWinner() const
 
     for( uint16_t i = 0; i < 360; i+= ASRCourseBallot::COURSE_RESOLUTION )
     {
-        if( courseBallot.get(i) > highestValue )
+        if( courseBallot.get(i) > highestValue && !courseBallot.getVeto(i) )
         {
             highestIndex = i;
             highestValue = courseBallot.get(i);

@@ -53,7 +53,8 @@
 
 "config_voter_system": {
   "loop_time": 0.5,
-  "max_vote": 25,
+  "max_vote": 100,
+  "course_voter_weight": 1,
   "waypoint_voter_weight": 1,
   "wind_voter_weight": 1,
   "channel_voter_weight": 1,
