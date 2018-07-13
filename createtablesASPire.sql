@@ -3,7 +3,7 @@ BEGIN TRANSACTION;
 
 DROP TABLE IF EXISTS "current_Mission";
 CREATE TABLE current_Mission (id INTEGER PRIMARY KEY AUTOINCREMENT, -- no autoincrement to ensure a correct order
-	is_checkpoint BOOLEAN,
+	isCheckpoint  BOOLEAN,
 	latitude      DOUBLE,
 	longitude     DOUBLE,
 	declination   INTEGER,

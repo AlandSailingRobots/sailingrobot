@@ -529,7 +529,7 @@ bool DBHandler::getWaypointValues(int& nextId,
             sqlite3_finalize(stmt);
 
             std::vector<std::string> columns = {"longitude", "latitude",  "declination",
-                                                "radius",    "stay_time", "is_checkpoint"};
+                                                "radius",    "stay_time", "isCheckpoint"};
             retCode = prepareStmtSelectFromStatements(stmt, joinStrings(columns, ","),
                                                       "current_Mission", "WHERE id = :id");
             if (retCode == SQLITE_OK) {
@@ -546,7 +546,7 @@ bool DBHandler::getWaypointValues(int& nextId,
                                          nextRadius);
                     sqlite3_column_value(stmt, indexOfStringInStrings(columns, "stay_time"),
                                          nextStayTime);
-                    sqlite3_column_value(stmt, indexOfStringInStrings(columns, "is_checkpoint"),
+                    sqlite3_column_value(stmt, indexOfStringInStrings(columns, "isCheckpoint"),
                                          isCheckpoint);
                     // selectFromId(nextLongitude, "longitude", "current_Mission", nextWayPointId);
 
@@ -570,7 +570,7 @@ bool DBHandler::getWaypointValues(int& nextId,
                             sqlite3_column_value(stmt, indexOfStringInStrings(columns, "stay_time"),
                                                  nextStayTime);
                             sqlite3_column_value(stmt,
-                                                 indexOfStringInStrings(columns, "is_checkpoint"),
+                                                 indexOfStringInStrings(columns, "isCheckpoint"),
                                                  isCheckpoint);
                         }
                     }
@@ -1060,44 +1060,84 @@ bool DBHandler::insertTableRow(const char *tableName, typedValuePairs &values) {
 	// INSERT
 }
 
-bool DBHandler::insertTableRows(const char *tableName, std::vector<typedValuePairs> &values) {
-	// TODO: flag for keeping this as a transaction? Like with waypoints, they should be all or nothing
+int DBHandler::insertTableRowsErrors(const char *tableName, tableRows &rows) {
 	sqlite3_stmt *stmt = nullptr;
+	int retCode;
 	int errors = 0;
-	if (!values.empty()) {
-		if (prepareStmtInsertError(stmt, tableName, values[0]) == SQLITE_OK) {
-			for (auto row : values) {
-				if (bindValuesToStmt(row, stmt) == SQLITE_OK) {
-					if (checkRetCode(stepAndFinalizeStmt(stmt)) == SQLITE_OK) {
-						return true;
-					}
-				} else {
+	if (!rows.empty()) {
+		if (prepareStmtInsertError(stmt, tableName, rows[0]) == SQLITE_OK) {
+			for (auto row : rows) {
+				retCode = bindValuesToStmt(row, stmt);
+				if (retCode == SQLITE_OK) {
+					retCode = checkRetCode(stepAndFinalizeStmt(stmt));
+				}
+				if (retCode != SQLITE_OK) {
 					errors++;
 				}
 			}
 		} else {
 			errors++;
 		}
-
-		// TODO TRANSACTION ROLLBACK
-		if (errors) {
-			Logger::error("%s %d error updating %s", __PRETTY_FUNCTION__, errors, tableName);
-			return false;
+		if (errors == 0) {
+			return true;
 		}
+	}
+	Logger::error("%s %d error updating %s", __PRETTY_FUNCTION__, errors, tableName);
+	return false;
+}
+
+bool DBHandler::transactionalReplaceTable(const char *tableName, tableRows &rows) {
+	sqlite3* db = DBConnect();
+	int retCode;
+	std::string sql = "BEGIN TRANSACTION";
+	retCode = sqlite3_exec(db, sql.c_str(), nullptr, nullptr, &m_error);
+	if (retCode == SQLITE_OK) {
+		sql = "DELETE FROM " + std::string(tableName);
+		retCode = sqlite3_exec(db, sql.c_str(), nullptr, nullptr, &m_error);
+	}
+	if (!insertTableRowsErrors(tableName, rows)) {
+		sql = "END TRANSACTION";
+		retCode = sqlite3_exec(db, sql.c_str(), nullptr, nullptr, &m_error);
+	}
+	if (checkRetCode(retCode) == SQLITE_OK) {
+		return true;
+	}
+	Logger::error("%s %s (%d) when replacing data in table %s", __PRETTY_FUNCTION__, sqlite3_errstr(retCode), retCode, tableName);
+	retCode = sqlite3_exec(db, "ROLLBACK TRANSACTION;", nullptr, nullptr, &m_error);
+	if (retCode != SQLITE_OK) {
+		Logger::info("%s SQLite ROLLBACK returned %s (%d)", __PRETTY_FUNCTION__, sqlite3_errstr(retCode), retCode);
 	}
 	return false;
 }
 
-void DBHandler::valuesFromTextTable(std::vector<typedValuePairs> &values, textTable &table) {
-	std::string tableName = table.first;
+bool DBHandler::transactionalReplaceTable(const char *tableName, textTableRows &rows) {
+	tableRows values;
+	valuesFromTextRows(values, rows);
+	return transactionalReplaceTable(tableName, values);
+}
 
-	textTableRow columnNames = table.second[0]; // First row is column names
-	textTableRows rows = table.second;
-	textTableRows::iterator row = rows.begin();
+bool DBHandler::transactionalReplaceTable(textTable &table) {
+	return transactionalReplaceTable(table.first.c_str(), table.second);
+}
+
+bool DBHandler::replaceTables(textTables &tables) {
+	int errors = 0;
+	for (auto table : tables) {
+		if (!transactionalReplaceTable(table)) {
+			errors++;
+		}
+	}
+	// TODO: Log errors
+	return (errors > 0);
+}
+
+void DBHandler::valuesFromTextRows(tableRows &values, textTableRows &textRows) {
+	textTableRow columnNames = textRows[0]; // First row is column names
+	textTableRows::iterator row = textRows.begin();
 	row++;
 
 	// detect types here, look at column info? For now we cheat and treat it as text
-	while (row != rows.end()) {
+	while (row != textRows.end()) {
 		textTableRow::iterator name = columnNames.begin();
 		textTableRow::iterator value = (*row).begin();
 		typedValuePairs rowValues;
@@ -1110,13 +1150,6 @@ void DBHandler::valuesFromTextTable(std::vector<typedValuePairs> &values, textTa
 		row++;
 	}
 }
-
-void DBHandler::valuesFromTextTables(std::vector<typedValuePairs> &values, textTables &tables) {
-	for (auto table : tables) {
-		valuesFromTextTable(values, table);
-	}
-}
-
 
 
 /******************************************************************************
@@ -1241,33 +1274,44 @@ void DBHandler::updateConfigs(std::string configs) {
     }
 }
 
+bool DBHandler::JSONAsTables(std::string &string, textTables& tables) {
+	JSON js = JSON::parse(string);
+	for (const auto& jstable : js.items()) {
+		std::string tableName = jstable.key();
+		textTableRows table;
+		for (const auto& jsrow : jstable.value().items()) {
+			textTableRow row;
+			for (const auto& jscolumn : jsrow.value().items()) {
+				if (jscolumn.value().is_string()) {
+					std::string content = jscolumn.value().dump();
+					content.erase(remove(content.begin(),content.end(), '\"' ),content.end()); // Remove all double-quote characters
+
+					row.emplace_back(content);
+				} else {
+					Logger::warning("%s Problems parsing contents of \"%s\"", __PRETTY_FUNCTION__, tableName.c_str());
+					return false;
+				}
+			}
+			table.emplace_back(row);
+		}
+		tables.emplace_back(std::make_pair(tableName, table));
+	}
+	return true;
+}
+
 // TODO: Rewrite old
-bool DBHandler::updateWaypoints(std::string waypoints) {
-    JSON js = JSON::parse(waypoints);
+bool DBHandler::receiveWayPoints(std::string wayPoints) {
+	textTables tables;
+	if (!JSONAsTables(wayPoints, tables)) {
+		Logger::error("%s Unable to parse waypoint JSON \"%s\"", __PRETTY_FUNCTION__, wayPoints.c_str());
+		return false;
+	}
+	return replaceTables(tables);
+
+/*    JSON js = JSON::parse(wayPoints);
     if (js.empty()) {
-        Logger::error("%s No JSON in \"%s\"", __PRETTY_FUNCTION__, waypoints);
+        Logger::error("%s No JSON in \"%s\"", __PRETTY_FUNCTION__, wayPoints.c_str());
         return false;
-    }
-
-    textTables tables;
-    for (const auto& jstable : js.items()) {
-    	std::string tableName = jstable.key();
-    	textTableRows table;
-    	for (const auto& jsrow : jstable.value().items()) {
-		    textTableRow row;
-		     for (const auto& jscolumn : jsrow.value().items()) {
-		     	if (jscolumn.value().is_string()) {
-		     		std::string content = jscolumn.value().dump();
-		     		content.erase(remove(content.begin(),content.end(), '\"' ),content.end()); // Remove all double-quote characters
-
-			        row.emplace_back(content);
-		        } else {
-		     		Logger::warning("%s Problems parsing contents of \"%s\"", __PRETTY_FUNCTION__, tableName.c_str());
-		     	}
-		    }
-		    table.emplace_back(row);
-	    }
-	    tables.emplace_back(std::make_pair(tableName, table));
     }
 
 
@@ -1325,7 +1369,7 @@ bool DBHandler::updateWaypoints(std::string waypoints) {
             return false;
         }
     }
-    return true;
+    return true;*/
 }
 
 /*******************************************************************************

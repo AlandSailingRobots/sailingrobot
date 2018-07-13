@@ -120,13 +120,22 @@ private:
 	typedef std::vector<textTableRow> textTableRows;            // 	typedef std::vector<std::vector<std::string>>;
 	typedef std::pair<std::string, textTableRows> textTable;    // std::pair<std::string, std::vector<std::vector<std::string>>>
 	typedef std::vector<textTable> textTables;                  // std::vector<std::pair<std::string, std::vector<std::vector<std::string>>>>
+
+	// For binding parameter values
+	struct typedValuePairs {
+		std::vector<std::pair<const char*, int>> ints;
+		std::vector<std::pair<const char*, double>> doubles;
+		std::vector<std::pair<const char*, std::string>> strings;
+	};
+	typedef std::vector<typedValuePairs> tableRows;
+
 	int getRows(std::string table);
 
 	void insertDataLogs(std::vector<LogItem>& logs);
 
 	// updates table with json string (data)
 	bool updateTableJson(std::string table, std::string data);
-	bool updateTableJsonObject(std::string table, JSON data);
+	/* bool updateTableJsonObject(std::string table, JSON data); */
 
 	// updates table using values given
 	//  bool updateTableColumnIdValue(std::string table, std::string column, int id, T value);
@@ -149,8 +158,10 @@ private:
 
 	void clearTable(std::string table);
 
+	bool JSONAsTables(std::string &string, textTables& tables);
+
 	void updateConfigs(std::string configs);
-	bool updateWaypoints(std::string waypoints);
+	bool receiveWayPoints(std::string wayPoints);
 
 	DBHandler::textTables getTablesAsText(std::string like, std::string statement = "");
 	std::string getTablesAsJSON(std::string like, std::string statement = "");
@@ -200,12 +211,6 @@ private:
 	const std::string& statements = nullptr);
 	int paramNameIndex(sqlite3_stmt*& stmt, const char* name);
 
-	// For binding parameter values
-	struct typedValuePairs {
-		std::vector<std::pair<const char*, int>> ints;
-		std::vector<std::pair<const char*, double>> doubles;
-		std::vector<std::pair<const char*, std::string>> strings;
-	};
 	int bindValuesToStmt(const typedValuePairs& values, sqlite3_stmt*& stmt);
 	void addValue(typedValuePairs& values, const char* name, int value);
 	void addValue(typedValuePairs& values, const char* name, double value);
@@ -225,6 +230,13 @@ private:
 	const std::string& table,
 	std::vector<std::string>& columns);
 	int prepareStmtInsertError(sqlite3_stmt*& stmt, const std::string& table, typedValuePairs& values);
+	bool insertTableRow(const char *tableName, typedValuePairs &values);
+	int insertTableRowsErrors(const char *tableName, tableRows &rows);
+
+	bool transactionalReplaceTable(const char *tableName, tableRows &rows);
+	bool transactionalReplaceTable(const char *tableName, textTableRows &rows);
+	bool transactionalReplaceTable(textTable &table);
+	bool replaceTables(textTables &tables);
 
 	// UPDATE
 	int prepareStmtUpdateError(sqlite3_stmt*& stmt,
@@ -244,11 +256,7 @@ private:
 		return updateTableRow(table, id, values);
 	}
 
-	bool insertTableRow(const char *tableName, typedValuePairs &values);
-	bool insertTableRows(const char *tableName, std::vector<typedValuePairs> &values);
-
-	void valuesFromTextTable(std::vector<typedValuePairs> &values, textTable &table);
-	void valuesFromTextTables(std::vector<typedValuePairs> &values, textTables &tables);
+	void valuesFromTextRows(tableRows &values, textTableRows &textRows);
 
 	// TODO: A select of multiple values into typedValuePairs struct would be nice
 	// No... a row and named column name index!
