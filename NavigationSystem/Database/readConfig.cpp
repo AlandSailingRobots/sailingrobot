@@ -13,7 +13,7 @@ void readConfig::waypointsInJson(json& wp, DBHandler db) {
   wp = db.getWayPointsAsJSON();
 }
 
-bool readConfig::updateConfiguration(const std::string& file, DBHandler db) {
+/* bool readConfig::updateConfiguration(const std::string& file, DBHandler db) {
   json cfg;
   readFromJsonFile(file, cfg);
   json idconst = {{"id", "1"}};
@@ -24,7 +24,7 @@ bool readConfig::updateConfiguration(const std::string& file, DBHandler db) {
   }
   db.updateConfigs(cfg.dump());
   return true;
-}
+} */
 
 json readConfig::merge(const json &a, const json &b) {
     json result = a.flatten();

@@ -585,47 +585,54 @@ bool DBHandler::getWaypointValues(int& nextId,
     return false;
 }
 
+
+// std::vector<std::pair<std::string, std::vector<std::vector<std::string>>>>
+DBHandler::textTables DBHandler::getTablesAsText(std::string like, std::string statement) {
+	sqlite3_stmt* stmt = nullptr;
+
+	textTableRow tableNames = getTableNames(like);
+	textTables tables;
+
+	try {
+		// insert all data in these tables as json array
+		for (const auto& table : tableNames) {
+			prepareStmtSelectFromStatements(stmt, "*", table, statement);
+			std::vector<std::vector<std::string>> rows = getRowsAsText(stmt, true);
+
+			if (rows.size() > 1) {  // we want actual data, not only the headers
+				// "dataLogs_" is 9 chars, next is at index 9 (starting from 0). config_% Like minus
+				// one will work check of like is a single or has % in it?
+				int wildcards = 0;
+				for (auto c : like) {
+					if (c == '%')
+						wildcards++;
+				}
+				std::string tableTitle =
+				  (wildcards ? table.substr(like.length() - wildcards, std::string::npos)
+				             : table);
+				tables.emplace_back(tableTitle, rows);
+			} else {
+				Logger::warning("%s, Table %s empty", __PRETTY_FUNCTION__, table.c_str());
+			}
+		}
+	} catch (const char* error) {
+		Logger::error("%s, Error gathering data from %s: %s", __PRETTY_FUNCTION__, like, error);
+	}
+	return tables;
+}
+
+
 /**
- * Retreives a table as a vector of tuples tablename - vector of rows (with 0 being a header)
+ * Retreives a table as a vector of pairs tablename - vector of rows (with 0 being a header)
  * converted to JSON
  * @param like
  * @param statement
  * @return
  */
 std::string DBHandler::getTablesAsJSON(std::string like, std::string statement) {
-    sqlite3_stmt* stmt = nullptr;
     std::string result;
     JSON js;
-
-    textTableRow tableNames = getTableNames(like);
-    textTables tables;
-
-    try {
-        // insert all data in these tables as json array
-        for (const auto& table : tableNames) {
-            prepareStmtSelectFromStatements(stmt, "*", table, statement);
-            std::vector<std::vector<std::string>> rows = getRowsAsText(stmt, true);
-
-            if (rows.size() > 1) {  // we want actual data, not only the headers
-                // "dataLogs_" is 9 chars, next is at index 9 (starting from 0). config_% Like minus
-                // one will work check of like is a single or has % in it?
-                int wildcards = 0;
-                for (auto c : like) {
-                    if (c == '%')
-                        wildcards++;
-                }
-                std::string tableTitle =
-                    (wildcards ? table.substr(like.length() - wildcards, std::string::npos)
-                               : table);
-                tables.emplace_back(tableTitle, rows);
-            } else {
-                Logger::warning("%s, Table %s empty", __PRETTY_FUNCTION__, table.c_str());
-            }
-        }
-
-    } catch (const char* error) {
-        Logger::error("%s, Error gathering data from %s: %s", __PRETTY_FUNCTION__, like, error);
-    }
+	auto tables = getTablesAsText(like, statement);
 
     try {
         int rowCnt = 0;
@@ -1078,18 +1085,33 @@ bool DBHandler::insertTableRows(const char *tableName, std::vector<typedValuePai
 			return false;
 		}
 	}
+	return false;
 }
 
-void DBHandler::valuesFromTextTable(typedValuePairs &values, textTable &table) {
+void DBHandler::valuesFromTextTable(std::vector<typedValuePairs> &values, textTable &table) {
 	std::string tableName = table.first;
+
+	textTableRow columnNames = table.second[0]; // First row is column names
 	textTableRows rows = table.second;
-	std::vector<std::string> columnNames = rows[0]; // First row is column names
-	rows.erase(rows.begin());
+	textTableRows::iterator row = rows.begin();
+	row++;
 
-
+	// detect types here, look at column info? For now we cheat and treat it as text
+	while (row != rows.end()) {
+		textTableRow::iterator name = columnNames.begin();
+		textTableRow::iterator value = (*row).begin();
+		typedValuePairs rowValues;
+		while ((name != columnNames.end()) && (value != (*row).end())) {
+			rowValues.strings.emplace_back(std::make_pair((*name).c_str(), *value));
+			name++;
+			value++;
+		}
+		values.emplace_back(rowValues);
+		row++;
+	}
 }
 
-void DBHandler::valuesFromTextTables(typedValuePairs &values, textTables &tables) {
+void DBHandler::valuesFromTextTables(std::vector<typedValuePairs> &values, textTables &tables) {
 	for (auto table : tables) {
 		valuesFromTextTable(values, table);
 	}
@@ -1160,7 +1182,7 @@ void DBHandler::clearLogs() {
 	}
 }*/
 
-/*// TODO: Rewrite old
+// TODO: Rewrite old
 bool DBHandler::updateTableJson(std::string table, std::string data) {
     std::vector<std::string> columns = getColumnInfo("name", table);
 
@@ -1195,7 +1217,7 @@ bool DBHandler::updateTableJson(std::string table, std::string data) {
         return false;
     }
     return true;
-}*/
+}
 
 // TODO: Rewrite old
 void DBHandler::updateConfigs(std::string configs) {
@@ -1224,7 +1246,31 @@ bool DBHandler::updateWaypoints(std::string waypoints) {
     JSON js = JSON::parse(waypoints);
     if (js.empty()) {
         Logger::error("%s No JSON in \"%s\"", __PRETTY_FUNCTION__, waypoints);
+        return false;
     }
+
+    textTables tables;
+    for (const auto& jstable : js.items()) {
+    	std::string tableName = jstable.key();
+    	textTableRows table;
+    	for (const auto& jsrow : jstable.value().items()) {
+		    textTableRow row;
+		     for (const auto& jscolumn : jsrow.value().items()) {
+		     	if (jscolumn.value().is_string()) {
+		     		std::string content = jscolumn.value().dump();
+		     		content.erase(remove(content.begin(),content.end(), '\"' ),content.end()); // Remove all double-quote characters
+
+			        row.emplace_back(content);
+		        } else {
+		     		Logger::warning("%s Problems parsing contents of \"%s\"", __PRETTY_FUNCTION__, tableName.c_str());
+		     	}
+		    }
+		    table.emplace_back(row);
+	    }
+	    tables.emplace_back(std::make_pair(tableName, table));
+    }
+
+
     std::string DBPrinter;
     std::string tempValue;
     int valuesLimit = 11;  //"Dirty" fix for limiting the amount of values requested from server
