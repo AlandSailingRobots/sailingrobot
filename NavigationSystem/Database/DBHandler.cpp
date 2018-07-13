@@ -182,7 +182,7 @@ int DBHandler::prepareStmtInsertError(sqlite3_stmt*& stmt,
 
 int DBHandler::prepareStmtInsertError(sqlite3_stmt*& stmt,
                                       const std::string& table,
-                                      bindValues& values) {
+                                      typedValuePairs& values) {
     std::vector<std::string> names = valueNames(values);
     return prepareStmtInsertError(stmt, table, names);
 }
@@ -210,7 +210,7 @@ int DBHandler::prepareStmtUpdateError(sqlite3_stmt*& stmt,
 int DBHandler::prepareStmtUpdateError(sqlite3_stmt*& stmt,
                                       const std::string& table,
                                       int id,
-                                      bindValues& values) {
+                                      typedValuePairs& values) {
     std::vector<std::string> names = valueNames(values);
     return prepareStmtUpdateError(stmt, table, id, names);
 }
@@ -318,7 +318,7 @@ int DBHandler::bindStmtIntsDoublesStrings(
     return firstErrorCode;
 }
 
-int DBHandler::bindValuesToStmt(const bindValues& values, sqlite3_stmt*& stmt) {
+int DBHandler::bindValuesToStmt(const typedValuePairs& values, sqlite3_stmt*& stmt) {
     int firstErrorCode = SQLITE_OK;
     int retCode;  // Uggly but works
 
@@ -344,20 +344,20 @@ int DBHandler::bindValuesToStmt(const bindValues& values, sqlite3_stmt*& stmt) {
     return firstErrorCode;
 }
 
-void DBHandler::addValue(bindValues& values, const char* name, int value) {
+void DBHandler::addValue(typedValuePairs& values, const char* name, int value) {
     std::pair<const char*, int> pair = std::make_pair(name, value);
     values.ints.emplace_back(pair);
 }
-void DBHandler::addValue(bindValues& values, const char* name, double value) {
+void DBHandler::addValue(typedValuePairs& values, const char* name, double value) {
     std::pair<const char*, double> pair = std::make_pair(name, value);
     values.doubles.emplace_back(pair);
 }
-void DBHandler::addValue(bindValues& values, const char* name, std::string& string) {
+void DBHandler::addValue(typedValuePairs& values, const char* name, std::string& string) {
     std::pair<const char*, std::string> pair = std::make_pair(name, string);
     values.strings.emplace_back(pair);
 }
 
-std::vector<std::string> DBHandler::valueNames(const bindValues& values) {
+std::vector<std::string> DBHandler::valueNames(const typedValuePairs& values) {
     std::vector<std::string> names;
 
     // This could probably be optimized
@@ -597,8 +597,8 @@ std::string DBHandler::getTablesAsJSON(std::string like, std::string statement) 
     std::string result;
     JSON js;
 
-    std::vector<std::string> tableNames = getTableNames(like);
-    std::vector<std::tuple<std::string, std::vector<std::vector<std::string>>>> tableContents;
+    textTableRow tableNames = getTableNames(like);
+    textTables tables;
 
     try {
         // insert all data in these tables as json array
@@ -617,7 +617,7 @@ std::string DBHandler::getTablesAsJSON(std::string like, std::string statement) 
                 std::string tableTitle =
                     (wildcards ? table.substr(like.length() - wildcards, std::string::npos)
                                : table);
-                tableContents.emplace_back(tableTitle, rows);
+                tables.emplace_back(tableTitle, rows);
             } else {
                 Logger::warning("%s, Table %s empty", __PRETTY_FUNCTION__, table.c_str());
             }
@@ -629,9 +629,9 @@ std::string DBHandler::getTablesAsJSON(std::string like, std::string statement) 
 
     try {
         int rowCnt = 0;
-        for (auto tup : tableContents) {
-            std::string table = std::get<0>(tup);
-            std::vector<std::vector<std::string>> rows = std::get<1>(tup);
+        for (auto pair : tables) {
+            std::string table = pair.first;
+            std::vector<std::vector<std::string>> rows = pair.second;
 
             for (auto row : rows) {
                 js[table.c_str()].push_back(row);
@@ -645,8 +645,8 @@ std::string DBHandler::getTablesAsJSON(std::string like, std::string statement) 
     } catch (const char* error) {
         Logger::error("%s, Error JSON-encoding data from %s: %s", __PRETTY_FUNCTION__, like, error);
     }
-    tableNames.clear();
-    tableContents.clear();
+    // tableNames.clear();
+    // tables.clear();
     return result;
 }
 
@@ -825,7 +825,7 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
 
         int _actuatorFeedbackId = 0;
         if (actuatorFeedbackId) {
-            bindValues values;
+            typedValuePairs values;
             addValue(values, "rudder_position", log.m_rudderPosition);
             addValue(values, "wingsail_position", log.m_wingsailPosition);
             addValue(values, "rc_on", log.m_radioControllerOn);
@@ -841,7 +841,7 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
 
         int _compassModelId = 0;
         if (compassModelId) {
-            bindValues values;
+            typedValuePairs values;
             addValue(values, "heading", log.m_compassHeading);
             addValue(values, "pitch", log.m_compassPitch);
             addValue(values, "roll", log.m_compassRoll);
@@ -856,7 +856,7 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
 
         int _courseCalculationId = 0;
         if (courseCalculationId) {
-            bindValues values;
+            typedValuePairs values;
             addValue(values, "distance_to_waypoint", log.m_distanceToWaypoint);
             addValue(values, "bearing_to_waypoint", log.m_bearingToWaypoint);
             addValue(values, "course_to_steer", log.m_courseToSteer);
@@ -873,7 +873,7 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
 
         int _marineSensorsId = 0;
         if (marineSensorsId) {
-            bindValues values;
+            typedValuePairs values;
             addValue(values, "temperature", log.m_temperature);
             addValue(values, "conductivity", log.m_conductivity);
             addValue(values, "ph", log.m_ph);
@@ -889,7 +889,7 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
 
         int _vesselStateId = 0;
         if (vesselStateId) {
-            bindValues values;
+            typedValuePairs values;
             addValue(values, "heading", log.m_vesselHeading);
             addValue(values, "latitude", log.m_vesselLat);
             addValue(values, "longitude", log.m_vesselLon);
@@ -906,7 +906,7 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
 
         int _windStateId = 0;
         if (windStateId) {
-            bindValues values;
+            typedValuePairs values;
             addValue(values, "true_wind_speed", log.m_trueWindSpeed);
             addValue(values, "true_wind_direction", log.m_trueWindDir);
             addValue(values, "apparent_wind_speed", log.m_apparentWindSpeed);
@@ -922,7 +922,7 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
 
         int _windsensorId = 0;
         if (windsensorId) {
-            bindValues values;
+            typedValuePairs values;
             addValue(values, "direction", log.m_windDir);
             addValue(values, "speed", log.m_windSpeed);
             addValue(values, "temperature", log.m_windTemp);
@@ -937,7 +937,7 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
 
         int _gpsId = 0;
         if (gpsId) {
-            bindValues values;
+            typedValuePairs values;
             addValue(values, "has_fix", log.m_gpsHasFix);
             addValue(values, "online", log.m_gpsOnline);
             addValue(values, "time", log.m_gpsUnixTime);
@@ -958,7 +958,7 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
 
         int _currentSensorsId = 0;
         if (currentSensorsId) {
-            bindValues values;
+            typedValuePairs values;
             addValue(values, "current", log.m_current);
             addValue(values, "voltage", log.m_voltage);
             addValue(values, "element", log.m_element);
@@ -972,7 +972,7 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
             }
         }
 
-        bindValues values;
+        typedValuePairs values;
         addValue(values, "actuator_feedback_id", _actuatorFeedbackId);
         addValue(values, "compass_id", _compassModelId);
         addValue(values, "course_calculation_id", _courseCalculationId);
@@ -1022,18 +1022,80 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
  * @param newValue
  * @return
  */
-bool DBHandler::updateTableIdColumnValues(const char* table, int id, bindValues& values) {
+bool DBHandler::updateTableRow(const char *table, int id, typedValuePairs &values) {
     sqlite3_stmt* stmt = nullptr;
-    // std::string sql = "UPDATE " + table + " SET " + colName + " = :value";
-    if (!prepareStmtUpdateError(stmt, table, id, values)) {
-        bindValuesToStmt(values, stmt);
-        if (stepAndFinalizeStmt(stmt)) {
-            return true;
+    if (prepareStmtUpdateError(stmt, table, id, values) == SQLITE_OK) {
+        if (bindValuesToStmt(values, stmt)  == SQLITE_OK) {
+	        if (checkRetCode(stepAndFinalizeStmt(stmt)) == SQLITE_OK) {
+		        return true;
+	        }
         }
     }
     Logger::error("%s Error updating %s", __PRETTY_FUNCTION__, table);
     return false;
 }
+
+bool DBHandler::insertTableRow(const char *tableName, typedValuePairs &values) {
+	sqlite3_stmt* stmt = nullptr;
+	if (prepareStmtInsertError(stmt, tableName, values) == SQLITE_OK) {
+		if (bindValuesToStmt(values, stmt)  == SQLITE_OK) {
+			if (checkRetCode(stepAndFinalizeStmt(stmt)) == SQLITE_OK) {
+				return true;
+			}
+		}
+	}
+	Logger::error("%s Error updating %s", __PRETTY_FUNCTION__, tableName);
+	return false;
+
+	// First row is column names
+	// std::vector<std::string>
+	// Then check all data types (for binding)
+	// INSERT
+}
+
+bool DBHandler::insertTableRows(const char *tableName, std::vector<typedValuePairs> &values) {
+	// TODO: flag for keeping this as a transaction? Like with waypoints, they should be all or nothing
+	sqlite3_stmt *stmt = nullptr;
+	int errors = 0;
+	if (!values.empty()) {
+		if (prepareStmtInsertError(stmt, tableName, values[0]) == SQLITE_OK) {
+			for (auto row : values) {
+				if (bindValuesToStmt(row, stmt) == SQLITE_OK) {
+					if (checkRetCode(stepAndFinalizeStmt(stmt)) == SQLITE_OK) {
+						return true;
+					}
+				} else {
+					errors++;
+				}
+			}
+		} else {
+			errors++;
+		}
+
+		// TODO TRANSACTION ROLLBACK
+		if (errors) {
+			Logger::error("%s %d error updating %s", __PRETTY_FUNCTION__, errors, tableName);
+			return false;
+		}
+	}
+}
+
+void DBHandler::valuesFromTextTable(typedValuePairs &values, textTable &table) {
+	std::string tableName = table.first;
+	textTableRows rows = table.second;
+	std::vector<std::string> columnNames = rows[0]; // First row is column names
+	rows.erase(rows.begin());
+
+
+}
+
+void DBHandler::valuesFromTextTables(typedValuePairs &values, textTables &tables) {
+	for (auto table : tables) {
+		valuesFromTextTable(values, table);
+	}
+}
+
+
 
 /******************************************************************************
  * DBTransaction() - Atomic transaction, all or nothing gets done
@@ -1089,7 +1151,16 @@ void DBHandler::clearLogs() {
     }
 }
 
-// TODO: Rewrite old
+
+
+/*<std::vector<std::pair<std::string, std::vector<std::string>>> DBHandler::JSONtoTables(std::string data) {
+	JSON js = JSON::parse(data);
+	for (auto element : js) {
+		std::string name = element
+	}
+}*/
+
+/*// TODO: Rewrite old
 bool DBHandler::updateTableJson(std::string table, std::string data) {
     std::vector<std::string> columns = getColumnInfo("name", table);
 
@@ -1099,7 +1170,6 @@ bool DBHandler::updateTableJson(std::string table, std::string data) {
     }
 
     JSON js = JSON::parse(data);
-
     std::stringstream ss;
 
     // start at i = 1 to skip the id
@@ -1125,7 +1195,7 @@ bool DBHandler::updateTableJson(std::string table, std::string data) {
         return false;
     }
     return true;
-}
+}*/
 
 // TODO: Rewrite old
 void DBHandler::updateConfigs(std::string configs) {

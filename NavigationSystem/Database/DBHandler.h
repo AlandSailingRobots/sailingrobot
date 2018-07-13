@@ -181,6 +181,11 @@ class DBHandler {
 
     std::string getConfigs();
 
+	typedef std::vector<std::string> textTableRow;
+	typedef std::vector<textTableRow> textTableRows;
+	typedef std::pair<std::string, textTableRows> textTable;
+	typedef std::vector<textTable> textTables;
+
     // Private SQLite wrapper functions
     int checkRetCode(int retCode) const;
 
@@ -193,16 +198,16 @@ class DBHandler {
     int paramNameIndex(sqlite3_stmt*& stmt, const char* name);
 
     // For binding parameter values
-    struct bindValues {
+    struct typedValuePairs {
         std::vector<std::pair<const char*, int>> ints;
         std::vector<std::pair<const char*, double>> doubles;
         std::vector<std::pair<const char*, std::string>> strings;
     };
-    int bindValuesToStmt(const bindValues& values, sqlite3_stmt*& stmt);
-    void addValue(bindValues& values, const char* name, int value);
-    void addValue(bindValues& values, const char* name, double value);
-    void addValue(bindValues& values, const char* name, std::string& string);
-    std::vector<std::string> valueNames(const bindValues& values);
+    int bindValuesToStmt(const typedValuePairs& values, sqlite3_stmt*& stmt);
+    void addValue(typedValuePairs& values, const char* name, int value);
+    void addValue(typedValuePairs& values, const char* name, double value);
+    void addValue(typedValuePairs& values, const char* name, std::string& string);
+    std::vector<std::string> valueNames(const typedValuePairs& values);
     int bindParam(sqlite3_stmt*& stmt, const char* name, const int& value);
     int bindParam(sqlite3_stmt*& stmt, const char* name, const double& value);
     int bindParam(sqlite3_stmt*& stmt, const char* name, const std::string& text);
@@ -216,7 +221,7 @@ class DBHandler {
     int prepareStmtInsertError(sqlite3_stmt*& stmt,
                                const std::string& table,
                                std::vector<std::string>& columns);
-    int prepareStmtInsertError(sqlite3_stmt*& stmt, const std::string& table, bindValues& values);
+    int prepareStmtInsertError(sqlite3_stmt*& stmt, const std::string& table, typedValuePairs& values);
 
     // UPDATE
     int prepareStmtUpdateError(sqlite3_stmt*& stmt,
@@ -226,17 +231,23 @@ class DBHandler {
     int prepareStmtUpdateError(sqlite3_stmt*& stmt,
                                const std::string& table,
                                int id,
-                               bindValues& values);
+                               typedValuePairs& values);
 
-    bool updateTableIdColumnValues(const char* table, int id, bindValues& values);
+    bool updateTableRow(const char *table, int id, typedValuePairs &values);
     template <typename T>
     bool updateTableIdColumnValue(const char* table, int id, const char* colName, T newValue) {
-        bindValues values;
+        typedValuePairs values;
         addValue(values, colName, newValue);
-        return updateTableIdColumnValues(table, id, values);
+        return updateTableRow(table, id, values);
     }
 
-    // TODO: A select of multiple values into bindValues struct would be nice
+	bool insertTableRow(const char *tableName, typedValuePairs &values);
+	bool insertTableRows(const char *tableName, std::vector<typedValuePairs> &values);
+
+	void valuesFromTextTables(typedValuePairs &values, textTable &table);
+	void valuesFromTextTables(typedValuePairs &values, textTables &tables);
+
+    // TODO: A select of multiple values into typedValuePairs struct would be nice
     // No... a row and named column name index!
 
     /* Not in use
@@ -315,7 +326,7 @@ class DBHandler {
 
     template <typename T>
     int refSelectFromTemplate(T& ref,
-                              const bindValues& values,
+                              const typedValuePairs& values,
                               const std::string& selector,
                               const std::string& from,
                               const std::string& statements = nullptr) {
