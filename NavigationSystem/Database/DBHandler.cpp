@@ -230,7 +230,7 @@ int DBHandler::prepareStmtUpdateError(sqlite3_stmt*& stmt,
  * @param value		Value
  * @return
  */
-int DBHandler::bindParam(sqlite3_stmt*& stmt, const char* name, const int& value) {
+int DBHandler::bindParam(sqlite3_stmt *&stmt, const char *name, int value) {
     int paramIndex = paramNameIndex(stmt, name);
     if (!paramIndex) {
         return SQLITE_MISUSE;
@@ -245,7 +245,7 @@ int DBHandler::bindParam(sqlite3_stmt*& stmt, const char* name, const int& value
  * @param value		Value
  * @return
  */
-int DBHandler::bindParam(sqlite3_stmt*& stmt, const char* name, const double& value) {
+int DBHandler::bindParam(sqlite3_stmt *&stmt, const char *name, double value) {
     int paramIndex = paramNameIndex(stmt, name);
     if (!paramIndex) {
         return SQLITE_MISUSE;
@@ -845,15 +845,15 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
                  logs[0].m_timestamp_str.c_str(), logs.size());
 
     // clang-format off
-    actuatorFeedbackId  = getTableId("dataLogs_actuator_feedback") + 1;
-    compassModelId      = getTableId("dataLogs_compass") + 1;
-    courseCalculationId = getTableId("dataLogs_course_calculation") + 1;
-    currentSensorsId    = getTableId("dataLogs_current_sensors" + 1);
-    gpsId               = getTableId("dataLogs_gps") + 1;
-    marineSensorsId     = getTableId("dataLogs_marine_sensors") + 1;
-    vesselStateId       = getTableId("dataLogs_vessel_state") + 1;
-    windStateId         = getTableId("dataLogs_wind_state") + 1;
-    windsensorId        = getTableId("dataLogs_windsensor") + 1;
+    actuatorFeedbackId  = 1 + getTableId("dataLogs_actuator_feedback");
+    compassModelId      = 1 + getTableId("dataLogs_compass");
+    courseCalculationId = 1 + getTableId("dataLogs_course_calculation");
+    currentSensorsId    = 1 + getTableId("dataLogs_current_sensors");
+    gpsId               = 1 + getTableId("dataLogs_gps");
+    marineSensorsId     = 1 + getTableId("dataLogs_marine_sensors");
+    vesselStateId       = 1 + getTableId("dataLogs_vessel_state");
+    windStateId         = 1 + getTableId("dataLogs_wind_state");
+    windsensorId        = 1 + getTableId("dataLogs_windsensor");
 
     selectFrom(currentMissionId, "id_mission", "current_Mission", "LIMIT 1");
     // selectFrom(currentWaypointId, "MIN(id)", "current_Mission", "WHERE harvested = 0");

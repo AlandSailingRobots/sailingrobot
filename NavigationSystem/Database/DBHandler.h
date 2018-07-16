@@ -219,8 +219,8 @@ class DBHandler {
     void addValue(typedValuePairs& values, const char* name, double value);
     void addValue(typedValuePairs& values, const char* name, std::string& string);
     std::vector<std::string> valueNames(const typedValuePairs& values);
-    int bindParam(sqlite3_stmt*& stmt, const char* name, const int& value);
-    int bindParam(sqlite3_stmt*& stmt, const char* name, const double& value);
+    int bindParam(sqlite3_stmt *&stmt, const char *name, int value);
+    int bindParam(sqlite3_stmt *&stmt, const char *name, double value);
     int bindParam(sqlite3_stmt*& stmt, const char* name, const std::string& text);
     int bindStmtIntsDoublesStrings(
         sqlite3_stmt*& stmt,
