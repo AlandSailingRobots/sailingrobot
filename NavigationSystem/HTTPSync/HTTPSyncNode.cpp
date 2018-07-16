@@ -35,6 +35,7 @@ HTTPSyncNode::HTTPSyncNode(MessageBus& msgBus, DBHandler* dbhandler)
       m_LoopTime(0.5),
       m_dbHandler(dbhandler) {
     msgBus.registerNode(*this, MessageType::LocalWaypointChange);
+	msgBus.registerNode(*this, MessageType::WaypointData);
     msgBus.registerNode(*this, MessageType::LocalConfigChange);
     msgBus.registerNode(*this, MessageType::ServerConfigsReceived);
 }
@@ -79,6 +80,9 @@ void HTTPSyncNode::processMessage(const Message* msgPtr) {
 
     switch (msgType) {
         case MessageType::LocalWaypointChange:
+	        pushWaypoints();
+		    break;
+        case MessageType::WaypointData:
             pushWaypoints();
             break;
         case MessageType::LocalConfigChange:
@@ -267,7 +271,7 @@ bool HTTPSyncNode::performCURLCall(std::string data, std::string call, std::stri
 
         // Perform the request, m_res will get the return code
         m_res = curl_easy_perform(curl);
-        curl_easy_cleanup(curl);
+        // curl_easy_cleanup(curl); // This gave double-free SIGABRT
 
         // Check for errors
         // std::cout << "/* Reponse serveur : " << response << "\n*/" << "\n\n\n\n";

@@ -1165,12 +1165,6 @@ bool DBHandler::replaceTables(textTables& tables) {
     return (errors == 0);
 }
 
-//
-//
-// TODO: Here we need to work on tables and lookup column types!!!
-//
-//
-
 void DBHandler::valuesFromTextRows(tableRows& values, textTableRows& textRows, ColumnTypes& types) {
     auto row = textRows.begin();
     textTableRow columnNames = *row;  // First row is column names
@@ -1181,30 +1175,7 @@ void DBHandler::valuesFromTextRows(tableRows& values, textTableRows& textRows, C
         auto value = (*row).begin();
         typedValuePairs rowValues;
         while ((name != columnNames.end()) && (value != (*row).end())) {
-            /*switch (columnType(*name, types)) {
-                case SQLITE_INTEGER:
-                    if ((*value).empty()) {
-                        rowValues.ints.emplace_back(std::make_pair((*name).c_str(), 0));
-                    } else {
-                        rowValues.ints.emplace_back(
-                            std::make_pair((*name).c_str(), safe_stoi(*value)));
-                    }
-                    break;
-                case SQLITE_FLOAT:
-                    if ((*value).empty()) {
-                        rowValues.doubles.emplace_back(std::make_pair((*name).c_str(), 0));
-                    } else {
-                        rowValues.doubles.emplace_back(
-                            std::make_pair((*name).c_str(), safe_stod(*value)));
-                    }
-                    break;
-                case SQLITE_TEXT:
-                    rowValues.strings.emplace_back(std::make_pair((*name).c_str(), *value));
-                    break;
-                default:
-                    Logger::error("%s unable to determine type for column \"%s\"",
-                                  __PRETTY_FUNCTION__, (*name).c_str());
-            }*/
+            // Cheat by telling SQLite we have all strings and let it sort it out
 	        rowValues.strings.emplace_back(std::make_pair((*name).c_str(), *value));
             name++;
             value++;
@@ -1358,82 +1329,23 @@ bool DBHandler::JSONAsTables(std::string& string, textTables& tables) {
     return true;
 }
 
-// TODO: Rewrite old
+/**
+ * Processes waypoint data as JSON and replaces current DB contents
+ * @param wayPoints
+ * @return
+ */
 bool DBHandler::receiveWayPoints(std::string wayPoints) {
 	textTables tables;
-	if (!JSONAsTables(wayPoints, tables)) {
+	if (JSONAsTables(wayPoints, tables)) {
+		if (replaceTables(tables)) {
+			return true;
+		}
+		Logger::error("%s failed to get new waypoints", __PRETTY_FUNCTION__);
+	} else {
 		Logger::error("%s Unable to parse waypoint JSON \"%s\"", __PRETTY_FUNCTION__,
 		              wayPoints.c_str());
-		return false;
 	}
-	if (replaceTables(tables)) {
-		// Logger::info("%s got new waypoints", __PRETTY_FUNCTION__);
-		return true;
-	}
-	Logger::error("%s failed to get new waypoints", __PRETTY_FUNCTION__);
 	return false;
-    /*    JSON js = JSON::parse(wayPoints);
-        if (js.empty()) {
-            Logger::error("%s No JSON in \"%s\"", __PRETTY_FUNCTION__, wayPoints.c_str());
-            return false;
-        }
-
-
-        std::string DBPrinter;
-        std::string tempValue;
-        int valuesLimit = 11;  //"Dirty" fix for limiting the amount of values requested from server
-        // waypoint entries (amount of fields n = valuesLimit + 1)
-        int limitCounter;
-
-        if (not DBTransaction("DELETE FROM current_Mission;")) {
-            Logger::error("%s, Error: failed to delete waypoints", __PRETTY_FUNCTION__);
-        }
-
-        for (const auto& i : js.items()) {
-            // m_logger.info(i.value().dump());
-
-            for (const auto& y : i.value().items()) {
-                limitCounter = valuesLimit;
-                DBPrinter =
-                    "INSERT INTO current_Mission "
-                    "(declination,harvested,id,id_mission,is_checkpoint,latitude,longitude,name,radius,"
-                    "rankInMission,stay_time) VALUES (";
-
-                for (const auto& z : y.value().items()) {
-                    // Each individual value
-                    tempValue = z.value().dump();
-                    tempValue = tempValue.substr(1, tempValue.size() - 2);
-                    if (tempValue.empty()) {
-                        tempValue = "NULL";
-                    }
-                    if (limitCounter > 0) {
-                        limitCounter--;
-                        DBPrinter = DBPrinter + tempValue + ",";
-                    }
-                }
-
-                // if (DBPrinter.size () > 0)  DBPrinter.resize (DBPrinter.size () - 1);
-                // DBPrinter = DBPrinter + "0);";
-                DBPrinter = DBPrinter.substr(0, DBPrinter.size() - 1) + ");";
-                std::cout << DBPrinter << "\n";
-                if (not DBTransaction(DBPrinter)) {
-                    Logger::error("%s, Error: failed to add waypoints", __PRETTY_FUNCTION__);
-                    return false;
-                }
-            }
-        }
-
-        // Make sure waypoints before the current waypoint are harvested
-        if (!m_currentWaypointId.empty()) {
-            std::string updateHarvested = "UPDATE current_Mission SET harvested = 1 WHERE id < ";
-            updateHarvested += m_currentWaypointId + ";";
-
-            if (not DBTransaction(updateHarvested)) {
-                Logger::error("%s, Error: failed to harvest waypoints", __PRETTY_FUNCTION__);
-                return false;
-            }
-        }
-        return true;*/
 }
 
 /*******************************************************************************
@@ -1510,6 +1422,69 @@ int DBHandler::indexOfStringInStrings(std::vector<std::string> haystack, std::st
     }
     return -1;
 }
+
+/*    JSON js = JSON::parse(wayPoints);
+	if (js.empty()) {
+		Logger::error("%s No JSON in \"%s\"", __PRETTY_FUNCTION__, wayPoints.c_str());
+		return false;
+	}
+
+
+	std::string DBPrinter;
+	std::string tempValue;
+	int valuesLimit = 11;  //"Dirty" fix for limiting the amount of values requested from server
+	// waypoint entries (amount of fields n = valuesLimit + 1)
+	int limitCounter;
+
+	if (not DBTransaction("DELETE FROM current_Mission;")) {
+		Logger::error("%s, Error: failed to delete waypoints", __PRETTY_FUNCTION__);
+	}
+
+	for (const auto& i : js.items()) {
+		// m_logger.info(i.value().dump());
+
+		for (const auto& y : i.value().items()) {
+			limitCounter = valuesLimit;
+			DBPrinter =
+				"INSERT INTO current_Mission "
+				"(declination,harvested,id,id_mission,is_checkpoint,latitude,longitude,name,radius,"
+				"rankInMission,stay_time) VALUES (";
+
+			for (const auto& z : y.value().items()) {
+				// Each individual value
+				tempValue = z.value().dump();
+				tempValue = tempValue.substr(1, tempValue.size() - 2);
+				if (tempValue.empty()) {
+					tempValue = "NULL";
+				}
+				if (limitCounter > 0) {
+					limitCounter--;
+					DBPrinter = DBPrinter + tempValue + ",";
+				}
+			}
+
+			// if (DBPrinter.size () > 0)  DBPrinter.resize (DBPrinter.size () - 1);
+			// DBPrinter = DBPrinter + "0);";
+			DBPrinter = DBPrinter.substr(0, DBPrinter.size() - 1) + ");";
+			std::cout << DBPrinter << "\n";
+			if (not DBTransaction(DBPrinter)) {
+				Logger::error("%s, Error: failed to add waypoints", __PRETTY_FUNCTION__);
+				return false;
+			}
+		}
+	}
+
+	// Make sure waypoints before the current waypoint are harvested
+	if (!m_currentWaypointId.empty()) {
+		std::string updateHarvested = "UPDATE current_Mission SET harvested = 1 WHERE id < ";
+		updateHarvested += m_currentWaypointId + ";";
+
+		if (not DBTransaction(updateHarvested)) {
+			Logger::error("%s, Error: failed to harvest waypoints", __PRETTY_FUNCTION__);
+			return false;
+		}
+	}
+	return true;*/
 
 // NOTE : Marc : change this otherwise it doesn't work
 /*	int rows = 0;
