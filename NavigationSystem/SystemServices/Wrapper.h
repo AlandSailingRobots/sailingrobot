@@ -22,3 +22,16 @@ static int safe_stoi(const std::string& str, std::size_t* pos = 0, int base = 10
     }
     return retvalue;
 }
+
+/* "Safe" stoi which does not throw exceptions on bad input values */
+static double safe_stod(const std::string& str, std::size_t* pos = 0, int base = 10) {
+	double retvalue = 0;
+	try {
+		retvalue = std::stod(str, pos);
+	} catch (std::invalid_argument& e) {
+		Logger::error("%s stoi(): invalid argument (%s)", __PRETTY_FUNCTION__, str);
+	} catch (std::out_of_range& e) {
+		Logger::error("%s stoi(): value out of range (%s)", __PRETTY_FUNCTION__, str);
+	}
+	return retvalue;
+}
