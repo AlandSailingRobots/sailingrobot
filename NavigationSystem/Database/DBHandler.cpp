@@ -4,7 +4,7 @@
 #include <sstream>
 #include <string>
 #include <thread>
-
+#include <utility>
 #include "../SystemServices/Logger.h"
 #include "../SystemServices/Timer.h"
 // #include "../SystemServices/Wrapper.h"
@@ -193,9 +193,10 @@ int DBHandler::prepareStmtUpdateError(sqlite3_stmt*& stmt,
                                       std::vector<std::string>& columns) {
     std::string sql = "UPDATE " + table + " SET ";
     int i = 0;
-    for (auto column : columns) {
-        if (i++)
-            sql += ",";
+    for (const auto &column : columns) {
+        if (i++) {
+	        sql += ",";
+        }
         sql += column + "=:" + column;
     }
     sql += " WHERE id = :id";
@@ -632,7 +633,7 @@ DBHandler::textTables DBHandler::getTablesAsText(std::string like, std::string s
 std::string DBHandler::getTablesAsJSON(std::string like, std::string statement) {
     std::string result;
     JSON js;
-	auto tables = getTablesAsText(like, statement);
+	auto tables = getTablesAsText(like, std::move(statement));
 
     try {
         int rowCnt = 0;
@@ -1066,7 +1067,7 @@ int DBHandler::insertTableRowsErrors(const char *tableName, tableRows &rows) {
 	int errors = 0;
 	if (!rows.empty()) {
 		if (prepareStmtInsertError(stmt, tableName, rows[0]) == SQLITE_OK) {
-			for (auto row : rows) {
+			for (const auto &row : rows) {
 				retCode = bindValuesToStmt(row, stmt);
 				if (retCode == SQLITE_OK) {
 					retCode = checkRetCode(stepAndFinalizeStmt(stmt));
@@ -1139,13 +1140,13 @@ bool DBHandler::replaceTables(textTables &tables) {
 
 void DBHandler::valuesFromTextRows(tableRows &values, textTableRows &textRows) {
 	textTableRow columnNames = textRows[0]; // First row is column names
-	textTableRows::iterator row = textRows.begin();
+	auto row = textRows.begin();
 	row++;
 
 	// detect types here, look at column info? For now we cheat and treat it as text
 	while (row != textRows.end()) {
-		textTableRow::iterator name = columnNames.begin();
-		textTableRow::iterator value = (*row).begin();
+		auto name = columnNames.begin();
+		auto value = (*row).begin();
 		typedValuePairs rowValues;
 		while ((name != columnNames.end()) && (value != (*row).end())) {
 			rowValues.strings.emplace_back(std::make_pair((*name).c_str(), *value));
@@ -1444,7 +1445,7 @@ std::vector<std::string> DBHandler::splitStrings(const std::string& string, cons
 
 int DBHandler::indexOfStringInStrings(std::vector<std::string> haystack, std::string needle) {
     int i = 0;
-    for (auto string : haystack) {
+    for (const auto &string : haystack) {
         if (string == needle) {
             return i;
         }
