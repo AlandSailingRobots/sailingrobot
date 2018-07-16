@@ -1131,6 +1131,12 @@ bool DBHandler::replaceTables(textTables &tables) {
 	return (errors > 0);
 }
 
+//
+//
+// TODO: Here we need to work on tables and lookup column types!!!
+//
+//
+
 void DBHandler::valuesFromTextRows(tableRows &values, textTableRows &textRows) {
 	textTableRow columnNames = textRows[0]; // First row is column names
 	textTableRows::iterator row = textRows.begin();
