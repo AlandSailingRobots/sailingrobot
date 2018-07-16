@@ -223,8 +223,6 @@ bool HTTPSyncNode::getWaypointsFromServer() {
         std::string waypoints = getData("getWaypoints");
         if (!waypoints.empty()) {
             if (m_dbHandler->receiveWayPoints(waypoints)) {
-                // EVENT MESSAGE - REPLACES OLD CALLBACK, CLEAN OUT CALLBACK REMNANTS IN OTHER
-                // CLASSES
                 MessagePtr newServerWaypoints = std::make_unique<ServerWaypointsReceivedMsg>();
                 m_MsgBus.sendMessage(std::move(newServerWaypoints));
                 Logger::info("Waypoints retrieved from remote server");

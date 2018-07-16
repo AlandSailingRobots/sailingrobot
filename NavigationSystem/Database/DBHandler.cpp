@@ -1,3 +1,4 @@
+#include "DBHandler.h"
 #include <cstdio>
 #include <cstdlib>
 #include <iomanip>
@@ -7,10 +8,22 @@
 #include <utility>
 #include "../SystemServices/Logger.h"
 #include "../SystemServices/Timer.h"
-#include "../SystemServices/Wrapper.h"
-#include "DBHandler.h"
+// #include "../SystemServices/Wrapper.h"
 
 // TODO: reusable statements?
+
+/* "Safe" stoi which does not throw exceptions on bad input values */
+/*static double safe_stod(const std::string& str, std::size_t* pos = 0, int base = 10) {
+    double retvalue = 0;
+    try {
+        retvalue = std::stod(str, pos);
+    } catch (std::invalid_argument& e) {
+        Logger::error("%s stod(): invalid argument (%s)", __PRETTY_FUNCTION__, str.c_str());
+    } catch (std::out_of_range& e) {
+        Logger::error("%s stod(): value out of range (%s)", __PRETTY_FUNCTION__, str.c_str());
+    }
+    return retvalue;
+}*/
 
 std::mutex DBHandler::m_databaseLock;
 
@@ -230,7 +243,7 @@ int DBHandler::prepareStmtUpdateError(sqlite3_stmt*& stmt,
  * @param value		Value
  * @return
  */
-int DBHandler::bindParam(sqlite3_stmt *&stmt, const char *name, int value) {
+int DBHandler::bindParam(sqlite3_stmt*& stmt, const char* name, int value) {
     int paramIndex = paramNameIndex(stmt, name);
     if (!paramIndex) {
         return SQLITE_MISUSE;
@@ -245,7 +258,7 @@ int DBHandler::bindParam(sqlite3_stmt *&stmt, const char *name, int value) {
  * @param value		Value
  * @return
  */
-int DBHandler::bindParam(sqlite3_stmt *&stmt, const char *name, double value) {
+int DBHandler::bindParam(sqlite3_stmt*& stmt, const char* name, double value) {
     int paramIndex = paramNameIndex(stmt, name);
     if (!paramIndex) {
         return SQLITE_MISUSE;
@@ -1076,24 +1089,28 @@ int DBHandler::insertTableRowsErrors(const char* tableName, tableRows& rows) {
     int retCode;
     int errors = 0;
     if (!rows.empty()) {
-        if (prepareStmtInsertError(stmt, tableName, rows[0]) == SQLITE_OK) {
-            for (const auto& row : rows) {
-                retCode = bindValuesToStmt(row, stmt);
+        auto row = rows.begin();
+        if (prepareStmtInsertError(stmt, tableName, *row) == SQLITE_OK) {
+            while (row != rows.end()) {
+                retCode = bindValuesToStmt(*row, stmt);
                 if (retCode == SQLITE_OK) {
-                    retCode = checkRetCode(stepAndFinalizeStmt(stmt));
+                    retCode = checkRetCode(sqlite3_step(stmt));
                 } else {
                     errors++;
                 }
+	            sqlite3_reset(stmt);
+                row++;
             }
         } else {
             errors++;
         }
+        sqlite3_finalize(stmt);
         if (errors == 0) {
-            return true;
+            return false;
         }
     }
-    Logger::error("%s %d error updating %s", __PRETTY_FUNCTION__, errors, tableName);
-    return false;
+    Logger::error("%s %d errors updating %s", __PRETTY_FUNCTION__, errors, tableName);
+    return true;
 }
 
 bool DBHandler::transactionalReplaceTable(const char* tableName, tableRows& rows) {
@@ -1104,6 +1121,10 @@ bool DBHandler::transactionalReplaceTable(const char* tableName, tableRows& rows
     if (retCode == SQLITE_OK) {
         sql = "DELETE FROM " + std::string(tableName);
         retCode = sqlite3_exec(db, sql.c_str(), nullptr, nullptr, &m_error);
+        if (checkRetCode(retCode) != SQLITE_OK) {
+        	Logger::error("%s %s (%d) deleting data in table %s", __PRETTY_FUNCTION__,
+	                      sqlite3_errstr(retCode), retCode, tableName);
+        }
     }
     if (!insertTableRowsErrors(tableName, rows)) {
         sql = "END TRANSACTION";
@@ -1124,7 +1145,6 @@ bool DBHandler::transactionalReplaceTable(const char* tableName, tableRows& rows
 
 bool DBHandler::transactionalReplaceTable(const char* tableName, textTableRows& rows) {
     tableRows values;
-    // Detect types
     std::vector<std::pair<std::string, int>> columnTypes = getTableColumnTypes(tableName);
     valuesFromTextRows(values, rows, columnTypes);
     return transactionalReplaceTable(tableName, values);
@@ -1142,7 +1162,7 @@ bool DBHandler::replaceTables(textTables& tables) {
         }
     }
     // TODO: Log errors
-    return (errors > 0);
+    return (errors == 0);
 }
 
 //
@@ -1152,23 +1172,31 @@ bool DBHandler::replaceTables(textTables& tables) {
 //
 
 void DBHandler::valuesFromTextRows(tableRows& values, textTableRows& textRows, ColumnTypes& types) {
-    textTableRow columnNames = textRows[0];  // First row is column names
     auto row = textRows.begin();
-    row++;
+    textTableRow columnNames = *row;  // First row is column names
 
     // detect types here, look at column info? For now we cheat and treat it as text
-    while (row != textRows.end()) {
+    while (++row != textRows.end()) {
         auto name = columnNames.begin();
         auto value = (*row).begin();
         typedValuePairs rowValues;
         while ((name != columnNames.end()) && (value != (*row).end())) {
-            switch (columnType(*name, types)) {
+            /*switch (columnType(*name, types)) {
                 case SQLITE_INTEGER:
-                    rowValues.ints.emplace_back(std::make_pair((*name).c_str(), safe_stoi(*value)));
+                    if ((*value).empty()) {
+                        rowValues.ints.emplace_back(std::make_pair((*name).c_str(), 0));
+                    } else {
+                        rowValues.ints.emplace_back(
+                            std::make_pair((*name).c_str(), safe_stoi(*value)));
+                    }
                     break;
                 case SQLITE_FLOAT:
-                    rowValues.doubles.emplace_back(
-                        std::make_pair((*name).c_str(), safe_stod(*value)));
+                    if ((*value).empty()) {
+                        rowValues.doubles.emplace_back(std::make_pair((*name).c_str(), 0));
+                    } else {
+                        rowValues.doubles.emplace_back(
+                            std::make_pair((*name).c_str(), safe_stod(*value)));
+                    }
                     break;
                 case SQLITE_TEXT:
                     rowValues.strings.emplace_back(std::make_pair((*name).c_str(), *value));
@@ -1176,12 +1204,12 @@ void DBHandler::valuesFromTextRows(tableRows& values, textTableRows& textRows, C
                 default:
                     Logger::error("%s unable to determine type for column \"%s\"",
                                   __PRETTY_FUNCTION__, (*name).c_str());
-            }
+            }*/
+	        rowValues.strings.emplace_back(std::make_pair((*name).c_str(), *value));
             name++;
             value++;
         }
         values.emplace_back(rowValues);
-        row++;
     }
 }
 
@@ -1332,14 +1360,18 @@ bool DBHandler::JSONAsTables(std::string& string, textTables& tables) {
 
 // TODO: Rewrite old
 bool DBHandler::receiveWayPoints(std::string wayPoints) {
-    textTables tables;
-    if (!JSONAsTables(wayPoints, tables)) {
-        Logger::error("%s Unable to parse waypoint JSON \"%s\"", __PRETTY_FUNCTION__,
-                      wayPoints.c_str());
-        return false;
-    }
-    return replaceTables(tables);
-
+	textTables tables;
+	if (!JSONAsTables(wayPoints, tables)) {
+		Logger::error("%s Unable to parse waypoint JSON \"%s\"", __PRETTY_FUNCTION__,
+		              wayPoints.c_str());
+		return false;
+	}
+	if (replaceTables(tables)) {
+		// Logger::info("%s got new waypoints", __PRETTY_FUNCTION__);
+		return true;
+	}
+	Logger::error("%s failed to get new waypoints", __PRETTY_FUNCTION__);
+	return false;
     /*    JSON js = JSON::parse(wayPoints);
         if (js.empty()) {
             Logger::error("%s No JSON in \"%s\"", __PRETTY_FUNCTION__, wayPoints.c_str());
