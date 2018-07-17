@@ -836,7 +836,7 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
     int windStateId;
     int windsensorId;
 
-    int currentMissionId;  // this is not like the others
+    int currentMissionId = 0;  // this is not like the others
 
     int logNumber = 0;
     std::string tableId;
@@ -1035,7 +1035,7 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
         addValue(values, "vessel_state_id", _vesselStateId);
         addValue(values, "wind_state_id", _windStateId);
         addValue(values, "windsensor_id", _windsensorId);
-        addValue(values, "currentMission_id", currentMissionId);
+        addValue(values, "current_mission_id", currentMissionId);
         if (!prepareStmtInsertError(stmt, "dataLogs_system", values)) {
             bindValuesToStmt(values, stmt);
             if (stepAndFinalizeStmt(stmt) == SQLITE_DONE) {

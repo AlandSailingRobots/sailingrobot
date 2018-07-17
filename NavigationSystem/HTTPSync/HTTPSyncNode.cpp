@@ -83,7 +83,8 @@ void HTTPSyncNode::processMessage(const Message* msgPtr) {
 	        pushWaypoints();
 		    break;
         case MessageType::WaypointData:
-            pushWaypoints();
+            //m_sendwaypoints = true;
+	        pushWaypoints();
             break;
         case MessageType::LocalConfigChange:
             pushConfigs();
@@ -250,6 +251,7 @@ bool HTTPSyncNode::performCURLCall(std::string data, std::string call, std::stri
     // example: serv=getAllConfigs&id=BOATID&pwd=BOATPW
     // std::cout << "/* Server call : " << serverCall.substr(0, 150) << " */" << '\n';
 
+	std::lock_guard<std::mutex> lock_guard(m_lock);
     curl = curl_easy_init();
     if (curl) {
         // https://curl.haxx.se/libcurl/c/threadsafe.html
@@ -271,7 +273,7 @@ bool HTTPSyncNode::performCURLCall(std::string data, std::string call, std::stri
 
         // Perform the request, m_res will get the return code
         m_res = curl_easy_perform(curl);
-        // curl_easy_cleanup(curl); // This gave double-free SIGABRT
+        curl_easy_cleanup(curl); // This gave double-free SIGABRT
 
         // Check for errors
         // std::cout << "/* Reponse serveur : " << response << "\n*/" << "\n\n\n\n";

@@ -73,6 +73,8 @@ class HTTPSyncNode : public ActiveNode {
     std::string m_shipPWD;
     std::string m_serverURL;
 
+	std::mutex m_lock;
+
     CURL* curl;
     CURLcode m_res;
     bool m_reportedConnectError;
