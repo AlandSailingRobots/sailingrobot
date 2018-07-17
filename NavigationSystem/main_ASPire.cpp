@@ -154,16 +154,35 @@ int main(int argc, char *argv[])
 	CameraProcessingUtility cameraProcessingUtility(messageBus, dbHandler, &collidableMgr);
 	AISProcessing aisProcessing(messageBus, dbHandler, &collidableMgr);
 
-  	#if LOCAL_NAVIGATION_MODULE == 1
+	#if LOCAL_NAVIGATION_MODULE == 1
 		LocalNavigationModule lnm	( messageBus, dbHandler );
 
-		const int16_t MAX_VOTES = dbHandler.retrieveCellAsInt("config_voter_system","1","max_vote");
-		CourseVoter courseVoter( MAX_VOTES, dbHandler.retrieveCellAsDouble("config_voter_system","1","course_voter_weight"));
-		WaypointVoter waypointVoter( MAX_VOTES, dbHandler.retrieveCellAsDouble("config_voter_system","1","waypoint_voter_weight")); // weight = 1
-		WindVoter windVoter( MAX_VOTES, dbHandler.retrieveCellAsDouble("config_voter_system","1","wind_voter_weight")); // weight = 1
-		ChannelVoter channelVoter( MAX_VOTES, dbHandler.retrieveCellAsDouble("config_voter_system","1","channel_voter_weight")); // weight = 1
-		MidRangeVoter midRangeVoter( MAX_VOTES, dbHandler.retrieveCellAsDouble("config_voter_system","1","midrange_voter_weight"), collidableMgr );
-		ProximityVoter proximityVoter( MAX_VOTES, dbHandler.retrieveCellAsDouble("config_voter_system","1","proximity_voter_weight"), collidableMgr);
+		int MAX_VOTES;
+		dbHandler.getConfigFrom(MAX_VOTES, "max_vote", "config_voter_system");
+
+		double weight = 0;
+		dbHandler.getConfigFrom(weight, "course_voter_weight","config_voter_system");
+		CourseVoter courseVoter(MAX_VOTES, weight);
+
+		weight = 0;
+		dbHandler.getConfigFrom(weight, "waypoint_voter_weight", "config_voter_system");
+		WaypointVoter waypointVoter(MAX_VOTES, weight); // weight = 1
+
+		weight = 0;
+		dbHandler.getConfigFrom(weight, "wind_voter_weight", "config_voter_system");
+		WindVoter windVoter(MAX_VOTES, weight); // weight = 1
+
+		weight = 0;
+		dbHandler.getConfigFrom(weight, "channel_voter_weight", "config_voter_system");
+		ChannelVoter channelVoter( MAX_VOTES, weight); // weight = 1
+
+		weight = 0;
+		dbHandler.getConfigFrom(weight, "midrange_voter_weight", "config_voter_system");
+		MidRangeVoter midRangeVoter( MAX_VOTES, weight, collidableMgr );
+
+		weight = 0;
+		dbHandler.getConfigFrom(weight, "proximity_voter_weight", "config_voter_system");
+		ProximityVoter proximityVoter( MAX_VOTES, weight, collidableMgr);
 
 		lnm.registerVoter( &courseVoter );
 		lnm.registerVoter( &waypointVoter );

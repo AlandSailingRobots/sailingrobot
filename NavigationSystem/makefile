@@ -30,7 +30,8 @@ export USE_LNM = 0
 # To detect if we are not compiling for the RaspberryPi
 uname_m := $(shell uname -m)
 ifneq ($(uname_m),armv7l)
-OPENCV = `pkg-config opencv --cflags --libs` #Not compiling on RaspberryPi
+OPENCVFLAGS = `pkg-config opencv --cflags` #Not compiling on RaspberryPi
+OPENCVLIBS = `pkg-config opencv --libs` #Not compiling on RaspberryPi
 else
 OPENCV = -lopencv_core -lopencv_videoio -lopencv_imgproc #Compiling on RaspberryPi
 endif
@@ -40,8 +41,8 @@ endif
 ###############################################################################
 
 
-export CPPFLAGS             = -g -Wall -pedantic -Werror -std=gnu++14 -DBOOST_LOG_DYN_LINK -Wno-psabi 
-export LIBS                 = -lsqlite3 -lgps -lrt -lcurl -lwiringPi -lncurses $(OPENCV) \
+export CPPFLAGS             = -g -Wall -pedantic -Werror -std=gnu++14 -DBOOST_LOG_DYN_LINK -Wno-psabi $(OPENCVFLAGS)
+export LIBS                 = -lsqlite3 -lgps -lrt -lcurl -lwiringPi -lncurses $(OPENCVLIBS) \
                               -lboost_log -lboost_thread -lboost_system -lboost_filesystem -lpthread 
                               # keep -lpthread after the boost libs, it can fail otherwise 
 

@@ -114,7 +114,8 @@ bool CameraProcessingUtility::init() {
     {
         Logger::error("Node: CameraProcessingUtility - Camera not available");
         // Shutdown if no camera found
-        exit(EXIT_FAILURE);
+        // exit(EXIT_FAILURE);
+	    m_running = false;
     }
     Logger::info("Video capture initialized");
     return true;

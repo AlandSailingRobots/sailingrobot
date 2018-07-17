@@ -335,7 +335,7 @@ CREATE TABLE config_voter_system (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   loop_time 				DOUBLE,
   max_vote 					INTEGER,
-  course_voter_weight   DOUBLE,
+  course_voter_weight       DOUBLE,
   waypoint_voter_weight 	DOUBLE,
   wind_voter_weight 		DOUBLE,
   channel_voter_weight 		DOUBLE,
