@@ -106,8 +106,8 @@ CameraProcessingUtility::~CameraProcessingUtility() {}
 
 
 bool CameraProcessingUtility::init() {
-    //VideoCapture capture(0); // Opens the camera handle
-    VideoCapture capture("/home/sailbot/Docs/output_edit.mp4"); // For testing from video
+    VideoCapture capture(0); // Opens the camera handle
+    //VideoCapture capture("/home/sailbot/Docs/output_edit.mp4"); // For testing from video
     this->m_capture = capture;
     if (this->m_capture.isOpened() == false) //  To check if object was associated to video input successfully
     {
