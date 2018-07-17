@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include "../Hardwares/MaestroController/MaestroController.h"
+#include "../../Hardwares/MaestroController/MaestroController.h"
 #include "../cxxtest/cxxtest/TestSuite.h"
 
 // For std::this_thread

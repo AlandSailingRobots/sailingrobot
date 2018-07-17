@@ -146,8 +146,8 @@ void CollidableMgr::addVisualField( std::map<int16_t, uint16_t> relBearingToRelO
             highBearing = it.first;
         }
     }
-    m_visualField.visualFieldLowBearing = lowBearing + heading;
-    m_visualField.visualFieldHighBearing = highBearing + heading;
+    m_visualField.visualFieldLowBearing = Utility::limitAngleRange(lowBearing + heading);
+    m_visualField.visualFieldHighBearing = Utility::limitAngleRange(highBearing + heading);
 }
 
 ///----------------------------------------------------------------------------------
@@ -227,3 +227,5 @@ void CollidableMgr::ContactGC(CollidableMgr* ptr)
         ptr->removeOldVisualField();
     }
 }
+
+

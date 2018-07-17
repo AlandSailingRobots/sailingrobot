@@ -1,8 +1,8 @@
 #include "catch.hpp"
-#include "dbhandler/DBHandler.h"
+#include "../dbhandler/DBHandler.h"
 #include <cstdio>
 #include <stdio.h>
-#include "models/PositionModel.h"
+#include "../models/PositionModel.h"
 #include "models/WaypointModel.h"
 #include "models/WindsensorModel.h"
 #include "models/CompassModel.h"

@@ -24,10 +24,10 @@
 
 #include <stdint.h>
 #include <thread>
-#include "../Database/DBHandler.h"
-#include "../Hardwares/CV7Node.h"
-#include "../MessageBus/MessageBus.h"
-#include "../SystemServices/Logger.h"
+#include "../../Database/DBHandler.h"
+#include "../../Hardwares/CV7Node.h"
+#include "../../MessageBus/MessageBus.h"
+#include "../../SystemServices/Logger.h"
 #include "../cxxtest/cxxtest/TestSuite.h"
 #include "TestMocks/MessageLogger.h"
 

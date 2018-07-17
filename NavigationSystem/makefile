@@ -26,15 +26,20 @@ TOOLCHAIN = 0
 export USE_SIM = 0
 export USE_LNM = 0
 
+## Temporary placed opencv libs
+OPENCV = `pkg-config opencv --cflags --libs`
+#OPENCV = -lopencv_core -lopencv_videoio -lopencv_imgproc  
 
 ###############################################################################
 # Tools
 ###############################################################################
 
-export CPPFLAGS             = -g -Wall -pedantic -Werror -std=gnu++14 -DBOOST_LOG_DYN_LINK -Wno-psabi
-export LIBS                 = -lsqlite3 -lgps -lrt -lcurl -lwiringPi -lncurses \
+
+export CPPFLAGS             = -g -Wall -pedantic -Werror -std=gnu++14 -DBOOST_LOG_DYN_LINK -Wno-psabi 
+export LIBS                 = -lsqlite3 -lgps -lrt -lcurl -lwiringPi -lncurses $(OPENCV) \
                               -lboost_log -lboost_thread -lboost_system -lboost_filesystem -lpthread 
                               # keep -lpthread after the boost libs, it can fail otherwise 
+
 
 ifeq ($(TOOLCHAIN),1)
     export CC               = arm-linux-gnueabihf-gcc
@@ -60,7 +65,7 @@ export SRC_DIR				= ./
 export BUILD_DIR        	= build
 export EXEC_DIR         	= ./
 
-export INC_DIR         	 	= -I./ -I./Libs -I./Libs/json/include
+export INC_DIR         	 	= -I./ -I./Libs -I./Libs/json/include   
 
 LNM_DIR                 	= Navigation/LocalNavigationModule
 
@@ -105,7 +110,7 @@ NAVIGATION_SRC				= Navigation/WaypointMgrNode.cpp
 SYSTEM_SERVICES_SRC  		= SystemServices/Logger.cpp SystemServices/SysClock.cpp SystemServices/Timer.cpp
 
 WORLD_STATE_SRC				= WorldState/VesselStateNode.cpp WorldState/StateEstimationNode.cpp \
-								WorldState/WindStateNode.cpp
+								WorldState/WindStateNode.cpp WorldState/CameraProcessingUtility.cpp
 
 DATA_COLLECTION_SRC			= DataCollection/DataCollectionMgrNode.cpp
 
@@ -120,10 +125,11 @@ export LNM_SRC              = $(LNM_DIR)/ASRCourseBallot.cpp $(LNM_DIR)/ASRArbit
                             	$(LNM_DIR)/LocalNavigationModule.cpp \
                             	$(LNM_DIR)/Voters/WaypointVoter.cpp $(LNM_DIR)/Voters/WindVoter.cpp  \
                             	$(LNM_DIR)/Voters/ChannelVoter.cpp $(LNM_DIR)/Voters/MidRangeVoter.cpp \
-								$(LNM_DIR)/Voters/ProximityVoter.cpp
+								$(LNM_DIR)/Voters/ProximityVoter.cpp $(LNM_DIR)/Voters/CourseVoter.cpp
 
 # Obstacles detection
-export COLLIDABLE_MGR_SRC	= WorldState/CollidableMgr/CollidableMgr.cpp WorldState/AISProcessing.cpp
+export COLLIDABLE_MGR_SRC	= WorldState/CollidableMgr/CollidableMgr.cpp WorldState/AISProcessing.cpp \
+							
 
 # Simulator
 export SIMULATOR_SRC        = Simulation/SimulationNode.cpp
@@ -145,6 +151,7 @@ export HW_NODES_ASPIRE_SRC 	= Hardwares/ActuatorNodeASPire.cpp Hardwares/CANAISN
                             	Hardwares/CANWindsensorNode.cpp Hardwares/CANArduinoNode.cpp \
                             	Hardwares/CANMarineSensorTransmissionNode.cpp Hardwares/CANMarineSensorReceiver.cpp \
                             	Hardwares/CANCurrentSensorNode.cpp 
+
 
 # ActuatorNode for Janet not compiling, uses removed ActuatorPositionMsg
 export HW_NODES_JANET_SRC 	= Hardwares/CV7Node.cpp Hardwares/ArduinoNode.cpp
@@ -169,6 +176,7 @@ all:
 
 ## Build the control system for ASPire
 ASPire: $(BUILD_DIR)
+	$(eval override CPPFLAGS += -Don_ASPire) # add a preprocessor flag to use in the wind voter for taking into account the tack downwind
 	$(MAKE) -f ASPire.mk
 
 ## Build the control system for Janet
