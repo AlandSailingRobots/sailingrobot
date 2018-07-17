@@ -91,7 +91,7 @@ TEST_CASE("DBhandler")
 
 		DBHandler db("testdb.db");
 
-		REQUIRE(db.retrieveCell("current_Mission","1","harvested").compare("0") == 0);
+		REQUIRE(db.retrieveCell("currentMission","1","harvested").compare("0") == 0);
 
 	}
 
@@ -101,14 +101,14 @@ TEST_CASE("DBhandler")
 
 		DBHandler db("testdb.db");
 
-		REQUIRE(db.retrieveCellAsInt("current_Mission","1","harvested") == 0);
+		REQUIRE(db.retrieveCellAsInt("currentMission","1","harvested") == 0);
 
 	}
 
-	SECTION("Delete row with id 1 from table current_Mission")
+	SECTION("Delete row with id 1 from table currentMission")
 	{
 		DBHandler db("testdb.db");
-		REQUIRE_NOTHROW(db.deleteRow("current_Mission", "1"));
+		REQUIRE_NOTHROW(db.deleteRow("currentMission", "1"));
 		//SHOULD ROLLBACK
 	}
 
@@ -116,18 +116,18 @@ TEST_CASE("DBhandler")
 	{
 		DBHandler db("testdb.db");
 
-		REQUIRE(db.getIdFromTable("current_Mission",false).empty());
+		REQUIRE(db.getIdFromTable("currentMission",false).empty());
 	}
 
 	SECTION("Insert function")
 	{
 		DBHandler db("testdb.db");
 
-		REQUIRE_NOTHROW(db.insert("current_Mission", "id, isCheckpoint, latitude, longitude, radius, harvested", "1, 2.2, 3.3, 500, 0"));
+		REQUIRE_NOTHROW(db.insert("currentMission", "id, isCheckpoint, latitude, longitude, radius, harvested", "1, 2.2, 3.3, 500, 0"));
 
-		REQUIRE(db.getIdFromTable("current_Mission",false).compare("1") == 0);
+		REQUIRE(db.getIdFromTable("currentMission",false).compare("1") == 0);
 
-		REQUIRE(db.retrieveCell("current_Mission","1","radius").compare("500") == 0);
+		REQUIRE(db.retrieveCell("currentMission","1","radius").compare("500") == 0);
 
 	}
 
@@ -135,11 +135,11 @@ TEST_CASE("DBhandler")
 	{
 		DBHandler db("testdb.db");
 
-		REQUIRE(db.retrieveCell("current_Mission","1","harvested").compare("0") == 0);
+		REQUIRE(db.retrieveCell("currentMission","1","harvested").compare("0") == 0);
 
-		REQUIRE_NOTHROW(db.changeOneValue("current_Mission", "1","1","harvested"));
+		REQUIRE_NOTHROW(db.changeOneValue("currentMission", "1","1","harvested"));
 
-		REQUIRE(db.retrieveCell("current_Mission","1","harvested").compare("1") == 0);
+		REQUIRE(db.retrieveCell("currentMission","1","harvested").compare("1") == 0);
 
 	}
 

@@ -574,7 +574,7 @@ bool DBHandler::getWaypointValues(int& nextId,
                                   bool& foundPrev) {
     sqlite3_stmt* stmt;
     int retCode =
-        prepareStmtSelectFromStatements(stmt, "MIN(id)", "current_Mission", "WHERE harvested = 0");
+        prepareStmtSelectFromStatements(stmt, "MIN(id)", "currentMission", "WHERE harvested = 0");
     if (retCode == SQLITE_OK) {
         retCode = sqlite3_step(stmt);
         if (retCode == SQLITE_ROW) {
@@ -584,7 +584,7 @@ bool DBHandler::getWaypointValues(int& nextId,
             std::vector<std::string> columns = {"longitude", "latitude",  "declination",
                                                 "radius",    "stay_time", "isCheckpoint"};
             retCode = prepareStmtSelectFromStatements(stmt, joinStrings(columns, ","),
-                                                      "current_Mission", "WHERE id = :id");
+                                                      "currentMission", "WHERE id = :id");
             if (retCode == SQLITE_OK) {
                 bindParam(stmt, ":id", nextId);
                 retCode = sqlite3_step(stmt);
@@ -601,9 +601,9 @@ bool DBHandler::getWaypointValues(int& nextId,
                                          nextStayTime);
                     sqlite3_column_value(stmt, indexOfStringInStrings(columns, "isCheckpoint"),
                                          isCheckpoint);
-                    // selectFromId(nextLongitude, "longitude", "current_Mission", nextWayPointId);
+                    // selectFromId(nextLongitude, "longitude", "currentMission", nextWayPointId);
 
-                    selectFrom(prevId, "MAX(id)", "current_Mission", "WHERE id < :id",
+                    selectFrom(prevId, "MAX(id)", "currentMission", "WHERE id < :id",
                                {{":id", nextId}});
                     foundPrev = (prevId != 0);
                     if (foundPrev) {
@@ -726,7 +726,7 @@ std::string DBHandler::getLogsAsJSON(bool onlyLatest) {
 }
 
 std::string DBHandler::getWayPointsAsJSON() {
-    std::string result = getTablesAsJSON("current_Mission");
+    std::string result = getTablesAsJSON("currentMission");
     if (result.empty()) {
         Logger::warning("No waypoints in database");
     }
@@ -868,8 +868,8 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
     windStateId         = 1 + getTableId("dataLogs_wind_state");
     windsensorId        = 1 + getTableId("dataLogs_windsensor");
 
-    selectFrom(currentMissionId, "id_mission", "current_Mission", "LIMIT 1");
-    // selectFrom(currentWaypointId, "MIN(id)", "current_Mission", "WHERE harvested = 0");
+    selectFrom(currentMissionId, "id_mission", "currentMission", "LIMIT 1");
+    // selectFrom(currentWaypointId, "MIN(id)", "currentMission", "WHERE harvested = 0");
     // clang-format on
 
     for (auto log : logs) {
@@ -1035,7 +1035,7 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
         addValue(values, "vessel_state_id", _vesselStateId);
         addValue(values, "wind_state_id", _windStateId);
         addValue(values, "windsensor_id", _windsensorId);
-        addValue(values, "current_mission_id", currentMissionId);
+        addValue(values, "currentMission_id", currentMissionId);
         if (!prepareStmtInsertError(stmt, "dataLogs_system", values)) {
             bindValuesToStmt(values, stmt);
             if (stepAndFinalizeStmt(stmt) == SQLITE_DONE) {
@@ -1436,7 +1436,7 @@ int DBHandler::indexOfStringInStrings(std::vector<std::string> haystack, std::st
 	// waypoint entries (amount of fields n = valuesLimit + 1)
 	int limitCounter;
 
-	if (not DBTransaction("DELETE FROM current_Mission;")) {
+	if (not DBTransaction("DELETE FROM currentMission;")) {
 		Logger::error("%s, Error: failed to delete waypoints", __PRETTY_FUNCTION__);
 	}
 
@@ -1446,7 +1446,7 @@ int DBHandler::indexOfStringInStrings(std::vector<std::string> haystack, std::st
 		for (const auto& y : i.value().items()) {
 			limitCounter = valuesLimit;
 			DBPrinter =
-				"INSERT INTO current_Mission "
+				"INSERT INTO currentMission "
 				"(declination,harvested,id,id_mission,is_checkpoint,latitude,longitude,name,radius,"
 				"rankInMission,stay_time) VALUES (";
 
@@ -1476,7 +1476,7 @@ int DBHandler::indexOfStringInStrings(std::vector<std::string> haystack, std::st
 
 	// Make sure waypoints before the current waypoint are harvested
 	if (!m_currentWaypointId.empty()) {
-		std::string updateHarvested = "UPDATE current_Mission SET harvested = 1 WHERE id < ";
+		std::string updateHarvested = "UPDATE currentMission SET harvested = 1 WHERE id < ";
 		updateHarvested += m_currentWaypointId + ";";
 
 		if (not DBTransaction(updateHarvested)) {
@@ -1491,14 +1491,14 @@ int DBHandler::indexOfStringInStrings(std::vector<std::string> haystack, std::st
     JSON js;
     std::string wp = "waypoint_";
 
-    rows = getRows("current_Mission");
+    rows = getRows("currentMission");
     // std::cout << "rows current mission " << rows << std::endl;
     if (rows > 0) {
         for (auto i = 1; i <= rows; ++i) {
             // getDataAsJson("id,is_checkpoint,latitude,longitude,declination,radius,stay_time",
-            // "current_Mission", wp + std::to_string(i), std::to_string(i),json, true);
+            // "currentMission", wp + std::to_string(i), std::to_string(i),json, true);
             getDataAsJson("id,is_checkpoint,latitude,longitude,declination,radius,stay_time",
-                          "current_Mission", wp + std::to_string(i), std::to_string(i), js, true);
+                          "currentMission", wp + std::to_string(i), std::to_string(i), js, true);
         }
         return js.dump();*/
 // Kill

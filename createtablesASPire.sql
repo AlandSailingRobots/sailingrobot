@@ -1,8 +1,8 @@
 PRAGMA foreign_keys = ON;
 BEGIN TRANSACTION;
 
-DROP TABLE IF EXISTS "current_Mission";
-CREATE TABLE current_Mission (id INTEGER PRIMARY KEY AUTOINCREMENT, -- no autoincrement to ensure a correct order
+DROP TABLE IF EXISTS "currentMission";
+CREATE TABLE currentMission (id INTEGER PRIMARY KEY AUTOINCREMENT, -- no autoincrement to ensure a correct order
 	isCheckpoint  BOOLEAN,
 	latitude      DOUBLE,
 	longitude     DOUBLE,
