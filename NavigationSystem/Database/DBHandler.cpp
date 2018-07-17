@@ -379,11 +379,11 @@ std::vector<std::string> DBHandler::valueNames(const typedValuePairs& values) {
 
     // This could probably be optimized
     for (auto pair : values.ints)
-        names.emplace_back(pair.first);
+        names.push_back(pair.first);
     for (auto pair : values.doubles)
-        names.emplace_back(pair.first);
+        names.push_back(pair.first);
     for (auto pair : values.strings)
-        names.emplace_back(pair.first);
+        names.push_back(pair.first);
     return std::move(names);
 }
 
