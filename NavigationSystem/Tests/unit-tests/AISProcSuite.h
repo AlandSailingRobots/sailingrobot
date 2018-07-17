@@ -10,12 +10,12 @@
  *
  *
  ***************************************************************************************/
-#include "../Database/DBHandler.h"
-#include "../MessageBus/MessageBus.h"
-#include "../MessageBusTestHelper.h"
-#include "../Messages/StateMessage.h"
-#include "../WorldState/AISProcessing.h"
-#include "../WorldState/CollidableMgr/CollidableMgr.h"
+#include "../../Database/DBHandler.h"
+#include "../../MessageBus/MessageBus.h"
+#include "MessageBusTestHelper.h"
+#include "../../Messages/StateMessage.h"
+#include "../../WorldState/AISProcessing.h"
+#include "../../WorldState/CollidableMgr/CollidableMgr.h"
 #include "../cxxtest/cxxtest/TestSuite.h"
 #include "TestMocks/MessageLogger.h"
 

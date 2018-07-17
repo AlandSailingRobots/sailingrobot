@@ -169,6 +169,9 @@ int main(int argc, char *argv[])
 		lnm.registerVoter( &waypointVoter );
 		lnm.registerVoter( &windVoter );
 		lnm.registerVoter( &channelVoter );
+
+		// As there is no veto used in both avoidance voters for now, you can disable avoidance system just by
+		// putting a weigth of zero in config_ASPire.json and push the new config manually or through the website.
 		lnm.registerVoter( &proximityVoter );
 		lnm.registerVoter( &midRangeVoter );
   	#else
@@ -243,7 +246,7 @@ int main(int argc, char *argv[])
 	wingSailControlNode.start();
 	courseRegulatorNode.start();
 
-	cameraProcessingUtility.start();
+
 
 	#if SIMULATION == 1
 		simulation.start();
@@ -257,6 +260,9 @@ int main(int argc, char *argv[])
 	#endif
 
 	#if LOCAL_NAVIGATION_MODULE == 1
+    // Cancel Camera Processing node if using voters without avoidance.
+    // Camera processing enabled for voter system only currently.
+	//  cameraProcessingUtility.start();
 		lnm.start();
 	#else
 		sailingLogic.start();

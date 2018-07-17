@@ -43,15 +43,21 @@ using namespace cv;
 #define NUMBER_OF_SEGMENTS 24 // make it close to an approximation of 1 degree
                               // per cols as the camera has a range from -12 to 12
 
+struct Compass
+{
+    float roll = 0;
+    float heading = 0;
+    int tmsp = 0; // Updated nowhere in the code
+} m_compass_data;
 
 // Next values have to be selected by failings and retry, in comments are the values that should
 // work for : regular webcam(output format should be documented) | 
 // registered frame from the thermal camera | thermal camera video input
 
-const int lowFrameX = 0; //280; //0; //68 //29
-const int widthFrame = 300; //725;//640; // 585; //257
-const int lowFrameY = 0; //100;//0; //98; //30
-const int heightFrame = 200; //200; //500;//480; //381; //195
+const int lowFrameX = 68; //0; //68 //29
+const int widthFrame = 585;//640; // 585; //257
+const int lowFrameY = 30;//0; //98; //30
+const int heightFrame = 440; //500;//480; //381; //195
 
 char c; // input for video display
 
@@ -69,15 +75,6 @@ int colorRad = 25;   // Mainly influence the details on edge, at 10 some waves a
                      // and at 25 there is no waves, but less edges on the horizon.
 int maxPyrLevel = 2; 
 Mat meanshiftBaseFrame;
-
-
-struct Compass
-{
-    float roll = 0;
-    float heading = 0;
-    int tmsp = 0;
-} m_compass_data;
-
 
 
 Mat dilateReconstruction(Mat imgReference, Mat imgMarker, Mat kernel)
@@ -109,10 +106,10 @@ CameraProcessingUtility::~CameraProcessingUtility() {}
 
 
 bool CameraProcessingUtility::init() {
-    VideoCapture capture(0); // Opens the camera handle
-  //  VideoCapture capture("/home/sailbot/Documents/untitled.mp4"); // For testing from video
+    //VideoCapture capture(0); // Opens the camera handle
+    VideoCapture capture("/home/sailbot/Docs/output_edit.mp4"); // For testing from video
     this->m_capture = capture;
-    if (this->m_capture.isOpened() == false) //  To check if object was associated to webcam successfully
+    if (this->m_capture.isOpened() == false) //  To check if object was associated to video input successfully
     {
         Logger::error("Node: CameraProcessingUtility - Camera not available");
         // Shutdown if no camera found
@@ -130,11 +127,11 @@ void CameraProcessingUtility::start() {
 void CameraProcessingUtility::stop() {
     m_running = false;
     m_capture.release();
- /*   if (WITH_GUI)
+    if (WITH_GUI)
     {
       destroyAllWindows();
     }
- */   stopThread(this);
+    stopThread(this);
 }
 
 void CameraProcessingUtility::CameraProcessingUtilityThreadFunc(ActiveNode* nodePtr) {
@@ -146,7 +143,7 @@ void CameraProcessingUtility::CameraProcessingUtilityThreadFunc(ActiveNode* node
     
     std::chrono::duration<double> elapsed_seconds;
 
- /*  if (WITH_GUI)
+   if (WITH_GUI)
     {
     namedWindow( "Display window", WINDOW_NORMAL );// Create a window for display.
     namedWindow( "Display roi", WINDOW_NORMAL );
@@ -156,7 +153,8 @@ void CameraProcessingUtility::CameraProcessingUtilityThreadFunc(ActiveNode* node
     resizeWindow( "Display roi", widthFrame - lowFrameX, heightFrame - lowFrameY );
     resizeWindow( "Display distance", widthFrame - lowFrameX, heightFrame - lowFrameY );
     }
-*/
+
+
     while(node->m_running) {
 
       auto start = std::chrono::system_clock::now();
@@ -235,18 +233,18 @@ void CameraProcessingUtility::freeSpaceProcessing() {
 
     imgOriginal = m_imgFullSize(thermalImagerArea).clone();
 
- /*   if (WITH_GUI)
+    if (WITH_GUI)
     {
       imshow( "Display window", imgOriginal );
     }
-  */  
+   
 
     /*
      * -----------------------------------------------------------------
      * Correct tilted image
      *-----------------------------------------------------------------
      */
-    // Check if compass data is up to date
+    // Check if compass data is up to date (tmsp is not updated anywhere btw)
     if(SysClock::unixTime() - m_compass_data.tmsp < MAX_COMPASS_FRAME_TIMEFRAME)
     {
         // Create the rotation matrix
@@ -354,11 +352,11 @@ void CameraProcessingUtility::freeSpaceProcessing() {
 
 
     roi=dst;
-   /* if (WITH_GUI)
+    if (WITH_GUI)
     {
       imshow( "Display roi", cdst );
     }
- */   //imshow( "Display roi", cdst );
+    //imshow( "Display roi", cdst );
 
     /*
      * -----------------------------------------------------------------
@@ -385,7 +383,7 @@ void CameraProcessingUtility::freeSpaceProcessing() {
     this->m_freeSpaceFrame = m_freeSpaceFrame; 
     //cout << to_string(this->m_freeSpaceFrame.type) << endl;
     
-  /*  if (WITH_GUI)
+    if (WITH_GUI)
     {
         imshow( "Display distance", m_freeSpaceFrame );
     
@@ -411,14 +409,15 @@ void CameraProcessingUtility::freeSpaceProcessing() {
     }
     else
     {
-   */     usleep(100000);
-   // }
+        usleep(100000);
+    }
 
 }
 
 int CameraProcessingUtility::computeRelDistances() {
     int16_t n_cols = this->m_freeSpaceFrame.cols;
     int16_t n_rows = this->m_freeSpaceFrame.rows;
+    collidableMgr->removeOldVisualField();
 
     vector<int16_t> n_whitePixelsVect(n_cols);
     for (int i=0; i < n_cols; i++)
@@ -427,6 +426,7 @@ int CameraProcessingUtility::computeRelDistances() {
         {
             // Notice that in Opencv, it's Point(col,row) but Mat(row,col)
             if (this->m_freeSpaceFrame.at<unsigned char>(j,i) > 127) // pixels are black or white so we choose an arbitrary value
+                                                                     // for comparing 
             {
                 n_whitePixelsVect.at(i)++;
                 // might have to check there if the roi resulting from the processing
@@ -437,6 +437,8 @@ int CameraProcessingUtility::computeRelDistances() {
 
     }
     // not really optimized to reloop over the cols, but that's a first shot
+
+    std::lock_guard<std::mutex> guard(m_lock);
     int pixsPerSegment = n_cols/NUMBER_OF_SEGMENTS;
     uint16_t tmp_sum=0;
     for (int i=0; i<NUMBER_OF_SEGMENTS; i++)
@@ -445,7 +447,11 @@ int CameraProcessingUtility::computeRelDistances() {
         {
             tmp_sum += n_whitePixelsVect[i*pixsPerSegment+j];
         }
-        this->m_relBearingToRelObstacleDistance.insert(pair<int16_t ,uint16_t>(i-NUMBER_OF_SEGMENTS/2, tmp_sum));
+        // We insert the mean of the distance in a group of columns (called a segment here), scaled between 0 and 100
+        // this->m_relBearingToRelObstacleDistance.insert(pair<int16_t ,uint16_t>(i-NUMBER_OF_SEGMENTS/2, 100.0*tmp_sum/(heightFrame*pixsPerSegment)));
+        // Change from insert to operator[], as insert does not overwrite the value of an existing key, and operator[]
+        // does call the insert function in case the key doesn't exist yet.
+        this->m_relBearingToRelObstacleDistance[(i-NUMBER_OF_SEGMENTS/2)] = static_cast<unsigned short>(100.0 * tmp_sum / (heightFrame * pixsPerSegment));
         tmp_sum = 0;
     }
     return EXIT_SUCCESS;

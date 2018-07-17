@@ -11,7 +11,7 @@
  ***************************************************************************************/
 
 
-#include "../XbeePacketNetwork.h"
+#include "../Network/XbeePacketNetwork.h"
 #include "../SystemServices/SysClock.h"
 #include "SLIP.h"
 #ifdef __linux__

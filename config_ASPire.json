@@ -57,9 +57,9 @@
   "course_voter_weight": 1,
   "waypoint_voter_weight": 1,
   "wind_voter_weight": 1,
-  "channel_voter_weight": 1,
-  "midrange_voter_weight": 1,
-  "proximity_voter_weight": 2
+  "channel_voter_weight": 1.15,
+  "midrange_voter_weight": 0,
+  "proximity_voter_weight": 0
 },
 
 "config_wind_sensor": {

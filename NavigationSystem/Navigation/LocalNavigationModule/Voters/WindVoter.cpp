@@ -48,7 +48,7 @@ const ASRCourseBallot& WindVoter::vote( const BoatState_t& boatState )
 #ifdef on_ASPire  // defined in makefile, need to take into account downwind beating mode for ASPire
     if(abs(sin(Utility::degreeToRadian(twdBearingDiff))) <= abs(sin(Utility::degreeToRadian(TACK_ANGLE))))
     {
-        Logger::info("[Wind voter]: Beating mode needed");
+//        Logger::info("[Wind voter]: Beating mode needed");
         if(cos(Utility::degreeToRadian(twdBearingDiff)) >= 0) {
             if ( abs( Utility::headingDifference( boatState.heading, twd + TACK_ANGLE ) ) < 
                  abs( Utility::headingDifference( boatState.heading, twd - TACK_ANGLE ) ) )
@@ -59,7 +59,7 @@ const ASRCourseBallot& WindVoter::vote( const BoatState_t& boatState )
             {
                 courseBallot.add( twd - TACK_ANGLE, courseBallot.maxVotes() );
             }
-            Logger::info("[Wind voter]: Beating mode downwind");
+//            Logger::info("[Wind voter]: Beating mode downwind");
         } else {
             if ( abs( Utility::headingDifference( boatState.heading, twd + (180 - TACK_ANGLE) ) ) < 
                  abs( Utility::headingDifference( boatState.heading, twd - (180 - TACK_ANGLE) ) ) )
@@ -70,7 +70,7 @@ const ASRCourseBallot& WindVoter::vote( const BoatState_t& boatState )
             {
                 courseBallot.add( twd - (180 - TACK_ANGLE), courseBallot.maxVotes() );
             }
-            Logger::info("[Wind voter]: Beating mode upwind");
+//            Logger::info("[Wind voter]: Beating mode upwind");
         }
     }
 

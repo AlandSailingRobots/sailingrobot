@@ -18,6 +18,9 @@
 #include <opencv2/imgproc.hpp>
 #include <opencv2/imgcodecs.hpp>
 
+// On computer for visual rendering
+#include <opencv2/highgui.hpp>
+
 
 #include <vector>
 #include <thread>

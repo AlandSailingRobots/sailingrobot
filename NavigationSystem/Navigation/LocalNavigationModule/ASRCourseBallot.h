@@ -18,6 +18,8 @@
 
 #include <stdint.h>
 #include <cstring>
+#include <algorithm>
+#include <iterator>
 
 class ASRCourseBallot {
     friend class ASRArbiter;
@@ -81,8 +83,31 @@ class ASRCourseBallot {
     ///----------------------------------------------------------------------------------
     static const int ELEMENT_COUNT = 360 / COURSE_RESOLUTION;
 
+    ///----------------------------------------------------------------------------------
+    /// Find min and max, useful for debugging, tuning
+    ///----------------------------------------------------------------------------------
+    std::pair<int , int > getMin() {
+        std::pair<int, int> PAIR;
+        int16_t* p_index = std::min_element(std::begin(courses), std::end(courses));
+        int index = std::distance(std::begin(courses), p_index);
+        PAIR.first = index;
+        PAIR.second = *p_index;
+        return PAIR;
+    };
+    std::pair<int , int > getMax() {
+        std::pair<int, int> PAIR;
+        int16_t* p_index = std::max_element(std::begin(courses), std::end(courses));
+        const int index = std::distance(std::begin(courses),p_index);
+        PAIR.first = index;
+        PAIR.second = *p_index;
+        return PAIR;
+    };
+
+// TODO: Put back as a private variable after debugging
+    int16_t courses[ELEMENT_COUNT];
    private:
     const int16_t MAX_VOTES;
-    int16_t courses[ELEMENT_COUNT];
+    
     bool veto[ELEMENT_COUNT];
+
 };
