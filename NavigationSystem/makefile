@@ -33,7 +33,7 @@ ifneq ($(uname_m),armv7l)
 OPENCVFLAGS = `pkg-config opencv --cflags` #Not compiling on RaspberryPi
 OPENCVLIBS = `pkg-config opencv --libs` #Not compiling on RaspberryPi
 else
-OPENCV = -lopencv_core -lopencv_videoio -lopencv_imgproc #Compiling on RaspberryPi
+OPENCVLIBS = -lopencv_core -lopencv_videoio -lopencv_imgproc #Compiling on RaspberryPi
 endif
 
 ###############################################################################
