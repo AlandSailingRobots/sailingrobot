@@ -1,7 +1,7 @@
 #pragma once
 
 #include <iostream>
-#include "../Hardwares/CAN_Services/N2kMsg.h"
+#include "../../Hardwares/CAN_Services/N2kMsg.h"
 #include "../cxxtest/cxxtest/TestSuite.h"
 
 class CANMessageSuite : public CxxTest::TestSuite {

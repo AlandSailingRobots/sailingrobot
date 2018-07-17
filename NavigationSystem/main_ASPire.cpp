@@ -6,6 +6,8 @@
 #include "../Messages/DataRequestMsg.h"
 #include "../SystemServices/Logger.h"
 
+#include "../WorldState/CameraProcessingUtility.h"
+#include "../WorldState/AISProcessing.h"
 #include "../Navigation/WaypointMgrNode.h"
 #include "../WorldState/StateEstimationNode.h"
 #include "../WorldState/WindStateNode.h"
@@ -16,6 +18,7 @@
 
 #if LOCAL_NAVIGATION_MODULE == 1
   #include "../Navigation/LocalNavigationModule/LocalNavigationModule.h"
+  #include "../Navigation/LocalNavigationModule/Voters/CourseVoter.h"
   #include "../Navigation/LocalNavigationModule/Voters/WaypointVoter.h"
   #include "../Navigation/LocalNavigationModule/Voters/WindVoter.h"
   #include "../Navigation/LocalNavigationModule/Voters/ChannelVoter.h"
@@ -148,24 +151,33 @@ int main(int argc, char *argv[])
 	WingsailControlNode wingSailControlNode(messageBus, dbHandler);
 	CourseRegulatorNode courseRegulatorNode(messageBus, dbHandler);
 
+	CameraProcessingUtility cameraProcessingUtility(messageBus, dbHandler, &collidableMgr);
+	AISProcessing aisProcessing(messageBus, dbHandler, &collidableMgr);
+
   	#if LOCAL_NAVIGATION_MODULE == 1
 		LocalNavigationModule lnm	( messageBus, dbHandler );
 
 		const int16_t MAX_VOTES = dbHandler.retrieveCellAsInt("config_voter_system","1","max_vote");
+		CourseVoter courseVoter( MAX_VOTES, dbHandler.retrieveCellAsDouble("config_voter_system","1","course_voter_weight"));
 		WaypointVoter waypointVoter( MAX_VOTES, dbHandler.retrieveCellAsDouble("config_voter_system","1","waypoint_voter_weight")); // weight = 1
 		WindVoter windVoter( MAX_VOTES, dbHandler.retrieveCellAsDouble("config_voter_system","1","wind_voter_weight")); // weight = 1
 		ChannelVoter channelVoter( MAX_VOTES, dbHandler.retrieveCellAsDouble("config_voter_system","1","channel_voter_weight")); // weight = 1
 		MidRangeVoter midRangeVoter( MAX_VOTES, dbHandler.retrieveCellAsDouble("config_voter_system","1","midrange_voter_weight"), collidableMgr );
 		ProximityVoter proximityVoter( MAX_VOTES, dbHandler.retrieveCellAsDouble("config_voter_system","1","proximity_voter_weight"), collidableMgr);
 
+		lnm.registerVoter( &courseVoter );
 		lnm.registerVoter( &waypointVoter );
 		lnm.registerVoter( &windVoter );
 		lnm.registerVoter( &channelVoter );
+
+		// As there is no veto used in both avoidance voters for now, you can disable avoidance system just by
+		// putting a weigth of zero in config_ASPire.json and push the new config manually or through the website.
 		lnm.registerVoter( &proximityVoter );
 		lnm.registerVoter( &midRangeVoter );
   	#else
 		LineFollowNode sailingLogic(messageBus, dbHandler);
   	#endif
+
 
 	#if SIMULATION == 1
   		SimulationNode simulation(messageBus, 1, &collidableMgr);
@@ -178,10 +190,12 @@ int main(int argc, char *argv[])
 	  	ActuatorNodeASPire actuators(messageBus, canService);
 	  	CANArduinoNode actuatorFeedback(messageBus, dbHandler, canService);
 
+
 		CANMarineSensorReceiver canMarineSensorReciver(messageBus, canService);
 
 		CANMarineSensorTransmissionNode canMarineSensorTransmissionNode(messageBus, canService);
 		CANCurrentSensorNode canCurrentSensorNode(messageBus, dbHandler, canService);
+
 
 	#endif
 
@@ -205,6 +219,7 @@ int main(int argc, char *argv[])
 		initialiseNode(sailingLogic, "LineFollow", NodeImportance::CRITICAL);
 	#endif
 
+
 	#if SIMULATION == 1
 		initialiseNode(simulation,"Simulation",NodeImportance::CRITICAL);
 	#else
@@ -216,6 +231,8 @@ int main(int argc, char *argv[])
 		initialiseNode(canMarineSensorTransmissionNode, "Marine Sensors", NodeImportance::NOT_CRITICAL);
 		initialiseNode(canCurrentSensorNode, "Current Sensors", NodeImportance::NOT_CRITICAL);
 	#endif
+
+	initialiseNode(cameraProcessingUtility, "Camera Processing", NodeImportance::NOT_CRITICAL);
 
 	// Start active nodes
 	//-------------------------------------------------------------------------------
@@ -229,6 +246,8 @@ int main(int argc, char *argv[])
 	wingSailControlNode.start();
 	courseRegulatorNode.start();
 
+
+
 	#if SIMULATION == 1
 		simulation.start();
 	#else
@@ -241,6 +260,9 @@ int main(int argc, char *argv[])
 	#endif
 
 	#if LOCAL_NAVIGATION_MODULE == 1
+    // Cancel Camera Processing node if using voters without avoidance.
+    // Camera processing enabled for voter system only currently.
+	//  cameraProcessingUtility.start();
 		lnm.start();
 	#else
 		sailingLogic.start();
@@ -252,6 +274,8 @@ int main(int argc, char *argv[])
 	messageBus.run();
 
 
+
 	//Logger::shutdown();
+
 	exit(0);
 }

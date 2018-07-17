@@ -5,7 +5,7 @@ set(CMAKE_CONFIGURATION_TYPES "Debug" CACHE STRING "" FORCE)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -Wall -pedantic -Werror -std=gnu++14 -Wno-psabi")
 
-add_custom_target(sr ALL COMMAND make all USE_SIM=1)
+add_custom_target(sr ALL COMMAND make all USE_SIM=1 USE_LNM=1)
 
 include_directories(Database)
 include_directories(DataCollection)
@@ -624,6 +624,8 @@ add_executable(NavigationSystem
         Messages/WindDataMsg.h
         Messages/WindStateMsg.h
         Messages/WingSailCommandMsg.h
+        Navigation/LocalNavigationModule/Voters/CourseVoter.cpp
+        Navigation/LocalNavigationModule/Voters/CourseVoter.h
         Navigation/LocalNavigationModule/Voters/ChannelVoter.cpp
         Navigation/LocalNavigationModule/Voters/ChannelVoter.h
         Navigation/LocalNavigationModule/Voters/MidRangeVoter.cpp
@@ -753,6 +755,8 @@ add_executable(NavigationSystem
         Tests/unit-tests/UtilitySuite.h
         Tests/unit-tests/WaypointNodeSuite.h
         Tests/unit-tests/WindStateNodeSuite.h
+        WorldState/CameraProcessingUtility.cpp
+        WorldState/CameraProcessingUtility.h
         WorldState/CollidableMgr/Collidable.h
         WorldState/CollidableMgr/CollidableList.h
         WorldState/CollidableMgr/CollidableMgr.cpp

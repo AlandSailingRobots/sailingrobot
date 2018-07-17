@@ -28,15 +28,15 @@
 
 #include <stdint.h>
 #include <thread>
-#include "../Database/DBHandler.h"
-#include "../Database/DBLoggerNode.h"
-#include "../HTTPSync/HTTPSyncNode.h"
-#include "../MessageBus/MessageBus.h"
-#include "../Messages/CompassDataMsg.h"
-#include "../Messages/LocalConfigChangeMsg.h"
-#include "../Messages/LocalWaypointChangeMsg.h"
-#include "../SystemServices/Logger.h"
-#include "../SystemServices/Timer.h"
+#include "../../Database/DBHandler.h"
+#include "../../Database/DBLoggerNode.h"
+#include "../../HTTPSync/HTTPSyncNode.h"
+#include "../../MessageBus/MessageBus.h"
+#include "../../Messages/CompassDataMsg.h"
+#include "../../Messages/LocalConfigChangeMsg.h"
+#include "../../Messages/LocalWaypointChangeMsg.h"
+#include "../../SystemServices/Logger.h"
+#include "../../SystemServices/Timer.h"
 #include "../cxxtest/cxxtest/TestSuite.h"
 #include "TestMocks/MessageLogger.h"
 

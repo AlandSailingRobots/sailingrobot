@@ -57,6 +57,11 @@ class ASRVoter {
     ///----------------------------------------------------------------------------------
     std::string getName() { return name; }
 
+    ///----------------------------------------------------------------------------------
+    /// Returns the course ballot of the voter
+    ///----------------------------------------------------------------------------------
+    ASRCourseBallot* getBallot() { return &courseBallot; }
+
    protected:
     ASRCourseBallot courseBallot;
     float voterWeight;
