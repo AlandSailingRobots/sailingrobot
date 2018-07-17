@@ -128,7 +128,7 @@ void CameraProcessingUtility::start() {
 void CameraProcessingUtility::stop() {
     m_running = false;
     m_capture.release();
-#ifndef __ARM__
+#ifndef __arm__
     if (WITH_GUI)
     {
       destroyAllWindows();
@@ -146,7 +146,7 @@ void CameraProcessingUtility::CameraProcessingUtilityThreadFunc(ActiveNode* node
     
     std::chrono::duration<double> elapsed_seconds;
 
-#ifndef __ARM__
+#ifndef __arm__
    if (WITH_GUI)
     {
     namedWindow( "Display window", WINDOW_NORMAL );// Create a window for display.
@@ -238,7 +238,7 @@ void CameraProcessingUtility::freeSpaceProcessing() {
 
     imgOriginal = m_imgFullSize(thermalImagerArea).clone();
 
-#ifndef __ARM__
+#ifndef __arm__
     if (WITH_GUI)
     {
       imshow( "Display window", imgOriginal );
@@ -359,7 +359,7 @@ void CameraProcessingUtility::freeSpaceProcessing() {
 
 
     roi=dst;
-#ifndef __ARM__
+#ifndef __arm__
     if (WITH_GUI)
     {
       imshow( "Display roi", cdst );
@@ -392,7 +392,7 @@ void CameraProcessingUtility::freeSpaceProcessing() {
     this->m_freeSpaceFrame = m_freeSpaceFrame; 
     //cout << to_string(this->m_freeSpaceFrame.type) << endl;
 
-#ifndef __ARM__
+#ifndef __arm__
     if (WITH_GUI)
     {
         imshow( "Display distance", m_freeSpaceFrame );
