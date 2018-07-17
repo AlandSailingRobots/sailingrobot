@@ -36,6 +36,7 @@
 using namespace std;
 using namespace cv;
 
+
 #define WITH_GUI 1 // disable with 0
 #define CAMERA_DEVICE_ID 0 // 0 = default webcam
 #define DETECTOR_LOOP_TIME 250 // in ms (250 * 20 ms = 5s)
@@ -127,10 +128,12 @@ void CameraProcessingUtility::start() {
 void CameraProcessingUtility::stop() {
     m_running = false;
     m_capture.release();
+#ifndef __ARM__
     if (WITH_GUI)
     {
       destroyAllWindows();
     }
+#endif
     stopThread(this);
 }
 
@@ -143,6 +146,7 @@ void CameraProcessingUtility::CameraProcessingUtilityThreadFunc(ActiveNode* node
     
     std::chrono::duration<double> elapsed_seconds;
 
+#ifndef __ARM__
    if (WITH_GUI)
     {
     namedWindow( "Display window", WINDOW_NORMAL );// Create a window for display.
@@ -153,6 +157,7 @@ void CameraProcessingUtility::CameraProcessingUtilityThreadFunc(ActiveNode* node
     resizeWindow( "Display roi", widthFrame - lowFrameX, heightFrame - lowFrameY );
     resizeWindow( "Display distance", widthFrame - lowFrameX, heightFrame - lowFrameY );
     }
+#endif
 
 
     while(node->m_running) {
@@ -233,10 +238,12 @@ void CameraProcessingUtility::freeSpaceProcessing() {
 
     imgOriginal = m_imgFullSize(thermalImagerArea).clone();
 
+#ifndef __ARM__
     if (WITH_GUI)
     {
       imshow( "Display window", imgOriginal );
     }
+#endif
    
 
     /*
@@ -352,11 +359,13 @@ void CameraProcessingUtility::freeSpaceProcessing() {
 
 
     roi=dst;
+#ifndef __ARM__
     if (WITH_GUI)
     {
       imshow( "Display roi", cdst );
     }
     //imshow( "Display roi", cdst );
+#endif
 
     /*
      * -----------------------------------------------------------------
@@ -382,7 +391,8 @@ void CameraProcessingUtility::freeSpaceProcessing() {
     m_freeSpaceFrame = roi.clone();
     this->m_freeSpaceFrame = m_freeSpaceFrame; 
     //cout << to_string(this->m_freeSpaceFrame.type) << endl;
-    
+
+#ifndef __ARM__
     if (WITH_GUI)
     {
         imshow( "Display distance", m_freeSpaceFrame );
@@ -411,6 +421,7 @@ void CameraProcessingUtility::freeSpaceProcessing() {
     {
         usleep(100000);
     }
+#endif
 
 }
 

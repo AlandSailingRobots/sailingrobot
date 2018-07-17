@@ -26,9 +26,14 @@ TOOLCHAIN = 0
 export USE_SIM = 0
 export USE_LNM = 0
 
-## Temporary placed opencv libs
-OPENCV = `pkg-config opencv --cflags --libs`
-#OPENCV = -lopencv_core -lopencv_videoio -lopencv_imgproc  
+## OPENCV Libs for camera processing (depends if we compile for RaspberryPi or not)
+# To detect if we are not compiling for the RaspberryPi
+uname_m := $(shell uname -m)
+ifneq ($(uname_m),armv7l)
+OPENCV = `pkg-config opencv --cflags --libs` #Not compiling on RaspberryPi
+else
+OPENCV = -lopencv_core -lopencv_videoio -lopencv_imgproc #Compiling on RaspberryPi
+endif
 
 ###############################################################################
 # Tools
