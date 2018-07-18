@@ -72,7 +72,7 @@ void CANCurrentSensorNode::processFrame (CanMsg& msg) {
         m_element = static_cast<SensedElement>(sensor_id);       
         MessagePtr currentSensorDataMsg = std::make_unique<CurrentSensorDataMsg>(static_cast<float>(m_current),
      		           static_cast<float>(m_voltage), static_cast<SensedElement>(m_element));
-        Logger::info("Current sensor data: Current: %lf , Voltage: %lf , Sensor: %d \n",m_current,m_voltage,m_element);
+       // Logger::info("Current sensor data: Current: %lf , Voltage: %lf , Sensor: %d \n",m_current,m_voltage,m_element);
     }
 }
 
