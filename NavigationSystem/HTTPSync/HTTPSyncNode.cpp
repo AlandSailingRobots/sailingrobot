@@ -83,7 +83,6 @@ void HTTPSyncNode::processMessage(const Message* msgPtr) {
 	        pushWaypoints();
 		    break;
         case MessageType::WaypointData:
-            //m_sendwaypoints = true;
 	        pushWaypoints();
             break;
         case MessageType::LocalConfigChange:

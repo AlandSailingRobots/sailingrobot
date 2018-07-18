@@ -238,10 +238,10 @@ class DBHandler {
     bool insertTableRow(const char* tableName, typedValuePairs& values);
     int insertTableRowsErrors(const char* tableName, tableRows& rows);
 
-    bool transactionalReplaceTable(const char* tableName, tableRows& rows);
-    bool transactionalReplaceTable(const char* tableName, textTableRows& rows);
-    bool transactionalReplaceTable(textTable& table);
-    bool replaceTables(textTables& tables);
+    bool transactionalReplaceTable(const char *tableName, const tableRows &rows);
+    bool transactionalReplaceTable(const char *tableName, const textTableRows &rows);
+    bool transactionalReplaceTable(const textTable &table);
+    bool replaceTables(const textTables &tables);
 
     // UPDATE
     int prepareStmtUpdateError(sqlite3_stmt*& stmt,

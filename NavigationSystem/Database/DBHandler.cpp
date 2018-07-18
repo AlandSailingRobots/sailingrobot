@@ -1113,7 +1113,7 @@ int DBHandler::insertTableRowsErrors(const char* tableName, tableRows& rows) {
     return true;
 }
 
-bool DBHandler::transactionalReplaceTable(const char* tableName, tableRows& rows) {
+bool DBHandler::transactionalReplaceTable(const char *tableName, const tableRows &rows) {
     sqlite3* db = DBConnect();
     int retCode;
     std::string sql = "BEGIN TRANSACTION";
@@ -1143,18 +1143,18 @@ bool DBHandler::transactionalReplaceTable(const char* tableName, tableRows& rows
     return false;
 }
 
-bool DBHandler::transactionalReplaceTable(const char* tableName, textTableRows& rows) {
+bool DBHandler::transactionalReplaceTable(const char *tableName, const textTableRows &rows) {
     tableRows values;
     std::vector<std::pair<std::string, int>> columnTypes = getTableColumnTypes(tableName);
     valuesFromTextRows(values, rows, columnTypes);
     return transactionalReplaceTable(tableName, values);
 }
 
-bool DBHandler::transactionalReplaceTable(textTable& table) {
+bool DBHandler::transactionalReplaceTable(const textTable &table) {
     return transactionalReplaceTable(table.first.c_str(), table.second);
 }
 
-bool DBHandler::replaceTables(textTables& tables) {
+bool DBHandler::replaceTables(const textTables &tables) {
     int errors = 0;
     for (auto table : tables) {
         if (!transactionalReplaceTable(table)) {
