@@ -879,6 +879,7 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
         int _actuatorFeedbackId = 0;
         if (actuatorFeedbackId) {
             typedValuePairs values;
+            values.ints.clear(); values.doubles.clear(); values.strings.clear();
             addValue(values, "rudder_position", log.m_rudderPosition);
             addValue(values, "wingsail_position", log.m_wingsailPosition);
             addValue(values, "rc_on", log.m_radioControllerOn);
@@ -895,6 +896,7 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
         int _compassModelId = 0;
         if (compassModelId) {
             typedValuePairs values;
+	        values.ints.clear(); values.doubles.clear(); values.strings.clear();
             addValue(values, "heading", log.m_compassHeading);
             addValue(values, "pitch", log.m_compassPitch);
             addValue(values, "roll", log.m_compassRoll);
@@ -910,6 +912,7 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
         int _courseCalculationId = 0;
         if (courseCalculationId) {
             typedValuePairs values;
+	        values.ints.clear(); values.doubles.clear(); values.strings.clear();
             addValue(values, "distance_to_waypoint", log.m_distanceToWaypoint);
             addValue(values, "bearing_to_waypoint", log.m_bearingToWaypoint);
             addValue(values, "course_to_steer", log.m_courseToSteer);
@@ -927,6 +930,7 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
         int _marineSensorsId = 0;
         if (marineSensorsId) {
             typedValuePairs values;
+	        values.ints.clear(); values.doubles.clear(); values.strings.clear();
             addValue(values, "temperature", log.m_temperature);
             addValue(values, "conductivity", log.m_conductivity);
             addValue(values, "ph", log.m_ph);
@@ -943,6 +947,7 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
         int _vesselStateId = 0;
         if (vesselStateId) {
             typedValuePairs values;
+	        values.ints.clear(); values.doubles.clear(); values.strings.clear();
             addValue(values, "heading", log.m_vesselHeading);
             addValue(values, "latitude", log.m_vesselLat);
             addValue(values, "longitude", log.m_vesselLon);
@@ -960,6 +965,7 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
         int _windStateId = 0;
         if (windStateId) {
             typedValuePairs values;
+	        values.ints.clear(); values.doubles.clear(); values.strings.clear();
             addValue(values, "true_wind_speed", log.m_trueWindSpeed);
             addValue(values, "true_wind_direction", log.m_trueWindDir);
             addValue(values, "apparent_wind_speed", log.m_apparentWindSpeed);
@@ -976,6 +982,7 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
         int _windsensorId = 0;
         if (windsensorId) {
             typedValuePairs values;
+	        values.ints.clear(); values.doubles.clear(); values.strings.clear();
             addValue(values, "direction", log.m_windDir);
             addValue(values, "speed", log.m_windSpeed);
             addValue(values, "temperature", log.m_windTemp);
@@ -991,6 +998,7 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
         int _gpsId = 0;
         if (gpsId) {
             typedValuePairs values;
+	        values.ints.clear(); values.doubles.clear(); values.strings.clear();
             addValue(values, "has_fix", log.m_gpsHasFix);
             addValue(values, "online", log.m_gpsOnline);
             addValue(values, "time", log.m_gpsUnixTime);
@@ -1012,6 +1020,7 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
         int _currentSensorsId = 0;
         if (currentSensorsId) {
             typedValuePairs values;
+	        values.ints.clear(); values.doubles.clear(); values.strings.clear();
             addValue(values, "current", log.m_current);
             addValue(values, "voltage", log.m_voltage);
             addValue(values, "element", log.m_element);
@@ -1026,6 +1035,7 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
         }
 
         typedValuePairs values;
+	    values.ints.clear(); values.doubles.clear(); values.strings.clear();
         addValue(values, "actuator_feedback_id", _actuatorFeedbackId);
         addValue(values, "compass_id", _compassModelId);
         addValue(values, "course_calculation_id", _courseCalculationId);
