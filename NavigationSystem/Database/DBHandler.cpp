@@ -689,7 +689,7 @@ std::string DBHandler::getTablesAsJSON(std::string like, std::string statement) 
         int rowCnt = 0;
         for (auto pair : tables) {
             std::string table = pair.first;
-            std::vector<std::vector<std::string>> rows = pair.second;
+            textTableRows rows = pair.second;
 
             for (auto row : rows) {
                 js[table.c_str()].push_back(row);
