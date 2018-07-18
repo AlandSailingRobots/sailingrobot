@@ -68,7 +68,7 @@ class DBHandler {
     sqlite3* m_DBHandle = NULL;
 
     // execute INSERT query and add new row into table
-    bool DBTransaction(std::string SQLQuery);
+    bool DBTransaction(const std::string &SQLQuery);
     // bool DBTransaction(std::string SQLQuery, sqlite3 *db);
 
     // retrieve data from given table/tables, return value is a C 2D char array
@@ -126,9 +126,9 @@ class DBHandler {
 
     // For binding parameter values
     struct typedValuePairs {
-        std::vector<std::pair<const char*, int>> ints;
-        std::vector<std::pair<const char*, double>> doubles;
-        std::vector<std::pair<const char*, std::string>> strings;
+        std::vector<std::pair<std::string, int>> ints;
+        std::vector<std::pair<std::string, double>> doubles;
+        std::vector<std::pair<std::string, std::string>> strings;
     };
     typedef std::vector<typedValuePairs> tableRows;
 
@@ -137,7 +137,7 @@ class DBHandler {
     void insertDataLogs(std::vector<LogItem>& logs);
 
     // updates table with json string (data)
-    bool updateTableJson(std::string table, std::string data);
+    bool updateTableJson(const std::string &table, const std::string &data);
     /* bool updateTableJsonObject(std::string table, JSON data); */
 
     // updates table using values given
@@ -159,12 +159,12 @@ class DBHandler {
         return false;
     }
 
-    void clearTable(std::string table);
+    void clearTable(const std::string &table);
 
-    bool JSONAsTables(std::string& string, textTables& tables);
+    bool JSONAsTables(const std::string &string, textTables &tables);
 
-    void updateConfigs(std::string configs);
-    bool receiveWayPoints(std::string wayPoints);
+    void updateConfigs(const std::string &configs);
+    bool receiveWayPoints(const std::string &wayPointsJSON);
 
     DBHandler::textTables getTablesAsText(std::string like, std::string statement = "");
     std::string getTablesAsJSON(std::string like, std::string statement = "");
@@ -207,7 +207,7 @@ class DBHandler {
     int checkRetCode(int retCode) const;
 
     // For preparing
-    int prepareStmtError(sqlite3_stmt*& stmt, std::string sql);  // Ref here gave segfaults
+    int prepareStmtError(sqlite3_stmt *&stmt, const std::string &sql);  // Ref here gave segfaults
     int prepareStmtSelectFromStatements(sqlite3_stmt*& stmt,
                                         const std::string& expressions,
                                         const std::string& tables,
@@ -232,11 +232,11 @@ class DBHandler {
     int prepareStmtInsertError(sqlite3_stmt*& stmt,
                                const std::string& table,
                                std::vector<std::string>& columns);
-    int prepareStmtInsertError(sqlite3_stmt*& stmt,
-                               const std::string& table,
-                               typedValuePairs& values);
-    bool insertTableRow(const char* tableName, typedValuePairs& values);
-    int insertTableRowsErrors(const char* tableName, tableRows& rows);
+    int prepareStmtInsertError(sqlite3_stmt *&stmt,
+                               const std::string &table,
+                               const typedValuePairs &values);
+    bool insertTableRow(const char *tableName, const typedValuePairs &values);
+    int insertTableRowsErrors(const char *tableName, const tableRows &rows);
 
     bool transactionalReplaceTable(const char *tableName, const tableRows &rows);
     bool transactionalReplaceTable(const char *tableName, const textTableRows &rows);
@@ -244,16 +244,16 @@ class DBHandler {
     bool replaceTables(const textTables &tables);
 
     // UPDATE
-    int prepareStmtUpdateError(sqlite3_stmt*& stmt,
-                               const std::string& table,
-                               int id,
-                               std::vector<std::string>& columns);
-    int prepareStmtUpdateError(sqlite3_stmt*& stmt,
-                               const std::string& table,
-                               int id,
-                               typedValuePairs& values);
+    int prepareStmtUpdateError(sqlite3_stmt *&stmt,
+                               const std::string &table,
+                               const int id,
+                               const std::vector<std::string> &columns);
+    int prepareStmtUpdateError(sqlite3_stmt *&stmt,
+                               const std::string &table,
+                               const int id,
+                               const typedValuePairs &values);
 
-    bool updateTableRow(const char* table, int id, typedValuePairs& values);
+    bool updateTableRow(const char *table, int id, const typedValuePairs &values);
     template <typename T>
     bool updateTableIdColumnValue(const char* table, int id, const char* colName, T newValue) {
         typedValuePairs values;
@@ -261,7 +261,7 @@ class DBHandler {
         return updateTableRow(table, id, values);
     }
 
-    void valuesFromTextRows(tableRows &values, textTableRows &textRows, ColumnTypes &types);
+    void valuesFromTextRows(tableRows &values, const textTableRows &textRows, const ColumnTypes &types);
 
     // TODO: A select of multiple values into typedValuePairs struct would be nice
     // No... a row and named column name index!
@@ -437,10 +437,10 @@ class DBHandler {
 	int columnType(std::string name, ColumnTypes types);
 
     // Generic string utility functions
-    std::string prependString(const std::string& string, const char* const prefix);
+    std::string prependString(const std::string &string, const char *prefix);
     std::vector<std::string> prependStrings(const std::vector<std::string>& strings,
                                             const char* const prefix);
     std::string joinStrings(const std::vector<std::string>& elements, const char* const glue);
     std::vector<std::string> splitStrings(const std::string& string, const char glue);
-    int indexOfStringInStrings(std::vector<std::string> haystack, std::string needle);
+    int indexOfStringInStrings(const std::vector<std::string> &haystack, const std::string &needle);
 };

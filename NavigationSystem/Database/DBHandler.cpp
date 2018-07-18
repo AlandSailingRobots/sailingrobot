@@ -150,7 +150,7 @@ void DBHandler::DBClose() {
  * @param stmt
  * @return
  */
-int DBHandler::prepareStmtError(sqlite3_stmt*& stmt, std::string sql) {
+int DBHandler::prepareStmtError(sqlite3_stmt *&stmt, const std::string &sql) {
     sqlite3* db = DBConnect();
     int resultCode =
         checkRetCode(sqlite3_prepare_v2(db, sql.c_str(), (int)sql.size(), &stmt, nullptr));
@@ -196,17 +196,17 @@ int DBHandler::prepareStmtInsertError(sqlite3_stmt*& stmt,
     return prepareStmtError(stmt, sql);
 }
 
-int DBHandler::prepareStmtInsertError(sqlite3_stmt*& stmt,
-                                      const std::string& table,
-                                      typedValuePairs& values) {
+int DBHandler::prepareStmtInsertError(sqlite3_stmt *&stmt,
+                                      const std::string &table,
+                                      const typedValuePairs &values) {
     std::vector<std::string> names = valueNames(values);
     return prepareStmtInsertError(stmt, table, names);
 }
 
-int DBHandler::prepareStmtUpdateError(sqlite3_stmt*& stmt,
-                                      const std::string& table,
-                                      int id,
-                                      std::vector<std::string>& columns) {
+int DBHandler::prepareStmtUpdateError(sqlite3_stmt *&stmt,
+                                      const std::string &table,
+                                      const int id,
+                                      const std::vector<std::string> &columns) {
     std::string sql = "UPDATE " + table + " SET ";
     int i = 0;
     for (const auto& column : columns) {
@@ -224,10 +224,10 @@ int DBHandler::prepareStmtUpdateError(sqlite3_stmt*& stmt,
     return retCode;
 }
 
-int DBHandler::prepareStmtUpdateError(sqlite3_stmt*& stmt,
-                                      const std::string& table,
-                                      int id,
-                                      typedValuePairs& values) {
+int DBHandler::prepareStmtUpdateError(sqlite3_stmt *&stmt,
+                                      const std::string &table,
+                                      const int id,
+                                      const typedValuePairs &values) {
     std::vector<std::string> names = valueNames(values);
     return prepareStmtUpdateError(stmt, table, id, names);
 }
@@ -1058,7 +1058,7 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
  * @param newValue
  * @return
  */
-bool DBHandler::updateTableRow(const char* table, int id, typedValuePairs& values) {
+bool DBHandler::updateTableRow(const char* table, int id, const typedValuePairs& values) {
     sqlite3_stmt* stmt = nullptr;
     if (prepareStmtUpdateError(stmt, table, id, values) == SQLITE_OK) {
         if (bindValuesToStmt(values, stmt) == SQLITE_OK) {
@@ -1071,7 +1071,7 @@ bool DBHandler::updateTableRow(const char* table, int id, typedValuePairs& value
     return false;
 }
 
-bool DBHandler::insertTableRow(const char* tableName, typedValuePairs& values) {
+bool DBHandler::insertTableRow(const char* tableName, const typedValuePairs& values) {
     sqlite3_stmt* stmt = nullptr;
     if (prepareStmtInsertError(stmt, tableName, values) == SQLITE_OK) {
         if (bindValuesToStmt(values, stmt) == SQLITE_OK) {
@@ -1084,7 +1084,7 @@ bool DBHandler::insertTableRow(const char* tableName, typedValuePairs& values) {
     return false;
 }
 
-int DBHandler::insertTableRowsErrors(const char* tableName, tableRows& rows) {
+int DBHandler::insertTableRowsErrors(const char* tableName, const tableRows& rows) {
     sqlite3_stmt* stmt = nullptr;
     int retCode;
     int errors = 0;
@@ -1098,7 +1098,7 @@ int DBHandler::insertTableRowsErrors(const char* tableName, tableRows& rows) {
                 } else {
                     errors++;
                 }
-	            sqlite3_reset(stmt);
+                sqlite3_reset(stmt);
                 row++;
             }
         } else {
@@ -1113,7 +1113,7 @@ int DBHandler::insertTableRowsErrors(const char* tableName, tableRows& rows) {
     return true;
 }
 
-bool DBHandler::transactionalReplaceTable(const char *tableName, const tableRows &rows) {
+bool DBHandler::transactionalReplaceTable(const char* tableName, const tableRows& rows) {
     sqlite3* db = DBConnect();
     int retCode;
     std::string sql = "BEGIN TRANSACTION";
@@ -1122,8 +1122,8 @@ bool DBHandler::transactionalReplaceTable(const char *tableName, const tableRows
         sql = "DELETE FROM " + std::string(tableName);
         retCode = sqlite3_exec(db, sql.c_str(), nullptr, nullptr, &m_error);
         if (checkRetCode(retCode) != SQLITE_OK) {
-        	Logger::error("%s %s (%d) deleting data in table %s", __PRETTY_FUNCTION__,
-	                      sqlite3_errstr(retCode), retCode, tableName);
+            Logger::error("%s %s (%d) deleting data in table %s", __PRETTY_FUNCTION__,
+                          sqlite3_errstr(retCode), retCode, tableName);
         }
     }
     if (!insertTableRowsErrors(tableName, rows)) {
@@ -1143,18 +1143,18 @@ bool DBHandler::transactionalReplaceTable(const char *tableName, const tableRows
     return false;
 }
 
-bool DBHandler::transactionalReplaceTable(const char *tableName, const textTableRows &rows) {
+bool DBHandler::transactionalReplaceTable(const char* tableName, const textTableRows& rows) {
     tableRows values;
     std::vector<std::pair<std::string, int>> columnTypes = getTableColumnTypes(tableName);
     valuesFromTextRows(values, rows, columnTypes);
     return transactionalReplaceTable(tableName, values);
 }
 
-bool DBHandler::transactionalReplaceTable(const textTable &table) {
+bool DBHandler::transactionalReplaceTable(const textTable& table) {
     return transactionalReplaceTable(table.first.c_str(), table.second);
 }
 
-bool DBHandler::replaceTables(const textTables &tables) {
+bool DBHandler::replaceTables(const textTables& tables) {
     int errors = 0;
     for (auto table : tables) {
         if (!transactionalReplaceTable(table)) {
@@ -1165,7 +1165,9 @@ bool DBHandler::replaceTables(const textTables &tables) {
     return (errors == 0);
 }
 
-void DBHandler::valuesFromTextRows(tableRows& values, textTableRows& textRows, ColumnTypes& types) {
+void DBHandler::valuesFromTextRows(tableRows& values,
+                                   const textTableRows& textRows,
+                                   const ColumnTypes& types) {
     auto row = textRows.begin();
     textTableRow columnNames = *row;  // First row is column names
 
@@ -1176,7 +1178,7 @@ void DBHandler::valuesFromTextRows(tableRows& values, textTableRows& textRows, C
         typedValuePairs rowValues;
         while ((name != columnNames.end()) && (value != (*row).end())) {
             // Cheat by telling SQLite we have all strings and let it sort it out
-	        rowValues.strings.emplace_back(std::make_pair((*name).c_str(), *value));
+            rowValues.strings.emplace_back(std::make_pair((*name).c_str(), *value));
             name++;
             value++;
         }
@@ -1189,7 +1191,7 @@ void DBHandler::valuesFromTextRows(tableRows& values, textTableRows& textRows, C
  * @param SQLQuery
  * @return bool
  */
-bool DBHandler::DBTransaction(std::string SQLQuery) {
+bool DBHandler::DBTransaction(const std::string& SQLQuery) {
     sqlite3* db = DBConnect();
     m_error = nullptr;
 
@@ -1223,7 +1225,7 @@ bool DBHandler::DBTransaction(std::string SQLQuery) {
  * Deletes all values from a table
  * @param table name
  */
-void DBHandler::clearTable(std::string table) {
+void DBHandler::clearTable(const std::string& table) {
     // If no table to delete, doesn't matter
     DBTransaction("DELETE FROM " + table + ";");
 }
@@ -1244,7 +1246,7 @@ data) { JSON js = JSON::parse(data); for (auto element : js) { std::string name 
 }*/
 
 // TODO: Rewrite old
-bool DBHandler::updateTableJson(std::string table, std::string data) {
+bool DBHandler::updateTableJson(const std::string& table, const std::string& data) {
     std::vector<std::string> columns = getColumnInfo("name", table);
 
     if (columns.empty()) {
@@ -1281,7 +1283,7 @@ bool DBHandler::updateTableJson(std::string table, std::string data) {
 }
 
 // TODO: Rewrite old
-void DBHandler::updateConfigs(std::string configs) {
+void DBHandler::updateConfigs(const std::string& configs) {
     JSON js = JSON::parse(configs);
     if (js.empty()) {
         Logger::error("%s No JSON in \"%s\"", __PRETTY_FUNCTION__, configs);
@@ -1302,7 +1304,7 @@ void DBHandler::updateConfigs(std::string configs) {
     }
 }
 
-bool DBHandler::JSONAsTables(std::string& string, textTables& tables) {
+bool DBHandler::JSONAsTables(const std::string& string, textTables& tables) {
     JSON js = JSON::parse(string);
     for (const auto& jstable : js.items()) {
         std::string tableName = jstable.key();
@@ -1331,29 +1333,29 @@ bool DBHandler::JSONAsTables(std::string& string, textTables& tables) {
 
 /**
  * Processes waypoint data as JSON and replaces current DB contents
- * @param wayPoints
+ * @param wayPointsJSON
  * @return
  */
-bool DBHandler::receiveWayPoints(std::string wayPoints) {
-	textTables tables;
-	if (JSONAsTables(wayPoints, tables)) {
-		if (replaceTables(tables)) {
-			return true;
-		}
-		Logger::error("%s failed to get new waypoints", __PRETTY_FUNCTION__);
-	} else {
-		Logger::error("%s Unable to parse waypoint JSON \"%s\"", __PRETTY_FUNCTION__,
-		              wayPoints.c_str());
-	}
-	return false;
+bool DBHandler::receiveWayPoints(const std::string& wayPointsJSON) {
+    textTables tables;
+    if (JSONAsTables(wayPointsJSON, tables)) {
+        if (replaceTables(tables)) {
+            return true;
+        }
+        Logger::error("%s failed to get new waypoints", __PRETTY_FUNCTION__);
+    } else {
+        Logger::error("%s Unable to parse waypoint JSON \"%s\"", __PRETTY_FUNCTION__,
+                      wayPointsJSON.c_str());
+    }
+    return false;
 }
 
 /*******************************************************************************
  * Utility functions
  ******************************************************************************/
 
-std::string DBHandler::prependString(const std::string& string, const char* const prefix) {
-    return std::string(prefix) + string;
+std::string DBHandler::prependString(const std::string& string, const char* prefix) {
+    return std::move(std::string(prefix) + string);
 }
 
 std::vector<std::string> DBHandler::prependStrings(const std::vector<std::string>& strings,
@@ -1386,7 +1388,7 @@ std::string DBHandler::joinStrings(const std::vector<std::string>& elements,
             std::copy(elements.begin(), elements.end() - 1,
                       std::ostream_iterator<std::string>(os, glue));
             os << *elements.rbegin();
-            return os.str();
+            return std::move(os.str());
     }
 }
 
@@ -1412,7 +1414,8 @@ std::vector<std::string> DBHandler::splitStrings(const std::string& string, cons
     return std::move(result);
 }
 
-int DBHandler::indexOfStringInStrings(std::vector<std::string> haystack, std::string needle) {
+int DBHandler::indexOfStringInStrings(const std::vector<std::string>& haystack,
+                                      const std::string& needle) {
     int i = 0;
     for (const auto& string : haystack) {
         if (string == needle) {
@@ -1424,67 +1427,67 @@ int DBHandler::indexOfStringInStrings(std::vector<std::string> haystack, std::st
 }
 
 /*    JSON js = JSON::parse(wayPoints);
-	if (js.empty()) {
-		Logger::error("%s No JSON in \"%s\"", __PRETTY_FUNCTION__, wayPoints.c_str());
-		return false;
-	}
+    if (js.empty()) {
+        Logger::error("%s No JSON in \"%s\"", __PRETTY_FUNCTION__, wayPoints.c_str());
+        return false;
+    }
 
 
-	std::string DBPrinter;
-	std::string tempValue;
-	int valuesLimit = 11;  //"Dirty" fix for limiting the amount of values requested from server
-	// waypoint entries (amount of fields n = valuesLimit + 1)
-	int limitCounter;
+    std::string DBPrinter;
+    std::string tempValue;
+    int valuesLimit = 11;  //"Dirty" fix for limiting the amount of values requested from server
+    // waypoint entries (amount of fields n = valuesLimit + 1)
+    int limitCounter;
 
-	if (not DBTransaction("DELETE FROM currentMission;")) {
-		Logger::error("%s, Error: failed to delete waypoints", __PRETTY_FUNCTION__);
-	}
+    if (not DBTransaction("DELETE FROM currentMission;")) {
+        Logger::error("%s, Error: failed to delete waypoints", __PRETTY_FUNCTION__);
+    }
 
-	for (const auto& i : js.items()) {
-		// m_logger.info(i.value().dump());
+    for (const auto& i : js.items()) {
+        // m_logger.info(i.value().dump());
 
-		for (const auto& y : i.value().items()) {
-			limitCounter = valuesLimit;
-			DBPrinter =
-				"INSERT INTO currentMission "
-				"(declination,harvested,id,id_mission,is_checkpoint,latitude,longitude,name,radius,"
-				"rankInMission,stay_time) VALUES (";
+        for (const auto& y : i.value().items()) {
+            limitCounter = valuesLimit;
+            DBPrinter =
+                "INSERT INTO currentMission "
+                "(declination,harvested,id,id_mission,is_checkpoint,latitude,longitude,name,radius,"
+                "rankInMission,stay_time) VALUES (";
 
-			for (const auto& z : y.value().items()) {
-				// Each individual value
-				tempValue = z.value().dump();
-				tempValue = tempValue.substr(1, tempValue.size() - 2);
-				if (tempValue.empty()) {
-					tempValue = "NULL";
-				}
-				if (limitCounter > 0) {
-					limitCounter--;
-					DBPrinter = DBPrinter + tempValue + ",";
-				}
-			}
+            for (const auto& z : y.value().items()) {
+                // Each individual value
+                tempValue = z.value().dump();
+                tempValue = tempValue.substr(1, tempValue.size() - 2);
+                if (tempValue.empty()) {
+                    tempValue = "NULL";
+                }
+                if (limitCounter > 0) {
+                    limitCounter--;
+                    DBPrinter = DBPrinter + tempValue + ",";
+                }
+            }
 
-			// if (DBPrinter.size () > 0)  DBPrinter.resize (DBPrinter.size () - 1);
-			// DBPrinter = DBPrinter + "0);";
-			DBPrinter = DBPrinter.substr(0, DBPrinter.size() - 1) + ");";
-			std::cout << DBPrinter << "\n";
-			if (not DBTransaction(DBPrinter)) {
-				Logger::error("%s, Error: failed to add waypoints", __PRETTY_FUNCTION__);
-				return false;
-			}
-		}
-	}
+            // if (DBPrinter.size () > 0)  DBPrinter.resize (DBPrinter.size () - 1);
+            // DBPrinter = DBPrinter + "0);";
+            DBPrinter = DBPrinter.substr(0, DBPrinter.size() - 1) + ");";
+            std::cout << DBPrinter << "\n";
+            if (not DBTransaction(DBPrinter)) {
+                Logger::error("%s, Error: failed to add waypoints", __PRETTY_FUNCTION__);
+                return false;
+            }
+        }
+    }
 
-	// Make sure waypoints before the current waypoint are harvested
-	if (!m_currentWaypointId.empty()) {
-		std::string updateHarvested = "UPDATE currentMission SET harvested = 1 WHERE id < ";
-		updateHarvested += m_currentWaypointId + ";";
+    // Make sure waypoints before the current waypoint are harvested
+    if (!m_currentWaypointId.empty()) {
+        std::string updateHarvested = "UPDATE currentMission SET harvested = 1 WHERE id < ";
+        updateHarvested += m_currentWaypointId + ";";
 
-		if (not DBTransaction(updateHarvested)) {
-			Logger::error("%s, Error: failed to harvest waypoints", __PRETTY_FUNCTION__);
-			return false;
-		}
-	}
-	return true;*/
+        if (not DBTransaction(updateHarvested)) {
+            Logger::error("%s, Error: failed to harvest waypoints", __PRETTY_FUNCTION__);
+            return false;
+        }
+    }
+    return true;*/
 
 // NOTE : Marc : change this otherwise it doesn't work
 /*	int rows = 0;
