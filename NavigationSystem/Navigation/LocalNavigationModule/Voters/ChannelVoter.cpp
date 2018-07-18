@@ -51,8 +51,8 @@ const ASRCourseBallot& ChannelVoter::vote( const BoatState_t& boatState )
     }
     }
 
-    Logger::info("Max Distance From Line: %f Current distance from line: %f", maxDistanceFromLine, distanceFromMiddle);
-    Logger::info("Prev waypoint: %f , %f", boatState.lastWaypointLat, boatState.lastWaypointLon);
+//    Logger::info("Max Distance From Line: %f Current distance from line: %f", maxDistanceFromLine, distanceFromMiddle);
+//    Logger::info("Prev waypoint: %f , %f", boatState.lastWaypointLat, boatState.lastWaypointLon);
 
     //double distanceRatio = distanceFromMiddle / boatState.radius;
     double waypointLineBearing = CourseMath::calculateBTW( boatState.lastWaypointLon, boatState.lastWaypointLat, boatState.currWaypointLon, boatState.currWaypointLat );
