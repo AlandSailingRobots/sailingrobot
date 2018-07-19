@@ -60,7 +60,7 @@ BOOST_LOG_GLOBAL_LOGGER_INIT(global_logger, logger_t)
         //keywords::rotation_size = 10 * 1024 * 1024,                   // rotate when 10MB file size                
         //keywords::time_based_rotation = sinks::file::rotation_at_time_point(0, 0, 0), //example for rotating at a given time, midnight in this case
         //keywords::format = "[%TimeStamp%]: %Message%"  //One way to format
-
+        keywords::filter = expr::attr< logging::trivial::severity_level >("Severity") >= FILE_LOG_SEV_LVL,  // defined in makefile
         // Output example:  "000112	[2018-06-25_05:39:33.621094] : <info>    Info  message"
         keywords::format =
 	    (
@@ -77,6 +77,7 @@ BOOST_LOG_GLOBAL_LOGGER_INIT(global_logger, logger_t)
     // Log to console
     logging::add_console_log(
         std::cout,
+        keywords::filter = expr::attr< logging::trivial::severity_level >("Severity") >= CONSOLE_LOG_SEV_LVL,  // defined in makefile
         // Output example:  "000112	[05:39:33.621094] : <info>    Info  message"
         keywords::format = 
         (
@@ -87,11 +88,11 @@ BOOST_LOG_GLOBAL_LOGGER_INIT(global_logger, logger_t)
         )
     );
 
-    // Keep only "info" and higher severity logs
-    logging::core::get()->set_filter
-    (
-        expr::attr< logging::trivial::severity_level >("Severity") >= logging::trivial::info
-    );
+//    // Keep only "info" and higher severity logs
+//    logging::core::get()->set_filter
+//    (
+//        expr::attr< logging::trivial::severity_level >("Severity") >= logging::trivial::info
+//    );
 
     return lg;
 }

@@ -15,7 +15,7 @@ CANFrameReceiver(canService, MSG_ID_MARINE_SENSOR_DATA), m_msgBus(messageBus)
 }
 
 void CANMarineSensorReceiver::processFrame (CanMsg& msg) {
-    Logger::info("Received marine sensor readings from CanBus");
+    Logger::trace("Received marine sensor readings from CanBus");
 
     CanMessageHandler handler(msg);
 
@@ -38,7 +38,7 @@ void CANMarineSensorReceiver::processFrame (CanMsg& msg) {
 
 
         if(handler.getErrorMessage() > 0) {
-            Logger::error("Error from marine sensors, error code: %d", handler.getErrorMessage());
+            Logger::trace("Error from marine sensors, error code: %d", handler.getErrorMessage());
         }
     }
 }
