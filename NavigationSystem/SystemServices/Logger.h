@@ -1,42 +1,56 @@
+#define BOOST_LOG_DYN_LINK 1 //needed for compiling
 /****************************************************************************************
  *
  * File:
  * 		Logger.h
  *
  * Purpose:
- *		Provides functions for logging data to file and console. Support for the WRSC2016
- *		format is also included, see Notes.
+ *		Provides functions for logging data to file and console.
+ *      The logger starts and stops automatically with the program.
+ *
  *
  * Developer Notes:
- *		WRSC2016 Logging:
- *			The WRSC 2016 logging format is as follows:
- *
- *				“hhmmssdd	Lat*10^7		Lon*10^7”
- *
- *			The GPS coordinates need to be in the format of degress in decimals, e.g:
- *			60.3456. When WRSC logging is enabled a separate log file is generated
- *			containing only this data and is located alongside the program.
+ *      Useful links:
+ *        Boost library documentation: https://www.boost.org/
+ *        Stack Overflow topic:
+ *          https://stackoverflow.com/questions/20086754/how-to-use-boost-log-from-multiple-files-with-gloa/22068278#22068278
+ *          https://stackoverflow.com/questions/29785243/c-how-to-set-a-severity-filter-on-a-boost-global-logger
+ *      
  *
  ***************************************************************************************/
 
 #pragma once
+#include "SysClock.h"
 
-#include <cstdarg>
-#include <string>
-#include <vector>
-#ifndef _WIN32
-#include <mutex>
-#endif
-#include <fstream>
-#include <iostream>
-#include "sys/stat.h"
+#include <boost/log/expressions.hpp>
+#include <boost/log/sources/logger.hpp>
+#include <boost/log/sources/severity_logger.hpp>
+#include <boost/log/sources/record_ostream.hpp>
+#include <boost/log/sources/global_logger_storage.hpp>
+#include <boost/log/support/date_time.hpp>
+#include <boost/log/utility/setup/file.hpp>
+#include <boost/log/trivial.hpp>
+#include <boost/log/utility/setup/common_attributes.hpp>
+#include <boost/log/utility/setup/console.hpp>
+#include <boost/move/utility_core.hpp>
+
 
 #define DEFAULT_LOG_NAME "sailing.log"
 #define DEFAULT_LOG_NAME_WRSC "wrsc.log"
-#define FILE_PATH "../logs/"
+#define FILE_PATH "../logs/" 
+#define MAX_LOG_SIZE	256*2
+
+
+//Narrow-char thread-safe logger, with severity level declared above
+typedef boost::log::sources::severity_logger_mt<boost::log::trivial::severity_level> logger_t;
+
+//declares a global logger with a custom initialization declared in cpp file
+BOOST_LOG_GLOBAL_LOGGER(global_logger, logger_t)
+
 
 class Logger {
    public:
+    static std::string m_filename;
     /////////////////////////////////////////////////////////////////////////////////////
     /// Initialises the singleton logger system, returns false if it is unable to
     /// generate a log file.
@@ -50,8 +64,6 @@ class Logger {
     /// SHOULD ONLY BE USED FOR UNIT TESTS!
     static void DisableLogging();
 
-    static void shutdown();
-
     /////////////////////////////////////////////////////////////////////////////////////
     /// A globally accessable function to log messages to that works exactly like printf.
     ///
@@ -59,28 +71,18 @@ class Logger {
     /// @params ...					A variable list, this allows printf like behaviour
     ///
     /////////////////////////////////////////////////////////////////////////////////////
+    static void trace(std::string message, ...);
+    static void debug(std::string message, ...);
     static void info(std::string message, ...);
-    static void error(std::string message, ...);
     static void warning(std::string message, ...);
+    static void error(std::string message, ...);
+    static void fatal(std::string message, ...);
 
-    static void logWRSC(double latitude, double longitude);
+	//static void logWRSC(double latitude, double longitude);
 
    private:
-    static void log(std::string message);
 
-    static bool createLogFiles(const char* filename = 0);
-
-    static void writeBufferedLogs();
-
-    static std::string m_LogFilePath;
-    static std::ofstream m_LogFile;
-    static std::vector<std::string> m_LogBuffer;
-#ifndef _WIN32
-    static std::mutex m_Mutex;
-#endif
     static bool m_DisableLogging;
 
-#ifdef ENABLE_WRSC_LOGGING
-    static std::ofstream m_LogFileWRSC;
-#endif
+
 };
