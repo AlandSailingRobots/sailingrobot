@@ -7,7 +7,7 @@
 #include <mutex>
 #include <string>
 #include <vector>
-
+#include <queue>
 #include "../Libs/json/include/nlohmann/json.hpp"
 #include "../Messages/CurrentSensorDataMsg.h"
 #include "../Messages/WindStateMsg.h"
@@ -66,6 +66,8 @@ class DBHandler {
     std::string m_filePath;
     static std::mutex m_databaseLock;
     sqlite3* m_DBHandle = nullptr;
+
+	sqlite3_stmt* m_actuatorFeedbackStmt = nullptr;
 
     // execute INSERT query and add new row into table
     bool DBTransaction(const std::string &SQLQuery);
@@ -134,7 +136,7 @@ class DBHandler {
 
     /*int getRows(std::string table);*/
 
-    void insertDataLogs(std::vector<LogItem>& logs);
+    void insertDataLogs(std::queue<LogItem> &logs);
 
     // updates table with json string (data)
     bool updateTableJson(const std::string &table, const std::string &data);
