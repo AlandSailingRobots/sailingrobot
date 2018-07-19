@@ -35,8 +35,8 @@ class DBLogger {
     unsigned int bufferSize() { return m_bufferSize; }
 
    private:
-    template <typename FloatOrDouble>
-    FloatOrDouble setValue(FloatOrDouble value);
+/*    template <typename FloatOrDouble>
+    FloatOrDouble setValue(FloatOrDouble value);*/
 
     static void workerThread(DBLogger* ptr);
 	DBHandler& m_dbHandler;
@@ -45,7 +45,6 @@ class DBLogger {
     std::thread* m_workerThread;
 
 	std::mutex m_logFifoMutex;
-    std::atomic<bool> m_hasWork;
 	std::condition_variable m_signal;
 	std::atomic<bool> m_runFlag;
 
@@ -55,5 +54,4 @@ class DBLogger {
     std::vector<LogItem>* m_logBufferBack;*/
 
 	std::queue<LogItem>* m_logFifoIn;
-	std::queue<LogItem>* m_logFifoOut;
 };

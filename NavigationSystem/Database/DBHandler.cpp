@@ -33,7 +33,7 @@ DBHandler::DBHandler(std::string filePath) : m_filePath(std::move(filePath)) {
 }
 
 DBHandler::~DBHandler() {
-	sqlite3_finalize(m_actuatorFeedbackStmt);
+    sqlite3_finalize(m_actuatorFeedbackStmt);
     DBClose();
     m_databaseLock.unlock();
 }
@@ -889,18 +889,19 @@ void DBHandler::insertDataLogs(std::queue<LogItem>& logs) {
     vesselStateId       = 1 + getTableId("dataLogs_vessel_state");
     windStateId         = 1 + getTableId("dataLogs_wind_state");
     windsensorId        = 1 + getTableId("dataLogs_windsensor");
+    // clang-format on
 
     selectFrom(currentMissionId, "id_mission", "currentMission", "LIMIT 1");
     // selectFrom(currentWaypointId, "MIN(id)", "currentMission", "WHERE harvested = 0");
-    // clang-format on
+    // sqlite3_stmt* stmt = nullptr;
 
-    sqlite3_stmt* stmt = nullptr;
-
+    std::lock_guard<std::mutex> lock_guard(m_databaseLock);
     while (!logs.empty()) {
         LogItem log = std::move(logs.front());
         logs.pop();
 
-        std::string sql;
+        std::string sql = "BEGIN TRANSACTION";
+	    sqlite3_exec(db, sql.c_str(), nullptr, nullptr, &m_error);
 
         int _actuatorFeedbackId = 0;
         if (actuatorFeedbackId) {
@@ -913,11 +914,11 @@ void DBHandler::insertDataLogs(std::queue<LogItem>& logs) {
             if (m_actuatorFeedbackStmt ||
                 (!prepareStmtInsertError(m_actuatorFeedbackStmt, "dataLogs_actuator_feedback",
                                          values))) {
-	            sqlite3_reset(m_actuatorFeedbackStmt);
-            	bindValuesToStmt(values, m_actuatorFeedbackStmt);
+                bindValuesToStmt(values, m_actuatorFeedbackStmt);
                 if (sqlite3_step(m_actuatorFeedbackStmt) == SQLITE_DONE) {
                     _actuatorFeedbackId = actuatorFeedbackId + logNumber;
                 }
+                sqlite3_reset(m_actuatorFeedbackStmt);
             }
         }
 
@@ -928,11 +929,13 @@ void DBHandler::insertDataLogs(std::queue<LogItem>& logs) {
             addValue(values, "pitch", log.m_compassPitch);
             addValue(values, "roll", log.m_compassRoll);
             addValue(values, "t_timestamp", log.m_timestamp_str);
-            if (!prepareStmtInsertError(stmt, "dataLogs_compass", values)) {
-                bindValuesToStmt(values, stmt);
-                if (stepAndFinalizeStmt(stmt) == SQLITE_DONE) {
+            if (m_compassModelStmt ||
+                (!prepareStmtInsertError(m_compassModelStmt, "dataLogs_compass", values))) {
+                bindValuesToStmt(values, m_compassModelStmt);
+                if (sqlite3_step(m_compassModelStmt) == SQLITE_DONE) {
                     _compassModelId = compassModelId + logNumber;
                 }
+                sqlite3_reset(m_compassModelStmt);
             }
         }
 
@@ -945,11 +948,14 @@ void DBHandler::insertDataLogs(std::queue<LogItem>& logs) {
             addValue(values, "tack", log.m_tack);
             addValue(values, "going_starboard", log.m_goingStarboard);
             addValue(values, "t_timestamp", log.m_timestamp_str);
-            if (!prepareStmtInsertError(stmt, "dataLogs_course_calculation", values)) {
-                bindValuesToStmt(values, stmt);
-                if (stepAndFinalizeStmt(stmt) == SQLITE_DONE) {
+            if (m_courseCalculationStmt ||
+                (!prepareStmtInsertError(m_courseCalculationStmt, "dataLogs_course_calculation",
+                                         values))) {
+                bindValuesToStmt(values, m_courseCalculationStmt);
+                if (sqlite3_step(m_courseCalculationStmt) == SQLITE_DONE) {
                     _courseCalculationId = courseCalculationId + logNumber;
                 }
+                sqlite3_reset(m_courseCalculationStmt);
             }
         }
 
@@ -961,11 +967,13 @@ void DBHandler::insertDataLogs(std::queue<LogItem>& logs) {
             addValue(values, "ph", log.m_ph);
             addValue(values, "salinity", log.m_salinity);
             addValue(values, "t_timestamp", log.m_timestamp_str);
-            if (!prepareStmtInsertError(stmt, "dataLogs_marine_sensors", values)) {
-                bindValuesToStmt(values, stmt);
-                if (stepAndFinalizeStmt(stmt) == SQLITE_DONE) {
+            if (m_marineSensorsStmt ||
+                (!prepareStmtInsertError(m_marineSensorsStmt, "dataLogs_marine_sensors", values))) {
+                bindValuesToStmt(values, m_marineSensorsStmt);
+                if (sqlite3_step(m_marineSensorsStmt) == SQLITE_DONE) {
                     _marineSensorsId = marineSensorsId + logNumber;
                 }
+                sqlite3_reset(m_marineSensorsStmt);
             }
         }
 
@@ -978,11 +986,13 @@ void DBHandler::insertDataLogs(std::queue<LogItem>& logs) {
             addValue(values, "speed", log.m_vesselSpeed);
             addValue(values, "course", log.m_vesselCourse);
             addValue(values, "t_timestamp", log.m_timestamp_str);
-            if (!prepareStmtInsertError(stmt, "dataLogs_vessel_state", values)) {
-                bindValuesToStmt(values, stmt);
-                if (stepAndFinalizeStmt(stmt) == SQLITE_DONE) {
+            if (m_vesselStateStmt ||
+                (!prepareStmtInsertError(m_vesselStateStmt, "dataLogs_vessel_state", values))) {
+                bindValuesToStmt(values, m_vesselStateStmt);
+                if (sqlite3_step(m_vesselStateStmt) == SQLITE_DONE) {
                     _vesselStateId = vesselStateId + logNumber;
                 }
+                sqlite3_reset(m_vesselStateStmt);
             }
         }
 
@@ -994,11 +1004,13 @@ void DBHandler::insertDataLogs(std::queue<LogItem>& logs) {
             addValue(values, "apparent_wind_speed", log.m_apparentWindSpeed);
             addValue(values, "apparent_wind_direction", log.m_apparentWindDir);
             addValue(values, "t_timestamp", log.m_timestamp_str);
-            if (!prepareStmtInsertError(stmt, "dataLogs_wind_state", values)) {
-                bindValuesToStmt(values, stmt);
-                if (stepAndFinalizeStmt(stmt) == SQLITE_DONE) {
+            if (m_windStateStmt ||
+                (!prepareStmtInsertError(m_windStateStmt, "dataLogs_wind_state", values))) {
+                bindValuesToStmt(values, m_windStateStmt);
+                if (sqlite3_step(m_windStateStmt) == SQLITE_DONE) {
                     _windStateId = windStateId + logNumber;
                 }
+                sqlite3_reset(m_windStateStmt);
             }
         }
 
@@ -1009,11 +1021,13 @@ void DBHandler::insertDataLogs(std::queue<LogItem>& logs) {
             addValue(values, "speed", log.m_windSpeed);
             addValue(values, "temperature", log.m_windTemp);
             addValue(values, "t_timestamp", log.m_timestamp_str);
-            if (!prepareStmtInsertError(stmt, "dataLogs_windsensor", values)) {
-                bindValuesToStmt(values, stmt);
-                if (stepAndFinalizeStmt(stmt) == SQLITE_DONE) {
+            if (m_windsensorStmt ||
+                (!prepareStmtInsertError(m_windsensorStmt, "dataLogs_windsensor", values))) {
+                bindValuesToStmt(values, m_windsensorStmt);
+                if (sqlite3_step(m_windsensorStmt) == SQLITE_DONE) {
                     _windsensorId = windsensorId + logNumber;
                 }
+                sqlite3_reset(m_windsensorStmt);
             }
         }
 
@@ -1030,11 +1044,12 @@ void DBHandler::insertDataLogs(std::queue<LogItem>& logs) {
             addValue(values, "satellites_used", log.m_gpsSatellite);
             addValue(values, "route_started", log.m_routeStarted);
             addValue(values, "t_timestamp", log.m_timestamp_str);
-            if (!prepareStmtInsertError(stmt, "dataLogs_gps", values)) {
-                bindValuesToStmt(values, stmt);
-                if (stepAndFinalizeStmt(stmt) == SQLITE_DONE) {
+            if (m_gpsStmt || (!prepareStmtInsertError(m_gpsStmt, "dataLogs_gps", values))) {
+                bindValuesToStmt(values, m_gpsStmt);
+                if (sqlite3_step(m_gpsStmt) == SQLITE_DONE) {
                     _gpsId = gpsId + logNumber;
                 }
+                sqlite3_reset(m_gpsStmt);
             }
         }
 
@@ -1046,11 +1061,14 @@ void DBHandler::insertDataLogs(std::queue<LogItem>& logs) {
             addValue(values, "element", log.m_element);
             addValue(values, "element_str", log.m_element_str);
             addValue(values, "t_timestamp", log.m_timestamp_str);
-            if (!prepareStmtInsertError(stmt, "dataLogs_current_sensors", values)) {
-                bindValuesToStmt(values, stmt);
-                if (stepAndFinalizeStmt(stmt) == SQLITE_DONE) {
+            if (m_currentSensorsStmt ||
+                (!prepareStmtInsertError(m_currentSensorsStmt, "dataLogs_current_sensors",
+                                         values))) {
+                bindValuesToStmt(values, m_currentSensorsStmt);
+                if (sqlite3_step(m_currentSensorsStmt) == SQLITE_DONE) {
                     _currentSensorsId = currentSensorsId + logNumber;
                 }
+                sqlite3_reset(m_currentSensorsStmt);
             }
         }
 
@@ -1065,18 +1083,22 @@ void DBHandler::insertDataLogs(std::queue<LogItem>& logs) {
         addValue(values, "wind_state_id", _windStateId);
         addValue(values, "windsensor_id", _windsensorId);
         addValue(values, "current_mission_id", currentMissionId);
-        if (!prepareStmtInsertError(stmt, "dataLogs_system", values)) {
-            bindValuesToStmt(values, stmt);
-            if (stepAndFinalizeStmt(stmt) == SQLITE_DONE) {
+        if (m_systemStmt || (!prepareStmtInsertError(m_systemStmt, "dataLogs_system", values))) {
+            bindValuesToStmt(values, m_systemStmt);
+            if (sqlite3_step(m_systemStmt) == SQLITE_DONE) {
                 m_latestDataLogId = getTableId("dataLogs_system");
             } else {
                 m_latestDataLogId = 0;
                 Logger::error("%s Error, failed to create system log index!", __PRETTY_FUNCTION__);
             }
+            sqlite3_reset(m_systemStmt);
         }
         logNumber++;
+	    sql = "END TRANSACTION";
+	    sqlite3_exec(db, sql.c_str(), nullptr, nullptr, &m_error);
         Logger::info("Writing of log item %d completed", logNumber);
     }
+    m_databaseLock.unlock();
     DBDisconnect();
     Logger::info("Writing of %d log items completed.", logNumber);
 }

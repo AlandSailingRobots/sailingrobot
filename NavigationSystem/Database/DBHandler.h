@@ -67,7 +67,17 @@ class DBHandler {
     static std::mutex m_databaseLock;
     sqlite3* m_DBHandle = nullptr;
 
+    // Reusable statements for dataLog inserts
 	sqlite3_stmt* m_actuatorFeedbackStmt = nullptr;
+	sqlite3_stmt* m_compassModelStmt = nullptr;
+	sqlite3_stmt* m_courseCalculationStmt = nullptr;
+	sqlite3_stmt* m_marineSensorsStmt = nullptr;
+	sqlite3_stmt* m_vesselStateStmt = nullptr;
+	sqlite3_stmt* m_windStateStmt = nullptr;
+	sqlite3_stmt* m_windsensorStmt = nullptr;
+	sqlite3_stmt* m_gpsStmt = nullptr;
+	sqlite3_stmt* m_currentSensorsStmt = nullptr;
+	sqlite3_stmt* m_systemStmt = nullptr;
 
     // execute INSERT query and add new row into table
     bool DBTransaction(const std::string &SQLQuery);

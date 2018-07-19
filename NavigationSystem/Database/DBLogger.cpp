@@ -54,7 +54,6 @@ void DBLogger::log(LogItem& item) {
 	}*/
 	std::unique_lock<std::mutex> lock(m_logFifoMutex);
 	m_logFifoIn->push(item);  // Maybe emplace? Check std::move one level up
-	m_hasWork = true;
 	m_signal.notify_one();
 }
 /*
