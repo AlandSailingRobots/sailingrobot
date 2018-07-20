@@ -63,7 +63,7 @@ void ActuatorNodeASPire::sendCommandMessage()
 	// New version, have to do the changes on the arduino side before enabling
 //	messageHandler.encodeMappedMessage(m_rudderAngle, RUDDER_ANGLE_START, RUDDER_ANGLE_DATASIZE, RUDDER_ANGLE_IN_BYTE, MIN_RUDDER_ANGLE, MAX_RUDDER_ANGLE);
 //	messageHandler.encodeMappedMessage(m_wingsailAngle, WINGSAIL_ANGLE_START,  WINGSAIL_ANGLE_DATASIZE, WINGSAIL_ANGLE_IN_BYTE,  MIN_WINGSAIL_ANGLE, MAX_WINGSAIL_ANGLE);
-//    messageHandler.encodeMessage(m_windvaneSelfSteeringOn, WINDVANE_SELFSTEERING_ON_START, WINDVANE_SELFSTEERING_ON_DATASIZE, WINDVANE_SELFSTEERING_ON_IN_BYTE);
+//  messageHandler.encodeMessage(m_windvaneSelfSteeringOn, WINDVANE_SELFSTEERING_ON_START, WINDVANE_SELFSTEERING_ON_DATASIZE, WINDVANE_SELFSTEERING_ON_IN_BYTE);
 //	messageHandler.bitsetToCanMsg();
 
 

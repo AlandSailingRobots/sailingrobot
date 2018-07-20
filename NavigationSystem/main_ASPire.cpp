@@ -90,7 +90,6 @@ int main(int argc, char *argv[])
 	printf("\n");
 	printf("================================================================================\n");
 
-
 	// This is for eclipse development so the output is constantly pumped out.
 	setbuf(stdout, NULL);
 
