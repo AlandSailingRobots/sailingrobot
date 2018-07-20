@@ -9,7 +9,6 @@
  * Developer Notes:
  *		Refactored 2018-07 by Kåre Hampf <khampf@users.sourceforge.net>
  *		TODO: Implement the config sender on the website
- *		TODO: Could still sort the functions a bit if needed
  *
  ***************************************************************************************/
 

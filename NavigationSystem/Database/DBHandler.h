@@ -8,7 +8,6 @@
  *
  * Developer Notes:
  *		Refactored 2018-07 by Kåre Hampf <khampf@users.sourceforge.net>
- *		TODO: really move stuff from public to private
  *
  ***************************************************************************************/
 
