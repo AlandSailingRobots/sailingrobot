@@ -138,8 +138,8 @@ int main(int argc, char *argv[])
 	// Declare nodes
 	//-------------------------------------------------------------------------------
 
-	int dbLoggerQueueSize = 5; 			// how many messages to log to the databse at a time
-	DBLoggerNode dbLoggerNode(messageBus, dbHandler, dbLoggerQueueSize);
+	int dbLoggerQueueItems = 5; 			// how many messages to log to the databse at a time
+	DBLoggerNode dbLoggerNode(messageBus, dbHandler, dbLoggerQueueItems);
 
 	//HTTPSyncNode httpsync(messageBus, &dbHandler);
 

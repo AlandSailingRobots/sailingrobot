@@ -20,12 +20,12 @@
 // Debug for alternating current sensors
 // int debug_count = 0;
 
-DBLoggerNode::DBLoggerNode(MessageBus& msgBus, DBHandler& db, int queueSize)
+DBLoggerNode::DBLoggerNode(MessageBus& msgBus, DBHandler& db, int queueItems)
     : ActiveNode(NodeID::DBLoggerNode, msgBus),
       m_db(db),
-      m_dbLogger(queueSize, db),
+      m_dbLogger(queueItems, db),
       m_loopTime(0.5),
-      m_queueSize(queueSize)
+      m_queueSize(queueItems)
 
 {
     msgBus.registerNode(*this, MessageType::CompassData);

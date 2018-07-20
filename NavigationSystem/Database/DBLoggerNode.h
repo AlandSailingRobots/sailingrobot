@@ -10,7 +10,7 @@
 
 class DBLoggerNode : public ActiveNode {
    public:
-    DBLoggerNode(MessageBus& msgBus, DBHandler& db, int queueSize);
+    DBLoggerNode(MessageBus& msgBus, DBHandler& db, int queueItems);
 
     void processMessage(const Message* message);
 

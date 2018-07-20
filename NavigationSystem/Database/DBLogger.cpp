@@ -8,55 +8,53 @@
  *		worker thread.
  *
  * Developer Notes:
- *
+ *		Refactored 2018-07 by Kåre Hampf <khampf@users.sourceforge.net>
  *
  ***************************************************************************************/
 
 #include "DBLogger.h"
 
-DBLogger::DBLogger(unsigned int logBufferSize, DBHandler& dbHandler)
-    : m_dbHandler(dbHandler), m_bufferSize(logBufferSize) {
-/*    m_logBufferFront = new std::vector<LogItem>();
-    m_logBufferFront->reserve(logBufferSize);
-
-    m_logBufferBack = new std::vector<LogItem>();
-    m_logBufferBack->reserve(logBufferSize);*/
-	m_runFlag = true;
+/**
+ * Constructor
+ * @param logBufferItems	Number of items to buffer before send
+ * @param dbHandler
+ */
+DBLogger::DBLogger(unsigned int logBufferItems, DBHandler& dbHandler)
+    : m_dbHandler(dbHandler), m_bufferItems(logBufferItems) {
+    m_runFlag = true;
     m_logFifoIn = new std::queue<LogItem>();
 }
 
+/**
+ * Destructor
+ */
 DBLogger::~DBLogger() {
     // .store(false);
 
     // Wait for the mutex to be unlocked.
-    { std::lock_guard<std::mutex> lk(m_logFifoMutex); }
+    { std::unique_lock<std::mutex> lock(m_logFifoMutex); }
 
-    // instruct the worker thread to work
+    // instruct the worker thread to work and empty the queue
     m_signal.notify_all();
 
-	if (m_workerThread->joinable()) m_workerThread->join();
+    if (m_workerThread->joinable())
+        m_workerThread->join();
     delete m_workerThread;
 }
 
+/**
+ * Add LogItem to input buffer and wake up the worker thread
+ * @param item
+ */
 void DBLogger::log(LogItem& item) {
-/*	m_logBufferFront->push_back(item);
-
-	// Kick off the worker thread
-	if (m_logBufferFront->size() >= m_bufferSize) {
-		std::vector<LogItem>* tmp = m_logBufferBack;
-		m_logBufferBack = m_logBufferFront;
-		m_logBufferFront = tmp;
-
-		// Wait for the mutex to be unlocked.
-		{ std::lock_guard<std::mutex> lk(m_logFifoMutex); }
-		// instruct the worker thread to work
-		m_cv.notify_one();
-	}*/
-	std::unique_lock<std::mutex> lock(m_logFifoMutex);
-	m_logFifoIn->push(item);  // Maybe emplace? Check std::move one level up
-	m_signal.notify_one();
+    std::unique_lock<std::mutex> lock(m_logFifoMutex);
+    m_logFifoIn->push(item);  // Maybe emplace? Check std::move one level up
+    m_signal.notify_one();
 }
+
 /*
+ * This should be left here as it is brilliant!
+ *
 template <typename FloatOrDouble>
 FloatOrDouble DBLogger::setValue(
     FloatOrDouble value)  // Function to check if value is NaN before setting the value
@@ -69,36 +67,40 @@ FloatOrDouble DBLogger::setValue(
     return value;
 }*/
 
+/**
+ * Starts a single worker thread
+ */
 void DBLogger::startWorkerThread() {
-    // m_working.store(true);
     m_workerThread = new std::thread(workerThread, this);
 }
 
+/**
+ * Worker thread
+ * @param ptr to DBLogger for accessing mutexes and whatnots
+ */
 void DBLogger::workerThread(DBLogger* ptr) {
-	std::queue<LogItem> logFifoOut;
-	while (ptr->m_runFlag) {
-		{
-			std::unique_lock<std::mutex> lock(ptr->m_logFifoMutex);
-			while ((*ptr->m_logFifoIn).empty()) { // avoid spurious wake-ups
-				ptr->m_signal.wait(lock);
-			}
-		}
-		while (!(*ptr->m_logFifoIn).empty()) {
-			std::unique_lock<std::mutex> lock(ptr->m_logFifoMutex);
-			logFifoOut.emplace(std::move((*ptr->m_logFifoIn).front())); // emplace should move but here we are
-			(*ptr->m_logFifoIn).pop();
-			lock.unlock();
-		}
-		while (!logFifoOut.empty()) {   // an if-clause would do fine but DBHandler might fail
-			ptr->m_dbHandler.insertDataLogs(logFifoOut);
-		}
-	}
-/*    while (ptr->m_working.load() == true) {
-        std::unique_lock<std::mutex> locker(ptr->m_logFifoMutex);
-        ptr->m_cv.wait(locker);
-        if (ptr->m_logBufferBack->size() > 0) {
-            ptr->m_dbHandler.insertDataLogs(*ptr->m_logBufferBack);
-            ptr->m_logBufferBack->clear();
+    std::queue<LogItem> logFifoOut;
+    while (ptr->m_runFlag) {
+        {
+            // Get a lock, then release it and wait for signal
+            std::unique_lock<std::mutex> lock(ptr->m_logFifoMutex);
+            while ((*ptr->m_logFifoIn).empty()) {  // avoid spurious wake-ups
+                ptr->m_signal.wait(lock);
+            }
         }
-    }*/
+        while (!(*ptr->m_logFifoIn).empty()) {
+            // move everything from the input FIFO to the output FIFO
+            std::unique_lock<std::mutex> lock(ptr->m_logFifoMutex);
+            logFifoOut.emplace(
+                std::move((*ptr->m_logFifoIn).front()));  // emplace should move but here we are
+            (*ptr->m_logFifoIn).pop();
+            lock.unlock();
+        }
+        if (logFifoOut.size() >= ptr->m_bufferItems) {
+            // store the contents of the output FIFO in the database
+            while (!logFifoOut.empty()) {  // an if-clause would do fine but DBHandler might fail
+                ptr->m_dbHandler.insertDataLogs(logFifoOut);
+            }
+        }
+    }
 }
