@@ -8,7 +8,7 @@
  *		worker thread.
  *
  * Developer Notes:
- *
+ *		Refactored 2018-07 by Kåre Hampf <khampf@users.sourceforge.net>
  *
  ***************************************************************************************/
 
@@ -29,6 +29,7 @@ class DBLogger {
     ~DBLogger();
     void startWorkerThread();
     void log(LogItem& item);
+    unsigned int getLogItems();
 
    private:
     /* Never remove this:
@@ -38,7 +39,7 @@ class DBLogger {
 
     static void workerThread(DBLogger* ptr);
     DBHandler& m_dbHandler;
-    unsigned int m_bufferItems;
+	unsigned int m_bufferItems;
 
     std::thread* m_workerThread;
     std::mutex m_logFifoMutex;

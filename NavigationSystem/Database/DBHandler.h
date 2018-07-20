@@ -1,6 +1,18 @@
-#pragma once
+/**************************************************************************
+ *
+ * File:
+ * 		DBHandler.cpp
+ *
+ * Purpose:
+ *		Interacts with the SQLite database
+ *
+ * Developer Notes:
+ *		Refactored 2018-07 by Kåre Hampf <khampf@users.sourceforge.net>
+ *		TODO: really move stuff from public to private
+ *
+ ***************************************************************************************/
 
-// TODO really move stuff from public to private
+#pragma once
 
 #include <sqlite3.h>
 #include <iostream>
@@ -59,12 +71,15 @@ struct LogItem {
 };
 
 class DBHandler {
+    /*******************************************************************************
+     * private
+     ******************************************************************************/
    private:
+    std::mutex m_databaseLock;
     char* m_error;
-    int m_latestDataLogId = 0;
-    std::string m_currentWaypointId = "";
+    int m_latestDataLogId;
+    // std::string m_currentWaypointId = "";
     std::string m_filePath;
-    static std::mutex m_databaseLock;
     sqlite3* m_DBHandle = nullptr;
 
     // Reusable statements for dataLog inserts
@@ -83,52 +98,32 @@ class DBHandler {
     bool DBTransaction(const std::string& SQLQuery);
     // bool DBTransaction(std::string SQLQuery, sqlite3 *db);
 
-    // retrieve data from given table/tables, return value is a C 2D char array
-    // rows and columns also return values (through a reference) about rows and columns in the
-    // result set
-    std::vector<std::string> retrieveFromTable(const std::string& SQLSelect,
-                                               int& rows,
-                                               int& columns);
-
-    // adds a table row into the json object as a array if array flag is true,
-    // otherwise it adds the table row as a json object
-    // id field is not obligatory, can be left empty
-    /*    void getDataAsJson(std::string select,
-                           std::string table,
-                           std::string key,
-                           std::string id,
-                           JSON& js,
-                           bool useArray);*/
-
-    // gets the id column from a given table
-    /*std::vector<std::string> getTableIds(std::string table);*/
-
-    // gets all datatable names related to "ending" string
+    // gets all database table names related to "suffix" string
     // used to fetch all tables ending with _datalogs or _config
     std::vector<std::string> getTableNames(std::string like);
 
     // gets information(for instance: name/datatype) about all columns
-    std::vector<std::string> getColumnInfo(std::string& info, std::string& table);
+    // std::vector<std::string> getColumnInfo(std::string& info, std::string& table);
 
-    // help function used in insertDataLog
-    /*int insertLog(std::string table, std::string values);*/
-
-    // own implementation of deprecated sqlite3_get_table()
-    int getTable(const std::string& sql,
-                 std::vector<std::string>& results,
-                 int& rows,
-                 int& columns);
+    /*
+        // retrieve data from given table/tables, return value is a C 2D char array
+        // rows and columns also return values (through a reference) about rows and columns in the
+        // result set
+        std::vector<std::string> retrieveFromTable(const std::string& SQLSelect,
+                                                   int& rows,
+                                                   int& columns);
+        // own implementation of deprecated sqlite3_get_table()
+        int getTable(const std::string& sql,
+                     std::vector<std::string>& results,
+                     int& rows,
+                     int& columns);
+    */
 
     sqlite3* DBConnect();
     void DBDisconnect();
     void DBClose();
 
-   public:
-    explicit DBHandler(std::string filePath);
-    ~DBHandler();
-
-    bool initialise();
-
+    // Internal data structures
     typedef std::vector<std::string> textTableRow;
     typedef std::vector<textTableRow>
         textTableRows;  // 	typedef std::vector<std::vector<std::string>>;
@@ -137,7 +132,6 @@ class DBHandler {
     typedef std::vector<textTable>
         textTables;  // std::vector<std::pair<std::string, std::vector<std::vector<std::string>>>>
     typedef std::vector<std::pair<std::string, int>> ColumnTypes;
-
     // For binding parameter values
     struct typedValuePairs {
         std::vector<std::pair<std::string, int>> ints;
@@ -146,81 +140,15 @@ class DBHandler {
     };
     typedef std::vector<typedValuePairs> tableRows;
 
-    /*int getRows(std::string table);*/
-
-    void insertDataLogs(std::queue<LogItem>& logs);
-
-    // updates table with json string (data)
-    bool updateTableJson(const std::string& table, const std::string& data);
-    /* bool updateTableJsonObject(std::string table, JSON data); */
-
-    // updates table using values given
-    //  bool updateTableColumnIdValue(std::string table, std::string column, int id, T value);
-    template <typename T>
-    bool updateTableColumnIdValue(const char* table, const char* column, int id, T value) {
-        sqlite3_stmt* stmt = nullptr;
-        std::string sql = "UPDATE " + std::string(table) + " SET " + std::string(column) +
-                          " = :value WHERE ID = :id";
-        if (!prepareStmtError(stmt, sql)) {
-            bindParam(stmt, ":value", value);
-            bindParam(stmt, ":id", id);
-            if (stepAndFinalizeStmt(stmt) == SQLITE_DONE) {
-                return true;
-            }
-        }
-        // Logger::error("%s Error updating table %s using \"%s\"", __PRETTY_FUNCTION__, table,
-        // sql.c_str()); Can not use logger in templates
-        return false;
-    }
-
-    void clearTable(const std::string& table);
-
     bool JSONAsTables(const std::string& string, textTables& tables);
-
-    void updateConfigs(const std::string& configsJSON);
-    bool receiveWayPoints(const std::string& wayPointsJSON);
-
-    DBHandler::textTables getTablesAsText(const std::string& like,
-                                          const std::string& statement = "");
+    void clearTable(const std::string& table);
+    /* DBHandler:: */ textTables getTablesAsText(const std::string& like,
+                                                 const std::string& statement = "");
     std::string getTablesAsJSON(const std::string& like, const std::string& statement = "");
-    // returns all logs in database as json; supply onlyLatest to get only the ones with the highest
-    // id
-    std::string getLogsAsJSON(bool onlyLatest);
-
-    void forceUnlock() { m_databaseLock.unlock(); }
-
-    void clearLogs();
-
     // get id from table returns either max or min id from table.
-    // max = false -> min id
-    // max = true -> max id
-    enum ID_MINMAX { MIN_ID = false, MAX_ID = true };
+    // max = false -> min id, max = true -> max id
+    enum ID_MINMAX { MIN_ID = false, MAX_ID = true };  // Uggly enum
     int getTableId(const std::string& table, ID_MINMAX = MAX_ID);
-
-    // not implemented
-    // void deleteRow(std::string table, std::string id);
-
-    bool getWaypointValues(int& nextId,
-                           double& nextLongitude,
-                           double& nextLatitude,
-                           int& nextDeclination,
-                           int& nextRadius,
-                           int& nextStayTime,
-                           bool& isCheckpoint,
-                           int& prevId,
-                           double& prevLongitude,
-                           double& prevLatitude,
-                           int& prevDeclination,
-                           int& prevRadius,
-                           bool& foundPrev);
-
-    std::string getWayPointsAsJSON();
-
-    std::string getConfigs();
-
-    // Private SQLite wrapper functions
-    int checkRetCode(int retCode) const;
-
     // For preparing
     int prepareStmtError(sqlite3_stmt*& stmt, const std::string& sql);  // Ref here gave segfaults
     int prepareStmtSelectFromStatements(sqlite3_stmt*& stmt,
@@ -234,14 +162,12 @@ class DBHandler {
     void addValue(typedValuePairs& values, const std::string& name, double value);
     void addValue(typedValuePairs& values, const std::string& name, std::string& string);
     std::vector<std::string> valueNames(const typedValuePairs& values);
+    void valuesFromTextRows(tableRows& values,
+                            const textTableRows& textRows,
+                            const ColumnTypes& types);
     int bindParam(sqlite3_stmt*& stmt, const std::string& name, int value);
     int bindParam(sqlite3_stmt*& stmt, const std::string& name, double value);
     int bindParam(sqlite3_stmt*& stmt, const std::string& name, const std::string& text);
-    int bindStmtIntsDoublesStrings(
-        sqlite3_stmt*& stmt,
-        const std::vector<std::pair<const std::string, int>>& ints = {},
-        const std::vector<std::pair<const std::string, double>>& doubles = {},
-        const std::vector<std::pair<const std::string, std::string>>& strings = {});
 
     // INSERT
     int prepareStmtInsertError(sqlite3_stmt*& stmt,
@@ -267,95 +193,15 @@ class DBHandler {
                                const std::string& table,
                                const int id,
                                const typedValuePairs& values);
-
     bool updateTableRow(const std::string& table, int id, const typedValuePairs& values);
-    template <typename T>
-    bool updateTableIdColumnValue(const char* table, int id, const char* colName, T newValue) {
-        typedValuePairs values;
-        addValue(values, colName, newValue);
-        return updateTableRow(table, id, values);
-    }
 
-    void valuesFromTextRows(tableRows& values,
-                            const textTableRows& textRows,
-                            const ColumnTypes& types);
-
-    // TODO: A select of multiple values into typedValuePairs struct would be nice
-    // No... a row and named column name index!
-
-    /* Not in use
-    int prepareAndBindSelectFromId(sqlite3_stmt*& stmt,
-                                   const std::string& selector,
-                                   const std::string& from,
-                                   const int id); */
+    // Private SQLite wrapper functions
+    int checkRetCode(int retCode) const;
     int stepAndFinalizeStmt(sqlite3_stmt*& stmt) const;
-
-    // Retreiving data from SELECT queries
-    // TODO: move out from headers
-
-    //    void sqlite3_column_value(sqlite3_stmt *stmt, int index, int &value);
-    //    void sqlite3_column_value(sqlite3_stmt *stmt, int index, double &value);
-    //    void sqlite3_column_value(sqlite3_stmt *stmt, int index, std::string &value);
-    void sqlite3_column_value(sqlite3_stmt*& stmt, int index, int& value) {
-        value = sqlite3_column_int(stmt, index);
-    }
-    void sqlite3_column_value(sqlite3_stmt*& stmt, int index, bool& value) {
-        value = (sqlite3_column_int(stmt, index) != 0);
-    }
-    void sqlite3_column_value(sqlite3_stmt*& stmt, int index, double& value) {
-        value = sqlite3_column_double(stmt, index);
-    }
-    void sqlite3_column_value(sqlite3_stmt*& stmt, int index, std::string& value) {
-        if (sqlite3_column_type(stmt, index) == SQLITE_NULL) {
-            value = std::string();
-        } else {
-            const char* strp = (char*)sqlite3_column_text(stmt, index);
-            value = std::string(strp);
-        }
-    }
-
-    /*    template <typename T>   // TODO wrap
-        T selectFrom(const std::string& selector,
-                     const std::string& from,
-                     const std::string& statements = NULL,
-                     const std::vector<std::tuple<const char*, int>>& ints = {},
-                     const std::vector<std::tuple<const char*, double>>& doubles = {},
-                     const std::vector<std::tuple<const char*, std::string>>& strings = {}) {
-            sqlite3_stmt* stmt = NULL;
-            // TODO: Error checking (retVals)
-            prepareStmtSelectFromStatements(&stmt, selector, from, statements);
-            bindValuesToStmt(&stmt, ints, doubles, strings);
-            T retVal;
-            sqlite3_column_value(stmt, 0, &retVal);
-            sqlite3_finalize(stmt);
-            return retVal;
-        }*/
-
-    /*template <typename T>
-    int refSelectFromTemplate(
-      T &ref,
-      const std::string &selector,
-      const std::string &from,
-      const std::string &statements = nullptr,
-      const std::vector<std::pair<const std::string &, int>> &ints = {},
-      const std::vector<std::pair<const std::string &, double>> &doubles = {},
-      const std::vector<std::pair<const std::string &, std::string>> &strings = {}) {
-        int retCode;
-        sqlite3_stmt* stmt = nullptr;
-
-        retCode = prepareStmtSelectFromStatements(stmt, selector, from, statements);
-        if (!retCode)
-            retCode = bindStmtIntsDoublesStrings(stmt, ints, doubles, strings);
-        if (!retCode)
-            retCode = sqlite3_step(stmt);
-        if (retCode == SQLITE_ROW) {
-            sqlite3_column_value(stmt, 0, ref);
-            retCode = SQLITE_OK;
-        }
-        if (stmt != nullptr)
-            retCode = sqlite3_finalize(stmt);
-        return retCode;
-    }*/
+    void sqlite3_column_value(sqlite3_stmt*& stmt, int index, int& value);
+    void sqlite3_column_value(sqlite3_stmt*& stmt, int index, bool& value);
+    void sqlite3_column_value(sqlite3_stmt*& stmt, int index, double& value);
+    void sqlite3_column_value(sqlite3_stmt*& stmt, int index, std::string& value);
 
     template <typename T>
     int refSelectFromTemplate(T& ref,
@@ -379,122 +225,55 @@ class DBHandler {
             retCode = sqlite3_finalize(stmt);
         return retCode;
     }
+
     // Because I cannot get templates to work with strings
     void selectFrom(int& value,
                     const typedValuePairs& values,
                     const std::string& selector,
                     const std::string& from,
-                    const std::string& statements = nullptr) {
-        refSelectFromTemplate(value, values, selector, from, statements);
-    }
+                    const std::string& statements = nullptr);
     void selectFrom(int& value,
                     const std::string& selector,
                     const std::string& from,
-                    const std::string& statements = nullptr) {
-        refSelectFromTemplate(value, {{}, {}, {}}, selector, from, statements);
-    }
+                    const std::string& statements = nullptr);
     void selectFrom(double& value,
                     const typedValuePairs& values,
                     const std::string& selector,
                     const std::string& from,
-                    const std::string& statements = nullptr) {
-        refSelectFromTemplate(value, values, selector, from, statements);
-    }
+                    const std::string& statements = nullptr);
     void selectFrom(double& value,
                     const std::string& selector,
                     const std::string& from,
-                    const std::string& statements = nullptr) {
-        refSelectFromTemplate(value, {{}, {}, {}}, selector, from, statements);
-    }
+                    const std::string& statements = nullptr);
     void selectFrom(std::string& value,
                     const typedValuePairs& values,
                     const std::string& selector,
                     const std::string& from,
-                    const std::string& statements = nullptr) {
-        refSelectFromTemplate(value, values, selector, from, statements);
-    }
+                    const std::string& statements = nullptr);
     void selectFrom(std::string& value,
                     const std::string& selector,
                     const std::string& from,
-                    const std::string& statements = nullptr) {
-        refSelectFromTemplate(value, {{}, {}, {}}, selector, from, statements);
-    }
-    /*
-    void selectFrom(int &value,
-                    const std::string &selector,
-                    const std::string &from,
-                    const std::string &statements = nullptr,
-                    const std::vector<std::pair<const std::string &, int>> &ints = {},
-                    const std::vector<std::pair<const std::string &, double>> &doubles = {},
-                    const std::vector<std::pair<const std::string &, std::string>> &strings = {}) {
-        refSelectFromTemplate(value, selector, from, statements, ints, doubles, strings);
-    }
-    void selectFrom(double &value,
-                    const std::string &selector,
-                    const std::string &from,
-                    const std::string &statements = nullptr,
-                    const std::vector<std::pair<const std::string &, int>> &ints = {},
-                    const std::vector<std::pair<const std::string &, double>> &doubles = {},
-                    const std::vector<std::pair<const std::string &, std::string>> &strings = {}) {
-        refSelectFromTemplate(value, selector, from, statements, ints, doubles, strings);
-    }
-    void selectFrom(std::string &value,
-                    const std::string &selector,
-                    const std::string &from,
-                    const std::string &statements = nullptr,
-                    const std::vector<std::pair<const std::string &, int>> &ints = {},
-                    const std::vector<std::pair<const std::string &, double>> &doubles = {},
-                    const std::vector<std::pair<const std::string &, std::string>> &strings = {}) {
-        refSelectFromTemplate(value, selector, from, statements, ints, doubles, strings);
-    }
-*/
+                    const std::string& statements = nullptr);
 
-    // TODO: Below should probably be a template while the weird cases should be moved up into the
-    // overloads
+    // TODO: Below should probably be a template while the weird cases should be overloads
 
     // ints
-    void selectFromId(int& result, const std::string& selector, const std::string& from, int id) {
-        selectFrom(result, {{std::make_pair("id", id)}, {}, {}}, selector, from, "WHERE id = :id");
-    }
+    void selectFromId(int& result, const std::string& selector, const std::string& from, int id);
     void selectFromId(unsigned int& result,
                       const std::string& selector,
                       const std::string& from,
-                      int id) {
-        int i;
-        selectFromId(i, selector, from, id);
-        result = (unsigned int)i;
-    }
-    void selectFromId(bool& result, const std::string& selector, const std::string& from, int id) {
-        int i;
-        selectFromId(i, selector, from, id);
-        result = (i != 0);
-    }
+                      int id);
+    void selectFromId(bool& result, const std::string& selector, const std::string& from, int id);
 
     // floats
-    void selectFromId(double& result,
-                      const std::string& selector,
-                      const std::string& from,
-                      int id) {
-        selectFrom(result, {{std::make_pair("id", id)}, {}, {}}, selector, from, "WHERE id = :id");
-    }
-    void selectFromId(float& result, const std::string& selector, const std::string& from, int id) {
-        double d;
-        selectFromId(d, selector, from, id);
-        result = (float)d;
-    }
+    void selectFromId(double& result, const std::string& selector, const std::string& from, int id);
+    void selectFromId(float& result, const std::string& selector, const std::string& from, int id);
 
     // strings
     void selectFromId(std::string& result,
                       const std::string& selector,
                       const std::string& from,
-                      int id) {
-        selectFrom(result, {{std::make_pair("id", id)}, {}, {}}, selector, from, "WHERE id = :id");
-    }
-
-    template <typename T>
-    void getConfigFrom(T& retVal, const char* selector, const char* from) {  // REDO
-        selectFromId(retVal, std::string(selector), std::string(from), 1);
-    }
+                      int id);
 
     std::vector<std::vector<std::string>> getRowsAsText(sqlite3_stmt*& stmt,
                                                         bool rowHeader = false);
@@ -502,11 +281,88 @@ class DBHandler {
     ColumnTypes getTableColumnTypes(const std::string& tableName);
     int columnType(const std::string& name, ColumnTypes& types);
 
+    /*******************************************************************************
+     * public
+     ******************************************************************************/
+
+   public:
+    explicit DBHandler(std::string filePath);
+    ~DBHandler();
+    bool initialise();
+
+    // Receiver for log items from DBLogger
+    void insertDataLogs(std::queue<LogItem>& logs);
+
+    // Receivers for data coming in to the database from the website
+    void receiveConfigs(const std::string& configsJSON);
+    bool receiveWayPoints(const std::string& wayPointsJSON);
+
+    // Config value reader
+    template <typename T>
+    void getConfigFrom(T& retVal,
+                       const char* selector,
+                       const char* from) {  // std::string version as well?
+        selectFromId(retVal, std::string(selector), std::string(from), 1);
+    }
+    template <typename T>
+    bool updateTableIdColumnValue(const char* table, int id, const char* colName, T newValue) {
+        typedValuePairs values;
+        addValue(values, colName, newValue);
+        return updateTableRow(table, id, values);
+    }
+    template <typename T>
+    bool updateTableColumnIdValue(const char* table, const char* column, int id, T value) {
+        sqlite3_stmt* stmt = nullptr;
+        std::string sql = "UPDATE " + std::string(table) + " SET " + std::string(column) +
+                          " = :value WHERE ID = :id";
+        if (!prepareStmtError(stmt, sql)) {
+            bindParam(stmt, ":value", value);
+            bindParam(stmt, ":id", id);
+            if (stepAndFinalizeStmt(stmt) == SQLITE_DONE) {
+                return true;
+            }
+        }
+        // Logger::error("%s Error updating table %s using \"%s\"", __PRETTY_FUNCTION__, table,
+        // sql.c_str()); Can not use logger in templates
+        return false;
+    }
+
+    // Get dataLogs_* as JSON for sending to the website
+    // supply onlyLatest to get only the ones with the highest id
+    std::string getLogsAsJSON(bool onlyLatest);
+
+    // Empties all dataLog_* tables
+    void clearLogs();
+
+    // Waypoint value getter
+    bool getWaypointValues(int& nextId,
+                           double& nextLongitude,
+                           double& nextLatitude,
+                           int& nextDeclination,
+                           int& nextRadius,
+                           int& nextStayTime,
+                           bool& isCheckpoint,
+                           int& prevId,
+                           double& prevLongitude,
+                           double& prevLatitude,
+                           int& prevDeclination,
+                           int& prevRadius,
+                           bool& foundPrev);
+
+    // Waypoints table as JSON
+    std::string getWayPointsAsJSON();
+
+    // Config tables as JSON
+    std::string getConfigs();
+
+    // Well ... umm
+    void forceUnlock() { m_databaseLock.unlock(); }
+
     // Generic string utility functions
-    std::string prependString(const std::string& prefix, const std::string& str);
-    std::vector<std::string> prependStrings(const std::string& prefix,
-                                            const std::vector<std::string>& strings);
-    std::string joinStrings(const std::vector<std::string>& elements, const std::string& glue);
-    std::vector<std::string> splitStrings(const std::string& string, const char glue);
-    int indexOfStringInStrings(const std::vector<std::string>& haystack, const std::string& needle);
+    std::string prepend(const std::string& prefix, const std::string& str);
+    std::vector<std::string> prepend(const std::string& prefix,
+                                     const std::vector<std::string>& strings);
+    std::string implode(const std::vector<std::string>& elements, const std::string& glue);
+    std::vector<std::string> explode(const std::string& string, const char glue);
+    int indexOfString(const std::vector<std::string>& haystack, const std::string& needle);
 };

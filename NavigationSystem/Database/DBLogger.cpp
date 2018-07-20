@@ -52,6 +52,10 @@ void DBLogger::log(LogItem& item) {
     m_signal.notify_one();
 }
 
+unsigned int DBLogger::getLogItems() {
+	return m_bufferItems;
+}
+
 /*
  * This should be left here as it is brilliant!
  *

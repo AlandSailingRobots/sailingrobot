@@ -204,7 +204,7 @@ bool HTTPSyncNode::getConfigsFromServer() {
     if (checkIfNewConfigs()) {
         std::string configs = getData("getAllConfigs");
         if (!configs.empty()) {
-            m_dbHandler->updateConfigs(configs);
+	        m_dbHandler->receiveConfigs(configs);
             if (not m_dbHandler->updateTableColumnIdValue("state", "configs_updated", 1, 1)) {
                 Logger::error("%s Error updating state table", __PRETTY_FUNCTION__);
                 return false;
