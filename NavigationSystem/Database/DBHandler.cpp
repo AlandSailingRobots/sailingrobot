@@ -971,12 +971,9 @@ void DBHandler::insertDataLogs(std::queue<LogItem>& logs) {
     auto writeBegin = std::chrono::high_resolution_clock::now();
     if (logItems > 2 * limitItems) {
         Logger::warning(
-            "%s Combining %d inserts as the input count is over two times the limit (2x%d)",
+            "%s Combining %d inserts as single transaction due to log item flooding",
             __PRETTY_FUNCTION__, logItems, limitItems);
         sqlite3_exec(db, "BEGIN TRANSACTION", nullptr, nullptr, &m_error);
-    } else if ((logItems > limitItems) && (logItems <= 2 * limitItems)) {
-        Logger::warning("%s Combining %d inserts as the input count is over the limit (%d)",
-                        __PRETTY_FUNCTION__, logItems, limitItems);
     }
     while (!logs.empty()) {
         auto loopBegin =
