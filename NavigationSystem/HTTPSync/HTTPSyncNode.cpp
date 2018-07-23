@@ -83,7 +83,6 @@ void HTTPSyncNode::processMessage(const Message* msgPtr) {
 	        pushWaypoints();
 		    break;
         case MessageType::WaypointData:
-            //m_sendwaypoints = true;
 	        pushWaypoints();
             break;
         case MessageType::LocalConfigChange:
@@ -146,10 +145,10 @@ bool HTTPSyncNode::pushWaypoints() {
     std::string waypointsData = m_dbHandler->getWayPointsAsJSON();
     if (waypointsData.size() > 0) {
         if (performCURLCall(waypointsData, "pushWaypoints", response)) {
-            Logger::info("Waypoints pushed to server");
+            Logger::info("Waypoints table pushed to the server");
             return true;
         } else if (!m_reportedConnectError) {
-            Logger::warning("%s Failed to push waypoints to server", __PRETTY_FUNCTION__);
+            Logger::warning("%s Failed to push way points table to the server", __PRETTY_FUNCTION__);
         }
     }
     return false;
@@ -159,12 +158,11 @@ bool HTTPSyncNode::pushConfigs() {
     std::string response;
 
     if (performCURLCall(m_dbHandler->getConfigs(), "pushConfigs", response)) {
-        Logger::info("Configs pushed to server");
+        Logger::info("Configs pushed to the server");
         return true;
     } else if (!m_reportedConnectError) {
         Logger::warning("%s Error: ", __PRETTY_FUNCTION__);
     }
-
     return false;
 }
 
@@ -206,7 +204,7 @@ bool HTTPSyncNode::getConfigsFromServer() {
     if (checkIfNewConfigs()) {
         std::string configs = getData("getAllConfigs");
         if (!configs.empty()) {
-            m_dbHandler->updateConfigs(configs);
+	        m_dbHandler->receiveConfigs(configs);
             if (not m_dbHandler->updateTableColumnIdValue("state", "configs_updated", 1, 1)) {
                 Logger::error("%s Error updating state table", __PRETTY_FUNCTION__);
                 return false;
@@ -230,11 +228,11 @@ bool HTTPSyncNode::getWaypointsFromServer() {
             if (m_dbHandler->receiveWayPoints(waypoints)) {
                 MessagePtr newServerWaypoints = std::make_unique<ServerWaypointsReceivedMsg>();
                 m_MsgBus.sendMessage(std::move(newServerWaypoints));
-                Logger::info("Waypoints retrieved from remote server");
+                Logger::info("Waypoints retrieved from remote the server");
                 return true;
             }
         } else if (!m_reportedConnectError) {
-            Logger::warning("%s Could not fetch any new waypoints", __PRETTY_FUNCTION__);
+            Logger::error("%s Could not retrieve new way points from the server!", __PRETTY_FUNCTION__);
         }
     }
     return false;
@@ -280,7 +278,7 @@ bool HTTPSyncNode::performCURLCall(std::string data, std::string call, std::stri
         if (m_res == CURLE_OK) {
             if (m_reportedConnectError) {
                 m_reportedConnectError = false;
-                Logger::info("Connection to server re-established");
+                Logger::info("Connections to the server re-established");
             }
             return true;  // All is well
         } else {

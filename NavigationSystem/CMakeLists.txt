@@ -5,7 +5,15 @@ set(CMAKE_CONFIGURATION_TYPES "Debug" CACHE STRING "" FORCE)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -Wall -pedantic -Werror -std=gnu++14 -Wno-psabi")
 
-add_custom_target(sr ALL COMMAND make all USE_SIM=1 USE_LNM=1)
+add_custom_target(sr-all COMMAND make -C ${NavigationSystem_SOURCE_DIR} all CLION_EXE_DIR=${PROJECT_BINARY_DIR})
+add_custom_target(sr-nosim COMMAND make -C ${NavigationSystem_SOURCE_DIR} ASPire CLION_EXE_DIR=${PROJECT_BINARY_DIR})
+add_custom_target(sr-sim COMMAND make -C ${NavigationSystem_SOURCE_DIR} ASPire USE_SIM=1 CLION_EXE_DIR=${PROJECT_BINARY_DIR})
+add_custom_target(sr-sim-lnm COMMAND make -C ${NavigationSystem_SOURCE_DIR} ASPire USE_SIM=1 USE_LNM=1 CLION_EXE_DIR=${PROJECT_BINARY_DIR})
+
+add_custom_target(chroot-sr-all COMMAND sudo arch-chroot /home/sailbot/sailingrobot-chroot /usr/bin/make -C /root/sailingrobot/NavigationSystem clean ASPire CLION_EXE_DIR=${PROJECT_BINARY_DIR})
+add_custom_target(chroot-sr-nosim COMMAND sudo arch-chroot /home/sailbot/sailingrobot-chroot /usr/bin/make -C /root/sailingrobot/NavigationSystem clean ASPire CLION_EXE_DIR=${PROJECT_BINARY_DIR})
+add_custom_target(chroot-sr-sim COMMAND sudo arch-chroot /home/sailbot/sailingrobot-chroot /usr/bin/make -C /root/sailingrobot/NavigationSystem clean ASPire USE_SIM=1 CLION_EXE_DIR=${PROJECT_BINARY_DIR})
+add_custom_target(chroot-sr-sim-lnm COMMAND sudo arch-chroot /home/sailbot/sailingrobot-chroot /usr/bin/make -C /root/sailingrobot/NavigationSystem clean ASPire USE_SIM=1 USE_LNM=1 CLION_EXE_DIR=${PROJECT_BINARY_DIR})
 
 include_directories(Database)
 include_directories(DataCollection)

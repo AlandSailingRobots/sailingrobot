@@ -9,7 +9,7 @@ bool readConfig::exists(json &cfg, const std::string &key){
   return cfg[key]!=NULL;
 }
 
-void readConfig::waypointsInJson(json& wp, DBHandler db) {
+void readConfig::waypointsAsJSON(json &wp, DBHandler db) {
   wp = db.getWayPointsAsJSON();
 }
 
@@ -22,7 +22,7 @@ void readConfig::waypointsInJson(json& wp, DBHandler db) {
       cfg[it.key()] = merge(cfg[it.key()],idconst);
     }
   }
-  db.updateConfigs(cfg.dump());
+  db.receiveConfigs(cfg.dump());
   return true;
 } */
 
