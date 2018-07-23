@@ -38,6 +38,8 @@ enum class MessageType {
     WindState,
     LocalNavigation,
     ASPireActuatorFeedback,
+    JanetActuatorFeedback,
+    VelvetActuatorFeedback,
     MarineSensorData,
     AISData,
     WingSailCommand,
@@ -90,6 +92,10 @@ inline std::string msgToString(MessageType msgType) {
             return "LocalNavigation";
         case MessageType::ASPireActuatorFeedback:
             return "ASPireActuatorFeedback";
+        case MessageType::JanetActuatorFeedback:
+            return "JanetActuatorFeedback";
+        case MessageType::VelvetActuatorFeedback:
+            return "VelvetActuatorFeedback";
         case MessageType::MarineSensorData:
             return "MarineSensorData";
         case MessageType::AISData:

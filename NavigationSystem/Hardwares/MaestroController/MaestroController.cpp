@@ -27,6 +27,7 @@ int MaestroController::m_Handle = -1;
 bool MaestroController::init(std::string portName)
 {
 	m_Handle = open(portName.c_str(), O_RDWR | O_NOCTTY);
+    Logger::info("Handle: %d", m_Handle);
 
 	struct termios options;
 	tcgetattr(m_Handle, &options);

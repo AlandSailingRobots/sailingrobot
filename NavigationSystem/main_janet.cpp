@@ -27,12 +27,16 @@
 
 #if SIMULATION == 1
   #include "../Simulation/SimulationNode.h"
+
+  #include "../Hardwares/ArduinoNode.h"
+  #include "../Hardwares/MaestroController/MaestroController.h"
+  #include "../Hardwares/ActuatorNodeJanet.h"
 #else
   #include "../Hardwares/ArduinoNode.h"
   #include "../Hardwares/CV7Node.h"
   #include "../Hardwares/HMC6343Node.h"
   #include "../Hardwares/GPSDNode.h"
-  #include "ActuatorNodeJanet.h" // NOTE - Maël: It will change (to ActuatorNodeJanet.h)
+  #include "../Hardwares/ActuatorNodeJanet.h" // NOTE - Maël: It will change (to ActuatorNodeJanet.h)
   #include "../Hardwares/MaestroController/MaestroController.h"
   #include "../Xbee/Xbee.h"
   #include "../Xbee/XbeeSyncNode.h"
@@ -68,7 +72,7 @@ void initialiseNode(Node& node, const char* nodeName, NodeImportance importance)
 		if(importance == NodeImportance::CRITICAL)
 		{
 			Logger::error("Critical node failed to initialise, shutting down");
-			Logger::shutdown();
+			//Logger::shutdown();
 			exit(1);
 		}
 	}
@@ -130,7 +134,7 @@ int main(int argc, char *argv[])
 	else
 	{
 		Logger::error("Database Handler init\t\t[FAILED]");
-		Logger::shutdown();
+		//Logger::shutdown();
 		exit(1);
 	}
 
@@ -173,6 +177,14 @@ int main(int argc, char *argv[])
 
 	#if SIMULATION == 1
 	  	SimulationNode simulation(messageBus, 0, &collidableMgr);
+
+	  	// Testing on workstation
+	  	ArduinoNode arduino(messageBus, dbHandler);
+	  	int channel = 5;
+		int speed = 0;
+		int acceleration = 0;
+		ActuatorNodeJanet sail(messageBus, NodeID::SailActuator, channel, speed, acceleration);
+
   	#else
 		CV7Node windSensor(messageBus, dbHandler);
 		HMC6343Node compass(messageBus, dbHandler);
@@ -182,12 +194,12 @@ int main(int argc, char *argv[])
 		int channel = 3;
 		int speed = 0;
 		int acceleration = 0;
-		ActuatorNode sail(messageBus, NodeID::SailActuator, channel, speed, acceleration);
+		ActuatorNodeJanet sail(messageBus, NodeID::SailActuator, channel, speed, acceleration);
 
 		channel = 4;
 		speed = 0;
 		acceleration = 0;
-		ActuatorNode rudder(messageBus, NodeID::RudderActuator, channel, speed, acceleration);
+		ActuatorNodeJanet rudder(messageBus, NodeID::RudderActuator, channel, speed, acceleration);
 
 		MaestroController::init(dbHandler.retrieveCell("config_maestro_controller", "1", "port"));
 
@@ -216,6 +228,10 @@ int main(int argc, char *argv[])
 
 	#if SIMULATION == 1
 		initialiseNode(simulation,"Simulation",NodeImportance::CRITICAL);
+
+
+		initialiseNode(sail, "Sail Actuator", NodeImportance::CRITICAL);
+
 	#else
 		initialiseNode(windSensor, "Wind Sensor", NodeImportance::CRITICAL);
 		initialiseNode(compass, "Compass", NodeImportance::CRITICAL);
@@ -240,6 +256,10 @@ int main(int argc, char *argv[])
 
 	#if SIMULATION == 1
 		simulation.start();
+
+
+		arduino.start();
+
 	#else
 		windSensor.start();
 		compass.start();
@@ -259,6 +279,6 @@ int main(int argc, char *argv[])
 	messageBus.run();
 
 
-	Logger::shutdown();
+	//Logger::shutdown();
 	exit(0);
 }

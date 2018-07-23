@@ -13,6 +13,8 @@ if len(sys.argv) > 1:
         filename = 'config_ASPire.json'
     elif str(sys.argv[1]) == 'Janet':
         filename = 'config_Janet.json'
+    elif str(sys.argv[1]) == 'Velvet':
+        filename = 'config_Velvet.json'
     else :
         filename = str(sys.argv[1])
 else:
@@ -24,7 +26,7 @@ print(filename)
 try:
     cfg = json.load(open(filename))
 except FileNotFoundError:
-    sys.exit('Error to open the file.\nPlease enter in argument either \'ASPire\', \'Janet\' or the filepath.')
+    sys.exit('Error to open the file.\nPlease enter in argument either \'ASPire\', \'Janet\', \'Velvet\' or the filepath.')
 
 conn = sqlite3.connect('asr.db')
 db = conn.cursor()

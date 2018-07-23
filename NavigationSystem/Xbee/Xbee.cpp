@@ -12,7 +12,7 @@
  ***************************************************************************************/
 
 
-#include "../Xbee.h"
+#include "../Xbee/Xbee.h"
 #include "../SystemServices/Logger.h"
 #include <wiringSerial.h>
 #include <thread>

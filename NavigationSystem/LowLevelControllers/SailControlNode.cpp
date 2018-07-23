@@ -5,7 +5,7 @@
  *
  * Purpose:
  *      Calculates the desired sail angle.
- *      It sends a SailComandMsg corresponding to the command angle of the sail.
+ *      It sends a SailCommandMsg corresponding to the command angle of the sail.
  *
  * Developer Notes:
  *      Two functions have been developed to calculate the desired sail angle :
@@ -107,7 +107,7 @@ float SailControlNode::calculateSailAngleLinear()
     if(m_ApparentWindDir != DATA_OUT_OF_RANGE)
     {
         // Equation from book "Robotic Sailing 2015", page 141
-        return (m_MaxSailAngle-m_MinSailAngle)*std::fabs(Utility::limitAngleRange180(m_ApparentWindDir))/180 + m_MinSailAngle; //!!! on some pc abs only ouptut an int (ubuntu 14.04 gcc 4.9.3)
+        return (m_MaxSailAngle-m_MinSailAngle)*std::fabs(Utility::limitAngleRange180(m_ApparentWindDir))/180 + m_MinSailAngle; //!!! on some pc abs only output an int (ubuntu 14.04 gcc 4.9.3)
     }
     else
     {

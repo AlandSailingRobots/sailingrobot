@@ -34,9 +34,17 @@ Janet)
 		print_result false
 	fi
 	;;
+Velvet)
+	printf 'Creating database for Velvet in %s\n' "$DBFILE"
+	if sqlite3 "$DBFILE" <"$DIR/createtablesVelvet.sql"; then
+		print_result true
+	else
+		print_result false
+	fi
+	;;
 *)
 	printf "ERROR: No arguments to create the DataBase!\\n"
-	printf "Please insert 'ASPire' or 'Janet' as arguments to create the DB.\\n"
+	printf "Please insert 'ASPire', 'Janet' or 'Velvet' as arguments to create the DB.\\n"
 	exit 1
 	;;
 esac

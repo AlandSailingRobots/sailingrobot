@@ -1,6 +1,6 @@
 ###############################################################################
 #
-# Makefile for building the control system for Janet
+# Makefile for building the control system for Velvet
 #
 # This makefile cannot be run directly. Use the master makefile instead.
 #
@@ -12,7 +12,7 @@
 ###############################################################################
 
 # Source files
-SRC						= main_janet.cpp $(CORE_SRC) $(COLLIDABLE_MGR_SRC)
+SRC						= main_velvet.cpp $(CORE_SRC) $(COLLIDABLE_MGR_SRC)
 
 ifeq ($(USE_LNM),1)
 SRC						+= $(LNM_SRC)
@@ -21,11 +21,11 @@ SRC						+= $(LINE_FOLLOW_SRC)
 endif
 
 ifeq ($(USE_SIM),1)
-SRC						+= $(SIMULATOR_SRC) $(HW_SERVICES_ALL_SRC) $(HW_SERVICES_JANET_SRC) $(HW_NODES_ALL_SRC) \
-                                            							$(HW_NODES_JANET_SRC)
+SRC						+= $(SIMULATOR_SRC) $(HW_SERVICES_ALL_SRC) $(HW_SERVICES_VELVET_SRC) $(HW_NODES_ALL_SRC) \
+                                            							$(HW_NODES_VELVET_SRC)
 else
-SRC						+= $(HW_SERVICES_ALL_SRC) $(HW_SERVICES_JANET_SRC) $(HW_NODES_ALL_SRC) \
-							$(HW_NODES_JANET_SRC) $(XBEE_NETWORK_SRC)
+SRC						+= $(HW_SERVICES_ALL_SRC) $(HW_SERVICES_VELVET_SRC) $(HW_NODES_ALL_SRC) \
+							$(HW_NODES_VELVET_SRC)
 endif
 
 

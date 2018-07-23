@@ -144,6 +144,8 @@ export CAN_SERVICES_SRC 	= Hardwares/CAN_Services/CANPGNReceiver.cpp Hardwares/C
 
 export HW_SERVICES_JANET_SRC = Hardwares/MaestroController/MaestroController.cpp
 
+export HW_SERVICES_VELVET_SRC = Hardwares/MaestroController/MaestroController.cpp
+
 # Hardware nodes
 export HW_NODES_ALL_SRC		= Hardwares/HMC6343Node.cpp Hardwares/GPSDNode.cpp
 
@@ -153,7 +155,10 @@ export HW_NODES_ASPIRE_SRC 	= Hardwares/ActuatorNodeASPire.cpp Hardwares/CANAISN
                             	Hardwares/CANCurrentSensorNode.cpp 
 
 # ActuatorNode for Janet not compiling, uses removed ActuatorPositionMsg
-export HW_NODES_JANET_SRC 	= Hardwares/CV7Node.cpp Hardwares/ArduinoNode.cpp
+export HW_NODES_JANET_SRC 	= Hardwares/CV7Node.cpp Hardwares/ArduinoNode.cpp Hardwares/ActuatorNodeJanet.cpp
+
+# ActuatorNode for Velvet
+export HW_NODES_VELVET_SRC 	= Hardwares/CV7Node.cpp Hardwares/ArduinoNode.cpp Hardwares/ActuatorNodeVelvet.cpp
 
 # XBee network, XbeeSyncNode not compiling, uses removed ActuatorPositionMsg
 export XBEE_NETWORK_SRC     = Network/DataLink.cpp Network/LinuxSerialDataLink.cpp Network/XbeePacketNetwork.cpp \
@@ -180,6 +185,10 @@ ASPire: $(BUILD_DIR)
 ## Build the control system for Janet
 Janet: $(BUILD_DIR)
 	$(MAKE) -f Janet.mk
+
+## Build the control system for Velvet
+Velvet: $(BUILD_DIR)
+	$(MAKE) -f Velvet.mk
 
 ## Build the unit tests
 unit_tests: $(BUILD_DIR)
