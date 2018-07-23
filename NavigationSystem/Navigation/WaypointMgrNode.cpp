@@ -72,6 +72,7 @@ bool WaypointMgrNode::waypointReached() {
     if (harvestWaypoint()) {
         if (not m_db.updateTableIdColumnValue("currentMission", m_nextId, "harvested", 1)) {
             Logger::error("Failed to harvest waypoint");
+            return false;
         }
         Logger::info("Waypoint %d harvested", m_nextId);
         m_waypointTimer.stop();
@@ -98,7 +99,7 @@ void WaypointMgrNode::sendMessage() {
     if (m_db.getWaypointValues(m_nextId, m_nextLongitude, m_nextLatitude, m_nextDeclination,
                                m_nextRadius, m_nextStayTime, m_isCheckpoint, m_prevId,
                                m_prevLongitude, m_prevLatitude, m_prevDeclination, m_prevRadius,
-                               foundPrev)) {
+                               foundPrev) && m_nextId) {
         if (!foundPrev) {
             m_prevLatitude = m_vesselLatitude;
             m_prevLongitude = m_vesselLongitude;
@@ -129,7 +130,6 @@ void WaypointMgrNode::sendMessage() {
 
         Logger::info("Completed route in %d:%d:%d", hours, minutes, seconds);
     }
-
     m_db.forceUnlock();
 }
 
@@ -137,14 +137,15 @@ bool WaypointMgrNode::harvestWaypoint() {
     double DistanceToWaypoint =
         CourseMath::calculateDTW(m_vesselLongitude, m_vesselLatitude, m_nextLongitude,
                                  m_nextLatitude);  // Calculate distance to waypoint
+	if (!m_nextId) return false;
+
     // std::cout << "DistanceToWaypoint: " << DistanceToWaypoint << std::endl;
     if (DistanceToWaypoint > m_nextRadius) {
         return false;
     }
 
-    if (m_nextStayTime >
-        0)  // if next waypoint has a time to stay inside its radius, start the timer
-    {
+	// if next waypoint has a time to stay inside its radius, start the timer
+    if (m_nextStayTime > 0) {
         m_waypointTimer.start();  // NOTE : Marc : writeTime has never been initialized
         if (not writeTime) {
             Logger::info("Started waypoint timer. Stay at waypoint for: %d seconds",
@@ -152,17 +153,14 @@ bool WaypointMgrNode::harvestWaypoint() {
             writeTime = true;
         }
 
-        if (m_waypointTimer.timeReached(
-                m_nextStayTime))  // Check if boat has stayed the designated amount of time
-        {
+        if (m_waypointTimer.timeReached(m_nextStayTime)) { // Check if boat has stayed the designated amount of time
             Logger::info("Waypoint timer passed");
             writeTime = false;
             return true;
         }
 
         return false;
-    } else  // if no timer for waypoint, harvest it
-    {
+    } else { // if no timer for waypoint, harvest it
         return true;
     }
 }
