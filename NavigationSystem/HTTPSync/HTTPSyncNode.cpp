@@ -205,11 +205,13 @@ bool HTTPSyncNode::getConfigsFromServer() {
         std::string configs = getData("getAllConfigs");
         if (!configs.empty()) {
 	        m_dbHandler->receiveConfigs(configs);
+/*
+            This does not work as there no longer seems to exist any "state" table /Kåre
             if (not m_dbHandler->updateTableColumnIdValue("state", "configs_updated", 1, 1)) {
                 Logger::error("%s Error updating state table", __PRETTY_FUNCTION__);
                 return false;
             }
-
+*/
             MessagePtr newServerConfigs = std::make_unique<ServerConfigsReceivedMsg>();
             m_MsgBus.sendMessage(std::move(newServerConfigs));
             Logger::info("Configuration retrieved from remote server");

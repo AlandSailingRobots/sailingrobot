@@ -1451,29 +1451,14 @@ void DBHandler::receiveConfigs(const std::string& configsJSON) {
         Logger::error("%s Unable to parse config JSON \"%s\"", __PRETTY_FUNCTION__,
                       configsJSON.c_str());
     } else {
+    	// Re-add prefix "config_" to all table names
+		for (auto &table : tables) {
+			table.first = prepend("config_", table.first);
+		}
         if (!replaceTables(tables)) {
             Logger::error("%s failed to get new configs", __PRETTY_FUNCTION__);
         }
     }
-
-    /*JSON js = JSON::parse(configsJSON);
-    if (js.empty()) {
-        Logger::error("%s No JSON in \"%s\"", __PRETTY_FUNCTION__, configsJSON);
-    }
-    std::vector<std::string> tables;
-
-    for (const auto& i : js.items()) {
-        tables.push_back(i.key());  // For each table key
-    }
-
-    // tables = sailing_config config_buffer etc
-
-    for (const auto& table : tables) {  // for each table in there
-        if (js[table] != NULL) {
-            updateTableJson(table, js[table].dump());  // eg updatetablejson("sailing_config",
-                                                       // configs['sailing_config'] as json)
-        }
-    }*/
 }
 
 /**
