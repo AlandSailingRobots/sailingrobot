@@ -739,7 +739,11 @@ bool DBHandler::getWaypointValues(int& nextId,
         prepareStmtSelectFromStatements(stmt, "MIN(id)", "currentMission", "WHERE harvested = 0");
     if (retCode == SQLITE_OK) {
         retCode = sqlite3_step(stmt);
-        if (retCode == SQLITE_ROW) {
+        if (retCode != SQLITE_ROW) {
+	        Logger::info("%s Out of waypoints to harvest", __PRETTY_FUNCTION__);
+	        nextId = 0;
+	        return false;
+        } else {
             sqlite3_column_value(stmt, 0, nextId);
             sqlite3_finalize(stmt);
 
@@ -790,8 +794,9 @@ bool DBHandler::getWaypointValues(int& nextId,
         }
     }
 
-    if (checkRetCode(retCode) == SQLITE_OK)
-        return true;
+    if (checkRetCode(retCode) == SQLITE_OK) {
+	    return true;
+    }
     Logger::error("%s Errors when retrieving way points from local database", __PRETTY_FUNCTION__);
     return false;
 }

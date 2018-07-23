@@ -19,7 +19,7 @@
 #include <queue>
 #include <string>
 #include <vector>
-#include "../Libs/json/include/nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 #include "../Messages/CurrentSensorDataMsg.h"
 #include "../Messages/WindStateMsg.h"
 using JSON = nlohmann::json;
