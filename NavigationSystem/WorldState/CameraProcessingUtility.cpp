@@ -55,10 +55,10 @@ struct Compass
 // work for : regular webcam(output format should be documented) | 
 // registered frame from the thermal camera | thermal camera video input
 
-const int lowFrameX = 68; //0; //68 //29
-const int widthFrame = 585;//640; // 585; //257
+const int lowFrameX = 29; //0; //68 //29
+const int widthFrame = 257;//640; // 585; //257
 const int lowFrameY = 30;//0; //98; //30
-const int heightFrame = 440; //500;//480; //381; //195
+const int heightFrame = 195; //500;//480; //381; //195
 
 char c; // input for video display
 
@@ -113,9 +113,11 @@ bool CameraProcessingUtility::init() {
     if (this->m_capture.isOpened() == false) //  To check if object was associated to video input successfully
     {
         Logger::error("Node: CameraProcessingUtility - Camera not available");
+
         // Shutdown if no camera found
         // exit(EXIT_FAILURE);
 	    m_running = false;
+
     }
     Logger::info("Video capture initialized");
     return true;

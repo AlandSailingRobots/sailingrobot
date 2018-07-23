@@ -73,8 +73,8 @@ const ASRCourseBallot& ProximityVoter::vote( const BoatState_t& boatState )
             minBearing = i;
         }
     }
-    Logger::info("Max vote: %d Min vote: %d", maxVote, minVote);
-    Logger::info("Max bearing: %d Min bearing: %d", maxBearing, minBearing);
+//    Logger::info("Max vote: %d Min vote: %d", maxVote, minVote);
+//    Logger::info("Max bearing: %d Min bearing: %d", maxBearing, minBearing);
 
     /* NOTE: This voter should not take care of tacking, the wind voter is here or that
     //Logger::info("Lifetime Closest: %f Closest: %f", lifeTimeClosest, currClosest);
@@ -102,9 +102,9 @@ const ASRCourseBallot& ProximityVoter::vote( const BoatState_t& boatState )
 void ProximityVoter::visualAvoidance(){
     VisualField_t visualField = collidableMgr.getVisualField();
     //Debug variable;
-    int dbg = collidableMgr.getVisualField().bearingToRelativeObstacleDistance.size();
-    int n_nzero = 360 - std::count(std::begin(courseBallot.courses), std::end(courseBallot.courses), 0);
-    std::cout << dbg << " " << n_nzero << std::endl;
+//    int dbg = collidableMgr.getVisualField().bearingToRelativeObstacleDistance.size();
+//    int n_nzero = 360 - std::count(std::begin(courseBallot.courses), std::end(courseBallot.courses), 0);
+//    std::cout << dbg << " " << n_nzero << std::endl;
     if (visualField.bearingToRelativeObstacleDistance.empty()){
         return;
     }
@@ -114,9 +114,9 @@ void ProximityVoter::visualAvoidance(){
         bearingAvoidanceSmoothed(it.first, it.second);
         bearingPreferenceSmoothed(it.first, it.second);
    }
-    n_nzero = 360 - std::count(std::begin(courseBallot.courses), std::end(courseBallot.courses), 0);
-    std::cout << courseBallot.getMin().first << " " << courseBallot.getMin().second << std::endl;
-    std::cout << courseBallot.getMax().first << " " << courseBallot.getMax().second << std::endl;
+//    n_nzero = 360 - std::count(std::begin(courseBallot.courses), std::end(courseBallot.courses), 0);
+//    std::cout << courseBallot.getMin().first << " " << courseBallot.getMin().second << std::endl;
+//    std::cout << courseBallot.getMax().first << " " << courseBallot.getMax().second << std::endl;
 }
 
 
