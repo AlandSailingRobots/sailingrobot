@@ -34,7 +34,7 @@ const ASRCourseBallot& WaypointVoter::vote( const BoatState_t& boatState )
     double distance = CourseMath::calculateDTW( boatState.lon, boatState.lat, boatState.currWaypointLon, boatState.currWaypointLat );
     courseBallot.clear();
 
-//    Logger::info("Bearing to WP: %d Distance to WP: %f", boatState.waypointBearing, distance);
+    Logger::debug("Bearing to WP: %d Distance to WP: %f", boatState.waypointBearing, distance);
 
     //std::cout << "Waypoint Votes: ";
     for( int i = 0; i < 90; i+= ASRCourseBallot::COURSE_RESOLUTION )

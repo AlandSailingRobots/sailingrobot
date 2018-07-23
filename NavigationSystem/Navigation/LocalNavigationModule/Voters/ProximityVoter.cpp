@@ -73,8 +73,8 @@ const ASRCourseBallot& ProximityVoter::vote( const BoatState_t& boatState )
             minBearing = i;
         }
     }
-//    Logger::info("Max vote: %d Min vote: %d", maxVote, minVote);
-//    Logger::info("Max bearing: %d Min bearing: %d", maxBearing, minBearing);
+    Logger::debug("Max vote: %d Min vote: %d", maxVote, minVote);
+    Logger::debug("Max bearing: %d Min bearing: %d", maxBearing, minBearing);
 
     /* NOTE: This voter should not take care of tacking, the wind voter is here or that
     //Logger::info("Lifetime Closest: %f Closest: %f", lifeTimeClosest, currClosest);
