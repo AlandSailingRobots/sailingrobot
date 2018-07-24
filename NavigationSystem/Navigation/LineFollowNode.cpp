@@ -181,6 +181,13 @@ double LineFollowNode::calculateTargetCourse()
 
     std::lock_guard<std::mutex> lock_guard(m_lock);
 
+    // Quick Fix, might be better to tackle with this issue elsewhere, in a higher layer
+    if (m_prevWaypointLat == DATA_OUT_OF_RANGE || m_prevWaypointLon == DATA_OUT_OF_RANGE) {
+        m_prevWaypointLon = m_VesselLon;
+        m_prevWaypointLat = m_VesselLat;
+        m_prevWaypointRadius = 30.0;
+    }
+
     if ((m_VesselLat == DATA_OUT_OF_RANGE) || (m_VesselLon == DATA_OUT_OF_RANGE) || 
         (m_trueWindSpeed == DATA_OUT_OF_RANGE) || (m_trueWindDir == DATA_OUT_OF_RANGE) ||
         (m_nextWaypointLon == DATA_OUT_OF_RANGE) || (m_nextWaypointLat == DATA_OUT_OF_RANGE) || (m_nextWaypointRadius == DATA_OUT_OF_RANGE) )

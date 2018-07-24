@@ -147,6 +147,15 @@ void LocalNavigationModule::startBallot()
     arbiter.clearBallot();
     boatState.waypointBearing = CourseMath::calculateBTW( boatState.lon, boatState.lat, boatState.currWaypointLon, boatState.currWaypointLat );
 
+    //     Quick fix, same kind of thing than the Line Follow Node, prev waypoint stay set to init value, here its 0.0.
+    //     Comparison is to something just a bit higher than zero because we're using floating point number.
+    //     And we won't sail close to the actual 0.0 0.0 point anyway.
+
+    if (abs(boatState.lastWaypointLat) <= 0.001 || abs(boatState.lastWaypointLon) <= 0.001) {
+        boatState.lastWaypointLat = boatState.lat;
+        boatState.lastWaypointLon = boatState.lon;
+    }
+
 //    std::cout << "Arbiter min/max: " << *std::min_element(std::begin(arbiter.getResult().courses),std::end(arbiter.getResult().courses)) << " "
 //              <<  *std::max_element(std::begin(arbiter.getResult().courses),std::end(arbiter.getResult().courses)) << std::endl;
 
