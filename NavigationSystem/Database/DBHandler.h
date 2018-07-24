@@ -24,6 +24,13 @@
 #include "../Messages/WindStateMsg.h"
 using JSON = nlohmann::json;
 
+struct currentSensorItem {
+	float m_current;  // dataLogs_current_sensors
+	float m_voltage;
+	SensedElement m_element;
+	std::string m_element_str;
+};
+
 struct LogItem {
     double m_rudderPosition;  // dataLogs_actuator_feedback
     double m_wingsailPosition;
@@ -62,11 +69,8 @@ struct LogItem {
     float m_windDir;  // dataLogs_windsensor
     float m_windSpeed;
     float m_windTemp;
-    float m_current;  // dataLogs_current_sensors
-    float m_voltage;
-    SensedElement m_element;
-    std::string m_element_str;
-    std::string m_timestamp_str;
+	std::queue<currentSensorItem> m_currentSensorItems;
+	std::string m_timestamp_str;
 };
 
 class DBHandler {
@@ -355,7 +359,8 @@ class DBHandler {
     std::string getConfigs();
 
     // Well ... umm
-    void forceUnlock() { m_databaseLock.unlock(); }
+	void lock() { m_databaseLock.lock(); }
+    void unlock() { m_databaseLock.unlock(); }
 
     // Generic string utility functions
     std::string prepend(const std::string& prefix, const std::string& str);

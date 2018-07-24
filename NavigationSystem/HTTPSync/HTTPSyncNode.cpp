@@ -123,20 +123,41 @@ void HTTPSyncNode::HTTPSyncThread(ActiveNode* nodePtr) {
 
 bool HTTPSyncNode::pushDatalogs() {
 	std::string response;
+
+	if (m_removeLogs) {
+		Logger::info("%s Locking DB", __PRETTY_FUNCTION__);
+		m_dbHandler->lock();
+		Logger::info("%s Locked DB", __PRETTY_FUNCTION__);
+	}
     std::string logs = m_dbHandler->getLogsAsJSON(m_pushOnlyLatestLogs);
     if (!logs.size()) {
-	    Logger::warning("%s Not pushing empty logs to server", __PRETTY_FUNCTION__);
+	    // Logger::warning("%s Not pushing empty logs to server", __PRETTY_FUNCTION__);
+	    m_dbHandler->unlock();
+	    Logger::info("%s Unlocked DB", __PRETTY_FUNCTION__);
     	return true;
     }
+
     if (performCURLCall(logs, "pushAllLogs", response)) {
+	    if (m_pushOnlyLatestLogs) {
+		    Logger::info("%s Latest logs were pushed to the server", __PRETTY_FUNCTION__);
+	    } else {
+		    Logger::info("%s All logs were pushed to the server", __PRETTY_FUNCTION__);
+	    }
         // remove logs after push
         if (m_removeLogs) {
-            m_dbHandler->clearLogs();
+	        m_dbHandler->clearLogs();
+	        m_dbHandler->unlock();
+	        Logger::info("%s Unlocked DB", __PRETTY_FUNCTION__);
+	        Logger::info("%s Logs cleared", __PRETTY_FUNCTION__);
         }
         return true;
     } else if (!m_reportedConnectError) {
         Logger::warning("%s Could not push logs to server", __PRETTY_FUNCTION__);
     }
+	if (m_removeLogs) {
+		m_dbHandler->unlock();
+		Logger::info("%s Unlocked DB", __PRETTY_FUNCTION__);
+	}
     return false;
 }
 
