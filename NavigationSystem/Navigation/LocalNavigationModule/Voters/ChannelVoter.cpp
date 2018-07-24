@@ -39,7 +39,7 @@ const ASRCourseBallot& ChannelVoter::vote( const BoatState_t& boatState )
     //const double CUTOFF = 0.8;
     static double maxDistanceFromLine = 0;
 
-    double distanceFromMiddle = Utility::calculateSignedDistanceToLine( boatState.currWaypointLon, 
+    double distanceFromMiddle = Utility::calculateSignedDistanceToLine( boatState.currWaypointLon,
                                 boatState.currWaypointLat, boatState.lastWaypointLon, 
                                 boatState.lastWaypointLat, boatState.lon, boatState.lat );
 

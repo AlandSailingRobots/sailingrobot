@@ -140,7 +140,10 @@ bool WaypointMgrNode::harvestWaypoint() {
 	if (!m_nextId) return false;
 
     // std::cout << "DistanceToWaypoint: " << DistanceToWaypoint << std::endl;
-    if (DistanceToWaypoint > m_nextRadius) {
+
+    if (!m_nextId) return false;
+
+    if(DistanceToWaypoint > m_nextRadius) {
         return false;
     }
 
