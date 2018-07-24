@@ -116,8 +116,6 @@ void LocalNavigationModule::processMessage( const Message* msg )
             Logger::info( "New Waypoint! Lat: %f Lon: %f Distance: %f", boatState.currWaypointLat, boatState.currWaypointLon, distance );
             Logger::info( "Boat state: Lat: %f Lon: %f Heading: %f", boatState.lat, boatState.lon, boatState.heading );
 
-
-
             // Delibrate dropdown after a new waypoint, we want to start a new ballot
             // and get a new heading
         }
@@ -159,12 +157,14 @@ void LocalNavigationModule::startBallot()
 //    std::cout << "Arbiter min/max: " << *std::min_element(std::begin(arbiter.getResult().courses),std::end(arbiter.getResult().courses)) << " "
 //              <<  *std::max_element(std::begin(arbiter.getResult().courses),std::end(arbiter.getResult().courses)) << std::endl;
 
+
     std::vector<ASRVoter*>::iterator it;
 
     for( it = voters.begin(); it != voters.end(); it++ )
     {
         ASRVoter* voter = (*it);
         arbiter.castVote( voter->weight(), voter->vote( boatState ) );
+
         //arbiter.castVeto( voter->vote( boatState ) ); // vetos done with castVote now
         //voter->vote( boatState ).clear();
 //        std::cout << "Arbiter min/max (after vote " << std::distance(std::begin(voters), it) << "): " << *std::min_element(std::begin(arbiter.getResult().courses),std::end(arbiter.getResult().courses)) << " "
@@ -173,6 +173,7 @@ void LocalNavigationModule::startBallot()
 //        std::pair<int, int> minpair = voter->getBallot()->getMin();
 //        std::pair<int, int> maxpair = voter->getBallot()->getMax();
 //        std::cout << "Voter " << voter->getName().c_str() << " min: " << minpair.first << " " << minpair.second << " max: " << maxpair.first << " " << maxpair.second << std::endl;
+
     }
 /*
     printf("[Voters] "); // Debug
