@@ -116,8 +116,6 @@ void LocalNavigationModule::processMessage( const Message* msg )
             Logger::info( "New Waypoint! Lat: %f Lon: %f Distance: %f", boatState.currWaypointLat, boatState.currWaypointLon, distance );
             Logger::info( "Boat state: Lat: %f Lon: %f Heading: %f", boatState.lat, boatState.lon, boatState.heading );
 
-
-
             // Delibrate dropdown after a new waypoint, we want to start a new ballot
             // and get a new heading
         }
@@ -147,8 +145,14 @@ void LocalNavigationModule::startBallot()
     arbiter.clearBallot();
     boatState.waypointBearing = CourseMath::calculateBTW( boatState.lon, boatState.lat, boatState.currWaypointLon, boatState.currWaypointLat );
 
-//    std::cout << "Arbiter min/max: " << *std::min_element(std::begin(arbiter.getResult().courses),std::end(arbiter.getResult().courses)) << " "
-//              <<  *std::max_element(std::begin(arbiter.getResult().courses),std::end(arbiter.getResult().courses)) << std::endl;
+    //     Quick fix, same kind of thing than the Line Follow Node, prev waypoint stay set to init value, here its 0.0.
+    //     Comparison is to something just a bit higher than zero because we're using floating point number.
+    //     And we won't sail close to the actual 0.0 0.0 point anyway.
+
+    if (abs(boatState.lastWaypointLat) <= 0.001 || abs(boatState.lastWaypointLon) <= 0.001) {
+        boatState.lastWaypointLat = boatState.lat;
+        boatState.lastWaypointLon = boatState.lon;
+    }
 
     std::vector<ASRVoter*>::iterator it;
 
@@ -156,14 +160,6 @@ void LocalNavigationModule::startBallot()
     {
         ASRVoter* voter = (*it);
         arbiter.castVote( voter->weight(), voter->vote( boatState ) );
-        //arbiter.castVeto( voter->vote( boatState ) ); // vetos done with castVote now
-        //voter->vote( boatState ).clear();
-//        std::cout << "Arbiter min/max (after vote " << std::distance(std::begin(voters), it) << "): " << *std::min_element(std::begin(arbiter.getResult().courses),std::end(arbiter.getResult().courses)) << " "
-//              <<  *std::max_element(std::begin(arbiter.getResult().courses),std::end(arbiter.getResult().courses)) << std::endl;
-        // Debug/Tuning
-        std::pair<int, int> minpair = voter->getBallot()->getMin();
-        std::pair<int, int> maxpair = voter->getBallot()->getMax();
-        std::cout << "Voter " << voter->getName().c_str() << " min: " << minpair.first << " " << minpair.second << " max: " << maxpair.first << " " << maxpair.second << std::endl;
     }
 /*
     printf("[Voters] "); // Debug
