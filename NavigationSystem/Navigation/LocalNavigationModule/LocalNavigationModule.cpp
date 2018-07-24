@@ -170,9 +170,9 @@ void LocalNavigationModule::startBallot()
 //        std::cout << "Arbiter min/max (after vote " << std::distance(std::begin(voters), it) << "): " << *std::min_element(std::begin(arbiter.getResult().courses),std::end(arbiter.getResult().courses)) << " "
 //              <<  *std::max_element(std::begin(arbiter.getResult().courses),std::end(arbiter.getResult().courses)) << std::endl;
         // Debug/Tuning
-        std::pair<int, int> minpair = voter->getBallot()->getMin();
-        std::pair<int, int> maxpair = voter->getBallot()->getMax();
-        std::cout << "Voter " << voter->getName().c_str() << " min: " << minpair.first << " " << minpair.second << " max: " << maxpair.first << " " << maxpair.second << std::endl;
+//        std::pair<int, int> minpair = voter->getBallot()->getMin();
+//        std::pair<int, int> maxpair = voter->getBallot()->getMax();
+//        std::cout << "Voter " << voter->getName().c_str() << " min: " << minpair.first << " " << minpair.second << " max: " << maxpair.first << " " << maxpair.second << std::endl;
     }
 /*
     printf("[Voters] "); // Debug
