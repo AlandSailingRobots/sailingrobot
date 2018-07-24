@@ -393,7 +393,7 @@ INSERT INTO "config_gps" VALUES(1,0.5);
 INSERT INTO "config_line_follow" VALUES(1,0.5,45,30,15);
 INSERT INTO "config_solar_tracker" VALUES(1,1);
 INSERT INTO "config_vessel_state" VALUES(1, 0.5, 0.5, 1);
-INSERT INTO "config_voter_system" VALUES(1,0.5,25,1,1,1,1,2);
+INSERT INTO "config_voter_system" VALUES(1,0.5,100,1,1,1,1.15,0,0);
 INSERT INTO "config_wind_sensor" VALUES(1,0.5);
 INSERT INTO "config_wingsail_control" VALUES(1,0.5,15);
 INSERT INTO "config_xbee" VALUES(1,1,1,0,0.1,1);
