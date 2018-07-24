@@ -1296,13 +1296,15 @@ bool DBHandler::transactionalReplaceTable(const std::string& tableName, const ta
                           sqlite3_errstr(retCode), retCode, tableName.c_str());
         }
     }
-    if (!insertTableRowsErrors(tableName, rows)) {
-        sql = "END TRANSACTION";
-        retCode = sqlite3_exec(db, sql.c_str(), nullptr, nullptr, &m_error);
-    }
-    if (checkRetCode(retCode) == SQLITE_OK) {
-        return true;
-    }
+	if (retCode == SQLITE_OK) {
+		if (!insertTableRowsErrors(tableName, rows)) {
+			sql = "END TRANSACTION";
+			retCode = sqlite3_exec(db, sql.c_str(), nullptr, nullptr, &m_error);
+		}
+		if (checkRetCode(retCode) == SQLITE_OK) {
+			return true;
+		}
+	}
     Logger::error("%s %s (%d) when replacing data in table %s", __PRETTY_FUNCTION__,
                   sqlite3_errstr(retCode), retCode, tableName.c_str());
     retCode = sqlite3_exec(db, "ROLLBACK TRANSACTION;", nullptr, nullptr, &m_error);
