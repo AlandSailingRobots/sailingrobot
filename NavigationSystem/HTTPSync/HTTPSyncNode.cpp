@@ -50,6 +50,8 @@ bool HTTPSyncNode::init() {
     m_dbHandler->getConfigFrom(m_shipPWD, "boat_pwd", "config_httpsync");
     updateConfigsFromDB();
 
+	m_dataLogsSystemLastId = 0;
+
     m_initialised = true;
 
     return m_initialised;
@@ -124,16 +126,28 @@ void HTTPSyncNode::HTTPSyncThread(ActiveNode* nodePtr) {
 bool HTTPSyncNode::pushDatalogs() {
 	std::string response;
 
+/*
 	if (m_removeLogs) {
 		Logger::info("%s Locking DB", __PRETTY_FUNCTION__);
 		m_dbHandler->lock();
 		Logger::info("%s Locked DB", __PRETTY_FUNCTION__);
 	}
-    std::string logs = m_dbHandler->getLogsAsJSON(m_pushOnlyLatestLogs);
+*/
+
+	if (!m_dataLogsSystemLastId) {
+		Logger::warning("%s Last pushed log index unavailable, resetting last (might resend the latest log)", __PRETTY_FUNCTION__);
+		m_dataLogsSystemLastId = m_dbHandler->getTableId("dataLogs_system");
+	}
+
+	if (m_pushOnlyLatestLogs) {
+		// Note: this will continue to re-add the latest logline upstream!
+		std::string logs = m_dbHandler->getLogsAsJSON(m_pushOnlyLatestLogs);
+	} else {
+		// get only logs that are indexed after the last push
+
+	}
     if (!logs.size()) {
-	    // Logger::warning("%s Not pushing empty logs to server", __PRETTY_FUNCTION__);
-	    m_dbHandler->unlock();
-	    Logger::info("%s Unlocked DB", __PRETTY_FUNCTION__);
+	    Logger::warning("%s Not pushing empty logs to server", __PRETTY_FUNCTION__);    // disable again when debugged
     	return true;
     }
 

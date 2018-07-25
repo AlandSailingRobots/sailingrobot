@@ -101,10 +101,6 @@ class DBHandler {
     bool DBTransaction(const std::string& SQLQuery);
     // bool DBTransaction(std::string SQLQuery, sqlite3 *db);
 
-    // gets all database table names related to "suffix" string
-    // used to fetch all tables ending with _datalogs or _config
-    std::vector<std::string> getTableNames(std::string like);
-
     // gets information(for instance: name/datatype) about all columns
     // std::vector<std::string> getColumnInfo(std::string& info, std::string& table);
 
@@ -143,15 +139,19 @@ class DBHandler {
     };
     typedef std::vector<typedValuePairs> tableRows;
 
-    bool JSONAsTables(const std::string& string, textTables& tables);
+	// gets all database table names related to "suffix" string
+	// used to fetch all tables ending with _datalogs or _config
+	std::vector<std::string> getTableNames(const std::string &like, const std::string &statements = "");
+	int sqliteTypeFromString(std::string const& typestr);
+	ColumnTypes getTableColumnTypes(const std::string& tableName);
+	std::vector<std::string> getTableColumnNames(const std::string& tableName);
+	int columnType(const std::string& name, ColumnTypes& types);
+
+	bool JSONAsTables(const std::string& string, textTables& tables);
     void clearTable(const std::string& table);
     /* DBHandler:: */ textTables getTablesAsText(const std::string& like,
                                                  const std::string& statement = "");
     std::string getTablesAsJSON(const std::string& like, const std::string& statement = "");
-    // get id from table returns either max or min id from table.
-    // max = false -> min id, max = true -> max id
-    enum ID_MINMAX { MIN_ID = false, MAX_ID = true };  // Uggly enum
-    int getTableId(const std::string& table, ID_MINMAX = MAX_ID);
     // For preparing
     int prepareStmtError(sqlite3_stmt*& stmt, const std::string& sql);  // Ref here gave segfaults
     int prepareStmtSelectFromStatements(sqlite3_stmt*& stmt,
@@ -280,9 +280,6 @@ class DBHandler {
 
     std::vector<std::vector<std::string>> getRowsAsText(sqlite3_stmt*& stmt,
                                                         bool rowHeader = false);
-    int sqliteTypeFromString(std::string const& typestr);
-    ColumnTypes getTableColumnTypes(const std::string& tableName);
-    int columnType(const std::string& name, ColumnTypes& types);
 
     /*******************************************************************************
      * public
@@ -293,7 +290,12 @@ class DBHandler {
     ~DBHandler();
     bool initialise();
 
-    // Receiver for log items from DBLogger
+	// get id from table returns either max or min id from table.
+	// max = false -> min id, max = true -> max id
+	enum ID_MINMAX { MIN_ID = false, MAX_ID = true };  // Uggly enum
+	int getTableId(const std::string& table, ID_MINMAX = MAX_ID);
+
+	// Receiver for log items from DBLogger
     void insertDataLogs(std::queue<LogItem>& logs);
 
     // Receivers for data coming in to the database from the website
@@ -332,7 +334,7 @@ class DBHandler {
 
     // Get dataLogs_* as JSON for sending to the website
     // supply onlyLatest to get only the ones with the highest id
-    std::string getLogsAsJSON(bool onlyLatest);
+    std::string getLogsAsJSON(int &afterId);
 
     // Empties all dataLog_* tables
     void clearLogs();
@@ -369,4 +371,5 @@ class DBHandler {
     std::string implode(const std::vector<std::string>& elements, const std::string& glue);
     std::vector<std::string> explode(const std::string& string, const char glue);
     int indexOfString(const std::vector<std::string>& haystack, const std::string& needle);
+	bool deleteString(std::vector<std::string>& haystack, const std::string& needle);
 };
