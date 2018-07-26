@@ -569,7 +569,8 @@ std::vector<std::vector<std::string>> DBHandler::getRowsAsText(sqlite3_stmt*& st
                                                                bool rowHeader) {
     std::vector<std::vector<std::string>> rows;
     int retCode = sqlite3_step(stmt);
-    if (checkRetCode(retCode) == SQLITE_OK) {
+    if (checkRetCode(retCode) ==
+        SQLITE_OK) {  // checkRetCode will return SQLITE_OK also on SQLITE_ROW
         int columns = sqlite3_column_count(stmt);
         std::vector<std::string> row;
         if (rowHeader) {
@@ -612,14 +613,15 @@ std::vector<std::vector<std::string>> DBHandler::getRowsAsText(sqlite3_stmt*& st
  * @param like
  * @return a vector of strings
  */
-std::vector<std::string> DBHandler::getTableNames(const std::string &like, const std::string &statements) {
+std::vector<std::string> DBHandler::getTableNames(const std::string& like,
+                                                  const std::string& statements) {
     sqlite3_stmt* stmt = nullptr;
     std::vector<std::vector<std::string>> results;
     std::vector<std::string> tableNames;
     int retCode;
 
-    retCode = prepareStmtSelectFromStatements(stmt, "name", "sqlite_master",
-                                              "WHERE type='table' AND name LIKE :like " + statements);
+    retCode = prepareStmtSelectFromStatements(
+        stmt, "name", "sqlite_master", "WHERE type='table' AND name LIKE :like " + statements);
     if (retCode == SQLITE_OK) {
         retCode = bindParam(stmt, ":like", like);
         if (retCode == SQLITE_OK) {
@@ -705,18 +707,18 @@ DBHandler::ColumnTypes DBHandler::getTableColumnTypes(const std::string& tableNa
  * @return
  */
 std::vector<std::string> DBHandler::getTableColumnNames(const std::string& tableName) {
-	std::string sql = "PRAGMA table_info(" + tableName + ")";
-	std::vector<std::string> result;
-	textTableRows rows;
-	sqlite3_stmt* stmt;
-	if (!prepareStmtError(stmt, sql)) {
-		rows = getRowsAsText(stmt);
-	}
-	for (auto row : rows) {
-		std::string name = row[1];
-		result.emplace_back(name);
-	}
-	return std::move(result);
+    std::string sql = "PRAGMA table_info(" + tableName + ")";
+    std::vector<std::string> result;
+    textTableRows rows;
+    sqlite3_stmt* stmt;
+    if (!prepareStmtError(stmt, sql)) {
+        rows = getRowsAsText(stmt);
+    }
+    for (auto row : rows) {
+        std::string name = row[1];
+        result.emplace_back(name);
+    }
+    return std::move(result);
 }
 
 /**
@@ -776,12 +778,12 @@ bool DBHandler::getWaypointValues(int& nextId,
             sqlite3_column_value(stmt, 0, nextId);
             sqlite3_finalize(stmt);
 
-            // TODO: This could be retreived from the DB
             std::vector<std::string> columns = getTableColumnNames("currentMission");
             deleteString(columns, "id");
 
-              /*{"longitude", "latitude",  "declination",
-                                                "radius",    "stay_time", "isCheckpoint"}*/
+            // TODO: This could be defined here as we know what values we want
+            /*{"longitude", "latitude",  "declination",
+                                              "radius",    "stay_time", "isCheckpoint"}*/
             retCode = prepareStmtSelectFromStatements(stmt, implode(columns, ","), "currentMission",
                                                       "WHERE id = :id");
             if (retCode == SQLITE_OK) {
@@ -935,10 +937,40 @@ std::string DBHandler::getLogsAsJSON(int& afterId) {
     int retCode;
     std::string result;
 
-    std::vector<std::string> tables = getTableNames("dataLogs_%", "WHERE name != 'dataLogs_system'");
-	retCode = prepareStmtSelectFromStatements(stmt, "id", "dataLogs_system", "WHERE id > :id");
+    /*
+        std::vector<std::string> tables =
+            getTableNames("dataLogs_%", "AND name != 'dataLogs_system'");
+    */
+    std::vector<std::string> columns = getTableColumnNames("dataLogs_system");
+    deleteString(columns, "id");
+
+    retCode = prepareStmtSelectFromStatements(stmt, "id", "dataLogs_system", "WHERE id > :id"); // ORDER BY id ASC?
     if (retCode == SQLITE_OK) {
-        bindValuesToStmt({{std::make_pair("id", m_latestDataLogId)}, {}, {}}, stmt);
+        retCode = bindValuesToStmt({{std::make_pair("id", m_latestDataLogId)}, {}, {}}, stmt);
+    }
+    if (retCode == SQLITE_OK) {
+        retCode = stepAndFinalizeStmt(stmt);
+    }
+    checkRetCode(retCode);
+    while (retCode == SQLITE_ROW) {
+    	// read id of the row here
+        for (auto column : columns) {
+            std::string table = "dataLogs_" + column;
+            table.resize(table.length() - 3);  // remove "_id" at the end
+
+	        // TODO: Verify subtable index = 0 works
+            std::string sql =
+                "SELECT * FROM " + table + " WHERE " + table + ".id <= ("
+                " SELECT " + column + " FROM dataLogs_system WHERE dataLogs_system.id = :index"
+                ") AND " + table + ".id > ("
+                " SELECT MIN(" + column + ") FROM ("
+                "  SELECT " + column +
+                "  FROM dataLogs_system WHERE dataLogs_system.id < :index"
+                "  ORDER BY id DESC LIMIT 1)"
+                ")";
+
+        }
+        sqlite3_column_value(stmt, i, retStr);
     }
     return result;
 }
@@ -1616,7 +1648,7 @@ std::vector<std::string> DBHandler::explode(const std::string& string, const cha
     std::vector<std::string> result;
     std::string::const_iterator cur = string.begin();
     std::string::const_iterator beg = string.begin();
-    while (cur < string.end()) {
+    while (cur != string.end()) {
         if (*cur == glue) {
             result.insert(result.end(), std::string(beg, cur));
             beg = ++cur;
@@ -1635,12 +1667,11 @@ std::vector<std::string> DBHandler::explode(const std::string& string, const cha
  * @return
  */
 int DBHandler::indexOfString(const std::vector<std::string>& haystack, const std::string& needle) {
-    int i = 0;
-    for (const auto& string : haystack) {
-        if (string == needle) {
-            return i;
+    auto hay = haystack.begin();
+    while (hay != haystack.end()) {
+        if (*hay == needle) {
+            return hay - haystack.begin();
         }
-        i++;
     }
     return -1;
 }
@@ -1652,11 +1683,12 @@ int DBHandler::indexOfString(const std::vector<std::string>& haystack, const std
  * @return
  */
 bool DBHandler::deleteString(std::vector<std::string>& haystack, const std::string& needle) {
-	for (auto& string : haystack) {
-		if (string == needle) {
-			string.erase();
-			return true;
-		}
-	}
-	return false;
+    auto hay = haystack.begin();
+    while (hay != haystack.end()) {
+        if (*hay == needle) {
+            hay = haystack.erase(hay);
+            return true;
+        }
+    }
+    return false;
 }

@@ -134,18 +134,12 @@ bool HTTPSyncNode::pushDatalogs() {
 	}
 */
 
-	if (!m_dataLogsSystemLastId) {
+	if (m_pushOnlyLatestLogs || (!m_dataLogsSystemLastId)) {
 		Logger::warning("%s Last pushed log index unavailable, resetting last (might resend the latest log)", __PRETTY_FUNCTION__);
 		m_dataLogsSystemLastId = m_dbHandler->getTableId("dataLogs_system");
 	}
+	std::string logs = m_dbHandler->getLogsAsJSON(m_dataLogsSystemLastId);
 
-	if (m_pushOnlyLatestLogs) {
-		// Note: this will continue to re-add the latest logline upstream!
-		std::string logs = m_dbHandler->getLogsAsJSON(m_pushOnlyLatestLogs);
-	} else {
-		// get only logs that are indexed after the last push
-
-	}
     if (!logs.size()) {
 	    Logger::warning("%s Not pushing empty logs to server", __PRETTY_FUNCTION__);    // disable again when debugged
     	return true;
@@ -158,20 +152,20 @@ bool HTTPSyncNode::pushDatalogs() {
 		    Logger::info("%s All logs were pushed to the server", __PRETTY_FUNCTION__);
 	    }
         // remove logs after push
-        if (m_removeLogs) {
+/*        if (m_removeLogs) {
 	        m_dbHandler->clearLogs();
 	        m_dbHandler->unlock();
 	        Logger::info("%s Unlocked DB", __PRETTY_FUNCTION__);
 	        Logger::info("%s Logs cleared", __PRETTY_FUNCTION__);
-        }
+        }*/
         return true;
     } else if (!m_reportedConnectError) {
         Logger::warning("%s Could not push logs to server", __PRETTY_FUNCTION__);
     }
-	if (m_removeLogs) {
+/*	if (m_removeLogs) {
 		m_dbHandler->unlock();
 		Logger::info("%s Unlocked DB", __PRETTY_FUNCTION__);
-	}
+	}*/
     return false;
 }
 
