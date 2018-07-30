@@ -152,6 +152,8 @@ class DBHandler {
     /* DBHandler:: */ textTables getTablesAsText(const std::string& like,
                                                  const std::string& statement = "");
     std::string getTablesAsJSON(const std::string& like, const std::string& statement = "");
+	std::string tablesAsJSON(const textTables &tables);
+
     // For preparing
     int prepareStmtError(sqlite3_stmt*& stmt, const std::string& sql);  // Ref here gave segfaults
     int prepareStmtSelectFromStatements(sqlite3_stmt*& stmt,
