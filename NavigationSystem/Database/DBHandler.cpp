@@ -849,14 +849,14 @@ DBHandler::textTables DBHandler::getTablesAsText(const std::string& like,
                                                  const std::string& statement) {
     sqlite3_stmt* stmt = nullptr;
 
+	textTables tables;
     textTableRow tableNames = getTableNames(like);
-    textTables tables;
 
     try {
         // insert all data in these tables as json array
         for (const auto& table : tableNames) {
             prepareStmtSelectFromStatements(stmt, "*", table, statement);
-            std::vector<std::vector<std::string>> rows = getRowsAsText(stmt, true);
+            textTableRows rows = getRowsAsText(stmt, true);
 
             if (rows.size() > 1) {  // we want actual data, not only the headers
                 // "dataLogs_" is 9 chars, next is at index 9 (starting from 0). config_% Like minus
@@ -935,9 +935,9 @@ std::string DBHandler::getLogsAsJSON(int& afterId) {
     // The following line just sends the latest entry in all dataLogs_% tables:
     // return getTablesAsJSON("dataLogs_%", (onlyLatest ? "ORDER BY id DESC LIMIT 1" : ""));
 
-    textTables resultRows;
+    textTables tables;
     std::string result;
-    int retCode;
+    // int retCode;
 
     int latestId =
         getTableId("dataLogs_system");  // we'll work with this as data might be added while we work
@@ -945,9 +945,12 @@ std::string DBHandler::getLogsAsJSON(int& afterId) {
     if (latestId > afterId) {
         std::string afterIdStr = std::to_string(afterId);
         std::string latestIdStr = std::to_string(latestId);
-        resultRows.emplace_back(getTablesAsText(
+        auto tmp = getTablesAsText(
             "dataLogs_system",
-            "WHERE id > " + afterIdStr + " AND id <= " + latestIdStr + " ORDER BY id"));
+            "WHERE id > " + afterIdStr + " AND id <= " + latestIdStr + " ORDER BY id");
+       	tables.reserve(tables.size() + tmp.size());
+       	tables.insert(tables.end(), std::make_move_iterator(tmp.begin()), std::make_move_iterator(tmp.end()));
+
         std::vector<std::string> columns = getTableColumnNames("dataLogs_system");
         deleteString(columns, "id");
         for (auto columnName : columns) {
@@ -955,11 +958,13 @@ std::string DBHandler::getLogsAsJSON(int& afterId) {
             columnShortName.resize(columnShortName.length() - 3);  // remove "_id" at the end
             std::string tableName =
                 "dataLogs_" + columnShortName;  // prefix with dataLogs_ to get real name
-            resultRows.emplace_back(getTablesAsText(
+            auto tmp2 = getTablesAsText(
                 tableName, "WHERE id > (SELECT " + columnName +
                                " FROM dataLogs_system WHERE dataLogs_system.id = " + afterIdStr +
-                               ") AND id <= (SELECT " + columnName +
-                               " FROM dataLogs_system WHERE dataLogs_system.id <= " + latestIdStr));
+                               ") AND id <= (SELECT MAX(" + columnName +
+                               ") FROM dataLogs_system WHERE dataLogs_system.id <= " + latestIdStr + ")");
+            tables.reserve(tables.size() + tmp2.size());
+            tables.insert(tables.end(), std::make_move_iterator(tmp2.begin()), std::make_move_iterator(tmp2.end()));
         }
     }
 
@@ -1012,7 +1017,7 @@ std::string DBHandler::getLogsAsJSON(int& afterId) {
                     subTable = getRowsAsText(subStmt, true);
                 }
                 if (!subTable.empty()) {
-                    resultRows.push_back(std::make_pair(columnShortName, subTable));
+                    tables.push_back(std::make_pair(columnShortName, subTable));
                 }
             }
         }
@@ -1021,12 +1026,12 @@ std::string DBHandler::getLogsAsJSON(int& afterId) {
     sqlite3_finalize(stmtFrom);
 */
     // remember to add dataLogs_system
-    if (!resultRows.empty()) {
+    if (!tables.empty()) {
         JSON js;
-        js.emplace_back(resultRows);
+        js.emplace_back(tables);
         result = js.dump();
     }
-    afterId = rowId;
+    afterId = latestId;
     return result;
 }
 

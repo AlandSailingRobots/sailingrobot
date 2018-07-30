@@ -138,10 +138,11 @@ bool HTTPSyncNode::pushDatalogs() {
 		Logger::warning("%s Last pushed log index unavailable, will send new log items from here on", __PRETTY_FUNCTION__);
 		m_dataLogsSystemLastId = m_dbHandler->getTableId("dataLogs_system");
 	}
-	std::string logs = m_dbHandler->getLogsAsJSON(m_dataLogsSystemLastId);
+	int pushedId = m_dataLogsSystemLastId;
+	std::string logs = m_dbHandler->getLogsAsJSON(pushedId);
 
     if (!logs.size()) {
-	    Logger::warning("%s Not pushing empty logs to server", __PRETTY_FUNCTION__);    // disable again when debugged
+	    // Logger::warning("%s Not pushing empty logs to server", __PRETTY_FUNCTION__);    // disable again when debugged
     	return true;
     }
 
@@ -158,6 +159,7 @@ bool HTTPSyncNode::pushDatalogs() {
 	        Logger::info("%s Unlocked DB", __PRETTY_FUNCTION__);
 	        Logger::info("%s Logs cleared", __PRETTY_FUNCTION__);
         }*/
+		m_dataLogsSystemLastId = pushedId;
         return true;
     } else if (!m_reportedConnectError) {
         Logger::warning("%s Could not push logs to server", __PRETTY_FUNCTION__);
