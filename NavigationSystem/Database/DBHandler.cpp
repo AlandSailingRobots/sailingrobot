@@ -567,7 +567,9 @@ std::vector<std::string> DBHandler::valueNames(const typedValuePairs& values) {
  */
 std::vector<std::vector<std::string>> DBHandler::getRowsAsText(sqlite3_stmt*& stmt,
                                                                bool rowHeader) {
-    std::vector<std::vector<std::string>> rows;
+    textTableRows rows;
+    textTableRow header;
+
     int retCode = sqlite3_step(stmt);
     if (checkRetCode(retCode) ==
         SQLITE_OK) {  // checkRetCode will return SQLITE_OK also on SQLITE_ROW
@@ -575,10 +577,8 @@ std::vector<std::vector<std::string>> DBHandler::getRowsAsText(sqlite3_stmt*& st
         std::vector<std::string> row;
         if (rowHeader) {
             for (int i = 0; i < columns; i++) {
-                row.emplace_back(sqlite3_column_name(stmt, i));
+                header.push_back(sqlite3_column_name(stmt, i));
             }
-            rows.push_back(row);
-            row.clear();
         }
         while (retCode == SQLITE_ROW) {
             for (int i = 0; i < columns; i++) {
@@ -596,16 +596,19 @@ std::vector<std::vector<std::string>> DBHandler::getRowsAsText(sqlite3_stmt*& st
                                     }
                                 }
                 */
-                row.push_back(retStr);
+                row.emplace_back(retStr);
             }
-            rows.push_back(row);
+            rows.push_back(row);  // emplace does weird things here
             row.clear();
             retCode = sqlite3_step(stmt);
             checkRetCode(retCode);
         }
     }
+    if (rowHeader && (!rows.empty())) {
+        rows.insert(rows.begin(), header);
+    }
     checkRetCode(sqlite3_finalize(stmt));  // Danger, danger!
-    return std::move(rows);
+    return rows;
 }
 
 /**
@@ -929,49 +932,101 @@ std::string DBHandler::getConfigs() {
  * @return
  */
 std::string DBHandler::getLogsAsJSON(int& afterId) {
-    // This just sends the latest enty in all dataLogs_% tables
+    // The following line just sends the latest entry in all dataLogs_% tables:
     // return getTablesAsJSON("dataLogs_%", (onlyLatest ? "ORDER BY id DESC LIMIT 1" : ""));
 
-    // sqlite3* db = DBConnect();
-    sqlite3_stmt* stmt;
-    int retCode;
+    textTables resultRows;
     std::string result;
+    int retCode;
+
+    int latestId =
+        getTableId("dataLogs_system");  // we'll work with this as data might be added while we work
+
+    if (latestId > afterId) {
+        std::string afterIdStr = std::to_string(afterId);
+        std::string latestIdStr = std::to_string(latestId);
+        resultRows.emplace_back(getTablesAsText(
+            "dataLogs_system",
+            "WHERE id > " + afterIdStr + " AND id <= " + latestIdStr + " ORDER BY id"));
+        std::vector<std::string> columns = getTableColumnNames("dataLogs_system");
+        deleteString(columns, "id");
+        for (auto columnName : columns) {
+            std::string columnShortName = columnName;
+            columnShortName.resize(columnShortName.length() - 3);  // remove "_id" at the end
+            std::string tableName =
+                "dataLogs_" + columnShortName;  // prefix with dataLogs_ to get real name
+            resultRows.emplace_back(getTablesAsText(
+                tableName, "WHERE id > (SELECT " + columnName +
+                               " FROM dataLogs_system WHERE dataLogs_system.id = " + afterIdStr +
+                               ") AND id <= (SELECT " + columnName +
+                               " FROM dataLogs_system WHERE dataLogs_system.id <= " + latestIdStr));
+        }
+    }
 
     /*
         std::vector<std::string> tables =
             getTableNames("dataLogs_%", "AND name != 'dataLogs_system'");
     */
-    std::vector<std::string> columns = getTableColumnNames("dataLogs_system");
-    deleteString(columns, "id");
+/*
 
-    retCode = prepareStmtSelectFromStatements(stmt, "id", "dataLogs_system", "WHERE id > :id"); // ORDER BY id ASC?
+    retCode = prepareStmtSelectFromStatements(stmtFrom, "*", "dataLogs_system",
+                                              "WHERE id > :id");  // ORDER BY id ASC?
     if (retCode == SQLITE_OK) {
-        retCode = bindValuesToStmt({{std::make_pair("id", m_latestDataLogId)}, {}, {}}, stmt);
+        retCode = bindParam(stmtFrom, "id", afterId);
     }
     if (retCode == SQLITE_OK) {
-        retCode = stepAndFinalizeStmt(stmt);
+        retCode = sqlite3_step(stmtFrom);
     }
     checkRetCode(retCode);
-    while (retCode == SQLITE_ROW) {
-    	// read id of the row here
-        for (auto column : columns) {
-            std::string table = "dataLogs_" + column;
-            table.resize(table.length() - 3);  // remove "_id" at the end
+    while (retCode == SQLITE_ROW) {  // dataLog_system row
+        for (auto columnName : columns) {
+            int i;
+            sqlite3_column_value(stmtFrom, indexOfString(columns, columnName), i);
+            if (columnName == "id") {  // dataLogs_system.id
+                rowId = i;
+            } else if (i) {
+                std::string columnShortName = columnName;
+                columnShortName.resize(columnShortName.length() - 3);  // remove "_id" at the end
+                std::string tableName =
+                    "dataLogs_" + columnShortName;  // prefix with dataLogs_ to get real name
+                textTableRows subTable;
 
-	        // TODO: Verify subtable index = 0 works
-            std::string sql =
-                "SELECT * FROM " + table + " WHERE " + table + ".id <= ("
-                " SELECT " + column + " FROM dataLogs_system WHERE dataLogs_system.id = :index"
-                ") AND " + table + ".id > ("
-                " SELECT MIN(" + column + ") FROM ("
-                "  SELECT " + column +
-                "  FROM dataLogs_system WHERE dataLogs_system.id < :index"
-                "  ORDER BY id DESC LIMIT 1)"
-                ")";
+                // TODO: Verify subtable index = 0 works
+                // clang-format off
+	            std::string sql =
+	                "SELECT * FROM " + tableName + " WHERE " + tableName + ".id <= ("
+	                " SELECT " + columnName + " FROM dataLogs_system WHERE dataLogs_system.id = " + std::to_string(i) +
+	                ") AND " + tableName + ".id > ("
+	                " SELECT MIN(" + columnName + ") FROM ("
+	                "  SELECT " + columnName +
+	                "  FROM dataLogs_system WHERE dataLogs_system.id < " + std::to_string(i) +
+	                "  ORDER BY id DESC LIMIT 1)"
+	                ")";
+                // clang-format on
 
+                sqlite3_stmt* subStmt;
+                int subRetCode;
+                subRetCode = prepareStmtError(subStmt, sql);
+                if (subRetCode == SQLITE_OK) {
+                    // bindParam(stmtFrom, "index", i);
+                    subTable = getRowsAsText(subStmt, true);
+                }
+                if (!subTable.empty()) {
+                    resultRows.push_back(std::make_pair(columnShortName, subTable));
+                }
+            }
         }
-        sqlite3_column_value(stmt, i, retStr);
+        retCode = sqlite3_step(stmtFrom);
     }
+    sqlite3_finalize(stmtFrom);
+*/
+    // remember to add dataLogs_system
+    if (!resultRows.empty()) {
+        JSON js;
+        js.emplace_back(resultRows);
+        result = js.dump();
+    }
+    afterId = rowId;
     return result;
 }
 
@@ -1672,6 +1727,7 @@ int DBHandler::indexOfString(const std::vector<std::string>& haystack, const std
         if (*hay == needle) {
             return hay - haystack.begin();
         }
+        hay++;
     }
     return -1;
 }
@@ -1689,6 +1745,7 @@ bool DBHandler::deleteString(std::vector<std::string>& haystack, const std::stri
             hay = haystack.erase(hay);
             return true;
         }
+        hay++;
     }
     return false;
 }

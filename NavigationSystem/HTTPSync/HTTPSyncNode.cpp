@@ -135,7 +135,7 @@ bool HTTPSyncNode::pushDatalogs() {
 */
 
 	if (m_pushOnlyLatestLogs || (!m_dataLogsSystemLastId)) {
-		Logger::warning("%s Last pushed log index unavailable, resetting last (might resend the latest log)", __PRETTY_FUNCTION__);
+		Logger::warning("%s Last pushed log index unavailable, will send new log items from here on", __PRETTY_FUNCTION__);
 		m_dataLogsSystemLastId = m_dbHandler->getTableId("dataLogs_system");
 	}
 	std::string logs = m_dbHandler->getLogsAsJSON(m_dataLogsSystemLastId);
