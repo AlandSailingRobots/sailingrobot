@@ -336,7 +336,7 @@ class DBHandler {
 
     // Get dataLogs_* as JSON for sending to the website
     // supply onlyLatest to get only the ones with the highest id
-    std::string getLogsAsJSON(int &afterId);
+    std::string getLogsAsJSON(unsigned int &afterId, const unsigned int toId = 0);
 
     // Empties all dataLog_* tables
     void clearLogs();

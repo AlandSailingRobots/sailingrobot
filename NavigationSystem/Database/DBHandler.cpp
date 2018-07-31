@@ -95,9 +95,9 @@ int DBHandler::stepAndFinalizeStmt(sqlite3_stmt*& stmt) const {
  */
 sqlite3* DBHandler::DBConnect() {
     if (!m_DBHandle) {
-        Logger::info("%s Locking DB", __PRETTY_FUNCTION__);
+        // Logger::info("%s Locking DB", __FUNCTION__);
         m_databaseLock.lock();
-        Logger::info("%s Locked DB", __PRETTY_FUNCTION__);
+        // Logger::info("%s Locked DB", __FUNCTION__);
 
         Logger::info("%s Opening database %s", __PRETTY_FUNCTION__, m_filePath.c_str());
         int resultcode = 0;
@@ -107,7 +107,7 @@ sqlite3* DBHandler::DBConnect() {
         if (db_file == nullptr) {
             Logger::error("%s %s not found", __PRETTY_FUNCTION__, m_filePath.c_str());
             m_databaseLock.unlock();
-            Logger::info("%s Unlocked DB", __PRETTY_FUNCTION__);
+            // Logger::info("%s Unlocked DB", __FUNCTION__);
             return nullptr;
         }
         fclose(db_file);
@@ -119,7 +119,7 @@ sqlite3* DBHandler::DBConnect() {
         if (resultcode) {
             Logger::error("%s Failed to open the database Error %s", __PRETTY_FUNCTION__,
                           sqlite3_errmsg(m_DBHandle));
-            Logger::info("%s Unlocked DB", __PRETTY_FUNCTION__);
+            // Logger::info("%s Unlocked DB", __FUNCTION__);
             m_databaseLock.unlock();
             return nullptr;
         }
@@ -127,7 +127,7 @@ sqlite3* DBHandler::DBConnect() {
         // set a 10 millisecond timeout
         sqlite3_busy_timeout(m_DBHandle, 10);
         m_databaseLock.unlock();
-        Logger::info("%s Unlocked DB", __PRETTY_FUNCTION__);
+        // Logger::info("%s Unlocked DB", __FUNCTION__);
     }
     return m_DBHandle;
 }
@@ -931,7 +931,7 @@ std::string DBHandler::getConfigs() {
  * @param afterId nullptr for only latest, otherwise newer than that Id (will be updated)
  * @return
  */
-std::string DBHandler::getLogsAsJSON(int& afterId) {
+std::string DBHandler::getLogsAsJSON(unsigned int& afterId, const unsigned int toId) {
     // The following line just sends the latest entry in all dataLogs_% tables:
     // return getTablesAsJSON("dataLogs_%", (onlyLatest ? "ORDER BY id DESC LIMIT 1" : ""));
 
@@ -939,14 +939,16 @@ std::string DBHandler::getLogsAsJSON(int& afterId) {
     std::string result;
     // int retCode;
 
-    int latestId =
-        getTableId("dataLogs_system");  // we'll work with this as data might be added while we work
+    unsigned int latestId =
+        (toId ? toId : getTableId("dataLogs_system"));  // we'll work with this as data might be
+                                                        // added while we work
 
     if (latestId > afterId) {
         std::string afterIdStr = std::to_string(afterId);
         std::string latestIdStr = std::to_string(latestId);
-        auto indexTable = getTablesAsText("dataLogs_system", "WHERE id > " + afterIdStr + " AND id <= " +
-                                                          latestIdStr + " ORDER BY id");
+        auto indexTable =
+            getTablesAsText("dataLogs_system", "WHERE id > " + afterIdStr +
+                                                   " AND id <= " + latestIdStr + " ORDER BY id");
         tables.push_back(std::make_pair("system", indexTable.front().second));
 
         std::vector<std::string> columns = getTableColumnNames("dataLogs_system");
@@ -961,9 +963,9 @@ std::string DBHandler::getLogsAsJSON(int& afterId) {
                                " FROM dataLogs_system WHERE dataLogs_system.id = " + afterIdStr +
                                ") AND id <= (SELECT MAX(" + columnName +
                                ") FROM dataLogs_system WHERE dataLogs_system.id <= " + latestIdStr +
-                               ")");
+                               ") ORDER BY id ASC");
             if (!subTable.empty()) {
-	            tables.push_back(std::make_pair(columnShortName, subTable.front().second));
+                tables.push_back(std::make_pair(columnShortName, subTable.front().second));
             }
         }
     }
@@ -1028,16 +1030,15 @@ void DBHandler::insertDataLogs(std::queue<LogItem>& logs) {
     const unsigned int limitItems = 5;  // hardcoded to the same as in DBLoggerNode for now
 
     if (logItems > 1) {
-        Logger::info("Writing %d log items from %s to %s to the database", logItems,
+        Logger::info("Starting write of %d log items from %s to %s to the database", logItems,
                      logs.front().m_timestamp_str.c_str(), logs.back().m_timestamp_str.c_str());
     } else {
-        Logger::info("Writing %d log item from %s to the database", logItems,
-                     logs.front().m_timestamp_str.c_str());
+        Logger::info("Writing single log item from %s to the database", logs.front().m_timestamp_str.c_str());
     }
 
-    Logger::info("%s Locking DB", __PRETTY_FUNCTION__);
+    // Logger::info("%s Locking DB", __FUNCTION__);
     m_databaseLock.lock();
-    Logger::info("%s Locked DB", __PRETTY_FUNCTION__);
+    // Logger::info("%s Locked DB", __FUNCTION__);
 
     // clang-format off
     actuatorFeedbackId  = 1 + getTableId("dataLogs_actuator_feedback");
@@ -1056,14 +1057,16 @@ void DBHandler::insertDataLogs(std::queue<LogItem>& logs) {
 
     auto writeBegin = std::chrono::high_resolution_clock::now();
     if (logItems > 2 * limitItems) {
-        Logger::warning("%s Combining %d inserts as single transaction due to log item flooding",
+        Logger::warning("%s Combining %d inserts as single transaction due to log item flood",
                         __PRETTY_FUNCTION__, logItems, limitItems);
         sqlite3_exec(db, "BEGIN TRANSACTION", nullptr, nullptr, &m_error);
     }
     while (!logs.empty()) {
+/*
         auto loopBegin =
             std::chrono::high_resolution_clock::now();  // This can be manually typed and moved
                                                         // inside the if-clause below
+*/
         if ((logItems > 1) && (logItems <= 2 * limitItems)) {
             sqlite3_exec(db, "BEGIN TRANSACTION", nullptr, nullptr, &m_error);
         }
@@ -1268,14 +1271,15 @@ void DBHandler::insertDataLogs(std::queue<LogItem>& logs) {
 
         if ((logItems > 1) && (logItems <= 2 * limitItems)) {
             sqlite3_exec(db, "END TRANSACTION", nullptr, nullptr, &m_error);
-            auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(
-                          std::chrono::high_resolution_clock::now() - loopBegin)
-                          .count();
-            Logger::info("Writing of log item %d completed in %d ms", logNumber, ms);
+            /*            auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(
+                                      std::chrono::high_resolution_clock::now() - loopBegin)
+                                      .count();
+                        Logger::info("Writing of log item %d (%d) completed in %d ms",
+               m_latestDataLogId, logNumber, ms);*/
         }
     }
     m_databaseLock.unlock();
-    Logger::info("%s Unlocked DB", __PRETTY_FUNCTION__);
+    // Logger::info("%s Unlocked DB", __PRETTY_FUNCTION__);
 
     DBDisconnect();
     if (logItems > 2 * limitItems) {
@@ -1285,7 +1289,8 @@ void DBHandler::insertDataLogs(std::queue<LogItem>& logs) {
     auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(
                   std::chrono::high_resolution_clock::now() - writeBegin)
                   .count();
-    Logger::info("Writing of %d log items completed in %d ms (avg. %.2f ms/item)", logNumber, ms,
+    Logger::info("Completed write of %d log items (%d-%d) in %d ms (avg. %.2f ms/item)", logNumber,
+                 m_latestDataLogId - logNumber, m_latestDataLogId, ms,
                  (float)ms / (float)logNumber);
 }
 
