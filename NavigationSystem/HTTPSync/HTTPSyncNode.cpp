@@ -149,7 +149,7 @@ bool HTTPSyncNode::pushDatalogs() {
         if (m_connectionErrors) {
             Logger::info("Trying to push single log item %d to the server", chunkEnd);
         } else {
-            Logger::info("Trying to push log items %d-%d to the server", pushedId + 1, chunkEnd);
+            Logger::info("Trying to push %d log items %d-%d to the server", chunkEnd - pushedId + 1, pushedId + 1, chunkEnd);
         }
         std::string logs = m_dbHandler->getLogsAsJSON(pushedId, chunkEnd);
 
@@ -165,7 +165,7 @@ bool HTTPSyncNode::pushDatalogs() {
             auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(
                           std::chrono::high_resolution_clock::now() - sendBegin)
                           .count();
-            int items = pushedId - m_dataLogsSystemLastId;
+            int items = pushedId - m_dataLogsSystemLastId + 1;
             Logger::info("Pushed %d log items %d-%d to the server in %d ms (avg. %.02f ms/item)",
                          items, m_dataLogsSystemLastId, pushedId, ms,
                          (float)ms / (float)items);
