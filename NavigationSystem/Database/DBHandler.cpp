@@ -1057,8 +1057,8 @@ void DBHandler::insertDataLogs(std::queue<LogItem>& logs) {
 
     auto writeBegin = std::chrono::high_resolution_clock::now();
     if (logItems > 2 * limitItems) {
-        Logger::warning("%s Combining %d inserts as single transaction due to log item flood",
-                        __PRETTY_FUNCTION__, logItems, limitItems);
+        Logger::warning("%s() Combining %d inserts as single transaction (log item overrun)",
+                        __FUNCTION__, logItems, limitItems);
         sqlite3_exec(db, "BEGIN TRANSACTION", nullptr, nullptr, &m_error);
     }
     while (!logs.empty()) {
