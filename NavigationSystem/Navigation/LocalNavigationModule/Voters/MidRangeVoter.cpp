@@ -21,6 +21,8 @@
 #include "../SystemServices/Logger.h"
 #include <cmath>
 
+ #include <algorithm>
+
 
 ///----------------------------------------------------------------------------------
 MidRangeVoter::MidRangeVoter( int16_t maxVotes, int16_t weight, CollidableMgr& collisionMgr )
@@ -50,7 +52,8 @@ const ASRCourseBallot& MidRangeVoter::vote( const BoatState_t& boatState )
     double SAFE_DISTANCE, cpa_weight, cpa_current_weight = 1., safe_dist_cpa = DEFAULT_SAFE_DISTANCE;
     CollidableList<AISCollidable_t> aisContacts = collidableMgr.getAISContacts();
 
-    for(uint16_t i = 0; i < 360; i++)
+    //std::cout << "Mid range max vote (before loop): " << *std::max_element(std::begin(courseBallot.courses),std::end(courseBallot.courses)) << std::endl;
+    for(uint16_t i = 0; i < 360; i++) // NOTE: not using ASRCourseBallot::COURSE_RESOLUTION
     {
         float closestCPA = 10000;
         //float closestTime = 0;
@@ -60,11 +63,17 @@ const ASRCourseBallot& MidRangeVoter::vote( const BoatState_t& boatState )
 
         for(uint16_t j = 0; j < aisContacts.length(); j++)
         {
+//            std::cout << "In AIS Contacts loop" << std::endl;
             AISCollidable_t collidable = aisContacts.next();
             distance = CourseMath::calculateDTW(boatState.lon, boatState.lat, collidable.longitude, collidable.latitude);
+//            std::cout << "AIS Distance value: " << distance << std::endl;
+//            std::cout << "Parameters for distance computation: " << std::endl;
+//            std::cout << "boatState lon/lat: " << boatState.lon << " " << boatState.lat << std::endl;
+//            std::cout << "collidable lon/lat: " << collidable.longitude << " " << collidable.latitude << std::endl;
 
             if(distance < MIN_DISTANCE || distance > MAX_DISTANCE)
             {
+//                std::cout << "Nothing to do for this distance" << std::endl;
                 continue;
             }
 
@@ -86,9 +95,12 @@ const ASRCourseBallot& MidRangeVoter::vote( const BoatState_t& boatState )
 
         if(closestCPA < safe_dist_cpa)
         {
+            std::cout << "In closestCPA conditional" << std::endl;
             riskOfCollision = (safe_dist_cpa - closestCPA) / safe_dist_cpa;
         }
+        //std::cout << "Risk value: " << riskOfCollision << std::endl;
         assignVotes(i, riskOfCollision);
+        //std::cout << "Mid range min vote (after assignement " << i << "): " << *std::min_element(std::begin(courseBallot.courses),std::end(courseBallot.courses)) << std::endl;
 
         if(closestCPA < 100)
         {
@@ -98,6 +110,9 @@ const ASRCourseBallot& MidRangeVoter::vote( const BoatState_t& boatState )
 
         aisContacts.reset();
     }
+    //std::cout << "Mid range min vote: " << *std::min_element(std::begin(courseBallot.courses),std::end(courseBallot.courses)) << std::endl;
+    //std::min_element(std::begin(playerSums), std::end(playerSums));
+    //std::cout << "Max vote default param = " << courseBallot.maxVotes() << std::endl;
 
     return courseBallot;
 }
@@ -161,6 +176,7 @@ const double MidRangeVoter::getCPA( const AISCollidable_t& collidable, const Boa
         time = 0;
         return -1;
     }
+    std::cout << "CPA Value: " << cpa << std::endl;
 
     return cpa;
 }

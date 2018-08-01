@@ -14,14 +14,14 @@
 #pragma once
 
 #include "../../MessageBus/MessageBus.h"
-#include "../Database/DBHandler.h"
-#include "../Math/Utility.h"
-#include "../MessageBusTestHelper.h"
-#include "../Messages/CompassDataMsg.h"
-#include "../Messages/GPSDataMsg.h"
-#include "../Messages/StateMessage.h"
-#include "../SystemServices/Timer.h"
-#include "../WorldState/StateEstimationNode.h"
+#include "../../Database/DBHandler.h"
+#include "../../Math/Utility.h"
+#include "MessageBusTestHelper.h"
+#include "../../Messages/CompassDataMsg.h"
+#include "../../Messages/GPSDataMsg.h"
+#include "../../Messages/StateMessage.h"
+#include "../../SystemServices/Timer.h"
+#include "../../WorldState/StateEstimationNode.h"
 #include "../cxxtest/cxxtest/TestSuite.h"
 #include "TestMocks/MessageLogger.h"
 

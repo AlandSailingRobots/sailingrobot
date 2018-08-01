@@ -1,11 +1,11 @@
 
 #pragma once
 
-#include "../Database/DBLoggerNode.h"
-#include "../MessageBus/MessageBus.h"
-#include "../MessageBusTestHelper.h"
-#include "../SystemServices/Logger.h"
-#include "../SystemServices/Timer.h"
+#include "../../Database/DBLoggerNode.h"
+#include "../../MessageBus/MessageBus.h"
+#include "MessageBusTestHelper.h"
+#include "../../SystemServices/Logger.h"
+#include "../../SystemServices/Timer.h"
 #include "../cxxtest/cxxtest/TestSuite.h"
 
 #include <chrono>

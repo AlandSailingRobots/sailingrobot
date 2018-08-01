@@ -607,6 +607,8 @@ add_executable(sr
         Messages/WindDataMsg.h
         Messages/WindStateMsg.h
         Messages/WingSailCommandMsg.h
+        Navigation/LocalNavigationModule/Voters/CourseVoter.cpp
+        Navigation/LocalNavigationModule/Voters/CourseVoter.h
         Navigation/LocalNavigationModule/Voters/ChannelVoter.cpp
         Navigation/LocalNavigationModule/Voters/ChannelVoter.h
         Navigation/LocalNavigationModule/Voters/MidRangeVoter.cpp
@@ -736,6 +738,8 @@ add_executable(sr
         Tests/unit-tests/UtilitySuite.h
         Tests/unit-tests/WaypointNodeSuite.h
         Tests/unit-tests/WindStateNodeSuite.h
+        WorldState/CameraProcessingUtility.cpp
+        WorldState/CameraProcessingUtility.h
         WorldState/CollidableMgr/Collidable.h
         WorldState/CollidableMgr/CollidableList.h
         WorldState/CollidableMgr/CollidableMgr.cpp
