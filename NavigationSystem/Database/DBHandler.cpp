@@ -1378,9 +1378,9 @@ int DBHandler::insertTableRowsErrors(const std::string& tableName, const tableRo
 bool DBHandler::transactionalReplaceTable(const std::string& tableName, const tableRows& rows) {
     sqlite3* db = DBConnect();
     int retCode;
-    Logger::info("%s Locking DB", __PRETTY_FUNCTION__);
+    // Logger::info("%s Locking DB", __PRETTY_FUNCTION__);
     m_databaseLock.lock();
-    Logger::info("%s Locked DB", __PRETTY_FUNCTION__);
+    // Logger::info("%s Locked DB", __PRETTY_FUNCTION__);
 
     std::string sql = "BEGIN TRANSACTION";
     retCode = sqlite3_exec(db, sql.c_str(), nullptr, nullptr, &m_error);
@@ -1399,7 +1399,7 @@ bool DBHandler::transactionalReplaceTable(const std::string& tableName, const ta
         }
         if (checkRetCode(retCode) == SQLITE_OK) {
             m_databaseLock.unlock();
-            Logger::info("%s Unlocked DB", __PRETTY_FUNCTION__);
+            // Logger::info("%s Unlocked DB", __PRETTY_FUNCTION__);
             return true;
         }
     }
@@ -1412,7 +1412,7 @@ bool DBHandler::transactionalReplaceTable(const std::string& tableName, const ta
                      sqlite3_errstr(retCode), retCode);
     }
     m_databaseLock.unlock();
-    Logger::info("%s Unlocked DB", __PRETTY_FUNCTION__);
+    // Logger::info("%s Unlocked DB", __PRETTY_FUNCTION__);
     return false;
 }
 bool DBHandler::transactionalReplaceTable(const std::string& tableName, const textTableRows& rows) {

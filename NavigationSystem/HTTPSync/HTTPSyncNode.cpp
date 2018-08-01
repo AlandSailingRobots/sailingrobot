@@ -256,9 +256,7 @@ bool HTTPSyncNode::checkIfNewWaypoints() {
 }
 
 bool HTTPSyncNode::getConfigsFromServer() {
-	if (m_configsNeedPush) {
-		return pushConfigs();
-	} else if (checkIfNewConfigs()) {
+	if (checkIfNewConfigs()) {
         std::string configs = getData("getAllConfigs");
         if (!configs.empty()) {
             m_dbHandler->receiveConfigs(configs);
@@ -272,20 +270,24 @@ bool HTTPSyncNode::getConfigsFromServer() {
             MessagePtr newServerConfigs = std::make_unique<ServerConfigsReceivedMsg>();
             m_MsgBus.sendMessage(std::move(newServerConfigs));
             Logger::info("Configuration retrieved from remote server");
+            m_configsNeedPush = false;
             return true;
         }
         Logger::error("%s Could not retrieve configuration from the server!", __PRETTY_FUNCTION__);
     }
+	if (m_configsNeedPush) {
+		return pushConfigs();
+	}
     return false;
 }
 
 bool HTTPSyncNode::getWaypointsFromServer() {
-	if (m_waypointsNeedPush) {
-		return pushWaypoints();
-	} else if (checkIfNewWaypoints()) {
+	if (checkIfNewWaypoints()) {
+		// TODO: locking
         std::string waypoints = getData("getWaypoints");
         if (!waypoints.empty()) {
             if (m_dbHandler->receiveWayPoints(waypoints)) {
+	            m_waypointsNeedPush = false;
                 MessagePtr newServerWaypoints = std::make_unique<ServerWaypointsReceivedMsg>();
                 m_MsgBus.sendMessage(std::move(newServerWaypoints));
                 Logger::info("Waypoints retrieved from remote the server");
@@ -294,7 +296,10 @@ bool HTTPSyncNode::getWaypointsFromServer() {
         }
         Logger::error("%s Could not retrieve new waypoints from the server!", __PRETTY_FUNCTION__);
     }
-    return false;
+    if (m_waypointsNeedPush) {
+		return pushWaypoints();
+	}
+	return false;
 }
 
 bool HTTPSyncNode::performCURLCall(std::string data, std::string call, std::string& response) {
