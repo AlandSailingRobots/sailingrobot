@@ -20,7 +20,7 @@ try:
 except FileNotFoundError:
     sys.exit('Error to open the file.\nPlease enter in argument a filepath in the folder Mission')
 
-db.execute('DELETE FROM current_Mission')
+db.execute('DELETE FROM currentMission')
 for wp in waypoints:
     keystr = 'id'
     valstr = str(wp)
@@ -28,7 +28,7 @@ for wp in waypoints:
         value = str(value)
         keystr = keystr + ', ' + key
         valstr = valstr + ', ' + value
-    db.execute('INSERT INTO current_Mission (' + keystr +
+    db.execute('INSERT INTO currentMission (' + keystr +
                ') VALUES (' + valstr + ')')
 conn.commit()
 db.close()

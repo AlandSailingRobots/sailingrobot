@@ -116,8 +116,6 @@ void LocalNavigationModule::processMessage( const Message* msg )
             Logger::info( "New Waypoint! Lat: %f Lon: %f Distance: %f", boatState.currWaypointLat, boatState.currWaypointLon, distance );
             Logger::info( "Boat state: Lat: %f Lon: %f Heading: %f", boatState.lat, boatState.lon, boatState.heading );
 
-
-
             // Delibrate dropdown after a new waypoint, we want to start a new ballot
             // and get a new heading
         }
@@ -156,14 +154,28 @@ void LocalNavigationModule::startBallot()
         boatState.lastWaypointLon = boatState.lon;
     }
 
+//    std::cout << "Arbiter min/max: " << *std::min_element(std::begin(arbiter.getResult().courses),std::end(arbiter.getResult().courses)) << " "
+//              <<  *std::max_element(std::begin(arbiter.getResult().courses),std::end(arbiter.getResult().courses)) << std::endl;
+
+
     std::vector<ASRVoter*>::iterator it;
 
     for( it = voters.begin(); it != voters.end(); it++ )
     {
         ASRVoter* voter = (*it);
         arbiter.castVote( voter->weight(), voter->vote( boatState ) );
-    }
 
+        //arbiter.castVeto( voter->vote( boatState ) ); // vetos done with castVote now
+        //voter->vote( boatState ).clear();
+//        std::cout << "Arbiter min/max (after vote " << std::distance(std::begin(voters), it) << "): " << *std::min_element(std::begin(arbiter.getResult().courses),std::end(arbiter.getResult().courses)) << " "
+//              <<  *std::max_element(std::begin(arbiter.getResult().courses),std::end(arbiter.getResult().courses)) << std::endl;
+        // Debug/Tuning
+//        std::pair<int, int> minpair = voter->getBallot()->getMin();
+//        std::pair<int, int> maxpair = voter->getBallot()->getMax();
+//        std::cout << "Voter " << voter->getName().c_str() << " min: " << minpair.first << " " << minpair.second << " max: " << maxpair.first << " " << maxpair.second << std::endl;
+
+    }
+/*
     printf("[Voters] "); // Debug
     for( it = voters.begin(); it != voters.end(); it++ )
     {
@@ -175,6 +187,8 @@ void LocalNavigationModule::startBallot()
         printf("%s : %d %d ", name.c_str(), bestCourse, votes); // Debug: Prints out some voting information
     }
     printf("\n");
+*/
+
 
     uint16_t targetCourse = arbiter.getWinner();
     bool targetTackStarboard = getTargetTackStarboard((double) targetCourse);

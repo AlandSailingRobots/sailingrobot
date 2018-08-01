@@ -29,7 +29,7 @@
 #include <unistd.h>
 #include <cstdlib>
 #include <iostream>
-#include "../Hardwares/i2ccontroller/I2CController.h"
+#include "../../Hardwares/i2ccontroller/I2CController.h"
 #include "../cxxtest/cxxtest/TestSuite.h"
 // For std::this_thread
 #include <chrono>

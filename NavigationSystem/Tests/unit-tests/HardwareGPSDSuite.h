@@ -23,9 +23,9 @@
 
 #include <stdint.h>
 #include <thread>
-#include "../Hardwares/GPSDNode.h"
-#include "../MessageBus/MessageBus.h"
-#include "../SystemServices/Logger.h"
+#include "../../Hardwares/GPSDNode.h"
+#include "../../MessageBus/MessageBus.h"
+#include "../../SystemServices/Logger.h"
 #include "../cxxtest/cxxtest/TestSuite.h"
 #include "TestMocks/MessageLogger.h"
 

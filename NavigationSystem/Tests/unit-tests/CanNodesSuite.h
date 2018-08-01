@@ -11,13 +11,13 @@
  ***************************************************************************************/
 #pragma once
 
-#include "../Hardwares/CANAISNode.h"
-#include "../Hardwares/CANSolarTrackerNode.h"
-#include "../MessageBus/MessageBus.h"
-#include "../MessageBusTestHelper.h"
-#include "../Messages/CompassDataMsg.h"
-#include "../Messages/GPSDataMsg.h"
-#include "../Messages/StateMessage.h"
+#include "../../Hardwares/CANAISNode.h"
+#include "../../Hardwares/CANSolarTrackerNode.h"
+#include "../../MessageBus/MessageBus.h"
+#include "MessageBusTestHelper.h"
+#include "../../Messages/CompassDataMsg.h"
+#include "../../Messages/GPSDataMsg.h"
+#include "../../Messages/StateMessage.h"
 #include "../cxxtest/cxxtest/TestSuite.h"
 #include "TestMocks/MessageLogger.h"
 #include "TestMocks/MockCANReceiver.h"
