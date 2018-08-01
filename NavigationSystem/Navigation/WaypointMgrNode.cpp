@@ -130,7 +130,7 @@ void WaypointMgrNode::sendMessage() {
 
         Logger::info("Completed route in %d:%d:%d", hours, minutes, seconds);
     }
-    m_db.forceUnlock();
+	m_db.unlock();
 }
 
 bool WaypointMgrNode::harvestWaypoint() {

@@ -181,7 +181,7 @@ void CollidableMgr::removeOldVisualField(){
         }
     }
     for (auto it :eraseBearings){
-        Logger::debug("erasing field for bearing: %d", it);
+        // Logger::info("erasing field for bearing: %d", it);
         m_visualField.bearingToRelativeObstacleDistance.erase(it);
         m_visualField.bearingToLastUpdated.erase(it);
     } 
@@ -227,5 +227,3 @@ void CollidableMgr::ContactGC(CollidableMgr* ptr)
         ptr->removeOldVisualField();
     }
 }
-
-
