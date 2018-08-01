@@ -53,9 +53,11 @@ bool HTTPSyncNode::init() {
     m_dataLogsSystemLastId = 0;
     m_connectionErrors = 0;
     m_sendFails = 0;
+	m_backLogged = false;
+	m_waypointsNeedPush = false;
+	m_configsNeedPush = false;
 
     m_initialised = true;
-
     return m_initialised;
 }
 
@@ -108,8 +110,8 @@ void HTTPSyncNode::HTTPSyncThread(ActiveNode* nodePtr) {
 
     curl_global_init(CURL_GLOBAL_ALL);
 
-    node->pushWaypoints();
-    node->pushConfigs();
+    node->m_waypointsNeedPush = true;
+	node->m_configsNeedPush = true;
 
     Timer timer;
     timer.start();
@@ -119,7 +121,9 @@ void HTTPSyncNode::HTTPSyncThread(ActiveNode* nodePtr) {
         node->getWaypointsFromServer();
         node->pushDatalogs();
 
-        timer.sleepUntil(node->m_LoopTime + (node->m_connectionErrors > 60 ? 60 : node->m_connectionErrors));
+        if (node->m_connectionErrors || (!node->m_backLogged)) {
+	        timer.sleepUntil(node->m_LoopTime + (node->m_connectionErrors > 60 ? 60 : node->m_connectionErrors));
+        }
         timer.reset();
     }
     curl_global_cleanup();
@@ -144,36 +148,42 @@ bool HTTPSyncNode::pushDatalogs() {
     unsigned int pushedId = m_dataLogsSystemLastId;
 
     if (pushedId < latestId) {
-        unsigned int chunkEnd = std::min(pushedId + (m_connectionErrors ? 1 : 5), latestId);
-        if (m_connectionErrors) {
-            Logger::info("Trying to push single log item %d to the server", chunkEnd);
-        } else {
-            Logger::info("Trying to push %d log items %d-%d to the server", chunkEnd - pushedId, pushedId + 1, chunkEnd);
-        }
-        std::string logs = m_dbHandler->getLogsAsJSON(pushedId, chunkEnd);
+	    unsigned int chunkEnd = std::min(pushedId + (m_connectionErrors ? 1 : 25), latestId);
+	    if (m_connectionErrors) {
+		    Logger::info("Trying to push single log item %d to the server", chunkEnd);
+	    } else {
+		    Logger::info("Trying to push %d log items %d-%d to the server", chunkEnd - pushedId, pushedId + 1,
+		                 chunkEnd);
+	    }
+	    std::string logs = m_dbHandler->getLogsAsJSON(pushedId, chunkEnd);
 
-        if (logs.empty()) {
-            Logger::warning("%s Not pushing empty logs to server",
-                            __PRETTY_FUNCTION__);  // disable again when debugged
-            return false;
-        }
+	    if (logs.empty()) {
+		    Logger::warning("%s Not pushing empty logs to server",
+		                    __PRETTY_FUNCTION__);  // disable again when debugged
+		    return false;
+	    }
 
-        // TODO: Behave differently on connection error or on service errors from server
-        auto sendBegin = std::chrono::high_resolution_clock::now();
-        if (performCURLCall(logs, "pushAllLogs", response)) {
-            auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(
-                          std::chrono::high_resolution_clock::now() - sendBegin)
-                          .count();
-            int items = pushedId - m_dataLogsSystemLastId;
-            Logger::info("Pushed %d log items %d-%d to the server in %d ms (avg. %.02f ms/item)",
-                         items, m_dataLogsSystemLastId, pushedId, ms,
-                         (float)ms / (float)items);
-            m_dataLogsSystemLastId = pushedId;
-        } else {
-            Logger::warning("%s Failed pushing logs to server, will retry later",
-                            __PRETTY_FUNCTION__);
-            return false;
-        }
+	    // TODO: Behave differently on connection error or on service errors from server
+	    auto sendBegin = std::chrono::high_resolution_clock::now();
+	    if (performCURLCall(logs, "pushAllLogs", response)) {
+		    auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(
+		      std::chrono::high_resolution_clock::now() - sendBegin)
+		      .count();
+		    int items = pushedId - m_dataLogsSystemLastId;
+		    Logger::info("Pushed %d log items %d-%d to the server in %d ms (avg. %.02f ms/item)",
+		                 items, m_dataLogsSystemLastId, pushedId, ms,
+		                 (float) ms / (float) items);
+		    m_dataLogsSystemLastId = pushedId;
+	    } else {
+		    Logger::warning("%s Failed pushing logs to server, will retry later",
+		                    __PRETTY_FUNCTION__);
+		    return false;
+	    }
+    }
+    if (pushedId <= latestId) {
+	    m_backLogged = true;
+    } else {
+    	m_backLogged = false;
     }
     return true;
 }
@@ -183,6 +193,7 @@ bool HTTPSyncNode::pushWaypoints() {
     std::string waypointsData = m_dbHandler->getWayPointsAsJSON();
     if (waypointsData.size() > 0) {
         if (performCURLCall(waypointsData, "pushWaypoints", response)) {
+        	m_waypointsNeedPush = false;
             Logger::info("Waypoints pushed to the server");
             return true;
         }
@@ -195,10 +206,12 @@ bool HTTPSyncNode::pushConfigs() {
     std::string response;
 
     if (performCURLCall(m_dbHandler->getConfigs(), "pushConfigs", response)) {
+    	m_configsNeedPush = false;
         Logger::info("Configs pushed to the server");
         return true;
     }
     Logger::error("%s Failed to push configs to the server", __PRETTY_FUNCTION__);
+	m_configsNeedPush = false; // THIS ALWAYS FAILS SO TEMPORARY JUST TRY ONCE AND QUIT
     return false;
 }
 
@@ -243,7 +256,9 @@ bool HTTPSyncNode::checkIfNewWaypoints() {
 }
 
 bool HTTPSyncNode::getConfigsFromServer() {
-    if (checkIfNewConfigs()) {
+	if (m_configsNeedPush) {
+		return pushConfigs();
+	} else if (checkIfNewConfigs()) {
         std::string configs = getData("getAllConfigs");
         if (!configs.empty()) {
             m_dbHandler->receiveConfigs(configs);
@@ -265,7 +280,9 @@ bool HTTPSyncNode::getConfigsFromServer() {
 }
 
 bool HTTPSyncNode::getWaypointsFromServer() {
-    if (checkIfNewWaypoints()) {
+	if (m_waypointsNeedPush) {
+		return pushWaypoints();
+	} else if (checkIfNewWaypoints()) {
         std::string waypoints = getData("getWaypoints");
         if (!waypoints.empty()) {
             if (m_dbHandler->receiveWayPoints(waypoints)) {
