@@ -197,7 +197,7 @@ int main(int argc, char *argv[])
 		//lnm.registerVoter( &proximityVoter );
 		//lnm.registerVoter( &midRangeVoter );
 
-        VoterTCPDebugger voterTCPD(messageBus, lnm, 3);
+        //VoterTCPDebugger voterTCPD(messageBus, lnm, 3);
         //VoterTCPDebugger voterTCPD(messageBus, courseVoter);
 
     #else
@@ -241,7 +241,7 @@ int main(int argc, char *argv[])
 
 	#if LOCAL_NAVIGATION_MODULE == 1
 		initialiseNode( lnm, "Local Navigation Module",	NodeImportance::CRITICAL );
-		initialiseNode( voterTCPD, "VoterTCPDebugger", NodeImportance::NOT_CRITICAL);
+		//initialiseNode( voterTCPD, "VoterTCPDebugger", NodeImportance::NOT_CRITICAL);
 	#else
 		initialiseNode(sailingLogic, "LineFollow", NodeImportance::CRITICAL);
 	#endif
@@ -291,7 +291,7 @@ int main(int argc, char *argv[])
     // Camera processing enabled for voter system only currently.
 	//  cameraProcessingUtility.start();
 		lnm.start();
-		voterTCPD.start();
+		//voterTCPD.start();
 	#else
 		sailingLogic.start();
 	#endif

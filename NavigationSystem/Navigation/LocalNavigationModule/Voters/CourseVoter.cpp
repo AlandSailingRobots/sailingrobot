@@ -40,13 +40,13 @@ const ASRCourseBallot& CourseVoter::vote( const BoatState_t& boatState )
     {
         courseBallot.add( boatState.heading + i, (( 10.0 - i ) / 10.0) * (courseBallot.maxVotes() / 10.0) );
         courseBallot.add( boatState.heading - i, (( 10.0 - i ) / 10.0) * (courseBallot.maxVotes() / 10.0) );
-        std::cout << "Looping: " << i << std::endl;
+        //std::cout << "Looping: " << i << std::endl;
     }
     //Negate doubled value on i=0
     courseBallot.add( boatState.heading, -(courseBallot.maxVotes() / 10.0) );
 
-    int num_non_zero = std::count_if( std::begin(courseBallot.courses), std::end(courseBallot.courses), [](int16_t i){return i>0;} );
-    std::cout << "Number of non zero: " << num_non_zero << std::endl;
+    //int num_non_zero = std::count_if( std::begin(courseBallot.courses), std::end(courseBallot.courses), [](int16_t i){return i>0;} );
+    //std::cout << "Number of non zero: " << num_non_zero << std::endl;
 
     return courseBallot;
 } 
