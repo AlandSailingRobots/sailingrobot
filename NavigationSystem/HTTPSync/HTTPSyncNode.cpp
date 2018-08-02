@@ -86,13 +86,13 @@ void HTTPSyncNode::processMessage(const Message* msgPtr) {
 
     switch (msgType) {
         case MessageType::LocalWaypointChange:
-            pushWaypoints();
+	        m_waypointsNeedPush = true;
             break;
         case MessageType::WaypointData:
-            pushWaypoints();
+	        m_waypointsNeedPush = true;
             break;
         case MessageType::LocalConfigChange:
-            pushConfigs();
+            m_configsNeedPush = true;
             break;
         case MessageType::ServerConfigsReceived:
             updateConfigsFromDB();
@@ -189,6 +189,15 @@ bool HTTPSyncNode::pushDatalogs() {
 }
 
 bool HTTPSyncNode::pushWaypoints() {
+
+	// BUG: The upstream server overwrites this if sent before user clicked second dialog on the website!!!
+	// REMOVE WHEN FIXED ON THE WEBSITE!
+	Logger::info("Sleeping 6 seconds before pushing waypoints to the server");
+	std::this_thread::sleep_for(std::chrono::milliseconds(6000));
+	if (!m_waypointsNeedPush) {
+		return true;
+	}
+
     std::string response;
     std::string waypointsData = m_dbHandler->getWayPointsAsJSON();
     if (waypointsData.size() > 0) {
@@ -200,6 +209,31 @@ bool HTTPSyncNode::pushWaypoints() {
     }
     Logger::error("%s Failed to push way points table to the server", __PRETTY_FUNCTION__);
     return false;
+}
+
+std::string HTTPSyncNode::getData(std::string call) {
+	std::string response = "";
+
+	if (performCURLCall("", call, response)) {
+		return response;
+	} else {
+		return "";
+	}
+}
+
+bool HTTPSyncNode::checkIfNewConfigs() {
+	std::string result = getData("checkIfNewConfigs");
+
+	if (result.length()) {
+		JSON js = JSON::parse(result);
+		if (safe_stoi(js["configs_updated"])) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	Logger::error("%s Could not check for new configs on the server!", __PRETTY_FUNCTION__);
+	return false;
 }
 
 bool HTTPSyncNode::pushConfigs() {
@@ -215,48 +249,9 @@ bool HTTPSyncNode::pushConfigs() {
     return false;
 }
 
-std::string HTTPSyncNode::getData(std::string call) {
-    std::string response = "";
-
-    if (performCURLCall("", call, response)) {
-        return response;
-    } else {
-        return "";
-    }
-}
-
-bool HTTPSyncNode::checkIfNewConfigs() {
-    std::string result = getData("checkIfNewConfigs");
-
-    if (result.length()) {
-        JSON js = JSON::parse(result);
-        if (safe_stoi(js["configs_updated"])) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-    Logger::error("%s Could not check for new configs on the server!", __PRETTY_FUNCTION__);
-    return false;
-}
-
-bool HTTPSyncNode::checkIfNewWaypoints() {
-    std::string result = getData("checkIfNewWaypoints");
-
-    if (result.length()) {
-        JSON js = JSON::parse(result);
-        if (safe_stoi(js["route_updated"])) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-    Logger::error("%s Could not check for new waypoints on the server!", __PRETTY_FUNCTION__);
-    return false;
-}
-
 bool HTTPSyncNode::getConfigsFromServer() {
 	if (checkIfNewConfigs()) {
+		m_configsNeedPush = false;
         std::string configs = getData("getAllConfigs");
         if (!configs.empty()) {
             m_dbHandler->receiveConfigs(configs);
@@ -270,24 +265,38 @@ bool HTTPSyncNode::getConfigsFromServer() {
             MessagePtr newServerConfigs = std::make_unique<ServerConfigsReceivedMsg>();
             m_MsgBus.sendMessage(std::move(newServerConfigs));
             Logger::info("Configuration retrieved from remote server");
-            m_configsNeedPush = false;
             return true;
         }
         Logger::error("%s Could not retrieve configuration from the server!", __PRETTY_FUNCTION__);
-    }
-	if (m_configsNeedPush) {
-		return pushConfigs();
+    } else {
+		if (m_configsNeedPush) {
+			return pushConfigs();
+		}
 	}
     return false;
 }
 
+bool HTTPSyncNode::checkIfNewWaypoints() {
+	std::string result = getData("checkIfNewWaypoints");
+
+	if (result.length()) {
+		JSON js = JSON::parse(result);
+		if (safe_stoi(js["route_updated"])) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	Logger::error("%s Could not check for new waypoints on the server!", __PRETTY_FUNCTION__);
+	return false;
+}
+
 bool HTTPSyncNode::getWaypointsFromServer() {
 	if (checkIfNewWaypoints()) {
-		// TODO: locking
+		m_waypointsNeedPush = false;
         std::string waypoints = getData("getWaypoints");
         if (!waypoints.empty()) {
             if (m_dbHandler->receiveWayPoints(waypoints)) {
-	            m_waypointsNeedPush = false;
                 MessagePtr newServerWaypoints = std::make_unique<ServerWaypointsReceivedMsg>();
                 m_MsgBus.sendMessage(std::move(newServerWaypoints));
                 Logger::info("Waypoints retrieved from remote the server");
@@ -295,9 +304,10 @@ bool HTTPSyncNode::getWaypointsFromServer() {
             }
         }
         Logger::error("%s Could not retrieve new waypoints from the server!", __PRETTY_FUNCTION__);
-    }
-    if (m_waypointsNeedPush) {
-		return pushWaypoints();
+    } else {
+		if (m_waypointsNeedPush) {
+			return pushWaypoints();
+		}
 	}
 	return false;
 }
@@ -313,7 +323,7 @@ bool HTTPSyncNode::performCURLCall(std::string data, std::string call, std::stri
     // example: serv=getAllConfigs&id=BOATID&pwd=BOATPW
     // std::cout << "/* Server call : " << serverCall.substr(0, 150) << " */" << '\n';
 
-    std::lock_guard<std::mutex> lock_guard(m_lock);
+    std::lock_guard<std::mutex> lock_guard(m_curlLock);
     curl = curl_easy_init();
     if (curl) {
         // https://curl.haxx.se/libcurl/c/threadsafe.html

@@ -79,6 +79,9 @@ class DBHandler {
      ******************************************************************************/
    private:
     std::mutex m_databaseLock;
+	std::mutex m_configsLock;
+	std::mutex m_waypointsLock;
+
     char* m_error;
     int m_latestDataLogId;
     // std::string m_currentWaypointId = "";
@@ -192,11 +195,11 @@ class DBHandler {
     // UPDATE
     int prepareStmtUpdateError(sqlite3_stmt*& stmt,
                                const std::string& table,
-                               const int id,
+                               int id,
                                const std::vector<std::string>& columns);
     int prepareStmtUpdateError(sqlite3_stmt*& stmt,
                                const std::string& table,
-                               const int id,
+                               int id,
                                const typedValuePairs& values);
     bool updateTableRow(const std::string& table, int id, const typedValuePairs& values);
 
@@ -336,7 +339,7 @@ class DBHandler {
 
     // Get dataLogs_* as JSON for sending to the website
     // supply onlyLatest to get only the ones with the highest id
-    std::string getLogsAsJSON(unsigned int &afterId, const unsigned int toId = 0);
+    std::string getLogsAsJSON(unsigned int &afterId, unsigned int toId = 0);
 
     // Empties all dataLog_* tables
     void clearLogs();
@@ -371,7 +374,7 @@ class DBHandler {
     std::vector<std::string> prepend(const std::string& prefix,
                                      const std::vector<std::string>& strings);
     std::string implode(const std::vector<std::string>& elements, const std::string& glue);
-    std::vector<std::string> explode(const std::string& string, const char glue);
+    std::vector<std::string> explode(const std::string& string, char glue);
     int indexOfString(const std::vector<std::string>& haystack, const std::string& needle);
 	bool deleteString(std::vector<std::string>& haystack, const std::string& needle);
 };
