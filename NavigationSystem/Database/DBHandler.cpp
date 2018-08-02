@@ -551,7 +551,7 @@ std::vector<std::string> DBHandler::valueNames(const typedValuePairs& values) {
         names.push_back(pair.first);
     for (auto pair : values.strings)
         names.push_back(pair.first);
-    return std::move(names);
+    return names;
 }
 
 /*******************************************************************************
@@ -701,7 +701,7 @@ DBHandler::ColumnTypes DBHandler::getTableColumnTypes(const std::string& tableNa
         std::string typestr = row[2];
         result.emplace_back(name, sqliteTypeFromString(typestr));
     }
-    return std::move(result);
+    return result;
 }
 
 /**
@@ -721,7 +721,7 @@ std::vector<std::string> DBHandler::getTableColumnNames(const std::string& table
         std::string name = row[1];
         result.emplace_back(name);
     }
-    return std::move(result);
+    return result;
 }
 
 /**
@@ -923,7 +923,22 @@ std::string DBHandler::getTablesAsJSON(const std::string& like, const std::strin
  * @return
  */
 std::string DBHandler::getConfigs() {
-    return getTablesAsJSON("config_%", "WHERE id = 1");
+	std::lock_guard<std::mutex> lock_guard(m_configsLock);
+    std::string result = getTablesAsJSON("config_%", "WHERE id = 1");
+	return result;
+}
+
+/**
+ * Get all waypoints as JSON
+ * @return
+ */
+std::string DBHandler::getWayPointsAsJSON() {
+	std::lock_guard<std::mutex> lock_guard(m_waypointsLock);
+	std::string result = getTablesAsJSON("currentMission");
+	if (result.empty()) {
+		Logger::warning("No waypoints in database");
+	}
+	return result;
 }
 
 /**
@@ -953,7 +968,7 @@ std::string DBHandler::getLogsAsJSON(unsigned int& afterId, const unsigned int t
 
         std::vector<std::string> columns = getTableColumnNames("dataLogs_system");
         deleteString(columns, "id");
-        for (auto columnName : columns) {
+        for (const auto &columnName : columns) {
             std::string columnShortName = columnName;
             columnShortName.resize(columnShortName.length() - 3);  // remove "_id" at the end
             std::string tableName =
@@ -973,18 +988,6 @@ std::string DBHandler::getLogsAsJSON(unsigned int& afterId, const unsigned int t
         result = tablesAsJSON(tables);
     }
     afterId = latestId;
-    return result;
-}
-
-/**
- * Get all waypoints as JSON
- * @return
- */
-std::string DBHandler::getWayPointsAsJSON() {
-    std::string result = getTablesAsJSON("currentMission");
-    if (result.empty()) {
-        Logger::warning("No waypoints in database");
-    }
     return result;
 }
 
@@ -1554,6 +1557,7 @@ bool DBHandler::JSONAsTables(const std::string& string, textTables& tables) {
  * @param configsJSON
  */
 void DBHandler::receiveConfigs(const std::string& configsJSON) {
+	std::lock_guard<std::mutex> lock_guard(m_configsLock);
     textTables tables;
     if (!JSONAsTables(configsJSON, tables)) {
         Logger::error("%s Unable to parse config JSON \"%s\"", __PRETTY_FUNCTION__,
@@ -1575,6 +1579,7 @@ void DBHandler::receiveConfigs(const std::string& configsJSON) {
  * @return
  */
 bool DBHandler::receiveWayPoints(const std::string& wayPointsJSON) {
+	std::lock_guard<std::mutex> lock_guard(m_waypointsLock);
     textTables tables;
     if (JSONAsTables(wayPointsJSON, tables)) {
         if (replaceTables(tables)) {
@@ -1600,7 +1605,7 @@ bool DBHandler::receiveWayPoints(const std::string& wayPointsJSON) {
  */
 std::string DBHandler::prepend(const std::string& prefix, const std::string& str) {
     std::string ret = prefix + str;
-    return std::move(ret);
+    return ret;
 }
 
 /**
@@ -1615,7 +1620,7 @@ std::vector<std::string> DBHandler::prepend(const std::string& prefix,
     for (const auto& item : strings) {
         result.emplace_back(prepend(prefix, item));
     }
-    return std::move(result);
+    return result;
 }
 
 // Theese could be put in a separate util lib
@@ -1638,7 +1643,7 @@ std::string DBHandler::implode(const std::vector<std::string>& elements, const s
             std::copy(elements.begin(), elements.end() - 1,
                       std::ostream_iterator<std::string>(os, glue.c_str()));
             os << *elements.rbegin();
-            return std::move(os.str());
+            return os.str();
     }
 }
 
@@ -1661,7 +1666,7 @@ std::vector<std::string> DBHandler::explode(const std::string& string, const cha
         }
     }
     result.insert(result.end(), std::string(beg, cur));
-    return std::move(result);
+    return result;
 }
 
 /**
@@ -1674,7 +1679,7 @@ int DBHandler::indexOfString(const std::vector<std::string>& haystack, const std
     auto hay = haystack.begin();
     while (hay != haystack.end()) {
         if (*hay == needle) {
-            return hay - haystack.begin();
+            return static_cast<int>(hay - haystack.begin());
         }
         hay++;
     }
