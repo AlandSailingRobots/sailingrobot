@@ -245,7 +245,7 @@ bool HTTPSyncNode::pushConfigs() {
         return true;
     }
     Logger::error("%s Failed to push configs to the server", __PRETTY_FUNCTION__);
-	m_configsNeedPush = false; // THIS ALWAYS FAILS SO TEMPORARY JUST TRY ONCE AND QUIT
+	// m_configsNeedPush = false; // THIS ALWAYS FAILS SO TEMPORARY JUST TRY ONCE AND QUIT
     return false;
 }
 
