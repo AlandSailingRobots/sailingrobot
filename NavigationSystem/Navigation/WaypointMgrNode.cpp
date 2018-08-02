@@ -33,6 +33,7 @@ WaypointMgrNode::WaypointMgrNode(MessageBus& msgBus, DBHandler& db)
 }
 
 bool WaypointMgrNode::init() {
+	writeTime = false;
     sendMessage();
     return true;
 }
@@ -149,7 +150,7 @@ bool WaypointMgrNode::harvestWaypoint() {
 
 	// if next waypoint has a time to stay inside its radius, start the timer
     if (m_nextStayTime > 0) {
-        m_waypointTimer.start();  // NOTE : Marc : writeTime has never been initialized
+        m_waypointTimer.start();
         if (not writeTime) {
             Logger::info("Started waypoint timer. Stay at waypoint for: %d seconds",
                          m_nextStayTime);
