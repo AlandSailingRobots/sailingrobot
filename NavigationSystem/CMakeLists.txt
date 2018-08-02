@@ -93,7 +93,7 @@ include_directories(WorldState/CollidableMgr)
 include_directories(WorldState/obstacledetection)
 include_directories(Xbee)
 
-add_executable(NavigationSystem
+add_executable(sr
         Database/DBHandler.cpp
         Database/DBHandler.h
         Database/DBLogger.cpp
@@ -419,31 +419,6 @@ add_executable(NavigationSystem
         Libs/Eigen/src/SVD/JacobiSVD_MKL.h
         Libs/Eigen/src/SVD/UpperBidiagonalization.h
         Libs/Eigen/src/UmfPackSupport/UmfPackSupport.h
-        Libs/json/include/nlohmann/detail/conversions/from_json.hpp
-        Libs/json/include/nlohmann/detail/conversions/to_chars.hpp
-        Libs/json/include/nlohmann/detail/conversions/to_json.hpp
-        Libs/json/include/nlohmann/detail/input/binary_reader.hpp
-        Libs/json/include/nlohmann/detail/input/input_adapters.hpp
-        Libs/json/include/nlohmann/detail/input/lexer.hpp
-        Libs/json/include/nlohmann/detail/input/parser.hpp
-        Libs/json/include/nlohmann/detail/iterators/internal_iterator.hpp
-        Libs/json/include/nlohmann/detail/iterators/iter_impl.hpp
-        Libs/json/include/nlohmann/detail/iterators/iteration_proxy.hpp
-        Libs/json/include/nlohmann/detail/iterators/json_reverse_iterator.hpp
-        Libs/json/include/nlohmann/detail/iterators/primitive_iterator.hpp
-        Libs/json/include/nlohmann/detail/output/binary_writer.hpp
-        Libs/json/include/nlohmann/detail/output/output_adapters.hpp
-        Libs/json/include/nlohmann/detail/output/serializer.hpp
-        Libs/json/include/nlohmann/detail/exceptions.hpp
-        Libs/json/include/nlohmann/detail/json_pointer.hpp
-        Libs/json/include/nlohmann/detail/json_ref.hpp
-        Libs/json/include/nlohmann/detail/macro_scope.hpp
-        Libs/json/include/nlohmann/detail/macro_unscope.hpp
-        Libs/json/include/nlohmann/detail/meta.hpp
-        Libs/json/include/nlohmann/detail/value_t.hpp
-        Libs/json/include/nlohmann/adl_serializer.hpp
-        Libs/json/include/nlohmann/json.hpp
-        Libs/json/include/nlohmann/json_fwd.hpp
         Libs/wiringPi/devLib/ds1302.c
         Libs/wiringPi/devLib/ds1302.h
         Libs/wiringPi/devLib/font.h

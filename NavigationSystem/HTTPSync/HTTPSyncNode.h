@@ -86,6 +86,13 @@ class HTTPSyncNode : public ActiveNode {
     double m_LoopTime;  // units : seconds (ex : 0.5 s)
     int m_pushOnlyLatestLogs;
 
+    unsigned int m_dataLogsSystemLastId;
+    unsigned int m_connectionErrors;
+    unsigned int m_sendFails;
+	bool m_backLogged;
+	bool m_waypointsNeedPush;
+	bool m_configsNeedPush;
+
     std::atomic<bool> m_Running;
     DBHandler* m_dbHandler;
 };

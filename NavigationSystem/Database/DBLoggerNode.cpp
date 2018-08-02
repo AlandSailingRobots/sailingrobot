@@ -107,14 +107,21 @@ void DBLoggerNode::processMessage(const Message* msg) {
         case MessageType::CurrentSensorData: {
             const CurrentSensorDataMsg* currentSensorMsg =
                 static_cast<const CurrentSensorDataMsg*>(msg);
-            item.m_current = currentSensorMsg->getCurrent();
-            item.m_voltage = currentSensorMsg->getVoltage();
-            item.m_element = currentSensorMsg->getSensedElement();
+	        currentSensorItem currentItem {
+	          (float)DATA_OUT_OF_RANGE,          // m_current;
+	          (float)DATA_OUT_OF_RANGE,          // m_voltage;
+	          (SensedElement)DATA_OUT_OF_RANGE,  // m_element;
+	          (std::string) "unknown",           // m_element_str;
+	        };
+	        currentItem.m_current = currentSensorMsg->getCurrent();
+	        currentItem.m_voltage = currentSensorMsg->getVoltage();
+	        currentItem.m_element = currentSensorMsg->getSensedElement();
             // item.m_element = (SensedElement)(debug_count%2 + 1);
-            item.m_element_str = currentSensorMsg->getSensedElementStr();
+	        currentItem.m_element_str = currentSensorMsg->getSensedElementStr();
             // debug_count++;
-            Logger::info("Item current sensor creation: %lf, %lf, %d, %s", item.m_current,
-                         item.m_voltage, item.m_element, item.m_element_str.c_str());
+/*            Logger::info("Item current sensor creation: %lf, %lf, %d, %s", item.m_current,
+                         item.m_voltage, item.m_element, item.m_element_str.c_str());*/
+			item.m_currentSensorItems.push(std::move(currentItem));
         } break;
 
         case MessageType::StateMessage: {

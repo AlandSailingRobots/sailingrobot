@@ -41,6 +41,7 @@ DBHandler::~DBHandler() {
     sqlite3_finalize(m_actuatorFeedbackStmt);
     DBClose();
     m_databaseLock.unlock();
+    Logger::info("%s Unlocked DB", __PRETTY_FUNCTION__);
 }
 
 /**
@@ -94,7 +95,10 @@ int DBHandler::stepAndFinalizeStmt(sqlite3_stmt*& stmt) const {
  */
 sqlite3* DBHandler::DBConnect() {
     if (!m_DBHandle) {
+        // Logger::info("%s Locking DB", __FUNCTION__);
         m_databaseLock.lock();
+        // Logger::info("%s Locked DB", __FUNCTION__);
+
         Logger::info("%s Opening database %s", __PRETTY_FUNCTION__, m_filePath.c_str());
         int resultcode = 0;
 
@@ -103,6 +107,7 @@ sqlite3* DBHandler::DBConnect() {
         if (db_file == nullptr) {
             Logger::error("%s %s not found", __PRETTY_FUNCTION__, m_filePath.c_str());
             m_databaseLock.unlock();
+            // Logger::info("%s Unlocked DB", __FUNCTION__);
             return nullptr;
         }
         fclose(db_file);
@@ -114,6 +119,7 @@ sqlite3* DBHandler::DBConnect() {
         if (resultcode) {
             Logger::error("%s Failed to open the database Error %s", __PRETTY_FUNCTION__,
                           sqlite3_errmsg(m_DBHandle));
+            // Logger::info("%s Unlocked DB", __FUNCTION__);
             m_databaseLock.unlock();
             return nullptr;
         }
@@ -121,6 +127,7 @@ sqlite3* DBHandler::DBConnect() {
         // set a 10 millisecond timeout
         sqlite3_busy_timeout(m_DBHandle, 10);
         m_databaseLock.unlock();
+        // Logger::info("%s Unlocked DB", __FUNCTION__);
     }
     return m_DBHandle;
 }
@@ -143,8 +150,10 @@ void DBHandler::DBClose() {
         // Ensure it closes properly (by sleeping a millisecond)?
         // std::this_thread::sleep_for(std::chrono::milliseconds(1));
         m_databaseLock.unlock();
+        Logger::info("%s Unlocked DB", __PRETTY_FUNCTION__);
     } else {
         m_databaseLock.unlock();
+        Logger::info("%s Unlocked DB", __PRETTY_FUNCTION__);
         throw "DBHandler::DBClose() : connection is already null";
     }
 }
@@ -558,17 +567,18 @@ std::vector<std::string> DBHandler::valueNames(const typedValuePairs& values) {
  */
 std::vector<std::vector<std::string>> DBHandler::getRowsAsText(sqlite3_stmt*& stmt,
                                                                bool rowHeader) {
-    std::vector<std::vector<std::string>> rows;
+    textTableRows rows;
+    textTableRow header;
+
     int retCode = sqlite3_step(stmt);
-    if (checkRetCode(retCode) == SQLITE_OK) {
+    if (checkRetCode(retCode) ==
+        SQLITE_OK) {  // checkRetCode will return SQLITE_OK also on SQLITE_ROW
         int columns = sqlite3_column_count(stmt);
         std::vector<std::string> row;
         if (rowHeader) {
             for (int i = 0; i < columns; i++) {
-                row.emplace_back(sqlite3_column_name(stmt, i));
+                header.push_back(sqlite3_column_name(stmt, i));
             }
-            rows.push_back(row);
-            row.clear();
         }
         while (retCode == SQLITE_ROW) {
             for (int i = 0; i < columns; i++) {
@@ -586,16 +596,19 @@ std::vector<std::vector<std::string>> DBHandler::getRowsAsText(sqlite3_stmt*& st
                                     }
                                 }
                 */
-                row.push_back(retStr);
+                row.emplace_back(retStr);
             }
-            rows.push_back(row);
+            rows.push_back(row);  // emplace does weird things here
             row.clear();
             retCode = sqlite3_step(stmt);
             checkRetCode(retCode);
         }
     }
+    if (rowHeader && (!rows.empty())) {
+        rows.insert(rows.begin(), header);
+    }
     checkRetCode(sqlite3_finalize(stmt));  // Danger, danger!
-    return std::move(rows);
+    return rows;
 }
 
 /**
@@ -603,14 +616,15 @@ std::vector<std::vector<std::string>> DBHandler::getRowsAsText(sqlite3_stmt*& st
  * @param like
  * @return a vector of strings
  */
-std::vector<std::string> DBHandler::getTableNames(std::string like) {
+std::vector<std::string> DBHandler::getTableNames(const std::string& like,
+                                                  const std::string& statements) {
     sqlite3_stmt* stmt = nullptr;
     std::vector<std::vector<std::string>> results;
     std::vector<std::string> tableNames;
     int retCode;
 
-    retCode = prepareStmtSelectFromStatements(stmt, "name", "sqlite_master",
-                                              "WHERE type='table' AND name LIKE :like");
+    retCode = prepareStmtSelectFromStatements(
+        stmt, "name", "sqlite_master", "WHERE type='table' AND name LIKE :like " + statements);
     if (retCode == SQLITE_OK) {
         retCode = bindParam(stmt, ":like", like);
         if (retCode == SQLITE_OK) {
@@ -691,6 +705,26 @@ DBHandler::ColumnTypes DBHandler::getTableColumnTypes(const std::string& tableNa
 }
 
 /**
+ * Returns all column names from a table
+ * @param tableName
+ * @return
+ */
+std::vector<std::string> DBHandler::getTableColumnNames(const std::string& tableName) {
+    std::string sql = "PRAGMA table_info(" + tableName + ")";
+    std::vector<std::string> result;
+    textTableRows rows;
+    sqlite3_stmt* stmt;
+    if (!prepareStmtError(stmt, sql)) {
+        rows = getRowsAsText(stmt);
+    }
+    for (auto row : rows) {
+        std::string name = row[1];
+        result.emplace_back(name);
+    }
+    return std::move(result);
+}
+
+/**
  * Will give you the type string of a named column
  * @param name
  * @param types
@@ -740,15 +774,19 @@ bool DBHandler::getWaypointValues(int& nextId,
     if (retCode == SQLITE_OK) {
         retCode = sqlite3_step(stmt);
         if (retCode != SQLITE_ROW) {
-	        Logger::info("%s Out of waypoints to harvest", __PRETTY_FUNCTION__);
-	        nextId = 0;
-	        return false;
+            Logger::info("%s Out of waypoints to harvest", __PRETTY_FUNCTION__);
+            nextId = 0;
+            return false;
         } else {
             sqlite3_column_value(stmt, 0, nextId);
             sqlite3_finalize(stmt);
 
-            std::vector<std::string> columns = {"longitude", "latitude",  "declination",
-                                                "radius",    "stay_time", "isCheckpoint"};
+            std::vector<std::string> columns = getTableColumnNames("currentMission");
+            deleteString(columns, "id");
+
+            // TODO: This could be defined here as we know what values we want
+            /*{"longitude", "latitude",  "declination",
+                                              "radius",    "stay_time", "isCheckpoint"}*/
             retCode = prepareStmtSelectFromStatements(stmt, implode(columns, ","), "currentMission",
                                                       "WHERE id = :id");
             if (retCode == SQLITE_OK) {
@@ -795,7 +833,7 @@ bool DBHandler::getWaypointValues(int& nextId,
     }
 
     if (checkRetCode(retCode) == SQLITE_OK) {
-	    return true;
+        return true;
     }
     Logger::error("%s Errors when retrieving way points from local database", __PRETTY_FUNCTION__);
     return false;
@@ -811,14 +849,14 @@ DBHandler::textTables DBHandler::getTablesAsText(const std::string& like,
                                                  const std::string& statement) {
     sqlite3_stmt* stmt = nullptr;
 
-    textTableRow tableNames = getTableNames(like);
     textTables tables;
+    textTableRow tableNames = getTableNames(like);
 
     try {
         // insert all data in these tables as json array
         for (const auto& table : tableNames) {
             prepareStmtSelectFromStatements(stmt, "*", table, statement);
-            std::vector<std::vector<std::string>> rows = getRowsAsText(stmt, true);
+            textTableRows rows = getRowsAsText(stmt, true);
 
             if (rows.size() > 1) {  // we want actual data, not only the headers
                 // "dataLogs_" is 9 chars, next is at index 9 (starting from 0). config_% Like minus
@@ -832,8 +870,9 @@ DBHandler::textTables DBHandler::getTablesAsText(const std::string& like,
                     (wildcards ? table.substr(like.length() - wildcards, std::string::npos)
                                : table);
                 tables.emplace_back(tableTitle, rows);
-            } else {
-                Logger::warning("%s, Table %s empty", __PRETTY_FUNCTION__, table.c_str());
+                /*            } else {
+                                Logger::warning("%s, Table %s empty", __PRETTY_FUNCTION__,
+                   table.c_str());*/
             }
         }
     } catch (const char* error) {
@@ -843,17 +882,9 @@ DBHandler::textTables DBHandler::getTablesAsText(const std::string& like,
     return tables;
 }
 
-/**
- * Retreives a table as a vector of pairs tablename - vector of rows (with 0 being a header)
- * converted to JSON
- * @param like
- * @param statement
- * @return
- */
-std::string DBHandler::getTablesAsJSON(const std::string& like, const std::string& statement) {
+std::string DBHandler::tablesAsJSON(const textTables& tables) {
     std::string result;
     JSON js;
-    auto tables = getTablesAsText(like, statement);
 
     try {
         int rowCnt = 0;
@@ -871,12 +902,20 @@ std::string DBHandler::getTablesAsJSON(const std::string& like, const std::strin
             result = js.dump();
         }
     } catch (const char* error) {
-        Logger::error("%s, Error JSON-encoding data from %s: %s", __PRETTY_FUNCTION__, like.c_str(),
-                      error);
+        Logger::error("%s, Error JSON-encoding data: %s", __PRETTY_FUNCTION__, error);
     }
-    // tableNames.clear();
-    // tables.clear();
     return result;
+}
+
+/**
+ * Retreives a table as a vector of pairs tablename - vector of rows (with 0 being a header)
+ * converted to JSON
+ * @param like
+ * @param statement
+ * @return
+ */
+std::string DBHandler::getTablesAsJSON(const std::string& like, const std::string& statement) {
+    return tablesAsJSON(getTablesAsText(like, statement));
 }
 
 /**
@@ -889,11 +928,52 @@ std::string DBHandler::getConfigs() {
 
 /**
  * Get all dataLogs as JSON
- * @param onlyLatest
+ * @param afterId nullptr for only latest, otherwise newer than that Id (will be updated)
  * @return
  */
-std::string DBHandler::getLogsAsJSON(bool onlyLatest) {
-    return getTablesAsJSON("dataLogs_%", (onlyLatest ? "ORDER BY id DESC LIMIT 1" : nullptr));
+std::string DBHandler::getLogsAsJSON(unsigned int& afterId, const unsigned int toId) {
+    // The following line just sends the latest entry in all dataLogs_% tables:
+    // return getTablesAsJSON("dataLogs_%", (onlyLatest ? "ORDER BY id DESC LIMIT 1" : ""));
+
+    textTables tables;
+    std::string result;
+    // int retCode;
+
+    unsigned int latestId =
+        (toId ? toId : getTableId("dataLogs_system"));  // we'll work with this as data might be
+                                                        // added while we work
+
+    if (latestId > afterId) {
+        std::string afterIdStr = std::to_string(afterId);
+        std::string latestIdStr = std::to_string(latestId);
+        auto indexTable =
+            getTablesAsText("dataLogs_system", "WHERE id > " + afterIdStr +
+                                                   " AND id <= " + latestIdStr + " ORDER BY id");
+        tables.push_back(std::make_pair("system", indexTable.front().second));
+
+        std::vector<std::string> columns = getTableColumnNames("dataLogs_system");
+        deleteString(columns, "id");
+        for (auto columnName : columns) {
+            std::string columnShortName = columnName;
+            columnShortName.resize(columnShortName.length() - 3);  // remove "_id" at the end
+            std::string tableName =
+                "dataLogs_" + columnShortName;  // prefix with dataLogs_ to get real name
+            auto subTable = getTablesAsText(
+                tableName, "WHERE id > (SELECT " + columnName +
+                               " FROM dataLogs_system WHERE dataLogs_system.id = " + afterIdStr +
+                               ") AND id <= (SELECT MAX(" + columnName +
+                               ") FROM dataLogs_system WHERE dataLogs_system.id <= " + latestIdStr +
+                               ") ORDER BY id ASC");
+            if (!subTable.empty()) {
+                tables.push_back(std::make_pair(columnShortName, subTable.front().second));
+            }
+        }
+    }
+    if (!tables.empty()) {
+        result = tablesAsJSON(tables);
+    }
+    afterId = latestId;
+    return result;
 }
 
 /**
@@ -950,12 +1030,15 @@ void DBHandler::insertDataLogs(std::queue<LogItem>& logs) {
     const unsigned int limitItems = 5;  // hardcoded to the same as in DBLoggerNode for now
 
     if (logItems > 1) {
-        Logger::info("Writing %d log items from %s to %s to the database", logItems,
+        Logger::info("Starting write of %d log items from %s to %s to the database", logItems,
                      logs.front().m_timestamp_str.c_str(), logs.back().m_timestamp_str.c_str());
     } else {
-        Logger::info("Writing %d log item from %s to the database", logItems,
-                     logs.front().m_timestamp_str.c_str());
+        Logger::info("Writing single log item from %s to the database", logs.front().m_timestamp_str.c_str());
     }
+
+    // Logger::info("%s Locking DB", __FUNCTION__);
+    m_databaseLock.lock();
+    // Logger::info("%s Locked DB", __FUNCTION__);
 
     // clang-format off
     actuatorFeedbackId  = 1 + getTableId("dataLogs_actuator_feedback");
@@ -972,18 +1055,18 @@ void DBHandler::insertDataLogs(std::queue<LogItem>& logs) {
     selectFrom(currentMissionId, "id_mission", "currentMission", "LIMIT 1");
     // selectFrom(currentWaypointId, "MIN(id)", "currentMission", "WHERE harvested = 0");
 
-    std::lock_guard<std::mutex> lock_guard(m_databaseLock);
     auto writeBegin = std::chrono::high_resolution_clock::now();
     if (logItems > 2 * limitItems) {
-        Logger::warning(
-            "%s Combining %d inserts as single transaction due to log item flooding",
-            __PRETTY_FUNCTION__, logItems, limitItems);
+        Logger::warning("%s() Combining %d inserts as single transaction (log item overrun)",
+                        __FUNCTION__, logItems, limitItems);
         sqlite3_exec(db, "BEGIN TRANSACTION", nullptr, nullptr, &m_error);
     }
     while (!logs.empty()) {
+/*
         auto loopBegin =
             std::chrono::high_resolution_clock::now();  // This can be manually typed and moved
                                                         // inside the if-clause below
+*/
         if ((logItems > 1) && (logItems <= 2 * limitItems)) {
             sqlite3_exec(db, "BEGIN TRANSACTION", nullptr, nullptr, &m_error);
         }
@@ -1143,19 +1226,23 @@ void DBHandler::insertDataLogs(std::queue<LogItem>& logs) {
         int _currentSensorsId = 0;
         if (currentSensorsId) {
             typedValuePairs values = {{}, {}, {}};
-            addValue(values, "current", log.m_current);
-            addValue(values, "voltage", log.m_voltage);
-            addValue(values, "element", log.m_element);
-            addValue(values, "element_str", log.m_element_str);
-            addValue(values, "t_timestamp", log.m_timestamp_str);
-            if (m_currentSensorsStmt ||
-                (!prepareStmtInsertError(m_currentSensorsStmt, "dataLogs_current_sensors",
-                                         values))) {
-                bindValuesToStmt(values, m_currentSensorsStmt);
-                if (sqlite3_step(m_currentSensorsStmt) == SQLITE_DONE) {
-                    _currentSensorsId = currentSensorsId + logNumber;
+            unsigned currentItemNumber = 0;
+            while (!log.m_currentSensorItems.empty()) {
+                addValue(values, "current", log.m_currentSensorItems.front().m_current);
+                addValue(values, "voltage", log.m_currentSensorItems.front().m_voltage);
+                addValue(values, "element", log.m_currentSensorItems.front().m_element);
+                addValue(values, "element_str", log.m_currentSensorItems.front().m_element_str);
+                log.m_currentSensorItems.pop();
+                addValue(values, "t_timestamp", log.m_timestamp_str);
+                if (m_currentSensorsStmt ||
+                    (!prepareStmtInsertError(m_currentSensorsStmt, "dataLogs_current_sensors",
+                                             values))) {
+                    bindValuesToStmt(values, m_currentSensorsStmt);
+                    if (sqlite3_step(m_currentSensorsStmt) == SQLITE_DONE) {
+                        _currentSensorsId = currentSensorsId + logNumber + currentItemNumber++;
+                    }
+                    sqlite3_reset(m_currentSensorsStmt);
                 }
-                sqlite3_reset(m_currentSensorsStmt);
             }
         }
 
@@ -1184,21 +1271,26 @@ void DBHandler::insertDataLogs(std::queue<LogItem>& logs) {
 
         if ((logItems > 1) && (logItems <= 2 * limitItems)) {
             sqlite3_exec(db, "END TRANSACTION", nullptr, nullptr, &m_error);
-            auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(
-                          std::chrono::high_resolution_clock::now() - loopBegin)
-                          .count();
-            Logger::info("Writing of log item %d completed in %d ms", logNumber, ms);
+            /*            auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(
+                                      std::chrono::high_resolution_clock::now() - loopBegin)
+                                      .count();
+                        Logger::info("Writing of log item %d (%d) completed in %d ms",
+               m_latestDataLogId, logNumber, ms);*/
         }
     }
     m_databaseLock.unlock();
+    // Logger::info("%s Unlocked DB", __PRETTY_FUNCTION__);
+
     DBDisconnect();
     if (logItems > 2 * limitItems) {
         sqlite3_exec(db, "END TRANSACTION", nullptr, nullptr, &m_error);
     }
+
     auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(
                   std::chrono::high_resolution_clock::now() - writeBegin)
                   .count();
-    Logger::info("Writing of %d log items completed in %d ms (avg. %.2f ms/item)", logNumber, ms,
+    Logger::info("Completed write of %d log items (%d-%d) in %d ms (avg. %.2f ms/item)", logNumber,
+                 m_latestDataLogId - logNumber, m_latestDataLogId, ms,
                  (float)ms / (float)logNumber);
 }
 
@@ -1286,6 +1378,10 @@ int DBHandler::insertTableRowsErrors(const std::string& tableName, const tableRo
 bool DBHandler::transactionalReplaceTable(const std::string& tableName, const tableRows& rows) {
     sqlite3* db = DBConnect();
     int retCode;
+    // Logger::info("%s Locking DB", __PRETTY_FUNCTION__);
+    m_databaseLock.lock();
+    // Logger::info("%s Locked DB", __PRETTY_FUNCTION__);
+
     std::string sql = "BEGIN TRANSACTION";
     retCode = sqlite3_exec(db, sql.c_str(), nullptr, nullptr, &m_error);
     if (retCode == SQLITE_OK) {
@@ -1296,20 +1392,27 @@ bool DBHandler::transactionalReplaceTable(const std::string& tableName, const ta
                           sqlite3_errstr(retCode), retCode, tableName.c_str());
         }
     }
-    if (!insertTableRowsErrors(tableName, rows)) {
-        sql = "END TRANSACTION";
-        retCode = sqlite3_exec(db, sql.c_str(), nullptr, nullptr, &m_error);
+    if (retCode == SQLITE_OK) {
+        if (!insertTableRowsErrors(tableName, rows)) {
+            sql = "END TRANSACTION";
+            retCode = sqlite3_exec(db, sql.c_str(), nullptr, nullptr, &m_error);
+        }
+        if (checkRetCode(retCode) == SQLITE_OK) {
+            m_databaseLock.unlock();
+            // Logger::info("%s Unlocked DB", __PRETTY_FUNCTION__);
+            return true;
+        }
     }
-    if (checkRetCode(retCode) == SQLITE_OK) {
-        return true;
-    }
-    Logger::error("%s %s (%d) when replacing data in table %s", __PRETTY_FUNCTION__,
-                  sqlite3_errstr(retCode), retCode, tableName.c_str());
+    Logger::error("%s %s (%d) when replacing data in table %s (probably on \"%s\")",
+                  __PRETTY_FUNCTION__, sqlite3_errstr(retCode), retCode, tableName.c_str(),
+                  sql.c_str());
     retCode = sqlite3_exec(db, "ROLLBACK TRANSACTION;", nullptr, nullptr, &m_error);
     if (retCode != SQLITE_OK) {
         Logger::info("%s SQLite ROLLBACK returned %s (%d)", __PRETTY_FUNCTION__,
                      sqlite3_errstr(retCode), retCode);
     }
+    m_databaseLock.unlock();
+    // Logger::info("%s Unlocked DB", __PRETTY_FUNCTION__);
     return false;
 }
 bool DBHandler::transactionalReplaceTable(const std::string& tableName, const textTableRows& rows) {
@@ -1456,10 +1559,10 @@ void DBHandler::receiveConfigs(const std::string& configsJSON) {
         Logger::error("%s Unable to parse config JSON \"%s\"", __PRETTY_FUNCTION__,
                       configsJSON.c_str());
     } else {
-    	// Re-add prefix "config_" to all table names
-		for (auto &table : tables) {
-			table.first = prepend("config_", table.first);
-		}
+        // Re-add prefix "config_" to all table names
+        for (auto& table : tables) {
+            table.first = prepend("config_", table.first);
+        }
         if (!replaceTables(tables)) {
             Logger::error("%s failed to get new configs", __PRETTY_FUNCTION__);
         }
@@ -1549,7 +1652,7 @@ std::vector<std::string> DBHandler::explode(const std::string& string, const cha
     std::vector<std::string> result;
     std::string::const_iterator cur = string.begin();
     std::string::const_iterator beg = string.begin();
-    while (cur < string.end()) {
+    while (cur != string.end()) {
         if (*cur == glue) {
             result.insert(result.end(), std::string(beg, cur));
             beg = ++cur;
@@ -1568,12 +1671,30 @@ std::vector<std::string> DBHandler::explode(const std::string& string, const cha
  * @return
  */
 int DBHandler::indexOfString(const std::vector<std::string>& haystack, const std::string& needle) {
-    int i = 0;
-    for (const auto& string : haystack) {
-        if (string == needle) {
-            return i;
+    auto hay = haystack.begin();
+    while (hay != haystack.end()) {
+        if (*hay == needle) {
+            return hay - haystack.begin();
         }
-        i++;
+        hay++;
     }
     return -1;
+}
+
+/**
+ * Deletes a specified string member
+ * @param haystack
+ * @param needle
+ * @return
+ */
+bool DBHandler::deleteString(std::vector<std::string>& haystack, const std::string& needle) {
+    auto hay = haystack.begin();
+    while (hay != haystack.end()) {
+        if (*hay == needle) {
+            hay = haystack.erase(hay);
+            return true;
+        }
+        hay++;
+    }
+    return false;
 }

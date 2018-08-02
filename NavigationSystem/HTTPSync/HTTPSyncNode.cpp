@@ -35,7 +35,7 @@ HTTPSyncNode::HTTPSyncNode(MessageBus& msgBus, DBHandler* dbhandler)
       m_LoopTime(0.5),
       m_dbHandler(dbhandler) {
     msgBus.registerNode(*this, MessageType::LocalWaypointChange);
-	msgBus.registerNode(*this, MessageType::WaypointData);
+    msgBus.registerNode(*this, MessageType::WaypointData);
     msgBus.registerNode(*this, MessageType::LocalConfigChange);
     msgBus.registerNode(*this, MessageType::ServerConfigsReceived);
 }
@@ -50,8 +50,14 @@ bool HTTPSyncNode::init() {
     m_dbHandler->getConfigFrom(m_shipPWD, "boat_pwd", "config_httpsync");
     updateConfigsFromDB();
 
-    m_initialised = true;
+    m_dataLogsSystemLastId = 0;
+    m_connectionErrors = 0;
+    m_sendFails = 0;
+	m_backLogged = false;
+	m_waypointsNeedPush = false;
+	m_configsNeedPush = false;
 
+    m_initialised = true;
     return m_initialised;
 }
 
@@ -80,10 +86,10 @@ void HTTPSyncNode::processMessage(const Message* msgPtr) {
 
     switch (msgType) {
         case MessageType::LocalWaypointChange:
-	        pushWaypoints();
-		    break;
+            pushWaypoints();
+            break;
         case MessageType::WaypointData:
-	        pushWaypoints();
+            pushWaypoints();
             break;
         case MessageType::LocalConfigChange:
             pushConfigs();
@@ -104,17 +110,20 @@ void HTTPSyncNode::HTTPSyncThread(ActiveNode* nodePtr) {
 
     curl_global_init(CURL_GLOBAL_ALL);
 
-    node->pushWaypoints();
-    node->pushConfigs();
+    node->m_waypointsNeedPush = true;
+	node->m_configsNeedPush = true;
 
     Timer timer;
     timer.start();
+
     while (node->m_Running.load() == true) {
         node->getConfigsFromServer();
         node->getWaypointsFromServer();
         node->pushDatalogs();
 
-        timer.sleepUntil(node->m_LoopTime);
+        if (node->m_connectionErrors || (!node->m_backLogged)) {
+	        timer.sleepUntil(node->m_LoopTime + (node->m_connectionErrors > 60 ? 60 : node->m_connectionErrors));
+        }
         timer.reset();
     }
     curl_global_cleanup();
@@ -122,35 +131,74 @@ void HTTPSyncNode::HTTPSyncThread(ActiveNode* nodePtr) {
 }
 
 bool HTTPSyncNode::pushDatalogs() {
-	std::string response;
-    std::string logs = m_dbHandler->getLogsAsJSON(m_pushOnlyLatestLogs);
-    if (!logs.size()) {
-	    Logger::warning("%s Not pushing empty logs to server", __PRETTY_FUNCTION__);
-    	return true;
+    std::string response;
+    unsigned int latestId = m_dbHandler->getTableId("dataLogs_system");
+
+    if (m_pushOnlyLatestLogs) {
+        m_dataLogsSystemLastId = std::max(m_dataLogsSystemLastId, latestId - 1);
     }
-    if (performCURLCall(logs, "pushAllLogs", response)) {
-        // remove logs after push
-        if (m_removeLogs) {
-            m_dbHandler->clearLogs();
-        }
-        return true;
-    } else if (!m_reportedConnectError) {
-        Logger::warning("%s Could not push logs to server", __PRETTY_FUNCTION__);
+    if (!m_dataLogsSystemLastId) {
+        m_dataLogsSystemLastId = latestId;
+        Logger::warning(
+            "%s() Last pushed log index unavailable, will send new log items from here on (items "
+            ">%d)",
+            __FUNCTION__, latestId);
     }
-    return false;
+
+    unsigned int pushedId = m_dataLogsSystemLastId;
+
+    if (pushedId < latestId) {
+	    unsigned int chunkEnd = std::min(pushedId + (m_connectionErrors ? 1 : 25), latestId);
+	    if (m_connectionErrors) {
+		    Logger::info("Trying to push single log item %d to the server", chunkEnd);
+	    } else {
+		    Logger::info("Trying to push %d log items %d-%d to the server", chunkEnd - pushedId, pushedId + 1,
+		                 chunkEnd);
+	    }
+	    std::string logs = m_dbHandler->getLogsAsJSON(pushedId, chunkEnd);
+
+	    if (logs.empty()) {
+		    Logger::warning("%s Not pushing empty logs to server",
+		                    __PRETTY_FUNCTION__);  // disable again when debugged
+		    return false;
+	    }
+
+	    // TODO: Behave differently on connection error or on service errors from server
+	    auto sendBegin = std::chrono::high_resolution_clock::now();
+	    if (performCURLCall(logs, "pushAllLogs", response)) {
+		    auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(
+		      std::chrono::high_resolution_clock::now() - sendBegin)
+		      .count();
+		    int items = pushedId - m_dataLogsSystemLastId;
+		    Logger::info("Pushed %d log items %d-%d to the server in %d ms (avg. %.02f ms/item)",
+		                 items, m_dataLogsSystemLastId, pushedId, ms,
+		                 (float) ms / (float) items);
+		    m_dataLogsSystemLastId = pushedId;
+	    } else {
+		    Logger::warning("%s Failed pushing logs to server, will retry later",
+		                    __PRETTY_FUNCTION__);
+		    return false;
+	    }
+    }
+    if (pushedId <= latestId) {
+	    m_backLogged = true;
+    } else {
+    	m_backLogged = false;
+    }
+    return true;
 }
 
 bool HTTPSyncNode::pushWaypoints() {
-	std::string response;
+    std::string response;
     std::string waypointsData = m_dbHandler->getWayPointsAsJSON();
     if (waypointsData.size() > 0) {
         if (performCURLCall(waypointsData, "pushWaypoints", response)) {
-            Logger::info("Waypoints table pushed to the server");
+        	m_waypointsNeedPush = false;
+            Logger::info("Waypoints pushed to the server");
             return true;
-        } else if (!m_reportedConnectError) {
-            Logger::warning("%s Failed to push way points table to the server", __PRETTY_FUNCTION__);
         }
     }
+    Logger::error("%s Failed to push way points table to the server", __PRETTY_FUNCTION__);
     return false;
 }
 
@@ -158,11 +206,12 @@ bool HTTPSyncNode::pushConfigs() {
     std::string response;
 
     if (performCURLCall(m_dbHandler->getConfigs(), "pushConfigs", response)) {
+    	m_configsNeedPush = false;
         Logger::info("Configs pushed to the server");
         return true;
-    } else if (!m_reportedConnectError) {
-        Logger::warning("%s Error: ", __PRETTY_FUNCTION__);
     }
+    Logger::error("%s Failed to push configs to the server", __PRETTY_FUNCTION__);
+	m_configsNeedPush = false; // THIS ALWAYS FAILS SO TEMPORARY JUST TRY ONCE AND QUIT
     return false;
 }
 
@@ -180,11 +229,14 @@ bool HTTPSyncNode::checkIfNewConfigs() {
     std::string result = getData("checkIfNewConfigs");
 
     if (result.length()) {
-	    JSON js = JSON::parse(result);
-	    if (safe_stoi(js["configs_updated"])) {
-		    return true;
-	    }
+        JSON js = JSON::parse(result);
+        if (safe_stoi(js["configs_updated"])) {
+            return true;
+        } else {
+            return false;
+        }
     }
+    Logger::error("%s Could not check for new configs on the server!", __PRETTY_FUNCTION__);
     return false;
 }
 
@@ -192,66 +244,76 @@ bool HTTPSyncNode::checkIfNewWaypoints() {
     std::string result = getData("checkIfNewWaypoints");
 
     if (result.length()) {
-	    JSON js = JSON::parse(result);
-	    if (safe_stoi(js["route_updated"])) {
-	    	return true;
-	    }
+        JSON js = JSON::parse(result);
+        if (safe_stoi(js["route_updated"])) {
+            return true;
+        } else {
+            return false;
+        }
     }
+    Logger::error("%s Could not check for new waypoints on the server!", __PRETTY_FUNCTION__);
     return false;
 }
 
 bool HTTPSyncNode::getConfigsFromServer() {
-    if (checkIfNewConfigs()) {
+	if (checkIfNewConfigs()) {
         std::string configs = getData("getAllConfigs");
         if (!configs.empty()) {
-	        m_dbHandler->receiveConfigs(configs);
-/*
-            This does not work as there no longer seems to exist any "state" table /Kåre
-            if (not m_dbHandler->updateTableColumnIdValue("state", "configs_updated", 1, 1)) {
-                Logger::error("%s Error updating state table", __PRETTY_FUNCTION__);
-                return false;
-            }
-*/
+            m_dbHandler->receiveConfigs(configs);
+            /*
+                        This does not work as there no longer seems to exist any "state" table /Kåre
+                        if (not m_dbHandler->updateTableColumnIdValue("state", "configs_updated", 1,
+               1)) { Logger::error("%s Error updating state table", __PRETTY_FUNCTION__); return
+               false;
+                        }
+            */
             MessagePtr newServerConfigs = std::make_unique<ServerConfigsReceivedMsg>();
             m_MsgBus.sendMessage(std::move(newServerConfigs));
             Logger::info("Configuration retrieved from remote server");
+            m_configsNeedPush = false;
             return true;
-        } else if (!m_reportedConnectError) {
-            Logger::error("%s Error: %s", __PRETTY_FUNCTION__);
         }
+        Logger::error("%s Could not retrieve configuration from the server!", __PRETTY_FUNCTION__);
     }
+	if (m_configsNeedPush) {
+		return pushConfigs();
+	}
     return false;
 }
 
 bool HTTPSyncNode::getWaypointsFromServer() {
-    if (checkIfNewWaypoints()) {
+	if (checkIfNewWaypoints()) {
+		// TODO: locking
         std::string waypoints = getData("getWaypoints");
         if (!waypoints.empty()) {
             if (m_dbHandler->receiveWayPoints(waypoints)) {
+	            m_waypointsNeedPush = false;
                 MessagePtr newServerWaypoints = std::make_unique<ServerWaypointsReceivedMsg>();
                 m_MsgBus.sendMessage(std::move(newServerWaypoints));
                 Logger::info("Waypoints retrieved from remote the server");
                 return true;
             }
-        } else if (!m_reportedConnectError) {
-            Logger::error("%s Could not retrieve new way points from the server!", __PRETTY_FUNCTION__);
         }
+        Logger::error("%s Could not retrieve new waypoints from the server!", __PRETTY_FUNCTION__);
     }
-    return false;
+    if (m_waypointsNeedPush) {
+		return pushWaypoints();
+	}
+	return false;
 }
 
 bool HTTPSyncNode::performCURLCall(std::string data, std::string call, std::string& response) {
     std::string serverCall = "";
 
     // std::cout << "/* Request : " << call << " */" << '\n';
-	serverCall = "serv=" + call + "&id=" + m_shipID + "&pwd=" + m_shipPWD;
-	if (data.length()) {
-		serverCall += "&data=" + data;
-	}
+    serverCall = "serv=" + call + "&id=" + m_shipID + "&pwd=" + m_shipPWD;
+    if (data.length()) {
+        serverCall += "&data=" + data;
+    }
     // example: serv=getAllConfigs&id=BOATID&pwd=BOATPW
     // std::cout << "/* Server call : " << serverCall.substr(0, 150) << " */" << '\n';
 
-	std::lock_guard<std::mutex> lock_guard(m_lock);
+    std::lock_guard<std::mutex> lock_guard(m_lock);
     curl = curl_easy_init();
     if (curl) {
         // https://curl.haxx.se/libcurl/c/threadsafe.html
@@ -273,29 +335,34 @@ bool HTTPSyncNode::performCURLCall(std::string data, std::string call, std::stri
 
         // Perform the request, m_res will get the return code
         m_res = curl_easy_perform(curl);
-        curl_easy_cleanup(curl); // This gave double-free SIGABRT
+        curl_easy_cleanup(curl);  // This gave double-free SIGABRT
 
         // Check for errors
         // std::cout << "/* Reponse serveur : " << response << "\n*/" << "\n\n\n\n";
         if (m_res == CURLE_OK) {
             if (m_reportedConnectError) {
                 m_reportedConnectError = false;
-                Logger::info("Connections to the server re-established");
+                Logger::info("Re-established server connection after %d failed attempts",
+                             m_connectionErrors);
+                m_connectionErrors = 0;
             }
             return true;  // All is well
         } else {
-            if (!m_reportedConnectError) {
-                if (strlen(errbuf)) {
-                    Logger::error("Connection error: %s", errbuf);
-                } else {
-                    Logger::error("Connection error: %s", curl_easy_strerror(m_res));
-                }
-                m_reportedConnectError = true;
+            // if (!m_reportedConnectError) {
+            if (strlen(errbuf)) {
+                Logger::error("%s() %s (code %d, errcnt %d)", __FUNCTION__, errbuf, m_res,
+                              m_connectionErrors);
+            } else {
+                Logger::error("%s() %s (code %d, errcnt %d)", __FUNCTION__,
+                              curl_easy_strerror(m_res), m_res, m_connectionErrors);
             }
+            m_reportedConnectError = true;
+            //}
         }
     } else {
         // fprintf(stderr, "CURL IS FALSE");
         Logger::error("%s ERROR: problems with curllib, curl is false!", __PRETTY_FUNCTION__);
     }
+    m_connectionErrors++;
     return false;
 }
