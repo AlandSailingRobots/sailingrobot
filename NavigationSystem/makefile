@@ -133,7 +133,8 @@ export LNM_SRC              = $(LNM_DIR)/ASRCourseBallot.cpp $(LNM_DIR)/ASRArbit
                             	$(LNM_DIR)/LocalNavigationModule.cpp \
                             	$(LNM_DIR)/Voters/WaypointVoter.cpp $(LNM_DIR)/Voters/WindVoter.cpp  \
                             	$(LNM_DIR)/Voters/ChannelVoter.cpp $(LNM_DIR)/Voters/MidRangeVoter.cpp \
-								$(LNM_DIR)/Voters/ProximityVoter.cpp $(LNM_DIR)/Voters/CourseVoter.cpp
+								$(LNM_DIR)/Voters/ProximityVoter.cpp $(LNM_DIR)/Voters/CourseVoter.cpp \
+								$(LNM_DIR)/VoterTCPDebugger.cpp
 
 # Obstacles detection
 export COLLIDABLE_MGR_SRC	= WorldState/CollidableMgr/CollidableMgr.cpp WorldState/AISProcessing.cpp \

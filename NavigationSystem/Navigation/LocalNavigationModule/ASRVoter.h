@@ -18,11 +18,19 @@
 #include <string>
 #include "ASRCourseBallot.h"
 #include "BoatState.h"
+#include <mutex>
 
 class ASRVoter {
    public:
-    ASRVoter(int16_t maxVotes, float weight, std::string name)
-        : courseBallot(maxVotes), voterWeight(weight), name(name) {}
+    friend class VoterTCPDebugger;
+    friend class LocalNavigationModule;
+
+    ASRVoter(int16_t maxVotes, float weight, const char* nameIn)
+        : courseBallot(maxVotes), voterWeight(weight) {
+        //name = nameIn;
+        strncpy(name, nameIn, sizeof name - 1);
+        name[19] = '\0';
+    }
 
     ///----------------------------------------------------------------------------------
     /// Triggers a ASR voter to place votes on the course headings. This function returns
@@ -55,15 +63,19 @@ class ASRVoter {
     ///----------------------------------------------------------------------------------
     /// Returns the name of the voter
     ///----------------------------------------------------------------------------------
-    std::string getName() { return name; }
+    const char* getName() { return name; }
 
     ///----------------------------------------------------------------------------------
     /// Returns the course ballot of the voter
     ///----------------------------------------------------------------------------------
     ASRCourseBallot* getBallot() { return &courseBallot; }
 
-   protected:
+
+    //int access_tester;
     ASRCourseBallot courseBallot;
     float voterWeight;
-    std::string name;
+    char name[20];
+   protected:
+
+    std::mutex m_lock;
 };

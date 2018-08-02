@@ -141,19 +141,22 @@ float WingsailControlNode::calculateTailAngle()
 }
 
 ///----------------------------------------------------------------------------------
-float WingsailControlNode::simpleCalculateTailAngle()
-{
-    std::lock_guard<std::mutex> lock_guard(m_lock);
+float WingsailControlNode::simpleCalculateTailAngle() {
+    std::lock_guard <std::mutex> lock_guard(m_lock);
+
+    ///   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!------
+
+
 
     if(m_TargetCourse != DATA_OUT_OF_RANGE && m_TargetCourse != NO_COMMAND)
     {
-        if (m_TargetTackStarboard)
+        if (sin(m_ApparentWindDir) >= 0)
         {
-            return m_MaxCommandAngle;
+            return -m_MaxCommandAngle;
         }
         else
         {
-            return - m_MaxCommandAngle;
+            return  m_MaxCommandAngle;
         }
     }
     else

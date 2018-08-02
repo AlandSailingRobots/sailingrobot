@@ -16,6 +16,7 @@
 
 #include <stdint.h>
 #include "ASRCourseBallot.h"
+#include <mutex>
 
 class ASRArbiter {
    public:
@@ -53,4 +54,6 @@ class ASRArbiter {
    private:
     const int MAX_VOTES = 150;
     ASRCourseBallot courseBallot;
+
+    std::mutex m_lock;
 };

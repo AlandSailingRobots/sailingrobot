@@ -120,8 +120,11 @@ void LocalNavigationModule::processMessage( const Message* msg )
             // and get a new heading
         }
         case MessageType::RequestCourse:
+        //{
+        //    std::lock_guard <std::mutex> lock_guard(m_lock);
             startBallot();
             break;
+        //}
         case MessageType::ServerConfigsReceived:
             updateConfigsFromDB();
             break;
@@ -158,12 +161,23 @@ void LocalNavigationModule::startBallot()
 //              <<  *std::max_element(std::begin(arbiter.getResult().courses),std::end(arbiter.getResult().courses)) << std::endl;
 
 
-    std::vector<ASRVoter*>::iterator it;
+    //std::vector<ASRVoter*>::iterator it;
 
-    for( it = voters.begin(); it != voters.end(); it++ )
+    //std::lock_guard<std::mutex> lock_guard(m_lock);
+
+    for( auto it = voters.begin(); it != voters.end(); it++ )
     {
+        std::lock_guard<std::mutex> lock_guard(m_lock);
         ASRVoter* voter = (*it);
+        //std::cout << "Iterator: _value=" << *it << " _memaddr=" << &it << " _memaddrofelement=" << &(*it) <<  std::endl;
+        //int tmp_dbg = voter->access_tester;
+        //std::cout << "Temp: " << tmp_dbg << " _testeraddr=" << &(tmp_dbg) << std::endl;
+        //std::cout << "Accessing first course value: " << voter->getBallot()->courses[0] << std::endl;
+        //std::string tmp_dbg2 =  (**it).getName();
+        //std::cout << "Voter name: " << (**it).name << " _nameaddr=" << &((**it).name) << std::endl;
+        //std::cout << "Before segfault" << std::endl;
         arbiter.castVote( voter->weight(), voter->vote( boatState ) );
+        //std::cout << "After segfault" << std::endl;
 
         //arbiter.castVeto( voter->vote( boatState ) ); // vetos done with castVote now
         //voter->vote( boatState ).clear();

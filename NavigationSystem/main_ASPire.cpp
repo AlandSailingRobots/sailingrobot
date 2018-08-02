@@ -24,6 +24,7 @@
   #include "../Navigation/LocalNavigationModule/Voters/ChannelVoter.h"
   #include "../Navigation/LocalNavigationModule/Voters/ProximityVoter.h"
   #include "../Navigation/LocalNavigationModule/Voters/MidRangeVoter.h"
+  #include "../Navigation/LocalNavigationModule/VoterTCPDebugger.h"
 #else
   #include "../Navigation/LineFollowNode.h"
 #endif
@@ -184,6 +185,8 @@ int main(int argc, char *argv[])
 		dbHandler.getConfigFrom(weight, "proximity_voter_weight", "config_voter_system");
 		ProximityVoter proximityVoter( MAX_VOTES, weight, collidableMgr);
 
+
+
 		lnm.registerVoter( &courseVoter );
 		lnm.registerVoter( &waypointVoter );
 		lnm.registerVoter( &windVoter );
@@ -191,9 +194,13 @@ int main(int argc, char *argv[])
 
 		// As there is no veto used in both avoidance voters for now, you can disable avoidance system just by
 		// putting a weigth of zero in config_ASPire.json and push the new config manually or through the website.
-		lnm.registerVoter( &proximityVoter );
-		lnm.registerVoter( &midRangeVoter );
-  	#else
+		//lnm.registerVoter( &proximityVoter );
+		//lnm.registerVoter( &midRangeVoter );
+
+        VoterTCPDebugger voterTCPD(messageBus, lnm, 3);
+        //VoterTCPDebugger voterTCPD(messageBus, courseVoter);
+
+    #else
 		LineFollowNode sailingLogic(messageBus, dbHandler);
   	#endif
 
@@ -234,6 +241,7 @@ int main(int argc, char *argv[])
 
 	#if LOCAL_NAVIGATION_MODULE == 1
 		initialiseNode( lnm, "Local Navigation Module",	NodeImportance::CRITICAL );
+		initialiseNode( voterTCPD, "VoterTCPDebugger", NodeImportance::NOT_CRITICAL);
 	#else
 		initialiseNode(sailingLogic, "LineFollow", NodeImportance::CRITICAL);
 	#endif
@@ -283,6 +291,7 @@ int main(int argc, char *argv[])
     // Camera processing enabled for voter system only currently.
 	//  cameraProcessingUtility.start();
 		lnm.start();
+		voterTCPD.start();
 	#else
 		sailingLogic.start();
 	#endif

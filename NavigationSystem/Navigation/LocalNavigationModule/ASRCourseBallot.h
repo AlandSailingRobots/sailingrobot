@@ -105,9 +105,10 @@ class ASRCourseBallot {
 
 // TODO: Put back as a private variable after debugging
     int16_t courses[ELEMENT_COUNT];
+    bool veto[ELEMENT_COUNT];
    private:
     const int16_t MAX_VOTES;
     
-    bool veto[ELEMENT_COUNT];
+
 
 };

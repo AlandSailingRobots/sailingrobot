@@ -27,6 +27,8 @@ ASRArbiter::ASRArbiter()
 ///----------------------------------------------------------------------------------
 void ASRArbiter::castVote( const int16_t weight, const ASRCourseBallot& ballot )
 {
+    //std::lock_guard<std::mutex> lock_guard(m_lock);
+
     for( uint16_t i = 0; i < 360; i+= ASRCourseBallot::COURSE_RESOLUTION )
     {
         courseBallot.add( i, ballot.get(i) * weight );

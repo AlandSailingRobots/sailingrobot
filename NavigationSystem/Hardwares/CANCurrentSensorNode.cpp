@@ -20,7 +20,7 @@
 const float DATA_OUT_OF_RANGE = -2000; // as uint16_t, cannot use -2000.
 
 CANCurrentSensorNode::CANCurrentSensorNode(MessageBus& messageBus, DBHandler& dbhandler, CANService& canService) :
-ActiveNode(NodeID::CANCurrentSensor, messageBus), CANFrameReceiver(canService, {MSG_ID_CURRENT_SENSOR_DATA,MSG_ID_CURRENT_SENSOR_DATA_POWER_UNIT}), m_LoopTime (0.5), m_db(dbhandler)
+ActiveNode(NodeID::CANCurrentSensor, messageBus), CANFrameReceiver(canService, {MSG_ID_CURRENT_SENSOR_DATA}), m_LoopTime (0.5), m_db(dbhandler)
 {
         m_current = DATA_OUT_OF_RANGE;
         m_voltage = DATA_OUT_OF_RANGE;
@@ -56,9 +56,7 @@ void CANCurrentSensorNode::processFrame (CanMsg& msg) {
 	CanMessageHandler messageHandler(msg);
 	uint16_t comp_current, comp_voltage;
 
-	if (messageHandler.getMessageId() == MSG_ID_CURRENT_SENSOR_DATA ||
-        messageHandler.getMessageId() == MSG_ID_CURRENT_SENSOR_DATA_POWER_UNIT ||
-        messageHandler.getMessageId() == MSG_ID_CURRENT_SENSOR_DATA_BOX)
+	if (messageHandler.getMessageId() == MSG_ID_CURRENT_SENSOR_DATA)
     {
         // Use get data instead(int)? Parse data here or add the routine in another file?
         messageHandler.getData(&comp_current, CURRENT_SENSOR_CURRENT_DATASIZE);

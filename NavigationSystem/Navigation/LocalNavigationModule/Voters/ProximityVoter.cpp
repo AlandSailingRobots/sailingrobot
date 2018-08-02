@@ -108,19 +108,33 @@ void ProximityVoter::visualAvoidance(){
     if (visualField.bearingToRelativeObstacleDistance.empty()){
         return;
     }
+
+
+    //std::sort(dupArr, dupArr + N);
+
     // Instead of negative votes, switched to adding vote on the other bearings
     avoidOutsideVisualField(visualField.visualFieldLowBearing, visualField.visualFieldHighBearing);
     for(auto it : visualField.bearingToRelativeObstacleDistance ){
+        // Basically: for each bearing, from -10 to 10 degree around it, decrease the number of vote depending
+        //            on the relative_distance value, ...
         bearingAvoidanceSmoothed(it.first, it.second);
+        //            ... then on this bearing's starboard and portboard, -10 to 10 degree around them, increase
+        //            the number of vote depending on the relative_distance value. With the portAvoidanceFactor,
+        //            you can give more weight to starboard or portboard, thus increasing the chance of always going
+        //            on one side when avoiding an obstacle.
         bearingPreferenceSmoothed(it.first, it.second);
    }
 //    n_nzero = 360 - std::count(std::begin(courseBallot.courses), std::end(courseBallot.courses), 0);
 //    std::cout << courseBallot.getMin().first << " " << courseBallot.getMin().second << std::endl;
 //    std::cout << courseBallot.getMax().first << " " << courseBallot.getMax().second << std::endl;
+
+
 }
 
 
-// NOTE: this part is kind of the same than the Course Voter in the end.
+// NOTE: this part is kind of the same than the Course Voter in the end: add votes to all bearings in the visual field,
+//       which is in front of the boat and range from -12 to 12 approximately. The course voter is currently doing it
+//       from -9 to 9.
 void ProximityVoter::avoidOutsideVisualField( int16_t visibleFieldLowBearingLimit, 
         int16_t visibleFieldHighBearingLimit)
 {
@@ -144,6 +158,9 @@ void ProximityVoter::avoidOutsideVisualField( int16_t visibleFieldLowBearingLimi
 
 // NOTE: This is sort of overwriting the avoidOutsideVisualField which is doing kind of the same thing
 //       than the course voter
+// More proper description: Put negative votes on a bearing (and it's neighbour -> smoothed) depending on the value of
+// relativeFreeDistance which is the percentage of free pixels in a column (sent by the camera processing)
+// compared to the image height.
 ///----------------------------------------------------------------------------------
 void ProximityVoter::bearingAvoidanceSmoothed( int16_t bearing, uint16_t relativeFreeDistance )
 {
@@ -159,11 +176,11 @@ void ProximityVoter::bearingAvoidanceSmoothed( int16_t bearing, uint16_t relativ
         Logger::debug("Decreasing votes around bearing %d with %f", bearing, vote*smoothWeight*normalizedVoteAdjust);
     }
     // Stick with negative votes for now
-    courseBallot.add(bearing, -vote * normalizedVoteAdjust * smoothWeight);
+    courseBallot.add(bearing, -vote * normalizedVoteAdjust * smoothWeight); //Done before loop to not double it
     for(uint16_t j = 1; j < avoidanceBearingRange; j++)
     {
         double voteAdjust = vote * normalizedVoteAdjust * smoothWeight * (avoidanceNormalization - j)/avoidanceNormalization;
-        courseBallot.add(bearing+j, -voteAdjust);        
+        courseBallot.add(bearing+j, -voteAdjust);
         courseBallot.add(bearing-j, -voteAdjust);        
     }
 }

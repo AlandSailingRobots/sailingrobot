@@ -87,6 +87,8 @@ const ASRCourseBallot& ChannelVoter::vote( const BoatState_t& boatState )
             courseBallot.add( waypointLineBearing + 90 - i, courseBallot.maxVotes() * std::min(threshhold, 1.0) );
             courseBallot.add( waypointLineBearing + 90 + i, courseBallot.maxVotes() * std::min(threshhold, 1.0) );
         }
+        //Negate the doubled vote on i=0
+        courseBallot.add( waypointLineBearing + 90, -courseBallot.maxVotes() * std::min(threshhold, 1.0) );
     }
     else if(distanceFromMiddle < 0 )
     {
@@ -95,6 +97,8 @@ const ASRCourseBallot& ChannelVoter::vote( const BoatState_t& boatState )
             courseBallot.add( waypointLineBearing - 90 - i, courseBallot.maxVotes() * std::min(threshhold, 1.0) );
             courseBallot.add( waypointLineBearing - 90 + i, courseBallot.maxVotes() * std::min(threshhold, 1.0) );
         }
+        //Negate the doubled vote on i=0
+        courseBallot.add( waypointLineBearing - 90, -courseBallot.maxVotes() * std::min(threshhold, 1.0) );
     }
     else {
         // no statement on zero for now, should not happen a lot anyway

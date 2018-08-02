@@ -31,14 +31,22 @@ CourseVoter::CourseVoter( int16_t maxVotes, int16_t weight )
 ///----------------------------------------------------------------------------------
 const ASRCourseBallot& CourseVoter::vote( const BoatState_t& boatState )
 {
+    //std::lock_guard<std::mutex> lock_guard(m_lock);
+
     courseBallot.clear();
     
     // Add votes to the direction the boat is facing, less cost to change the vessel.
     for( int i = 0; i < 10; i += ASRCourseBallot::COURSE_RESOLUTION )
     {
-        courseBallot.add( boatState.heading + i, (( 10 - i ) / 10) * (courseBallot.maxVotes() / 10) );
-        courseBallot.add( boatState.heading - i, (( 10 - i ) / 10) * (courseBallot.maxVotes() / 10) );
+        courseBallot.add( boatState.heading + i, (( 10.0 - i ) / 10.0) * (courseBallot.maxVotes() / 10.0) );
+        courseBallot.add( boatState.heading - i, (( 10.0 - i ) / 10.0) * (courseBallot.maxVotes() / 10.0) );
+        std::cout << "Looping: " << i << std::endl;
     }
+    //Negate doubled value on i=0
+    courseBallot.add( boatState.heading, -(courseBallot.maxVotes() / 10.0) );
+
+    int num_non_zero = std::count_if( std::begin(courseBallot.courses), std::end(courseBallot.courses), [](int16_t i){return i>0;} );
+    std::cout << "Number of non zero: " << num_non_zero << std::endl;
 
     return courseBallot;
 } 
