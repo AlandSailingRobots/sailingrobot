@@ -79,7 +79,10 @@ const ASRCourseBallot& ChannelVoter::vote( const BoatState_t& boatState )
     */
 
     // Left hand side
-    double threshhold = abs(distanceFromMiddle/(boatState.radius-3));
+    double threshhold = 0;
+    if (abs(boatState.radius > 0)) { // Avoid divide by zero
+        threshhold = abs(distanceFromMiddle / (boatState.radius));
+    }
     if( distanceFromMiddle > 0)
     {
         for( int i = 0; i < 90; i++ )

@@ -41,11 +41,14 @@ const ASRCourseBallot& WindVoter::vote( const BoatState_t& boatState )
     }
     */
 
-    int16_t twdBearingDiff = abs(Utility::headingDifference( boatState.waypointBearing, twd ));
+
+    //int16_t twdBearingDiff = abs(Utility::headingDifference( boatState.waypointBearing, twd ));
     
     // Encourage tacking if necessary 
 
 #ifdef on_ASPire  // defined in makefile, need to take into account downwind beating mode for ASPire
+
+/*  Try using only the vetos
     if(abs(sin(Utility::degreeToRadian(twdBearingDiff))) <= abs(sin(Utility::degreeToRadian(TACK_ANGLE))))
     {
 //        Logger::info("[Wind voter]: Beating mode needed");
@@ -73,6 +76,7 @@ const ASRCourseBallot& WindVoter::vote( const BoatState_t& boatState )
 //            Logger::info("[Wind voter]: Beating mode upwind");
         }
     }
+*/
 
     // Set a veto to courses into the no go zones (upwind and downwind for wingsails).
     for( int i = 0; i < TACK_ANGLE; i+= ASRCourseBallot::COURSE_RESOLUTION )
@@ -86,6 +90,8 @@ const ASRCourseBallot& WindVoter::vote( const BoatState_t& boatState )
         courseBallot.setVeto( twd + 180 - i );
     }
 #else         // for regular sails
+
+/* Try using only the vetos
     if( twdBearingDiff <= TACK_ANGLE )
     {
         if ( abs( Utility::headingDifference( boatState.heading, twd + TACK_ANGLE ) ) < 
@@ -98,13 +104,14 @@ const ASRCourseBallot& WindVoter::vote( const BoatState_t& boatState )
             courseBallot.add( twd - TACK_ANGLE, courseBallot.maxVotes() );
         }
     }
-
+*/
     // Set a veto to courses into the no go zone.
     for( int i = 0; i < TACK_ANGLE; i+= ASRCourseBallot::COURSE_RESOLUTION )
     {
         courseBallot.setVeto( twd + i );
         courseBallot.setVeto( twd - i );
     }
+
 #endif //ASPire
 
     
