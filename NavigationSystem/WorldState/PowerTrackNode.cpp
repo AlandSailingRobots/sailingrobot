@@ -114,6 +114,9 @@ void PowerTrackNode::PowerTrackThreadFunc(ActiveNode* nodePtr)
 
 		node->m_MsgBus.sendMessage(std::move(powerTrack));
 
+		Logger::info("PowerTrackInfo: %f,%f,%d", (float)node->m_CurrentSensorDataCurrent, 
+			(float)node->m_CurrentSensorDataVoltage, (uint8_t)node->m_CurrentSensorDataElement);
+
 		//int size = snprintf(buffer, 1024, "%d,%d,%d,%d,%f,%f,%d\n",
 		//					(int)node->m_ArduinoPressure, (int)node->m_ArduinoRudder,
 		//					(int)node->m_ArduinoSheet, (int)node->m_ArduinoBattery,
