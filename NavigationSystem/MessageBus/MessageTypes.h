@@ -45,7 +45,8 @@ enum class MessageType {
     SailCommand,
     DataCollectionStart,
     DataCollectionStop,
-    CurrentSensorData
+    CurrentSensorData,
+    PowerTrack
 };
 
 inline std::string msgToString(MessageType msgType) {
@@ -106,6 +107,8 @@ inline std::string msgToString(MessageType msgType) {
             return "DataCollectionStop";
         case MessageType::CurrentSensorData:
             return "CurrentSensorData";
+        case MessageType::PowerTrack:
+            return "PowerTrack";
     }
     return "";
 }

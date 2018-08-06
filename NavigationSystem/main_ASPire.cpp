@@ -39,6 +39,7 @@
 #include "../Hardwares/CANMarineSensorTransmissionNode.h"
 
 #include "../Hardwares/CANCurrentSensorNode.h"
+#include "../WorldState/PowerTrackNode.h"
 
 #endif
 
@@ -188,6 +189,7 @@ int main(int argc, char *argv[])
 
 		CANMarineSensorTransmissionNode canMarineSensorTransmissionNode(messageBus, canService);
 		CANCurrentSensorNode canCurrentSensorNode(messageBus, dbHandler, canService);
+		PowerTrackNode powerTrackNode(messageBus, dbHandler, 0.5);
 
 	#endif
 
@@ -221,6 +223,7 @@ int main(int argc, char *argv[])
 		initialiseNode(actuatorFeedback, "Actuator Feedback", NodeImportance::NOT_CRITICAL);
 		initialiseNode(canMarineSensorTransmissionNode, "Marine Sensors", NodeImportance::NOT_CRITICAL);
 		initialiseNode(canCurrentSensorNode, "Current Sensors", NodeImportance::NOT_CRITICAL);
+		initialiseNode(powerTrackNode, "Powertrack", NodeImportance::NOT_CRITICAL);
 	#endif
 
 	// Start active nodes
@@ -244,6 +247,7 @@ int main(int argc, char *argv[])
 		windSensor.start();
 		actuatorFeedback.start();
 		canCurrentSensorNode.start();
+		powerTrackNode.start();
 	#endif
 
 	#if LOCAL_NAVIGATION_MODULE == 1

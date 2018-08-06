@@ -14,7 +14,7 @@
 #ifndef NAVIGATIONSYSTEM_POWERTRACKMSG_H
 #define NAVIGATIONSYSTEM_POWERTRACKMSG_H
 
-#include "../MessageBus/Messsage.h"
+#include "../MessageBus/Message.h"
 
  class PowerTrackMsg : public Message {
    public:
@@ -32,9 +32,9 @@
    	  m_ArduinoRudder(arduinoRudder),
    	  m_ArduinoSheet(arduinoSheet),
    	  m_ArduinoBattery(arduinoBattery),
-   	  m_CurrentDataCurrent(currentsensordataCurrent),
-   	  m_CurrentDataVoltage(currentsensordataVoltage),
-   	  m_CurrentDataElement(currentsensordataElement) {}
+   	  m_CurrentSensorDataCurrent(currentsensordataCurrent),
+   	  m_CurrentSensorDataVoltage(currentsensordataVoltage),
+   	  m_CurrentSensorDataElement(currentsensordataElement) {}
 
    	PowerTrackMsg(int arduinoPressure,
    		            int arduinoRudder,
@@ -50,14 +50,14 @@
    	  m_ArduinoBattery(arduinoBattery),
    	  m_CurrentSensorDataCurrent(currentsensordataCurrent),
    	  m_CurrentSensorDataVoltage(currentsensordataVoltage),
-   	  m_Current SensorDataElement(currentsensordataElement) {}
+   	  m_CurrentSensorDataElement(currentsensordataElement) {}
 
    	PowerTrackMsg(MessageDeserialiser deserialiser) : Message(deserialiser) {
    		if (!deserialiser.readInt(m_ArduinoPressure) || !deserialiser.readInt(m_ArduinoRudder) ||
    			!deserialiser.readInt(m_ArduinoSheet) || !deserialiser.readInt(m_ArduinoBattery) ||
    			!deserialiser.readFloat(m_CurrentSensorDataCurrent) || 
-   			!deserialiser.readFloat(m_CurrentSesnorDataVoltage) ||
-   			!deserialiser.readSensedElement(m_CurrentSensordataElement)) {
+   			!deserialiser.readFloat(m_CurrentSensorDataVoltage) ||
+   			!deserialiser.readInt((int&)m_CurrentSensorDataElement)) {
 	        m_valid = false;
         }
    	}
@@ -68,7 +68,7 @@
    	int arduinoRudder() { return m_ArduinoRudder; }
    	int arduinoSheet() { return m_ArduinoSheet; }
    	int arduinoBattery() { return m_ArduinoBattery; }
-   	float currentsensordataCurrent() { return m_CurrentSesnorDataCurrent; }
+   	float currentsensordataCurrent() { return m_CurrentSensorDataCurrent; }
    	float currentsensordataVoltage() { return m_CurrentSensorDataVoltage; }
    	SensedElement currentsensordataElement() { return m_CurrentSensorDataElement; }
 

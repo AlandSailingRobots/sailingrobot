@@ -103,7 +103,7 @@ NAVIGATION_SRC				= Navigation/WaypointMgrNode.cpp
 SYSTEM_SERVICES_SRC  		= SystemServices/Logger.cpp SystemServices/SysClock.cpp SystemServices/Timer.cpp
 
 WORLD_STATE_SRC				= WorldState/VesselStateNode.cpp WorldState/StateEstimationNode.cpp \
-								WorldState/WindStateNode.cpp
+								WorldState/WindStateNode.cpp WorldState/PowerTrackNode.cpp
 
 DATA_COLLECTION_SRC			= DataCollection/DataCollectionMgrNode.cpp
 
