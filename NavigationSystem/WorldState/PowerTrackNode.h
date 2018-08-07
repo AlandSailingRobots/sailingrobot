@@ -66,6 +66,8 @@ class PowerTrackNode : public ActiveNode {
     	float m_CurrentSensorDataCurrent;
     	float m_CurrentSensorDataVoltage;
     	SensedElement m_CurrentSensorDataElement;
+        float m_Power;
+        float m_PowerBalance;
         double m_Looptime;
 
     	DBHandler& m_db;

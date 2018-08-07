@@ -179,15 +179,15 @@ int main(int argc, char *argv[])
   	#else
 		CANService canService;
 
-		HMC6343Node compass(messageBus, dbHandler);
-	  	GPSDNode gpsd(messageBus, dbHandler);
-		CANWindsensorNode windSensor(messageBus, dbHandler, canService);
-	  	ActuatorNodeASPire actuators(messageBus, canService);
-	  	CANArduinoNode actuatorFeedback(messageBus, dbHandler, canService);
+//		HMC6343Node compass(messageBus, dbHandler);
+//	  	GPSDNode gpsd(messageBus, dbHandler);
+//		CANWindsensorNode windSensor(messageBus, dbHandler, canService);
+//	  	ActuatorNodeASPire actuators(messageBus, canService);
+//	  	CANArduinoNode actuatorFeedback(messageBus, dbHandler, canService);
 
-		CANMarineSensorReceiver canMarineSensorReciver(messageBus, canService);
+//		CANMarineSensorReceiver canMarineSensorReciver(messageBus, canService);
 
-		CANMarineSensorTransmissionNode canMarineSensorTransmissionNode(messageBus, canService);
+//		CANMarineSensorTransmissionNode canMarineSensorTransmissionNode(messageBus, canService);
 		CANCurrentSensorNode canCurrentSensorNode(messageBus, dbHandler, canService);
 		PowerTrackNode powerTrackNode(messageBus, dbHandler, 0.5);
 
@@ -216,12 +216,12 @@ int main(int argc, char *argv[])
 	#if SIMULATION == 1
 		initialiseNode(simulation,"Simulation",NodeImportance::CRITICAL);
 	#else
-		initialiseNode(compass, "Compass", NodeImportance::CRITICAL);
-		initialiseNode(gpsd, "GPSD", NodeImportance::CRITICAL);
-		initialiseNode(windSensor, "Wind Sensor", NodeImportance::CRITICAL);
-		initialiseNode(actuators, "Actuators", NodeImportance::CRITICAL);
-		initialiseNode(actuatorFeedback, "Actuator Feedback", NodeImportance::NOT_CRITICAL);
-		initialiseNode(canMarineSensorTransmissionNode, "Marine Sensors", NodeImportance::NOT_CRITICAL);
+//		initialiseNode(compass, "Compass", NodeImportance::CRITICAL);
+//		initialiseNode(gpsd, "GPSD", NodeImportance::CRITICAL);
+//		initialiseNode(windSensor, "Wind Sensor", NodeImportance::CRITICAL);
+//		initialiseNode(actuators, "Actuators", NodeImportance::CRITICAL);
+//		initialiseNode(actuatorFeedback, "Actuator Feedback", NodeImportance::NOT_CRITICAL);
+//		initialiseNode(canMarineSensorTransmissionNode, "Marine Sensors", NodeImportance::NOT_CRITICAL);
 		initialiseNode(canCurrentSensorNode, "Current Sensors", NodeImportance::NOT_CRITICAL);
 		initialiseNode(powerTrackNode, "Powertrack", NodeImportance::NOT_CRITICAL);
 	#endif
@@ -233,7 +233,7 @@ int main(int argc, char *argv[])
 	dbLoggerNode.start();
 
 	stateEstimationNode.start();
-	collidableMgr.startGC();
+	/collidableMgr.startGC();
 
 	wingSailControlNode.start();
 	courseRegulatorNode.start();
@@ -242,10 +242,10 @@ int main(int argc, char *argv[])
 		simulation.start();
 	#else
 	  	auto future = canService.start();
-		compass.start();
-		gpsd.start();
-		windSensor.start();
-		actuatorFeedback.start();
+//		compass.start();
+//		gpsd.start();
+//		windSensor.start();
+//		actuatorFeedback.start();
 		canCurrentSensorNode.start();
 		powerTrackNode.start();
 	#endif

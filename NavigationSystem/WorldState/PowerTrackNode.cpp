@@ -29,8 +29,8 @@
  PowerTrackNode::PowerTrackNode(MessageBus& msgBus, DBHandler& dbhandler, double loopTime)
     : ActiveNode(NodeID::PowerTrack, msgBus),
             m_ArduinoPressure(0), m_ArduinoRudder(0), m_ArduinoSheet(0), m_ArduinoBattery(0),
-            m_CurrentSensorDataCurrent(0), m_CurrentSensorDataVoltage(0), m_CurrentSensorDataElement((SensedElement)0),
-            m_Looptime(loopTime), m_db(dbhandler)
+            m_CurrentSensorDataCurrent(0), m_CurrentSensorDataVoltage(0), 
+            m_CurrentSensorDataElement((SensedElement)0),m_Looptime(loopTime), m_db(dbhandler)
 {
 	msgBus.registerNode(*this, MessageType::ArduinoData);
 	msgBus.registerNode(*this, MessageType::CurrentSensorData);
@@ -86,6 +86,19 @@ void PowerTrackNode::processCurrentSensorDataMessage(CurrentSensorDataMsg* msg)
 	m_CurrentSensorDataCurrent = msg->getCurrent();
 	m_CurrentSensorDataVoltage = msg->getVoltage();
 	m_CurrentSensorDataElement = msg->getSensedElement();
+	m_Power = m_CurrentSensorDataVoltage * m_CurrentSensorDataCurrent;
+
+	switch(m_CurrentSensorDataElement)
+	{
+		case SAILDRIVE :
+			m_PowerBalance += m_Power;
+			break;
+		case WINDVANE_SWITCH :
+			m_PowerBalance -= m_Power;
+			break;
+		default: 
+			break;
+	}
 }
 
 void PowerTrackNode::PowerTrackThreadFunc(ActiveNode* nodePtr)
@@ -114,13 +127,15 @@ void PowerTrackNode::PowerTrackThreadFunc(ActiveNode* nodePtr)
 
 		node->m_MsgBus.sendMessage(std::move(powerTrack));
 
-		Logger::info("PowerTrackInfo: %f,%f,%d", (float)node->m_CurrentSensorDataCurrent, 
-			(float)node->m_CurrentSensorDataVoltage, (uint8_t)node->m_CurrentSensorDataElement);
+		Logger::info("PowerTrackInfo: %f,%f,%f,%f,%d", (float)node->m_CurrentSensorDataCurrent, 
+			(float)node->m_CurrentSensorDataVoltage, (float)node->m_PowerBalance, (float)node->m_Power,
+			(uint8_t)node->m_CurrentSensorDataElement);
 
 		//int size = snprintf(buffer, 1024, "%d,%d,%d,%d,%f,%f,%d\n",
 		//					(int)node->m_ArduinoPressure, (int)node->m_ArduinoRudder,
 		//					(int)node->m_ArduinoSheet, (int)node->m_ArduinoBattery,
-		//					(float)node->m_CurrentSensorDataCurrent, (float)node->m_CurrentSensorDataVoltage,
+		//					(float)node->m_CurrentSensorDataCurrent, 
+		//                  (float)node->m_CurrentSensorDataVoltage,
 		//					(uint8_t)node->m_CurrentSensorDataElement);
 		//if( size > 0 )
 		//{
