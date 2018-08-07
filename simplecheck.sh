@@ -61,7 +61,7 @@ output() {
         fi
     fi
 
-    for log in $LOGS; do
+    for log in "$LOGS"; do
         printf '=== %s last inits and errors/warnings in %s ===\n' "$LOGLINES" "$log"
         grep init < "$log" | tail -n $LOGLINES
         grep -e error -e warning < "$log" | tail -n $LOGLINES
