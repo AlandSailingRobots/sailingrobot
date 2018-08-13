@@ -121,7 +121,7 @@ void PowerTrackNode::PowerTrackThreadFunc(ActiveNode* nodePtr)
 
 		node->m_MsgBus.sendMessage(std::move(powerTrack));
 
-		// For testing only (to be removed soon)
+		// For testing only (to be removed soon/or shift to debug mode)
 		Logger::info("PowerTrackInfo: %f,%f,%f,%f,%d", (float)node->m_CurrentSensorDataCurrent, 
 			(float)node->m_CurrentSensorDataVoltage, (float)node->m_PowerBalance, (float)node->m_Power,
 			(uint8_t)node->m_CurrentSensorDataElement);
