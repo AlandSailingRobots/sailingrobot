@@ -92,6 +92,9 @@ bool HMC6343Node::init()
 		Logger::error("%s Failed to obtain I2C file descriptor", __PRETTY_FUNCTION__);
 	}
 
+	if (m_LoopTime < 0.2)
+		setMeasurementRate(COM_MEASUREMENT_RATE_10HZ);
+
 	return m_Initialised;
 }
 
@@ -189,6 +192,22 @@ bool HMC6343Node::setOrientation(CompassOrientation orientation)
 	else
 	{
 		Logger::error("%s Cannot set compass orientation as the node was not correctly initialised!", __PRETTY_FUNCTION__);
+		return false;
+	}
+}
+
+bool HMC6343Node::setMeasurementRate(CompassMeasurementRate rate)
+{
+	if(m_Initialised)
+	{
+		m_I2C.beginTransmission();
+		m_I2C.writeReg(OM2_ADDRESS, (uint8_t)rate);
+		m_I2C.endTransmission();
+		return true;
+	}
+	else
+	{
+		Logger::error("%s Cannot set compass measurement rate as the node was not correctly initialised!", __PRETTY_FUNCTION__);
 		return false;
 	}
 }
