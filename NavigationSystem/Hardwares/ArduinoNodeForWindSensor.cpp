@@ -75,7 +75,7 @@ void ArduinoNodeForWindSensor::start()
 	}
 	else
 	{
-		Logger::error("%s Cannot start Aurdino thread as the node was not correctly initialised!", __PRETTY_FUNCTION__);
+		Logger::error("%s Cannot start Arduino thread as the node was not correctly initialised!", __PRETTY_FUNCTION__);
 	}
 }
 

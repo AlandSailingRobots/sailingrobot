@@ -17,9 +17,12 @@ CANFrameReceiver::CANFrameReceiver(CANService& service, uint32_t ID) {
 
 void CANFrameReceiver::processFrameAndLogErrors(CanMsg &msg) {
 	CanMessageHandler messageHandler(msg);
+//  Temporarily disabling error logging to avoid flooding the output
+	/*if(messageHandler.getErrorMessage() != NO_ERRORS) {
 
-	if(messageHandler.getErrorMessage() != NO_ERRORS) {
-		Logger::error("Error in Can Message with id:%d   Error message code:%d\n",messageHandler.getMessageId(),messageHandler.getErrorMessage());
-	}
+		Logger::error("Error in Can Message with id:%d   Error message code:%d\n", messageHandler.getMessageId(),
+						  messageHandler.getErrorMessage());
+
+	}*/
 	processFrame(msg);
 }
