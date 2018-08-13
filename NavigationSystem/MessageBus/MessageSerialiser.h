@@ -30,6 +30,7 @@ class MessageSerialiser {
     void serialise(uint8_t data);
     void serialise(uint16_t data);
     void serialise(uint32_t data);
+    void serialise(uint64_t data);
     void serialise(int data);
     void serialise(float data);
     void serialise(double data);

@@ -39,6 +39,12 @@ void MessageSerialiser::serialise(uint32_t data)
 	serialise(ptr, sizeof(data));
 }
 
+void MessageSerialiser::serialise(uint64_t data)
+{
+	uint8_t* ptr = (uint8_t*)&data;
+	serialise(ptr, sizeof(data));
+}
+
 void MessageSerialiser::serialise(int data)
 {
 	uint8_t* ptr = (uint8_t*)&data;

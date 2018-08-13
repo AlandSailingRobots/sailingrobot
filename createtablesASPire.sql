@@ -38,6 +38,7 @@ CREATE TABLE dataLogs_compass (
   heading 		DOUBLE,
   pitch 		DOUBLE,
   roll 			DOUBLE,
+  acquisition_timestamp VARCHAR(20),
   t_timestamp 	TIMESTAMP
 );
 

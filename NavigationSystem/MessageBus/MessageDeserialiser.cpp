@@ -76,6 +76,24 @@ bool MessageDeserialiser::readUint32_t(uint32_t& data)
 	return false;
 }
 
+bool MessageDeserialiser::readUint64_t(uint64_t& data)
+{
+	if(m_index + sizeof(uint64_t) <= m_size)
+	{
+		data = 0;
+		for(unsigned int i = 0; i < sizeof(uint64_t); i++)
+		{
+			data = data | (m_data[m_index] << (8 * (i)));
+			m_index++;
+
+		}
+
+		return true;
+	}
+
+	return false;
+}
+
 bool MessageDeserialiser::readInt(int& data)
 {
 	if(m_index + sizeof(int) <= m_size)
