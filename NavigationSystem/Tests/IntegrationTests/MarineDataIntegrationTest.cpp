@@ -32,29 +32,28 @@ public:
     }
 
     void processFrame (CanMsg& msg) {
-        Logger::info("Recieved marine sensor readings from CanBus");
+        Logger::info("Received marine sensor readings from CanBus");
 
         CanMessageHandler handler(msg);
 
         if(handler.getMessageId() == MSG_ID_MARINE_SENSOR_DATA) {
-            double ph;
-			double conductivety;
-			double temp;
-            handler.getMappedData(&ph, SENSOR_PH_DATASIZE,
-                                              SENSOR_PH_INTERVAL_MIN, SENSOR_PH_INTERVAL_MAX);
+        	Float16Compressor fltCompressor;
+            float ph, conductivety, temperature;
+            uint16_t comp_temperature;
+            handler.canMsgToBitset(); // update bitset with m_message.data
+            handler.getMappedData(&ph, SENSOR_PH_START, SENSOR_PH_DATASIZE, SENSOR_PH_IN_BYTE, SENSOR_PH_INTERVAL_MIN, SENSOR_PH_INTERVAL_MAX);
+            handler.getMappedData(&conductivety, SENSOR_CONDUCTIVETY_START, SENSOR_CONDUCTIVETY_DATASIZE, SENSOR_CONDUCTIVETY_IN_BYTE, SENSOR_CONDUCTIVETY_INTERVAL_MIN, SENSOR_CONDUCTIVETY_INTERVAL_MAX);
+            //handler.getData(&conductivety,SENSOR_CONDUCTIVETY_START, SENSOR_CONDUCTIVETY_DATASIZE, SENSOR_CONDUCTIVETY_IN_BYTE);
 
-            handler.getMappedData(&conductivety, SENSOR_CONDUCTIVETY_DATASIZE,
-                                                        SENSOR_CONDUCTIVETY_INTERVAL_MIN, SENSOR_CONDUCTIVETY_INTERVAL_MAX);
+            handler.getData(&comp_temperature, SENSOR_TEMPERATURE_START, SENSOR_TEMPERATURE_DATASIZE, SENSOR_TEMPERATURE_IN_BYTE);
+            temperature = fltCompressor.decompress(comp_temperature);
+            float salinity = Utility::calculateSalinity (temperature, conductivety);
 
-            handler.getMappedData(&temp, SENSOR_TEMPERATURE_DATASIZE,
-                                                SENSOR_TEMPERATURE_INTERVAL_MIN, SENSOR_TEMPERATURE_INTERVAL_MAX);
-            float salinity = Utility::calculateSalinity (temp, conductivety);
-
-            MessagePtr marineSensorDataMsg = std::make_unique<MarineSensorDataMsg>(static_cast<float>(temp), static_cast<float>(conductivety), static_cast<float>(ph), salinity);
+            MessagePtr marineSensorDataMsg = std::make_unique<MarineSensorDataMsg>(static_cast<float>(temperature), static_cast<float>(conductivety), static_cast<float>(ph), salinity);
             m_msgBus.sendMessage(std::move(marineSensorDataMsg));
 
 
-            Logger::info(" Marine sensor data: \n PH: %lf \n Conductivety: %lf \n Temperature: %lf \n Error ID: %d",ph,conductivety,temp,handler.getErrorMessage());
+            Logger::info(" Marine sensor data: \n PH: %lf \n Conductivety: %lf \n Temperature: %lf \n Error ID: %d",ph,conductivety,temperature,handler.getErrorMessage());
 
 
             if(handler.getErrorMessage() > 0) {
@@ -100,7 +99,7 @@ void initialiseNode(Node& node, const char* nodeName, NodeImportance importance)
 		if(importance == NodeImportance::CRITICAL)
 		{
 			Logger::error("Critical node failed to initialise, shutting down");
-			Logger::shutdown();
+			//Logger::shutdown();
 			exit(1);
 		}
 	}
@@ -176,6 +175,6 @@ int main(int argc, char *argv[])
 	messageBus.run();
 
 
-	Logger::shutdown();
+	//Logger::shutdown();
 	exit(0);
 }

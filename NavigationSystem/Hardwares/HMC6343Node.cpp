@@ -73,7 +73,7 @@ bool HMC6343Node::init()
 		m_I2C.writeReg(COM_READ_EEPROM, EEPROM_ADDRESS);
 		delay(10);
 		uint8_t deviceID = m_I2C.I2Cread();
-		printf("received %02x request %02x\n",deviceID,I2C_ADDRESS);
+		Logger::info("HMC6343 Node: received %02x request %02x\n",deviceID,I2C_ADDRESS);
 
 		m_I2C.endTransmission();
 

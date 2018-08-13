@@ -125,8 +125,8 @@ void DBLoggerNode::processMessage(const Message* msg) {
             //item.m_element = (SensedElement)(debug_count%2 + 1);
             item.m_element_str = currentSensorMsg->getSensedElementStr();
             //debug_count++;
-            Logger::info("Item current sensor creation: %lf, %lf, %d, %s", item.m_current,
-                         item.m_voltage, item.m_element, item.m_element_str.c_str());
+            //Logger::info("Item current sensor creation: %lf, %lf, %d, %s", item.m_current,
+            //             item.m_voltage, item.m_element, item.m_element_str.c_str());
         }
         break;
 

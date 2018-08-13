@@ -26,13 +26,19 @@ TOOLCHAIN = 0
 export USE_SIM = 0
 export USE_LNM = 0
 
+# Logger severity levels(0-5): trace,debug,info,warning,error,fatal
+export FILE_LOG_SEV_LVL = 2
+export CONSOLE_LOG_SEV_LVL = 2
+
 
 ###############################################################################
 # Tools
 ###############################################################################
 
-export CPPFLAGS             = -g -Wall -pedantic -Werror -std=gnu++14 -Wno-psabi
-export LIBS                 = -lsqlite3 -lgps -lrt -lcurl -lpthread -lwiringPi -lncurses
+export CPPFLAGS             = -g -Wall -pedantic -Werror -std=gnu++14 -DBOOST_LOG_DYN_LINK -Wno-psabi
+export LIBS                 = -lsqlite3 -lgps -lrt -lcurl -lwiringPi -lncurses \
+                              -lboost_log -lboost_thread -lboost_system -lboost_filesystem -lpthread 
+                              # keep -lpthread after the boost libs, it can fail otherwise 
 
 ifeq ($(TOOLCHAIN),1)
     export CC               = arm-linux-gnueabihf-gcc
@@ -47,7 +53,9 @@ endif
 export MKDIR_P				= mkdir -p
 
 export DEFINES          	= -DTOOLCHAIN=$(TOOLCHAIN) -DSIMULATION=$(USE_SIM) \
-								-DLOCAL_NAVIGATION_MODULE=$(USE_LNM)
+								-DLOCAL_NAVIGATION_MODULE=$(USE_LNM)           \
+								-DCONSOLE_LOG_SEV_LVL=$(CONSOLE_LOG_SEV_LVL)   \
+								-DFILE_LOG_SEV_LVL=$(FILE_LOG_SEV_LVL)
 
 
 ###############################################################################

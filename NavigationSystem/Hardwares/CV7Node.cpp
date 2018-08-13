@@ -157,7 +157,7 @@ void CV7Node::WindSensorThread(ActiveNode* nodePtr)
 		{
 			buffer_to_parse+=buffer;
 
-      //Logger::info("buffer windsensor %s",buffer_to_parse.c_str());
+        Logger::trace("buffer windsensor %s",buffer_to_parse.c_str());
 			if(node->parseString(buffer_to_parse, windDir, windSpeed, windTemp))
 			{
 				if(windDirData.size() < DATA_BUFFER_SIZE)
