@@ -86,15 +86,15 @@ void PowerTrackNode::processCurrentSensorDataMessage(CurrentSensorDataMsg* msg)
 
 	switch(m_CurrentSensorDataElement)
 	{
-		case SAILDRIVE :     //this will need to be changed soon (canbus_rewrite changed the names)
+		case SOLAR_POWER :
 			m_PowerBalance += m_Power;
 			break;
 
-		case WINDVANE_SWITCH : //same with this. (SAILDRIVE -> SOLAR_POWER // WINDV -> POWER_UNIT)
+		case POWER_UNIT :
 			m_PowerBalance -= m_Power;
 			break;
 
-		default: 
+		default : 
 			break;
 	}
 }
