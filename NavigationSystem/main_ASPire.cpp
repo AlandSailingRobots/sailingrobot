@@ -25,6 +25,7 @@
   #include "../Navigation/LocalNavigationModule/Voters/ProximityVoter.h"
   #include "../Navigation/LocalNavigationModule/Voters/MidRangeVoter.h"
   #include "../Navigation/LocalNavigationModule/VoterTCPDebugger.h"
+  #include "../Navigation/LocalNavigationModule/Voters/LastCourseVoter.h"
 #else
   #include "../Navigation/LineFollowNode.h"
 #endif
@@ -185,6 +186,8 @@ int main(int argc, char *argv[])
 		dbHandler.getConfigFrom(weight, "proximity_voter_weight", "config_voter_system");
 		ProximityVoter proximityVoter( MAX_VOTES, weight, collidableMgr);
 
+		LastCourseVoter lastCourseVoter( MAX_VOTES, 0.7 );
+
 
 
 		lnm.registerVoter( &courseVoter );
@@ -194,8 +197,10 @@ int main(int argc, char *argv[])
 
 		// As there is no veto used in both avoidance voters for now, you can disable avoidance system just by
 		// putting a weigth of zero in config_ASPire.json and push the new config manually or through the website.
-		//lnm.registerVoter( &proximityVoter );
-		//lnm.registerVoter( &midRangeVoter );
+		lnm.registerVoter( &proximityVoter );
+		lnm.registerVoter( &midRangeVoter );
+
+		lnm.registerVoter( &lastCourseVoter );
 
         //VoterTCPDebugger voterTCPD(messageBus, lnm, 3);
         //VoterTCPDebugger voterTCPD(messageBus, courseVoter);

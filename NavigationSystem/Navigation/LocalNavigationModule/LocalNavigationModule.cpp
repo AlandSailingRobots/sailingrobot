@@ -23,6 +23,7 @@
 #include "../SystemServices/Timer.h"
 #include "../Math/CourseMath.h"
 #include "../Math/Utility.h"
+#include "../LocalNavigationModule/Voters/LastCourseVoter.h"
 
 #include <cstdio>
 
@@ -205,6 +206,18 @@ void LocalNavigationModule::startBallot()
 
 
     uint16_t targetCourse = arbiter.getWinner();
+
+    //Update LastCourseVoter target heading
+    for ( auto it = voters.begin(); it != voters.end(); it++ )
+    {
+        auto voter = (*it);
+        if (strcmp("LastCourseVoter", voter->getName()) == 0)
+        {
+            auto lastCourseVoter = (LastCourseVoter*) voter;
+            lastCourseVoter->lastWinningBearing = targetCourse;
+        }
+    }
+
     bool targetTackStarboard = getTargetTackStarboard((double) targetCourse);
     MessagePtr msg = std::make_unique<LocalNavigationMsg>((float) targetCourse, NO_COMMAND, 0, targetTackStarboard);
     m_MsgBus.sendMessage( std::move( msg ) );
