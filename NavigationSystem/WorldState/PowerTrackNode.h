@@ -21,7 +21,6 @@
 #include "../Database/DBHandler.h"
 #include "../Messages/CurrentSensorDataMsg.h"
 #include "../Messages/ArduinoDataMsg.h"
-//#include "../Network/TCPServer.h"
 #include "../MessageBus/ActiveNode.h"
 
 class PowerTrackNode : public ActiveNode {
@@ -73,9 +72,6 @@ class PowerTrackNode : public ActiveNode {
     	DBHandler& m_db;
 
         const int POWER_STATE_INITIAL_SLEEP = 20000;
-    	
-
-        //TCPServer server;
 
 
 };

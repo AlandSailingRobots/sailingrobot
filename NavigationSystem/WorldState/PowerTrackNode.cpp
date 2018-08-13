@@ -9,7 +9,7 @@
  *		
  *
  * Developer Notes:
- *
+ *		The ArduinoData may or may not be necessary.
  *
  ***************************************************************************************/
 
@@ -37,15 +37,11 @@
 }
 
 //----------------------------------------------------------------------------------
-PowerTrackNode::~PowerTrackNode()
-{
-	//server.shutdown();
-}
+PowerTrackNode::~PowerTrackNode(){}
 
 //----------------------------------------------------------------------------------
 bool PowerTrackNode::init()
 {
-	//return server.start( 9600 );
 	return true;
 }
 
@@ -90,13 +86,15 @@ void PowerTrackNode::processCurrentSensorDataMessage(CurrentSensorDataMsg* msg)
 
 	switch(m_CurrentSensorDataElement)
 	{
-		case SAILDRIVE :
+		case SOLAR_POWER :
 			m_PowerBalance += m_Power;
 			break;
-		case WINDVANE_SWITCH :
+
+		case POWER_UNIT :
 			m_PowerBalance -= m_Power;
 			break;
-		default: 
+
+		default : 
 			break;
 	}
 }
@@ -108,39 +106,26 @@ void PowerTrackNode::PowerTrackThreadFunc(ActiveNode* nodePtr)
 	// Initial sleep time in order for enough data to be transmitted on the first message
 	std::this_thread::sleep_for(std::chrono::milliseconds(POWER_TRACK_INITIAL_SLEEP));
 
-	//char buffer[1024];
-
 	Timer timer;
 	timer.start();
 	while(true)
 	{
-		// Accept and recieve connections
-		//node->server.AcceptConnections();
-
 		//Regulate the rate at whcih the messages are sent
 		timer.sleepUntil(node->m_Looptime);
 
 		MessagePtr powerTrack = std::make_unique<PowerTrackMsg>(
 			node->m_ArduinoPressure, node->m_ArduinoRudder, node->m_ArduinoSheet,
-			node->m_ArduinoBattery, node->m_CurrentSensorDataCurrent, node->m_CurrentSensorDataVoltage,
+			node->m_ArduinoBattery, 
+			node->m_CurrentSensorDataCurrent, node->m_CurrentSensorDataVoltage,
 			node->m_CurrentSensorDataElement);
 
 		node->m_MsgBus.sendMessage(std::move(powerTrack));
 
+		// For testing only (to be removed soon/or shift to debug mode)
 		Logger::info("PowerTrackInfo: %f,%f,%f,%f,%d", (float)node->m_CurrentSensorDataCurrent, 
 			(float)node->m_CurrentSensorDataVoltage, (float)node->m_PowerBalance, (float)node->m_Power,
 			(uint8_t)node->m_CurrentSensorDataElement);
 
-		//int size = snprintf(buffer, 1024, "%d,%d,%d,%d,%f,%f,%d\n",
-		//					(int)node->m_ArduinoPressure, (int)node->m_ArduinoRudder,
-		//					(int)node->m_ArduinoSheet, (int)node->m_ArduinoBattery,
-		//					(float)node->m_CurrentSensorDataCurrent, 
-		//                  (float)node->m_CurrentSensorDataVoltage,
-		//					(uint8_t)node->m_CurrentSensorDataElement);
-		//if( size > 0 )
-		//{
-			//node->server.broadcast( (uint8_t*)buffer, size );
-		//}
 		timer.reset();
 	}
 }

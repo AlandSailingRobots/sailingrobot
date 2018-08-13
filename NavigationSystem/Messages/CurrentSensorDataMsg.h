@@ -17,10 +17,13 @@
 #include "../MessageBus/Message.h"
 
 enum SensedElement : uint8_t {
-    SAILDRIVE = 1,
-    WINDVANE_SWITCH = 2,
-    WINDVANE_ANGLE = 3,
-    ACTUATOR_UNIT = 4
+    SOLAR_PANEL = 0,
+    POWER_UNIT = 1,
+    ACTUATOR_UNIT = 2,
+    //SAILDRIVE = 1,
+    //WINDVANE_SWITCH = 2,
+    //WINDVANE_ANGLE = 3,
+    //ACTUATOR_UNIT = 4
 };
 
 class CurrentSensorDataMsg : public Message {
@@ -71,20 +74,20 @@ class CurrentSensorDataMsg : public Message {
 
         switch (m_element) {  // added "' '" to have proper sql string when using sal command lines
                               // in dbloggernode
-            case SAILDRIVE:
-                elem = "saildrive";
+            case SOLAR_PANEL: //SAILDRIVE:
+                elem = "Solar Panel"; // "saildrive";
                 break;
 
-            case WINDVANE_SWITCH:
-                elem = "windvane switch";
+            case POWER_UNIT: //WINDVANE_SWITCH:
+                elem = "Power Unit"; // "windvane switch";
                 break;
 
-            case WINDVANE_ANGLE:
-                elem = "windvane angle";
-                break;
+            //case WINDVANE_ANGLE:
+            //    elem = "windvane angle";
+            //    break;
 
             case ACTUATOR_UNIT:
-                elem = "actuator unit";
+                elem = "Actuator unit";
                 break;
 
             default:
