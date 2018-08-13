@@ -86,7 +86,7 @@ void PowerTrackNode::processCurrentSensorDataMessage(CurrentSensorDataMsg* msg)
 
 	switch(m_CurrentSensorDataElement)
 	{
-		case SOLAR_POWER :
+		case SOLAR_PANEL :
 			m_PowerBalance += m_Power;
 			break;
 
