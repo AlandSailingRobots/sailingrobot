@@ -154,8 +154,8 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
     if (tableId.size() > 0) {
         windsensorId = (int)strtol(tableId.c_str(), NULL, 10);
     }
-    // NOTE : Marc : To update the id of current_Mission in the DB
-    tableId = getIdFromTable("current_Mission", true, db);
+    // NOTE : Marc : To update the id of currentMission in the DB
+    tableId = getIdFromTable("currentMission", true, db);
     if (tableId.size() > 0) {
         currentMissionId = (int)strtol(tableId.c_str(), NULL, 10);
     }
@@ -438,7 +438,7 @@ bool DBHandler::updateWaypoints(std::string waypoints) {
                            // waypoint entries (amount of fields n = valuesLimit + 1)
     int limitCounter;
 
-    if (not queryTable("DELETE FROM current_Mission;")) {
+    if (not queryTable("DELETE FROM currentMission;")) {
         Logger::error("%s, Error: failed to delete waypoints", __PRETTY_FUNCTION__);
     }
 
@@ -448,8 +448,8 @@ bool DBHandler::updateWaypoints(std::string waypoints) {
         for (auto y : i.value().items()) {
             limitCounter = valuesLimit;
             DBPrinter =
-                "INSERT INTO current_Mission "
-                "(declination,harvested,id,id_mission,is_checkpoint,latitude,longitude,name,radius,"
+                "INSERT INTO currentMission "
+                "(declination,harvested,id,id_mission,isCheckpoint,latitude,longitude,name,radius,"
                 "rankInMission,stay_time) VALUES (";
 
             for (auto z : y.value().items()) {
@@ -478,7 +478,7 @@ bool DBHandler::updateWaypoints(std::string waypoints) {
 
     // Make sure waypoints before the current waypoint are harvested
     if (!m_currentWaypointId.empty()) {
-        std::string updateHarvested = "UPDATE current_Mission SET harvested = 1 WHERE id < ";
+        std::string updateHarvested = "UPDATE currentMission SET harvested = 1 WHERE id < ";
         updateHarvested += m_currentWaypointId + ";";
 
         if (not queryTable(updateHarvested)) {
@@ -608,14 +608,14 @@ std::string DBHandler::getWaypoints() {  // NOTE : Marc : change this otherwise 
     Json js;
     std::string wp = "waypoint_";
 
-    rows = getRows("current_Mission");
+    rows = getRows("currentMission");
     // std::cout << "rows current mission " << rows << std::endl;
     if (rows > 0) {
         for (auto i = 1; i <= rows; ++i) {
-            // getDataAsJson("id,is_checkpoint,latitude,longitude,declination,radius,stay_time",
-            // "current_Mission", wp + std::to_string(i), std::to_string(i),json, true);
-            getDataAsJson("id,is_checkpoint,latitude,longitude,declination,radius,stay_time",
-                          "current_Mission", wp + std::to_string(i), std::to_string(i), js, true);
+            // getDataAsJson("id,isCheckpoint,latitude,longitude,declination,radius,stay_time",
+            // "currentMission", wp + std::to_string(i), std::to_string(i),json, true);
+            getDataAsJson("id,isCheckpoint,latitude,longitude,declination,radius,stay_time",
+                          "currentMission", wp + std::to_string(i), std::to_string(i), js, true);
         }
         return js.dump();
     } else {
@@ -1009,9 +1009,9 @@ bool DBHandler::getWaypointValues(int& nextId,
     std::vector<std::string> results;
     std::vector<std::string> results2;
     try {
-        results = retrieveFromTable("SELECT MIN(id) FROM current_Mission WHERE harvested = 0;",
+        results = retrieveFromTable("SELECT MIN(id) FROM currentMission WHERE harvested = 0;",
                                     rows, columns);
-        results2 = retrieveFromTable("SELECT MAX(id) FROM current_Mission WHERE harvested = 1;",
+        results2 = retrieveFromTable("SELECT MAX(id) FROM currentMission WHERE harvested = 1;",
                                      rows2, columns2);
     } catch (const char* error) {
         Logger::error("%s Error: %s", __PRETTY_FUNCTION__, error);
@@ -1031,21 +1031,21 @@ bool DBHandler::getWaypointValues(int& nextId,
     // Set values to next waypoint
     nextId = safe_stoi(results[1]);
 
-    nextLongitude = atof(retrieveCell("current_Mission", results[1], "longitude").c_str());
-    nextLatitude = atof(retrieveCell("current_Mission", results[1], "latitude").c_str());
-    nextDeclination = retrieveCellAsInt("current_Mission", results[1], "declination");
-    nextRadius = retrieveCellAsInt("current_Mission", results[1], "radius");
-    nextStayTime = retrieveCellAsInt("current_Mission", results[1], "stay_time");
-    isCheckpoint = retrieveCellAsInt("current_Mission", results[1], "is_checkpoint");
+    nextLongitude = atof(retrieveCell("currentMission", results[1], "longitude").c_str());
+    nextLatitude = atof(retrieveCell("currentMission", results[1], "latitude").c_str());
+    nextDeclination = retrieveCellAsInt("currentMission", results[1], "declination");
+    nextRadius = retrieveCellAsInt("currentMission", results[1], "radius");
+    nextStayTime = retrieveCellAsInt("currentMission", results[1], "stay_time");
+    isCheckpoint = retrieveCellAsInt("currentMission", results[1], "isCheckpoint");
 
     if (foundPrev)  // Set values to next waypoint if harvested waypoint found
     {
         prevId = safe_stoi(results2[1]);
 
-        prevLongitude = atof(retrieveCell("current_Mission", results2[1], "longitude").c_str());
-        prevLatitude = atof(retrieveCell("current_Mission", results2[1], "latitude").c_str());
-        prevDeclination = retrieveCellAsInt("current_Mission", results2[1], "declination");
-        prevRadius = retrieveCellAsInt("current_Mission", results2[1], "radius");
+        prevLongitude = atof(retrieveCell("currentMission", results2[1], "longitude").c_str());
+        prevLatitude = atof(retrieveCell("currentMission", results2[1], "latitude").c_str());
+        prevDeclination = retrieveCellAsInt("currentMission", results2[1], "declination");
+        prevRadius = retrieveCellAsInt("currentMission", results2[1], "radius");
     }
 
     return true;

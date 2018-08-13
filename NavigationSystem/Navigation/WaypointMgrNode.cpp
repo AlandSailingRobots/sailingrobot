@@ -75,7 +75,7 @@ bool WaypointMgrNode::waypointReached()
     //             m_prevLatitude, m_vesselLongitude, m_vesselLatitude); //Checks if boat has passed the waypoint following the line, without entering waypoints radius
     if(harvestWaypoint())
     {
-        if(not m_db.changeOneValue("current_Mission", std::to_string(m_nextId),"1","harvested"))
+        if(not m_db.changeOneValue("currentMission", std::to_string(m_nextId),"1","harvested"))
         {
             Logger::error("Failed to harvest waypoint");
         }
