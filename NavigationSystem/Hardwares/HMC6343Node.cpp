@@ -169,6 +169,14 @@ bool HMC6343Node::readData(float& heading, float& pitch, float& roll)
 	}
 }
 
+bool HMC6343Node::readData(float& heading, float& pitch, float& roll, uint64_t& timestamp)
+{
+	struct timespec ts;
+	clock_gettime(CLOCK_MONOTONIC_RAW, &ts);
+	timestamp = ts.tv_sec * (uint64_t) 1e9 + ts.tv_nsec;
+	return readData(heading, pitch, roll);
+}
+
 bool HMC6343Node::setOrientation(CompassOrientation orientation)
 {
 	if(m_Initialised)

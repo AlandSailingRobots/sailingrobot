@@ -68,6 +68,7 @@ void DBLoggerNode::processMessage(const Message* msg) {
             item.m_compassHeading = compassDataMsg->heading();
             item.m_compassPitch = compassDataMsg->pitch();
             item.m_compassRoll = compassDataMsg->roll();
+            item.m_compassTimestamp = std::to_string(compassDataMsg->timestamp());
         } break;
 
         case MessageType::LocalNavigation: {

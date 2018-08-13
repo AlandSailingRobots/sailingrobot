@@ -64,6 +64,7 @@ class HMC6343Node : public ActiveNode {
     /// Reads the heading, pitch and roll from the compass.
     ///----------------------------------------------------------------------------------
     bool readData(float& heading, float& pitch, float& roll);
+    bool readData(float& heading, float& pitch, float& roll, uint64_t& timestamp);
 
     void calibrate(int calibrationTime);
 

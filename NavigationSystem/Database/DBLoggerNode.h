@@ -47,6 +47,7 @@ class DBLoggerNode : public ActiveNode {
         (double)DATA_OUT_OF_RANGE,        // m_compassHeading;
         (double)DATA_OUT_OF_RANGE,        // m_compassPitch;
         (double)DATA_OUT_OF_RANGE,        // m_compassRoll;
+        (std::string) "initialized",      // m_compassTimestamp;
         (double)DATA_OUT_OF_RANGE,        // m_distanceToWaypoint;
         (double)DATA_OUT_OF_RANGE,        // m_bearingToWaypoint;
         (double)DATA_OUT_OF_RANGE,        // m_courseToSteer;

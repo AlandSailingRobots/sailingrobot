@@ -39,6 +39,7 @@ struct LogItem {
     double m_compassHeading;  // dataLogs_compass
     double m_compassPitch;
     double m_compassRoll;
+    std::string m_compassTimestamp;
     double m_distanceToWaypoint;  // dataLogs_course_calculation
     double m_bearingToWaypoint;
     double m_courseToSteer;
