@@ -233,7 +233,7 @@ int main(int argc, char *argv[])
 	dbLoggerNode.start();
 
 	stateEstimationNode.start();
-	/collidableMgr.startGC();
+	collidableMgr.startGC();
 
 	wingSailControlNode.start();
 	courseRegulatorNode.start();
