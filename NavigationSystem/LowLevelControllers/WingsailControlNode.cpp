@@ -152,11 +152,11 @@ float WingsailControlNode::simpleCalculateTailAngle() {
     {
         if (sin(m_ApparentWindDir) >= 0)
         {
-            return -m_MaxCommandAngle;
+            return m_MaxCommandAngle;
         }
         else
         {
-            return  m_MaxCommandAngle;
+            return  -m_MaxCommandAngle;
         }
     }
     else
