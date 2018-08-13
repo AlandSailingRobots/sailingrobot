@@ -45,6 +45,8 @@
 
 #define EEPROM_ADDRESS			0x00
 
+// Operational Mode Register 2 EEPROM address (measurement rate)
+#define OM2_ADDRESS 0x05
 
 #define COM_ORIENT_LEVEL 0x72
 #define COM_ORIENT_SIDEWAYS 0x73
@@ -93,7 +95,7 @@ bool HMC6343Node::init()
 	}
 
 	if (m_LoopTime < 0.2)
-		setMeasurementRate(COM_MEASUREMENT_RATE_10HZ);
+		setMeasurementRate(CompassMeasurementRate::COM_MEASUREMENT_RATE_10HZ);
 
 	return m_Initialised;
 }
