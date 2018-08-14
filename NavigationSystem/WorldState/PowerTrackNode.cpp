@@ -84,6 +84,9 @@ void PowerTrackNode::processCurrentSensorDataMessage(CurrentSensorDataMsg* msg)
 	m_CurrentSensorDataElement = msg->getSensedElement();
 	m_Power = m_CurrentSensorDataVoltage * m_CurrentSensorDataCurrent;
 
+	std::cout << "m_element: " << m_CurrentSensorDataElement << std::endl;
+	std::cout << "solar_panel: " << SOLAR_PANEL << std::endl;
+	std::cout << "POWER_UNIT: " << POWER_UNIT << std::endl;
 	switch(m_CurrentSensorDataElement)
 	{
 		case SOLAR_PANEL :
