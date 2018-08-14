@@ -30,7 +30,8 @@
     : ActiveNode(NodeID::PowerTrack, msgBus),
             m_ArduinoPressure(0), m_ArduinoRudder(0), m_ArduinoSheet(0), m_ArduinoBattery(0),
             m_CurrentSensorDataCurrent(0), m_CurrentSensorDataVoltage(0), 
-            m_CurrentSensorDataElement((SensedElement)0),m_Looptime(loopTime), m_db(dbhandler)
+            m_CurrentSensorDataElement((SensedElement)0),m_Looptime(loopTime), m_db(dbhandler),
+            m_PowerBalance(0.f)
 {
 	msgBus.registerNode(*this, MessageType::ArduinoData);
 	msgBus.registerNode(*this, MessageType::CurrentSensorData);
