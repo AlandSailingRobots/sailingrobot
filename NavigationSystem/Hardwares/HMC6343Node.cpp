@@ -251,7 +251,8 @@ void HMC6343Node::HMC6343ThreadFunc(ActiveNode* nodePtr)
 		}
 
 		float heading, pitch, roll;
-		if(node->readData(heading, pitch, roll))
+		uint64_t timestamp;
+		if(node->readData(heading, pitch, roll, timestamp))
 		{
 			errorCount = 0;
 
@@ -271,7 +272,7 @@ void HMC6343Node::HMC6343ThreadFunc(ActiveNode* nodePtr)
 				headingIndex++;
 			}
 			// Post the data to the message bus
-			MessagePtr msg = std::make_unique<CompassDataMsg>(int(Utility::meanOfAngles(headingData) + 0.5), pitch, roll);
+			MessagePtr msg = std::make_unique<CompassDataMsg>(int(Utility::meanOfAngles(headingData) + 0.5), pitch, roll, timestamp);
 			node->m_MsgBus.sendMessage(std::move(msg));
 		}
 		else
