@@ -29,9 +29,10 @@
  PowerTrackNode::PowerTrackNode(MessageBus& msgBus, DBHandler& dbhandler, double loopTime)
     : ActiveNode(NodeID::PowerTrack, msgBus),
             m_ArduinoPressure(0), m_ArduinoRudder(0), m_ArduinoSheet(0), m_ArduinoBattery(0),
-            m_CurrentSensorDataCurrent(0), m_CurrentSensorDataVoltage(0), 
-            m_CurrentSensorDataElement((SensedElement)0),m_Looptime(loopTime), m_db(dbhandler),
-            m_PowerBalance(0.f)
+            m_CurrentSensorDataCurrent(0), m_CurrentSensorDataVoltage(0),  
+            m_CurrentSensorDataElement((SensedElement)0),m_PowerBalance(0.f), m_Looptime(loopTime),
+            m_lastElementRead(-1),m_db(dbhandler)
+            
 {
 	msgBus.registerNode(*this, MessageType::ArduinoData);
 	msgBus.registerNode(*this, MessageType::CurrentSensorData);
@@ -85,21 +86,21 @@ void PowerTrackNode::processCurrentSensorDataMessage(CurrentSensorDataMsg* msg)
 	m_CurrentSensorDataElement = msg->getSensedElement();
 	m_Power = m_CurrentSensorDataVoltage * m_CurrentSensorDataCurrent;
 
-	std::cout << "m_element: " << m_CurrentSensorDataElement << std::endl;
-	std::cout << "solar_panel: " << SOLAR_PANEL << std::endl;
-	std::cout << "POWER_UNIT: " << POWER_UNIT << std::endl;
-	switch(m_CurrentSensorDataElement)
-	{
-		case SOLAR_PANEL :
-			m_PowerBalance += m_Power;
-			break;
+	if ( m_CurrentSensorDataElement == (m_lastElementRead + 1)%2 ) {
 
-		case POWER_UNIT :
-			m_PowerBalance -= m_Power;
-			break;
+		switch(m_CurrentSensorDataElement)
+		{
+			case SOLAR_PANEL :
+				m_PowerBalance += m_Power;
+				break;
 
-		default : 
-			break;
+			case POWER_UNIT :
+				m_PowerBalance -= m_Power;
+				break;
+
+			default : 
+				break;
+		}
 	}
 }
 

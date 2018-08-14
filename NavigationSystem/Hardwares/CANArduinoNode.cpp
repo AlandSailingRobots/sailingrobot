@@ -59,7 +59,7 @@ void CANArduinoNode::processFrame (CanMsg& msg) {
 	if (messageHandler.getMessageId() == MSG_ID_AU_FEEDBACK) {
 		messageHandler.getMappedData(&m_RudderFeedback,	RUDDER_ANGLE_DATASIZE, -MAX_RUDDER_ANGLE, MAX_RUDDER_ANGLE);
 		messageHandler.getMappedData(&m_WingsailFeedback, WINGSAIL_ANGLE_DATASIZE, -MAX_WINGSAIL_ANGLE, MAX_WINGSAIL_ANGLE);
-		messageHandler.getMappedData(&m_WindvaneSelfSteerAngle,	WINDVANE_SELFSTEERING_DATASIZE, WINDVANE_SELFSTEERING_ANGLE_MIN, WINDVANE_SELFSTEERING_ANGLE_MAX);
+		messageHandler.getMappedData(&m_WindvaneSelfSteerAngle,	WINDVANE_SELFSTEERING_ANGLE_DATASIZE, WINDVANE_SELFSTEERING_ANGLE_MIN, WINDVANE_SELFSTEERING_ANGLE_MAX);
 		messageHandler.getData(&m_WindvaneActuatorPos, WINDVANE_ACTUATOR_POSITION_DATASIZE);
 
 		//New version
