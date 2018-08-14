@@ -73,7 +73,7 @@ void initialiseNode(Node& node, const char* nodeName, NodeImportance importance)
 		if(importance == NodeImportance::CRITICAL)
 		{
 			Logger::error("Critical node failed to initialise, shutting down");
-			//Logger::shutdown();
+			Logger::shutdown();
 			exit(1);
 		}
 	}
@@ -90,6 +90,7 @@ int main(int argc, char *argv[])
 	printf("\t\t\t\tSailing Robot\n");
 	printf("\n");
 	printf("================================================================================\n");
+
 
 	// This is for eclipse development so the output is constantly pumped out.
 	setbuf(stdout, NULL);
@@ -109,16 +110,22 @@ int main(int argc, char *argv[])
 	DBHandler dbHandler(db_path);
 	MessageBus messageBus;
 
-	// Logger start
-	Logger::info("Built on %s at %s", __DATE__, __TIME__);
-	Logger::info("ASPire");
-  	#if LOCAL_NAVIGATION_MODULE == 1
-		Logger::info( "Using Local Navigation Module" );
-  	#else
-		Logger::info( "Using Line-follow" );
-  	#endif
-	Logger::info("Logger init\t\t[OK]");
-
+	// Initialise logger
+	if (Logger::init())
+	{
+		Logger::info("Built on %s at %s", __DATE__, __TIME__);
+    	Logger::info("ASPire");
+	  	#if LOCAL_NAVIGATION_MODULE == 1
+			Logger::info( "Using Local Navigation Module" );
+	  	#else
+			Logger::info( "Using Line-follow" );
+	  	#endif
+		Logger::info("Logger init\t\t[OK]");
+	}
+	else
+	{
+		Logger::error("Logger init\t\t[FAILED]");
+	}
 
 	// Initialise DBHandler
 	if(dbHandler.initialise())
@@ -128,7 +135,7 @@ int main(int argc, char *argv[])
 	else
 	{
 		Logger::error("Database Handler init\t\t[FAILED]");
-		//Logger::shutdown();
+		Logger::shutdown();
 		exit(1);
 	}
 
@@ -255,6 +262,6 @@ int main(int argc, char *argv[])
 	messageBus.run();
 
 
-	//Logger::shutdown();
+	Logger::shutdown();
 	exit(0);
 }
