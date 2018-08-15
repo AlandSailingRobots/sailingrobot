@@ -16,6 +16,8 @@ class DBLoggerNode : public ActiveNode {
 
     void updateConfigsFromDB();
 
+    static void clearCurretSensorQueue(std::queue<currentSensorItem> &q );
+
     void start();
 
     void stop();
