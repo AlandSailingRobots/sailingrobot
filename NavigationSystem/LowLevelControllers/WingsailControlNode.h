@@ -33,6 +33,7 @@
 #include "../Messages/WindStateMsg.h"
 #include "../Messages/WingSailCommandMsg.h"
 #include "../SystemServices/Timer.h"
+#include "../SystemServices/Logger.h"
 
 class WingsailControlNode : public ActiveNode {
    public:

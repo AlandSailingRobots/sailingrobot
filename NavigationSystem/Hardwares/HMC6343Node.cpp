@@ -42,6 +42,8 @@
 #define COM_POST_MAG 			0x45
 #define COM_POST_ACCEL 			0x40
 #define COM_READ_EEPROM 		0xE1
+#define COM_WRITE_EEPROM 		0xF1
+#define COM_RESET_PROC 			0x82
 
 #define EEPROM_ADDRESS			0x00
 
@@ -94,8 +96,11 @@ bool HMC6343Node::init()
 		Logger::error("%s Failed to obtain I2C file descriptor", __PRETTY_FUNCTION__);
 	}
 
-	if (m_LoopTime < 0.2)
+	if (m_LoopTime < 0.2) {
 		setMeasurementRate(CompassMeasurementRate::COM_MEASUREMENT_RATE_10HZ);
+	} else {
+		setMeasurementRate(CompassMeasurementRate::COM_MEASUREMENT_RATE_5HZ);
+	}
 
 	return m_Initialised;
 }
@@ -202,9 +207,12 @@ bool HMC6343Node::setMeasurementRate(CompassMeasurementRate rate)
 {
 	if(m_Initialised)
 	{
-		m_I2C.beginTransmission();
-		m_I2C.writeReg(OM2_ADDRESS, (uint8_t)rate);
-		m_I2C.endTransmission();
+		m_I2C.I2Cwrite((uint8_t)COM_WRITE_EEPROM);
+		m_I2C.I2Cwrite((uint8_t)OM2_ADDRESS);
+		m_I2C.I2Cwrite((uint8_t)rate);
+		delay(10);
+		m_I2C.I2Cwrite((uint8_t)COM_RESET_PROC);
+		delay(500);
 		return true;
 	}
 	else

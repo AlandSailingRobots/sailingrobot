@@ -147,16 +147,17 @@ float WingsailControlNode::simpleCalculateTailAngle() {
     ///   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!------
 
 
-
+    //Logger::info("APP WIND %f", sin(Utility::degreeToRadian(m_ApparentWindDir)));
     if(m_TargetCourse != DATA_OUT_OF_RANGE && m_TargetCourse != NO_COMMAND)
     {
-        if (sin(m_ApparentWindDir) >= 0)
+        
+        if (sin(Utility::degreeToRadian(m_ApparentWindDir)) >= 0)
         {
-            return m_MaxCommandAngle;
+            return -m_MaxCommandAngle;
         }
         else
         {
-            return  -m_MaxCommandAngle;
+            return  m_MaxCommandAngle;
         }
     }
     else
