@@ -86,7 +86,7 @@ void PowerTrackNode::processCurrentSensorDataMessage(CurrentSensorDataMsg* msg)
 	m_CurrentSensorDataElement = msg->getSensedElement();
 	m_Power = m_CurrentSensorDataVoltage * m_CurrentSensorDataCurrent;
 
-	if ( m_CurrentSensorDataElement == (m_lastElementRead + 1)%2 ) {
+	if ( m_CurrentSensorDataElement != m_lastElementRead ) {
 
 		switch(m_CurrentSensorDataElement)
 		{
@@ -101,6 +101,8 @@ void PowerTrackNode::processCurrentSensorDataMessage(CurrentSensorDataMsg* msg)
 			default : 
 				break;
 		}
+
+        m_lastElementRead = m_CurrentSensorDataElement;
 	}
 }
 
