@@ -16,6 +16,7 @@
 
 #include <stdint.h>
 #include "ASRCourseBallot.h"
+#include <mutex>
 
 class ASRArbiter {
    public:
@@ -25,9 +26,15 @@ class ASRArbiter {
     ASRArbiter();
 
     ///----------------------------------------------------------------------------------
-    /// Adds all the votes from a course ballot into its internal ballot.
+    /// Adds all the votes from a course ballot into its internal ballot. (and the vetos)
     ///----------------------------------------------------------------------------------
     void castVote(const int16_t weight, const ASRCourseBallot& ballot);
+
+    ///----------------------------------------------------------------------------------
+    /// Adds all the vetos from a course ballot into its internal ballot.
+    /// NOTE: vetos added with cast vote, previous calls made the voters process twice
+    ///----------------------------------------------------------------------------------
+    void castVeto(const ASRCourseBallot& ballot);
 
     ///----------------------------------------------------------------------------------
     /// Returns the winning course.
@@ -47,4 +54,6 @@ class ASRArbiter {
    private:
     const int MAX_VOTES = 150;
     ASRCourseBallot courseBallot;
+
+    std::mutex m_lock;
 };

@@ -25,6 +25,7 @@ class MessageDeserialiser {
     bool readUint8_t(uint8_t& data);
     bool readUint16_t(uint16_t& data);
     bool readUint32_t(uint32_t& data);
+    bool readUint64_t(uint64_t& data);
     bool readInt(int& data);
     bool readFloat(float& data);
     bool readDouble(double& data);

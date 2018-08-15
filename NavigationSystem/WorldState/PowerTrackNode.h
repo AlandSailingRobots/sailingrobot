@@ -68,6 +68,7 @@ class PowerTrackNode : public ActiveNode {
         float m_Power;
         float m_PowerBalance;
         double m_Looptime;
+        int m_lastElementRead;
 
     	DBHandler& m_db;
 

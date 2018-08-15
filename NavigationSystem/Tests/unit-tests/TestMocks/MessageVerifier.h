@@ -11,10 +11,10 @@
  ***************************************************************************************/
 #pragma once
 
-#include "../MessageBus/Message.h"
-#include "../MessageBus/Node.h"
-#include "../Messages/ASPireActuatorFeedbackMsg.h"
-#include "../Messages/WindStateMsg.h"
+#include "../../../MessageBus/Message.h"
+#include "../../../MessageBus/Node.h"
+#include "../../../Messages/ASPireActuatorFeedbackMsg.h"
+#include "../../../Messages/WindStateMsg.h"
 
 class MessageVerifier : public Node {
    public:

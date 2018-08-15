@@ -69,10 +69,14 @@ void LineFollowNode::stop()
 
 void LineFollowNode::updateConfigsFromDB()
 {
-    m_LoopTime = m_db.retrieveCellAsDouble("config_line_follow","1","loop_time");
-    m_CloseHauledAngle = Utility::degreeToRadian(m_db.retrieveCellAsDouble("config_line_follow","1","close_hauled_angle"));
-    m_BroadReachAngle = Utility::degreeToRadian(m_db.retrieveCellAsDouble("config_line_follow","1","broad_reach_angle"));
-    m_TackingDistance = m_db.retrieveCellAsDouble("config_line_follow","1","tacking_distance");
+    m_db.getConfigFrom(m_LoopTime, "loop_time", "config_line_follow");
+
+    double value;
+	m_db.getConfigFrom(value, "close_hauled_angle", "config_line_follow");
+    m_CloseHauledAngle = Utility::degreeToRadian(value);
+	m_db.getConfigFrom(value, "broad_reach_angle", "config_line_follow");
+    m_BroadReachAngle = Utility::degreeToRadian(value);
+    m_db.getConfigFrom(m_TackingDistance, "tacking_distance", "config_line_follow");
 }
 
 void LineFollowNode::processMessage(const Message* msg)
@@ -176,6 +180,13 @@ double LineFollowNode::calculateTargetCourse()
     // In the articles the reference frame is East-North-Up. Here the reference frame is North-East-Down.
 
     std::lock_guard<std::mutex> lock_guard(m_lock);
+
+    // Quick Fix, might be better to tackle with this issue elsewhere, in a higher layer
+    if (m_prevWaypointLat == DATA_OUT_OF_RANGE || m_prevWaypointLon == DATA_OUT_OF_RANGE) {
+        m_prevWaypointLon = m_VesselLon;
+        m_prevWaypointLat = m_VesselLat;
+        m_prevWaypointRadius = 30.0;
+    }
 
     if ((m_VesselLat == DATA_OUT_OF_RANGE) || (m_VesselLon == DATA_OUT_OF_RANGE) || 
         (m_trueWindSpeed == DATA_OUT_OF_RANGE) || (m_trueWindDir == DATA_OUT_OF_RANGE) ||

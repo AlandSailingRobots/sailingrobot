@@ -44,7 +44,7 @@ class LidarLiteNode : public ActiveNode {
     void start();
 
    private:
-    static void LidarThreadFunc(void* nodePtr);
+    static void LidarThreadFunc(ActiveNode* nodePtr);
     int m_delay;  // units : milliseconds
     int m_fd;
     bool m_debug;

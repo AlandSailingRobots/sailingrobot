@@ -78,9 +78,9 @@ void SailControlNode::processMessage( const Message* msg)
 ///----------------------------------------------------------------------------------
 void SailControlNode::updateConfigsFromDB()
 {
-    m_LoopTime = m_db.retrieveCellAsDouble("config_sail_control","1","loop_time");
-    m_MaxSailAngle = m_db.retrieveCellAsInt("config_sail_control","1","max_sail_angle");
-    m_MinSailAngle = m_db.retrieveCellAsInt("config_sail_control","1","min_sail_angle");
+    m_db.getConfigFrom(m_LoopTime, "loop_time", "config_sail_control");
+    m_db.getConfigFrom(m_MaxSailAngle, "max_sail_angle", "config_sail_control");
+    m_db.getConfigFrom(m_MinSailAngle, "min_sail_angle", "config_sail_control");
 }
 
 ///----------------------------------------------------------------------------------

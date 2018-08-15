@@ -1,0 +1,42 @@
+ 
+{
+"1": {
+  "isCheckpoint": 0,
+  "latitude": 60.1079, 
+  "longitude": 19.92235,
+  "declination": 6,
+  "radius": 30,
+  "stay_time": 0,
+  "harvested": 0
+},
+
+"2": {
+  "isCheckpoint": 0,
+  "latitude": 60.10584, 
+  "longitude": 19.92246,
+  "declination": 6,
+  "radius": 30,
+  "stay_time": 0,
+  "harvested": 0
+},
+
+"3": {
+  "isCheckpoint": 0,
+  "latitude": 60.10549, 
+  "longitude": 19.92049,
+  "declination": 6,
+  "radius": 30,
+  "stay_time": 0,
+  "harvested": 0
+},
+
+"4": {
+  "isCheckpoint": 0,
+  "latitude": 60.10793, 
+  "longitude": 19.9216,
+  "declination": 6,
+  "radius": 30,
+  "stay_time": 60,
+  "harvested": 0
+}
+}

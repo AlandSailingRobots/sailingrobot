@@ -41,14 +41,14 @@
         -:   36:
         8:   37:	if (m_rc) {
     #####:   38:		std::stringstream errorStream;
-    #####:   39:		errorStream << "DBHandler::openDatabase(), " << sqlite3_errmsg(m_db);
+    #####:   39:		errorStream << "DBHandler::connectDB(), " << sqlite3_errmsg(m_db);
         -:   40:
     #####:   41:		throw errorStream.str().c_str();
         -:   42:	}
         8:   43:}
         -:   44:
         -:   45:
-       10:   46:void DBHandler::closeDatabase(void) {
+       10:   46:void DBHandler::DBDisconnect(void) {
        10:   47:	sqlite3_close(m_db);
        10:   48:	m_db = NULL;
        10:   49:}
@@ -142,7 +142,7 @@
     #####:  137:	while(decoder.hasNext()) {
         -:  138:
     #####:  139:		if (decoder.getSize() != columns.size()) {
-    #####:  140:			throw ("DBHandler::updateTable(), decoder and columns size mismatch for table: " + table).c_str();
+    #####:  140:			throw ("DBHandler::updateTableColumnIdValue(), decoder and columns size mismatch for table: " + table).c_str();
         -:  141:		}
         -:  142:
     #####:  143:		std::string values = "";
@@ -201,7 +201,7 @@
     #####:  196:}
         -:  197:
         -:  198:
-    #####:  199:std::string DBHandler::getLogs() {
+    #####:  199:std::string DBHandler::getLogsAsJSON() {
         -:  200:
     #####:  201:	std::vector<std::string> logIds;
     #####:  202:	logIds = getTableIds("dataLogs");
@@ -416,9 +416,9 @@
         1:  411:}
         -:  412:
         -:  413:
-    #####:  414:void DBHandler::changeOneValue(std::string table, std::string id,std::string newValue, std::string colName){
+    #####:  414:void DBHandler::updateTableIdColumnValue(std::string table, std::string id,std::string newValue, std::string colName){
         -:  415:
-    #####:  416:	queryTable("UPDATE " + table + " SET "+ colName + " = "+ newValue +" WHERE id = " + id +";");
+    #####:  416:	DBTransaction("UPDATE " + table + " SET "+ colName + " = "+ newValue +" WHERE id = " + id +";");
         -:  417:
     #####:  418:}
         -:  419:

@@ -38,7 +38,7 @@ void LidarLiteNode::start()
 	}
 }
 
-void LidarLiteNode::LidarThreadFunc(void* nodePtr)
+void LidarLiteNode::LidarThreadFunc(ActiveNode* nodePtr)
 {
 	LidarLiteNode* node = (LidarLiteNode*)nodePtr;
 	Logger::info("LidarLiteNode thread started");

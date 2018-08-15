@@ -73,6 +73,8 @@ class HTTPSyncNode : public ActiveNode {
     std::string m_shipPWD;
     std::string m_serverURL;
 
+    std::mutex m_curlLock;
+
     CURL* curl;
     CURLcode m_res;
     bool m_reportedConnectError;
@@ -83,6 +85,13 @@ class HTTPSyncNode : public ActiveNode {
     bool m_removeLogs;
     double m_LoopTime;  // units : seconds (ex : 0.5 s)
     int m_pushOnlyLatestLogs;
+
+    unsigned int m_dataLogsSystemLastId;
+    unsigned int m_connectionErrors;
+    unsigned int m_sendFails;
+	bool m_backLogged;
+	bool m_waypointsNeedPush;
+	bool m_configsNeedPush;
 
     std::atomic<bool> m_Running;
     DBHandler* m_dbHandler;

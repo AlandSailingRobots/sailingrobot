@@ -138,8 +138,8 @@ int main(int argc, char *argv[])
 	// Declare nodes
 	//-------------------------------------------------------------------------------
 
-	int dbLoggerQueueSize = 5; 			// how many messages to log to the databse at a time
-	DBLoggerNode dbLoggerNode(messageBus, dbHandler, dbLoggerQueueSize);
+	int dbLoggerQueueItems = 5; 			// how many messages to log to the databse at a time
+	DBLoggerNode dbLoggerNode(messageBus, dbHandler, dbLoggerQueueItems);
 
 	//HTTPSyncNode httpsync(messageBus, &dbHandler);
 
@@ -189,7 +189,9 @@ int main(int argc, char *argv[])
 		acceleration = 0;
 		ActuatorNode rudder(messageBus, NodeID::RudderActuator, channel, speed, acceleration);
 
-		MaestroController::init(dbHandler.retrieveCell("config_maestro_controller", "1", "port"));
+		std::string maestroPort;
+		dbHandler.getConfigFrom(maestroPort, "port", "config_maestro_controller");
+		MaestroController::init(maestroPort);
 
 		XbeeSyncNode xbee(messageBus, dbHandler);
 	#endif

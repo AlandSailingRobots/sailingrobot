@@ -23,6 +23,7 @@
 
 class LocalNavigationModule : public ActiveNode {
    public:
+    friend class VoterTCPDebugger;
     ///----------------------------------------------------------------------------------
     /// Constructs the LocalNavigationModule
     ///----------------------------------------------------------------------------------
@@ -82,4 +83,6 @@ class LocalNavigationModule : public ActiveNode {
     double m_LoopTime;
     DBHandler& m_db;
     double m_trueWindDir;
+
+    std::mutex m_lock; // Only for the cast vote step as the VoterTCPDebugger seems to conflict with it
 };
