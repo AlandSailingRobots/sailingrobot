@@ -86,6 +86,7 @@ void PowerTrackNode::processCurrentSensorDataMessage(CurrentSensorDataMsg* msg)
 	m_CurrentSensorDataElement = msg->getSensedElement();
 	m_Power = m_CurrentSensorDataVoltage * m_CurrentSensorDataCurrent;
 
+	//if statement to ensure data flow is balanced.
 	if ( m_CurrentSensorDataElement != m_lastElementRead ) {
 
 		switch(m_CurrentSensorDataElement)
