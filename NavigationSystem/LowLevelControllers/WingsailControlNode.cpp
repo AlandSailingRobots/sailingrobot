@@ -75,7 +75,7 @@ void WingsailControlNode::processMessage( const Message* msg)
 void WingsailControlNode::updateConfigsFromDB()
 {
     m_db.getConfigFrom(m_LoopTime, "loop_time", "config_wingsail_control");
-    m_db.getConfigFrom(m_LoopTime, "max_cmd_angle", "config_wingsail_control");
+    m_db.getConfigFrom(m_MaxCommandAngle, "max_cmd_angle", "config_wingsail_control");
 }
 
 ///----------------------------------------------------------------------------------

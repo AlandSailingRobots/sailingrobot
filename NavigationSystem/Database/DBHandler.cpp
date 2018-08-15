@@ -1227,7 +1227,7 @@ void DBHandler::insertDataLogs(std::queue<LogItem>& logs) {
             }
         }
 
-        int _currentSensorsId = 0;
+        int _currentSensorsId = currentSensorsId-1;
         if (currentSensorsId) {
             typedValuePairs values = {{}, {}, {}};
             unsigned currentItemNumber = 0;
