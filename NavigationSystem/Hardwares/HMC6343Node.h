@@ -33,9 +33,9 @@ enum class CompassOrientation {
 
 enum class CompassMeasurementRate {
     COM_MEASUREMENT_RATE_1HZ  = 0x00,
-    COM_MEASUREMENT_RATE_5HZ  = 0x02, // hardware default
-    COM_MEASUREMENT_RATE_10HZ = 0x03,
-    COM_MEASUREMENT_RATE_NA   = 0x04
+    COM_MEASUREMENT_RATE_5HZ  = 0x01, // hardware default
+    COM_MEASUREMENT_RATE_10HZ = 0x02,
+    COM_MEASUREMENT_RATE_NA   = 0x03
 };
 
 class HMC6343Node : public ActiveNode {
