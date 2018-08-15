@@ -1,9 +1,9 @@
 PRAGMA foreign_keys = ON;
 BEGIN TRANSACTION;
 
-DROP TABLE IF EXISTS "current_Mission";
-CREATE TABLE current_Mission (id INTEGER PRIMARY KEY AUTOINCREMENT, -- no autoincrement to ensure a correct order
-	is_checkpoint BOOLEAN,
+DROP TABLE IF EXISTS "currentMission";
+CREATE TABLE currentMission (id INTEGER PRIMARY KEY AUTOINCREMENT, -- no autoincrement to ensure a correct order
+	isCheckpoint  BOOLEAN,
 	latitude      DOUBLE,
 	longitude     DOUBLE,
 	declination   INTEGER,
@@ -38,6 +38,7 @@ CREATE TABLE dataLogs_compass (
   heading 		DOUBLE,
   pitch 		DOUBLE,
   roll 			DOUBLE,
+  acquisition_timestamp VARCHAR(20),
   t_timestamp 	TIMESTAMP
 );
 
@@ -335,6 +336,7 @@ CREATE TABLE config_voter_system (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   loop_time 				DOUBLE,
   max_vote 					INTEGER,
+  course_voter_weight       DOUBLE,
   waypoint_voter_weight 	DOUBLE,
   wind_voter_weight 		DOUBLE,
   channel_voter_weight 		DOUBLE,
@@ -392,7 +394,7 @@ INSERT INTO "config_gps" VALUES(1,0.5);
 INSERT INTO "config_line_follow" VALUES(1,0.5,45,30,15);
 INSERT INTO "config_solar_tracker" VALUES(1,1);
 INSERT INTO "config_vessel_state" VALUES(1, 0.5, 0.5, 1);
-INSERT INTO "config_voter_system" VALUES(1,0.5,25,1,1,1,1,2);
+INSERT INTO "config_voter_system" VALUES(1,0.5,100,6,1,1,1,0,0);
 INSERT INTO "config_wind_sensor" VALUES(1,0.5);
 INSERT INTO "config_wingsail_control" VALUES(1,0.5,15);
 INSERT INTO "config_xbee" VALUES(1,1,1,0,0.1,1);

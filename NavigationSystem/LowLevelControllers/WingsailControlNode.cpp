@@ -74,8 +74,8 @@ void WingsailControlNode::processMessage( const Message* msg)
 ///----------------------------------------------------------------------------------
 void WingsailControlNode::updateConfigsFromDB()
 {
-    m_LoopTime = m_db.retrieveCellAsDouble("config_wingsail_control","1","loop_time");
-    m_MaxCommandAngle = m_db.retrieveCellAsDouble("config_wingsail_control","1","max_cmd_angle");
+    m_db.getConfigFrom(m_LoopTime, "loop_time", "config_wingsail_control");
+    m_db.getConfigFrom(m_LoopTime, "max_cmd_angle", "config_wingsail_control");
 }
 
 ///----------------------------------------------------------------------------------
@@ -141,19 +141,22 @@ float WingsailControlNode::calculateTailAngle()
 }
 
 ///----------------------------------------------------------------------------------
-float WingsailControlNode::simpleCalculateTailAngle()
-{
-    std::lock_guard<std::mutex> lock_guard(m_lock);
+float WingsailControlNode::simpleCalculateTailAngle() {
+    std::lock_guard <std::mutex> lock_guard(m_lock);
+
+    ///   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!------
+
+
 
     if(m_TargetCourse != DATA_OUT_OF_RANGE && m_TargetCourse != NO_COMMAND)
     {
-        if (m_TargetTackStarboard)
+        if (sin(m_ApparentWindDir) >= 0)
         {
             return m_MaxCommandAngle;
         }
         else
         {
-            return - m_MaxCommandAngle;
+            return  -m_MaxCommandAngle;
         }
     }
     else

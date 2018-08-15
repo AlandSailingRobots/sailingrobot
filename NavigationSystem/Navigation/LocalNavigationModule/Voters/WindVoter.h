@@ -37,6 +37,6 @@ class WindVoter : public ASRVoter {
     const ASRCourseBallot& vote(const BoatState_t& boatState);
 
    private:
-    const int TW_BUFFER_SIZE = 2;
+    const int TW_BUFFER_SIZE = 5;
     std::vector<float> trueWindBuffer;
 };

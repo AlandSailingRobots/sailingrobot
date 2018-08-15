@@ -18,7 +18,7 @@ if [ -f "$DB_FILE" ]; then
 	echo "Creating db..."
 	sqlite3 "$TEST_DIR$TEST_DB_FILE" < "$DB_FILE"
 
-	sqlite3 "$TEST_DIR$TEST_DB_FILE" "INSERT INTO current_Mission VALUES(1,0,2.2,3.3,500,0,0);"
+	sqlite3 "$TEST_DIR$TEST_DB_FILE" "INSERT INTO currentMission VALUES(1,0,2.2,3.3,500,0,0);"
 	sqlite3 "$TEST_DIR$TEST_DB_FILE" "INSERT INTO waypoint_stationary VALUES (1,1);"
 
 	cd $START_DIR

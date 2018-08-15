@@ -24,10 +24,10 @@
 
 #include <stdint.h>
 #include <thread>
-#include "../Database/DBHandler.h"
-#include "../Hardwares/CV7Node.h"
-#include "../MessageBus/MessageBus.h"
-#include "../SystemServices/Logger.h"
+#include "../../Database/DBHandler.h"
+#include "../../Hardwares/CV7Node.h"
+#include "../../MessageBus/MessageBus.h"
+#include "../../SystemServices/Logger.h"
 #include "../cxxtest/cxxtest/TestSuite.h"
 #include "TestMocks/MessageLogger.h"
 
@@ -61,9 +61,12 @@ class HardwareCV7Suite : public CxxTest::TestSuite {
 
             Logger::DisableLogging();
             logger = new MessageLogger(msgBus());
-            // cv7 = new CV7Node(msgBus(), dbHandler.retrieveCell("windsensor_config", "1", "port"),
-            // dbHandler.retrieveCellAsInt("windsensor_config", "1", "baud_rate")); // Not in the
-            // database
+            // std::string windSensorPort;
+            // dbHandler.getConfig(windSensorPort, "windsensor_config", "port")
+            // cv7 = new CV7Node(msgBus(), windSensorPort,
+            // int windSensorBaudRate = 0;
+            // dbHandler.getConfig(windSensorBaudRate, "windsensor_config", "baud_rate")); // Not in
+            // the DB
             thr = new std::thread(runMessageLoop);
         }
         testCount++;

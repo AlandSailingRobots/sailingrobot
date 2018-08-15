@@ -20,8 +20,6 @@
 #pragma once
 
 #include "ActuatorNode-notused.h"
-#include "../Hardwares/MaestroController/MaestroController.h"
-#include "../cxxtest/cxxtest/TestSuite.h"
 #include "TestMocks/MessageLogger.h"
 
 // For std::this_thread

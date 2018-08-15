@@ -1,8 +1,8 @@
 #include "catch.hpp"
-#include "dbhandler/DBHandler.h"
+#include "../dbhandler/DBHandler.h"
 #include <cstdio>
 #include <stdio.h>
-#include "models/PositionModel.h"
+#include "../models/PositionModel.h"
 #include "models/WaypointModel.h"
 #include "models/WindsensorModel.h"
 #include "models/CompassModel.h"
@@ -30,7 +30,7 @@ TEST_CASE("DBhandler")
 	SECTION("Open a connection to a non existing database")
 	{
 		DBHandler db("doesnotexist");
-		// REQUIRE_THROWS(db.retrieveCell("mock", "1", "gps")); // No mock in DB
+		// REQUIRE_THROWS(db.getConfig(STOREDHERE, "mock", "gps")); // No mock in DB
 	}
 
 	SECTION("Delete query on a table that doesnt exist")
@@ -86,28 +86,29 @@ TEST_CASE("DBhandler")
 
 	}
 
-	SECTION("retrieveCell function")
+	SECTION("getConfigFrom function")
 	{
 
 		DBHandler db("testdb.db");
 
-		REQUIRE(db.retrieveCell("current_Mission","1","harvested").compare("0") == 0);
+		REQUIRE(db.retrieveCell("currentMission","1","harvested").compare("0") == 0);
 
 	}
 
-	SECTION("retrieveCellAsInt function")
+	// NOT OK! DBHandler has updated since this
+	SECTION("getConfig function")
 	{
 
 		DBHandler db("testdb.db");
 
-		REQUIRE(db.retrieveCellAsInt("current_Mission","1","harvested") == 0);
+		REQUIRE(db.retrieveCellAsInt("currentMission","1","harvested") == 0);
 
 	}
 
-	SECTION("Delete row with id 1 from table current_Mission")
+	SECTION("Delete row with id 1 from table currentMission")
 	{
 		DBHandler db("testdb.db");
-		REQUIRE_NOTHROW(db.deleteRow("current_Mission", "1"));
+		REQUIRE_NOTHROW(db.deleteRow("currentMission", "1"));
 		//SHOULD ROLLBACK
 	}
 
@@ -115,30 +116,30 @@ TEST_CASE("DBhandler")
 	{
 		DBHandler db("testdb.db");
 
-		REQUIRE(db.getIdFromTable("current_Mission",false).empty());
+		REQUIRE(db.getIdFromTable("currentMission",false).empty());
 	}
 
 	SECTION("Insert function")
 	{
 		DBHandler db("testdb.db");
 
-		REQUIRE_NOTHROW(db.insert("current_Mission", "id, isCheckpoint, latitude, longitude, radius, harvested", "1, 2.2, 3.3, 500, 0"));
+		REQUIRE_NOTHROW(db.insert("currentMission", "id, isCheckpoint, latitude, longitude, radius, harvested", "1, 2.2, 3.3, 500, 0"));
 
-		REQUIRE(db.getIdFromTable("current_Mission",false).compare("1") == 0);
+		REQUIRE(db.getIdFromTable("currentMission",false).compare("1") == 0);
 
-		REQUIRE(db.retrieveCell("current_Mission","1","radius").compare("500") == 0);
+		REQUIRE(db.retrieveCell("currentMission","1","radius").compare("500") == 0);
 
 	}
 
-	SECTION("changeOneValue function")
+	SECTION("updateTableIdColumnValue function")
 	{
 		DBHandler db("testdb.db");
 
-		REQUIRE(db.retrieveCell("current_Mission","1","harvested").compare("0") == 0);
+		REQUIRE(db.retrieveCell("currentMission","1","harvested").compare("0") == 0);
 
-		REQUIRE_NOTHROW(db.changeOneValue("current_Mission", "1","1","harvested"));
+		REQUIRE_NOTHROW(db.changeOneValue("currentMission", "1","1","harvested"));
 
-		REQUIRE(db.retrieveCell("current_Mission","1","harvested").compare("1") == 0);
+		REQUIRE(db.retrieveCell("currentMission","1","harvested").compare("1") == 0);
 
 	}
 

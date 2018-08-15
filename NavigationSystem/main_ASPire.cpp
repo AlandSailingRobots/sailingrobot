@@ -6,6 +6,8 @@
 #include "../Messages/DataRequestMsg.h"
 #include "../SystemServices/Logger.h"
 
+#include "../WorldState/CameraProcessingUtility.h"
+#include "../WorldState/AISProcessing.h"
 #include "../Navigation/WaypointMgrNode.h"
 #include "../WorldState/StateEstimationNode.h"
 #include "../WorldState/WindStateNode.h"
@@ -16,11 +18,13 @@
 
 #if LOCAL_NAVIGATION_MODULE == 1
   #include "../Navigation/LocalNavigationModule/LocalNavigationModule.h"
+  #include "../Navigation/LocalNavigationModule/Voters/CourseVoter.h"
   #include "../Navigation/LocalNavigationModule/Voters/WaypointVoter.h"
   #include "../Navigation/LocalNavigationModule/Voters/WindVoter.h"
   #include "../Navigation/LocalNavigationModule/Voters/ChannelVoter.h"
   #include "../Navigation/LocalNavigationModule/Voters/ProximityVoter.h"
   #include "../Navigation/LocalNavigationModule/Voters/MidRangeVoter.h"
+  #include "../Navigation/LocalNavigationModule/VoterTCPDebugger.h"
 #else
   #include "../Navigation/LineFollowNode.h"
 #endif
@@ -143,8 +147,8 @@ int main(int argc, char *argv[])
 	// Declare nodes
 	//-------------------------------------------------------------------------------
 
-	int dbLoggerQueueSize = 5; 			// how many messages to log to the databse at a time
-	DBLoggerNode dbLoggerNode(messageBus, dbHandler, dbLoggerQueueSize);
+	int dbLoggerQueueItems = 5; 			// how many messages to log to the database at a time
+	DBLoggerNode dbLoggerNode(messageBus, dbHandler, dbLoggerQueueItems);
 	HTTPSyncNode httpsync(messageBus, &dbHandler);
 
 	StateEstimationNode stateEstimationNode(messageBus, dbHandler);
@@ -155,41 +159,78 @@ int main(int argc, char *argv[])
 	WingsailControlNode wingSailControlNode(messageBus, dbHandler);
 	CourseRegulatorNode courseRegulatorNode(messageBus, dbHandler);
 
-  	#if LOCAL_NAVIGATION_MODULE == 1
+	CameraProcessingUtility cameraProcessingUtility(messageBus, dbHandler, &collidableMgr);
+	AISProcessing aisProcessing(messageBus, dbHandler, &collidableMgr);
+
+	#if LOCAL_NAVIGATION_MODULE == 1
 		LocalNavigationModule lnm	( messageBus, dbHandler );
 
-		const int16_t MAX_VOTES = dbHandler.retrieveCellAsInt("config_voter_system","1","max_vote");
-		WaypointVoter waypointVoter( MAX_VOTES, dbHandler.retrieveCellAsDouble("config_voter_system","1","waypoint_voter_weight")); // weight = 1
-		WindVoter windVoter( MAX_VOTES, dbHandler.retrieveCellAsDouble("config_voter_system","1","wind_voter_weight")); // weight = 1
-		ChannelVoter channelVoter( MAX_VOTES, dbHandler.retrieveCellAsDouble("config_voter_system","1","channel_voter_weight")); // weight = 1
-		MidRangeVoter midRangeVoter( MAX_VOTES, dbHandler.retrieveCellAsDouble("config_voter_system","1","midrange_voter_weight"), collidableMgr );
-		ProximityVoter proximityVoter( MAX_VOTES, dbHandler.retrieveCellAsDouble("config_voter_system","1","proximity_voter_weight"), collidableMgr);
+		int MAX_VOTES;
+		dbHandler.getConfigFrom(MAX_VOTES, "max_vote", "config_voter_system");
 
+		double weight = 0;
+		dbHandler.getConfigFrom(weight, "course_voter_weight","config_voter_system");
+		CourseVoter courseVoter(MAX_VOTES, weight);
+
+		weight = 0;
+		dbHandler.getConfigFrom(weight, "waypoint_voter_weight", "config_voter_system");
+		WaypointVoter waypointVoter(MAX_VOTES, weight); // weight = 1
+
+		weight = 0;
+		dbHandler.getConfigFrom(weight, "wind_voter_weight", "config_voter_system");
+		WindVoter windVoter(MAX_VOTES, weight); // weight = 1
+
+		weight = 0;
+		dbHandler.getConfigFrom(weight, "channel_voter_weight", "config_voter_system");
+		ChannelVoter channelVoter( MAX_VOTES, weight); // weight = 1
+
+		weight = 0;
+		dbHandler.getConfigFrom(weight, "midrange_voter_weight", "config_voter_system");
+		MidRangeVoter midRangeVoter( MAX_VOTES, weight, collidableMgr );
+
+		weight = 0;
+		dbHandler.getConfigFrom(weight, "proximity_voter_weight", "config_voter_system");
+		ProximityVoter proximityVoter( MAX_VOTES, weight, collidableMgr);
+
+
+
+		lnm.registerVoter( &courseVoter );
 		lnm.registerVoter( &waypointVoter );
 		lnm.registerVoter( &windVoter );
 		lnm.registerVoter( &channelVoter );
-		lnm.registerVoter( &proximityVoter );
-		lnm.registerVoter( &midRangeVoter );
-  	#else
+
+		// As there is no veto used in both avoidance voters for now, you can disable avoidance system just by
+		// putting a weigth of zero in config_ASPire.json and push the new config manually or through the website.
+		//lnm.registerVoter( &proximityVoter );
+		//lnm.registerVoter( &midRangeVoter );
+
+        //VoterTCPDebugger voterTCPD(messageBus, lnm, 3);
+        //VoterTCPDebugger voterTCPD(messageBus, courseVoter);
+
+    #else
 		LineFollowNode sailingLogic(messageBus, dbHandler);
   	#endif
+
 
 	#if SIMULATION == 1
   		SimulationNode simulation(messageBus, 1, &collidableMgr);
   	#else
 		CANService canService;
 
-//		HMC6343Node compass(messageBus, dbHandler);
-//	  	GPSDNode gpsd(messageBus, dbHandler);
-//		CANWindsensorNode windSensor(messageBus, dbHandler, canService);
-//	  	ActuatorNodeASPire actuators(messageBus, canService);
-//	  	CANArduinoNode actuatorFeedback(messageBus, dbHandler, canService);
+		HMC6343Node compass(messageBus, dbHandler);
+	  	GPSDNode gpsd(messageBus, dbHandler);
+		CANWindsensorNode windSensor(messageBus, dbHandler, canService);
+	  	ActuatorNodeASPire actuators(messageBus, canService);
+	  	CANArduinoNode actuatorFeedback(messageBus, dbHandler, canService);
 
-//		CANMarineSensorReceiver canMarineSensorReciver(messageBus, canService);
 
-//		CANMarineSensorTransmissionNode canMarineSensorTransmissionNode(messageBus, canService);
+
+		CANMarineSensorReceiver canMarineSensorReciver(messageBus, canService);
+
+		CANMarineSensorTransmissionNode canMarineSensorTransmissionNode(messageBus, canService);
 		CANCurrentSensorNode canCurrentSensorNode(messageBus, dbHandler, canService);
 		PowerTrackNode powerTrackNode(messageBus, dbHandler, 0.5);
+
 
 	#endif
 
@@ -209,22 +250,26 @@ int main(int argc, char *argv[])
 
 	#if LOCAL_NAVIGATION_MODULE == 1
 		initialiseNode( lnm, "Local Navigation Module",	NodeImportance::CRITICAL );
+		//initialiseNode( voterTCPD, "VoterTCPDebugger", NodeImportance::NOT_CRITICAL);
 	#else
 		initialiseNode(sailingLogic, "LineFollow", NodeImportance::CRITICAL);
 	#endif
 
+
 	#if SIMULATION == 1
 		initialiseNode(simulation,"Simulation",NodeImportance::CRITICAL);
 	#else
-//		initialiseNode(compass, "Compass", NodeImportance::CRITICAL);
-//		initialiseNode(gpsd, "GPSD", NodeImportance::CRITICAL);
-//		initialiseNode(windSensor, "Wind Sensor", NodeImportance::CRITICAL);
-//		initialiseNode(actuators, "Actuators", NodeImportance::CRITICAL);
-//		initialiseNode(actuatorFeedback, "Actuator Feedback", NodeImportance::NOT_CRITICAL);
-//		initialiseNode(canMarineSensorTransmissionNode, "Marine Sensors", NodeImportance::NOT_CRITICAL);
+		initialiseNode(compass, "Compass", NodeImportance::CRITICAL);
+		initialiseNode(gpsd, "GPSD", NodeImportance::CRITICAL);
+		initialiseNode(windSensor, "Wind Sensor", NodeImportance::CRITICAL);
+		initialiseNode(actuators, "Actuators", NodeImportance::CRITICAL);
+		initialiseNode(actuatorFeedback, "Actuator Feedback", NodeImportance::NOT_CRITICAL);
+		initialiseNode(canMarineSensorTransmissionNode, "Marine Sensors", NodeImportance::NOT_CRITICAL);
 		initialiseNode(canCurrentSensorNode, "Current Sensors", NodeImportance::NOT_CRITICAL);
 		initialiseNode(powerTrackNode, "Powertrack", NodeImportance::NOT_CRITICAL);
 	#endif
+
+	initialiseNode(cameraProcessingUtility, "Camera Processing", NodeImportance::NOT_CRITICAL);
 
 	// Start active nodes
 	//-------------------------------------------------------------------------------
@@ -238,20 +283,26 @@ int main(int argc, char *argv[])
 	wingSailControlNode.start();
 	courseRegulatorNode.start();
 
+
+
 	#if SIMULATION == 1
 		simulation.start();
 	#else
 	  	auto future = canService.start();
-//		compass.start();
-//		gpsd.start();
-//		windSensor.start();
-//		actuatorFeedback.start();
+		compass.start();
+		gpsd.start();
+		windSensor.start();
+		actuatorFeedback.start();
 		canCurrentSensorNode.start();
 		powerTrackNode.start();
 	#endif
 
 	#if LOCAL_NAVIGATION_MODULE == 1
+    // Cancel Camera Processing node if using voters without avoidance.
+    // Camera processing enabled for voter system only currently.
+	//  cameraProcessingUtility.start();
 		lnm.start();
+		//voterTCPD.start();
 	#else
 		sailingLogic.start();
 	#endif
@@ -262,6 +313,8 @@ int main(int argc, char *argv[])
 	messageBus.run();
 
 
+
 	//Logger::shutdown();
+
 	exit(0);
 }

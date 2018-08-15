@@ -42,7 +42,7 @@ bool CANArduinoNode::init() {
 
 void CANArduinoNode::updateConfigsFromDB()
 {
-    m_LoopTime = m_db.retrieveCellAsDouble("config_can_arduino","1","loop_time");
+    m_db.getConfigFrom(m_LoopTime, "loop_time", "config_can_arduino");
 }
 
 void CANArduinoNode::processMessage (const Message* message){
@@ -75,6 +75,7 @@ void CANArduinoNode::processFrame (CanMsg& msg) {
 //
 //        messageHandler.getData(&m_WindvaneActuatorPos, WINDVANE_ACTUATOR_POSITION_START, WINDVANE_ACTUATOR_POSITION_DATASIZE,
 //                               WINDVANE_ACTUATOR_POSITION_IN_BYTE);
+
 
 	}
 	else if (messageHandler.getMessageId() == MSG_ID_RC_STATUS) {

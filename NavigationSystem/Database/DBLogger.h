@@ -8,7 +8,7 @@
  *		worker thread.
  *
  * Developer Notes:
- *
+ *		Refactored 2018-07 by Kåre Hampf <khampf@users.sourceforge.net>
  *
  ***************************************************************************************/
 
@@ -19,32 +19,31 @@
 #include <iostream>
 #include <mutex>
 #include <thread>
-#include <vector>
+// #include <vector>
+#include <queue>
 #include "DBHandler.h"
 
 class DBLogger {
    public:
-    DBLogger(unsigned int LogBufferSize, DBHandler& dbHandler);
+    DBLogger(unsigned int logBufferItems, DBHandler& dbHandler);
     ~DBLogger();
-
     void startWorkerThread();
-
     void log(LogItem& item);
-
-    unsigned int bufferSize() { return m_bufferSize; }
+    unsigned int getLogItems();
 
    private:
-    template <typename FloatOrDouble>
-    FloatOrDouble setValue(FloatOrDouble value);
+    /* Never remove this:
+     * template <typename FloatOrDouble>
+     *   FloatOrDouble setValue(FloatOrDouble value);
+     */
 
     static void workerThread(DBLogger* ptr);
-
-    std::thread* m_thread;
-    std::atomic<bool> m_working;
-    std::mutex m_mutex;
-    std::condition_variable m_cv;
     DBHandler& m_dbHandler;
-    unsigned int m_bufferSize;
-    std::vector<LogItem>* m_logBufferFront;
-    std::vector<LogItem>* m_logBufferBack;
+	unsigned int m_bufferItems;
+
+    std::thread* m_workerThread;
+    std::mutex m_logFifoMutex;
+    std::condition_variable m_signal;
+    std::atomic<bool> m_runFlag;
+    std::queue<LogItem>* m_logFifoIn;
 };

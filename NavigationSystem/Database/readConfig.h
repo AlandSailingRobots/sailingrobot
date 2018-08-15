@@ -4,7 +4,7 @@
 #include <string>
 
 #include "DBHandler.h"
-#include "json.hpp"
+#include <nlohmann/json.hpp>
 
 using json = nlohmann::json;
 
@@ -23,7 +23,7 @@ class readConfig {
     /*
      * Returns the waypoints in the db in the json object wp
      */
-    static void waypointsInJson(json& cfg, DBHandler db);
+    static void waypointsAsJSON(json &cfg, DBHandler db);
 
     /*
      * Updates the database with the data in the file

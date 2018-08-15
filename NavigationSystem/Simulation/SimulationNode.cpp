@@ -273,6 +273,7 @@ void SimulationNode::processVisualField(TCPPacket_t& packet) {
         for (int i = 0; i < 24; ++i) {
             bearingToRelativeObstacleDistance[12 - i] = data->relativeObstacleDistances[i];
         }
+
         Logger::debug("retrieving heading: %d", Utility::wrapAngle(90 - data->heading));
 
         this->collidableMgr->addVisualField(bearingToRelativeObstacleDistance,
