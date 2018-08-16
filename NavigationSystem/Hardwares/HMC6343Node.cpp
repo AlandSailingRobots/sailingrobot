@@ -42,9 +42,13 @@
 #define COM_POST_MAG 			0x45
 #define COM_POST_ACCEL 			0x40
 #define COM_READ_EEPROM 		0xE1
+#define COM_WRITE_EEPROM 		0xF1
+#define COM_RESET_PROC 			0x82
 
 #define EEPROM_ADDRESS			0x00
 
+// Operational Mode Register 2 EEPROM address (measurement rate)
+#define OM2_ADDRESS 0x05
 
 #define COM_ORIENT_LEVEL 0x72
 #define COM_ORIENT_SIDEWAYS 0x73
@@ -73,7 +77,7 @@ bool HMC6343Node::init()
 		m_I2C.writeReg(COM_READ_EEPROM, EEPROM_ADDRESS);
 		delay(10);
 		uint8_t deviceID = m_I2C.I2Cread();
-		printf("received %02x request %02x\n",deviceID,I2C_ADDRESS);
+		Logger::info("HMC6343 Node: received %02x request %02x\n",deviceID,I2C_ADDRESS);
 
 		m_I2C.endTransmission();
 
@@ -90,6 +94,12 @@ bool HMC6343Node::init()
 	else
 	{
 		Logger::error("%s Failed to obtain I2C file descriptor", __PRETTY_FUNCTION__);
+	}
+
+	if (m_LoopTime < 0.2) {
+		setMeasurementRate(CompassMeasurementRate::COM_MEASUREMENT_RATE_10HZ);
+	} else {
+		setMeasurementRate(CompassMeasurementRate::COM_MEASUREMENT_RATE_5HZ);
 	}
 
 	return m_Initialised;
@@ -169,6 +179,14 @@ bool HMC6343Node::readData(float& heading, float& pitch, float& roll)
 	}
 }
 
+bool HMC6343Node::readData(float& heading, float& pitch, float& roll, uint64_t& timestamp)
+{
+	struct timespec ts;
+	clock_gettime(CLOCK_MONOTONIC_RAW, &ts);
+	timestamp = ts.tv_sec * (uint64_t) 1e9 + ts.tv_nsec;
+	return readData(heading, pitch, roll);
+}
+
 bool HMC6343Node::setOrientation(CompassOrientation orientation)
 {
 	if(m_Initialised)
@@ -181,6 +199,25 @@ bool HMC6343Node::setOrientation(CompassOrientation orientation)
 	else
 	{
 		Logger::error("%s Cannot set compass orientation as the node was not correctly initialised!", __PRETTY_FUNCTION__);
+		return false;
+	}
+}
+
+bool HMC6343Node::setMeasurementRate(CompassMeasurementRate rate)
+{
+	if(m_Initialised)
+	{
+		m_I2C.I2Cwrite((uint8_t)COM_WRITE_EEPROM);
+		m_I2C.I2Cwrite((uint8_t)OM2_ADDRESS);
+		m_I2C.I2Cwrite((uint8_t)rate);
+		delay(10);
+		m_I2C.I2Cwrite((uint8_t)COM_RESET_PROC);
+		delay(500);
+		return true;
+	}
+	else
+	{
+		Logger::error("%s Cannot set compass measurement rate as the node was not correctly initialised!", __PRETTY_FUNCTION__);
 		return false;
 	}
 }
@@ -222,7 +259,8 @@ void HMC6343Node::HMC6343ThreadFunc(ActiveNode* nodePtr)
 		}
 
 		float heading, pitch, roll;
-		if(node->readData(heading, pitch, roll))
+		uint64_t timestamp;
+		if(node->readData(heading, pitch, roll, timestamp))
 		{
 			errorCount = 0;
 
@@ -242,7 +280,7 @@ void HMC6343Node::HMC6343ThreadFunc(ActiveNode* nodePtr)
 				headingIndex++;
 			}
 			// Post the data to the message bus
-			MessagePtr msg = std::make_unique<CompassDataMsg>(int(Utility::meanOfAngles(headingData) + 0.5), pitch, roll);
+			MessagePtr msg = std::make_unique<CompassDataMsg>(int(Utility::meanOfAngles(headingData) + 0.5), pitch, roll, timestamp);
 			node->m_MsgBus.sendMessage(std::move(msg));
 		}
 		else

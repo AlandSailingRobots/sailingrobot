@@ -68,6 +68,7 @@ void DBLoggerNode::processMessage(const Message* msg) {
             item.m_compassHeading = compassDataMsg->heading();
             item.m_compassPitch = compassDataMsg->pitch();
             item.m_compassRoll = compassDataMsg->roll();
+            item.m_compassTimestamp = std::to_string(compassDataMsg->timestamp());
         } break;
 
         case MessageType::LocalNavigation: {
@@ -104,6 +105,7 @@ void DBLoggerNode::processMessage(const Message* msg) {
         //     WaypointDataMsg* waypMsg = (WaypointDataMsg*)msg;
         //     item.m_waypointId = waypMsg->nextId();
         // }
+
         case MessageType::CurrentSensorData: {
             const CurrentSensorDataMsg* currentSensorMsg =
                 static_cast<const CurrentSensorDataMsg*>(msg);
@@ -125,6 +127,7 @@ void DBLoggerNode::processMessage(const Message* msg) {
         } break;
 
         case MessageType::StateMessage: {
+
             const StateMessage* stateMsg = static_cast<const StateMessage*>(msg);
             item.m_vesselHeading = stateMsg->heading();
             item.m_vesselLat = stateMsg->latitude();
@@ -162,6 +165,12 @@ void DBLoggerNode::processMessage(const Message* msg) {
             return;
     }
 }
+void DBLoggerNode::clearCurretSensorQueue( std::queue<currentSensorItem> &q )
+{
+    std::queue<currentSensorItem> empty;
+    std::swap( q, empty );
+}
+
 
 void DBLoggerNode::start() {
     m_Running.store(true);
@@ -200,6 +209,7 @@ void DBLoggerNode::DBLoggerNodeThreadFunc(ActiveNode* nodePtr) {
         node->m_lock.lock();
         node->m_dbLogger.log(node->item);
         node->m_lock.unlock();
+        DBLoggerNode::clearCurretSensorQueue(node->item.m_currentSensorItems);
         timer.sleepUntil(node->m_loopTime);
         timer.reset();
     }

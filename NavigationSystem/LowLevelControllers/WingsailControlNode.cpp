@@ -75,7 +75,7 @@ void WingsailControlNode::processMessage( const Message* msg)
 void WingsailControlNode::updateConfigsFromDB()
 {
     m_db.getConfigFrom(m_LoopTime, "loop_time", "config_wingsail_control");
-    m_db.getConfigFrom(m_LoopTime, "max_cmd_angle", "config_wingsail_control");
+    m_db.getConfigFrom(m_MaxCommandAngle, "max_cmd_angle", "config_wingsail_control");
 }
 
 ///----------------------------------------------------------------------------------
@@ -147,10 +147,11 @@ float WingsailControlNode::simpleCalculateTailAngle() {
     ///   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!------
 
 
-
+    //Logger::info("APP WIND %f", sin(Utility::degreeToRadian(m_ApparentWindDir)));
     if(m_TargetCourse != DATA_OUT_OF_RANGE && m_TargetCourse != NO_COMMAND)
     {
-        if (sin(m_ApparentWindDir) >= 0)
+        
+        if (sin(Utility::degreeToRadian(m_ApparentWindDir)) >= 0)
         {
             return -m_MaxCommandAngle;
         }

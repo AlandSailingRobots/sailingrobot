@@ -1101,6 +1101,7 @@ void DBHandler::insertDataLogs(std::queue<LogItem>& logs) {
             addValue(values, "heading", log.m_compassHeading);
             addValue(values, "pitch", log.m_compassPitch);
             addValue(values, "roll", log.m_compassRoll);
+            addValue(values, "acquisition_timestamp", log.m_compassTimestamp);
             addValue(values, "t_timestamp", log.m_timestamp_str);
             if (m_compassModelStmt ||
                 (!prepareStmtInsertError(m_compassModelStmt, "dataLogs_compass", values))) {
@@ -1226,7 +1227,7 @@ void DBHandler::insertDataLogs(std::queue<LogItem>& logs) {
             }
         }
 
-        int _currentSensorsId = 0;
+        int _currentSensorsId = currentSensorsId-1;
         if (currentSensorsId) {
             typedValuePairs values = {{}, {}, {}};
             unsigned currentItemNumber = 0;

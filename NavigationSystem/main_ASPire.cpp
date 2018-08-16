@@ -44,6 +44,7 @@
 #include "../Hardwares/CANMarineSensorTransmissionNode.h"
 
 #include "../Hardwares/CANCurrentSensorNode.h"
+#include "../WorldState/PowerTrackNode.h"
 
 #endif
 
@@ -114,16 +115,22 @@ int main(int argc, char *argv[])
 	DBHandler dbHandler(db_path);
 	MessageBus messageBus;
 
-	// Logger start
-	Logger::info("Built on %s at %s", __DATE__, __TIME__);
-	Logger::info("ASPire");
-  	#if LOCAL_NAVIGATION_MODULE == 1
-		Logger::info( "Using Local Navigation Module" );
-  	#else
-		Logger::info( "Using Line-follow" );
-  	#endif
-	Logger::info("Logger init\t\t[OK]");
-
+	// Initialise logger
+	if (Logger::init())
+	{
+		Logger::info("Built on %s at %s", __DATE__, __TIME__);
+    	Logger::info("ASPire");
+	  	#if LOCAL_NAVIGATION_MODULE == 1
+			Logger::info( "Using Local Navigation Module" );
+	  	#else
+			Logger::info( "Using Line-follow" );
+	  	#endif
+		Logger::info("Logger init\t\t[OK]");
+	}
+	else
+	{
+		Logger::error("Logger init\t\t[FAILED]");
+	}
 
 	// Initialise DBHandler
 	if(dbHandler.initialise())
@@ -232,10 +239,12 @@ int main(int argc, char *argv[])
 	  	CANArduinoNode actuatorFeedback(messageBus, dbHandler, canService);
 
 
+
 		CANMarineSensorReceiver canMarineSensorReciver(messageBus, canService);
 
 		CANMarineSensorTransmissionNode canMarineSensorTransmissionNode(messageBus, canService);
 		CANCurrentSensorNode canCurrentSensorNode(messageBus, dbHandler, canService);
+		PowerTrackNode powerTrackNode(messageBus, dbHandler, 0.5);
 
 
 	#endif
@@ -280,6 +289,7 @@ int main(int argc, char *argv[])
 		initialiseNode(actuatorFeedback, "Actuator Feedback", NodeImportance::NOT_CRITICAL);
 		initialiseNode(canMarineSensorTransmissionNode, "Marine Sensors", NodeImportance::NOT_CRITICAL);
 		initialiseNode(canCurrentSensorNode, "Current Sensors", NodeImportance::NOT_CRITICAL);
+		initialiseNode(powerTrackNode, "Powertrack", NodeImportance::NOT_CRITICAL);
 	#endif
 
 	initialiseNode(cameraProcessingUtility, "Camera Processing", NodeImportance::NOT_CRITICAL);
@@ -307,6 +317,7 @@ int main(int argc, char *argv[])
 		windSensor.start();
 		actuatorFeedback.start();
 		canCurrentSensorNode.start();
+		powerTrackNode.start();
 	#endif
 
 	#if LOCAL_NAVIGATION_MODULE == 1

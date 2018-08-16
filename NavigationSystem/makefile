@@ -26,6 +26,10 @@ TOOLCHAIN = 0
 export USE_SIM = 0
 export USE_LNM = 0
 
+# Logger severity levels(0-5): trace,debug,info,warning,error,fatal
+export FILE_LOG_SEV_LVL = 2
+export CONSOLE_LOG_SEV_LVL = 2
+
 ## OPENCV Libs for camera processing (depends if we compile for RaspberryPi or not)
 # To detect if we are not compiling for the RaspberryPi
 uname_m := $(shell uname -m)
@@ -62,7 +66,9 @@ endif
 export MKDIR_P				= mkdir -p
 
 export DEFINES          	= -DTOOLCHAIN=$(TOOLCHAIN) -DSIMULATION=$(USE_SIM) \
-								-DLOCAL_NAVIGATION_MODULE=$(USE_LNM)
+								-DLOCAL_NAVIGATION_MODULE=$(USE_LNM)           \
+								-DCONSOLE_LOG_SEV_LVL=$(CONSOLE_LOG_SEV_LVL)   \
+								-DFILE_LOG_SEV_LVL=$(FILE_LOG_SEV_LVL)
 
 
 ###############################################################################
@@ -118,7 +124,8 @@ NAVIGATION_SRC				= Navigation/WaypointMgrNode.cpp
 SYSTEM_SERVICES_SRC  		= SystemServices/Logger.cpp SystemServices/SysClock.cpp SystemServices/Timer.cpp
 
 WORLD_STATE_SRC				= WorldState/VesselStateNode.cpp WorldState/StateEstimationNode.cpp \
-								WorldState/WindStateNode.cpp WorldState/CameraProcessingUtility.cpp
+								WorldState/WindStateNode.cpp WorldState/PowerTrackNode.cpp \
+							    WorldState/CameraProcessingUtility.cpp
 
 DATA_COLLECTION_SRC			= DataCollection/DataCollectionMgrNode.cpp
 
