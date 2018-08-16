@@ -200,11 +200,12 @@ int TCPServer::readPacket(TCPPacket_t& packet, uint32_t timeout) {
 
         int bytesRead = 0;
         uint16_t length = 0;
-        bool timedOut = false;
-        int startTime = SysClock::unixTime();
-        unsigned long endTime = startTime + timeout;
+        //bool timedOut = false;
+        //int startTime = SysClock::unixTime();
+        //unsigned long endTime = startTime + timeout;
 
-        while (!timedOut) {
+        //while (!timedOut) {
+
             for (uint16_t i = 0; i < clientCopy.size(); i++) {
                 tcpClient_t* client = &clientCopy[i];
                 bytesRead = read(client->socketFD, &length, 2);
@@ -226,10 +227,11 @@ int TCPServer::readPacket(TCPPacket_t& packet, uint32_t timeout) {
                 }
             }
 
-            if (timeout > 0 && (SysClock::unixTime() > endTime)) {
-                timedOut = false;
-            }
-        }
+            //if ((timeout > 0 )&& (SysClock::unixTime() > endTime)) {
+                //Logger::info("TCP BROKE");
+                //timedOut = true;
+            //}
+        //}
     }
     return 0;
 }

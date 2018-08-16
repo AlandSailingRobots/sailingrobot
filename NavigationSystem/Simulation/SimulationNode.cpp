@@ -97,9 +97,13 @@ void SimulationNode::processMessage(const Message* msg) {
             break;
         case MessageType::WingSailCommand:
             processWingSailCommandMessage((WingSailCommandMsg*)msg);
+            m_recivedWingCommand = true;
+            //Logger::info("REC WING");
             break;
         case MessageType::RudderCommand:
             processRudderCommandMessage((RudderCommandMsg*)msg);
+            m_recivedRudderCommand = true;
+            //Logger::info("REC RUDDER");
             break;
         case MessageType::WaypointData:
             processWaypointMessage((WaypointDataMsg*)msg);
@@ -305,17 +309,32 @@ void SimulationNode::sendMarineSensor(int socketFD) {
     server.sendData(socketFD, &marineSensorData, sizeof(MarineSensorDataPacket_t));
 }
 
+void SimulationNode::sendAck(int socketFD){
+    server.sendData(socketFD, &ackData ,sizeof(ACKDataPacket_t));
+}
+
 ///--------------------------------------------------------------------------------------
 void SimulationNode::SimulationThreadFunc(ActiveNode* nodePtr) {
     SimulationNode* node = dynamic_cast<SimulationNode*>(nodePtr);
 
     TCPPacket_t packet;
     int simulatorFD = 0;
+    int read = 0;
 
     while (true) {
         // Don't timeout on a packet read
-        node->server.readPacket(packet, 0);
+        read = node->server.readPacket(packet, 0);
+        while (!read){
+            //Logger::info("SIMU WAITING");
+            read = node->server.readPacket(packet, 0);
 
+
+        }
+        node->sendAck(simulatorFD);
+
+
+        //Logger::info("GOT PACK %d", read);
+        //Logger::info("SIMU LOOPED");
         // We only care about the latest packet, so clear out the old ones
         // node->server.clearSocketBuffer( packet.socketFD );
 
@@ -325,42 +344,54 @@ void SimulationNode::SimulationThreadFunc(ActiveNode* nodePtr) {
             simulatorFD = packet.socketFD;
         }
         // First byte is the message type
-        switch (packet.data[0]) {
-            case SimulatorPacket::SailBoatData:
-                node->processSailBoatData(packet);
-                break;
 
-            case SimulatorPacket::WingBoatData:
-                node->processWingBoatData(packet);
-                break;
-            case SimulatorPacket::AISData:
-                node->processAISContact(packet);
-                break;
+        if (read) {
+            switch (packet.data[0]) {
+                case SimulatorPacket::SailBoatData:
+                    node->processSailBoatData(packet);
+                    break;
 
-            case SimulatorPacket::CameraData:
-                node->processVisualField(packet);
-                break;
+                case SimulatorPacket::WingBoatData:
+                    node->processWingBoatData(packet);
 
-            case SimulatorPacket::MarineSensorData:
-                node->processSailBoatData(packet);
-                break;
+                    break;
+                case SimulatorPacket::AISData:
+                    node->processAISContact(packet);
+                    break;
 
-            // unknown or deformed packet
-            default:
+                case SimulatorPacket::CameraData:
+                    node->processVisualField(packet);
+                    break;
 
-                continue;
+                case SimulatorPacket::MarineSensorData:
+                    node->processSailBoatData(packet);
+                    break;
+
+                    // unknown or deformed packet
+                default:
+
+                    continue;
+            }
         }
         // Reset our packet, better safe than sorry
         packet.socketFD = 0;
         packet.length = 0;
 
+        while (!(node->m_recivedRudderCommand && node->m_recivedWingCommand)){
+
+        }
+
         if (node->m_boatType == 0) {
             node->sendActuatorDataSail(simulatorFD);
         } else if (node->m_boatType == 1) {
+
             node->sendActuatorDataWing(simulatorFD);
+            node->m_recivedWingCommand = false;
+            node->m_recivedRudderCommand = false;
+
         }
 
-        node->sendWaypoint(simulatorFD);
+        // node->sendWaypoint(simulatorFD);
         // node->sendMarineSensor( simulatorFD );
     }
 }
