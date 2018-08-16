@@ -255,9 +255,9 @@ void SimulationNode::processAISContact(TCPPacket_t& packet) {
         // The first byte is the packet type, lets skip that
         uint8_t* ptr = packet.data + 1;
         AISContactPacket_t* aisData = (AISContactPacket_t*)ptr;
-
+        
         this->collidableMgr->addAISContact(
-            aisData->mmsi, aisData->latitude, aisData->longitude, aisData->speed,
+            aisData->mmsi, (double)(aisData->latitude), (double)(aisData->longitude), aisData->speed,
             Utility::limitAngleRange(90 - aisData->course) /* [0, 360] north east down*/);
         this->collidableMgr->addAISContact(aisData->mmsi, aisData->length, aisData->beam);
     }

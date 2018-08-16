@@ -63,10 +63,12 @@ const ASRCourseBallot& MidRangeVoter::vote( const BoatState_t& boatState )
 
         for(uint16_t j = 0; j < aisContacts.length(); j++)
         {
-//            std::cout << "In AIS Contacts loop" << std::endl;
+            //std::cout << "In AIS Contacts loop" << std::endl;
             AISCollidable_t collidable = aisContacts.next();
             distance = CourseMath::calculateDTW(boatState.lon, boatState.lat, collidable.longitude, collidable.latitude);
-//            std::cout << "AIS Distance value: " << distance << std::endl;
+            //std::cout << "Boat lon/lat and Collidable lon/lat: " << boatState.lon << " / " << boatState.lat << std::endl;
+            //std::cout << "                                     " << collidable.longitude << " / " << collidable.latitude << std::endl;
+            //std::cout << "AIS Distance value: " << distance << std::endl;
 //            std::cout << "Parameters for distance computation: " << std::endl;
 //            std::cout << "boatState lon/lat: " << boatState.lon << " " << boatState.lat << std::endl;
 //            std::cout << "collidable lon/lat: " << collidable.longitude << " " << collidable.latitude << std::endl;
@@ -95,7 +97,7 @@ const ASRCourseBallot& MidRangeVoter::vote( const BoatState_t& boatState )
 
         if(closestCPA < safe_dist_cpa)
         {
-            std::cout << "In closestCPA conditional" << std::endl;
+            //std::cout << "In closestCPA conditional" << std::endl;
             riskOfCollision = (safe_dist_cpa - closestCPA) / safe_dist_cpa;
         }
         //std::cout << "Risk value: " << riskOfCollision << std::endl;
@@ -104,8 +106,8 @@ const ASRCourseBallot& MidRangeVoter::vote( const BoatState_t& boatState )
 
         if(closestCPA < 100)
         {
-        //Logger::info("CPA %f at %d so votes is %d", closestCPA, i, courseBallot.get(i));
-        //Logger::info("Distance: %f ", distance);
+        Logger::debug("CPA %f at %d so votes is %d", closestCPA, i, courseBallot.get(i));
+        Logger::debug("Distance: %f ", distance);
         }
 
         aisContacts.reset();
@@ -176,7 +178,7 @@ const double MidRangeVoter::getCPA( const AISCollidable_t& collidable, const Boa
         time = 0;
         return -1;
     }
-    std::cout << "CPA Value: " << cpa << std::endl;
+    //std::cout << "CPA Value: " << cpa << std::endl;
 
     return cpa;
 }

@@ -76,7 +76,7 @@ const ASRCourseBallot& ProximityVoter::vote( const BoatState_t& boatState )
     Logger::debug("Max vote: %d Min vote: %d", maxVote, minVote);
     Logger::debug("Max bearing: %d Min bearing: %d", maxBearing, minBearing);
 
-    /* NOTE: This voter should not take care of tacking, the wind voter is here or that
+    /* NOTE: This voter should not take care of tacking, the wind voter is here for that
     //Logger::info("Lifetime Closest: %f Closest: %f", lifeTimeClosest, currClosest);
 
     // Need to take tacking into account, otherwise a upwind course might be chosen
@@ -113,7 +113,8 @@ void ProximityVoter::visualAvoidance(){
     //std::sort(dupArr, dupArr + N);
 
     // Instead of negative votes, switched to adding vote on the other bearings
-    avoidOutsideVisualField(visualField.visualFieldLowBearing, visualField.visualFieldHighBearing);
+    // avoidOutsideVisualField disabled because it's interfering with the course voter, it's like adding weigth to it
+    // avoidOutsideVisualField(visualField.visualFieldLowBearing, visualField.visualFieldHighBearing);
     for(auto it : visualField.bearingToRelativeObstacleDistance ){
         // Basically: for each bearing, from -10 to 10 degree around it, decrease the number of vote depending
         //            on the relative_distance value, ...
@@ -135,6 +136,7 @@ void ProximityVoter::visualAvoidance(){
 // NOTE: this part is kind of the same than the Course Voter in the end: add votes to all bearings in the visual field,
 //       which is in front of the boat and range from -12 to 12 approximately. The course voter is currently doing it
 //       from -9 to 9.
+//  Currently disabled as it's interfering with the tacking pattern defined by the weight of the course voter versus the channel voter
 void ProximityVoter::avoidOutsideVisualField( int16_t visibleFieldLowBearingLimit, 
         int16_t visibleFieldHighBearingLimit)
 {
@@ -176,13 +178,14 @@ void ProximityVoter::bearingAvoidanceSmoothed( int16_t bearing, uint16_t relativ
         Logger::debug("Decreasing votes around bearing %d with %f", bearing, vote*smoothWeight*normalizedVoteAdjust);
     }
     // Stick with negative votes for now
-    courseBallot.add(bearing, -vote * normalizedVoteAdjust * smoothWeight); //Done before loop to not double it
-    for(uint16_t j = 1; j < avoidanceBearingRange; j++)
+    
+    for(uint16_t j = 0; j < avoidanceBearingRange; j++)
     {
         double voteAdjust = vote * normalizedVoteAdjust * smoothWeight * (avoidanceNormalization - j)/avoidanceNormalization;
         courseBallot.add(bearing+j, -voteAdjust);
         courseBallot.add(bearing-j, -voteAdjust);        
     }
+    courseBallot.add(bearing, vote * normalizedVoteAdjust * smoothWeight); //Cancel the double vote on j=0
 }
 
 void ProximityVoter::bearingPreferenceSmoothed( int16_t bearing, uint16_t relativeFreeDistance )
@@ -262,6 +265,10 @@ float ProximityVoter::aisAvoidance( const BoatState_t& boatState, AISCollidable_
             courseBallot.add(courseOfEscape + j, vote * (1 - (j/AVOIDANCE_BEARING_RANGE)));
             courseBallot.add(courseOfEscape - j, vote * (1 - (j/AVOIDANCE_BEARING_RANGE)));
         }
+        // Cancelling double vote on j=0
+        int16_t vote = (MIN_DISTANCE / distance) * courseBallot.maxVotes();
+        courseBallot.add(courseOfEscape + 180 + 0, (vote / (0 + 1)));
+        courseBallot.add(courseOfEscape + 0, -vote * (1 - (0/AVOIDANCE_BEARING_RANGE)));
     }
 
     return distance;

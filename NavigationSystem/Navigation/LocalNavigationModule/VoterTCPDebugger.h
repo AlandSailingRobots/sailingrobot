@@ -45,6 +45,7 @@ struct VoterDataPacket_t {
 
 class VoterTCPDebugger : public ActiveNode {
   public:
+    VoterTCPDebugger(MessageBus& mgsBus);
     VoterTCPDebugger(MessageBus& msgBus, ASRVoter& voter);
     VoterTCPDebugger(MessageBus& msgBus, LocalNavigationModule& lnm, int voter_pos_in_lnm_vector);
 
@@ -64,6 +65,7 @@ class VoterTCPDebugger : public ActiveNode {
     /// Update voterDataPacket
     ///----------------------------------------------------------------------------------
     void updateMessage();
+    void updateMessage(ASRVoter* voter);
 
     ///----------------------------------------------------------------------------------
     /// Sends the voterDataPacket through the TCP connection
@@ -74,13 +76,21 @@ class VoterTCPDebugger : public ActiveNode {
     /// Main loop
     ///----------------------------------------------------------------------------------
     static void VoterTCPDebuggerThreadFunc(ActiveNode* nodePtr);
+    
+    ///----------------------------------------------------------------------------------
+    /// Registers a voter, this voter will then send its data packet through the TCP 
+    /// connection.
+    ///----------------------------------------------------------------------------------
+    void registerVoter(ASRVoter* voter);
 
-
+    static uint8_t nb_debuggers;
   private:
     ASRVoter* m_voter;
+    std::vector<ASRVoter*> voters; //try having every voters now on one node
     TCPServer server;
     VoterDataPacket_t voterDataPacket;
     std::mutex m_lock;
+    
 };
 
 #endif //NAVIGATIONSYSTEM_VOTERTCPDEBUGGER_H

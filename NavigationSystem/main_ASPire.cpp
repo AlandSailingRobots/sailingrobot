@@ -189,7 +189,6 @@ int main(int argc, char *argv[])
 		LastCourseVoter lastCourseVoter( MAX_VOTES, 0.7 );
 
 
-
 		lnm.registerVoter( &courseVoter );
 		lnm.registerVoter( &waypointVoter );
 		lnm.registerVoter( &windVoter );
@@ -197,13 +196,24 @@ int main(int argc, char *argv[])
 
 		// As there is no veto used in both avoidance voters for now, you can disable avoidance system just by
 		// putting a weigth of zero in config_ASPire.json and push the new config manually or through the website.
+
 		lnm.registerVoter( &proximityVoter );
 		lnm.registerVoter( &midRangeVoter );
 
 		lnm.registerVoter( &lastCourseVoter );
 
-        //VoterTCPDebugger voterTCPD(messageBus, lnm, 3);
+                
+        /*VoterTCPDebugger courseVoterDbg(messageBus, lnm, 0);
+        VoterTCPDebugger waypointVoterDbg(messageBus, lnm, 1);
+        VoterTCPDebugger windVoterDbg(messageBus, lnm, 2);
+        VoterTCPDebugger channelVoterDbg(messageBus, lnm, 3);
+        VoterTCPDebugger proximityVoterDbg(messageBus, lnm, 4);
+        VoterTCPDebugger midRangeVoterDbg(messageBus, lnm, 5);
+        VoterTCPDebugger lastCourseVoterDbg(messageBus, lnm, 6);
         //VoterTCPDebugger voterTCPD(messageBus, courseVoter);
+        VoterTCPDebugger voterTCPDbg(messageBus);
+        voterTCPDbg.registerVoter( &courseVoter );
+        voterTCPDbg.registerVoter( &waypointVoter );*/
 
     #else
 		LineFollowNode sailingLogic(messageBus, dbHandler);
@@ -246,7 +256,15 @@ int main(int argc, char *argv[])
 
 	#if LOCAL_NAVIGATION_MODULE == 1
 		initialiseNode( lnm, "Local Navigation Module",	NodeImportance::CRITICAL );
-		//initialiseNode( voterTCPD, "VoterTCPDebugger", NodeImportance::NOT_CRITICAL);
+                
+                //List the debug output you want
+		//initialiseNode( windVoterDbg, "windVoterTCPDebugger", NodeImportance::NOT_CRITICAL);
+                //initialiseNode( channelVoterDbg, "channelVoterTCPDebugger", NodeImportance::NOT_CRITICAL);
+                //initialiseNode( proximityVoterDbg, "proximityVoterTCPDebugger", NodeImportance::NOT_CRITICAL);
+                //initialiseNode( midRangeVoterDbg, "midRangeVoterTCPDebugger", NodeImportance::NOT_CRITICAL);
+                
+                //initialiseNode( voterTCPDbg, "VoterTCPDebugger", NodeImportance::NOT_CRITICAL);
+
 	#else
 		initialiseNode(sailingLogic, "LineFollow", NodeImportance::CRITICAL);
 	#endif
@@ -296,7 +314,15 @@ int main(int argc, char *argv[])
     // Camera processing enabled for voter system only currently.
 	//  cameraProcessingUtility.start();
 		lnm.start();
-		//voterTCPD.start();
+                
+                //Start debug outputs
+		//windVoterDbg.start();
+                //channelVoterDbg.start();
+                //proximityVoterDbg.start();
+               // midRangeVoterDbg.start();
+                
+                //Multiple voters dbg version
+                //voterTCPDbg.start();
 	#else
 		sailingLogic.start();
 	#endif
