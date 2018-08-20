@@ -25,11 +25,14 @@
 #include "../MessageBus/MessageTypes.h"
 #include "../MessageBus/MessageBus.h"
 #include "../MessageBus/NodeIDs.h"
+#include "../Database/DBHandler.h"
 
 #include "../Math/Utility.h"
 
  #include "../Messages/SailCommandMsg.h"
  #include "../Messages/RudderCommandMsg.h"
+ #include "../LowLevelControllers/SailControlNode.h"
+ #include "../LowLevelControllers/CourseRegulatorNode.h"
 
 
 
@@ -95,6 +98,7 @@ bool init()
 	{
 		Logger::error("%s Actuator: %d Failed to write position command", __PRETTY_FUNCTION__, (int)nodeID());
 	}
+	Logger::info("Current command: %d", setPosition);
 	usleep(1000000); //sleep 1 sec before each new command for testing
 
 }
@@ -171,6 +175,7 @@ int main(int argc, char *argv[])
 	}
 
 	MessageBus messageBus;
+	DBHandler dbHandler(db_path);
 
 	// Initialise logger
 	if (Logger::init())
@@ -194,10 +199,13 @@ int main(int argc, char *argv[])
 
 	MaestroController::init(portname);
 
+	SailControlNode sailControlNode(messageBus, dbHandler);
+	CourseRegulatorNode courseRegulatorNode(messageBus, dbHandler);
 
 	// Initialise nodes
 	//-------------------------------------------------------------------------------
-    
+    initialiseNode(sailControlNode, "Sail Controller", NodeImportance::CRITICAL);
+    initialiseNode(courseRegulatorNode, "Course Regulator", NodeImportance::CRITICAL);
 	initialiseNode(rudder, "Rudder Actuator", NodeImportance::CRITICAL);
 
 	// Start active nodes
