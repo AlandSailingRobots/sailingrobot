@@ -103,7 +103,7 @@ bool init()
 
 }
 
-
+	int m_count; //used for testing different pwm values
 private:
 	    MessageBus& m_msgBus;
 	    double m_LoopTime;
@@ -111,7 +111,7 @@ private:
 	    int m_Channel;
 	    int m_Speed;
 	    int m_Acceleration;
-	    int m_count = 0; //used for testing different pwm values
+	    
 
 	};
 
@@ -197,6 +197,8 @@ int main(int argc, char *argv[])
 	int acceleration = 0;
 	VelvetActuatorTest rudder(messageBus, NodeID::RudderActuator, channel, speed, acceleration);
 
+	rudder.m_count = 0;
+
 	MaestroController::init(portname);
 
 	SailControlNode sailControlNode(messageBus, dbHandler);
@@ -211,12 +213,25 @@ int main(int argc, char *argv[])
 	// Start active nodes
 	//-------------------------------------------------------------------------------
 
-
+	
 	// Begins running the message bus
 	//-------------------------------------------------------------------------------
 	Logger::info("Message bus started!");
 	messageBus.run();
 
+	while(rudder.m_count < 10000000) {
+
+		int setPosition = 1000 + (470 + rudder.m_count)%900; //testing values
+	    rudder.m_count += 50;
+
+	    if(not MaestroController::writeCommand(MaestroCommands::SetPosition, channel, setPosition))
+		{
+			Logger::error("%s Actuator: %d Failed to write position command", __PRETTY_FUNCTION__, 1);
+		}
+		Logger::info("Current command: %d", setPosition);
+		usleep(1000000); //sleep 1 sec before each new command for testing
+
+	}
 
 	exit(0);
 }
