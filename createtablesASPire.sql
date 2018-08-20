@@ -139,6 +139,16 @@ CREATE TABLE dataLogs_windsensor (
   t_timestamp  TIMESTAMP
 );
 
+-- -----------------------------------------------------
+-- Table windsensor_datalogs
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS "dataLogs_powertrack";
+CREATE TABLE dataLogs_powertrack (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  balance   DOUBLE,
+  t_timestamp  TIMESTAMP
+);
+
 
 
 -- -----------------------------------------------------
@@ -156,6 +166,7 @@ CREATE TABLE dataLogs_system (
   vessel_state_id	 	INTEGER,
   wind_state_id	 		INTEGER,
   windsensor_id 		INTEGER,
+  powertrack_id     INTEGER,
   current_mission_id 	INTEGER,
   CONSTRAINT actuator_feedback_id
   	FOREIGN KEY (actuator_feedback_id)
@@ -183,7 +194,10 @@ CREATE TABLE dataLogs_system (
     REFERENCES dataLogs_wind_state (id),
   CONSTRAINT windsensor_id
     FOREIGN KEY (windsensor_id)
-    REFERENCES dataLogs_windsensor (id)
+    REFERENCES dataLogs_windsensor (id),
+  CONSTRAINT powertrack_id
+    FOREIGN KEY (powertrack_id)
+    REFERENCES dataLogs_powertrack (id)
   );
 
 
@@ -199,6 +213,7 @@ DELETE FROM "dataLogs_marine_sensors" WHERE ID = OLD.marine_sensors_id;
 DELETE FROM "dataLogs_vessel_state" WHERE ID = OLD.vessel_state_id;
 DELETE FROM "dataLogs_wind_state" WHERE ID = OLD.wind_state_id;
 DELETE FROM "dataLogs_windsensor" WHERE ID = OLD.windsensor_id;
+DELETE FROM "dataLogs_powertrack" WHERE ID = OLD.powertrack_id;
 
 END;
 
