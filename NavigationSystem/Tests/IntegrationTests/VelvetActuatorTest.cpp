@@ -69,7 +69,8 @@ bool init()
 	void processMessage(const Message* message)
 {
     
-    int setPosition = 1470; // pwm value for sailwinch and rudder servo in middle course (sail in, rudder centered)
+    int setPosition = 1000 + (470 + m_count)%900; //testing values
+    m_count += 50;
 
     if(message->messageType() == MessageType::SailCommand)
     {
@@ -94,6 +95,7 @@ bool init()
 	{
 		Logger::error("%s Actuator: %d Failed to write position command", __PRETTY_FUNCTION__, (int)nodeID());
 	}
+	usleep(1000000); //sleep 1 sec before each new command for testing
 
 }
 
@@ -105,6 +107,7 @@ private:
 	    int m_Channel;
 	    int m_Speed;
 	    int m_Acceleration;
+	    int m_count = 0; //used for testing different pwm values
 
 	};
 
@@ -183,7 +186,7 @@ int main(int argc, char *argv[])
 
 	// Declare nodes
 	//-------------------------------------------------------------------------------
-	std::string portname = "/dev/ttyUSB0";
+	std::string portname = "/dev/ttyACM0";
 	int channel = 4;
 	int speed = 0;
 	int acceleration = 0;
