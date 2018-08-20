@@ -80,8 +80,9 @@ class DBLoggerNode : public ActiveNode {
         (float)DATA_OUT_OF_RANGE,         // m_windSpeed;
         (float)DATA_OUT_OF_RANGE,         // m_windDir;
         (float)DATA_OUT_OF_RANGE,         // m_windTemp;
+        (float)DATA_OUT_OF_RANGE,         // m_PowerBalance
         std::queue<currentSensorItem>(),  // m_currentSensorItems
-        (std::string) "initialized"       // m_timestamp_str;
+        (std::string) "initialized"       // m_timestamp_str;          
     };
 
     double m_loopTime;

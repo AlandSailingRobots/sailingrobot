@@ -11,6 +11,7 @@
 #include "../Messages/WaypointDataMsg.h"
 #include "../Messages/WindDataMsg.h"
 #include "../Messages/WindStateMsg.h"
+#include "../Messages/PowerTrackMsg.h"
 #include "../SystemServices/Logger.h"
 #include "../SystemServices/SysClock.h"
 #include "../SystemServices/Timer.h"
@@ -32,6 +33,7 @@ DBLoggerNode::DBLoggerNode(MessageBus& msgBus, DBHandler& db, int queueItems)
     msgBus.registerNode(*this, MessageType::GPSData);
     msgBus.registerNode(*this, MessageType::WindData);
     msgBus.registerNode(*this, MessageType::CurrentSensorData);
+    msgBus.registerNode(*this, MessageType::PowerTrack);
 
     msgBus.registerNode(*this, MessageType::ASPireActuatorFeedback);
     msgBus.registerNode(*this, MessageType::MarineSensorData);
@@ -44,6 +46,7 @@ DBLoggerNode::DBLoggerNode(MessageBus& msgBus, DBHandler& db, int queueItems)
     msgBus.registerNode(*this, MessageType::LocalNavigation);
 
     msgBus.registerNode(*this, MessageType::ServerConfigsReceived);
+
 }
 
 void DBLoggerNode::processMessage(const Message* msg) {
@@ -155,6 +158,11 @@ void DBLoggerNode::processMessage(const Message* msg) {
             const CourseDataMsg* courseDataMsg = static_cast<const CourseDataMsg*>(msg);
             item.m_distanceToWaypoint = courseDataMsg->distanceToWP();
             item.m_bearingToWaypoint = courseDataMsg->courseToWP();
+        } break;
+
+        case MessageType::PowerTrack: {
+            const PowerTrackMsg* powerTrackMsg = static_cast<const PowerTrackMsg*>(msg);
+            item.m_powerBalance = powerTrackMsg->getBalance();
         } break;
 
         case MessageType::ServerConfigsReceived:

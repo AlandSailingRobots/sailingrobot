@@ -21,6 +21,7 @@
 #include <vector>
 #include <nlohmann/json.hpp>
 #include "../Messages/CurrentSensorDataMsg.h"
+#include "../Messages/PowerTrackMsg.h"
 #include "../Messages/WindStateMsg.h"
 using JSON = nlohmann::json;
 
@@ -70,6 +71,7 @@ struct LogItem {
     float m_windDir;  // dataLogs_windsensor
     float m_windSpeed;
     float m_windTemp;
+    float m_powerBalance; // dataLogs_powertrack
 	std::queue<currentSensorItem> m_currentSensorItems;
 	std::string m_timestamp_str;
 };
@@ -100,6 +102,7 @@ class DBHandler {
     sqlite3_stmt* m_gpsStmt = nullptr;
     sqlite3_stmt* m_currentSensorsStmt = nullptr;
     sqlite3_stmt* m_systemStmt = nullptr;
+    sqlite3_stmt* m_powertrackStmt = nullptr;
 
     // execute INSERT query and add new row into table
     bool DBTransaction(const std::string& SQLQuery);

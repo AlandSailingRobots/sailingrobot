@@ -28,13 +28,13 @@
 
  PowerTrackNode::PowerTrackNode(MessageBus& msgBus, DBHandler& dbhandler, double loopTime)
     : ActiveNode(NodeID::PowerTrack, msgBus),
-            m_ArduinoPressure(0), m_ArduinoRudder(0), m_ArduinoSheet(0), m_ArduinoBattery(0),
+            //m_ArduinoPressure(0), m_ArduinoRudder(0), m_ArduinoSheet(0), m_ArduinoBattery(0),
             m_CurrentSensorDataCurrent(0), m_CurrentSensorDataVoltage(0),  
             m_CurrentSensorDataElement((SensedElement)0),m_PowerBalance(0.f), m_Looptime(loopTime),
             m_lastElementRead(-1),m_db(dbhandler)
             
 {
-	msgBus.registerNode(*this, MessageType::ArduinoData);
+	//msgBus.registerNode(*this, MessageType::ArduinoData);
 	msgBus.registerNode(*this, MessageType::CurrentSensorData);
 }
 
@@ -58,9 +58,9 @@ void PowerTrackNode::processMessage(const Message* msg)
 
 	switch(type)
 	{
-		case MessageType::ArduinoData:
-			processArduinoMessage((ArduinoDataMsg*) msg);
-			break;
+		//case MessageType::ArduinoData:
+		//	processArduinoMessage((ArduinoDataMsg*) msg);
+		//	break;
 
 		case MessageType::CurrentSensorData:
 			processCurrentSensorDataMessage((CurrentSensorDataMsg*) msg);
@@ -71,6 +71,7 @@ void PowerTrackNode::processMessage(const Message* msg)
 	}
 }
 
+/*
 void PowerTrackNode::processArduinoMessage(ArduinoDataMsg* msg)
 {
 	m_ArduinoPressure = msg->pressure();
@@ -78,6 +79,7 @@ void PowerTrackNode::processArduinoMessage(ArduinoDataMsg* msg)
 	m_ArduinoSheet = msg->sheet();
 	m_ArduinoBattery = msg->battery();
 }
+*/
 
 void PowerTrackNode::processCurrentSensorDataMessage(CurrentSensorDataMsg* msg)
 {
@@ -120,14 +122,6 @@ void PowerTrackNode::PowerTrackThreadFunc(ActiveNode* nodePtr)
 	{
 		//Regulate the rate at whcih the messages are sent
 		timer.sleepUntil(node->m_Looptime);
-
-		MessagePtr powerTrack = std::make_unique<PowerTrackMsg>(
-			node->m_ArduinoPressure, node->m_ArduinoRudder, node->m_ArduinoSheet,
-			node->m_ArduinoBattery, 
-			node->m_CurrentSensorDataCurrent, node->m_CurrentSensorDataVoltage,
-			node->m_CurrentSensorDataElement);
-
-		node->m_MsgBus.sendMessage(std::move(powerTrack));
 
 		// For testing only (to be removed soon/or shift to debug mode)
 		Logger::debug("PowerTrackInfo: %f,%f,%f,%f,%d", (float)node->m_CurrentSensorDataCurrent, 

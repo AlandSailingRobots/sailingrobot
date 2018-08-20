@@ -1010,6 +1010,7 @@ void DBHandler::insertDataLogs(std::queue<LogItem>& logs) {
     int vesselStateId;
     int windStateId;
     int windsensorId;
+    int powertrackId;
 
     int currentMissionId = 0;  // this is not like the others
 
@@ -1053,6 +1054,7 @@ void DBHandler::insertDataLogs(std::queue<LogItem>& logs) {
     vesselStateId       = 1 + getTableId("dataLogs_vessel_state");
     windStateId         = 1 + getTableId("dataLogs_wind_state");
     windsensorId        = 1 + getTableId("dataLogs_windsensor");
+    powertrackId        = 1 + getTableId("dataLogs_powertrack");
     // clang-format on
 
     selectFrom(currentMissionId, "id_mission", "currentMission", "LIMIT 1");
@@ -1227,6 +1229,21 @@ void DBHandler::insertDataLogs(std::queue<LogItem>& logs) {
             }
         }
 
+
+        int _powertrackId = 0;
+        if (powertrackId) {
+            typedValuePairs values = {{}, {}, {}};
+            addValue(values, "power_balance", log.m_powerBalance);
+            if (m_powertrackStmt || (!prepareStmtInsertError(m_powertrackStmt, "dataLogs_powertrack", values))) {
+                bindValuesToStmt(values, m_powertrackStmt);
+                if (sqlite3_step(m_powertrackStmt) == SQLITE_DONE) {
+                    _powertrackId = powertrackId + logNumber;
+                }
+                sqlite3_reset(m_powertrackStmt);
+            }
+        }
+
+
         int _currentSensorsId = currentSensorsId-1;
         if (currentSensorsId) {
             typedValuePairs values = {{}, {}, {}};
@@ -1250,6 +1267,7 @@ void DBHandler::insertDataLogs(std::queue<LogItem>& logs) {
             }
         }
 
+
         typedValuePairs values = {{}, {}, {}};
         addValue(values, "actuator_feedback_id", _actuatorFeedbackId);
         addValue(values, "compass_id", _compassModelId);
@@ -1261,6 +1279,7 @@ void DBHandler::insertDataLogs(std::queue<LogItem>& logs) {
         addValue(values, "wind_state_id", _windStateId);
         addValue(values, "windsensor_id", _windsensorId);
         addValue(values, "current_mission_id", currentMissionId);
+        addValue(values, "powertrack_id", _powertrackId);
         if (m_systemStmt || (!prepareStmtInsertError(m_systemStmt, "dataLogs_system", values))) {
             bindValuesToStmt(values, m_systemStmt);
             if (sqlite3_step(m_systemStmt) == SQLITE_DONE) {
