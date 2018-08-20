@@ -1233,7 +1233,7 @@ void DBHandler::insertDataLogs(std::queue<LogItem>& logs) {
         int _powertrackId = 0;
         if (powertrackId) {
             typedValuePairs values = {{}, {}, {}};
-            addValue(values, "power_balance", log.m_powerBalance);
+            addValue(values, "balance", log.m_powerBalance);
             if (m_powertrackStmt || (!prepareStmtInsertError(m_powertrackStmt, "dataLogs_powertrack", values))) {
                 bindValuesToStmt(values, m_powertrackStmt);
                 if (sqlite3_step(m_powertrackStmt) == SQLITE_DONE) {
