@@ -38,8 +38,9 @@ const ASRCourseBallot& CourseVoter::vote( const BoatState_t& boatState )
     // Add votes to the direction the boat is facing, less cost to change the vessel.
     for( int i = 0; i < 10; i += ASRCourseBallot::COURSE_RESOLUTION )
     {
-        courseBallot.add( boatState.heading + i, (( 10.0 - i ) / 10.0) * (courseBallot.maxVotes() / 10.0) );
-        courseBallot.add( boatState.heading - i, (( 10.0 - i ) / 10.0) * (courseBallot.maxVotes() / 10.0) );
+        courseBallot.add( boatState.heading + i, (( 10.0 - i ) / 10.0) * courseBallot.maxVotes() );
+        courseBallot.add( boatState.heading - i, (( 10.0 - i ) / 10.0) * courseBallot.maxVotes() );
+
         //std::cout << "Looping: " << i << std::endl;
     }
     //Negate doubled value on i=0
