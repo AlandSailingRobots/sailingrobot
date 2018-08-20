@@ -20,7 +20,6 @@
 #include <stdint.h>
 #include "../Database/DBHandler.h"
 #include "../Messages/CurrentSensorDataMsg.h"
-//#include "../Messages/ArduinoDataMsg.h"
 #include "../MessageBus/ActiveNode.h"
 
 class PowerTrackNode : public ActiveNode {
@@ -42,11 +41,6 @@ class PowerTrackNode : public ActiveNode {
     	void processMessage(const Message* msg);
 
     	///---------------------------------------------------------------------------
-    	/// Stores arduino data from a ArduinoDataMsg.
-    	///---------------------------------------------------------------------------
-    	//void processArduinoMessage(ArduinoDataMsg* msg);
-
-    	///---------------------------------------------------------------------------
     	/// Stores CurrentSensor data from CurrentSensorDataMsg.
     	///---------------------------------------------------------------------------
     	void processCurrentSensorDataMessage(CurrentSensorDataMsg* msg);
@@ -58,10 +52,6 @@ class PowerTrackNode : public ActiveNode {
     	///---------------------------------------------------------------------------
     	static void PowerTrackThreadFunc(ActiveNode* nodePtr);
 
-    	//int m_ArduinoPressure;
-    	//int m_ArduinoRudder;
-    	//int m_ArduinoSheet;
-    	//int m_ArduinoBattery;
     	float m_CurrentSensorDataCurrent;
     	float m_CurrentSensorDataVoltage;
     	SensedElement m_CurrentSensorDataElement;

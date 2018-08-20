@@ -28,13 +28,11 @@
 
  PowerTrackNode::PowerTrackNode(MessageBus& msgBus, DBHandler& dbhandler, double loopTime)
     : ActiveNode(NodeID::PowerTrack, msgBus),
-            //m_ArduinoPressure(0), m_ArduinoRudder(0), m_ArduinoSheet(0), m_ArduinoBattery(0),
             m_CurrentSensorDataCurrent(0), m_CurrentSensorDataVoltage(0),  
             m_CurrentSensorDataElement((SensedElement)0),m_PowerBalance(0.f), m_Looptime(loopTime),
             m_lastElementRead(-1),m_db(dbhandler)
             
 {
-	//msgBus.registerNode(*this, MessageType::ArduinoData);
 	msgBus.registerNode(*this, MessageType::CurrentSensorData);
 }
 
@@ -58,9 +56,6 @@ void PowerTrackNode::processMessage(const Message* msg)
 
 	switch(type)
 	{
-		//case MessageType::ArduinoData:
-		//	processArduinoMessage((ArduinoDataMsg*) msg);
-		//	break;
 
 		case MessageType::CurrentSensorData:
 			processCurrentSensorDataMessage((CurrentSensorDataMsg*) msg);
@@ -70,16 +65,6 @@ void PowerTrackNode::processMessage(const Message* msg)
 			return;
 	}
 }
-
-/*
-void PowerTrackNode::processArduinoMessage(ArduinoDataMsg* msg)
-{
-	m_ArduinoPressure = msg->pressure();
-	m_ArduinoRudder = msg->rudder();
-	m_ArduinoSheet = msg->sheet();
-	m_ArduinoBattery = msg->battery();
-}
-*/
 
 void PowerTrackNode::processCurrentSensorDataMessage(CurrentSensorDataMsg* msg)
 {
