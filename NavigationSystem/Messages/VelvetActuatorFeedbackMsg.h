@@ -7,37 +7,37 @@ class VelvetActuatorFeedbackMsg : public Message {
 public:
     VelvetActuatorFeedbackMsg(NodeID sourceID,
                              NodeID destinationID,
-                             double wingsailFeedback,
+                             double sailFeedback,
                              double rudderFeedback,
                              bool radioControllerOn)
             : Message(MessageType::VelvetActuatorFeedback, sourceID, destinationID),
-              m_WingsailFeedback(wingsailFeedback),
+              m_SailFeedback(sailFeedback),
               m_RudderFeedback(rudderFeedback),
               m_RadioControllerOn(radioControllerOn) {}
 
-    VelvetActuatorFeedbackMsg(double wingsailFeedback,
+    VelvetActuatorFeedbackMsg(double sailFeedback,
                              double rudderFeedback,
                              bool radioControllerOn)
             : Message(MessageType::VelvetActuatorFeedback, NodeID::None, NodeID::None),
-              m_WingsailFeedback(wingsailFeedback),
+              m_SailFeedback(sailFeedback),
               m_RudderFeedback(rudderFeedback),
               m_RadioControllerOn(radioControllerOn) {}
 
     VelvetActuatorFeedbackMsg(MessageDeserialiser deserialiser) : Message(deserialiser) {
         if (!deserialiser.readDouble(m_RudderFeedback) ||
-            !deserialiser.readDouble(m_WingsailFeedback)) {
+            !deserialiser.readDouble(m_SailFeedback)) {
             m_valid = false;
         }
     }
 
     virtual ~VelvetActuatorFeedbackMsg() {}
 
-    double wingsailFeedback() const { return m_WingsailFeedback; }
+    double sailFeedback() const { return m_SailFeedback; }
     double rudderFeedback() const { return m_RudderFeedback; }
     bool radioControllerOn() const { return m_RadioControllerOn; }
 
 private:
-    double m_WingsailFeedback;  // degree in wing sail reference frame (clockwise from top view)
+    double m_SailFeedback;  // degree in wing sail reference frame (clockwise from top view)
     double m_RudderFeedback;    // degree in vessel reference frame (clockwise from top view)
     bool m_RadioControllerOn;
 };

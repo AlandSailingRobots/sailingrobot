@@ -83,6 +83,7 @@ export MARINE_SENSOR_INTEGRATION_TEST_EXEC = marine_sensor-integration-tests.run
 export HTTP_SYNC_TEST_EXEC	= HTTPSync-test.run
 export AIS_TEST_EXEC		= ais-integration-tests.run
 export CURRENT_SENSOR_INTEGRATION_TEST_EXEC = current_sensor-integration-tests.run
+export INTEGRATION_TEST_EXEC_VELVET = integration-tests-Velvet.run
 
 export OBJECT_FILE          = $(BUILD_DIR)/objects.tmp
 
@@ -154,6 +155,7 @@ export HW_NODES_ASPIRE_SRC 	= Hardwares/ActuatorNodeASPire.cpp Hardwares/CANAISN
                             	Hardwares/CANMarineSensorTransmissionNode.cpp Hardwares/CANMarineSensorReceiver.cpp \
                             	Hardwares/CANCurrentSensorNode.cpp 
 
+export HW_NODES_VELVET_SRC  = Hardwares/VelvetWindSensorSerialNode.cpp
 # ActuatorNode for Janet not compiling, uses removed ActuatorPositionMsg
 export HW_NODES_JANET_SRC 	= Hardwares/CV7Node.cpp Hardwares/ArduinoNode.cpp Hardwares/ActuatorNodeJanet.cpp
 
@@ -202,6 +204,9 @@ integration_tests_ASPire: $(BUILD_DIR)
 	$(MAKE) -f marine_sensor_integration_test.mk
 	$(MAKE) -f current_sensor_integration_test.mk
 
+## Build the integration tests for Velvet
+integration_tests_Velvet: $(BUILD_DIR)
+	$(MAKE) -f integration_tests_Velvet.mk
 
 ## Build HTTPSync Test
 HTTPSync_test: $(BUILD_DIR)

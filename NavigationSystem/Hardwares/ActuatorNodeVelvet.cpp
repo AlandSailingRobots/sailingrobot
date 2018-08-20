@@ -16,6 +16,8 @@
 #include "../Messages/VelvetActuatorFeedbackMsg.h"
 #include "../Hardwares/MaestroController/MaestroController.h"
 #include "../SystemServices/Logger.h"
+#include "../Messages/SailCommandMsg.h"
+#include "../Messages/RudderCommandMsg.h"
 
 
 ActuatorNodeVelvet::ActuatorNodeVelvet(MessageBus& msgBus, NodeID id, int channel, int speed, int acceleration)
@@ -55,7 +57,7 @@ void ActuatorNodeVelvet::processMessage(const Message* message)
         }
         else if (nodeID() == NodeID::SailActuator)
         {
-            setPosition = msg->wingsailFeedback();
+            setPosition = msg->sailFeedback();
         }
         else
         {
@@ -67,6 +69,22 @@ void ActuatorNodeVelvet::processMessage(const Message* message)
         {
             Logger::error("%s Actuator: %d Failed to write position command", __PRETTY_FUNCTION__, (int)nodeID());
         }
+    }
+
+    if(message->messageType() == MessageType::SailCommand)
+    {
+        SailCommandMsg* msg = (SailCommandMsg*)message;
+        int setPosition = 1470; // pwm value for sailwinch and rudder servo in middle course (sail in, rudder centered)
+        if (nodeID() == NodeID::SailActuator) 
+        {
+            setPosition = msg->maxSailAngle(); //have to check why it is named maxSailAngle
+            // and modify it for smartwinch
+        }
+        else {
+            std::cout << setPosition << std::endl; //compiler complaining for unused variable at the moment
+        }
+       
+
     }
 
 }
