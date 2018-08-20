@@ -145,7 +145,7 @@ CREATE TABLE dataLogs_windsensor (
 DROP TABLE IF EXISTS "dataLogs_powertrack";
 CREATE TABLE dataLogs_powertrack (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
-  balance   DOUBLE,
+  power_balance   DOUBLE,
   t_timestamp  TIMESTAMP
 );
 
