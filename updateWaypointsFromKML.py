@@ -58,7 +58,7 @@ def main():
     iterTree(root)
     insertstr = "INSERT INTO currentMission (id, isCheckpoint, latitude, longitude, declination, radius, stay_time, harvested) VALUES "
 
-    db.execute('DELETE FROM current_Mission')
+    db.execute('DELETE FROM currentMission')
     for wp in wps:
         print(insertstr+ str(wp))
         db.execute(insertstr+ str(wp))
