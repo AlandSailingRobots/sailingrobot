@@ -35,6 +35,16 @@ SailControlNode::SailControlNode(MessageBus& msgBus, DBHandler& dbhandler)
     msgBus.registerNode( *this, MessageType::ServerConfigsReceived);
 }
 
+SailControlNode::SailControlNode(MessageBus& msgBus, DBHandler& dbhandler, int maxSailAngle, int minSailAngle)
+        :ActiveNode(NodeID::SailControlNode,msgBus),m_db(dbhandler), m_Running(0),
+         m_LoopTime(0.5), m_MaxSailAngle(maxSailAngle), m_MinSailAngle(minSailAngle),
+         m_ApparentWindDir(DATA_OUT_OF_RANGE)
+{
+    msgBus.registerNode( *this, MessageType::WindState);
+    msgBus.registerNode( *this, MessageType::LocalNavigation);
+    msgBus.registerNode( *this, MessageType::ServerConfigsReceived);
+}
+
 ///----------------------------------------------------------------------------------
 SailControlNode::~SailControlNode(){}
 

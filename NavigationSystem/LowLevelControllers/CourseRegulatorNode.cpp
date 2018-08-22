@@ -31,6 +31,17 @@ m_VesselCourse(DATA_OUT_OF_RANGE), m_VesselSpeed(DATA_OUT_OF_RANGE), m_DesiredCo
     msgBus.registerNode( *this, MessageType::ServerConfigsReceived);
 }
 
+CourseRegulatorNode::CourseRegulatorNode( MessageBus& msgBus,  DBHandler& dbhandler, int maxRudderAngle)
+        :ActiveNode(NodeID::CourseRegulatorNode,msgBus), m_db(dbhandler), m_Running(0),
+         m_LoopTime(0.5), m_MaxRudderAngle(maxRudderAngle), m_pGain(1), m_iGain(1), m_dGain(1),
+         m_VesselCourse(DATA_OUT_OF_RANGE), m_VesselSpeed(DATA_OUT_OF_RANGE), m_DesiredCourse(DATA_OUT_OF_RANGE)
+
+{
+    msgBus.registerNode( *this, MessageType::StateMessage);
+    msgBus.registerNode( *this, MessageType::LocalNavigation);
+    msgBus.registerNode( *this, MessageType::ServerConfigsReceived);
+}
+
 ///----------------------------------------------------------------------------------
 CourseRegulatorNode::~CourseRegulatorNode(){}
 

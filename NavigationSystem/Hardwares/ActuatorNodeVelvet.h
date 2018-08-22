@@ -18,6 +18,11 @@
 #include "../Database/DBHandler.h"
 #include "../MessageBus/Node.h"
 
+#define MIN_PWM_SAIL 4500
+#define MAX_PWM_SAIL 5500
+#define MIN_PWM_RUDDER 4500
+#define MAX_PWM_RUDDER 5500
+
 class ActuatorNodeVelvet : public Node {
 public:
     ActuatorNodeVelvet(MessageBus& msgBus, NodeID id, int channel, int speed, int acceleration);
@@ -33,6 +38,12 @@ public:
     ///
     ///----------------------------------------------------------------------------------
     virtual void processMessage(const Message* message);
+
+    ///----------------------------------------------------------------------------------
+    /// Map angle commands into pwm value
+    ///
+    ///----------------------------------------------------------------------------------
+    int mapCommandToPWM(int angleCommand);
 
 private:
     int m_Channel;

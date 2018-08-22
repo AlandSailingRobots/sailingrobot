@@ -36,6 +36,7 @@
 class SailControlNode : public ActiveNode {
    public:
     SailControlNode(MessageBus& msgBus, DBHandler& dbhandler);
+    SailControlNode(MessageBus& msgBus, DBHandler& dbhandler, int maxSailAngle, int minSailAngle);
     ~SailControlNode();
 
     bool init();

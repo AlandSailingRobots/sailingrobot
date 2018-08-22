@@ -193,8 +193,8 @@ int main(int argc, char *argv[])
 	//-------------------------------------------------------------------------------
 	std::string portname = "/dev/ttyACM0";
 	int channel = 4;
-	int speed = 1;
-	int acceleration = 1;
+	int speed = 0;
+	int acceleration = 0;
 	VelvetActuatorTest rudder(messageBus, NodeID::RudderActuator, channel, speed, acceleration);
 
 	rudder.m_count = 0;
@@ -222,7 +222,7 @@ int main(int argc, char *argv[])
     int getPosition = 0;
 	while(rudder.m_count < 10000000) {
 
-		int setPosition = 1000 + (470 + rudder.m_count)%900; //testing values
+		int setPosition = 3500 + rudder.m_count%6000; //testing values
 	    rudder.m_count += 100;
 
 	    if(not MaestroController::writeCommand(MaestroCommands::SetPosition, channel, setPosition))
@@ -231,13 +231,8 @@ int main(int argc, char *argv[])
 		}
 		Logger::info("Current command: %d", setPosition);
 
-	    usleep(1000);
-	    if(not MaestroController::writeCommand(MaestroCommands::GetPosition, channel, getPosition)) {
-	        Logger::error("%s Actuator: %d Failed to read current position", __PRETTY_FUNCTION__, 1);
-	    };
-	    Logger::info("Current position: %d, getPosition");
 
-		usleep(1000000); //sleep 1 sec before each new command for testing
+		usleep(500000); //sleep 0.5 sec before each new command for testing
 
 	}
 

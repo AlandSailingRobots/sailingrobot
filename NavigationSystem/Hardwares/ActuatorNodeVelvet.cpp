@@ -74,8 +74,8 @@ void ActuatorNodeVelvet::processMessage(const Message* message)
     if(message->messageType() == MessageType::SailCommand)
     {
         SailCommandMsg* msg = (SailCommandMsg*)message;
-        int setPosition = 1470; // pwm value for sailwinch and rudder servo in middle course (sail in, rudder centered)
-        if (nodeID() == NodeID::SailActuator) 
+        int setPosition = 6000; // pwm value for sailwinch and rudder servo in middle course (sail in, rudder centered)
+        if (nodeID() == NodeID::SailActuator)
         {
             setPosition = msg->maxSailAngle(); //have to check why it is named maxSailAngle
             // and modify it for smartwinch
@@ -87,4 +87,44 @@ void ActuatorNodeVelvet::processMessage(const Message* message)
 
     }
 
+    if(message->messageType() == MessageType::RudderCommand)
+    {
+        RudderCommandMsg* msg = (RudderCommandMsg*)message;
+        int setPosition = 6000; // pwm value for sailwinch and rudder servo in middle course (sail in, rudder centered)
+        if (nodeID() == NodeID::RudderActuator)
+        {
+            setPosition = msg->maxSailAngle(); //have to check why it is named maxSailAngle
+            // and modify it for smartwinch
+        }
+        else {
+            std::cout << setPosition << std::endl; //compiler complaining for unused variable at the moment
+        }
+
+
+    }
+
+}
+
+int mapCommandToPWM(int angleCommand) {
+    int pwm_output = -1;
+    int max_pwm = 0;
+    int min_pwm = 0;
+    int max_angle = 0;
+    int min_angle = 0;
+    if (nodeID() == NodeID::SailActuator)
+    {
+        min_pwm = MIN_PWM_SAIL;
+        max_pwm = MAX_PWM_SAIL;
+        min_angle =
+    }
+    else if (nodeID() == NodeID::SailActuator)
+    {
+        min_pwm = MIN_PWM_RUDDER;
+        max_pwm = MAX_PWM_RUDDER;
+    }
+    else
+    {
+        Logger::error("In ActuatorNodeVelvet: Wrong node catching an actuator command");
+    }
+    pwm_output =
 }

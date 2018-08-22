@@ -148,8 +148,12 @@ int main(int argc, char *argv[])
     WaypointMgrNode waypoint(messageBus, dbHandler);
     CollidableMgr collidableMgr;
 
-    SailControlNode sailControlNode(messageBus, dbHandler);
-    CourseRegulatorNode courseRegulatorNode(messageBus, dbHandler);
+    int maxSailAngle = 60; //rope out with the smartwinch
+    int minSailAngle = 0;  //rope in with the smartwinch
+    int maxRudderAngle = 40; //these three values are to be checked with the actual min/max command we can send
+                             //careful with the rudder as it can go too far out for its support
+    SailControlNode sailControlNode(messageBus, dbHandler, maxSailAngle, minSailAngle);
+    CourseRegulatorNode courseRegulatorNode(messageBus, dbHandler, maxRudderAngle);
 
 #if LOCAL_NAVIGATION_MODULE == 1
     LocalNavigationModule lnm	( messageBus, dbHandler );

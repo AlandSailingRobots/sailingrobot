@@ -32,6 +32,7 @@
 class CourseRegulatorNode : public ActiveNode {
    public:
     CourseRegulatorNode(MessageBus& msgBus, DBHandler& dbhandler);
+    CourseRegulatorNode(MessageBus& msgBus, DBHandler& dbhandler, int maxRudderAngle);
     ~CourseRegulatorNode();
 
     bool init();
