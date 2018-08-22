@@ -18,14 +18,18 @@
 #include "../Database/DBHandler.h"
 #include "../MessageBus/Node.h"
 
-#define MIN_PWM_SAIL 4500
-#define MAX_PWM_SAIL 5500
-#define MIN_PWM_RUDDER 4500
-#define MAX_PWM_RUDDER 5500
+#define MIN_PWM_SAIL 4000
+#define MAX_PWM_SAIL 8000
+#define MIN_PWM_RUDDER 4000
+#define MAX_PWM_RUDDER 8000
+
+//CHECK ANGLE
 
 class ActuatorNodeVelvet : public Node {
 public:
     ActuatorNodeVelvet(MessageBus& msgBus, NodeID id, int channel, int speed, int acceleration);
+    ActuatorNodeVelvet(MessageBus& msgBus, NodeID id, int channel, int speed, int acceleration, int minSailAngle, int maxSailAngle);
+    ActuatorNodeVelvet(MessageBus& msgBus, NodeID id, int channel, int speed, int acceleration, int maxRudderAngle);
 
     ///----------------------------------------------------------------------------------
     /// Setups the actuator.
@@ -43,12 +47,21 @@ public:
     /// Map angle commands into pwm value
     ///
     ///----------------------------------------------------------------------------------
-    int mapCommandToPWM(int angleCommand);
+    float mapCommandToPWM(float angleCommand);
 
 private:
     int m_Channel;
     int m_Speed;
     int m_Acceleration;
+
+    int m_minSailAngle;
+    int m_maxSailAngle;
+    int m_maxRudderAngle;
+
+    int m_minSailAngle;
+    int m_maxSailAngle;
+    int m_maxRudderAngle;
+
 };
 
 

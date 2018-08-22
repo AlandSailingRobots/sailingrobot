@@ -152,7 +152,7 @@ int main(int argc, char *argv[])
     int minSailAngle = 0;  //rope in with the smartwinch
     int maxRudderAngle = 40; //these three values are to be checked with the actual min/max command we can send
                              //careful with the rudder as it can go too far out for its support
-    SailControlNode sailControlNode(messageBus, dbHandler, maxSailAngle, minSailAngle);
+    SailControlNode sailControlNode(messageBus, dbHandler, minSailAngle, maxSailAngle);
     CourseRegulatorNode courseRegulatorNode(messageBus, dbHandler, maxRudderAngle);
 
 #if LOCAL_NAVIGATION_MODULE == 1
@@ -178,7 +178,7 @@ int main(int argc, char *argv[])
 #if SIMULATION == 1
     SimulationNode simulation(messageBus, 0, &collidableMgr);
 #else
-    CV7Node windSensor(messageBus, dbHandler);
+    VelvetWindSensorSerialNode windSensor(messageBus, dbHandler);
     HMC6343Node compass(messageBus, dbHandler);
     GPSDNode gpsd(messageBus, dbHandler);
     ArduinoNode arduino(messageBus, dbHandler);
@@ -186,16 +186,19 @@ int main(int argc, char *argv[])
     int channel = 3;
     int speed = 0;
     int acceleration = 0;
-    ActuatorNodeVelvet sail(messageBus, NodeID::SailActuator, channel, speed, acceleration);
+    ActuatorNodeVelvet sail(messageBus, NodeID::SailActuator, channel, speed, acceleration, minSailAngle, maxSailAngle);
 
-    channel = 4;
+    channel = 1;
     speed = 0;
     acceleration = 0;
-    ActuatorNodeVelvet rudder(messageBus, NodeID::RudderActuator, channel, speed, acceleration);
+    ActuatorNodeVelvet rudder(messageBus, NodeID::RudderActuator, channel, speed, acceleration, maxRudderAngle);
 
-    MaestroController::init(dbHandler.retrieveCell("config_maestro_controller", "1", "port"));
+    std::string portname = "/dev/ttyACM0";
+    MaestroController::init(portname);
 
-    XbeeSyncNode xbee(messageBus, dbHandler);
+    //MaestroController::init(dbHandler.retrieveCell("config_maestro_controller", "1", "port"));
+
+    //XbeeSyncNode xbee(messageBus, dbHandler);
 #endif
 
 
@@ -228,7 +231,7 @@ int main(int argc, char *argv[])
     initialiseNode(arduino, "Arduino", NodeImportance::NOT_CRITICAL);
     initialiseNode(sail, "Sail Actuator", NodeImportance::CRITICAL);
     initialiseNode(rudder, "Rudder Actuator", NodeImportance::CRITICAL);
-    initialiseNode(xbee, "Xbee Sync", NodeImportance::NOT_CRITICAL);
+    //initialiseNode(xbee, "Xbee Sync", NodeImportance::NOT_CRITICAL);
 #endif
 
     // Start active nodes
