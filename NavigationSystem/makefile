@@ -159,7 +159,7 @@ export HW_NODES_ASPIRE_SRC 	= Hardwares/ActuatorNodeASPire.cpp Hardwares/CANAISN
 export HW_NODES_JANET_SRC 	= Hardwares/CV7Node.cpp Hardwares/ArduinoNode.cpp Hardwares/ActuatorNodeJanet.cpp
 
 # ActuatorNode for Velvet
-export HW_NODES_VELVET_SRC 	= Hardwares/CV7Node.cpp Hardwares/ArduinoNode.cpp Hardwares/ActuatorNodeVelvet.cpp \
+export HW_NODES_VELVET_SRC 	= Hardwares/CV7Node.cpp Hardwares/ActuatorNodeVelvet.cpp \
                               Hardwares/VelvetWindSensorSerialNode.cpp
 
 # XBee network, XbeeSyncNode not compiling, uses removed ActuatorPositionMsg

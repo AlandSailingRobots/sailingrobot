@@ -2,7 +2,7 @@
  * Function from: https://stackoverflow.com/questions/6947413/how-to-open-read-and-write-from-serial-port-in-c
  * 
 */
-
+#pragma once
 
 #include <errno.h>
 #include <fcntl.h> 

@@ -90,6 +90,8 @@ void ActuatorNodeVelvet::processMessage(const Message* message)
 
     // maybe init setPosition before and add a check on setPosition value before writing it
     // adding a looptime could be useful, have to check when testing
+
+    Logger::info("ActuatorNodeVelvet received message: %d", message->messageType());
     if(message->messageType() == MessageType::SailCommand)
     {
         SailCommandMsg* msg = (SailCommandMsg*)message;

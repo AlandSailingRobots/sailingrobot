@@ -28,7 +28,6 @@
 #if SIMULATION == 1
     #include "../Simulation/SimulationNode.h"
 #else
-#include "../Hardwares/ArduinoNode.h"
 #include "../Hardwares/CV7Node.h"
 #include "../Hardwares/HMC6343Node.h"
 #include "../Hardwares/GPSDNode.h"
@@ -180,7 +179,6 @@ int main(int argc, char *argv[])
     VelvetWindSensorSerialNode windSensor(messageBus, dbHandler);
     HMC6343Node compass(messageBus, dbHandler);
     GPSDNode gpsd(messageBus, dbHandler);
-    ArduinoNode arduino(messageBus, dbHandler);
 
     int channel = 3;
     int speed = 0;
@@ -227,7 +225,6 @@ int main(int argc, char *argv[])
     initialiseNode(windSensor, "Wind Sensor", NodeImportance::CRITICAL);
     initialiseNode(compass, "Compass", NodeImportance::CRITICAL);
     initialiseNode(gpsd, "GPSD", NodeImportance::CRITICAL);
-    initialiseNode(arduino, "Arduino", NodeImportance::NOT_CRITICAL);
     initialiseNode(sail, "Sail Actuator", NodeImportance::CRITICAL);
     initialiseNode(rudder, "Rudder Actuator", NodeImportance::CRITICAL);
     //initialiseNode(xbee, "Xbee Sync", NodeImportance::NOT_CRITICAL);
@@ -252,7 +249,6 @@ int main(int argc, char *argv[])
     windSensor.start();
     compass.start();
     gpsd.start();
-    arduino.start();
 #endif
 
 #if LOCAL_NAVIGATION_MODULE == 1

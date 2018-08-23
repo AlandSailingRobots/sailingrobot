@@ -14,6 +14,7 @@
 
 #include "VelvetWindSensorSerialNode.h"
 #include "../MessageBus/MessageTypes.h"
+#include "../Hardwares/Serial_Connection/serial_interface.h"
 
 const float DATA_OUT_OF_RANGE = -2000; // as uint16_t, cannot use -2000.
 

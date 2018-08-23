@@ -12,20 +12,19 @@
 *
 ***************************************************************************************/
 #pragma once
-
+/*
 #include <chrono>
 #include <iostream>
 #include <mutex>
 #include <thread>
 #include <vector>
-
+*/
 #include "../Database/DBHandler.h"
 #include "../MessageBus/ActiveNode.h"
 #include "../MessageBus/Message.h"
 #include "../MessageBus/MessageBus.h"
 #include "../Messages/WindDataMsg.h"
 #include "../SystemServices/Timer.h"
-#include "../Hardwares/Serial_Connection/serial_interface.h"
 
 class VelvetWindSensorSerialNode : public ActiveNode {
    public:
