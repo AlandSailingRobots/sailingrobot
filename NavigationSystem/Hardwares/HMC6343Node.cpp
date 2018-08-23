@@ -207,12 +207,14 @@ bool HMC6343Node::setMeasurementRate(CompassMeasurementRate rate)
 {
 	if(m_Initialised)
 	{
+		m_I2C.beginTransmission();
 		m_I2C.I2Cwrite((uint8_t)COM_WRITE_EEPROM);
 		m_I2C.I2Cwrite((uint8_t)OM2_ADDRESS);
 		m_I2C.I2Cwrite((uint8_t)rate);
 		delay(10);
 		m_I2C.I2Cwrite((uint8_t)COM_RESET_PROC);
 		delay(500);
+		m_I2C.endTransmission();
 		return true;
 	}
 	else
