@@ -142,11 +142,14 @@ float ActuatorNodeVelvet::mapCommandToPWM(float angleCommand) {
         min_pwm = MIN_PWM_RUDDER;
         max_pwm = MAX_PWM_RUDDER;
         max_angle = m_maxRudderAngle;
+        min_angle = -m_maxRudderAngle;
     }
     else
     {
         Logger::error("In ActuatorNodeVelvet: Wrong node catching an actuator command");
     }
-    pwm_output = min_pwm + (max_pwm - min_pwm) * (angleCommand - min_angle)/(max_angle - min_angle);
+    if (max_angle-min_angle != 0){
+        pwm_output = min_pwm + (max_pwm - min_pwm) * (angleCommand - min_angle)/(max_angle - min_angle);
+    }
     return pwm_output;
 }
