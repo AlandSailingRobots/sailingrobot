@@ -122,7 +122,7 @@ void ActuatorNodeVelvet::processMessage(const Message* message)
 
 }
 
-float mapCommandToPWM(float angleCommand) {
+float ActuatorNodeVelvet::mapCommandToPWM(float angleCommand) {
     int pwm_output = -1;
     int max_pwm = 0;
     int min_pwm = 0;

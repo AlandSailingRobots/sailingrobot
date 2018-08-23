@@ -25,6 +25,7 @@
 #include "../MessageBus/MessageBus.h"
 #include "../Messages/WindDataMsg.h"
 #include "../SystemServices/Timer.h"
+#include "../Hardwares/Serial_Connection/serial_interface.h"
 
 class VelvetWindSensorSerialNode : public ActiveNode {
    public:

@@ -58,10 +58,6 @@ private:
     int m_maxSailAngle;
     int m_maxRudderAngle;
 
-    int m_minSailAngle;
-    int m_maxSailAngle;
-    int m_maxRudderAngle;
-
 };
 
 

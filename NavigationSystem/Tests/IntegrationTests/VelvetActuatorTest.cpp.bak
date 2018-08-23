@@ -34,7 +34,41 @@
  #include "../LowLevelControllers/SailControlNode.h"
  #include "../LowLevelControllers/CourseRegulatorNode.h"
 
+#include <termios.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <unistd.h>
 
+int maestroGetPosition(int fd, unsigned char channel)
+{
+  unsigned char command[] = {0x90, channel};
+  if(write(fd, command, sizeof(command)) == -1)
+  {
+    Logger::error("error writing");
+    return -1;
+  }
+ 
+  unsigned char response[2];
+  if(read(fd,response,2) != 2)
+  {
+    Logger::error("error reading");
+    return -1;
+  }
+ 
+  return response[0] + 256*response[1];
+}
+
+
+int maestroSetTarget(int fd, unsigned char channel, unsigned short target)
+{
+    unsigned char command[] = {0x84, channel, target & 0x7F, target >> 7 & 0x7F};
+    if (write(fd, command, sizeof(command)) == -1)
+    {
+        Logger::error("Error writing command using setMaestroTarget");
+        return -1;
+    }
+    return 0;
+}
 
 class VelvetActuatorTest: public Node {
 
@@ -192,7 +226,7 @@ int main(int argc, char *argv[])
 	// Declare nodes
 	//-------------------------------------------------------------------------------
 	std::string portname = "/dev/ttyACM0";
-	int channel = 1;
+    int channel = 1;
 	int speed = 0;
 	int acceleration = 0;
 	VelvetActuatorTest rudder(messageBus, NodeID::RudderActuator, channel, speed, acceleration);
@@ -218,12 +252,12 @@ int main(int argc, char *argv[])
 	//-------------------------------------------------------------------------------
 	Logger::info("Message bus started!");
 	//messageBus.run();
-
-//    int getPosition = 0;
+//    Logger::info("________________________");
+    int getPosition = 0;
 	while(rudder.m_count < 10000000) {
 
-		int setPosition = 3500 + (2500 + rudder.m_count)%6000; //testing values
-	    rudder.m_count += 100;
+		int setPosition = 3900 + (rudder.m_count)%4200; //testing values
+	    rudder.m_count += 50;
 
 	    if(not MaestroController::writeCommand(MaestroCommands::SetPosition, channel, setPosition))
 		{
@@ -231,11 +265,39 @@ int main(int argc, char *argv[])
 		}
 		Logger::info("Current command: %d", setPosition);
 
+	    //usleep(1000);
+        //getPosition = maestroGetPosition(intfd, channel);
+	    //Logger::info("Current position: %d", getPosition);
 
-		usleep(500000); //sleep 0.5 sec before each new command for testing
+		usleep(50000); //sleep 0.5 sec before each new command for testing
 
 	}
 
 	exit(0);
+
+  /*  const char * device = "/dev/ttyACM0";
+    int fd = open(device, O_RDWR | O_NOCTTY);
+    if (fd==-1)
+    {
+        Logger::error("No device");
+        return -1;
+    }
+    struct termios options;
+    tcgetattr(fd, &options);
+    options.c_iflag &= ~(INLCR | IGNCR | ICRNL | IXON | IXOFF);
+    options.c_oflag &= ~(ONLCR | OCRNL);
+    options.c_lflag &= ~(ECHO | ECHONL | ICANON | ISIG | IEXTEN);
+    tcsetattr(fd, TCSANOW, &options);
+
+    int position = maestroGetPosition(fd, 0);
+  printf("Current position is %d.\n", position);
+
+    unsigned short target = (position < 4450) ? 7000 : 1050;
+  printf("Setting target to %d (%d us).\n", target, target/4);
+  maestroSetTarget(fd, 0, target);
+ 
+  close(fd);
+  return 0;
+*/
 }
 

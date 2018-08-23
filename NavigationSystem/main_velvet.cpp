@@ -34,8 +34,7 @@
 #include "../Hardwares/GPSDNode.h"
 #include "../Hardwares/ActuatorNodeVelvet.h"
 #include "../Hardwares/MaestroController/MaestroController.h"
-#include "../Xbee/Xbee.h"
-#include "../Xbee/XbeeSyncNode.h"
+#include "../Hardwares/VelvetWindSensorSerialNode.h"
 #endif
 
 

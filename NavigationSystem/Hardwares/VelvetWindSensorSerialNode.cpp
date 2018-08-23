@@ -59,20 +59,20 @@ void VelvetWindSensorSerialNode::VelvetWindSensorSerialNodeThreadFunc(ActiveNode
     timer.start();
 
     while(true) {
-        
-        char *portname = "/dev/ttyACM0";
+        std::string str_portname = "/dev/ttyACM0";        
+        const char *portname = str_portname.c_str();
         int fd = open (portname, O_RDWR | O_NOCTTY | O_SYNC);
         if (fd < 0)
         {
             std::cout << "error %d opening %s: %s" << errno << portname << strerror (errno) << std::endl;
-            return -1;
+            //return -1;
         }
         set_interface_attribs (fd, B9600, 0);  // set speed to 9600 bps, 8n1 (no parity)
         set_blocking (fd, 0);                // set no blocking
 
         usleep ((50) * 100);             // sleep enough to receive 8:  approx 100 uS per char transmit
         char buf [120];
-        int n = read (fd, buf, sizeof buf);  // read up to 100 characters if ready to read
+        read (fd, buf, sizeof buf);  // read up to 100 characters if ready to read
         std::vector <std::string> tokens;
             std::stringstream check(buf);
             std::string tmp_string;
