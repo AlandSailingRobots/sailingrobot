@@ -109,6 +109,7 @@ void VelvetWindSensorSerialNode::VelvetWindSensorSerialNodeThreadFunc(ActiveNode
                 //the sensor on the velvet only give apparent wind angle
                 MessagePtr windData = std::make_unique<WindDataMsg>( node->m_apparentWindDir, 4, 20);
                 node->m_MsgBus.sendMessage(std::move(windData));
+                Logger::info("Windsensor data: %f", node->m_apparentWindDir);
             }
         node->m_lock.unlock();
 

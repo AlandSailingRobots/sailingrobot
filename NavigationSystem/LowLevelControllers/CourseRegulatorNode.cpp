@@ -12,7 +12,7 @@
  ***************************************************************************************/
 
 #include "CourseRegulatorNode.h"
-
+#include "../SystemServices/Logger.h"
 
 #define DATA_OUT_OF_RANGE -2000
 const int INITIAL_SLEEP = 2000; // milliseconds
@@ -89,7 +89,8 @@ void CourseRegulatorNode::processMessage( const Message* msg )
 void CourseRegulatorNode::updateConfigsFromDB()
 {
     m_LoopTime = m_db.retrieveCellAsDouble("config_course_regulator","1","loop_time");
-    m_MaxRudderAngle = m_db.retrieveCellAsInt("config_course_regulator","1","max_rudder_angle");
+// defined with second constructor for now
+//    m_MaxRudderAngle = m_db.retrieveCellAsInt("config_course_regulator","1","max_rudder_angle");
     m_pGain = m_db.retrieveCellAsDouble("config_course_regulator","1","p_gain");
     m_iGain = m_db.retrieveCellAsDouble("config_course_regulator","1","i_gain");
     m_dGain = m_db.retrieveCellAsDouble("config_course_regulator","1","d_gain");
@@ -156,6 +157,7 @@ void CourseRegulatorNode::CourseRegulatorNodeThreadFunc(ActiveNode* nodePtr)
         {
             MessagePtr rudderCommandMsg = std::make_unique<RudderCommandMsg>(rudderCommand);
             node->m_MsgBus.sendMessage(std::move(rudderCommandMsg));
+            Logger::info("Rudder command sent: %f", rudderCommand);
         }
         timer.sleepUntil(node->m_LoopTime);
         timer.reset();

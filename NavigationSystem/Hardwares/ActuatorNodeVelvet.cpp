@@ -39,7 +39,7 @@ ActuatorNodeVelvet::ActuatorNodeVelvet(MessageBus& msgBus, NodeID id, int channe
 ActuatorNodeVelvet::ActuatorNodeVelvet(MessageBus& msgBus, NodeID id, int channel, int speed, int acceleration, int maxRudderAngle)
         :Node(id, msgBus), m_Channel(channel), m_Speed(speed), m_Acceleration(acceleration), m_maxRudderAngle(maxRudderAngle)
 {
-    //msgBus.registerNode(*this,MessageType::VelvetActuatorFeedback);
+    msgBus.registerNode(*this,MessageType::CompassData);
     msgBus.registerNode(*this,MessageType::RudderCommand);
     msgBus.registerNode(*this,MessageType::ServerConfigsReceived);
 }

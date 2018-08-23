@@ -127,6 +127,7 @@ void GPSDNode::GPSThreadFunc(ActiveNode* nodePtr)
 
 		MessagePtr msg = std::make_unique<GPSDataMsg>(gps_hasFix, gps_online, node->m_Lat, node->m_Lon, unixTime, node->m_Speed, node->m_Course, satCount, mode);
 		node->m_MsgBus.sendMessage(std::move(msg));
+        Logger::info("GPS Data lon/lat: %f / %f ", node->m_Lon, node->m_Lat);
 
 		// Controls how often we pump out messages
 		timer.sleepUntil(node->m_LoopTime);

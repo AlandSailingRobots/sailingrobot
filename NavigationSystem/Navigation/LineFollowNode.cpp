@@ -279,6 +279,7 @@ void LineFollowNode::LineFollowNodeThreadFunc(ActiveNode* nodePtr)
             bool targetTackStarboard = node->getTargetTackStarboard(targetCourse);
             MessagePtr LocalNavMsg = std::make_unique<LocalNavigationMsg>((float) targetCourse, NO_COMMAND, node->m_BeatingMode, targetTackStarboard);
             node->m_MsgBus.sendMessage( std::move( LocalNavMsg ) );
+            Logger::info("Target sent by linefollow: %f", float(targetCourse));
         }
         timer.sleepUntil(node->m_LoopTime);
         timer.reset();

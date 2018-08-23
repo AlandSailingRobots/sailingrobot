@@ -17,7 +17,7 @@
  ***************************************************************************************/
 
 #include "SailControlNode.h"
-
+#include "../SystemServices/Logger.h"
 
 #define DATA_OUT_OF_RANGE -2000
 const int INITIAL_SLEEP = 2000; // milliseconds
@@ -89,8 +89,9 @@ void SailControlNode::processMessage( const Message* msg)
 void SailControlNode::updateConfigsFromDB()
 {
     m_LoopTime = m_db.retrieveCellAsDouble("config_sail_control","1","loop_time");
-    m_MaxSailAngle = m_db.retrieveCellAsInt("config_sail_control","1","max_sail_angle");
-    m_MinSailAngle = m_db.retrieveCellAsInt("config_sail_control","1","min_sail_angle");
+// defined with second constructor for now
+//    m_MaxSailAngle = m_db.retrieveCellAsInt("config_sail_control","1","max_sail_angle");
+//    m_MinSailAngle = m_db.retrieveCellAsInt("config_sail_control","1","min_sail_angle");
 }
 
 ///----------------------------------------------------------------------------------
@@ -155,12 +156,14 @@ void SailControlNode::SailControlNodeThreadFunc(ActiveNode* nodePtr)
 
     while(node->m_Running.load() == true)
     {
-        //float sailAngle = node->calculateSailAngleLinear();
+    
+    //float sailAngle = node->calculateSailAngleLinear();
         float sailAngle = node->calculateSailAngleCardioid();
         if(sailAngle != NO_COMMAND)
         {
             MessagePtr sailCommandMsg = std::make_unique<SailCommandMsg>(sailAngle);
             node->m_MsgBus.sendMessage(std::move(sailCommandMsg));
+            Logger::info("Sail command sent: %f", sailAngle);
         }
         timer.sleepUntil(node->m_LoopTime);
         timer.reset();

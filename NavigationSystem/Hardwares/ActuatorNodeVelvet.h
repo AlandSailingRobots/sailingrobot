@@ -18,10 +18,10 @@
 #include "../Database/DBHandler.h"
 #include "../MessageBus/Node.h"
 
-#define MIN_PWM_SAIL 4000
-#define MAX_PWM_SAIL 8000
-#define MIN_PWM_RUDDER 4000
-#define MAX_PWM_RUDDER 8000
+#define MIN_PWM_SAIL 5000
+#define MAX_PWM_SAIL 7000
+#define MIN_PWM_RUDDER 5000
+#define MAX_PWM_RUDDER 7000
 
 //CHECK ANGLE
 
