@@ -33,7 +33,7 @@ bool GPSDNode::init()
 {
 	m_Initialised = false;
 	updateConfigsFromDB();
-	m_GpsConnection = new gpsmm("localhost", DEFAULT_GPSD_PORT);
+	m_GpsConnection = new gpsmm("127.0.0.1", DEFAULT_GPSD_PORT);
 	m_currentDay = SysClock::day();
 
 	if (m_GpsConnection->stream(WATCH_ENABLE | WATCH_JSON) != NULL) {

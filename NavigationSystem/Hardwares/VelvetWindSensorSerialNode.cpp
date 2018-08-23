@@ -59,7 +59,7 @@ void VelvetWindSensorSerialNode::VelvetWindSensorSerialNodeThreadFunc(ActiveNode
     timer.start();
 
     while(true) {
-        std::string str_portname = "/dev/ttyACM0";        
+        std::string str_portname = "/dev/ttyACM2";        
         const char *portname = str_portname.c_str();
         int fd = open (portname, O_RDWR | O_NOCTTY | O_SYNC);
         if (fd < 0)

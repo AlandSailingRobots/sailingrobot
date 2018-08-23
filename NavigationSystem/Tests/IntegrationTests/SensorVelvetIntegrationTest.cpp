@@ -1,12 +1,13 @@
- 
+/*
 #include <ncurses.h>
 #include <unordered_map>
 #include <thread>
 #include <sstream>
+*/
 
 #include "../Hardwares/GPSDNode.h"
-#include "../Hardwares/VelvetWindSensorSerialNode.h"
-
+//#include "../Hardwares/VelvetWindSensorSerialNode.h"
+#include "../SystemServices/Timer.h"
 #include "../SystemServices/Logger.h"
 
 #include "../MessageBus/MessageTypes.h"
@@ -63,7 +64,7 @@ public:
 	    while(true) {
 	        //node->m_lock.lock();
 
-	        std::string str = "/dev/ttyACM0";
+	        std::string str = "/dev/ttyACM2";
 	        const char *portname = str.c_str();
 	        Logger::info("Reading port: %s", portname);
 	        int fd = open (portname, O_RDWR | O_NOCTTY | O_SYNC);
