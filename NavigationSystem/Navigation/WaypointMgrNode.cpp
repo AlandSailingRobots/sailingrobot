@@ -107,7 +107,7 @@ void WaypointMgrNode::sendMessage()
 
     if(m_db.getWaypointValues(m_nextId, m_nextLongitude, m_nextLatitude, m_nextDeclination, m_nextRadius, m_nextStayTime,
                         m_isCheckpoint, m_prevId, m_prevLongitude, m_prevLatitude, m_prevDeclination,
-                        m_prevRadius, foundPrev))
+                        m_prevRadius, foundPrev) && m_nextId)
     {
         if( !foundPrev )
         {
@@ -149,6 +149,9 @@ bool WaypointMgrNode::harvestWaypoint()
 {
     double DistanceToWaypoint = CourseMath::calculateDTW(m_vesselLongitude, m_vesselLatitude, m_nextLongitude, m_nextLatitude); //Calculate distance to waypoint
     // std::cout << "DistanceToWaypoint: " << DistanceToWaypoint << std::endl;
+
+    if (!m_nextId) return false;
+
     if(DistanceToWaypoint > m_nextRadius)
     {
         return false;
