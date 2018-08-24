@@ -139,7 +139,7 @@ int main(int argc, char *argv[])
     int dbLoggerQueueSize = 5; 			// how many messages to log to the database at a time
     DBLoggerNode dbLoggerNode(messageBus, dbHandler, dbLoggerQueueSize);
 
-    //HTTPSyncNode httpsync(messageBus, &dbHandler);
+    HTTPSyncNode httpsync(messageBus, &dbHandler);
 
     StateEstimationNode stateEstimationNode(messageBus, dbHandler);
     WindStateNode windStateNode(messageBus);
@@ -202,7 +202,7 @@ int main(int argc, char *argv[])
     // Initialise nodes
     //-------------------------------------------------------------------------------
 
-    //initialiseNode(httpsync, "Httpsync", NodeImportance::NOT_CRITICAL); // This node is not critical during the developement phase.
+    initialiseNode(httpsync, "Httpsync", NodeImportance::NOT_CRITICAL); // This node is not critical during the developement phase.
     initialiseNode(dbLoggerNode, "DBLogger", NodeImportance::CRITICAL);
 
     initialiseNode(stateEstimationNode,"StateEstimation",NodeImportance::CRITICAL);
@@ -233,7 +233,7 @@ int main(int argc, char *argv[])
     // Start active nodes
     //-------------------------------------------------------------------------------
 
-    //httpsync.start();
+    httpsync.start();
     dbLoggerNode.start();
 
     stateEstimationNode.start();

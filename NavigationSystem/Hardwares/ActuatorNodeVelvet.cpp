@@ -39,7 +39,6 @@ ActuatorNodeVelvet::ActuatorNodeVelvet(MessageBus& msgBus, NodeID id, int channe
 ActuatorNodeVelvet::ActuatorNodeVelvet(MessageBus& msgBus, NodeID id, int channel, int speed, int acceleration, int maxRudderAngle)
         :Node(id, msgBus), m_Channel(channel), m_Speed(speed), m_Acceleration(acceleration), m_maxRudderAngle(maxRudderAngle)
 {
-    msgBus.registerNode(*this,MessageType::CompassData);
     msgBus.registerNode(*this,MessageType::RudderCommand);
     msgBus.registerNode(*this,MessageType::ServerConfigsReceived);
 }
@@ -100,8 +99,9 @@ void ActuatorNodeVelvet::processMessage(const Message* message)
         {
             setPosition = mapCommandToPWM(msg->maxSailAngle()); //have to check why it is named maxSailAngle
             // and modify it for smartwinch
+            setPosition = MAX_PWM_SAIL - setPosition + MIN_PWM_SAIL; //the command was inverted
         }
-
+        
         MaestroController::writeCommand(MaestroCommands::SetPosition, m_Channel, setPosition);
        
 
@@ -110,7 +110,7 @@ void ActuatorNodeVelvet::processMessage(const Message* message)
     if(message->messageType() == MessageType::RudderCommand)
     {
         RudderCommandMsg* msg = (RudderCommandMsg*)message;
-        int setPosition = 6000; // pwm value for sailwinch and rudder servo in middle course (sail in, rudder centered)
+        int setPosition = 5800; // pwm value for sailwinch and rudder servo in middle course (sail in, rudder centered)
         if (nodeID() == NodeID::RudderActuator)
         {
             setPosition = mapCommandToPWM(msg->rudderAngle()); //have to check why it is named maxSailAngle

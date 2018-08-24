@@ -118,10 +118,10 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
                      logs[0].m_timestamp_str.c_str(), logs.size());
     }
 
-    tableId = getIdFromTable("dataLogs_actuator_feedback", true, db);
-    if (tableId.size() > 0) {
-        actuatorFeedbackId = (int)strtol(tableId.c_str(), NULL, 10);
-    }
+//    tableId = getIdFromTable("dataLogs_actuator_feedback", true, db);
+//    if (tableId.size() > 0) {
+//        actuatorFeedbackId = (int)strtol(tableId.c_str(), NULL, 10);
+//    }
     tableId = getIdFromTable("dataLogs_compass", true, db);
     if (tableId.size() > 0) {
         compassModelId = (int)strtol(tableId.c_str(), NULL, 10);
@@ -130,18 +130,18 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
     if (tableId.size() > 0) {
         courceCalculationId = (int)strtol(tableId.c_str(), NULL, 10);
     }
-    tableId = getIdFromTable("dataLogs_current_sensors", true, db);
-    if (tableId.size() > 0) {
-        currentSensorsId = (int)strtol(tableId.c_str(), NULL, 10);
-    }
+//    tableId = getIdFromTable("dataLogs_current_sensors", true, db);
+//    if (tableId.size() > 0) {
+//        currentSensorsId = (int)strtol(tableId.c_str(), NULL, 10);
+//    }
     tableId = getIdFromTable("dataLogs_gps", true, db);
     if (tableId.size() > 0) {
         gpsId = (int)strtol(tableId.c_str(), NULL, 10);
     }
-    tableId = getIdFromTable("dataLogs_marine_sensors", true, db);
-    if (tableId.size() > 0) {
-        marineSensorsId = (int)strtol(tableId.c_str(), NULL, 10);
-    }
+//    tableId = getIdFromTable("dataLogs_marine_sensors", true, db);
+//    if (tableId.size() > 0) {
+//        marineSensorsId = (int)strtol(tableId.c_str(), NULL, 10);
+//    }
     tableId = getIdFromTable("dataLogs_vessel_state", true, db);
     if (tableId.size() > 0) {
         vesselStateId = (int)strtol(tableId.c_str(), NULL, 10);
@@ -177,9 +177,9 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
                                << log.m_wingsailPosition << ", " << log.m_radioControllerOn << ", "
                                << log.m_windVaneAngle << ",'" << log.m_timestamp_str.c_str();
 
-        ss << "INSERT INTO "
-           << "dataLogs_actuator_feedback"
-           << " VALUES(NULL, " << actuatorFeedbackValues.str() << "'); \n";
+//        ss << "INSERT INTO "
+//           << "dataLogs_actuator_feedback"
+//           << " VALUES(NULL, " << actuatorFeedbackValues.str() << "'); \n";
 
         compassModelValues << std::setprecision(10) << log.m_compassHeading << ", "
                            << log.m_compassPitch << ", " << log.m_compassRoll << ",'"
@@ -204,9 +204,9 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
                             << log.m_conductivity << ", " << log.m_ph << ", " << log.m_salinity
                             << ",'" << log.m_timestamp_str.c_str();
 
-        ss << "INSERT INTO "
-           << "dataLogs_marine_sensors"
-           << " VALUES(NULL, " << marineSensorsValues.str() << "'); \n";
+//        ss << "INSERT INTO "
+//           << "dataLogs_marine_sensors"
+//           << " VALUES(NULL, " << marineSensorsValues.str() << "'); \n";
 
         vesselStateValues << std::setprecision(10) << log.m_vesselHeading << ", " << log.m_vesselLat
                           << ", " << log.m_vesselLon << ", " << log.m_vesselSpeed << ", "
@@ -249,9 +249,9 @@ void DBHandler::insertDataLogs(std::vector<LogItem>& logs) {
                               << log.m_element_str.c_str() << "', '" //AND HERE (moved to the m_element_str)
                              << log.m_timestamp_str.c_str();
 
-        ss << "INSERT INTO "
-           << "dataLogs_current_sensors"
-           << " VALUES(NULL, " << currentSensorsValues.str() << "'); \n";
+  //      ss << "INSERT INTO "
+  //         << "dataLogs_current_sensors"
+  //         << " VALUES(NULL, " << currentSensorsValues.str() << "'); \n";
 
         
 

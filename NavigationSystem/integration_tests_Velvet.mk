@@ -13,7 +13,7 @@
 
 # Source files
 #MAIN_INTEGRATION_TESTS 	= Tests/IntegrationTests/SensorVelvetIntegrationTest.cpp
-MAIN_INTEGRATION_TESTS 	= Tests/IntegrationTests/SensorVelvetIntegrationTest.cpp
+MAIN_INTEGRATION_TESTS 	= Tests/IntegrationTests/VelvetActuatorTest.cpp
 
 SRC 					= $(MAIN_INTEGRATION_TESTS) $(CORE_SRC) $(HW_SERVICES_ALL_SRC) \
 							$(HW_NODES_ALL_SRC) $(HW_NODES_VELVET_SRC) $(HW_SERVICES_VELVET_SRC)

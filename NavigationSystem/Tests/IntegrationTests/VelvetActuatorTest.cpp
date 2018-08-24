@@ -192,7 +192,7 @@ int main(int argc, char *argv[])
 	// Declare nodes
 	//-------------------------------------------------------------------------------
 	std::string portname = "/dev/ttyACM0";
-	int channel = 1;
+	int channel = 3;
 	int speed = 0;
 	int acceleration = 0;
 	VelvetActuatorTest rudder(messageBus, NodeID::RudderActuator, channel, speed, acceleration);
@@ -222,7 +222,7 @@ int main(int argc, char *argv[])
 //    int getPosition = 0;
 	while(rudder.m_count < 10000000) {
 
-		int setPosition = 3500 + (2500 + rudder.m_count)%6000; //testing values
+		int setPosition = 6000 + ( rudder.m_count)%2000; //testing values
 	    rudder.m_count += 100;
 
 	    if(not MaestroController::writeCommand(MaestroCommands::SetPosition, channel, setPosition))
@@ -232,7 +232,7 @@ int main(int argc, char *argv[])
 		Logger::info("Current command: %d", setPosition);
 
 
-		usleep(500000); //sleep 0.5 sec before each new command for testing
+		usleep(1000000); //sleep 0.5 sec before each new command for testing
 
 	}
 
