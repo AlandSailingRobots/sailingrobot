@@ -18,8 +18,8 @@
 #include "../Database/DBHandler.h"
 #include "../MessageBus/Node.h"
 
-#define MIN_PWM_SAIL 6000
-#define MAX_PWM_SAIL 7900
+#define MIN_PWM_SAIL 4600
+#define MAX_PWM_SAIL 6500
 #define MIN_PWM_RUDDER 4540
 #define MAX_PWM_RUDDER 7050
 

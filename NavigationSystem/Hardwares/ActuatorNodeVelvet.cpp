@@ -115,6 +115,7 @@ void ActuatorNodeVelvet::processMessage(const Message* message)
         {
             setPosition = mapCommandToPWM(msg->rudderAngle()); //have to check why it is named maxSailAngle
             // and modify it for smartwinch
+            setPosition = MAX_PWM_RUDDER - setPosition + MIN_PWM_RUDDER;
         }
 
         MaestroController::writeCommand(MaestroCommands::SetPosition, m_Channel, setPosition);

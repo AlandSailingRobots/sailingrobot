@@ -59,10 +59,10 @@ void VelvetWindSensorSerialNode::VelvetWindSensorSerialNodeThreadFunc(ActiveNode
     Timer timer;
     timer.start();
 
+    std::string str_portname = "/dev/ttyACM2";        
+    const char *portname = str_portname.c_str();
+    int fd = open (portname, O_RDWR | O_NOCTTY | O_SYNC);
     while(true) {
-        std::string str_portname = "/dev/ttyACM2";        
-        const char *portname = str_portname.c_str();
-        int fd = open (portname, O_RDWR | O_NOCTTY | O_SYNC);
         if (fd < 0)
         {
             std::cout << "error %d opening %s: %s" << errno << portname << strerror (errno) << std::endl;
@@ -116,4 +116,5 @@ void VelvetWindSensorSerialNode::VelvetWindSensorSerialNodeThreadFunc(ActiveNode
         timer.sleepUntil(node->m_LoopTime);
         timer.reset();
     }
+    close(fd);
 }

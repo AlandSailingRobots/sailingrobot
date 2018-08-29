@@ -150,7 +150,7 @@ int main(int argc, char *argv[])
     int minSailAngle = 0;  //rope in with the smartwinch
     int maxRudderAngle = 40; //these three values are to be checked with the actual min/max command we can send
                              //careful with the rudder as it can go too far out for its support
-    SailControlNode sailControlNode(messageBus, dbHandler, minSailAngle, maxSailAngle);
+    SailControlNode sailControlNode(messageBus, dbHandler, maxSailAngle, minSailAngle);
     CourseRegulatorNode courseRegulatorNode(messageBus, dbHandler, maxRudderAngle);
 
 #if LOCAL_NAVIGATION_MODULE == 1

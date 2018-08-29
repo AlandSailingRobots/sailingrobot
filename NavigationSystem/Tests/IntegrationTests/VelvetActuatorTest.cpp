@@ -222,7 +222,7 @@ int main(int argc, char *argv[])
 //    int getPosition = 0;
 	while(rudder.m_count < 10000000) {
 
-		int setPosition = 6000 + ( rudder.m_count)%2000; //testing values
+		int setPosition = 5000 + ( rudder.m_count)%2200; //testing values
 	    rudder.m_count += 100;
 
 	    if(not MaestroController::writeCommand(MaestroCommands::SetPosition, channel, setPosition))
