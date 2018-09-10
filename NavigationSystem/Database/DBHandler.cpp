@@ -479,7 +479,7 @@ int DBHandler::paramNameIndex(sqlite3_stmt*& stmt,
  */
 int DBHandler::bindValuesToStmt(const typedValuePairs& values, sqlite3_stmt*& stmt) {
     int firstErrorCode = SQLITE_OK;
-    int retCode;  // Uggly but works
+    int retCode;  // Ugly but works
 
     // This could probably be optimized
     for (auto pair : values.ints) {

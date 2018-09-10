@@ -100,12 +100,6 @@ BOOST_LOG_GLOBAL_LOGGER_INIT(global_logger, logger_t)
         )
     );
 
-//    // Keep only "info" and higher severity logs
-//    logging::core::get()->set_filter
-//    (
-//        expr::attr< logging::trivial::severity_level >("Severity") >= logging::trivial::info
-//    );
-
     return lg;
 }
 

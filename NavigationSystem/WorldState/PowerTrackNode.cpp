@@ -1,7 +1,7 @@
 /****************************************************************************************
  *
  * File:
- * 		PowerTrackNode.h
+ * 		PowerTrackNode.cpp
  *
  * Purpose:
  *      Collects voltage and current data from the actuators, ECUs, and solar
@@ -88,7 +88,10 @@ void PowerTrackNode::processCurrentSensorDataMessage(CurrentSensorDataMsg* msg)
 	m_CurrentSensorDataElement = msg->getSensedElement();
 	m_Power = m_CurrentSensorDataVoltage * m_CurrentSensorDataCurrent;
 
-	//if statement to ensure data flow is balanced.
+	//if statement to ensure data flow is balanced
+	// WARNING: this if statement only works if there are only 2 sensors, we want to switch between the readings
+	//		    of the solar panel input and the battery output
+	// POSSIBLE FIX: move the update of m_lastElementRead in the SOLAR_PANEL and POWER_UNIT cases
 	if ( m_CurrentSensorDataElement != m_lastElementRead ) {
 
 		switch(m_CurrentSensorDataElement)
@@ -120,7 +123,7 @@ void PowerTrackNode::PowerTrackThreadFunc(ActiveNode* nodePtr)
 	timer.start();
 	while(true)
 	{
-		//Regulate the rate at whcih the messages are sent
+		//Regulate the rate at which the messages are sent
 		timer.sleepUntil(node->m_Looptime);
 
 		// For testing only (to be removed soon/or shift to debug mode)

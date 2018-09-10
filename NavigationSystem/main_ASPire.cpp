@@ -193,6 +193,7 @@ int main(int argc, char *argv[])
 		dbHandler.getConfigFrom(weight, "proximity_voter_weight", "config_voter_system");
 		ProximityVoter proximityVoter( MAX_VOTES, weight, collidableMgr);
 
+    // #TODO add LastCourseVoter voter weight in the tables and put a getConfig call here
 		LastCourseVoter lastCourseVoter( MAX_VOTES, 0.7 );
 
 
@@ -240,7 +241,7 @@ int main(int argc, char *argv[])
 
 
 
-		CANMarineSensorReceiver canMarineSensorReciver(messageBus, canService);
+		CANMarineSensorReceiver canMarineSensorReceiver(messageBus, canService);
 
 		CANMarineSensorTransmissionNode canMarineSensorTransmissionNode(messageBus, canService);
 		CANCurrentSensorNode canCurrentSensorNode(messageBus, dbHandler, canService);
@@ -253,7 +254,7 @@ int main(int argc, char *argv[])
 	// Initialise nodes
 	//-------------------------------------------------------------------------------
 
-	initialiseNode(httpsync, "Httpsync", NodeImportance::NOT_CRITICAL); // This node is not critical during the developement phase.
+	initialiseNode(httpsync, "Httpsync", NodeImportance::NOT_CRITICAL); // This node is not critical during the development phase.
 	initialiseNode(dbLoggerNode, "DBLogger", NodeImportance::CRITICAL);
 
 	initialiseNode(stateEstimationNode,"StateEstimation",NodeImportance::CRITICAL);

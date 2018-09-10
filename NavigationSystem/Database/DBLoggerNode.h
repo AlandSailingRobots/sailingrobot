@@ -16,7 +16,7 @@ class DBLoggerNode : public ActiveNode {
 
     void updateConfigsFromDB();
 
-    static void clearCurretSensorQueue(std::queue<currentSensorItem> &q );
+    static void clearCurrentSensorQueue(std::queue<currentSensorItem> &q );
 
     void start();
 
@@ -32,13 +32,6 @@ class DBLoggerNode : public ActiveNode {
     DBHandler& m_db;
     DBLogger m_dbLogger;
 
-    /*	LogItem currentSensorItem{
-          (float)DATA_OUT_OF_RANGE,          // m_current;
-          (float)DATA_OUT_OF_RANGE,          // m_voltage;
-          (SensedElement)DATA_OUT_OF_RANGE,  // m_element;
-          (std::string) "unknown",           // m_element_str;
-          (std::string) "initialized"        // m_timestamp_str;
-        };*/
 
     // struct used from DBHandler.h
     LogItem item{
@@ -81,7 +74,7 @@ class DBLoggerNode : public ActiveNode {
         (float)DATA_OUT_OF_RANGE,         // m_windDir;
         (float)DATA_OUT_OF_RANGE,         // m_windTemp;
         (float)DATA_OUT_OF_RANGE,         // m_PowerBalance
-        std::queue<currentSensorItem>(),  // m_currentSensorItems
+        std::queue<currentSensorItem>(),  // m_currentSensorItems, defined in DBHandler.h
         (std::string) "initialized"       // m_timestamp_str;          
     };
 
