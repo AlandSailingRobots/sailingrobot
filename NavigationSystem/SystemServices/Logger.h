@@ -28,7 +28,7 @@
 #define FILE_PATH "../logs/"
 #define MAX_LOG_SIZE 256 * 2
 
-// Narrow-char thread-safe logger, with severity level declared above
+// Narrow-char thread-safe logger, with default severity levels from boost library
 typedef boost::log::sources::severity_logger_mt<boost::log::trivial::severity_level> logger_t;
 
 // declares a global logger with a custom initialization declared in cpp file
@@ -41,7 +41,7 @@ class Logger {
     /// Initialises the singleton logger system, returns false if it is unable to
     /// generate a log file.
     ///
-    /// @params logType 			The type of log message, if this paramter is not
+    /// @params logType 			The type of log message, if this parameter is not
     ///								provided then a default name is used.
     ///
     /////////////////////////////////////////////////////////////////////////////////////
@@ -64,7 +64,6 @@ class Logger {
     static void error(std::string message, ...);
     static void fatal(std::string message, ...);
 
-    // static void logWRSC(double latitude, double longitude);
 
    private:
     static bool m_DisableLogging;

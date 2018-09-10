@@ -173,7 +173,7 @@ void DBLoggerNode::processMessage(const Message* msg) {
             return;
     }
 }
-void DBLoggerNode::clearCurretSensorQueue( std::queue<currentSensorItem> &q )
+void DBLoggerNode::clearCurrentSensorQueue( std::queue<currentSensorItem> &q )
 {
     std::queue<currentSensorItem> empty;
     std::swap( q, empty );
@@ -217,7 +217,7 @@ void DBLoggerNode::DBLoggerNodeThreadFunc(ActiveNode* nodePtr) {
         node->m_lock.lock();
         node->m_dbLogger.log(node->item);
         node->m_lock.unlock();
-        DBLoggerNode::clearCurretSensorQueue(node->item.m_currentSensorItems);
+        DBLoggerNode::clearCurrentSensorQueue(node->item.m_currentSensorItems);
         timer.sleepUntil(node->m_loopTime);
         timer.reset();
     }
