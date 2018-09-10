@@ -108,8 +108,14 @@ void PowerTrackNode::PowerTrackThreadFunc(ActiveNode* nodePtr)
 		//Regulate the rate at whcih the messages are sent
 		timer.sleepUntil(node->m_Looptime);
 
+        MessagePtr powerTrack = std::make_unique<PowerTrackMsg>(
+            node->m_PowerBalance, node->m_CurrentSensorDataCurrent, node->m_CurrentSensorDataVoltage,
+            node->m_CurrentSensorDataElement);
+
+        node->m_MsgBus.sendMessage(std::move(powerTrack));
+
 		// For testing only (to be removed soon/or shift to debug mode)
-		Logger::debug("PowerTrackInfo: %f,%f,%f,%f,%d", (float)node->m_CurrentSensorDataCurrent, 
+		Logger::info("PowerTrackInfo: %f,%f,%f,%f,%d", (float)node->m_CurrentSensorDataCurrent, 
 			(float)node->m_CurrentSensorDataVoltage, (float)node->m_PowerBalance, (float)node->m_Power,
 			(uint8_t)node->m_CurrentSensorDataElement);
 
