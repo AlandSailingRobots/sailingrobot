@@ -25,7 +25,7 @@ for point in root.iter('{http://www.opengis.net/kml/2.2}Point'):
 waypointNumber = 1
 routeDict = {}
 for waypoint in waypoints:
-    waypointDict = {"is_checkpoint" : 0, "latitude" : waypoint[1],
+    waypointDict = {"isCheckpoint" : 0, "latitude" : waypoint[1],
                     "longitude" : waypoint[0], "declination" : 6,
                     "radius" : 15, "stay_time" : 0, "harvested" : 0}
     routeDict[str(waypointNumber)] = waypointDict

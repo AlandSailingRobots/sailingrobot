@@ -611,6 +611,7 @@ std::vector<std::vector<std::string>> DBHandler::getRowsAsText(sqlite3_stmt*& st
     return rows;
 }
 
+
 /**
  * Matches DB table names
  * @param like
@@ -637,6 +638,7 @@ std::vector<std::string> DBHandler::getTableNames(const std::string& like,
     }
     return tableNames;
 }
+
 
 /**
  * get id from table returns either max or min id from table
@@ -665,6 +667,7 @@ int DBHandler::getTableId(const std::string& table, ID_MINMAX minmax) {
         sqlite3_finalize(stmt);
     return id;
 }
+
 
 /**
  * Returns the internal data type in the database
@@ -918,6 +921,7 @@ std::string DBHandler::getTablesAsJSON(const std::string& like, const std::strin
     return tablesAsJSON(getTablesAsText(like, statement));
 }
 
+
 /**
  * Get all configs as JSON
  * @return
@@ -927,6 +931,7 @@ std::string DBHandler::getConfigs() {
     std::string result = getTablesAsJSON("config_%", "WHERE id = 1");
 	return result;
 }
+
 
 /**
  * Get all waypoints as JSON
@@ -940,6 +945,7 @@ std::string DBHandler::getWayPointsAsJSON() {
 	}
 	return result;
 }
+
 
 /**
  * Get all dataLogs as JSON
@@ -1628,6 +1634,7 @@ std::string DBHandler::prepend(const std::string& prefix, const std::string& str
     return ret;
 }
 
+
 /**
  * Prepends all strings with a prefix
  * @param prefix
@@ -1642,6 +1649,7 @@ std::vector<std::string> DBHandler::prepend(const std::string& prefix,
     }
     return result;
 }
+
 
 // Theese could be put in a separate util lib
 // From: https://stackoverflow.com/questions/5288396/c-ostream-out-manipulation/5289170#5289170

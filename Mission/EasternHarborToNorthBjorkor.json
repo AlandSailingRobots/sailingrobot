@@ -1,6 +1,6 @@
 {
     "1": {
-        "is_checkpoint": 0,
+        "isCheckpoint": 0,
         "latitude": 60.10045887661865,
         "longitude": 19.95677987725212,
         "declination": 6,
@@ -9,7 +9,7 @@
         "harvested": 0
     },
     "2": {
-        "is_checkpoint": 0,
+        "isCheckpoint": 0,
         "latitude": 60.1004454207209,
         "longitude": 19.95665411806137,
         "declination": 6,
@@ -18,7 +18,7 @@
         "harvested": 0
     },
     "3": {
-        "is_checkpoint": 0,
+        "isCheckpoint": 0,
         "latitude": 60.09504467521966,
         "longitude": 19.95902557708698,
         "declination": 6,
@@ -27,7 +27,7 @@
         "harvested": 0
     },
     "4": {
-        "is_checkpoint": 0,
+        "isCheckpoint": 0,
         "latitude": 60.08260253605897,
         "longitude": 19.97387414439507,
         "declination": 6,
@@ -36,7 +36,7 @@
         "harvested": 0
     },
     "5": {
-        "is_checkpoint": 0,
+        "isCheckpoint": 0,
         "latitude": 60.08058748023929,
         "longitude": 19.97254469009283,
         "declination": 6,
@@ -45,7 +45,7 @@
         "harvested": 0
     },
     "6": {
-        "is_checkpoint": 0,
+        "isCheckpoint": 0,
         "latitude": 60.0774771404061,
         "longitude": 19.97047864624476,
         "declination": 6,
@@ -54,7 +54,7 @@
         "harvested": 0
     },
     "7": {
-        "is_checkpoint": 0,
+        "isCheckpoint": 0,
         "latitude": 60.07742776755916,
         "longitude": 19.97046966344542,
         "declination": 6,
@@ -63,7 +63,7 @@
         "harvested": 0
     },
     "8": {
-        "is_checkpoint": 0,
+        "isCheckpoint": 0,
         "latitude": 60.07615302474196,
         "longitude": 19.97033492145533,
         "declination": 6,
@@ -72,7 +72,7 @@
         "harvested": 0
     },
     "9": {
-        "is_checkpoint": 0,
+        "isCheckpoint": 0,
         "latitude": 60.07540790569295,
         "longitude": 19.97085592381702,
         "declination": 6,
@@ -81,7 +81,7 @@
         "harvested": 0
     },
     "10": {
-        "is_checkpoint": 0,
+        "isCheckpoint": 0,
         "latitude": 60.07342383163933,
         "longitude": 19.97223029211595,
         "declination": 6,
@@ -90,7 +90,7 @@
         "harvested": 0
     },
     "11": {
-        "is_checkpoint": 0,
+        "isCheckpoint": 0,
         "latitude": 60.06975163206114,
         "longitude": 19.97555392787154,
         "declination": 6,
@@ -99,7 +99,7 @@
         "harvested": 0
     },
     "12": {
-        "is_checkpoint": 0,
+        "isCheckpoint": 0,
         "latitude": 60.0670802756304,
         "longitude": 19.97797928369319,
         "declination": 6,
@@ -108,7 +108,7 @@
         "harvested": 0
     },
     "13": {
-        "is_checkpoint": 0,
+        "isCheckpoint": 0,
         "latitude": 60.06515856064753,
         "longitude": 19.97923687560072,
         "declination": 6,
@@ -117,7 +117,7 @@
         "harvested": 0
     },
     "14": {
-        "is_checkpoint": 0,
+        "isCheckpoint": 0,
         "latitude": 60.06323224296599,
         "longitude": 19.98051243310692,
         "declination": 6,
@@ -126,7 +126,7 @@
         "harvested": 0
     },
     "15": {
-        "is_checkpoint": 0,
+        "isCheckpoint": 0,
         "latitude": 60.05570100922165,
         "longitude": 19.98545297274361,
         "declination": 6,
@@ -135,7 +135,7 @@
         "harvested": 0
     },
     "16": {
-        "is_checkpoint": 0,
+        "isCheckpoint": 0,
         "latitude": 60.04812761882522,
         "longitude": 19.99440882368502,
         "declination": 6,
@@ -144,7 +144,7 @@
         "harvested": 0
     },
     "17": {
-        "is_checkpoint": 0,
+        "isCheckpoint": 0,
         "latitude": 60.03929878037975,
         "longitude": 20.00632001560912,
         "declination": 6,
@@ -153,7 +153,7 @@
         "harvested": 0
     },
     "18": {
-        "is_checkpoint": 0,
+        "isCheckpoint": 0,
         "latitude": 60.03662045587618,
         "longitude": 20.01070362168677,
         "declination": 6,
@@ -162,7 +162,7 @@
         "harvested": 0
     },
     "19": {
-        "is_checkpoint": 0,
+        "isCheckpoint": 0,
         "latitude": 60.03644518879034,
         "longitude": 20.01099107126563,
         "declination": 6,
@@ -171,7 +171,7 @@
         "harvested": 0
     },
     "20": {
-        "is_checkpoint": 0,
+        "isCheckpoint": 0,
         "latitude": 60.0313575426424,
         "longitude": 20.02178839607163,
         "declination": 6,
@@ -180,7 +180,7 @@
         "harvested": 0
     },
     "21": {
-        "is_checkpoint": 0,
+        "isCheckpoint": 0,
         "latitude": 60.02861564055137,
         "longitude": 20.02820211479999,
         "declination": 6,
@@ -189,7 +189,7 @@
         "harvested": 0
     },
     "22": {
-        "is_checkpoint": 0,
+        "isCheckpoint": 0,
         "latitude": 60.02509128682546,
         "longitude": 20.03471464432108,
         "declination": 6,
@@ -198,7 +198,7 @@
         "harvested": 0
     },
     "23": {
-        "is_checkpoint": 0,
+        "isCheckpoint": 0,
         "latitude": 60.02439895873787,
         "longitude": 20.03643035899492,
         "declination": 6,
@@ -207,7 +207,7 @@
         "harvested": 0
     },
     "24": {
-        "is_checkpoint": 0,
+        "isCheckpoint": 0,
         "latitude": 60.02277597676148,
         "longitude": 20.04047261869767,
         "declination": 6,
@@ -216,7 +216,7 @@
         "harvested": 0
     },
     "25": {
-        "is_checkpoint": 0,
+        "isCheckpoint": 0,
         "latitude": 60.0214406656983,
         "longitude": 20.04515265715351,
         "declination": 6,
@@ -225,7 +225,7 @@
         "harvested": 0
     },
     "26": {
-        "is_checkpoint": 0,
+        "isCheckpoint": 0,
         "latitude": 60.02109446510474,
         "longitude": 20.0453323131403,
         "declination": 6,
@@ -234,7 +234,7 @@
         "harvested": 0
     },
     "27": {
-        "is_checkpoint": 0,
+        "isCheckpoint": 0,
         "latitude": 60.01752883690143,
         "longitude": 20.04721870100158,
         "declination": 6,
@@ -243,7 +243,7 @@
         "harvested": 0
     },
     "28": {
-        "is_checkpoint": 0,
+        "isCheckpoint": 0,
         "latitude": 60.01318481377405,
         "longitude": 20.0479732561461,
         "declination": 6,
@@ -252,7 +252,7 @@
         "harvested": 0
     },
     "29": {
-        "is_checkpoint": 0,
+        "isCheckpoint": 0,
         "latitude": 60.01013556105877,
         "longitude": 20.04871882849127,
         "declination": 6,
@@ -261,7 +261,7 @@
         "harvested": 0
     },
     "30": {
-        "is_checkpoint": 0,
+        "isCheckpoint": 0,
         "latitude": 60.00224577205973,
         "longitude": 20.0623008210925,
         "declination": 6,
@@ -270,7 +270,7 @@
         "harvested": 0
     },
     "31": {
-        "is_checkpoint": 0,
+        "isCheckpoint": 0,
         "latitude": 59.99532153379945,
         "longitude": 20.07612534927589,
         "declination": 6,
@@ -279,7 +279,7 @@
         "harvested": 0
     },
     "32": {
-        "is_checkpoint": 0,
+        "isCheckpoint": 0,
         "latitude": 59.99486706575299,
         "longitude": 20.07702362920984,
         "declination": 6,
@@ -288,7 +288,7 @@
         "harvested": 0
     },
     "33": {
-        "is_checkpoint": 0,
+        "isCheckpoint": 0,
         "latitude": 59.99443959009177,
         "longitude": 20.07864951589028,
         "declination": 6,
@@ -297,7 +297,7 @@
         "harvested": 0
     },
     "34": {
-        "is_checkpoint": 0,
+        "isCheckpoint": 0,
         "latitude": 59.99399860939226,
         "longitude": 20.08030235096873,
         "declination": 6,
@@ -306,7 +306,7 @@
         "harvested": 0
     },
     "35": {
-        "is_checkpoint": 0,
+        "isCheckpoint": 0,
         "latitude": 59.99335512697444,
         "longitude": 20.08288041437915,
         "declination": 6,
@@ -315,7 +315,7 @@
         "harvested": 0
     },
     "36": {
-        "is_checkpoint": 0,
+        "isCheckpoint": 0,
         "latitude": 59.99313913006141,
         "longitude": 20.08375174591508,
         "declination": 6,
@@ -324,7 +324,7 @@
         "harvested": 0
     },
     "37": {
-        "is_checkpoint": 0,
+        "isCheckpoint": 0,
         "latitude": 59.99243263027677,
         "longitude": 20.08553932298362,
         "declination": 6,
@@ -333,7 +333,7 @@
         "harvested": 0
     },
     "38": {
-        "is_checkpoint": 0,
+        "isCheckpoint": 0,
         "latitude": 59.99173511564155,
         "longitude": 20.08675200089445,
         "declination": 6,
@@ -342,7 +342,7 @@
         "harvested": 0
     },
     "39": {
-        "is_checkpoint": 0,
+        "isCheckpoint": 0,
         "latitude": 59.99121759524985,
         "longitude": 20.0876502808284,
         "declination": 6,
@@ -351,7 +351,7 @@
         "harvested": 0
     },
     "40": {
-        "is_checkpoint": 0,
+        "isCheckpoint": 0,
         "latitude": 59.99076757091672,
         "longitude": 20.08844076717027,
         "declination": 6,
@@ -360,7 +360,7 @@
         "harvested": 0
     },
     "41": {
-        "is_checkpoint": 0,
+        "isCheckpoint": 0,
         "latitude": 59.99068656588458,
         "longitude": 20.08857550916036,
         "declination": 6,
@@ -369,7 +369,7 @@
         "harvested": 0
     },
     "42": {
-        "is_checkpoint": 0,
+        "isCheckpoint": 0,
         "latitude": 59.99007452143353,
         "longitude": 20.09061460461041,
         "declination": 6,
@@ -378,7 +378,7 @@
         "harvested": 0
     },
     "43": {
-        "is_checkpoint": 0,
+        "isCheckpoint": 0,
         "latitude": 59.98937695692329,
         "longitude": 20.09362384238912,
         "declination": 6,
@@ -387,7 +387,7 @@
         "harvested": 0
     },
     "44": {
-        "is_checkpoint": 0,
+        "isCheckpoint": 0,
         "latitude": 59.98964698364514,
         "longitude": 20.09627376819425,
         "declination": 6,
@@ -396,7 +396,7 @@
         "harvested": 0
     },
     "45": {
-        "is_checkpoint": 0,
+        "isCheckpoint": 0,
         "latitude": 59.9897549937149,
         "longitude": 20.09733373851631,
         "declination": 6,
@@ -405,7 +405,7 @@
         "harvested": 0
     },
     "46": {
-        "is_checkpoint": 0,
+        "isCheckpoint": 0,
         "latitude": 59.98998901431925,
         "longitude": 20.10114244543623,
         "declination": 6,
@@ -414,7 +414,7 @@
         "harvested": 0
     },
     "47": {
-        "is_checkpoint": 0,
+        "isCheckpoint": 0,
         "latitude": 59.9897549937149,
         "longitude": 20.10330730007703,
         "declination": 6,
@@ -423,7 +423,7 @@
         "harvested": 0
     },
     "48": {
-        "is_checkpoint": 0,
+        "isCheckpoint": 0,
         "latitude": 59.98947596697801,
         "longitude": 20.10434930480041,
         "declination": 6,
@@ -432,7 +432,7 @@
         "harvested": 0
     },
     "49": {
-        "is_checkpoint": 0,
+        "isCheckpoint": 0,
         "latitude": 59.9893544545967,
         "longitude": 20.10478946196804,
         "declination": 6,
@@ -441,7 +441,7 @@
         "harvested": 0
     },
     "50": {
-        "is_checkpoint": 0,
+        "isCheckpoint": 0,
         "latitude": 59.98891790642249,
         "longitude": 20.10564282790529,
         "declination": 6,
@@ -450,7 +450,7 @@
         "harvested": 0
     },
     "51": {
-        "is_checkpoint": 0,
+        "isCheckpoint": 0,
         "latitude": 59.98785576508469,
         "longitude": 20.10892154966418,
         "declination": 6,
@@ -459,7 +459,7 @@
         "harvested": 0
     },
     "52": {
-        "is_checkpoint": 0,
+        "isCheckpoint": 0,
         "latitude": 59.98658655134444,
         "longitude": 20.11255060059732,
         "declination": 6,
@@ -468,7 +468,7 @@
         "harvested": 0
     },
     "53": {
-        "is_checkpoint": 0,
+        "isCheckpoint": 0,
         "latitude": 59.98657304880807,
         "longitude": 20.11259551459401,
         "declination": 6,
@@ -477,7 +477,7 @@
         "harvested": 0
     },
     "54": {
-        "is_checkpoint": 0,
+        "isCheckpoint": 0,
         "latitude": 59.9856953720882,
         "longitude": 20.11399683129097,
         "declination": 6,
@@ -486,7 +486,7 @@
         "harvested": 0
     },
     "55": {
-        "is_checkpoint": 0,
+        "isCheckpoint": 0,
         "latitude": 59.98165775838837,
         "longitude": 20.11699708627034,
         "declination": 6,
@@ -495,7 +495,7 @@
         "harvested": 0
     },
     "56": {
-        "is_checkpoint": 0,
+        "isCheckpoint": 0,
         "latitude": 59.98129313349333,
         "longitude": 20.11729351864854,
         "declination": 6,
@@ -504,7 +504,7 @@
         "harvested": 0
     },
     "57": {
-        "is_checkpoint": 0,
+        "isCheckpoint": 0,
         "latitude": 59.98077094761346,
         "longitude": 20.11771571021749,
         "declination": 6,
@@ -513,7 +513,7 @@
         "harvested": 0
     },
     "58": {
-        "is_checkpoint": 0,
+        "isCheckpoint": 0,
         "latitude": 59.96990670678531,
         "longitude": 20.17200774942506,
         "declination": 6,
@@ -522,7 +522,7 @@
         "harvested": 0
     },
     "59": {
-        "is_checkpoint": 0,
+        "isCheckpoint": 0,
         "latitude": 59.96969055630469,
         "longitude": 20.17310365094447,
         "declination": 6,
@@ -531,7 +531,7 @@
         "harvested": 0
     },
     "60": {
-        "is_checkpoint": 0,
+        "isCheckpoint": 0,
         "latitude": 59.9695059266483,
         "longitude": 20.17423548366124,
         "declination": 6,
@@ -540,7 +540,7 @@
         "harvested": 0
     },
     "61": {
-        "is_checkpoint": 0,
+        "isCheckpoint": 0,
         "latitude": 59.96896103798264,
         "longitude": 20.17656202869015,
         "declination": 6,
@@ -549,7 +549,7 @@
         "harvested": 0
     },
     "62": {
-        "is_checkpoint": 0,
+        "isCheckpoint": 0,
         "latitude": 59.96838011371369,
         "longitude": 20.17841248535407,
         "declination": 6,
@@ -558,7 +558,7 @@
         "harvested": 0
     },
     "63": {
-        "is_checkpoint": 0,
+        "isCheckpoint": 0,
         "latitude": 59.96744340808905,
         "longitude": 20.18065818518894,
         "declination": 6,
@@ -567,7 +567,7 @@
         "harvested": 0
     },
     "64": {
-        "is_checkpoint": 0,
+        "isCheckpoint": 0,
         "latitude": 59.96653369737793,
         "longitude": 20.18401775214189,
         "declination": 6,
@@ -576,7 +576,7 @@
         "harvested": 0
     },
     "65": {
-        "is_checkpoint": 0,
+        "isCheckpoint": 0,
         "latitude": 59.96565999121421,
         "longitude": 20.19321613866547,
         "declination": 6,
@@ -585,7 +585,7 @@
         "harvested": 0
     },
     "66": {
-        "is_checkpoint": 0,
+        "isCheckpoint": 0,
         "latitude": 59.94910023983085,
         "longitude": 20.23654017987958,
         "declination": 6,

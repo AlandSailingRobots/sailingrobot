@@ -166,7 +166,7 @@ CREATE TABLE dataLogs_system (
   vessel_state_id	 	INTEGER,
   wind_state_id	 		INTEGER,
   windsensor_id 		INTEGER,
-  powertrack_id     INTEGER,
+  powertrack_id         INTEGER,
   current_mission_id 	INTEGER,
   CONSTRAINT actuator_feedback_id
   	FOREIGN KEY (actuator_feedback_id)
