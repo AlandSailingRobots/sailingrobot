@@ -34,11 +34,11 @@ void LidarLiteNode::start()
 		runThread(LidarThreadFunc);
 	}
 	else{
-		Logger::error("%sCannot open the Lidar connexion", __PRETTY_FUNCTION__);
+		Logger::error("%sCannot open the Lidar connection", __PRETTY_FUNCTION__);
 	}
 }
 
-void LidarLiteNode::LidarThreadFunc(void* nodePtr)
+void LidarLiteNode::LidarThreadFunc(ActiveNode* nodePtr)
 {
 	LidarLiteNode* node = (LidarLiteNode*)nodePtr;
 	Logger::info("LidarLiteNode thread started");
@@ -46,7 +46,7 @@ void LidarLiteNode::LidarThreadFunc(void* nodePtr)
 	for (;;) {
 		res = lidar_read(node->m_fd);
 		st = lidar_status(node->m_fd);
-		Logger::info("%3.0d cm \n", res);
+		Logger::trace("Lidar Node: distance = %3.0d cm \n", res);
 		lidar_status_print(st);
 
 		MessagePtr msg = std::make_unique<LidarMsg>(res);

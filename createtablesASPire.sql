@@ -3,7 +3,7 @@ BEGIN TRANSACTION;
 
 DROP TABLE IF EXISTS "currentMission";
 CREATE TABLE currentMission (id INTEGER PRIMARY KEY AUTOINCREMENT, -- no autoincrement to ensure a correct order
-	isCheckpoint BOOLEAN,
+	isCheckpoint  BOOLEAN,
 	latitude      DOUBLE,
 	longitude     DOUBLE,
 	declination   INTEGER,
@@ -38,6 +38,7 @@ CREATE TABLE dataLogs_compass (
   heading 		DOUBLE,
   pitch 		DOUBLE,
   roll 			DOUBLE,
+  acquisition_timestamp VARCHAR(20),
   t_timestamp 	TIMESTAMP
 );
 
@@ -138,6 +139,16 @@ CREATE TABLE dataLogs_windsensor (
   t_timestamp  TIMESTAMP
 );
 
+-- -----------------------------------------------------
+-- Table windsensor_datalogs
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS "dataLogs_powertrack";
+CREATE TABLE dataLogs_powertrack (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  balance   DOUBLE,
+  t_timestamp  TIMESTAMP
+);
+
 
 
 -- -----------------------------------------------------
@@ -155,6 +166,7 @@ CREATE TABLE dataLogs_system (
   vessel_state_id	 	INTEGER,
   wind_state_id	 		INTEGER,
   windsensor_id 		INTEGER,
+  powertrack_id         INTEGER,
   current_mission_id 	INTEGER,
   CONSTRAINT actuator_feedback_id
   	FOREIGN KEY (actuator_feedback_id)
@@ -182,7 +194,10 @@ CREATE TABLE dataLogs_system (
     REFERENCES dataLogs_wind_state (id),
   CONSTRAINT windsensor_id
     FOREIGN KEY (windsensor_id)
-    REFERENCES dataLogs_windsensor (id)
+    REFERENCES dataLogs_windsensor (id),
+  CONSTRAINT powertrack_id
+    FOREIGN KEY (powertrack_id)
+    REFERENCES dataLogs_powertrack (id)
   );
 
 
@@ -198,6 +213,7 @@ DELETE FROM "dataLogs_marine_sensors" WHERE ID = OLD.marine_sensors_id;
 DELETE FROM "dataLogs_vessel_state" WHERE ID = OLD.vessel_state_id;
 DELETE FROM "dataLogs_wind_state" WHERE ID = OLD.wind_state_id;
 DELETE FROM "dataLogs_windsensor" WHERE ID = OLD.windsensor_id;
+DELETE FROM "dataLogs_powertrack" WHERE ID = OLD.powertrack_id;
 
 END;
 
@@ -335,6 +351,7 @@ CREATE TABLE config_voter_system (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   loop_time 				DOUBLE,
   max_vote 					INTEGER,
+  course_voter_weight       DOUBLE,
   waypoint_voter_weight 	DOUBLE,
   wind_voter_weight 		DOUBLE,
   channel_voter_weight 		DOUBLE,
@@ -392,7 +409,7 @@ INSERT INTO "config_gps" VALUES(1,0.5);
 INSERT INTO "config_line_follow" VALUES(1,0.5,45,30,15);
 INSERT INTO "config_solar_tracker" VALUES(1,1);
 INSERT INTO "config_vessel_state" VALUES(1, 0.5, 0.5, 1);
-INSERT INTO "config_voter_system" VALUES(1,0.5,25,1,1,1,1,2);
+INSERT INTO "config_voter_system" VALUES(1,0.5,100,0.6,1,1,1,0,0);
 INSERT INTO "config_wind_sensor" VALUES(1,0.5);
 INSERT INTO "config_wingsail_control" VALUES(1,0.5,15);
 INSERT INTO "config_xbee" VALUES(1,1,1,0,0.1,1);

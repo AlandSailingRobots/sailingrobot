@@ -15,9 +15,9 @@
 
 #pragma once
 
-#include "../Navigation/LocalNavigationModule/Voters/ProximityVoter.h"
-#include "../Tests/cxxtest/cxxtest/TestSuite.h"
-#include "../WorldState/CollidableMgr/CollidableMgr.h"
+#include "../../Navigation/LocalNavigationModule/Voters/ProximityVoter.h"
+#include "../../Tests/cxxtest/cxxtest/TestSuite.h"
+#include "../../WorldState/CollidableMgr/CollidableMgr.h"
 
 class ProximityVoterSuite : public CxxTest::TestSuite {
    public:

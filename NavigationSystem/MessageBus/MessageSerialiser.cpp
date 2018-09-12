@@ -15,7 +15,6 @@
 #include "../MessageBus/MessageSerialiser.h"
 #include "../SystemServices/Logger.h"
 
-
 void MessageSerialiser::serialise(uint8_t data)
 {
 	if(m_ptr != MAX_MESSAGE_SIZE)
@@ -35,6 +34,12 @@ void MessageSerialiser::serialise(uint16_t data)
 }
 
 void MessageSerialiser::serialise(uint32_t data)
+{
+	uint8_t* ptr = (uint8_t*)&data;
+	serialise(ptr, sizeof(data));
+}
+
+void MessageSerialiser::serialise(uint64_t data)
 {
 	uint8_t* ptr = (uint8_t*)&data;
 	serialise(ptr, sizeof(data));

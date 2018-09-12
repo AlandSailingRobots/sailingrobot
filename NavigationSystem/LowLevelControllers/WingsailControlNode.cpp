@@ -74,8 +74,8 @@ void WingsailControlNode::processMessage( const Message* msg)
 ///----------------------------------------------------------------------------------
 void WingsailControlNode::updateConfigsFromDB()
 {
-    m_LoopTime = m_db.retrieveCellAsDouble("config_wingsail_control","1","loop_time");
-    m_MaxCommandAngle = m_db.retrieveCellAsDouble("config_wingsail_control","1","max_cmd_angle");
+    m_db.getConfigFrom(m_LoopTime, "loop_time", "config_wingsail_control");
+    m_db.getConfigFrom(m_MaxCommandAngle, "max_cmd_angle", "config_wingsail_control");
 }
 
 ///----------------------------------------------------------------------------------
@@ -141,19 +141,26 @@ float WingsailControlNode::calculateTailAngle()
 }
 
 ///----------------------------------------------------------------------------------
-float WingsailControlNode::simpleCalculateTailAngle()
-{
-    std::lock_guard<std::mutex> lock_guard(m_lock);
+float WingsailControlNode::simpleCalculateTailAngle() {
+    std::lock_guard <std::mutex> lock_guard(m_lock);
 
+    ///   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!------
+
+
+    //Logger::info("APP WIND %f", sin(Utility::degreeToRadian(m_ApparentWindDir)));
     if(m_TargetCourse != DATA_OUT_OF_RANGE && m_TargetCourse != NO_COMMAND)
     {
+
+        // TODO : take the speed of the boat into account somewhere there when tacking
+        // The use of m_TargetTackStarboard still better than sin(Utility::degreeToRadian(m_ApparentWindDir)) >= 0
+        // in 'bad' wind conditions
         if (m_TargetTackStarboard)
         {
-            return m_MaxCommandAngle;
+            return -m_MaxCommandAngle;
         }
         else
         {
-            return - m_MaxCommandAngle;
+            return  m_MaxCommandAngle;
         }
     }
     else

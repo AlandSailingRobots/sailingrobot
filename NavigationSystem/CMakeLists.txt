@@ -1,0 +1,764 @@
+cmake_minimum_required(VERSION 3.10)
+project(NavigationSystem)
+
+set(CMAKE_CONFIGURATION_TYPES "Debug" CACHE STRING "" FORCE)
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -Wall -pedantic -Werror -std=gnu++14 -Wno-psabi")
+
+add_custom_target(sr-all COMMAND make -C ${NavigationSystem_SOURCE_DIR} all CLION_EXE_DIR=${PROJECT_BINARY_DIR})
+add_custom_target(sr-nosim COMMAND make -C ${NavigationSystem_SOURCE_DIR} ASPire CLION_EXE_DIR=${PROJECT_BINARY_DIR})
+add_custom_target(sr-sim COMMAND make -C ${NavigationSystem_SOURCE_DIR} ASPire USE_SIM=1 CLION_EXE_DIR=${PROJECT_BINARY_DIR})
+add_custom_target(sr-sim-lnm COMMAND make -C ${NavigationSystem_SOURCE_DIR} ASPire USE_SIM=1 USE_LNM=1 CLION_EXE_DIR=${PROJECT_BINARY_DIR})
+
+add_custom_target(chroot-sr-all COMMAND sudo arch-chroot /home/sailbot/sailingrobot-chroot /usr/bin/make -C /root/sailingrobot/NavigationSystem clean ASPire CLION_EXE_DIR=${PROJECT_BINARY_DIR})
+add_custom_target(chroot-sr-nosim COMMAND sudo arch-chroot /home/sailbot/sailingrobot-chroot /usr/bin/make -C /root/sailingrobot/NavigationSystem clean ASPire CLION_EXE_DIR=${PROJECT_BINARY_DIR})
+add_custom_target(chroot-sr-sim COMMAND sudo arch-chroot /home/sailbot/sailingrobot-chroot /usr/bin/make -C /root/sailingrobot/NavigationSystem clean ASPire USE_SIM=1 CLION_EXE_DIR=${PROJECT_BINARY_DIR})
+add_custom_target(chroot-sr-sim-lnm COMMAND sudo arch-chroot /home/sailbot/sailingrobot-chroot /usr/bin/make -C /root/sailingrobot/NavigationSystem clean ASPire USE_SIM=1 USE_LNM=1 CLION_EXE_DIR=${PROJECT_BINARY_DIR})
+
+include_directories(Database)
+include_directories(DataCollection)
+include_directories(Hardwares)
+include_directories(Hardwares/AtlasScientificController)
+include_directories(Hardwares/CAN_Services)
+include_directories(Hardwares/CAN_Services/CanBusCommon)
+include_directories(Hardwares/i2ccontroller)
+include_directories(Hardwares/lidarLite)
+include_directories(Hardwares/MaestroController)
+include_directories(HTTPSync)
+include_directories(Libs/Eigen)
+include_directories(Libs/Eigen/src)
+include_directories(Libs/Eigen/src/Cholesky)
+include_directories(Libs/Eigen/src/CholmodSupport)
+include_directories(Libs/Eigen/src/Core)
+include_directories(Libs/Eigen/src/Core/arch)
+include_directories(Libs/Eigen/src/Core/arch/AltiVec)
+include_directories(Libs/Eigen/src/Core/arch/Default)
+include_directories(Libs/Eigen/src/Core/arch/NEON)
+include_directories(Libs/Eigen/src/Core/arch/SSE)
+include_directories(Libs/Eigen/src/Core/products)
+include_directories(Libs/Eigen/src/Core/util)
+include_directories(Libs/Eigen/src/Eigen2Support)
+include_directories(Libs/Eigen/src/Eigen2Support/Geometry)
+include_directories(Libs/Eigen/src/Eigenvalues)
+include_directories(Libs/Eigen/src/Geometry)
+include_directories(Libs/Eigen/src/Geometry/arch)
+include_directories(Libs/Eigen/src/Householder)
+include_directories(Libs/Eigen/src/IterativeLinearSolvers)
+include_directories(Libs/Eigen/src/Jacobi)
+include_directories(Libs/Eigen/src/LU)
+include_directories(Libs/Eigen/src/LU/arch)
+include_directories(Libs/Eigen/src/MetisSupport)
+include_directories(Libs/Eigen/src/misc)
+include_directories(Libs/Eigen/src/OrderingMethods)
+include_directories(Libs/Eigen/src/PardisoSupport)
+include_directories(Libs/Eigen/src/PaStiXSupport)
+include_directories(Libs/Eigen/src/plugins)
+include_directories(Libs/Eigen/src/QR)
+include_directories(Libs/Eigen/src/SparseCholesky)
+include_directories(Libs/Eigen/src/SparseCore)
+include_directories(Libs/Eigen/src/SparseLU)
+include_directories(Libs/Eigen/src/SparseQR)
+include_directories(Libs/Eigen/src/SPQRSupport)
+include_directories(Libs/Eigen/src/StlSupport)
+include_directories(Libs/Eigen/src/SuperLUSupport)
+include_directories(Libs/Eigen/src/SVD)
+include_directories(Libs/Eigen/src/UmfPackSupport)
+include_directories(Libs/json)
+include_directories(Libs/json/include)
+include_directories(Libs/json/include/nlohmann)
+include_directories(Libs/json/include/nlohmann/detail)
+include_directories(Libs/json/include/nlohmann/detail/conversions)
+include_directories(Libs/json/include/nlohmann/detail/input)
+include_directories(Libs/json/include/nlohmann/detail/iterators)
+include_directories(Libs/json/include/nlohmann/detail/output)
+include_directories(Libs/wiringPi/devLib)
+include_directories(Libs/wiringPi/examples)
+include_directories(Libs/wiringPi/gpio)
+include_directories(Libs/wiringPi/wiringPi)
+include_directories(LowLevelControllers)
+include_directories(Math)
+include_directories(MessageBus)
+include_directories(Messages)
+include_directories(Navigation)
+include_directories(Navigation/LocalNavigationModule)
+include_directories(Navigation/LocalNavigationModule/Voters)
+include_directories(Network)
+include_directories(Simulation)
+include_directories(SystemServices)
+include_directories(Tests/cxxtest/cxxtest)
+include_directories(Tests/unit-tests)
+include_directories(Tests/unit-tests/TestMocks)
+include_directories(WorldState)
+include_directories(WorldState/CollidableMgr)
+include_directories(WorldState/obstacledetection)
+include_directories(Xbee)
+
+add_executable(sr
+        Database/DBHandler.cpp
+        Database/DBHandler.h
+        Database/DBLogger.cpp
+        Database/DBLogger.h
+        Database/DBLoggerNode.cpp
+        Database/DBLoggerNode.h
+        Database/readConfig.cpp
+        Database/readConfig.h
+        DataCollection/DataCollectionMgrNode.cpp
+        DataCollection/DataCollectionMgrNode.h
+        Hardwares/AtlasScientificController/AtlasScientific.cpp
+        Hardwares/AtlasScientificController/AtlasScientific.h
+        Hardwares/CAN_Services/CanBusCommon/canbus_datamappings_defs.h
+        Hardwares/CAN_Services/CanBusCommon/canbus_defs.h
+        Hardwares/CAN_Services/CanBusCommon/canbus_error_defs.h
+        Hardwares/CAN_Services/CanBusCommon/canbus_global_defs.h
+        Hardwares/CAN_Services/CanBusCommon/canbus_id_defs.h
+        Hardwares/CAN_Services/CanBusCommon/canbus_struct_defs.h
+        Hardwares/CAN_Services/CanBusCommon/CanMessageHandler.cpp
+        Hardwares/CAN_Services/CanBusCommon/CanMessageHandler.h
+        Hardwares/CAN_Services/CanBusCommon/CanUtility.cpp
+        Hardwares/CAN_Services/CanBusCommon/CanUtility.h
+        Hardwares/CAN_Services/CanBusCommon/Float16Compressor.h
+        Hardwares/CAN_Services/can_rpi_defs.h
+        Hardwares/CAN_Services/CANFrameReceiver.cpp
+        Hardwares/CAN_Services/CANFrameReceiver.h
+        Hardwares/CAN_Services/CANPGNReceiver.cpp
+        Hardwares/CAN_Services/CANPGNReceiver.h
+        Hardwares/CAN_Services/CANService.cpp
+        Hardwares/CAN_Services/CANService.h
+        Hardwares/CAN_Services/mcp2515.cpp
+        Hardwares/CAN_Services/mcp2515.h
+        Hardwares/CAN_Services/mcp2515_defs.h
+        Hardwares/CAN_Services/MsgFunctions.cpp
+        Hardwares/CAN_Services/N2kMsg.h
+        Hardwares/i2ccontroller/I2CController.cpp
+        Hardwares/i2ccontroller/I2CController.h
+        Hardwares/lidarLite/lidarLite.cpp
+        Hardwares/lidarLite/lidarLite.h
+        Hardwares/MaestroController/MaestroController.cpp
+        Hardwares/MaestroController/MaestroController.h
+        Hardwares/ActuatorNodeASPire.cpp
+        Hardwares/ActuatorNodeASPire.h
+        Hardwares/ArduinoNode.cpp
+        Hardwares/ArduinoNode.h
+        Hardwares/ArduinoNodeForWindSensor.cpp
+        Hardwares/ArduinoNodeForWindSensor.h
+        Hardwares/CANAISNode.cpp
+        Hardwares/CANAISNode.h
+        Hardwares/CANArduinoNode.cpp
+        Hardwares/CANArduinoNode.h
+        Hardwares/CANCurrentSensorNode.cpp
+        Hardwares/CANCurrentSensorNode.h
+        Hardwares/CANMarineSensorReceiver.cpp
+        Hardwares/CANMarineSensorReceiver.h
+        Hardwares/CANMarineSensorTransmissionNode.cpp
+        Hardwares/CANMarineSensorTransmissionNode.h
+        Hardwares/CANSolarTrackerNode.cpp
+        Hardwares/CANSolarTrackerNode.h
+        Hardwares/CANWindsensorNode.cpp
+        Hardwares/CANWindsensorNode.h
+        Hardwares/CV7Node.cpp
+        Hardwares/CV7Node.h
+        Hardwares/GPSDNode.cpp
+        Hardwares/GPSDNode.h
+        Hardwares/HMC6343Node.cpp
+        Hardwares/HMC6343Node.h
+        Hardwares/LidarLiteNode.cpp
+        Hardwares/LidarLiteNode.h
+        HTTPSync/HTTPSyncNode.cpp
+        HTTPSync/HTTPSyncNode.h
+        Libs/Eigen/src/Cholesky/LDLT.h
+        Libs/Eigen/src/Cholesky/LLT.h
+        Libs/Eigen/src/Cholesky/LLT_MKL.h
+        Libs/Eigen/src/CholmodSupport/CholmodSupport.h
+        Libs/Eigen/src/Core/arch/AltiVec/Complex.h
+        Libs/Eigen/src/Core/arch/AltiVec/PacketMath.h
+        Libs/Eigen/src/Core/arch/Default/Settings.h
+        Libs/Eigen/src/Core/arch/NEON/Complex.h
+        Libs/Eigen/src/Core/arch/NEON/PacketMath.h
+        Libs/Eigen/src/Core/arch/SSE/Complex.h
+        Libs/Eigen/src/Core/arch/SSE/MathFunctions.h
+        Libs/Eigen/src/Core/arch/SSE/PacketMath.h
+        Libs/Eigen/src/Core/products/CoeffBasedProduct.h
+        Libs/Eigen/src/Core/products/GeneralBlockPanelKernel.h
+        Libs/Eigen/src/Core/products/GeneralMatrixMatrix.h
+        Libs/Eigen/src/Core/products/GeneralMatrixMatrix_MKL.h
+        Libs/Eigen/src/Core/products/GeneralMatrixMatrixTriangular.h
+        Libs/Eigen/src/Core/products/GeneralMatrixMatrixTriangular_MKL.h
+        Libs/Eigen/src/Core/products/GeneralMatrixVector.h
+        Libs/Eigen/src/Core/products/GeneralMatrixVector_MKL.h
+        Libs/Eigen/src/Core/products/Parallelizer.h
+        Libs/Eigen/src/Core/products/SelfadjointMatrixMatrix.h
+        Libs/Eigen/src/Core/products/SelfadjointMatrixMatrix_MKL.h
+        Libs/Eigen/src/Core/products/SelfadjointMatrixVector.h
+        Libs/Eigen/src/Core/products/SelfadjointMatrixVector_MKL.h
+        Libs/Eigen/src/Core/products/SelfadjointProduct.h
+        Libs/Eigen/src/Core/products/SelfadjointRank2Update.h
+        Libs/Eigen/src/Core/products/TriangularMatrixMatrix.h
+        Libs/Eigen/src/Core/products/TriangularMatrixMatrix_MKL.h
+        Libs/Eigen/src/Core/products/TriangularMatrixVector.h
+        Libs/Eigen/src/Core/products/TriangularMatrixVector_MKL.h
+        Libs/Eigen/src/Core/products/TriangularSolverMatrix.h
+        Libs/Eigen/src/Core/products/TriangularSolverMatrix_MKL.h
+        Libs/Eigen/src/Core/products/TriangularSolverVector.h
+        Libs/Eigen/src/Core/util/BlasUtil.h
+        Libs/Eigen/src/Core/util/Constants.h
+        Libs/Eigen/src/Core/util/DisableStupidWarnings.h
+        Libs/Eigen/src/Core/util/ForwardDeclarations.h
+        Libs/Eigen/src/Core/util/Macros.h
+        Libs/Eigen/src/Core/util/Memory.h
+        Libs/Eigen/src/Core/util/Meta.h
+        Libs/Eigen/src/Core/util/MKL_support.h
+        Libs/Eigen/src/Core/util/NonMPL2.h
+        Libs/Eigen/src/Core/util/ReenableStupidWarnings.h
+        Libs/Eigen/src/Core/util/StaticAssert.h
+        Libs/Eigen/src/Core/util/XprHelper.h
+        Libs/Eigen/src/Core/Array.h
+        Libs/Eigen/src/Core/ArrayBase.h
+        Libs/Eigen/src/Core/ArrayWrapper.h
+        Libs/Eigen/src/Core/Assign.h
+        Libs/Eigen/src/Core/Assign_MKL.h
+        Libs/Eigen/src/Core/BandMatrix.h
+        Libs/Eigen/src/Core/Block.h
+        Libs/Eigen/src/Core/BooleanRedux.h
+        Libs/Eigen/src/Core/CommaInitializer.h
+        Libs/Eigen/src/Core/CoreIterators.h
+        Libs/Eigen/src/Core/CwiseBinaryOp.h
+        Libs/Eigen/src/Core/CwiseNullaryOp.h
+        Libs/Eigen/src/Core/CwiseUnaryOp.h
+        Libs/Eigen/src/Core/CwiseUnaryView.h
+        Libs/Eigen/src/Core/DenseBase.h
+        Libs/Eigen/src/Core/DenseCoeffsBase.h
+        Libs/Eigen/src/Core/DenseStorage.h
+        Libs/Eigen/src/Core/Diagonal.h
+        Libs/Eigen/src/Core/DiagonalMatrix.h
+        Libs/Eigen/src/Core/DiagonalProduct.h
+        Libs/Eigen/src/Core/Dot.h
+        Libs/Eigen/src/Core/EigenBase.h
+        Libs/Eigen/src/Core/Flagged.h
+        Libs/Eigen/src/Core/ForceAlignedAccess.h
+        Libs/Eigen/src/Core/Functors.h
+        Libs/Eigen/src/Core/Fuzzy.h
+        Libs/Eigen/src/Core/GeneralProduct.h
+        Libs/Eigen/src/Core/GenericPacketMath.h
+        Libs/Eigen/src/Core/GlobalFunctions.h
+        Libs/Eigen/src/Core/IO.h
+        Libs/Eigen/src/Core/Map.h
+        Libs/Eigen/src/Core/MapBase.h
+        Libs/Eigen/src/Core/MathFunctions.h
+        Libs/Eigen/src/Core/Matrix.h
+        Libs/Eigen/src/Core/MatrixBase.h
+        Libs/Eigen/src/Core/NestByValue.h
+        Libs/Eigen/src/Core/NoAlias.h
+        Libs/Eigen/src/Core/NumTraits.h
+        Libs/Eigen/src/Core/PermutationMatrix.h
+        Libs/Eigen/src/Core/PlainObjectBase.h
+        Libs/Eigen/src/Core/ProductBase.h
+        Libs/Eigen/src/Core/Random.h
+        Libs/Eigen/src/Core/Redux.h
+        Libs/Eigen/src/Core/Ref.h
+        Libs/Eigen/src/Core/Replicate.h
+        Libs/Eigen/src/Core/ReturnByValue.h
+        Libs/Eigen/src/Core/Reverse.h
+        Libs/Eigen/src/Core/Select.h
+        Libs/Eigen/src/Core/SelfAdjointView.h
+        Libs/Eigen/src/Core/SelfCwiseBinaryOp.h
+        Libs/Eigen/src/Core/SolveTriangular.h
+        Libs/Eigen/src/Core/StableNorm.h
+        Libs/Eigen/src/Core/Stride.h
+        Libs/Eigen/src/Core/Swap.h
+        Libs/Eigen/src/Core/Transpose.h
+        Libs/Eigen/src/Core/Transpositions.h
+        Libs/Eigen/src/Core/TriangularMatrix.h
+        Libs/Eigen/src/Core/VectorBlock.h
+        Libs/Eigen/src/Core/VectorwiseOp.h
+        Libs/Eigen/src/Core/Visitor.h
+        Libs/Eigen/src/Eigen2Support/Geometry/AlignedBox.h
+        Libs/Eigen/src/Eigen2Support/Geometry/All.h
+        Libs/Eigen/src/Eigen2Support/Geometry/AngleAxis.h
+        Libs/Eigen/src/Eigen2Support/Geometry/Hyperplane.h
+        Libs/Eigen/src/Eigen2Support/Geometry/ParametrizedLine.h
+        Libs/Eigen/src/Eigen2Support/Geometry/Quaternion.h
+        Libs/Eigen/src/Eigen2Support/Geometry/Rotation2D.h
+        Libs/Eigen/src/Eigen2Support/Geometry/RotationBase.h
+        Libs/Eigen/src/Eigen2Support/Geometry/Scaling.h
+        Libs/Eigen/src/Eigen2Support/Geometry/Transform.h
+        Libs/Eigen/src/Eigen2Support/Geometry/Translation.h
+        Libs/Eigen/src/Eigen2Support/Block.h
+        Libs/Eigen/src/Eigen2Support/Cwise.h
+        Libs/Eigen/src/Eigen2Support/CwiseOperators.h
+        Libs/Eigen/src/Eigen2Support/Lazy.h
+        Libs/Eigen/src/Eigen2Support/LeastSquares.h
+        Libs/Eigen/src/Eigen2Support/LU.h
+        Libs/Eigen/src/Eigen2Support/Macros.h
+        Libs/Eigen/src/Eigen2Support/MathFunctions.h
+        Libs/Eigen/src/Eigen2Support/Memory.h
+        Libs/Eigen/src/Eigen2Support/Meta.h
+        Libs/Eigen/src/Eigen2Support/Minor.h
+        Libs/Eigen/src/Eigen2Support/QR.h
+        Libs/Eigen/src/Eigen2Support/SVD.h
+        Libs/Eigen/src/Eigen2Support/TriangularSolver.h
+        Libs/Eigen/src/Eigen2Support/VectorBlock.h
+        Libs/Eigen/src/Eigenvalues/ComplexEigenSolver.h
+        Libs/Eigen/src/Eigenvalues/ComplexSchur.h
+        Libs/Eigen/src/Eigenvalues/ComplexSchur_MKL.h
+        Libs/Eigen/src/Eigenvalues/EigenSolver.h
+        Libs/Eigen/src/Eigenvalues/GeneralizedEigenSolver.h
+        Libs/Eigen/src/Eigenvalues/GeneralizedSelfAdjointEigenSolver.h
+        Libs/Eigen/src/Eigenvalues/HessenbergDecomposition.h
+        Libs/Eigen/src/Eigenvalues/MatrixBaseEigenvalues.h
+        Libs/Eigen/src/Eigenvalues/RealQZ.h
+        Libs/Eigen/src/Eigenvalues/RealSchur.h
+        Libs/Eigen/src/Eigenvalues/RealSchur_MKL.h
+        Libs/Eigen/src/Eigenvalues/SelfAdjointEigenSolver.h
+        Libs/Eigen/src/Eigenvalues/SelfAdjointEigenSolver_MKL.h
+        Libs/Eigen/src/Eigenvalues/Tridiagonalization.h
+        Libs/Eigen/src/Geometry/arch/Geometry_SSE.h
+        Libs/Eigen/src/Geometry/AlignedBox.h
+        Libs/Eigen/src/Geometry/AngleAxis.h
+        Libs/Eigen/src/Geometry/EulerAngles.h
+        Libs/Eigen/src/Geometry/Homogeneous.h
+        Libs/Eigen/src/Geometry/Hyperplane.h
+        Libs/Eigen/src/Geometry/OrthoMethods.h
+        Libs/Eigen/src/Geometry/ParametrizedLine.h
+        Libs/Eigen/src/Geometry/Quaternion.h
+        Libs/Eigen/src/Geometry/Rotation2D.h
+        Libs/Eigen/src/Geometry/RotationBase.h
+        Libs/Eigen/src/Geometry/Scaling.h
+        Libs/Eigen/src/Geometry/Transform.h
+        Libs/Eigen/src/Geometry/Translation.h
+        Libs/Eigen/src/Geometry/Umeyama.h
+        Libs/Eigen/src/Householder/BlockHouseholder.h
+        Libs/Eigen/src/Householder/Householder.h
+        Libs/Eigen/src/Householder/HouseholderSequence.h
+        Libs/Eigen/src/IterativeLinearSolvers/BasicPreconditioners.h
+        Libs/Eigen/src/IterativeLinearSolvers/BiCGSTAB.h
+        Libs/Eigen/src/IterativeLinearSolvers/ConjugateGradient.h
+        Libs/Eigen/src/IterativeLinearSolvers/IncompleteLUT.h
+        Libs/Eigen/src/IterativeLinearSolvers/IterativeSolverBase.h
+        Libs/Eigen/src/Jacobi/Jacobi.h
+        Libs/Eigen/src/LU/arch/Inverse_SSE.h
+        Libs/Eigen/src/LU/Determinant.h
+        Libs/Eigen/src/LU/FullPivLU.h
+        Libs/Eigen/src/LU/Inverse.h
+        Libs/Eigen/src/LU/PartialPivLU.h
+        Libs/Eigen/src/LU/PartialPivLU_MKL.h
+        Libs/Eigen/src/MetisSupport/MetisSupport.h
+        Libs/Eigen/src/misc/blas.h
+        Libs/Eigen/src/misc/Image.h
+        Libs/Eigen/src/misc/Kernel.h
+        Libs/Eigen/src/misc/Solve.h
+        Libs/Eigen/src/misc/SparseSolve.h
+        Libs/Eigen/src/OrderingMethods/Amd.h
+        Libs/Eigen/src/OrderingMethods/Eigen_Colamd.h
+        Libs/Eigen/src/OrderingMethods/Ordering.h
+        Libs/Eigen/src/PardisoSupport/PardisoSupport.h
+        Libs/Eigen/src/PaStiXSupport/PaStiXSupport.h
+        Libs/Eigen/src/plugins/ArrayCwiseBinaryOps.h
+        Libs/Eigen/src/plugins/ArrayCwiseUnaryOps.h
+        Libs/Eigen/src/plugins/BlockMethods.h
+        Libs/Eigen/src/plugins/CommonCwiseBinaryOps.h
+        Libs/Eigen/src/plugins/CommonCwiseUnaryOps.h
+        Libs/Eigen/src/plugins/MatrixCwiseBinaryOps.h
+        Libs/Eigen/src/plugins/MatrixCwiseUnaryOps.h
+        Libs/Eigen/src/QR/ColPivHouseholderQR.h
+        Libs/Eigen/src/QR/ColPivHouseholderQR_MKL.h
+        Libs/Eigen/src/QR/FullPivHouseholderQR.h
+        Libs/Eigen/src/QR/HouseholderQR.h
+        Libs/Eigen/src/QR/HouseholderQR_MKL.h
+        Libs/Eigen/src/SparseCholesky/SimplicialCholesky.h
+        Libs/Eigen/src/SparseCholesky/SimplicialCholesky_impl.h
+        Libs/Eigen/src/SparseCore/AmbiVector.h
+        Libs/Eigen/src/SparseCore/CompressedStorage.h
+        Libs/Eigen/src/SparseCore/ConservativeSparseSparseProduct.h
+        Libs/Eigen/src/SparseCore/MappedSparseMatrix.h
+        Libs/Eigen/src/SparseCore/SparseBlock.h
+        Libs/Eigen/src/SparseCore/SparseColEtree.h
+        Libs/Eigen/src/SparseCore/SparseCwiseBinaryOp.h
+        Libs/Eigen/src/SparseCore/SparseCwiseUnaryOp.h
+        Libs/Eigen/src/SparseCore/SparseDenseProduct.h
+        Libs/Eigen/src/SparseCore/SparseDiagonalProduct.h
+        Libs/Eigen/src/SparseCore/SparseDot.h
+        Libs/Eigen/src/SparseCore/SparseFuzzy.h
+        Libs/Eigen/src/SparseCore/SparseMatrix.h
+        Libs/Eigen/src/SparseCore/SparseMatrixBase.h
+        Libs/Eigen/src/SparseCore/SparsePermutation.h
+        Libs/Eigen/src/SparseCore/SparseProduct.h
+        Libs/Eigen/src/SparseCore/SparseRedux.h
+        Libs/Eigen/src/SparseCore/SparseSelfAdjointView.h
+        Libs/Eigen/src/SparseCore/SparseSparseProductWithPruning.h
+        Libs/Eigen/src/SparseCore/SparseTranspose.h
+        Libs/Eigen/src/SparseCore/SparseTriangularView.h
+        Libs/Eigen/src/SparseCore/SparseUtil.h
+        Libs/Eigen/src/SparseCore/SparseVector.h
+        Libs/Eigen/src/SparseCore/SparseView.h
+        Libs/Eigen/src/SparseCore/TriangularSolver.h
+        Libs/Eigen/src/SparseLU/SparseLU.h
+        Libs/Eigen/src/SparseLU/SparseLU_column_bmod.h
+        Libs/Eigen/src/SparseLU/SparseLU_column_dfs.h
+        Libs/Eigen/src/SparseLU/SparseLU_copy_to_ucol.h
+        Libs/Eigen/src/SparseLU/SparseLU_gemm_kernel.h
+        Libs/Eigen/src/SparseLU/SparseLU_heap_relax_snode.h
+        Libs/Eigen/src/SparseLU/SparseLU_kernel_bmod.h
+        Libs/Eigen/src/SparseLU/SparseLU_Memory.h
+        Libs/Eigen/src/SparseLU/SparseLU_panel_bmod.h
+        Libs/Eigen/src/SparseLU/SparseLU_panel_dfs.h
+        Libs/Eigen/src/SparseLU/SparseLU_pivotL.h
+        Libs/Eigen/src/SparseLU/SparseLU_pruneL.h
+        Libs/Eigen/src/SparseLU/SparseLU_relax_snode.h
+        Libs/Eigen/src/SparseLU/SparseLU_Structs.h
+        Libs/Eigen/src/SparseLU/SparseLU_SupernodalMatrix.h
+        Libs/Eigen/src/SparseLU/SparseLU_Utils.h
+        Libs/Eigen/src/SparseLU/SparseLUImpl.h
+        Libs/Eigen/src/SparseQR/SparseQR.h
+        Libs/Eigen/src/SPQRSupport/SuiteSparseQRSupport.h
+        Libs/Eigen/src/StlSupport/details.h
+        Libs/Eigen/src/StlSupport/StdDeque.h
+        Libs/Eigen/src/StlSupport/StdList.h
+        Libs/Eigen/src/StlSupport/StdVector.h
+        Libs/Eigen/src/SuperLUSupport/SuperLUSupport.h
+        Libs/Eigen/src/SVD/JacobiSVD.h
+        Libs/Eigen/src/SVD/JacobiSVD_MKL.h
+        Libs/Eigen/src/SVD/UpperBidiagonalization.h
+        Libs/Eigen/src/UmfPackSupport/UmfPackSupport.h
+        Libs/wiringPi/devLib/ds1302.c
+        Libs/wiringPi/devLib/ds1302.h
+        Libs/wiringPi/devLib/font.h
+        Libs/wiringPi/devLib/gertboard.c
+        Libs/wiringPi/devLib/gertboard.h
+        Libs/wiringPi/devLib/lcd.c
+        Libs/wiringPi/devLib/lcd.h
+        Libs/wiringPi/devLib/lcd128x64.c
+        Libs/wiringPi/devLib/lcd128x64.h
+        Libs/wiringPi/devLib/maxdetect.c
+        Libs/wiringPi/devLib/maxdetect.h
+        Libs/wiringPi/devLib/piFace.c
+        Libs/wiringPi/devLib/piFace.h
+        Libs/wiringPi/devLib/piFaceOld.c
+        Libs/wiringPi/devLib/piGlow.c
+        Libs/wiringPi/devLib/piGlow.h
+        Libs/wiringPi/devLib/piNes.c
+        Libs/wiringPi/devLib/piNes.h
+        Libs/wiringPi/devLib/scrollPhat.c
+        Libs/wiringPi/devLib/scrollPhat.h
+        Libs/wiringPi/devLib/scrollPhatFont.h
+        Libs/wiringPi/examples/Gertboard/7segments.c
+        Libs/wiringPi/examples/Gertboard/buttons.c
+        Libs/wiringPi/examples/Gertboard/gertboard.c
+        Libs/wiringPi/examples/Gertboard/record.c
+        Libs/wiringPi/examples/Gertboard/temperature.c
+        Libs/wiringPi/examples/Gertboard/voltmeter.c
+        Libs/wiringPi/examples/Gertboard/vumeter.c
+        Libs/wiringPi/examples/PiFace/blink.c
+        Libs/wiringPi/examples/PiFace/buttons.c
+        Libs/wiringPi/examples/PiFace/ladder.c
+        Libs/wiringPi/examples/PiFace/metro.c
+        Libs/wiringPi/examples/PiFace/motor.c
+        Libs/wiringPi/examples/PiFace/reaction.c
+        Libs/wiringPi/examples/PiGlow/piglow.c
+        Libs/wiringPi/examples/PiGlow/piGlow0.c
+        Libs/wiringPi/examples/PiGlow/piGlow1.c
+        Libs/wiringPi/examples/q2w/binary.c
+        Libs/wiringPi/examples/q2w/blink-io.c
+        Libs/wiringPi/examples/q2w/blink.c
+        Libs/wiringPi/examples/q2w/bright.c
+        Libs/wiringPi/examples/q2w/button.c
+        Libs/wiringPi/examples/q2w/volts.c
+        Libs/wiringPi/examples/scrollPhat/scphat.c
+        Libs/wiringPi/examples/scrollPhat/test.c
+        Libs/wiringPi/examples/blink.c
+        Libs/wiringPi/examples/blink12.c
+        Libs/wiringPi/examples/blink12drcs.c
+        Libs/wiringPi/examples/blink6drcs.c
+        Libs/wiringPi/examples/blink8.c
+        Libs/wiringPi/examples/clock.c
+        Libs/wiringPi/examples/delayTest.c
+        Libs/wiringPi/examples/ds1302.c
+        Libs/wiringPi/examples/header.h
+        Libs/wiringPi/examples/isr-osc.c
+        Libs/wiringPi/examples/isr.c
+        Libs/wiringPi/examples/lcd-adafruit.c
+        Libs/wiringPi/examples/lcd.c
+        Libs/wiringPi/examples/lowPower.c
+        Libs/wiringPi/examples/max31855.c
+        Libs/wiringPi/examples/nes.c
+        Libs/wiringPi/examples/okLed.c
+        Libs/wiringPi/examples/pwm.c
+        Libs/wiringPi/examples/rht03.c
+        Libs/wiringPi/examples/serialRead.c
+        Libs/wiringPi/examples/serialTest.c
+        Libs/wiringPi/examples/servo.c
+        Libs/wiringPi/examples/softPwm.c
+        Libs/wiringPi/examples/softTone.c
+        Libs/wiringPi/examples/speed.c
+        Libs/wiringPi/examples/spiSpeed.c
+        Libs/wiringPi/examples/wfi.c
+        Libs/wiringPi/gpio/gpio.c
+        Libs/wiringPi/gpio/pins.c
+        Libs/wiringPi/gpio/readall.c
+        Libs/wiringPi/gpio/version.h
+        Libs/wiringPi/wiringPi/ads1115.c
+        Libs/wiringPi/wiringPi/ads1115.h
+        Libs/wiringPi/wiringPi/drcSerial.c
+        Libs/wiringPi/wiringPi/drcSerial.h
+        Libs/wiringPi/wiringPi/max31855.c
+        Libs/wiringPi/wiringPi/max31855.h
+        Libs/wiringPi/wiringPi/max5322.c
+        Libs/wiringPi/wiringPi/max5322.h
+        Libs/wiringPi/wiringPi/mcp23008.c
+        Libs/wiringPi/wiringPi/mcp23008.h
+        Libs/wiringPi/wiringPi/mcp23016.c
+        Libs/wiringPi/wiringPi/mcp23016.h
+        Libs/wiringPi/wiringPi/mcp23016reg.h
+        Libs/wiringPi/wiringPi/mcp23017.c
+        Libs/wiringPi/wiringPi/mcp23017.h
+        Libs/wiringPi/wiringPi/mcp23s08.c
+        Libs/wiringPi/wiringPi/mcp23s08.h
+        Libs/wiringPi/wiringPi/mcp23s17.c
+        Libs/wiringPi/wiringPi/mcp23s17.h
+        Libs/wiringPi/wiringPi/mcp23x08.h
+        Libs/wiringPi/wiringPi/mcp23x0817.h
+        Libs/wiringPi/wiringPi/mcp3002.c
+        Libs/wiringPi/wiringPi/mcp3002.h
+        Libs/wiringPi/wiringPi/mcp3004.c
+        Libs/wiringPi/wiringPi/mcp3004.h
+        Libs/wiringPi/wiringPi/mcp3422.c
+        Libs/wiringPi/wiringPi/mcp3422.h
+        Libs/wiringPi/wiringPi/mcp4802.c
+        Libs/wiringPi/wiringPi/mcp4802.h
+        Libs/wiringPi/wiringPi/pcf8574.c
+        Libs/wiringPi/wiringPi/pcf8574.h
+        Libs/wiringPi/wiringPi/pcf8591.c
+        Libs/wiringPi/wiringPi/pcf8591.h
+        Libs/wiringPi/wiringPi/piHiPri.c
+        Libs/wiringPi/wiringPi/piThread.c
+        Libs/wiringPi/wiringPi/sn3218.c
+        Libs/wiringPi/wiringPi/sn3218.h
+        Libs/wiringPi/wiringPi/softPwm.c
+        Libs/wiringPi/wiringPi/softPwm.h
+        Libs/wiringPi/wiringPi/softServo.c
+        Libs/wiringPi/wiringPi/softServo.h
+        Libs/wiringPi/wiringPi/softTone.c
+        Libs/wiringPi/wiringPi/softTone.h
+        Libs/wiringPi/wiringPi/sr595.c
+        Libs/wiringPi/wiringPi/sr595.h
+        Libs/wiringPi/wiringPi/wiringPi.c
+        Libs/wiringPi/wiringPi/wiringPi.h
+        Libs/wiringPi/wiringPi/wiringPiI2C.c
+        Libs/wiringPi/wiringPi/wiringPiI2C.h
+        Libs/wiringPi/wiringPi/wiringPiSPI.c
+        Libs/wiringPi/wiringPi/wiringPiSPI.h
+        Libs/wiringPi/wiringPi/wiringSerial.c
+        Libs/wiringPi/wiringPi/wiringSerial.h
+        Libs/wiringPi/wiringPi/wiringShift.c
+        Libs/wiringPi/wiringPi/wiringShift.h
+        Libs/wiringPi/wiringPi/wpiExtensions.c
+        Libs/wiringPi/wiringPi/wpiExtensions.h
+        LowLevelControllers/CourseRegulatorNode.cpp
+        LowLevelControllers/CourseRegulatorNode.h
+        LowLevelControllers/SailControlNode.cpp
+        LowLevelControllers/SailControlNode.h
+        LowLevelControllers/SailSpeedRegulatorNode.cpp
+        LowLevelControllers/SailSpeedRegulatorNode.h
+        LowLevelControllers/WingsailControlNode.cpp
+        LowLevelControllers/WingsailControlNode.h
+        Math/CourseCalculation.cpp
+        Math/CourseCalculation.h
+        Math/CourseMath.cpp
+        Math/CourseMath.h
+        Math/Utility.cpp
+        Math/Utility.h
+        MessageBus/ActiveNode.cpp
+        MessageBus/ActiveNode.h
+        MessageBus/Message.h
+        MessageBus/MessageBus.cpp
+        MessageBus/MessageBus.h
+        MessageBus/MessageDeserialiser.cpp
+        MessageBus/MessageDeserialiser.h
+        MessageBus/MessageSerialiser.cpp
+        MessageBus/MessageSerialiser.h
+        MessageBus/MessageTypes.h
+        MessageBus/Node.h
+        MessageBus/NodeIDs.h
+        Messages/AISDataMsg.h
+        Messages/ArduinoDataMsg.h
+        Messages/ASPireActuatorFeedbackMsg.h
+        Messages/CompassDataMsg.h
+        Messages/CourseDataMsg.h
+        Messages/CurrentSensorDataMsg.h
+        Messages/DataCollectionStartMsg.h
+        Messages/DataCollectionStopMsg.h
+        Messages/DataRequestMsg.h
+        Messages/ExternalControlMsg.h
+        Messages/GPSDataMsg.h
+        Messages/JanetActuatorFeedbackMsg.h
+        Messages/LidarMsg.h
+        Messages/LocalConfigChangeMsg.h
+        Messages/LocalNavigationMsg.h
+        Messages/LocalWaypointChangeMsg.h
+        Messages/MarineSensorDataMsg.h
+        Messages/ObstacleVectorMsg.h
+        Messages/RequestCourseMsg.h
+        Messages/RudderCommandMsg.h
+        Messages/SailCommandMsg.h
+        Messages/ServerConfigsReceivedMsg.h
+        Messages/ServerWaypointsReceivedMsg.h
+        Messages/StateMessage.h
+        Messages/VesselStateMsg.h
+        Messages/WaypointDataMsg.h
+        Messages/WindDataMsg.h
+        Messages/WindStateMsg.h
+        Messages/WingSailCommandMsg.h
+        Navigation/LocalNavigationModule/Voters/CourseVoter.cpp
+        Navigation/LocalNavigationModule/Voters/CourseVoter.h
+        Navigation/LocalNavigationModule/Voters/ChannelVoter.cpp
+        Navigation/LocalNavigationModule/Voters/ChannelVoter.h
+        Navigation/LocalNavigationModule/Voters/MidRangeVoter.cpp
+        Navigation/LocalNavigationModule/Voters/MidRangeVoter.h
+        Navigation/LocalNavigationModule/Voters/ProximityVoter.cpp
+        Navigation/LocalNavigationModule/Voters/ProximityVoter.h
+        Navigation/LocalNavigationModule/Voters/WaypointVoter.cpp
+        Navigation/LocalNavigationModule/Voters/WaypointVoter.h
+        Navigation/LocalNavigationModule/Voters/WindVoter.cpp
+        Navigation/LocalNavigationModule/Voters/WindVoter.h
+        Navigation/LocalNavigationModule/ASRArbiter.cpp
+        Navigation/LocalNavigationModule/ASRArbiter.h
+        Navigation/LocalNavigationModule/ASRCourseBallot.cpp
+        Navigation/LocalNavigationModule/ASRCourseBallot.h
+        Navigation/LocalNavigationModule/ASRVoter.h
+        Navigation/LocalNavigationModule/BoatState.h
+        Navigation/LocalNavigationModule/LocalNavigationModule.cpp
+        Navigation/LocalNavigationModule/LocalNavigationModule.h
+        Navigation/LineFollowNode.cpp
+        Navigation/LineFollowNode.h
+        Navigation/WaypointMgrNode.cpp
+        Navigation/WaypointMgrNode.h
+        Network/DataLink.cpp
+        Network/DataLink.h
+        Network/LinuxSerialDataLink.cpp
+        Network/LinuxSerialDataLink.h
+        Network/NetworkFrame.h
+        Network/SLIP.h
+        Network/TCPServer.cpp
+        Network/TCPServer.h
+        Network/XbeePacketNetwork.cpp
+        Network/XbeePacketNetwork.h
+        Simulation/SimulationNode.cpp
+        Simulation/SimulationNode.h
+        SystemServices/Logger.cpp
+        SystemServices/Logger.h
+        SystemServices/SysClock.cpp
+        SystemServices/SysClock.h
+        SystemServices/Timer.cpp
+        SystemServices/Timer.h
+        SystemServices/Wrapper.h
+        Tests/cxxtest/cxxtest/Descriptions.cpp
+        Tests/cxxtest/cxxtest/Descriptions.h
+        Tests/cxxtest/cxxtest/DummyDescriptions.cpp
+        Tests/cxxtest/cxxtest/DummyDescriptions.h
+        Tests/cxxtest/cxxtest/ErrorFormatter.h
+        Tests/cxxtest/cxxtest/ErrorPrinter.h
+        Tests/cxxtest/cxxtest/Flags.h
+        Tests/cxxtest/cxxtest/GlobalFixture.cpp
+        Tests/cxxtest/cxxtest/GlobalFixture.h
+        Tests/cxxtest/cxxtest/Gui.h
+        Tests/cxxtest/cxxtest/LinkedList.cpp
+        Tests/cxxtest/cxxtest/LinkedList.h
+        Tests/cxxtest/cxxtest/Mock.h
+        Tests/cxxtest/cxxtest/MSVCErrorPrinter.h
+        Tests/cxxtest/cxxtest/ParenPrinter.h
+        Tests/cxxtest/cxxtest/QtGui.h
+        Tests/cxxtest/cxxtest/RealDescriptions.cpp
+        Tests/cxxtest/cxxtest/RealDescriptions.h
+        Tests/cxxtest/cxxtest/Root.cpp
+        Tests/cxxtest/cxxtest/SelfTest.h
+        Tests/cxxtest/cxxtest/StdHeaders.h
+        Tests/cxxtest/cxxtest/StdioFilePrinter.h
+        Tests/cxxtest/cxxtest/StdioPrinter.h
+        Tests/cxxtest/cxxtest/StdTestSuite.h
+        Tests/cxxtest/cxxtest/StdValueTraits.h
+        Tests/cxxtest/cxxtest/TeeListener.h
+        Tests/cxxtest/cxxtest/TestListener.h
+        Tests/cxxtest/cxxtest/TestMain.h
+        Tests/cxxtest/cxxtest/TestRunner.h
+        Tests/cxxtest/cxxtest/TestSuite.cpp
+        Tests/cxxtest/cxxtest/TestSuite.h
+        Tests/cxxtest/cxxtest/TestTracker.cpp
+        Tests/cxxtest/cxxtest/TestTracker.h
+        Tests/cxxtest/cxxtest/unix.h
+        Tests/cxxtest/cxxtest/ValueTraits.cpp
+        Tests/cxxtest/cxxtest/ValueTraits.h
+        Tests/cxxtest/cxxtest/Win32Gui.h
+        Tests/cxxtest/cxxtest/X11Gui.h
+        Tests/cxxtest/cxxtest/XmlFormatter.h
+        Tests/cxxtest/cxxtest/XmlPrinter.h
+        Tests/cxxtest/cxxtest/XUnitPrinter.h
+        Tests/cxxtest/cxxtest/YesNoRunner.h
+        Tests/DB_tests/main.cpp
+        Tests/DB_tests/test_dbhandler.cpp
+        Tests/IntegrationTests/CANAISTest.cpp
+        Tests/IntegrationTests/CurrentSensorIntegrationTest.cpp
+        Tests/IntegrationTests/CV7IntegrationTest.cpp
+        Tests/IntegrationTests/HTTPSyncTest.cpp
+        Tests/IntegrationTests/IntegrationTestASPire.cpp
+        Tests/IntegrationTests/LoggerIntegrationTest.cpp
+        Tests/IntegrationTests/MarineDataIntegrationTest.cpp
+        Tests/IntegrationTests/XBeeIntegrationTest.cpp
+        Tests/IntegrationTests/XBeeSyncIntegrationTest.cpp
+        Tests/unit-tests/TestMocks/MessageLogger.h
+        Tests/unit-tests/TestMocks/MessageVerifier.h
+        Tests/unit-tests/TestMocks/MockCANPGNReceiver.h
+        Tests/unit-tests/TestMocks/MockCANReceiver.h
+        Tests/unit-tests/TestMocks/MockNode.h
+        Tests/unit-tests/ActuatorNodeASPireSuite.h
+        Tests/unit-tests/ActuatorRudderNodeSuite.h
+        Tests/unit-tests/ActuatorSailNodeSuite.h
+        Tests/unit-tests/AISProcSuite.h
+        Tests/unit-tests/ArduinoI2CSuite.h
+        Tests/unit-tests/ASRArbiterSuite.h
+        Tests/unit-tests/ASRCourseBallotSuite.h
+        Tests/unit-tests/CANArduinoNodeSuite.h
+        Tests/unit-tests/CanMessageHandlerSuite.h
+        Tests/unit-tests/CANMessageSuite.h
+        Tests/unit-tests/CanNodesSuite.h
+        Tests/unit-tests/CANServiceSuite.h
+        Tests/unit-tests/CourseRegulatorNodeSuite.h
+        Tests/unit-tests/DBLoggerNodeSuite.h
+        Tests/unit-tests/HardwareCompassSuite.h
+        Tests/unit-tests/HardwareCV7Suite.h
+        Tests/unit-tests/HardwareGPSDSuite.h
+        Tests/unit-tests/HardwareXbeeSuite.h
+        Tests/unit-tests/HTTPSyncSuite.h
+        Tests/unit-tests/I2CControllerSuite.h
+        Tests/unit-tests/LineFollowSuite.h
+        Tests/unit-tests/MaestroControllerSuite.h
+        Tests/unit-tests/MessageBusTestHelper.h
+        Tests/unit-tests/MessageCoreSuite.h
+        Tests/unit-tests/MessageSuite.h
+        Tests/unit-tests/ProximityVoterSuite.h
+        Tests/unit-tests/StateEstimationNodeSuite.h
+        Tests/unit-tests/UtilitySuite.h
+        Tests/unit-tests/WaypointNodeSuite.h
+        Tests/unit-tests/WindStateNodeSuite.h
+        WorldState/CameraProcessingUtility.cpp
+        WorldState/CameraProcessingUtility.h
+        WorldState/CollidableMgr/Collidable.h
+        WorldState/CollidableMgr/CollidableList.h
+        WorldState/CollidableMgr/CollidableMgr.cpp
+        WorldState/CollidableMgr/CollidableMgr.h
+        WorldState/obstacledetection/colorDetectionNode.cpp
+        WorldState/obstacledetection/colorDetectionNode.h
+        WorldState/obstacledetection/colorDetectionUtility.cpp
+        WorldState/obstacledetection/colorDetectionUtility.h
+        WorldState/AISProcessing.cpp
+        WorldState/AISProcessing.h
+        WorldState/StateEstimationNode.cpp
+        WorldState/StateEstimationNode.h
+        WorldState/VesselStateNode.cpp
+        WorldState/VesselStateNode.h
+        WorldState/WindStateNode.cpp
+        WorldState/WindStateNode.h
+        Xbee/Xbee.cpp
+        Xbee/Xbee.h
+        Xbee/XbeeSyncNode.cpp
+        Xbee/XbeeSyncNode.h
+        main_ASPire.cpp
+        main_janet.cpp)

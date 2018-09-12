@@ -78,7 +78,7 @@ struct WingBoatDataPacket_t {
 } __attribute__((packed));
 
 struct AISContactPacket_t {
-    uint16_t mmsi;
+    uint32_t mmsi;
     float latitude;
     float longitude;
     float speed;

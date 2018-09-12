@@ -44,6 +44,7 @@ class CollidableMgr {
 
     void removeOldAISContacts();
 
+
    private:
     static void ContactGC(CollidableMgr* ptr);
 

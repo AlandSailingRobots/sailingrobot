@@ -1,14 +1,14 @@
 #pragma once
 
-#include "../Hardwares/CAN_Services/CANService.h"
-#include "../Hardwares/CAN_Services/CanBusCommon/CanMessageHandler.h"
-#include "../Hardwares/CAN_Services/N2kMsg.h"
+#include "../../Hardwares/CAN_Services/CANService.h"
+#include "../../Hardwares/CAN_Services/CanBusCommon/CanMessageHandler.h"
+#include "../../Hardwares/CAN_Services/N2kMsg.h"
 
-#include "../Database/DBHandler.h"
-#include "../Hardwares/CANArduinoNode.h"
-#include "../MessageBus/MessageBus.h"
-#include "../Tests/unit-tests/TestMocks/MessageLogger.h"
-#include "../Tests/unit-tests/TestMocks/MessageVerifier.h"
+#include "../../Database/DBHandler.h"
+#include "../../Hardwares/CANArduinoNode.h"
+#include "../../MessageBus/MessageBus.h"
+#include "../unit-tests/TestMocks/MessageLogger.h"
+#include "../unit-tests/TestMocks/MessageVerifier.h"
 
 #include "../cxxtest/cxxtest/TestSuite.h"
 

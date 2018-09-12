@@ -23,6 +23,7 @@
 #include "../SystemServices/Timer.h"
 #include "../Math/CourseMath.h"
 #include "../Math/Utility.h"
+#include "../LocalNavigationModule/Voters/LastCourseVoter.h"
 
 #include <cstdio>
 
@@ -75,7 +76,7 @@ void LocalNavigationModule::start()
 
 ///----------------------------------------------------------------------------------
 void LocalNavigationModule::updateConfigsFromDB(){
-    m_LoopTime = m_db.retrieveCellAsDouble("config_voter_system","1","loop_time");
+    m_db.getConfigFrom(m_LoopTime, "loop_time", "config_voter_system");
 }
 
 ///----------------------------------------------------------------------------------
@@ -116,14 +117,15 @@ void LocalNavigationModule::processMessage( const Message* msg )
             Logger::info( "New Waypoint! Lat: %f Lon: %f Distance: %f", boatState.currWaypointLat, boatState.currWaypointLon, distance );
             Logger::info( "Boat state: Lat: %f Lon: %f Heading: %f", boatState.lat, boatState.lon, boatState.heading );
 
-
-
             // Delibrate dropdown after a new waypoint, we want to start a new ballot
             // and get a new heading
         }
         case MessageType::RequestCourse:
+        //{
+        //    std::lock_guard <std::mutex> lock_guard(m_lock);
             startBallot();
             break;
+        //}
         case MessageType::ServerConfigsReceived:
             updateConfigsFromDB();
             break;
@@ -156,14 +158,39 @@ void LocalNavigationModule::startBallot()
         boatState.lastWaypointLon = boatState.lon;
     }
 
-    std::vector<ASRVoter*>::iterator it;
+//    std::cout << "Arbiter min/max: " << *std::min_element(std::begin(arbiter.getResult().courses),std::end(arbiter.getResult().courses)) << " "
+//              <<  *std::max_element(std::begin(arbiter.getResult().courses),std::end(arbiter.getResult().courses)) << std::endl;
 
-    for( it = voters.begin(); it != voters.end(); it++ )
+
+    //std::vector<ASRVoter*>::iterator it;
+
+    //std::lock_guard<std::mutex> lock_guard(m_lock);
+
+    for( auto it = voters.begin(); it != voters.end(); it++ )
     {
+        std::lock_guard<std::mutex> lock_guard(m_lock);
         ASRVoter* voter = (*it);
+        //std::cout << "Iterator: _value=" << *it << " _memaddr=" << &it << " _memaddrofelement=" << &(*it) <<  std::endl;
+        //int tmp_dbg = voter->access_tester;
+        //std::cout << "Temp: " << tmp_dbg << " _testeraddr=" << &(tmp_dbg) << std::endl;
+        //std::cout << "Accessing first course value: " << voter->getBallot()->courses[0] << std::endl;
+        //std::string tmp_dbg2 =  (**it).getName();
+        //std::cout << "Voter name: " << (**it).name << " _nameaddr=" << &((**it).name) << std::endl;
+        //std::cout << "Before segfault" << std::endl;
         arbiter.castVote( voter->weight(), voter->vote( boatState ) );
-    }
+        //std::cout << "After segfault" << std::endl;
 
+        //arbiter.castVeto( voter->vote( boatState ) ); // vetos done with castVote now
+        //voter->vote( boatState ).clear();
+//        std::cout << "Arbiter min/max (after vote " << std::distance(std::begin(voters), it) << "): " << *std::min_element(std::begin(arbiter.getResult().courses),std::end(arbiter.getResult().courses)) << " "
+//              <<  *std::max_element(std::begin(arbiter.getResult().courses),std::end(arbiter.getResult().courses)) << std::endl;
+        // Debug/Tuning
+//        std::pair<int, int> minpair = voter->getBallot()->getMin();
+//        std::pair<int, int> maxpair = voter->getBallot()->getMax();
+//        std::cout << "Voter " << voter->getName().c_str() << " min: " << minpair.first << " " << minpair.second << " max: " << maxpair.first << " " << maxpair.second << std::endl;
+
+    }
+/*
     printf("[Voters] "); // Debug
     for( it = voters.begin(); it != voters.end(); it++ )
     {
@@ -175,8 +202,22 @@ void LocalNavigationModule::startBallot()
         printf("%s : %d %d ", name.c_str(), bestCourse, votes); // Debug: Prints out some voting information
     }
     printf("\n");
+*/
+
 
     uint16_t targetCourse = arbiter.getWinner();
+
+    //Update LastCourseVoter target heading
+    for ( auto it = voters.begin(); it != voters.end(); it++ )
+    {
+        auto voter = (*it);
+        if (strcmp("LastCourseVoter", voter->getName()) == 0)
+        {
+            auto lastCourseVoter = (LastCourseVoter*) voter;
+            lastCourseVoter->lastWinningBearing = targetCourse;
+        }
+    }
+
     bool targetTackStarboard = getTargetTackStarboard((double) targetCourse);
     MessagePtr msg = std::make_unique<LocalNavigationMsg>((float) targetCourse, NO_COMMAND, 0, targetTackStarboard);
     m_MsgBus.sendMessage( std::move( msg ) );

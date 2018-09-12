@@ -19,7 +19,7 @@
 
 GPSDNode::GPSDNode(MessageBus& msgBus, DBHandler& dbhandler)
 	: ActiveNode(NodeID::GPS, msgBus), m_Initialised(false), m_GpsConnection(0),
-	m_Lat(0), m_Lon(0), m_Speed(0), m_Course(0),m_LoopTime(0.5),m_db(dbhandler)
+	m_Lat(0), m_Lon(0), m_Speed(0), m_Course(0),m_LoopTime(0.5), m_db(dbhandler)
 {
 	msgBus.registerNode(*this, MessageType::ServerConfigsReceived);
 }
@@ -49,7 +49,7 @@ bool GPSDNode::init()
 
 void GPSDNode::updateConfigsFromDB()
 {
-	m_LoopTime = m_db.retrieveCellAsDouble("config_gps","1","loop_time");
+	m_db.getConfigFrom(m_LoopTime, "loop_time", "config_gps");
 }
 
 void GPSDNode::processMessage(const Message* msgPtr)

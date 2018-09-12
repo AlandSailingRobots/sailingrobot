@@ -1,18 +1,36 @@
-#ifndef __DBHANDLER_H__
-#define __DBHANDLER_H__  //__DATACOLLECT_H__
+/**************************************************************************
+ *
+ * File:
+ * 		DBHandler.cpp
+ *
+ * Purpose:
+ *		Interacts with the SQLite database
+ *
+ * Developer Notes:
+ *		Refactored 2018-07 by Kåre Hampf <khampf@users.sourceforge.net>
+ *
+ ***************************************************************************************/
+
+#pragma once
 
 #include <sqlite3.h>
 #include <iostream>
 #include <mutex>
-#include <sstream>
+#include <queue>
 #include <string>
 #include <vector>
+#include <nlohmann/json.hpp>
 #include "../Messages/CurrentSensorDataMsg.h"
+#include "../Messages/PowerTrackMsg.h"
 #include "../Messages/WindStateMsg.h"
-#include "../SystemServices/Logger.h"
+using JSON = nlohmann::json;
 
-#include "../Libs/json/include/nlohmann/json.hpp"
-using Json = nlohmann::json;
+struct currentSensorItem {
+	float m_current;  // dataLogs_current_sensors
+	float m_voltage;
+	SensedElement m_element;
+	std::string m_element_str;
+};
 
 struct LogItem {
     double m_rudderPosition;  // dataLogs_actuator_feedback
@@ -22,6 +40,7 @@ struct LogItem {
     double m_compassHeading;  // dataLogs_compass
     double m_compassPitch;
     double m_compassRoll;
+    std::string m_compassTimestamp;
     double m_distanceToWaypoint;  // dataLogs_course_calculation
     double m_bearingToWaypoint;
     double m_courseToSteer;
@@ -52,117 +71,284 @@ struct LogItem {
     float m_windDir;  // dataLogs_windsensor
     float m_windSpeed;
     float m_windTemp;
-    float m_current;  // dataLogs_current_sensors
-    float m_voltage;
-    SensedElement m_element;
-    std::string m_element_str;
-    std::string m_timestamp_str;
+    float m_powerBalance; // dataLogs_powertrack
+	std::queue<currentSensorItem> m_currentSensorItems;
+	std::string m_timestamp_str;
 };
 
 class DBHandler {
+    /*******************************************************************************
+     * private
+     ******************************************************************************/
    private:
+    std::mutex m_databaseLock;
+	std::mutex m_configsLock;
+	std::mutex m_waypointsLock;
+
     char* m_error;
     int m_latestDataLogId;
-    std::string m_currentWaypointId = "";
+    // std::string m_currentWaypointId = "";
     std::string m_filePath;
-    static std::mutex m_databaseLock;
+    sqlite3* m_DBHandle = nullptr;
+
+    // Reusable statements for dataLog inserts
+    sqlite3_stmt* m_actuatorFeedbackStmt = nullptr;
+    sqlite3_stmt* m_compassModelStmt = nullptr;
+    sqlite3_stmt* m_courseCalculationStmt = nullptr;
+    sqlite3_stmt* m_marineSensorsStmt = nullptr;
+    sqlite3_stmt* m_vesselStateStmt = nullptr;
+    sqlite3_stmt* m_windStateStmt = nullptr;
+    sqlite3_stmt* m_windsensorStmt = nullptr;
+    sqlite3_stmt* m_gpsStmt = nullptr;
+    sqlite3_stmt* m_currentSensorsStmt = nullptr;
+    sqlite3_stmt* m_systemStmt = nullptr;
+    sqlite3_stmt* m_powertrackStmt = nullptr;
 
     // execute INSERT query and add new row into table
-    bool queryTable(std::string sqlINSERT);
-    bool queryTable(std::string sqlINSERT, sqlite3* db);
-
-    // retrieve data from given table/tables, return value is a C 2D char array
-    // rows and columns also return values (through a reference) about rows and columns in the
-    // result set
-    std::vector<std::string> retrieveFromTable(std::string sqlSELECT, int& rows, int& columns);
-    std::vector<std::string> retrieveFromTable(std::string sqlSELECT,
-                                               int& rows,
-                                               int& columns,
-                                               sqlite3* db);
-
-    // adds a table row into the json object as a array if array flag is true,
-    // otherwise it adds the table row as a json object
-    // id field is not obligatory, can be left empty
-    void getDataAsJson(std::string select,
-                       std::string table,
-                       std::string key,
-                       std::string id,
-                       Json& js,
-                       bool useArray);
-
-    // gets the id column from a given table
-    std::vector<std::string> getTableIds(std::string table);
-
-    // gets all datatable names related to "ending" string
-    // used to fetch all tables ending with _datalogs or _config
-    std::vector<std::string> getTableNames(std::string like);
+    bool DBTransaction(const std::string& SQLQuery);
+    // bool DBTransaction(std::string SQLQuery, sqlite3 *db);
 
     // gets information(for instance: name/datatype) about all columns
-    std::vector<std::string> getColumnInfo(std::string info, std::string table);
+    // std::vector<std::string> getColumnInfo(std::string& info, std::string& table);
 
-    // help function used in insertDataLog
-    int insertLog(std::string table, std::string values, sqlite3* db);
+    /*
+        // retrieve data from given table/tables, return value is a C 2D char array
+        // rows and columns also return values (through a reference) about rows and columns in the
+        // result set
+        std::vector<std::string> retrieveFromTable(const std::string& SQLSelect,
+                                                   int& rows,
+                                                   int& columns);
+        // own implementation of deprecated sqlite3_get_table()
+        int getTable(const std::string& sql,
+                     std::vector<std::string>& results,
+                     int& rows,
+                     int& columns);
+    */
 
-    // own implementation of deprecated sqlite3_get_table()
-    int getTable(sqlite3* db,
-                 const std::string& sql,
-                 std::vector<std::string>& results,
-                 int& rows,
-                 int& columns);
+    sqlite3* DBConnect();
+    void DBDisconnect();
+    void DBClose();
 
-    sqlite3* openDatabase();
+    // Internal data structures
+    typedef std::vector<std::string> textTableRow;
+    typedef std::vector<textTableRow>
+        textTableRows;  // 	typedef std::vector<std::vector<std::string>>;
+    typedef std::pair<std::string, textTableRows>
+        textTable;  // std::pair<std::string, std::vector<std::vector<std::string>>>
+    typedef std::vector<textTable>
+        textTables;  // std::vector<std::pair<std::string, std::vector<std::vector<std::string>>>>
+    typedef std::vector<std::pair<std::string, int>> ColumnTypes;
+    // For binding parameter values
+    struct typedValuePairs {
+        std::vector<std::pair<std::string, int>> ints;
+        std::vector<std::pair<std::string, double>> doubles;
+        std::vector<std::pair<std::string, std::string>> strings;
+    };
+    typedef std::vector<typedValuePairs> tableRows;
 
-    void closeDatabase(sqlite3* connection);
+	// gets all database table names related to "suffix" string
+	// used to fetch all tables ending with _datalogs or _config
+	std::vector<std::string> getTableNames(const std::string &like, const std::string &statements = "");
+	int sqliteTypeFromString(std::string const& typestr);
+	ColumnTypes getTableColumnTypes(const std::string& tableName);
+	std::vector<std::string> getTableColumnNames(const std::string& tableName);
+	int columnType(const std::string& name, ColumnTypes& types);
+
+	bool JSONAsTables(const std::string& string, textTables& tables);
+    void clearTable(const std::string& table);
+    /* DBHandler:: */ textTables getTablesAsText(const std::string& like,
+                                                 const std::string& statement = "");
+    std::string getTablesAsJSON(const std::string& like, const std::string& statement = "");
+	std::string tablesAsJSON(const textTables &tables);
+
+    // For preparing
+    int prepareStmtError(sqlite3_stmt*& stmt, const std::string& sql);  // Ref here gave segfaults
+    int prepareStmtSelectFromStatements(sqlite3_stmt*& stmt,
+                                        const std::string& expressions,
+                                        const std::string& tables,
+                                        const std::string& statements = nullptr);
+    int paramNameIndex(sqlite3_stmt*& stmt, std::string name);
+
+    int bindValuesToStmt(const typedValuePairs& values, sqlite3_stmt*& stmt);
+    void addValue(typedValuePairs& values, const std::string& name, int value);
+    void addValue(typedValuePairs& values, const std::string& name, double value);
+    void addValue(typedValuePairs& values, const std::string& name, std::string& string);
+    std::vector<std::string> valueNames(const typedValuePairs& values);
+    void valuesFromTextRows(tableRows& values,
+                            const textTableRows& textRows,
+                            const ColumnTypes& types);
+    int bindParam(sqlite3_stmt*& stmt, const std::string& name, int value);
+    int bindParam(sqlite3_stmt*& stmt, const std::string& name, double value);
+    int bindParam(sqlite3_stmt*& stmt, const std::string& name, const std::string& text);
+
+    // INSERT
+    int prepareStmtInsertError(sqlite3_stmt*& stmt,
+                               const std::string& table,
+                               std::vector<std::string>& columns);
+    int prepareStmtInsertError(sqlite3_stmt*& stmt,
+                               const std::string& table,
+                               const typedValuePairs& values);
+    bool insertTableRow(const std::string& tableName, const typedValuePairs& values);
+    int insertTableRowsErrors(const std::string& tableName, const tableRows& rows);
+
+    bool transactionalReplaceTable(const std::string& tableName, const tableRows& rows);
+    bool transactionalReplaceTable(const std::string& tableName, const textTableRows& rows);
+    bool transactionalReplaceTable(const textTable& table);
+    bool replaceTables(const textTables& tables);
+
+    // UPDATE
+    int prepareStmtUpdateError(sqlite3_stmt*& stmt,
+                               const std::string& table,
+                               int id,
+                               const std::vector<std::string>& columns);
+    int prepareStmtUpdateError(sqlite3_stmt*& stmt,
+                               const std::string& table,
+                               int id,
+                               const typedValuePairs& values);
+    bool updateTableRow(const std::string& table, int id, const typedValuePairs& values);
+
+    // Private SQLite wrapper functions
+    int checkRetCode(int retCode) const;
+    int stepAndFinalizeStmt(sqlite3_stmt*& stmt) const;
+    void sqlite3_column_value(sqlite3_stmt*& stmt, int index, int& value);
+    void sqlite3_column_value(sqlite3_stmt*& stmt, int index, bool& value);
+    void sqlite3_column_value(sqlite3_stmt*& stmt, int index, double& value);
+    void sqlite3_column_value(sqlite3_stmt*& stmt, int index, std::string& value);
+
+    template <typename T>
+    int refSelectFromTemplate(T& ref,
+                              const typedValuePairs& values,
+                              const std::string& selector,
+                              const std::string& from,
+                              const std::string& statements = nullptr) {
+        int retCode;
+        sqlite3_stmt* stmt = nullptr;
+
+        retCode = prepareStmtSelectFromStatements(stmt, selector, from, statements);
+        if (!retCode)
+            retCode = bindValuesToStmt(values, stmt);
+        if (!retCode)
+            retCode = sqlite3_step(stmt);
+        if (retCode == SQLITE_ROW) {
+            sqlite3_column_value(stmt, 0, ref);
+            retCode = SQLITE_OK;
+        }
+        if (stmt != nullptr)
+            retCode = sqlite3_finalize(stmt);
+        return retCode;
+    }
+
+    // Because I cannot get templates to work with strings
+    void selectFrom(int& value,
+                    const typedValuePairs& values,
+                    const std::string& selector,
+                    const std::string& from,
+                    const std::string& statements = nullptr);
+    void selectFrom(int& value,
+                    const std::string& selector,
+                    const std::string& from,
+                    const std::string& statements = nullptr);
+    void selectFrom(double& value,
+                    const typedValuePairs& values,
+                    const std::string& selector,
+                    const std::string& from,
+                    const std::string& statements = nullptr);
+    void selectFrom(double& value,
+                    const std::string& selector,
+                    const std::string& from,
+                    const std::string& statements = nullptr);
+    void selectFrom(std::string& value,
+                    const typedValuePairs& values,
+                    const std::string& selector,
+                    const std::string& from,
+                    const std::string& statements = nullptr);
+    void selectFrom(std::string& value,
+                    const std::string& selector,
+                    const std::string& from,
+                    const std::string& statements = nullptr);
+
+    // TODO: Below should probably be a template while the weird cases should be overloads
+
+    // ints
+    void selectFromId(int& result, const std::string& selector, const std::string& from, int id);
+    void selectFromId(unsigned int& result,
+                      const std::string& selector,
+                      const std::string& from,
+                      int id);
+    void selectFromId(bool& result, const std::string& selector, const std::string& from, int id);
+
+    // floats
+    void selectFromId(double& result, const std::string& selector, const std::string& from, int id);
+    void selectFromId(float& result, const std::string& selector, const std::string& from, int id);
+
+    // strings
+    void selectFromId(std::string& result,
+                      const std::string& selector,
+                      const std::string& from,
+                      int id);
+
+    std::vector<std::vector<std::string>> getRowsAsText(sqlite3_stmt*& stmt,
+                                                        bool rowHeader = false);
+
+    /*******************************************************************************
+     * public
+     ******************************************************************************/
 
    public:
-    DBHandler(std::string filePath);
-    ~DBHandler(void);
-
+    explicit DBHandler(std::string filePath);
+    ~DBHandler();
     bool initialise();
 
-    int getRows(std::string table);
+	// get id from table returns either max or min id from table.
+	// max = false -> min id, max = true -> max id
+	enum ID_MINMAX { MIN_ID = false, MAX_ID = true };  // Uggly enum
+	int getTableId(const std::string& table, ID_MINMAX = MAX_ID);
 
-    void insertDataLogs(std::vector<LogItem>& logs);
+	// Receiver for log items from DBLogger
+    void insertDataLogs(std::queue<LogItem>& logs);
 
-    void insertMessageLog(std::string gps_time, std::string type, std::string msg);
+    // Receivers for data coming in to the database from the website
+    void receiveConfigs(const std::string& configsJSON);
+    bool receiveWayPoints(const std::string& wayPointsJSON);
 
-    // updates table with json string (data)
-    bool updateTableJson(std::string table, std::string data);
-    bool updateTableJsonObject(std::string table, Json data);
+    // Config value reader
+    template <typename T>
+    void getConfigFrom(T& retVal,
+                       const char* selector,
+                       const char* from) {  // std::string version as well?
+        selectFromId(retVal, std::string(selector), std::string(from), 1);
+    }
+    template <typename T>
+    bool updateTableIdColumnValue(const char* table, int id, const char* colName, T newValue) {
+        typedValuePairs values;
+        addValue(values, colName, newValue);
+        return updateTableRow(table, id, values);
+    }
+    template <typename T>
+    bool updateTableColumnIdValue(const char* table, const char* column, int id, T value) {
+        sqlite3_stmt* stmt = nullptr;
+        std::string sql = "UPDATE " + std::string(table) + " SET " + std::string(column) +
+                          " = :value WHERE ID = :id";
+        if (!prepareStmtError(stmt, sql)) {
+            bindParam(stmt, ":value", value);
+            bindParam(stmt, ":id", id);
+            if (stepAndFinalizeStmt(stmt) == SQLITE_DONE) {
+                return true;
+            }
+        }
+        // Logger::error("%s Error updating table %s using \"%s\"", __PRETTY_FUNCTION__, table,
+        // sql.c_str()); Can not use logger in templates
+        return false;
+    }
 
-    // updates table using values given
-    bool updateTable(std::string table, std::string column, std::string value, std::string id);
+    // Get dataLogs_* as JSON for sending to the website
+    // supply onlyLatest to get only the ones with the highest id
+    std::string getLogsAsJSON(unsigned int &afterId, unsigned int toId = 0);
 
-    void clearTable(std::string table);
-
-    void updateConfigs(std::string configs);
-    bool updateWaypoints(std::string waypoints);
-
-    // retrieve one value from a table as string
-    std::string retrieveCell(std::string table, std::string id, std::string column);
-
-    // retrieve one value from a table as integer
-    int retrieveCellAsInt(std::string table, std::string id, std::string column);
-
-    // retrieve one value from a table as double
-    double retrieveCellAsDouble(std::string table, std::string id, std::string column);
-
-    // returns all logs in database as json; supply onlyLatest to get only the ones with the highest
-    // id
-    std::string getLogs(bool onlyLatest);
-
-    void forceUnlock() { m_databaseLock.unlock(); }
-
+    // Empties all dataLog_* tables
     void clearLogs();
 
-    // get id from table returns either max or min id from table.
-    // max = false -> min id
-    // max = true -> max id
-    std::string getIdFromTable(std::string table, bool max);
-    std::string getIdFromTable(std::string table, bool max, sqlite3* db);
-
-    void deleteRow(std::string table, std::string id);
-
+    // Waypoint value getter
     bool getWaypointValues(int& nextId,
                            double& nextLongitude,
                            double& nextLatitude,
@@ -177,21 +363,22 @@ class DBHandler {
                            int& prevRadius,
                            bool& foundPrev);
 
-    bool insert(std::string table, std::string fields, std::string values);
+    // Waypoints table as JSON
+    std::string getWayPointsAsJSON();
 
-    // inserts area scanning measurements into db
-    // TODO - remove here as well yeyeye
-    // void insertScan(std::string waypoint_id, PositionModel position, float temperature,
-    // std::string timestamp);
-
-    bool changeOneValue(std::string table,
-                        std::string id,
-                        std::string newValue,
-                        std::string colName);
-
-    std::string getWaypoints();
-
+    // Config tables as JSON
     std::string getConfigs();
-};
 
-#endif
+    // Well ... umm
+	void lock() { m_databaseLock.lock(); }
+    void unlock() { m_databaseLock.unlock(); }
+
+    // Generic string utility functions
+    std::string prepend(const std::string& prefix, const std::string& str);
+    std::vector<std::string> prepend(const std::string& prefix,
+                                     const std::vector<std::string>& strings);
+    std::string implode(const std::vector<std::string>& elements, const std::string& glue);
+    std::vector<std::string> explode(const std::string& string, char glue);
+    int indexOfString(const std::vector<std::string>& haystack, const std::string& needle);
+	bool deleteString(std::vector<std::string>& haystack, const std::string& needle);
+};

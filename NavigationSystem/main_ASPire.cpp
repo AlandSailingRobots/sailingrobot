@@ -6,6 +6,8 @@
 #include "../Messages/DataRequestMsg.h"
 #include "../SystemServices/Logger.h"
 
+#include "../WorldState/CameraProcessingUtility.h"
+#include "../WorldState/AISProcessing.h"
 #include "../Navigation/WaypointMgrNode.h"
 #include "../WorldState/StateEstimationNode.h"
 #include "../WorldState/WindStateNode.h"
@@ -16,11 +18,14 @@
 
 #if LOCAL_NAVIGATION_MODULE == 1
   #include "../Navigation/LocalNavigationModule/LocalNavigationModule.h"
+  #include "../Navigation/LocalNavigationModule/Voters/CourseVoter.h"
   #include "../Navigation/LocalNavigationModule/Voters/WaypointVoter.h"
   #include "../Navigation/LocalNavigationModule/Voters/WindVoter.h"
   #include "../Navigation/LocalNavigationModule/Voters/ChannelVoter.h"
   #include "../Navigation/LocalNavigationModule/Voters/ProximityVoter.h"
   #include "../Navigation/LocalNavigationModule/Voters/MidRangeVoter.h"
+  #include "../Navigation/LocalNavigationModule/VoterTCPDebugger.h"
+  #include "../Navigation/LocalNavigationModule/Voters/LastCourseVoter.h"
 #else
   #include "../Navigation/LineFollowNode.h"
 #endif
@@ -39,6 +44,7 @@
 #include "../Hardwares/CANMarineSensorTransmissionNode.h"
 
 #include "../Hardwares/CANCurrentSensorNode.h"
+#include "../WorldState/PowerTrackNode.h"
 
 #endif
 
@@ -109,16 +115,22 @@ int main(int argc, char *argv[])
 	DBHandler dbHandler(db_path);
 	MessageBus messageBus;
 
-	// Logger start
-	Logger::info("Built on %s at %s", __DATE__, __TIME__);
-	Logger::info("ASPire");
-  	#if LOCAL_NAVIGATION_MODULE == 1
-		Logger::info( "Using Local Navigation Module" );
-  	#else
-		Logger::info( "Using Line-follow" );
-  	#endif
-	Logger::info("Logger init\t\t[OK]");
-
+	// Initialise logger
+	if (Logger::init())
+	{
+		Logger::info("Built on %s at %s", __DATE__, __TIME__);
+    	Logger::info("ASPire");
+	  	#if LOCAL_NAVIGATION_MODULE == 1
+			Logger::info( "Using Local Navigation Module" );
+	  	#else
+			Logger::info( "Using Line-follow" );
+	  	#endif
+		Logger::info("Logger init\t\t[OK]");
+	}
+	else
+	{
+		Logger::error("Logger init\t\t[FAILED]");
+	}
 
 	// Initialise DBHandler
 	if(dbHandler.initialise())
@@ -136,8 +148,8 @@ int main(int argc, char *argv[])
 	// Declare nodes
 	//-------------------------------------------------------------------------------
 
-	int dbLoggerQueueSize = 5; 			// how many messages to log to the databse at a time
-	DBLoggerNode dbLoggerNode(messageBus, dbHandler, dbLoggerQueueSize);
+	int dbLoggerQueueItems = 5; 			// how many messages to log to the database at a time
+	DBLoggerNode dbLoggerNode(messageBus, dbHandler, dbLoggerQueueItems);
 	HTTPSyncNode httpsync(messageBus, &dbHandler);
 
 	StateEstimationNode stateEstimationNode(messageBus, dbHandler);
@@ -148,24 +160,73 @@ int main(int argc, char *argv[])
 	WingsailControlNode wingSailControlNode(messageBus, dbHandler);
 	CourseRegulatorNode courseRegulatorNode(messageBus, dbHandler);
 
-  	#if LOCAL_NAVIGATION_MODULE == 1
+	CameraProcessingUtility cameraProcessingUtility(messageBus, dbHandler, &collidableMgr);
+	AISProcessing aisProcessing(messageBus, dbHandler, &collidableMgr);
+
+	#if LOCAL_NAVIGATION_MODULE == 1
 		LocalNavigationModule lnm	( messageBus, dbHandler );
 
-		const int16_t MAX_VOTES = dbHandler.retrieveCellAsInt("config_voter_system","1","max_vote");
-		WaypointVoter waypointVoter( MAX_VOTES, dbHandler.retrieveCellAsDouble("config_voter_system","1","waypoint_voter_weight")); // weight = 1
-		WindVoter windVoter( MAX_VOTES, dbHandler.retrieveCellAsDouble("config_voter_system","1","wind_voter_weight")); // weight = 1
-		ChannelVoter channelVoter( MAX_VOTES, dbHandler.retrieveCellAsDouble("config_voter_system","1","channel_voter_weight")); // weight = 1
-		MidRangeVoter midRangeVoter( MAX_VOTES, dbHandler.retrieveCellAsDouble("config_voter_system","1","midrange_voter_weight"), collidableMgr );
-		ProximityVoter proximityVoter( MAX_VOTES, dbHandler.retrieveCellAsDouble("config_voter_system","1","proximity_voter_weight"), collidableMgr);
+		int MAX_VOTES;
+		dbHandler.getConfigFrom(MAX_VOTES, "max_vote", "config_voter_system");
 
+		double weight = 0;
+		dbHandler.getConfigFrom(weight, "course_voter_weight","config_voter_system");
+		CourseVoter courseVoter(MAX_VOTES, weight);
+
+		weight = 0;
+		dbHandler.getConfigFrom(weight, "waypoint_voter_weight", "config_voter_system");
+		WaypointVoter waypointVoter(MAX_VOTES, weight); // weight = 1
+
+		weight = 0;
+		dbHandler.getConfigFrom(weight, "wind_voter_weight", "config_voter_system");
+		WindVoter windVoter(MAX_VOTES, weight); // weight = 1
+
+		weight = 0;
+		dbHandler.getConfigFrom(weight, "channel_voter_weight", "config_voter_system");
+		ChannelVoter channelVoter( MAX_VOTES, weight); // weight = 1
+
+		weight = 0;
+		dbHandler.getConfigFrom(weight, "midrange_voter_weight", "config_voter_system");
+		MidRangeVoter midRangeVoter( MAX_VOTES, weight, collidableMgr );
+
+		weight = 0;
+		dbHandler.getConfigFrom(weight, "proximity_voter_weight", "config_voter_system");
+		ProximityVoter proximityVoter( MAX_VOTES, weight, collidableMgr);
+
+    // #TODO add LastCourseVoter voter weight in the tables and put a getConfig call here
+		LastCourseVoter lastCourseVoter( MAX_VOTES, 0.7 );
+
+
+		lnm.registerVoter( &courseVoter );
 		lnm.registerVoter( &waypointVoter );
 		lnm.registerVoter( &windVoter );
 		lnm.registerVoter( &channelVoter );
+
+		// As there is no veto used in both avoidance voters for now, you can disable avoidance system just by
+		// putting a weigth of zero in config_ASPire.json and push the new config manually or through the website.
+
 		lnm.registerVoter( &proximityVoter );
 		lnm.registerVoter( &midRangeVoter );
-  	#else
+
+		lnm.registerVoter( &lastCourseVoter );
+
+                
+        /*VoterTCPDebugger courseVoterDbg(messageBus, lnm, 0);
+        VoterTCPDebugger waypointVoterDbg(messageBus, lnm, 1);
+        VoterTCPDebugger windVoterDbg(messageBus, lnm, 2);
+        VoterTCPDebugger channelVoterDbg(messageBus, lnm, 3);
+        VoterTCPDebugger proximityVoterDbg(messageBus, lnm, 4);
+        VoterTCPDebugger midRangeVoterDbg(messageBus, lnm, 5);
+        VoterTCPDebugger lastCourseVoterDbg(messageBus, lnm, 6);
+        //VoterTCPDebugger voterTCPD(messageBus, courseVoter);
+        VoterTCPDebugger voterTCPDbg(messageBus);
+        voterTCPDbg.registerVoter( &courseVoter );
+        voterTCPDbg.registerVoter( &waypointVoter );*/
+
+    #else
 		LineFollowNode sailingLogic(messageBus, dbHandler);
   	#endif
+
 
 	#if SIMULATION == 1
   		SimulationNode simulation(messageBus, 1, &collidableMgr);
@@ -178,10 +239,14 @@ int main(int argc, char *argv[])
 	  	ActuatorNodeASPire actuators(messageBus, canService);
 	  	CANArduinoNode actuatorFeedback(messageBus, dbHandler, canService);
 
-		CANMarineSensorReceiver canMarineSensorReciver(messageBus, canService);
+
+
+		CANMarineSensorReceiver canMarineSensorReceiver(messageBus, canService);
 
 		CANMarineSensorTransmissionNode canMarineSensorTransmissionNode(messageBus, canService);
 		CANCurrentSensorNode canCurrentSensorNode(messageBus, dbHandler, canService);
+		PowerTrackNode powerTrackNode(messageBus, dbHandler, 0.5);
+
 
 	#endif
 
@@ -189,7 +254,7 @@ int main(int argc, char *argv[])
 	// Initialise nodes
 	//-------------------------------------------------------------------------------
 
-	initialiseNode(httpsync, "Httpsync", NodeImportance::NOT_CRITICAL); // This node is not critical during the developement phase.
+	initialiseNode(httpsync, "Httpsync", NodeImportance::NOT_CRITICAL); // This node is not critical during the development phase.
 	initialiseNode(dbLoggerNode, "DBLogger", NodeImportance::CRITICAL);
 
 	initialiseNode(stateEstimationNode,"StateEstimation",NodeImportance::CRITICAL);
@@ -201,9 +266,19 @@ int main(int argc, char *argv[])
 
 	#if LOCAL_NAVIGATION_MODULE == 1
 		initialiseNode( lnm, "Local Navigation Module",	NodeImportance::CRITICAL );
+                
+                //List the debug output you want
+		//initialiseNode( windVoterDbg, "windVoterTCPDebugger", NodeImportance::NOT_CRITICAL);
+                //initialiseNode( channelVoterDbg, "channelVoterTCPDebugger", NodeImportance::NOT_CRITICAL);
+                //initialiseNode( proximityVoterDbg, "proximityVoterTCPDebugger", NodeImportance::NOT_CRITICAL);
+                //initialiseNode( midRangeVoterDbg, "midRangeVoterTCPDebugger", NodeImportance::NOT_CRITICAL);
+                
+                //initialiseNode( voterTCPDbg, "VoterTCPDebugger", NodeImportance::NOT_CRITICAL);
+
 	#else
 		initialiseNode(sailingLogic, "LineFollow", NodeImportance::CRITICAL);
 	#endif
+
 
 	#if SIMULATION == 1
 		initialiseNode(simulation,"Simulation",NodeImportance::CRITICAL);
@@ -215,7 +290,10 @@ int main(int argc, char *argv[])
 		initialiseNode(actuatorFeedback, "Actuator Feedback", NodeImportance::NOT_CRITICAL);
 		initialiseNode(canMarineSensorTransmissionNode, "Marine Sensors", NodeImportance::NOT_CRITICAL);
 		initialiseNode(canCurrentSensorNode, "Current Sensors", NodeImportance::NOT_CRITICAL);
+		initialiseNode(powerTrackNode, "Powertrack", NodeImportance::NOT_CRITICAL);
 	#endif
+
+	initialiseNode(cameraProcessingUtility, "Camera Processing", NodeImportance::NOT_CRITICAL);
 
 	// Start active nodes
 	//-------------------------------------------------------------------------------
@@ -229,6 +307,8 @@ int main(int argc, char *argv[])
 	wingSailControlNode.start();
 	courseRegulatorNode.start();
 
+
+
 	#if SIMULATION == 1
 		simulation.start();
 	#else
@@ -238,10 +318,23 @@ int main(int argc, char *argv[])
 		windSensor.start();
 		actuatorFeedback.start();
 		canCurrentSensorNode.start();
+		powerTrackNode.start();
 	#endif
 
 	#if LOCAL_NAVIGATION_MODULE == 1
+    // Cancel Camera Processing node if using voters without avoidance.
+    // Camera processing enabled for voter system only currently.
+	//  cameraProcessingUtility.start();
 		lnm.start();
+                
+                //Start debug outputs
+		//windVoterDbg.start();
+                //channelVoterDbg.start();
+                //proximityVoterDbg.start();
+               // midRangeVoterDbg.start();
+                
+                //Multiple voters dbg version
+                //voterTCPDbg.start();
 	#else
 		sailingLogic.start();
 	#endif
@@ -252,6 +345,8 @@ int main(int argc, char *argv[])
 	messageBus.run();
 
 
+
 	//Logger::shutdown();
+
 	exit(0);
 }

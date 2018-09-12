@@ -42,8 +42,8 @@ CV7Node::CV7Node(MessageBus& msgBus, DBHandler& dbhandler)
 {
 	msgBus.registerNode(*this, MessageType::DataRequest);
 	msgBus.registerNode(*this, MessageType::ServerConfigsReceived);
-	m_BaudRate = m_db.retrieveCellAsInt("config_wind_sensor","1","baud_rate");
-	m_PortName = m_db.retrieveCell("config_wind_sensor","1","port");
+	m_db.getConfigFrom(m_BaudRate, "baud_rate", "config_wind_sensor");
+	m_db.getConfigFrom(m_PortName, "port", "config_wind_sensor");
 }
 
 CV7Node::~CV7Node()
@@ -84,7 +84,7 @@ void CV7Node::start()
 
 void CV7Node::updateConfigsFromDB()
 {
-	m_LoopTime = m_db.retrieveCellAsDouble("config_wind_sensor","1","loop_time");
+	m_db.getConfigFrom(m_LoopTime, "loop_time", "config_wind_sensor");
 }
 
 void CV7Node::processMessage(const Message* message)
@@ -157,7 +157,7 @@ void CV7Node::WindSensorThread(ActiveNode* nodePtr)
 		{
 			buffer_to_parse+=buffer;
 
-      //Logger::info("buffer windsensor %s",buffer_to_parse.c_str());
+        Logger::trace("buffer windsensor %s",buffer_to_parse.c_str());
 			if(node->parseString(buffer_to_parse, windDir, windSpeed, windTemp))
 			{
 				if(windDirData.size() < DATA_BUFFER_SIZE)

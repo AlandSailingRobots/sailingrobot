@@ -36,7 +36,7 @@ ArduinoNode::ArduinoNode(MessageBus& msgBus,  DBHandler& dbhandler)
 
 void ArduinoNode::updateConfigsFromDB()
 {
-	m_LoopTime = m_db.retrieveCellAsDouble("config_arduino","1","loop_time");
+	m_db.getConfigFrom(m_LoopTime, "loop_time", "config_arduino");
 }
 
 bool ArduinoNode::init()
@@ -80,7 +80,7 @@ void ArduinoNode::start()
 	}
 	else
 	{
-		Logger::error("%s Cannot start Aurdino thread as the node was not correctly initialised!", __PRETTY_FUNCTION__);
+		Logger::error("%s Cannot start Arduino thread as the node was not correctly initialised!", __PRETTY_FUNCTION__);
 	}
 }
 

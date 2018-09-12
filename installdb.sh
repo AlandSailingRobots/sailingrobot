@@ -50,7 +50,7 @@ printf 'Enter boat password: '
 read -r BOATPWD
 
 printf 'Storing configuration into %s\n' "$DBFILE"
-if sqlite3 "$DBFILE" "INSERT INTO config_httpsync(id, loop_time, remove_logs, push_only_latest_logs, boat_id, boat_pwd, srv_addr) VALUES('1', '0.5', '0', '1', '$BOATID', '$BOATPWD', '$SRVADDR')"
+if sqlite3 "$DBFILE" "INSERT INTO config_httpsync(id, loop_time, remove_logs, push_only_latest_logs, boat_id, boat_pwd, srv_addr) VALUES('1', '0.5', '0', '0', '$BOATID', '$BOATPWD', '$SRVADDR')"
 then
 	print_result true
 else
