@@ -150,8 +150,11 @@ float WingsailControlNode::simpleCalculateTailAngle() {
     //Logger::info("APP WIND %f", sin(Utility::degreeToRadian(m_ApparentWindDir)));
     if(m_TargetCourse != DATA_OUT_OF_RANGE && m_TargetCourse != NO_COMMAND)
     {
-        
-        if (sin(Utility::degreeToRadian(m_ApparentWindDir)) >= 0)
+
+        // TODO : take the speed of the boat into account somewhere there when tacking
+        // The use of m_TargetTackStarboard still better than sin(Utility::degreeToRadian(m_ApparentWindDir)) >= 0
+        // in 'bad' wind conditions
+        if (m_TargetTackStarboard)
         {
             return -m_MaxCommandAngle;
         }

@@ -145,9 +145,8 @@ void CameraProcessingUtility::CameraProcessingUtilityThreadFunc(ActiveNode* node
 
     Timer timer;
     timer.start();
-    //Logger::info("Entering CameraProcessingUtilityThreadFunc loop");
     
-    std::chrono::duration<double> elapsed_seconds;
+    //std::chrono::duration<double> elapsed_seconds;
 
 #ifndef __arm__
    if (WITH_GUI)
@@ -165,11 +164,11 @@ void CameraProcessingUtility::CameraProcessingUtilityThreadFunc(ActiveNode* node
 
     while(node->m_running) {
 
-      auto start = std::chrono::system_clock::now();
+      //auto start = std::chrono::system_clock::now();
       node->freeSpaceProcessing();
-      auto end = std::chrono::system_clock::now();
-      elapsed_seconds = end-start;
-      cout << "-------------------------- Image Processing Took: " << elapsed_seconds.count() << " Seconds" << endl;
+      //auto end = std::chrono::system_clock::now();
+      //elapsed_seconds = end-start;
+      //cout << "-------------------------- Image Processing Took: " << elapsed_seconds.count() << " Seconds" << endl;
 
       node->computeRelDistances();
       node->addCameraDataToCollidableMgr();
@@ -177,7 +176,6 @@ void CameraProcessingUtility::CameraProcessingUtilityThreadFunc(ActiveNode* node
       timer.sleepUntil(0.25); // pause when thread is restarted
       timer.reset();
     }
-    //Logger::info("Exiting CameraProcessingUtilityThreadFunc loop");
 }
 
 void CameraProcessingUtility::addCameraDataToCollidableMgr() {
@@ -464,7 +462,7 @@ int CameraProcessingUtility::computeRelDistances() {
         // We insert the mean of the distance in a group of columns (called a segment here), scaled between 0 and 100
         // this->m_relBearingToRelObstacleDistance.insert(pair<int16_t ,uint16_t>(i-NUMBER_OF_SEGMENTS/2, 100.0*tmp_sum/(heightFrame*pixsPerSegment)));
         // Change from insert to operator[], as insert does not overwrite the value of an existing key, and operator[]
-        // does call the insert function in case the key doesn't exist yet.
+        // does call the insert function if the key doesn't exist yet.
         this->m_relBearingToRelObstacleDistance[(i-NUMBER_OF_SEGMENTS/2)] = static_cast<unsigned short>(100.0 * tmp_sum / (heightFrame * pixsPerSegment));
         tmp_sum = 0;
     }

@@ -76,24 +76,26 @@ void PowerTrackNode::processCurrentSensorDataMessage(CurrentSensorDataMsg* msg)
 	//if statement to ensure data flow is balanced
 	// WARNING: this if statement only works if there are only 2 sensors, we want to switch between the readings
 	//		    of the solar panel input and the battery output
-	// POSSIBLE FIX: move the update of m_lastElementRead in the SOLAR_PANEL and POWER_UNIT cases
+	// ONE POSSIBLE FIX: move the update of m_lastElementRead in the SOLAR_PANEL and POWER_UNIT cases
 	if ( m_CurrentSensorDataElement != m_lastElementRead ) {
 
 		switch(m_CurrentSensorDataElement)
 		{
 			case SOLAR_PANEL :
 				m_PowerBalance += m_Power;
+				m_lastElementRead = m_CurrentSensorDataElement;
 				break;
 
 			case POWER_UNIT :
 				m_PowerBalance -= m_Power;
+				m_lastElementRead = m_CurrentSensorDataElement;
 				break;
 
 			default : 
 				break;
 		}
 
-        m_lastElementRead = m_CurrentSensorDataElement;
+        //m_lastElementRead = m_CurrentSensorDataElement;
 	}
 }
 
@@ -118,7 +120,7 @@ void PowerTrackNode::PowerTrackThreadFunc(ActiveNode* nodePtr)
         node->m_MsgBus.sendMessage(std::move(powerTrack));
 
 		// For testing only (to be removed soon/or shift to debug mode)
-		Logger::info("PowerTrackInfo: %f,%f,%f,%f,%d", (float)node->m_CurrentSensorDataCurrent, 
+		Logger::debug("PowerTrackInfo: %f,%f,%f,%f,%d", (float)node->m_CurrentSensorDataCurrent,
 			(float)node->m_CurrentSensorDataVoltage, (float)node->m_PowerBalance, (float)node->m_Power,
 			(uint8_t)node->m_CurrentSensorDataElement);
 
