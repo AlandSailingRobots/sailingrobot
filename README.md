@@ -77,6 +77,8 @@ External Variables (Only for building a control system):
 * `USE_LNM`: Chooses which navigation algorithm you want to use.
   - `=1`: Local Navigation Module (Voter System)
   - `=0`: Line-follow algorithm (default)
+
+Logger Variables:
 * `FILE_LOG_SEV_LVL`: Chooses which severity level are logged by the logger.
   - `=0/1/2/3/4/5`: Logs to file when severity >= trace/debug/info(default)/warning/error/fatal
 * `CONSOLE_LOG_SEV_LVL`: Chooses which severity level are logged by the logger.
