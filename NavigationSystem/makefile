@@ -124,8 +124,8 @@ NAVIGATION_SRC				= Navigation/WaypointMgrNode.cpp
 SYSTEM_SERVICES_SRC  		= SystemServices/Logger.cpp SystemServices/SysClock.cpp SystemServices/Timer.cpp
 
 WORLD_STATE_SRC				= WorldState/VesselStateNode.cpp WorldState/StateEstimationNode.cpp \
-								WorldState/WindStateNode.cpp WorldState/PowerTrackNode.cpp \
-							    WorldState/CameraProcessingUtility.cpp
+								WorldState/WindStateNode.cpp WorldState/PowerTrackNode.cpp
+
 
 DATA_COLLECTION_SRC			= DataCollection/DataCollectionMgrNode.cpp
 
@@ -144,7 +144,9 @@ export LNM_SRC              = $(LNM_DIR)/ASRCourseBallot.cpp $(LNM_DIR)/ASRArbit
 								$(LNM_DIR)/VoterTCPDebugger.cpp $(LNM_DIR)/Voters/LastCourseVoter.cpp
 
 # Obstacles detection
-export COLLIDABLE_MGR_SRC	= WorldState/CollidableMgr/CollidableMgr.cpp WorldState/AISProcessing.cpp \
+export COLLIDABLE_MGR_SRC	= WorldState/CollidableMgr/CollidableMgr.cpp WorldState/AISProcessing.cpp
+
+export CAMERA_PROCESS_SRC   = WorldState/CameraProcessingUtility.cpp
 							
 
 # Simulator
@@ -166,7 +168,7 @@ export HW_NODES_ALL_SRC		= Hardwares/HMC6343Node.cpp Hardwares/GPSDNode.cpp
 export HW_NODES_ASPIRE_SRC 	= Hardwares/ActuatorNodeASPire.cpp Hardwares/CANAISNode.cpp Hardwares/CANSolarTrackerNode.cpp\
                             	Hardwares/CANWindsensorNode.cpp Hardwares/CANArduinoNode.cpp \
                             	Hardwares/CANMarineSensorTransmissionNode.cpp Hardwares/CANMarineSensorReceiver.cpp \
-                            	Hardwares/CANCurrentSensorNode.cpp 
+                            	Hardwares/CANCurrentSensorNode.cpp
 
 
 # ActuatorNode for Janet not compiling, uses removed ActuatorPositionMsg
