@@ -14,8 +14,8 @@
 
 #pragma once
 
-#include "../Navigation/LocalNavigationModule/ASRVoter.h"
-#include "../WorldState/CollidableMgr/CollidableMgr.h"
+#include "Navigation/LocalNavigationModule/ASRVoter.h"
+#include "WorldState/CollidableMgr/CollidableMgr.h"
 
 class ProximityVoterSuite;  // forward declaration;
 

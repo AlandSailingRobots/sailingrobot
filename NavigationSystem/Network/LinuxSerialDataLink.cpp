@@ -12,11 +12,11 @@
 
 
 #include "LinuxSerialDataLink.h"
-#include "../SystemServices/Logger.h"
+#include "SystemServices/Logger.h"
 #include <wiringSerial.h>
 #include <thread>
 #include <cstring>
-#include "../SystemServices/SysClock.h"
+#include "SystemServices/SysClock.h"
 
 
 #define ENTER_CMD_MODE() 	writeData((uint8_t*)"+++", 3); std::this_thread::sleep_for(std::chrono::milliseconds(3000))

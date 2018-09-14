@@ -16,16 +16,16 @@
 #include <string>
 #include <vector>
 
-#include "../Database/DBHandler.h"
-#include "../Math/CourseMath.h"
-#include "../Math/Utility.h"
-#include "../MessageBus/Node.h"
-#include "../Messages/CourseDataMsg.h"
-#include "../Messages/ServerWaypointsReceivedMsg.h"
-#include "../Messages/StateMessage.h"
-#include "../Messages/WaypointDataMsg.h"
-#include "../SystemServices/Logger.h"
-#include "../SystemServices/Timer.h"
+#include "Database/DBHandler.h"
+#include "Math/CourseMath.h"
+#include "Math/Utility.h"
+#include "MessageBus/Node.h"
+#include "Messages/CourseDataMsg.h"
+#include "Messages/ServerWaypointsReceivedMsg.h"
+#include "Messages/StateMessage.h"
+#include "Messages/WaypointDataMsg.h"
+#include "SystemServices/Logger.h"
+#include "SystemServices/Timer.h"
 
 class WaypointMgrNode : public Node {
    public:

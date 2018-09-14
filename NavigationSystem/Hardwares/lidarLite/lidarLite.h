@@ -29,7 +29,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.*/
 #include <stdlib.h> /* atoi */
 #include <unistd.h>
 #include <wiringPiI2C.h>
-#include "../SystemServices/Logger.h"
+#include "SystemServices/Logger.h"
 
 #define LIDAR_LITE_ADRS 0x62
 

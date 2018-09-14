@@ -1,5 +1,5 @@
 #include "colorDetectionNode.h"
-#include "../SystemServices/Logger.h"
+#include "SystemServices/Logger.h"
 using namespace cv;
 using namespace std;
 #define DISPLAY_WINDOWS_AND_TRACKBARS 0

@@ -13,7 +13,7 @@
 
 #pragma once
 
-#include "../ActiveNode.h"
+#include "ActiveNode.h"
 #include "colorDetectionUtility.h"
 
 class colorDetectionNode : public ActiveNode {

@@ -18,9 +18,9 @@
 
 #pragma once
 
-#include "../Hardwares/CAN_Services/CANFrameReceiver.h"
-#include "../Hardwares/CAN_Services/CANService.h"
-#include "../MessageBus/MessageBus.h"
+#include "Hardwares/CAN_Services/CANFrameReceiver.h"
+#include "Hardwares/CAN_Services/CANService.h"
+#include "MessageBus/MessageBus.h"
 
 class CANMarineSensorReceiver : public CANFrameReceiver {
    public:

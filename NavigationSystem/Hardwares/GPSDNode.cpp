@@ -12,9 +12,9 @@
  ***************************************************************************************/
 
 #include "GPSDNode.h"
-#include "../SystemServices/Logger.h"
-#include "../Messages/GPSDataMsg.h"
-#include "../SystemServices/Timer.h"
+#include "SystemServices/Logger.h"
+#include "Messages/GPSDataMsg.h"
+#include "SystemServices/Timer.h"
 
 
 GPSDNode::GPSDNode(MessageBus& msgBus, DBHandler& dbhandler)

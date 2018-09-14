@@ -486,7 +486,7 @@ class DenseBase
     void reverseInPlace();
 
 #define EIGEN_CURRENT_STORAGE_BASE_CLASS Eigen::DenseBase
-#include "../plugins/BlockMethods.h"
+#include "plugins/BlockMethods.h"
 #ifdef EIGEN_DENSEBASE_PLUGIN
 #include EIGEN_DENSEBASE_PLUGIN
 #endif

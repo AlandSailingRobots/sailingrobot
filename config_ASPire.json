@@ -59,7 +59,8 @@
   "wind_voter_weight": 1,
   "channel_voter_weight": 1,
   "midrange_voter_weight": 0,
-  "proximity_voter_weight": 0
+  "proximity_voter_weight": 0,
+  "lastcourse_voter_weight": 0.7
 },
 
 "config_wind_sensor": {

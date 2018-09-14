@@ -1,8 +1,8 @@
 #pragma once
 
-#include "../../../Hardwares/CAN_Services/CANFrameReceiver.h"
-#include "../../../Hardwares/CAN_Services/CANService.h"
-#include "../../../Hardwares/CAN_Services/N2kMsg.h"
+#include "Hardwares/CAN_Services/CANFrameReceiver.h"
+#include "Hardwares/CAN_Services/CANService.h"
+#include "Hardwares/CAN_Services/N2kMsg.h"
 
 #include <iostream>
 

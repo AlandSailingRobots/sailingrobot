@@ -24,11 +24,11 @@
 #include <map>
 #include <unistd.h>
 
-#include "../SystemServices/SysClock.h"
-#include "../SystemServices/Timer.h"
-#include "../Database/DBHandler.h"
-#include "../SystemServices/Logger.h"
-#include "../WorldState/CollidableMgr/CollidableMgr.h"
+#include "SystemServices/SysClock.h"
+#include "SystemServices/Timer.h"
+#include "Database/DBHandler.h"
+#include "SystemServices/Logger.h"
+#include "WorldState/CollidableMgr/CollidableMgr.h"
 #include "CameraProcessingUtility.h"
 
 #include <chrono> // testing execution speed

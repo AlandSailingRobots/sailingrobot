@@ -18,11 +18,11 @@
  #include <chrono>
  #include <thread>
 
- #include "../Messages/PowerTrackMsg.h"
- #include "../Math/CourseMath.h"
- #include "../SystemServices/Logger.h"
- #include "../SystemServices/Timer.h"
- #include "../Database/DBHandler.h"
+ #include "Messages/PowerTrackMsg.h"
+ #include "Math/CourseMath.h"
+ #include "SystemServices/Logger.h"
+ #include "SystemServices/Timer.h"
+ #include "Database/DBHandler.h"
 
  #define POWER_TRACK_INITIAL_SLEEP 100
 

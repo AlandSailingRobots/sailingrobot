@@ -16,9 +16,9 @@
 #include "MidRangeVoter.h"
 
 
-#include "../Math/CourseMath.h"
-#include "../Math/Utility.h"
-#include "../SystemServices/Logger.h"
+#include "Math/CourseMath.h"
+#include "Math/Utility.h"
+#include "SystemServices/Logger.h"
 #include <cmath>
 
  #include <algorithm>

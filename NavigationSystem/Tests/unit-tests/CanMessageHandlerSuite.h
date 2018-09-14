@@ -1,12 +1,12 @@
 #pragma once
 
-#include "../../Hardwares/CAN_Services/CanBusCommon/CanMessageHandler.h"
+#include "Hardwares/CAN_Services/CanBusCommon/CanMessageHandler.h"
 
-#include "../cxxtest/cxxtest/TestSuite.h"
+#include "Tests/cxxtest/cxxtest/TestSuite.h"
 
 class CanMessageHandlerSuite : public CxxTest::TestSuite {
    public:
-    const int MESSAGE_ID = 500;
+    const uint32_t MESSAGE_ID = 500;
 
     void test_encodeAndDecode() {
         CanMessageHandler encodeHandler(MESSAGE_ID);

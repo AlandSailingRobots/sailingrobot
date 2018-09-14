@@ -18,8 +18,8 @@
 
 #pragma once
 
-#include "../ASRVoter.h"
-#include "../Math/CourseMath.h"
+#include "Navigation/LocalNavigationModule/ASRVoter.h"
+#include "Math/CourseMath.h"
 
 class LastCourseVoter : public ASRVoter {
 public:

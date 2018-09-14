@@ -13,7 +13,7 @@
 ***************************************************************************************/
 
 #include "CANWindsensorNode.h"
-#include "../Math/Utility.h"
+#include "Math/Utility.h"
 
 
 const int DATA_OUT_OF_RANGE	=	-2000;

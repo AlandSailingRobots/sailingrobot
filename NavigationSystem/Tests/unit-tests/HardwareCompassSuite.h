@@ -24,10 +24,10 @@
 
 #include <stdint.h>
 #include <thread>
-#include "../../MessageBus/MessageBus.h"
-#include "../../Hardwares/HMC6343Node.h"
-#include "../../SystemServices/Logger.h"
-#include "../cxxtest/cxxtest/TestSuite.h"
+#include "MessageBus/MessageBus.h"
+#include "Hardwares/HMC6343Node.h"
+#include "SystemServices/Logger.h"
+#include "Tests/cxxtest/cxxtest/TestSuite.h"
 #include "TestMocks/MessageLogger.h"
 
 // For std::this_thread

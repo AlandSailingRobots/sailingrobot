@@ -12,7 +12,7 @@
 
 #pragma once
 
-#include "../MessageBus/Message.h"
+#include "MessageBus/Message.h"
 
 enum class GPSMode {
     NoUpdate = 0,  // Indicates that a update hasn't occured yet

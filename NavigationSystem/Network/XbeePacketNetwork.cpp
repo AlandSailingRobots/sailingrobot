@@ -11,11 +11,11 @@
  ***************************************************************************************/
 
 
-#include "../Network/XbeePacketNetwork.h"
-#include "../SystemServices/SysClock.h"
+#include "Network/XbeePacketNetwork.h"
+#include "SystemServices/SysClock.h"
 #include "SLIP.h"
 #ifdef __linux__
-#include "../SystemServices/Logger.h"
+#include "SystemServices/Logger.h"
 #elif _WIN32
 #include "..\SystemServices/Logger.h"
 #endif

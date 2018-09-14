@@ -1,20 +1,20 @@
 #include "DBLoggerNode.h"
 
-#include "../Messages/ASPireActuatorFeedbackMsg.h"
-#include "../Messages/CompassDataMsg.h"
-#include "../Messages/CourseDataMsg.h"
-#include "../Messages/CurrentSensorDataMsg.h"
-#include "../Messages/GPSDataMsg.h"
-#include "../Messages/LocalNavigationMsg.h"
-#include "../Messages/MarineSensorDataMsg.h"
-#include "../Messages/StateMessage.h"
-#include "../Messages/WaypointDataMsg.h"
-#include "../Messages/WindDataMsg.h"
-#include "../Messages/WindStateMsg.h"
-#include "../Messages/PowerTrackMsg.h"
-#include "../SystemServices/Logger.h"
-#include "../SystemServices/SysClock.h"
-#include "../SystemServices/Timer.h"
+#include "Messages/ASPireActuatorFeedbackMsg.h"
+#include "Messages/CompassDataMsg.h"
+#include "Messages/CourseDataMsg.h"
+#include "Messages/CurrentSensorDataMsg.h"
+#include "Messages/GPSDataMsg.h"
+#include "Messages/LocalNavigationMsg.h"
+#include "Messages/MarineSensorDataMsg.h"
+#include "Messages/StateMessage.h"
+#include "Messages/WaypointDataMsg.h"
+#include "Messages/WindDataMsg.h"
+#include "Messages/WindStateMsg.h"
+#include "Messages/PowerTrackMsg.h"
+#include "SystemServices/Logger.h"
+#include "SystemServices/SysClock.h"
+#include "SystemServices/Timer.h"
 
 #define STATE_INITIAL_SLEEP 100
 
@@ -68,10 +68,18 @@ void DBLoggerNode::processMessage(const Message* msg) {
 
         case MessageType::CompassData: {
             const CompassDataMsg* compassDataMsg = static_cast<const CompassDataMsg*>(msg);
-            item.m_compassHeading = compassDataMsg->heading();
-            item.m_compassPitch = compassDataMsg->pitch();
-            item.m_compassRoll = compassDataMsg->roll();
-            item.m_compassTimestamp = std::to_string(compassDataMsg->timestamp());
+            compassItem compass_item{
+                    (double)DATA_OUT_OF_RANGE,          // m_compassHeading;
+                    (double)DATA_OUT_OF_RANGE,          // m_compassPitch;
+                    (double)DATA_OUT_OF_RANGE,          // m_compassRoll;
+                    (std::string) "initialized",        // m_compassTimeStamp;
+            };
+            compass_item.m_compassHeading = compassDataMsg->heading();
+            compass_item.m_compassPitch = compassDataMsg->pitch();
+            compass_item.m_compassRoll = compassDataMsg->roll();
+            compass_item.m_compassTimestamp = std::to_string(compassDataMsg->timestamp());
+
+            item.m_compassItems.push(std::move(compass_item));
         } break;
 
         case MessageType::LocalNavigation: {
@@ -178,6 +186,11 @@ void DBLoggerNode::clearCurrentSensorQueue( std::queue<currentSensorItem> &q )
     std::queue<currentSensorItem> empty;
     std::swap( q, empty );
 }
+void DBLoggerNode::clearCompassQueue( std::queue<compassItem> &q )
+{
+    std::queue<compassItem> empty;
+    std::swap( q, empty );
+}
 
 
 void DBLoggerNode::start() {
@@ -218,6 +231,7 @@ void DBLoggerNode::DBLoggerNodeThreadFunc(ActiveNode* nodePtr) {
         node->m_dbLogger.log(node->item);
         node->m_lock.unlock();
         DBLoggerNode::clearCurrentSensorQueue(node->item.m_currentSensorItems);
+        DBLoggerNode::clearCompassQueue(node->item.m_compassItems);
         timer.sleepUntil(node->m_loopTime);
         timer.reset();
     }

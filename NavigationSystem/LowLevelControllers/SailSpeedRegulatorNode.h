@@ -22,14 +22,14 @@
 #include <thread>
 #include <vector>
 
-#include "../Database/DBHandler.h"
-#include "../Math/Utility.h"
-#include "../MessageBus/ActiveNode.h"
-#include "../MessageBus/MessageBus.h"
-#include "../Messages/SailCommandMsg.h"
-#include "../Messages/StateMessage.h"
-#include "../Messages/WindDataMsg.h"
-#include "../SystemServices/Timer.h"
+#include "Database/DBHandler.h"
+#include "Math/Utility.h"
+#include "MessageBus/ActiveNode.h"
+#include "MessageBus/MessageBus.h"
+#include "Messages/SailCommandMsg.h"
+#include "Messages/StateMessage.h"
+#include "Messages/WindDataMsg.h"
+#include "SystemServices/Timer.h"
 
 class SailSpeedRegulatorNode : public ActiveNode {
    public:

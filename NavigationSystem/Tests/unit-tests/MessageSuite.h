@@ -18,21 +18,21 @@
 
 #pragma once
 
-#include "../../Messages/AISDataMsg.h"
-#include "../../Messages/ArduinoDataMsg.h"
-#include "../../Messages/CompassDataMsg.h"
-#include "../../Messages/CourseDataMsg.h"
-#include "../../Messages/DataRequestMsg.h"
-#include "../../Messages/GPSDataMsg.h"
-#include "../../Messages/LocalConfigChangeMsg.h"
-#include "../../Messages/LocalWaypointChangeMsg.h"
-#include "../../Messages/ServerConfigsReceivedMsg.h"
-#include "../../Messages/ServerWaypointsReceivedMsg.h"
-#include "../../Messages/StateMessage.h"
-#include "../../Messages/VesselStateMsg.h"
-#include "../../Messages/WaypointDataMsg.h"
-#include "../../Messages/WindDataMsg.h"
-#include "../cxxtest/cxxtest/TestSuite.h"
+#include "Messages/AISDataMsg.h"
+#include "Messages/ArduinoDataMsg.h"
+#include "Messages/CompassDataMsg.h"
+#include "Messages/CourseDataMsg.h"
+#include "Messages/DataRequestMsg.h"
+#include "Messages/GPSDataMsg.h"
+#include "Messages/LocalConfigChangeMsg.h"
+#include "Messages/LocalWaypointChangeMsg.h"
+#include "Messages/ServerConfigsReceivedMsg.h"
+#include "Messages/ServerWaypointsReceivedMsg.h"
+#include "Messages/StateMessage.h"
+#include "Messages/VesselStateMsg.h"
+#include "Messages/WaypointDataMsg.h"
+#include "Messages/WindDataMsg.h"
+#include "Tests/cxxtest/cxxtest/TestSuite.h"
 
 class MessageSuite : public CxxTest::TestSuite {
    public:

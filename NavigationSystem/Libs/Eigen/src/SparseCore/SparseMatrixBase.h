@@ -149,11 +149,11 @@ class SparseMatrixBase
 #endif  // not EIGEN_PARSED_BY_DOXYGEN
 
 #define EIGEN_CURRENT_STORAGE_BASE_CLASS Eigen::SparseMatrixBase
-#include "../plugins/BlockMethods.h"
-#include "../plugins/CommonCwiseBinaryOps.h"
-#include "../plugins/CommonCwiseUnaryOps.h"
-#include "../plugins/MatrixCwiseBinaryOps.h"
-#include "../plugins/MatrixCwiseUnaryOps.h"
+#include "plugins/BlockMethods.h"
+#include "plugins/CommonCwiseBinaryOps.h"
+#include "plugins/CommonCwiseUnaryOps.h"
+#include "plugins/MatrixCwiseBinaryOps.h"
+#include "plugins/MatrixCwiseUnaryOps.h"
 #ifdef EIGEN_SPARSEMATRIXBASE_PLUGIN
 #include EIGEN_SPARSEMATRIXBASE_PLUGIN
 #endif

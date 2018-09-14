@@ -34,7 +34,7 @@
 #ifndef EIGEN_QR_MKL_H
 #define EIGEN_QR_MKL_H
 
-#include "../Core/util/MKL_support.h"
+#include "Core/util/MKL_support.h"
 
 namespace Eigen {
 

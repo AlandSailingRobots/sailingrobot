@@ -1,41 +1,41 @@
 #include <string>
-#include "../Database/DBHandler.h"
-#include "../Database/DBLoggerNode.h"
-#include "../HTTPSync/HTTPSyncNode.h"
-#include "../MessageBus/MessageBus.h"
-#include "../Messages/DataRequestMsg.h"
-#include "../SystemServices/Logger.h"
+#include "Database/DBHandler.h"
+#include "Database/DBLoggerNode.h"
+#include "HTTPSync/HTTPSyncNode.h"
+#include "MessageBus/MessageBus.h"
+#include "Messages/DataRequestMsg.h"
+#include "SystemServices/Logger.h"
 
-#include "../Navigation/WaypointMgrNode.h"
-#include "../WorldState/StateEstimationNode.h"
-#include "../WorldState/WindStateNode.h"
-#include "../WorldState/CollidableMgr/CollidableMgr.h"
+#include "Navigation/WaypointMgrNode.h"
+#include "WorldState/StateEstimationNode.h"
+#include "WorldState/WindStateNode.h"
+#include "WorldState/CollidableMgr/CollidableMgr.h"
 
-#include "../LowLevelControllers/SailControlNode.h"
-#include "../LowLevelControllers/CourseRegulatorNode.h"
+#include "LowLevelControllers/SailControlNode.h"
+#include "LowLevelControllers/CourseRegulatorNode.h"
 
 #if LOCAL_NAVIGATION_MODULE == 1
-  #include "../Navigation/LocalNavigationModule/LocalNavigationModule.h"
-  #include "../Navigation/LocalNavigationModule/Voters/WaypointVoter.h"
-  #include "../Navigation/LocalNavigationModule/Voters/WindVoter.h"
-  #include "../Navigation/LocalNavigationModule/Voters/ChannelVoter.h"
-  #include "../Navigation/LocalNavigationModule/Voters/ProximityVoter.h"
-  #include "../Navigation/LocalNavigationModule/Voters/MidRangeVoter.h"
+  #include "Navigation/LocalNavigationModule/LocalNavigationModule.h"
+  #include "Navigation/LocalNavigationModule/Voters/WaypointVoter.h"
+  #include "Navigation/LocalNavigationModule/Voters/WindVoter.h"
+  #include "Navigation/LocalNavigationModule/Voters/ChannelVoter.h"
+  #include "Navigation/LocalNavigationModule/Voters/ProximityVoter.h"
+  #include "Navigation/LocalNavigationModule/Voters/MidRangeVoter.h"
 #else
-  #include "../Navigation/LineFollowNode.h"
+  #include "Navigation/LineFollowNode.h"
 #endif
 
 #if SIMULATION == 1
-  #include "../Simulation/SimulationNode.h"
+  #include "Simulation/SimulationNode.h"
 #else
-  #include "../Hardwares/ArduinoNode.h"
-  #include "../Hardwares/CV7Node.h"
-  #include "../Hardwares/HMC6343Node.h"
-  #include "../Hardwares/GPSDNode.h"
+  #include "Hardwares/ArduinoNode.h"
+  #include "Hardwares/CV7Node.h"
+  #include "Hardwares/HMC6343Node.h"
+  #include "Hardwares/GPSDNode.h"
   #include "ActuatorNodeJanet.h" // NOTE - Maël: It will change (to ActuatorNodeJanet.h)
-  #include "../Hardwares/MaestroController/MaestroController.h"
-  #include "../Xbee/Xbee.h"
-  #include "../Xbee/XbeeSyncNode.h"
+  #include "Hardwares/MaestroController/MaestroController.h"
+  #include "Xbee/Xbee.h"
+  #include "Xbee/XbeeSyncNode.h"
 #endif
 
 

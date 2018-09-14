@@ -14,7 +14,7 @@
 #ifndef NAVIGATIONSYSTEM_POWERTRACKMSG_H
 #define NAVIGATIONSYSTEM_POWERTRACKMSG_H
 
-#include "../MessageBus/Message.h"
+#include "MessageBus/Message.h"
 
  class PowerTrackMsg : public Message {
    public:

@@ -23,11 +23,11 @@
 
 #pragma once
 
-#include "../../MessageBus/MessageBus.h"
+#include "MessageBus/MessageBus.h"
 #include "MessageBusTestHelper.h"
-#include "../../Messages/GPSDataMsg.h"
-#include "../../Navigation/WaypointMgrNode.h"
-#include "../cxxtest/cxxtest/TestSuite.h"
+#include "Messages/GPSDataMsg.h"
+#include "Navigation/WaypointMgrNode.h"
+#include "Tests/cxxtest/cxxtest/TestSuite.h"
 #include "TestMocks/MockNode.h"
 
 #include <chrono>
@@ -54,9 +54,9 @@ class WaypointNodeSuite : public CxxTest::TestSuite {
             mockNode = new MockNode(messageBus, nodeRegistered);
             dbHandler = new DBHandler("../asr.db");
             // Reset of the database after reaching waypoints during test
-            dbHandler->updateTable("current_mission", "harvested", "0", "1");
-            dbHandler->updateTable("current_mission", "harvested", "0", "2");
-            dbHandler->updateTable("current_mission", "harvested", "0", "3");
+            dbHandler->updateTableIdColumnValue("current_mission", 0, "harvested", 1);
+            dbHandler->updateTableIdColumnValue("current_mission", 0, "harvested", 2);
+            dbHandler->updateTableIdColumnValue("current_mission", 0, "harvested", 3);
             Logger::DisableLogging();
             waypoint = new WaypointMgrNode(messageBus, *dbHandler);
             messageBusHelper.reset(new MessageBusTestHelper(messageBus));
@@ -102,8 +102,8 @@ class WaypointNodeSuite : public CxxTest::TestSuite {
 
         std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_FOR_MESSAGE));
 
-        bool proofWaypointReached =
-            dbHandler->retrieveCellAsInt("current_mission", "1", "harvested");
+        bool proofWaypointReached = false;
+        dbHandler->selectFromId(proofWaypointReached, "harvested", "current_mission", 1);
         TS_ASSERT_EQUALS(proofWaypointReached, true);
 
         TS_ASSERT(mockNode->m_MessageReceived);
@@ -138,8 +138,8 @@ class WaypointNodeSuite : public CxxTest::TestSuite {
         messageBus.sendMessage(std::move(nextStateMsg));
         std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_FOR_MESSAGE));
 
-        bool proofWaypointReached =
-            dbHandler->retrieveCellAsInt("current_mission", "2", "harvested");
+        bool proofWaypointReached = false;
+        dbHandler->selectFromId(proofWaypointReached, "harvested", "current_mission", 2);
         TS_ASSERT_EQUALS(proofWaypointReached, true);
 
         TS_ASSERT(mockNode->m_MessageReceived);

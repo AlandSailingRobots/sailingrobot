@@ -14,8 +14,8 @@
 #pragma once
 
 #include <stdint.h>
-#include "../MessageBus/MessageTypes.h"
-#include "../MessageBus/NodeIDs.h"
+#include "MessageBus/MessageTypes.h"
+#include "MessageBus/NodeIDs.h"
 
 class MessageDeserialiser {
    public:

@@ -26,14 +26,14 @@
 
 #pragma once
 
-#include "../../Math/Utility.h"
-#include "../../MessageBus/MessageBus.h"
+#include "Math/Utility.h"
+#include "MessageBus/MessageBus.h"
 #include "MessageBusTestHelper.h"
-#include "../../Messages/StateMessage.h"
-#include "../../Messages/VesselStateMsg.h"
-#include "../../Messages/WindStateMsg.h"
-#include "../../Navigation/LineFollowNode.h"
-#include "../cxxtest/cxxtest/TestSuite.h"
+#include "Messages/StateMessage.h"
+#include "Messages/VesselStateMsg.h"
+#include "Messages/WindStateMsg.h"
+#include "Navigation/LineFollowNode.h"
+#include "Tests/cxxtest/cxxtest/TestSuite.h"
 
 #include <math.h>
 #include <chrono>

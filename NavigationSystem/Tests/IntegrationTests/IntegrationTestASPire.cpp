@@ -15,40 +15,40 @@ mode. It is a interface between the messagebus and the CAN-bus that can be monit
 *
 ***************************************************************************************/
 
-#include "../Hardwares/CAN_Services/CANService.h"
-#include "../Hardwares/CAN_Services/N2kMsg.h"
-#include "../SystemServices/Logger.h"
-#include "../SystemServices/Timer.h"
+#include "Hardwares/CAN_Services/CANService.h"
+#include "Hardwares/CAN_Services/N2kMsg.h"
+#include "SystemServices/Logger.h"
+#include "SystemServices/Timer.h"
 
-#include "../Messages/AISDataMsg.h"
-#include "../Messages/ASPireActuatorFeedbackMsg.h"
-#include "../Messages/CompassDataMsg.h"
-#include "../Messages/GPSDataMsg.h"
-#include "../Messages/DataRequestMsg.h"
-
-
+#include "Messages/AISDataMsg.h"
+#include "Messages/ASPireActuatorFeedbackMsg.h"
+#include "Messages/CompassDataMsg.h"
+#include "Messages/GPSDataMsg.h"
+#include "Messages/DataRequestMsg.h"
 
 
 
-#include "../Messages/RudderCommandMsg.h"
-#include "../Messages/WindDataMsg.h"
-#include "../Messages/WingSailCommandMsg.h"
 
 
-#include "../MessageBus/ActiveNode.h"
-#include "../MessageBus/MessageBus.h"
-#include "../MessageBus/MessageTypes.h"
-#include "../MessageBus/NodeIDs.h"
-
-#include "../Hardwares/ActuatorNodeASPire.h"
-#include "../Hardwares/CANAISNode.h"
+#include "Messages/RudderCommandMsg.h"
+#include "Messages/WindDataMsg.h"
+#include "Messages/WingSailCommandMsg.h"
 
 
+#include "MessageBus/ActiveNode.h"
+#include "MessageBus/MessageBus.h"
+#include "MessageBus/MessageTypes.h"
+#include "MessageBus/NodeIDs.h"
 
-#include "../Hardwares/CANArduinoNode.h"
-#include "../Hardwares/CANWindsensorNode.h"
-#include "../Hardwares/GPSDNode.h"
-#include "../Hardwares/HMC6343Node.h"
+#include "Hardwares/ActuatorNodeASPire.h"
+#include "Hardwares/CANAISNode.h"
+
+
+
+#include "Hardwares/CANArduinoNode.h"
+#include "Hardwares/CANWindsensorNode.h"
+#include "Hardwares/GPSDNode.h"
+#include "Hardwares/HMC6343Node.h"
 
 
 #include <ncurses.h>

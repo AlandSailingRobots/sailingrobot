@@ -1,8 +1,8 @@
 #pragma once
 
-#include "../MessageBus/ActiveNode.h"
-#include "../MessageBus/MessageBus.h"
-#include "../MessageBus/MessageTypes.h"
+#include "MessageBus/ActiveNode.h"
+#include "MessageBus/MessageBus.h"
+#include "MessageBus/MessageTypes.h"
 #include "DBLogger.h"
 
 #include <iostream>
@@ -17,6 +17,7 @@ class DBLoggerNode : public ActiveNode {
     void updateConfigsFromDB();
 
     static void clearCurrentSensorQueue(std::queue<currentSensorItem> &q );
+    static void clearCompassQueue( std::queue<compassItem> &q );
 
     void start();
 
@@ -39,10 +40,7 @@ class DBLoggerNode : public ActiveNode {
         (double)DATA_OUT_OF_RANGE,        // m_wingsailPosition;
         (bool)false,                      // m_radioControllerOn;
         (double)DATA_OUT_OF_RANGE,        // m_windVaneAngle;
-        (double)DATA_OUT_OF_RANGE,        // m_compassHeading;
-        (double)DATA_OUT_OF_RANGE,        // m_compassPitch;
-        (double)DATA_OUT_OF_RANGE,        // m_compassRoll;
-        (std::string) "initialized",      // m_compassTimestamp;
+        std::queue<compassItem>(),  // m_currentSensorItems, defined in DBHandler.h
         (double)DATA_OUT_OF_RANGE,        // m_distanceToWaypoint;
         (double)DATA_OUT_OF_RANGE,        // m_bearingToWaypoint;
         (double)DATA_OUT_OF_RANGE,        // m_courseToSteer;

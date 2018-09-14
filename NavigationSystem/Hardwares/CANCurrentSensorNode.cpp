@@ -14,7 +14,7 @@
 
 #include "CANCurrentSensorNode.h"
 #include "CAN_Services/CanBusCommon/CanUtility.h"
-#include "../MessageBus/MessageTypes.h"
+#include "MessageBus/MessageTypes.h"
 #include "CAN_Services/CanBusCommon/CanMessageHandler.h"
 
 const float DATA_OUT_OF_RANGE = -2000; // as uint16_t, cannot use -2000.

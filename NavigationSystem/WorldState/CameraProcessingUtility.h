@@ -27,15 +27,15 @@
 #include <mutex>
 #include <map>
 
-#include "../SystemServices/SysClock.h"
-#include "../SystemServices/Timer.h"
-#include "../Database/DBHandler.h"
-#include "../Messages/CompassDataMsg.h"
-#include "../MessageBus/MessageTypes.h"
-#include "../MessageBus/MessageBus.h"
-#include "../MessageBus/ActiveNode.h"
-#include "../SystemServices/Logger.h"
-#include "../WorldState/CollidableMgr/CollidableMgr.h"
+#include "SystemServices/SysClock.h"
+#include "SystemServices/Timer.h"
+#include "Database/DBHandler.h"
+#include "Messages/CompassDataMsg.h"
+#include "MessageBus/MessageTypes.h"
+#include "MessageBus/MessageBus.h"
+#include "MessageBus/ActiveNode.h"
+#include "SystemServices/Logger.h"
+#include "WorldState/CollidableMgr/CollidableMgr.h"
 
 
 class CameraProcessingUtility : public ActiveNode {

@@ -13,15 +13,15 @@
 
 #pragma once
 
-#include "../MessageBus/MessageDeserialiser.h"
-#include "../MessageBus/MessageSerialiser.h"
-#include "../MessageBus/MessageTypes.h"
-#include "../MessageBus/NodeIDs.h"
+#include "MessageBus/MessageDeserialiser.h"
+#include "MessageBus/MessageSerialiser.h"
+#include "MessageBus/MessageTypes.h"
+#include "MessageBus/NodeIDs.h"
 
 #define LOG_MESSAGES
 
 #ifdef LOG_MESSAGES
-#include "../SystemServices/SysClock.h"
+#include "SystemServices/SysClock.h"
 #endif
 
 class Message {

@@ -1,12 +1,12 @@
 
 #pragma once
 
-#include "../../Database/DBLoggerNode.h"
-#include "../../MessageBus/MessageBus.h"
+#include "Database/DBLoggerNode.h"
+#include "MessageBus/MessageBus.h"
 #include "MessageBusTestHelper.h"
-#include "../../SystemServices/Logger.h"
-#include "../../SystemServices/Timer.h"
-#include "../cxxtest/cxxtest/TestSuite.h"
+#include "SystemServices/Logger.h"
+#include "SystemServices/Timer.h"
+#include "Tests/cxxtest/cxxtest/TestSuite.h"
 
 #include <chrono>
 #include <future>
@@ -47,7 +47,6 @@ class DBLoggerNodeSuite : public CxxTest::TestSuite {
             Logger::info("Database init\t\t[OK]");
         } else {
             Logger::error("Database init\t\t[FAILED]");
-            Logger::shutdown();
             exit(1);
         }
 

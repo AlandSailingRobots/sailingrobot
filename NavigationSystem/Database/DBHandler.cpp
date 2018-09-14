@@ -22,8 +22,8 @@
 #include <thread>
 #include <utility>
 
-#include "../SystemServices/Logger.h"
-#include "../SystemServices/Timer.h"
+#include "SystemServices/Logger.h"
+#include "SystemServices/Timer.h"
 #include "DBLogger.h"
 
 /**
@@ -1103,21 +1103,25 @@ void DBHandler::insertDataLogs(std::queue<LogItem>& logs) {
             }
         }
 
-        int _compassModelId = 0;
+        int _compassModelId = compassModelId-1;
         if (compassModelId) {
             typedValuePairs values = {{}, {}, {}};
-            addValue(values, "heading", log.m_compassHeading);
-            addValue(values, "pitch", log.m_compassPitch);
-            addValue(values, "roll", log.m_compassRoll);
-            addValue(values, "acquisition_timestamp", log.m_compassTimestamp);
-            addValue(values, "t_timestamp", log.m_timestamp_str);
-            if (m_compassModelStmt ||
-                (!prepareStmtInsertError(m_compassModelStmt, "dataLogs_compass", values))) {
-                bindValuesToStmt(values, m_compassModelStmt);
-                if (sqlite3_step(m_compassModelStmt) == SQLITE_DONE) {
-                    _compassModelId = compassModelId + logNumber;
+            unsigned currentItemNumber = 0;
+            while (!log.m_currentSensorItems.empty()) {
+                addValue(values, "heading", log.m_compassItems.front().m_compassHeading);
+                addValue(values, "pitch", log.m_compassItems.front().m_compassPitch);
+                addValue(values, "roll", log.m_compassItems.front().m_compassRoll);
+                addValue(values, "acquisition_timestamp", log.m_compassItems.front().m_compassTimestamp);
+                log.m_compassItems.pop();
+                addValue(values, "t_timestamp", log.m_timestamp_str);
+                if (m_compassModelStmt ||
+                    (!prepareStmtInsertError(m_compassModelStmt, "dataLogs_compass", values))) {
+                    bindValuesToStmt(values, m_compassModelStmt);
+                    if (sqlite3_step(m_compassModelStmt) == SQLITE_DONE) {
+                        _compassModelId = compassModelId + logNumber + currentItemNumber++;
+                    }
+                    sqlite3_reset(m_compassModelStmt);
                 }
-                sqlite3_reset(m_compassModelStmt);
             }
         }
 

@@ -1,13 +1,13 @@
 #pragma once
 
-#include "../../Math/Utility.h"
-#include "../../MessageBus/MessageBus.h"
+#include "Math/Utility.h"
+#include "MessageBus/MessageBus.h"
 #include "MessageBusTestHelper.h"
-#include "../../Tests/unit-tests/TestMocks/MessageLogger.h"
-#include "../../Tests/unit-tests/TestMocks/MessageVerifier.h"
-#include "../../WorldState/WindStateNode.h"
+#include "Tests/unit-tests/TestMocks/MessageLogger.h"
+#include "Tests/unit-tests/TestMocks/MessageVerifier.h"
+#include "WorldState/WindStateNode.h"
 
-#include "../cxxtest/cxxtest/TestSuite.h"
+#include "Tests/cxxtest/cxxtest/TestSuite.h"
 
 #include <chrono>
 

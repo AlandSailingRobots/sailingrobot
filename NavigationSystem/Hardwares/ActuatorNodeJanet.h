@@ -13,8 +13,8 @@
 
 #pragma once
 
-#include "../Database/DBHandler.h"
-#include "../MessageBus/Node.h"
+#include "Database/DBHandler.h"
+#include "MessageBus/Node.h"
 
 class ActuatorNodeJanet : public Node {
    public:

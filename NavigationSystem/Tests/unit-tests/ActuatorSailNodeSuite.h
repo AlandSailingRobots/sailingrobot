@@ -19,7 +19,7 @@
 
 #pragma once
 
-#include "../../MessageBus/MessageBus.h"
+#include "MessageBus/MessageBus.h"
 #include "ActuatorNode-notused.h"
 #include "TestMocks/MessageLogger.h"
 

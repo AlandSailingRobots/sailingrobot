@@ -28,16 +28,16 @@
 
 #include <stdint.h>
 #include <thread>
-#include "../../Database/DBHandler.h"
-#include "../../Database/DBLoggerNode.h"
-#include "../../HTTPSync/HTTPSyncNode.h"
-#include "../../MessageBus/MessageBus.h"
-#include "../../Messages/CompassDataMsg.h"
-#include "../../Messages/LocalConfigChangeMsg.h"
-#include "../../Messages/LocalWaypointChangeMsg.h"
-#include "../../SystemServices/Logger.h"
-#include "../../SystemServices/Timer.h"
-#include "../cxxtest/cxxtest/TestSuite.h"
+#include "Database/DBHandler.h"
+#include "Database/DBLoggerNode.h"
+#include "HTTPSync/HTTPSyncNode.h"
+#include "MessageBus/MessageBus.h"
+#include "Messages/CompassDataMsg.h"
+#include "Messages/LocalConfigChangeMsg.h"
+#include "Messages/LocalWaypointChangeMsg.h"
+#include "SystemServices/Logger.h"
+#include "SystemServices/Timer.h"
+#include "Tests/cxxtest/cxxtest/TestSuite.h"
 #include "TestMocks/MessageLogger.h"
 
 // For std::this_thread
@@ -107,7 +107,8 @@ class HTTPSyncSuite : public CxxTest::TestSuite {
     void test_HTTPSyncValidURL() {
         std::string url1 = "http://sailingrobots.ax/aspire/sync/";
         std::string url2 = "http://localhost/sync/";
-        std::string urlOrigin = dbhandler->retrieveCell("config_httpsync", "1", "srv_addr");
+        std::string urlOrigin;
+        dbhandler->selectFromId(urlOrigin, "srv_addr", "config_httpsync", 1);
 
         bool validCheck = (urlOrigin == url1 || urlOrigin == url2);
 
@@ -115,7 +116,7 @@ class HTTPSyncSuite : public CxxTest::TestSuite {
     }
 
     void test_HTTPSyncWaypoints() {
-        std::string waypointString = dbhandler->getWaypoints();
+        std::string waypointString = dbhandler->getWayPointsAsJSON();
         TS_TRACE("\nSending waypoint string: " + waypointString + "\n");
         if (waypointString == "") {
             TS_TRACE("Empty waypoint string - please run test with some waypoints in database");
@@ -126,7 +127,7 @@ class HTTPSyncSuite : public CxxTest::TestSuite {
             httpsync->getWaypointsFromServer();
             std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_FOR_MESSAGE));
 
-            std::string newWaypointString = dbhandler->getWaypoints();
+            std::string newWaypointString = dbhandler->getWayPointsAsJSON();
             TS_TRACE("\nWaypoint string is now: " + newWaypointString + "\n");
             TS_TRACE("String comparison result: " +
                      std::to_string(waypointString.compare(newWaypointString)));
@@ -153,11 +154,12 @@ class HTTPSyncSuite : public CxxTest::TestSuite {
         msgBus().sendMessage(std::move(compassDatalogs));
         std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_FOR_MESSAGE));
 
-        std::string currentLogs = dbhandler->getLogs(true);
+        unsigned int afterId;
+        std::string currentLogs = dbhandler->getLogsAsJSON(afterId);
         std::string emptyJson = "null";
         TS_ASSERT_DIFFERS(currentLogs.compare(emptyJson), 0);
 
-        dbhandler->changeOneValue("config_httpsync", "1", "1", "remove_logs");
+        dbhandler->updateTableIdColumnValue("config_httpsync", 1, "remove_logs", 1);
         MessagePtr serverConfig = std::make_unique<ServerConfigsReceivedMsg>();
         msgBus().sendMessage(std::move(serverConfig));
         std::this_thread::sleep_for(std::chrono::milliseconds(1000));

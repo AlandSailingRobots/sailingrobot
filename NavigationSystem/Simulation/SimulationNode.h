@@ -30,21 +30,21 @@
 #include <memory>
 #include <thread>
 
-#include "../Math/CourseMath.h"
-#include "../Math/Utility.h"
-#include "../MessageBus/ActiveNode.h"
-#include "../Messages/CompassDataMsg.h"
-#include "../Messages/GPSDataMsg.h"
-#include "../Messages/MarineSensorDataMsg.h"
-#include "../Messages/RudderCommandMsg.h"
-#include "../Messages/SailCommandMsg.h"
-#include "../Messages/WaypointDataMsg.h"
-#include "../Messages/WindDataMsg.h"
-#include "../Messages/WingSailCommandMsg.h"
-#include "../Network/TCPServer.h"
-#include "../SystemServices/Logger.h"
-#include "../SystemServices/SysClock.h"
-#include "../WorldState/CollidableMgr/CollidableMgr.h"
+#include "Math/CourseMath.h"
+#include "Math/Utility.h"
+#include "MessageBus/ActiveNode.h"
+#include "Messages/CompassDataMsg.h"
+#include "Messages/GPSDataMsg.h"
+#include "Messages/MarineSensorDataMsg.h"
+#include "Messages/RudderCommandMsg.h"
+#include "Messages/SailCommandMsg.h"
+#include "Messages/WaypointDataMsg.h"
+#include "Messages/WindDataMsg.h"
+#include "Messages/WingSailCommandMsg.h"
+#include "Network/TCPServer.h"
+#include "SystemServices/Logger.h"
+#include "SystemServices/SysClock.h"
+#include "WorldState/CollidableMgr/CollidableMgr.h"
 
 enum SimulatorPacket : unsigned char {
     SailBoatData = 0,

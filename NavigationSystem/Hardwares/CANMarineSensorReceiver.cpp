@@ -1,9 +1,9 @@
 #include <iostream>
 #include "CANMarineSensorReceiver.h"
 #include "CAN_Services/CANService.h"
-#include "../Math/Utility.h"
-#include "../Messages/MarineSensorDataMsg.h"
-#include "../SystemServices/Logger.h"
+#include "Math/Utility.h"
+#include "Messages/MarineSensorDataMsg.h"
+#include "SystemServices/Logger.h"
 #include "CAN_Services/CanBusCommon/canbus_defs.h"
 #include "CAN_Services/CanBusCommon/CanMessageHandler.h"
 

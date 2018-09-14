@@ -19,12 +19,12 @@
 #include <thread>
 #include <vector>
 
-#include "../Database/DBHandler.h"
-#include "../Hardwares/CAN_Services/CANPGNReceiver.h"
-#include "../Hardwares/CAN_Services/CANService.h"
-#include "../MessageBus/ActiveNode.h"
-#include "../Messages/WindDataMsg.h"
-#include "../SystemServices/Timer.h"
+#include "Database/DBHandler.h"
+#include "Hardwares/CAN_Services/CANPGNReceiver.h"
+#include "Hardwares/CAN_Services/CANService.h"
+#include "MessageBus/ActiveNode.h"
+#include "Messages/WindDataMsg.h"
+#include "SystemServices/Timer.h"
 
 class CANWindsensorNode : public CANPGNReceiver, public ActiveNode {
    public:

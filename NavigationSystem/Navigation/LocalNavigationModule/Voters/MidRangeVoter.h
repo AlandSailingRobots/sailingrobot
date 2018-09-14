@@ -15,8 +15,8 @@
 
 #pragma once
 
-#include "../ASRVoter.h"
-#include "../WorldState/CollidableMgr/CollidableMgr.h"
+#include "Navigation/LocalNavigationModule/ASRVoter.h"
+#include "WorldState/CollidableMgr/CollidableMgr.h"
 
 class MidRangeVoter : public ASRVoter {
    public:

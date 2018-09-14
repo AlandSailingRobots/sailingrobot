@@ -15,7 +15,7 @@
 
 #include <stdint.h>
 #include <string>
-#include "../Network/NetworkFrame.h"
+#include "Network/NetworkFrame.h"
 
 class DataLink {
    public:

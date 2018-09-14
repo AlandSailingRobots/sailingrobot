@@ -19,7 +19,7 @@
 
 #pragma once
 
-#include "../ASRVoter.h"
+#include "Navigation/LocalNavigationModule/ASRVoter.h"
 
 #include <vector>
 

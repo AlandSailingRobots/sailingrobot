@@ -23,8 +23,8 @@
 
 #pragma once
 
-#include "../../Navigation/LocalNavigationModule/ASRArbiter.h"
-#include "../cxxtest/cxxtest/TestSuite.h"
+#include "Navigation/LocalNavigationModule/ASRArbiter.h"
+#include "Tests/cxxtest/cxxtest/TestSuite.h"
 
 class ASRArbiterSuite : public CxxTest::TestSuite {
    public:

@@ -13,15 +13,15 @@
 
 #pragma once
 
-#include "../../MessageBus/MessageBus.h"
-#include "../../Database/DBHandler.h"
-#include "../../LowLevelControllers/CourseRegulatorNode.h"
-#include "../../Math/Utility.h"
+#include "MessageBus/MessageBus.h"
+#include "Database/DBHandler.h"
+#include "LowLevelControllers/CourseRegulatorNode.h"
+#include "Math/Utility.h"
 #include "MessageBusTestHelper.h"
-#include "../../Messages/LocalNavigationMsg.h"
-#include "../../Messages/StateMessage.h"
-#include "../../SystemServices/Timer.h"
-#include "../cxxtest/cxxtest/TestSuite.h"
+#include "Messages/LocalNavigationMsg.h"
+#include "Messages/StateMessage.h"
+#include "SystemServices/Timer.h"
+#include "Tests/cxxtest/cxxtest/TestSuite.h"
 #include "TestMocks/MessageLogger.h"
 
 #include <chrono>
@@ -104,7 +104,7 @@ class CourseRegulatorNodeSuite : public CxxTest::TestSuite {
     }
 
     // ----------------
-    // Test to see if ,after the Stata messsage, the rudder angle is not changed
+    // Test to see if ,after the State message, the rudder angle is not changed
     // ----------------
     void test_CourseRegulatorCourseMsgRudder() {
         double heading = 10;
@@ -224,8 +224,8 @@ class CourseRegulatorNodeSuite : public CxxTest::TestSuite {
     void test_CourseRegulatorUpdateFromDB() {
         Timer timer;
 
-        dbHandler->changeOneValue("config_course_regulator", "1", "0.7", "loop_time");
-        dbHandler->changeOneValue("config_course_regulator", "1", "20.0", "max_rudder_angle");
+        dbHandler->updateTableIdColumnValue("config_course_regulator", 1, "loop_time", 0.7 );
+        dbHandler->updateTableIdColumnValue("config_course_regulator", 1, "max_rudder_angle", 20.0);
         MessagePtr serverConfig = std::make_unique<ServerConfigsReceivedMsg>();
         messageBus.sendMessage(std::move(serverConfig));
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -264,7 +264,7 @@ class CourseRegulatorNodeSuite : public CxxTest::TestSuite {
 
         TS_ASSERT_DELTA(mockNode->m_rudderAngle, rudderAngle, 5e-1);
 
-        dbHandler->changeOneValue("config_course_regulator", "1", "0.5", "loop_time");
-        dbHandler->changeOneValue("config_course_regulator", "1", "30.0", "max_rudder_angle");
+        dbHandler->updateTableIdColumnValue("config_course_regulator", 1, "loop_time", 0.5);
+        dbHandler->updateTableIdColumnValue("config_course_regulator", 1, "max_rudder_angle", 30.0);
     }
 };

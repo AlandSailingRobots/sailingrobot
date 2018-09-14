@@ -16,13 +16,13 @@
 
 #pragma once
 
-#include "../Database/DBHandler.h"
-#include "../MessageBus/ActiveNode.h"
-#include "../Messages/VesselStateMsg.h"
-#include "../Network/LinuxSerialDataLink.h"
-#include "../Network/XbeePacketNetwork.h"
-#include "../SystemServices/Logger.h"
-#include "../Xbee/Xbee.h"
+#include "Database/DBHandler.h"
+#include "MessageBus/ActiveNode.h"
+#include "Messages/VesselStateMsg.h"
+#include "Network/LinuxSerialDataLink.h"
+#include "Network/XbeePacketNetwork.h"
+#include "SystemServices/Logger.h"
+#include "Xbee/Xbee.h"
 
 class XbeeSyncNode : public ActiveNode {
    public:

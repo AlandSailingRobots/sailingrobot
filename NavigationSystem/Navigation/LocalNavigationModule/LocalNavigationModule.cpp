@@ -14,16 +14,16 @@
 
 
 #include "LocalNavigationModule.h"
-#include "../Messages/LocalNavigationMsg.h"
-#include "../Messages/StateMessage.h"
-#include "../Messages/WindStateMsg.h"
-#include "../Messages/WaypointDataMsg.h"
-#include "../Messages/RequestCourseMsg.h"
-#include "../SystemServices/Logger.h"
-#include "../SystemServices/Timer.h"
-#include "../Math/CourseMath.h"
-#include "../Math/Utility.h"
-#include "../LocalNavigationModule/Voters/LastCourseVoter.h"
+#include "Messages/LocalNavigationMsg.h"
+#include "Messages/StateMessage.h"
+#include "Messages/WindStateMsg.h"
+#include "Messages/WaypointDataMsg.h"
+#include "Messages/RequestCourseMsg.h"
+#include "SystemServices/Logger.h"
+#include "SystemServices/Timer.h"
+#include "Math/CourseMath.h"
+#include "Math/Utility.h"
+#include "Navigation/LocalNavigationModule/Voters/LastCourseVoter.h"
 
 #include <cstdio>
 

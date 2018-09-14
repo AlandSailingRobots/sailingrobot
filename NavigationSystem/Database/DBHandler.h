@@ -20,9 +20,9 @@
 #include <string>
 #include <vector>
 #include <nlohmann/json.hpp>
-#include "../Messages/CurrentSensorDataMsg.h"
-#include "../Messages/PowerTrackMsg.h"
-#include "../Messages/WindStateMsg.h"
+#include "Messages/CurrentSensorDataMsg.h"
+#include "Messages/PowerTrackMsg.h"
+#include "Messages/WindStateMsg.h"
 using JSON = nlohmann::json;
 
 struct currentSensorItem {
@@ -32,15 +32,19 @@ struct currentSensorItem {
 	std::string m_element_str;
 };
 
+struct compassItem {
+    double m_compassHeading;  // dataLogs_compass
+    double m_compassPitch;
+    double m_compassRoll;
+    std::string m_compassTimestamp;
+};
+
 struct LogItem {
     double m_rudderPosition;  // dataLogs_actuator_feedback
     double m_wingsailPosition;
     bool m_radioControllerOn;
     double m_windVaneAngle;
-    double m_compassHeading;  // dataLogs_compass
-    double m_compassPitch;
-    double m_compassRoll;
-    std::string m_compassTimestamp;
+    std::queue<compassItem> m_compassItems;
     double m_distanceToWaypoint;  // dataLogs_course_calculation
     double m_bearingToWaypoint;
     double m_courseToSteer;
@@ -269,6 +273,11 @@ class DBHandler {
 
     // TODO: Below should probably be a template while the weird cases should be overloads
 
+/*******************************************************************************
+* public
+******************************************************************************/
+
+  public:
     // ints
     void selectFromId(int& result, const std::string& selector, const std::string& from, int id);
     void selectFromId(unsigned int& result,
@@ -290,18 +299,14 @@ class DBHandler {
     std::vector<std::vector<std::string>> getRowsAsText(sqlite3_stmt*& stmt,
                                                         bool rowHeader = false);
 
-    /*******************************************************************************
-     * public
-     ******************************************************************************/
 
-   public:
     explicit DBHandler(std::string filePath);
     ~DBHandler();
     bool initialise();
 
 	// get id from table returns either max or min id from table.
 	// max = false -> min id, max = true -> max id
-	enum ID_MINMAX { MIN_ID = false, MAX_ID = true };  // Uggly enum
+	enum ID_MINMAX { MIN_ID = false, MAX_ID = true };  // Ugly enum
 	int getTableId(const std::string& table, ID_MINMAX = MAX_ID);
 
 	// Receiver for log items from DBLogger

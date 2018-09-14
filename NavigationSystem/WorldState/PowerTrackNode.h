@@ -18,9 +18,9 @@
 #define NAVIGATIONSYSTEM_POWERTRACKNODE_H
 
 #include <stdint.h>
-#include "../Database/DBHandler.h"
-#include "../Messages/CurrentSensorDataMsg.h"
-#include "../MessageBus/ActiveNode.h"
+#include "Database/DBHandler.h"
+#include "Messages/CurrentSensorDataMsg.h"
+#include "MessageBus/ActiveNode.h"
 
 class PowerTrackNode : public ActiveNode {
     public:

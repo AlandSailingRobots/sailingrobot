@@ -13,9 +13,9 @@
 ***************************************************************************************/
 
 #include "ArduinoNodeForWindSensor.h"
-#include "../Messages/WindDataMsg.h"
-#include "../SystemServices/Logger.h"
-#include "../SystemServices/Timer.h"
+#include "Messages/WindDataMsg.h"
+#include "SystemServices/Logger.h"
+#include "SystemServices/Timer.h"
 
 
 // For std::this_thread

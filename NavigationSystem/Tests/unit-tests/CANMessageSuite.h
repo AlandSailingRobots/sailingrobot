@@ -1,8 +1,8 @@
 #pragma once
 
 #include <iostream>
-#include "../../Hardwares/CAN_Services/N2kMsg.h"
-#include "../cxxtest/cxxtest/TestSuite.h"
+#include "Hardwares/CAN_Services/N2kMsg.h"
+#include "Tests/cxxtest/cxxtest/TestSuite.h"
 
 class CANMessageSuite : public CxxTest::TestSuite {
    public:

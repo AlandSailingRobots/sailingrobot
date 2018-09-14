@@ -102,12 +102,12 @@ class ArrayBase : public DenseBase<Derived> {
 #endif  // not EIGEN_PARSED_BY_DOXYGEN
 
 #define EIGEN_CURRENT_STORAGE_BASE_CLASS Eigen::ArrayBase
-#include "../plugins/ArrayCwiseBinaryOps.h"
-#include "../plugins/ArrayCwiseUnaryOps.h"
-#include "../plugins/CommonCwiseBinaryOps.h"
-#include "../plugins/CommonCwiseUnaryOps.h"
-#include "../plugins/MatrixCwiseBinaryOps.h"
-#include "../plugins/MatrixCwiseUnaryOps.h"
+#include "plugins/ArrayCwiseBinaryOps.h"
+#include "plugins/ArrayCwiseUnaryOps.h"
+#include "plugins/CommonCwiseBinaryOps.h"
+#include "plugins/CommonCwiseUnaryOps.h"
+#include "plugins/MatrixCwiseBinaryOps.h"
+#include "plugins/MatrixCwiseUnaryOps.h"
 #ifdef EIGEN_ARRAYBASE_PLUGIN
 #include EIGEN_ARRAYBASE_PLUGIN
 #endif

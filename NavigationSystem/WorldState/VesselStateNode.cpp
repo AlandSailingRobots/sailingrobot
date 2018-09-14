@@ -18,10 +18,10 @@
 #include <chrono>
 #include <thread>
 
-#include "../Messages/VesselStateMsg.h"
-#include "../Math/CourseMath.h"
-#include "../SystemServices/Logger.h"
-#include "../SystemServices/Timer.h"
+#include "Messages/VesselStateMsg.h"
+#include "Math/CourseMath.h"
+#include "SystemServices/Logger.h"
+#include "SystemServices/Timer.h"
 
 
 VesselStateNode::VesselStateNode(MessageBus& msgBus, DBHandler& dbhandler, double loopTime)

@@ -1,16 +1,16 @@
 #pragma once
 
-#include "../../Hardwares/CAN_Services/CANService.h"
-#include "../../Hardwares/CAN_Services/CanBusCommon/CanMessageHandler.h"
-#include "../../Hardwares/CAN_Services/N2kMsg.h"
+#include "Hardwares/CAN_Services/CANService.h"
+#include "Hardwares/CAN_Services/CanBusCommon/CanMessageHandler.h"
+#include "Hardwares/CAN_Services/N2kMsg.h"
 
-#include "../../Database/DBHandler.h"
-#include "../../Hardwares/CANArduinoNode.h"
-#include "../../MessageBus/MessageBus.h"
-#include "../unit-tests/TestMocks/MessageLogger.h"
-#include "../unit-tests/TestMocks/MessageVerifier.h"
+#include "Database/DBHandler.h"
+#include "Hardwares/CANArduinoNode.h"
+#include "MessageBus/MessageBus.h"
+#include "Tests/unit-tests/TestMocks/MessageLogger.h"
+#include "Tests/unit-tests/TestMocks/MessageVerifier.h"
 
-#include "../cxxtest/cxxtest/TestSuite.h"
+#include "Tests/cxxtest/cxxtest/TestSuite.h"
 
 #include <chrono>
 #include <thread>
@@ -63,7 +63,7 @@ class CANArduinoNodeSuite : public CxxTest::TestSuite {
         CanMessageHandler messageHandler(MSG_ID_AU_FEEDBACK);
         messageHandler.encodeMessage(RUDDER_ANGLE_DATASIZE, rudderFeedback);
         messageHandler.encodeMessage(WINGSAIL_ANGLE_DATASIZE, wingsailFeedback);
-        messageHandler.encodeMessage(WINDVANE_SELFSTEERING_DATASIZE, windvaneSteerAngle);
+        messageHandler.encodeMessage(WINDVANE_SELFSTEERING_ON_DATASIZE, windvaneSteerAngle);
 
         CanMsg Cmsg = messageHandler.getMessage();
         canService().sendCANMessage(Cmsg);

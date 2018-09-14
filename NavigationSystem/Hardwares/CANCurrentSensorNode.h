@@ -17,14 +17,14 @@
 #include <thread>
 #include <vector>
 
-#include "../Database/DBHandler.h"
-#include "../Hardwares/CAN_Services/CANFrameReceiver.h"
-#include "../Hardwares/CAN_Services/CANService.h"
-#include "../MessageBus/ActiveNode.h"
-#include "../MessageBus/Message.h"
-#include "../MessageBus/MessageBus.h"
-#include "../Messages/CurrentSensorDataMsg.h"
-#include "../SystemServices/Timer.h"
+#include "Database/DBHandler.h"
+#include "Hardwares/CAN_Services/CANFrameReceiver.h"
+#include "Hardwares/CAN_Services/CANService.h"
+#include "MessageBus/ActiveNode.h"
+#include "MessageBus/Message.h"
+#include "MessageBus/MessageBus.h"
+#include "Messages/CurrentSensorDataMsg.h"
+#include "SystemServices/Timer.h"
 
 class CANCurrentSensorNode : public ActiveNode, public CANFrameReceiver {
    public:

@@ -8,7 +8,7 @@
 #include "models/SystemStateModel.h"
 #include "logger/Logger.h"
 #include "dbhandler/DBHandler.h"
-#include "../SystemServices/Timer.h"
+#include "SystemServices/Timer.h"
 #include <mutex>
 
 int main() {

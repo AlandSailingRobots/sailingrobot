@@ -1,6 +1,6 @@
 #include "CourseCalculation.h"
 #include <math.h>
-#include "../Math/Utility.h"
+#include "Math/Utility.h"
 
 
 CourseCalculation::CourseCalculation() :

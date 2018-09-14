@@ -24,8 +24,8 @@
 #include <mutex>
 #include <queue>
 #include <vector>
-#include "../MessageBus/Message.h"
-#include "../MessageBus/Node.h"
+#include "MessageBus/Message.h"
+#include "MessageBus/Node.h"
 
 typedef std::unique_ptr<Message> MessagePtr;
 

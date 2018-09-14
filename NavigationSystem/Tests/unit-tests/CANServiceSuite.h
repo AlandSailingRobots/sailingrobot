@@ -5,12 +5,12 @@
 ////////////////////////////////////////////////////////
 #pragma once
 
-#include "../../Hardwares/CAN_Services/CANFrameReceiver.h"
-#include "../../Hardwares/CAN_Services/CANService.h"
-#include "../../Hardwares/CAN_Services/CanBusCommon/CanMessageHandler.h"
-#include "../../Hardwares/CAN_Services/N2kMsg.h"
-#include "../../SystemServices/Logger.h"
-#include "../cxxtest/cxxtest/TestSuite.h"
+#include "Hardwares/CAN_Services/CANFrameReceiver.h"
+#include "Hardwares/CAN_Services/CANService.h"
+#include "Hardwares/CAN_Services/CanBusCommon/CanMessageHandler.h"
+#include "Hardwares/CAN_Services/N2kMsg.h"
+#include "SystemServices/Logger.h"
+#include "Tests/cxxtest/cxxtest/TestSuite.h"
 #include "TestMocks/MockCANReceiver.h"
 
 #include <chrono>
@@ -85,7 +85,6 @@ class CANServiceSuite : public CxxTest::TestSuite {
             Logger::info("No missed messages from the CAN-Bus");
         }
 
-        Logger::shutdown();
     }
 
    private:

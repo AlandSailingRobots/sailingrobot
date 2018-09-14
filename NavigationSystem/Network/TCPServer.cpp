@@ -22,8 +22,8 @@
 #include <unistd.h>
 #include <cstring>
 
-#include "../SystemServices/Logger.h"
-#include "../SystemServices/SysClock.h"
+#include "SystemServices/Logger.h"
+#include "SystemServices/SysClock.h"
 
 #define ERROR -1
 #define SELECT_TIMEOUT_SEC 0

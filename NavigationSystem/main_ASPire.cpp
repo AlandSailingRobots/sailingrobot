@@ -1,50 +1,50 @@
 #include <string>
-#include "../Database/DBHandler.h"
-#include "../Database/DBLoggerNode.h"
-#include "../HTTPSync/HTTPSyncNode.h"
-#include "../MessageBus/MessageBus.h"
-#include "../Messages/DataRequestMsg.h"
-#include "../SystemServices/Logger.h"
+#include "Database/DBHandler.h"
+#include "Database/DBLoggerNode.h"
+#include "HTTPSync/HTTPSyncNode.h"
+#include "MessageBus/MessageBus.h"
+#include "Messages/DataRequestMsg.h"
+#include "SystemServices/Logger.h"
 
-#include "../WorldState/CameraProcessingUtility.h"
-#include "../WorldState/AISProcessing.h"
-#include "../Navigation/WaypointMgrNode.h"
-#include "../WorldState/StateEstimationNode.h"
-#include "../WorldState/WindStateNode.h"
-#include "../WorldState/CollidableMgr/CollidableMgr.h"
+#include "WorldState/CameraProcessingUtility.h"
+#include "WorldState/AISProcessing.h"
+#include "Navigation/WaypointMgrNode.h"
+#include "WorldState/StateEstimationNode.h"
+#include "WorldState/WindStateNode.h"
+#include "WorldState/CollidableMgr/CollidableMgr.h"
 
-#include "../LowLevelControllers/WingsailControlNode.h"
-#include "../LowLevelControllers/CourseRegulatorNode.h"
+#include "LowLevelControllers/WingsailControlNode.h"
+#include "LowLevelControllers/CourseRegulatorNode.h"
 
 #if LOCAL_NAVIGATION_MODULE == 1
-  #include "../Navigation/LocalNavigationModule/LocalNavigationModule.h"
-  #include "../Navigation/LocalNavigationModule/Voters/CourseVoter.h"
-  #include "../Navigation/LocalNavigationModule/Voters/WaypointVoter.h"
-  #include "../Navigation/LocalNavigationModule/Voters/WindVoter.h"
-  #include "../Navigation/LocalNavigationModule/Voters/ChannelVoter.h"
-  #include "../Navigation/LocalNavigationModule/Voters/ProximityVoter.h"
-  #include "../Navigation/LocalNavigationModule/Voters/MidRangeVoter.h"
-  #include "../Navigation/LocalNavigationModule/VoterTCPDebugger.h"
-  #include "../Navigation/LocalNavigationModule/Voters/LastCourseVoter.h"
+  #include "Navigation/LocalNavigationModule/LocalNavigationModule.h"
+  #include "Navigation/LocalNavigationModule/Voters/CourseVoter.h"
+  #include "Navigation/LocalNavigationModule/Voters/WaypointVoter.h"
+  #include "Navigation/LocalNavigationModule/Voters/WindVoter.h"
+  #include "Navigation/LocalNavigationModule/Voters/ChannelVoter.h"
+  #include "Navigation/LocalNavigationModule/Voters/ProximityVoter.h"
+  #include "Navigation/LocalNavigationModule/Voters/MidRangeVoter.h"
+  #include "Navigation/LocalNavigationModule/VoterTCPDebugger.h"
+  #include "Navigation/LocalNavigationModule/Voters/LastCourseVoter.h"
 #else
-  #include "../Navigation/LineFollowNode.h"
+  #include "Navigation/LineFollowNode.h"
 #endif
 
 #if SIMULATION == 1
-  #include "../Simulation/SimulationNode.h"
+  #include "Simulation/SimulationNode.h"
 #else
-  #include "../Hardwares/HMC6343Node.h"
-  #include "../Hardwares/GPSDNode.h"
-  #include "../Hardwares/CAN_Services/CANService.h"
-  #include "../Hardwares/CANWindsensorNode.h"
-  #include "../Hardwares/ActuatorNodeASPire.h"
-  #include "../Hardwares/CANArduinoNode.h"
+  #include "Hardwares/HMC6343Node.h"
+  #include "Hardwares/GPSDNode.h"
+  #include "Hardwares/CAN_Services/CANService.h"
+  #include "Hardwares/CANWindsensorNode.h"
+  #include "Hardwares/ActuatorNodeASPire.h"
+  #include "Hardwares/CANArduinoNode.h"
 
-#include "../Hardwares/CANMarineSensorReceiver.h"
-#include "../Hardwares/CANMarineSensorTransmissionNode.h"
+#include "Hardwares/CANMarineSensorReceiver.h"
+#include "Hardwares/CANMarineSensorTransmissionNode.h"
 
-#include "../Hardwares/CANCurrentSensorNode.h"
-#include "../WorldState/PowerTrackNode.h"
+#include "Hardwares/CANCurrentSensorNode.h"
+#include "WorldState/PowerTrackNode.h"
 
 #endif
 
@@ -194,7 +194,10 @@ int main(int argc, char *argv[])
 		ProximityVoter proximityVoter( MAX_VOTES, weight, collidableMgr);
 
     // #TODO add LastCourseVoter voter weight in the tables and put a getConfig call here
-		LastCourseVoter lastCourseVoter( MAX_VOTES, 0.7 );
+        weight = 0;
+		dbHandler.getConfigFrom(weight, "lastcourse_voter_weight", "config_voter_system");
+		LastCourseVoter lastCourseVoter( MAX_VOTES, weight);
+		//LastCourseVoter lastCourseVoter( MAX_VOTES, 0.7 );
 
 
 		lnm.registerVoter( &courseVoter );

@@ -17,12 +17,12 @@
 #ifndef NAVIGATIONSYSTEM_VOTERTCPDEBUGGER_H
 #define NAVIGATIONSYSTEM_VOTERTCPDEBUGGER_H
 
-#include "ASRVoter.h"
-#include "../../Network/TCPServer.h"
-#include "../../MessageBus/ActiveNode.h"
-#include "../../SystemServices/Logger.h"
-#include "../SystemServices/Timer.h"
-#include "../LocalNavigationModule/LocalNavigationModule.h"
+#include "Navigation/LocalNavigationModule/ASRVoter.h"
+#include "Network/TCPServer.h"
+#include "MessageBus/ActiveNode.h"
+#include "SystemServices/Logger.h"
+#include "SystemServices/Timer.h"
+#include "Navigation/LocalNavigationModule/LocalNavigationModule.h"
 #include <string.h>
 
 

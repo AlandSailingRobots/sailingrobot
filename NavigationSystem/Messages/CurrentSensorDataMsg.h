@@ -14,7 +14,7 @@
 
 #pragma once
 
-#include "../MessageBus/Message.h"
+#include "MessageBus/Message.h"
 
 enum SensedElement : uint8_t {
     SOLAR_PANEL   = 0,

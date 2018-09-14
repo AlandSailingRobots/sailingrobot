@@ -24,16 +24,16 @@
 #include <thread>
 #include <vector>
 
-#include "../Database/DBHandler.h"
-#include "../Math/Utility.h"
-#include "../MessageBus/ActiveNode.h"
-#include "../MessageBus/MessageBus.h"
-#include "../Messages/LocalNavigationMsg.h"
-#include "../Messages/StateMessage.h"
-#include "../Messages/WindStateMsg.h"
-#include "../Messages/WingSailCommandMsg.h"
-#include "../SystemServices/Timer.h"
-#include "../SystemServices/Logger.h"
+#include "Database/DBHandler.h"
+#include "Math/Utility.h"
+#include "MessageBus/ActiveNode.h"
+#include "MessageBus/MessageBus.h"
+#include "Messages/LocalNavigationMsg.h"
+#include "Messages/StateMessage.h"
+#include "Messages/WindStateMsg.h"
+#include "Messages/WingSailCommandMsg.h"
+#include "SystemServices/Timer.h"
+#include "SystemServices/Logger.h"
 
 class WingsailControlNode : public ActiveNode {
    public:

@@ -11,10 +11,10 @@
  *
  ***************************************************************************************/
 
-#include "../Hardwares/ActuatorNodeJanet.h"
-#include "../Messages/JanetActuatorFeedbackMsg.h"
-#include "../Hardwares/MaestroController/MaestroController.h"
-#include "../SystemServices/Logger.h"
+#include "Hardwares/ActuatorNodeJanet.h"
+#include "Messages/JanetActuatorFeedbackMsg.h"
+#include "Hardwares/MaestroController/MaestroController.h"
+#include "SystemServices/Logger.h"
 
 
 ActuatorNodeJanet::ActuatorNodeJanet(MessageBus& msgBus, NodeID id, int channel, int speed, int acceleration)

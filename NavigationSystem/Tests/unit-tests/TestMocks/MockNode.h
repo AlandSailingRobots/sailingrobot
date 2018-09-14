@@ -15,15 +15,15 @@
 
 #include <atomic>
 
-#include "../../../MessageBus/Node.h"
-#include "../../../Messages/CompassDataMsg.h"
-#include "../../../Messages/GPSDataMsg.h"
-#include "../../../Messages/LocalNavigationMsg.h"
-#include "../../../Messages/RudderCommandMsg.h"
-#include "../../../Messages/StateMessage.h"
-#include "../../../Messages/WaypointDataMsg.h"
-#include "../../../Messages/WindDataMsg.h"
-#include "../../../Messages/WindStateMsg.h"
+#include "MessageBus/Node.h"
+#include "Messages/CompassDataMsg.h"
+#include "Messages/GPSDataMsg.h"
+#include "Messages/LocalNavigationMsg.h"
+#include "Messages/RudderCommandMsg.h"
+#include "Messages/StateMessage.h"
+#include "Messages/WaypointDataMsg.h"
+#include "Messages/WindDataMsg.h"
+#include "Messages/WindStateMsg.h"
 
 class MockNode : public Node {
    public:

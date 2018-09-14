@@ -13,16 +13,16 @@
 
 #pragma once
 
-#include "../../MessageBus/MessageBus.h"
-#include "../../Database/DBHandler.h"
-#include "../../Math/Utility.h"
+#include "MessageBus/MessageBus.h"
+#include "Database/DBHandler.h"
+#include "Math/Utility.h"
 #include "MessageBusTestHelper.h"
-#include "../../Messages/CompassDataMsg.h"
-#include "../../Messages/GPSDataMsg.h"
-#include "../../Messages/StateMessage.h"
-#include "../../SystemServices/Timer.h"
-#include "../../WorldState/StateEstimationNode.h"
-#include "../cxxtest/cxxtest/TestSuite.h"
+#include "Messages/CompassDataMsg.h"
+#include "Messages/GPSDataMsg.h"
+#include "Messages/StateMessage.h"
+#include "SystemServices/Timer.h"
+#include "WorldState/StateEstimationNode.h"
+#include "Tests/cxxtest/cxxtest/TestSuite.h"
 #include "TestMocks/MessageLogger.h"
 
 #include <chrono>
@@ -260,7 +260,7 @@ class StateEstimationNodeSuite : public CxxTest::TestSuite {
     void test_StateEstimationUpdateFrequency() {
         Timer timer;
 
-        dbhandler->changeOneValue("config_vessel_state", "1", "0.7", "loop_time");
+        dbhandler->updateTableIdColumnValue("config_vessel_state", 1, "loop_time", 0.7 );
         MessagePtr serverConfig = std::make_unique<ServerConfigsReceivedMsg>();
         messageBus.sendMessage(std::move(serverConfig));
 
@@ -279,6 +279,6 @@ class StateEstimationNodeSuite : public CxxTest::TestSuite {
 
         TS_ASSERT_DELTA(timer.timePassed(), 0.70, 1e-2);
 
-        dbhandler->changeOneValue("config_vessel_state", "1", "0.5", "loop_time");
+        dbhandler->updateTableIdColumnValue("config_vessel_state", 1, "loop_time", 0.5);
     }
 };

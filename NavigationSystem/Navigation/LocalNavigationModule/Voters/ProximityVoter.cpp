@@ -14,10 +14,10 @@
 
 
 #include "ProximityVoter.h"
-#include "../SystemServices/Logger.h"
-#include "../Math/CourseMath.h"
+#include "SystemServices/Logger.h"
+#include "Math/CourseMath.h"
 #include <vector>
-#include "../Math/Utility.h"
+#include "Math/Utility.h"
 
 
 ///----------------------------------------------------------------------------------
