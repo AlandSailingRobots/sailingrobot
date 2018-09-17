@@ -1107,7 +1107,7 @@ void DBHandler::insertDataLogs(std::queue<LogItem>& logs) {
         if (compassModelId) {
             typedValuePairs values = {{}, {}, {}};
             unsigned currentItemNumber = 0;
-            while (!log.m_currentSensorItems.empty()) {
+            while (!log.m_compassItems.empty()) {
                 addValue(values, "heading", log.m_compassItems.front().m_compassHeading);
                 addValue(values, "pitch", log.m_compassItems.front().m_compassPitch);
                 addValue(values, "roll", log.m_compassItems.front().m_compassRoll);
