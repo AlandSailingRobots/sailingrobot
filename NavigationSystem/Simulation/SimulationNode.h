@@ -54,7 +54,8 @@ enum SimulatorPacket : unsigned char {
     WingBoatCmd,
     SailBoatCmd,
     WaypointData,
-    MarineSensorData
+    MarineSensorData,
+    ACK
 };
 
 struct SailBoatDataPacket_t {
@@ -127,6 +128,11 @@ struct MarineSensorDataPacket_t {
     float ph;
     float salinity;
 } __attribute__((packed));
+
+struct ACKDataPacket_t{
+    unsigned char simulatorPacket = ACK;
+
+}__attribute__((packed));
 
 class SimulationNode : public ActiveNode {
    public:
@@ -211,6 +217,8 @@ class SimulationNode : public ActiveNode {
     ///----------------------------------------------------------------------------------
     void sendMarineSensor(int socketFD);
 
+    void sendAck(int socketFD);
+
     ///----------------------------------------------------------------------------------
     /// Communicate with the simulation receive sensor data and send actuator data
     ///----------------------------------------------------------------------------------
@@ -224,6 +232,9 @@ class SimulationNode : public ActiveNode {
     float m_RudderCommand;
     float m_SailCommand;
     float m_TailCommand;
+
+    bool m_recivedWingCommand;
+    bool m_recivedRudderCommand;
 
     int m_CompassHeading;
     double m_GPSLat;
@@ -244,6 +255,7 @@ class SimulationNode : public ActiveNode {
     ActuatorDataSailPacket_t actuatorDataSail;
     WaypointPacket_t waypoint;
     MarineSensorDataPacket_t marineSensorData;
+    ACKDataPacket_t ackData;
 
     std::mutex m_lock;
 };
